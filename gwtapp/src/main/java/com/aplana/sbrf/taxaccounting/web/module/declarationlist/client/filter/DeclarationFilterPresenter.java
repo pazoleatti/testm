@@ -70,7 +70,6 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 	private List<TaxPeriod> taxPeriods;
 	private List<Department> departments;
 	private Set<ReportPeriod> periods = new HashSet<ReportPeriod>();
-	private ReportPeriod currentReportPeriod;
 	private DeclarationDataFilterAvailableValues filterValues;
 
 	@Inject
@@ -104,19 +103,6 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		return departments;
 	}
 
-	public ReportPeriod getCurrentReportPeriod() {
-		if (getView().getSelectedReportPeriods().size() == 1) {
-			int firstSelectedPeriodId = getView().getSelectedReportPeriods().get(0);
-			for (ReportPeriod period : periods) {
-				if (period.getId() == firstSelectedPeriodId) {
-					return period;
-				}
-			}
-			return currentReportPeriod;
-		}
-		return null;
-	}
-
 	public void updateSavedFilterData(DeclarationDataFilter declarationFilter){
 		savedFilterData.put(this.taxType, declarationFilter);
 		List<Integer> selectedDepartments = new ArrayList<Integer>();
@@ -138,7 +124,6 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 							filterValues = result.getFilterValues();
 							taxPeriods = result.getTaxPeriods();
 							departments = result.getDepartments();
-							currentReportPeriod = result.getCurrentReportPeriod();
 
 							getView().setDepartmentsList(departments, filterValues.getDepartmentIds());
 							getView().setTaxPeriods(taxPeriods);
@@ -151,9 +136,10 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 	}
 
 	@Override
-	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
+	public void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId) {
 		GetReportPeriods action = new GetReportPeriods();
 		action.setTaxPeriod(taxPeriod);
+		action.setDepartamentId(departmentId);
 		dispatchAsync.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
 					@Override
@@ -192,10 +178,6 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 				formDataFilter.setDepartmentIds(defaultDepartment);
 			} else {
 				formDataFilter.setDepartmentIds(null);
-			}
-			if (currentReportPeriod != null) {
-				getView().setSelectedReportPeriods(Arrays.asList(currentReportPeriod));
-				formDataFilter.setReportPeriodIds(Arrays.asList(currentReportPeriod.getId()));
 			}
 		} else {
 			//В противном случае - заполняем фильтр значениями, по которым делалась фильтрация в последний раз,

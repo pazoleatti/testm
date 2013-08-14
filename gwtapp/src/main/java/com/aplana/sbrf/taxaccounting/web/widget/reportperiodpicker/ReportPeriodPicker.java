@@ -21,13 +21,16 @@ import java.util.*;
  * Компонент для выбора отчетного периода.
  * Период может быть выбран один или несколько.
  */
-public class ReportPeriodPicker extends Composite{
+public class ReportPeriodPicker extends Composite implements HasEnabled{
 
 	interface SelectionUiBinder extends UiBinder<HTMLPanel, ReportPeriodPicker> {
 	}
 
 	@UiField
 	TextBox selected;
+	
+	@UiField
+	Button selectButton;
 
 	private static final String ROOT_PANEL_WIDTH        = "250px";
 	private static final String ROOT_PANEL_HEIGHT       = "250px";
@@ -88,9 +91,9 @@ public class ReportPeriodPicker extends Composite{
 			@Override
 			public void onOpen(OpenEvent<TreeItem> event) {
 				lastTimeSelectedTaxPeriod = ((TaxPeriodItem) event.getTarget()).getTaxPeriod();
-				if (taxPeriodNodes.get(lastTimeSelectedTaxPeriod).getChildCount() == 1) { // 1 => т.к. мы вставляли Фэйковую ноду для того чтобы значок "+" отображался слева от пустой ноды
+				//if (taxPeriodNodes.get(lastTimeSelectedTaxPeriod).getChildCount() == 1) { // 1 => т.к. мы вставляли Фэйковую ноду для того чтобы значок "+" отображался слева от пустой ноды
 					dataProvider.onTaxPeriodSelected(lastTimeSelectedTaxPeriod);
-				}
+				//}
 			}
 		});
 
@@ -158,6 +161,17 @@ public class ReportPeriodPicker extends Composite{
 		this.taxPeriods = taxPeriods;
 		taxPeriodNodes.clear();
 		tree.clear();
+	}
+	
+	public void clearReportPeriods(){
+		clearSelected();
+		reportPeriodItems.clear();
+        cbToReportPeriod.clear();
+        for (TreeItem item : taxPeriodNodes.values()) {
+			item.removeItems();
+			item.addItem(new Label(""));
+			item.setState(false);
+		}
 	}
 
 	public void setReportPeriods(List<ReportPeriod> reportPeriods){
@@ -301,5 +315,15 @@ public class ReportPeriodPicker extends Composite{
 				}
 			}
 		});
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return selectButton.isEnabled();
+	}
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		selectButton.setEnabled(enabled);
 	}
 }

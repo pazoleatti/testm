@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
@@ -14,6 +15,8 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -103,9 +106,25 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
         this.driver.initialize(this);
 
 	    for (TaxType taxType : TaxType.values()){
-		    taxTypeReportPeriodPickerMap.put(taxType, new ReportPeriodPicker(this));
+	    	final ReportPeriodPicker periodPiker = new ReportPeriodPicker(this);
+	    	periodPiker.setEnabled(false);
+		    taxTypeReportPeriodPickerMap.put(taxType, periodPiker);
 		    // Убрал мультивыбор подразделения (http://jira.aplana.com/browse/SBRFACCTAX-3401)
-		    taxTypeDepartmentSelectionTree.put(taxType, new DepartmentPickerPopupWidget("Выберите подразделение", false));
+		    DepartmentPickerPopupWidget depPiker = new DepartmentPickerPopupWidget("Выберите подразделение", false);
+		    depPiker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+				@Override
+				public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+					if (event.getValue().isEmpty()){
+						periodPiker.clearReportPeriods();
+						periodPiker.setEnabled(false);
+					} else {
+						periodPiker.clearReportPeriods();
+						periodPiker.setEnabled(true);
+					}
+					
+				}
+			});
+		    taxTypeDepartmentSelectionTree.put(taxType, depPiker);
 	    }
     }
 
@@ -214,8 +233,9 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 
 	@Override
 	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
-		if(getUiHandlers() != null){
-			getUiHandlers().onTaxPeriodSelected(taxPeriod);
+		DepartmentPicker depPiker = taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType());
+		if (taxPeriod!=null && !depPiker.getValue().isEmpty()){
+			getUiHandlers().onTaxPeriodSelected(taxPeriod, depPiker.getValue().iterator().next());
 		}
 	}
 
