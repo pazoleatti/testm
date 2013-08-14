@@ -256,9 +256,10 @@ void checkNSI() {
 
         // 5. Проверка кода экологического класса
         if (row.ecoClass != null) {
-            if (!transportTaxDao.validateEcoClass(row.ecoClass)) {
-                logger.error('Неверный код экологического класса!')
-            }
+            // TODO Переписать. Экологические классы переехали в версионные справочникию
+            // if (!transportTaxDao.validateEcoClass(row.ecoClass)) {
+            //    logger.error('Неверный код экологического класса!')
+            // }
         }
 
         // 6. Проверка кода ед. измерения мощности

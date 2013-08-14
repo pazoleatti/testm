@@ -42,12 +42,4 @@ public interface TransportTaxDao {
 	 * @return true - если код существует, false - если не существует
 	 */
 	boolean validateTaxBaseUnit(BigDecimal code);
-
-	/**
-	 * Проверяет существование кода экологического класса
-	 *
-	 * @param code код экологического класса
-	 * @return true - если код существует, false - если нет
-	 */
-	boolean validateEcoClass(BigDecimal code);
 }

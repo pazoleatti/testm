@@ -80,18 +80,4 @@ public class TransportTaxDaoImpl extends AbstractDao implements TransportTaxDao 
 				new Object[]{code}, new int[]{Types.NUMERIC}
 		) > 0;
 	}
-
-	/**
-	 * Проверяет существование кода экологического класса
-	 *
-	 * @param code код экологического класса
-	 * @return true - если код существует, false - если нет
-	 */
-	@Override
-	public boolean validateEcoClass(BigDecimal code) {
-		return getJdbcTemplate().queryForInt(
-				"select count(*) from transport_eco_class where code = ?",
-				new Object[]{code}, new int[]{Types.NUMERIC}
-		) > 0;
-	}
 }
