@@ -62,7 +62,7 @@
                 </g:center>
                 <g:east size="600">
                     <g:VerticalPanel ui:field="content">
-
+                        <g:Button ui:field="save">Сохранить</g:Button>
                     </g:VerticalPanel>
                 </g:east>
             </g:SplitLayoutPanel>
