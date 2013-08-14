@@ -545,7 +545,7 @@ create table income_102 (
   opu_code varchar2(25 char) not null,
   total_sum number(22,4),
   department_id number(15) not null,
-  item_name varchar(255 char)
+  item_name varchar2(255 char)
   );
 
 alter table income_102 add constraint income_102_pk primary key (report_period_id, opu_code,department_id);
