@@ -39,11 +39,10 @@
                         <g:ListBox ui:field="bookerReportType" width="200px"/>
                     </g:cell>
                     <g:cell>
-                        <g:FormPanel ui:field="uploadFormDataXls" encoding="multipart/form-data" method="post"
-                                     action="" >
+                        <g:FormPanel ui:field="uploadFormPanel" encoding="multipart/form-data" method="post">
                             <g:HorizontalPanel ui:field="uploadPanel">
                                 <g:FileUpload ui:field="uploader" title="Файл xls" name="uploader"/>
-                                <g:Button ui:field="uploadButton" text="Загрузить"/>
+                                <g:SubmitButton ui:field="uploadButton" text="Загрузить"/>
                             </g:HorizontalPanel>
                         </g:FormPanel>
                     </g:cell>

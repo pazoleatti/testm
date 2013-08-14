@@ -55,6 +55,8 @@ switch (formDataEvent) {
         calc()
         logicalCheck(false)
         checkNSI()
+        // для сохранения изменений приемников
+        getData(formData).commit()
         break
 }
 

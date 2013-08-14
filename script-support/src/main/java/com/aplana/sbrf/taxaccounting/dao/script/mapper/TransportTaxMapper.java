@@ -6,12 +6,7 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 public interface TransportTaxMapper {
-	/**
-	 * В БД есть уникальность по коду ОКАТО
-	 */
-	@Select("select name from dict_okato where okato = #{okato}")
-	String getRegionName(@Param("okato") String okato);
-	
+
 	@Select({
 		"select value from transport_tax_rate", 
 		"where code = #{transportCode}",

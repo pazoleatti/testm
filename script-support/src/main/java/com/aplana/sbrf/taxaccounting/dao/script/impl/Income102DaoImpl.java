@@ -33,6 +33,7 @@ public class Income102DaoImpl extends AbstractDao implements Income102Dao {
                             income102Data.setOpuCode(rs.getString("OPU_CODE"));
                             income102Data.setTotalSum(rs.getDouble("TOTAL_SUM"));
                             income102Data.setDepartmentId(rs.getInt("DEPARTMENT_ID"));
+                            income102Data.setItemName(rs.getString("ITEM_NAME"));
                             return income102Data;
                         }
                     }

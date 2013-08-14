@@ -375,7 +375,7 @@ alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreig
 
 create unique index i_ref_book_record_refbookid on ref_book_record(ref_book_id, record_id, version);
 
-create sequence seq_ref_book_record start with 100000;
+create sequence seq_ref_book_record start with 100000 increment by 100;
 create sequence seq_ref_book_record_row_id start with 100000;
 
 comment on table ref_book_record is 'Запись справочника';
@@ -513,14 +513,15 @@ create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------
 create table income_101 (
   report_period_id number(9) not null,
-  account varchar2(255) not null,
+  account varchar2(255 char) not null,
   income_debet_remains number(22,4),
   income_credit_remains number(22,4),
   debet_rate number(22,4),
   credit_rate number(22,4),
   outcome_debet_remains number(22,4),
   outcome_credit_remains number(22,4),
-  department_id number(15) not null
+  department_id number(15) not null,
+  account_name varchar2(255 char)
 );
 
 alter table income_101 add constraint income_101_pk primary key (report_period_id, account,department_id);
@@ -537,12 +538,15 @@ comment on column income_101.credit_rate is 'Обороты по кредиту'
 comment on column income_101.outcome_debet_remains is 'Исходящие остатки по дебету';
 comment on column income_101.outcome_credit_remains is 'Исходящие остатки по кредиту';
 comment on column income_101.department_id is 'Подразделение';
+comment on column income_101.account_name is 'Название счёта';
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table income_102 (
   report_period_id number(9) not null,
-  opu_code varchar2(25) not null,
+  opu_code varchar2(25 char) not null,
   total_sum number(22,4),
-  department_id number(15) not null);
+  department_id number(15) not null,
+  item_name varchar2(255 char)
+  );
 
 alter table income_102 add constraint income_102_pk primary key (report_period_id, opu_code,department_id);
 alter table income_102 add constraint income_102_fk_department_id foreign key (department_id) references department(id);
@@ -553,6 +557,7 @@ comment on column income_102.report_period_id is 'Идентификатор о�
 comment on column income_102.opu_code is 'Код ОПУ';
 comment on column income_102.total_sum is 'Сумма';
 comment on column income_102.department_id is 'Подразделение';
+comment on column income_102.item_name is 'Наименование статьи';
 ---------------------------------------------------------------------------------------------------
 create table declaration_type (
   id       number(9) not null,

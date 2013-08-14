@@ -6,10 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookDataRowAction;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookDataRowResult;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookTableDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookTableDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookTableCell;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -21,23 +20,23 @@ import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP')")
-public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookDataRowAction, GetRefBookDataRowResult> {
+public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTableDataAction, GetRefBookTableDataResult> {
 
 	@Autowired
 	RefBookFactory refBookFactory;
 
 	public GetRefBookDataRowHandler() {
-		super(GetRefBookDataRowAction.class);
+		super(GetRefBookTableDataAction.class);
 	}
 
 	@Override
-	public GetRefBookDataRowResult execute(GetRefBookDataRowAction action, ExecutionContext executionContext) throws ActionException {
+	public GetRefBookTableDataResult execute(GetRefBookTableDataAction action, ExecutionContext executionContext) throws ActionException {
 
 		RefBookDataProvider refBookDataProvider = refBookFactory
 				.getDataProvider(action.getRefbookId());
 		PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider
 				.getRecords(new Date(), null, null, null); //TODO Нужно доделать
-		GetRefBookDataRowResult result = new GetRefBookDataRowResult();
+		GetRefBookTableDataResult result = new GetRefBookTableDataResult();
 		RefBook refBook = refBookFactory.get(action.getRefbookId());
 
 		List<RefBookAttribute> headers = new ArrayList<RefBookAttribute>();
@@ -47,36 +46,35 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookDa
 		List<RefBookDataRow> rows = new ArrayList<RefBookDataRow>();
 		for (Map<String, RefBookValue> record : refBookPage.getRecords()) {
 
-			Map<String, RefBookTableCell> row = new HashMap<String, RefBookTableCell>();
+			Map<String, String> tableRowData = new HashMap<String, String>();
 			for (Map.Entry<String, RefBookValue> val : record.entrySet()) {
 
-				RefBookTableCell cell = new RefBookTableCell();
-				cell.setAttributeType(val.getValue().getAttributeType());
-				String value;
+				String tableCell;
 				switch (val.getValue().getAttributeType()) {
 					case NUMBER:
-						value = val.getValue().getStringValue();
+						tableCell = val.getValue().getNumberValue().toString();
 						break;
 					case DATE:
-						value = val.getValue().getDateValue().toString();
+						tableCell = val.getValue().getDateValue().toString();
 						break;
 					case STRING:
-						value = val.getValue().getStringValue();
+						tableCell = val.getValue().getStringValue();
 						break;
 					case REFERENCE:
+
 						if (val.getValue().getReferenceObject() != null) {
-							value = val.getValue().getReferenceObject().get(val.getValue().getAttributeType()).toString();
+							tableCell = val.getValue().getReferenceValue().toString();
 							break;
 						}
 					default:
-						value = "undefined";
+						tableCell = "undefined";
 						break;
 				}
-				cell.setStringValue(value);
-				row.put(val.getKey(), cell);
+				tableRowData.put(val.getKey(), tableCell);
 			}
 			RefBookDataRow tableRow = new RefBookDataRow();
-			tableRow.setValues(row);
+			tableRow.setValues(tableRowData);
+			tableRow.setRefBookRowId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
 			rows.add(tableRow);
 
 		}
@@ -86,6 +84,6 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookDa
 	}
 
 	@Override
-	public void undo(GetRefBookDataRowAction getRefBookDataRowAction, GetRefBookDataRowResult getRefBookDataRowResult, ExecutionContext executionContext) throws ActionException {
+	public void undo(GetRefBookTableDataAction getRefBookDataRowAction, GetRefBookTableDataResult getRefBookDataRowResult, ExecutionContext executionContext) throws ActionException {
 	}
 }

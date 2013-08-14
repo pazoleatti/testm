@@ -64,6 +64,8 @@ switch (formDataEvent) {
         calc()
         addAllStatic()
         allCheck()
+        // для сохранения изменений приемников
+        getData(formData).commit()
         break
 }
 

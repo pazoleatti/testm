@@ -5,7 +5,7 @@ import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
 
-public class GetRefBookDataRowResult implements Result {
+public class GetRefBookTableDataResult implements Result {
 
 	List<RefBookAttribute> tableHeaders;
 	List<RefBookDataRow> dataRows;

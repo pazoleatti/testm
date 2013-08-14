@@ -7,13 +7,6 @@ import java.math.BigDecimal;
 
 @ScriptExposed(taxTypes = TaxType.TRANSPORT)
 public interface TransportTaxDao {
-	/**
-	 * Возращает имя муниципального отделения по коду ОКАТО
-	 *
-	 * @param okato код ОКАТО
-	 * @return имя региона, или null, если такого ОКАТО нет в справочнике
-	 */
-	String getRegionName(String okato);
 
 	/**
 	 * Возвращает значение ставки транспортного налога
@@ -33,14 +26,6 @@ public interface TransportTaxDao {
 	 * @return название вида транспортного средства или null, если передан несуществующий код
 	 */
 	String getTsTypeName(String tsTypeCode);
-
-	/**
-	 * Проверяет существование кода ОКАТО
-	 *
-	 * @param okato код ОКАТО
-	 * @return true - если код ОКАТО существует, false - если не существует
-	 */
-	boolean validateOkato(String okato);
 
 	/**
 	 * Проверяет существование кода транспортного средства

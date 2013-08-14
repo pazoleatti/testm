@@ -6,11 +6,15 @@ import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +22,7 @@ import javax.script.Bindings;
 import javax.script.ScriptException;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -51,10 +56,6 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             return;
         }
 
-        // TODO Переписать этот блок позле избавления от getInputStream в BlobData
-        // Заполнить переменную script из массива байт:
-        // примерно так: String script = new String(bd.getBytes(), "UTF-8")
-        // Начало блока
         StringWriter writer = new StringWriter();
 
         try {
@@ -64,7 +65,6 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             return;
         }
         String script = writer.toString();
-        // Конец блока
 
         if (script == null || script.trim().isEmpty() || refBookFactory == null) {
             return;
@@ -72,6 +72,17 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
         // Биндиг параметров для выполнения скрипта
         Bindings bindings = scriptEngine.createBindings();
+        // ScriptExposed
+        Map<String, ?> scriptComponents = applicationContext.getBeansWithAnnotation(ScriptExposed.class);
+        for (Object component : scriptComponents.values()) {
+            if (component instanceof ScriptComponentContextHolder) {
+                ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
+                scriptComponentContext.setUserInfo(userInfo);
+                scriptComponentContext.setLogger(logger);
+                ((ScriptComponentContextHolder) component).setScriptComponentContext(scriptComponentContext);
+            }
+        }
+        bindings.putAll(scriptComponents);
 
         bindings.put("formDataEvent", event);
         bindings.put("logger", logger);

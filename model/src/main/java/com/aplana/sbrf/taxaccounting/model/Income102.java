@@ -13,6 +13,8 @@ public class Income102 {
 	private Double totalSum;
     // подразделение
     private Integer departmentId;
+    // Наименование статьи
+    private String itemName;
 
 	public Integer getReportPeriodId() {
 		return reportPeriodId;
@@ -44,5 +46,13 @@ public class Income102 {
 
     public void setDepartmentId(Integer departmentId) {
         this.departmentId = departmentId;
+    }
+
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
     }
 }

@@ -226,16 +226,18 @@ void checkNSI() {
 
         // 1. Проверка ОКАТО
         if (row.codeOKATO != null) {
-            if (!transportTaxDao.validateOkato(row.codeOKATO)) {
-                logger.error('Неверный код ОКАТО!')
-            }
+            // TODO переписать проверку ОКАТО. ОКАТО переехал в версионный справочник.
+            // if (!transportTaxDao.validateOkato(row.codeOKATO)) {
+            //    logger.error('Неверный код ОКАТО!')
+            //}
         }
 
         // 2. Проверка муниципального образования
         if (row.regionName != null) {
-            if (row.regionName != transportTaxDao.getRegionName(row.codeOKATO)) {
-                logger.error('Неверное наименование муниципального образования!')
-            }
+            // TODO переписать проверку
+            // if (row.regionName != transportTaxDao.getRegionName(row.codeOKATO)) {
+            //     logger.error('Неверное наименование муниципального образования!')
+            // }
         }
 
         // 3. Проверка кода вида ТС
@@ -276,7 +278,8 @@ void fillForm() {
 
         // заполнение графы 3 на основе графы 2
         if (row.codeOKATO != null) {
-            row.regionName = transportTaxDao.getRegionName(row.codeOKATO)
+            // TODO Переписать
+            //row.regionName = transportTaxDao.getRegionName(row.codeOKATO)
         }
 
         // заполнение графы 5 на основе графы 4

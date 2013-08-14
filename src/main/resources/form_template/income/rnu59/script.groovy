@@ -112,6 +112,8 @@ switch (formDataEvent){
         consolidation()
         fillForm()
         logicalCheck()
+        // для сохранения изменений приемников
+        getData(formData).commit()
         break
 }
 
@@ -154,7 +156,7 @@ def checkNSI() {
     def data = getData(formData)
     if (!getRows(data).isEmpty()) {
 
-        for (def row : getRows(data)) {
+        for (DataRow row : getRows(data)) {
             if (isTotal(row)) {
                 continue
             }
@@ -165,7 +167,8 @@ def checkNSI() {
             }
 
             // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
-            if (row.rateBR!=roundTo2(calculateColumn11(row,row.part2REPODate))) {
+            def col11 = roundTo2(calculateColumn11(row, row.part2REPODate))
+            if (col11!=null && col11!=row.rateBR) {
                 logger.error('Неверно указана ставка Банка России!')
                 return false
             }
@@ -199,7 +202,7 @@ def fillForm(){
         newRow[alias] = 0
     }
 
-    data.getAllCached().each{ row ->
+    data.getAllCached().each{ DataRow row ->
         /**
          * Табл. 199 Алгоритмы заполнения полей формы «Регистр налогового учёта закрытых сделок РЕПО с обязательством продажи по 2-й части»
          */
@@ -496,7 +499,7 @@ void consolidation() {
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 getData(source).getAllCached().each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        data.insert(row, data.getAllCached().size+1);
+                        data.insert(row, getRows(data).size+1);
                     }
                 }
             }
@@ -548,10 +551,13 @@ def inPeriod(def date, def from, to) {
  * @param date
  */
 def getRate(def date) {
-    def refDataProvider = refBookFactory.getDataProvider(23)
-    def res = refDataProvider.getRecords(date, null, null, null);
-    tmp = res.getRecords().get(0).RATE.getNumberValue()
-
+    if (date!=null) {
+        def refDataProvider = refBookFactory.getDataProvider(23)
+        def res = refDataProvider.getRecords(date, null, null, null);
+        return res.getRecords().get(0).RATE.getNumberValue()
+    } else {
+        return null;
+    }
 }
 
 /**

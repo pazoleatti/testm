@@ -5,9 +5,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookDataRowAction;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookDataRowResult;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -23,13 +21,36 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.List;
+import java.util.Map;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers  {
 
+	Long refBookDataId;
+
 	@Override
 	public void onCancelClicked() {
 		placeManager.revealPlace(new PlaceRequest(RefBookListTokens.refbookList));
+	}
+
+	@Override
+	public void onAddRowClicked() {
+
+	}
+
+	@Override
+	public void onSelectionChanged(Long recordId) {
+		GetRefBookDataAction action = new GetRefBookDataAction();
+		action.setRefbookId(refBookDataId);
+		action.setRecordId(recordId);
+		dispatcher.execute(action,
+				CallbackUtils.defaultCallback(
+						new AbstractCallback<GetRefBookDataResult>() {
+							@Override
+							public void onSuccess(GetRefBookDataResult result) {
+								getView().fillInputFields(result.getRecord());
+							}
+						}, this));
 	}
 
 	@ProxyCodeSplit
@@ -43,6 +64,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	public interface MyView extends View, HasUiHandlers<RefBookDataUiHandlers> {
 		void setTableColumns(List<RefBookAttribute> headers);
 		void setTableData(List<RefBookDataRow> dataRows);
+		void createInputFields(List<RefBookAttribute> headers);
+		void fillInputFields(Map<String, com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttribute> data);
 	}
 
 	@Inject
@@ -57,16 +80,17 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
-		GetRefBookDataRowAction action = new GetRefBookDataRowAction();
-
-		action.setRefbookId(Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null)));
+		refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
+		GetRefBookTableDataAction action = new GetRefBookTableDataAction();
+		action.setRefbookId(refBookDataId);
 		dispatcher.execute(action,
 				CallbackUtils.defaultCallback(
-						new AbstractCallback<GetRefBookDataRowResult>() {
+						new AbstractCallback<GetRefBookTableDataResult>() {
 							@Override
-							public void onSuccess(GetRefBookDataRowResult result) {
+							public void onSuccess(GetRefBookTableDataResult result) {
 								getView().setTableColumns(result.getTableHeaders());
 								getView().setTableData(result.getDataRows());
+								getView().createInputFields(result.getTableHeaders());
 							}
 						}, this));
 	}

@@ -16,6 +16,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,6 +29,7 @@ import java.util.*;
  * @since 04.07.13 18:48
  */
 @Repository
+@Transactional
 public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
@@ -345,9 +347,20 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         RefBook refBook = get(refBookId);
         List<Object[]> recordIds = new ArrayList<Object[]>();
         List<Object[]> listValues = new ArrayList<Object[]>();
+
+        int counter = 0;
+        // Шаг последовательности = 100
+        Long seq = generateId("seq_ref_book_record", Long.class);
+
         for (int i = 0; i < records.size(); i++) {
             // создаем строки справочника
-            Long recordId = generateId("seq_ref_book_record", Long.class);
+            Long recordId = seq + counter++;
+
+            if (counter >= 100) {
+                counter = 0;
+                seq = generateId("seq_ref_book_record", Long.class);
+            }
+
             recordIds.add(new Object[]{recordId});
             // записываем значения ячеек
             Map<String, RefBookValue> record = records.get(i);
@@ -505,7 +518,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         jt.batchUpdate(String.format(DELETE_REF_BOOK_RECORD_SQL, refBookId, sdf.format(version)), values);
     }
 
-    private static final String DELETE_ALL_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, ref_book_id, " +
+    private static final String DELETE_ALL_REF_BOOK_VALUE_SQL = "delete from ref_book_value " +
+            "where record_id in (select id from ref_book_record where ref_book_id = ? " +
+            "and version = trunc(?, 'DD') and status = 0)";
+
+    private static final String DELETE_ALL_REF_BOOK_RECORD_SQL = "delete from ref_book_record " +
+            "where ref_book_id = ? and version = trunc(?, 'DD') and status = 0";
+
+    private static final String DELETE_MARK_ALL_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, ref_book_id, " +
             "version, status, record_id) " +
             "select seq_ref_book_record.nextval, ref_book_id, trunc(?, 'DD'), -1, record_id " +
             "from ref_book_record " +
@@ -515,7 +535,17 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public void deleteAllRecords(Long refBookId, Date version) {
-        getJdbcTemplate().update(DELETE_ALL_REF_BOOK_RECORD_SQL, new Object[] {version, refBookId, version, refBookId},
+        if (refBookId == null || version == null) {
+            return;
+        }
+        // Удаление записей при совпадении даты у даления и какой-либо версии
+        getJdbcTemplate().update(DELETE_ALL_REF_BOOK_VALUE_SQL, new Object[]{refBookId, version},
+                new int[]{Types.NUMERIC, Types.TIMESTAMP});
+        getJdbcTemplate().update(DELETE_ALL_REF_BOOK_RECORD_SQL, new Object[]{refBookId, version},
+                new int[]{Types.NUMERIC, Types.TIMESTAMP});
+        // Отметка записей ближайшей меньшей версии как удаленных
+        getJdbcTemplate().update(DELETE_MARK_ALL_REF_BOOK_RECORD_SQL,
+                new Object[] {version, refBookId, version, refBookId},
                 new int[] { Types.TIMESTAMP, Types.NUMERIC, Types.TIMESTAMP, Types.NUMERIC });
     }
 

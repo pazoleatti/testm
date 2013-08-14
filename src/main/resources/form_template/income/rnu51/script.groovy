@@ -40,6 +40,8 @@ switch (formDataEvent) {
         calc()
         addAllStatic()
         allCheck()
+        // для сохранения изменений приемников
+        getData(formData).commit()
         break
 }
 
@@ -560,8 +562,9 @@ void deleteRow() {
  * Консолидация.
  */
 void consolidation() {
+    def data = getData(formData)
     // удалить все строки и собрать из источников их строки
-    getData(formData).clear()
+    data.clear()
 
     departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
@@ -569,7 +572,7 @@ void consolidation() {
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 getData(source).getAllCached().each { DataRow row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        getData(formData).insert(row,getData(formData).getAllCached().size()+1)
+                        data.insert(row, getRows(data).size()+1)
                     }
                 }
             }

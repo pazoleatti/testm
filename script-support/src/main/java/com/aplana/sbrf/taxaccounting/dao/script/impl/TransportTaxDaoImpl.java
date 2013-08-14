@@ -20,11 +20,6 @@ public class TransportTaxDaoImpl extends AbstractDao implements TransportTaxDao 
 	private TransportTaxMapper transportTaxMapper;
 
 	@Override
-	public String getRegionName(String okato) {
-		return transportTaxMapper.getRegionName(okato);
-	}
-
-	@Override
 	public int getTaxRate(String code, BigDecimal age, BigDecimal power, String regionId) {
 		List<Integer> list = transportTaxMapper.getTransportTaxRate(code, age.intValue(), power.intValue(), regionId);
 
@@ -56,20 +51,6 @@ public class TransportTaxDaoImpl extends AbstractDao implements TransportTaxDao 
 	@Override
 	public String getTsTypeName(String tsTypeCode) {
 		return transportTaxMapper.getTsTypeName(tsTypeCode);
-	}
-
-	/**
-	 * Проверяет существование кода ОКАТО
-	 *
-	 * @param okato код ОКАТО
-	 * @return true - если код ОКАТО существует, false - если не существует
-	 */
-	@Override
-	public boolean validateOkato(String okato) {
-		return getJdbcTemplate().queryForInt(
-				"select count(*) from dict_okato where okato=?",
-				new Object[]{okato}, new int[]{Types.VARCHAR}
-		) > 0;
 	}
 
 	/**
