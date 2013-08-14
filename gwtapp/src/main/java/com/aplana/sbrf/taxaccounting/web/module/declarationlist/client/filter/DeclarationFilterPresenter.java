@@ -139,7 +139,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 	public void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId) {
 		GetReportPeriods action = new GetReportPeriods();
 		action.setTaxPeriod(taxPeriod);
-		action.setDepartamentId(departmentId);
+		action.setDepartmentId(departmentId);
 		dispatchAsync.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
 					@Override

@@ -6,5 +6,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface DeclarationCreationUiHandlers extends UiHandlers {
 	void onContinue();
-	void onTaxPeriodSelected(TaxPeriod taxPeriod);
+	void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId);
 }

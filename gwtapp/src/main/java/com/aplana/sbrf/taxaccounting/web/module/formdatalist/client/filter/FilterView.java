@@ -114,14 +114,9 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 		    depPiker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
 				@Override
 				public void onValueChange(ValueChangeEvent<List<Integer>> event) {
-					if (event.getValue().isEmpty()){
-						periodPiker.clearReportPeriods();
-						periodPiker.setEnabled(false);
-					} else {
-						periodPiker.clearReportPeriods();
-						periodPiker.setEnabled(true);
-					}
-					
+					periodPiker.clearReportPeriods();
+					// Если подразделения не выбраны то дизаблим выбор отчетного периода и наоборот
+					periodPiker.setEnabled(!event.getValue().isEmpty());
 				}
 			});
 		    taxTypeDepartmentSelectionTree.put(taxType, depPiker);

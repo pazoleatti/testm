@@ -91,9 +91,9 @@ public class ReportPeriodPicker extends Composite implements HasEnabled{
 			@Override
 			public void onOpen(OpenEvent<TreeItem> event) {
 				lastTimeSelectedTaxPeriod = ((TaxPeriodItem) event.getTarget()).getTaxPeriod();
-				//if (taxPeriodNodes.get(lastTimeSelectedTaxPeriod).getChildCount() == 1) { // 1 => т.к. мы вставляли Фэйковую ноду для того чтобы значок "+" отображался слева от пустой ноды
+				if (taxPeriodNodes.get(lastTimeSelectedTaxPeriod).getChildCount() == 1) { // 1 => т.к. мы вставляли Фэйковую ноду для того чтобы значок "+" отображался слева от пустой ноды
 					dataProvider.onTaxPeriodSelected(lastTimeSelectedTaxPeriod);
-				//}
+				}
 			}
 		});
 
