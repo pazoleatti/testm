@@ -6,7 +6,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class GetReportPeriods extends UnsecuredActionImpl<GetReportPeriodsResult> {
 
 	TaxPeriod taxPeriod;
-    Integer departamentId;
+    Integer departmentId;
 
 	public TaxPeriod getTaxPeriod() {
 		return taxPeriod;
@@ -16,11 +16,11 @@ public class GetReportPeriods extends UnsecuredActionImpl<GetReportPeriodsResult
 		this.taxPeriod = taxPeriod;
 	}
 
-    public Integer getDepartamentId() {
-        return departamentId;
+    public Integer getDepartmentId() {
+        return departmentId;
     }
 
-    public void setDepartamentId(Integer departamentId) {
-        this.departamentId = departamentId;
+    public void setDepartmentId(Integer departmentId) {
+        this.departmentId = departmentId;
     }
 }

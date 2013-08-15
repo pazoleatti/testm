@@ -1,7 +1,9 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+    xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+    xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+    xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker">   
     <ui:style>
         .content {
             padding: 10px;
@@ -18,14 +20,15 @@
 	<g:DialogBox height="100%" width="250px" glassEnabled="true" text="Создание декларации">
         <g:VerticalPanel height="100%" width="250px">
             <g:FlowPanel styleName="{style.content}">
-                <g:FlowPanel height="60px">
-                    <g:Label text="Отчетный период" />
-                    <g:SimplePanel ui:field="reportPeriodPanel" />
-                </g:FlowPanel>
-
+            
                 <g:FlowPanel height="60px">
                     <g:Label text="Подразделение" />
-                    <g:SimplePanel ui:field="departmentPickerPanel" />
+                    <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" header="Выбор подразделения"/>
+                </g:FlowPanel>
+                
+                <g:FlowPanel height="60px">
+                    <g:Label text="Отчетный период" />
+                     <rep:ReportPeriodPicker ui:field="periodPicker"/>
                 </g:FlowPanel>
 
                 <g:FlowPanel height="60px">

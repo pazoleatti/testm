@@ -2,7 +2,8 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
-        >
+             xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+             xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker">
     <ui:style>
         .content {
             padding: 10px;
@@ -20,9 +21,15 @@
         <g:VerticalPanel height="100%" width="250px">
             <g:FlowPanel addStyleNames="{style.content}">
 
-                <g:FlowPanel height="60px" ui:field="reportPeriodPanel"/>
+                <g:FlowPanel height="60px">
+                    <g:Label text="Подразделение"/>
+                    <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" header="Выбор подразделения"/>
+                </g:FlowPanel>
 
-                <g:FlowPanel height="60px" ui:field="departmentPanel"/>
+                <g:FlowPanel height="60px">
+                    <g:Label text="Отчетный период"/>
+                    <rep:ReportPeriodPicker ui:field="reportPeriodPicker"/>
+                </g:FlowPanel>
 
                 <g:FlowPanel height="60px">
                     <g:Label text="Тип налоговой формы"/>

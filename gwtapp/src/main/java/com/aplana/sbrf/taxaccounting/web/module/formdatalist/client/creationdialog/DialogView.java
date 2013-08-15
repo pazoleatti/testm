@@ -1,30 +1,34 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.creationdialog;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implements DialogPresenter.MyView,
         ReportPeriodSelectHandler {
@@ -33,10 +37,10 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	}
 
 	@UiField
-	Panel reportPeriodPanel;
+	DepartmentPicker departmentPicker;
 
-	@UiField
-	Panel departmentPanel;
+	@UiField(provided=true)
+	ReportPeriodPicker reportPeriodPicker;
 
 	@UiField(provided = true)
 	ValueListBox<FormDataKind> formKind;
@@ -48,11 +52,8 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	Button continueButton;
 
 	@UiField
-	Button cancelButton;
+	Button cancelButton;	
 
-	private final PopupPanel widget;
-	private ReportPeriodPicker reportPeriodPicker;
-	private DepartmentPickerPopupWidget departmentPicker;
 
 	@Inject
 	@UiConstructor
@@ -79,43 +80,35 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 			}
 		});
 
-		widget = uiBinder.createAndBindUi(this);
-		widget.setAnimationEnabled(true);
+		reportPeriodPicker = new ReportPeriodPicker(this, false);
+		reportPeriodPicker.setEnabled(false);
+
+		
+		initWidget(uiBinder.createAndBindUi(this));
+		
+		departmentPicker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+				reportPeriodPicker.clearReportPeriods();
+				reportPeriodPicker.setEnabled(!event.getValue().isEmpty());
+			}
+		});
+		
 	}
 
 	@Override
-	public Widget asWidget() {
-		return widget;
-	}
-
-	@Override
-	public void createDepartmentFilter(List<Department> list, Set<Integer> availableValues){
-		departmentPicker = new DepartmentPickerPopupWidget("Выберите подразделение", false);
+	public void setAvalibleDepartments(List<Department> list, Set<Integer> availableValues){
 		departmentPicker.setAvalibleValues(list, availableValues);
 	}
 
 	@Override
-	public void createReportPeriodFilter(List<TaxPeriod> taxPeriods){
-		reportPeriodPicker = new ReportPeriodPicker(this, false);
+	public void setAvalibleTaxPeriods(List<TaxPeriod> taxPeriods){
 		reportPeriodPicker.setTaxPeriods(taxPeriods);
-	}
-
-	@Override
-	public void setupUI(){
-		reportPeriodPanel.clear();
-		departmentPanel.clear();
-
-		reportPeriodPanel.add(new Label("Отчетный период"));
-		reportPeriodPanel.add(reportPeriodPicker);
-		departmentPanel.add(new Label("Подразделение"));
-		departmentPanel.add(departmentPicker);
 	}
 
 	@UiHandler("continueButton")
 	public void onSave(ClickEvent event){
-		if(getUiHandlers() != null){
-			getUiHandlers().onConfirm();
-		}
+		getUiHandlers().onConfirm();
 	}
 
 	@UiHandler("cancelButton")
@@ -167,7 +160,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	@Override
 	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
 		if(getUiHandlers() != null){
-			getUiHandlers().onTaxPeriodSelected(taxPeriod);
+			getUiHandlers().onTaxPeriodSelected(taxPeriod, departmentPicker.getValue().iterator().next());
 		}
 	}
 

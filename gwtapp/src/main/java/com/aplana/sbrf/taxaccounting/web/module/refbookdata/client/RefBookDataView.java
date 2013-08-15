@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
@@ -13,8 +14,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -35,7 +35,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	@UiField
 	VerticalPanel content;
 
-	Map<String, Widget> inputFields = new HashMap<String, Widget>();
+	Map<String, HasValue> inputFields = new HashMap<String, HasValue>();
 
 	SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
 
@@ -71,12 +71,30 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	}
 
 	@Override
+	public void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data) {
+		refbookDataTable.setPageSize(pageSize);
+		data.addDataDisplay(refbookDataTable);
+
+	}
+
+	@Override
+	public void setRange(Range range) {
+		refbookDataTable.setVisibleRangeAndClearData(range, true);
+	}
+
+	@Override
+	public void updateTable() {
+		Range range = new Range(pager.getPageStart(), pager.getPageSize());
+		refbookDataTable.setVisibleRangeAndClearData(range, true);
+	}
+
+	@Override
 	public void createInputFields(final List<RefBookAttribute> headers) {
 		for (final RefBookAttribute header : headers) {
 			// Сформируем поля ввода
 			HorizontalPanel hp = new HorizontalPanel();
 			hp.add(new Label(header.getName()));
-			Widget inputWidget;
+			HasValue inputWidget;
 			switch (header.getAttributeType()) {
 				case STRING:
 					inputWidget = new TextBox();
@@ -96,16 +114,15 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 					break;
 			}
 			inputFields.put(header.getAlias(), inputWidget);
-			System.out.println("Alias: " + header.getAlias() + " " + header.getAttributeType());
 
-			hp.add(inputWidget);
+			hp.add((Widget)inputWidget);
 			content.add(hp);
 		}
 	}
 
 	@Override
 	public void fillInputFields(Map<String, com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttribute> data) {
-		for (Map.Entry<String, Widget> w : inputFields.entrySet()) {
+		for (Map.Entry<String, HasValue> w : inputFields.entrySet()) {
 			switch (data.get(w.getKey()).getAttributeType()) {
 				case STRING:
 					((TextBox)w.getValue()).setValue(data.get(w.getKey()).getStringValue());
@@ -124,11 +141,13 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	}
 
 	@Override
-	public void setTableData(List<RefBookDataRow> dataRows) {
+	public void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows) {
 		if (dataRows == null) {
+			refbookDataTable.setRowCount(totalCount);
 			refbookDataTable.setRowData(new ArrayList<RefBookDataRow>());
 		}
-		refbookDataTable.setRowData(dataRows);
+		refbookDataTable.setRowCount(totalCount);
+		refbookDataTable.setRowData(start, dataRows);
 	}
 
 //	@UiHandler("cancel")
@@ -138,10 +157,28 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 //		}
 //	}
 
+	@UiHandler("save")
+	void saveButtonClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			Map<String, Object> inputFields = getInputFieldsValues();
+			inputFields.put(RefBook.RECORD_ID_ALIAS, selectionModel.getSelectedObject().getRefBookRowId());
+			getUiHandlers().onSaveClicked(inputFields);
+		}
+	}
+
 	@UiHandler("addRow")
 	void addRowButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onAddRowClicked();
 		}
+
+	}
+
+	private Map<String, Object> getInputFieldsValues() {
+		Map<String, Object> values = new HashMap<String, Object>();
+		for (Map.Entry<String, HasValue> w : inputFields.entrySet()) {
+			values.put(w.getKey(), w.getValue().getValue());
+		}
+		return values;
 	}
 }

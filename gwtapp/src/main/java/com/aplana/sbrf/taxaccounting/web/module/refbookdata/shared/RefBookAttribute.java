@@ -54,18 +54,11 @@ public class RefBookAttribute implements Serializable {
 		this.referenceValue = referenceValue;
 	}
 
-	public String getValue() {
-		switch (attributeType) {
-			case NUMBER:
-				return numberValue.toString();
-			case STRING:
-				return stringValue;
-			case DATE:
-				return dateValue.toString();
-			case REFERENCE:
-				return stringValue;
-			default:
-				return "";
-		}
+	public Object getValue() {
+		if (stringValue != null) return stringValue;
+		else if (numberValue != null) return numberValue;
+		else if (dateValue != null) return dateValue;
+		else if (referenceValue != null) return referenceValue;
+		else return null;
 	}
 }
