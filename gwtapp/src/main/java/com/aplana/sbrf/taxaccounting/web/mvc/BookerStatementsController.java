@@ -30,8 +30,8 @@ public class BookerStatementsController {
     @Autowired
     BookerStatementsService service;
 
-    @RequestMapping(value = "/bookerstatements/{periodID}/{departmentID}/{typeID}", method = RequestMethod.POST)
-    public void processUpload(@PathVariable Integer periodID, @PathVariable int departmentID, @PathVariable int typeID,
+    @RequestMapping(value = "/bookerstatements/{periodID}/{typeID}", method = RequestMethod.POST)
+    public void processUpload(@PathVariable Integer periodID,  @PathVariable int typeID,
                               HttpServletRequest request, HttpServletResponse response) throws FileUploadException, IOException, ServiceException {
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
@@ -39,10 +39,6 @@ public class BookerStatementsController {
 
         final FileItem fi = items.get(0);
 
-        service.importXML(fi.getInputStream(), periodID, departmentID, typeID);
-
-        System.out.println("BookerStatementsController.processUpload end");
+        service.importXML(fi.getInputStream(), periodID, typeID);
     }
-
-
 }

@@ -15,6 +15,6 @@ public interface Income101Dao {
 	 * @param reportPeriodId идентификатор отчетного периода
 	 * @param account номер счета
 	 */
-	public List<Income101> getIncome101(int reportPeriodId, String account, int departmentId);
+	public List<Income101> getIncome101(int reportPeriodId, String account);
 
 }
