@@ -51,18 +51,15 @@ def bildXml(){
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
 
     def departmentId = declarationData.departmentId
-    // получить настройки обособленного подразделения
-    // TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
-    def departmentParam = departmentService.getDepartmentParam(departmentId)
-    if (departmentParam == null){
-        throw new Exception("Ошибка при получении настроек обособленного подразделения")
-    }
+    // получаем подразделение так как в настройках хранится record_id а не значение
+    department = getModRefBookValue(30, "ID = "+departmentId)
 
     // Получить параметры по транспортному налогу
-    // TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
-    def departmentParamTransport = departmentService.getDepartmentParamTransport(departmentId)
+    departmentParamTransport = getModRefBookValue(31, "DICT_REGION_ID = "+department.record_id)
+    logger.error("departmentParamTransport.okato = "+departmentParamTransport.okato)
+
     // получения региона по кода ОКАТО по справочнику Регионов
-    def region = dictionaryRegionService.getRegionByOkatoOrg(departmentParam.okato.toString());
+    def region = getRegionByOkatoOrg(departmentParamTransport.okato.toString());
 
 
     def builder = new MarkupBuilder(xml)
@@ -74,29 +71,29 @@ def bildXml(){
                     ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"), //new Date().format("dd.MM.yyyy"),
                     Период: 34,
                     ОтчетГод: taxPeriodService.get(reportPeriodService.get(declarationData.reportPeriodId).taxPeriodId).startDate.format('yyyy'),
-                    КодНО: departmentParam.taxOrganCode,
+                    КодНО: departmentParamTransport.taxOrganCode,
                     // TODO учесть что потом будут корректирующие периоды
                     НомКорр: "0",
                     ПоМесту: departmentParamTransport.taxPlaceTypeCode
             ){
 
-                Integer formReorg = departmentParam.reorgFormCode != null ? Integer.parseInt(departmentParam.reorgFormCode):0;
-                def svnp = [ОКВЭД: departmentParam.okvedCode]
-                if (departmentParam.okvedCode) {
-                    svnp.Тлф = departmentParam.phone
+                Integer formReorg = departmentParamTransport.reorgFormCode != null ? Integer.parseInt(departmentParamTransport.reorgFormCode):0;
+                def svnp = [ОКВЭД: departmentParamTransport.okvedCode]
+                if (departmentParamTransport.okvedCode) {
+                    svnp.Тлф = departmentParamTransport.phone
                 }
                 СвНП(svnp){
                     НПЮЛ(
-                            НаимОрг: departmentParam.name,
-                            ИННЮЛ: (departmentParam.inn),
-                            КПП: (departmentParam.kpp)){
+                            НаимОрг: departmentParamTransport.name,
+                            ИННЮЛ: (departmentParamTransport.inn),
+                            КПП: (departmentParamTransport.kpp)){
 
 
-                        if (departmentParam.reorgFormCode){
+                        if (departmentParamTransport.reorgFormCode){
                             СвРеоргЮЛ(
-                                    ФормРеорг:departmentParam.reorgFormCode,
-                                    ИННЮЛ: (formReorg in [1, 2, 3, 5, 6] ? departmentParam.reorgInn: 0),
-                                    КПП: (formReorg in [1, 2, 3, 5, 6] ? departmentParam.reorgKpp: 0)
+                                    ФормРеорг:departmentParamTransport.reorgFormCode,
+                                    ИННЮЛ: (formReorg in [1, 2, 3, 5, 6] ? departmentParamTransport.reorgInn: 0),
+                                    КПП: (formReorg in [1, 2, 3, 5, 6] ? departmentParamTransport.reorgKpp: 0)
                             )
                         }
                     }
@@ -109,7 +106,7 @@ def bildXml(){
                             "Отчество": departmentParamTransport.getSignatoryLastName()
                     )
                     // СвПред - Сведения о представителе налогоплательщика
-                    if (departmentParam.name == 2)
+                    if (departmentParamTransport.name == 2)
                     {
                         def svPred = ["НаимДок": departmentParamTransport.approveDocName]
                         if (departmentParamTransport.approveOrgName)
@@ -302,6 +299,71 @@ def bildXml(){
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * Получение региона по коду ОКАТО
+ * @param okato
+ */
+def getRegionByOkatoOrg(okato){
+    /*
+    * первые две цифры проверяемого кода ОКАТО
+    * совпадают со значением поля «Определяющая часть кода ОКАТО»
+    * справочника «Коды субъектов Российской Федерации»
+    */
+    // провайдер для справочника - Коды субъектов Российской Федерации
+    def records = refDataProvider.getRecords(new Date(), null, "OKATO_DEFINITION like '"+okato.toString().substring(0, 2)+"%'", null).getRecords()
+
+    if (records.size == 1){
+        return records.get(0);
+    } else{
+        /**
+         * Если первые пять цифр кода равны "71140" то код ОКАТО соответствует
+         * Ямало-ненецкому АО (код 89 в справочнике «Коды субъектов Российской Федерации»)
+         */
+        def reg89 = records.find{ it.OKATO_DEFINITION.substring(0, 4).equals("71140")}
+        if (reg89 != null) return reg89;
+
+        /**
+         * Если первые пять цифр кода равны "71100" то
+         * код ОКАТО соответствует Ханты-мансийскому АО
+         * (код 86 в справочнике «Коды субъектов Российской Федерации»)
+         */
+        def reg86 = records.find{ it.OKATO_DEFINITION.substring(0, 4).equals("71100")}
+        if (reg86 != null) return reg86;
+
+        /**
+         * Если первые четыре цифры кода равны "1110"
+         * то код ОКАТО соответствует Ненецкому АО
+         * (код 83 в справочнике «Коды субъектов Российской Федерации»)
+         */
+        def reg83 = records.find{ it.OKATO_DEFINITION.substring(0, 4).equals("1110")}
+        if (reg83 != null) return reg83;
+
+        logger.error("Не удалось определить регион по коду ОКАТО")
+    }
+}
+
+/**
+ * Получение нормальноного справочника
+ */
+def getModRefBookValue(refBookId, filter){
+    // провайдер для справочника
+    def refBookProvider = refBookFactory.getDataProvider(refBookId)
+    // записи
+    def records = refBookProvider.getRecords(new Date(), null, filter, null).getRecords();
+    if (records.size() != 1){
+        throw new Exception("Ошибка получения значения из справочника refBookId = "+refBookId)
+    }
+    // значение справочника в виде мапы
+    def record = records[0]
+
+    // получение связанных данных
+    for(r in record){
+        if (r.attributeType == RefBookAttributeType.REFERENCE){
+            r.value = refBookProvider.getValue(r, Long attributeId);
         }
     }
 }
