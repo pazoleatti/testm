@@ -169,7 +169,7 @@ void calculationControlGraphs() {
                     'rnu5Field5Accepted', row.consumptionBuhSumAccountNumber)
 
             // графа 15
-            def income102 = income102Dao.getIncome102(formData.reportPeriodId, row.accountingRecords, formData.departmentId)
+            def income102 = income102Dao.getIncome102(formData.reportPeriodId, row.accountingRecords)
             if (income102 == null || income102.isEmpty()) {
                 income102NotFound += getIndex(row)
                 tmp = 0
