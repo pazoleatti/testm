@@ -12,6 +12,6 @@ insert into report_period (id, name, is_active, months, tax_period_id, ord,  dep
 insert into report_period (id, name, is_active, months, tax_period_id, ord,  department_id, dict_tax_period_id) values (2, '2002 - 2 квартал', 0, 3, 1, 2, 1, 21);
 
 -- income101 data
-insert into income_101 (report_period_id, account, income_debet_remains, income_credit_remains, debet_rate, credit_rate, outcome_debet_remains, outcome_credit_remains,  department_id) values (1, '2', 3, 4, 5, 6, 7, 8, 1);
-insert into income_101 (report_period_id, account, income_debet_remains, income_credit_remains, debet_rate, credit_rate, outcome_debet_remains, outcome_credit_remains,  department_id) values (1, '2', 4, 5, 6, 7, 8, 9, 2);
-insert into income_101 (report_period_id, account, income_debet_remains, income_credit_remains, debet_rate, credit_rate, outcome_debet_remains, outcome_credit_remains,  department_id) values (2, '3', 5, 6, 7, 8, 9, 0, 1);
+insert into income_101 (report_period_id, account, income_debet_remains, income_credit_remains, debet_rate, credit_rate, outcome_debet_remains, outcome_credit_remains) values (1, '2', 3, 4, 5, 6, 7, 8);
+insert into income_101 (report_period_id, account, income_debet_remains, income_credit_remains, debet_rate, credit_rate, outcome_debet_remains, outcome_credit_remains) values (1, '2.1', 4, 5, 6, 7, 8, 9);
+insert into income_101 (report_period_id, account, income_debet_remains, income_credit_remains, debet_rate, credit_rate, outcome_debet_remains, outcome_credit_remains) values (2, '3', 5, 6, 7, 8, 9, 0);

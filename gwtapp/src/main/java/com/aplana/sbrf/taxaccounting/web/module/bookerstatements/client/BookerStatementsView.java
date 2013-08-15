@@ -140,11 +140,11 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
     private void setAction() {
         boolean isReady = currentReportPeriod != null && bookerReportType.getSelectedIndex() != -1 && uploader.getFilename() != null
-                && !uploader.getFilename().isEmpty();
+                && !uploader.getFilename().isEmpty() && currentDepartmentId != null;
         uploadButton.setEnabled(isReady);
         if (isReady) {
             uploadFormPanel.setAction(GWT.getHostPageBaseURL() + "upload/bookerstatements/" + currentReportPeriod.getId()
-                    + "/" + currentDepartmentId + "/" + bookerReportType.getSelectedIndex());
+                    + "/" + bookerReportType.getSelectedIndex());
         }
     }
 

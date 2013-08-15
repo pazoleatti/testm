@@ -20,11 +20,11 @@ import java.util.List;
 public class Income102DaoImpl extends AbstractDao implements Income102Dao {
 
 	@Override
-	public List<Income102> getIncome102(int reportPeriodId, String opuCode, int departmentId) {
+	public List<Income102> getIncome102(int reportPeriodId, String opuCode) {
 		try {
 			return getJdbcTemplate().query(
-                    "SELECT * FROM income_102 WHERE REPORT_PERIOD_ID= ? and OPU_CODE = ? and DEPARTMENT_ID = ?",
-                    new Object[]{reportPeriodId, opuCode, departmentId},
+                    "SELECT * FROM income_102 WHERE REPORT_PERIOD_ID= ? and OPU_CODE = ?",
+                    new Object[]{reportPeriodId, opuCode},
                     new RowMapper<Income102>() {
                         @Override
                         public Income102 mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -32,7 +32,6 @@ public class Income102DaoImpl extends AbstractDao implements Income102Dao {
                             income102Data.setReportPeriodId(rs.getInt("REPORT_PERIOD_ID"));
                             income102Data.setOpuCode(rs.getString("OPU_CODE"));
                             income102Data.setTotalSum(rs.getDouble("TOTAL_SUM"));
-                            income102Data.setDepartmentId(rs.getInt("DEPARTMENT_ID"));
                             income102Data.setItemName(rs.getString("ITEM_NAME"));
                             return income102Data;
                         }
