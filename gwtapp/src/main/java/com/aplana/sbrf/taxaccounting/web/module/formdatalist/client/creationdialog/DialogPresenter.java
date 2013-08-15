@@ -52,9 +52,8 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 	public interface MyView extends PopupView, HasUiHandlers<DialogUiHandlers> {
 		void clearInput();
 		void setReportPeriods(List<ReportPeriod> reportPeriods);
-		void createDepartmentFilter(List<Department> list, Set<Integer> availableValues);
-		void createReportPeriodFilter(List<TaxPeriod> taxPeriods);
-		void setupUI();
+		void setAvalibleDepartments(List<Department> list, Set<Integer> availableValues);
+		void setAvalibleTaxPeriods(List<TaxPeriod> taxPeriods);
 		void setKindList(List<FormDataKind> list);
 		void setFormTypeList(List<FormType> list);
 		FormDataFilter getFilterData();
@@ -102,9 +101,10 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 	}
 
 	@Override
-	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
+	public void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId) {
 		GetReportPeriods action = new GetReportPeriods();
 		action.setTaxPeriod(taxPeriod);
+		action.setDepartmentId(departmentId);
 		dispatchAsync.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
 					@Override
@@ -125,15 +125,14 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 
 						if (filterValues.getDepartmentIds() == null) {
 							//Контролер УНП
-							getView().createDepartmentFilter(result.getDepartments(), convertDepartmentsToIds(result.getDepartments()));
+							getView().setAvalibleDepartments(result.getDepartments(), convertDepartmentsToIds(result.getDepartments()));
 						} else {
-							getView().createDepartmentFilter(result.getDepartments(), filterValues.getDepartmentIds());
+							getView().setAvalibleDepartments(result.getDepartments(), filterValues.getDepartmentIds());
 						}
 						getView().setKindList(fillFilterList(filterValues.getKinds()));
 						getView().setFormTypeList(fillFilterList(filterValues.getFormTypes()));
 
-						getView().createReportPeriodFilter(result.getTaxPeriods());
-						getView().setupUI();
+						getView().setAvalibleTaxPeriods(result.getTaxPeriods());
 
 						fillDepartmentsMap(result.getDepartments());
 						fillFormTypeMap(filterValues.getFormTypes());

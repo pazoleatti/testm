@@ -195,7 +195,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
 
         GetReportPeriods action = new GetReportPeriods();
         action.setTaxPeriod(taxPeriod);
-        action.setDepartamentId(departmentId);
+        action.setDepartmentId(departmentId);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
                     @Override

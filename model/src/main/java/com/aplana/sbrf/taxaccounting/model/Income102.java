@@ -11,8 +11,6 @@ public class Income102 {
 	private String opuCode;
 	// Сумма
 	private Double totalSum;
-    // подразделение
-    private Integer departmentId;
     // Наименование статьи
     private String itemName;
 
@@ -39,14 +37,6 @@ public class Income102 {
 	public void setTotalSum(Double totalSum) {
 		this.totalSum = totalSum;
 	}
-
-    public Integer getDepartmentId() {
-        return departmentId;
-    }
-
-    public void setDepartmentId(Integer departmentId) {
-        this.departmentId = departmentId;
-    }
 
     public String getItemName() {
         return itemName;

@@ -130,9 +130,10 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 	}
 
 	@Override
-	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
+	public void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId) {
 		GetReportPeriods action = new GetReportPeriods();
 		action.setTaxPeriod(taxPeriod);
+		action.setDepartmentId(departmentId);
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
 					@Override

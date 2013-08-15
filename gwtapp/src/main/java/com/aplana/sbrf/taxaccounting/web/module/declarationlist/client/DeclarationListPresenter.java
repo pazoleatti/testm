@@ -80,7 +80,6 @@ public class DeclarationListPresenter extends
 		creationPresenter.setFilterValues(filterPresenter.getFilterValues());
 		creationPresenter.setTaxPeriods(filterPresenter.getTaxPeriods());
 		creationPresenter.setDepartments(filterPresenter.getDepartments());
-		creationPresenter.setCurrentReportPeriod(filterPresenter.getCurrentReportPeriod());
 		addToPopupSlot(creationPresenter);
 	}
 

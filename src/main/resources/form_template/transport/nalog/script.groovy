@@ -2,7 +2,6 @@ import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.dao.script.TransportTaxDao
 
 /**
  * Форма "Сведения о транспортных средствах, по которым уплачивается транспортный налог".
@@ -242,30 +241,34 @@ void checkNSI() {
 
         // 3. Проверка кода вида ТС
         if (row.tsTypeCode != null) {
-            if (transportTaxDao.validateTransportTypeCode(row.tsTypeCode)) {
+            // TODO Переписать. Переехали в версионные справочники
+            // if (transportTaxDao.validateTransportTypeCode(row.tsTypeCode)) {
 
                 // 4. Проверка вида ТС
-                if (transportTaxDao.getTsTypeName(row.tsTypeCode) != row.tsType) {
-                    logger.error('Неверный вид ТС!')
-                }
+                // TODO Переписать. Переехали в версионные справочники
+                // if (transportTaxDao.getTsTypeName(row.tsTypeCode) != row.tsType) {
+                //    logger.error('Неверный вид ТС!')
+                //}
 
-            } else {
-                logger.error('Неверный код вида транспортного средства!')
-            }
+            // } else {
+            //     logger.error('Неверный код вида транспортного средства!')
+            // }
         }
 
         // 5. Проверка кода экологического класса
         if (row.ecoClass != null) {
-            if (!transportTaxDao.validateEcoClass(row.ecoClass)) {
-                logger.error('Неверный код экологического класса!')
-            }
+            // TODO Переписать. Экологические классы переехали в версионные справочники
+            // if (!transportTaxDao.validateEcoClass(row.ecoClass)) {
+            //    logger.error('Неверный код экологического класса!')
+            // }
         }
 
         // 6. Проверка кода ед. измерения мощности
         if (row.baseUnit != null) {
-            if (!transportTaxDao.validateTaxBaseUnit(row.baseUnit)) {
-                logger.error('Неверный код ед. измерения мощности!')
-            }
+            // TODO Переписать. Переехали в версионные справочники
+            // if (!transportTaxDao.validateTaxBaseUnit(row.baseUnit)) {
+            //    logger.error('Неверный код ед. измерения мощности!')
+            //}
         }
     }
 }
@@ -278,13 +281,14 @@ void fillForm() {
 
         // заполнение графы 3 на основе графы 2
         if (row.codeOKATO != null) {
-            // TODO Переписать
+            // TODO Переписать. Переехали в версионные справочники
             //row.regionName = transportTaxDao.getRegionName(row.codeOKATO)
         }
 
         // заполнение графы 5 на основе графы 4
         if (row.tsTypeCode != null) {
-            row.tsType = transportTaxDao.getTsTypeName(row.tsTypeCode)
+            // TODO Переписать. Переехали в версионные справочники
+            // row.tsType = transportTaxDao.getTsTypeName(row.tsTypeCode)
         }
     }
 }

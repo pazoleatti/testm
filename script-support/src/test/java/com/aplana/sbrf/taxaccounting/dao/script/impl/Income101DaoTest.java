@@ -24,13 +24,13 @@ public class Income101DaoTest {
 
 	@Test
 	public void testValid(){
-        List<Income101> income101List = income101Dao.getIncome101(1, "2", 1);
+        List<Income101> income101List = income101Dao.getIncome101(1, "2");
 		assertEquals(income101List.get(0).getIncomeDebetRemains(), 3, 1e-5);
 	}
 
 	@Test
 	public void testNotFound(){
-		assertTrue(income101Dao.getIncome101(1, "not exists", 1).size() == 0);
+		assertTrue(income101Dao.getIncome101(1, "not exists").size() == 0);
 	}
 }
 
