@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodP
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.*;
@@ -77,10 +78,11 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     private Map<Integer, String> formTypesMap;
     private Map<Integer, String> userLoginMap;
     private Map<Integer, String> declarationTypesMap;
+    private List<Integer> selectedValues = new ArrayList<Integer>();
 
     @Override
     public void setDepartments(List<Department> list, Set<Integer> availableValues) {
-        departmentSelectionTree.setAvalibleValues(list,availableValues);
+        departmentSelectionTree.setAvalibleValues(list, availableValues);
     }
 
     @Override
@@ -121,7 +123,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         LogSystemFilter lsf = new LogSystemFilter();
         List<Integer> reportPeriods = new ArrayList<Integer>();
 
-        //Antil we choose tax type
+        //Until we choose tax type
         if(currentReportPeriod !=null){
             for (Map.Entry<Integer, ReportPeriod> reportPeriod : currentReportPeriod.getSelectedReportPeriods().entrySet()){
                 reportPeriods.add(reportPeriod.getKey());
@@ -268,6 +270,13 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         initWidget(uiBinder.createAndBindUi(this));
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
+        departmentSelectionTree.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+                selectedValues.clear();
+                selectedValues.addAll(event.getValue());
+            }
+        });
     }
 
     @UiHandler("search")
