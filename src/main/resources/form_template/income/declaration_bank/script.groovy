@@ -1,6 +1,9 @@
 package form_template.income.declaration_bank
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 
 /**
  * Формирование XML для декларации налога на прибыль.
@@ -679,8 +682,6 @@ if (xml == null) {
  * Формирование XML'ки.
  */
 
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import groovy.xml.MarkupBuilder;
 def xmlbuilder = new MarkupBuilder(xml)
 xmlbuilder.Файл(
