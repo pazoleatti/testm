@@ -12,6 +12,10 @@ import java.text.SimpleDateFormat
 
 /**
  * 6.3.2    Расчет налога на прибыль с доходов, удерживаемого налоговым агентом
+ *
+ * TODO:
+ *      - при импорте нет получения имени файла для определения типа файла (xls или csv)
+ *      - проверки корректности данных проверить когда будут сделаны вывод сообщении
  */
 
 DataRowHelper getDataRowsHelper() {
@@ -128,7 +132,7 @@ void logicCheck() {
         }
         if (!logger.containsLevel(LogLevel.ERROR)) {
             // графа 3 - справочник "Коды субъектов Российской Федерации"
-            def record = refDataProvider.getRecordData(row.subdivisionRF);
+            def record = refDataProvider.getRecordData(row.subdivisionRF)
             if (record == null) {
                 logger.warn('Неверное наименование субъекта РФ!')
             }
@@ -137,18 +141,18 @@ void logicCheck() {
 }
 
 /**
-* Вставить новую строку в конец нф.
-*
-* @param data данные нф
-* @param row строка
-*/
+ * Вставить новую строку в конец нф.
+ *
+ * @param data данные нф
+ * @param row строка
+ */
 void insert(def data, def row) {
     data.insert(row, getRows(data).size() + 1)
 }
 
 /**
-* Получение импортируемых данных.
-*/
+ * Получение импортируемых данных.
+ */
 void importData() {
     // TODO (Ramil Timerbaev) Костыль! это значение должно передаваться в скрипт
     def fileName = 'fileName.xls'
@@ -158,7 +162,7 @@ void importData() {
         return
     }
 
-    def xmlString = importService.getData(is, fileName, 'windows-1251', '№ стр.', null);
+    def xmlString = importService.getData(is, fileName, 'windows-1251', '№ стр.', null)
     if (xmlString == null) {
         return
     }
@@ -182,11 +186,11 @@ void importData() {
 }
 
 /**
-* Заполнить форму данными.
-*
-* @param xml данные
-* @param headRowCount количество строк в шапке
-*/
+ * Заполнить форму данными.
+ *
+ * @param xml данные
+ * @param headRowCount количество строк в шапке
+ */
 void addData(def xml, headRowCount) {
     if (xml == null) {
         return
@@ -194,7 +198,7 @@ void addData(def xml, headRowCount) {
     def data = getDataRowsHelper()
 
     // количество графов в таблице
-    def columnCount = 12
+    def columnCount = 22
 
     def tmp
     def newRows = []
@@ -231,7 +235,7 @@ void addData(def xml, headRowCount) {
             newRow.zipCode = row.cell[7].text()
 
             // графа 3 - справочник "Коды субъектов Российской Федерации"
-            def records = refDataProvider.getRecords(new Date(), null, "CODE = '" + row.cell[8].text() + "'", null);
+            def records = refDataProvider.getRecords(new Date(), null, "CODE = '" + row.cell[8].text() + "'", null)
             if (records == null || records.getRecords().isEmpty()) {
                 logger.error("Строка $indexRow столбец 9 содержит неверный код субъекта РФ!")
             } else {
@@ -301,10 +305,10 @@ void addData(def xml, headRowCount) {
 }
 
 /**
-* Получить числовое значение.
-*
-* @param value строка
-*/
+ * Получить числовое значение.
+ *
+ * @param value строка
+ */
 def getNumber(def value) {
     if (value == null) {
         return null
@@ -333,18 +337,15 @@ DataRow<Cell> getNewRow() {
 }
 
 /**
-* Проверить шапку таблицы.
-*
-* @param xml данные
-* @param headRowCount количество строк в шапке
-*/
+ * Проверить шапку таблицы.
+ *
+ * @param xml данные
+ * @param headRowCount количество строк в шапке
+ */
 def checkTableHead(def xml, def headRowCount) {
-    logger.info('checkTableHead >>')
     def colCount = 22
     // проверить количество строк и голонок в шапке
     if (xml.row.size() < headRowCount || xml.row[0].cell.size() < colCount) {
-        logger.info('row = ' + xml.row.size() + ' != ' + headRowCount + ', col = '+ xml.row[0].cell.size() + ' != ' + colCount)
-        logger.info('checkTableHead 0')
         return false
     }
     def result = (xml.row[0].cell[0] == '№ стр.' &&
@@ -371,16 +372,15 @@ def checkTableHead(def xml, def headRowCount) {
             xml.row[0].cell[19] == 'Дата перечисления дивидентов' &&
             xml.row[0].cell[20] == 'Сумма дивидентов' &&
             xml.row[0].cell[21] == 'Сумма налога')
-    logger.info('checkTableHead !!!')
     return result
 }
 
 /**
-* Получить значение атрибута строки справочника.
+ * Получить значение атрибута строки справочника.
 
-* @param record строка справочника
-* @param alias алиас
-*/
+ * @param record строка справочника
+ * @param alias алиас
+ */
 def getValue(def record, def alias) {
     def value = record.get(alias)
     switch (value.getAttributeType()) {
