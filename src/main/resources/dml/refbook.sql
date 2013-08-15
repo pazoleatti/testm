@@ -13,7 +13,7 @@ INSERT INTO ref_book(ID, NAME) VALUES (11,'Услуги в части прогр
 INSERT INTO ref_book(ID, NAME) VALUES (12,'Коды единиц измерения на основании ОКЕИ');
 INSERT INTO ref_book(ID, NAME) VALUES (13,'Виды услуг');
 INSERT INTO ref_book(ID, NAME) VALUES (14,'Режимы переговорных сделок');
-INSERT INTO ref_book(ID, NAME) VALUES (15,'Единый справочник валют');
+INSERT INTO ref_book(ID, NAME) VALUES (15,'Общероссийский классификатор валют');
 INSERT INTO ref_book(ID, NAME) VALUES (16,'Типы сделок');
 INSERT INTO ref_book(ID, NAME) VALUES (17,'Коды драгоценных металлов');
 INSERT INTO ref_book(ID, NAME) VALUES (18,'Признаки физической поставки');
