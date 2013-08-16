@@ -55,7 +55,7 @@ public interface FormDataService {
      * @param inputStream
      * @param fileName
      */
-    public void importFormData(Logger logger, TAUserInfo userInfo, int formDataId,int formTemplateId,
+    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId,int formTemplateId,
                                int departmentId, FormDataKind kind, int reportPeriodId, InputStream inputStream, String fileName);
 	
 	

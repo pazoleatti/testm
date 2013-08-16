@@ -1,18 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-
+import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.script.TaxPeriodService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
@@ -20,6 +11,13 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResul
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
@@ -46,6 +44,9 @@ public class GetFormDataHandler extends
 
 	@Autowired
 	FormTemplateService formTemplateService;
+
+    @Autowired
+    BlobDataService blobDataService;
 
 	public GetFormDataHandler() {
 		super(GetFormData.class);
