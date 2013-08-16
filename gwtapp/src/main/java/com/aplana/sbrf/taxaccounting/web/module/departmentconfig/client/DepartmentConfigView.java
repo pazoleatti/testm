@@ -172,7 +172,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                 }
 
                 Integer selDepartmentId = event.getValue().iterator().next();
-                //String selDepartmentName = event.getItems().keySet().iterator().next();
 
                 boolean checkPass = checkUnsaved(new CheckUnsavedHandler() {
                     @Override
@@ -201,7 +200,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
                 // Обновление налоговых периодов
                 reloadTaxPeriods();
-				
 			}
 		});
         		
@@ -231,8 +229,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
                 // Очистка формы
                 clear();
-                updateVisibility();
                 currentReportPeriod = null;
+                updateVisibility();
 
                 // Обновление налоговых периодов
                 reloadTaxPeriods();
@@ -307,9 +305,9 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         // Ставка налога
         taxRatePanel.setVisible(currentTaxType == TaxType.INCOME);
         // Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде
-        sumTaxPanel.setVisible(isUnp && (currentTaxType == TaxType.INCOME || currentTaxType == TaxType.DEAL));
+        sumTaxPanel.setVisible(isUnp && currentTaxType == TaxType.INCOME);
         // Сумма налога с выплаченных дивидендов за пределами Российской Федерации в последнем квартале отчётного периода
-        sumDividendsPanel.setVisible(isUnp && (currentTaxType == TaxType.INCOME || currentTaxType == TaxType.DEAL));
+        sumDividendsPanel.setVisible(isUnp && currentTaxType == TaxType.INCOME);
         // Обязанность по уплате налога и Признак расчёта
         payPanel.setVisible(!isUnp && currentTaxType == TaxType.INCOME);
     }

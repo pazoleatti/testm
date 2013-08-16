@@ -276,8 +276,6 @@ INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENC
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES (244,37,'Код места, по которому представляется документ','TAX_PLACE_TYPE_CODE',4,18,2,3,1,null,10);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES (245,37,'Версия программы, с помощью которой сформирован файл','APP_VERSION',1,19,null,null,1,null,40);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES (246,37,'Версия формата','FORMAT_VERSION',1,20,null,null,1,null,10);
-INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES (247,37,'Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде','SUM_TAX',2,21,null,null,1,0,15);
-INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES (248,37,'Сумма налога с выплаченных дивидендов за пределами Российской Федерации в последнем квартале отчётного периода','SUM_DIVIDENDS',2,22,null,null,1,0,15);
 
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES (249,38,'Код','CODE',2,0,null,null,1,0,1);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES (250,38,'Значение','VALUE',1,1,null,null,1,null,3);
