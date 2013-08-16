@@ -5,6 +5,9 @@
  * @since 19.03.2013 16:30
  */
 
+
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 // Форма настроек обособленного подразделения: значение атрибута 11
 
 /*
@@ -52,65 +55,67 @@ def bildXml(){
 
     def departmentId = declarationData.departmentId
     // получаем подразделение так как в настройках хранится record_id а не значение
+    logger.info("departmentId = "+departmentId)
     department = getModRefBookValue(30, "ID = "+departmentId)
+    logger.info("department = "+department)
 
     // Получить параметры по транспортному налогу
-    departmentParamTransport = getModRefBookValue(31, "DICT_REGION_ID = "+department.record_id)
-    logger.error("departmentParamTransport.okato = "+departmentParamTransport.okato)
+    departmentParamTransport = getModRefBookValue(31, "DEPARTMENT_ID = "+department.record_id)
+    logger.info("departmentParamTransport = "+departmentParamTransport)
 
     // получения региона по кода ОКАТО по справочнику Регионов
-    def region = getRegionByOkatoOrg(departmentParamTransport.okato.toString());
+    def region = getRegionByOkatoOrg(departmentParamTransport.OKATO.OKATO);
 
 
     def builder = new MarkupBuilder(xml)
     if (!declarationData.isAccepted()) {
-        builder.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId), ВерсПрог: departmentParamTransport.appVersion, ВерсФорм:departmentParamTransport.formatVersion) {
+        builder.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId), ВерсПрог: departmentParamTransport.APP_VERSION, ВерсФорм:departmentParamTransport.FORMAT_VERSION) {
             Документ(
                     КНД:"1152004",
                     // TODO обсудить всплывающее окно, вынести в конф. Трансп декл
                     ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"), //new Date().format("dd.MM.yyyy"),
                     Период: 34,
                     ОтчетГод: taxPeriodService.get(reportPeriodService.get(declarationData.reportPeriodId).taxPeriodId).startDate.format('yyyy'),
-                    КодНО: departmentParamTransport.taxOrganCode,
+                    КодНО: departmentParamTransport.TAX_ORGAN_CODE,
                     // TODO учесть что потом будут корректирующие периоды
                     НомКорр: "0",
-                    ПоМесту: departmentParamTransport.taxPlaceTypeCode
+                    ПоМесту: departmentParamTransport.TAX_PLACE_TYPE_CODE
             ){
 
-                Integer formReorg = departmentParamTransport.reorgFormCode != null ? Integer.parseInt(departmentParamTransport.reorgFormCode):0;
-                def svnp = [ОКВЭД: departmentParamTransport.okvedCode]
-                if (departmentParamTransport.okvedCode) {
-                    svnp.Тлф = departmentParamTransport.phone
+                Integer formReorg = departmentParamTransport.REORG_FORM_CODE.stringValue != null ? Integer.parseInt(departmentParamTransport.REORG_FORM_CODE.stringValue):0;
+                def svnp = [ОКВЭД: departmentParamTransport.OKVED_CODE]
+                if (departmentParamTransport.OKVED_CODE) {
+                    svnp.Тлф = departmentParamTransport.PHONE
                 }
                 СвНП(svnp){
                     НПЮЛ(
-                            НаимОрг: departmentParamTransport.name,
-                            ИННЮЛ: (departmentParamTransport.inn),
-                            КПП: (departmentParamTransport.kpp)){
+                            НаимОрг: departmentParamTransport.NAME,
+                            ИННЮЛ: (departmentParamTransport.INN),
+                            КПП: (departmentParamTransport.KPP)){
 
 
-                        if (departmentParamTransport.reorgFormCode){
+                        if (departmentParamTransport.REORG_FORM_CODE){
                             СвРеоргЮЛ(
-                                    ФормРеорг:departmentParamTransport.reorgFormCode,
-                                    ИННЮЛ: (formReorg in [1, 2, 3, 5, 6] ? departmentParamTransport.reorgInn: 0),
-                                    КПП: (formReorg in [1, 2, 3, 5, 6] ? departmentParamTransport.reorgKpp: 0)
+                                    ФормРеорг:departmentParamTransport.REORG_FORM_CODE,
+                                    ИННЮЛ: (formReorg in [1, 2, 3, 5, 6] ? departmentParamTransport.REORG_INN: 0),
+                                    КПП: (formReorg in [1, 2, 3, 5, 6] ? departmentParamTransport.REORG_KPP: 0)
                             )
                         }
                     }
                 }
 
-                Подписант(ПрПодп: departmentParamTransport.signatoryId){
+                Подписант(ПрПодп: departmentParamTransport.SIGNATORY_ID){
                     ФИО(
-                            "Фамилия": departmentParamTransport.signatorySurname,
-                            "Имя": departmentParamTransport.getSignatoryFirstName(),
-                            "Отчество": departmentParamTransport.getSignatoryLastName()
+                            "Фамилия": departmentParamTransport.SIGNATORY_SURNAME,
+                            "Имя": departmentParamTransport.SIGNATORY_FIRSTNAME,
+                            "Отчество": departmentParamTransport.SIGNATORY_LASTNAME
                     )
                     // СвПред - Сведения о представителе налогоплательщика
-                    if (departmentParamTransport.name == 2)
+                    if (departmentParamTransport.NAME == 2)
                     {
-                        def svPred = ["НаимДок": departmentParamTransport.approveDocName]
-                        if (departmentParamTransport.approveOrgName)
-                            svPred.НаимОрг = departmentParamTransport.approveOrgName
+                        def svPred = ["НаимДок": departmentParamTransport.APPROVE_DOC_NAME]
+                        if (departmentParamTransport.APPROVE_ORG_NAME)
+                            svPred.НаимОрг = departmentParamTransport.APPROVE_ORG_NAME
                         СвПред(svPred)
                     }
                 }
@@ -317,6 +322,8 @@ def getRegionByOkatoOrg(okato){
     * справочника «Коды субъектов Российской Федерации»
     */
     // провайдер для справочника - Коды субъектов Российской Федерации
+    logger.info("okato -"+okato)
+    def  refDataProvider = refBookFactory.getDataProvider(4)
     def records = refDataProvider.getRecords(new Date(), null, "OKATO_DEFINITION like '"+okato.toString().substring(0, 2)+"%'", null).getRecords()
 
     if (records.size == 1){
@@ -350,10 +357,11 @@ def getRegionByOkatoOrg(okato){
 }
 
 /**
- * Получение нормальноного справочника
+ * Получение полного справочника
  */
 def getModRefBookValue(refBookId, filter){
     // провайдер для справочника
+    def refBook = refBookFactory.get(refBookId);
     def refBookProvider = refBookFactory.getDataProvider(refBookId)
     // записи
     def records = refBookProvider.getRecords(new Date(), null, filter, null).getRecords();
@@ -364,9 +372,14 @@ def getModRefBookValue(refBookId, filter){
     def record = records[0]
 
     // получение связанных данных
-    for(r in record){
-        if (r.attributeType == RefBookAttributeType.REFERENCE){
-            r.value = refBookProvider.getValue(r, Long attributeId);
+    logger.info("record = "+record)
+
+    refBook.attributes.each() { RefBookAttribute attr ->
+        def ref = record[attr.alias].referenceValue;
+        if (attr.attributeType  == RefBookAttributeType.REFERENCE && ref != null) {
+            def attrProvider = refBookFactory.getDataProvider(attr.refBookId)
+            record[attr.alias] = attrProvider.getRecordData(ref);
         }
     }
+    record
 }
