@@ -1,6 +1,7 @@
 package form_template.income.rnu25
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
@@ -983,6 +984,7 @@ void addData(def xml) {
         }
     }
     save(data)
+    logger.info('Данные загружены')
 }
 
 /**
