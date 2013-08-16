@@ -13,7 +13,7 @@ INSERT INTO ref_book(ID, NAME) VALUES (11,'Услуги в части прогр
 INSERT INTO ref_book(ID, NAME) VALUES (12,'Коды единиц измерения на основании ОКЕИ');
 INSERT INTO ref_book(ID, NAME) VALUES (13,'Виды услуг');
 INSERT INTO ref_book(ID, NAME) VALUES (14,'Режимы переговорных сделок');
-INSERT INTO ref_book(ID, NAME) VALUES (15,'Единый справочник валют');
+INSERT INTO ref_book(ID, NAME) VALUES (15,'Общероссийский классификатор валют');
 INSERT INTO ref_book(ID, NAME) VALUES (16,'Типы сделок');
 INSERT INTO ref_book(ID, NAME) VALUES (17,'Коды драгоценных металлов');
 INSERT INTO ref_book(ID, NAME) VALUES (18,'Признаки физической поставки');
@@ -291,7 +291,7 @@ INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENC
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 413, 41,'Срок использования "До", лет','MAX_AGE', 2, 4,null,null,1, 0, 10);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 414, 41,'Мощность "От"','MIN_POWER', 2, 5,null,null,1, 2, 10);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 415, 41,'Мощность "До"','MAX_POWER', 2, 6,null,null,1, 2, 10);
-INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 416, 41,'Ставка, руб.','VALUE', 2, 7,null,null,1, 0, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 416, 41,'Ставка, руб.','VALUE', 2, 7,null,null,1, 2, 10);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 417, 41,'Код региона','DICT_REGION_ID', 4, 8, 4, 10 ,1,null, 10);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 418, 41,'Ед. измерения мощности','UNIT_OF_POWER', 4, 9, 12, 58, 1, null, 10);
 
@@ -309,12 +309,10 @@ INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENC
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 506, 50,'Обороты по кредиту','CREDIT_RATE', 2, 7,null,null,1, 4, 10);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 507, 50,'Исходящие остатки по дебету','OUTCOME_DEBET_REMAINS', 2, 8,null,null,1, 4, 10);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 508, 50,'Исходящие остатки по кредиту','OUTCOME_CREDIT_REMAINS', 2, 9,null,null,1, 4, 10);
-INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 509, 50,'Подразделение','DEPARTMENT_ID', 4, 10, 30, 161, 1, null, 10);
 
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 520, 52,'Идентификатор отчетного периода','REPORT_PERIOD_ID', 2, 1,null,null,1, 0, 10);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 521, 52,'Код ОПУ','OPU_CODE', 1, 2,null,null,1,null, 10);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 522, 52,'Сумма','TOTAL_SUM', 2, 3,null,null,1, 4, 10);
-INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 523, 52,'Подразделение','DEPARTMENT_ID', 4, 4, 30, 161, 1, null, 10);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 524, 52,'Наименование статьи','ITEM_NAME', 1, 5,null,null,1,null, 100);
 
 

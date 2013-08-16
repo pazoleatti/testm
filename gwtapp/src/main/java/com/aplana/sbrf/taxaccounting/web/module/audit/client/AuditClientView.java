@@ -41,6 +41,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     private static final String noteColumnHeader = "Текст события";
     private static final String reportPeriodColumnHeader = "Период";
     private static final String departmentColumnHeader = "Подразделение";
+    private static final String typeColumnHeader = "Тип формы";
     private static final String formDataKindColumnHeader = "Тип налоговой формы";
     private static final String formTypeColumnHeader = "Вид налоговой формы/декларации";
     private static final String userLoginColumnHeader = "Пользователь";
@@ -86,6 +87,19 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
             @Override
             public String getValue(LogSystemSearchResultItem object) {
                 return object.getDepartment().getName();
+            }
+        };
+
+        TextColumn<LogSystemSearchResultItem> typeColumn = new TextColumn<LogSystemSearchResultItem>() {
+            @Override
+            public String getValue(LogSystemSearchResultItem object) {
+                if (object.getFormType() != null) {
+                    return "Налоговые формы";
+                }
+                else if (object.getDeclarationType() != null) {
+                    return "Декларации";
+                }
+                return null;
             }
         };
 
@@ -136,6 +150,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         auditTable.addColumn(noteColumn, noteColumnHeader);
         auditTable.addColumn(reportPeriodColumn, reportPeriodColumnHeader);
         auditTable.addColumn(departmentColumn, departmentColumnHeader);
+        auditTable.addColumn(typeColumn, typeColumnHeader);
         auditTable.addColumn(formDataKindColumn, formDataKindColumnHeader);
         auditTable.addColumn(formDeclTypeColumn, formTypeColumnHeader);
         auditTable.addColumn(userLoginColumn, userLoginColumnHeader);
@@ -143,7 +158,6 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         auditTable.addColumn(userIpColumn, userIpColumnHeader);
 
         pager.setDisplay(auditTable);
-
     }
 
     @Override
@@ -157,7 +171,6 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         else {
             super.setInSlot(slot, content);
         }
-
     }
 
     @Override
@@ -171,5 +184,4 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         auditTable.setPageSize(pageSize);
         provider.addDataDisplay(auditTable);
     }
-
 }

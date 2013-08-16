@@ -34,52 +34,53 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 
 		RefBookDataProvider refBookDataProvider = refBookFactory
 				.getDataProvider(action.getRefbookId());
-		PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider
-				.getRecords(new Date(), null, null, null); //TODO Нужно доделать
+
 		GetRefBookTableDataResult result = new GetRefBookTableDataResult();
 		RefBook refBook = refBookFactory.get(action.getRefbookId());
+		result.setTableHeaders(refBook.getAttributes());
 
-		List<RefBookAttribute> headers = new ArrayList<RefBookAttribute>();
-		for (RefBookAttribute attribute : refBook.getAttributes()) {
-			headers.add(attribute);
-		}
-		List<RefBookDataRow> rows = new ArrayList<RefBookDataRow>();
-		for (Map<String, RefBookValue> record : refBookPage.getRecords()) {
+		if (action.getPagingParams() != null) {//TODO перенести в отдельный хэндлер
+			PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider
+					.getRecords(new Date(), action.getPagingParams(), null, refBook.getAttributes().get(0)); //TODO Нужно доделать
+			List<RefBookDataRow> rows = new ArrayList<RefBookDataRow>();
+			for (Map<String, RefBookValue> record : refBookPage.getRecords()) {
 
-			Map<String, String> tableRowData = new HashMap<String, String>();
-			for (Map.Entry<String, RefBookValue> val : record.entrySet()) {
+				Map<String, String> tableRowData = new HashMap<String, String>();
+				for (Map.Entry<String, RefBookValue> val : record.entrySet()) {
 
-				String tableCell;
-				switch (val.getValue().getAttributeType()) {
-					case NUMBER:
-						tableCell = val.getValue().getNumberValue().toString();
-						break;
-					case DATE:
-						tableCell = val.getValue().getDateValue().toString();
-						break;
-					case STRING:
-						tableCell = val.getValue().getStringValue();
-						break;
-					case REFERENCE:
-
-						if (val.getValue().getReferenceObject() != null) {
-							tableCell = val.getValue().getReferenceValue().toString();
+					String tableCell;
+					switch (val.getValue().getAttributeType()) {
+						case NUMBER:
+							tableCell = val.getValue().getNumberValue().toString();
 							break;
-						}
-					default:
-						tableCell = "undefined";
-						break;
-				}
-				tableRowData.put(val.getKey(), tableCell);
-			}
-			RefBookDataRow tableRow = new RefBookDataRow();
-			tableRow.setValues(tableRowData);
-			tableRow.setRefBookRowId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
-			rows.add(tableRow);
+						case DATE:
+							tableCell = val.getValue().getDateValue().toString();
+							break;
+						case STRING:
+							tableCell = val.getValue().getStringValue();
+							break;
+						case REFERENCE:
 
+							if (val.getValue().getReferenceObject() != null) {
+								tableCell = val.getValue().getReferenceValue().toString();
+								break;
+							}
+						default:
+							tableCell = "undefined";
+							break;
+					}
+					tableRowData.put(val.getKey(), tableCell);
+				}
+				RefBookDataRow tableRow = new RefBookDataRow();
+				tableRow.setValues(tableRowData);
+				tableRow.setRefBookRowId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+				rows.add(tableRow);
+
+			}
+			result.setTotalCount(refBookPage.getTotalRecordCount());
+
+			result.setDataRows(rows);
 		}
-		result.setDataRows(rows);
-		result.setTableHeaders(headers);
 		return result;
 	}
 

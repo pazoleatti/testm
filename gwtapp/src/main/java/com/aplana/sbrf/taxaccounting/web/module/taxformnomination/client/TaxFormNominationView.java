@@ -26,7 +26,7 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 import java.util.*;
 
 /**
- * View для формы форма «Согласование организации»
+ * View для формы форма «Назначение налоговых форм и деклараций»
  *
  * @author Stanislav Yasinskiy
  */
@@ -104,7 +104,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
     }
 
-    private void setDepiId(Long id) {
+    private void setDepoId(Long id) {
         if ((depoId != null && !depoId.equals(id)) || (depoId == null && id != null)) {
             depoId = id;
             onDepoChange();
@@ -216,7 +216,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
     // Изменение выбранного значения "Вид налоговой формы"
     private void onTaxFormKindChange() {
-        enableAnchor(assignAnchor, boxTaxFormKind.hasSelectedItem() && (boxFormDataKind.hasSelectedItem() || !isForm) && depoId!=null);
+        enableAnchor(assignAnchor, boxTaxFormKind.hasSelectedItem() && (boxFormDataKind.hasSelectedItem() || !isForm) && depoId != null);
     }
 
     // Перезаполнение комбика "Вид налоговой формы"/"Вид декларации"
@@ -267,7 +267,6 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
                 onTaxFormKindChange();
             }
         });
-        boxFormDataKind.setAcceptableValues(FORM_DATA_KIND);
 
         boxTaxFormKind = new MyValueListBox<FormType>(new AbstractRenderer<FormType>() {
             @Override
@@ -282,7 +281,6 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         boxTaxFormKind.addValueChangeHandler(new ValueChangeHandler<FormType>() {
             @Override
             public void onValueChange(ValueChangeEvent<FormType> event) {
-
                 onTaxFormKindChange();
             }
         });
@@ -332,7 +330,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     ClickHandler handler = new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-            setDepiId(cbMap.get(event.getSource()));
+            setDepoId(cbMap.get(event.getSource()));
         }
     };
 
@@ -347,7 +345,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         while (treeItemIterator.hasNext()) {
             item = treeItemIterator.next();
             CheckBox widget = (CheckBox) item.getWidget();
-            cbMap.put( widget,((Integer) ((Pair) item.getUserObject()).getFirst()).longValue());
+            cbMap.put(widget, ((Integer) ((Pair) item.getUserObject()).getFirst()).longValue());
             widget.addClickHandler(handler);
         }
     }
@@ -356,14 +354,14 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @Override
     public void init(Boolean isForm) {
         this.isForm = isForm;
-        setDepiId(null);
+            depoId = null;
 
         // видимость частных полей
         formLabel.setVisible(isForm);
         formAnchor.setVisible(!isForm);
         declarationLabel.setVisible(!isForm);
         declarationAnchor.setVisible(isForm);
-        panelFormDataKind.setWidgetSize(panelFormDataKind2,isForm ? 200:0);
+        panelFormDataKind.setWidgetSize(panelFormDataKind2, isForm ? 200 : 0);
         //panelFormDataKind.getWidget(DeckLayoutPanel.)setWidth("0px");
         labelKind.setText(isForm ? "Вид налоговой формы" : "Вид декларации");
 
@@ -372,11 +370,14 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         initTableHeader();
 
         // "Вид налога": "Налог на прибыль"
-        boxTaxType.setValue(TaxType.INCOME, true);
+        boxTaxType.setValue(TaxType.INCOME, false);
 
         // Кнопки "Назначить" и "Отменить назначение" — неактивны
         enableAnchor(assignAnchor, false);
         enableAnchor(cancelAnchor, false);
+
+        setTaxFormKind(new ArrayList<FormType>());
+        boxFormDataKind.setAcceptableValues(new ArrayList<FormDataKind>());
     }
 
     private void initTableHeader() {

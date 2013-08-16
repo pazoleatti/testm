@@ -27,7 +27,8 @@ public class MyValueListBox<T> extends ValueListBox<T> {
     @Override
     public void setAcceptableValues(Collection<T> newValues) {
         super.setAcceptableValues(newValues);
-        listBox.removeItem(listBox.getItemCount() - 1);
+        if(listBox.getItemCount()>newValues.size())
+            listBox.removeItem(listBox.getItemCount() - 1);
     }
 
     public boolean hasSelectedItem() {

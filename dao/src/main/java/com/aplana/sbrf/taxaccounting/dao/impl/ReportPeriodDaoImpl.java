@@ -86,9 +86,9 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 	@Override
 	public List<ReportPeriod> listByTaxPeriodAndDepartmentId(int taxPeriodId, long departmentId) {
 		return getJdbcTemplate().query(
-				"select * from report_period where tax_period_id = ? order by ord",
-				new Object[]{taxPeriodId},
-				new int[]{Types.NUMERIC},
+				"select * from report_period where tax_period_id = ? and department_id = ? order by ord",
+				new Object[]{taxPeriodId, departmentId},
+				new int[]{Types.NUMERIC, Types.NUMERIC},
 				new ReportPeriodMapper()
 		);
 	}

@@ -111,9 +111,10 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 	}
 
 	@Override
-	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
+	public void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId) {
 		GetReportPeriods action = new GetReportPeriods();
 		action.setTaxPeriod(taxPeriod);
+		action.setDepartmentId(departmentId);
 		dispatchAsync.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
 					@Override
@@ -153,10 +154,6 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 				formDataFilter.setDepartmentId(defaultDepartment);
 			} else {
 				formDataFilter.setDepartmentId(null);
-			}
-			if (result.getCurrentReportPeriod() != null) {
-				getView().setSelectedReportPeriods(Arrays.asList(result.getCurrentReportPeriod()));
-				formDataFilter.setReportPeriodIds(Arrays.asList(result.getCurrentReportPeriod().getId()));
 			}
 		} else {
 			//В противном случае - заполняем фильтр значениями, по которым делалась фильтрация в последний раз,
@@ -213,4 +210,6 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 			savedDepartmentsMap.put(value, new ArrayList<Integer>());
 		}
 	}
+
+
 }

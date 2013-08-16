@@ -21,8 +21,8 @@ public class Income101 {
 	private Double outcomeDebetRemains;
 	// Исходящие остатки по кредиту
 	private Double outcomeCreditRemains;
-    // подразделение
-    private Integer departmentId;
+    // Название счёта
+    private String accountName;
 	
 	public Integer getReportPeriodId() {
 		return reportPeriodId;
@@ -73,10 +73,12 @@ public class Income101 {
 	public void setOutcomeCreditRemains(Double outcomeCreditRemains) {
 		this.outcomeCreditRemains = outcomeCreditRemains;
 	}
-    public Integer getDepartmentId() {
-        return departmentId;
+
+    public String getAccountName() {
+        return accountName;
     }
-    public void setDepartmentId(Integer departmentId) {
-        this.departmentId = departmentId;
+
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
     }
 }

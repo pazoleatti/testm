@@ -13,8 +13,6 @@ import java.text.SimpleDateFormat
  *
  * @author Stanislav Yasinskiy
  */
-
-
 switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importFromXML()
@@ -22,15 +20,17 @@ switch (formDataEvent) {
 }
 
 void importFromXML() {
-    def dataProvider = refBookFactory.getDataProvider(3)
-    def refBook = refBookFactory.get(3)
+
+    def dataProvider = refBookFactory.getDataProvider(3L)
+    def refBook = refBookFactory.get(3L)
     def SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd")
     def reader = null
     def Date version = null  //дата актуальности
     def Map<String, RefBookValue> recordsMap = new HashMap<String, RefBookValue>() // аттрибут и его значение
     def List<Map<String, RefBookValue>> recordsList = new ArrayList<Map<String, RefBookValue>>() // данные для записи в бд
     def Map<String, Model> mapper = new HashMap<String, Model>() // соответствие имён аттрибутов в бд и xml
-    def final INSERT_SIZE = 1000 // размер одной порции данных // 10000 Превышает таймаут
+    def final INSERT_SIZE = 100 // размер одной порции данных // 10000 Превышает таймаут
+    def counter = 1
 
     refBook.attributes.each {
         if (it.alias.equals("NAME"))
@@ -45,8 +45,6 @@ void importFromXML() {
         factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
         reader = factory.createXMLStreamReader(inputStream)
 
-        println("begin")
-
         while (reader.hasNext()) {
 
             if (reader.startElement) {
@@ -54,8 +52,8 @@ void importFromXML() {
                 // Версия справочника
                 if (reader.getName().equals(QName.valueOf("rollout"))) {
                     version = sdf.parse(reader.getAttributeValue(null, "dateSet"))
+                    dataProvider.deleteAllRecords(version)
                 }
-
 
                 // Список значений для вставки в бд
                 if (reader.getName().equals(QName.valueOf("field"))) {
@@ -78,10 +76,10 @@ void importFromXML() {
 
             // Запись в лист
             if (reader.endElement && reader.getName().equals(QName.valueOf("record"))) {
+                recordsMap.put("ID", new RefBookValue(RefBookAttributeType.NUMBER, counter++))
                 recordsList.add(recordsMap)
                 recordsMap = new HashMap<String, RefBookValue>()
                 if (recordsList.size() >= INSERT_SIZE) {
-                    println("recordsList.size() = " + recordsList.size())
                     dataProvider.insertRecords(version, recordsList)
                     recordsList.clear()
                 }
@@ -92,13 +90,11 @@ void importFromXML() {
     } finally {
         reader?.close()
     }
-    dataProvider.deleteAllRecords(version)
+
     dataProvider.insertRecords(version, recordsList)
+    refBookOkatoDao.updateParentId(version)
 
 //дебаг
-    println("version = " + version)
-    println("record count = " + recordsList.size())
-
 /*recordsList.each { map ->
     println("==========================")
     map.each {
