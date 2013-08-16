@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttributeSerializable;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
@@ -9,10 +10,13 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPick
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
@@ -34,6 +38,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	FlexiblePager pager;
 	@UiField
 	VerticalPanel content;
+	@UiField
+	Button save;
 
 	Map<String, HasValue> inputFields = new HashMap<String, HasValue>();
 
@@ -49,11 +55,12 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 			public void onSelectionChange(SelectionChangeEvent event) {
 				if (getUiHandlers() != null) {
 					getUiHandlers().onSelectionChanged(selectionModel.getSelectedObject().getRefBookRowId());
+					getUiHandlers().onSelectionChanged(selectionModel.getSelectedObject().getRefBookRowId());
 				}
-			}
+					}
 		});
 		pager.setDisplay(refbookDataTable);
-
+		save.setEnabled(false);
 	}
 
 	@Override
@@ -74,7 +81,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	public void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data) {
 		refbookDataTable.setPageSize(pageSize);
 		data.addDataDisplay(refbookDataTable);
-
 	}
 
 	@Override
@@ -86,6 +92,25 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	public void updateTable() {
 		Range range = new Range(pager.getPageStart(), pager.getPageSize());
 		refbookDataTable.setVisibleRangeAndClearData(range, true);
+	}
+
+	@Override
+	public void addRowToEnd(RefBookDataRow newRow, boolean select) {
+		List<RefBookDataRow> list = new ArrayList<RefBookDataRow>();
+		list.add(newRow);
+		refbookDataTable.setRowData(refbookDataTable.getRowCount(), list);
+		if (select) {
+			selectionModel.clear();
+
+			selectionModel.setSelected(newRow, true);
+		}
+	}
+
+	@Override
+	public Map<String, Object> getChangedValues() {
+		Map<String, Object> inputFields = getInputFieldsValues();
+		inputFields.put(RefBook.RECORD_ID_ALIAS, selectionModel.getSelectedObject().getRefBookRowId());
+		return inputFields;
 	}
 
 	@Override
@@ -113,6 +138,15 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 					inputWidget = new TextBox();
 					break;
 			}
+			inputWidget.addValueChangeHandler(new ValueChangeHandler() {
+				@Override
+				public void onValueChange(ValueChangeEvent event) {
+					save.setEnabled(true);
+					if (getUiHandlers() != null) {
+						getUiHandlers().onValueChanged();
+					}
+				}
+			});
 			inputFields.put(header.getAlias(), inputWidget);
 
 			hp.add((Widget)inputWidget);
@@ -121,7 +155,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	}
 
 	@Override
-	public void fillInputFields(Map<String, com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttribute> data) {
+	public void fillInputFields(Map<String, RefBookAttributeSerializable> data) {
 		for (Map.Entry<String, HasValue> w : inputFields.entrySet()) {
 			switch (data.get(w.getKey()).getAttributeType()) {
 				case STRING:
@@ -160,9 +194,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	@UiHandler("save")
 	void saveButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			Map<String, Object> inputFields = getInputFieldsValues();
-			inputFields.put(RefBook.RECORD_ID_ALIAS, selectionModel.getSelectedObject().getRefBookRowId());
-			getUiHandlers().onSaveClicked(inputFields);
+			getUiHandlers().onSaveClicked();
 		}
 	}
 
@@ -171,7 +203,17 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		if (getUiHandlers() != null) {
 			getUiHandlers().onAddRowClicked();
 		}
+	}
 
+	@UiHandler("deleteRow")
+	void deleteRowButtonClicked(ClickEvent event) {
+		boolean confirm = Window.confirm("Удалить выбранную запись справочника?");
+		if (confirm) {
+			if (getUiHandlers() != null) {
+				save.setEnabled(true);
+				getUiHandlers().onDeleteRowClicked(selectionModel.getSelectedObject());
+			}
+		}
 	}
 
 	private Map<String, Object> getInputFieldsValues() {

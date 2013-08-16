@@ -27,10 +27,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers  {
@@ -50,14 +47,20 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	private static final int PAGE_SIZE = 20;
 	private final TableDataProvider dataProvider = new TableDataProvider();
 
+	private boolean isValueChanged = false;
+	private List<RefBookDataRow> rowsToDelete = new ArrayList<RefBookDataRow>();
+	private List<RefBookDataRow> rowsToInsert = new ArrayList<RefBookDataRow>();
+
 	public interface MyView extends View, HasUiHandlers<RefBookDataUiHandlers> {
 		void setTableColumns(List<RefBookAttribute> headers);
 		void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows);
 		void createInputFields(List<RefBookAttribute> headers);
-		void fillInputFields(Map<String, com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttribute> data);
+		void fillInputFields(Map<String, RefBookAttributeSerializable> data);
 		void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data);
 		void setRange(Range range);
 		void updateTable();
+		void addRowToEnd(RefBookDataRow newRow, boolean select);
+		Map<String, Object> getChangedValues();
 	}
 
 	@Inject
@@ -77,7 +80,20 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	@Override
 	public void onAddRowClicked() {
+		RefBookDataRow newRow = new RefBookDataRow();
+		Map<String, String> newRowData = new HashMap<String, String>();
+		for (RefBookAttribute attribute : refBook) {
+			newRowData.put(attribute.getAlias(), "");
+		}
+		newRow.setValues(newRowData);
+		getView().addRowToEnd(newRow, true);
+		rowsToInsert.add(newRow);
 
+	}
+
+	@Override
+	public void onDeleteRowClicked(RefBookDataRow row) {
+		rowsToDelete.add(row);
 	}
 
 	@Override
@@ -96,22 +112,59 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	}
 
 	@Override
-	public void onSaveClicked(Map<String, Object > values) {
-		SaveRefBookRowAction action = new SaveRefBookRowAction();
-		action.setRefbookId(refBookDataId);
-		action.setValueToSave(convertValues(values));
-		for(Map.Entry<String, Object> v : values.entrySet()) {
-			System.out.println("Val: " + v.getKey() + ": " + v.getValue());
-		}
-		dispatcher.execute(action,
-				CallbackUtils.defaultCallback(
-						new AbstractCallback<SaveRefBookRowResult>() {
+	public void onSaveClicked() {
+		if (!rowsToDelete.isEmpty()) {
+			DeleteRefBookRowAction action = new DeleteRefBookRowAction();
+			action.setRefbookId(refBookDataId);
+			List<Long> rowsId = new ArrayList<Long>();
+			for (RefBookDataRow row : rowsToDelete) {
+				rowsId.add(row.getRefBookRowId());
+			}
+			action.setRecordsId(rowsId);
+			dispatcher.execute(action,
+					CallbackUtils.defaultCallback(
+							new AbstractCallback<DeleteRefBookRowResult>() {
+								@Override
+								public void onSuccess(DeleteRefBookRowResult result) {
+									rowsToDelete.clear();
+									getView().updateTable();
+								}
+							}, this));
+		} else if (!rowsToInsert.isEmpty()) {
+			AddRefBookRowAction action = new AddRefBookRowAction();
+			action.setRefbookId(refBookDataId);
+			List<Map<String, RefBookAttributeSerializable>> toInsert = new ArrayList<Map<String, RefBookAttributeSerializable>>();
+			toInsert.add(convertValues(getView().getChangedValues()));
+			action.setRecords(toInsert);
+			dispatcher.execute(action,
+					CallbackUtils.defaultCallback(
+							new AbstractCallback<AddRefBookRowResult>() {
+								@Override
+								public void onSuccess(AddRefBookRowResult result) {
+									rowsToInsert.clear();
+									getView().updateTable();
+								}
+							}, this));
+		} else if (isValueChanged) {
+			SaveRefBookRowAction action = new SaveRefBookRowAction();
+			action.setRefbookId(refBookDataId);
+
+			action.setValueToSave(convertValues(getView().getChangedValues()));
+			dispatcher.execute(action,
+					CallbackUtils.defaultCallback(
+							new AbstractCallback<SaveRefBookRowResult>() {
 							@Override
 							public void onSuccess(SaveRefBookRowResult result) {
 								getView().updateTable();
 							}
 						}, this));
+		}
 
+	}
+
+	@Override
+	public void onValueChanged() {
+		isValueChanged = true;
 	}
 
 	@Override
@@ -134,36 +187,35 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	}
 
-	private Map<String, com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttribute>
-		convertValues(Map<String, Object> valuesToConvert) {
-		Map<String, com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttribute> convertedValues =
-				new HashMap<String, com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttribute>();
+	private Map<String, RefBookAttributeSerializable> convertValues(Map<String, Object> valuesToConvert) {
+		Map<String, RefBookAttributeSerializable> convertedValues =
+				new HashMap<String, RefBookAttributeSerializable>();
 
 		for(RefBookAttribute attribute : refBook) {
-			com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttribute refBookAttribute =
-					new com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttribute();
-			refBookAttribute.setAttributeType(attribute.getAttributeType());
+			RefBookAttributeSerializable refBookAttributeSerializable =
+					new RefBookAttributeSerializable();
+			refBookAttributeSerializable.setAttributeType(attribute.getAttributeType());
 			String alias = attribute.getAlias();
 
 			switch (attribute.getAttributeType()) {
 				case STRING:
-					refBookAttribute.setStringValue((String)valuesToConvert.get(alias));
+					refBookAttributeSerializable.setStringValue((String)valuesToConvert.get(alias));
 					break;
 				case DATE:
-					refBookAttribute.setDateValue((Date) valuesToConvert.get(alias));
+					refBookAttributeSerializable.setDateValue((Date) valuesToConvert.get(alias));
 					break;
 				case NUMBER:
-					refBookAttribute.setNumberValue((Number) valuesToConvert.get(alias));
+					refBookAttributeSerializable.setNumberValue((Number) valuesToConvert.get(alias));
 					break;
 				case REFERENCE:
-					refBookAttribute.setReferenceValue((Long)valuesToConvert.get(alias));
+					refBookAttributeSerializable.setReferenceValue((Long)valuesToConvert.get(alias));
 					break;
 			}
 
-			convertedValues.put(alias, refBookAttribute);
+			convertedValues.put(alias, refBookAttributeSerializable);
 		}
-		com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttribute recordId =
-				new com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttribute();
+		RefBookAttributeSerializable recordId =
+				new RefBookAttributeSerializable();
 		recordId.setAttributeType(RefBookAttributeType.NUMBER);
 		recordId.setNumberValue((Long)valuesToConvert.get(RefBook.RECORD_ID_ALIAS));
 		convertedValues.put(RefBook.RECORD_ID_ALIAS, recordId);
@@ -179,7 +231,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 			final Range range = display.getVisibleRange();
 			GetRefBookTableDataAction action = new GetRefBookTableDataAction();
 			action.setRefbookId(refBookDataId);
-			action.setPagingParams(new PagingParams(range.getStart(), range.getLength()));
+			action.setPagingParams(new PagingParams(range.getStart()+1, range.getLength()));
 			dispatcher.execute(action,
 					CallbackUtils.defaultCallback(
 							new AbstractCallback<GetRefBookTableDataResult>() {

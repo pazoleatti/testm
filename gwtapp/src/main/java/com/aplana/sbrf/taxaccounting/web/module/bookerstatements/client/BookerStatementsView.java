@@ -12,6 +12,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -22,6 +24,7 @@ import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
 
 import java.util.*;
 
@@ -131,7 +134,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
                 String error = event.getResults();
                 if (!error.toLowerCase().contains("error")) {
-                   logs.add(new LogEntry(LogLevel.INFO, "Файл успешно загружен"));
+                    logs.add(new LogEntry(LogLevel.INFO, "Файл успешно загружен"));
                 } else {
                     int index = error.indexOf("ServiceException: ");
                     if (index != -1) {
@@ -141,11 +144,17 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
                     logs.add(new LogEntry(LogLevel.ERROR, error));
                 }
                 setLogMessages(logs);
+                LockInteractionEvent.fire((BookerStatementsPresenter) getUiHandlers(), false);
+            }
+        });
+
+        uploadButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                LockInteractionEvent.fire((BookerStatementsPresenter) getUiHandlers(), true);
             }
         });
     }
-
-    //TODO дизэйблить форму пока файл обрабатывается
 
     private void setAction() {
         boolean isReady = currentReportPeriod != null && bookerReportType.getSelectedIndex() != -1 && uploader.getFilename() != null
@@ -234,8 +243,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
             logPanel.setVisible(true);
             loggerList.setVisible(true);
             loggerList.setRowData(entries);
-        }
-        else {
+        } else {
             loggerList.setRowCount(0);
             loggerList.setRowData(new ArrayList<LogEntry>(0));
         }

@@ -7,68 +7,77 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @Transactional
 public class DepartmentServiceImpl implements DepartmentService {
-		
-	@Autowired
-	DepartmentDao departmentDao;
 
-	@Override
-	public Department getDepartment(int departmentId) {
-		return departmentDao.getDepartment(departmentId);
-	}
+    @Autowired
+    DepartmentDao departmentDao;
 
-	@Override
-	public List<Department> listAll(){
-		return departmentDao.listDepartments();
-	}
+    @Override
+    public Department getDepartment(int departmentId) {
+        return departmentDao.getDepartment(departmentId);
+    }
 
-	@Override
-	public List<Department> getChildren(int parentDepartmentId) {
-		return departmentDao.getChildren(parentDepartmentId);
-	}
+    @Override
+    public List<Department> listAll() {
+        return departmentDao.listDepartments();
+    }
 
-	@Override
-	public Department getParent(int departmentId){
-		return departmentDao.getParent(departmentId);
-	}
+    @Override
+    public List<Department> getChildren(int parentDepartmentId) {
+        return departmentDao.getChildren(parentDepartmentId);
+    }
 
-	@Override
- 	public Map<Integer, Department> getRequiredForTreeDepartments(Set<Integer> availableDepartments){
-		Map<Integer, Department> departmentSet = new HashMap<Integer, Department>();
-		for(Integer departmentId : availableDepartments){
-			departmentSet.put(departmentId, getDepartment(departmentId));
-		}
-		for(Integer departmentId : availableDepartments){
-			Integer searchFor = departmentId;
-			while (true){
-				Department department = getParent(searchFor);
-				if(department == null){
-					break;
-				}
-				if(department.getParentId() == null || departmentSet.containsKey(department.getParentId())){
-					departmentSet.put(department.getId(), department);
-					break;
-				} else {
-					departmentSet.put(department.getId(), department);
-					searchFor = department.getParentId();
-				}
-			}
-		}
-		return departmentSet;
-	}
-	
-	@Override
-	public List<Department> listDepartments() {
-		return departmentDao.listDepartments();
-	}
+    @Override
+    public Department getParent(int departmentId) {
+        return departmentDao.getParent(departmentId);
+    }
 
-	@Override
-	public Department getDepartmentBySbrfCode(String sbrfCode) {
-		return departmentDao.getDepartmentBySbrfCode(sbrfCode);
-	}
+    @Override
+    public Map<Integer, Department> getRequiredForTreeDepartments(Set<Integer> availableDepartments) {
+        // TODO использовать древовидный запрос см. getAllChildren()
+        Map<Integer, Department> departmentSet = new HashMap<Integer, Department>();
+        for (Integer departmentId : availableDepartments) {
+            departmentSet.put(departmentId, getDepartment(departmentId));
+        }
+        for (Integer departmentId : availableDepartments) {
+            Integer searchFor = departmentId;
+            while (true) {
+                Department department = getParent(searchFor);
+                if (department == null) {
+                    break;
+                }
+                if (department.getParentId() == null || departmentSet.containsKey(department.getParentId())) {
+                    departmentSet.put(department.getId(), department);
+                    break;
+                } else {
+                    departmentSet.put(department.getId(), department);
+                    searchFor = department.getParentId();
+                }
+            }
+        }
+        return departmentSet;
+    }
+
+    @Override
+    public List<Department> listDepartments() {
+        return departmentDao.listDepartments();
+    }
+
+    @Override
+    public Department getDepartmentBySbrfCode(String sbrfCode) {
+        return departmentDao.getDepartmentBySbrfCode(sbrfCode);
+    }
+
+    @Override
+    public List<Department> getAllChildren(int parentDepartmentId) {
+        return departmentDao.getAllChildren(parentDepartmentId);
+    }
 
 }

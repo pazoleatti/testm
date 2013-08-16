@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import java.io.Serializable;
 import java.util.Date;
 
-public class RefBookAttribute implements Serializable {
+public class RefBookAttributeSerializable implements Serializable {
 
 	private RefBookAttributeType attributeType;
 

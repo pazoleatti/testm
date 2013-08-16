@@ -145,7 +145,7 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
     @Override
-    public void importFormData(Logger logger, TAUserInfo userInfo, int formDataId, int formTemplateId,
+    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, int formTemplateId,
                                int departmentId, FormDataKind kind, int reportPeriodId, InputStream inputStream, String fileName) {
         if (formDataAccessService.canCreate(userInfo, formTemplateId, kind,
                 departmentId, reportPeriodId)) {
@@ -170,10 +170,11 @@ public class FormDataServiceImpl implements FormDataService {
             fd.initFormTemplateParams(formTemplateDao.get(formTemplateId));
             Map<String, Object> additionalParameters = new HashMap<String, Object>();
             additionalParameters.put("ImportInputStream", inputStream);
+            additionalParameters.put("UploadFileName", fileName);
             formDataScriptingService.executeScript(userInfo, fd, FormDataEvent.IMPORT, logger, additionalParameters);
             formDataDao.save(fd); //TODO: Когда переделаем пейджинг,переделать на сохранение во временную таблицу (спросить у Марата)
 
-            logBusinessService.add((long) formDataId, null, userInfo, FormDataEvent.IMPORT, null);
+            logBusinessService.add(formDataId, null, userInfo, FormDataEvent.IMPORT, null);
             auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, reportPeriodId,
                     null, fd.getFormType().getId(), kind.getId(), fileName);
         }else {

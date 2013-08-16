@@ -101,7 +101,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 				(formatter.format(filter.getToSearchDate()))
 				.append("', '").append(dbDateFormat).append("')");
 
-		if (filter.getUserId() != 0) {
+		if (filter.getUserId() != null) {
 			sql.append(" AND user_id = ").append(filter.getUserId());
 		}
 
@@ -115,18 +115,24 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			sql.append(" AND form_kind_id = ").append(filter.getFormKind().getId());
 		}
 
-		if (filter.getFormTypeId() != 0) {
+		if (filter.getFormTypeId() != null) {
 			sql.append(" AND form_type_id = ").append(filter.getFormTypeId());
 		}
 
-		if (filter.getDeclarationTypeId() != 0) {
+		if (filter.getDeclarationTypeId() != null) {
 			sql.append(" AND declaration_type_id = ").append(filter.getDeclarationTypeId());
 		}
 
-		if (filter.getDepartmentIds() != null) {
-			for (Integer departmentId : filter.getDepartmentIds()) {
-				sql.append(" AND department_id = ").append(departmentId);
-			}
+        if (filter.getAuditFormTypeId() != null) {
+            if (filter.getAuditFormTypeId().equals(AuditFormType.FORM_TYPE_TAX.getId())) {
+                sql.append(" AND form_type_id is not null ");
+            } else if (filter.getAuditFormTypeId().equals(AuditFormType.FORM_TYPE_DECLARATION.getId())) {
+                sql.append(" AND declaration_type_id is not null ");
+            }
+        }
+
+		if (filter.getDepartmentId() != null) {
+            sql.append(" AND department_id = ").append(filter.getDepartmentId());
 		}
 	}
 

@@ -155,7 +155,7 @@ comment on column blob_data.type is 'Тип данных (0 - постоянны
 comment on column blob_data.data_size is 'Размер файла в байтах';
 ----------------------------------------------------------------------------------------------------
 create table ref_book (
-  id number(9,0) not null,
+  id number(18,0) not null,
   name varchar2(200) not null,
   script_id varchar2(36)
 );
@@ -169,14 +169,14 @@ comment on column ref_book.name is 'Название справочника';
 comment on column ref_book.script_id is 'Идентификатор связанного скрипта';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
-  id number(9) not null,
-  ref_book_id number(9) not null,
+  id number(18) not null,
+  ref_book_id number(18) not null,
   name varchar2(510) not null,
   alias varchar2(30) not null,
   type number(1) not null,
   ord number(9) not null,
-  reference_id number(9),
-  attribute_id number(9),
+  reference_id number(18),
+  attribute_id number(18),
   visible number(1) default 1 not null,
   precision number(2),
   width number(9) default 15 not null
@@ -210,9 +210,9 @@ comment on column ref_book_attribute.precision is 'Точность, колич�
 comment on column ref_book_attribute.width is 'Ширина столбца. Используется при отображении справочника в виде таблицы';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
-  id number(9) not null,
+  id number(18) not null,
   record_id number(9) not null,
-  ref_book_id number(9) not null,
+  ref_book_id number(18) not null,
   version date not null,
   status number(1) default 0 not null
 );
@@ -236,12 +236,12 @@ comment on column ref_book_record.version is 'Версия. Дата актуа�
 comment on column ref_book_record.status is 'Статус записи (0-обычная запись; -1-помеченная на удаление)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_value (
-  record_id number(9) not null,
-  attribute_id number(9) not null,
+  record_id number(18) not null,
+  attribute_id number(18) not null,
   string_value varchar2(4000),
   number_value number(27,10),
   date_value date,
-  reference_value number(9)
+  reference_value number(18)
 );
 
 alter table ref_book_value add constraint ref_book_value_pk primary key (record_id, attribute_id);
@@ -269,7 +269,7 @@ create table form_column (
   group_name varchar(1000),
   max_length number(4),
   checking  number(1) default 0 not null,
-  attribute_id number(9),
+  attribute_id number(18),
   format number(2),
   filter varchar2(1000)
 );
@@ -339,7 +339,7 @@ create table report_period (
   ord      number(2) not null,
   department_id number(15) not null,
   is_balance_period number(1) default 0 not null,
-  dict_tax_period_id number(9) not null
+  dict_tax_period_id number(18) not null
 );
 
 alter table report_period add constraint report_period_pk primary key(id);
