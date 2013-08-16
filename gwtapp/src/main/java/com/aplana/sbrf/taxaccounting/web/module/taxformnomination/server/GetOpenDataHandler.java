@@ -14,10 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Stanislav Yasinskiy
@@ -64,20 +61,11 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
         // Подразделения доступные пользователю
         Set<Integer> avSet = new HashSet<Integer>();
         if (!currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-            // Первичные и консолид. отчеты
-            List<DepartmentFormType> formIncomeSrcList = departmentFormTypService.getDepartmentFormSources(currUser.getDepartmentId(), TaxType.INCOME);
-            List<DepartmentFormType> formTransportSrcList = departmentFormTypService.getDepartmentFormSources(currUser.getDepartmentId(), TaxType.TRANSPORT);
 
-            for (DepartmentFormType ft : formIncomeSrcList) {
-                avSet.add(ft.getDepartmentId());
+            // Подразделение пользователя и все дочерние
+            for (Department dep : departmentService.getAllChildren(currUser.getDepartmentId())) {
+                avSet.add(dep.getId());
             }
-
-            for (DepartmentFormType ft : formTransportSrcList) {
-                avSet.add(ft.getDepartmentId());
-            }
-
-            // Подразделение пользователя
-            avSet.add(currUser.getDepartmentId());
 
             // Необходимые для дерева подразделения
             result.setDepartments(new ArrayList(departmentService.getRequiredForTreeDepartments(avSet).values()));
