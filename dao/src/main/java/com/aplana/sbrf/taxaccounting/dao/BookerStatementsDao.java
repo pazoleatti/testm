@@ -21,10 +21,24 @@ public interface BookerStatementsDao {
     void create101(List<Income101> list, Integer periodID);
 
     /**
-     * Создание записей в таблице INCOME_101.
+     * Создание записей в таблице INCOME_102.
      *
      * @param list         записи для добавления
      * @param periodID     налоговоый период
      */
     void create102(List<Income102> list, Integer periodID);
+
+    /**
+     * Удаляет все записи в таблице INCOME_101 на выбранный период
+     *
+     * @param periodID     налоговоый период
+     */
+    void delete101(Integer periodID);
+
+    /**
+     * Удаляет все записи в таблице INCOME_102 на выбранный период
+     *
+     * @param periodID     налоговоый период
+     */
+    void delete102(Integer periodID);
 }
