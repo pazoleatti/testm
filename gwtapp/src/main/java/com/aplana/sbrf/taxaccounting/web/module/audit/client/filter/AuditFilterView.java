@@ -290,4 +290,5 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     AuditFilterView getView(){
         return this;
     }
+
 }

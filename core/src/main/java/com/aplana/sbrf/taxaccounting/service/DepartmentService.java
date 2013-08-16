@@ -35,6 +35,13 @@ public interface DepartmentService {
 	 */
 	List<Department> getChildren(int parentDepartmentId);
 
+    /**
+     * Получить все дочерние подразделения
+     *
+     * @param parentDepartmentId
+     * @return
+     */
+    List<Department> getAllChildren(int parentDepartmentId);
 
 	/**
 	 * Получить родительское подразделения для департамента
