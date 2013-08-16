@@ -55,13 +55,10 @@ def bildXml(){
 
     def departmentId = declarationData.departmentId
     // получаем подразделение так как в настройках хранится record_id а не значение
-    logger.info("departmentId = "+departmentId)
     department = getModRefBookValue(30, "ID = "+departmentId)
-    logger.info("department = "+department)
 
     // Получить параметры по транспортному налогу
     departmentParamTransport = getModRefBookValue(31, "DEPARTMENT_ID = "+department.record_id)
-    logger.info("departmentParamTransport = "+departmentParamTransport)
 
     // получения региона по кода ОКАТО по справочнику Регионов
     def region = getRegionByOkatoOrg(departmentParamTransport.OKATO.OKATO);
@@ -79,11 +76,11 @@ def bildXml(){
                     КодНО: departmentParamTransport.TAX_ORGAN_CODE,
                     // TODO учесть что потом будут корректирующие периоды
                     НомКорр: "0",
-                    ПоМесту: departmentParamTransport.TAX_PLACE_TYPE_CODE
+                    ПоМесту: departmentParamTransport.TAX_PLACE_TYPE_CODE.CODE
             ){
 
                 Integer formReorg = departmentParamTransport.REORG_FORM_CODE.stringValue != null ? Integer.parseInt(departmentParamTransport.REORG_FORM_CODE.stringValue):0;
-                def svnp = [ОКВЭД: departmentParamTransport.OKVED_CODE]
+                def svnp = [ОКВЭД: departmentParamTransport.OKVED_CODE.CODE]
                 if (departmentParamTransport.OKVED_CODE) {
                     svnp.Тлф = departmentParamTransport.PHONE
                 }
@@ -104,7 +101,7 @@ def bildXml(){
                     }
                 }
 
-                Подписант(ПрПодп: departmentParamTransport.SIGNATORY_ID){
+                Подписант(ПрПодп: departmentParamTransport.SIGNATORY_ID.CODE){
                     ФИО(
                             "Фамилия": departmentParamTransport.SIGNATORY_SURNAME,
                             "Имя": departmentParamTransport.SIGNATORY_FIRSTNAME,
@@ -322,7 +319,6 @@ def getRegionByOkatoOrg(okato){
     * справочника «Коды субъектов Российской Федерации»
     */
     // провайдер для справочника - Коды субъектов Российской Федерации
-    logger.info("okato -"+okato)
     def  refDataProvider = refBookFactory.getDataProvider(4)
     def records = refDataProvider.getRecords(new Date(), null, "OKATO_DEFINITION like '"+okato.toString().substring(0, 2)+"%'", null).getRecords()
 
@@ -372,8 +368,6 @@ def getModRefBookValue(refBookId, filter){
     def record = records[0]
 
     // получение связанных данных
-    logger.info("record = "+record)
-
     refBook.attributes.each() { RefBookAttribute attr ->
         def ref = record[attr.alias].referenceValue;
         if (attr.attributeType  == RefBookAttributeType.REFERENCE && ref != null) {
