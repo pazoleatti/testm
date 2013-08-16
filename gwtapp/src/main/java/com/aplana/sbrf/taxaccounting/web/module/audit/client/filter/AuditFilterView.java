@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodP
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.*;
@@ -78,10 +79,11 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     private Map<Integer, String> formTypesMap;
     private Map<Integer, String> userLoginMap;
     private Map<Integer, String> declarationTypesMap;
+    private List<Integer> selectedValues = new ArrayList<Integer>();
 
     @Override
     public void setDepartments(List<Department> list, Set<Integer> availableValues) {
-        departmentSelectionTree.setAvalibleValues(list,availableValues);
+        departmentSelectionTree.setAvalibleValues(list, availableValues);
     }
 
     @Override
@@ -109,7 +111,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @Override
     public void updateTaxPeriodPicker(List<TaxPeriod> taxPeriods) {
-        currentReportPeriod.setTaxPeriods(taxPeriods == null?new ArrayList<TaxPeriod>():taxPeriods);
+        currentReportPeriod.setTaxPeriods(taxPeriods == null ? new ArrayList<TaxPeriod>() : taxPeriods);
     }
 
     @Override
@@ -120,14 +122,14 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @Override
     public LogSystemFilter getFilterData() {
         LogSystemFilter lsf = new LogSystemFilter();
-
         // Отчетные периоды
         if(currentReportPeriod != null){
             lsf.setReportPeriodIds(new ArrayList<Integer>(currentReportPeriod.getSelectedReportPeriods().keySet()));
         }
-
-        // Подразделения
-        lsf.setDepartmentIds(departmentSelectionTree.getValue());
+        // Подразделение
+        if (!selectedValues.isEmpty()) {
+            lsf.setDepartmentId(selectedValues.get(0));
+        }
         // Тип формы
         lsf.setAuditFormTypeId(auditFormType.getValue() == null ? null : auditFormType.getValue().getId());
         // Вид налоговой формы
@@ -273,6 +275,14 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         initWidget(uiBinder.createAndBindUi(this));
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
+
+        departmentSelectionTree.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+                selectedValues.clear();
+                selectedValues.addAll(event.getValue());
+            }
+        });
     }
 
     @UiHandler("search")
@@ -290,5 +300,4 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     AuditFilterView getView(){
         return this;
     }
-
 }

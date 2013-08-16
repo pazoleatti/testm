@@ -131,15 +131,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             }
         }
 
-		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
-            sql.append(" AND (");
-            for (Integer departmentId : filter.getDepartmentIds()) {
-				sql.append(" department_id = ").append(departmentId);
-                if (filter.getDepartmentIds().indexOf(departmentId) != filter.getDepartmentIds().size()-1) {
-                    sql.append(" OR ");
-                }
-			}
-            sql.append(") ");
+		if (filter.getDepartmentId() != null) {
+            sql.append(" AND department_id = ").append(filter.getDepartmentId());
 		}
 	}
 
