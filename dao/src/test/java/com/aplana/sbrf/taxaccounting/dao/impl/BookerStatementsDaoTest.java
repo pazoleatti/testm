@@ -15,6 +15,8 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.*;
+
 /**
  * Тест дао для формы "Загрузка бухгалтерской отчётности из xls"
  *
@@ -30,10 +32,11 @@ public class BookerStatementsDaoTest {
 
     List<Income101> list101 = new ArrayList<Income101>();
     List<Income102> list102 = new ArrayList<Income102>();
+    static final int REPORT_PERIOD_ID = 1;
 
     @Before
     public void init() throws FileNotFoundException {
-        for (int i = 1; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
             Income101 model = new Income101();
             model.setAccount("Account " + i);
             model.setAccountName("AccountName" + i);
@@ -54,15 +57,46 @@ public class BookerStatementsDaoTest {
     }
 
     @Test
-    public void test101() {
-        bookerStatementsDao.create101(list101, 1);
-        //TODO
+    public void testSimple() {
+        assertNotNull(bookerStatementsDao);
     }
 
     @Test
-    public void test102() {
-        bookerStatementsDao.create102(list102, 1);
-        //TODO
+    public void delete101Test() {
+        assertEquals(bookerStatementsDao.delete101(REPORT_PERIOD_ID), 2);
+        assertEquals(bookerStatementsDao.getIncome101(REPORT_PERIOD_ID).size(), 0);
     }
 
+    @Test
+    public void delete102Test() {
+        assertEquals(bookerStatementsDao.delete102(REPORT_PERIOD_ID), 3);
+        assertEquals(bookerStatementsDao.getIncome102(REPORT_PERIOD_ID).size(), 0);
+    }
+
+    @Test
+    public void create101Test() {
+        bookerStatementsDao.delete101(REPORT_PERIOD_ID);
+        bookerStatementsDao.create101(list101, REPORT_PERIOD_ID);
+        assertEquals(bookerStatementsDao.getIncome101(REPORT_PERIOD_ID).size(), list101.size());
+    }
+
+    @Test
+    public void create102Test() {
+        bookerStatementsDao.delete102(REPORT_PERIOD_ID);
+        bookerStatementsDao.create102(list102, REPORT_PERIOD_ID);
+        assertEquals(bookerStatementsDao.getIncome102(REPORT_PERIOD_ID).size(), list102.size());
+    }
+
+    @Test
+    public void getIncome101Test() {
+        List<Income101> income101List = bookerStatementsDao.getIncome101(REPORT_PERIOD_ID);
+        assertEquals(income101List.get(0).getIncomeDebetRemains(), 3, 1e-5);
+        assertTrue(bookerStatementsDao.getIncome101(REPORT_PERIOD_ID).size() == 2);
+    }
+
+    @Test
+    public void getIncome102Test() {
+        assertEquals(bookerStatementsDao.getIncome102(2).get(0).getTotalSum(), new Double(555));
+        assertTrue(bookerStatementsDao.getIncome102(REPORT_PERIOD_ID).size() == 3);
+    }
 }
