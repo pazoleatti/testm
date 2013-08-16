@@ -2,7 +2,8 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:d='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
-             xmlns:pager='urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager'>
+             xmlns:pager='urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager'
+             xmlns:c='urn:import:com.google.gwt.user.cellview.client'>
     <ui:style>
         .titleLabel {
             font-size: 26px;
@@ -13,7 +14,7 @@
             margin-left: auto;
         }
     </ui:style>
-    <g:DockLayoutPanel>
+    <g:DockLayoutPanel ui:field="dockPanel">
         <g:north size="110">
             <g:VerticalPanel>
                 <g:Label styleName="{style.titleLabel}" text="Загрузка бухгалтерской отчётности"/>
@@ -63,6 +64,12 @@
                 </g:south>
             </g:DockLayoutPanel>
         </g:center>
+
+        <g:south size="80">
+            <g:ScrollPanel width="100%" ui:field="logPanel">
+                <c:CellList ui:field="loggerList" />
+            </g:ScrollPanel>
+        </g:south>
 
     </g:DockLayoutPanel>
 </ui:UiBinder>

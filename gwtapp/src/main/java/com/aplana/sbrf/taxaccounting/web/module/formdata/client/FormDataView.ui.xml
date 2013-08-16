@@ -2,9 +2,9 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
-             xmlns:p="urn:import:com.google.gwt.user.cellview.client"
              xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
-             xmlns:cellview="urn:import:com.google.gwt.user.cellview.client">
+             xmlns:fileuplod="urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload"
+        >
     <ui:style>
         .lockInformation {
             height: 30px;
@@ -63,6 +63,7 @@
 
     </ui:style>
 
+    <ui:with field="formDataProvider" type="com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataView"/>
 	<g:DockLayoutPanel ui:field="dockPanel" unit='PX' height="100%" width="100%">
         <g:north size="100">
             <g:HorizontalPanel height="100px" width="100%">
@@ -130,13 +131,7 @@
                                 <g:Button ui:field="cancelButton" text="Отмена" />
                             </style:LeftBar>
                             <style:RightBar>
-                                <g:FormPanel ui:field="uploadFormDataXls" encoding="multipart/form-data" method="post"
-                                        action="upload/uploadController/xls/">
-                                    <g:HorizontalPanel ui:field="uploadPanel">
-                                        <g:FileUpload ui:field="uploader" title="Файл xls" name="uploader"/>
-                                        <g:Button ui:field="uploadButton" text="Загрузить"/>
-                                    </g:HorizontalPanel>
-                                </g:FormPanel>
+                                <fileuplod:FileUploadWidget ui:field="fileUploader" uploadHandler="{formDataProvider.getView}" actionUrl="upload/uploadController/xls/"/>
                             </style:RightBar>
                         </style:Bar>
                         <g:CheckBox ui:field="showCheckedColumns" value="true" addStyleNames="{style.showCheckedColumns}"
