@@ -3,12 +3,12 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-import java.util.Map;
+import java.util.List;
 
-public class SaveRefBookRowAction extends UnsecuredActionImpl<SaveRefBookRowResult> implements ActionName {
+public class DeleteRefBookRowAction extends UnsecuredActionImpl<DeleteRefBookRowResult> implements ActionName {
 
 	Long refbookId;
-	Map<String, RefBookAttributeSerializable> valueToSave;
+	List<Long> recordsId;
 
 	public Long getRefbookId() {
 		return refbookId;
@@ -18,12 +18,12 @@ public class SaveRefBookRowAction extends UnsecuredActionImpl<SaveRefBookRowResu
 		this.refbookId = refbookId;
 	}
 
-	public Map<String, RefBookAttributeSerializable> getValueToSave() {
-		return valueToSave;
+	public List<Long> getRecordsId() {
+		return recordsId;
 	}
 
-	public void setValueToSave(Map<String, RefBookAttributeSerializable> valueToSave) {
-		this.valueToSave = valueToSave;
+	public void setRecordsId(List<Long> recordsId) {
+		this.recordsId = recordsId;
 	}
 
 	@Override

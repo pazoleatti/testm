@@ -38,7 +38,7 @@
                 </g:cell>
                 <g:VerticalPanel width="100%">
                     <style:ButtonLink title="Добавить строку" text="Добавить строку" ui:field="addRow" img="resources/img/exclamation_mark.png"/>
-                    <!--<style:ButtonLink title="Удалить строку" img="resources/img/exclamation_mark.png">Удалить строку</style:ButtonLink>-->
+                    <style:ButtonLink title="Удалить строку" text="Удалить строку" ui:field="deleteRow" img="resources/img/exclamation_mark.png">Удалить строку</style:ButtonLink>
                     <!--<g:Button>Сохранить</g:Button>-->
                     <!--<g:Button ui:field="cancel">Отмена</g:Button>-->
                 </g:VerticalPanel>
