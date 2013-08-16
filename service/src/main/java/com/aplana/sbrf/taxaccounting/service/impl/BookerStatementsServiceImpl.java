@@ -16,9 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,13 +40,14 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             throw new ServiceException("Указан закрытый период. Файл не может быть загружен.");
         }
 
-        // TODO SBRFACCTAX-3451
         if (typeID == 1) {
             List<Income101> list = importIncome101(stream);
-            // bookerStatementsDao.create101(list, periodID);
+            bookerStatementsDao.delete101(periodID);
+            bookerStatementsDao.create101(list, periodID);
         } else {
             List<Income102> list = importIncome102(stream);
-            // bookerStatementsDao.create102(list, periodID);
+            bookerStatementsDao.delete102(periodID);
+            bookerStatementsDao.create102(list, periodID);
         }
     }
 
@@ -58,13 +57,10 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         HSSFWorkbook wb = new HSSFWorkbook(stream);
         Sheet sheet = wb.getSheetAt(0);
         Iterator<Row> it = sheet.iterator();
-        while (it.hasNext()) {
+        boolean endOfFile = false;
+        while (it.hasNext() && !endOfFile) {
             Row row = it.next();
             Iterator<Cell> cells = row.iterator();
-
-            //debug
-            if (row.getRowNum() > 100)
-                break;
 
             // проверка ячеек в строке 10
             if (row.getRowNum() == 9) {
@@ -99,6 +95,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             if (row.getRowNum() % 3 == 0) {
                 boolean isValid = true;
                 Income101 model = new Income101();
+                endOfFile = true;
                 while (cells.hasNext()) {
                     if (!isValid)
                         break;
@@ -107,6 +104,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                         // заполняем модель для вставки в БД
                         switch (cell.getColumnIndex()) {
                             case 1:
+                                endOfFile = false;
                                 // игнорируем строки не соотнесённые с номерами счетов (разделы, главы)
                                 String account = cell.getStringCellValue();
                                 Pattern p = Pattern.compile("[0-9.]+");
@@ -142,7 +140,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                         throw getServiceException(cell.getColumnIndex(), 1);
                     }
                 }
-                if (isValid) {
+                if (!endOfFile && isValid) {
                     if (!isModelValid(model)) {
                         throw new ServiceException(errMsg);
                     }
@@ -150,82 +148,69 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                 }
             }
         }
-
-        //debug
-        System.out.println("list.size() = " + list.size());
-        for (Income101 m : list) {
-            System.out.println(m.getAccount());
-            System.out.println(m.getIncomeDebetRemains());
-            System.out.println(m.getIncomeCreditRemains());
-            System.out.println(m.getDebetRate());
-            System.out.println(m.getCreditRate());
-            System.out.println(m.getOutcomeCreditRemains());
-            System.out.println(m.getOutcomeDebetRemains());
-            System.out.println(m.getAccountName());
-            System.out.println("----------------------------");
-        }
         return list;
     }
 
     private List<Income102> importIncome102(InputStream stream) throws IOException {
+        // строки со следующими кодами игнорируем
+        Set<String> excludeCode = new HashSet<String>();
+        excludeCode.add("");
+        excludeCode.add("0");
+        excludeCode.add("10000");
+        excludeCode.add("20000");
+        excludeCode.add("01000");
+        excludeCode.add("02000");
+        // выходной лист с моделями для записи в бд
         List<Income102> list = new ArrayList<Income102>();
         HSSFWorkbook wb = new HSSFWorkbook(stream);
         Sheet sheet = wb.getSheetAt(0);
         Iterator<Row> it = sheet.iterator();
-        while (it.hasNext()) {
+        boolean isEndOfFile102 = false;
+        while (it.hasNext() && !isEndOfFile102) {
             Row row = it.next();
             Iterator<Cell> cells = row.iterator();
 
-            //debug
-            if (row.getRowNum() > 100)
-                break;
-
             // парсим с 18 строки
-            if (row.getRowNum() < 9) {
+            if (row.getRowNum() < 18) {
                 continue;
             }
-            // TODO какие строки парсим (SBRFACCTAX-3444)
-            if (row.getRowNum() % 3 == 0) {
-                boolean isValid = true;
-                Income102 model = new Income102();
-                while (cells.hasNext()) {
-                    if (!isValid)
-                        break;
-                    Cell cell = cells.next();
-                    try {
-                        // заполняем модель для вставки в БД
-                        switch (cell.getColumnIndex()) {
-                            case 2:
-                                // TODO SBRFACCTAX-3444
-                                // model.setItemName(cell.getStringCellValue());
+
+            boolean isValid = true;
+            Income102 model = new Income102();
+            while (cells.hasNext()) {
+                if (!isValid)
+                    break;
+                Cell cell = cells.next();
+                try {
+                    // заполняем модель для вставки в БД
+                    switch (cell.getColumnIndex()) {
+                        case 2:
+                            model.setItemName(cell.getStringCellValue());
+                            break;
+                        case 3:
+                            //Пропускаем строки с "плохим" кодом
+                            String opCode = cell.getStringCellValue();
+                            if (opCode == null || excludeCode.contains(opCode.trim())) {
+                                isValid = false;
                                 break;
-                            case 3:
-                                model.setOpuCode(cell.getStringCellValue());
-                                break;
-                            case 6:
-                                model.setTotalSum(cell.getNumericCellValue());
-                                break;
-                        }
-                    } catch (IllegalStateException e) {
-                        throw getServiceException(cell.getColumnIndex(), 1);
+                            }
+                            model.setOpuCode(opCode.trim());
+                            break;
+                        case 6:
+                            model.setTotalSum(cell.getNumericCellValue());
+                            break;
                     }
-                }
-                if (isValid) {
-                    if (!isModelValid(model)) {
-                        throw new ServiceException("Формат файла не соответствуют ожидаемому формату. Файл не может быть загружен.");
-                    }
-                    list.add(model);
+                } catch (IllegalStateException e) {
+                    throw getServiceException(cell.getColumnIndex(), 1);
                 }
             }
-        }
-
-        //debug
-        System.out.println("list.size() = " + list.size());
-        for (Income102 m : list) {
-            System.out.println(m.getOpuCode());
-            System.out.println(m.getTotalSum());
-            System.out.println(m.getItemName());
-            System.out.println("----------------------------");
+            isEndOfFile102 = isEndOfFile102(model);
+            if (!isEndOfFile102 && isValid) {
+                if (!isModelValid(model)) {
+                    throw new ServiceException("Формат файла не соответствуют ожидаемому формату. Файл не может быть загружен.");
+                }
+                list.add(model);
+            }
         }
         return list;
     }
@@ -235,14 +220,14 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
      * @return true если ячейки в столбцах, указанные в описании формата, не пустые (нет ни одной пустой ячейки), иначе - false
      */
     private boolean isModelValid(Income101 model) {
-        return model.getAccount() != null
+        return model.getAccount() != null &&  !model.getAccount().isEmpty()
                 && model.getIncomeDebetRemains() != null
                 && model.getIncomeCreditRemains() != null
                 && model.getDebetRate() != null
                 && model.getCreditRate() != null
                 && model.getOutcomeDebetRemains() != null
                 && model.getOutcomeCreditRemains() != null
-                && model.getAccountName() != null;
+                && model.getAccountName() != null  &&  !model.getAccountName().isEmpty();
     }
 
     /**
@@ -251,8 +236,14 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
      */
     private boolean isModelValid(Income102 model) {
         return model.getOpuCode() != null
-                && model.getTotalSum() != null;
-        // && model.getItemName() != null;
+                && model.getTotalSum() != null &&
+                model.getItemName() != null;
+    }
+
+    private boolean isEndOfFile102(Income102 model) {
+        return model.getOpuCode() == null
+                && model.getTotalSum() == null &&
+                model.getItemName() == null;
     }
 
     /**
@@ -303,6 +294,6 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     break;
             }
         }
-        return new ServiceException("Данные столбца " + colName + " файла не соответствуют ожидаемому типу данных. Файл не может быть загружен.");
+        return new ServiceException("Данные столбца '" + colName + "' файла не соответствуют ожидаемому типу данных. Файл не может быть загружен.");
     }
 }

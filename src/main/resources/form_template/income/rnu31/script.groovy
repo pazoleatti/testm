@@ -1,11 +1,17 @@
+package form_template.income.rnu31
+
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+
 /**
- * Скрипт для РНУ-31 (rnu31.groovy).
  * Форма "(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям".
  *
  * @version 59
  *
  * TODO:
- *      - нет уcловии в проверках соответствия НСИ (потому что нету справочников)
+ *      - при импорте нет получения имени файла для определения типа файла (xls или csv)
+ *      - проверки корректности данных проверить когда будут сделаны вывод сообщении
  *
  * @author rtimerbaev
  */
@@ -27,10 +33,6 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW :
         // deleteRow()
         break
-    // проверка при "вернуть из принята в подготовлена"
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
-        checkOnCancelAcceptance()
-        break
     // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
         logicalCheck(true)
@@ -40,6 +42,9 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicalCheck(false)
+        break
+    case FormDataEvent.IMPORT :
+        importData()
         break
 }
 
@@ -61,21 +66,14 @@ switch (formDataEvent) {
  */
 def addNewRow() {
     def data = getData(formData)
-    def newRow = formData.createDataRow()
+    def newRow = getNewRow()
     def index = 0
-    if(currentDataRow!=null){
-        if(currentDataRow.getAlias()==null){
+    if (currentDataRow != null) {
+        if (currentDataRow.getAlias() == null) {
             index = getIndex(currentDataRow)
-        }else{
-            index = getIndex(currentDataRow)-1
+        } else {
+            index = getIndex(currentDataRow) - 1
         }
-    }
-    // графа 3..12
-    ['ofz', 'municipalBonds', 'governmentBonds  ', 'mortgageBonds',
-            'municipalBondsBefore', 'rtgageBondsBefore', 'ovgvz',
-            'eurobondsRF', 'itherEurobonds', 'corporateBonds'].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
     }
     data.insert(newRow, index + 1)
 }
@@ -234,6 +232,41 @@ void checkCreation() {
     }
 }
 
+/**
+ * Получение импортируемых данных.
+ */
+void importData() {
+    // TODO (Ramil Timerbaev) Костыль! это значение должно передаваться в скрипт
+    def fileName = 'fileName.xls'
+
+    def is = ImportInputStream
+    if (is == null) {
+        return
+    }
+
+    def xmlString = importService.getData(is, fileName, 'windows-1251', 'Вид ценных бумаг', null);
+    if (xmlString == null) {
+        return
+    }
+
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        return
+    }
+
+    // количество строк в шапке
+    def headRowCount = 4
+
+    // проверка заголовка таблицы
+    if (!checkTableHead(xml, headRowCount)) {
+        logger.error('Заголовок таблицы не соответствует требуемой структуре!')
+        return
+    }
+
+    // добавить данные в форму
+    addData(xml, headRowCount)
+}
+
 /*
  * Вспомогательные методы.
  */
@@ -356,4 +389,174 @@ def getData(def formData) {
 def getRows(def data) {
     def cached = data.getAllCached()
     return cached
+}
+
+/**
+ * Получить новую стролу с заданными стилями.
+ */
+def getNewRow() {
+    def row = formData.createDataRow()
+
+    // графа 3..12
+    ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds',
+            'municipalBondsBefore', 'rtgageBondsBefore', 'ovgvz',
+            'eurobondsRF', 'itherEurobonds', 'corporateBonds'].each {
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
+    }
+
+    return row
+}
+
+/**
+ * Заполнить форму данными.
+ *
+ * @param xml данные
+ * @param headRowCount количество строк в шапке
+ */
+void addData(def xml, headRowCount) {
+    if (xml == null) {
+        return
+    }
+    def data = getData(formData)
+
+    def tmp
+
+    def indexRow = 0
+    // TODO (Ramil Timerbaev) Проверка корректности данных
+    for (def row : xml.row) {
+        indexRow++
+
+        // пропустить шапку таблицы
+        if (indexRow <= headRowCount) {
+            continue
+        }
+
+        if (row.cell[0].text() == 'Процентный (купонный) доход по облигациям') {
+            def newRow = getNewRow()
+            def index = 0
+
+            // графа 1
+            newRow.number = 1
+
+            // графа 2
+            newRow.securitiesType = row.cell[index].text()
+            index++
+
+            // графа 3
+            newRow.ofz = getNumber(row.cell[index].text())
+            index++
+
+            // графа 4
+            newRow.municipalBonds = getNumber(row.cell[index].text())
+            index++
+
+            // графа 5
+            newRow.governmentBonds = getNumber(row.cell[index].text())
+            index++
+
+            // графа 6
+            newRow.mortgageBonds = getNumber(row.cell[index].text())
+            index++
+
+            // графа 7
+            newRow.municipalBondsBefore = getNumber(row.cell[index].text())
+            index++
+
+            // графа 8
+            newRow.rtgageBondsBefore = getNumber(row.cell[index].text())
+            index++
+
+            // графа 9
+            newRow.ovgvz = getNumber(row.cell[index].text())
+            index++
+
+            // графа 10
+            newRow.eurobondsRF = getNumber(row.cell[index].text())
+            index++
+
+            // графа 11
+            newRow.itherEurobonds = getNumber(row.cell[index].text())
+            index++
+
+            // графа 12
+            newRow.corporateBonds = getNumber(row.cell[index].text())
+
+            data.clear()
+            data.insert(newRow, 1)
+            data.commit()
+            logger.info('Данные загружены')
+            break
+        }
+    }
+}
+
+/**
+ * Получить числовое значение.
+ *
+ * @param value строка
+ */
+def getNumber(def value) {
+    if (value == null) {
+        return null
+    }
+    def tmp = value.trim()
+    if ("".equals(tmp)) {
+        return null
+    }
+    // поменять запятую на точку и убрать пробелы
+    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
+    return new BigDecimal(tmp)
+}
+
+/**
+ * Проверить шапку таблицы.
+ *
+ * @param xml данные
+ * @param headRowCount количество строк в шапке
+ */
+def checkTableHead(def xml, def headRowCount) {
+    def colCount = 11
+    // проверить количество строк и колонок в шапке
+    if (xml.row.size() < headRowCount || xml.row[0].cell.size() < colCount) {
+        return false
+    }
+    def result = (xml.row[0].cell[0] == 'Вид ценных бумаг' &&
+            xml.row[0].cell[1] == 'Ставка налога на прибыль' &&
+            xml.row[1].cell[1] == '15' &&
+            xml.row[2].cell[1] == 'ОФЗ' &&
+            xml.row[2].cell[2] == 'Субфедеральные и муниципальные облигации, за исключением муниципальных облигаций, выпущенных до 1 января 2007 года на срок не менее 3 лет' &&
+            xml.row[2].cell[3] == 'Государственные облигации Республики Беларусь' &&
+            xml.row[2].cell[4] == 'Ипотечные облигации, выпущенные после  1 января 2007 года' &&
+            xml.row[1].cell[5] == '9' &&
+            xml.row[2].cell[5] == 'Муниципальные облигации, выпущенные до 1 января 2007 года на срок не менее 3 лет' &&
+            xml.row[2].cell[6] == 'Ипотечные облигации, выпущенные до  1 января 2007 года' &&
+            xml.row[1].cell[7] == '0' &&
+            xml.row[2].cell[7] == 'ОВГВЗ' &&
+            xml.row[1].cell[8] == '20' &&
+            xml.row[2].cell[8] == 'Еврооблигации РФ' &&
+            xml.row[2].cell[9] == 'Прочие еврооблигации' &&
+            xml.row[2].cell[10] == 'Корпоративные облигации')
+    return result
+}
+
+/**
+ * Получить значение атрибута строки справочника.
+
+ * @param record строка справочника
+ * @param alias алиас
+ */
+def getValue(def record, def alias) {
+    def value = record.get(alias)
+    switch (value.getAttributeType()) {
+        case RefBookAttributeType.DATE :
+            return value.getDateValue()
+        case RefBookAttributeType.NUMBER :
+            return value.getNumberValue()
+        case RefBookAttributeType.STRING :
+            return value.getStringValue()
+        case RefBookAttributeType.REFERENCE :
+            return value.getReferenceValue()
+    }
+    return null
 }

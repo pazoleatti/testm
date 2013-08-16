@@ -32,7 +32,7 @@ public class BookerStatementsDaoImpl extends AbstractDao implements BookerStatem
                             " CREDIT_RATE," +
                             " OUTCOME_DEBET_REMAINS," +
                             " OUTCOME_CREDIT_REMAINS," +
-                            " ACCOUNT_NAME) " +
+                            " ACCOUNT_NAME)" +
                             " values (?,?,?,?,?,?,?,?,?)",
                     new BatchPreparedStatementSetter() {
 
@@ -69,7 +69,7 @@ public class BookerStatementsDaoImpl extends AbstractDao implements BookerStatem
                             " REPORT_PERIOD_ID," +
                             " OPU_CODE," +
                             " TOTAL_SUM," +
-                            " ITEM_NAME) " +
+                            " ITEM_NAME)" +
                             " values (?,?,?,?)",
                     new BatchPreparedStatementSetter() {
 
@@ -91,6 +91,22 @@ public class BookerStatementsDaoImpl extends AbstractDao implements BookerStatem
                     }
             );
         }
+    }
+
+    @Override
+    public void delete101(Integer periodID) {
+        getJdbcTemplate().update(
+                "delete from INCOME_101  where REPORT_PERIOD_ID = ?",
+                periodID
+        );
+    }
+
+    @Override
+    public void delete102(Integer periodID) {
+        getJdbcTemplate().update(
+                "delete from INCOME_102  where REPORT_PERIOD_ID = ?",
+                periodID
+        );
     }
 
 }

@@ -223,9 +223,8 @@ def getOpuSumByTableDFor35to40(def dataRow, def income101Data){
 def getIncome101Data(def dataRow) {
     def account = dataRow.accountingRecords
     def reportPeriodId = formData.reportPeriodId
-    def departmentId = formData.departmentId
 
-    return income101Dao.getIncome101(reportPeriodId, account, departmentId)
+    return income101Dao.getIncome101(reportPeriodId, account)
 }
 
 /**
@@ -292,9 +291,8 @@ def getOpuSumTotalFor4to5(def dataRow, def income102Data) {
 def getIncome102Data(def dataRow){
     def account = dataRow.accountingRecords
     def reportPeriodId = formData.reportPeriodId
-    def departmentId = formData.departmentId
 
-    return income102Dao.getIncome102(reportPeriodId, account, departmentId)
+    return income102Dao.getIncome102(reportPeriodId, account)
 }
 
 /**
