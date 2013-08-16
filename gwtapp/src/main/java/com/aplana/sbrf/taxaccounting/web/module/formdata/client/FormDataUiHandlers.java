@@ -39,13 +39,9 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onShowCheckedColumns();
 
-    void onUploadClickedSuccess();
-
-    void onUploadClickedFail(String message);
-
-    String jsoninit();
-
 	void onRangeChange(final int start, int length);
 
 	void onCellModified(DataRow<Cell> dataRow);
+
+    void onFileParse(String uuid);
 }

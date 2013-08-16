@@ -25,4 +25,5 @@
     <source path="departmentpicker"/>
     <source path="reportperiodpicker"/>
     <source path="incrementbutton"/>
+    <source path="fileupload"/>
 </module>
