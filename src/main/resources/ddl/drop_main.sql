@@ -1,4 +1,5 @@
 drop sequence seq_log_system;
+drop sequence seq_log_business;
 drop table log_system;
 drop index i_form_data_signer_formdataid;
 drop index i_form_data_kind;

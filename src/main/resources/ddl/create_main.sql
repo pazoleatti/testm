@@ -91,7 +91,7 @@ alter table form_template add constraint form_template_check_active check (is_ac
 alter table form_template add constraint form_template_chk_num_cols check (numbered_columns in (0, 1));
 alter table form_template add constraint form_template_chk_fixed_rows check(fixed_rows in (0, 1));
 
-comment on table form_template is 'Описания налоговых форм';
+comment on table form_template IS 'Описания шаблонов налоговых форм';
 comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
 comment on column form_template.id is 'Первичный ключ';
 comment on column form_template.is_active is 'Признак активности';
@@ -141,7 +141,7 @@ create table blob_data (
   data          blob not null,
   creation_date date not null,
   type          number(1) default 0 not null,
-  data_size     number(9) default 0 not null
+  data_size     number(9) not null
 );
 alter table blob_data add constraint blob_data_pk primary key(id);
 alter table blob_data add constraint blob_data_chk_type check (type in (0, 1));
@@ -301,6 +301,7 @@ comment on column form_column.checking is 'Признак проверочног
 comment on column form_column.attribute_id is 'Код отображаемого атрибута для столбцов-ссылок';
 comment on column form_column.format is 'Формат';
 comment on column form_column.filter is 'Условие фильтрации элементов справочника';
+comment on column form_column.max_length IS 'Максимальная длина строки';
 ---------------------------------------------------------------------------------------------------
 create table department (
   id number(9) not null,
@@ -495,8 +496,6 @@ create table form_data (
   state number(9) not null,
   kind number(9) not null,
   report_period_id number(9) not null,
-  acceptance_date date,
-  creation_date date default sysdate not null,
   return_sign number(1) not null
 );
 alter table form_data add constraint form_data_pk primary key (id);
@@ -514,7 +513,6 @@ comment on column form_data.department_id is 'Идентификатор под�
 comment on column form_data.state is 'Код состояния';
 comment on column form_data.kind is 'Тип налоговой формы (1 - Первичная, 2 - Консолидированная, 3 - Сводная, 4 - Форма УНП, 5 - Выходная)';
 comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
-comment on column form_data.creation_date is 'Дата создания';
 comment on column form_data.return_sign is 'Флаг возврата (0 - обычный режим; 1 - форма возвращена из вышестоящего статуса)';
 
 create sequence seq_form_data start with 10000;
@@ -795,6 +793,8 @@ comment on column log_business.declaration_data_id is 'Код деклараци
 comment on column log_business.form_data_id is 'Код налоговой формы';
 comment on column log_business.note is 'Текст сообщения';
 comment on column log_business.user_department_id is 'Код подразделения пользователя';
+
+CREATE SEQUENCE seq_log_business;
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);
