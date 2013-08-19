@@ -40,6 +40,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	VerticalPanel content;
 	@UiField
 	Button save;
+	@UiField
+	Label titleDesc;
 
 	Map<String, HasValue> inputFields = new HashMap<String, HasValue>();
 
@@ -116,6 +118,11 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		Map<String, Object> inputFields = getInputFieldsValues();
 		inputFields.put(RefBook.RECORD_ID_ALIAS, selectionModel.getSelectedObject().getRefBookRowId());
 		return inputFields;
+	}
+
+	@Override
+	public void setRefBookNameDesc(String desc) {
+		titleDesc.setText(desc);
 	}
 
 	@Override

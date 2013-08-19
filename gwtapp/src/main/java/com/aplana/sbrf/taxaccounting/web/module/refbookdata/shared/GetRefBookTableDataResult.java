@@ -12,6 +12,7 @@ public class GetRefBookTableDataResult implements Result {
 	List<RefBookAttribute> tableHeaders;
 	List<RefBookDataRow> dataRows;
 	int totalCount;
+	String desc;
 
 	public List<RefBookAttribute> getTableHeaders() {
 		return tableHeaders;
@@ -35,5 +36,13 @@ public class GetRefBookTableDataResult implements Result {
 
 	public void setTotalCount(int totalCount) {
 		this.totalCount = totalCount;
+	}
+
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
 	}
 }
