@@ -9,3 +9,4 @@ target
 .gwt
 bin
 *~
+libpeerconnection.log
