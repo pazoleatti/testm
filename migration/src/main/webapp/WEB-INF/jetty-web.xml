@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+<Configure class="org.mortbay.jetty.webapp.WebAppContext">
+
+	<Get name="securityHandler">
+		<Set name="userRealm">
+			<New class="org.mortbay.jetty.security.HashUserRealm">
+				<!-- TODO: Указать такое же имя realm, как будет в WebSphere -->
+				<Set name="name">defaultWIMFileBasedRealm</Set>
+				<Set name="config">
+					<Call name="format" class="java.lang.String">
+						<Arg>%s/src/test/config/jetty-realm.properties</Arg>
+						<Arg>
+							<Array type="java.lang.Object">
+								<Item>
+									<SystemProperty name="jetty.home" default="." />
+								</Item>
+							</Array>
+						</Arg>
+					</Call>
+				</Set>
+			</New>
+		</Set>
+	</Get>
+
+	<New id="ds" class="org.mortbay.jetty.plus.naming.Resource">
+		<Arg>java:comp/env/jdbc/TaxAccDS</Arg>
+		<Arg>
+			<New class="bitronix.tm.resource.jdbc.PoolingDataSource">
+				<Set name="className">bitronix.tm.resource.jdbc.lrc.LrcXADataSource</Set>
+				<Set name="uniqueName">TaxAccDS</Set>
+				<Set name="allowLocalTransactions">true</Set>
+				<Set name="minPoolSize">0</Set>
+				<Set name="maxPoolSize">10</Set>
+				<Get name="driverProperties">
+					<Put name="driverClassName">oracle.jdbc.OracleDriver</Put>
+					<Put name="url">
+						jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL
+					</Put>
+					<Put name="user">TAX</Put>
+					<Put name="password">TAX</Put>
+				</Get>
+				<Call name="init" />
+			</New>
+		</Arg>
+	</New>
+
+	<Call name="getConfiguration" class="bitronix.tm.TransactionManagerServices">
+		<Set name="journal">null</Set>
+		<Set name="defaultTransactionTimeout">360</Set>
+	</Call>
+
+	<New id="tx" class="org.mortbay.jetty.plus.naming.Resource">
+		<Arg>java:comp/UserTransaction</Arg>
+		<Arg>
+			<Call name="getTransactionManager" class="bitronix.tm.TransactionManagerServices" />
+		</Arg>
+	</New>
+
+    <!-- Хранилища для кэшей -->
+
+    <New class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>java:comp/env/services/cache/aplana/taxaccounting/FormType</Arg>
+        <Arg>
+            <New class="java.util.concurrent.ConcurrentHashMap" />
+        </Arg>
+    </New>
+
+    <New class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>java:comp/env/services/cache/aplana/taxaccounting/FormTemplate
+        </Arg>
+        <Arg>
+            <New class="java.util.concurrent.ConcurrentHashMap" />
+        </Arg>
+    </New>
+
+    <New class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>java:comp/env/services/cache/aplana/taxaccounting/DeclarationType
+        </Arg>
+        <Arg>
+            <New class="java.util.concurrent.ConcurrentHashMap" />
+        </Arg>
+    </New>
+
+    <New class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>java:comp/env/services/cache/aplana/taxaccounting/DeclarationTemplate
+        </Arg>
+        <Arg>
+            <New class="java.util.concurrent.ConcurrentHashMap" />
+        </Arg>
+    </New>
+
+    <New class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>java:comp/env/services/cache/aplana/taxaccounting/Department
+        </Arg>
+        <Arg>
+            <New class="java.util.concurrent.ConcurrentHashMap" />
+        </Arg>
+    </New>
+
+    <New class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>java:comp/env/services/cache/aplana/taxaccounting/User</Arg>
+        <Arg>
+            <New class="java.util.concurrent.ConcurrentHashMap" />
+        </Arg>
+    </New>
+
+    <New class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>java:comp/env/services/cache/aplana/taxaccounting/DataBlobsCache</Arg>
+        <Arg>
+            <New class="java.util.concurrent.ConcurrentHashMap" />
+        </Arg>
+    </New>
+
+    <New class="org.mortbay.jetty.plus.naming.EnvEntry">
+        <Arg>java:comp/env/url/Sign</Arg>
+        <Arg type="java.net.URL">http://ignore/</Arg>
+    </New>
+
+</Configure>
