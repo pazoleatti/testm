@@ -254,7 +254,6 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                 getView().setUnpFlag(result.getControlUNP());
                                 // Текущее подразделение пользователя
                                 userDepartment = result.getDepartment();
-                                getView().setDepartment(result.getDepartment());
                                 // Доступные типы налогов
                                 getView().setTaxTypes(Arrays.asList(TaxType.INCOME, TaxType.TRANSPORT, TaxType.DEAL));
                             }

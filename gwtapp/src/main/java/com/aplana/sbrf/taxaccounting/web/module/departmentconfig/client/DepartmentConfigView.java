@@ -263,6 +263,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     public void setReportPeriod(ReportPeriod reportPeriod) {
         currentReportPeriod = reportPeriod;
         period.setSelectedReportPeriods(Arrays.asList(currentReportPeriod));
+        editButton.setVisible(reportPeriod != null && reportPeriod.isActive());
     }
 
     @Override
@@ -417,7 +418,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     @Override
     public void setDepartment(final Department department) {
         if (department != null) {
-        	departmentPicker.setValue(Arrays.asList(department.getId()));
+        	departmentPicker.setValue(Arrays.asList(department.getId()), true);
             reloadDepartmentParams();
         }
         
