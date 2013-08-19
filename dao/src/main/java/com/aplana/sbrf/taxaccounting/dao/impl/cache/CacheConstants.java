@@ -6,6 +6,5 @@ public final class CacheConstants {
 	}
 	
 	public static final String DECLARATION_TEMPLATE = "DeclarationType";
-	public static final String DECLARATION_DATA_BLOB = "DataBlobsCache";
 	
 }
