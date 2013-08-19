@@ -75,7 +75,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	@Override
 	public void onCancelClicked() {
-		placeManager.revealPlace(new PlaceRequest(RefBookListTokens.refbookList));
+		rowsToDelete.clear();
+		rowsToInsert.clear();
+		isValueChanged = false;
+		getView().updateTable();
 	}
 
 	@Override
