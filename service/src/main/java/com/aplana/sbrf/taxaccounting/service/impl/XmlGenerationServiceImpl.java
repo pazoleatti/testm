@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
 import com.aplana.sbrf.taxaccounting.model.migration.enums.*;
 import com.aplana.sbrf.taxaccounting.model.migration.row.AbstractRnuRow;
+import com.aplana.sbrf.taxaccounting.model.migration.row.Rnu60Row;
 import com.aplana.sbrf.taxaccounting.model.migration.row.Rnu64Row;
 import com.aplana.sbrf.taxaccounting.service.MigrationService;
 import com.aplana.sbrf.taxaccounting.service.XmlGenerationService;
@@ -23,6 +24,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -53,7 +55,7 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
         }
 
         Element root = document.createElement("form");
-        root.setAttribute("xmlns", "http://sberrnu");
+        root.setAttribute("xmlns", "http://sberbank.ru/XMLSchemas/sberrnu");
         root.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
         document.appendChild(root);
 
@@ -85,8 +87,48 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
 
     @Override
     public String getXmlFileName(Exemplar ex) {
-        //TODO
-        return null;
+        StringBuilder sb = new StringBuilder();
+
+        String type = NalogFormType.getNewXmlCode(ex.getRnuTypeId());
+        sb.append(completeStringLength(10, type));
+
+        sb.append(completeStringLength(11, ex.getDepCode()));
+
+        sb.append(SystemType.fromId(ex.getSystemId()).getCodeNew()).append(ex.getSubSystemId());
+
+        DateFormat year = new SimpleDateFormat("yyyy");
+        Integer month = Integer.valueOf(new SimpleDateFormat("MM").format(ex.getBeginDate()));
+
+        switch (ex.getPeriodityId()) {
+            case 1:            //Ежегодно
+                sb.append("y12");
+                break;
+            case 4:             //Ежеквартально
+                sb.append(QuartalCode.fromNum(month).getCodeString());
+                break;
+            case 5:            //Ежемесячно
+                sb.append('m').append(year.format(ex.getBeginDate()));
+                break;
+            case 8:             //ежедневно и по рабочим дням
+            case 10:
+            default:
+        }
+
+        sb.append(year.format(ex.getBeginDate()).substring(2));
+        sb.append(".xml");
+        return sb.toString();
+    }
+
+    private String completeStringLength(Integer lengthNeed, String str) {
+        if (str == null || lengthNeed <= str.length()) {
+            return str;
+        } else {
+            StringBuilder sb = new StringBuilder(str);
+            for (int i = 0; i < lengthNeed - str.length(); i++) {
+                sb.append('_');
+            }
+            return sb.toString();
+        }
     }
 
     private Element getExemplarElement(Exemplar ex, Document document) {
@@ -99,14 +141,7 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
         element.setAttribute("subbranch", ex.getDepCode().substring(6, 8));
         element.setAttribute("fld", ex.getDepCode().substring(8, 9));
 
-        element.setAttribute("dep_id", String.valueOf(
-                DeparmanetCode.getNewDepCode(
-                        ex.getDepCode(),
-                        SystemType.getNewCodeByOldCode(ex.getSystemId()),
-                        ex.getSubSystemId()))
-        );     //дополнительный атрибут на всякий случай
-
-        element.setAttribute("asystem", String.valueOf(SystemType.getNewCodeByOldCode(ex.getSystemId())));
+        element.setAttribute("asystem", String.valueOf(SystemType.fromId(ex.getSystemId()).getCodeNew()));
         element.setAttribute("subasystem", ex.getSubSystemId());
         element.setAttribute("datebegin", exemplarSDF.format(ex.getBeginDate()));
         element.setAttribute("dateend", exemplarSDF.format(ex.getEndDate()));
@@ -133,17 +168,18 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
                 total.appendChild(getRecordElement(row, doc));
             }
         }
-
         return table;
     }
-
 
     private Element getRecordElement(AbstractRnuRow abstractRnuRow, Document doc) {
         if (abstractRnuRow instanceof Rnu64Row) {
             return generateRecordXml((Rnu64Row) abstractRnuRow, doc);
+        } else if (abstractRnuRow instanceof Rnu60Row) {
+            return generateRecordXml((Rnu60Row) abstractRnuRow, doc);
         } else {
             throw new ServiceException("Ошибка формирования XML файла.");
         }
+
     }
 
     private Element generateRecordXml(Rnu64Row row, Document doc) {
@@ -154,6 +190,26 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
         record.appendChild(getFieldElement("PARTDEAL", row.getPartDeal(), doc));
         record.appendChild(getFieldElement("NUMDEAL", row.getNumDeal(), doc, true));
         record.appendChild(getFieldElement("RCOST", row.getCost(), doc));
+
+        return record;
+    }
+
+    private Element generateRecordXml(Rnu60Row row, Document doc) {
+        Element record = doc.createElement("record");
+
+        record.appendChild(getFieldElement("NUM", row.getNum(), doc));
+        record.appendChild(getFieldElement("NUMDEAL", row.getNumDeal(), doc, true));
+        record.appendChild(getFieldElement("DEFPAPER", row.getDefPaper(), doc, true));
+        record.appendChild(getFieldElement("CODECURRENCY", row.getCodecurrency(), doc, true));
+        record.appendChild(getFieldElement("DREPO1", formatDate(row.getDrepo1()), doc));
+        record.appendChild(getFieldElement("DREPO2", formatDate(row.getDrepo2()), doc));
+        record.appendChild(getFieldElement("GETPRICENKD", row.getGetpricenkd(), doc));
+        record.appendChild(getFieldElement("SALEPRICENKD", row.getSalepricenkd(), doc));
+        record.appendChild(getFieldElement("COSTREPO", row.getCostrepo(), doc));
+        record.appendChild(getFieldElement("IMPLREPO", row.getImplrepo(), doc));
+        record.appendChild(getFieldElement("BANKRATE", row.getBankrate(), doc));
+        record.appendChild(getFieldElement("COSTREPO269", row.getCostrepo269(), doc));
+        record.appendChild(getFieldElement("COSTREPOTAX", row.getCostrepotax(), doc));
 
         return record;
     }

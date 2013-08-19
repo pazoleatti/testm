@@ -84,6 +84,7 @@ public class MigrationServiceImpl implements MigrationService {
             case RNU59:
                 break;
             case RNU60:
+                list = migrationDao.getRnu60RowList(ex);
                 break;
             case RNU64:
                 list = migrationDao.getRnu64RowList(ex);

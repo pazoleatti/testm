@@ -6,33 +6,37 @@ import java.io.Serializable;
  * Соотвествие номера квартала к значению в новой системе
  */
 public enum QuartalCode implements Serializable {
-    ONE_1(1, 21),
-    ONE_2(2, 21),
-    ONE_3(3, 21),
-    TWO_4(4, 31),
-    TWO_5(5, 31),
-    TWO_6(6, 31),
-    THREE_7(7, 33),
-    THREE_8(8, 33),
-    THREE_9(9, 33),
-    FOUR_10(10, 34),
-    FOUR_11(11, 34),
-    FOUR_12(12, 34);
+    ONE_1(1, "1", "D", "q03"),
+    ONE_2(2, "2", "D", "q03"),
+    ONE_3(3, "3", "D", "q03"),
+    TWO_4(4, "4", "E", "q06"),
+    TWO_5(5, "5", "E", "q06"),
+    TWO_6(6, "6", "E", "q06"),
+    THREE_7(7, "7", "F", "q09"),
+    THREE_8(8, "8", "F", "q09"),
+    THREE_9(9, "9", "F", "q09"),
+    FOUR_10(10, "A", "G", "q12"),
+    FOUR_11(11, "B", "G", "q12"),
+    FOUR_12(12, "C", "G", "q12");
 
     private static final long serialVersionUID = 1L;
 
     private final int num;
-    private final int code;
+    private final String codeIfMonth;
+    private final String codeIfQuartal;
+    private final String codeString;
 
-    private QuartalCode(int num, int code) {
+    private QuartalCode(int num, String codeIfMonth, String codeIfQuartal, String codeString) {
         this.num = num;
-        this.code = code;
+        this.codeIfMonth = codeIfMonth;
+        this.codeIfQuartal = codeIfQuartal;
+        this.codeString = codeString;
     }
 
-    public static int fromNum(int num) {
+    public static QuartalCode fromNum(int num) {
         for (QuartalCode t : values()) {
             if (t.num == num) {
-                return t.code;
+                return t;
             }
         }
         throw new IllegalArgumentException("Неверный номер квартала: " + num);
@@ -42,7 +46,15 @@ public enum QuartalCode implements Serializable {
         return num;
     }
 
-    public int getCode() {
-        return code;
+    public String getCodeIfMonth() {
+        return codeIfMonth;
+    }
+
+    public String getCodeIfQuartal() {
+        return codeIfQuartal;
+    }
+
+    public String getCodeString() {
+        return codeString;
     }
 }

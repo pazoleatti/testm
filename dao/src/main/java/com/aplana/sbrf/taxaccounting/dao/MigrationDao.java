@@ -18,4 +18,6 @@ public interface MigrationDao {
     List<Rnu31Row> getRnu31RowList(Exemplar ex);
 
     List<Rnu64Row> getRnu64RowList(Exemplar ex);
+
+    List<Rnu60Row> getRnu60RowList(Exemplar ex);
 }

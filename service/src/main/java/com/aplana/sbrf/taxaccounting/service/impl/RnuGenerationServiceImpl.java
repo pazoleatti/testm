@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -29,9 +28,7 @@ public class RnuGenerationServiceImpl implements RnuGenerationService {
         StringBuilder bu = new StringBuilder();
         bu.append(getRnuFirstRow(ex)).append(CR);
         bu.append(CR);
-
         List<? extends AbstractRnuRow> rnuRows = migrationService.getRnuList(ex);
-
         for (AbstractRnuRow row : rnuRows) {
             if (TOTAL_ROW.equals(row.getTypeRow())) {
                 bu.append(CR);                          //итоговая строка отделается пустой строкой
@@ -59,54 +56,53 @@ public class RnuGenerationServiceImpl implements RnuGenerationService {
         StringBuilder builder = new StringBuilder();
 
         //NNN
-        builder.append(NalogFormType.getNewCodefromOldCode(exemplar.getRnuTypeId()));
+        builder.append(completeStringLength(3, exemplar.getRnuTypeId()));
 
         //ППП
-        builder.append(getRnuDepCode(exemplar));
+        builder.append(completeStringLength(3, Integer.valueOf(exemplar.getDepCode())));
 
-        //И - замена на ИИИ
-        builder.append(SystemType.getNewCodeByOldCode(exemplar.getSystemId()));
+        //И
+        builder.append(SystemType.fromId(exemplar.getSystemId()).getSysCodeChar());
 
-        DateFormat df = new SimpleDateFormat("MM");
-        DateFormat year = new SimpleDateFormat("yyyy");
+        Integer month = Integer.valueOf(new SimpleDateFormat("MM").format(exemplar.getBeginDate()));
+        Integer year = Integer.valueOf(new SimpleDateFormat("yyyy").format(exemplar.getBeginDate()));
 
-        //К - замена на КК
+        //К
         switch (exemplar.getPeriodityId()) {
             case 1:            //Ежегодно
-                builder.append(YearCode.fromYear(Integer.valueOf(year.format(exemplar.getBeginDate()))));
+                builder.append(YearCode.fromYear(year));
                 break;
             case 4:             //Ежеквартально
-                Integer month = Integer.valueOf(df.format(exemplar.getBeginDate()));
-                builder.append(QuartalCode.fromNum(month));
+                builder.append(QuartalCode.fromNum(month).getCodeIfQuartal());
                 break;
             case 5:            //Ежемесячно
-                builder.append(df.format(exemplar.getBeginDate()));
+                builder.append(QuartalCode.fromNum(month).getCodeIfMonth());
                 break;
             case 8:             //ежедневно и по рабочим дням
             case 10:
             default:
         }
 
-        //.RXX
-        // убрал потом учто не понятно rnu только для DC или для Гамма в том числе.
-        // builder.append(".R").append("00".equals(exemplar.getSubSystemId()) ? "NU" : exemplar.getSubSystemId());
         builder.append(".RNU");
 
         return builder.toString();
     }
 
-    private String getRnuDepCode(Exemplar ex) {
-        String cutCode = ex.getDepCode().substring(2); //сдвиг влево
-        Integer intCode = Integer.valueOf(cutCode);
+    private String completeStringLength(Integer lengthNeed, Integer value) {
+        return completeStringLength(lengthNeed, String.valueOf(value));
+    }
 
-        if (Integer.valueOf(13).equals(intCode)) {
-            return String.valueOf(SystemType.getDepCode(ex.getSystemId(), ex.getSubSystemId()));
-        } else if (Integer.valueOf(22).equals(intCode)) {
-            return String.valueOf(intCode) + "0";
+    private String completeStringLength(Integer lengthNeed, String str) {
+        if (str == null) {
+            return null;
+        } else if (lengthNeed < str.length()) {
+            return "XXX";   //  TODO нужно переделать
         } else {
-            //throw new ServiceException("Ошибка при транспонировании кода департамента.");
-            // TODO (aivanov 14.08.2013) сделать правильную обработку, после уточнения значений
-            return "XXX";
+            StringBuilder sb = new StringBuilder(str);
+            for (int i = 0; i < lengthNeed - str.length(); i++) {
+                sb.append('0');
+            }
+            return sb.toString();
         }
     }
 
@@ -131,19 +127,21 @@ public class RnuGenerationServiceImpl implements RnuGenerationService {
         char sep = AbstractRnuRow.SEP;
         StringBuilder builder = new StringBuilder();
 
-        builder.append(exemplar.getTerCode()).append(sep);              //1
-        builder.append(getRnuDepCode(exemplar)).append(sep);       //2
+        builder.append(Integer.valueOf(exemplar.getTerCode())).append(sep);              //1
+        builder.append(exemplar.getDepCode()).append(sep);       //2
 
         builder.append(formatter.format(exemplar.getBeginDate())).append(sep);      //3
         builder.append(formatter.format(exemplar.getEndDate())).append(sep);        //4
 
-        builder.append(NalogFormType.getNewCodefromOldCode(exemplar.getRnuTypeId())).append(sep);   //5
+        builder.append(completeStringLength(3, Integer.valueOf(exemplar.getDepCode()))).append(sep);   //5
 
-        builder.append(SystemType.getNewCodeByOldCode(exemplar.getSystemId()));                     //6
-        //Номер АС, формирующей налоговую форму, может быть вместе с кодом части АС
-        //пока неизвестно нужно ли это
-        //builder.append('|');
-        //builder.append(exemplar.getSubSystemId());
+        SystemType sysType = SystemType.fromId(exemplar.getSystemId());
+
+        builder.append(sysType.getSysCodeChar());                     //6
+        if (SystemType.DC != sysType) {
+            builder.append(sysType.getSubCode());
+        }
+
         return builder.toString();
     }
 }

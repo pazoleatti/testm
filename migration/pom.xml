@@ -78,10 +78,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
-		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>com.google.gwt</groupId>
@@ -114,11 +110,6 @@
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
 			<artifactId>gwtp-processors</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.pdfbox</groupId>
-			<artifactId>pdfbox</artifactId>
 		</dependency>
         <dependency>
             <groupId>org.json</groupId>

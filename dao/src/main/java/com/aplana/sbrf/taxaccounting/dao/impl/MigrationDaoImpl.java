@@ -372,4 +372,67 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
             throw new DaoException("Error " + e.getLocalizedMessage(), ex.getExemplarId());
         }
     }
+
+    private class Rnu60RowMapper implements RowMapper<Rnu60Row> {
+        public Rnu60Row mapRow(ResultSet rs, int index) throws SQLException {
+            Rnu60Row row = new Rnu60Row();
+
+            row.setNum(MapperUtils.getLong(rs, 1));
+
+            row.setNumDeal(MapperUtils.getString(rs, 2));
+            row.setDefPaper(MapperUtils.getString(rs, 3));
+            row.setCodecurrency(MapperUtils.getString(rs, 4));
+            row.setNompaper(MapperUtils.getBD(rs, 5));
+            row.setDrepo1(MapperUtils.getDate(rs, 6));
+            row.setDrepo1(MapperUtils.getDate(rs, 7));
+            row.setGetpricenkd(MapperUtils.getBD(rs, 8));
+            row.setSalepricenkd(MapperUtils.getBD(rs, 9));
+            row.setCostrepo(MapperUtils.getBD(rs, 10));
+            row.setImplrepo(MapperUtils.getBD(rs, 11));
+            row.setBankrate(MapperUtils.getBD(rs, 12));
+            row.setCostrepo269(MapperUtils.getBD(rs, 13));
+            row.setCostrepotax(MapperUtils.getBD(rs, 14));
+
+            row.setTypeRow(MapperUtils.getString(rs, 15));
+            return row;
+        }
+    }
+
+    @Override
+    public List<Rnu60Row> getRnu60RowList(Exemplar ex) {
+        try {
+            logger.debug("Start getRnu60RowList with " + ex);
+            return getJdbcTemplate().query(
+                    "select\n" +
+                            "\"r60\".num,\n" +
+                            "\"r60\".numdeal,\n" +
+                            "\"r60\".defpaper,\n" +
+                            "\"r60\".codecurrency,\n" +
+                            "\"r60\".nompaper,\n" +
+                            "\"r60\".drepo1,\n" +
+                            "\"r60\".drepo2,\n" +
+                            "\"r60\".getpricenkd,\n" +
+                            "\"r60\".salepricenkd,\n" +
+                            "\"r60\".costrepo,\n" +
+                            "\"r60\".implrepo,\n" +
+                            "\"r60\".bankrate,\n" +
+                            "\"r60\".costrepo269,\n" +
+                            "\"r60\".costrepotax,\n" +
+                            "\"r60\".typerow\n" +
+                            "from migration.trd_60 \"r60\" \n" +
+                            "inner join migration.exemplar \"ex\"  on \"r60\".fidexemplar = \"ex\".idexemplar\n" +
+                            "left outer join migration.periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
+                            "left outer join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "left outer join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "left outer join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "where \"ex\".idexemplar=?\n" +
+                            "order by \"r60\".num asc, \"r60\".typerow desc",
+                    new Object[]{ex.getExemplarId()},
+                    new Rnu60RowMapper()
+            );
+        } catch (DataRetrievalFailureException e) {
+            throw new DaoException("Error " + e.getLocalizedMessage(), ex.getExemplarId());
+        }
+    }
 }
