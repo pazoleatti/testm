@@ -7,6 +7,7 @@ import java.util.Date;
 
 public class RefBookAttributeSerializable implements Serializable {
 
+	private static final long serialVersionUID = -5912108710642757399L;
 	private RefBookAttributeType attributeType;
 
 	String stringValue;

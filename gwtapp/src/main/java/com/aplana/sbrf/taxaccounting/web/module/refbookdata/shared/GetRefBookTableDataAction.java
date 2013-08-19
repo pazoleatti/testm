@@ -27,6 +27,6 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
 
 	@Override
 	public String getName() {
-		return "";
+		return "Получить строку из справочника";
 	}
 }
