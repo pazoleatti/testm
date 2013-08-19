@@ -721,7 +721,9 @@ def getSumForColumn5or6or8(def form, def value1, def value2, def alias1, def ali
     def tmpValueA = value2.replace('.', '')
     def tmpValueB
     getRows(data).each { row ->
-        tmpValueB = (row.getCell(alias2).getValue() ? row.getCell(alias2).getValue().replace('.', '') : null)
+        tmpValueB = (row.getCell(alias2).getValue() ?
+                refBookService.getStringValue(27, row.getCell(alias2).getValue(), 'NUMBER') : null)
+
         if (value1 == row.getCell(alias1).getValue() && tmpValueA == tmpValueB) {
             sum += (row.getCell(resultAlias).getValue() ?: 0)
         }
