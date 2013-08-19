@@ -24,11 +24,11 @@
             <g:VerticalPanel>
                 <g:Label styleName="{style.titleLabel}" text="Настройки подразделений"/>
                 <g:HorizontalPanel spacing="5">
-                    <g:Label styleName="{style.boldLabel}" text="Подразделение:"/>
-                    <d:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false"
-                                        header="Выберите подразделение"/>
                     <g:Label styleName="{style.boldLabel}" text="Вид налога:"/>
                     <g:ListBox width="200px" ui:field="taxType"/>
+                    <g:Label styleName="{style.boldLabel}" text="Подразделение:"/>
+                    <d:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false"
+                                                   header="Выберите подразделение"/>
                 </g:HorizontalPanel>
                 <g:HorizontalPanel>
                     <g:HorizontalPanel spacing="5" width="676px" height="35px">
@@ -149,13 +149,13 @@
                                     <g:Label text="Признак расчёта" width="110px" styleName="{style.sps}"/>
                                     <r:RefBookPickerPopupWidget ui:field="type" width="80px" attributeIdInt="120" styleName="{style.sps}"/>
                                 </g:HorizontalPanel>
-                                <g:HorizontalPanel ui:field="sumTaxPanel">
+                                <g:HorizontalPanel ui:field="sumTaxPanel" visible="false">
                                     <g:Label
                                             text="Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде"
                                             width="515px"/>
                                     <g:LongBox ui:field="sumTax" width="75px" styleName="{style.sps}"/>
                                 </g:HorizontalPanel>
-                                <g:HorizontalPanel ui:field="sumDividendsPanel">
+                                <g:HorizontalPanel ui:field="sumDividendsPanel" visible="false">
                                     <g:Label
                                             text="Сумма налога с выплаченных дивидендов за пределами Российской Федерации в последнем квартале отчётного периода"
                                             width="515px"/>
