@@ -54,10 +54,15 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 			@Override
 			public void onSelectionChange(SelectionChangeEvent event) {
 				if (getUiHandlers() != null) {
-					getUiHandlers().onSelectionChanged(selectionModel.getSelectedObject().getRefBookRowId());
-					getUiHandlers().onSelectionChanged(selectionModel.getSelectedObject().getRefBookRowId());
-				}
+					if (selectionModel.getSelectedObject().getRefBookRowId() == null) {
+						for (Map.Entry<String, HasValue> field : inputFields.entrySet()) {
+							field.getValue().setValue(null);
+						}
+					} else {
+						getUiHandlers().onSelectionChanged(selectionModel.getSelectedObject().getRefBookRowId());
 					}
+				}
+			}
 		});
 		pager.setDisplay(refbookDataTable);
 		save.setEnabled(false);
@@ -184,12 +189,15 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		refbookDataTable.setRowData(start, dataRows);
 	}
 
-//	@UiHandler("cancel")
-//	void cancelButtonClicked(ClickEvent event) {
-//		if (getUiHandlers() != null) {
-//			getUiHandlers().onCancelClicked();
-//		}
-//	}
+	@UiHandler("cancel")
+	void cancelButtonClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			boolean cancel = Window.confirm("Вы уверены, что хотите отменить изменения?");
+			if (cancel) {
+				getUiHandlers().onCancelClicked();
+			}
+		}
+	}
 
 	@UiHandler("save")
 	void saveButtonClicked(ClickEvent event) {

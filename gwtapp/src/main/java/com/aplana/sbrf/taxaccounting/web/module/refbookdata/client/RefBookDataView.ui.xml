@@ -40,7 +40,7 @@
                     <style:ButtonLink title="Добавить строку" text="Добавить строку" ui:field="addRow" img="resources/img/exclamation_mark.png"/>
                     <style:ButtonLink title="Удалить строку" text="Удалить строку" ui:field="deleteRow" img="resources/img/exclamation_mark.png">Удалить строку</style:ButtonLink>
                     <!--<g:Button>Сохранить</g:Button>-->
-                    <!--<g:Button ui:field="cancel">Отмена</g:Button>-->
+
                 </g:VerticalPanel>
             </g:HorizontalPanel>
         </g:north>
@@ -62,7 +62,10 @@
                 </g:center>
                 <g:east size="600">
                     <g:VerticalPanel ui:field="content">
-                        <g:Button ui:field="save">Сохранить</g:Button>
+                        <g:HorizontalPanel>
+                            <g:Button ui:field="save">Сохранить</g:Button>
+                            <g:Button ui:field="cancel">Отмена</g:Button>
+                        </g:HorizontalPanel>
                     </g:VerticalPanel>
                 </g:east>
             </g:SplitLayoutPanel>
