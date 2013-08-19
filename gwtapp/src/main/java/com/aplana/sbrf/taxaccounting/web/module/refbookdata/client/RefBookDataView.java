@@ -40,6 +40,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	VerticalPanel content;
 	@UiField
 	Button save;
+	@UiField
+	Label titleDesc;
 
 	Map<String, HasValue> inputFields = new HashMap<String, HasValue>();
 
@@ -119,11 +121,18 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	}
 
 	@Override
+	public void setRefBookNameDesc(String desc) {
+		titleDesc.setText(desc);
+	}
+
+	@Override
 	public void createInputFields(final List<RefBookAttribute> headers) {
 		for (final RefBookAttribute header : headers) {
 			// Сформируем поля ввода
 			HorizontalPanel hp = new HorizontalPanel();
-			hp.add(new Label(header.getName()));
+			Label label = new Label(header.getName());
+			label.setWidth("300px");
+			hp.add(label);
 			HasValue inputWidget;
 			switch (header.getAttributeType()) {
 				case STRING:

@@ -8,8 +8,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
-import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetTaxPeriodAction;
-import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetTaxPeriodResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.*;
@@ -24,10 +22,7 @@ import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.*;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Presenter для формы настроек подразделений
@@ -43,6 +38,8 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     private final DispatchAsync dispatcher;
+
+    private Department userDepartment;
 
     public interface MyView extends View, HasUiHandlers<DepartmentConfigUiHandlers>, ReportPeriodSelectHandler {
         /**
@@ -102,6 +99,11 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * Обновление списка налоговых периодов
          */
         void reloadTaxPeriods();
+
+        /**
+         * Обновление дерева подразделений
+         */
+        void reloadDepartments();
 
         /**
          * Установка выбранного отчетного периода
@@ -188,6 +190,31 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     @Override
+    public void reloadDepartments(TaxType taxType) {
+        GetDepartmentTreeDataAction action = new GetDepartmentTreeDataAction();
+        action.setTaxType(taxType);
+
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetDepartmentTreeDataResult>() {
+                            @Override
+                            public void onSuccess(GetDepartmentTreeDataResult result) {
+                                // Дерево подразделений
+                                if (result.getAvailableDepartments() != null && result.getDepartments() != null) {
+                                    getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
+                                }
+                                else {
+                                    getView().setDepartments(new ArrayList<Department>(), new HashSet<Integer>());
+                                }
+                                // Выбирается подразделение пользователя
+                                getView().setDepartment(userDepartment);
+                                // Обновление налоговых периодов
+                                getView().reloadTaxPeriods();
+                            }
+                        }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
+    }
+
+    @Override
     public void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId) {
         if (taxPeriod == null || departmentId == null) {
             return;
@@ -214,27 +241,23 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
 
-        dispatcher.execute(new GetOpenDataAction(),
+        dispatcher.execute(new GetUserDepartmentAction(),
                 CallbackUtils.defaultCallback(
-                        new AbstractCallback<GetOpenDataResult>() {
+                        new AbstractCallback<GetUserDepartmentResult>() {
                             @Override
-                            public void onSuccess(GetOpenDataResult result) {
+                            public void onSuccess(GetUserDepartmentResult result) {
                                 if (result == null || result.getControlUNP() == null) {
                                     getProxy().manualRevealFailed();
                                     return;
                                 }
-
+                                // Признак УНП
                                 getView().setUnpFlag(result.getControlUNP());
-
-                                // Список подразделений для справочника
-                                getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
                                 // Текущее подразделение пользователя
-                                getView().setDepartment(result.getDepartment());
+                                userDepartment = result.getDepartment();
                                 // Доступные типы налогов
                                 getView().setTaxTypes(Arrays.asList(TaxType.INCOME, TaxType.TRANSPORT, TaxType.DEAL));
-
                             }
-                        }, this).addCallback(new ManualRevealCallback<GetOpenDataResult>(this)));
+                        }, this).addCallback(new ManualRevealCallback<GetUserDepartmentAction>(this)));
     }
 
     // TODO Unlock. Реализовать механизм блокировок.

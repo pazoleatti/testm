@@ -28,6 +28,6 @@ public class DeleteRefBookRowAction extends UnsecuredActionImpl<DeleteRefBookRow
 
 	@Override
 	public String getName() {
-		return "";
+		return "Удалить запись из справочника";
 	}
 }

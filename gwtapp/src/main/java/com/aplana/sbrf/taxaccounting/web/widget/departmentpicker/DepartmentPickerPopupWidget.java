@@ -100,12 +100,15 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 
 	@Override
 	public void setValue(List<Integer> value) {
-		departmentPiker.setValue(value);
+		setValue(value, false);
 	}
 
 	@Override
 	public void setValue(List<Integer> value, boolean fireEvents) {
 		departmentPiker.setValue(value, fireEvents);
+		if (!fireEvents) {
+			selected.setText(joinListToString(departmentPiker.getValueDereference()));
+		}
 	}
 
 	@Override

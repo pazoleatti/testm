@@ -15,6 +15,7 @@ public class PeriodsGetFilterDataResult implements Result {
 	private int yearTo;
 	private int currentYear;
 	private Department selectedDepartment;
+	private boolean enableDepartmentPicker;
 //	private List<>
 
     public PeriodsGetFilterDataResult(){
@@ -83,5 +84,13 @@ public class PeriodsGetFilterDataResult implements Result {
 
 	public void setSelectedDepartment(Department selectedDepartment) {
 		this.selectedDepartment = selectedDepartment;
+	}
+
+	public boolean isEnableDepartmentPicker() {
+		return enableDepartmentPicker;
+	}
+
+	public void setEnableDepartmentPicker(boolean enableDepartmentPicker) {
+		this.enableDepartmentPicker = enableDepartmentPicker;
 	}
 }
