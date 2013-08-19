@@ -516,7 +516,7 @@ void fillForm() {
          * Скрипт для вычисления значения столбца "Исчисленная сумма налога, подлежащая уплате в бюджет".
          */
         if (row.calculatedTaxSum != null) {
-            row.taxSumToPay = round(row.calculatedTaxSum - (row.benefitSum?:0), 0)
+            row.taxSumToPay = (row.calculatedTaxSum - (row.benefitSum?:0)).setScale(0, BigDecimal.ROUND_HALF_UP)
         } else {
             row.taxSumToPay = null
 

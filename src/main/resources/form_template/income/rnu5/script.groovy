@@ -8,9 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
  *
  * @version 59
  *
- * TODO:
- *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *
  * @author rtimerbaev
  */
 
@@ -69,7 +66,7 @@ def addNewRow() {
     def newRow = formData.createDataRow()
 
     // Графы 2-5 Заполняется вручную
-    ['code', 'number', 'name', 'sum'].each{ column ->
+    ['number', 'sum'].each{ column ->
         newRow.getCell(column).setEditable(true)
         newRow.getCell(column).setStyleAlias('Редактируемая')
     }
@@ -110,7 +107,7 @@ void calc() {
      */
 
     // список проверяемых столбцов (графа 2..5)
-    def requiredColumns = ['code', 'number', 'name', 'sum']
+    def requiredColumns = ['number', 'sum']
     def data = getData(formData)
     for (def row : getRows(data)) {
         if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
@@ -133,8 +130,17 @@ void calc() {
         deleteRow(data, it)
     }
 
+    getRows(data).each { row ->
+        // графа 2
+        row.code = row.number
+
+        // графа 3
+        row.name = row.number
+    }
+
     // отсортировать/группировать
-    getRows(data).sort { it.code }
+    getRows(data).sort { getCodeAttribute(it.code) }
+    save(data)
 
     // cумма "Итого"
     def total = 0
@@ -155,13 +161,13 @@ void calc() {
         }
         // если код расходы поменялся то создать новую строку "итого по коду"
         if (tmp != row.code) {
-            totalRows.put(i, getNewRow(tmp, sum))
+            totalRows.put(i, getNewTotalRow(tmp, sum))
             sum = 0
         }
         // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
         if (i == getRows(data).size() - 1) {
             sum += row.sum
-            totalRows.put(i + 1, getNewRow(row.code, sum))
+            totalRows.put(i + 1, getNewTotalRow(row.code, sum))
             sum = 0
         }
 
@@ -230,10 +236,17 @@ def logicalCheck(def useLog) {
             // 3. Проверка итогового значения по коду для графы 5
             def hindError = false
             sums.each { code, sum ->
-                def row = getRowByAlias(data,('total' + code))
-                if (row.sum != sum && !hindError) {
-                    hindError = true
-                    logger.error("Неверное итоговое значение по коду $code графы «Сумма расходов за отчётный период (руб.)»!")
+                def totalRowAlias = 'total' + code
+                if (!checkAlias(getRows(data), totalRowAlias)) {
+                    def codeAttribute = getCodeAttribute(code)
+                    logger.warn("Итоговые значения по коду $codeAttribute не рассчитаны! Необходимо расчитать данные формы.")
+                } else {
+                    def row = getRowByAlias(data, totalRowAlias)
+                    if (row.sum != sum && !hindError) {
+                        hindError = true
+                        def codeAttribute = getCodeAttribute(code)
+                        logger.error("Неверное итоговое значение по коду $codeAttribute графы «Сумма расходов за отчётный период (руб.)»!")
+                    }
                 }
             }
             if (hindError) {
@@ -257,25 +270,34 @@ def logicalCheck(def useLog) {
 def checkNSI() {
     def data = getData(formData)
     if (!getRows(data).isEmpty()) {
+        // справочник 27 - «Классификатор расходов Сбербанка России для целей налогового учёта»
+        def refBookId = 27
         for (def row : getRows(data)) {
             if (isTotal(row)) {
                 continue
             }
-
-            // Проверка балансового счёта для кода классификации расхода (графа 2)
-            if (false) {
-                logger.warn('Балансовый счёт в справочнике отсутствует!')
+            // 4. Проверка соответствия графы 2, 3, 4 одной записи в справочнике
+            if (row.code != row.number) {
+                logger.warn('Код налогового учета не соответствует номеру балансового счета')
+            }
+            if (row.code != row.name) {
+                logger.warn('Наименование балансового счета не соответствует номеру балансового счета')
             }
 
-            // Проверка кода классификации расхода для данного РНУ (графа 2)
-            if (false) {
-                logger.error('Операция в РНУ не учитывается!')
+            // 1. Проверка графа «Код налогового учета» (графа 2)
+            if (refBookService.getRecordData(refBookId, row.code) == null) {
+                logger.warn('Код налогового учёта в справочнике отсутствует!')
+            }
+
+            // 1. Проверка графы «Номер балансового счета» (графа 3)
+            if (refBookService.getRecordData(refBookId, row.number) == null) {
+                logger.error('Номер балансового счета в справочнике отсутствует!')
                 return false
             }
 
-            // Проверка балансового счёта для кода классификации расхода (графа 3)
-            if (false) {
-                logger.warn('Балансовый счёт в справочнике отсутствует!')
+            // 3. Проверка графы «Наименование балансового счета» (графа 4)
+            if (refBookService.getRecordData(refBookId, row.name) == null) {
+                logger.warn('Наименование балансового счета в справочнике отсутствует!')
                 return false
             }
         }
@@ -344,10 +366,11 @@ def isTotal(def row) {
 /**
  * Получить новую строку.
  */
-def getNewRow(def alias, def sum) {
+def getNewTotalRow(def codeId, def sum) {
     def newRow = formData.createDataRow()
-    newRow.setAlias('total' + alias)
+    newRow.setAlias('total' + codeId)
     newRow.sum = sum
+    def alias = getCodeAttribute(codeId)
     newRow.fix = 'Итого по коду ' + alias
     newRow.getCell('fix').colSpan = 2
     setTotalStyle(newRow)
@@ -463,4 +486,32 @@ def getRowByAlias(def data, def alias) {
  */
 void deleteRow(def data, def row) {
     data.delete(row)
+}
+
+/**
+ * Получить атрибут 130 - "Код налогового учёта" справочник 27 - "Классификатор расходов Сбербанка России для целей налогового учёта".
+ *
+ * @param id идентификатор записи справочника
+ */
+def getCodeAttribute(def id) {
+    return refBookService.getStringValue(27, id, 'CODE')
+}
+
+/**
+ * Проверить существования строки по алиасу.
+ *
+ * @param list строки нф
+ * @param rowAlias алиас
+ * @return <b>true</b> - строка с указанным алиасом есть, иначе <b>false</b>
+ */
+def checkAlias(def list, def rowAlias) {
+    if (rowAlias == null || rowAlias == "" || list == null || list.isEmpty()) {
+        return false
+    }
+    for (def row : list) {
+        if (row.getAlias() == rowAlias) {
+            return true
+        }
+    }
+    return false
 }
