@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.main.entry.server;
 
+import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server.BookerStatementsServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.RefBookDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.server.RefBookListServerModule;
 import org.springframework.context.annotation.ComponentScan;
@@ -28,15 +29,15 @@ import com.aplana.sbrf.taxaccounting.web.widget.signin.server.SigninControlServe
 import com.aplana.sbrf.taxaccounting.web.widget.version.server.ProjectVersionControlServerModule;
 
 @Configuration
-@Import(value = {MainHandlerModule.class,  FormDataListServerModule.class,
-		FormDataServerModule.class, SigninControlServerModule.class, MainMenuServerModule.class,
-		AdminServerModule.class, DeclarationTemplateServerModule.class, DeclarationDataServerModule.class, TaxFormNominationServerModule.class,
-		DeclarationServerModule.class,ProjectVersionControlServerModule.class, HistoryServerModule.class, UserListServerModule.class, FormDataImportServerModule.class,
-        AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class, SourcesServerModule.class, DepartmentConfigServerModule.class, RefBookPickerServerModule.class,
+@Import(value = {MainHandlerModule.class, FormDataListServerModule.class,
+        FormDataServerModule.class, SigninControlServerModule.class, MainMenuServerModule.class,
+        AdminServerModule.class, DeclarationTemplateServerModule.class, DeclarationDataServerModule.class,
+        TaxFormNominationServerModule.class, DeclarationServerModule.class, ProjectVersionControlServerModule.class,
+        HistoryServerModule.class, UserListServerModule.class, FormDataImportServerModule.class,
+        AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class, SourcesServerModule.class,
+        DepartmentConfigServerModule.class, BookerStatementsServerModule.class, RefBookPickerServerModule.class,
         RefBookListServerModule.class, RefBookDataServerModule.class})
 @ComponentScan(basePackageClasses = MainServerModule.class)
 @EnableAspectJAutoProxy
 public class MainServerModule {
-
-
 }

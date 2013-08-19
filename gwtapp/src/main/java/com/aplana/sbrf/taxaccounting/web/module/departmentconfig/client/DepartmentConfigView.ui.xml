@@ -24,11 +24,11 @@
             <g:VerticalPanel>
                 <g:Label styleName="{style.titleLabel}" text="Настройки подразделений"/>
                 <g:HorizontalPanel spacing="5">
-                    <g:Label styleName="{style.boldLabel}" text="Подразделение:"/>
-                    <d:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false"
-                                        header="Выберите подразделение"/>
                     <g:Label styleName="{style.boldLabel}" text="Вид налога:"/>
                     <g:ListBox width="200px" ui:field="taxType"/>
+                    <g:Label styleName="{style.boldLabel}" text="Подразделение:"/>
+                    <d:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false"
+                                                   header="Выберите подразделение"/>
                 </g:HorizontalPanel>
                 <g:HorizontalPanel>
                     <g:HorizontalPanel spacing="5" width="676px" height="35px">

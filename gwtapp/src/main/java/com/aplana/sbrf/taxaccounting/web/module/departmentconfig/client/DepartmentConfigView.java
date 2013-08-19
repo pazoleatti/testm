@@ -1,11 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
@@ -29,20 +23,11 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DoubleBox;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.HasEnabled;
-import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.LongBox;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextArea;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+
+import java.util.*;
 
 /**
  * View для формы настроек подразделений
@@ -232,8 +217,11 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                 currentReportPeriod = null;
                 updateVisibility();
 
+                // Обновление дерева подразделений
+                reloadDepartments();
+
                 // Обновление налоговых периодов
-                reloadTaxPeriods();
+                // reloadTaxPeriods();
             }
         });
     }
@@ -264,6 +252,11 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     @Override
     public void reloadTaxPeriods() {
         getUiHandlers().reloadTaxPeriods(currentTaxType, currentDepartmentId);
+    }
+
+    @Override
+    public void reloadDepartments() {
+        getUiHandlers().reloadDepartments(currentTaxType);
     }
 
     @Override
@@ -471,6 +464,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                 taxType.addItem(type.getName(), String.valueOf(type.getCode()));
             }
         }
-        reloadTaxPeriods();
+        reloadDepartments();
     }
 }

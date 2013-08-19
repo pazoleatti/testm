@@ -4,8 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetOpenDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetOpenDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentTreeDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentTreeDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -13,17 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Dmitriy Levykin
  */
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction, GetOpenDataResult> {
+public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepartmentTreeDataAction, GetDepartmentTreeDataResult> {
 
     @Autowired
     private DepartmentService departmentService;
@@ -34,26 +31,23 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
     @Autowired
     DepartmentFormTypeService departmentFormTypService;
 
-    public GetOpenDataHandler() {
-        super(GetOpenDataAction.class);
+    public GetDepartmentTreeDataHandler() {
+        super(GetDepartmentTreeDataAction.class);
     }
 
     @Override
-    public GetOpenDataResult execute(GetOpenDataAction action, ExecutionContext executionContext) throws ActionException {
-        GetOpenDataResult result = new GetOpenDataResult();
+    public GetDepartmentTreeDataResult execute(GetDepartmentTreeDataAction action, ExecutionContext executionContext) throws ActionException {
+        GetDepartmentTreeDataResult result = new GetDepartmentTreeDataResult();
 
         // Текущий пользователь
         TAUser currUser = securityService.currentUserInfo().getUser();
 
-        // Признак контролера
-        if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-            result.setControlUNP(true);
-        } else if (currUser.hasRole(TARole.ROLE_CONTROL)) {
-            result.setControlUNP(false);
-        }
-
-        if (result.getControlUNP() == null) {
+        if (!currUser.hasRole(TARole.ROLE_CONTROL_UNP) && !currUser.hasRole(TARole.ROLE_CONTROL)) {
             // Не контролер, далее не загружаем
+            return result;
+        }
+        if (!Arrays.asList(TaxType.INCOME, TaxType.TRANSPORT, TaxType.DEAL).contains(action.getTaxType())) {
+            // Не соответствующий тип налога, далее не загружаем
             return result;
         }
 
@@ -61,14 +55,9 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
         Set<Integer> avSet = new HashSet<Integer>();
         if (!currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // Первичные и консолид. отчеты
-            List<DepartmentFormType> formIncomeSrcList = departmentFormTypService.getDepartmentFormSources(currUser.getDepartmentId(), TaxType.INCOME);
-            List<DepartmentFormType> formTransportSrcList = departmentFormTypService.getDepartmentFormSources(currUser.getDepartmentId(), TaxType.TRANSPORT);
+            List<DepartmentFormType> formSrcList =  departmentFormTypService.getDepartmentFormSources(currUser.getDepartmentId(), action.getTaxType());
 
-            for (DepartmentFormType ft : formIncomeSrcList) {
-                avSet.add(ft.getDepartmentId());
-            }
-
-            for (DepartmentFormType ft : formTransportSrcList) {
+            for (DepartmentFormType ft : formSrcList) {
                 avSet.add(ft.getDepartmentId());
             }
 
@@ -88,14 +77,11 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
         }
         result.setAvailableDepartments(avSet);
 
-        // Подразделение текущего пользователя
-        result.setDepartment(departmentService.getDepartment(currUser.getDepartmentId()));
-
         return result;
     }
 
     @Override
-    public void undo(GetOpenDataAction action, GetOpenDataResult result, ExecutionContext executionContext) throws ActionException {
+    public void undo(GetDepartmentTreeDataAction action, GetDepartmentTreeDataResult result, ExecutionContext executionContext) throws ActionException {
         // Не требуется
     }
 }
