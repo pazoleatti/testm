@@ -199,7 +199,6 @@ public class DepartmentPickerWidget extends Composite implements
 				return o1h.size() - o2h.size();
 			}
 		});
-        this.value = new ArrayList<Integer>();
 		for (Department department : list) {
 			CheckBox checkBox;
 			if (multiselection) {
@@ -220,7 +219,6 @@ public class DepartmentPickerWidget extends Composite implements
 				nested.add(newItem);
 			}
 			lookup.put(department.getId(), newItem);
-            this.value.add(department.getId());
 		}
 		Collections.sort(nested, new Comparator<TreeItem>() {
 			@Override

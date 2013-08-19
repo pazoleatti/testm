@@ -17,8 +17,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -33,11 +31,12 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import java.util.ArrayList;
 
 public class FormDataPresenter extends
-		FormDataPresenterBase<FormDataPresenter.MyProxy> implements
-		FormDataUiHandlers {
+        FormDataPresenterBase<FormDataPresenter.MyProxy> implements
+        FormDataUiHandlers{
 
 	public static final int PAGE_SIZE = 15;
-	/**
+
+    /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
 	 * 's proxy.
 	 */
@@ -60,7 +59,6 @@ public class FormDataPresenter extends
 		try {
 			super.prepareFromRequest(request);
 
-            //TODO: Возможно переписать придется, если новый пейджинг сделают, т.к. данные в какой-то временной таблице будут.
 			final GetFormData action = new GetFormData();
 
 			action.setFormDataId(Long.parseLong(request.getParameter(
@@ -113,7 +111,23 @@ public class FormDataPresenter extends
 
 	}
 
-	@Override
+    @Override
+    public void onFileParse(String uuid) {
+        GetFileUpload action = new GetFileUpload();
+        action.setUuid(uuid);
+        action.setFormDataId(formData.getId());
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(new AbstractCallback<GetFileUploadResult>() {
+                    @Override
+                    public void onSuccess(GetFileUploadResult result) {
+                        getView().updateData();
+                        LogAddEvent.fire(FormDataPresenter.this,
+                                result.getLogEntries());
+                    }
+                }, this));
+    }
+
+    @Override
 	public void onSelectRow() {
 		manageDeleteRowButtonEnabled();
 	}
@@ -122,42 +136,6 @@ public class FormDataPresenter extends
 	public void onShowCheckedColumns() {
 		getView().setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 	}
-
-    @Override
-    public void onUploadClickedSuccess() {
-
-        try {
-
-            final GetFormData action = new GetFormData();
-            action.setFormDataId(formData.getId());
-            action.setReadOnly(readOnlyMode);
-
-            executeAction(action);
-
-        } catch (Exception e) {
-            placeManager.navigateBackQuietly();
-            getProxy().manualRevealFailed();
-            MessageEvent.fire(this,
-                    "Не удалось загрузить данные из файла для налоговой формы", e);
-        }
-    }
-
-    @Override
-    public void onUploadClickedFail(String msg) {
-        MessageEvent.fire(this, "Не удалось импортировать данные для формы. Ошибка: " + msg);
-    }
-
-    @Override
-    public String jsoninit() {
-        JSONObject jObj = new JSONObject();
-        jObj.put("formDataId",new JSONString(String.valueOf(formData.getId())));
-        jObj.put("formTemplateId",new JSONString(String.valueOf(formData.getFormTemplateId())));
-        jObj.put("departmentId",new JSONString(String.valueOf(formData.getDepartmentId())));
-        jObj.put("formDataKindId",new JSONString(String.valueOf(formData.getKind().getId())));
-        jObj.put("formDataRPId",new JSONString(String.valueOf(formData.getReportPeriodId())));
-
-        return jObj.toString();
-    }
 
     private void manageDeleteRowButtonEnabled() {
 		if (!readOnlyMode) {

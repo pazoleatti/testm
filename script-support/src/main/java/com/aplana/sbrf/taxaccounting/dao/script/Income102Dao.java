@@ -15,6 +15,6 @@ public interface Income102Dao {
 	 * @param reportPeriodId идентификатор отчетного периода
 	 * @param opuCode код ОПУ
 	 */
-	public List<Income102> getIncome102(int reportPeriodId, String opuCode, int departmentId);
+	public List<Income102> getIncome102(int reportPeriodId, String opuCode);
 
 }

@@ -35,7 +35,7 @@
                 </g:cell>
                 <g:cell>
                     <g:HorizontalPanel>
-                        <g:Label width="30px" text="по" />
+                        <g:Label width="30px" text="По" />
                         <d:CustomDateBox ui:field="toSearchDate" />
                     </g:HorizontalPanel>
                 </g:cell>
@@ -61,7 +61,7 @@
                             <g:Label width="200px" text="Тип формы"/>
                         </g:cell>
                         <g:cell height="25px">
-                            <g:ValueListBox width="200px" ui:field="formType" />
+                            <g:ValueListBox width="200px" ui:field="auditFormType" />
                         </g:cell>
                     </g:VerticalPanel>
                 </g:cell>
@@ -100,7 +100,7 @@
                             <g:Label width="200px" text="Подразделение" />
                         </g:cell>
                         <g:cell height="25px">
-                            <n:DepartmentPickerPopupWidget ui:field="departmentSelectionTree" header="Выберите подразделение" multiselection="true"/>
+                            <n:DepartmentPickerPopupWidget ui:field="departmentSelectionTree" header="Выберите подразделение" multiselection="false"/>
                         </g:cell>
                     </g:VerticalPanel>
                 </g:cell>

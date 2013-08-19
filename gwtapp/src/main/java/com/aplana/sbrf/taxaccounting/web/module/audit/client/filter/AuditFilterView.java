@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AuditFormType;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
@@ -8,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodP
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.*;
@@ -61,7 +63,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     ValueListBox<TaxType> formDataTaxType;
 
     @UiField(provided = true)
-    ValueListBox<String> formType;
+    ValueListBox<AuditFormType> auditFormType;
 
     @UiField
     Panel formKindPanel;
@@ -77,10 +79,11 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     private Map<Integer, String> formTypesMap;
     private Map<Integer, String> userLoginMap;
     private Map<Integer, String> declarationTypesMap;
+    private List<Integer> selectedValues = new ArrayList<Integer>();
 
     @Override
     public void setDepartments(List<Department> list, Set<Integer> availableValues) {
-        departmentSelectionTree.setAvalibleValues(list,availableValues);
+        departmentSelectionTree.setAvalibleValues(list, availableValues);
     }
 
     @Override
@@ -108,7 +111,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @Override
     public void updateTaxPeriodPicker(List<TaxPeriod> taxPeriods) {
-        currentReportPeriod.setTaxPeriods(taxPeriods == null?new ArrayList<TaxPeriod>():taxPeriods);
+        currentReportPeriod.setTaxPeriods(taxPeriods == null ? new ArrayList<TaxPeriod>() : taxPeriods);
     }
 
     @Override
@@ -119,26 +122,27 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @Override
     public LogSystemFilter getFilterData() {
         LogSystemFilter lsf = new LogSystemFilter();
-        List<Integer> reportPeriods = new ArrayList<Integer>();
-
-        //Antil we choose tax type
-        if(currentReportPeriod !=null){
-            for (Map.Entry<Integer, ReportPeriod> reportPeriod : currentReportPeriod.getSelectedReportPeriods().entrySet()){
-                reportPeriods.add(reportPeriod.getKey());
-            }
-            lsf.setReportPeriodIds(reportPeriods);
+        // Отчетные периоды
+        if(currentReportPeriod != null){
+            lsf.setReportPeriodIds(new ArrayList<Integer>(currentReportPeriod.getSelectedReportPeriods().keySet()));
         }
-
-        List<Integer> departments = new ArrayList<Integer>();
-        departments.addAll(departmentSelectionTree.getValue()!=null?departmentSelectionTree.getValue():new ArrayList<Integer>());
-        
-        lsf.setDepartmentIds(departments);
-        lsf.setFormTypeId((null == formTypeId.getValue()) ? 0 : formTypeId.getValue());
-        lsf.setDeclarationTypeId((null == declarationTypeId.getValue()) ? 0 : declarationTypeId.getValue());
+        // Подразделение
+        if (!selectedValues.isEmpty()) {
+            lsf.setDepartmentId(selectedValues.get(0));
+        }
+        // Тип формы
+        lsf.setAuditFormTypeId(auditFormType.getValue() == null ? null : auditFormType.getValue().getId());
+        // Вид налоговой формы
+        lsf.setFormTypeId(formTypeId.getValue());
+        // Вид декларации
+        lsf.setDeclarationTypeId(declarationTypeId.getValue());
+        // Тип налоговой формы
         lsf.setFormKind(formKind.getValue());
+        // Период
         lsf.setFromSearchDate(fromSearchDate.getValue());
         lsf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
-        lsf.setUserId(null == userId.getValue()? 0 : userId.getValue());
+        // Пользователь
+        lsf.setUserId(userId.getValue());
         return lsf;
     }
 
@@ -185,8 +189,8 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     }
 
     @Override
-    public void setFormTypeHandler(ValueChangeHandler<String> handler) {
-        formType.addValueChangeHandler(handler);
+    public void setFormTypeHandler(ValueChangeHandler<AuditFormType> handler) {
+        auditFormType.addValueChangeHandler(handler);
     }
 
     @Override
@@ -204,16 +208,19 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiConstructor
     public AuditFilterView(final Binder uiBinder) {
 
-        formType = new ValueListBox<String>(new AbstractRenderer<String>() {
+        auditFormType = new ValueListBox<AuditFormType>(new AbstractRenderer<AuditFormType>() {
             @Override
-            public String render(String s) {
-                return s;
+            public String render(AuditFormType s) {
+                if (s == null) {
+                    return "";
+                }
+                return s.getName();
             }
         });
 
-        formType.setValue("Налоговые формы");
-        formType.setValue("Декларации");
-        formType.setValue("");
+        auditFormType.setValue(AuditFormType.FORM_TYPE_TAX);
+        auditFormType.setValue(AuditFormType.FORM_TYPE_DECLARATION);
+        auditFormType.setValue(null);
 
         formKind = new ValueListBox<FormDataKind>(new AbstractRenderer<FormDataKind>() {
             @Override
@@ -268,6 +275,14 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         initWidget(uiBinder.createAndBindUi(this));
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
+
+        departmentSelectionTree.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+                selectedValues.clear();
+                selectedValues.addAll(event.getValue());
+            }
+        });
     }
 
     @UiHandler("search")
@@ -285,5 +300,4 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     AuditFilterView getView(){
         return this;
     }
-
 }

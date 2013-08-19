@@ -109,4 +109,9 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 				new DepartmentJdbcMapper()
 		);
 	}
+
+    @Override
+    public List<Department> getAllChildren(int parentDepartmentId) {
+        return departmentMapper.getAllChildren(parentDepartmentId);
+    }
 }

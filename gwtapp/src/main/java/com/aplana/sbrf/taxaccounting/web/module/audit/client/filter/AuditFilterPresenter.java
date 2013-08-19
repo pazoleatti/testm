@@ -27,9 +27,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
 
     private final DispatchAsync dispatchAsync;
 
-    private static String formType1 = "Налоговые формы";
-    private static String formType2 = "Декларации";
-
     @Inject
     public AuditFilterPresenter(EventBus eventBus, MyView view, DispatchAsync dispatchAsync) {
         super(eventBus, view);
@@ -87,7 +84,7 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         void setFormDataTaxType(List<TaxType> taxTypeList);
         void setUserLogins(Map<Integer, String> userLoginsMap);
         void setValueListBoxHandler(ValueChangeHandler<TaxType> handler);
-        void setFormTypeHandler(ValueChangeHandler<String> handler);
+        void setFormTypeHandler(ValueChangeHandler<AuditFormType> handler);
         void updateTaxPeriodPicker(List<TaxPeriod> taxPeriods);
         void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
         LogSystemFilter getFilterData();
@@ -180,12 +177,12 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         };
         getView().setValueListBoxHandler(taxTypeValueChangeHandler);
 
-        final ValueChangeHandler<String> formTypeValueChangeHandler = new ValueChangeHandler<String>() {
+        ValueChangeHandler<AuditFormType> formTypeValueChangeHandler = new ValueChangeHandler<AuditFormType>() {
             @Override
-            public void onValueChange(ValueChangeEvent<String> stringValueChangeEvent) {
-                if(stringValueChangeEvent.getValue().equals(formType1)){
+            public void onValueChange(ValueChangeEvent<AuditFormType> event) {
+                if (event.getValue() == AuditFormType.FORM_TYPE_TAX) {
                     getView().setVisibleTaxFields();
-                }else if((stringValueChangeEvent.getValue().equals(formType2))) {
+                } else if (event.getValue() == AuditFormType.FORM_TYPE_DECLARATION) {
                     getView().setVisibleDeclarationFields();
                 } else {
                     getView().hideAll();

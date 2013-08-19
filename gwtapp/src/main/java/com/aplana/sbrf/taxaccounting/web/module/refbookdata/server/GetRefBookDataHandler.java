@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttributeSerializable;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -33,31 +33,31 @@ public class GetRefBookDataHandler extends AbstractActionHandler<GetRefBookDataA
 		Map<String, RefBookValue> record = refBookDataProvider.getRecordData(action.getRecordId());
 
 
-		Map<String, RefBookAttribute> resultItems = new HashMap<String, RefBookAttribute>();
+		Map<String, RefBookAttributeSerializable> resultItems = new HashMap<String, RefBookAttributeSerializable>();
 		for (Map.Entry<String, RefBookValue> val : record.entrySet()) {
-			RefBookAttribute refBookAttribute = new RefBookAttribute();
-			refBookAttribute.setAttributeType(val.getValue().getAttributeType());
+			RefBookAttributeSerializable refBookAttributeSerializable = new RefBookAttributeSerializable();
+			refBookAttributeSerializable.setAttributeType(val.getValue().getAttributeType());
 			switch (val.getValue().getAttributeType()) {
 					case NUMBER:
-						refBookAttribute.setNumberValue(val.getValue().getNumberValue());
+						refBookAttributeSerializable.setNumberValue(val.getValue().getNumberValue());
 						break;
 					case DATE:
-						refBookAttribute.setDateValue(val.getValue().getDateValue());
+						refBookAttributeSerializable.setDateValue(val.getValue().getDateValue());
 						break;
 					case STRING:
-						refBookAttribute.setStringValue(val.getValue().getStringValue());
+						refBookAttributeSerializable.setStringValue(val.getValue().getStringValue());
 						break;
 					case REFERENCE:
 
 						if (val.getValue().getReferenceObject() != null) {
-							refBookAttribute.setReferenceValue(val.getValue().getReferenceValue());
+							refBookAttributeSerializable.setReferenceValue(val.getValue().getReferenceValue());
 							break;
 						}
 					default:
-						refBookAttribute.setStringValue("undefined");
+						refBookAttributeSerializable.setStringValue("undefined");
 						break;
 				}
-			resultItems.put(val.getKey(), refBookAttribute);
+			resultItems.put(val.getKey(), refBookAttributeSerializable);
 
 		}
 		GetRefBookDataResult result = new GetRefBookDataResult();

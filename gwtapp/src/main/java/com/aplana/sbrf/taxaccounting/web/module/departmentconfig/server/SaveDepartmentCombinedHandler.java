@@ -101,8 +101,8 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
                 // Налог на прибыль
                 if (depCombined.getTaxType() == TaxType.INCOME) {
-                    paramsMap.put(DepartmentParamAliases.TAX_PLACE_TYPE_CODE.name(), new RefBookValue(RefBookAttributeType.REFERENCE, depCombined.getObligation()));
-                    paramsMap.put(DepartmentParamAliases.FORMAT_VERSION.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getTaxRate()));
+                    paramsMap.put(DepartmentParamAliases.OBLIGATION.name(), new RefBookValue(RefBookAttributeType.REFERENCE, depCombined.getObligation()));
+                    paramsMap.put(DepartmentParamAliases.TAX_RATE.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getTaxRate()));
                     paramsMap.put(DepartmentParamAliases.TYPE.name(), new RefBookValue(RefBookAttributeType.REFERENCE, depCombined.getType()));
                 }
             }

@@ -110,19 +110,15 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             depCombined.setAppVersion(paramsMap.get(DepartmentParamAliases.APP_VERSION.name()).getStringValue());
             depCombined.setFormatVersion(paramsMap.get(DepartmentParamAliases.FORMAT_VERSION.name()).getStringValue());
 
-            // УКС и налог на прибыль
-            if (action.getTaxType() == TaxType.INCOME || action.getTaxType() == TaxType.DEAL) {
+            // Налог на прибыль
+            if (action.getTaxType() == TaxType.INCOME) {
                 Number sumTax = paramsMap.get(DepartmentParamAliases.SUM_TAX.name()).getNumberValue();
                 depCombined.setSumTax(sumTax == null ? null : sumTax.longValue());
                 Number sumDividends = paramsMap.get(DepartmentParamAliases.SUM_DIVIDENDS.name()).getNumberValue();
                 depCombined.setSumDividends(sumDividends == null ? null : sumDividends.longValue());
-
-                // Налог на прибыль
-                if (action.getTaxType() == TaxType.INCOME) {
-                    depCombined.setObligation(paramsMap.get(DepartmentParamAliases.OBLIGATION.name()).getReferenceValue());
-                    depCombined.setTaxRate((Double) paramsMap.get(DepartmentParamAliases.FORMAT_VERSION.name()).getNumberValue());
-                    depCombined.setType(paramsMap.get(DepartmentParamAliases.TYPE.name()).getReferenceValue());
-                }
+                depCombined.setObligation(paramsMap.get(DepartmentParamAliases.OBLIGATION.name()).getReferenceValue());
+                depCombined.setTaxRate((Double) paramsMap.get(DepartmentParamAliases.FORMAT_VERSION.name()).getNumberValue());
+                depCombined.setType(paramsMap.get(DepartmentParamAliases.TYPE.name()).getReferenceValue());
             }
         }
 
@@ -133,28 +129,28 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         Map<Long, String> rbTextValues = new HashMap<Long, String>();
 
         if (depCombined.getDictRegionId() != null) {
-            rbTextValues.put(9L, getStringValue(provider.getValue(depCombined.getDictRegionId(), 9L)));
+            rbTextValues.put(9L, getStringValue(rbFactory.getDataProvider(4L).getValue(depCombined.getDictRegionId(), 9L)));
         }
         if (depCombined.getOkato() != null) {
-            rbTextValues.put(7L, getStringValue(provider.getValue(depCombined.getOkato(), 7L)));
+            rbTextValues.put(7L, getStringValue(rbFactory.getDataProvider(3L).getValue(depCombined.getOkato(), 7L)));
         }
         if (depCombined.getOkvedCode() != null) {
-            rbTextValues.put(210L, getNumberValue(provider.getValue(depCombined.getOkvedCode(), 210L)));
+            rbTextValues.put(210L, getNumberValue(rbFactory.getDataProvider(34L).getValue(depCombined.getOkvedCode(), 210L)));
         }
         if (depCombined.getReorgFormCode() != null) {
-            rbTextValues.put(13L, getStringValue(provider.getValue(depCombined.getReorgFormCode(), 13L)));
+            rbTextValues.put(13L, getStringValue(rbFactory.getDataProvider(5L).getValue(depCombined.getReorgFormCode(), 13L)));
         }
         if (depCombined.getSignatoryId() != null) {
-            rbTextValues.put(213L, getStringValue(provider.getValue(depCombined.getSignatoryId(), 213L)));
+            rbTextValues.put(213L, getStringValue(rbFactory.getDataProvider(35L).getValue(depCombined.getSignatoryId(), 213L)));
         }
         if (depCombined.getTaxPlaceTypeCode() != null) {
-            rbTextValues.put(3L, getStringValue(provider.getValue(depCombined.getTaxPlaceTypeCode(), 3L)));
+            rbTextValues.put(3L, getStringValue(rbFactory.getDataProvider(2L).getValue(depCombined.getTaxPlaceTypeCode(), 3L)));
         }
         if (depCombined.getObligation() != null) {
-            rbTextValues.put(110L, getStringValue(provider.getValue(depCombined.getObligation(), 110L)));
+            rbTextValues.put(110L, getStringValue(rbFactory.getDataProvider(25L).getValue(depCombined.getObligation(), 110L)));
         }
         if (depCombined.getType() != null) {
-            rbTextValues.put(120L, getNumberValue(provider.getValue(depCombined.getType(), 120L)));
+            rbTextValues.put(120L, getNumberValue(rbFactory.getDataProvider(26L).getValue(depCombined.getType(), 120L)));
         }
 
         result.setRbTextValues(rbTextValues);

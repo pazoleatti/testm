@@ -5,13 +5,13 @@ package form_template.transport.summary
  */
 
 switch (formDataEvent) {
-    // создать
+// создать
     case FormDataEvent.CREATE :
         checkBeforeCreate()
         // save(getData(formData))
         // calculationTotal()
         break
-    // расчитать
+// расчитать
     case FormDataEvent.CALCULATE :
         deleteTotal()
         if (checkRequiredField()) {
@@ -24,11 +24,11 @@ switch (formDataEvent) {
             setRowIndex()
         }
         break
-    // обобщить
+// обобщить
     case FormDataEvent.COMPOSE :
         sort()
         break
-    // проверить
+// проверить
     case FormDataEvent.CHECK :
         if (checkRequiredField()){
             deleteTotal()
@@ -41,22 +41,22 @@ switch (formDataEvent) {
             setRowIndex()
         }
         break
-    // утвердить
+// утвердить
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :
         logicalChecks()
         checkNSI()
         break
-    // принять из утверждена
+// принять из утверждена
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED :
         logicalChecks()
         checkNSI()
         break
-    // принять из создана
+// принять из создана
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :
         logicalChecks()
         checkNSI()
         break
-    // вернуть из принята в создана
+// вернуть из принята в создана
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED :
         checkToCancelAccept()
         break
@@ -101,7 +101,7 @@ void addRow() {
     def data = getData(formData)
 
     def row = formData.createDataRow()
-    data.insert(row, data.getAllCached().size + 1)
+    data.insert(row, data.getAllCached().size() + 1)
     ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase',
             'taxBaseOkeiUnit', 'ecoClass', 'years', 'ownMonths',
             'taxBenefitCode', 'benefitStartDate', 'benefitEndDate'].each { alias ->
@@ -140,7 +140,7 @@ void calculationTotal() {
     sums.each {
         totalRow[it[0]] = it[1]
     }
-    data.insert(totalRow, data.getAllCached().size + 1)
+    data.insert(totalRow, data.getAllCached().size() + 1)
     save(data)
 }
 
@@ -208,7 +208,7 @@ void checkNSI() {
         def tsTypeCode = getRefBookValue(42, row.tsTypeCode, "CODE")
         def tsType = getRefBookValue(42, row.tsType, "NAME")
 
-        if (row.tsType != null && row.tsTypeCode != null &&(tsTypeCode == null || tsType == null || refTransportCodeDataProvider.getRecords(new Date(), null, "CODE like '"+tsTypeCode+"' and NAME LIKE '"+tsType+"'", null).getRecords().size == 0)){
+        if (row.tsType != null && row.tsTypeCode != null &&(tsTypeCode == null || tsType == null || refTransportCodeDataProvider.getRecords(new Date(), null, "CODE like '"+tsTypeCode+"' and NAME LIKE '"+tsType+"'", null).getRecords().size() == 0)){
             logger.error('Название вида ТС не совпадает с Кодом вида ТС')
         }
 
@@ -516,7 +516,7 @@ void fillForm() {
          * Скрипт для вычисления значения столбца "Исчисленная сумма налога, подлежащая уплате в бюджет".
          */
         if (row.calculatedTaxSum != null) {
-            row.taxSumToPay = round(row.calculatedTaxSum - (row.benefitSum?:0), 0)
+            row.taxSumToPay = (row.calculatedTaxSum - (row.benefitSum?:0)).setScale(0, BigDecimal.ROUND_HALF_UP)
         } else {
             row.taxSumToPay = null
 
@@ -706,9 +706,9 @@ def getRegionByOkatoOrg(okatoCell){
     def  refDataProvider = refBookFactory.getDataProvider(4)
     def records = refDataProvider.getRecords(new Date(), null, "OKATO_DEFINITION like '"+okato.toString().substring(0, 2)+"%'", null).getRecords()
 
-    if (records.size == 1){
+    if (records.size() == 1){
         return records.get(0);
-    } else if (records.size == 0){
+    } else if (records.size() == 0){
         logger.error("Не удалось определить регион по коду ОКАТО")
         return null;
     } else{
@@ -716,7 +716,7 @@ def getRegionByOkatoOrg(okatoCell){
          * Если первые пять цифр кода равны "71140" то код ОКАТО соответствует
          * Ямало-ненецкому АО (код 89 в справочнике «Коды субъектов Российской Федерации»)
          */
-        def reg89 = records.find{ it.OKATO_DEFINITION.substring(0, 4).equals("71140")}
+        def reg89 = records.find{ it.OKATO.toString().substring(0, 4).equals("71140")}
         if (reg89 != null) return reg89;
 
         /**
@@ -724,7 +724,7 @@ def getRegionByOkatoOrg(okatoCell){
          * код ОКАТО соответствует Ханты-мансийскому АО
          * (код 86 в справочнике «Коды субъектов Российской Федерации»)
          */
-        def reg86 = records.find{ it.OKATO_DEFINITION.substring(0, 4).equals("71100")}
+        def reg86 = records.find{ it.OKATO.toString().substring(0, 4).equals("71100")}
         if (reg86 != null) return reg86;
 
         /**
@@ -732,8 +732,11 @@ def getRegionByOkatoOrg(okatoCell){
          * то код ОКАТО соответствует Ненецкому АО
          * (код 83 в справочнике «Коды субъектов Российской Федерации»)
          */
-        def reg83 = records.find{ it.OKATO_DEFINITION.substring(0, 4).equals("1110")}
+        def reg83 = records.find{ it.OKATO.toString().substring(0, 4).equals("1110")}
         if (reg83 != null) return reg83;
+
+        logger.error("Не удалось определить регион по коду ОКАТО")
+        return null;
     }
 }
 

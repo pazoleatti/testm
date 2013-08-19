@@ -273,6 +273,16 @@ public class FormTemplate extends IdentityObject<Integer> {
 		this.numberedColumns = numberedColumns;
 	}
 
+    private HeaderCell createHeaderCell(Column column) {
+        HeaderCell cell = new HeaderCell(column);
+        if (column.getWidth() > 0) {
+            cell.setValue(column.getName());
+        } else {
+            cell.setValue("");
+        }
+        return cell;
+    }
+
 	/**
 	 * Добавляет колонку в шаблон формы.
 	 * @param position позиция для вставки
@@ -284,7 +294,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 			row.addColumn(position, new Cell(column, styles));
 		}
 		for (DataRow<HeaderCell> row : headers) {
-			row.addColumn(position,  new HeaderCell(column));
+			row.addColumn(position,  createHeaderCell(column));
 		}
 	}
 
@@ -298,7 +308,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 			row.addColumn(new Cell(column, styles));
 		}
 		for (DataRow<HeaderCell> row : headers) {
-			row.addColumn(new HeaderCell(column));
+			row.addColumn(createHeaderCell(column));
 		}
 	}
 

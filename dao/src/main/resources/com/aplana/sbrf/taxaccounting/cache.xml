@@ -55,6 +55,7 @@
 					<constructor-arg value="User" />
 					<constructor-arg ref="userCacheStore" />
 				</bean>
+
 			</set>
 		</property>
 	</bean>

@@ -1,35 +1,3 @@
-create table dict_declaration_presentation (
- code varchar2(3) not null,
- name varchar2(510) not null
-);
-
-alter table dict_declaration_presentation add constraint dict_decl_present_pk primary key (code);
-
-comment on table dict_declaration_presentation is 'Коды представления налоговой по месту нахождения (учёта)';
-comment on column dict_declaration_presentation.code is 'Код';
-comment on column dict_declaration_presentation.name is 'Наименование';
------------------------------------------------------------------------------------------------------------
-create table dict_reorganization_form (
- code varchar2(1) not null,
- name varchar2(510) not null
-);
-
-alter table dict_reorganization_form add constraint dict_reorg_form_pk primary key (code);
-
-comment on table dict_reorganization_form is 'Коды форм реорганизации и ликвидации организации';
-comment on column dict_reorganization_form.code is 'Код';
-comment on column dict_reorganization_form.name is 'Наименование';
--------------------------------------------------------------------------------------------------------------
-create table dict_declaration_present_way (
- code varchar2(2) not null,
- name varchar2(510) not null
-);
-alter table dict_declaration_present_way add constraint dict_decl_way_pk primary key (code);
-
-comment on table dict_declaration_present_way is 'Коды, определяющие способ представления налоговой декларации в налоговый орган';
-comment on column dict_declaration_present_way.code is 'Код';
-comment on column dict_declaration_present_way.name is 'Наименование';
------------------------------------------------------------------------------------------------------------
 create table dict_tax_period (
   code varchar2(2) not null,
   name varchar2(510) not null,
@@ -70,124 +38,6 @@ comment on column dict_region.code is 'Код';
 comment on column dict_region.name is 'Наименование';
 comment on column dict_region.okato is 'Код ОКАТО';
 comment on column dict_region.okato_definition is 'Определяющая часть кода ОКАТО';
------------------------------------------------------------------------------------------------------------
-create table dict_okato (
-  id number(9) not null,
-  parent_id number(9),
-  okato varchar(11) not null,
-  name varchar(510) not null
-);
-alter table dict_okato add constraint dict_okato_pk primary key(id);
-alter table dict_okato add constraint dict_okato_unique_okato unique (okato);
-alter table dict_okato add constraint dict_okato_fk_parent_id foreign key (parent_id) references dict_okato(id);
-
-comment on table dict_okato is 'Коды ОКАТО и Муниципальных образований';
-comment on column dict_okato.id is 'Идентификатор записи';
-comment on column dict_okato.parent_id is 'Идентификатор родительской записи';
-comment on column dict_okato.okato is 'Код ОКАТО';
-comment on column dict_okato.name is 'Наименование муниципального образования';
----------------------------------------------------------------------------------------------------
-create table transport_tax_rate (
-  id number(15) not null,
-  code varchar(10) not null,
-  min_age number(15),
-  max_age number(15),
-  min_power number(15,2),
-  max_power number(15,2),
-  value number(15) not null,
-  dict_region_id varchar2(2),
-  unit_of_power number(5) not null
-);
-alter table transport_tax_rate add constraint transport_tax_rate_pk primary key (id);
-alter table transport_tax_rate add constraint transport_tax_rate_fk_dict_reg foreign key (dict_region_id) references dict_region(code);
-
-comment on table transport_tax_rate is 'Ставки транспортного налога';
-comment on column transport_tax_rate.id is 'Первичный ключ (номер п.п.)';
-comment on column transport_tax_rate.code is 'Код транспортного средства';
-comment on column transport_tax_rate.min_age is 'Срок использования "От", лет';
-comment on column transport_tax_rate.max_age is 'Срок использования "До", лет';
-comment on column transport_tax_rate.min_power is 'Мощность "От"';
-comment on column transport_tax_rate.max_power is 'Мощность "До"';
-comment on column transport_tax_rate.value is 'Ставка, руб.';
-comment on column transport_tax_rate.dict_region_id is 'Код региона';
-comment on column transport_tax_rate.unit_of_power is 'Ед. измерения мощности';
---------------------------------------------------------------------------------------------------
-create table transport_type_code (
-  id number(9) not null,
-  parent_id number(9) null,
-  code varchar(5) not null,
-  name varchar(510) not null
-);
-alter table transport_type_code add constraint transport_type_code_pk primary key(id);
-alter table transport_type_code add constraint transport_type_code_un_code unique (code);
-alter table transport_type_code add constraint transport_type_code_fk_parent foreign key(parent_id) references transport_type_code(id);
-
-comment on table transport_type_code is 'Код вида транспортного средства';
-comment on column transport_type_code.id is 'Идентификатор записи';
-comment on column transport_type_code.parent_id is 'Идентификатор родительской записи';
-comment on column transport_type_code.code is 'Код типа';
-comment on column transport_type_code.name is 'Наименование';
----------------------------------------------------------------------------------------------------
-create table transport_unit_code (
- code number(9) not null,
- name varchar2(510) not null,
- convention varchar2(510) not null
-);
-
-comment on table transport_unit_code is 'Коды единиц измерения налоговой базы на основании ОКЕИ (Выписка)';
-comment on column transport_unit_code.code is 'Код единиц измерения';
-comment on column transport_unit_code.name is 'Наименование единицы измерения';
-comment on column transport_unit_code.convention is 'Условное обозначение';
----------------------------------------------------------------------------------------------------
-create table dict_tax_benefit (
- code varchar2(10) not null,
- name varchar2(4000) not null
-);
-
-alter table dict_tax_benefit add constraint dict_tax_benefit_pk primary key (code);
-
-comment on table dict_tax_benefit is 'Коды налоговых льгот';
-comment on column dict_tax_benefit.code is 'Код налоговых льгот';
-comment on column dict_tax_benefit.name is 'Наименование льготы';
----------------------------------------------------------------------------------------------------
-create table transport_eco_class (
- code number(9) not null,
- name varchar2(510) not null
-);
-
-alter table transport_eco_class add constraint transport_eco_class_pk primary key (code);
-
-comment on table transport_eco_class is 'Экономические классы транспортных средств';
-comment on column transport_eco_class.code is 'Код';
-comment on column transport_eco_class.name is 'Наименование';
-
-create index I_TRANSPORT_TAX_RATE_CODE on TRANSPORT_TAX_RATE (CODE);
------------------------------------------------------------------------------------------------------------
-create table dict_tax_benefit_param (
- id             number(9) not null,
- dict_region_id varchar(2) not null,
- tax_benefit_id varchar2(10) not null,
- section        varchar2(4),
- item           varchar2(4),
- subitem        varchar2(4),
- percent        number(3,2),
- rate           number(15,2)
-);
-
-alter table dict_tax_benefit_param add constraint dict_tax_benefit_p_fk_dict_reg foreign key (dict_region_id) references dict_region(code);
-alter table dict_tax_benefit_param add constraint dict_tax_ben_p_fk_taxben foreign key (tax_benefit_id) references dict_tax_benefit(code);
-alter table dict_tax_benefit_param add constraint dict_tax_benefit_param_pk primary key (id);
-alter table dict_tax_benefit_param add constraint dict_tax_benefit_p_chk_perc check ((percent>=0) and (percent<=100));
-
-comment on table dict_tax_benefit_param is 'Параметры налоговых льгот';
-comment on column dict_tax_benefit_param.id is 'Первичный ключ';
-comment on column dict_tax_benefit_param.dict_region_id is 'Код региона';
-comment on column dict_tax_benefit_param.tax_benefit_id is 'Код налоговой льготы';
-comment on column dict_tax_benefit_param.section is 'Основание - статья';
-comment on column dict_tax_benefit_param.item is 'Основание - пункт';
-comment on column dict_tax_benefit_param.subitem is 'Основание - подпункт';
-comment on column dict_tax_benefit_param.percent is 'Уменьшающий процент, %';
-comment on column dict_tax_benefit_param.rate is 'Пониженная ставка';
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table form_type (
   id       number(9) not null,
@@ -241,7 +91,7 @@ alter table form_template add constraint form_template_check_active check (is_ac
 alter table form_template add constraint form_template_chk_num_cols check (numbered_columns in (0, 1));
 alter table form_template add constraint form_template_chk_fixed_rows check(fixed_rows in (0, 1));
 
-comment on table form_template is 'Описания налоговых форм';
+comment on table form_template IS 'Описания шаблонов налоговых форм';
 comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
 comment on column form_template.id is 'Первичный ключ';
 comment on column form_template.is_active is 'Признак активности';
@@ -291,7 +141,7 @@ create table blob_data (
   data          blob not null,
   creation_date date not null,
   type          number(1) default 0 not null,
-  data_size     number(9) default 0 not null
+  data_size     number(9) not null
 );
 alter table blob_data add constraint blob_data_pk primary key(id);
 alter table blob_data add constraint blob_data_chk_type check (type in (0, 1));
@@ -305,7 +155,7 @@ comment on column blob_data.type is 'Тип данных (0 - постоянны
 comment on column blob_data.data_size is 'Размер файла в байтах';
 ----------------------------------------------------------------------------------------------------
 create table ref_book (
-  id number(9,0) not null,
+  id number(18,0) not null,
   name varchar2(200) not null,
   script_id varchar2(36)
 );
@@ -319,14 +169,14 @@ comment on column ref_book.name is 'Название справочника';
 comment on column ref_book.script_id is 'Идентификатор связанного скрипта';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
-  id number(9) not null,
-  ref_book_id number(9) not null,
+  id number(18) not null,
+  ref_book_id number(18) not null,
   name varchar2(510) not null,
   alias varchar2(30) not null,
   type number(1) not null,
   ord number(9) not null,
-  reference_id number(9),
-  attribute_id number(9),
+  reference_id number(18),
+  attribute_id number(18),
   visible number(1) default 1 not null,
   precision number(2),
   width number(9) default 15 not null
@@ -360,9 +210,9 @@ comment on column ref_book_attribute.precision is 'Точность, колич�
 comment on column ref_book_attribute.width is 'Ширина столбца. Используется при отображении справочника в виде таблицы';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
-  id number(9) not null,
+  id number(18) not null,
   record_id number(9) not null,
-  ref_book_id number(9) not null,
+  ref_book_id number(18) not null,
   version date not null,
   status number(1) default 0 not null
 );
@@ -386,12 +236,12 @@ comment on column ref_book_record.version is 'Версия. Дата актуа�
 comment on column ref_book_record.status is 'Статус записи (0-обычная запись; -1-помеченная на удаление)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_value (
-  record_id number(9) not null,
-  attribute_id number(9) not null,
+  record_id number(18) not null,
+  attribute_id number(18) not null,
   string_value varchar2(4000),
   number_value number(27,10),
   date_value date,
-  reference_value number(9)
+  reference_value number(18)
 );
 
 alter table ref_book_value add constraint ref_book_value_pk primary key (record_id, attribute_id);
@@ -419,7 +269,7 @@ create table form_column (
   group_name varchar(1000),
   max_length number(4),
   checking  number(1) default 0 not null,
-  attribute_id number(9),
+  attribute_id number(18),
   format number(2),
   filter varchar2(1000)
 );
@@ -451,6 +301,7 @@ comment on column form_column.checking is 'Признак проверочног
 comment on column form_column.attribute_id is 'Код отображаемого атрибута для столбцов-ссылок';
 comment on column form_column.format is 'Формат';
 comment on column form_column.filter is 'Условие фильтрации элементов справочника';
+comment on column form_column.max_length IS 'Максимальная длина строки';
 ---------------------------------------------------------------------------------------------------
 create table department (
   id number(9) not null,
@@ -488,7 +339,7 @@ create table report_period (
   ord      number(2) not null,
   department_id number(15) not null,
   is_balance_period number(1) default 0 not null,
-  dict_tax_period_id number(9) not null
+  dict_tax_period_id number(18) not null
 );
 
 alter table report_period add constraint report_period_pk primary key(id);
@@ -645,8 +496,6 @@ create table form_data (
   state number(9) not null,
   kind number(9) not null,
   report_period_id number(9) not null,
-  acceptance_date date,
-  creation_date date default sysdate not null,
   return_sign number(1) not null
 );
 alter table form_data add constraint form_data_pk primary key (id);
@@ -664,7 +513,6 @@ comment on column form_data.department_id is 'Идентификатор под�
 comment on column form_data.state is 'Код состояния';
 comment on column form_data.kind is 'Тип налоговой формы (1 - Первичная, 2 - Консолидированная, 3 - Сводная, 4 - Форма УНП, 5 - Выходная)';
 comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
-comment on column form_data.creation_date is 'Дата создания';
 comment on column form_data.return_sign is 'Флаг возврата (0 - обычный режим; 1 - форма возвращена из вышестоящего статуса)';
 
 create sequence seq_form_data start with 10000;
@@ -913,101 +761,6 @@ comment on column cell_span_info.column_id is 'Идентификатор сто
 comment on column cell_span_info.colspan is 'Число ячеек, которые должны быть объединены по горизонтали';
 comment on column cell_span_info.rowspan is 'Число ячеек, которые должны быть объединены по вертикали';
 ----------------------------------------------------------------------------------------------------
-create table department_param (
-  department_id number(9) not null,
-  dict_region_id varchar2(2) not null,
-  okato varchar2(11) not null,
-  inn varchar2(10) not null,
-  kpp varchar2(9) not null,
-  tax_organ_code varchar2(4) not null,
-  okved_code varchar2(8) not null,
-  phone varchar2(20),
-  reorg_form_code varchar2(1),
-  reorg_inn varchar2(10),
-  reorg_kpp varchar2(9),
-  name varchar2(2000)
-);
-alter table department_param add constraint department_param_pk primary key (department_id);
-alter table department_param add constraint dept_param_fk_dict_region_id foreign key (dict_region_id) references dict_region(code);
-alter table department_param add constraint dept_param_fk_dept_id foreign key (department_id) references department(id);
-
-comment on table department_param is 'Общие сведения';
-comment on column department_param.department_id is 'Идентификатор (первичный ключ)';
-comment on column department_param.dict_region_id is 'Субъект Российской Федерации (код)';
-comment on column department_param.okato is 'Код по ОКАТО';
-comment on column department_param.inn is 'ИНН';
-comment on column department_param.kpp is 'КПП';
-comment on column department_param.tax_organ_code is 'Код налогового органа';
-comment on column department_param.okved_code is 'Код вида экономической деятельности и по классификатору ОКВЭД';
-comment on column department_param.phone is 'Номер контактного телефона';
-comment on column department_param.reorg_form_code is 'Код формы реорганизации и ликвидации';
-comment on column department_param.reorg_inn is 'ИНН реорганизованного обособленного подразделения';
-comment on column department_param.reorg_kpp is 'КПП реорганизованного обособленного подразделения';
-comment on column department_param.name is 'Наименование обособленного подразделения';
----------------------------------------------------------------------------------------------------------------------------------------------------
-create table department_param_income (
-  department_id    number(9) not null,
-  signatory_id    number(1) not null,
-  signatory_surname  varchar2(120) not null,
-  signatory_firstname varchar2(120),
-  signatory_lastname varchar2(120),
-  approve_doc_name  varchar2(240),
-  approve_org_name  varchar2(2000),
-  tax_place_type_code varchar2(3) not null,
-  tax_rate      number(4,2),
-  external_tax_sum  number(15),
-  sum_difference   number(15),
-  correction_sum   number(15),
-  app_version     varchar2(40),
-  format_version   varchar2(5)
-);
-alter table department_param_income add constraint department_param_income_pk primary key (department_id);
-alter table department_param_income add constraint dept_param_income_chk_taxplace check (tax_place_type_code in ('213','214','215','216','218','220','223','225','226','231'));
-alter table department_param_income add constraint dept_param_income_fk_dept_id foreign key (department_id) references department(id);
-
-comment on table department_param_income is 'Параметры подразделения по налогу на прибыль';
-comment on column department_param_income.department_id is 'Идентификатор (первичный ключ)';
-comment on column department_param_income.signatory_id is 'Признак лица подписавшего документ';
-comment on column department_param_income.signatory_surname is 'Фамилия подписанта';
-comment on column department_param_income.signatory_firstname is 'Имя подписанта';
-comment on column department_param_income.signatory_lastname is 'Отчество подписанта';
-comment on column department_param_income.approve_doc_name is 'Наименование документа, подтверждающего полномочия представителя';
-comment on column department_param_income.approve_org_name is 'Наименование организации-представителя налогоплательщика';
-comment on column department_param_income.tax_place_type_code is 'Код места, по которому представляется документ';
-comment on column department_param_income.tax_rate is 'Ставка налога (региональная часть)';
-comment on column department_param_income.external_tax_sum is 'Сумма налога, выплаченная за пределами Российской Федерации и засчитываемая в уплату налога согласно порядку, установленному ст. 311 НК ';
-comment on column department_param_income.sum_difference is 'Суммы отклонения от максимальной (расчетной) цены ';
-comment on column department_param_income.correction_sum is 'Внереализационные доходы в виде сумм корректировки прибыли вследствие применения методов определения для целей налогообложения соответствия цен, примененных в сделках, рыночным ценам (рентабельности), предусмотренным статьями 105.12 и 105.13 НК ';
-comment on column department_param_income.app_version is 'Версия программы, с помощью которой сформирован файл';
-comment on column department_param_income.format_version is 'Версия формата';
---------------------------------------------------------------------------------------------------------------------------------------------------------
-create table department_param_transport (
-  department_id       number(9) not null,
-  signatory_id        number(1) not null,
-  signatory_surname   varchar2(120) not null,
-  signatory_firstname varchar2(120),
-  signatory_lastname  varchar2(120),
-  approve_doc_name    varchar2(240),
-  approve_org_name    varchar2(2000),
-  tax_place_type_code varchar2(3) not null,
-  app_version         varchar2(40),
-  format_version      varchar2(5)
-);
-alter table department_param_transport add constraint department_param_transport_pk primary key (department_id);
-alter table department_param_transport add constraint dept_param_transport_fk_deptid foreign key (department_id) references department(id);
-
-comment on table department_param_transport is 'Параметры подразделения по транспортному налогу';
-comment on column department_param_transport.department_id is 'Идентификатор (первичный ключ)';
-comment on column department_param_transport.signatory_id is 'Признак лица подписавшего документ';
-comment on column department_param_transport.signatory_surname is 'Фамилия подписанта';
-comment on column department_param_transport.signatory_firstname is 'Имя подписанта';
-comment on column department_param_transport.signatory_lastname is 'Отчество подписанта';
-comment on column department_param_transport.approve_doc_name is 'Наименование документа, подтверждающего полномочия представителя';
-comment on column department_param_transport.approve_org_name is 'Наименование организации-представителя налогоплательщика';
-comment on column department_param_transport.tax_place_type_code is 'Код места, по которому представляется документ';
-comment on column department_param_transport.app_version is 'Версия программы, с помощью которой сформирован файл';
-comment on column department_param_transport.format_version is 'Версия формата';
-----------------------------------------------------------------------------------------------------
 create table log_business (
   id                  number(18,0) primary key,
   log_date            date not null,
@@ -1040,6 +793,8 @@ comment on column log_business.declaration_data_id is 'Код деклараци
 comment on column log_business.form_data_id is 'Код налоговой формы';
 comment on column log_business.note is 'Текст сообщения';
 comment on column log_business.user_department_id is 'Код подразделения пользователя';
+
+CREATE SEQUENCE seq_log_business;
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);

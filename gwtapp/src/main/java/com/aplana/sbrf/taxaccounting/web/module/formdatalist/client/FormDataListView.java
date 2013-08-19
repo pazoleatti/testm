@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.client.*;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.*;
 import com.google.gwt.cell.client.*;
 import com.google.gwt.safehtml.shared.*;

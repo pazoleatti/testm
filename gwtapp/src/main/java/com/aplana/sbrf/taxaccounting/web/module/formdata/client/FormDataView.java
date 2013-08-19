@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
@@ -16,9 +18,11 @@ import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
@@ -28,11 +32,18 @@ import java.util.Date;
 import java.util.List;
 
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
-		implements FormDataPresenterBase.MyView {
+		implements FormDataPresenterBase.MyView,FileUploadHandler {
 
 	private NoSelectionModel<DataRow> selectionModel;
 
-	interface Binder extends UiBinder<Widget, FormDataView> {
+    @Override
+    public void onFileUploadSuccess(String uuid) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onFileParse(uuid);
+        }
+    }
+
+    interface Binder extends UiBinder<Widget, FormDataView> {
 	}
 
 	private DataRowColumnFactory factory = new DataRowColumnFactory();
@@ -81,12 +92,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	Panel manualInputPanel;
 
-    @UiField
-    FormPanel uploadFormDataXls;
-
-    @UiField
-    HorizontalPanel uploadPanel;
-
 	@UiField
 	Label formKindLabel;
 	@UiField
@@ -103,7 +108,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	CheckBox showCheckedColumns;
 
-	@Inject
+    @UiField
+    FileUploadWidget fileUploader;
+
+    @Inject
 	public FormDataView(final Binder binder) {
 		initWidget(binder.createAndBindUi(this));
 
@@ -133,17 +141,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			}
 		});
 		pager.setDisplay(formDataTable);
-
-        uploadFormDataXls.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
-	        @Override
-	        public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-		        if (!event.getResults().toLowerCase().contains("error")) {
-			        getUiHandlers().onUploadClickedSuccess();
-		        } else {
-			        getUiHandlers().onUploadClickedFail(event.getResults().replaceFirst("error ", ""));
-		        }
-	        }
-        });
 	}
 
 	@Override
@@ -324,19 +321,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 	}
 
-    @UiHandler("uploadButton")
-    void onUploadButtonClicked(ClickEvent event){
-        //Make post request for script
-        TextBox tb = new TextBox();
-        tb.setName("formData");
-        tb.setValue(getUiHandlers().jsoninit());
-        tb.setVisible(false);
-        uploadPanel.add(tb);
-
-        uploadFormDataXls.submit();
-        uploadPanel.remove(tb);
-    }
-
 	@Override
 	public void setAdditionalFormInfo(
 			String formType, TaxType taxType,
@@ -477,5 +461,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			getUiHandlers().onRangeChange(range.getStart(), range.getLength());
 		}
 	}
+
+    @UiFactory
+    FormDataView getView(){
+        return this;
+    }
 
 }
