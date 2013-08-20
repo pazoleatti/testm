@@ -23,7 +23,7 @@ import java.util.List;
  * @author Stanislav Yasinskiy
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP')")
 @Component("getRefBookListTableDataHandler")
 public class GetTableDataHandler extends AbstractActionHandler<GetTableDataAction, GetTableDataResult> {
 
