@@ -146,9 +146,11 @@ void calculationControlGraphs() {
         //Строки 213-217 расчет 8-й графы
         if (row.getAlias() in ['R213','R214','R215','R216', 'R217']) {
             def formDataRNU14 = getFormDataRNU14()
-            for (def rowRNU14 : getData(formDataRNU14).getAllCached()){
-                if(row.consumptionTypeId == rowRNU14.knu){
-                    row.rnu5Field5Accepted = rowRNU14.overApprovedNprms
+            if (formDataRNU14 != null) {
+                for (def rowRNU14 : getData(formDataRNU14).getAllCached()){
+                    if(row.consumptionTypeId == rowRNU14.knu){
+                        row.rnu5Field5Accepted = rowRNU14.overApprovedNprms
+                    }
                 }
             }
             continue
