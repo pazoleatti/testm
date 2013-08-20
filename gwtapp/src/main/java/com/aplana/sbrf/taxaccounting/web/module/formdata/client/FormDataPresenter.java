@@ -58,6 +58,7 @@ public class FormDataPresenter extends
 	public void prepareFromRequest(PlaceRequest request) {
 		try {
 			super.prepareFromRequest(request);
+		
 
 			final GetFormData action = new GetFormData();
 
@@ -382,7 +383,10 @@ public class FormDataPresenter extends
 
                                 LogAddEvent.fire(FormDataPresenter.this,
                                         result.getLogEntries());
-
+                                
+                    			// Очищаем возможные изменения на форме перед открытием.
+                    			modifiedRows.clear();
+                    			
                                 formData = result.getFormData();
                                 formDataAccessParams = result
                                         .getFormDataAccessParams();
