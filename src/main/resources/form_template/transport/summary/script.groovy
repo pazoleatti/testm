@@ -18,10 +18,11 @@ switch (formDataEvent) {
             fillForm()
             determinationTransportType()
             checkNSI()
-            logicalChecks()
-            sort()
-            calculationTotal()
-            setRowIndex()
+            if (logicalChecks()){
+                sort()
+                calculationTotal()
+                setRowIndex()
+            }
         }
         break
 // обобщить
@@ -35,26 +36,30 @@ switch (formDataEvent) {
             determinationTransportType()
             fillForm()
             checkNSI()
-            logicalChecks()
-            sort()
-            calculationTotal()
-            setRowIndex()
+            if (logicalChecks()){
+                sort()
+                calculationTotal()
+                setRowIndex()
+            }
         }
         break
 // утвердить
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :
-        logicalChecks()
-        checkNSI()
+        if (logicalChecks()){
+            checkNSI()
+        }
         break
 // принять из утверждена
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED :
-        logicalChecks()
-        checkNSI()
+        if (logicalChecks()){
+            checkNSI()
+        }
         break
 // принять из создана
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :
-        logicalChecks()
-        checkNSI()
+        if (logicalChecks()){
+            checkNSI()
+        }
         break
 // вернуть из принята в создана
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED :
@@ -233,6 +238,18 @@ void checkNSI() {
         if (row.ecoClass!=null && getRefBookValue(40, row.ecoClass, "NAME") == null) {// refEcoClassDataProvider.getRecords(new Date(), null, "NAME LIKE '"+row.ecoClass+"'", null).getRecords().size == 0) {
             logger.error("Неверный экологический класс")
         }
+
+        /**
+         * Проверка льготы
+         */
+        if (row.taxBenefitCode != null){
+            def refTaxBenefitParameters = refBookFactory.getDataProvider(7)
+            def region = getRegionByOkatoOrg(row.okato)
+            query = "TAX_BENEFIT_ID ="+row.taxBenefitCode+" AND DICT_REGION_ID = "+region.record_id
+            if (refTaxBenefitParameters.getRecords(new Date(), null, query, null).getRecords().size() == 0){
+                logger.error("Выбранная льгота для текущего региона не предусмотрена")
+            }
+        }
     }
 }
 
@@ -257,6 +274,20 @@ def checkRequiredField() {
                 errorMsg += (!''.equals(errorMsg) ? ', ' : '') + '"' + row.getCell(it).getColumn().getName() + '"'
             }
         }
+
+
+        /**
+         * Проверка одновременного не заполнения данных о налоговой льготе
+         *
+         * Если  «графа 16» не заполнена ТО не заполнены графы 17,18,19,20
+         */
+        def notNull17_20 = row.benefitStartDate != null && row.benefitEndDate != null
+        if ((row.taxBenefitCode != null) ^ notNull17_20){
+            logger.error("Данные о налоговой льготе указаны не полностью")
+            return false
+        }
+
+
         if (!''.equals(errorMsg)) {
             logger.error("Не заполнены поля в колонках : $errorMsg.")
             return false
@@ -331,7 +362,7 @@ void determinationTransportType() {
  * @author auldanov
  * @since 24.02.2013 14:00
  */
-void fillForm() {
+def fillForm() {
     /** Число полных месяцев в текущем периоде (либо отчетном либо налоговом). */
     int monthCountInPeriod = 0
     def period = reportPeriodService.get(formData.reportPeriodId)
@@ -361,14 +392,13 @@ void fillForm() {
             def records = refDataProvideTaxBenefit.getRecords(new Date(), null, query, null).getRecords()
 
             if (records.size() == 0){
-                logger.error('Ошибка при получении параметров региона')
-            }
-            else{
+                logger.error('Ошибка при получении параметров налоговых льгот')
+                return;
+            } else{
                 reducingPerc = records.get(0).percent
                 loweringRates = records.get(0).rate
             }
         }
-
 
         /*
          * Графа 1 (№ пп) - Установка номера строки
@@ -394,7 +424,7 @@ void fillForm() {
          * Скрипт для вычисления автоматических полей 13, 19, 20
          */
         if (row.ownMonths != null) {
-            row.coef362 = row.ownMonths / monthCountInPeriod
+            row.coef362 = (row.ownMonths / monthCountInPeriod).setScale(4, BigDecimal.ROUND_HALF_UP)
         } else {
             row.coef362 = null
 
@@ -417,15 +447,43 @@ void fillForm() {
             def  refDataProvideTransportRate = refBookFactory.getDataProvider(41)
             // запрос по выборке данных из справочника
             def query = " and ((MIN_POWER is null or MIN_POWER < "+row.taxBase+") and (MAX_POWER is null or MAX_POWER > "+row.taxBase+"))"+
-                    "and ((MIN_AGE is null or MIN_AGE < "+row.years+") and (MAX_AGE is null or MAX_AGE > "+row.years+"))"+
-                    "and DICT_REGION_ID = "+region.record_id; // DICT_REGION_ID типа REFERENCE
+                    "and ((MIN_AGE is null or MIN_AGE < "+row.years+") and (MAX_AGE is null or MAX_AGE > "+row.years+"))";
 
-            def queryLikeStrictly = "CODE LIKE '"+tsTypeCode.toString()+"'"+query;
-            def record = refDataProvideTransportRate.getRecords(new Date(), null, queryLikeStrictly, null).getRecords()
+            /**
+             * Переберем варианты
+             * 1. код = коду ТС && регион указан
+             * 2. код = коду ТС && регион НЕ указан
+             * 3. код = соответствует 2м двум символом кода ТС && регион указан
+             * 4. код = соответствует 2м двум символом кода ТС && регион НЕ указан
+             */
+
+            def regionSqlPartID = " and DICT_REGION_ID = "+region.record_id
+            def regionSqlPartNull = " and DICT_REGION_ID is null"
+
+            // вариант 1
+            def queryLikeStrictly = "CODE LIKE '"+tsTypeCode.toString()+"'"+query
+            def finalQuery = queryLikeStrictly + regionSqlPartID
+            def record = refDataProvideTransportRate.getRecords(new Date(), null, finalQuery, null).getRecords()
+            // вариант 2
             if (record.size() == 0){
-                def queryLike = "CODE LIKE '"+tsTypeCode.toString().substring(0, 2)+"%'"+  query
-                record = refDataProvideTransportRate.getRecords(new Date(), null, queryLike, null).getRecords()
+                finalQuery = queryLikeStrictly + regionSqlPartNull
+                record = refDataProvideTransportRate.getRecords(new Date(), null, finalQuery, null).getRecords()
             }
+
+            def queryLike = "CODE LIKE '"+tsTypeCode.toString().substring(0, 2)+"%'"+  query
+            // вариант 3
+            if (record.size() == 0){
+                finalQuery = queryLike + regionSqlPartID
+                record = refDataProvideTransportRate.getRecords(new Date(), null, finalQuery, null).getRecords()
+            }
+            // вариант 4
+            if (record.size() == 0){
+                finalQuery = queryLike + regionSqlPartNull
+                record = refDataProvideTransportRate.getRecords(new Date(), null, finalQuery, null).getRecords()
+            }
+
+
+
             if (record.size() != 0){
                 row.taxRate = record.get(0).record_id.numberValue
             } else{
@@ -539,7 +597,7 @@ void fillForm() {
  *
  * @since 18.02.2013 14:00
  */
-void logicalChecks() {
+def logicalChecks() {
     def data = getData(formData)
     for (def row : data.getAllCached()) {
         if (row.getAlias() == 'total') {
@@ -586,20 +644,15 @@ void logicalChecks() {
             }
         }
 
-        // 17 графа - Проверка заполнения полей льгот
-        // все ячейки заполнены
-        def allCellsFill = true
-        // все ячейки пустые
-        def allCellsEmpty = true
-        ['benefitStartDate', 'benefitEndDate'].each {
-            if (row[it]){
-                allCellsEmpty = false
-            } else {
-                allCellsFill = false
-            }
-        }
-        if (!(allCellsFill || allCellsEmpty)) {
-            logger.error("Данные о налоговой льготе указаны не полностью в строке № " + row.rowNumber)
+        /**
+         * Проверка одновременного не заполнения данных о налоговой льготе
+         *
+         * Если  «графа 16» не заполнена ТО не заполнены графы 17,18,19,20
+         */
+        def notNull17_20 = row.benefitStartDate != null && row.benefitEndDate != null && row.coefKl != null && row.benefitSum != null
+        if ((row.taxBenefitCode != null) ^ notNull17_20){
+            logger.error("Данные о налоговой льготе указаны не полностью")
+            return;
         }
 
         // дополнительная проверка для 12 графы
@@ -607,6 +660,7 @@ void logicalChecks() {
             logger.warn('Срок владение ТС не должен быть больше текущего налогового периода.')
         }
     }
+    return true;
 }
 
 /**
