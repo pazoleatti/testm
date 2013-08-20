@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.migration.enums.*;
 import com.aplana.sbrf.taxaccounting.model.migration.row.AbstractRnuRow;
 import com.aplana.sbrf.taxaccounting.service.MigrationService;
 import com.aplana.sbrf.taxaccounting.service.RnuGenerationService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,8 @@ import java.util.*;
 @Transactional
 public class RnuGenerationServiceImpl implements RnuGenerationService {
 
+    private final Log logger = LogFactory.getLog(getClass());
+
     @Autowired
     MigrationService migrationService;
 
@@ -24,7 +28,7 @@ public class RnuGenerationServiceImpl implements RnuGenerationService {
     private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
-    public String generateRnuFile(Exemplar ex) {
+    public String generateRnuFileToString(Exemplar ex) {
         StringBuilder bu = new StringBuilder();
         bu.append(getRnuFirstRow(ex)).append(CR);
         bu.append(CR);
@@ -36,6 +40,12 @@ public class RnuGenerationServiceImpl implements RnuGenerationService {
             bu.append(row.toRow()).append(CR);
         }
         return bu.toString();
+    }
+
+    @Override
+    public byte[] generateRnuFileToBytes(Exemplar ex) {
+        String strFile = generateRnuFileToString(ex);
+        return strFile.getBytes();
     }
 
     /**

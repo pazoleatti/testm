@@ -9,7 +9,9 @@ import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
  */
 public interface XmlGenerationService {
 
-    String generateXmlFile(Exemplar ex);
+    String generateXmlFileToString(Exemplar ex);
 
     String getXmlFileName(Exemplar ex);
+
+    byte[] generateXmlFileToBytes(Exemplar ex);
 }

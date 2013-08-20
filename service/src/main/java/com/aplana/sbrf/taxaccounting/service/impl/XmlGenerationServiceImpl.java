@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.migration.row.Rnu60Row;
 import com.aplana.sbrf.taxaccounting.model.migration.row.Rnu64Row;
 import com.aplana.sbrf.taxaccounting.service.MigrationService;
 import com.aplana.sbrf.taxaccounting.service.XmlGenerationService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,12 +19,10 @@ import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -32,21 +32,42 @@ import java.util.*;
 @Transactional
 public class XmlGenerationServiceImpl implements XmlGenerationService {
 
+    private final Log logger = LogFactory.getLog(getClass());
+
     @Autowired
     MigrationService migrationService;
 
     private static final SimpleDateFormat exemplarSDF = new SimpleDateFormat("yyyy-MM-dd");
     private static final SimpleDateFormat fieldSDF = new SimpleDateFormat("dd.MM.yyyy");
 
+    private static Transformer transformer;
+
+    static {
+        try {
+            transformer = TransformerFactory.newInstance().newTransformer();
+            transformer.setOutputProperty(OutputKeys.ENCODING, "utf-8");
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        } catch (TransformerConfigurationException e) {
+            throw new ServiceException("TransformerFactory failed. " + e.getLocalizedMessage());
+        }
+    }
+
     private static final String NAME = "name";
     private static final String NULL = "null";
     private static final String VALUE = "value";
 
     @Override
-    public String generateXmlFile(Exemplar ex) {
+    public String generateXmlFileToString(Exemplar ex) {
+        return documentToString(createDocument(ex));
+    }
 
+    @Override
+    public byte[] generateXmlFileToBytes(Exemplar ex) {
+        return documentToBytes(createDocument(ex));
+    }
+
+    private Document createDocument(Exemplar ex) {
         Document document;
-
         try {
             document = DocumentBuilderFactory.newInstance().newDocumentBuilder()
                     .newDocument();
@@ -63,25 +84,33 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
         root.appendChild(exemplar);
 
         exemplar.appendChild(getTableElement(ex, document));
-
-        return documentToString(document);
+        return document;
     }
 
     private String documentToString(Document doc) {
         try {
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.ENCODING, "utf-8");
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-
             StringWriter writer = new StringWriter();
             StreamResult result = new StreamResult(writer);
             DOMSource source = new DOMSource(doc);
             transformer.transform(source, result);
-
             return writer.toString();
         } catch (TransformerException e) {
+            throw new XmlSerializationException("Error by converting document to string.", e);
+        }
+    }
+
+    private byte[] documentToBytes(Document doc) {
+        try {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            StreamResult result = new StreamResult(stream);
+            DOMSource source = new DOMSource(doc);
+
+            transformer.transform(source, result);
+
+            return stream.toByteArray();
+        } catch (TransformerException e) {
             throw new XmlSerializationException(
-                    "Error by converting document to string.", e);
+                    "Error by converting document to bytes.", e);
         }
     }
 

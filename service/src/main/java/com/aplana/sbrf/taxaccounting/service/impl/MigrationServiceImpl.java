@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
 import com.aplana.sbrf.taxaccounting.service.MigrationService;
 import com.aplana.sbrf.taxaccounting.service.RnuGenerationService;
 import com.aplana.sbrf.taxaccounting.service.XmlGenerationService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,8 @@ import java.util.*;
 @Service
 @Transactional
 public class MigrationServiceImpl implements MigrationService {
+
+    private final Log logger = LogFactory.getLog(getClass());
 
     @Autowired
     private MigrationDao migrationDao;
@@ -41,7 +45,7 @@ public class MigrationServiceImpl implements MigrationService {
     }
 
     @Override
-    public Map<String, String> startMigrationProcess(List<Long> rnuIds) {
+    public Map<String, String> startMigrationProcessDebug(List<Long> rnuIds) {
         List<Exemplar> list = getActualExemplarByRnuType(rnuIds);
 
         List<Integer> rnus = Arrays.asList(25, 26, 27, 31);
@@ -51,9 +55,28 @@ public class MigrationServiceImpl implements MigrationService {
 
         for (Exemplar ex : list) {
             if (rnus.contains(ex.getRnuTypeId())) {
-                hashMap.put(rnuService.getRnuFileName(ex), rnuService.generateRnuFile(ex));
+                hashMap.put(rnuService.getRnuFileName(ex), rnuService.generateRnuFileToString(ex));
             } else if (xmls.contains(ex.getRnuTypeId())) {
-                hashMap.put(xmlService.getXmlFileName(ex), xmlService.generateXmlFile(ex));
+                hashMap.put(xmlService.getXmlFileName(ex), xmlService.generateXmlFileToString(ex));
+            }
+        }
+        return hashMap;
+    }
+
+    @Override
+    public Map<String, byte[]> startMigrationProcess(List<Long> rnuIds) {
+        List<Exemplar> list = getActualExemplarByRnuType(rnuIds);
+
+        List<Integer> rnus = Arrays.asList(25, 26, 27, 31);
+        List<Integer> xmls = Arrays.asList(51, 53, 54, 59, 60, 64);
+
+        LinkedHashMap<String, byte[]> hashMap = new LinkedHashMap<String, byte[]>();
+
+        for (Exemplar ex : list) {
+            if (rnus.contains(ex.getRnuTypeId())) {
+                hashMap.put(rnuService.getRnuFileName(ex), rnuService.generateRnuFileToBytes(ex));
+            } else if (xmls.contains(ex.getRnuTypeId())) {
+                hashMap.put(xmlService.getXmlFileName(ex), xmlService.generateXmlFileToBytes(ex));
             }
         }
         return hashMap;

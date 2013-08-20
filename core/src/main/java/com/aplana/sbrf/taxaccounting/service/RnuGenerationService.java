@@ -8,7 +8,9 @@ import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
  * @author Alexande Ivanov
  */
 public interface RnuGenerationService {
-    String generateRnuFile(Exemplar ex);
+    String generateRnuFileToString(Exemplar ex);
 
     String getRnuFileName(Exemplar exemplar);
+
+    byte[] generateRnuFileToBytes(Exemplar ex);
 }

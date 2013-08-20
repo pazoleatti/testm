@@ -45,6 +45,33 @@
 		</Arg>
 	</New>
 
+    <New id="url" class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>jmx/url</Arg>
+        <Arg>
+            <New class="java.lang.String">
+                <Arg>service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi,service:jmx:rmi:///jndi/rmi://localhost:1299/jmxrmi</Arg>
+            </New>
+        </Arg>
+    </New>
+
+    <New id="cf" class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>java:comp/env/jms/connectionFactory</Arg>
+        <Arg>
+            <New class="org.apache.activemq.ActiveMQConnectionFactory">
+                <Arg>tcp://localhost:61616</Arg>
+            </New>
+        </Arg>
+    </New>
+
+    <New id="qu" class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>java:comp/env/jms/fileMigrationQueue</Arg>
+        <Arg>
+            <New class="org.apache.activemq.command.ActiveMQQueue">
+                <Arg>Files</Arg>
+            </New>
+        </Arg>
+    </New>
+
 	<Call name="getConfiguration" class="bitronix.tm.TransactionManagerServices">
 		<Set name="journal">null</Set>
 		<Set name="defaultTransactionTimeout">360</Set>

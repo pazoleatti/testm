@@ -8,6 +8,7 @@
 			/WEB-INF/applicationContext.xml
 			/WEB-INF/security.xml
 			/WEB-INF/security-preauth.xml
+            /WEB-INF/spring-jms.xml
 			classpath:com/aplana/sbrf/taxaccounting/dao.xml
             classpath:com/aplana/sbrf/taxaccounting/script-support.xml
 			classpath:com/aplana/sbrf/taxaccounting/service.xml
@@ -50,7 +51,22 @@
 		<res-ref-name>jdbc/TaxAccDS</res-ref-name>
 		<res-type>javax.sql.DataSource</res-type> 
 		<res-auth>Container</res-auth>
-	</resource-ref> 
+	</resource-ref>
+
+    <resource-ref>
+        <description>Connection Factory</description>
+        <res-ref-name>jms/conFactory</res-ref-name>
+        <res-type>javax.jms.ConnectionFactory</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+    </resource-ref>
+
+    <message-destination-ref>
+        <message-destination-ref-name>jms/fileMigrationQueue</message-destination-ref-name>
+        <message-destination-type>javax.jms.Queue</message-destination-type>
+        <message-destination-usage>Produces</message-destination-usage>
+        <message-destination-link>jms/fileMigrationQueue</message-destination-link>
+    </message-destination-ref>
 	
 	<security-role>
 		<description>Все аутентифицированные пользователи</description>	

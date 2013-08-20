@@ -223,8 +223,12 @@
 					<groupId>org.slf4j</groupId>
 					<artifactId>jcl-over-slf4j</artifactId>
 				</dependency>
-
-			</dependencies>
+                <dependency>
+                    <groupId>org.apache.activemq</groupId>
+                    <artifactId>activemq-all</artifactId>
+                    <version>5.7.0</version>
+                </dependency>
+            </dependencies>
 		</profile>
 		<profile>
 			<id>production</id>

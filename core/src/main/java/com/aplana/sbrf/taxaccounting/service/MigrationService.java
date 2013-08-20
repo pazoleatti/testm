@@ -34,7 +34,7 @@ public interface MigrationService {
      * @param rnuIds список видов рну для которых надо сформировать ТФ
      * @return связную карту с названием файла и его содержимым
      */
-    Map<String, String> startMigrationProcess(List<Long> rnuIds);
+    Map<String, String> startMigrationProcessDebug(List<Long> rnuIds);
 
     /**
      * Получение списка строк налоговой формы
@@ -44,4 +44,6 @@ public interface MigrationService {
      * @return список строк + 2 итоговые строки
      */
     List<? extends AbstractRnuRow> getRnuList(Exemplar ex);
+
+    Map<String, byte[]> startMigrationProcess(List<Long> rnuIds);
 }
