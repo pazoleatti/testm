@@ -61,6 +61,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		void updateTable();
 		void addRowToEnd(RefBookDataRow newRow, boolean select);
 		Map<String, Object> getChangedValues();
+		void setRefBookNameDesc(String desc);
 	}
 
 	@Inject
@@ -75,7 +76,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	@Override
 	public void onCancelClicked() {
-		placeManager.revealPlace(new PlaceRequest(RefBookListTokens.refbookList));
+		rowsToDelete.clear();
+		rowsToInsert.clear();
+		isValueChanged = false;
+		getView().updateTable();
 	}
 
 	@Override
@@ -182,6 +186,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 								getView().createInputFields(result.getTableHeaders());
 								refBook = result.getTableHeaders();
 								getView().setRange(new Range(0, PAGE_SIZE));
+								getView().setRefBookNameDesc(result.getDesc());
 							}
 						}, this));
 

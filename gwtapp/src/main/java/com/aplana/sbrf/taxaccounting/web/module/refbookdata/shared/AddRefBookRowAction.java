@@ -29,6 +29,6 @@ public class AddRefBookRowAction extends UnsecuredActionImpl<AddRefBookRowResult
 
 	@Override
 	public String getName() {
-		return "";
+		return "Добавить запись в справочник";
 	}
 }

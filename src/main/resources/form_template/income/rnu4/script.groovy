@@ -18,7 +18,7 @@ switch (formDataEvent){
         //1. Логические проверки значений налоговой формы
         logicalCheck()
         //2. Проверки соответствия НСИ
-        //NCICheck()
+        checkNSI()
         break
 // Инициирование Пользователем создания формы
     case FormDataEvent.CREATE:
@@ -64,8 +64,17 @@ switch (formDataEvent){
         break
 
     case FormDataEvent.CALCULATE:
-        logicalCheck()
         fillForm()
+        logicalCheck()
+        checkNSI()
+        break
+
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        fillForm()
+        logicalCheck()
+        // для сохранения изменений приемников
+        getData(formData).commit()
         break
 }
 
@@ -77,17 +86,20 @@ def addNewRow(){
     def data = getData(formData)
     def newRow = formData.createDataRow()
 
-
-    // Графы 2-5 Заполняется вручную
-    ['code', 'balance', 'name', 'sum'].each{ column ->
+    // Графы 3-5 Заполняется вручную
+    ['balance', 'name', 'sum'].each{ column ->
         newRow.getCell(column).setEditable(true)
     }
-    insert(data, newRow)
+    def i = getRows(data).size()
+    while(i>0 && isTotalRow(getRows(data).get(i-1))){i--}
+    data.insert(newRow, i + 1)
 
     // проставление номеров строк
-    def i = 1;
+    i = 1;
     getRows(data).each{ row->
-        row.rowNumber = i++
+        if(!isTotalRow(row)){
+            row.rowNumber = i++
+        }
     }
     save(data)
 }
@@ -131,98 +143,66 @@ def fillForm(){
         data.delete(getRowByAlias(data, alias))
     }
 
+    //выбираем код на основе балансового счета
+    getRows(data).each{row->
+        row.code = row.balance
+    }
+    data.save(getRows(data))
+
     // сортируем по кодам
-    getRows(data).sort { it.code }
-    // сумма блока по коду
-    def summByCode = 0
-    // итого по таблице
+    getRows(data).sort { getKnu(it.code) }
+    // cумма "Итого"
     def total = 0
-    // индекс строки
-    def i = 0;
 
-    while(getRows(data).size() > i){
-        // текущая строка
-        def row = getRows(data)[i]
-        // начиная со второй строки, если код предыдущей и этой различается то вставляем итого
-        if((i != 0 && row.code != getRows(data)[i-1].code)){
-            def newRow = formData.createDataRow()
-            newRow.setAlias('total' + row.code)
-            newRow.sum = summByCode
-            summByCode = 0
-            //newRow.code = 'Итого по коду' TODO (Aydar Kadyrgulov)
-            newRow.balance = getRows(data)[i-1].code.toString()
-            logger.info("i = "+(i+1))
-            data.insert(newRow, i+1)
-            i++
-        }
-
-        // к сумме добавляем тукущее значение
-        summByCode += row.sum ?:0
-        total += row.sum ?:0
-
-        // добавляем последняю строку по группам
-        if (i + 1 == getRows(data).size() && !isTotalRow(getRows(data)[i])){
-
-            def newRow = formData.createDataRow()
-            newRow.setAlias('total' + row.code)
-            newRow.sum = summByCode
-            newRow.fix = 'Итого по КНУ'
-            newRow.getCell('fix').colSpan = 2
-            newRow.balance = getRows(data)[i-1].code
-            data.insert(newRow, i + 1)
-            // пропуск текущей добавленной строки
-            i++
-        }
-        // переход к следующей строке
-        i++
+    // нумерация (графа 1) и посчитать "итого"
+    getRows(data).eachWithIndex { row, i ->
+        row.rowNumber = i + 1
+        total += row.sum
     }
 
-    // добавляем итого
-    def newRow = formData.createDataRow()
-    newRow.setAlias('total')
-    newRow.sum = total
-    newRow.fix = 'Итого'
-    newRow.getCell('fix').colSpan = 2
-    data.insert(newRow, i + 1)
-
-}
-
-/**
- * Функция возвращает суммы значений по кодам
- * возвращет Мар [index->[code, sumByCode]]
- */
-def sumByCode(){
-    while(getData(formData).size() > i){
-        // текущая строка
-        def row = getData(formData)[i]
-        // начиная со второй строки, если код предыдущей и этой различается то вставляем итого
-        if((i != 0 && row.code != getData(formData)[i-1].code)){
-            def newRow = formData.appendDataRow(i, "total"+row.code)
-            newRow.sum = summByCode
-            summByCode = 0
-            newRow.code = 'Итого по коду'
-            newRow.balance = getData(formData)[i-1].code
-            i++
+    // посчитать "итого по коду"
+    def totalRows = [:]
+    def tmp = null
+    def sum = 0
+    getRows(data).eachWithIndex { row, i ->
+        if (tmp == null) {
+            tmp = row.code
+        }
+        // если код расходы поменялся то создать новую строку "итого по коду"
+        if (tmp != row.code) {
+            def code = getKnu(tmp)
+            totalRows.put(i, getNewRow(code, sum))
+            sum = 0
+        }
+        // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
+        if (i == getRows(data).size() - 1) {
+            sum += row.sum
+            def code = getKnu(row.code)
+            totalRows.put(i + 1, getNewRow(code, sum))
+            sum = 0
         }
 
-        // к сумме добавляем тукущее значени
-        summByCode += row.sum ?:0
-        total += row.sum ?:0
+        sum += row.sum
+        tmp = row.code
+    }
+    // добавить "итого по коду" в таблицу
+    def i = 0
+    totalRows.each { index, row ->
+        data.insert(row, index + i + 1)
+        i = i + 1
+    }
 
-        // добавляем последняю строку по группам
-        if (i + 1 == getData(formData).size() && !isTotalRow(getData(formData)[i])){
-            def newRow = formData.appendDataRow(i+1, "total"+row.code)
-            newRow.sum = summByCode
-            newRow.code = 'Итого по коду'
-            newRow.balance = getData(formData)[i-1].code
-            // пропуск текущей добавленной строки
-            i++
-        }
-        // переход к следующей строке
-        i++
+    // добавить строку "итого"
+    def totalRow = formData.createDataRow()
+    totalRow.setAlias('total')
+    totalRow.fix = 'Итого'
+    totalRow.getCell('fix').colSpan = 2
+    totalRow.sum = total
+
+    if (getRows(data).size()>1) {
+        data.insert(totalRow, getRows(data).size() + 1)
     }
 }
-
 
 /**
  * Логические проверки
@@ -236,55 +216,126 @@ def logicalCheck(){
     def data = getData(formData)
     getRows(data).each{ row ->
         if (!isTotalRow(row)){
-            ['rowNumber', 'code', 'balance', 'name', 'sum'].each{ alias ->
+            ['rowNumber', 'balance', 'name', 'sum'].each{ alias ->
                 if (row[alias] == null || row[alias] == '')
                     logger.error('Поле «'+row.getCell(alias).getColumn().getName()+'» не заполнено! Строка №пп - '+row.rowNumber)
+            }
+            //TODO Проверка на уникальность поля «№ пп»
+            getRows(data).each{ rowB ->
+                if(!row.equals(rowB) && row.rowNumber ==rowB.rowNumber){
+                    logger.error('Нарушена уникальность номера по порядку!')
+                }
             }
         }
     }
 
-    // TODO нужно реализовать Проверка на уникальность поля «№ пп»
-
     /**
      *  Проверка итогового значения по коду для графы 5
-     */
-
-
-
-    /**
-     *  Проверка итогового значения графы 5
-     *  Пройдемся по всем строкам посчитаем сумму строк с одинаковым коодом и выберем значения итоговых строк
+     *  Пройдемся по всем строкам посчитаем сумму строк с одинаковым кодом и выберем значения итоговых строк
      */
     def sumAllTotalByCodeRows = 0
+    def sumTotalRow = null
+    //две карты: одна с реальными значениями итого по кодам, а вторая - с рассчитанными
+    def totalRows = [:]
+    def sumRowsByCode = [:]
     getRows(data).each{ row ->
-        def totalRows = [:]
-        def sumRowsByCode = [:]
-
         // если строка
         if (isTotalRowByCode(row) ){
-            totalRows[row.code] = row.code
+            totalRows[row.getAlias().replace('total','')] = row.sum
+        }else if(isTotalRow(row)){
+            sumTotalRow = row.sum
+        }else{
+            def code = getKnu(row.code)
+            if (sumRowsByCode[code]!=null) {
+                sumRowsByCode[code]+=row.sum?:0
+            } else {
+                sumRowsByCode[code]=row.sum?:0
+            }
+            sumAllTotalByCodeRows+=row.sum
         }
     }
+    totalRows.keys.each{key->
+        if(!totalRows.isEmpty() && totalRows.get(key)!=sumRowsByCode.get(key)){
+            def code = totalRows.get(key)
+            logger.error("Неверное итоговое значение по коду $code графы «Сумма доходов за отчётный период (руб.)»!")
+        }
+    }
+    if(sumTotalRow!=null && sumTotalRow!=sumAllTotalByCodeRows){
+        logger.error("Неверное итоговое значение графы «Сумма доходов за отчётный период (руб.)»!")
+    }
+}
 
-
+def checkNSI(){
+    def data = getData(formData)
+    getRows(data).each{row->
+        if (!isTotalRow(row)) {
+            if (row.code!=null && getKnu(row.code)==null){
+                logger.warn('Код налогового учета в справочнике отсутствует!')
+            }
+            if (row.balance!=null && getBalance(row.balance)==null){
+                logger.warn('Код налогового учета в справочнике отсутствует!')
+            }
+            def start = reportPeriodService.getStartDate(formData.reportPeriodId)
+            def end = reportPeriodService.getEndDate(formData.reportPeriodId)
+            if (row.code!=null && isKnuDate(row.code,start.getTime()) && isKnuDate(row.code,end.getTime())){
+                logger.error('Операция в РНУ не учитывается!')
+            }
+        }
+    }
 }
 
 /**
- * Проверка является ли строка итововой по коду
+ * Консолидация.
+ */
+void consolidation() {
+    def data = getData(formData)
+    // удалить все строки и собрать из источников их строки
+    data.clear()
+
+    departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                getRows(getData(source)).each { row->
+                    if (row.getAlias() == null || row.getAlias() == '') {
+                        def found = false
+                        getRows(data).each{ rowB->
+                            // в случае совпадения строк из разных источников,
+                            // необходимо использовать суммирование значений ячеек строк форм-источников для «графы 5»
+                            if(row.code==rowB.code && row.balance==rowB.balance){
+                                rowB.sum+=row.sum
+                                found = true
+                            }
+                        }
+                        if (found) {
+                            data.save(getRows(data))
+                        } else {
+                            data.insert(row,getRows(data).size()+1)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
+}
+
+/**
+ * Проверка является ли строка итоговой по коду
  */
 def isTotalRowByCode(row){
-    row.getAlias()==~/total\d{1}/
+    row.getAlias()==~/total\d+/
 }
 
 /**
- * Проверка является ли строка итововой (последняя строка)
+ * Проверка является ли строка итоговой (последняя строка)
  */
 def isMainTotalRow(row){
     row.getAlias()==~/total/
 }
 
 /**
- * Проверка является ли строка итововой (любой итоговой, т.е. по коду, либо основной)
+ * Проверка является ли строка итоговой (любой итоговой, т.е. по коду, либо основной)
  */
 def isTotalRow(row){
     row.getAlias()==~/total\d*/
@@ -305,7 +356,7 @@ def getData(def formData) {
 }
 
 /**
- * Получить строку по алиасу.
+ * Получить строки.
  *
  * @param data данные нф (helper)
  */
@@ -353,11 +404,32 @@ void deleteRow(def data, def row) {
 }
 
 /**
- * Вставить новыую строку в конец нф.
- *
- * @param data данные нф
- * @param row строка
+ * Получить новую строку.
  */
-void insert(def data, def row) {
-    data.insert(row, getRows(data).size() + 1)
+def getNewRow(def alias, def sum) {
+    def newRow = formData.createDataRow()
+    newRow.setAlias('total' + alias)
+    newRow.sum = sum
+    newRow.fix = 'Итого по коду ' + alias
+    newRow.getCell('fix').colSpan = 2
+    return newRow
+}
+
+def getKnu(def code) {
+    return refBookService.getStringValue(28,code,'CODE')
+}
+
+def isKnuDate(def code, def date) {
+    def refDataProvider =  refBookFactory.getDataProvider(28);
+    def res = refDataProvider.getRecords(date, null, null, null);
+    res.getRecords().each{record->
+        if (record.CODE==code){
+            return true
+        }
+    }
+    return false
+}
+
+def getBalance(def balance) {
+    return refBookService.getStringValue(28,balance,'NUMBER')
 }

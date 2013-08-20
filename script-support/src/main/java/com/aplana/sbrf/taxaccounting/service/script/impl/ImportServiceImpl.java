@@ -17,10 +17,12 @@ import java.util.Iterator;
 public class ImportServiceImpl implements ImportService {
 
     private final String XLS = "xls";
-    private final String CSV = "csv";
+    private final String RNU = "rnu";
     private final String DEFAULT_CHARSET = "UTF-8";
     private final String ENTER = "\r\n";
     private final String TAB = "\t";
+    private final char SEPARATOR = '|';
+
     private static HSSFDataFormatter formatter = new HSSFDataFormatter();
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -44,10 +46,10 @@ public class ImportServiceImpl implements ImportService {
 
         if (XLS.equals(format)) {
             return getXMLStringFromXLS(inputStream);
-        } else if (CSV.equals(format)) {
+        } else if (RNU.equals(format) || (format != null && format.matches("r[\\d]{2}"))) {
             return getXMLStringFromCSV(inputStream, charset);
         }
-        throw new IllegalArgumentException("format cannot be " + format + ". Only xls or csv");
+        throw new IllegalArgumentException("format cannot be " + format + ". Only xls or rnu");
     }
 
     @Override
@@ -79,8 +81,7 @@ public class ImportServiceImpl implements ImportService {
 
         if (XLS.equals(format)) {
             return getXMLStringFromXLS(inputStream, startStr, endStr);
-        } else if (CSV.equals(format)) {
-            // TODO (Ramil Timerbaev) обработка csv с позициями
+        } else if (RNU.equals(format) || (format != null && format.matches("r[\\d]{2}"))) {
             return getXMLStringFromCSV(inputStream, charset);
         }
         throw new IllegalArgumentException("format cannot be " + format + ". Only xls or csv");
@@ -95,18 +96,28 @@ public class ImportServiceImpl implements ImportService {
     private String getXMLStringFromCSV(InputStream inputStream, String charset) {
         try {
             InputStreamReader isr = new InputStreamReader(inputStream, charset);
-            CSVReader reader = new CSVReader(isr, ';');
+            CSVReader reader = new CSVReader(isr, SEPARATOR);
 
             StringBuilder sb = new StringBuilder();
             sb.append("<data>").append(ENTER);
             String [] row;
+            int countEmptyRow = 0;
             while ((row = reader.readNext()) != null) {
+                // если встетилась вторая пустая строка, то дальше только строки итогов и ЦП
+                if (row.length == 1 && row[0].length() < 1) {
+                    if (countEmptyRow > 0) {
+                        break;
+                    }
+                    countEmptyRow++;
+                    continue;
+                }
                 sb.append(TAB).append("<row>").append(ENTER);
                 for (String cell : row) {
                     sb.append(TAB).append(TAB).append("<cell>");
                     sb.append(cell);
                     sb.append("</cell>").append(ENTER);
                 }
+
                 sb.append(TAB).append("</row>").append(ENTER);
             }
             sb.append("</data>");

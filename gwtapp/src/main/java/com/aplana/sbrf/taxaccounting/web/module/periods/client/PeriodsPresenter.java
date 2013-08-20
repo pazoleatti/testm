@@ -114,11 +114,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		taxType = TaxType.valueOf(request.getParameter("nType", ""));
 		getView().setTitle(taxType.getName() + " / Ведение периодов");
 		this.openDialogPresenter.setTaxType(taxType);
-		if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT)) {
-			getView().setDepartmentPickerEnable(false);
-		} else {
-			getView().setDepartmentPickerEnable(true);
-		}
 		GetPeriodDataAction requestData = new GetPeriodDataAction();
 		requestData.setTaxType(TaxType.valueOf(request.getParameter("nType", "")));
 
@@ -133,6 +128,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 						List<Integer> selectedDepartments = new ArrayList<Integer>();
 						selectedDepartments.add(result.getSelectedDepartment().getId());
 						getView().setFilterData(departments, selectedDepartments, result.getYearFrom(), result.getYearTo());
+						getView().setDepartmentPickerEnable(result.isEnableDepartmentPicker());
 						openDialogPresenter.setDepartments(departments, selectedDepartments);
 						openDialogPresenter.setDictionaryTaxPeriod(dictionaryTaxPeriods);
 						openDialogPresenter.setYear(result.getCurrentYear());

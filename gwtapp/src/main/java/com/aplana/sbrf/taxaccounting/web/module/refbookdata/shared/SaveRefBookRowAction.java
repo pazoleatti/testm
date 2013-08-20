@@ -28,6 +28,6 @@ public class SaveRefBookRowAction extends UnsecuredActionImpl<SaveRefBookRowResu
 
 	@Override
 	public String getName() {
-		return "";
+		return "Сохранить справочник";
 	}
 }

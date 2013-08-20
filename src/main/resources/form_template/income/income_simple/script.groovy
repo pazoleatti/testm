@@ -312,10 +312,35 @@ def isEditableField(Cell cell){
  * Консолидация формы
  */
 def consolidation(){
-    if (!isTerBank()) {
-        return
-    }
+    isTerBank()?consolidationTerBank():consolidationOP()
+    getData(formData).commit()
+}
 
+def consolidationTerBank(){
+// очистить форму
+    dataRowsHelper.getAllCached().each{ row ->
+        ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted', 'logicalCheck', 'accountingRecords'].each{ alias->
+            row.getCell(alias).setValue(null)
+        }
+    }
+    // получить данные из источников
+    departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
+        def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        if (child != null && child.state == WorkflowState.ACCEPTED) {
+            child.getDataRows().eachWithIndex() { row, i ->
+                def rowResult = dataRowsHelper.getAllCached().get(i)
+                ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted', 'logicalCheck', 'accountingRecords'].each {
+                    if (row.getCell(it).getValue() != null) {
+                        if (isCalcField(row.getCell(it)) || isEditableField(row.getCell(it)))
+                            rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)))
+                    }
+                }
+            }
+        }
+    }
+}
+
+def consolidationOP(){
     // очистить форму
     getRows(data).each{ row ->
         ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted'].each{ alias->
@@ -433,10 +458,7 @@ def consolidation(){
             row.rnu4Field5Accepted+= rowPrev.rnu4Field5Accepted
         }
     }
-    data.commit()
 }
-
-
 /**
  * Скрипт для проверки создания.
  *

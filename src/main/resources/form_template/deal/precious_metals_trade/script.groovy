@@ -206,7 +206,7 @@ void logicCheck() {
         checkNSI(row, "metalName", "Коды драгоценных металлов", 40)
         checkNSI(row, "deliverySign", "Признаки физической поставки", 44)
         checkNSI(row, "deliveryCode", "Коды условий поставки", 47)
-        checkNSI(row, "dealFocus", "Направленности сделок", 46)
+        checkNSI(row, "dealFocus", "Направленности сделок", 20)
     }
 }
 

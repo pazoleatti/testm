@@ -6,9 +6,6 @@ import java.text.SimpleDateFormat
  *
  * @version 59
  *
- * TODO:
- *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *
  * @author rtimerbaev
  */
 
@@ -314,7 +311,6 @@ def logicalCheck(def useLog) {
             }
             i += 1
 
-            // 6. Проверка соответствия балансового счета коду налогового учета
 
             // 7. Арифметические проверки граф 10, 12
             // «Графа 10» = ОКРУГЛ((«графа 9»  «графа 8»);2)
@@ -391,10 +387,8 @@ def logicalCheck(def useLog) {
  */
 def checkDate(def row) {
     def sum = null
-    // def data = getData(formData)
     SimpleDateFormat formatY = new SimpleDateFormat('yyyy')
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    // getRows(data).each { row ->
         if (row.ruble != null && row.ruble != 0) {
             // получить (дату - 3 года)
             dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(row.docDate)) - 3))
@@ -409,10 +403,6 @@ def checkDate(def row) {
                     def d = getData(f)
                     if (d != null) {
                         getRows(d).each { r ->
-                            // графа  4 - balance
-                            // графа  5 - docNumber
-                            // графа  6 - docDate
-                            // графа 10 - taxAccountingRuble
                             if ((r.balance == row.balance) && (r.docNumber == row.docNumber) && (r.docDate == row.docDate)) {
                                 return true
                                 sum += (sum ?: 0) + r.taxAccountingRuble
@@ -422,39 +412,60 @@ def checkDate(def row) {
                 }
             }
         }
-    // }
     return sum
 }
 
 /**
  * Проверки соответствия НСИ.
  */
+
 def checkNSI() {
-    // 1. Проверка балансового счёта для кода классификации дохода - Проверка актуальности «графы 2»
-    if (false) {
-        logger.warn('Балансовый счёт в справочнике отсутствует!')
-    }
+    def data = getData(formData)
+    if (!getRows(data).isEmpty()) {
+        // справочник 27 - «Классификатор расходов Сбербанка России для целей налогового учёта»
+        def expensesClassifierRefBookId = 27
+        def currencyRefBookId = 15
 
-    // 2. Проверка балансового счёта для кода классификации дохода - Проверка актуальности «графы 4»
-    if (false) {
-        logger.warn('Балансовый счёт в справочнике отсутствует!')
-    }
+        // справочник 22 "Курсы Валют"
+        def refDataProvider = refBookFactory.getDataProvider(22)
+        for (def row : getRows(data)) {
+            if (isTotal(row)) {
+                continue
+            }
+            // 4. Проверка соответствия графы 2, 3, 4 одной записи в справочнике
+            if (row.code != row.balance) {
+                logger.warn('Код налогового учета не соответствует номеру балансового счета')
+            }
 
-    // 3. Проверка кода классификации дохода для данного РНУ - Проверка актуальности «графы 4» на дату по «графе 3»
-    if (false) {
-        logger.error('Операция в РНУ не учитывается!')
-        return false
+            // 1. Проверка графа «Код налогового учета» (графа 2)
+            if (refBookService.getRecordData(expensesClassifierRefBookId, row.code) == null) {
+                logger.warn('Код налогового учёта в справочнике отсутствует!')
+            }
 
-    }
-    // 4. Проверка кода валюты - Проверка актуальности «графы 7»	1
-    if (false) {
-        logger.error('Код валюты в справочнике отсутствует!')
-        return false
-    }
+            // 1. Проверка графы «Номер балансового счета» (графа 3)
+            if (refBookService.getRecordData(expensesClassifierRefBookId, row.balance) == null) {
+                logger.error('Номер балансового счета в справочнике отсутствует!')
+                return false
+            }
 
-    // 5. Проверка курса валюты со справочным - Проверка актуальности «графы 8» на дату по «графе 3»
-    if (false) {
-        logger.warn('Неверный курс валюты!')
+            // Код валюты
+            def currCode = refBookService.getRecordData(currencyRefBookId, row.currencyCode)
+            if (currCode == null) {
+                logger.error('Код валюты в справочнике отсутствует!')
+                return false
+            } else {
+                def records = refDataProvider.getRecords(row.date, null, "CODE_NUMBER = " + row.currencyCode, null)
+                if (records != null && records.getRecords() != null && records.getRecords().size() > 0) {
+                    def record = records.getRecords().getAt(0)
+                    def rate = record.get('RATE') // атрибут "Курс валюты"
+                    if (row.rateOfTheBankOfRussia != rate.getNumberValue()) {
+                        logger.warn('Неверный курс валюты!')
+                    }
+                } else {
+                    logger.warn('Неверный курс валюты!')
+                }
+            }
+        }
     }
     return true
 }

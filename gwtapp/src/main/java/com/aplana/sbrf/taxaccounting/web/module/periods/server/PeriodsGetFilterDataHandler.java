@@ -82,8 +82,10 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 
 	    if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT)) {
 		    res.setSelectedDepartment(departmentService.getDepartmentBySbrfCode("99006200")); //УНП
+		    res.setEnableDepartmentPicker(false);
 	    } else if ((taxType == TaxType.TRANSPORT) || (taxType == TaxType.PROPERTY)) {
 			res.setSelectedDepartment(departmentService.getDepartment(userInfo.getUser().getDepartmentId()));
+		    res.setEnableDepartmentPicker(true);
 	    }
 	    Calendar current = Calendar.getInstance();
 	    res.setCurrentYear(current.get(Calendar.YEAR));

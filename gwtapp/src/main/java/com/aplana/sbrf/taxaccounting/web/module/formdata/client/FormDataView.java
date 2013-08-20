@@ -1,6 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import java.util.Date;
+import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
@@ -22,19 +31,26 @@ import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.*;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.CellPreviewEvent;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.NoSelectionModel;
+import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-
-import java.util.Date;
-import java.util.List;
 
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		implements FormDataPresenterBase.MyView,FileUploadHandler {
 
-	private NoSelectionModel<DataRow> selectionModel;
+	private NoSelectionModel<DataRow<Cell>> selectionModel;
 
     @Override
     public void onFileUploadSuccess(String uuid) {
@@ -48,7 +64,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	private DataRowColumnFactory factory = new DataRowColumnFactory();
 
-	private MyDataProvider dataProvider = new MyDataProvider();
+	private AsyncDataProvider<DataRow<Cell>> dataProvider = new  AsyncDataProvider<DataRow<Cell>>() {
+		@Override
+		protected void onRangeChanged(HasData<DataRow<Cell>> display) {
+			final Range range = display.getVisibleRange();
+			getUiHandlers().onRangeChange(range.getStart(), range.getLength());
+		}
+	};
 
 	@UiField
 	DockLayoutPanel dockPanel;
@@ -115,7 +137,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public FormDataView(final Binder binder) {
 		initWidget(binder.createAndBindUi(this));
 
-		selectionModel = new NoSelectionModel<DataRow>();
+		selectionModel = new NoSelectionModel<DataRow<Cell>>();
 		formDataTable.setSelectionModel(selectionModel);
 		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
@@ -152,12 +174,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 		//Create order column
 		NumericColumn numericColumn = new NumericColumn();
+		
 		DataRowColumn indexColumn = new DataRowColumn(new IndexCell(), numericColumn) {
 			@Override
 			public Object getValue(Object object) {
 				return object;
 			}
 		};
+		
 		indexColumn.setCellStyleNames("order");
 		formDataTable.addColumn(indexColumn, "№");
 		formDataTable.setColumnWidth(indexColumn, "3em");
@@ -444,22 +468,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void updateData() {
-		dataProvider.update();
-	}
-
-	private class MyDataProvider extends AsyncDataProvider<DataRow<Cell>> {
-
-		public void update() {
-			for (HasData<DataRow<Cell>> display: getDataDisplays()) {
-				onRangeChanged(display);
-			}
-		}
-
-		@Override
-		protected void onRangeChanged(HasData<DataRow<Cell>> display) {
-			final Range range = display.getVisibleRange();
-			getUiHandlers().onRangeChange(range.getStart(), range.getLength());
-		}
+		formDataTable.setVisibleRangeAndClearData(formDataTable.getVisibleRange(), true);
 	}
 
     @UiFactory

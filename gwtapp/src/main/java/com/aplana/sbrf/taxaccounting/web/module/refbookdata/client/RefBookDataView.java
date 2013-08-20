@@ -40,6 +40,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	VerticalPanel content;
 	@UiField
 	Button save;
+	@UiField
+	Label titleDesc;
 
 	Map<String, HasValue> inputFields = new HashMap<String, HasValue>();
 
@@ -54,10 +56,15 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 			@Override
 			public void onSelectionChange(SelectionChangeEvent event) {
 				if (getUiHandlers() != null) {
-					getUiHandlers().onSelectionChanged(selectionModel.getSelectedObject().getRefBookRowId());
-					getUiHandlers().onSelectionChanged(selectionModel.getSelectedObject().getRefBookRowId());
-				}
+					if (selectionModel.getSelectedObject().getRefBookRowId() == null) {
+						for (Map.Entry<String, HasValue> field : inputFields.entrySet()) {
+							field.getValue().setValue(null);
+						}
+					} else {
+						getUiHandlers().onSelectionChanged(selectionModel.getSelectedObject().getRefBookRowId());
 					}
+				}
+			}
 		});
 		pager.setDisplay(refbookDataTable);
 		save.setEnabled(false);
@@ -114,11 +121,18 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	}
 
 	@Override
+	public void setRefBookNameDesc(String desc) {
+		titleDesc.setText(desc);
+	}
+
+	@Override
 	public void createInputFields(final List<RefBookAttribute> headers) {
 		for (final RefBookAttribute header : headers) {
 			// Сформируем поля ввода
 			HorizontalPanel hp = new HorizontalPanel();
-			hp.add(new Label(header.getName()));
+			Label label = new Label(header.getName());
+			label.setWidth("300px");
+			hp.add(label);
 			HasValue inputWidget;
 			switch (header.getAttributeType()) {
 				case STRING:
@@ -184,12 +198,15 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		refbookDataTable.setRowData(start, dataRows);
 	}
 
-//	@UiHandler("cancel")
-//	void cancelButtonClicked(ClickEvent event) {
-//		if (getUiHandlers() != null) {
-//			getUiHandlers().onCancelClicked();
-//		}
-//	}
+	@UiHandler("cancel")
+	void cancelButtonClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			boolean cancel = Window.confirm("Вы уверены, что хотите отменить изменения?");
+			if (cancel) {
+				getUiHandlers().onCancelClicked();
+			}
+		}
+	}
 
 	@UiHandler("save")
 	void saveButtonClicked(ClickEvent event) {

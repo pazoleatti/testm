@@ -7,10 +7,10 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpenDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpenDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetOpenDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetOpenDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetTaxPeriodWDAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetTaxPeriodWDResult;
 import com.google.inject.Inject;
@@ -147,11 +147,11 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
 
-        dispatcher.execute(new GetOpenDataAction(),
+        dispatcher.execute(new GetBSOpenDataAction(),
                 CallbackUtils.defaultCallback(
-                        new AbstractCallback<GetOpenDataResult>() {
+                        new AbstractCallback<GetBSOpenDataResult>() {
                             @Override
-                            public void onSuccess(GetOpenDataResult result) {
+                            public void onSuccess(GetBSOpenDataResult result) {
                                 if (result == null || result.getControlUNP() == null) {
                                     getProxy().manualRevealFailed();
                                     return;
@@ -168,6 +168,6 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                                     put("102", "Форма 102");
                                 }});
                             }
-                        }, this).addCallback(new ManualRevealCallback<GetOpenDataResult>(this)));
+                        }, this).addCallback(new ManualRevealCallback<GetBSOpenDataAction>(this)));
     }
 }
