@@ -425,6 +425,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         // Редактировать можно только открытые периоды
         editButton.setVisible(reportPeriod != null && reportPeriod.isActive());
 
+        updateVisibility();
         reloadDepartmentParams();
     }
 
@@ -437,6 +438,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     public void setDepartment(final Department department) {
         if (department != null) {
         	departmentPicker.setValue(Arrays.asList(department.getId()), true);
+            updateVisibility();
             reloadDepartmentParams();
         }
         

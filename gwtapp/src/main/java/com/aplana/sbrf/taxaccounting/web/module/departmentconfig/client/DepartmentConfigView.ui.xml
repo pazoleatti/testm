@@ -143,7 +143,7 @@
                                     <g:Label text="Версия формата" width="110px" styleName="{style.sps}"/>
                                     <g:TextBox ui:field="formatVersion" width="75px" styleName="{style.sps}"/>
                                 </g:HorizontalPanel>
-                                <g:HorizontalPanel ui:field="payPanel">
+                                <g:HorizontalPanel ui:field="payPanel" visible="false">
                                     <g:Label text="Обязанность по уплате налога" width="250px"/>
                                     <r:RefBookPickerPopupWidget ui:field="obligation" width="145px" attributeIdInt="110"/>
                                     <g:Label text="Признак расчёта" width="110px" styleName="{style.sps}"/>
