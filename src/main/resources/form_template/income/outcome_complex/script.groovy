@@ -156,12 +156,12 @@ void calculationControlGraphs() {
                 String knySum
                 String kny
                 if (rowSum.getCell('consumptionTypeId').hasValueOwner()) {
-                    knySum = rowSum.getCell('consumptionTypeId').valueOwner
+                    knySum = rowSum.getCell('consumptionTypeId').valueOwner.value
                 } else {
                     knySum = rowSum.getCell('consumptionTypeId').value
                 }
                 if (row.getCell('consumptionTypeId').hasValueOwner()) {
-                    kny = row.getCell('consumptionTypeId').valueOwner
+                    kny = row.getCell('consumptionTypeId').valueOwner.value
                 } else {
                     kny = row.getCell('consumptionTypeId').value
                 }
