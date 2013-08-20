@@ -518,13 +518,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         jt.batchUpdate(String.format(DELETE_REF_BOOK_RECORD_SQL, refBookId, sdf.format(version)), values);
     }
 
-    private static final String DELETE_ALL_REF_BOOK_VALUE_SQL = "delete from ref_book_value " +
-            "where record_id in (select id from ref_book_record where ref_book_id = ? " +
-            "and version = trunc(?, 'DD') and status = 0)";
-
-    private static final String DELETE_ALL_REF_BOOK_RECORD_SQL = "delete from ref_book_record " +
-            "where ref_book_id = ? and version = trunc(?, 'DD') and status = 0";
-
     private static final String DELETE_MARK_ALL_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, ref_book_id, " +
             "version, status, record_id) " +
             "select seq_ref_book_record.nextval, ref_book_id, trunc(?, 'DD'), -1, record_id " +
@@ -538,11 +531,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         if (refBookId == null || version == null) {
             return;
         }
-        // Удаление записей при совпадении даты у даления и какой-либо версии
-        getJdbcTemplate().update(DELETE_ALL_REF_BOOK_VALUE_SQL, new Object[]{refBookId, version},
-                new int[]{Types.NUMERIC, Types.TIMESTAMP});
-        getJdbcTemplate().update(DELETE_ALL_REF_BOOK_RECORD_SQL, new Object[]{refBookId, version},
-                new int[]{Types.NUMERIC, Types.TIMESTAMP});
         // Отметка записей ближайшей меньшей версии как удаленных
         getJdbcTemplate().update(DELETE_MARK_ALL_REF_BOOK_RECORD_SQL,
                 new Object[] {version, refBookId, version, refBookId},

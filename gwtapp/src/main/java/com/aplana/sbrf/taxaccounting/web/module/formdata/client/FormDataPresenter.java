@@ -246,6 +246,12 @@ public class FormDataPresenter extends
 						processFormDataResult(result);
 						getView().setSelectedRow(result.getCurrentRow(), true);
 					}
+					
+					@Override
+					public void onFailure(Throwable caught) {
+						modifiedRows.clear();
+						getView().updateData();
+					}
 
 				}, this));
 	}
@@ -267,6 +273,12 @@ public class FormDataPresenter extends
 							getView().updateData();
 							processFormDataResult(result);
 							getView().setSelectedRow(null, true); // clear selection
+						}
+						
+						@Override
+						public void onFailure(Throwable caught) {
+							modifiedRows.clear();
+							getView().updateData();
 						}
 
 					},this));
@@ -293,6 +305,7 @@ public class FormDataPresenter extends
 
 					@Override
 					public void onFailure(Throwable caught) {
+						modifiedRows.clear();
 						getView().updateData();
 					}
 
@@ -317,6 +330,7 @@ public class FormDataPresenter extends
 
 					@Override
 					public void onFailure(Throwable caught) {
+						modifiedRows.clear();
 						getView().updateData();
 					}
 				}, this));
