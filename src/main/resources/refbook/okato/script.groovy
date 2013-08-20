@@ -20,7 +20,6 @@ switch (formDataEvent) {
 }
 
 void importFromXML() {
-
     def dataProvider = refBookFactory.getDataProvider(3L)
     def refBook = refBookFactory.get(3L)
     def SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd")
@@ -30,29 +29,39 @@ void importFromXML() {
     def List<Map<String, RefBookValue>> recordsList = new ArrayList<Map<String, RefBookValue>>() // данные для записи в бд
     def Map<String, Model> mapper = new HashMap<String, Model>() // соответствие имён аттрибутов в бд и xml
     def final INSERT_SIZE = 100 // размер одной порции данных // 10000 Превышает таймаут
-    def counter = 1
 
     refBook.attributes.each {
-        if (it.alias.equals("NAME"))
+        if (it.alias.equals("NAME")) {
             mapper.put("NAME1", new Model(it.attributeType, "NAME"))
-        else if (it.alias.equals("OKATO"))
+        }
+        else if (it.alias.equals("OKATO")) {
             mapper.put("KOD", new Model(it.attributeType, "OKATO"))
+        }
     }
 
+    // Признак обновления записей
+    def isUpdateMode = false;
+
     try {
-        def XMLInputFactory factory = XMLInputFactory.newInstance();
+        def XMLInputFactory factory = XMLInputFactory.newInstance()
         // TODO падает из-за DTD (без следующей строки кода)
-        factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
+        factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
         reader = factory.createXMLStreamReader(inputStream)
 
         while (reader.hasNext()) {
-
             if (reader.startElement) {
 
                 // Версия справочника
                 if (reader.getName().equals(QName.valueOf("rollout"))) {
                     version = sdf.parse(reader.getAttributeValue(null, "dateSet"))
-                    dataProvider.deleteAllRecords(version)
+
+                    List<Date> versionList = dataProvider.getVersions(version, version)
+                    isUpdateMode = versionList.contains(version)
+
+                    // Если версии не совпадают, прежние записи отмечаются как удаленные
+                    if (!isUpdateMode) {
+                        dataProvider.deleteAllRecords(version)
+                    }
                 }
 
                 // Список значений для вставки в бд
@@ -76,11 +85,11 @@ void importFromXML() {
 
             // Запись в лист
             if (reader.endElement && reader.getName().equals(QName.valueOf("record"))) {
-                recordsMap.put("ID", new RefBookValue(RefBookAttributeType.NUMBER, counter++))
+                // recordsMap.put("ID", new RefBookValue(RefBookAttributeType.NUMBER, counter++))
                 recordsList.add(recordsMap)
                 recordsMap = new HashMap<String, RefBookValue>()
                 if (recordsList.size() >= INSERT_SIZE) {
-                    dataProvider.insertRecords(version, recordsList)
+                    writeRecords(dataProvider, isUpdateMode, version, recordsList)
                     recordsList.clear()
                 }
             }
@@ -91,17 +100,29 @@ void importFromXML() {
         reader?.close()
     }
 
-    dataProvider.insertRecords(version, recordsList)
-    refBookOkatoDao.updateParentId(version)
+    writeRecords(dataProvider, isUpdateMode, version, recordsList)
 
-//дебаг
-/*recordsList.each { map ->
-    println("==========================")
-    map.each {
-        println("attr = " + it.key + "; value = [s:" + it.value.getStringValue() + "; n:" + it.value.getNumberValue()
-                + "; d:" + it.value.getDateValue() + "; r:" + it.value.getReferenceValue() + "]")
+    if (isUpdateMode) {
+        refBookOkatoDao.clearParentId(version)
     }
-} */
+
+    refBookOkatoDao.updateParentId(version)
+}
+
+// Добавление или обновление порции записей
+private void writeRecords(def dataProvider, boolean isUpdateMode, Date version,
+                          List<Map<String, RefBookValue>> recordsList) {
+    if (!isUpdateMode) {
+        // Добавление новых записей
+        dataProvider.insertRecords(version, recordsList)
+    } else {
+        // Обновление атрибутов
+        List<Map<String, RefBookValue>> notFoundList = refBookOkatoDao.updateValueNames(version, recordsList)
+        // Добавление новых записей
+        if (!notFoundList.isEmpty()) {
+            dataProvider.insertRecords(version, notFoundList)
+        }
+    }
 }
 
 class Model {

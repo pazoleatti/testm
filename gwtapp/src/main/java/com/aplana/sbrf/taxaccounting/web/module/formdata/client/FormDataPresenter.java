@@ -58,6 +58,7 @@ public class FormDataPresenter extends
 	public void prepareFromRequest(PlaceRequest request) {
 		try {
 			super.prepareFromRequest(request);
+		
 
 			final GetFormData action = new GetFormData();
 
@@ -245,6 +246,12 @@ public class FormDataPresenter extends
 						processFormDataResult(result);
 						getView().setSelectedRow(result.getCurrentRow(), true);
 					}
+					
+					@Override
+					public void onFailure(Throwable caught) {
+						modifiedRows.clear();
+						getView().updateData();
+					}
 
 				}, this));
 	}
@@ -266,6 +273,12 @@ public class FormDataPresenter extends
 							getView().updateData();
 							processFormDataResult(result);
 							getView().setSelectedRow(null, true); // clear selection
+						}
+						
+						@Override
+						public void onFailure(Throwable caught) {
+							modifiedRows.clear();
+							getView().updateData();
 						}
 
 					},this));
@@ -292,6 +305,7 @@ public class FormDataPresenter extends
 
 					@Override
 					public void onFailure(Throwable caught) {
+						modifiedRows.clear();
 						getView().updateData();
 					}
 
@@ -316,6 +330,7 @@ public class FormDataPresenter extends
 
 					@Override
 					public void onFailure(Throwable caught) {
+						modifiedRows.clear();
 						getView().updateData();
 					}
 				}, this));
@@ -382,7 +397,10 @@ public class FormDataPresenter extends
 
                                 LogAddEvent.fire(FormDataPresenter.this,
                                         result.getLogEntries());
-
+                                
+                    			// Очищаем возможные изменения на форме перед открытием.
+                    			modifiedRows.clear();
+                    			
                                 formData = result.getFormData();
                                 formDataAccessParams = result
                                         .getFormDataAccessParams();

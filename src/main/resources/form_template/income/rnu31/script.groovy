@@ -10,8 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
  * @version 59
  *
  * TODO:
- *      - при импорте нет получения имени файла для определения типа файла (xls или csv)
- *      - проверки корректности данных проверить когда будут сделаны вывод сообщении
+ *      - проверки корректности данных при загрузке данных из транспортного файла
  *
  * @author rtimerbaev
  */
@@ -236,35 +235,50 @@ void checkCreation() {
  * Получение импортируемых данных.
  */
 void importData() {
-    // TODO (Ramil Timerbaev) Костыль! это значение должно передаваться в скрипт
-    def fileName = 'fileName.xls'
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        return
+    }
 
     def is = ImportInputStream
     if (is == null) {
         return
     }
 
-    def xmlString = importService.getData(is, fileName, 'windows-1251', 'Вид ценных бумаг', null);
-    if (xmlString == null) {
+    def isRnu
+    // TODO (Ramil Timerbaev) потом убрать загрузку из эксельки
+    if (fileName.contains('.xls')) {
+        isRnu = false
+    } else if (fileName.contains('.r')) {
+        isRnu = true
+    } else {
         return
     }
 
+    def xmlString = (isRnu ?
+        importService.getData(is, fileName, 'cp866') :
+        importService.getData(is, fileName, 'windows-1251', 'Вид ценных бумаг', null))
+    if (xmlString == null) {
+        return
+    }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
         return
     }
+    // номер строки с которой брать данные (что бы пропустить шапку таблицы или лишнюю информацию)
+    def startRow = (isRnu ? 1 : 4)
 
-    // количество строк в шапке
-    def headRowCount = 4
+    // номер графы с которой брать данные (что бы пропустить нумерацию или лишнюю информацию)
+    def startColumn = (isRnu ? 2 : 0)
 
-    // проверка заголовка таблицы
-    if (!checkTableHead(xml, headRowCount)) {
+    // проверка заголовка таблицы (только при загрузке из эксельки)
+    if (!isRnu && !checkTableHead(xml, startRow)) {
         logger.error('Заголовок таблицы не соответствует требуемой структуре!')
         return
     }
 
     // добавить данные в форму
-    addData(xml, headRowCount)
+    addData(xml, startRow, startColumn)
 }
 
 /*
@@ -412,9 +426,10 @@ def getNewRow() {
  * Заполнить форму данными.
  *
  * @param xml данные
- * @param headRowCount количество строк в шапке
+ * @param startRow номер строки с которой брать данные (что бы пропустить шапку таблицы или лишнюю информацию)
+ * @param startColumn номер графы с которой брать данные (что бы пропустить нумерацию или лишнюю информацию)
  */
-void addData(def xml, headRowCount) {
+void addData(def xml, def startRow, def startColumn) {
     if (xml == null) {
         return
     }
@@ -428,13 +443,13 @@ void addData(def xml, headRowCount) {
         indexRow++
 
         // пропустить шапку таблицы
-        if (indexRow <= headRowCount) {
+        if (indexRow <= startRow) {
             continue
         }
 
-        if (row.cell[0].text() == 'Процентный (купонный) доход по облигациям') {
+        def index = startColumn + 0
+        if (row.cell[index].text() == 'Процентный (купонный) доход по облигациям') {
             def newRow = getNewRow()
-            def index = 0
 
             // графа 1
             newRow.number = 1
