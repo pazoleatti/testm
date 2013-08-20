@@ -53,6 +53,9 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     // Параметры выбранного подразделения
     private DepartmentCombined data;
 
+    // Разыменованные значения справочников. Требуются для отмены.
+    Map<Long, String> dereferenceValues;
+
     // Выбранное подразделение
     private Integer currentDepartmentId;
 
@@ -328,12 +331,27 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     public void onSave(ClickEvent event) {
         getUiHandlers().save(driver.flush(), currentReportPeriod);
         driver.edit(data);
+
+        if (dereferenceValues != null)
+        {
+            // Обновление разыменованных значений
+            dereferenceValues.clear();
+            dereferenceValues.put(dictRegionId.getAttributeId(), dictRegionId.getDereferenceValue());
+            dereferenceValues.put(reorgFormCode.getAttributeId(), reorgFormCode.getDereferenceValue());
+            dereferenceValues.put(signatoryId.getAttributeId(), signatoryId.getDereferenceValue());
+            dereferenceValues.put(taxPlaceTypeCode.getAttributeId(), taxPlaceTypeCode.getDereferenceValue());
+            dereferenceValues.put(obligation.getAttributeId(), obligation.getDereferenceValue());
+            dereferenceValues.put(okato.getAttributeId(), okato.getDereferenceValue());
+            dereferenceValues.put(okvedCode.getAttributeId(), okvedCode.getDereferenceValue());
+            dereferenceValues.put(type.getAttributeId(), type.getDereferenceValue());
+        }
     }
 
     @UiHandler("cancelButton")
     public void onCancel(ClickEvent event) {
         if (checkUnsaved(null)) {
             driver.edit(data);
+            setDereferenceValue(dereferenceValues);
         }
     }
 
@@ -446,15 +464,19 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @Override
     public void setDereferenceValue(Map<Long, String> rbTextValues) {
-        // Заполнение текстовых значений справочников
-        dictRegionId.setDereferenceValue(rbTextValues.get(dictRegionId.getAttributeId()));
-        reorgFormCode.setDereferenceValue(rbTextValues.get(reorgFormCode.getAttributeId()));
-        signatoryId.setDereferenceValue(rbTextValues.get(signatoryId.getAttributeId()));
-        taxPlaceTypeCode.setDereferenceValue(rbTextValues.get(taxPlaceTypeCode.getAttributeId()));
-        obligation.setDereferenceValue(rbTextValues.get(obligation.getAttributeId()));
-        okato.setDereferenceValue(rbTextValues.get(okato.getAttributeId()));
-        okvedCode.setDereferenceValue(rbTextValues.get(okvedCode.getAttributeId()));
-        type.setDereferenceValue(rbTextValues.get(type.getAttributeId()));
+        this.dereferenceValues =  rbTextValues;
+        if (dereferenceValues != null)
+        {
+            // Заполнение текстовых значений справочников
+            dictRegionId.setDereferenceValue(rbTextValues.get(dictRegionId.getAttributeId()));
+            reorgFormCode.setDereferenceValue(rbTextValues.get(reorgFormCode.getAttributeId()));
+            signatoryId.setDereferenceValue(rbTextValues.get(signatoryId.getAttributeId()));
+            taxPlaceTypeCode.setDereferenceValue(rbTextValues.get(taxPlaceTypeCode.getAttributeId()));
+            obligation.setDereferenceValue(rbTextValues.get(obligation.getAttributeId()));
+            okato.setDereferenceValue(rbTextValues.get(okato.getAttributeId()));
+            okvedCode.setDereferenceValue(rbTextValues.get(okvedCode.getAttributeId()));
+            type.setDereferenceValue(rbTextValues.get(type.getAttributeId()));
+        }
     }
 
     @Override
