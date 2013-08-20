@@ -317,7 +317,7 @@ public class RefBookDaoTest {
         refBookDao.getValue(-1L, 2L);
     }
 
-    @Test
+    @Test(expected = DuplicateKeyException.class)
     public void testDeleteAllRecords1() {
         // Удаление на дату совпадающую с какой-либо версией
         Date delDate = getDate(1, 1, 2013);
