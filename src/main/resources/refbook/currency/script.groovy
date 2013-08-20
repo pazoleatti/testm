@@ -77,7 +77,9 @@ void importFromXML() {
 
                 // Курс валюты
                 if (currencySector && reader.getName().equals(QName.valueOf("Rate"))) {
-                    rate = reader.getElementText().toDouble()
+                    // Округление
+                    rate = BigDecimal.valueOf(reader.getElementText().toDouble()).setScale(refBook.getAttribute("RATE").precision,
+                            RoundingMode.HALF_UP).doubleValue()
                 }
             }
 
