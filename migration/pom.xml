@@ -117,6 +117,12 @@
             <version>20090211</version>
         </dependency>
 
+        <dependency>
+            <groupId>javax.jms</groupId>
+            <artifactId>jms-api</artifactId>
+            <version>1.1-rev-1</version>
+        </dependency>
+
 
         <!-- Tester component -->
 		<dependency>
@@ -227,6 +233,12 @@
                     <groupId>org.apache.activemq</groupId>
                     <artifactId>activemq-all</artifactId>
                     <version>5.7.0</version>
+                    <exclusions>
+                        <exclusion>
+                            <artifactId>javax.jms</artifactId>
+                            <groupId>jms-api</groupId>
+                        </exclusion>
+                    </exclusions>
                 </dependency>
             </dependencies>
 		</profile>

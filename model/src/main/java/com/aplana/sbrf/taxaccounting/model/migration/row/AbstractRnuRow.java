@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.migration.row;
 import java.io.Serializable;
 
 /**
+ * Модель с общими полями для строчек РНУ
  * @author Alexander Ivanov
  */
 public class AbstractRnuRow implements Serializable {

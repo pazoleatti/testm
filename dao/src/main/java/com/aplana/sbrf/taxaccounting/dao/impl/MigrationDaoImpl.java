@@ -373,9 +373,9 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
         }
     }
 
-    private class Rnu60RowMapper implements RowMapper<Rnu60Row> {
-        public Rnu60Row mapRow(ResultSet rs, int index) throws SQLException {
-            Rnu60Row row = new Rnu60Row();
+    private class RnuCommonRowMapper implements RowMapper<RnuCommonRow> {
+        public RnuCommonRow mapRow(ResultSet rs, int index) throws SQLException {
+            RnuCommonRow row = new RnuCommonRow();
 
             row.setNum(MapperUtils.getLong(rs, 1));
 
@@ -399,7 +399,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     }
 
     @Override
-    public List<Rnu60Row> getRnu60RowList(Exemplar ex) {
+    public List<RnuCommonRow> getRnu60RowList(Exemplar ex) {
         try {
             logger.debug("Start getRnu60RowList with " + ex);
             return getJdbcTemplate().query(
@@ -429,7 +429,201 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "where \"ex\".idexemplar=?\n" +
                             "order by \"r60\".num asc, \"r60\".typerow desc",
                     new Object[]{ex.getExemplarId()},
-                    new Rnu60RowMapper()
+                    new RnuCommonRowMapper()
+            );
+        } catch (DataRetrievalFailureException e) {
+            throw new DaoException("Error " + e.getLocalizedMessage(), ex.getExemplarId());
+        }
+    }
+
+    @Override
+    public List<RnuCommonRow> getRnu59RowList(Exemplar ex) {
+        try {
+            logger.debug("Start getRnu59RowList with " + ex);
+            return getJdbcTemplate().query(
+                    "select\n" +
+                            "\"r59\".num,\n" +
+                            "\"r59\".numdeal,\n" +
+                            "\"r59\".defpaper,\n" +
+                            "\"r59\".codecurrency,\n" +
+                            "\"r59\".nompaper,\n" +
+                            "\"r59\".drepo1,\n" +
+                            "\"r59\".drepo2,\n" +
+                            "\"r59\".getpricenkd,\n" +
+                            "\"r59\".salepricenkd,\n" +
+                            "\"r59\".costrepo,\n" +
+                            "\"r59\".implrepo,\n" +
+                            "\"r59\".bankrate,\n" +
+                            "\"r59\".costrepo269,\n" +
+                            "\"r59\".costrepotax,\n" +
+                            "\"r59\".typerow\n" +
+                            "from migration.trd_59 \"r59\" \n" +
+                            "inner join migration.exemplar \"ex\"  on \"r59\".fidexemplar = \"ex\".idexemplar\n" +
+                            "left outer join migration.periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
+                            "left outer join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "left outer join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "left outer join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "where \"ex\".idexemplar=?\n" +
+                            "order by \"r59\".num asc, \"r59\".typerow desc",
+                    new Object[]{ex.getExemplarId()},
+                    new RnuCommonRowMapper()
+            );
+        } catch (DataRetrievalFailureException e) {
+            throw new DaoException("Error " + e.getLocalizedMessage(), ex.getExemplarId());
+        }
+    }
+
+    @Override
+    public List<RnuCommonRow> getRnu54RowList(Exemplar ex) {
+        try {
+            logger.debug("Start getRnu54RowList with " + ex);
+            return getJdbcTemplate().query(
+                    "select\n" +
+                            "\"r54\".num,\n" +
+                            "\"r54\".numdeal,\n" +
+                            "\"r54\".defpaper,\n" +
+                            "\"r54\".codecurrency,\n" +
+                            "\"r54\".nompaper,\n" +
+                            "\"r54\".drepo1,\n" +
+                            "\"r54\".drepo2,\n" +
+                            "\"r54\".getpricenkd,\n" +
+                            "\"r54\".salepricenkd,\n" +
+                            "\"r54\".costrepo,\n" +
+                            "\"r54\".implrepo,\n" +
+                            "\"r54\".bankrate,\n" +
+                            "\"r54\".costrepo269,\n" +
+                            "\"r54\".costrepotax,\n" +
+                            "\"r54\".typerow\n" +
+                            "from migration.trd_54 \"r54\" \n" +
+                            "inner join migration.exemplar \"ex\"  on \"r54\".fidexemplar = \"ex\".idexemplar\n" +
+                            "left outer join migration.periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
+                            "left outer join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "left outer join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "left outer join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "where \"ex\".idexemplar=?\n" +
+                            "order by \"r54\".num asc, \"r54\".typerow desc",
+                    new Object[]{ex.getExemplarId()},
+                    new RnuCommonRowMapper()
+            );
+        } catch (DataRetrievalFailureException e) {
+            throw new DaoException("Error " + e.getLocalizedMessage(), ex.getExemplarId());
+        }
+    }
+
+
+    @Override
+    public List<RnuCommonRow> getRnu53RowList(Exemplar ex) {
+        try {
+            logger.debug("Start getRnu53RowList with " + ex);
+            return getJdbcTemplate().query(
+                    "select\n" +
+                            "\"r53\".num,\n" +
+                            "\"r53\".numdeal,\n" +
+                            "\"r53\".defpaper,\n" +
+                            "\"r53\".codecurrency,\n" +
+                            "\"r53\".nompaper,\n" +
+                            "\"r53\".drepo1,\n" +
+                            "\"r53\".drepo2,\n" +
+                            "\"r53\".getpricenkd,\n" +
+                            "\"r53\".salepricenkd,\n" +
+                            "\"r53\".costrepo,\n" +
+                            "\"r53\".implrepo,\n" +
+                            "\"r53\".bankrate,\n" +
+                            "\"r53\".costrepo269,\n" +
+                            "\"r53\".costrepotax,\n" +
+                            "\"r53\".typerow\n" +
+                            "from migration.trd_53 \"r53\" \n" +
+                            "inner join migration.exemplar \"ex\"  on \"r53\".fidexemplar = \"ex\".idexemplar\n" +
+                            "left outer join migration.periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
+                            "left outer join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "left outer join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "left outer join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "where \"ex\".idexemplar=?\n" +
+                            "order by \"r53\".num asc, \"r53\".typerow desc",
+                    new Object[]{ex.getExemplarId()},
+                    new RnuCommonRowMapper()
+            );
+        } catch (DataRetrievalFailureException e) {
+            throw new DaoException("Error " + e.getLocalizedMessage(), ex.getExemplarId());
+        }
+    }
+
+    private class Rnu51RowMapper implements RowMapper<Rnu51Row> {
+        public Rnu51Row mapRow(ResultSet rs, int index) throws SQLException {
+            Rnu51Row row = new Rnu51Row();
+
+            row.setNum(MapperUtils.getLong(rs, 1));
+            row.setCodedeal(MapperUtils.getLong(rs,2));
+
+            row.setTypepaper(MapperUtils.getString(rs, 3));
+            row.setDefpaper(MapperUtils.getString(rs, 4));
+            row.setDget(MapperUtils.getDate(rs, 5));
+            row.setDimpl(MapperUtils.getDate(rs, 6));
+            row.setNumpaper(MapperUtils.getLong(rs,7));
+            row.setSalepriceperc(MapperUtils.getBD(rs, 8));
+            row.setRsaleprice(MapperUtils.getBD(rs, 9));
+            row.setGetsalepricetax(MapperUtils.getBD(rs, 10));
+            row.setGetmpriceperc(MapperUtils.getBD(rs, 11));
+            row.setGetmprice(MapperUtils.getBD(rs, 12));
+            row.setRmarketprice(MapperUtils.getBD(rs, 13));
+            row.setMarketpriceperc(MapperUtils.getBD(rs, 14));
+            row.setRcost(MapperUtils.getBD(rs, 15));
+            row.setRtotalcost(MapperUtils.getBD(rs, 16));
+            row.setRprofitcost(MapperUtils.getBD(rs, 17));
+            row.setRgetprice(MapperUtils.getBD(rs, 18));
+            row.setRgetcost(MapperUtils.getBD(rs, 19));
+            row.setRsumext(MapperUtils.getBD(rs, 20));
+            row.setRsalepricetax(MapperUtils.getBD(rs, 21));
+            row.setRovwrprice(MapperUtils.getBD(rs, 22));
+
+            row.setTypeRow(MapperUtils.getString(rs, 23));
+            return row;
+        }
+    }
+
+    @Override
+    public List<Rnu51Row> getRnu51RowList(Exemplar ex) {
+        try {
+            logger.debug("Start getRnu51RowList with " + ex);
+            return getJdbcTemplate().query(
+                    "select\n" +
+                            "\"r51\".num,\n" +
+                            "\"r51\".codedeal as \"tradenumber\",\n" +
+                            "\"r51\".typepaper as \"singsecurirty\",\n" +
+                            "\"r51\".defpaper as \"issue\",\n" +
+                            "\"r51\".dget as \"acquisitiondate\",\n" +
+                            "\"r51\".dimpl as \"saledate\",\n" +
+                            "\"r51\".numpaper as \"amountbonds\",\n" +
+                            "\"r51\".salepriceperc as \"priceinfactperc\",\n" +
+                            "\"r51\".rsaleprice as \"priceinfactrub\",\n" +
+                            "\"r51\".getsalepricetax,\n" +
+                            "\"r51\".getmpriceperc,\n" +
+                            "\"r51\".getmprice,\n" +
+                            "\"r51\".rmarketprice,\n" +
+                            "\"r51\".marketpriceperc,\n" +
+                            "\"r51\".rcost as \"expensesonsale\",\n" +
+                            "\"r51\".rtotalcost as \"expensestotal\",\n" +
+                            "\"r51\".rprofitcost as \"profit\",\n" +
+                            "\"r51\".rgetprice,\n" +
+                            "\"r51\".rgetcost,\n" +
+                            "\"r51\".rsumext,\n" +
+                            "\"r51\".rsalepricetax,\n" +
+                            "\"r51\".rovwrprice\n," +
+                            "\"r51\".typerow\n" +
+                            "from migration.trd_51 \"r51\" \n" +
+                            "inner join migration.exemplar \"ex\"  on \"r51\".fidexemplar = \"ex\".idexemplar\n" +
+                            "left outer join migration.periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
+                            "left outer join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "left outer join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "left outer join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "where \"ex\".idexemplar=?\n" +
+                            "order by \"r51\".num asc, \"r51\".typerow desc",
+                    new Object[]{ex.getExemplarId()},
+                    new Rnu51RowMapper()
             );
         } catch (DataRetrievalFailureException e) {
             throw new DaoException("Error " + e.getLocalizedMessage(), ex.getExemplarId());

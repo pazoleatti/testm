@@ -63,7 +63,8 @@
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao"/>
-    </bean>    <bean class="org.mockito.Mockito" factory-method="mock">
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.MigrationDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">

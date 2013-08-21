@@ -5,7 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
 import com.aplana.sbrf.taxaccounting.model.migration.enums.*;
 import com.aplana.sbrf.taxaccounting.model.migration.row.AbstractRnuRow;
-import com.aplana.sbrf.taxaccounting.model.migration.row.Rnu60Row;
+import com.aplana.sbrf.taxaccounting.model.migration.row.Rnu51Row;
+import com.aplana.sbrf.taxaccounting.model.migration.row.RnuCommonRow;
 import com.aplana.sbrf.taxaccounting.model.migration.row.Rnu64Row;
 import com.aplana.sbrf.taxaccounting.service.MigrationService;
 import com.aplana.sbrf.taxaccounting.service.XmlGenerationService;
@@ -58,12 +59,14 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
 
     @Override
     public String generateXmlFileToString(Exemplar ex) {
-        return documentToString(createDocument(ex));
+        Document document = createDocument(ex);
+        return xmlDocumentToString(document);
     }
 
     @Override
     public byte[] generateXmlFileToBytes(Exemplar ex) {
-        return documentToBytes(createDocument(ex));
+        Document document = createDocument(ex);
+        return xmlDocumentToBytes(document);
     }
 
     private Document createDocument(Exemplar ex) {
@@ -87,7 +90,7 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
         return document;
     }
 
-    private String documentToString(Document doc) {
+    private String xmlDocumentToString(Document doc) {
         try {
             StringWriter writer = new StringWriter();
             StreamResult result = new StreamResult(writer);
@@ -99,7 +102,7 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
         }
     }
 
-    private byte[] documentToBytes(Document doc) {
+    private byte[] xmlDocumentToBytes(Document doc) {
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             StreamResult result = new StreamResult(stream);
@@ -203,8 +206,10 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
     private Element getRecordElement(AbstractRnuRow abstractRnuRow, Document doc) {
         if (abstractRnuRow instanceof Rnu64Row) {
             return generateRecordXml((Rnu64Row) abstractRnuRow, doc);
-        } else if (abstractRnuRow instanceof Rnu60Row) {
-            return generateRecordXml((Rnu60Row) abstractRnuRow, doc);
+        } else if (abstractRnuRow instanceof RnuCommonRow) {
+            return generateRecordXml((RnuCommonRow) abstractRnuRow, doc);
+        } else if (abstractRnuRow instanceof Rnu51Row) {
+            return generateRecordXml((Rnu51Row) abstractRnuRow, doc);
         } else {
             throw new ServiceException("Ошибка формирования XML файла.");
         }
@@ -223,7 +228,7 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
         return record;
     }
 
-    private Element generateRecordXml(Rnu60Row row, Document doc) {
+    private Element generateRecordXml(RnuCommonRow row, Document doc) {
         Element record = doc.createElement("record");
 
         record.appendChild(getFieldElement("NUM", row.getNum(), doc));
@@ -239,6 +244,35 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
         record.appendChild(getFieldElement("BANKRATE", row.getBankrate(), doc));
         record.appendChild(getFieldElement("COSTREPO269", row.getCostrepo269(), doc));
         record.appendChild(getFieldElement("COSTREPOTAX", row.getCostrepotax(), doc));
+
+        return record;
+    }
+
+    private Element generateRecordXml(Rnu51Row row, Document doc) {
+        Element record = doc.createElement("record");
+
+        record.appendChild(getFieldElement("NUM", row.getNum(), doc));
+        record.appendChild(getFieldElement("CODEDEAL", row.getCodedeal(), doc));
+        record.appendChild(getFieldElement("TYPEPAPER", row.getTypepaper(), doc, true));
+        record.appendChild(getFieldElement("DEFPAPER", row.getDefpaper(), doc, true));
+        record.appendChild(getFieldElement("DGET", formatDate(row.getDget()), doc));
+        record.appendChild(getFieldElement("DIMPL", formatDate(row.getDimpl()), doc));
+        record.appendChild(getFieldElement("NUMPAPER", row.getNumpaper(), doc));
+        record.appendChild(getFieldElement("SALEPRICEPERC", row.getSalepriceperc(), doc));
+        record.appendChild(getFieldElement("RSALEPRICE", row.getRsaleprice(), doc));
+        record.appendChild(getFieldElement("GETSALEPRICETAX", row.getGetsalepricetax(), doc));
+        record.appendChild(getFieldElement("GETMPRICEPERC", row.getGetmpriceperc(), doc));
+        record.appendChild(getFieldElement("GETMPRICE", row.getGetmprice(), doc));
+        record.appendChild(getFieldElement("RMARKETPRICE", row.getRmarketprice(), doc));
+        record.appendChild(getFieldElement("MARKETPRICEPERC", row.getMarketpriceperc(), doc));
+        record.appendChild(getFieldElement("RCOST", row.getRcost(), doc));
+        record.appendChild(getFieldElement("RTOTALCOST", row.getRtotalcost(), doc));
+        record.appendChild(getFieldElement("RPROFITCOST", row.getRprofitcost(), doc));
+        record.appendChild(getFieldElement("RGETPRICE", row.getRgetprice(), doc));
+        record.appendChild(getFieldElement("RGETCOST", row.getRgetcost(), doc));
+        record.appendChild(getFieldElement("RSUMEXT", row.getRsumext(), doc));
+        record.appendChild(getFieldElement("RSALEPRICETAX", row.getRsalepricetax(), doc));
+        record.appendChild(getFieldElement("ROVWRPRICE", row.getRovwrprice(), doc));
 
         return record;
     }

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
 import com.aplana.sbrf.taxaccounting.model.migration.row.AbstractRnuRow;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,9 @@ import java.util.Map;
  * @author Alexande Ivanov
  */
 public interface MigrationService {
+
+    public static List<Integer> RNU_LIST = Arrays.asList(25, 26, 27, 31);
+    public static List<Integer> XML_LIST = Arrays.asList(51, 53, 54, 59, 60, 64);
     /**
      * Получение актуальных записей экземпляров конкретного типа рну
      *

@@ -66,6 +66,8 @@ public class MainPagePresenter extends
                     getView().appendText(entry.getKey() + "\n\r");
                     getView().appendText(entry.getValue() + "\n\r");
                 }
+
+                getView().appendText("Отправленые экземпляры: " + result.getSendFiles());
             }
         });
     }

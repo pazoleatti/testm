@@ -36,16 +36,16 @@ public class StartHandler extends AbstractActionHandler<StartAction, StartResult
     public StartResult execute(StartAction action, ExecutionContext context) throws ActionException {
         StartResult result = new StartResult();
         result.getExemplarList().addAll(migrationService.getActualExemplarByRnuType(action.getRnuList()));
-        //Map<String, String> map = migrationService.startMigrationProcessDebug(action.getRnuList());
-        //result.setFiles(map);
-
+//        Map<String, String> map = migrationService.startMigrationProcessDebug(action.getRnuList());
+//        result.setFiles(map);
+        Integer sendFiles = 0;
         Map<String, byte[]> map = migrationService.startMigrationProcess(action.getRnuList());
         try {
-            messageService.sendMessagePack(map);
+            sendFiles = messageService.sendMessagePack(map);
         } catch (JMSException e) {
             logger.error("Error by sending messages with transport files data. " + e.getMessage());
         }
-
+        result.setSendFiles(sendFiles);
         return result;
     }
 

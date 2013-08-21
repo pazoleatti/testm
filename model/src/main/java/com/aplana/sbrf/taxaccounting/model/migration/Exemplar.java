@@ -98,7 +98,7 @@ public class Exemplar implements Serializable {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("Exemplar");
-        sb.append("{exemplarId=").append(exemplarId);
+        sb.append("{Id=").append(exemplarId);
         sb.append(", periodityId=").append(periodityId);
         sb.append(", beginDate=").append(beginDate);
         sb.append(", endDate=").append(endDate);

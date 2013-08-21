@@ -48,17 +48,22 @@ public class MigrationServiceImpl implements MigrationService {
     public Map<String, String> startMigrationProcessDebug(List<Long> rnuIds) {
         List<Exemplar> list = getActualExemplarByRnuType(rnuIds);
 
-        List<Integer> rnus = Arrays.asList(25, 26, 27, 31);
-        List<Integer> xmls = Arrays.asList(51, 53, 54, 59, 60, 64);
+        logger.debug("Count of examples - " + list.size());
 
         LinkedHashMap<String, String> hashMap = new LinkedHashMap<String, String>();
 
         for (Exemplar ex : list) {
-            if (rnus.contains(ex.getRnuTypeId())) {
-                hashMap.put(rnuService.getRnuFileName(ex), rnuService.generateRnuFileToString(ex));
-            } else if (xmls.contains(ex.getRnuTypeId())) {
-                hashMap.put(xmlService.getXmlFileName(ex), xmlService.generateXmlFileToString(ex));
+            logger.debug("Start forming file. ExemplarId=" + ex.getExemplarId());
+            if (RNU_LIST.contains(ex.getRnuTypeId())) {
+                String filename = rnuService.getRnuFileName(ex);
+                logger.debug("Filename " + filename);
+                hashMap.put(filename, rnuService.generateRnuFileToString(ex));
+            } else if (XML_LIST.contains(ex.getRnuTypeId())) {
+                String filename = xmlService.getXmlFileName(ex);
+                logger.debug("Filename " + filename);
+                hashMap.put(filename, xmlService.generateXmlFileToString(ex));
             }
+            logger.debug("Stop forming file. ExemplarId=" + ex.getExemplarId());
         }
         return hashMap;
     }
@@ -67,17 +72,22 @@ public class MigrationServiceImpl implements MigrationService {
     public Map<String, byte[]> startMigrationProcess(List<Long> rnuIds) {
         List<Exemplar> list = getActualExemplarByRnuType(rnuIds);
 
-        List<Integer> rnus = Arrays.asList(25, 26, 27, 31);
-        List<Integer> xmls = Arrays.asList(51, 53, 54, 59, 60, 64);
+        logger.debug("Count of examples - " + list.size());
 
         LinkedHashMap<String, byte[]> hashMap = new LinkedHashMap<String, byte[]>();
 
         for (Exemplar ex : list) {
-            if (rnus.contains(ex.getRnuTypeId())) {
-                hashMap.put(rnuService.getRnuFileName(ex), rnuService.generateRnuFileToBytes(ex));
-            } else if (xmls.contains(ex.getRnuTypeId())) {
-                hashMap.put(xmlService.getXmlFileName(ex), xmlService.generateXmlFileToBytes(ex));
+            logger.debug("Start forming file. ExemplarId=" + ex.getExemplarId());
+            if (RNU_LIST.contains(ex.getRnuTypeId())) {
+                String filename = rnuService.getRnuFileName(ex);
+                logger.debug("Filename " + filename);
+                hashMap.put(filename, rnuService.generateRnuFileToBytes(ex));
+            } else if (XML_LIST.contains(ex.getRnuTypeId())) {
+                String filename = xmlService.getXmlFileName(ex);
+                logger.debug("Filename " + filename);
+                hashMap.put(filename, xmlService.generateXmlFileToBytes(ex));
             }
+            logger.debug("Stop forming file. ExemplarId=" + ex.getExemplarId());
         }
         return hashMap;
     }
@@ -99,12 +109,16 @@ public class MigrationServiceImpl implements MigrationService {
                 list = migrationDao.getRnu31RowList(ex);
                 break;
             case RNU51:
+                list = migrationDao.getRnu51RowList(ex);
                 break;
             case RNU53:
+                list = migrationDao.getRnu53RowList(ex);
                 break;
             case RNU54:
+                list = migrationDao.getRnu54RowList(ex);
                 break;
             case RNU59:
+                list = migrationDao.getRnu59RowList(ex);
                 break;
             case RNU60:
                 list = migrationDao.getRnu60RowList(ex);

@@ -3,7 +3,11 @@ package com.aplana.sbrf.taxaccounting.model.migration.row;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class Rnu60Row extends AbstractRnuRow {
+/**
+ * Общая модель для строк из РНУ 53,54, 59,60
+ * @author Alexander Ivanov
+ */
+public class RnuCommonRow extends AbstractRnuRow {
 
     private String numDeal;
     private String defPaper;
@@ -19,7 +23,7 @@ public class Rnu60Row extends AbstractRnuRow {
     private BigDecimal costrepo269;
     private BigDecimal costrepotax;
 
-    public Rnu60Row() {
+    public RnuCommonRow() {
     }
 
     public String getNumDeal() {

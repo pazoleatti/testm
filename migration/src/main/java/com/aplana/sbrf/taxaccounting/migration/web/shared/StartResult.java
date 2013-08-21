@@ -11,6 +11,7 @@ public class StartResult implements Result {
 
     private List<Exemplar> exemplarList;
     private Map<String, String> files;
+    private Integer sendFiles = 0;
 
     public StartResult() {
         exemplarList = new ArrayList<Exemplar>();
@@ -30,5 +31,13 @@ public class StartResult implements Result {
 
     public void setFiles(Map<String, String> files) {
         this.files = files;
+    }
+
+    public Integer getSendFiles() {
+        return sendFiles;
+    }
+
+    public void setSendFiles(Integer sendFiles) {
+        this.sendFiles = sendFiles;
     }
 }
