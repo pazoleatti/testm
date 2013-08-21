@@ -12,10 +12,14 @@ import java.util.Map;
  * @date 19.08.13
  */
 public class MessageService {
-    private final Log logger = LogFactory.getLog(getClass());
 
-    private Queue fileQueue;
-    private ConnectionFactory conFactory;
+	public static final String FILENAME_PROPERTY_NAME = "FILENAME";
+	public static final String DATA_PROPERTY_NAME = "DATA";
+
+	private static final Log logger = LogFactory.getLog(MessageService.class);
+
+    private Queue queue;
+    private ConnectionFactory connectionFactory;
     private Connection connection;
 
     /**
@@ -26,9 +30,9 @@ public class MessageService {
      */
     public void sendMessage(final String fileName, final byte[] bodyFile) throws JMSException {
 
-        connection = conFactory.createConnection();
+        connection = connectionFactory.createConnection();
 
-        logger.debug("About to put message on queue. Queue[" + fileQueue + "]");
+        logger.debug("About to put message on queue. Queue[" + queue + "]");
         logger.debug("FileName[" + fileName + "]");
         logger.debug("BodyFileLength[" + bodyFile.length + "]");
 
@@ -36,9 +40,9 @@ public class MessageService {
 
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             MapMessage map = session.createMapMessage();
-            map.setString("FILENAME", fileName);
-            map.setBytes("DATA", bodyFile);
-            MessageProducer queueSender = session.createProducer(fileQueue);
+            map.setString(FILENAME_PROPERTY_NAME, fileName);
+            map.setBytes(DATA_PROPERTY_NAME, bodyFile);
+            MessageProducer queueSender = session.createProducer(queue);
             queueSender.send(map);
 
         } catch (JMSException e) {
@@ -54,16 +58,16 @@ public class MessageService {
      */
     public Integer sendMessagePack(Map<String, byte[]> files) throws JMSException {
         Integer coutSendedFiles = 0;
-        connection = conFactory.createConnection();
-        logger.debug("About to put message on queue. Queue[" + fileQueue + "]");
+        connection = connectionFactory.createConnection();
+        logger.debug("About to put message on queue. Queue[" + queue + "]");
         try {
 
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            MessageProducer queueSender = session.createProducer(fileQueue);
+            MessageProducer queueSender = session.createProducer(queue);
             for (Map.Entry<String, byte[]> file : files.entrySet()) {
                 MapMessage map = session.createMapMessage();
-                map.setString("FILENAME", file.getKey());
-                map.setBytes("DATA", file.getValue());
+                map.setString(FILENAME_PROPERTY_NAME, file.getKey());
+                map.setBytes(DATA_PROPERTY_NAME, file.getValue());
                 queueSender.send(map);
                 coutSendedFiles++;
                 logger.debug("File Name [" + file.getKey() + "] with Data File Length [" + file.getValue().length + "] is sended.");
@@ -74,19 +78,19 @@ public class MessageService {
         return coutSendedFiles;
     }
 
-    public ConnectionFactory getConFactory() {
-        return conFactory;
+    public ConnectionFactory getConnectionFactory() {
+        return connectionFactory;
     }
 
-    public void setConFactory(ConnectionFactory conFactory) {
-        this.conFactory = conFactory;
+    public void setConnectionFactory(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
     }
 
-    public void setFileQueue(Queue fileQueue) {
-        this.fileQueue = fileQueue;
+    public void setQueue(Queue queue) {
+        this.queue = queue;
     }
 
-    public Queue getFileQueue() {
-        return fileQueue;
+    public Queue getQueue() {
+        return queue;
     }
 }

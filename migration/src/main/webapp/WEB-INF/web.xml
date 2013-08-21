@@ -54,20 +54,21 @@
 	</resource-ref>
 
     <resource-ref>
-        <description>Connection Factory</description>
-        <res-ref-name>jms/conFactory</res-ref-name>
+        <description>Migration Connection Factory</description>
+        <res-ref-name>jms/migrationConnectionFactory</res-ref-name>
         <res-type>javax.jms.ConnectionFactory</res-type>
         <res-auth>Container</res-auth>
         <res-sharing-scope>Shareable</res-sharing-scope>
     </resource-ref>
 
-    <message-destination-ref>
-        <message-destination-ref-name>jms/fileMigrationQueue</message-destination-ref-name>
-        <message-destination-type>javax.jms.Queue</message-destination-type>
-        <message-destination-usage>Produces</message-destination-usage>
-        <message-destination-link>jms/fileMigrationQueue</message-destination-link>
-    </message-destination-ref>
-	
+    <resource-ref>
+        <description>Migration Message Queue</description>
+        <res-ref-name>jms/migrationQueue</res-ref-name>
+        <res-type>javax.jms.Queue</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+    </resource-ref>
+
 	<security-role>
 		<description>Все аутентифицированные пользователи</description>	
 		<role-name>taxaccountingUsers</role-name>
