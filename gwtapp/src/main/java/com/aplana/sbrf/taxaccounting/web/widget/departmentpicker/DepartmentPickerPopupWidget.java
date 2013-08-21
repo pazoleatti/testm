@@ -66,6 +66,7 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 		departmentPiker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+                popup.hide();
 				selected.setText(joinListToString(departmentPiker.getValueDereference()));
 				ValueChangeEvent.fire(DepartmentPickerPopupWidget.this, event.getValue());
 			}

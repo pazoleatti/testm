@@ -26,6 +26,8 @@ public class RefBookDaoTest {
 	public static final String ATTRIBUTE_PAGECOUNT = "order";
 	public static final String ATTRIBUTE_AUTHOR = "author";
 	public static final String ATTRIBUTE_NAME = "name";
+    public static final String ATTRIBUTE_WEIGHT = "weight";
+
 	@Autowired
     RefBookDao refBookDao;
 
@@ -33,7 +35,7 @@ public class RefBookDaoTest {
 	public void testGet1() {
 		RefBook refBook1 = refBookDao.get(1L);
 		Assert.assertEquals(1, refBook1.getId().longValue());
-		Assert.assertEquals(3, refBook1.getAttributes().size());
+		Assert.assertEquals(4, refBook1.getAttributes().size());
 	}
 
 	@Test
@@ -196,29 +198,60 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testCreateRecords1() {
-		RefBook refBook = refBookDao.get(1L);
-		Date version = getDate(1, 1, 2012);
+        RefBook refBook = refBookDao.get(1L);
+        Date version = getDate(1, 1, 2012);
 
-		List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
-		int rowCount = 5;
-		for (int i = 0; i < rowCount; i++) {
-			Map<String, RefBookValue> record = refBook.createRecord();
-			record.get(ATTRIBUTE_NAME).setValue("Название книги " + i);
-			record.get(ATTRIBUTE_PAGECOUNT).setValue(100 + i);
-			record.get(ATTRIBUTE_AUTHOR).setValue(6L);
-			records.add(record);
-		}
-		refBookDao.createRecords(refBook.getId(), version, records);
+        List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
+        int rowCount = 5;
+        for (int i = 0; i < rowCount; i++) {
+            Map<String, RefBookValue> record = refBook.createRecord();
+            record.get(ATTRIBUTE_NAME).setValue("Название книги " + i);
+            record.get(ATTRIBUTE_PAGECOUNT).setValue(100 + i);
+            record.get(ATTRIBUTE_AUTHOR).setValue(6L);
+            records.add(record);
+        }
+        refBookDao.createRecords(refBook.getId(), version, records);
 
-		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(refBook.getId(), version, new PagingParams(), null, refBook.getAttribute(ATTRIBUTE_NAME));
-		Assert.assertEquals(rowCount, data.getRecords().size());
-		for (int i = 0; i < rowCount; i++) {
-			Map<String, RefBookValue> record = data.getRecords().get(i);
-			Assert.assertEquals("Название книги " + i, record.get(ATTRIBUTE_NAME).getStringValue());
-			Assert.assertEquals(100 + i, record.get(ATTRIBUTE_PAGECOUNT).getNumberValue().intValue());
-			Assert.assertEquals(6, record.get(ATTRIBUTE_AUTHOR).getReferenceValue().intValue());
-		}
-	}
+        PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(refBook.getId(), version, new PagingParams(), null, refBook.getAttribute(ATTRIBUTE_NAME));
+        Assert.assertEquals(rowCount, data.getRecords().size());
+        for (int i = 0; i < rowCount; i++) {
+            Map<String, RefBookValue> record = data.getRecords().get(i);
+            Assert.assertEquals("Название книги " + i, record.get(ATTRIBUTE_NAME).getStringValue());
+            Assert.assertEquals(100 + i, record.get(ATTRIBUTE_PAGECOUNT).getNumberValue().intValue());
+            Assert.assertEquals(6, record.get(ATTRIBUTE_AUTHOR).getReferenceValue().intValue());
+        }
+    }
+
+    @Test
+    public void testCreateRecords2() {
+        // Проверка округления
+        RefBook refBook = refBookDao.get(1L);
+        Date version = getDate(1, 1, 2012);
+        List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
+
+        Map<String, RefBookValue> record = refBook.createRecord();
+        record.get(ATTRIBUTE_NAME).setValue("Название книги 1");
+        record.get(ATTRIBUTE_PAGECOUNT).setValue(100);
+        record.get(ATTRIBUTE_AUTHOR).setValue(6L);
+        record.get(ATTRIBUTE_WEIGHT).setValue(0.9245);
+        records.add(record);
+
+        record = refBook.createRecord();
+        record.get(ATTRIBUTE_NAME).setValue("Название книги 2");
+        record.get(ATTRIBUTE_PAGECOUNT).setValue(500);
+        record.get(ATTRIBUTE_AUTHOR).setValue(6L);
+        record.get(ATTRIBUTE_WEIGHT).setValue(2.1344);
+        records.add(record);
+
+        refBookDao.createRecords(refBook.getId(), version, records);
+
+        PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(refBook.getId(), version,
+                new PagingParams(), null, refBook.getAttribute(ATTRIBUTE_WEIGHT));
+        Assert.assertEquals(2, data.getRecords().size());
+
+        Assert.assertEquals(data.getRecords().get(0).get(ATTRIBUTE_WEIGHT).getNumberValue().doubleValue(), 0.925d, 0d);
+        Assert.assertEquals(data.getRecords().get(1).get(ATTRIBUTE_WEIGHT).getNumberValue().doubleValue(), 2.134d, 0d);
+    }
 
 	/**
 	 * Проверяем на пустом наборе данных
@@ -279,6 +312,32 @@ public class RefBookDaoTest {
         Assert.assertEquals(record.get(RefBookDaoTest.ATTRIBUTE_NAME).getStringValue(), "Вий. Туда и обратно");
         Assert.assertEquals(record.get(ATTRIBUTE_PAGECOUNT).getNumberValue().longValue(), 123L);
         Assert.assertEquals(record.get(RefBookDaoTest.ATTRIBUTE_AUTHOR).getReferenceValue(), Long.valueOf(7L));
+    }
+
+    @Test
+    public void testUpdateRecords3() {
+        // Проверка округления
+        Long refBookId = 1L;
+        // Существующая дата
+        Date version = getDate(1, 1, 2013);
+        PagingParams pp = new PagingParams();
+        pp.setCount(3);
+        PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(refBookId, version, pp, null, null);
+
+        Map<String, RefBookValue> record = data.getRecords().get(0);
+        record.get(ATTRIBUTE_WEIGHT).setValue(0.123456789d);
+        refBookDao.updateRecords(refBookId, version, Arrays.asList(record));
+
+        record = data.getRecords().get(1);
+        record.get(ATTRIBUTE_WEIGHT).setValue(-345.9905);
+        refBookDao.updateRecords(refBookId, version, Arrays.asList(record));
+
+        data = refBookDao.getRecords(refBookId, version, new PagingParams(), null, null);
+
+        Assert.assertEquals(data.getRecords().get(0).get(ATTRIBUTE_WEIGHT).getNumberValue().doubleValue(),
+                0.123d, 0d);
+        Assert.assertEquals(data.getRecords().get(1).get(ATTRIBUTE_WEIGHT).getNumberValue().doubleValue(),
+                -345.991d, 0d);
     }
 
     @Test
