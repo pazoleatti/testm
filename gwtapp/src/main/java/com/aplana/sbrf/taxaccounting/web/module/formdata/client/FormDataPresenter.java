@@ -148,7 +148,7 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onManualInputClicked(boolean readOnlyMode) {
-		revealForm(readOnlyMode);
+		revealFormData(readOnlyMode);
 	}
 
 	@Override
@@ -179,13 +179,13 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onReturnClicked() {
-			goToFormDataList();
+			revealFormDataList();
 		}
 
 	@Override
 	public void onCancelClicked() {
 			if(formData.getId() == null){
-				goToFormDataList();
+				revealFormDataList();
 			} else {
 				RollbackDataAction action = new RollbackDataAction();
 				action.setFormDataId(formData.getId());
@@ -196,7 +196,7 @@ public class FormDataPresenter extends
 							}
 
 						}, this));
-				revealForm(true);
+				revealFormData(true);
 				modifiedRows.clear();
 			}
 		}
@@ -350,7 +350,7 @@ public class FormDataPresenter extends
 										@Override
 										public void onSuccess(
 												DeleteFormDataResult result) {
-											goToFormDataList();
+											revealFormDataList();
 										}
 
 									}, this));
@@ -368,11 +368,7 @@ public class FormDataPresenter extends
 		}
 	}
 
-	private void goToFormDataList() {
-		placeManager.revealPlace(new PlaceRequest(
-				FormDataListNameTokens.FORM_DATA_LIST).with("nType",
-				String.valueOf(formData.getFormType().getTaxType())));
-	}
+
 
 	private void goMove(final WorkflowMove wfMove){
 		GoMoveAction action = new GoMoveAction();
@@ -382,7 +378,7 @@ public class FormDataPresenter extends
 				.defaultCallback(new AbstractCallback<GoMoveResult>() {
 					@Override
 					public void onSuccess(GoMoveResult result) {
-						revealForm(true, wfMove.getId());
+						revealFormData(true);
 					}
 				}, this));
 	}
