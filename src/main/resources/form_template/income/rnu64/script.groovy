@@ -96,29 +96,21 @@ switch (formDataEvent){
     case FormDataEvent.CALCULATE:
         fillForm()
         logicalCheck()
-
         sort()
         break
 
     case FormDataEvent.COMPOSE:
         consolidation()
         fillForm()
+        logicalCheck()
+        // для сохранения изменений приемников
+        getData(formData).commit()
         break
     // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
         logicalCheck()
         break
-    // обобщить
-    case FormDataEvent.COMPOSE :
-        consolidation()
-        fillForm()
-        logicalCheck()
-        // для сохранения изменений приемников
-        getData(formData).commit()
-        break
 }
-
-
 
 /**
  * Добавление новой строки
@@ -252,43 +244,49 @@ def fillForm(){
  */
 def logicalCheck(){
     def data = getData(formData)
+    def totalQuarterRow = null
+    def totalRow = null
     getRows(data).each{ row ->
         // Обязательность заполнения поля графы (с 1 по 6); фатальная; Поле ”Наименование поля” не заполнено!
-        ['number', 'date', 'part', 'dealingNumber', 'bondKind', 'costs'].each{alias ->
-            if (!isTotalRow(row) && (row[alias] == null || row[alias] == '')){
-                logger.error('Поле ”'+row.getCell(alias).getColumn().getName()+'” не заполнено!')
+        if(!isTotalRow(row)){
+            ['number', 'date', 'part', 'dealingNumber', 'bondKind', 'costs'].each{alias ->
+                if (!isTotalRow(row) && (row[alias] == null || row[alias] == '')){
+                    logger.error('Поле ”'+row.getCell(alias).getColumn().getName()+'” не заполнено!')
+                }
             }
-        }
 
-        reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
-        reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
-        // Проверка даты совершения операции и границ отчетного периода; фатальная; Дата совершения операции вне границ отчетного периода!
-        if (!isTotalRow(row) && row.date != null && !(
-                (reportPeriodStartDate.getTime().equals(row.date) || row.date.after(reportPeriodStartDate.getTime())) &&
-                (reportPeriodEndDate.getTime().equals(row.date) || row.date.before(reportPeriodEndDate.getTime()))
-        )){
-            logger.error('Дата совершения операции вне границ отчетного периода!')
-        }
-
-        getRows(data).each { rowItem ->
-            if (!isTotalRow(row) && row.number == rowItem.number && !row.equals(rowItem)) {
-                logger.error('Нарушена уникальность номера по порядку!')
+            reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+            reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
+            // Проверка даты совершения операции и границ отчетного периода; фатальная; Дата совершения операции вне границ отчетного периода!
+            if (!isTotalRow(row) && row.date != null && !(
+                    (reportPeriodStartDate.getTime().equals(row.date) || row.date.after(reportPeriodStartDate.getTime())) &&
+                    (reportPeriodEndDate.getTime().equals(row.date) || row.date.before(reportPeriodEndDate.getTime()))
+            )){
+                logger.error('Дата совершения операции вне границ отчетного периода!')
             }
-        }
 
-        // Проверка на нулевые значения; фатальная; Все суммы по операции нулевые!
-        if (row.costs == 0){
-            logger.error('Все суммы по операции нулевые!')
-        }
-        // Проверка актуальности поля «Часть сделки»; не фатальная;
-        if (row.part!=null && getPart(row.part)==null){
-            logger.warn('Поле ”Часть сделки” указано неверно!');
+            getRows(data).each { rowItem ->
+                if (!isTotalRow(row) && row.number == rowItem.number && !row.equals(rowItem)) {
+                    logger.error('Нарушена уникальность номера по порядку!')
+                }
+            }
+
+            // Проверка на нулевые значения; фатальная; Все суммы по операции нулевые!
+            if (row.costs == 0){
+                logger.error('Все суммы по операции нулевые!')
+            }
+            // Проверка актуальности поля «Часть сделки»; не фатальная;
+            if (row.part!=null && getPart(row.part)==null){
+                logger.warn('Поле ”Часть сделки” указано неверно!');
+            }
+        } else if (isMainTotalRow(row)){
+            totalRow = row
+        } else if (isQuarterTotal(row)){
+            totalQuarterRow = row
         }
     }
 
     // проверка на наличие итоговых строк, иначе будет ошибка
-    def totalQuarterRow = data.getDataRow(getRows(data),'totalQuarter')
-    def totalRow = data.getDataRow(getRows(data),'total')
     if (totalQuarterRow!=null || totalRow!=null) {
         // Проверка итоговых значений за текущий квартал; фатальная; Итоговые значения за текущий квартал рассчитаны неверно!
         if (totalQuarterRow!=null && totalQuarterRow.costs != getQuarterTotal()) {
