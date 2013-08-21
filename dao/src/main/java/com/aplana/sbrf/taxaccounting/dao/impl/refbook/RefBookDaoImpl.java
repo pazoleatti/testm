@@ -18,6 +18,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -384,7 +386,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     }
                     break;
                     case NUMBER: {
-                        values[3] = entry.getValue().getNumberValue();
+                        if (entry.getValue().getNumberValue() != null) {
+                            values[3] = BigDecimal.valueOf(entry.getValue().getNumberValue().doubleValue())
+                                    .setScale(attribute.getPrecision(), RoundingMode.HALF_UP).doubleValue();
+                        }
                     }
                     break;
                     case DATE: {
@@ -454,7 +459,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         }
                         break;
                         case NUMBER: {
-                            values[3] = entry.getValue().getNumberValue();
+                            if (entry.getValue().getNumberValue() != null) {
+                                values[3] = BigDecimal.valueOf(entry.getValue().getNumberValue().doubleValue())
+                                        .setScale(attribute.getPrecision(), RoundingMode.HALF_UP).doubleValue();
+                            }
                         }
                         break;
                         case DATE: {
