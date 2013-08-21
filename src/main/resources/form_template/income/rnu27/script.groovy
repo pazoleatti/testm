@@ -181,7 +181,7 @@ void logicalCheck() {
 
             // @author ivildanov
             // Арифметические проверки граф 5, 8, 11, 12, 13, 14, 15, 16, 17
-            List checks = ['currency', 'reserveCalcValuePrev', 'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
+            List checks = ['reserveCalcValuePrev', 'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
             Map<String, Object> value = [:]
             value.put('reserveCalcValuePrev', calc8(row))
             value.put('marketQuotation', calc11(row))
@@ -782,7 +782,7 @@ void addNewRowwarnrmData() {
         index = 0
     }
     [
-            'issuer', 'regNumber', 'tradeNumber', 'prev', 'current', 'reserveCalcValuePrev', 'cost', 'signSecurity',
+            'currency', 'issuer', 'regNumber', 'tradeNumber', 'prev', 'current', 'reserveCalcValuePrev', 'cost', 'signSecurity',
             'marketQuotation', 'rubCourse', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery'
     ].each {
         newRow.getCell(it).editable = true
