@@ -21,7 +21,7 @@
         <intercept-url pattern="/**" access="isAuthenticated()"/>
         <custom-filter position="PRE_AUTH_FILTER" ref="j2eePreAuthFilter"/>
         <form-login login-processing-url="/j_security_check"/>
-        <logout logout-success-url="/logout" />
+        <logout logout-success-url="/" />
     </http>
     <sec:global-method-security pre-post-annotations="enabled" proxy-target-class = "true"/>
 </beans:beans>
