@@ -214,8 +214,9 @@ def fillForm(){
 
     def i=1
     getRows(data).each{ row ->
-        row.number = i
-        i++
+        if (isTotalRow(row)) {
+            row.number = i++
+        }
     }
     data.save(getRows(data))
 
@@ -389,8 +390,11 @@ void setRowIndex() {
     def data = getData(formData)
     def i = 1;
     getRows(data).each { rowItem ->
-        rowItem.number = i++
+        if (!isTotalRow(rowItem)) {
+            rowItem.number = i++
+        }
     }
+    data.save(getRows(data))
 }
 
 /**
