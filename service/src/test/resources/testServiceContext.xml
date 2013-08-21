@@ -65,6 +65,9 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.MigrationDao"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService"/>
     </bean>
     <bean id="signDataPath" class="java.net.URL">

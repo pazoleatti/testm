@@ -15,6 +15,9 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         allCheck()
         break
+    case FormDataEvent.CREATE:
+        checkCreation()
+        break
     case FormDataEvent.CALCULATE:
         deleteAllStatic()
         sort()
@@ -511,6 +514,18 @@ void addAllStatic() {
 void allCheck() {
     logicalCheck()
     checkNSI()
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = formDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
+    }
 }
 
 void checkNSI() {

@@ -16,6 +16,7 @@
 		<module>dao</module>
 		<module>service</module>
 		<module>gwtapp</module>
+		<module>migration</module>
 		<module>taxaccounting-ear</module>
 		<module>dynacache-spring</module>
 		<module>test-utils</module>

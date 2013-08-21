@@ -1,0 +1,22 @@
+<configuration>
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} %level %logger - %msg%n</pattern>
+		</encoder>
+	</appender>
+	<!-- Уровень логов по-умолчанию - info -->
+	<root level="info">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+	<!-- Spring слишком много пишет в лог на уровне info -->
+	<logger name="org.springframework" level="warn"/>
+	
+	<!-- Логгеры проекта пишут с уровнем debug -->
+	<logger name="com.aplana.sbrf.taxaccounting" level="debug"/>
+
+	<!-- Мапперы MyBatis на урвоне debug выдают слишком много информации, поэтому для них уровень info -->
+	<logger name="com.aplana.sbrf.taxaccounting.dao.mapper" level="info"/>
+	<logger name="com.aplana.sbrf.taxaccounting.dao.security.mapper" level="info"/>
+    <logger name="com.aplana.sbrf.taxaccounting.dao.script.mapper" level="info"/>
+</configuration>

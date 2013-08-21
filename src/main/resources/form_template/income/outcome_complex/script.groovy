@@ -149,8 +149,28 @@ void calculationControlGraphs() {
         }
         if (!isEmpty(row.consumptionTaxSumS) && !isEmpty(row.consumptionBuhSumAccepted) &&
                 !isEmpty(row.consumptionBuhSumPrevTaxPeriod)) {
-            // графы 11 = ОКРУГЛ(«графа 9» - («графа 6» - «графа 7»); 2)
-            tmp = round(row.consumptionTaxSumS - (row.consumptionBuhSumAccepted - row.consumptionBuhSumPrevTaxPeriod), 2)
+            // ОКРУГЛ( «графа9»-(Сумма 6-Сумма 7);2),
+            sum6 = 0
+            sum7 = 0
+            for (rowSum in dataRowsHelper.getAllCached()) {
+                String knySum
+                String kny
+                if (rowSum.getCell('consumptionTypeId').hasValueOwner()) {
+                    knySum = rowSum.getCell('consumptionTypeId').valueOwner
+                } else {
+                    knySum = rowSum.getCell('consumptionTypeId').value
+                }
+                if (row.getCell('consumptionTypeId').hasValueOwner()) {
+                    kny = row.getCell('consumptionTypeId').valueOwner
+                } else {
+                    kny = row.getCell('consumptionTypeId').value
+                }
+                if (kny == knySum) {
+                    sum6 += rowSum.consumptionBuhSumAccepted
+                    sum7 += rowSum.consumptionBuhSumPrevTaxPeriod
+                }
+            }
+            tmp = round(row.consumptionTaxSumS - (sum6 - sum7), 2)
             value = ((BigDecimal) tmp).setScale(2, BigDecimal.ROUND_HALF_UP)
             row.logicalCheck = (tmp < 0 ? message : value.toString())
         }
