@@ -53,6 +53,7 @@ switch (formDataEvent){
 // Инициирование Пользователем создания формы
     case FormDataEvent.CREATE:
         //1.    Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при создании формы.
+        checkCreation()
         //2.    Логические проверки значений налоговой.
         //3.    Проверки соответствия НСИ.
         break
@@ -260,6 +261,18 @@ def fillForm(){
     if (data.getAllCached().size()>0) {
 // вставка строки итого
         data.insert(newRow, data.getAllCached().size()+1);
+    }
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = formDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
 }
 

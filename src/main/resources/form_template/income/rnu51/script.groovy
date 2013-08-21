@@ -13,7 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK:
-        allCheck()
+        checkCreation()
         break
     case FormDataEvent.CALCULATE:
         deleteAllStatic()
@@ -511,6 +511,18 @@ void addAllStatic() {
 void allCheck() {
     logicalCheck()
     checkNSI()
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = formDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
+    }
 }
 
 void checkNSI() {

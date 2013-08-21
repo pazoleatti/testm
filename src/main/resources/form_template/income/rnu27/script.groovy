@@ -17,7 +17,7 @@ switch (formDataEvent) {
             logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
             return
         }
-        allCheck()
+        checkCreation()
         break
     case FormDataEvent.CALCULATE:
         formPrev
@@ -337,6 +337,18 @@ void checkNSI() {
 
 void allCheck() {
     logicalCheck()
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = formDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
+    }
 }
 
 // список столбцов, для которых нужно считать итоги
