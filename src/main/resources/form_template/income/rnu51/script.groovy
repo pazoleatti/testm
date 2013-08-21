@@ -13,6 +13,9 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK:
+        allCheck()
+        break
+    case FormDataEvent.CREATE:
         checkCreation()
         break
     case FormDataEvent.CALCULATE:

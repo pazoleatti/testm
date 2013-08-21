@@ -11,13 +11,16 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK:
+        checkCreation()
+        break
+    case FormDataEvent.CHECK:
         formPrev
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
         if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
             logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
             return
         }
-        checkCreation()
+        allCheck()
         break
     case FormDataEvent.CALCULATE:
         formPrev
