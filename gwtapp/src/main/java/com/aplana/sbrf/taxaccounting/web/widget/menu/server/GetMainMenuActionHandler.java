@@ -65,10 +65,14 @@ public class GetMainMenuActionHandler extends
 			taxMenu.getSubMenu().add(new MenuItem("Учет КС", "", TaxType.DEAL.name()));
 
 			for (MenuItem menu : taxMenu.getSubMenu()) {
-				menu.getSubMenu().add(new MenuItem("Налоговые формы", NUMBER_SIGN + FormDataListNameTokens.FORM_DATA_LIST
+                boolean isDeal = menu.getMeta().equals(TaxType.DEAL.name());
+                String formItemName = isDeal ? "Список форм" : "Налоговые формы";
+                String declarationItemName = isDeal ? "Уведомления" : "Декларации";
+
+				menu.getSubMenu().add(new MenuItem(formItemName, NUMBER_SIGN + FormDataListNameTokens.FORM_DATA_LIST
 					+ ";" + TYPE + "=" + menu.getMeta()));
 				if (!currentUser.hasRole(TARole.ROLE_OPERATOR)) {
-					menu.getSubMenu().add(new MenuItem("Декларации", NUMBER_SIGN + DeclarationListNameTokens.DECLARATION_LIST
+					menu.getSubMenu().add(new MenuItem(declarationItemName, NUMBER_SIGN + DeclarationListNameTokens.DECLARATION_LIST
 						+ ";" + TYPE + "=" + menu.getMeta()));
 				}
 				menu.getSubMenu().add(new MenuItem("Ведение периодов", NUMBER_SIGN + PeriodsTokens.PERIODS
@@ -85,7 +89,9 @@ public class GetMainMenuActionHandler extends
                 settingMenuItem.getSubMenu().add(nsiMenuItem);
 
                 nsiMenuItem.getSubMenu().add(new MenuItem("Бухгалтерская отчётность", NUMBER_SIGN + BookerStatementsTokens.bookerStatements));
-                nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.refbookList));
+	            if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+	                nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.refbookList));
+	            }
             }
 			/*settingMenuItem.getSubMenu().add(new MenuItem("Тест РНУ 26",
 					new StringBuilder(NUMBER_SIGN)

@@ -11,6 +11,9 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK:
+        checkCreation()
+        break
+    case FormDataEvent.CHECK:
         formPrev
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
         if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
@@ -181,7 +184,7 @@ void logicalCheck() {
 
             // @author ivildanov
             // Арифметические проверки граф 5, 8, 11, 12, 13, 14, 15, 16, 17
-            List checks = ['currency', 'reserveCalcValuePrev', 'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
+            List checks = ['reserveCalcValuePrev', 'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
             Map<String, Object> value = [:]
             value.put('reserveCalcValuePrev', calc8(row))
             value.put('marketQuotation', calc11(row))
@@ -337,6 +340,18 @@ void checkNSI() {
 
 void allCheck() {
     logicalCheck()
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = formDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
+    }
 }
 
 // список столбцов, для которых нужно считать итоги
@@ -782,7 +797,7 @@ void addNewRowwarnrmData() {
         index = 0
     }
     [
-            'issuer', 'regNumber', 'tradeNumber', 'prev', 'current', 'reserveCalcValuePrev', 'cost', 'signSecurity',
+            'currency', 'issuer', 'regNumber', 'tradeNumber', 'prev', 'current', 'reserveCalcValuePrev', 'cost', 'signSecurity',
             'marketQuotation', 'rubCourse', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery'
     ].each {
         newRow.getCell(it).editable = true
