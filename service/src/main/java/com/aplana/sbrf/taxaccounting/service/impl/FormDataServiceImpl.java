@@ -477,6 +477,9 @@ public class FormDataServiceImpl implements FormDataService {
 							"Произошли ошибки в скрипте, который выполняется после перехода",
 							logger.getEntries());
 				} else {
+					// TODO: Непонятно что этот код здесь делает. Он должен быть в script-support и вызываться из
+					// вызываться из скриптов
+					
                     // compose для приемников после принятия формы или отмены
                     if (workflowMove.getToState() == WorkflowState.ACCEPTED ||
                             workflowMove.getFromState() == WorkflowState.ACCEPTED) {
