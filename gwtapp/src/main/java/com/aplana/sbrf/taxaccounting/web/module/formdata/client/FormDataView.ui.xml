@@ -70,7 +70,7 @@
                 <g:FlowPanel>
                     <g:HorizontalPanel height="28px">
                         <g:cell width="25px">
-                            <style:ButtonLink title="Перейти к списку налоговых форм" ui:field="returnAnchor" img="resources/img/arrow-left-24.png"/>
+                            <style:LinkAnchor title="Перейти к списку налоговых форм" ui:field="returnAnchor" img="resources/img/arrow-left-24.png"/>
                         </g:cell>
                         <g:cell verticalAlignment="middle">
                             <g:HorizontalPanel>
@@ -81,11 +81,11 @@
                     </g:HorizontalPanel>
                     <g:HorizontalPanel height="35px">
                         <g:cell width="220px" verticalAlignment="middle">
-                            <style:ButtonLink ui:field="signersAnchor" text="Исполнитель и подписанты"
+                            <style:LinkButton ui:field="signersAnchor" text="Исполнитель и подписанты"
                                 img="resources/img/businessperson-16.png" title="Указать исполнителя и список подписантов налоговой формы"/>
                         </g:cell>
                         <g:cell verticalAlignment="middle">
-                            <style:ButtonLink ui:field="printAnchor" text="Печать" img="resources/img/printer-16.png" title="Отобразить печатное представление документа"/>
+                            <style:LinkButton ui:field="printAnchor" text="Печать" img="resources/img/printer-16.png" title="Отобразить печатное представление документа"/>
                         </g:cell>
                     </g:HorizontalPanel>
                     <style:Bar height="30px">
@@ -117,12 +117,12 @@
                         <g:HorizontalPanel>
                             <g:Label width="100px" text="Состояние:" addStyleNames="{style.headerAttrName}" />
                             <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}" />
-                            <style:ButtonLink ui:field="infoAnchor" text="Информация" img="resources/img/exclamation_mark.png"/>
+                            <style:LinkButton ui:field="infoAnchor" text="Информация" img="resources/img/exclamation_mark.png" title="Отобразить историю налоговой формы"/>
                         </g:HorizontalPanel>
                     </g:FlowPanel>
                     <g:HorizontalPanel height="30px">
                         <g:SimplePanel width="245px" ui:field="manualInputPanel" addStyleNames="{style.manualInput}">
-                            <style:ButtonLink text="Ручной ввод" ui:field="manualInputAnchor" img="resources/img/pencil-16.png"
+                            <style:LinkButton text="Ручной ввод" ui:field="manualInputAnchor" img="resources/img/pencil-16.png"
                                  title="Перейти в режим редактирования"/>
                         </g:SimplePanel>
                         <style:Bar width="500px" ui:field="saveCancelBar">
