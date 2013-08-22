@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
@@ -74,7 +75,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void setLockInformation(boolean isVisible, String lockDate, String lockedBy);
 
-		DataRow getSelectedRow();
+		DataRow<Cell> getSelectedRow();
 
 		void setSelectedRow(DataRow<Cell> item, boolean selected);
 
@@ -231,20 +232,16 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	}
 
 
-	
-	protected void revealForm(Boolean readOnly) {
-		placeManager.revealPlace(new PlaceRequest(FormDataPresenterBase.NAME_TOKEN)
-				.with(FormDataPresenterBase.READ_ONLY, readOnly.toString()).with(
-						FormDataPresenterBase.FORM_DATA_ID,
-						formData.getId().toString()));
+	protected void revealFormDataList() {
+		placeManager.revealPlace(new PlaceRequest.Builder().nameToken(
+				FormDataListNameTokens.FORM_DATA_LIST).with("nType",
+				String.valueOf(formData.getFormType().getTaxType())).build());
 	}
-
-	protected void revealForm(Boolean readOnly, Integer wfMove) {
-		placeManager.revealPlace(new PlaceRequest(FormDataPresenterBase.NAME_TOKEN)
-				.with(FormDataPresenterBase.WORK_FLOW_ID, wfMove.toString())
-				.with(FormDataPresenterBase.READ_ONLY, readOnly.toString()).with(
-						FormDataPresenterBase.FORM_DATA_ID,
-						formData.getId().toString()));
+	
+	protected void revealFormData(Boolean readOnly) {
+		placeManager.revealPlace(new PlaceRequest.Builder().nameToken(FormDataPresenterBase.NAME_TOKEN)
+				.with(FormDataPresenterBase.READ_ONLY, String.valueOf(readOnly))
+				.with(FormDataPresenterBase.FORM_DATA_ID, String.valueOf(formData.getId())).build());
 	}
 
 	@SuppressWarnings("unchecked")

@@ -49,7 +49,7 @@
                 <g:FlowPanel>
                     <g:HorizontalPanel height="28px">
                         <g:cell width="25px">
-                            <style:ButtonLink title="Перейти к списку деклараций" ui:field="returnAnchor" img="resources/img/arrow-left-24.png"/>
+                            <style:LinkAnchor title="Перейти к списку деклараций" ui:field="returnAnchor" img="resources/img/arrow-left-24.png"/>
                         </g:cell>
                         <g:HorizontalPanel>
                             <g:Label ui:field="title" addStyleNames="{style.titleLabel}"/>
@@ -59,13 +59,13 @@
                     <g:HorizontalPanel height="35px">
                         <g:cell verticalAlignment="middle">
                             <g:SimplePanel width="140px" ui:field="downloadXml">
-                                <style:ButtonLink text="Выгрузить в xml" ui:field="downloadXmlButton" img="resources/img/download-xml-16.png"
+                                <style:LinkAnchor text="Выгрузить в xml" ui:field="downloadXmlButton" img="resources/img/download-xml-16.png"
                                     title="Скачать декларацию в формате законодателя"/>
                             </g:SimplePanel>
                         </g:cell>
                         <g:cell verticalAlignment="middle">
                             <g:SimplePanel width="145px">
-                                <style:ButtonLink text="Выгрузить в xlsx" ui:field="downloadExcelButton" img="resources/img/download-xls-16.png"
+                                <style:LinkAnchor text="Выгрузить в xlsx" ui:field="downloadExcelButton" img="resources/img/download-xls-16.png"
                                     title="Скачать декларацию в формате Excel-документа"/>
                             </g:SimplePanel>
                         </g:cell>
@@ -109,7 +109,7 @@
                     <g:HorizontalPanel>
                         <g:Label width="100px" addStyleNames="{style.headerAttrName}">Состояние:</g:Label>
                         <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}" />
-                        <style:ButtonLink ui:field="infoAnchor" text="Информация" />
+                        <style:LinkAnchor ui:field="infoAnchor" text="Информация" />
                     </g:HorizontalPanel>
                 </g:FlowPanel>
             </g:HorizontalPanel>

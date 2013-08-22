@@ -66,11 +66,11 @@
             </g:FlowPanel>
 
             <g:cell width="100px" verticalAlignment="bottom">
-                <style:ButtonLink ui:field="assignButton" text="Назначить" />
+                <style:LinkAnchor ui:field="assignButton" text="Назначить" />
             </g:cell>
 
             <g:cell verticalAlignment="bottom">
-                <style:ButtonLink ui:field="cancelButton" text="Оменить назначение" />
+                <style:LinkAnchor ui:field="cancelButton" text="Оменить назначение" />
             </g:cell>
         </g:HorizontalPanel>
 
