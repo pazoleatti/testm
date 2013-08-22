@@ -796,14 +796,6 @@ comment on column log_business.user_department_id is 'Код подраздел�
 
 CREATE SEQUENCE seq_log_business;
 ------------------------------------------------------------------------------------------------------
-create index i_department_parent_id on department(parent_id);
-create index i_data_row_form_data_id on data_row(form_data_id);
-create index i_form_data_report_period_id on form_data(report_period_id);
-create index i_form_data_form_template_id on form_data(form_template_id);
-create index i_form_data_department_id on form_data(department_id);
-create index i_form_data_kind on form_data(kind);
-create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
-------------------------------------------------------------------------------------------------------
 create table log_system (
   id                  number(18,0) primary key,
   log_date            date not null,
@@ -851,4 +843,13 @@ comment on column log_system.note is 'Текст сообщения';
 comment on column log_system.user_department_id is 'Код подразделения пользователя';
 
 create sequence seq_log_system start with 10000;
+------------------------------------------------------------------------------------------------------
+create index i_department_parent_id on department(parent_id);
+create index i_data_row_form_data_id on data_row(form_data_id);
+create index i_form_data_report_period_id on form_data(report_period_id);
+create index i_form_data_form_template_id on form_data(form_template_id);
+create index i_form_data_department_id on form_data(department_id);
+create index i_form_data_kind on form_data(kind);
+create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
+create index i_ref_book_value_string on ref_book_value(string_value);
 ------------------------------------------------------------------------------------------------------
