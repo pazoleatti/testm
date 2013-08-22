@@ -35,6 +35,7 @@ public class GetMainMenuActionHandler extends
 	private static final String CLEAR_CACHE_LINK = "cache/clear-cache";
 	private static final String NUMBER_SIGN = "#";
 	private static final String TYPE = "nType";
+	private static final String MIGRATION_URL = "migration";
 
 	public GetMainMenuActionHandler() {
 		super(GetMainMenuAction.class);
@@ -136,6 +137,9 @@ public class GetMainMenuActionHandler extends
             settingMenuItem.getSubMenu().add(
                     new MenuItem("Указание форм-источников",
                             NUMBER_SIGN + SourcesTokens.sources + ";" + SourcesTokens.form + "=" + true));
+
+            settingMenuItem.getSubMenu().add(
+                    new MenuItem("Импорт данных", MIGRATION_URL));
 
             menuItems.add(settingMenuItem);
         }

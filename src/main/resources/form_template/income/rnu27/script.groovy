@@ -10,7 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
  */
 
 switch (formDataEvent) {
-    case FormDataEvent.CHECK:
+    case FormDataEvent.CREATE:
         checkCreation()
         break
     case FormDataEvent.CHECK:
