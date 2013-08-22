@@ -18,6 +18,7 @@ public class ImportServiceImpl implements ImportService {
 
     private final String XLS = "xls";
     private final String RNU = "rnu";
+    private final String XML = "xml";
     private final String DEFAULT_CHARSET = "UTF-8";
     private final String ENTER = "\r\n";
     private final String TAB = "\t";
@@ -43,9 +44,12 @@ public class ImportServiceImpl implements ImportService {
 
         // Получение расширения файла
         String format = getFileExtension(fileName.trim());
+        System.out.println("======== format = " + format);
 
         if (XLS.equals(format)) {
-            return getXMLStringFromXLS(inputStream);
+            return getXMLStringFromXLS(inputStream, null, null);
+        } else if (XML.equals(format)) {
+            return getXMLStringFromXML(inputStream, charset);
         } else if (RNU.equals(format) || (format != null && format.matches("r[\\d]{2}"))) {
             return getXMLStringFromCSV(inputStream, charset);
         }
@@ -100,29 +104,19 @@ public class ImportServiceImpl implements ImportService {
 
             StringBuilder sb = new StringBuilder();
             sb.append("<data>").append(ENTER);
-            String [] row;
+            String [] rowCells;
             int countEmptyRow = 0;
-            while ((row = reader.readNext()) != null) {
+            while ((rowCells = reader.readNext()) != null) {
                 // если встетилась вторая пустая строка, то дальше только строки итогов и ЦП
-                if (row.length == 1 && row[0].length() < 1) {
+                if (rowCells.length == 1 && rowCells[0].length() < 1) {
                     if (countEmptyRow > 0) {
-                        sb.append(TAB).append("<row>").append(ENTER);
-                        sb.append(TAB).append("</row>").append(ENTER);
-                        countEmptyRow++;
-                        continue;
+                        addRow(sb, reader.readNext(), "rowTotal");
+                        break;
                     }
                     countEmptyRow++;
                     continue;
                 }
-                sb.append(TAB).append("<row>").append(ENTER);
-                for (String cell : row) {
-                    sb.append(TAB).append(TAB).append("<cell>");
-                    sb.append(cell);
-                    sb.append("</cell>").append(ENTER);
-                }
-
-                sb.append(TAB).append("</row>").append(ENTER);
-                if (countEmptyRow == 2) break;
+                addRow(sb, rowCells, "row");
             }
             sb.append("</data>");
             return sb.toString();
@@ -130,6 +124,26 @@ public class ImportServiceImpl implements ImportService {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * Добавить строку в xml (при обработке CSV).
+     *
+     * @param sb текст xml
+     * @param rowCells список значении из CSV
+     * @param rowName наименование добавляемой строки (обычная строка с данными - <b>row</b>, итоговая строка - <b>rowTotal</b>)
+     */
+    void addRow(StringBuilder sb, String [] rowCells, String rowName) {
+        if (rowCells == null) {
+            return;
+        }
+        sb.append(TAB).append("<" + rowName + ">").append(ENTER);
+        for (String cell : rowCells) {
+            sb.append(TAB).append(TAB).append("<cell>");
+            sb.append(cell);
+            sb.append("</cell>").append(ENTER);
+        }
+        sb.append(TAB).append("</" + rowName + ">").append(ENTER);
     }
 
     /**
@@ -152,7 +166,7 @@ public class ImportServiceImpl implements ImportService {
         // позиция начала таблицы
         Point firstP = findCellCoordinateByValue(sheet, startStr);
         if (firstP == null) {
-            return "<data></data>";
+            firstP = new Point(0, 0);
         }
         // позиция конца таблицы
         Point endP = findCellCoordinateByValue(sheet, endStr);
@@ -187,31 +201,31 @@ public class ImportServiceImpl implements ImportService {
     }
 
     /**
-     * Получить текстовый xml из XLS файла.
+     * Получить текстовый xml из XML файла.
      *
      * @param inputStream данные из файла
+     * @param charset кодировка
      */
-    private String getXMLStringFromXLS(InputStream inputStream) {
-        HSSFWorkbook workbook;
+    private String getXMLStringFromXML(InputStream inputStream, String charset) {
+        StringBuilder sb = new StringBuilder();
         try {
-            workbook = new HSSFWorkbook(inputStream);
+            InputStreamReader isr = new InputStreamReader(inputStream, charset);
+            BufferedReader br = new BufferedReader(isr);
+            String endXML = "</form>";
+            String st;
+            while (null != (st = br.readLine())) {
+                // не брать цифровую подпись (после строки "</form>")
+                if (st.contains(endXML)) {
+                    int lastIndex = st.indexOf(endXML) + endXML.length();
+                    sb.append(st.substring(0, lastIndex));
+                    break;
+                }
+                sb.append(st);
+                sb.append("\n");
+            }
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
         }
-        HSSFSheet sheet = workbook.getSheetAt(0);
-        Iterator rows = sheet.rowIterator();
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("<data>").append(ENTER);
-
-        String rowStr;
-        while (rows.hasNext()) {
-            HSSFRow row = (HSSFRow) rows.next();
-            rowStr = getRowString(row);
-            sb.append(rowStr);
-        }
-        sb.append("</data>");
         return sb.toString();
     }
 

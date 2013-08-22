@@ -143,7 +143,7 @@
         <g:cell width="15%">
             <g:VerticalPanel>
                 <g:Label height="20px" text="Дата архивации: " />
-                <style:ButtonLink  text="Выгрузить в xlsx" ui:field="printButton" img="resources/img/printer-16.png"
+                <style:LinkAnchor  text="Выгрузить в xlsx" ui:field="printButton" img="resources/img/printer-16.png"
                                    title="Выгрузка отчета в excel"/>
                 <g:cell height="50px"  verticalAlignment="bottom">
                     <g:HorizontalPanel>
