@@ -853,3 +853,23 @@ create index i_form_data_kind on form_data(kind);
 create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
 create index i_ref_book_value_string on ref_book_value(string_value);
 ------------------------------------------------------------------------------------------------------
+
+create table department_report_period (
+  department_id       number(9) not null,
+  repost_period_id    number(9) not null,
+  is_active           number(1) not null,
+  is_balance_period   number(1) default 0 not null
+);
+
+alter table department_report_period add constraint department_report_period_pk primary key (department_id, repost_period_id);
+
+alter table department_report_period add constraint dep_rep_per_chk_is_active check (is_active in (0, 1));
+alter table department_report_period add constraint dep_rep_per_chk_is_balance_per check (is_balance_period in (0, 1));
+
+comment on table department_report_period is  'Привязка отчетных периодов к подразделениям';
+
+comment on column department_report_period.department_id is 'Код подразделения';
+comment on column department_report_period.repost_period_id is 'Код отчетного периода';
+comment on column department_report_period.is_active is 'Признак активности (0 - период закрыт, 1 - период открыт)';
+comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
+------------------------------------------------------------------------------------------------------
