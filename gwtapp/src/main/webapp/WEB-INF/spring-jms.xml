@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:jee="http://www.springframework.org/schema/jee"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd">
+
+    <!-- JMS ConnectionFactory -->
+    <jee:jndi-lookup id="transportConnectionFactory" jndi-name="java:comp/env/jms/transportConnectionFactory"
+                     expected-type="javax.jms.ConnectionFactory"/>
+
+    <!-- JMS очередь для импорта транспортных файлов -->
+    <jee:jndi-lookup id="transportQueue" jndi-name="java:comp/env/jms/transportQueue"/>
+
+    <!-- Слушатель транспортных JMS-сообщений -->
+    <bean id="transportJMSMessageListener" class="com.aplana.sbrf.taxaccounting.jms.TransportMessageListener"/>
+
+    <!-- Spring-аналог EJB Message Driven Bean -->
+    <bean id="dmlc" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="transportConnectionFactory"/>
+        <property name="destination" ref="transportQueue"/>
+        <property name="messageListener" ref="transportJMSMessageListener"/>
+        <property name="recoveryInterval" value="60000"/> <!-- 1 мин -->
+    </bean>
+</beans>

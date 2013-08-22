@@ -8,6 +8,7 @@
 			/WEB-INF/applicationContext.xml
 			/WEB-INF/security.xml
 			/WEB-INF/security-preauth.xml
+            /WEB-INF/spring-jms.xml
 			classpath:com/aplana/sbrf/taxaccounting/dao.xml
             classpath:com/aplana/sbrf/taxaccounting/script-support.xml
 			classpath:com/aplana/sbrf/taxaccounting/service.xml
@@ -147,6 +148,22 @@
         <description>Адрес публичных ключей для проверки подписи</description>
         <res-ref-name>url/Sign</res-ref-name>
         <res-type>java.net.URL</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+    </resource-ref>
+
+    <resource-ref>
+        <description>Transport Connection Factory</description>
+        <res-ref-name>jms/transportConnectionFactory</res-ref-name>
+        <res-type>javax.jms.ConnectionFactory</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+    </resource-ref>
+
+    <resource-ref>
+        <description>Transport Message Queue</description>
+        <res-ref-name>jms/transportQueue</res-ref-name>
+        <res-type>javax.jms.Queue</res-type>
         <res-auth>Container</res-auth>
         <res-sharing-scope>Shareable</res-sharing-scope>
     </resource-ref>
