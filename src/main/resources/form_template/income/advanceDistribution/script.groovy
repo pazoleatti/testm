@@ -91,6 +91,14 @@ def addNewRow() {
         (getRows(data).size() == 0 ? 1 : getRows(data).size()))
 
     data.insert(newRow, index)
+    // проставление номеров строк
+    def i = 1;
+    getRows(data).each{ row->
+        if (!isTotal(row)) {
+            row.number = i++
+        }
+    }
+    save(data)
 }
 
 /**
@@ -187,28 +195,40 @@ void calc() {
 
     // расчет графы 1..4, 8..21
     getRows(data).eachWithIndex { row, i ->
-        def departmentRecord = departmentRefDataProvider.getRecordData(row.regionBankDivision);
+
+        def departmentRecords = departmentRefDataProvider.getRecords(new Date(), null, "ID = '" + row.regionBankDivision + "'", null);
+        if (departmentRecords == null || departmentRecords.getRecords().isEmpty()) {
+            logger.error('Не найдено родительское подразделение для строки ' + (row.number ?: getIndex(data, row)))
+            return
+        }
+        def departmentParam = departmentRecords.getRecords().getAt(0)
+
         def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(new Date(), null, "DEPARTMENT_ID = '" + row.regionBankDivision + "'", null);
         if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.getRecords().isEmpty()) {
             logger.error('Не найдены настройки подразделения для строки ' + (row.number ?: getIndex(data, row)))
             return
         }
-        def incomeParams = departmentParamIncomeRecords.getRecords().getAt(0)
+        def incomeParam = departmentParamIncomeRecords.getRecords().getAt(0)
+
+        logger.info('TYPE = ' + incomeParam.get('TYPE'))
+        logger.info('OBLIGATION = ' + incomeParam.get('OBLIGATION'))
+
+        def parentDepartmentId = departmentParam.get('PARENT_ID').getReferenceValue()
 
         // графа 1
         row.number = i + 1
 
         // графа 2 - название подразделения
-        row.regionBank = getValue(departmentRecord, 'NAME')
+        row.regionBank = parentDepartmentId
 
         // графа 4 - кпп
-        row.kpp = getValue(incomeParams, 'KPP')
+        row.kpp = incomeParam.get('record_id').getNumberValue()
 
         // графа 8 - Признак расчёта
-        row.calcFlag = getValue(incomeParams, 'TYPE')
+        row.calcFlag = incomeParam.get('TYPE').getReferenceValue()
 
         // графа 9 - Обязанность по уплате налога
-        row.obligationPayTax = getValue(incomeParams, 'OBLIGATION')
+        row.obligationPayTax = incomeParam.get('OBLIGATION').getReferenceValue()
 
         // графа 10
         tmp = ((((row.propertyPrice / propertyPriceSumm) * 100) + ((row.workersCount / workersCountSumm) * 100)) / 2)
@@ -218,7 +238,7 @@ void calc() {
         row.baseTaxOfRub = round(taxBase * row.baseTaxOf / 100, 0)
 
         // графа 12
-        row.subjectTaxStavka = getValue(incomeParams, 'TAX_RATE')
+        row.subjectTaxStavka = row.kpp
 
         // графа 13..21
         calcColumnFrom13To21(row, sumNal, reportPeriod)
@@ -228,15 +248,18 @@ void calc() {
     def caTotalRow = formData.createDataRow()
     insert(data, caTotalRow)
     caTotalRow.setAlias('ca')
-    caTotalRow.regionBank = 'Центральный аппарат (скорректированный)'
+    caTotalRow.fix = 'Центральный аппарат (скорректированный)'
+    caTotalRow.getCell('fix').colSpan = 2
     setTotalStyle(caTotalRow)
 
     // добавить итого (графа 5..7, 10, 11, 13..21)
     def totalRow = formData.createDataRow()
     insert(data, totalRow)
     totalRow.setAlias('total')
-    totalRow.regionBank = 'Итого'
+    totalRow.fix = 'Итого'
+    totalRow.getCell('fix').colSpan = 2
     setTotalStyle(totalRow)
+
     ['propertyPrice', 'workersCount', 'subjectTaxCredit', 'baseTaxOf',
             'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
             'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
@@ -277,13 +300,16 @@ def logicalCheck(def useLog) {
 
     if (!getRows(data).isEmpty()) {
         // список проверяемых столбцов (графа 1..21)
-        def requiredColumns = ['number', 'regionBank', 'regionBankDivision', 'kpp',
-                'propertyPrice', 'workersCount', 'subjectTaxCredit', 'calcFlag',
-                'obligationPayTax', 'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
-                'taxSum', 'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
-                'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
-                'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
-                'everyMonthForFourthKvartalNextPeriod']
+        def requiredColumns = ['number',
+                //'regionBank',
+                'regionBankDivision',
+                //'kpp',
+                'propertyPrice', 'workersCount', 'subjectTaxCredit'
+                // , 'calcFlag', 'obligationPayTax', 'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
+                //'taxSum', 'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
+                //'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+                //'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod', 'everyMonthForFourthKvartalNextPeriod'
+                ]
 
         for (def row : getRows(data)) {
             if (isFixedRow(row)) {
@@ -417,7 +443,7 @@ def isEmpty(def value) {
  * Устаносить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
-    ['number', 'regionBank', 'regionBankDivision', 'kpp', 'propertyPrice',
+    ['number', 'regionBank', 'fix', 'regionBankDivision', 'kpp', 'propertyPrice',
             'workersCount', 'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
             'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka', 'taxSum',
             'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
