@@ -106,7 +106,10 @@ public class ImportServiceImpl implements ImportService {
                 // если встетилась вторая пустая строка, то дальше только строки итогов и ЦП
                 if (row.length == 1 && row[0].length() < 1) {
                     if (countEmptyRow > 0) {
-                        break;
+                        sb.append(TAB).append("<row>").append(ENTER);
+                        sb.append(TAB).append("</row>").append(ENTER);
+                        countEmptyRow++;
+                        continue;
                     }
                     countEmptyRow++;
                     continue;
@@ -119,6 +122,7 @@ public class ImportServiceImpl implements ImportService {
                 }
 
                 sb.append(TAB).append("</row>").append(ENTER);
+                if (countEmptyRow == 2) break;
             }
             sb.append("</data>");
             return sb.toString();

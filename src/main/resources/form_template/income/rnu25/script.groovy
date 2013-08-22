@@ -1,7 +1,6 @@
 package form_template.income.rnu25
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
@@ -571,26 +570,42 @@ void checkCreation() {
  * Получение импортируемых данных.
  */
 void importData() {
-    // TODO (Ramil Timerbaev) Костыль! это значение должно передаваться в скрипт
-    def fileName = 'fileName.xls'
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        return
+    }
 
     def is = ImportInputStream
     if (is == null) {
         return
     }
 
-    def xmlString = importService.getData(is, fileName, 'windows-1251', 'Государственный регистрационный номер', 'Общий итог');
-    if (xmlString == null) {
+    if (fileName.contains('.rnu')) {
+        isRnu = true
+    } else {
         return
     }
 
+    logger.info('Начата загрузка файла ' + fileName)
+
+    def xmlString = importService.getData(is, fileName, 'cp866')
+    if (xmlString == null) {
+        return
+    }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
         return
     }
+    // номер строки с которой брать данные (что бы пропустить шапку таблицы или лишнюю информацию)
+    def startRow = 0
+
+    // номер графы с которой брать данные (что бы пропустить нумерацию или лишнюю информацию)
+    def startColumn = 2
 
     // добавить данные в форму
-    addData(xml)
+    addData(xml, startRow, startColumn)
+
+    logger.info('Закончена загрузка файла ' + fileName)
 }
 
 /*
@@ -899,41 +914,47 @@ def hasTotal(def data) {
  *
  * @param xml данные
  */
-void addData(def xml) {
+void addData(def xml, def startRow, def startColumn) {
     if (xml == null) {
         return
     }
+
+    Date date = new Date()
+
+    def cache = [:]
     def data = getData(formData)
+    data.clear()
 
     // количество графов в таблице
-    def columnCount = 12
-    // количество строк в шапке
-    def headRowCount = 3
+    def columnCount = 13+2
 
     def tmp
-    def indexRow = -1;
+    def indexRow = -1
+    def isTotal = false
+    def total = getNewRow()
+    def totalColumns = [4:'lotSizePrev', 5:'lotSizeCurrent', 7:'cost', 10:'costOnMarketQuotation', 11:'reserveCalcValue']
+    totalColumns.each{k,it->
+        total[it] = 0
+    }
     for (def row : xml.row) {
         indexRow++
 
         // пропустить шапку таблицы
-        if (indexRow < headRowCount) {
+        if (indexRow <= startRow) {// || indexRow>20) {
+            continue
+        }
+        if (row.cell.size() < 2) {
+            isTotal = true
             continue
         }
 
-        // проверить по грн итоговая ли это строка
-        tmp = (row.cell[0] != null ? row.cell[0].text() : null)
-        if (tmp != null && tmp.contains('Итог')) {
-            continue
-        }
-        if (row.cell.size() == columnCount) {
-            // проверить по номеру договора повторяющиеся записи
-            tmp = (row.cell[1] != null ? row.cell[1].text() : null)
-            def newRow = getRowByTradeNumber(data, tmp)
-            if (newRow == null) {
-                newRow = getNewRow()
-                insert(data, newRow)
-            }
-            def indexCell = 0
+
+        if (row.cell.size() == columnCount && !isTotal) {
+            def newRow = getNewRow()
+
+            def indexCell = startColumn
+
+            newRow.rowNumber = indexRow
 
             // графа 2
             newRow.regNumber = row.cell[indexCell].text()
@@ -945,10 +966,12 @@ void addData(def xml) {
 
             // графа 4
             newRow.lotSizePrev = getNumber(row.cell[indexCell].text())
+            total.lotSizePrev = total.lotSizePrev + newRow.lotSizePrev
             indexCell++
 
             // графа 5
             newRow.lotSizeCurrent = getNumber(row.cell[indexCell].text())
+            total.lotSizeCurrent = total.lotSizeCurrent + newRow.lotSizeCurrent
             indexCell++
 
             // графа 6
@@ -957,14 +980,68 @@ void addData(def xml) {
 
             // графа 7
             newRow.cost = getNumber(row.cell[indexCell].text())
+            total.cost = total.cost + newRow.cost
             indexCell++
 
             // графа 8
-            newRow.signSecurity = row.cell[indexCell].text()
+            newRow.signSecurity = getRecords(62, 'CODE', row.cell[indexCell].text().replaceAll('[ ]', ''), date, cache)
             indexCell++
 
             // графа 9
             newRow.marketQuotation = getNumber(row.cell[indexCell].text())
+            indexCell++
+
+            // графа 10
+            newRow.costOnMarketQuotation = getNumber(row.cell[indexCell].text())
+            total.costOnMarketQuotation = total.costOnMarketQuotation + newRow.costOnMarketQuotation
+            indexCell++
+
+            // графа 11
+            newRow.reserveCalcValue = getNumber(row.cell[indexCell].text())
+            total.reserveCalcValue = total.reserveCalcValue + newRow.reserveCalcValue
+            indexCell++
+
+            // графа 12
+            newRow.reserveCreation = getNumber(row.cell[indexCell].text())
+            indexCell++
+
+            // графа 13
+            newRow.reserveRecovery = getNumber(row.cell[indexCell].text())
+
+            data.insert(newRow, indexRow)
+        } else {
+            def newRow = getNewRow()
+            newRow.setAlias('total')
+            newRow.regNumber = 'Общий итог'
+            setTotalStyle(newRow)
+
+            def indexCell = startColumn
+
+            // графа 2
+            indexCell++
+
+            // графа 3
+            indexCell++
+
+            // графа 4
+            newRow.lotSizePrev = getNumber(row.cell[indexCell].text())
+            indexCell++
+
+            // графа 5
+            newRow.lotSizeCurrent = getNumber(row.cell[indexCell].text())
+            indexCell++
+
+            // графа 6
+            indexCell++
+
+            // графа 7
+            newRow.cost = getNumber(row.cell[indexCell].text())
+            indexCell++
+
+            // графа 8
+            indexCell++
+
+            // графа 9
             indexCell++
 
             // графа 10
@@ -976,15 +1053,20 @@ void addData(def xml) {
             indexCell++
 
             // графа 12
-            newRow.reserveCreation = getNumber(row.cell[indexCell].text())
             indexCell++
 
             // графа 13
-            newRow.reserveRecovery = getNumber(row.cell[indexCell].text())
+
+            totalColumns.each{k,it->
+                if (newRow[it]!=total[it]) logger.error("Итоговая сумма в графе $v в транспортном файле некорректна (${total[it]}!=${newRow[it]}")
+            }
+
+            //data.insert(newRow, indexRow-1)
+            break
         }
     }
-    save(data)
-    logger.info('Данные загружены')
+
+    data.commit()
 }
 
 /**
@@ -1003,6 +1085,23 @@ def getNumber(def value) {
     // поменять запятую на точку и убрать пробелы
     tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
     return new BigDecimal(tmp)
+}
+
+def getRecords(def ref_id, String code, String value, Date date, def cache) {
+    String filter = code + "= '"+ value+"'"
+    if (cache[ref_id]!=null) {
+        if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    if (records.size() == 1){
+        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        return cache[ref_id][filter]
+    }
+    logger.error("Не удалось определить элемент справочника!")
+    return null;
 }
 
 /**
