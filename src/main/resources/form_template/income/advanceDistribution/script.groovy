@@ -210,10 +210,14 @@ void calc() {
         }
         def incomeParam = departmentParamIncomeRecords.getRecords().getAt(0)
 
-        logger.info('TYPE = ' + incomeParam.get('TYPE'))
-        logger.info('OBLIGATION = ' + incomeParam.get('OBLIGATION'))
+        def parentDepartmentId = null;
+        long centralId = 113
+        if (centralId == row.regionBankDivision) {
+            parentDepartmentId = centralId
+        } else {
+            parentDepartmentId = departmentParam.get('PARENT_ID').getReferenceValue()
+        }
 
-        def parentDepartmentId = departmentParam.get('PARENT_ID').getReferenceValue()
 
         // графа 1
         row.number = i + 1
@@ -907,14 +911,16 @@ void calcColumnFrom13To21(def row, def sumNal, def reportPeriod) {
  * Найти строку ЦА
  */
 def findCA(def data) {
+    def resultRow = null
+    long centralId = 113
     if (data != null) {
         for (def row : getRows(data)) {
-            if (row.regionBank == 'Центральный аппарат') {
-                return row
+            if (row.regionBank == centralId) {
+                resultRow = row
             }
         }
     }
-    return null
+    return resultRow
 }
 
 /**
