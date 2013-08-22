@@ -62,3 +62,4 @@ drop table tax_period;
 drop table form_type;
 drop table dict_region;
 drop table dict_tax_period;
+drop table department_report_period;
