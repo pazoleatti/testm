@@ -211,7 +211,8 @@ void calc() {
         def incomeParam = departmentParamIncomeRecords.getRecords().getAt(0)
 
         def parentDepartmentId = null;
-        long centralId = 113
+        long centralId = 113 // ID Центрального аппарата.
+        // У Центрального аппарата родительским подразделением должен быть он сам
         if (centralId == row.regionBankDivision) {
             parentDepartmentId = centralId
         } else {
@@ -305,14 +306,8 @@ def logicalCheck(def useLog) {
     if (!getRows(data).isEmpty()) {
         // список проверяемых столбцов (графа 1..21)
         def requiredColumns = ['number',
-                //'regionBank',
                 'regionBankDivision',
-                //'kpp',
                 'propertyPrice', 'workersCount', 'subjectTaxCredit'
-                // , 'calcFlag', 'obligationPayTax', 'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
-                //'taxSum', 'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
-                //'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
-                //'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod', 'everyMonthForFourthKvartalNextPeriod'
                 ]
 
         for (def row : getRows(data)) {
@@ -912,7 +907,7 @@ void calcColumnFrom13To21(def row, def sumNal, def reportPeriod) {
  */
 def findCA(def data) {
     def resultRow = null
-    long centralId = 113
+    long centralId = 113 // ID Центрального аппарата
     if (data != null) {
         for (def row : getRows(data)) {
             if (row.regionBank == centralId) {
