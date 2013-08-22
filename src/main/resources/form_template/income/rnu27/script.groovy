@@ -10,6 +10,9 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.CREATE:
+        checkCreation()
+        break
     case FormDataEvent.CHECK:
         formPrev
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
@@ -337,6 +340,18 @@ void checkNSI() {
 
 void allCheck() {
     logicalCheck()
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = formDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
+    }
 }
 
 // список столбцов, для которых нужно считать итоги

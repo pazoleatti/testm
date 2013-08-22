@@ -322,14 +322,19 @@ def getRegionByOkatoOrg(okato){
     def  refDataProvider = refBookFactory.getDataProvider(4)
     def records = refDataProvider.getRecords(new Date(), null, "OKATO_DEFINITION like '"+okato.toString().substring(0, 2)+"%'", null).getRecords()
 
-    if (records.size == 1){
+    if (records.size() == 1){
         return records.get(0);
     } else{
         /**
          * Если первые пять цифр кода равны "71140" то код ОКАТО соответствует
          * Ямало-ненецкому АО (код 89 в справочнике «Коды субъектов Российской Федерации»)
          */
-        def reg89 = records.find{ it.OKATO_DEFINITION.substring(0, 4).equals("71140")}
+
+        def reg89 = records.find{
+            if (it.CODE.toString().length() >= 5 ) {
+                return it.CODE.toString().substring(0, 5).equals("71140")
+            } else return false
+        }
         if (reg89 != null) return reg89;
 
         /**
@@ -337,7 +342,11 @@ def getRegionByOkatoOrg(okato){
          * код ОКАТО соответствует Ханты-мансийскому АО
          * (код 86 в справочнике «Коды субъектов Российской Федерации»)
          */
-        def reg86 = records.find{ it.OKATO_DEFINITION.substring(0, 4).equals("71100")}
+        def reg86 = records.find{
+            if (it.CODE.toString().length() >= 5 ) {
+                return it.CODE.toString().substring(0, 5).equals("71100")
+            } else return false
+        }
         if (reg86 != null) return reg86;
 
         /**
@@ -345,7 +354,11 @@ def getRegionByOkatoOrg(okato){
          * то код ОКАТО соответствует Ненецкому АО
          * (код 83 в справочнике «Коды субъектов Российской Федерации»)
          */
-        def reg83 = records.find{ it.OKATO_DEFINITION.substring(0, 4).equals("1110")}
+        def reg83 = records.find{
+            if (it.CODE.toString().length() >= 4 ) {
+                return it.CODE.toString().substring(0, 4).equals("1110")
+            } else return false
+        }
         if (reg83 != null) return reg83;
 
         logger.error("Не удалось определить регион по коду ОКАТО")

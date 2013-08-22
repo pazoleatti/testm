@@ -1,6 +1,4 @@
-drop sequence seq_log_system;
-drop sequence seq_log_business;
-drop table log_system;
+drop index i_ref_book_value_string;
 drop index i_form_data_signer_formdataid;
 drop index i_form_data_kind;
 drop index i_form_data_department_id;
@@ -8,6 +6,9 @@ drop index i_form_data_form_template_id;
 drop index i_form_data_report_period_id;
 drop index i_data_row_form_data_id;
 drop index i_department_parent_id;
+drop sequence seq_log_system;
+drop sequence seq_log_business;
+drop table log_system;
 drop table log_business;
 drop table cell_span_info;
 drop table sec_user_role;

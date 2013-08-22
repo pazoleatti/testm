@@ -110,5 +110,23 @@
         <Arg type="java.net.URL">http://ignore/</Arg>
     </New>
 
+    <!-- Тестовое подключение Jetty к ApacheMQ -->
+    <New class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>java:comp/env/jms/jmsConnectionFactory</Arg>
+        <Arg>
+            <New class="org.apache.activemq.ActiveMQConnectionFactory">
+                <Arg>tcp://localhost:61616</Arg>
+            </New>
+        </Arg>
+    </New>
 
+    <!-- Тестовый топик ApacheMQ -->
+    <New class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>java:comp/env/jms/myTopic</Arg>
+        <Arg>
+            <New class="org.apache.activemq.command.ActiveMQTopic">
+                <Arg>myTopic</Arg>
+            </New>
+        </Arg>
+    </New>
 </Configure>

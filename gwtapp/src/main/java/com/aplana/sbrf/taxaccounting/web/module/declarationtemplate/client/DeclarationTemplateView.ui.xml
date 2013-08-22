@@ -27,7 +27,7 @@
 					    <g:Button text="Отмена" ui:field="cancelButton" />
 				    </t:LeftBar>
 			    </t:Bar>
-                <style:ButtonLink text="Экспорт" ui:field="downloadDectButton"
+                <style:LinkAnchor text="Экспорт" ui:field="downloadDectButton"
                                   title="Экспорт шаблона деклараций" />
                 <g:FormPanel ui:field="uploadDectForm" encoding="multipart/form-data"
                              method="post">

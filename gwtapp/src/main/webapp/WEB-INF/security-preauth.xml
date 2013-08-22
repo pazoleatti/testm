@@ -36,7 +36,7 @@
 	</beans:bean>
 
     <beans:bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
-        <beans:constructor-arg value="/"/>
+        <beans:constructor-arg value="/logout"/>
         <beans:constructor-arg>
             <beans:list>
                 <beans:bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>

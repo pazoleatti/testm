@@ -32,7 +32,7 @@
                 </g:HorizontalPanel>
                 <g:HorizontalPanel>
                     <g:HorizontalPanel spacing="5" width="676px" height="35px">
-                        <style:ButtonLink ui:field="editButton" text="Редактировать" visible="false"/>
+                        <style:LinkAnchor ui:field="editButton" text="Редактировать" visible="false"/>
                         <g:Button ui:field="saveButton" text="Сохранить" visible="false"/>
                         <g:cell width="100%">
                             <g:Button ui:field="cancelButton" text="Отмена" visible="false"/>

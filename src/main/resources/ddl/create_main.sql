@@ -796,14 +796,6 @@ comment on column log_business.user_department_id is 'Код подраздел�
 
 CREATE SEQUENCE seq_log_business;
 ------------------------------------------------------------------------------------------------------
-create index i_department_parent_id on department(parent_id);
-create index i_data_row_form_data_id on data_row(form_data_id);
-create index i_form_data_report_period_id on form_data(report_period_id);
-create index i_form_data_form_template_id on form_data(form_template_id);
-create index i_form_data_department_id on form_data(department_id);
-create index i_form_data_kind on form_data(kind);
-create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
-------------------------------------------------------------------------------------------------------
 create table log_system (
   id                  number(18,0) primary key,
   log_date            date not null,
@@ -851,4 +843,33 @@ comment on column log_system.note is 'Текст сообщения';
 comment on column log_system.user_department_id is 'Код подразделения пользователя';
 
 create sequence seq_log_system start with 10000;
+------------------------------------------------------------------------------------------------------
+create index i_department_parent_id on department(parent_id);
+create index i_data_row_form_data_id on data_row(form_data_id);
+create index i_form_data_report_period_id on form_data(report_period_id);
+create index i_form_data_form_template_id on form_data(form_template_id);
+create index i_form_data_department_id on form_data(department_id);
+create index i_form_data_kind on form_data(kind);
+create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
+create index i_ref_book_value_string on ref_book_value(string_value);
+------------------------------------------------------------------------------------------------------
+
+create table department_report_period (
+  department_id       number(9) not null,
+  repost_period_id    number(9) not null,
+  is_active           number(1) not null,
+  is_balance_period   number(1) default 0 not null
+);
+
+alter table department_report_period add constraint department_report_period_pk primary key (department_id, repost_period_id);
+
+alter table department_report_period add constraint dep_rep_per_chk_is_active check (is_active in (0, 1));
+alter table department_report_period add constraint dep_rep_per_chk_is_balance_per check (is_balance_period in (0, 1));
+
+comment on table department_report_period is  'Привязка отчетных периодов к подразделениям';
+
+comment on column department_report_period.department_id is 'Код подразделения';
+comment on column department_report_period.repost_period_id is 'Код отчетного периода';
+comment on column department_report_period.is_active is 'Признак активности (0 - период закрыт, 1 - период открыт)';
+comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
 ------------------------------------------------------------------------------------------------------

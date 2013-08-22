@@ -1,0 +1,20 @@
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:sec="http://www.springframework.org/schema/security"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+             http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+             http://www.springframework.org/schema/security
+             http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+
+	<!-- Exclude some URL's from spring security. See also web.xml. -->
+	<http pattern="/favicon.ico" security="none"/>
+	<http pattern="/j_security_check" security="none"/>
+
+    <http create-session="never" use-expressions="true" auto-config="false" entry-point-ref="preAuthenticatedProcessingFilterEntryPoint">
+        <intercept-url pattern="/**" access="isAuthenticated()"/>
+        <custom-filter position="PRE_AUTH_FILTER" ref="preAuthFilter"/>
+    </http>
+    <sec:global-method-security pre-post-annotations="enabled" proxy-target-class = "true"/>
+</beans:beans>

@@ -1,23 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
@@ -25,6 +9,10 @@ import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 /**
  * Сервис, отвечающий за интеграцию/дезинтеграцию форм. Поставляется в скрипты и позволяет формам посылать события
@@ -88,16 +76,15 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 	@Override
 	public void compose(FormData sformData, int departmentId, int formTypeId, FormDataKind kind) {
 		TaxType taxType = formTypeDao.getType(formTypeId).getTaxType();
-		ReportPeriod currentPeriod = reportPeriodDao.getCurrentPeriod(taxType);
 
 		// Find form data.
-		FormData dformData = formDataDao.find(formTypeId, kind, departmentId, currentPeriod.getId());
+		FormData dformData = formDataDao.find(formTypeId, kind, departmentId, sformData.getReportPeriodId());
 
 		// Create form data if doesn't exist.
 		if (dformData == null) {
 			// TODO: Надо подумать, что делать с пользователем.
 			int formTemplateId = formTemplateDao.getActiveFormTemplateId(formTypeId);
-			long dFormDataId = formDataService.createFormDataWithoutCheck(scriptComponentContext.getLogger(), scriptComponentContext.getUserInfo(), formTemplateId, departmentId, kind, currentPeriod.getId(), false);
+			long dFormDataId = formDataService.createFormDataWithoutCheck(scriptComponentContext.getLogger(), scriptComponentContext.getUserInfo(), formTemplateId, departmentId, kind, sformData.getReportPeriodId(), false);
 			dformData = formDataDao.get(dFormDataId);
 		}
 

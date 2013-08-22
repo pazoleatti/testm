@@ -15,6 +15,9 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         allCheck()
         break
+    case FormDataEvent.CREATE:
+        checkCreation()
+        break
     case FormDataEvent.CALCULATE:
         deleteAllStatic()
         sort()
@@ -216,7 +219,7 @@ void logicalCheck() {
             itogo
             for (String alias in itogoSum) {
                 if (realItogo.getCell(alias).value != itogo.getCell(alias).value) {
-                    logger.error("Итоговые значения за текущий квартал рассчитаны неверно!")
+                    logger.error("Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!")
                     break
                 }
             }
@@ -282,7 +285,7 @@ DataRow<Cell> getItogo() {
     DataRow<Cell> itogo = formData.createDataRow()
     itogo.setAlias("itogo")
     itogo.getCell('fix').colSpan = 7
-    itogo.fix = "Итого"
+    itogo.fix = "Итого за текущий отчетный (налоговый) период"
     sumColumns = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInRub', 'acquisitionPriceTax', 'redemptionValue', 'priceInFactRub',
             'marketPriceInRub1', 'salePriceTax', 'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
     itogoKvartal
@@ -511,6 +514,18 @@ void addAllStatic() {
 void allCheck() {
     logicalCheck()
     checkNSI()
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = formDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
+    }
 }
 
 void checkNSI() {

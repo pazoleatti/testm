@@ -14,7 +14,7 @@
             <g:HorizontalPanel height="35px">
                 <g:Label styleName="{style.title}">Пользователи АС Учет налогов</g:Label>
                 <g:cell verticalAlignment="middle">
-                    <style:ButtonLink ui:field="printButton" text="Печать" img="resources/img/printer-16.png" title="Отобразить печатное представление документа"/>
+                    <style:LinkAnchor ui:field="printButton" text="Печать" img="resources/img/printer-16.png" title="Отобразить печатное представление документа"/>
                 </g:cell>
             </g:HorizontalPanel>
 
