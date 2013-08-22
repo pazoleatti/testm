@@ -5,7 +5,19 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.Anchor;
 
-public class ButtonLink extends Anchor{
+/**
+ * Ссылка с картинкой
+ * 
+ * НЕ ИСПОЛЬЗУЙТЕ ЭТОТ ВИДЖЕТ ЕСЛИ
+ * НУЖНА РЕАЛЬНО КНОПКА В ВИДЕ ССЫЛКИ
+ * ДЛЯ ЭТОГО ИСПОЛЬЗУЙТЕ LinkButton
+ * 
+ * http://jira.aplana.com/browse/SBRFACCTAX-3402
+ * 
+ * @author sgoryachkin
+ *
+ */
+public class LinkAnchor extends Anchor{
 
 	interface LocalHtmlTemplates extends SafeHtmlTemplates {
 		@Template("<div style=\"text-decoration: underline;"+
@@ -20,7 +32,7 @@ public class ButtonLink extends Anchor{
 	private static final String DEFAULT_URL = "resources/img/starfish-16.png";
 	private String text = "";
 
-	public ButtonLink() {
+	public LinkAnchor() {
 		super(templates.img(DEFAULT_URL));
 	}
 

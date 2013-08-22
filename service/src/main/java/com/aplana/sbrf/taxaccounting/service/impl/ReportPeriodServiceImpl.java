@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,4 +57,10 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
     public ReportPeriod getLastReportPeriod(TaxType taxType, long departmentId) {
         return reportPeriodDao.getLastReportPeriod(taxType, departmentId);
     }
+
+	@Override
+	public boolean checkOpened(int reportPeriodId, long departmentId) {
+		// TODO
+		throw new UnsupportedOperationException("Не реализован метод проверки открытости периода TODO");
+	}
 }

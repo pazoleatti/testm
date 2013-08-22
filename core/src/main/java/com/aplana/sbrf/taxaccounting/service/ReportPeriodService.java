@@ -31,4 +31,15 @@ public interface ReportPeriodService {
      * @return
      */
     ReportPeriod getLastReportPeriod(TaxType taxType, long departmentId);
+    
+
+	/**
+	 * Проверяем, открыт ли период для департамента или нет
+	 * 
+	 * @param reportPeriodId
+	 * @param departmentId
+	 * @return
+	 */
+	boolean checkOpened(int reportPeriodId, long departmentId);
+	
 }
