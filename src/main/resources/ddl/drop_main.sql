@@ -8,6 +8,7 @@ drop index i_data_row_form_data_id;
 drop index i_department_parent_id;
 drop sequence seq_log_system;
 drop sequence seq_log_business;
+drop table department_report_period;
 drop table log_system;
 drop table log_business;
 drop table cell_span_info;
