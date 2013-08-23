@@ -144,7 +144,6 @@ def calcForm(){
  * а-ля точное отображение аналитики
  */
 def logicalCheck() {
-    logger.info('-->');
     getRows(data).each{ row ->
 
         /*
@@ -296,7 +295,6 @@ def logicalCheck() {
         }
     }
     data.save(getRows(data))
-    logger.info('<--');
 }
 
 /**

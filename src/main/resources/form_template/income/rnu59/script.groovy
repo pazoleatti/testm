@@ -6,7 +6,7 @@
  * Столбцы
  * 1. Номер сделки первая часть / вторая часть - tradeNumber
  * 2. Наименование ценной бумаги - securityName
- * 3. Код валюты - currencyCode
+ * 3. Код валюты - currencyCode Справочник
  * 4. Номинальная стоимость ценных бумаг (ед. вал.) - nominalPrice
  * 5. Дата первой части РЕПО - part1REPODate
  * 6. Дата второй части РЕПО - part2REPODate
@@ -442,7 +442,7 @@ def calculateColumn12(DataRow row){
     Date date30_06_2010 = new Date(1277834400000)       // 1277834400000 - 30.06.2010 00:00 GMT
     Date date01_11_2009 = new Date(1257012000000)       // 1257012000000 - 01.11.2009 00:00 GMT
     // Если «графа 10» > 0 И«графа 3» = 810, то:
-    if (row.outcome > 0 && row.currencyCode == 810){
+    if (row.outcome > 0 && getCurrency(row.currencyCode) == '810'){
         if (row.part2REPODate.compareTo(date01_09_2008) >= 0 && row.part2REPODate.compareTo(date31_12_2009) <=0){
             // 1.   Если «графа 6» принадлежит периоду с 01.09.2008 по 31.12.2009, то:
             // «графа 12» = («графа 7» × «графа 11» × 1,5) × ((«графа 6» - «графа 5») / 365 (366)) / 100;
@@ -460,7 +460,7 @@ def calculateColumn12(DataRow row){
             //«графа 12» = («графа 7» × «графа 11» × 1,1) х ((«графа 6» - «графа 5») / 365 (366)) / 100;
             return (row.acquisitionPrice * row.rateBR * 1.1) * ((row.part2REPODate - row.part1REPODate) / countDaysOfYear) / 100
         }
-    } else if (row.outcome != null && row.outcome > 0 && row.currencyCode != 810){ // Если «графа 10» > 0 И «графа 3» ≠ 810, то:
+    } else if (row.outcome != null && row.outcome > 0 && getCurrency(row.currencyCode) != '810'){ // Если «графа 10» > 0 И «графа 3» ≠ 810, то:
         if (row.part2REPODate.compareTo(date01_01_2011) >= 0 && row.part2REPODate.compareTo(date31_12_2012)){
             //Если «графа 6» принадлежит периоду с 01.01.2011 по 31.12.2012, то:
             // «графа 12» = («графа 7» × «графа 11» × 0,8) × ((«графа 6» - «графа 5») / 365 (366)) / 100.
