@@ -1064,13 +1064,22 @@ void insert(def data, def row) {
 }
 
 /**
+ * Проверка валюты на рубли
+ */
+def isRubleCurrency(def currencyCode) {
+    return  refBookService.getStringValue(15,currencyCode,'CODE_2')=='810'
+}
+
+/**
  * Получить курс валюты
  */
 def getCourse(def currency, def date) {
-    if (currency!=null) {
+    if (currency!=null && !isRubleCurrency(currency)) {
         def refCourseDataProvider = refBookFactory.getDataProvider(22)
         def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
         return res.getRecords().get(0).RATE.getNumberValue()
+    } else if (isRubleCurrency(currency)){
+        return 1;
     } else {
         return null;
     }

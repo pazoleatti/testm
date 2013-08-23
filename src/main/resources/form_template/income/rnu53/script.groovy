@@ -215,7 +215,9 @@ def logicalCheck(def useLog) {
     if (!getRows(data).isEmpty()) {
 
         // список проверяемых столбцов (графа 12, 13)
-        def requiredColumns = ['outcome269st', 'outcomeTax']
+        def requiredColumns = ['tadeNumber', 'securityName', 'currencyCode',
+                'nominalPriceSecurities', 'acquisitionPrice', 'salePrice',
+                'part1REPODate', 'part2REPODate', 'income', 'outcome', 'outcome269st', 'outcomeTax']
 
         /** Отчетная дата. */
         def reportDate = getReportDate()
@@ -239,7 +241,9 @@ def logicalCheck(def useLog) {
                 continue
             }
 
-            course = getCourse(row.currencyCode,reportDate)
+            if (row.currencyCode!=null) {
+                course = getCourse(row.currencyCode,reportDate)
+            }
 
             // 1. Обязательность заполнения поля графы 12 и 13
             if (!checkRequiredColumns(row, requiredColumns, true)) {
@@ -712,10 +716,23 @@ def getCurrency(def currencyCode) {
 }
 
 /**
+ * Проверка валюты на рубли
+ */
+def isRubleCurrency(def currencyCode) {
+    return  refBookService.getStringValue(15,currencyCode,'CODE_2')=='810'
+}
+
+/**
  * Получить курс валюты
  */
 def getCourse(def currency, def date) {
-    def refCourseDataProvider = refBookFactory.getDataProvider(22)
-    def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
-    return res.getRecords().get(0).RATE.getNumberValue()
+    if (currency!=null && !isRubleCurrency(currency)) {
+        def refCourseDataProvider = refBookFactory.getDataProvider(22)
+        def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
+        return res.getRecords().get(0).RATE.getNumberValue()
+    } else if ( isRubleCurrency(currency)){
+        return 1;
+    } else {
+        return null
+    }
 }

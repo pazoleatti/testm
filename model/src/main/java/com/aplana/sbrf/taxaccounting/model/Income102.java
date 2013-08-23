@@ -5,6 +5,8 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 public class Income102 {
 
+	// Код записи
+	private Long id;
 	// Идентификатор отчетного периода
 	private Integer reportPeriodId;
 	// Код ОПУ
@@ -13,6 +15,14 @@ public class Income102 {
 	private Double totalSum;
     // Наименование статьи
     private String itemName;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	public Integer getReportPeriodId() {
 		return reportPeriodId;

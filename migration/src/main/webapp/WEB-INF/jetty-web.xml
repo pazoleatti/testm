@@ -55,7 +55,7 @@
     </New>
 
     <New id="cf" class="org.mortbay.jetty.plus.naming.Resource">
-        <Arg>java:comp/env/jms/migrationConnectionFactory</Arg>
+        <Arg>java:comp/env/jms/transportConnectionFactory</Arg>
         <Arg>
             <New class="org.apache.activemq.ActiveMQConnectionFactory">
                 <Arg>tcp://localhost:61616</Arg>
@@ -64,7 +64,7 @@
     </New>
 
     <New id="qu" class="org.mortbay.jetty.plus.naming.Resource">
-        <Arg>java:comp/env/jms/migrationQueue</Arg>
+        <Arg>java:comp/env/jms/transportQueue</Arg>
         <Arg>
             <New class="org.apache.activemq.command.ActiveMQQueue">
                 <Arg>Files</Arg>

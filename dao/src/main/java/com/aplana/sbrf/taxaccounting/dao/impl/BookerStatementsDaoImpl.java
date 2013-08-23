@@ -27,6 +27,7 @@ public class BookerStatementsDaoImpl extends AbstractDao implements BookerStatem
         if (!list.isEmpty()) {
             getJdbcTemplate().batchUpdate(
                     "insert into INCOME_101 (" +
+							" ID,"  +
                             " REPORT_PERIOD_ID," +
                             " ACCOUNT," +
                             " INCOME_DEBET_REMAINS," +
@@ -36,7 +37,7 @@ public class BookerStatementsDaoImpl extends AbstractDao implements BookerStatem
                             " OUTCOME_DEBET_REMAINS," +
                             " OUTCOME_CREDIT_REMAINS," +
                             " ACCOUNT_NAME)" +
-                            " values (?,?,?,?,?,?,?,?,?)",
+                            " values (seq_income_101.nextval,?,?,?,?,?,?,?,?,?)",
                     new BatchPreparedStatementSetter() {
 
                         @Override
@@ -69,11 +70,12 @@ public class BookerStatementsDaoImpl extends AbstractDao implements BookerStatem
         if (!list.isEmpty()) {
             getJdbcTemplate().batchUpdate(
                     "insert into INCOME_102 (" +
+							" ID,"  +
                             " REPORT_PERIOD_ID," +
                             " OPU_CODE," +
                             " TOTAL_SUM," +
                             " ITEM_NAME)" +
-                            " values (?,?,?,?)",
+                            " values (seq_income_101.nextval,?,?,?,?)",
                     new BatchPreparedStatementSetter() {
 
                         @Override
@@ -99,7 +101,7 @@ public class BookerStatementsDaoImpl extends AbstractDao implements BookerStatem
     @Override
     public int delete101(Integer reportPeriodId) {
         try {
-            return getJdbcTemplate().update("delete from INCOME_101  where REPORT_PERIOD_ID = ?", reportPeriodId);
+            return getJdbcTemplate().update("delete from INCOME_101 where REPORT_PERIOD_ID = ?", reportPeriodId);
         } catch (EmptyResultDataAccessException e) {
             return 0;
         }
@@ -108,7 +110,7 @@ public class BookerStatementsDaoImpl extends AbstractDao implements BookerStatem
     @Override
     public int delete102(Integer reportPeriodId) {
         try {
-            return getJdbcTemplate().update("delete from INCOME_102  where REPORT_PERIOD_ID = ?", reportPeriodId);
+            return getJdbcTemplate().update("delete from INCOME_102 where REPORT_PERIOD_ID = ?", reportPeriodId);
         } catch (EmptyResultDataAccessException e) {
             return 0;
         }
@@ -125,6 +127,7 @@ public class BookerStatementsDaoImpl extends AbstractDao implements BookerStatem
                         @Override
                         public Income101 mapRow(ResultSet rs, int rowNum) throws SQLException {
                             Income101 income101Data = new Income101();
+							income101Data.setId(rs.getLong("ID"));
                             income101Data.setReportPeriodId(rs.getInt("REPORT_PERIOD_ID"));
                             income101Data.setAccount(rs.getString("ACCOUNT"));
                             income101Data.setIncomeDebetRemains(rs.getDouble("INCOME_DEBET_REMAINS"));
@@ -153,6 +156,7 @@ public class BookerStatementsDaoImpl extends AbstractDao implements BookerStatem
                         @Override
                         public Income102 mapRow(ResultSet rs, int rowNum) throws SQLException {
                             Income102 income102Data = new Income102();
+							income102Data.setId(rs.getLong("ID"));
                             income102Data.setReportPeriodId(rs.getInt("REPORT_PERIOD_ID"));
                             income102Data.setOpuCode(rs.getString("OPU_CODE"));
                             income102Data.setTotalSum(rs.getDouble("TOTAL_SUM"));

@@ -312,7 +312,6 @@ INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENC
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 522, 52,'Сумма','TOTAL_SUM', 2, 3,null,null,1, 4, 10);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 524, 52,'Наименование статьи','ITEM_NAME', 1, 5,null,null,1,null, 100);
 
-
 update ref_book_attribute
 set width=10
 where width<10 and (ref_book_id>=22 OR ref_book_id<=9);
@@ -329,8 +328,3 @@ INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENC
 
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 621, 62,'Код признака','CODE', 1, 1,null,null,1,null, 10);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 622, 62,'Признак ценной бумаги','NAME', 1, 2,null,null,1,null, 100);
-
-
-
-
-commit;

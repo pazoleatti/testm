@@ -363,21 +363,23 @@ comment on column report_period.dict_tax_period_id is 'Ссылка на спр�
 create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------
 create table income_101 (
-  report_period_id number(9) not null,
-  account varchar2(255 char) not null,
-  income_debet_remains number(22,4),
-  income_credit_remains number(22,4),
-  debet_rate number(22,4),
-  credit_rate number(22,4),
-  outcome_debet_remains number(22,4),
+  id                     number(18) not null,
+  report_period_id       number(9) not null,
+  account                varchar2(255 char) not null,
+  income_debet_remains   number(22,4),
+  income_credit_remains  number(22,4),
+  debet_rate             number(22,4),
+  credit_rate            number(22,4),
+  outcome_debet_remains  number(22,4),
   outcome_credit_remains number(22,4),
   account_name varchar2(255 char)
 );
 
-alter table income_101 add constraint income_101_pk primary key (report_period_id, account);
+alter table income_101 add constraint income_101_pk primary key (id);
 alter table income_101 add constraint income_101_fk_report_period_id foreign key (report_period_id) references report_period(id);
 
 comment on table income_101 is 'Оборотная ведомость (Форма 0409101-СБ)';
+comment on column income_101.id is 'Код записи';
 comment on column income_101.report_period_id is 'Идентификатор отчетного периода';
 comment on column income_101.account is 'Номер счета';
 comment on column income_101.income_debet_remains is 'Входящие остатки по дебету';
@@ -387,22 +389,28 @@ comment on column income_101.credit_rate is 'Обороты по кредиту'
 comment on column income_101.outcome_debet_remains is 'Исходящие остатки по дебету';
 comment on column income_101.outcome_credit_remains is 'Исходящие остатки по кредиту';
 comment on column income_101.account_name is 'Название счёта';
+
+create sequence seq_income_101 start with 100;
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table income_102 (
+  id               number(18) not null,
   report_period_id number(9) not null,
-  opu_code varchar2(25 char) not null,
-  total_sum number(22,4),
-  item_name varchar2(255 char)
+  opu_code         varchar2(25 char) not null,
+  total_sum        number(22,4),
+  item_name        varchar2(255 char)
   );
 
-alter table income_102 add constraint income_102_pk primary key (report_period_id, opu_code);
+alter table income_102 add constraint income_102_pk primary key (id);
 alter table income_102 add constraint income_102_fk_report_period_id foreign key (report_period_id) references report_period(id);
 
 comment on table income_102 is 'Отчет о прибылях и убытках (Форма 0409102-СБ)';
+comment on column income_102.id is 'Код записи';
 comment on column income_102.report_period_id is 'Идентификатор отчетного периода';
 comment on column income_102.opu_code is 'Код ОПУ';
 comment on column income_102.total_sum is 'Сумма';
 comment on column income_102.item_name is 'Наименование статьи';
+
+create sequence seq_income_102 start with 100;
 ---------------------------------------------------------------------------------------------------
 create table declaration_type (
   id       number(9) not null,
@@ -496,7 +504,8 @@ create table form_data (
   state number(9) not null,
   kind number(9) not null,
   report_period_id number(9) not null,
-  return_sign number(1) not null
+  return_sign number(1) not null,
+  period_order number(2)
 );
 alter table form_data add constraint form_data_pk primary key (id);
 alter table form_data add constraint form_data_fk_form_templ_id foreign key (form_template_id) references form_template(id);
@@ -514,6 +523,7 @@ comment on column form_data.state is 'Код состояния';
 comment on column form_data.kind is 'Тип налоговой формы (1 - Первичная, 2 - Консолидированная, 3 - Сводная, 4 - Форма УНП, 5 - Выходная)';
 comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
 comment on column form_data.return_sign is 'Флаг возврата (0 - обычный режим; 1 - форма возвращена из вышестоящего статуса)';
+comment on column form_data.period_order is 'Указывает на очередность налоговой формы в рамках отчетного периода. Необходимо для, например, месячных форм в рамках квартального отчетного периода';
 
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------
