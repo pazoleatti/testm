@@ -43,7 +43,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 		return getJdbcTemplate()
 				.query("select * from DEPARTMENT_REPORT_PERIOD where DEPARTMENT_ID=?",
 						new Object[] { departmentId },
-						new int[] { Types.NUMERIC, Types.NUMERIC },
+						new int[] { Types.NUMERIC},
 						mapper);
 	}
 
