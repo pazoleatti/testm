@@ -60,10 +60,6 @@ def bildXml(){
     // Получить параметры по транспортному налогу
     departmentParamTransport = getModRefBookValue(31, "DEPARTMENT_ID = "+department.record_id)
 
-    // получения региона по кода ОКАТО по справочнику Регионов
-    def region = getRegionByOkatoOrg(departmentParamTransport.OKATO.OKATO);
-
-
     def builder = new MarkupBuilder(xml)
     if (!declarationData.isAccepted()) {
         builder.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId), ВерсПрог: departmentParamTransport.APP_VERSION, ВерсФорм:departmentParamTransport.FORMAT_VERSION) {
@@ -193,7 +189,7 @@ def bildXml(){
                             ){
 
                                 row.rowData.each{ tRow ->
-                                    def taxBenefitCode = tRow.taxBenefitCode ? Integer.parseInt(tRow.taxBenefitCode):null
+                                    def taxBenefitCode = tRow.taxBenefitCode ? tRow.taxBenefitCode:null
                                     // TODO есть поля которые могут не заполняться, в нашем случае опираться какой логики?
                                     РасчНалТС(
                                             [
@@ -219,24 +215,37 @@ def bildXml(){
                                                     (tRow.coefKl ? [КоэфКл: tRow.coefKl]:[]),
                                     ){
 
+                                        /* 	2.2. Получить в справочнике «Параметры налоговых льгот» запись,
+                                        *	соответствующую значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
+                                        */
+                                        // TODO Переписать. Сервис удален, параметры перенесены в версионный справочник
+                                        // получения региона по кода ОКАТО по справочнику Регионов
+                                        def tOkato = getRefBookValue(3, tRow.okato, "OKATO")
+                                        def region = getRegionByOkatoOrg(tOkato);
+
+                                        def refBookProvider = refBookFactory.getDataProvider(7)
+                                        logger.info("region "+region)
+
+                                        def query = "DICT_REGION_ID LIKE '"+region.record_id+"' AND TAX_BENEFIT_ID LIKE '"+tRow.taxBenefitCode+"'"
+                                        def params = refBookProvider.getRecords(new Date(), null, query, null).getRecords()
+                                        def param;
+                                        if (params.size() == 1)
+                                            param = params.get(0)
+                                        else{
+                                            logger.error("Ошибка при получении данных из справочника «Параметры налоговых льгот» Query: "+query)
+                                        }
+                                        //logger.error("param "+param)
                                         // генерация КодОсвНал
                                         if ((taxBenefitCode != 20220 && taxBenefitCode != 20230 && taxBenefitCode != null)){
 
                                             def l = tRow.taxBenefitCode;
-                                            /* 	2.2. Получить в справочнике «Параметры налоговых льгот» запись,
-                                            *	соответствующую значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
-                                            dictRegionId
-                                            */
-                                            // TODO Переписать. Сервис удален, параметры перенесены в версионный справочник
-                                            def param = dictionaryTaxBenefitParamService.get(region.code, tRow.taxBenefitCode)
                                             if (param != null) {
-                                                def x = l == 30200 ? "" : ((param.section.toString().size() < 4 ? "0"*(4 - param.section.toString().size()) : param.section.toString())
-                                                        + (param.item.toString().size() < 4 ? "0"*(4 - param.item.toString().size()) : param.item.toString())
-                                                        + (param.subitem.toString().size() < 4 ? "0"*(4 - param.subitem.toString().size()) : param.subitem.toString()))
+                                                def x = l == 30200 ? "" : ((param.SECTION.toString().size() < 4 ? "0"*(4 - param.SECTION.toString().size()) : param.SECTION.toString())
+                                                        + (param.ITEM.toString().size() < 4 ? "0"*(4 - param.ITEM.toString().size()) : param.ITEM.toString())
+                                                        + (param.SUBITEM.toString().size() < 4 ? "0"*(4 - param.SUBITEM.toString().size()) : param.SUBITEM.toString()))
 
 
                                                 def kodOsnNal = (l != "" ? l.toString():"0000") +"/"+ x
-
 
                                                 ЛьготОсвНал(
                                                         КодОсвНал: kodOsnNal,
@@ -255,15 +264,10 @@ def bildXml(){
 
                                             // вычисление КодУменСум
                                             def valL = tRow.taxBenefitCode;
-                                            /* 	2.2. Получить в справочнике «Параметры налоговых льгот» запись,
-                                            *	соответствующую значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
-                                            */
-                                            // TODO Переписать. Сервис удален, параметры перенесены в версионный справочник
-                                            def param = dictionaryTaxBenefitParamService.get(region.code, tRow.taxBenefitCode)
                                             if (param != null) {
-                                                def valX = ((param.section.toString().size() < 4 ? ("0"*(4 - param.section.toString().size())) : param.section.toString())
-                                                        + (param.item.toString().size() < 4 ? ("0"*(4 - param.item.toString().size())) : param.item.toString())
-                                                        + (param.subitem.toString().size() < 4 ? ("0"*(4 - param.subitem.toString().size())) : param.subitem.toString()))
+                                                def valX = ((param.SECTION.toString().size() < 4 ? ("0"*(4 - param.SECTION.toString().size())) : param.SECTION.toString())
+                                                        + (param.ITEM.toString().size() < 4 ? ("0"*(4 - param.ITEM.toString().size())) : param.ITEM.toString())
+                                                        + (param.SUBITEM.toString().size() < 4 ? ("0"*(4 - param.SUBITEM.toString().size())) : param.SUBITEM.toString()))
 
                                                 def kodUmenSum = (valL != "" ? valL.toString():"0000") +"/"+ valX
 
@@ -282,15 +286,10 @@ def bildXml(){
 
                                             // вычисление КодУменСум
                                             def valL = tRow.taxBenefitCode;
-                                            /* 	2.2. Получить в справочнике «Параметры налоговых льгот» запись,
-                                            *	соответствующую значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
-                                            */
-                                            // TODO Переписать. Сервис удален, параметры перенесены в версионный справочник
-                                            def param = dictionaryTaxBenefitParamService.get(region.code, tRow.taxBenefitCode)
                                             if (param != null) {
-                                                def valX = ((param.section.toString().size() < 4 ? "0"*(4 - param.section.toString().size()) : param.section.toString())
-                                                        + (param.item.toString().size() < 4 ? "0"*(4 - param.item.toString().size()) : param.item.toString())
-                                                        + (param.subitem.toString().size() < 4 ? "0"*(4 - param.subitem.toString().size()) : param.subitem.toString()))
+                                                def valX = ((param.SECTION.toString().size() < 4 ? "0"*(4 - param.SECTION.toString().size()) : param.SECTION.toString())
+                                                        + (param.ITEM.toString().size() < 4 ? "0"*(4 - param.ITEM.toString().size()) : param.ITEM.toString())
+                                                        + (param.SUBITEM.toString().size() < 4 ? "0"*(4 - param.SUBITEM.toString().size()) : param.SUBITEM.toString()))
 
                                                 def kodNizhStav = (valL != "" ? valL.toString():"0000") +"/"+ valX
 
@@ -389,4 +388,14 @@ def getModRefBookValue(refBookId, filter){
         }
     }
     record
+}
+
+/**
+ * Получение значения (разменовываение)
+ */
+def getRefBookValue(refBookID, recordId, alias){
+    def  refDataProvider = refBookFactory.getDataProvider(refBookID)
+    def records = refDataProvider.getRecordData(recordId)
+
+    return records != null ? records.get(alias) : null;
 }
