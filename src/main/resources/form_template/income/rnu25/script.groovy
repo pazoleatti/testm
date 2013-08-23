@@ -1016,8 +1016,10 @@ boolean addData(def xml) {
             newRow.reserveCalcValue = getNumber(row.cell[11].text())
 
             totalColumns.each{k,it->
-                if (newRow[it]!=total[it]) logger.error("Итоговая сумма в графе $k в транспортном файле некорректна.")
-                isTotal = false
+                if (newRow[it]!=total[it]) {
+                    logger.error("Итоговая сумма в графе $k в транспортном файле некорректна.")
+                    isTotal = false
+                }
             }
             //data.insert(newRow, indexRow-1)
         }
