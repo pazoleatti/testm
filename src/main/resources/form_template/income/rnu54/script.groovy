@@ -1,5 +1,11 @@
+package form_template.income.rnu54
+
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+
 /**
- * Скрипт для РНУ-54 (rnu54.groovy).
  * Форма "(РНУ-54) Регистр налогового учёта открытых сделок РЕПО с обязательством покупки по 2-й части".
  *
  * @version 65
@@ -7,6 +13,7 @@
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *      - откуда брать курс ЦБ РФ на отчётную дату для подсчета графы 12 и для 5ой и 6ой логической проверки
+ *      - проверки корректности данных при загрузке данных из транспортного файла
  *
  * @author rtimerbaev
  */
@@ -46,6 +53,9 @@ switch (formDataEvent) {
         // для сохранения изменений приемников
         getData(formData).commit()
         break
+    case FormDataEvent.IMPORT :
+        importData()
+        break
 }
 
 // графа 1  - tadeNumber
@@ -67,19 +77,12 @@ switch (formDataEvent) {
  */
 def addNewRow() {
     def data = getData(formData)
-    def newRow = formData.createDataRow()
+    def newRow = getNewRow()
     def index = 0
     if(currentDataRow!=null){
         if(currentDataRow.getAlias()==null){
             index = getIndex(currentDataRow)+1
         }
-    }
-
-    // графа 1..10
-    ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
-            'salePrice', 'acquisitionPrice', 'part1REPODate', 'part2REPODate'].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
     }
     data.insert(newRow,index+1)
 }
@@ -96,6 +99,9 @@ def deleteRow() {
  */
 void calc() {
     def data = getData(formData)
+    if (data == null) {
+        return
+    }
     /*
      * Проверка объязательных полей.
      */
@@ -141,7 +147,7 @@ void calc() {
     def tmp
     def a, b ,c
 
-    getRows(data).eachWithIndex { row, i ->
+    getRows(data).each { row ->
 
         def currency = getCurrency(row.currencyCode)
         course = getCourse(row.currencyCode,reportDate)
@@ -193,8 +199,7 @@ void calc() {
         }
         row.outcomeTax = tmp
     }
-
-    data.save(getRows(data))
+    save(data)
 
     // строка итого
     def totalRow = formData.createDataRow()
@@ -205,7 +210,7 @@ void calc() {
     ['salePrice', 'acquisitionPrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each { alias ->
         totalRow.getCell(alias).setValue(getSum(alias))
     }
-    data.insert(totalRow,getRows(data).size()+1)
+    insert(data, totalRow)
 }
 
 /**
@@ -215,6 +220,9 @@ void calc() {
  */
 def logicalCheck(def useLog) {
     def data = getData(formData)
+    if (data == null) {
+        return true
+    }
     if (!getRows(data).isEmpty()) {
 
         // список проверяемых столбцов (графа 12, 13)
@@ -354,7 +362,7 @@ def logicalCheck(def useLog) {
 
         // 9. Проверка итоговых значений формы  Заполняется автоматически (графа 5, 6, 9, 10, 12, 13).
         if (hasTotalRow) {
-            def totalRow = data.getDataRow(getRows(data),'total')
+            def totalRow = getRowByAlias(data, 'total')
             def totalSumColumns = ['salePrice', 'acquisitionPrice', 'income',
                     'outcome', 'outcome269st', 'outcomeTax']
             for (def alias : totalSumColumns) {
@@ -373,6 +381,9 @@ def logicalCheck(def useLog) {
  */
 def checkNSI() {
     def data = getData(formData)
+    if (data == null) {
+        return true
+    }
     if (!getRows(data).isEmpty()) {
         /** Отчетная дата. */
         def reportDate = getReportDate()
@@ -403,6 +414,9 @@ def checkNSI() {
  */
 void consolidation() {
     def data = getData(formData)
+    if (data == null) {
+        return
+    }
     // удалить все строки и собрать из источников их строки
     data.clear()
 
@@ -412,7 +426,7 @@ void consolidation() {
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 getRows(getData(source)).each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        data.insert(row,getRows(data).size()+1)
+                        insert(data, row)
                     }
                 }
             }
@@ -441,6 +455,35 @@ void checkCreation() {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
 }
+
+/**
+ * Получение импортируемых данных.
+ * Транспортный файл формата xml.
+ */
+void importData() {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '' || !fileName.contains('.xml')) {
+        return
+    }
+
+    def is = ImportInputStream
+    if (is == null) {
+        return
+    }
+
+    def xmlString = importService.getData(is, fileName)
+    if (xmlString == null || xmlString == '') {
+        return
+    }
+
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        return
+    }
+    addData(xml)
+}
+
+
 
 /*
  * Вспомогательные методы.
@@ -554,6 +597,21 @@ void setTotalStyle(def row) {
 }
 
 /**
+ * Получить новую стролу с заданными стилями.
+ */
+def getNewRow() {
+    def row = formData.createDataRow()
+
+    // графа 1..10
+    ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
+            'salePrice', 'acquisitionPrice', 'part1REPODate', 'part2REPODate'].each {
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return row
+}
+
+/**
  * Получить номер строки в таблице.
  */
 def getIndex(def row) {
@@ -595,7 +653,7 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         if (!useLog) {
             return false
         }
-        def index = getIndex(row) + 1
+        def index = row.tadeNumber
         def errorMsg = colNames.join(', ')
         if (!isEmpty(index)) {
             logger.error("В строке \"Номер сделки\" равной $index не заполнены колонки : $errorMsg.")
@@ -661,8 +719,36 @@ def getData(def formData) {
  * @param formData форма
  */
 def getRows(def data) {
-    def cached = data.getAllCached()
-    return cached
+    return data.getAllCached()
+}
+
+/**
+ * Получить строку по алиасу.
+ *
+ * @param data данные нф (helper)
+ * @param alias алиас
+ */
+def getRowByAlias(def data, def alias) {
+    return data.getDataRow(getRows(data), alias)
+}
+
+/**
+ * Вставить новыую строку в конец нф.
+ *
+ * @param data данные нф
+ * @param row строка
+ */
+void insert(def data, def row) {
+    data.insert(row, getRows(data).size() + 1)
+}
+
+/**
+ * Сохранить измененные значения нф.
+ *
+ * @param data данные нф (helper)
+ */
+void save(def data) {
+    data.save(getRows(data))
 }
 
 /**
@@ -699,4 +785,138 @@ def getRate(def date) {
  */
 def getCurrency(def currencyCode) {
     return refBookService.getStringValue(15,currencyCode,'CODE')
+}
+
+/**
+ * Проверка валюты на рубли
+ */
+def isRubleCurrency(def currencyCode) {
+    return  refBookService.getStringValue(15,currencyCode,'CODE_2')=='810'
+}
+
+/**
+ * Получить курс валюты.
+ *
+ * @param currency атрибут "Цифровой код валюты"
+ * @param date дата
+ */
+def getCourse(def currency, def date) {
+    if (currency!=null && !isRubleCurrency(currency)) {
+        def refCourseDataProvider = refBookFactory.getDataProvider(22)
+        def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
+        return res.getRecords().get(0).RATE.getNumberValue()
+    } else if (isRubleCurrency(currency)){
+        return 1;
+    } else {
+        return null
+    }
+}
+
+/**
+ * Заполнить форму данными.
+ *
+ * @param xml данные
+ */
+void addData(def xml) {
+    def data = getData(formData)
+
+    def tmp
+    def indexRow = 0
+    def newRows = []
+    def index
+    def refDataProvider = refBookFactory.getDataProvider(15)
+
+    // TODO (Ramil Timerbaev) Проверка корректности данных
+    for (def row : xml.exemplar.table.detail.record) {
+        indexRow++
+        index = 0
+
+        def newRow = getNewRow()
+
+        // графа 1
+        newRow.tadeNumber = row.field[index].@value.text()
+        index++
+
+        // графа 2
+        newRow.securityName = row.field[index].@value.text()
+        index++
+
+        // графа 3 - справочник 15 "Общероссийский классификатор валют"
+        tmp = null
+        if (row.field[index].@value.text() != null &&
+                row.field[index].@value.text().trim() != '') {
+            def records = refDataProvider.getRecords(new Date(), null, "CODE = '" + row.field[index].@value.text() + "'", null);
+            if (records != null && !records.getRecords().isEmpty()) {
+                tmp = records.getRecords().get(0).get('record_id').getNumberValue()
+            }
+        }
+        newRow.currencyCode = tmp
+        index++
+
+        // графа 4
+        newRow.nominalPriceSecurities = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 5
+        newRow.salePrice = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 6
+        newRow.acquisitionPrice = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 7
+        newRow.part1REPODate = getDate(row.field[index].@value.text())
+        index++
+
+        // графа 8
+        newRow.part2REPODate = getDate(row.field[index].@value.text())
+
+        newRows.add(newRow)
+    }
+    // проверка итоговых данных
+    if (xml.exemplar.table.total.record.field.size() > 0 && !newRows.isEmpty()) {
+        def totalRow = formData.createDataRow()
+
+        totalRow.salePrice = 0
+        totalRow.acquisitionPrice = 0
+
+        newRows.each { row ->
+            totalRow.salePrice += (row.salePrice != null ? row.salePrice : 0)
+            totalRow.acquisitionPrice += (row.acquisitionPrice != null ? row.acquisitionPrice : 0)
+        }
+
+        for (def row : xml.exemplar.table.total.record) {
+            // графа 5 и 6
+            if (totalRow.salePrice != getNumber(row.field[4].@value.text()) ||
+                    totalRow.acquisitionPrice != getNumber(row.field[5].@value.text())) {
+                logger.error('Итоговые значения неправильные.')
+                return
+            }
+        }
+    }
+    data.clear()
+    newRows.each { newRow ->
+        insert(data, newRow)
+    }
+    data.commit()
+    logger.info('Данные загружены')
+}
+
+/**
+ * Получить числовое значение.
+ *
+ * @param value строка
+ */
+def getNumber(def value) {
+    if (value == null) {
+        return null
+    }
+    def tmp = value.trim()
+    if ("".equals(tmp)) {
+        return null
+    }
+    // поменять запятую на точку и убрать пробелы
+    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
+    return new BigDecimal(tmp)
 }

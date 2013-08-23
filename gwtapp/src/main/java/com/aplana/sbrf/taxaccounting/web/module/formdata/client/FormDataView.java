@@ -68,7 +68,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	private AsyncDataProvider<DataRow<Cell>> dataProvider = new  AsyncDataProvider<DataRow<Cell>>() {
 		@Override
 		protected void onRangeChanged(HasData<DataRow<Cell>> display) {
-			final Range range = display.getVisibleRange();
+			Range range = display.getVisibleRange();
 			getUiHandlers().onRangeChange(range.getStart(), range.getLength());
 		}
 	};
@@ -260,7 +260,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@Override
-	public DataRow getSelectedRow() {
+	public DataRow<Cell> getSelectedRow() {
 		return selectionModel.getLastSelectedObject();
 	}
 

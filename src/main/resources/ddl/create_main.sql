@@ -333,20 +333,20 @@ alter table department add constraint department_chk_parent_id check ((type = 1 
 create table report_period (
   id number(9) not null,
   name varchar2(50) not null,
-  is_active number(1) default 1 not null,
+  is_active number(1) default 1,
   months  number(2) not null,
   tax_period_id number(9) not null,
   ord      number(2) not null,
-  department_id number(15) not null,
-  is_balance_period number(1) default 0 not null,
+  department_id number(15),
+  is_balance_period number(1) default 0,
   dict_tax_period_id number(18) not null
 );
 
 alter table report_period add constraint report_period_pk primary key(id);
 alter table report_period add constraint report_period_fk_taxperiod foreign key (tax_period_id) references tax_period (id);
-alter table report_period add constraint report_period_chk_active check (is_active in (0, 1));
-alter table report_period add constraint report_period_chk_balance check (is_balance_period in (0, 1));
-alter table report_period add constraint report_period_fk_department_id foreign key (department_id) references department(id);
+--alter table report_period add constraint report_period_chk_active check (is_active in (0, 1));
+--alter table report_period add constraint report_period_chk_balance check (is_balance_period in (0, 1));
+--alter table report_period add constraint report_period_fk_department_id foreign key (department_id) references department(id);
 alter table report_period add constraint report_period_fk_dtp_id foreign key (dict_tax_period_id) references ref_book_record(id);
 
 comment on table report_period is 'Отчетные периоды';
@@ -363,21 +363,23 @@ comment on column report_period.dict_tax_period_id is 'Ссылка на спр�
 create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------
 create table income_101 (
-  report_period_id number(9) not null,
-  account varchar2(255 char) not null,
-  income_debet_remains number(22,4),
-  income_credit_remains number(22,4),
-  debet_rate number(22,4),
-  credit_rate number(22,4),
-  outcome_debet_remains number(22,4),
+  id                     number(18) not null,
+  report_period_id       number(9) not null,
+  account                varchar2(255 char) not null,
+  income_debet_remains   number(22,4),
+  income_credit_remains  number(22,4),
+  debet_rate             number(22,4),
+  credit_rate            number(22,4),
+  outcome_debet_remains  number(22,4),
   outcome_credit_remains number(22,4),
   account_name varchar2(255 char)
 );
 
-alter table income_101 add constraint income_101_pk primary key (report_period_id, account);
+alter table income_101 add constraint income_101_pk primary key (id);
 alter table income_101 add constraint income_101_fk_report_period_id foreign key (report_period_id) references report_period(id);
 
 comment on table income_101 is 'Оборотная ведомость (Форма 0409101-СБ)';
+comment on column income_101.id is 'Код записи';
 comment on column income_101.report_period_id is 'Идентификатор отчетного периода';
 comment on column income_101.account is 'Номер счета';
 comment on column income_101.income_debet_remains is 'Входящие остатки по дебету';
@@ -387,22 +389,28 @@ comment on column income_101.credit_rate is 'Обороты по кредиту'
 comment on column income_101.outcome_debet_remains is 'Исходящие остатки по дебету';
 comment on column income_101.outcome_credit_remains is 'Исходящие остатки по кредиту';
 comment on column income_101.account_name is 'Название счёта';
+
+create sequence seq_income_101 start with 1;
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table income_102 (
+  id               number(18) not null,
   report_period_id number(9) not null,
-  opu_code varchar2(25 char) not null,
-  total_sum number(22,4),
-  item_name varchar2(255 char)
+  opu_code         varchar2(25 char) not null,
+  total_sum        number(22,4),
+  item_name        varchar2(255 char)
   );
 
-alter table income_102 add constraint income_102_pk primary key (report_period_id, opu_code);
+alter table income_102 add constraint income_102_pk primary key (id);
 alter table income_102 add constraint income_102_fk_report_period_id foreign key (report_period_id) references report_period(id);
 
 comment on table income_102 is 'Отчет о прибылях и убытках (Форма 0409102-СБ)';
+comment on column income_102.id is 'Код записи';
 comment on column income_102.report_period_id is 'Идентификатор отчетного периода';
 comment on column income_102.opu_code is 'Код ОПУ';
 comment on column income_102.total_sum is 'Сумма';
 comment on column income_102.item_name is 'Наименование статьи';
+
+create sequence seq_income_102 start with 1;
 ---------------------------------------------------------------------------------------------------
 create table declaration_type (
   id       number(9) not null,
@@ -496,7 +504,8 @@ create table form_data (
   state number(9) not null,
   kind number(9) not null,
   report_period_id number(9) not null,
-  return_sign number(1) not null
+  return_sign number(1) not null,
+  period_order number(2)
 );
 alter table form_data add constraint form_data_pk primary key (id);
 alter table form_data add constraint form_data_fk_form_templ_id foreign key (form_template_id) references form_template(id);
@@ -514,6 +523,7 @@ comment on column form_data.state is 'Код состояния';
 comment on column form_data.kind is 'Тип налоговой формы (1 - Первичная, 2 - Консолидированная, 3 - Сводная, 4 - Форма УНП, 5 - Выходная)';
 comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
 comment on column form_data.return_sign is 'Флаг возврата (0 - обычный режим; 1 - форма возвращена из вышестоящего статуса)';
+comment on column form_data.period_order is 'Указывает на очередность налоговой формы в рамках отчетного периода. Необходимо для, например, месячных форм в рамках квартального отчетного периода';
 
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -844,6 +854,30 @@ comment on column log_system.user_department_id is 'Код подразделе�
 
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
+
+create table department_report_period (
+  department_id       number(9) not null,
+  report_period_id    number(9) not null,
+  is_active           number(1) not null,
+  is_balance_period   number(1) default 0 not null
+);
+
+alter table department_report_period add constraint department_report_period_pk primary key (department_id, report_period_id);
+
+alter table department_report_period add constraint dep_rep_per_chk_is_active check (is_active in (0, 1));
+alter table department_report_period add constraint dep_rep_per_chk_is_balance_per check (is_balance_period in (0, 1));
+
+comment on table department_report_period is  'Привязка отчетных периодов к подразделениям';
+
+comment on column department_report_period.department_id is 'Код подразделения';
+comment on column department_report_period.report_period_id is 'Код отчетного периода';
+comment on column department_report_period.is_active is 'Признак активности (0 - период закрыт, 1 - период открыт)';
+comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
+
+alter table department_report_period add constraint dep_rep_per_fk_department_id foreign key (department_id) references DEPARTMENT (id);
+alter table department_report_period add constraint dep_rep_per_fk_rep_period_id foreign key (report_period_id) references REPORT_PERIOD (id);
+
+------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);
 create index i_form_data_report_period_id on form_data(report_period_id);
@@ -854,22 +888,3 @@ create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
 create index i_ref_book_value_string on ref_book_value(string_value);
 ------------------------------------------------------------------------------------------------------
 
-create table department_report_period (
-  department_id       number(9) not null,
-  repost_period_id    number(9) not null,
-  is_active           number(1) not null,
-  is_balance_period   number(1) default 0 not null
-);
-
-alter table department_report_period add constraint department_report_period_pk primary key (department_id, repost_period_id);
-
-alter table department_report_period add constraint dep_rep_per_chk_is_active check (is_active in (0, 1));
-alter table department_report_period add constraint dep_rep_per_chk_is_balance_per check (is_balance_period in (0, 1));
-
-comment on table department_report_period is  'Привязка отчетных периодов к подразделениям';
-
-comment on column department_report_period.department_id is 'Код подразделения';
-comment on column department_report_period.repost_period_id is 'Код отчетного периода';
-comment on column department_report_period.is_active is 'Признак активности (0 - период закрыт, 1 - период открыт)';
-comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
-------------------------------------------------------------------------------------------------------

@@ -110,22 +110,21 @@
         <Arg type="java.net.URL">http://ignore/</Arg>
     </New>
 
-    <!-- Тестовое подключение Jetty к ApacheMQ -->
+    <!-- Подмена JMS-factory в WebSphere на ApacheMQ для теста -->
     <New class="org.mortbay.jetty.plus.naming.Resource">
-        <Arg>java:comp/env/jms/jmsConnectionFactory</Arg>
+        <Arg>java:comp/env/jms/transportConnectionFactory</Arg>
         <Arg>
-            <New class="org.apache.activemq.ActiveMQConnectionFactory">
-                <Arg>tcp://localhost:61616</Arg>
-            </New>
+            <New class="org.apache.activemq.ActiveMQConnectionFactory"/>
         </Arg>
     </New>
 
-    <!-- Тестовый топик ApacheMQ -->
+    <!-- Тестовая очередь миграции -->
     <New class="org.mortbay.jetty.plus.naming.Resource">
-        <Arg>java:comp/env/jms/myTopic</Arg>
+        <Arg>java:comp/env/jms/transportQueue</Arg>
         <Arg>
-            <New class="org.apache.activemq.command.ActiveMQTopic">
-                <Arg>myTopic</Arg>
+            <New class="org.apache.activemq.command.ActiveMQQueue">
+                <!-- Имя очереди -->
+                <Arg>Files</Arg>
             </New>
         </Arg>
     </New>

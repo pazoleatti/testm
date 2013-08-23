@@ -11,7 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DataRowResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -26,7 +26,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class AddRowHandler extends
-		AbstractActionHandler<AddRowAction, FormDataResult> {
+		AbstractActionHandler<AddRowAction, DataRowResult> {
 
 	@Autowired
 	private FormDataService formDataService;
@@ -42,7 +42,7 @@ public class AddRowHandler extends
 	}
 
 	@Override
-	public FormDataResult execute(AddRowAction action, ExecutionContext context)
+	public DataRowResult execute(AddRowAction action, ExecutionContext context)
 		throws ActionException {
 		FormData formData = action.getFormData();
 		Logger logger = new Logger();
@@ -51,15 +51,14 @@ public class AddRowHandler extends
 			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows());
 		}
 		formDataService.addRow(logger, securityService.currentUserInfo(), formData, action.getCurrentDataRow());
-		FormDataResult result = new FormDataResult();
-		result.setFormData(formData);
+		DataRowResult result = new DataRowResult();
 		result.setLogEntries(logger.getEntries());
 		result.setCurrentRow(action.getCurrentDataRow());
 		return result;
 	}
 
 	@Override
-	public void undo(AddRowAction action, FormDataResult result,
+	public void undo(AddRowAction action, DataRowResult result,
 			ExecutionContext context) throws ActionException {
 		// Nothing!
 	}

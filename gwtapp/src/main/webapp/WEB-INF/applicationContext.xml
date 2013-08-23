@@ -23,20 +23,6 @@
 		</constructor-arg>
 	</bean>
 
-    <jee:jndi-lookup id="jmsConnectionFactory" jndi-name="java:comp/env/jms/jmsConnectionFactory" />
-    <jee:jndi-lookup id="jmsTopic" jndi-name="java:comp/env/jms/myTopic" />
-
-    <!-- Слушалель JMS-сообщений -->
-    <bean id="jmsMessageListener" class="com.aplana.sbrf.taxaccounting.jms.JmsMessageListener" />
-
-    <!-- Spring-аналог EJB Message Driven Bean -->
-    <!-- Раскомментировать для работы с JMS
-    <bean id="messageListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
-        <property name="connectionFactory" ref="jmsConnectionFactory"/>
-        <property name="destination" ref="jmsTopic"/>
-        <property name="messageListener" ref="jmsMessageListener"/>
-    </bean>-->
-
     <jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/TaxAccDS" />
 	<tx:jta-transaction-manager/>
 	

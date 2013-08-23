@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DataRowResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
@@ -18,7 +18,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class SaveFormDataHandler extends
-		AbstractActionHandler<SaveFormDataAction, FormDataResult> {
+		AbstractActionHandler<SaveFormDataAction, DataRowResult> {
 
 	@Autowired
 	private SecurityService securityService;
@@ -32,7 +32,7 @@ public class SaveFormDataHandler extends
 	}
 
 	@Override
-	public FormDataResult execute(SaveFormDataAction action,
+	public DataRowResult execute(SaveFormDataAction action,
 			ExecutionContext context) throws ActionException {
 		Logger logger = new Logger();
 		FormData formData = action.getFormData();
@@ -42,14 +42,13 @@ public class SaveFormDataHandler extends
 		formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
 
 		logger.info("Данные успешно записаны");
-		FormDataResult result = new FormDataResult();
-		result.setFormData(formData);
+		DataRowResult result = new DataRowResult();
 		result.setLogEntries(logger.getEntries());
 		return result;
 	}
 
 	@Override
-	public void undo(SaveFormDataAction action, FormDataResult result,
+	public void undo(SaveFormDataAction action, DataRowResult result,
 			ExecutionContext context) throws ActionException {
 		// Nothing!
 	}
