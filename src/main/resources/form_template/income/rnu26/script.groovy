@@ -58,6 +58,9 @@ switch (formDataEvent) {
         // для сохранения изменений приемников
         getData(formData).commit()
         break
+    case FormDataEvent.IMPORT :
+        importData()
+        break
 }
 
 // графа 1  - rowNumber
@@ -100,6 +103,20 @@ def addNewRow() {
     data.insert(newRow,index+1)
 }
 
+/**
+ * Получить новую стролу с заданными стилями.
+ */
+def getNewRow() {
+    def newRow = formData.createDataRow()
+
+    // графа 2..7, 9..13
+    ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
+            'cost', 'signSecurity', 'marketQuotation', 'rubCourse'].each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return newRow
+}
 /**
  * Удалить строку.
  */
@@ -535,6 +552,49 @@ void checkCreation() {
     }
 }
 
+/**
+ * Получение импортируемых данных.
+ */
+void importData() {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        return
+    }
+
+    def is = ImportInputStream
+    if (is == null) {
+        return
+    }
+
+    if (!fileName.contains('.rnu')) {
+        logger.error("Некорректное расширение файла")
+        return
+    }
+
+    logger.info('Начата загрузка файла ' + fileName)
+
+    def xmlString = importService.getData(is, fileName, 'cp866')
+    if (xmlString == null) {
+        return
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        return
+    }
+    // номер строки с которой брать данные (что бы пропустить шапку таблицы или лишнюю информацию)
+    def startRow = 0
+
+    // номер графы с которой брать данные (что бы пропустить нумерацию или лишнюю информацию)
+    def startColumn = 1
+
+    // добавить данные в форму
+    if (addData(xml, startRow, startColumn)) {
+        logger.info('Закончена загрузка файла ' + fileName)
+    } else {
+        logger.error("Загрузка файла $fileName завершилась ошибкой")
+    }
+}
+
 /*
  * Вспомогательные методы.
  */
@@ -771,6 +831,217 @@ def getData(def formData) {
     }
     return null
 }
+/**
+ * Заполнить форму данными.
+ *
+ * @param xml данные
+ */
+boolean addData(def xml, def startRow, def startColumn) {
+    if (xml == null) {
+        return
+    }
+
+    Date date = new Date()
+
+    def cache = [:]
+    def data = getData(formData)
+
+    def newRows = []
+
+    boolean isTotal = true
+    def total = formData.createDataRow()
+    def totalColumns = [6:'lotSizePrev', 7:'lotSizeCurrent', 9:'cost', 14:'costOnMarketQuotation', 15:'reserveCalcValue']
+    totalColumns.each{k,it->
+        total[it] = 0
+    }
+
+    def indexRow = -1
+    for (def row : xml.row) {
+        indexRow++
+
+        // пропустить шапку таблицы
+        if (indexRow <= startRow) {// || indexRow>20) {
+            continue
+        }
+
+        def newRow = getNewRow()
+
+        def indexCell = startColumn
+
+        newRow.rowNumber = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 2
+        newRow.issuer = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 3
+        newRow.shareType = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 4
+        newRow.tradeNumber = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 5
+        newRow.currency = getRecords(15, 'CODE_2', row.cell[indexCell].text().replaceAll('[ ]', ''), date, cache)
+        indexCell++
+
+        // графа 6
+        newRow.lotSizePrev = getNumber(row.cell[indexCell].text())
+        total.lotSizePrev = total.lotSizePrev + newRow.lotSizePrev
+        indexCell++
+
+        // графа 7
+        newRow.lotSizeCurrent = getNumber(row.cell[indexCell].text())
+        total.lotSizeCurrent = total.lotSizeCurrent + newRow.lotSizeCurrent
+        indexCell++
+
+        // графа 8
+        newRow.reserveCalcValuePrev = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 9
+        newRow.cost = getNumber(row.cell[indexCell].text())
+        total.cost = total.cost + newRow.cost
+        indexCell++
+
+        // графа 10
+        newRow.signSecurity = getRecords(62, 'CODE', row.cell[indexCell].text().replaceAll('[ ]', ''), date, cache)
+        indexCell++
+
+        // графа 11
+        newRow.marketQuotation = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 12
+        newRow.rubCourse = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 13
+        newRow.marketQuotationInRub = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 14
+        newRow.costOnMarketQuotation = getNumber(row.cell[indexCell].text())
+        total.costOnMarketQuotation = total.costOnMarketQuotation + newRow.costOnMarketQuotation
+        indexCell++
+
+        // графа 15
+        newRow.reserveCalcValue = getNumber(row.cell[indexCell].text())
+        total.reserveCalcValue = total.reserveCalcValue + newRow.reserveCalcValue
+        indexCell++
+
+        // графа 16
+        newRow.reserveCreation = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 17
+        newRow.reserveRecovery = getNumber(row.cell[indexCell].text())
+
+        newRows << newRow
+    }
+
+    if (xml.rowTotal.size()==1)
+        for (def row : xml.rowTotal) {
+            def newRow = formData.createDataRow()
+            newRow.setAlias('total')
+            newRow.issuer = 'Общий итог'
+            setTotalStyle(newRow)
+
+            def indexCell = startColumn + 5
+
+            // графа 6
+            newRow.lotSizePrev = getNumber(row.cell[indexCell].text())
+            indexCell++
+
+            // графа 7
+            newRow.lotSizeCurrent = getNumber(row.cell[indexCell].text())
+            indexCell++
+
+            // графа 8
+            indexCell++
+
+            // графа 9
+            newRow.cost = getNumber(row.cell[indexCell].text())
+            indexCell++
+
+            // графа 10
+            indexCell++
+
+            // графа 11
+            indexCell++
+
+            // графа 12
+            indexCell++
+
+            // графа 13
+            indexCell++
+
+            // графа 14
+            newRow.costOnMarketQuotation = getNumber(row.cell[indexCell].text())
+            indexCell++
+
+            // графа 15
+            newRow.reserveCalcValue = getNumber(row.cell[indexCell].text())
+
+            totalColumns.each{k,it->
+                if (newRow[it]!=total[it]) {
+                    logger.error("Итоговая сумма в графе $k в транспортном файле некорректна.")
+                    isTotal = false
+                }
+            }
+
+        }
+    else {
+        logger.error("Нет итоговой строки.")
+        isTotal = false
+    }
+    if (isTotal) {
+        data.clear()
+        newRows.each { newRow ->
+            insert(data, newRow)
+        }
+        data.commit()
+        return true
+    }
+    return false
+}
+
+/**
+ * Получить числовое значение.
+ *
+ * @param value строка
+ */
+def getNumber(def value) {
+    if (value == null) {
+        return null
+    }
+    def tmp = value.trim()
+    if ("".equals(tmp)) {
+        return null
+    }
+    // поменять запятую на точку и убрать пробелы
+    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
+    return new BigDecimal(tmp)
+}
+
+def getRecords(def ref_id, String code, String value, Date date, def cache) {
+    String filter = code + " like '"+ value+"%'"
+    if (cache[ref_id]!=null) {
+        if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    if (records.size() == 1){
+        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        return cache[ref_id][filter]
+    }
+    logger.error("Не удалось определить элемент справочника! ($filter)")
+    return null;
+}
 
 /**
  * Получить строки формы.
@@ -783,13 +1054,32 @@ def getRows(def data) {
 }
 
 /**
+ * Вставить новыую строку в конец нф.
+ *
+ * @param data данные нф
+ * @param row строка
+ */
+void insert(def data, def row) {
+    data.insert(row, getRows(data).size() + 1)
+}
+
+/**
+ * Проверка валюты на рубли
+ */
+def isRubleCurrency(def currencyCode) {
+    return  refBookService.getStringValue(15,currencyCode,'CODE_2')=='810'
+}
+
+/**
  * Получить курс валюты
  */
 def getCourse(def currency, def date) {
-    if (currency!=null) {
+    if (currency!=null && !isRubleCurrency(currency)) {
         def refCourseDataProvider = refBookFactory.getDataProvider(22)
         def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
         return res.getRecords().get(0).RATE.getNumberValue()
+    } else if (isRubleCurrency(currency)){
+        return 1;
     } else {
         return null;
     }
