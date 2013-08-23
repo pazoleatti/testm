@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
+import java.util.ArrayList;
+
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
@@ -13,11 +15,29 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CheckFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DataRowResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteRowAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFileUpload;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFileUploadResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RollbackDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RollbackDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -27,8 +47,6 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
-
-import java.util.ArrayList;
 
 public class FormDataPresenter extends
         FormDataPresenterBase<FormDataPresenter.MyProxy> implements
@@ -56,25 +74,11 @@ public class FormDataPresenter extends
 
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
-		try {
-			super.prepareFromRequest(request);
-		
-
-			final GetFormData action = new GetFormData();
-
-			action.setFormDataId(Long.parseLong(request.getParameter(
-					FORM_DATA_ID, null)));
-			action.setReadOnly(Boolean.parseBoolean(request.getParameter(
-					READ_ONLY, "true")));
-
-            executeAction(action);
-
-		} catch (Exception e) {
-			placeManager.navigateBackQuietly();
-			getProxy().manualRevealFailed();
-			MessageEvent.fire(this,
-					"Не удалось открыть/создать налоговую форму", e);
-		}
+		super.prepareFromRequest(request);
+		GetFormData action = new GetFormData();
+		action.setFormDataId(Long.parseLong(request.getParameter(FORM_DATA_ID, null)));
+		action.setReadOnly(Boolean.parseBoolean(request.getParameter(READ_ONLY, "true")));
+        executeAction(action);
 	}
 
 	@Override
@@ -98,9 +102,7 @@ public class FormDataPresenter extends
 									getView().assignDataProvider(result.getDataRows().getRecords().size());
 								}
 							}
-
-						modifiedRows.clear();
-
+							modifiedRows.clear();
 						}
 					}, FormDataPresenter.this));
 		}
@@ -121,7 +123,7 @@ public class FormDataPresenter extends
                 CallbackUtils.defaultCallback(new AbstractCallback<GetFileUploadResult>() {
                     @Override
                     public void onSuccess(GetFileUploadResult result) {
-                        getView().updateData();
+                        revealFormData(true);
                         LogAddEvent.fire(FormDataPresenter.this,
                                 result.getLogEntries());
                     }
@@ -141,7 +143,7 @@ public class FormDataPresenter extends
     private void manageDeleteRowButtonEnabled() {
 		if (!readOnlyMode) {
 			MyView view = getView();
-			DataRow dataRow = view.getSelectedRow();
+			DataRow<Cell> dataRow = view.getSelectedRow();
 			view.enableRemoveRowButton(dataRow != null);
 		}
 	}
@@ -179,137 +181,104 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onReturnClicked() {
-			revealFormDataList();
-		}
+		revealFormDataList();
+	}
 
 	@Override
 	public void onCancelClicked() {
-			if(formData.getId() == null){
-				revealFormDataList();
-			} else {
-				RollbackDataAction action = new RollbackDataAction();
-				action.setFormDataId(formData.getId());
-				dispatcher.execute(action, CallbackUtils
-						.defaultCallback(new AbstractCallback<RollbackDataResult>() {
-							@Override
-							public void onSuccess(RollbackDataResult result) {
-							}
-
-						}, this));
-				revealFormData(true);
-				modifiedRows.clear();
-			}
+			RollbackDataAction action = new RollbackDataAction();
+			action.setFormDataId(formData.getId());
+			dispatcher.execute(action, CallbackUtils
+					.defaultCallback(new AbstractCallback<RollbackDataResult>() {
+						@Override
+						public void onSuccess(RollbackDataResult result) {
+							revealFormData(true);
+						}
+						
+						public void onFailure(Throwable caught) {
+							modifiedRows.clear();
+							getView().updateData();
+						}
+						
+				}, this));
 		}
 
+
+	
+	private AsyncCallback<DataRowResult> createDataRowResultCallback(){ 
+			return CallbackUtils.defaultCallback(new AbstractCallback<DataRowResult>() {
+				@Override
+				public void onSuccess(DataRowResult result) {
+					modifiedRows.clear();
+					getView().updateData();
+					
+					LogAddEvent.fire(FormDataPresenter.this, result.getLogEntries());
+					getView().setSelectedRow(result.getCurrentRow(), true);
+				}
+				
+				@Override
+				public void onFailure(Throwable caught) {
+					modifiedRows.clear();
+					getView().updateData();
+				}
+
+			}, this);
+	}
+	
+	
+	/* (non-Javadoc)
+	 * @see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataUiHandlers#onSaveClicked()
+	 */
 	@Override
 	public void onSaveClicked() {
 		LogCleanEvent.fire(this);
 		SaveFormDataAction action = new SaveFormDataAction();
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<FormDataResult>() {
-					@Override
-					public void onSuccess(FormDataResult result) {
-						processFormDataResult(result);
-						modifiedRows.clear();
-					}
-
-				}, this));
+		dispatcher.execute(action, createDataRowResultCallback());
 	}
+	
 
-	private void processFormDataResult(FormDataResult result) {
-		if (result != null) {
-			formData = result.getFormData();
-			LogAddEvent.fire(this, result.getLogEntries());
-		}
-		/*getView().updateData();*/
-		// TODO: Тут было получение строк из FormData
-		// Сделать пейджинг: Задача: http://jira.aplana.com/browse/SBRFACCTAX-2977
-//		getView().setRowsData(0, 0, new ArrayList<DataRow<Cell>>());
-	}
-
+	/* (non-Javadoc)
+	 * @see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataUiHandlers#onAddRowClicked()
+	 */
 	@Override
 	public void onAddRowClicked() {
 		LogCleanEvent.fire(this);
-		DataRow dataRow = getView().getSelectedRow();
+		DataRow<Cell> dataRow = getView().getSelectedRow();
 		AddRowAction action = new AddRowAction();
 		action.setCurrentDataRow(dataRow);
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<FormDataResult>() {
-					@Override
-					public void onSuccess(FormDataResult result) {
-						modifiedRows.clear();
-						getView().updateData();
-						processFormDataResult(result);
-						getView().setSelectedRow(result.getCurrentRow(), true);
-					}
-					
-					@Override
-					public void onFailure(Throwable caught) {
-						modifiedRows.clear();
-						getView().updateData();
-					}
-
-				}, this));
+		dispatcher.execute(action, createDataRowResultCallback());
 	}
 
+	/* (non-Javadoc)
+	 * @see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataUiHandlers#onRemoveRowClicked()
+	 */
 	@Override
 	public void onRemoveRowClicked() {
 		LogCleanEvent.fire(this);
-		DataRow dataRow = getView().getSelectedRow();
+		DataRow<Cell> dataRow = getView().getSelectedRow();
 		DeleteRowAction action = new DeleteRowAction();
 		action.setCurrentDataRow(dataRow);
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		if (dataRow != null) {
-			dispatcher.execute(action, CallbackUtils
-					.defaultCallback(new AbstractCallback<FormDataResult>() {
-						@Override
-						public void onSuccess(FormDataResult result) {
-							modifiedRows.clear();
-							getView().updateData();
-							processFormDataResult(result);
-							getView().setSelectedRow(null, true); // clear selection
-						}
-						
-						@Override
-						public void onFailure(Throwable caught) {
-							modifiedRows.clear();
-							getView().updateData();
-						}
-
-					},this));
-			// TODO: Тут было получение строк из FormData
-			// Сделать пейджинг: Задача: http://jira.aplana.com/browse/SBRFACCTAX-2977
-//			getView().setRowsData(0, 0, new ArrayList<DataRow<Cell>>());
+			dispatcher.execute(action, createDataRowResultCallback());
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataUiHandlers#onRecalculateClicked()
+	 */
 	@Override
 	public void onRecalculateClicked() {
 		LogCleanEvent.fire(this);
 		RecalculateFormDataAction action = new RecalculateFormDataAction();
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<FormDataResult>() {
-					@Override
-					public void onSuccess(FormDataResult result) {
-						modifiedRows.clear();
-						getView().updateData();
-						processFormDataResult(result);
-					}
-
-					@Override
-					public void onFailure(Throwable caught) {
-						modifiedRows.clear();
-						getView().updateData();
-					}
-
-				}, this));
+		dispatcher.execute(action, createDataRowResultCallback());
 	}
 
 	@Override
@@ -319,9 +288,9 @@ public class FormDataPresenter extends
 		checkAction.setFormData(formData);
 		checkAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		dispatcher.execute(checkAction, CallbackUtils
-				.defaultCallbackNoModalError(new AbstractCallback<FormDataResult>() {
+				.defaultCallbackNoModalError(new AbstractCallback<DataRowResult>() {
 					@Override
-					public void onSuccess(FormDataResult result) {
+					public void onSuccess(DataRowResult result) {
 						modifiedRows.clear();
 						MessageEvent.fire(FormDataPresenter.this, "Ошибок не обнаружено");
 						LogAddEvent.fire(FormDataPresenter.this, result.getLogEntries());
@@ -439,11 +408,6 @@ public class FormDataPresenter extends
                                         formData.getFormColumns(),
                                         readOnlyMode,
                                         forceEditMode);
-                        		// TODO: Тут было получение строк из FormData
-                        		// Сделать пейджинг: Задача: http://jira.aplana.com/browse/SBRFACCTAX-2977
-//                                getView().setRowsData(0, 0,
-//                                        new ArrayList<DataRow<Cell>>());
-	                            getView().updateData();
                                 getView().addCustomHeader(
                                         formData.getHeaders());
                                 getView().addCustomTableStyles(
@@ -455,11 +419,12 @@ public class FormDataPresenter extends
                                                         : "Редактирование налоговой формы",
                                                 formData.getFormType()
                                                         .getName());
+	                            getView().updateData();
 
                             }
 
                         }, this).addCallback(
-                        TaManualRevealCallback.create(this, placeManager)));
+                        		TaManualRevealCallback.create(this, placeManager)));
     }
 
 }

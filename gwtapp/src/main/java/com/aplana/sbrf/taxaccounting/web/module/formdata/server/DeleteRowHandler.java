@@ -11,7 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteRowAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DataRowResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -24,7 +24,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
  */
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class DeleteRowHandler extends AbstractActionHandler<DeleteRowAction, FormDataResult> {
+public class DeleteRowHandler extends AbstractActionHandler<DeleteRowAction, DataRowResult> {
 
 	@Autowired
 	private FormDataService formDataService;
@@ -40,7 +40,7 @@ public class DeleteRowHandler extends AbstractActionHandler<DeleteRowAction, For
 	}
 
 	@Override
-	public FormDataResult execute(DeleteRowAction action,
+	public DataRowResult execute(DeleteRowAction action,
 			ExecutionContext context) throws ActionException {
 		Logger logger = new Logger();
 		FormData formData = action.getFormData();
@@ -50,15 +50,14 @@ public class DeleteRowHandler extends AbstractActionHandler<DeleteRowAction, For
 		}
 		formDataService.deleteRow(logger, securityService.currentUserInfo(), formData, action.getCurrentDataRow());
 		
-		FormDataResult result = new FormDataResult();
-		result.setFormData(formData);
+		DataRowResult result = new DataRowResult();
 		result.setLogEntries(logger.getEntries());
 		
 		return result;
 	}
 
 	@Override
-	public void undo(DeleteRowAction action, FormDataResult result,
+	public void undo(DeleteRowAction action, DataRowResult result,
 			ExecutionContext context) throws ActionException {
 		// Nothing!
 		
