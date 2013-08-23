@@ -101,10 +101,9 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 	}
 
 	@Override
-	public void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId) {
+	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
 		GetReportPeriods action = new GetReportPeriods();
 		action.setTaxPeriod(taxPeriod);
-		action.setDepartmentId(departmentId);
 		dispatchAsync.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
 					@Override

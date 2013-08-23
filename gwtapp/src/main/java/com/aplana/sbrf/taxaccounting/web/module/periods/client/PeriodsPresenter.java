@@ -130,7 +130,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 						getView().setFilterData(departments, selectedDepartments, result.getYearFrom(), result.getYearTo());
 						getView().setDepartmentPickerEnable(result.isEnableDepartmentPicker());
 						openDialogPresenter.setDepartments(departments, selectedDepartments);
-						openDialogPresenter.setDictionaryTaxPeriod(dictionaryTaxPeriods);
+//						openDialogPresenter.setDictionaryTaxPeriod(dictionaryTaxPeriods);
 						openDialogPresenter.setYear(result.getCurrentYear());
 						applyFilter(result.getYearFrom(), result.getYearTo(), result.getSelectedDepartment().getId());
 					}

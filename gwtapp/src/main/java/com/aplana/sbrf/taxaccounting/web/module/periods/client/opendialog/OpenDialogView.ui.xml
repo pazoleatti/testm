@@ -4,6 +4,7 @@
     xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
     xmlns:w='urn:import:com.aplana.sbrf.taxaccounting.web.widget.incrementbutton'
     xmlns:date="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
+    xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client'
     xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
     <ui:style>
         .content {
@@ -34,7 +35,8 @@
 
                 <g:HorizontalPanel height="10px">
                     <g:Label text="Период: " />
-                    <style:ListBoxWithTooltip width="200px" ui:field="period" showTooltip="true"/>
+                    <!--<style:ListBoxWithTooltip width="200px" ui:field="period" showTooltip="true"/>-->
+                    <r:RefBookPickerPopupWidget ui:field="period" width="100px" attributeIdInt="26"/>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel height="10px">

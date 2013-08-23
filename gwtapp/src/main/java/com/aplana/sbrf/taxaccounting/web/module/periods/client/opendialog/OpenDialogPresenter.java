@@ -37,8 +37,8 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		void setTaxPeriods(List<TaxPeriod> taxPeriods);
 		void setDepartments(List<Department> departments, List<Integer> selectedDepartments);
 		void setCurrentReportPeriod(ReportPeriod reportPeriod);
-		void setDictionaryTaxPeriod(List<DictionaryTaxPeriod> dictionaryTaxPeriod);
 		void setYear(int year);
+		void setTaxType(TaxType taxType);
 	}
 
 	private DispatchAsync dispatcher;
@@ -67,10 +67,6 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		getView().setDepartments(departments, selectedDepartments);
 	}
 
-	public void setDictionaryTaxPeriod(List<DictionaryTaxPeriod> dictionaryTaxPeriod) {
-		getView().setDictionaryTaxPeriod(dictionaryTaxPeriod);
-	}
-
 	public void setCurrentReportPeriod(ReportPeriod currentReportPeriod) {
 		getView().setCurrentReportPeriod(currentReportPeriod);
 	}
@@ -89,8 +85,7 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		action.setDepartmentId(openFilterData.getDepartmentId());
 		action.setBalancePeriod(openFilterData.isBalancePeriod());
 		action.setActive(true);
-		action.setDictionaryTaxPeriodId(openFilterData.getDictionaryTaxPeriod().getCode());
-		action.setMonths(openFilterData.getDictionaryTaxPeriod().getMonths());
+		action.setDictionaryTaxPeriodId(openFilterData.getDictionaryTaxPeriod());
 		dispatcher.execute(action, CallbackUtils
 				.simpleCallback(new AbstractCallback<OpenPeriodResult>() {
 					@Override
@@ -146,5 +141,6 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 
 	public void setTaxType(TaxType taxType) {
 		this.taxType = taxType;
+		getView().setTaxType(taxType);
 	}
 }

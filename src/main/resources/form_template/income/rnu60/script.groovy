@@ -234,7 +234,17 @@ DataRow<Cell> getItogo() {
             }
         }
     }
+    setTotalStyle(itogo)
     return itogo
+}
+
+/**
+ * Установить стиль для итоговых строк.
+ */
+void setTotalStyle(def row) {
+    ['tradeNumber', 'securityName', 'currencyCode', 'nominalPrice', 'part1REPODate', 'part2REPODate', 'acquisitionPrice', 'salePrice', 'income', 'outcome', 'rateBR', 'outcome269st', 'outcomeTax'].each {
+        row.getCell(it).setStyleAlias('Контрольные суммы')
+    }
 }
 
 BigDecimal calc9(DataRow row) {

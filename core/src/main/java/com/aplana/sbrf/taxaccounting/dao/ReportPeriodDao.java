@@ -26,6 +26,7 @@ public interface ReportPeriodDao {
 	 * @return объект представляющий текущий отчётный период по заданному виду налога, или null, если такого периода нет (еще не открыли)
 	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException если в БД несколько открытых периодов по заданному виду налога
 	 */
+	@Deprecated
 	ReportPeriod getCurrentPeriod(TaxType taxType);
 	
 	/**
@@ -42,6 +43,7 @@ public interface ReportPeriodDao {
 	 * @param departmentId
 	 * @return
 	 */
+	@Deprecated
 	public List<ReportPeriod> listByTaxPeriodAndDepartmentId(int taxPeriodId, long departmentId);
 
 	/**
@@ -49,6 +51,7 @@ public interface ReportPeriodDao {
 	 * @param reportPeriodId
 	 * @param active
 	 */
+	@Deprecated
 	void changeActive(int reportPeriodId, boolean active);
 
 	/**
@@ -56,6 +59,7 @@ public interface ReportPeriodDao {
 	 * @param reportPeriod отчётный период
 	 * @return идентификатор нового отчетного периода
 	 */
+	//TODO: Перименовать в save
 	int add(ReportPeriod reportPeriod);
 
     /**
@@ -64,5 +68,6 @@ public interface ReportPeriodDao {
      * @param departmentId Подразделение
      * @return
      */
+	@Deprecated
     ReportPeriod getLastReportPeriod(TaxType taxType, long departmentId);
 }

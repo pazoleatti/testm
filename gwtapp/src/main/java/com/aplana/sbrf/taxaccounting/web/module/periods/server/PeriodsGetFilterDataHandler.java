@@ -5,6 +5,9 @@ import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -22,14 +25,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGetFilterData, PeriodsGetFilterDataResult> {
 
 	private Log logger = LogFactory.getLog(getClass());
+	public static final long DICT_ID = 8L;
 	
 	@Autowired
 	private FormDataSearchService formDataSearchService;
@@ -42,9 +45,9 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	@Autowired
 	TaxPeriodDao taxPeriodDao;
 	@Autowired
-	DictionaryTaxPeriodDao dictionaryTaxPeriodDao;
-	@Autowired
 	TAUserService userService;
+	@Autowired
+	RefBookFactory refBookFactory;
 
     public PeriodsGetFilterDataHandler() {
         super(PeriodsGetFilterData.class);
@@ -55,6 +58,10 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	    PeriodsGetFilterDataResult res = new PeriodsGetFilterDataResult();
 	    TAUserInfo userInfo = securityService.currentUserInfo();
 	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(userInfo, action.getTaxType());
+	    RefBookDataProvider refBookDataProvider = refBookFactory
+			    .getDataProvider(DICT_ID);
+	    PagingResult<Map<String, RefBookValue>> result = refBookDataProvider.getRecords(new Date(), null,
+			    action.getTaxType().getCode()+"=1", null);
 	    if(filterValues.getDepartmentIds() == null) {
 		    //Контролер УНП
 		    res.setDepartments(departmentService.listAll());
@@ -64,7 +71,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 				    .getDepartmentIds()).values()));
 	    }
 	    res.setFilterValues(filterValues);
-	    res.setDictionaryTaxPeriods(dictionaryTaxPeriodDao.getByTaxType(action.getTaxType()));
+	    res.setDictionaryTaxPeriods(convert(result));
 	    res.setCurrentReportPeriod(getCurrentReportPeriod(action.getTaxType()));
 	    TaxPeriod lastTaxType = taxPeriodDao.getLast(action.getTaxType());
 
@@ -108,5 +115,16 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 			logger.warn("Failed to find current report period for taxType = " + taxType + ", message is: " + e.getMessage());
 		}
 		return null;
+	}
+
+	private List<DictionaryTaxPeriod> convert(PagingResult<Map<String, RefBookValue>> values) {
+		List<DictionaryTaxPeriod> result = new ArrayList<DictionaryTaxPeriod>();
+		for(Map<String, RefBookValue> rec : values.getRecords()) {
+			DictionaryTaxPeriod r = new DictionaryTaxPeriod();
+			r.setName(rec.get("NAME").getStringValue());
+			r.setCode(Integer.parseInt(rec.get("CODE").getStringValue()));
+			result.add(r);
+		}
+		return result;
 	}
 }
