@@ -6,7 +6,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 /**
  * @author Vitalii Samolovskikh
  */
-public class AbstractFormDataAction extends UnsecuredActionImpl<FormDataResult> {
+public class AbstractFormDataAction extends UnsecuredActionImpl<DataRowResult> {
 	private FormData formData;
 
 	public FormData getFormData() {

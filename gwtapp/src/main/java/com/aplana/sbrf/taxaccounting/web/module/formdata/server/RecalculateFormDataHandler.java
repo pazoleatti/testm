@@ -10,7 +10,7 @@ import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DataRowResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataAction;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
@@ -22,7 +22,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class RecalculateFormDataHandler extends
-		AbstractActionHandler<RecalculateFormDataAction, FormDataResult> {
+		AbstractActionHandler<RecalculateFormDataAction, DataRowResult> {
 
 	@Autowired
 	private FormDataService formDataService;
@@ -38,7 +38,7 @@ public class RecalculateFormDataHandler extends
 	}
 
 	@Override
-	public FormDataResult execute(RecalculateFormDataAction action,
+	public DataRowResult execute(RecalculateFormDataAction action,
 			ExecutionContext context) throws ActionException {
 		TAUserInfo userInfo = securityService.currentUserInfo();
 		Logger logger = new Logger();
@@ -47,14 +47,13 @@ public class RecalculateFormDataHandler extends
 			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows());
 		}
 		formDataService.doCalc(logger, userInfo, formData);
-		FormDataResult result = new FormDataResult();
+		DataRowResult result = new DataRowResult();
 		result.setLogEntries(logger.getEntries());
-		result.setFormData(formData);
 		return result;
 	}
 
 	@Override
-	public void undo(RecalculateFormDataAction action, FormDataResult result,
+	public void undo(RecalculateFormDataAction action, DataRowResult result,
 			ExecutionContext context) throws ActionException {
 		// Ничего не делаем
 	}

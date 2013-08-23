@@ -80,8 +80,16 @@ switch (formDataEvent) {
 
 void logicalCheck() {
     def data = getData(formData).getAllCached()
+    def columns = ['rowNumber', 'tradeNumber', 'singSecurirty', 'issue', 'acquisitionDate', 'saleDate', 'amountBonds',
+            'acquisitionPrice', 'costOfAcquisition', 'marketPriceInPerc', 'marketPriceInRub', 'acquisitionPriceTax',
+            'redemptionValue', 'priceInFactPerc', 'priceInFactRub', 'marketPriceInPerc1', 'marketPriceInRub1',
+            'salePriceTax', 'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
+
     for (DataRow row in data) {
         if (row.getAlias() == null) {
+
+            checkRequiredColumns(row, columns)
+
             // 1.Проверка цены приобретения для целей налогообложения (графа 12)
             if (row.acquisitionPrice > row.marketPriceInRub && row.acquisitionPriceTax != row.marketPriceInRub) {
                 logger.error("Неверно определена цена приобретения для целей налогообложения")
@@ -219,7 +227,7 @@ void logicalCheck() {
             itogo
             for (String alias in itogoSum) {
                 if (realItogo.getCell(alias).value != itogo.getCell(alias).value) {
-                    logger.error("Итоговые значения за текущий квартал рассчитаны неверно!")
+                    logger.error("Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!")
                     break
                 }
             }
@@ -285,7 +293,7 @@ DataRow<Cell> getItogo() {
     DataRow<Cell> itogo = formData.createDataRow()
     itogo.setAlias("itogo")
     itogo.getCell('fix').colSpan = 7
-    itogo.fix = "Итого"
+    itogo.fix = "Итого за текущий отчетный (налоговый) период"
     sumColumns = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInRub', 'acquisitionPriceTax', 'redemptionValue', 'priceInFactRub',
             'marketPriceInRub1', 'salePriceTax', 'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
     itogoKvartal
@@ -538,6 +546,31 @@ void checkNSI() {
                 logger.warn('Признак ценной бумаги в справочнике отсутствует!');
             }
         }
+    }
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ */
+def checkRequiredColumns(def row, def columns) {
+    def data = getData(formData)
+    def colNames = []
+
+    def cell
+    columns.each {
+        cell = row.getCell(it)
+        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+            def name = getColumnName(row, it)
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        def index = getRows(data).indexOf(row) + 1
+        def errorMsg = colNames.join(', ')
+        logger.error("В строке $index не заполнены колонки : $errorMsg.")
     }
 }
 

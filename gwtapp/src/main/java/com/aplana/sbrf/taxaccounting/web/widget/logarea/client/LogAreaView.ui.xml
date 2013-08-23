@@ -33,10 +33,10 @@
                 <g:HTMLPanel width="110px" addStyleNames="{style.floatRight}" ui:field="htmlPanel">
                 	
                     <div class="{style.floatLeft}">
-                        <style:ButtonLink text="Печать" ui:field="printButton" img="resources/img/printer-black-16.png" title="Отобразить печатное представление документа"/>
+                        <style:LinkButton text="Печать" ui:field="printButton" img="resources/img/printer-black-16.png" title="Отобразить печатное представление документа"/>
                     </div>
                     <div class="{style.floatRight}" style="margin-right: 20px;">
-                        <style:ButtonLink ui:field="hideButton" img="resources/img/close-16.png" title="Закрыть панель"/>
+                        <style:LinkButton ui:field="hideButton" img="resources/img/close-16.png" title="Закрыть панель"/>
                     </div>
                     <g:FormPanel ui:field="formPanel" method="post" visible="false" action="download/downloadController/processLogDownload/">
 

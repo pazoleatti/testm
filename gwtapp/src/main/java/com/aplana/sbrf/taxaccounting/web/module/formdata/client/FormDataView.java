@@ -37,6 +37,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -67,7 +68,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	private AsyncDataProvider<DataRow<Cell>> dataProvider = new  AsyncDataProvider<DataRow<Cell>>() {
 		@Override
 		protected void onRangeChanged(HasData<DataRow<Cell>> display) {
-			final Range range = display.getVisibleRange();
+			Range range = display.getVisibleRange();
 			getUiHandlers().onRangeChange(range.getStart(), range.getLength());
 		}
 	};
@@ -92,15 +93,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	Button deleteFormButton;
 
 	@UiField
-	Anchor printAnchor;
-	@UiField
-	Anchor signersAnchor;
+	UIObject printAnchor;
 	@UiField
 	Anchor returnAnchor;
-	@UiField
-	Anchor manualInputAnchor;
-	@UiField
-	Anchor infoAnchor;
+
 	@UiField
 	Button cancelButton;
 	@UiField
@@ -264,7 +260,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@Override
-	public DataRow getSelectedRow() {
+	public DataRow<Cell> getSelectedRow() {
 		return selectionModel.getLastSelectedObject();
 	}
 

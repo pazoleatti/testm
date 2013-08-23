@@ -11,7 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CheckFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DataRowResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -22,7 +22,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class CheckFormDataHandler extends
-		AbstractActionHandler<CheckFormDataAction, FormDataResult> {
+		AbstractActionHandler<CheckFormDataAction, DataRowResult> {
 
 	@Autowired
 	private FormDataService formDataService;
@@ -38,7 +38,7 @@ public class CheckFormDataHandler extends
 	}
 
 	@Override
-	public FormDataResult execute(CheckFormDataAction action,
+	public DataRowResult execute(CheckFormDataAction action,
 			ExecutionContext context) throws ActionException {
 
 		Logger logger = new Logger();
@@ -48,13 +48,13 @@ public class CheckFormDataHandler extends
 			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows());
 		}
 		formDataService.doCheck(logger, securityService.currentUserInfo(), formData);
-		FormDataResult result = new FormDataResult();
+		DataRowResult result = new DataRowResult();
 		result.setLogEntries(logger.getEntries());
 		return result;
 	}
 
 	@Override
-	public void undo(CheckFormDataAction action, FormDataResult result,
+	public void undo(CheckFormDataAction action, DataRowResult result,
 			ExecutionContext context) throws ActionException {
 		// Ничего не делаем
 	}
