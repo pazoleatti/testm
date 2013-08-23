@@ -20,8 +20,25 @@ public interface DepartmentReportPeriodDao {
 	 * @param departmentReportPeriod
 	 */
 	void save(DepartmentReportPeriod departmentReportPeriod);
+
+	/**
+	 * Открыть закрыть период для подразделения
+	 * 
+	 * @param reportPeriodId
+	 * @param departmentId
+	 * @param active
+	 */
+	void updateActive(int reportPeriodId, Long departmentId, boolean active);
 	
+	/**
+	 * Получить объект
+	 * 
+	 * @param reportPeriodId
+	 * @param departmentId
+	 * @return
+	 */
+	DepartmentReportPeriod get(int reportPeriodId, Long departmentId);
 	
-	
+
 	
 }

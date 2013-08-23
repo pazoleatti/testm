@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-public class DepartmentReportPeriod extends IdentityObject<Integer>{
+import java.io.Serializable;
+
+public class DepartmentReportPeriod implements Serializable{
 	private static final long serialVersionUID = 5623552659772659276L;
 
 	private ReportPeriod reportPeriod;
