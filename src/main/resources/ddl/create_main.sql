@@ -390,7 +390,7 @@ comment on column income_101.outcome_debet_remains is 'Исходящие ост
 comment on column income_101.outcome_credit_remains is 'Исходящие остатки по кредиту';
 comment on column income_101.account_name is 'Название счёта';
 
-create sequence seq_income_101 start with 1;
+create sequence seq_income_101 start with 100;
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table income_102 (
   id               number(18) not null,
@@ -410,7 +410,7 @@ comment on column income_102.opu_code is 'Код ОПУ';
 comment on column income_102.total_sum is 'Сумма';
 comment on column income_102.item_name is 'Наименование статьи';
 
-create sequence seq_income_102 start with 1;
+create sequence seq_income_102 start with 100;
 ---------------------------------------------------------------------------------------------------
 create table declaration_type (
   id       number(9) not null,

@@ -5,6 +5,8 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 public class Income101 {
 
+	// Код записи
+	private Long id;
 	// Идентификатор отчетного периода
 	private Integer reportPeriodId;
 	// Номер счета
@@ -23,7 +25,13 @@ public class Income101 {
 	private Double outcomeCreditRemains;
     // Название счёта
     private String accountName;
-	
+
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
 	public Integer getReportPeriodId() {
 		return reportPeriodId;
 	}
