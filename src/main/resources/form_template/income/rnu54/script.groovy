@@ -788,15 +788,28 @@ def getCurrency(def currencyCode) {
 }
 
 /**
+ * Проверка валюты на рубли
+ */
+def isRubleCurrency(def currencyCode) {
+    return  refBookService.getStringValue(15,currencyCode,'CODE_2')=='810'
+}
+
+/**
  * Получить курс валюты.
  *
  * @param currency атрибут "Цифровой код валюты"
  * @param date дата
  */
 def getCourse(def currency, def date) {
-    def refCourseDataProvider = refBookFactory.getDataProvider(22)
-    def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
-    return res.getRecords().get(0).RATE.getNumberValue()
+    if (currency!=null && !isRubleCurrency(currency)) {
+        def refCourseDataProvider = refBookFactory.getDataProvider(22)
+        def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
+        return res.getRecords().get(0).RATE.getNumberValue()
+    } else if (isRubleCurrency(currency)){
+        return 1;
+    } else {
+        return null
+    }
 }
 
 /**
