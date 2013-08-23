@@ -1,435 +1,679 @@
+package form_template.income.rnu6
+
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormData
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.TaxType
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
+
 /**
- * Скрипт для РНУ-6 (rnu6.groovy).
- * Форма "(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения метода начисления".
- *
- * @version 59
- *
- * TODO:
- *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *
- * @author rtimerbaev
+ * 6.3	(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения метода начисления
  */
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         checkCreation()
         break
-    case FormDataEvent.CHECK :
-        logicalCheck(true)
-        checkNSI()
+    case FormDataEvent.CHECK:
+        form = dataRowsHelper
+        logicCheckBefore(form)
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            logicalCheck(form)
+            NSICheck(form)
+        }
         break
-    case FormDataEvent.CALCULATE :
-        calc()
-        logicalCheck(false)
-        checkNSI()
+    case FormDataEvent.CALCULATE:
+        orm = dataRowsHelperf
+        logicCheckBefore(form)
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            deleteAllStatic(form)
+            calc(form)
+            sort(form)
+            addAllStatic(form)
+            logicalCheck(form)
+            NSICheck(form)
+            form.save(form.getAllCached())
+        }
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         addNewRow()
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
-// проверка при "подготовить"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :
-        checkOnPrepareOrAcceptance('Подготовка')
+    case FormDataEvent.COMPOSE:
+        consolidation(dataRowsHelper)
         break
-// проверка при "принять"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
-        checkOnPrepareOrAcceptance('Принятие')
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:
+        form = dataRowsHelper
+        consolidationForms = formDataConsolidation
+        for (formConsolidation in consolidationForms) {
+            if (formConsolidation.getState() == WorkflowState.ACCEPTED) {
+                logger.error("Подготовка первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
+            }
+        }
+        logicCheckBefore(form)
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            logicalCheck(form)
+            NSICheck(form)
+        }
         break
-// проверка при "вернуть из принята в подготовлена"
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
-        checkOnCancelAcceptance()
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED:
+        form = dataRowsHelper
+        consolidationForms = formDataConsolidation
+        for (formConsolidation in consolidationForms) {
+            if (formConsolidation.getState() == WorkflowState.ACCEPTED) {
+                logger.error("Утверждение первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
+            }
+        }
+        logicCheckBefore(form)
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            logicalCheck(form)
+            NSICheck(form)
+        }
         break
-// после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
-        acceptance()
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED:
+        form = dataRowsHelper
+        consolidationForms = formDataConsolidation
+        for (formConsolidation in consolidationForms) {
+            if (formConsolidation.getState() == WorkflowState.ACCEPTED) {
+                logger.error("Принятие первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
+            }
+        }
+        logicCheckBefore(form)
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            logicalCheck(form)
+            NSICheck(form)
+            if (!logger.containsLevel(LogLevel.ERROR)) {
+                acceptance()
+            }
+        }
         break
-// обобщить
-    case FormDataEvent.COMPOSE :
-        consolidation()
-        calc()
-        logicalCheck(false)
-        checkNSI()
+    case FormDataEvent.MOVE_ACCEPTED_TO_APPROVED:
+        form = dataRowsHelper
+        consolidationForms = formDataConsolidation
+        for (formConsolidation in consolidationForms) {
+            if (formConsolidation.getState() == WorkflowState.ACCEPTED) {
+                logger.error("Отмена принятия первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
+            }
+        }
+        logicCheckBefore(form)
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            logicalCheck(form)
+            NSICheck(form)
+        }
         break
-}
 
-// графа 1  - number
-// графа 2  - balance
-// графа 3  - date
-// графа 4  - code
-// графа 5  - docNumber
-// графа 6  - docDate
-// графа 7  - currencyCode
-// графа 8  - rateOfTheBankOfRussia
-// графа 9  - taxAccountingCurrency
-// графа 10 - taxAccountingRuble
-// графа 11 - accountingCurrency
-// графа 12 - ruble
-
-/**
- * Добавить новую строку.
- */
-def addNewRow() {
-    def newRow = formData.createDataRow()
-    formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
-
-    // графа 2..9, 11
-    ['balance', 'date', 'code', 'docNumber', 'docDate', 'currencyCode',
-            'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'accountingCurrency'].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
-}
-
-/**
- * Удалить строку.
- */
-def deleteRow() {
-    formData.dataRows.remove(currentDataRow)
-}
-
-/**
- * Расчеты. Алгоритмы заполнения полей формы.
- */
-void calc() {
-    /*
-     * Проверка объязательных полей.
-     */
-
-    for (def row : formData.dataRows) {
-        if (!isTotal(row)) {
-            // список проверяемых столбцов (графа 2..9, 11)
-            def requiredColumns = ['balance', 'date', 'code', 'docNumber',
-                    'docDate', 'currencyCode', 'rateOfTheBankOfRussia',
-                    'taxAccountingCurrency', 'accountingCurrency']
-            if (!checkRequiredColumns(row, requiredColumns, true)) {
-                return
-            }
-        }
-    }
-
-    /*
-     * Расчеты.
-     */
-
-    // удалить строки "итого" и "итого по коду"
-    def delRow = []
-    formData.dataRows.each { row ->
-        if (isTotal(row)) {
-            delRow += row
-        }
-    }
-    delRow.each { row ->
-        formData.dataRows.remove(getIndex(row))
-    }
-    if (formData.dataRows.isEmpty()) {
-        return
-    }
-
-    // отсортировать/группировать
-    formData.dataRows.sort { it.code }
-
-    // графа 1
-    formData.dataRows.eachWithIndex { row, index ->
-        row.number = index + 1
-    }
-
-    // графа 8 (для строк НЕитого)
-    formData.dataRows.each { row ->
-        if (row.currencyCode != null && row.currencyCode == 'RUR') {
-            row.rateOfTheBankOfRussia = 1
-        }
-    }
-
-    // графа 10, 12
-    formData.dataRows.each { row ->
-        // графа 10 (для строк НЕитого) = графа 9 * графа 8
-        row.taxAccountingRuble = round(row.taxAccountingCurrency * row.rateOfTheBankOfRussia, 2)
-
-        // графа 12 (для строк НЕитого) = графа 11 * графа 8
-        row.ruble = round(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)
-    }
-
-    /** Столбцы для которых надо вычислять итого и итого по коду классификации дохода. Графа 10, 12. */
-    def totalColumns = ['taxAccountingRuble', 'ruble']
-
-    // добавить строки "итого"
-    def totalRow = formData.createDataRow()
-    formData.dataRows.add(totalRow)
-    totalRow.setAlias('total')
-    totalRow.code = 'Итого'
-    setTotalStyle(totalRow)
-    // графа 10, 12 для последней строки "итого"
-    totalColumns.each { alias ->
-        totalRow.getCell(alias).setValue(getSum(alias))
-    }
-
-    // посчитать "итого по коду"
-    def totalRows = [:]
-    def tmp = null
-    def sums = [:]
-    totalColumns.each {
-        sums[it] = 0
-    }
-    formData.dataRows.eachWithIndex { row, i ->
-        if (!isTotal(row)) {
-            if (tmp == null) {
-                tmp = row.code
-            }
-            // если код расходы поменялся то создать новую строку "итого по коду"
-            if (tmp != row.code) {
-                totalRows.put(i, getNewRow(tmp, totalColumns, sums))
-                totalColumns.each {
-                    sums[it] = 0
-                }
-            }
-            // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
-            if (i == formData.dataRows.size() - 2) {
-                totalColumns.each {
-                    sums[it] += row.getCell(it).getValue()
-                }
-                totalRows.put(i + 1, getNewRow(row.code, totalColumns, sums))
-                totalColumns.each {
-                    sums[it] = 0
-                }
-            }
-            totalColumns.each {
-                sums[it] += row.getCell(it).getValue()
-            }
-            tmp = row.code
-        }
-    }
-
-    // добавить "итого по коду" в таблицу
-    def i = 0
-    totalRows.each { index, row ->
-        formData.dataRows.add(index + i, row)
-        i = i + 1
-    }
-}
-
-/**
- * Логические проверки.
- *
- * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
- */
-def logicalCheck(def useLog) {
-    def tmp
-
-    /** Дата начала отчетного периода. */
-    tmp = reportPeriodService.getStartDate(formData.reportPeriodId)
-    def a = (tmp ? tmp.getTime() : null)
-
-    /** Дата окончания отчетного периода. */
-    tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
-    def b = (tmp ? tmp.getTime() : null)
-
-    if (!formData.dataRows.isEmpty()) {
-        def i = 1
-
-        // суммы строки общих итогов
-        def totalSums = [:]
-
-        // столбцы для которых надо вычислять итого и итого по коду классификации дохода. Графа 10, 12
-        def totalColumns = ['taxAccountingRuble', 'ruble']
-
-        // признак наличия итоговых строк
-        def hasTotal = false
-
-        // список групп кодов классификации для которых надо будет посчитать суммы
-        def totalGroupsName = []
-
-        for (def row : formData.dataRows) {
-            if (isTotal(row)) {
-                hasTotal = true
-                continue
-            }
-
-            // список проверяемых столбцов (графа 1..12)
-            def requiredColumns = ['number', 'balance', 'date', 'code', 'docNumber',
-                    'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency',
-                    'taxAccountingRuble', 'accountingCurrency', 'ruble']
-
-            // 4. Обязательность заполнения полей (графа 1..12)
-            if (!checkRequiredColumns(row, requiredColumns, useLog)) {
-                return false
-            }
-
-            // 1. Проверка даты совершения операции и границ отчётного периода (графа 3)
-            if (row.date < a || b < row.date) {
-                logger.error('Дата совершения операции вне границ отчётного периода!')
-                return false
-            }
-
-            // 2. Проверка на нулевые значения (графа 9, 10, 11, 12)
-            if (row.taxAccountingCurrency == 0 && row.taxAccountingRuble == 0 &&
-                    row.accountingCurrency == 0 && row.ruble == 0) {
-                logger.error('Все суммы по операции нулевые!')
-                return false
-            }
-
-            // 5. Проверка на уникальность поля «№ пп» (графа 1)
-            if (i != row.number) {
-                logger.error('Нарушена уникальность номера по порядку!')
-                return
-            }
-            i += 1
-
-            // 6. Арифметическая проверка графы 10
-            tmp = round(row.rateOfTheBankOfRussia * row.taxAccountingCurrency , 2)
-            if (row.taxAccountingRuble != tmp) {
-                logger.warn('Неверное значение в поле «Сумма дохода, начисленная в налоговом учёте. Рубли»!')
-            }
-
-            // 7. Арифметическая проверка графы 12
-            tmp = round(row.accountingCurrency * row.rateOfTheBankOfRussia , 2)
-            if (row.ruble != tmp) {
-                logger.warn('Неверное значение поле «Сумма дохода, отражённая в бухгалтерском учёте. Рубли»!')
-            }
-
-            // 8. Проверка итоговых значений по кодам классификации дохода - нахождение кодов классификации
-            if (!totalGroupsName.contains(row.code)) {
-                totalGroupsName.add(row.code)
-            }
-
-            // 9. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
-            totalColumns.each { alias ->
-                if (totalSums[alias] == null) {
-                    totalSums[alias] = 0
-                }
-                totalSums[alias] += row.getCell(alias).getValue()
-            }
-        }
-
-        if (hasTotal) {
-            def totalRow = formData.getDataRow('total')
-
-            // 3. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода (графа 10, 12)
-            if (totalRow.ruble > 0 && totalRow.taxAccountingRuble >= totalRow.ruble) {
-                logger.warn('Сумма данных бухгалтерского учёта превышает сумму начисленных платежей!')
-            }
-
-            // 8. Проверка итоговых значений по кодам классификации дохода
-            for (def codeName : totalGroupsName) {
-                def row = formData.getDataRow('total' + codeName)
-                for (def alias : totalColumns) {
-                    if (calcSumByCode(codeName, alias) != row.getCell(alias).getValue()) {
-                        logger.error("Итоговые значения по коду $codeName рассчитаны неверно!")
-                        return false
-                    }
-                }
-            }
-
-            // 9. Проверка итогового значений по всей форме
-            for (def alias : totalColumns) {
-                if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
-                    logger.error('Итоговые значения рассчитаны неверно!')
-                    return false
-                }
-            }
-        }
-    }
-    return true
-}
-
-/**
- * Проверки соответствия НСИ.
- */
-def checkNSI() {
-    // 1. Проверка балансового счёта для кода классификации дохода - Проверка актуальности «графы 2»
-    if (false) {
-        logger.warn('Балансовый счёт в справочнике отсутствует!')
-    }
-
-    // 2. Проверка балансового счёта для кода классификации дохода - Проверка актуальности «графы 4»
-    if (false) {
-        logger.warn('Балансовый счёт в справочнике отсутствует!')
-    }
-
-    // 3. Проверка кода классификации дохода для данного РНУ - Проверка актуальности «графы 4» на дату по «графе 3»
-    if (false) {
-        logger.error('Операция в РНУ не учитывается!')
-        return false
-    }
-    // 4. Проверка кода валюты - Проверка актуальности «графы 7»
-    if (false) {
-        logger.error('Код валюты в справочнике отсутствует!')
-        return false
-    }
-
-    // 5. Проверка курса валюты со справочным - Проверка актуальности «графы 8» на дату по «графе 3»
-    if (false) {
-        logger.warn('Неверный курс валюты!')
-    }
-    return true
-}
-
-/**
- * Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята".
- */
-void checkOnPrepareOrAcceptance(def value) {
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() { department ->
-        if (department.formTypeId == formData.getFormType().getId()) {
-            def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-            // если форма существует и статус "принята"
-            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
-                logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
-            }
-        }
-    }
-}
-
-/**
- * Консолидация.
- */
-void consolidation() {
-    // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
-
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
-                    if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
-                    }
-                }
-            }
-        }
-    }
-    logger.info('Формирование консолидированной формы прошло успешно.')
-}
-
-/**
- * Проверки при переходе "Отменить принятие".
- */
-void checkOnCancelAcceptance() {
-    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
-            formData.getFormType().getId(), formData.getKind());
-    DepartmentFormType department = departments.getAt(0);
-    if (department != null) {
-        FormData form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-
-        if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
-            logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
-        }
-    }
 }
 
 /**
  * Принять.
  */
 void acceptance() {
-    if (!logicalCheck(true) || !checkNSI()) {
-        return
+    for (target in departmentFormTypeService.getFormDestinations(formData.departmentId, formData.getFormType().getId(), formData.getKind())) {
+        formDataCompositionService.compose(formData, target.departmentId, target.formTypeId, target.kind, logger)
     }
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() {
-        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
+}
+
+List <FormData> getFormDataConsolidation() {
+    List <FormData> result = new ArrayList<>()
+    for (destionationFormType in departmentFormTypeService.getFormDestinations(formData.departmentId, formData.getFormType().getId(), formData.getKind())){
+        if (destionationFormType.formTypeId == formData.getFormType().getId()) {
+            form = formDataService.find(destionationFormType.formTypeId, destionationFormType.kind, destionationFormType.departmentId, formData.reportPeriodId)
+            if (form != null) {
+                result.add(form)
+            }
+        }
     }
+    return result
+}
+
+DataRowHelper getDataRowsHelper() {
+    DataRowHelper dataRowsHelper = null
+    if (formData.id != null) {
+        dataRowsHelper = formDataService.getDataRowHelper(formData)
+    }
+    return dataRowsHelper
+}
+
+// графа 1  Число/15/                       number
+// helper   Строка/1000                     helper
+// графа 2  А140/CODE/Строка/15/            kny
+// графа 3  Дата                            date
+// графа 4  A350/NUMBER/Строка/12/          code
+// графа 5  Строка/15                       docNumber
+// графа 6  Дата/ДД.ММ.ГГГГ                 docDate
+// графа 7  A64/CODE/Строка/3/              currencyCode
+// графа 8  Число/19.4/                     rateOfTheBankOfRussia
+// графа 9  Число/17.2/                     taxAccountingCurrency
+// графа 10 Число/17.2/                     taxAccountingRuble
+// графа 11 Число/17.2/                     accountingCurrency
+// графа 12 Число/17.2/                     ruble
+
+void logicCheckBefore(DataRowHelper form) {
+    columns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'currencyCode']
+    for (row in form.allCached) {
+        if (row.getAlias() == null) {
+            if (row.taxAccountingCurrency == null && row.accountingCurrency == null
+                    || row.taxAccountingCurrency == 0 && row.accountingCurrency == 0) {
+                logger.error('Не заполнены оба поля «%s» и «%s>»', row.getCell('taxAccountingCurrency').column.name, row.getCell('taxAccountingCurrency').column.name)
+            }
+            for (alias in columns) {
+                if (row.getCell(alias).value == null) {
+                    logger.error('Поле %s не заполнено!', row.getCell(alias).column.name)
+                }
+            }
+        }
+    }
+}
+
+void NSICheck(DataRowHelper form) {
+    reportDate = reportPeriodService.getEndDate(formData.reportPeriodId)
+    reportDate.set(Calendar.DATE, reportDate.get(Calendar.DATE) + 1)
+    for (row in form.getAllCached()) {
+        if (row.getAlias() == null) {
+            // ПС 1 и 2
+            incomeSBRFRecords = providerIncomeSBRF.getRecords(reportDate.time, null, null, null).records
+            isFind = false
+            isFind2 = false
+            for (record in incomeSBRFRecords) {
+                if (row.kny == record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()) {
+                    isFind = true
+                }
+                if (row.code == record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()) {
+                    isFind2 = true
+                }
+                if (isFind && isFind2) {
+                    break
+                }
+            }
+            if (!isFind) {
+                logger.warn('Балансовый счёт в справочнике отсутствует!')
+            }
+            if (!isFind2) {
+                logger.warn('Балансовый счёт в справочнике отсутствует!')
+            }
+            // ПС 3
+            records = providerClassValut.getRecords(reportDate.time, null, null, null).records
+            isFind = false
+            for (record in records) {
+                if (row.currencyCode == record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()) {
+                    isFind = true
+                    break
+                }
+            }
+            if (!isFind) {
+                logger.warn('Неверно заполнена графа %s!', row.getCell('currencyCode').column.name)
+            }
+            // ПС 4
+            records = getProviderCurrency().getRecords(row.date as Date, null,  'CODE_NUMBER = ' + row.currencyCode, null).records
+            isFind = false
+            for (record in records) {
+                if (row.rateOfTheBankOfRussia == (record.get('RATE').getNumberValue() as BigDecimal).setScale(4, BigDecimal.ROUND_HALF_UP)) {
+                    isFind = true
+                    break
+                }
+            }
+            if (!isFind) {
+                logger.warn('Неверно заполнена графа %s!', row.getCell('rateOfTheBankOfRussia').column.name)
+            }
+        }
+    }
+}
+
+/**
+ * Курс валют
+ * @return
+ */
+RefBookDataProvider getProviderCurrency() {
+    return refBookFactory.getDataProvider(22L);
+}
+
+/**
+ * Получает провайдер Классификатор доходов ОАО «Сбербанк России» для целей налогового учёта
+ * @return
+ */
+RefBookDataProvider getProviderIncomeSBRF() {
+    return refBookFactory.getDataProvider(28L)
+}
+
+RefBookDataProvider getProviderClassValut() {
+    return refBookFactory.getDataProvider(15L)
+}
+
+/**
+ * Консолидация.
+ */
+void consolidation(DataRowHelper form) {
+
+    // удалить все строки и собрать из источников их строки
+    form.allCached.clear()
+
+    for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())) {
+        if (formDataSource.formTypeId == formData.getFormType().getId()) {
+            def source = formDataService.find(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                sourceForm = formDataService.getDataRowHelper(source)
+                for (row in sourceForm.allCached) {
+                    if (row.getAlias() == null) {
+                        form.insert(row, form.allCached.size() + 1)
+                    }
+                }
+            }
+        }
+    }
+    form.commit()
+}
+
+void logicalCheck(DataRowHelper form) {
+
+    List<BigDecimal> uniq = new ArrayList<>(form.allCached.size())
+    List<Map<Integer, Object>> docs = new ArrayList<>()
+    for (row in form.allCached) {
+        if (row.getAlias() == null) {
+            //logger.info('Проверка на заполнение поля «<Наименование поля>»')
+            // LC Проверка на заполнение поля «<Наименование поля>»
+            columns = ['number', 'kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
+            for (alias in columns) {
+                if (row.getCell(alias).value == null) {
+                    logger.error('Поле %s не заполнено!', row.getCell(alias).column.name)
+                }
+            }
+
+            //logger.info('Проверка на нулевые значения')
+            // Проверка на нулевые значения
+            if (row.taxAccountingCurrency == row.taxAccountingRuble && row.taxAccountingRuble == row.accountingCurrency
+                    && row.accountingCurrency == row.ruble && row.ruble == 0) {
+                logger.error('Все суммы по операции нулевые!')
+            }
+
+            //logger.info('Проверка, что не  отображаются данные одновременно по бухгалтерскому и по налоговому учету')
+            if (row.taxAccountingCurrency == null && row.accountingCurrency == null
+                    || row.taxAccountingCurrency == 0 && row.accountingCurrency == 0) {
+                logger.error('Не заполнены оба поля «%s» и «%s>»', row.getCell('taxAccountingCurrency').column.name, row.getCell('taxAccountingCurrency').column.name)
+            }
+
+            //logger.info('Проверка даты совершения операции и границ отчётного периода')
+            // Проверка даты совершения операции и границ отчётного периода
+            if (reportPeriodService.getStartDate(formData.reportPeriodId).time.time <= row.date.time
+                    && row.date.time <= reportPeriodService.getEndDate(formData.reportPeriodId).time.time) {
+                logger.error('Дата совершения операции вне границ отчётного периода!')
+            }
+
+            // @todo LC Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода
+            Map<Integer, Object> map = new HashMap<>()
+            map.put(5, row.docNumber)
+            map.put(6, row.docDate)
+            if (!docs.indexOf(map)) {
+                docs.add(map)
+                c12 = 0
+                c10 = 0
+                for(rowSum in form.allCached) {
+                    if (rowSum.docNumber == row.docNumber && rowSum.docDate == row.docDate) {
+                        c12 += rowSum.ruble
+                        c10 += rowSum.taxAccountingRuble
+                    }
+                }
+                if (!(c10 > c12)) {
+                    logger.error('Сумма данных бухгалтерского учёта превышает сумму начисленных платежей для документа %s от %s!', row.docNumber as String, rowSum.docDate as String)
+                }
+            }
+
+            //logger.info('Проверка на уникальность поля «№ пп»')
+            // Проверка на уникальность поля «№ пп» SBRFACCTAX-3507
+            if (uniq.contains(row.number)) {
+                logger.error('Нарушена уникальность номера по порядку!')
+            } else {
+                uniq.add(row.number as BigDecimal)
+            }
+
+            // Проверка соответствия балансового счета коду налогового учета
+            if (!(row.kny == row.code)) {
+                logger.error('Балансовый счет не соответствует коду налогового учета!')
+            }
+            // Арифметические проверки расчета неитоговых граф
+            if (row.docNumber != '0000' && !(row.taxAccountingRuble == calc10(row))) {
+                logger.error('Неверно рассчитана графа %s!', row.getCell('taxAccountingRuble').column.name)
+            }
+            if (row.docNumber != '0000' && !(row.ruble == calc12(row))) {
+                logger.error('Неверно рассчитана графа %s!', row.getCell('ruble').column.name)
+            }
+
+            // Проверка наличия суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
+            // Проверка значения суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
+            if (row.docDate != null) {
+                date = row.docDate as Date
+                from = new GregorianCalendar()
+                from.setTime(date)
+                from.set(Calendar.YEAR, from.get(Calendar.YEAR) - 3)
+                taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, from.getTime(), date)
+                isFind = false
+                for (taxPeriod in taxPeriods) {
+                    reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.id)
+                    for (reportPeriod in reportPeriods) {
+                        findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriod.id)
+                        if (findFormData != null) {
+                            findForm = formDataService.getDataRowHelper(findFormData)
+                            for (findRow in findForm.getAllCached()) {
+                                // SBRFACCTAX-3531 исключать строку из той же самой формы не надо
+                                if (findRow.code == row.code && findRow.docNumber == row.docNumber && findRow.docDate == row.docDate) {
+                                    isFind = true
+                                    if (!(findRow.ruble > row.ruble)) {
+                                        logger.warn('Операция, указанная в строке %s, в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-6 в %s отчетном периоде.', row.number.toString(), reportPeriod.name)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!isFind) {
+                    logger.warn('Операция, указанная в строке %s, в налоговом учете за последние 3 года не проходила!', row.number.toString())
+                }
+            }
+
+            // FIXME SBRFACCTAX-3535
+        } else {
+            // Итоговые строки
+
+            if (row.getAlias() != 'itogo') {
+                // Итого по КНУ
+
+                // Арифметические проверки расчета итоговых строк «Итого по КНУ»
+                itogoKNY = itogoKNY(form, form.getAllCached().indexOf(row) - 1)
+                if (row.taxAccountingRuble != itogoKNY.taxAccountingRuble) {
+                    logger.error('Неверное значение %s для графы %s', row.helper as String, row.getCell('taxAccountingRuble').column.name)
+                }
+                if (row.ruble != itogoKNY.ruble) {
+                    logger.error('Неверное значение %s для графы %s', row.helper as String, row.getCell('ruble').column.name)
+                }
+            } else {
+                // Общее итого
+
+                // Арифметические проверки расчета строки общих итогов
+                itogo = getItogo(form)
+                if (row.taxAccountingRuble != itogo.taxAccountingRuble || row.ruble != itogo.ruble) {
+                    logger.error('Неверное итоговое значение')
+                }
+            }
+        }
+    }
+}
+
+void addAllStatic(DataRowHelper form) {
+    for (int i = 0; i < form.getAllCached().size(); i++) {
+        row = form.getAllCached().get(i)
+        newxRow = null
+
+        if (i + 1 < form.getAllCached().size()) {
+            newxRow = form.getAllCached().get(i + 1)
+        }
+
+        if (row.getAlias() == null && newxRow == null || newxRow != null && row.kny != newxRow.kny) {
+            itogoKNY = itogoKNY(form, i)
+            form.insert(itogoKNY, i + 2)
+            i++
+        }
+    }
+
+    rowItogo = getItogo(form)
+    form.insert(rowItogo, form.getAllCached().size() + 1)
+}
+
+DataRow getItogo(DataRowHelper form) {
+    newRow = formData.createDataRow()
+    newRow.setAlias('itogo')
+    newRow.getCell('helper').colSpan = 2
+    newRow.helper = 'Итого'
+
+    columns = ['taxAccountingRuble', 'ruble']
+
+    for (column in columns) {
+        newRow.getCell(column).value = new BigDecimal(0)
+    }
+
+    for (row in form.getAllCached()) {
+        if (row.getAlias() == null) {
+            for (column in columns) {
+                if (row.getCell(column).value != null) {
+                    newRow.getCell(column).value += row.getCell(column).value
+                }
+            }
+        }
+    }
+    return newRow
+}
+
+/**
+ * Считает итого по kny
+ * @param form
+ * @param i индекс последней строки в форме с целевым кну
+ * @return
+ */
+DataRow itogoKNY(DataRowHelper form, int i) {
+    newRow = formData.createDataRow()
+    newRow.getCell('helper').colSpan = 2
+    newRow.setAlias('itogoKNY#'.concat(i.toString()))
+    StringBuffer sb = new StringBuffer("Итого по КНУ ");
+    String kny = null
+    // Получим КНУ вверху строки может быть другая строка итого(гипотетически) и надо искать строку внесённую пользователем
+    for (int j = i; j >= 0; j--) {
+        if (form.getAllCached().get(j).getAlias() == null) {
+            kny = getKNY(form.getAllCached().get(j).kny as Long)
+            sb.append(kny)
+            break
+        }
+    }
+    newRow.helper = sb.toString()
+
+    columns = ['taxAccountingRuble', 'ruble']
+
+    for (column in columns) {
+        newRow.getCell(column).value = new BigDecimal(0)
+    }
+
+    for (j = i; j >= 0; j--) {
+        row = form.getAllCached().get(j)
+        if (row.getAlias() == null && !kny.equals(getKNY(row.kny as Long))) {
+            break
+        }
+        for (column in columns) {
+            if (row.getCell(column).value != null) {
+                newRow.getCell(column).value += row.getCell(column).value
+            }
+        }
+    }
+
+    return newRow
+}
+
+/**
+ * Сортирует форму в соответвие с требованиями 6.3.3	Перечень полей формы
+ */
+void sort(DataRowHelper form) {
+    form.getAllCached().sort({ DataRow a, DataRow b ->
+        if (a.kny == b.kny && a.code == b.code) {
+            return a.date.time <=> b.date.time
+        }
+        if (a.kny == b.kny) {
+            return getBS(a.code as Long) <=> getBS(b.code as Long)
+        }
+        return getKNY(a.kny as Long) <=> getKNY(b.kny as Long)
+    })
+}
+
+void calc(DataRowHelper form) {
+    // Расчеты не надо делать на
+    if (formData.kind == FormDataKind.PRIMARY) {
+        for (row in form.allCached) {
+            if (row.getAlias() == null) {
+                row.number = calc1(row)
+                row.rateOfTheBankOfRussia = calc8(row)
+                row.taxAccountingRuble = calc10(row)
+                row.ruble = calc12(row)
+            }
+        }
+    }
+}
+
+BigDecimal calc1(DataRow row) {
+    return new BigDecimal(dataRowsHelper.getAllCached().indexOf(row) + 1)
+}
+
+BigDecimal calc8(DataRow row) {
+    result = 0
+    if (get(providerClassValut, row.currencyCode as Long, 'CODE').getStringValue() == '810') {
+        result = 1
+    } else {
+        result = getCurrency(row.date as Date, row.currencyCode as Long)
+        if (result == null) {
+            throw new javax.script.ScriptException('Неизвестный курс валют')
+        }
+    }
+    return result
+}
+
+/**
+ * «Курс валюты» справочника «Курсы валют» на дату
+ * @param row
+ * @return
+ */
+BigDecimal getCurrency(Date date, Long code) {
+    records = providerCurrency.getRecords(date, null, 'CODE_NUMBER = ' + code, null).getRecords() // отфильтровать по валюте SBRFACCTAX-3482
+    if (records.size() > 0 && records.get(0).containsKey('RATE')) {
+        return records.get(0).get('RATE').getNumberValue();
+    } else {
+        throw new javax.script.ScriptException('Не могу получить recordId курс')
+    }
+}
+
+BigDecimal calc10(DataRow row) {
+    result = null
+    if (row.docNumber == '0000') {
+        // @todo SBRFACCTAX-3469
+    } else {
+        result = row.taxAccountingCurrency * row.rateOfTheBankOfRussia
+    }
+    return result.setScale(2, BigDecimal.ROUND_HALF_UP)
+}
+
+BigDecimal calc12(DataRow row) {
+    // FIXME SBRFACCTAX-3534
+    result = new BigDecimal(0)
+    if (row.docNumber == '0000') {
+        // @todo SBRFACCTAX-3469
+    } else {
+        result = row.accountingCurrency * row.rateOfTheBankOfRussia
+    }
+    return result.setScale(2, BigDecimal.ROUND_HALF_UP)
+}
+
+RefBookValue get(RefBookDataProvider provider, Long recordId, String alias) {
+    result = provider.getRecordData(recordId)
+    if (result.containsKey(alias)) {
+        return result.get(alias)
+    } else {
+        return null
+    }
+}
+
+String getKNY(Long recordId) {
+    result = get(providerIncomeSBRF, recordId, 'CODE')
+    if (result == null) {
+        return new String()
+    }
+    return result
+}
+
+String getBS(Long recordId) {
+    result = get(providerIncomeSBRF, recordId, 'NUMBER')
+    if (result == null) {
+        return new String()
+    }
+    return result
+}
+
+/**
+ * Удаляет строку из формы
+ */
+void deleteRow() {
+    if (currentDataRow != null) {
+        dataRowsHelper.delete(currentDataRow)
+    }
+}
+
+/**
+ * Удаляет все статические строки(ИТОГО) во всей форме
+ */
+void deleteAllStatic(DataRowHelper form) {
+    List<DataRow<Cell>> forDelete = new ArrayList<>();
+    for (row in form.allCached) {
+        if (row.getAlias() != null) {
+            forDelete.add(row)
+        }
+    }
+    for (row in forDelete) {
+        form.delete(row)
+    }
+}
+
+/**
+ * Вставка строки в случае если форма генирует динамически строки итого (на основе данных введённых пользователем)
+ */
+void addNewRow() {
+    DataRow<Cell> newRow = formData.createDataRow()
+    int index // Здесь будет позиция вставки
+
+    form = dataRowsHelper
+    if (form.allCached.size() > 0) {
+        DataRow<Cell> selectRow
+        // Форма не пустая
+        if (currentDataRow != null && form.allCached.indexOf(currentDataRow) != -1) {
+            // Значит выбрал строку куда добавлять
+            selectRow = currentDataRow
+        } else {
+            // Строку не выбрал поэтому добавляем в самый конец
+            selectRow = form.allCached.get(form.allCached.size() - 1) // Вставим в конец
+        }
+
+        int indexSelected = form.allCached.indexOf(selectRow)
+
+        // Определим индекс для выбранного места
+        if (selectRow.getAlias() == null) {
+            // Выбрана строка не итого
+            index = indexSelected // Поставим на то место новую строку
+        } else {
+            // Выбрана строка итого, для статических строг итого тут проще и надо фиксить под свою форму
+            // Для динимаческих строк итого идём вверх пока не встретим конец формы или строку не итого
+
+            for (index = indexSelected; index >= 0; index--) {
+                if (form.allCached.get(index).getAlias() == null) {
+                    index++
+                    break
+                }
+            }
+            if (index < 0) {
+                // Значит выше строки итого нет строк, добавим новую в начало
+                index = 0
+            }
+        }
+    } else {
+        // Форма пустая поэтому поставим строку в начало
+        index = 0
+    }
+    [
+            'kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'taxAccountingCurrency', 'accountingCurrency'
+    ].each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    form.insert(newRow, index + 1)
 }
 
 /**
@@ -437,7 +681,7 @@ void acceptance() {
  */
 void checkCreation() {
     // отчётный период
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     //проверка периода ввода остатков
     if (reportPeriod != null && reportPeriod.isBalancePeriod()) {
@@ -445,121 +689,10 @@ void checkCreation() {
         return
     }
 
-    def findForm = FormDataService.find(formData.formType.id,
+    findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
-}
-
-/*
- * Вспомогательные методы.
- */
-
-/**
- * Проверка является ли строка итоговой.
- */
-def isTotal(def row) {
-    return row != null && row.getAlias() != null && row.getAlias().contains('total')
-}
-
-/**
- * Получить сумму столбца.
- */
-def getSum(def columnAlias) {
-    def from = 0
-    def to = formData.dataRows.size() - 2
-    if (from > to) {
-        return 0
-    }
-    return summ(formData, new ColumnRange(columnAlias, from, to))
-}
-
-/**
- * Получить новую строку.
- */
-def getNewRow(def alias, def totalColumns, def sums) {
-    def newRow = formData.createDataRow()
-    newRow.setAlias('total' + alias)
-    newRow.code = 'Итого по коду'
-    setTotalStyle(newRow)
-    totalColumns.each {
-        newRow.getCell(it).setValue(sums[it])
-    }
-    return newRow
-}
-
-/**
- * Устаносить стиль для итоговых строк.
- */
-void setTotalStyle(def row) {
-    ['number', 'balance', 'date', 'code', 'docNumber', 'docDate',
-            'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency',
-            'taxAccountingRuble', 'accountingCurrency', 'ruble'].each {
-        row.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-}
-
-/**
- * Посчитать сумму указанного графа для строк с общим кодом классификации
- *
- * @param code код классификации дохода
- * @param alias название графа
- */
-def calcSumByCode(def code, def alias) {
-    def sum = 0
-    formData.dataRows.each { row ->
-        if (!isTotal(row) && row.code == code) {
-            sum += row.getCell(alias).getValue()
-        }
-    }
-    return sum
-}
-
-/**
- * Получить номер строки в таблице.
- */
-def getIndex(def row) {
-    formData.dataRows.indexOf(row)
-}
-
-/**
- * Проверить заполненость обязательных полей.
- *
- * @param row строка
- * @param columns список обязательных графов
- * @param useLog нужно ли записывать сообщения в лог
- * @return true - все хорошо, false - есть незаполненные поля
- */
-def checkRequiredColumns(def row, def columns, def useLog) {
-    def colNames = []
-
-    // если "графа 7" == 'RUR', то "графа 8" = 1 и ее проверять не надо
-    def needColumn8 = (row.currencyCode != null && row.currencyCode == 'RUR')
-    if (!needColumn8) {
-        columns -= 'rateOfTheBankOfRussia'
-    }
-
-    columns.each {
-        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-            def name = row.getCell(it).getColumn().getName().replace('%', '%%')
-            colNames.add('"' + name + '"')
-        }
-    }
-    if (!colNames.isEmpty()) {
-        if (!useLog) {
-            return false
-        }
-        def index = getIndex(row) + 1
-        def errorMsg = colNames.join(', ')
-        if (index != null) {
-            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-        } else {
-            index = getIndex(row) + 1
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
-        }
-        return false
-    }
-    return true
 }
