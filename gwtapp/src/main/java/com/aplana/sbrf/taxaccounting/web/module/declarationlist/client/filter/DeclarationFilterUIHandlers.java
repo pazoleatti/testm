@@ -6,7 +6,7 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface DeclarationFilterUIHandlers extends UiHandlers {
 
-	void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId);
+	void onTaxPeriodSelected(TaxPeriod taxPeriod);
 
 	TaxType getCurrentTaxType();
 }
