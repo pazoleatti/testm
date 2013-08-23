@@ -126,8 +126,9 @@ def addNewRow(){
     def newRow = formData.createDataRow()
 
     // Графы 1-10 Заполняется вручную
-    ['tradeNumber', 'securityName', 'currencyCode', 'nominalPrice', 'part1REPODate', 'part2REPODate', 'acquisitionPrice', 'salePrice', 'income', 'outcome'].each{ column ->
+    ['tradeNumber', 'securityName', 'currencyCode', 'nominalPrice', 'part1REPODate', 'part2REPODate', 'acquisitionPrice', 'salePrice'].each{ column ->
         newRow.getCell(column).setEditable(true)
+        newRow.getCell(column).setStyleAlias('Редактируемая')
     }
     getData(formData).insert(newRow, getData(formData).getAllCached().size() > 0 ? getData(formData).getAllCached().size() : 1)
 }
@@ -197,6 +198,7 @@ def fillForm(){
     def newRow = formData.createDataRow()
     newRow.alias = "total"
     newRow.securityName = "Итого"
+    setTotalStyle(newRow)
 
     // проставим 0ми
     ['nominalPrice', 'acquisitionPrice', 'salePrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each{ alias ->
@@ -579,4 +581,15 @@ def getRate(def date) {
 def getCurrency(def currencyCode) {
     return refBookService.getStringValue(15,currencyCode,'CODE')
 
+}
+
+/**
+ * Устаносить стиль для итоговых строк.
+ */
+void setTotalStyle(def row) {
+    ['tradeNumber', 'securityName', 'currencyCode', 'nominalPrice',
+            'part1REPODate', 'part2REPODate', 'acquisitionPrice', 'salePrice',
+            'income', 'outcome', 'rateBR', 'outcome269st', 'outcomeTax'].each {
+        row.getCell(it).setStyleAlias('Контрольные суммы')
+    }
 }
