@@ -580,13 +580,10 @@ void importData() {
         return
     }
 
-    if (fileName.contains('.rnu')) {
-        isRnu = true
-    } else {
+    if (!fileName.contains('.r')) {
+        logger.error("Некорректное расширение файла")
         return
     }
-
-    logger.info('Начата загрузка файла ' + fileName)
 
     def xmlString = importService.getData(is, fileName, 'cp866')
     if (xmlString == null) {
@@ -596,16 +593,12 @@ void importData() {
     if (xml == null) {
         return
     }
-    // номер строки с которой брать данные (что бы пропустить шапку таблицы или лишнюю информацию)
-    def startRow = 0
 
-    // номер графы с которой брать данные (что бы пропустить нумерацию или лишнюю информацию)
-    def startColumn = 2
-
-    // добавить данные в форму
-    addData(xml, startRow, startColumn)
-
-    logger.info('Закончена загрузка файла ' + fileName)
+    if (addData(xml)) {
+        logger.info('Закончена загрузка файла ' + fileName)
+    } else {
+        logger.error("Загрузка файла $fileName завершилась ошибкой")
+    }
 }
 
 /*
@@ -914,159 +907,133 @@ def hasTotal(def data) {
  *
  * @param xml данные
  */
-void addData(def xml, def startRow, def startColumn) {
-    if (xml == null) {
-        return
-    }
-
+boolean addData(def xml) {
     Date date = new Date()
 
     def cache = [:]
     def data = getData(formData)
-    data.clear()
 
-    // количество графов в таблице
-    def columnCount = 13+2
+    def newRows = []
 
-    def tmp
-    def indexRow = -1
-    def isTotal = false
-    def total = getNewRow()
+    boolean isTotal = true
+    def total = formData.createDataRow()
     def totalColumns = [4:'lotSizePrev', 5:'lotSizeCurrent', 7:'cost', 10:'costOnMarketQuotation', 11:'reserveCalcValue']
     totalColumns.each{k,it->
         total[it] = 0
     }
+
+    def indexRow = -1
     for (def row : xml.row) {
         indexRow++
 
         // пропустить шапку таблицы
-        if (indexRow <= startRow) {// || indexRow>20) {
+        if (indexRow <= 0) {// || indexRow>20) {
             continue
         }
-        if (row.cell.size() < 2) {
-            isTotal = true
-            continue
-        }
+        def newRow = getNewRow()
 
+        def indexCell = 1
 
-        if (row.cell.size() == columnCount && !isTotal) {
-            def newRow = getNewRow()
+        // графа 1
+        newRow.rowNumber = indexRow
+        indexCell++
 
-            def indexCell = startColumn
+        // графа 2
+        newRow.regNumber = row.cell[indexCell].text()
+        indexCell++
 
-            newRow.rowNumber = indexRow
+        // графа 3
+        newRow.tradeNumber = row.cell[indexCell].text()
+        indexCell++
 
-            // графа 2
-            newRow.regNumber = row.cell[indexCell].text()
-            indexCell++
+        // графа 4
+        newRow.lotSizePrev = getNumber(row.cell[indexCell].text())
+        total.lotSizePrev = total.lotSizePrev + newRow.lotSizePrev
+        indexCell++
 
-            // графа 3
-            newRow.tradeNumber = row.cell[indexCell].text()
-            indexCell++
+        // графа 5
+        newRow.lotSizeCurrent = getNumber(row.cell[indexCell].text())
+        total.lotSizeCurrent = total.lotSizeCurrent + newRow.lotSizeCurrent
+        indexCell++
 
-            // графа 4
-            newRow.lotSizePrev = getNumber(row.cell[indexCell].text())
-            total.lotSizePrev = total.lotSizePrev + newRow.lotSizePrev
-            indexCell++
+        // графа 6
+        newRow.reserve = getNumber(row.cell[indexCell].text())
+        indexCell++
 
-            // графа 5
-            newRow.lotSizeCurrent = getNumber(row.cell[indexCell].text())
-            total.lotSizeCurrent = total.lotSizeCurrent + newRow.lotSizeCurrent
-            indexCell++
+        // графа 7
+        newRow.cost = getNumber(row.cell[indexCell].text())
+        total.cost = total.cost + newRow.cost
+        indexCell++
 
-            // графа 6
-            newRow.reserve = getNumber(row.cell[indexCell].text())
-            indexCell++
+        // графа 8
+        newRow.signSecurity = getRecords(62, 'CODE', row.cell[indexCell].text(), date, cache)
+        indexCell++
 
-            // графа 7
-            newRow.cost = getNumber(row.cell[indexCell].text())
-            total.cost = total.cost + newRow.cost
-            indexCell++
+        // графа 9
+        newRow.marketQuotation = getNumber(row.cell[indexCell].text())
+        indexCell++
 
-            // графа 8
-            newRow.signSecurity = getRecords(62, 'CODE', row.cell[indexCell].text().replaceAll('[ ]', ''), date, cache)
-            indexCell++
+        // графа 10
+        newRow.costOnMarketQuotation = getNumber(row.cell[indexCell].text())
+        total.costOnMarketQuotation = total.costOnMarketQuotation + newRow.costOnMarketQuotation
+        indexCell++
 
-            // графа 9
-            newRow.marketQuotation = getNumber(row.cell[indexCell].text())
-            indexCell++
+        // графа 11
+        newRow.reserveCalcValue = getNumber(row.cell[indexCell].text())
+        total.reserveCalcValue = total.reserveCalcValue + newRow.reserveCalcValue
+        indexCell++
 
-            // графа 10
-            newRow.costOnMarketQuotation = getNumber(row.cell[indexCell].text())
-            total.costOnMarketQuotation = total.costOnMarketQuotation + newRow.costOnMarketQuotation
-            indexCell++
+        // графа 12
+        newRow.reserveCreation = getNumber(row.cell[indexCell].text())
+        indexCell++
 
-            // графа 11
-            newRow.reserveCalcValue = getNumber(row.cell[indexCell].text())
-            total.reserveCalcValue = total.reserveCalcValue + newRow.reserveCalcValue
-            indexCell++
+        // графа 13
+        newRow.reserveRecovery = getNumber(row.cell[indexCell].text())
 
-            // графа 12
-            newRow.reserveCreation = getNumber(row.cell[indexCell].text())
-            indexCell++
-
-            // графа 13
-            newRow.reserveRecovery = getNumber(row.cell[indexCell].text())
-
-            data.insert(newRow, indexRow)
-        } else {
-            def newRow = getNewRow()
+        newRows << newRow
+    }
+    // проверка итоговой строки
+    if (xml.rowTotal.size()==1)
+        for (def row : xml.rowTotal) {
+            def newRow = formData.createDataRow()
             newRow.setAlias('total')
             newRow.regNumber = 'Общий итог'
             setTotalStyle(newRow)
 
-            def indexCell = startColumn
-
-            // графа 2
-            indexCell++
-
-            // графа 3
-            indexCell++
-
             // графа 4
-            newRow.lotSizePrev = getNumber(row.cell[indexCell].text())
-            indexCell++
+            newRow.lotSizePrev = getNumber(row.cell[4].text())
 
             // графа 5
-            newRow.lotSizeCurrent = getNumber(row.cell[indexCell].text())
-            indexCell++
-
-            // графа 6
-            indexCell++
+            newRow.lotSizeCurrent = getNumber(row.cell[5].text())
 
             // графа 7
-            newRow.cost = getNumber(row.cell[indexCell].text())
-            indexCell++
-
-            // графа 8
-            indexCell++
-
-            // графа 9
-            indexCell++
+            newRow.cost = getNumber(row.cell[7].text())
 
             // графа 10
-            newRow.costOnMarketQuotation = getNumber(row.cell[indexCell].text())
-            indexCell++
+            newRow.costOnMarketQuotation = getNumber(row.cell[10].text())
 
             // графа 11
-            newRow.reserveCalcValue = getNumber(row.cell[indexCell].text())
-            indexCell++
-
-            // графа 12
-            indexCell++
-
-            // графа 13
+            newRow.reserveCalcValue = getNumber(row.cell[11].text())
 
             totalColumns.each{k,it->
-                if (newRow[it]!=total[it]) logger.error("Итоговая сумма в графе $v в транспортном файле некорректна (${total[it]}!=${newRow[it]}")
+                if (newRow[it]!=total[it]) logger.error("Итоговая сумма в графе $k в транспортном файле некорректна.")
+                isTotal = false
             }
-
             //data.insert(newRow, indexRow-1)
-            break
         }
+    else {
+        logger.error("Нет итоговой строки.")
+        isTotal = false
     }
-
-    data.commit()
+    if (isTotal) {
+        data.clear()
+        newRows.each { newRow ->
+            insert(data, newRow)
+        }
+        data.commit()
+        return true
+    }
+    return false
 }
 
 /**
@@ -1088,7 +1055,7 @@ def getNumber(def value) {
 }
 
 def getRecords(def ref_id, String code, String value, Date date, def cache) {
-    String filter = code + "= '"+ value+"'"
+    String filter = code + "= '"+ value.replaceAll('[ ]', '')+"'"
     if (cache[ref_id]!=null) {
         if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
     } else {
