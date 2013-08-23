@@ -77,9 +77,9 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 		}
 
 		jt.update(
-				"insert into report_period (id, name, months, tax_period_id, ord, " +
-						"is_balance_period, department_id, dict_tax_period_id)" +
-						" values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				"insert into report_period (id, name, months, tax_period_id, ord," +
+						" dict_tax_period_id)" +
+						" values (?, ?, ?, ?, ?, ?)",
 				id,
 				reportPeriod.getName(),
 				reportPeriod.getMonths(),
