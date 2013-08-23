@@ -46,7 +46,6 @@ switch (formDataEvent) {
         break
 // обобщить
     case FormDataEvent.COMPOSE :
-        logger.info('compose')
         consolidation()
         calc()
         logicalCheck(false)
@@ -82,10 +81,13 @@ def addNewRow() {
         newRow.getCell(column).setEditable(true)
         newRow.getCell(column).setStyleAlias('Редактируемая')
     }
-    insert(data, newRow)
+
+    def i = getRows(data).size()
+    while(i>0 && isTotalRow(getRows(data).get(i-1))){i--}
+    data.insert(newRow, i + 1)
 
     // проставление номеров строк
-    def i = 1;
+    i = 1;
     getRows(data).each{ row->
         if (!isTotal(row)) {
             row.rowNumber = i++
@@ -150,14 +152,11 @@ void calc() {
         return
     }
 
-
-
     // справочник 22 "Курсы Валют"
     def refDataProvider = refBookFactory.getDataProvider(22)
 
     getRows(data).eachWithIndex { row, index ->
         // графа 1
-        row.rowNumber = index + 1
         row.code = row.balance
 
         def records = refDataProvider.getRecords(row.date, null, "CODE_NUMBER = " + row.currencyCode, null)
@@ -177,7 +176,13 @@ void calc() {
         row.ruble = round(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)
     }
     // отсортировать/группировать
-    getRows(data).sort { refBookService.getStringValue(27, it.code) }
+    //getRows(data).sort { refBookService.getStringValue(27, it.code, "CODE") }
+    getRows(data).sort { getCodeAttribute(it.code) }
+
+    getRows(data).eachWithIndex { row, index ->
+        row.rowNumber = index + 1
+    }
+
     save(data)
     // графа 10, 12 для последней строки "итого"
     def total10 = 0
@@ -283,9 +288,9 @@ def logicalCheck(def useLog) {
                     'docDate', 'currencyCode',
                     //'rateOfTheBankOfRussia',
                     'taxAccountingCurrency',
-                    'taxAccountingRuble' ,
+                    //'taxAccountingRuble' ,
                     'accountingCurrency'
-                     ,'ruble'
+                     //,'ruble'
             ]
             if (!checkRequiredColumns(row, requiredColumns, useLog)) {
                 return false
@@ -311,15 +316,15 @@ def logicalCheck(def useLog) {
             }
             i += 1
 
-
             // 7. Арифметические проверки граф 10, 12
             // «Графа 10» = ОКРУГЛ((«графа 9»  «графа 8»);2)
             // «Графа 12» =ОКРУГЛ( («графа 11»  «графа 8»);2)
-
+            if (row.taxAccountingRuble != null)
             if (row.taxAccountingRuble != round(row.taxAccountingCurrency * row.rateOfTheBankOfRussia, 2)) {
                 logger.warn('Неверно рассчитана графа "Сумма расхода в налоговом учёте - Рубли"')
                 return false
             }
+            if (row.ruble != null)
             if (row.ruble != round(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)) {
                 logger.warn('Неверно рассчитана графа "Сумма расхода в бухгалтерском учёте - Рубли"')
                 return false
@@ -341,13 +346,14 @@ def logicalCheck(def useLog) {
             // 10. Проверка наличия суммы расхода в налоговом учете, для первичного документа, указанного для суммы расхода в бухгалтерском учёте
 
             def checkSumm = checkDate(row)
+            /*
             if (checkSumm == null) {
                 logger.error('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете за последние 3 года не проходила!')
                 return false
             } else if (checkSumm >= row.ruble) {
                 logger.warn('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-7 в <отчетный период> отчетном периоде.')
             }
-
+            */
         }
 
         if (hasTotal) {
@@ -450,19 +456,22 @@ def checkNSI() {
 
             // Код валюты
             def currCode = refBookService.getRecordData(currencyRefBookId, row.currencyCode)
-            if (currCode == null) {
-                logger.error('Код валюты в справочнике отсутствует!')
-                return false
-            } else {
-                def records = refDataProvider.getRecords(row.date, null, "CODE_NUMBER = " + row.currencyCode, null)
-                if (records != null && records.getRecords() != null && records.getRecords().size() > 0) {
-                    def record = records.getRecords().getAt(0)
-                    def rate = record.get('RATE') // атрибут "Курс валюты"
-                    if (row.rateOfTheBankOfRussia != rate.getNumberValue()) {
+            if (row.date != null)
+            {
+                if (currCode == null) {
+                    logger.error('Код валюты в справочнике отсутствует!')
+                    return false
+                } else {
+                    def records = refDataProvider.getRecords(row.date, null, "CODE_NUMBER = " + row.currencyCode, null)
+                    if (records != null && records.getRecords() != null && records.getRecords().size() > 0) {
+                        def record = records.getRecords().getAt(0)
+                        def rate = record.get('RATE') // атрибут "Курс валюты"
+                        if (row.rateOfTheBankOfRussia != rate.getNumberValue()) {
+                            logger.warn('Неверный курс валюты!')
+                        }
+                    } else {
                         logger.warn('Неверный курс валюты!')
                     }
-                } else {
-                    logger.warn('Неверный курс валюты!')
                 }
             }
         }
@@ -582,7 +591,7 @@ def getNewRow(def alias, def totalColumns, def sums) {
     totalColumns.each {
         newRow.getCell(it).setValue(sums[it])
     }
-    newRow.fix = 'Итого по коду'
+    newRow.fix = 'Итого по коду ' + (getKnu(alias))
     newRow.getCell('fix').colSpan = 2
     setTotalStyle(newRow)
     return newRow
@@ -716,4 +725,17 @@ def getRowByAlias(def data, def alias) {
  */
 void deleteRow(def data, def row) {
     data.delete(row)
+}
+
+def getKnu(def code) {
+    return refBookService.getStringValue(27,code,'CODE')
+}
+
+/**
+ * Получить атрибут 130 - "Код налогового учёта" справочник 27 - "Классификатор расходов Сбербанка России для целей налогового учёта".
+ *
+ * @param id идентификатор записи справочника
+ */
+def getCodeAttribute(def id) {
+    return refBookService.getStringValue(27, id, 'CODE')
 }
