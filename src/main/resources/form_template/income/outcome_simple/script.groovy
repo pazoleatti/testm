@@ -23,6 +23,7 @@ switch (formDataEvent) {
     // расчитать
     case FormDataEvent.CALCULATE :
         checkAndCalc()
+        save(getData(formData))
         break
     // обобщить
     case FormDataEvent.COMPOSE :
@@ -77,6 +78,7 @@ switch (formDataEvent) {
  */
 void checkAndCalc() {
     calculationBasicSum()
+    calculationControlGraphs()
 }
 
 /**
@@ -86,14 +88,6 @@ void calculationBasicSum() {
     def data = getData(formData)
     if (data == null) {
         return
-    }
-    getRows(data).each { row ->
-        ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each {
-            def cell = row.getCell(it)
-            if (cell.isEditable()) {
-                cell.setValue(1)
-            }
-        }
     }
 
     /*
