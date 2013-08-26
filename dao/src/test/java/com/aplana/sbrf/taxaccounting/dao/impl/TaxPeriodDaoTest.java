@@ -72,6 +72,36 @@ public class TaxPeriodDaoTest {
 		assertEquals(lastTaxPeriod.getStartDate(), taxPeriodDao.getLast(TaxType.TRANSPORT).getStartDate());
 	}
 
+	@Test
+	public void listByTaxTypeAndDateTest() {
+		Date d2010 = getDate(2010, 0, 1);
+		Date d2012_2 = getDate(2012, 5, 1);
+		Date d2013 = getDate(2013, 0, 1);
+		Date d2013_2 = getDate(2013, 5, 1);
+		Date d2015 = getDate(2015, 0, 1);
+		List<TaxPeriod> taxPeriodList = taxPeriodDao.listByTaxTypeAndDate(TaxType.TRANSPORT, d2010, d2015);
+		assertEquals(2, taxPeriodList.size());
+		taxPeriodList = taxPeriodDao.listByTaxTypeAndDate(TaxType.INCOME, d2010, d2015);
+		assertEquals(0, taxPeriodList.size());
+		taxPeriodList = taxPeriodDao.listByTaxTypeAndDate(TaxType.DEAL, d2010, d2015);
+		assertEquals(0, taxPeriodList.size());
+		taxPeriodList = taxPeriodDao.listByTaxTypeAndDate(TaxType.PROPERTY, d2010, d2015);
+		assertEquals(1, taxPeriodList.size());
+		taxPeriodList = taxPeriodDao.listByTaxTypeAndDate(TaxType.VAT, d2010, d2015);
+		assertEquals(1, taxPeriodList.size());
+
+		taxPeriodList = taxPeriodDao.listByTaxTypeAndDate(TaxType.TRANSPORT, d2012_2, d2012_2);
+		assertEquals(1, taxPeriodList.size());
+		taxPeriodList = taxPeriodDao.listByTaxTypeAndDate(TaxType.TRANSPORT, d2012_2, d2013_2);
+		assertEquals(2, taxPeriodList.size());
+		taxPeriodList = taxPeriodDao.listByTaxTypeAndDate(TaxType.TRANSPORT, d2013, d2013);
+		assertEquals(1, taxPeriodList.size());
+		taxPeriodList = taxPeriodDao.listByTaxTypeAndDate(TaxType.TRANSPORT, d2010, d2010);
+		assertEquals(0, taxPeriodList.size());
+		taxPeriodList = taxPeriodDao.listByTaxTypeAndDate(TaxType.TRANSPORT, d2015, d2015);
+		assertEquals(0, taxPeriodList.size());
+	}
+
 	private Date getDate(int year, int month, int day) {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.YEAR, year);

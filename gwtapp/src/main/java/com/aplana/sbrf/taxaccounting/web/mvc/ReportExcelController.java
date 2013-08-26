@@ -61,7 +61,7 @@ public class ReportExcelController {
      */
     @RequestMapping(value = "/processSecUserDownload",method = RequestMethod.GET)
     public void processSecUserDownload(HttpServletRequest req, HttpServletResponse response) throws IOException {
-        String filePath = printingService.generateExcelUsers(taUserService.lisAllFullActiveUsers());
+        String filePath = printingService.generateExcelUsers(taUserService.listAllFullActiveUsers());
         createResponse(req, response, filePath);
     }
 

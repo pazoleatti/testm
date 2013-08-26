@@ -56,6 +56,6 @@ public interface TAUserService {
 	 * Возвращает список только активных пользователей.
 	 * @return
 	 */
-    List<TAUserFull> lisAllFullActiveUsers();
+    List<TAUserFull> listAllFullActiveUsers();
 
 }

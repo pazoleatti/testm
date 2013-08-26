@@ -96,7 +96,7 @@ public class TAUserServiceTest {
 
     @Test
     public void testListAllFullUsers(){
-        assertEquals(3, service.lisAllFullActiveUsers().size());
+        assertEquals(3, service.listAllFullActiveUsers().size());
     }
 
 }

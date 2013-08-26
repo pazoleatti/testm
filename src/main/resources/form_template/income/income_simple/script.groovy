@@ -5,28 +5,28 @@ import java.text.SimpleDateFormat
 /**
  * Сводная форма " Доходы, учитываемые в простых РНУ" уровня обособленного подразделения
  *
+ * TODO:
+ *      - не сделан подсчет графы 13 (контрольные графы) потому что справочники "Отчет о прибылях и убытках" и "Оборотная ведомость" еще не реализованы
+ *
  * @since 6.06.2013
  * @author auldanov
  */
 
-/**
- * Состав графов
- * 1. КНУ - incomeTypeId
- * 2. Группа доходов - incomeGroup
- * 3. Вид дохода по операции - incomeTypeByOperation
- * 4. Балансовый счёт по учёту дохода - accountNo
- * 5. РНУ-6 (графа 10) cумма - rnu6Field10Sum
- * 6. сумма - rnu6Field12Accepted
- * 7. в т.ч. учтено в предыдущих налоговых периодах по графе 10 - rnu6Field12PrevTaxPeriod
- * 8. РНУ-4 (графа 5) сумма - rnu4Field5Accepted
- * 9. Логическая проверка - logicalCheck
- * 10. Счёт бухгалтерского учёта - accountingRecords
- * 11. в Приложении №5 - opuSumByEnclosure2
- * 12. в Таблице "Д" - opuSumByTableD
- * 13. в бухгалтерской отчётности - opuSumTotal
- * 14. Расхождение - difference
- *
- */
+ // Состав графов
+ // графа 1  - incomeTypeId              - КНУ
+ // графа 2  - incomeGroup               - Группа доходов
+ // графа 3  - incomeTypeByOperation     - Вид дохода по операции
+ // графа 4  - accountNo                 - Балансовый счёт по учёту дохода
+ // графа 5  - rnu6Field10Sum            - РНУ-6 (графа 10) cумма
+ // графа 6  - rnu6Field12Accepted       - сумма
+ // графа 7  - rnu6Field12PrevTaxPeriod  - в т.ч. учтено в предыдущих налоговых периодах по графе 10
+ // графа 8  - rnu4Field5Accepted        - РНУ-4 (графа 5) сумма
+ // графа 9  - logicalCheck              - Логическая проверка
+ // графа 10 - accountingRecords         - Счёт бухгалтерского учёта
+ // графа 11 - opuSumByEnclosure2        - в Приложении №5
+ // графа 12 - opuSumByTableD            - в Таблице "Д"
+ // графа 13 - opuSumTotal               - в бухгалтерской отчётности
+ // графа 14 - difference                - Расхождение
 
 data = getData(formData)
 
@@ -135,6 +135,7 @@ def calcForm(){
         // «графа 8» =сумма значений  «графы 8» для строк с 55 по 155 (раздел «Внереализационные доходы»)
         row40002.rnu4Field5Accepted = (row40002.rnu4Field5Accepted?:0) + (row.rnu4Field5Accepted?:0)
     }
+    calculationControlGraphs()
     data.save(getRows(data))
 }
 
@@ -604,4 +605,126 @@ def getBalanceValue(def value) {
 
 boolean isEqualNum(String accNum, def balance) {
     return accNum.replace('.','')==getBalanceValue(balance).replace('.','')
+}
+
+
+/**
+ * Заполнение контрольных полей.
+ */
+void calculationControlGraphs() {
+    def data = getData(formData)
+    def message = 'ТРЕБУЕТСЯ ОБЪЯСНЕНИЕ'
+    def tmp
+    def value
+    def complexRows = getComplexRows()
+
+    // для  расчета графы 14
+    def row141 = getRowByAlias(data, 'R141')
+    def row142 = getRowByAlias(data, 'R142')
+    def aPlusB = (row141.rnu4Field5Accepted + row142.rnu4Field5Accepted)
+
+    for (def row : getRows(data)) {
+        // исключить итоговые строки
+        if (row.getAlias() in ['R1', 'R53', 'R54', 'R156']) {
+            continue
+        }
+
+        // графы 9 = ОКРУГЛ(«графа 5» - («графа 6» - «графа 7»); 2)
+        if (row.rnu6Field10Sum != null && row.rnu6Field12Accepted != null &&
+                row.rnu6Field12PrevTaxPeriod != null) {
+            tmp = round(row.rnu6Field10Sum - (row.rnu6Field12Accepted - row.rnu6Field12PrevTaxPeriod), 2)
+            value = ((BigDecimal) tmp).setScale(2, BigDecimal.ROUND_HALF_UP)
+            row.logicalCheck = (tmp < 0 ? message : value.toString())
+        }
+
+        // графа 11
+        row.opuSumByEnclosure2 = getSumFromData(complexRows,
+                    'incomeBuhSumAccountNumber', 'incomeBuhSumAccepted', row.accountNo)
+
+        // графа 12
+        row.opuSumByTableD = getSumFromData(getRows(data), 'rnu4Field5Accepted', 'accountNo', row.accountNo)
+
+        // графа 13
+        // TODO (Ramil Timerbaev) справочники "Отчет о прибылях и убытках" и "Оборотная ведомость" еще не реализованы
+        if (row.getAlias() in ['R118', 'R119', 'R141', 'R142']) {
+            tmp = 0 // TODO (Ramil Timerbaev) костыль
+        } else {
+            tmp = 0 // TODO (Ramil Timerbaev) костыль
+        }
+        row.opuSumTotal = tmp
+
+        // графа 14
+        if (row.getAlias() in ['R118', 'R119']) {
+            // «графа 14» = «графа 13» - «графа 8»
+            tmp = getValue(row.opuSumTotal) - getValue(row.rnu4Field5Accepted)
+        } else if (row.getAlias() in ['R141', 'R142']) {
+            // «графа 14» = «графа 13» - (А + Б)
+            tmp = getValue(row.opuSumTotal) - aPlusB
+        } else {
+            // «графа 14» = («графа 11» + «графа 12») – «графа 13»
+            tmp = (getValue(row.opuSumByEnclosure2) + getValue(row.opuSumByTableD)) - getValue(row.opuSumTotal)
+        }
+        row.difference = tmp
+    }
+}
+
+/**
+ * Проверка пустое ли значение.
+ */
+def isEmpty(def value) {
+    return value == null || value == ''
+}
+
+/**
+ * Получить значение или ноль.
+ *
+ * @param value значение которое надо проверить
+ */
+def getValue(def value) {
+    return value ?: 0
+}
+
+/**
+ * Получить сумму значений для указанной формы.
+ *
+ * @param rows строки формы
+ * @param columnAliasCheck алиас графы, по которой отбираются строки для суммирования
+ * @param columnAliasSum алиас графы, значения которой суммируются
+ * @param value значение, по которому отбираются строки для суммирования
+ */
+def getSumFromData(rows, columnAliasCheck, columnAliasSum, value) {
+    def sum = 0
+    if (rows != null && (columnAliasCheck != null || columnAliasCheck != '') &&
+            (columnAliasSum != null || columnAliasSum != '') && value != null) {
+        for (def row : rows) {
+            if (row.getCell(columnAliasCheck).getValue() == value) {
+                sum += (row.getCell(columnAliasSum).getValue() ?: 0)
+            }
+        }
+    }
+    return sum
+}
+
+/**
+ * Получить строки формы "дохоы сложные" (id = 302)
+ */
+def getComplexRows() {
+    def formDataComplex = formDataService.find(302, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+    if (formDataComplex != null) {
+        def data = getData(formDataComplex)
+        if (data != null) {
+            return getRows(data)
+        }
+    }
+    return null
+}
+
+/**
+ * Получить строку по алиасу.
+ *
+ * @param data данные нф (helper)
+ * @param alias алиас
+ */
+def getRowByAlias(def data, def alias) {
+    return data.getDataRow(getRows(data), alias)
 }

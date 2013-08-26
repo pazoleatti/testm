@@ -109,7 +109,7 @@ public class TAUserServiceImpl implements TAUserService {
 	}
 
     @Override
-    public List<TAUserFull> lisAllFullActiveUsers() {
+    public List<TAUserFull> listAllFullActiveUsers() {
         List<TAUserFull> taUserFullList = new ArrayList<TAUserFull>();
         for(Integer userId : userDao.getUserIds()){
             TAUserFull userFull = new TAUserFull();

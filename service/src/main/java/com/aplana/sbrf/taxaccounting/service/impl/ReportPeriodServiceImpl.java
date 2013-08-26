@@ -1,26 +1,28 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DictionaryTaxPeriodDao;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
 import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
 
 @Service
 @Transactional
@@ -34,9 +36,6 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 
 	@Autowired
 	private DepartmentReportPeriodDao departmentReportPeriodDao;
-
-	@Autowired
-	private DictionaryTaxPeriodDao dictionaryTaxPeriodDao;
 
 	@Autowired
 	private RefBookDao refBookDao;
@@ -55,11 +54,6 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	@Override
 	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
 		return reportPeriodDao.listByTaxPeriod(taxPeriodId);
-	}
-
-	@Override
-	public List<ReportPeriod> listByTaxPeriodAndDepartment(int taxPeriodId, long departmentId) {
-		return reportPeriodDao.listByTaxPeriodAndDepartmentId(taxPeriodId, departmentId);
 	}
 
 	@Override
