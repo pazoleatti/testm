@@ -198,16 +198,17 @@ public class FormDataServiceImpl implements FormDataService {
 		// Execute scripts for the form event CREATE
 		formDataScriptingService.executeScript(userInfo, formData,
 				importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger,null);
-		
-		formDataDao.save(formData);
-		// Заполняем начальные строки (но не сохраняем)
-		dataRowDao.saveRows(formData, formTemplate.getRows());
-		
+
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте создания налоговой формы",
 					logger.getEntries());
 		}
+
+		formDataDao.save(formData);
+		// Заполняем начальные строки (но не сохраняем)
+		dataRowDao.saveRows(formData, formTemplate.getRows());
+
 		dataRowDao.commit(formData.getId());
 		
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
