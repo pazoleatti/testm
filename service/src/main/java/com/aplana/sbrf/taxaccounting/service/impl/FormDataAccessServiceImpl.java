@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 
 import org.apache.commons.logging.Log;
@@ -39,6 +40,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	private FormTemplateDao formTemplateDao;
 	@Autowired
 	private DepartmentFormTypeDao departmentFormTypeDao;
+	@Autowired
+	private DepartmentReportPeriodDao departmentReportPeriodDao;
 
 	@Override
 	public boolean canRead(TAUserInfo userInfo, long formDataId) {
@@ -162,12 +165,13 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 
 	private boolean canEdit(FormDataAccessRoles formDataAccess, FormData formData, ReportPeriod formDataReportPeriod) {
+		DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formDataReportPeriod.getId(), Long.valueOf(formData.getDepartmentId()));
 		WorkflowState state = formData.getState();
-		if(!formDataReportPeriod.isActive()){
+		if(!departmentReportPeriod.isActive()){
 			//Нельзя редактировать НФ для неактивного налогового периода
 			return false;
 		}
-		if (formDataReportPeriod.isBalancePeriod()) {
+		if (departmentReportPeriod.isBalance()) {
 			/* В отчетных периодах для ввода остатков редактирование возможно только контролерами для
 			 НФ в статусе "Создана" */
 			switch (state){
@@ -319,8 +323,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 	
 	private boolean canCreate(FormDataAccessRoles formDataAccess, int formTypeId, FormDataKind kind, Department formDataDepartment, ReportPeriod reportPeriod) {
-		if(!reportPeriod.isActive()){
+		DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriod.getId(), Long.valueOf(formDataDepartment.getId()));
+		if(!departmentReportPeriod.isActive()){
 			//Нельзя создавать НФ для неактивного налогового периода
+			logger.warn(String.format("Отчетный период (%d) закрыт!", reportPeriod.getId()));
 			return false;
 		}
 
@@ -333,9 +339,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			}
 		}
 		if (!found) {
+			logger.warn(String.format("Вид формы (%d) и ее тип (%d) отсутствует среди допустимых у подразделения (%d)", formTypeId, kind.getId(), formDataDepartment.getId()));
 			return false;
 		}
-		if (reportPeriod.isBalancePeriod()) {
+		if (departmentReportPeriod.isBalance()) {
 			return formDataAccess.isControllerOfCurrentLevel() ||
 					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
 		} else if((kind == FormDataKind.ADDITIONAL || kind == FormDataKind.PRIMARY) &&
@@ -415,17 +422,18 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
 	private List<WorkflowMove> getAvailableMoves(FormDataAccessRoles formDataAccess, FormData formData,
 			ReportPeriod formDataReportPeriod) {
+		DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formDataReportPeriod.getId(), Long.valueOf(formData.getDepartmentId()));
 		List<WorkflowMove> result = new ArrayList<WorkflowMove>();
 		// Для того, чтобы иметь возможность изменить статус, у пользователя должны быть права
 		// на чтение соответствующей карточки данных и отчетный период должен быть активным
-		if (!canRead(formDataAccess, formData) || !formDataReportPeriod.isActive()) {
+		if (!canRead(formDataAccess, formData) || !departmentReportPeriod.isActive()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Report period is closed");
 			}
 			return result;
 		}
 		WorkflowState state = formData.getState();
-		if (formDataReportPeriod.isBalancePeriod()) {
+		if (departmentReportPeriod.isBalance()) {
 			// Если отчетный период для ввода остатков, то сокращаем жц до Создана - Принята
 			switch (state) {
 				case CREATED:

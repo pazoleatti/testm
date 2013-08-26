@@ -13,7 +13,7 @@
 	<logger name="org.springframework" level="warn"/>
 	
 	<!-- Логгеры проекта пишут с уровнем debug -->
-	<logger name="com.aplana.sbrf.taxaccounting" level="debug"/>
+	<logger name="com.aplana.sbrf.taxaccounting" level="all"/>
 
 	<!-- Мапперы MyBatis на урвоне debug выдают слишком много информации, поэтому для них уровень info -->
 	<logger name="com.aplana.sbrf.taxaccounting.dao.mapper" level="info"/>
