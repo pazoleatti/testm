@@ -53,8 +53,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 		}
 	}
 
-
-
 	@Override
 	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
 		return getJdbcTemplate().query(
@@ -64,7 +62,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 				REPORT_PERIOD_MAPPER
 		);
 	}
-
 
 	@Override
 	@Transactional(readOnly = false)
@@ -95,11 +92,24 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     public ReportPeriod getLastReportPeriod(TaxType taxType, long departmentId) {
     	throw new DaoException("Ошибок не заводить. В разработке");
     }
-	
+
+
+    @Override
+    public ReportPeriod getReportPeriodByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "select * from report_period where tax_period_id = ? and dict_tax_period_id = ?",
+                    new Object[]{taxPeriodId, dictTaxPeriodId},
+                    new int[]{Types.NUMERIC, Types.NUMERIC},
+                    REPORT_PERIOD_MAPPER
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException("Не существует периода с tax_period_id=" + taxPeriodId + " и dict_tax_period_id = " + dictTaxPeriodId);
+        }
+    }
 
 	@Override
 	public void changeActive(int reportPeriodId, boolean active) {
 		throw new DaoException("Ошибок не заводить. В разработке");
 	}
-
 }

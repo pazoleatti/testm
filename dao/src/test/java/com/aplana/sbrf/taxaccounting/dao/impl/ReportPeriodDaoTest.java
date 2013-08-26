@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,7 +77,6 @@ public class ReportPeriodDaoTest {
 		assertEquals(0, reportPeriodList.size());
 	}
 
-
 	@Test
 	public void saveAndGetSuccessTest() {
 		ReportPeriod newReportPeriod = new ReportPeriod();
@@ -97,4 +97,16 @@ public class ReportPeriodDaoTest {
 		assertEquals(21, reportPeriod.getDictTaxPeriodId());
 	}
 
+    @Test
+    public void getReportPeriodByTaxPeriodAndDictTest1() {
+        ReportPeriod reportPeriod1 = reportPeriodDao.getReportPeriodByTaxPeriodAndDict(1, 21);
+        ReportPeriod reportPeriod2 = reportPeriodDao.getReportPeriodByTaxPeriodAndDict(1, 22);
+        Assert.assertEquals(reportPeriod1.getId(), Integer.valueOf(1));
+        Assert.assertEquals(reportPeriod2.getId(), Integer.valueOf(2));
+    }
+
+    @Test(expected = DaoException.class)
+    public void getReportPeriodByTaxPeriodAndDictTest2() {
+        reportPeriodDao.getReportPeriodByTaxPeriodAndDict(-1, -1);
+    }
 }
