@@ -12,7 +12,7 @@ insert into report_period (id, name, is_active, months, tax_period_id, ord, depa
 insert into report_period (id, name, is_active, months, tax_period_id, ord, department_id, dict_tax_period_id) values (2, '2002 - 2 квартал', 0, 3, 1, 2, 1, 21);
 
 -- income102 data
-insert into income_102 (report_period_id,  opu_code,  total_sum) values (1, '2', 666);
-insert into income_102 (report_period_id,  opu_code,  total_sum) values (1, '2.1', 666);
-insert into income_102 (report_period_id,  opu_code,  total_sum) values (2, '2', 555);
-insert into income_102 (report_period_id,  opu_code,  total_sum) values (1, '3', 444);
+insert into income_102 (id, report_period_id,  opu_code,  total_sum) values (1, 1, '2', 666);
+insert into income_102 (id, report_period_id,  opu_code,  total_sum) values (2, 1, '2.1', 666);
+insert into income_102 (id, report_period_id,  opu_code,  total_sum) values (3, 2, '2', 555);
+insert into income_102 (id, report_period_id,  opu_code,  total_sum) values (4, 1, '3', 444);

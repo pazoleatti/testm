@@ -76,12 +76,12 @@ switch (formDataEvent) {
 // графа 2  - строка issuer эмитит
 // графа 3  - строка regNumber гос номер
 // графа 4  - строка tradeNumber Номер сделки
-// графа 5  - строка currency Валюта выпуска облигации
+// графа 5  - строка currency Валюта выпуска облигации (справочник)
 // графа 6  - число  prev Размер лота на отчётную дату по депозитарному учёту (шт.). Предыдущую
 // графа 7  - число  current Размер лота на отчётную дату по депозитарному учёту (шт.). Текущую
 // графа 8  - число  reserveCalcValuePrev Расчётная величина резерва на предыдущую отчётную дату (руб.коп.)
 // графа 9  - число  cost Стоимость по цене приобретения (руб.коп.)
-// графа 10 - строка signSecurity Признак ценной бумаги на текущую отчётную дату
+// графа 10 - строка signSecurity Признак ценной бумаги на текущую отчётную дату (справочник)
 // графа 11 - число  marketQuotation Quotation Рыночная котировка одной ценной бумаги в иностранной валюте
 // графа 12 - число  rubCourse Курс рубля к валюте рыночной котировки
 // графа 13 - число  marketQuotationInRub Рыночная котировка одной ценной бумаги в рублях
@@ -115,10 +115,10 @@ void logicalCheck() {
                 logger.error("Графы 8 и 17 ненулевые!")
             }
             // LC • Проверка необращающихся облигаций (графа 10 = «x»)
-            if (row.signSecurity == "x" && (row.reserveCalcValue != row.reserveCreation || row.reserveCreation != 0)) {
+            if (getSign(row.signSecurity) == "x" && (row.reserveCalcValue != row.reserveCreation || row.reserveCreation != 0)) {
                 logger.warn("Облигации необращающиеся, графы 15 и 16 ненулевые!")
             }
-            if (row.signSecurity == "+") {
+            if (getSign(row.signSecurity) == "+") {
                 // LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
                 if (row.reserveCalcValue - row.reserveCalcValuePrev > 0 && row.recovery != 0) {
                     logger.error("Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
@@ -430,6 +430,7 @@ def calcItogIssuer(int i) {
         }
 
     }
+    setTotalStyle(newRow)
     newRow
 }
 
@@ -475,6 +476,7 @@ def calcItogRegNumber(int i) {
             }
         }
     }
+    setTotalStyle(newRow)
     newRow
 }
 
@@ -505,7 +507,7 @@ def calcItogo() {
             }
         }
     }
-
+    setTotalStyle(rowItogo)
     rowItogo
 }
 
@@ -634,7 +636,7 @@ BigDecimal calc15(DataRow row) {
         a = 0
     }
 
-    if (row.signSecurity == "+") {
+    if (getSign(row.signSecurity) == "+") {
         if (a - row.costOnMarketQuotation > 0) {
             return a - row.costOnMarketQuotation
         } else {
@@ -839,6 +841,16 @@ void consolidation() {
 }
 
 /**
+ * Установить стиль для итоговых строк.
+ */
+void setTotalStyle(def row) {
+    ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current', 'reserveCalcValuePrev', 'cost', 'signSecurity',
+            'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery'].each {
+        row.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+}
+
+/**
  * Получить данные формы.
  *
  * @param formData форма
@@ -865,11 +877,24 @@ def getSign(def sign) {
 }
 
 /**
+ * Проверка валюты на рубли
+ */
+def isRubleCurrency(def currencyCode) {
+    return  refBookService.getStringValue(15,currencyCode,'CODE_2')=='810'
+}
+
+/**
  * Получить курс валюты
  */
 def getCourse(def currency, def date) {
-    def refCourseDataProvider = refBookFactory.getDataProvider(22)
-    def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
-    return res.getRecords().get(0).RATE.getNumberValue()
+    if (currency!=null && !isRubleCurrency(currency)) {
+        def refCourseDataProvider = refBookFactory.getDataProvider(22)
+        def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
+        return res.getRecords().get(0).RATE.getNumberValue()
+    } else if (isRubleCurrency(currency)){
+        return 1;
+    } else {
+        return null
+    }
 }
 

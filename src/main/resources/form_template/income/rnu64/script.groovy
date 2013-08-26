@@ -13,7 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
  * Описание столбцов
  * 1. number - № пп
  * 2. date - Дата сделки
- * 3. part - Часть сделки
+ * 3. part - Часть сделки Справочник
  * 4. dealingNumber - Номер сделки
  * 5. bondKind - Вид ценных бумаг
  * 6. costs - Затраты (руб.коп.)
@@ -172,7 +172,7 @@ def addNewRow(){
 
     ['date', 'part', 'dealingNumber', 'bondKind', 'costs'].each {
         newRow.getCell(it).editable = true
-        //newRow.getCell(it).setStyleAlias('Редактируемая')
+        newRow.getCell(it).setStyleAlias('Редактируемая')
     }
     getData(formData).insert(newRow,index+1)
 }
@@ -228,6 +228,7 @@ def fillForm(){
     // 6 графа Содержит сумму значений "графы 6" для всех строк данной таблицы, за исключением итоговых строк («Итого за текущий квартал», «Итого за текущий отчетный (налоговый) период»)
     newRowQuarter.costs = getQuarterTotal()
     newRowQuarter.setAlias("totalQuarter")
+    setTotalStyle(newRowQuarter)
     data.insert(newRowQuarter, getRows(data).size()+1)
 
     // строка Итого за текущий отчетный (налоговый) период
@@ -237,6 +238,7 @@ def fillForm(){
     newRowTotal.fix = "Итого за текущий отчетный (налоговый) период"
     newRowTotal.costs = getTotalValue()
     newRowTotal.setAlias("total")
+    setTotalStyle(newRowTotal)
     data.insert(newRowTotal, getRows(data).size()+1)
 }
 
@@ -514,3 +516,13 @@ def getRows(def data) {
 def getPart(def part) {
     return refBookService.getNumberValue(60,part,'CODE');
 }
+
+/**
+ * Установить стиль для итоговых строк.
+ */
+void setTotalStyle(def row) {
+    ['number', 'fix', 'date', 'part', 'dealingNumber', 'bondKind', 'costs'].each {
+        row.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+}
+

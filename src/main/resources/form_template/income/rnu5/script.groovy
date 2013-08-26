@@ -139,8 +139,7 @@ void calc() {
     }
 
     // отсортировать/группировать
-    getRows(data).sort { getCodeAttribute(it.code) }
-    save(data)
+    data.save(getRows(data).sort { getCodeAttribute(it.code) })
 
     // cумма "Итого"
     def total = 0

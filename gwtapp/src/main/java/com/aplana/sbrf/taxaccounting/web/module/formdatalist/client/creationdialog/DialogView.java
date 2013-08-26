@@ -16,8 +16,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodP
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -81,18 +79,10 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 		});
 
 		reportPeriodPicker = new ReportPeriodPicker(this, false);
-		reportPeriodPicker.setEnabled(false);
 
 		
 		initWidget(uiBinder.createAndBindUi(this));
 		
-		departmentPicker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<List<Integer>> event) {
-				reportPeriodPicker.clearReportPeriods();
-				reportPeriodPicker.setEnabled(!event.getValue().isEmpty());
-			}
-		});
 		
 	}
 
@@ -159,8 +149,8 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
 	@Override
 	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
-		if(getUiHandlers() != null){
-			getUiHandlers().onTaxPeriodSelected(taxPeriod, departmentPicker.getValue().iterator().next());
+		if (taxPeriod!=null){
+			getUiHandlers().onTaxPeriodSelected(taxPeriod);
 		}
 	}
 

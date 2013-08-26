@@ -1,15 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_ADMIN')")
@@ -20,17 +21,12 @@ public class GetReportPeriodsHandler extends AbstractActionHandler<GetReportPeri
 	}
 
 	@Autowired
-	private ReportPeriodDao reportPeriodDao;
+	private ReportPeriodService reportPeriodService;
 
 	@Override
 	public GetReportPeriodsResult execute(GetReportPeriods action, ExecutionContext executionContext) throws ActionException {
 		GetReportPeriodsResult result = new GetReportPeriodsResult();
-        if (action.getDepartmentId() == null) {
-		    result.setReportPeriods(reportPeriodDao.listByTaxPeriod(action.getTaxPeriod().getId()));
-        } else {
-            result.setReportPeriods(reportPeriodDao.listByTaxPeriodAndDepartmentId(action.getTaxPeriod().getId(), action.getDepartmentId()));
-        }
-
+	    result.setReportPeriods(reportPeriodService.listByTaxPeriod(action.getTaxPeriod().getId()));
 		return result;
 	}
 

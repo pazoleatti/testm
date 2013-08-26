@@ -146,9 +146,11 @@ void calculationControlGraphs() {
         //Строки 213-217 расчет 8-й графы
         if (row.getAlias() in ['R213','R214','R215','R216', 'R217']) {
             def formDataRNU14 = getFormDataRNU14()
-            for (def rowRNU14 : getData(formDataRNU14).getAllCached()){
-                if(row.consumptionTypeId == rowRNU14.knu){
-                    row.rnu5Field5Accepted = rowRNU14.overApprovedNprms
+            if (formDataRNU14 != null) {
+                for (def rowRNU14 : getData(formDataRNU14).getAllCached()){
+                    if(row.consumptionTypeId == rowRNU14.knu){
+                        row.rnu5Field5Accepted = rowRNU14.overApprovedNprms
+                    }
                 }
             }
             continue
@@ -257,7 +259,7 @@ void checkDeclarationBankOnCancelAcceptance() {
  * @author rtimerbaev
  * @since 21.02.2013 13:50
  */
-void consolidationBank() {
+def consolidationBank() {
     def data = getData(formData)
     if (data == null) {
         return
@@ -300,7 +302,7 @@ void consolidationBank() {
 /**
  * Консолидация данных из рну-7 и рну-5 в сводные расходы простые уровня ОП.
  */
-void consolidationSummary() {
+def consolidationSummary() {
     def data = getData(formData)
     if (data == null) {
         return

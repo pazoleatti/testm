@@ -87,8 +87,10 @@ def addNewRow(){
     def newRow = formData.createDataRow()
 
     // Графы 3-5 Заполняется вручную
-    ['balance', 'name', 'sum'].each{ column ->
+    ['balance', 'sum'].each{ column ->
         newRow.getCell(column).setEditable(true)
+        newRow.getCell(column).setStyleAlias('Редактируемая')
+
     }
     def i = getRows(data).size()
     while(i>0 && isTotalRow(getRows(data).get(i-1))){i--}
@@ -146,6 +148,7 @@ def fillForm(){
     //выбираем код на основе балансового счета
     getRows(data).each{row->
         row.code = row.balance
+        row.name = row.balance
     }
     data.save(getRows(data))
 
@@ -178,7 +181,9 @@ def fillForm(){
         if (i == getRows(data).size() - 1) {
             sum += row.sum
             def code = getKnu(row.code)
-            totalRows.put(i + 1, getNewRow(code, sum))
+            def totalRowCode =  getNewRow(code, sum)
+            setTotalStyle(totalRowCode)
+            totalRows.put(i + 1, totalRowCode)
             sum = 0
         }
 
@@ -198,6 +203,7 @@ def fillForm(){
     totalRow.fix = 'Итого'
     totalRow.getCell('fix').colSpan = 2
     totalRow.sum = total
+    setTotalStyle(totalRow)
 
     if (getRows(data).size()>1) {
         data.insert(totalRow, getRows(data).size() + 1)
@@ -216,7 +222,7 @@ def logicalCheck(){
     def data = getData(formData)
     getRows(data).each{ row ->
         if (!isTotalRow(row)){
-            ['rowNumber', 'balance', 'name', 'sum'].each{ alias ->
+            ['rowNumber', 'balance', 'sum'].each{ alias ->
                 if (row[alias] == null || row[alias] == '')
                     logger.error('Поле «'+row.getCell(alias).getColumn().getName()+'» не заполнено! Строка №пп - '+row.rowNumber)
             }
@@ -432,4 +438,14 @@ def isKnuDate(def code, def date) {
 
 def getBalance(def balance) {
     return refBookService.getStringValue(28,balance,'NUMBER')
+}
+
+/**
+ * Устаносить стиль для итоговых строк.
+ */
+void setTotalStyle(def row) {
+    ['rowNumber', 'fix', 'balance', 'code', 'name', 'sum'].each {
+        row.getCell(it).setStyleAlias('Контрольные суммы')
+        row.getCell(it).setEditable(false)
+    }
 }

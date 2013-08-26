@@ -1,7 +1,6 @@
 package form_template.income.rnu25
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
@@ -78,7 +77,7 @@ switch (formDataEvent) {
 // графа 5  - lotSizeCurrent
 // графа 6  - reserve
 // графа 7  - cost
-// графа 8  - signSecurity
+// графа 8  - signSecurity Справочник
 // графа 9  - marketQuotation
 // графа 10 - costOnMarketQuotation
 // графа 11 - reserveCalcValue
@@ -178,7 +177,7 @@ void calc() {
         row.costOnMarketQuotation = (row.marketQuotation ? round(row.lotSizeCurrent * row.marketQuotation, 2) : 0)
 
         // графа 11
-        if (row.signSecurity == '+') {
+        if (getSign(row.signSecurity) == '+') {
             def a = (row.cost ?: 0)
             tmp = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
         } else {
@@ -341,24 +340,25 @@ def logicalCheck(def useLog) {
             }
 
             // 5. Проверка необращающихся акций (графа 8, 11, 12)
-            if (row.signSecurity == '-' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
+            def sign = getSign(row.signSecurity)
+            if (sign == '-' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
                 logger.warn('Облигации необращающиеся, графы 11 и 12 ненулевые!')
             }
 
             // 6. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 13)
-            if (row.signSecurity == '+' && row.reserveCalcValue - row.reserve > 0 && row.reserveRecovery != 0) {
+            if (sign == '+' && row.reserveCalcValue - row.reserve > 0 && row.reserveRecovery != 0) {
                 logger.error('Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
                 return false
             }
 
             // 7. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 12)
-            if (row.signSecurity == '+' && row.reserveCalcValue - row.reserve < 0 && row.reserveCreation != 0) {
+            if (sign == '+' && row.reserveCalcValue - row.reserve < 0 && row.reserveCreation != 0) {
                 logger.error('Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
                 return false
             }
 
             // 8. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 13)
-            if (row.signSecurity == '+' && row.reserveCalcValue - row.reserve == 0 &&
+            if (sign == '+' && row.reserveCalcValue - row.reserve == 0 &&
                     (row.reserveCreation != 0 || row.reserveRecovery != 0)) {
                 logger.error('Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
                 return false
@@ -424,7 +424,7 @@ def logicalCheck(def useLog) {
             }
 
             // графа 11
-            if (row.signSecurity == '+') {
+            if (sign == '+') {
                 def a = (row.cost == null ? 0 : row.cost)
                 tmp = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
             } else {
@@ -571,26 +571,35 @@ void checkCreation() {
  * Получение импортируемых данных.
  */
 void importData() {
-    // TODO (Ramil Timerbaev) Костыль! это значение должно передаваться в скрипт
-    def fileName = 'fileName.xls'
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        return
+    }
 
     def is = ImportInputStream
     if (is == null) {
         return
     }
 
-    def xmlString = importService.getData(is, fileName, 'windows-1251', 'Государственный регистрационный номер', 'Общий итог');
-    if (xmlString == null) {
+    if (!fileName.contains('.r')) {
+        logger.error("Некорректное расширение файла")
         return
     }
 
+    def xmlString = importService.getData(is, fileName, 'cp866')
+    if (xmlString == null) {
+        return
+    }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
         return
     }
 
-    // добавить данные в форму
-    addData(xml)
+    if (addData(xml)) {
+        logger.info('Закончена загрузка файла ' + fileName)
+    } else {
+        logger.error("Загрузка файла $fileName завершилась ошибкой")
+    }
 }
 
 /*
@@ -809,7 +818,7 @@ def getValueForColumn4(def dataOld, def formDataOld, def row) {
     if (dataOld != null && !getRows(dataOld).isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
         for (def rowOld : getRows(dataOld)) {
             if (rowOld.tradeNumber == row.tradeNumber) {
-                value = (rowOld.signSecurity == '+' && row.signSecurity == '-' ? rowOld.lotSizePrev : 0)
+                value = (getSign(rowOld.signSecurity) == '+' && getSign(row.signSecurity) == '-' ? rowOld.lotSizePrev : 0)
                 count += 1
             }
         }
@@ -899,92 +908,135 @@ def hasTotal(def data) {
  *
  * @param xml данные
  */
-void addData(def xml) {
-    if (xml == null) {
-        return
-    }
+boolean addData(def xml) {
+    Date date = new Date()
+
+    def cache = [:]
     def data = getData(formData)
 
-    // количество графов в таблице
-    def columnCount = 12
-    // количество строк в шапке
-    def headRowCount = 3
+    def newRows = []
 
-    def tmp
-    def indexRow = -1;
+    boolean isTotal = true
+    def total = formData.createDataRow()
+    def totalColumns = [4:'lotSizePrev', 5:'lotSizeCurrent', 7:'cost', 10:'costOnMarketQuotation', 11:'reserveCalcValue']
+    totalColumns.each{k,it->
+        total[it] = 0
+    }
+
+    def indexRow = -1
     for (def row : xml.row) {
         indexRow++
 
         // пропустить шапку таблицы
-        if (indexRow < headRowCount) {
+        if (indexRow <= 0) {// || indexRow>20) {
             continue
         }
+        def newRow = getNewRow()
 
-        // проверить по грн итоговая ли это строка
-        tmp = (row.cell[0] != null ? row.cell[0].text() : null)
-        if (tmp != null && tmp.contains('Итог')) {
-            continue
-        }
-        if (row.cell.size() == columnCount) {
-            // проверить по номеру договора повторяющиеся записи
-            tmp = (row.cell[1] != null ? row.cell[1].text() : null)
-            def newRow = getRowByTradeNumber(data, tmp)
-            if (newRow == null) {
-                newRow = getNewRow()
-                insert(data, newRow)
-            }
-            def indexCell = 0
+        def indexCell = 1
 
-            // графа 2
-            newRow.regNumber = row.cell[indexCell].text()
-            indexCell++
+        // графа 1
+        newRow.rowNumber = indexRow
+        indexCell++
 
-            // графа 3
-            newRow.tradeNumber = row.cell[indexCell].text()
-            indexCell++
+        // графа 2
+        newRow.regNumber = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 3
+        newRow.tradeNumber = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 4
+        newRow.lotSizePrev = getNumber(row.cell[indexCell].text())
+        total.lotSizePrev = total.lotSizePrev + newRow.lotSizePrev
+        indexCell++
+
+        // графа 5
+        newRow.lotSizeCurrent = getNumber(row.cell[indexCell].text())
+        total.lotSizeCurrent = total.lotSizeCurrent + newRow.lotSizeCurrent
+        indexCell++
+
+        // графа 6
+        newRow.reserve = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 7
+        newRow.cost = getNumber(row.cell[indexCell].text())
+        total.cost = total.cost + newRow.cost
+        indexCell++
+
+        // графа 8
+        newRow.signSecurity = getRecords(62, 'CODE', row.cell[indexCell].text(), date, cache)
+        indexCell++
+
+        // графа 9
+        newRow.marketQuotation = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 10
+        newRow.costOnMarketQuotation = getNumber(row.cell[indexCell].text())
+        total.costOnMarketQuotation = total.costOnMarketQuotation + newRow.costOnMarketQuotation
+        indexCell++
+
+        // графа 11
+        newRow.reserveCalcValue = getNumber(row.cell[indexCell].text())
+        total.reserveCalcValue = total.reserveCalcValue + newRow.reserveCalcValue
+        indexCell++
+
+        // графа 12
+        newRow.reserveCreation = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 13
+        newRow.reserveRecovery = getNumber(row.cell[indexCell].text())
+
+        newRows << newRow
+    }
+    // проверка итоговой строки
+    if (xml.rowTotal.size()==1)
+        for (def row : xml.rowTotal) {
+            def newRow = formData.createDataRow()
+            newRow.setAlias('total')
+            newRow.regNumber = 'Общий итог'
+            setTotalStyle(newRow)
 
             // графа 4
-            newRow.lotSizePrev = getNumber(row.cell[indexCell].text())
-            indexCell++
+            newRow.lotSizePrev = getNumber(row.cell[4].text())
 
             // графа 5
-            newRow.lotSizeCurrent = getNumber(row.cell[indexCell].text())
-            indexCell++
-
-            // графа 6
-            newRow.reserve = getNumber(row.cell[indexCell].text())
-            indexCell++
+            newRow.lotSizeCurrent = getNumber(row.cell[5].text())
 
             // графа 7
-            newRow.cost = getNumber(row.cell[indexCell].text())
-            indexCell++
-
-            // графа 8
-            newRow.signSecurity = row.cell[indexCell].text()
-            indexCell++
-
-            // графа 9
-            newRow.marketQuotation = getNumber(row.cell[indexCell].text())
-            indexCell++
+            newRow.cost = getNumber(row.cell[7].text())
 
             // графа 10
-            newRow.costOnMarketQuotation = getNumber(row.cell[indexCell].text())
-            indexCell++
+            newRow.costOnMarketQuotation = getNumber(row.cell[10].text())
 
             // графа 11
-            newRow.reserveCalcValue = getNumber(row.cell[indexCell].text())
-            indexCell++
+            newRow.reserveCalcValue = getNumber(row.cell[11].text())
 
-            // графа 12
-            newRow.reserveCreation = getNumber(row.cell[indexCell].text())
-            indexCell++
-
-            // графа 13
-            newRow.reserveRecovery = getNumber(row.cell[indexCell].text())
+            totalColumns.each{k,it->
+                if (newRow[it]!=total[it]) {
+                    logger.error("Итоговая сумма в графе $k в транспортном файле некорректна.")
+                    isTotal = false
+                }
+            }
+            //data.insert(newRow, indexRow-1)
         }
+    else {
+        logger.error("Нет итоговой строки.")
+        isTotal = false
     }
-    save(data)
-    logger.info('Данные загружены')
+    if (isTotal) {
+        data.clear()
+        newRows.each { newRow ->
+            insert(data, newRow)
+        }
+        data.commit()
+        return true
+    }
+    return false
 }
 
 /**
@@ -1003,6 +1055,23 @@ def getNumber(def value) {
     // поменять запятую на точку и убрать пробелы
     tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
     return new BigDecimal(tmp)
+}
+
+def getRecords(def ref_id, String code, String value, Date date, def cache) {
+    String filter = code + "= '"+ value.replaceAll('[ ]', '')+"'"
+    if (cache[ref_id]!=null) {
+        if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    if (records.size() == 1){
+        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        return cache[ref_id][filter]
+    }
+    logger.error("Не удалось определить элемент справочника!")
+    return null;
 }
 
 /**

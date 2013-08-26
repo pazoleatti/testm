@@ -54,8 +54,8 @@ switch (formDataEvent) {
  № графы	ALIAS                   Тип поля                Наименование поля
  0          fix                     Строка 255              Скрытое поле для строки итого
  1.		    rowNumber               Число/15/               № пп	            		                                                    Натуральное число( ≥1)
- 2.		    tradeNumber             Число/1/                Код сделки			                                                            Может принимать значения: 1 ИЛИ 2 ИЛИ 4 ИЛИ 5 1 - сделки на ОРЦБ, кроме переговорных; 2 - переговорные сделки на ОРЦБ; 4 - погашение, в т.ч. частичное; 5 - операции, связанные с открытием-закрытием короткой позиции.
- 3.		    singSecurirty           Строка /1/	            Признак ценной бумаги	                                                        Может принимать значения «+» или «-»
+ 2.		    tradeNumber             Число/1/                Код сделки			                                                            Справочник, Может принимать значения: 1 ИЛИ 2 ИЛИ 4 ИЛИ 5 1 - сделки на ОРЦБ, кроме переговорных; 2 - переговорные сделки на ОРЦБ; 4 - погашение, в т.ч. частичное; 5 - операции, связанные с открытием-закрытием короткой позиции.
+ 3.		    singSecurirty           Строка /1/	            Признак ценной бумаги	                                                        Справочник, Может принимать значения «+» или «-»
  4.		    issue                   Строка /255/            Выпуск
  5.		    acquisitionDate         Дата	ДД.ММ.ГГГГ      Дата приобретения, закрытия короткой позиции
  6.		    saleDate                Дата	ДД.ММ.ГГГГ      Дата реализации, погашения, прочего выбытия, открытия короткой позиции
@@ -80,8 +80,16 @@ switch (formDataEvent) {
 
 void logicalCheck() {
     def data = getData(formData).getAllCached()
+    def columns = ['rowNumber', 'tradeNumber', 'singSecurirty', 'issue', 'acquisitionDate', 'saleDate', 'amountBonds',
+            'acquisitionPrice', 'costOfAcquisition', 'marketPriceInPerc', 'marketPriceInRub', 'acquisitionPriceTax',
+            'redemptionValue', 'priceInFactPerc', 'priceInFactRub', 'marketPriceInPerc1', 'marketPriceInRub1',
+            'salePriceTax', 'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
+
     for (DataRow row in data) {
         if (row.getAlias() == null) {
+
+            checkRequiredColumns(row, columns)
+
             // 1.Проверка цены приобретения для целей налогообложения (графа 12)
             if (row.acquisitionPrice > row.marketPriceInRub && row.acquisitionPriceTax != row.marketPriceInRub) {
                 logger.error("Неверно определена цена приобретения для целей налогообложения")
@@ -105,7 +113,8 @@ void logicalCheck() {
              * Проверка цены реализации (выбытия) для целей налогообложения (графа 18)
              * Если «графа 2» = 1 или 2 или 5, и при этом «графа 14» > «графа 16» и «графа 15» > «графа 17», то «графа 18» = «графа 15»
              */
-            if ((row.tradeNumber == 1 || row.tradeNumber == 2 || row.tradeNumber == 5) && row.priceInFactPerc > row.marketPriceInPerc1
+            def code = getCode(row.tradeNumber)
+            if ((code == 1 || code == 2 || code == 5) && row.priceInFactPerc > row.marketPriceInPerc1
                     && row.priceInFactRub > row.marketPriceInRub1 && row.salePriceTax != row.priceInFactRub
             ) {
                 logger.error('Неверно определена цена реализации для целей налогообложения по сделкам на ОРЦБ!')
@@ -117,7 +126,7 @@ void logicalCheck() {
              * 1
              * Неверно определена цена реализации для целей налогообложения при погашении!
              */
-            if (row.tradeNumber == 4 && row.salePriceTax != row.redemptionValue) {
+            if (code == 4 && row.salePriceTax != row.redemptionValue) {
                 logger.error('Неверно определена цена реализации для целей налогообложения при погашении!')
             }
 
@@ -127,7 +136,7 @@ void logicalCheck() {
              * 1
              * Неверно определена цена реализации для целей налогообложения по переговорным сделкам на ОРЦБ и сделкам, связанным с открытием-закрытием короткой позиции!
              */
-            if ((row.tradeNumber == 2 || row.tradeNumber == 5) && row.tradeNumber < row.marketPriceInPerc1
+            if ((code == 2 || code == 5) && row.tradeNumber < row.marketPriceInPerc1
                     && row.priceInFactRub < row.marketPriceInRub1 && row.salePriceTax != row.marketPriceInRub1) {
                 logger.error('Неверно определена цена реализации для целей налогообложения по переговорным сделкам на ОРЦБ и сделкам, связанным с открытием-закрытием короткой позиции!')
             }
@@ -160,8 +169,8 @@ void logicalCheck() {
              1
              Неверно определено превышение цены реализации для целей налогообложения над фактической ценой реализации!
              */
-            if ((row.tradeNumber != 4 && row.excessSalePriceTax != (row.salePriceTax ?: 0) - (row.priceInFactRub ?: 0))
-                    || (row.tradeNumber == 4 && row.excessSalePriceTax != 0)
+            if ((code != 4 && row.excessSalePriceTax != (row.salePriceTax ?: 0) - (row.priceInFactRub ?: 0))
+                    || (code == 4 && row.excessSalePriceTax != 0)
                     || row.excessSalePriceTax < 0
             ) {
                 logger.error('Неверно определено превышение цены реализации для целей налогообложения над фактической ценой реализации!')
@@ -306,6 +315,7 @@ DataRow<Cell> getItogo() {
             }
         }
     }
+    setTotalStyle(itogo)
     return itogo
 }
 
@@ -349,7 +359,20 @@ DataRow<Cell> getItogoKvartal() {
             }
         }
     }
+    setTotalStyle(itogo)
     return itogo
+}
+
+/**
+ * Установить стиль для итоговых строк.
+ */
+void setTotalStyle(def row) {
+    ['rowNumber', 'fix', 'tradeNumber', 'singSecurirty', 'issue', 'acquisitionDate', 'saleDate', 'amountBonds',
+            'acquisitionPrice', 'costOfAcquisition', 'marketPriceInPerc', 'marketPriceInRub', 'acquisitionPriceTax',
+            'redemptionValue', 'priceInFactPerc', 'priceInFactRub', 'marketPriceInPerc1', 'marketPriceInRub1',
+            'salePriceTax', 'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax'].each {
+        row.getCell(it).setStyleAlias('Контрольные суммы')
+    }
 }
 
 /**
@@ -388,13 +411,14 @@ BigDecimal calc17(DataRow row) {
  */
 BigDecimal calc18(DataRow row) {
     BigDecimal result = null
-    if ((row.tradeNumber == 1 || row.tradeNumber == 2 || row.tradeNumber == 5) && (row.priceInFactPerc > row.marketPriceInPerc1 && row.priceInFactRub > row.marketPriceInRub1)) {
+    def code = getCode(row.tradeNumber)
+    if ((code == 1 || code == 2 || code == 5) && (row.priceInFactPerc > row.marketPriceInPerc1 && row.priceInFactRub > row.marketPriceInRub1)) {
         result = row.priceInFactRub
     }
-    if (row.tradeNumber == 4) {
+    if (code == 4) {
         result = row.redemptionValue
     }
-    if ((row.tradeNumber == 2 || row.tradeNumber == 5) && (row.priceInFactPerc < row.marketPriceInPerc1 && row.priceInFactRub < row.marketPriceInRub1)) {
+    if ((code == 2 || code == 5) && (row.priceInFactPerc < row.marketPriceInPerc1 && row.priceInFactRub < row.marketPriceInRub1)) {
         result = row.marketPriceInRub1
     }
     if (result != null) result = roundTo2(result, 3)
@@ -431,7 +455,7 @@ BigDecimal calc21(DataRow row) {
  */
 BigDecimal calc22(DataRow row) {
     BigDecimal result = null
-    if (row.tradeNumber == 4) {
+    if (getCode(row.tradeNumber) == 4) {
         result = 0
     } else {
         result = (row.salePriceTax ?: 0) - (row.priceInFactRub ?: 0)
@@ -496,13 +520,15 @@ void deleteAllStatic() {
  */
 void sort() {
     getRows(getData(formData)).sort({ DataRow a, DataRow b ->
-        if (a.tradeNumber == b.tradeNumber && a.singSecurirty == b.singSecurirty) {
+        def codeA = getCode(a.tradeNumber)
+        def codeB = getCode(b.tradeNumber)
+        if (codeA == codeB && a.singSecurirty == b.singSecurirty) {
             return a.issue <=> b.issue
         }
-        if (a.tradeNumber == b.tradeNumber) {
+        if (codeA == codeB) {
             return a.singSecurirty <=> b.singSecurirty
         }
-        return a.tradeNumber <=> b.tradeNumber
+        return codeA <=> codeB
     })
 }
 
@@ -539,6 +565,44 @@ void checkNSI() {
             }
         }
     }
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ */
+def checkRequiredColumns(def row, def columns) {
+    def data = getData(formData)
+    def colNames = []
+
+    def cell
+    columns.each {
+        cell = row.getCell(it)
+        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+            def name = getColumnName(row, it)
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        def index = getRows(data).indexOf(row) + 1
+        def errorMsg = colNames.join(', ')
+        logger.error("В строке $index не заполнены колонки : $errorMsg.")
+    }
+}
+
+/**
+ * Получить название графы по псевдониму.
+ *
+ * @param row строка
+ * @param alias псевдоним графы
+ */
+def getColumnName(def row, def alias) {
+    if (row != null && alias != null) {
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
+    }
+    return ''
 }
 
 /**
