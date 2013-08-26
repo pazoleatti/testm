@@ -111,6 +111,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 			taxPeriod.setStartDate(from.getTime());
 			taxPeriod.setEndDate(to.getTime());
 			taxPeriod.setTaxType(taxType);
+			taxPeriodDao.add(taxPeriod);
 		} else {
 			taxPeriod = taxPeriodList.get(0);
 		}
