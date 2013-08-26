@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
@@ -35,13 +36,10 @@ public class RnuMappingServiceImpl implements RnuMappingService {
     private FormDataService formDataService;
 
     @Autowired
-    private ReportPeriodService reportPeriodService;
-
-    @Autowired
     private TAUserService taUserService;
 
     @Autowired
-    private RefBookFactory rbFactory;
+    private ReportPeriodDao reportPeriodDao;
 
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     private static SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
@@ -53,21 +51,20 @@ public class RnuMappingServiceImpl implements RnuMappingService {
         InputStream inputStream = new ByteArrayInputStream(fileContent);
         RestoreExemplar restoreExemplar = restoreExemplar(filename, fileContent);
 
-        long formDataId;
+        log.debug(restoreExemplar);
 
         //TODO сделать правильную загрузку данных текущего пользователя
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(taUserService.getUser("admin"));
         userInfo.setIp("127.0.0.1");
 
-        //TODO сделать правильный поиск отчетного периода, нужны данные в базе
-        ReportPeriod reportPeriod = new ReportPeriod();
-
-        //rbFactory.getDataProvider()
-        //reportPeriod = reportPeriodService.listByTaxPeriodAndDepartment();
+        ReportPeriod reportPeriod = reportPeriodDao.getReportPeriodByTaxPeriodAndDict(
+                restoreExemplar.getTaxPeriod(),
+                restoreExemplar.getDictTaxPeriodId());
 
         Logger logger = new Logger();
-        formDataId = formDataService.createFormData(logger,
+
+        long formDataId = formDataService.createFormData(logger,
                 userInfo,
                 restoreExemplar.getFormTemplateId(),
                 restoreExemplar.getDepartmentId(),
@@ -89,6 +86,7 @@ public class RnuMappingServiceImpl implements RnuMappingService {
             exemplar.setBeginDate(dateFormat.parse(params[2]));
             exemplar.setEndDate(dateFormat.parse(params[3]));
 
+            // по коду NNN в назавании файла тип налоговой формы
             exemplar.setFormTemplateId(NalogFormType.getNewCodeByNNN(rnuFilename.substring(0, 3)));
 
             // код подразделения
@@ -102,9 +100,11 @@ public class RnuMappingServiceImpl implements RnuMappingService {
                 throw new ServiceException("Ошибка при маппинге кода подразделения");
             }
 
+            //по году определяем TAX_PERIOD
             Integer year = Integer.valueOf(yearFormat.format(params[2]));
             exemplar.setTaxPeriod(YearCode.fromYear(year).getTaxPeriodId());
 
+            // по коду отчетного периода 7 символа в назавании файла DICT_TAX_PERIOD
             String periodCode = rnuFilename.substring(7, 8);
             if (NalogFormType.RNU31.getCodeNew() == exemplar.getFormTemplateId()) {
                 exemplar.setDictTaxPeriodId(PeriodRnuMapping.fromCode(periodCode).getDictTaxPeriodIdForMonthly());

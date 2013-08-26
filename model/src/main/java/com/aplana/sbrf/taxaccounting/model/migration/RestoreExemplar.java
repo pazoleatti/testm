@@ -86,4 +86,20 @@ public class RestoreExemplar implements Serializable {
     public void setDictTaxPeriodId(Integer dictTaxPeriodId) {
         this.dictTaxPeriodId = dictTaxPeriodId;
     }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer();
+        sb.append("RestoreExemplar");
+        sb.append("{periodity=").append(periodity);
+        sb.append(", beginDate=").append(beginDate);
+        sb.append(", endDate=").append(endDate);
+        sb.append(", formTemplateId=").append(formTemplateId);
+        sb.append(", systemCode='").append(systemCode).append('\'');
+        sb.append(", departmentId=").append(departmentId);
+        sb.append(", taxPeriod=").append(taxPeriod);
+        sb.append(", dictTaxPeriodId=").append(dictTaxPeriodId);
+        sb.append('}');
+        return sb.toString();
+    }
 }
