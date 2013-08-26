@@ -14,7 +14,7 @@ public interface ReportPeriodDao {
 	 * Получить объект отчётного периода по идентификатору периода
 	 * @param reportPeriodId идентификатор отчётного периода
 	 * @return объект, задаваемый идентификатором
-	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException если периода с заданным идентификатором не существует
+	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.exception.DaoException если периода с заданным идентификатором не существует
 	 */
 	ReportPeriod get(int reportPeriodId);
 		

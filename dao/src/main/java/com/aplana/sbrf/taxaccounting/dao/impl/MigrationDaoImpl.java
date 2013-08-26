@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.MigrationDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.MapperUtils;
 import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
 import com.aplana.sbrf.taxaccounting.model.migration.row.Rnu25Row;

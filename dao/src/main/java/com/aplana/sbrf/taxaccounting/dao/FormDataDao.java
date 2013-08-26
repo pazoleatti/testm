@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.dao.api.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
@@ -16,7 +16,7 @@ public interface FormDataDao {
 	 *
 	 * @param formDataId идентификатор заполненной налоговой формы
 	 * @return данные по налоговой форме
-	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException,
+	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.exception.DaoException,
 	 *          если данных с таким id нет (также может возникнуть из-за других ошибок в слое Dao)
 	 */
 	FormData get(long formDataId);
@@ -31,7 +31,7 @@ public interface FormDataDao {
 	 * -состояние налоговой формы
 	 * @param formDataId идентификатор  налоговой формы
 	 * @return FormData, которая содержит только информацию по налоговой форме и не содержит данных налоговой формы.
-	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException,
+	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.exception.DaoException,
 	 *          если данных с таким id нет (также может возникнуть из-за других ошибок в слое Dao)
 	 */
 	FormData getWithoutRows(long formDataId);

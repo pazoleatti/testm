@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ClassUtils;
 
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 
 /**

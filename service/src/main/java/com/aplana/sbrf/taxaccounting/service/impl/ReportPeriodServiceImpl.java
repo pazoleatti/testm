@@ -69,7 +69,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 
     @Override
     public DepartmentReportPeriod getLastReportPeriod(TaxType taxType, long departmentId) {
-    	// TODO: Нужно получить последний открытый для этого подразделения.
+    	// TODO: Нужно получить последний открытый для этого подразделения и типа налога.
     	return null;
     }
 
