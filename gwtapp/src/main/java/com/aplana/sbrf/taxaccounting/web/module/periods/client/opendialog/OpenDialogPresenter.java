@@ -11,8 +11,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.ChangeActivePeriodAction;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.ChangeActivePeriodResult;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenException;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodResult;
@@ -90,36 +88,6 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 					@Override
 					public void onSuccess(OpenPeriodResult result) {
 						getView().hide();
-					}
-
-					@Override
-					public void onFailure(Throwable caught) {
-						if (caught instanceof OpenException) {
-							OpenException openException = (OpenException) caught;
-							switch (openException.getErrorCode()) {
-								case EXIST_OPEN:
-								case PREVIOUS_ACTIVE:
-									Window.alert(openException.getErrorMsg());
-									break;
-								case EXIST_CLOSED:
-									if (Window.confirm(openException.getErrorMsg())) {
-										ChangeActivePeriodAction requestData = new ChangeActivePeriodAction();
-										requestData.setReportPeriodId(openException.getReportPeriodId());
-										requestData.setActive(true);
-										dispatcher.execute(requestData, CallbackUtils //TODO добавить апдейт таблицы
-												.defaultCallback(new AbstractCallback<ChangeActivePeriodResult>() {
-													@Override
-													public void onSuccess(ChangeActivePeriodResult result) {
-														getView().hide();
-													}
-												}, OpenDialogPresenter.this)
-										);
-									}
-									break;
-							}
-						} else {
-							Window.alert(caught.getMessage());
-						}
 					}
 				})
 		);
