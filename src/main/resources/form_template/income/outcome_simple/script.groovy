@@ -152,7 +152,7 @@ void calculationControlGraphs() {
         if (!isEmpty(row.rnu7Field10Sum) && !isEmpty(row.rnu7Field12Accepted) &&
                 !isEmpty(row.rnu7Field12PrevTaxPeriod)) {
             // графы 9 = ОКРУГЛ(«графа 5» - («графа 6» - «графа 7»); 2)
-            tmp = round(row.rnu7Field10Sum - (row.rnu7Field10Sum - row.rnu7Field12Accepted), 2)
+            tmp = round(row.rnu7Field10Sum - (row.rnu7Field12Accepted - row.rnu7Field12PrevTaxPeriod), 2)
             value = ((BigDecimal) tmp).setScale(2, BigDecimal.ROUND_HALF_UP)
             row.logicalCheck = (tmp < 0 ? message : value.toString())
         }
