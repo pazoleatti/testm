@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -95,11 +95,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     public ReportPeriod getLastReportPeriod(TaxType taxType, long departmentId) {
     	throw new DaoException("Ошибок не заводить. В разработке");
     }
-    
-	@Override
-	public ReportPeriod getCurrentPeriod(TaxType taxType) {
-		throw new DaoException("Ошибок не заводить. В разработке"); 
-	}
 	
 
 	@Override

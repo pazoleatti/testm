@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao;
+package com.aplana.sbrf.taxaccounting.dao.api;
 
 import java.util.List;
 
@@ -18,17 +18,7 @@ public interface ReportPeriodDao {
 	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException если периода с заданным идентификатором не существует
 	 */
 	ReportPeriod get(int reportPeriodId);
-	
-	/**
-	 * Получить объект текущего отчётного периода по виду налога. Поиск ведется только по обычным периодам, то есть
-	 * периоды для ввода остатков исключены из поиска.
-	 * @param taxType вид налога
-	 * @return объект представляющий текущий отчётный период по заданному виду налога, или null, если такого периода нет (еще не открыли)
-	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException если в БД несколько открытых периодов по заданному виду налога
-	 */
-	@Deprecated
-	ReportPeriod getCurrentPeriod(TaxType taxType);
-	
+		
 	/**
 	 * Возвращает список отчётных периодов, входящий в данный налоговый период. 
 	 * Список отсортирован по {@link ReportPeriod#getOrder() порядковым номерам} отчётных периодов
