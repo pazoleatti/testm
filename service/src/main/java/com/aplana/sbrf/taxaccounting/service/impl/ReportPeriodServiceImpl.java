@@ -266,7 +266,6 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 
 	@Override
 	public TaxPeriod getLastTaxPeriod(TaxType taxType) {
-		// TODO Auto-generated method stub
 		return taxPeriodDao.getLast(taxType);
 	}
 
