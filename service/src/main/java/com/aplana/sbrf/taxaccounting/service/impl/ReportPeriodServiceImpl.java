@@ -1,9 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,11 +11,6 @@ import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -83,12 +77,11 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	}
 
 	@Override
-	public void open(ReportPeriod reportPeriod, int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId) {
+	public void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId) {
 		Calendar date = Calendar.getInstance();
 		date.set(Calendar.YEAR, year);
 		date.set(Calendar.MONTH, Calendar.JANUARY);
 		date.set(Calendar.DAY_OF_MONTH, 1);
-//		TaxType taxType = taxPeriodDao.get(reportPeriod.getTaxPeriodId()).getTaxType();
 		List<TaxPeriod> taxPeriodList = taxPeriodDao.listByTaxTypeAndDate(taxType, date.getTime(), date.getTime());
 		if (taxPeriodList.size() > 1) {
 			throw new ServiceException("Слишком много TaxPeriod'ов"); //TODO
@@ -107,10 +100,14 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 			taxPeriod = taxPeriodList.get(0);
 		}
 
+
 		List<ReportPeriod> reportPeriods = listByTaxPeriod(taxPeriod.getId());
-		for (ReportPeriod rp : reportPeriods) {
-			if (rp.getDictTaxPeriodId() != dictionaryTaxPeriodId) {
-				reportPeriods.remove(rp); //TODO
+		if (!reportPeriods.isEmpty()) {
+			Iterator<ReportPeriod> it = reportPeriods.iterator();
+			while (it.hasNext()) {
+				if (it.next().getDictTaxPeriodId() != dictionaryTaxPeriodId) {
+					it.remove();
+				}
 			}
 		}
 
@@ -122,19 +119,37 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 			newReportPeriod.setTaxPeriodId(taxPeriod.getId());
 			newReportPeriod.setDictTaxPeriodId(dictionaryTaxPeriodId);
 			newReportPeriod.setName(record.get("NAME").getStringValue());
-			newReportPeriod.setOrder(record.get("ORD").getNumberValue().intValue());
+			newReportPeriod.setOrder(4);
 			newReportPeriod.setMonths(4);//TODO заполнять из справочника
+			reportPeriodDao.add(newReportPeriod);
 
 		} else {
-			newReportPeriod = reportPeriods.get(0); //TODO
+			newReportPeriod = reportPeriods.get(0);
 		}
-
 		if (user.getUser().getDepartmentId() == departmentId) {
 			DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
 			departmentReportPeriod.setActive(true); //TODO
 			departmentReportPeriod.setBalance(false); //TODO
 			departmentReportPeriod.setDepartmentId(Long.valueOf(user.getUser().getDepartmentId()));
 			departmentReportPeriod.setReportPeriod(newReportPeriod);
+			departmentReportPeriodDao.save(departmentReportPeriod);
+			List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
+			departmentFormTypes.addAll(departmentFormTypeService.getDepartmentFormSources((int) departmentId, taxType));
+			List<Long> departmentIds = new ArrayList<Long>();
+			for (DepartmentFormType dft : departmentFormTypes) {
+				departmentIds.add(dft.getId());
+			}
+			for (Long depId : departmentIds) {
+				DepartmentReportPeriod depRP = new DepartmentReportPeriod();
+				depRP.setReportPeriod(newReportPeriod);
+				depRP.setDepartmentId(depId);
+				departmentReportPeriodDao.save(depRP);
+			}
+		} else if (!departmentFormTypeService.getDepartmentFormDestinations((int) departmentId, taxType).isEmpty()) {
+			DepartmentReportPeriod depRP = new DepartmentReportPeriod();
+			depRP.setReportPeriod(newReportPeriod);
+			depRP.setDepartmentId(departmentId);
+			departmentReportPeriodDao.save(depRP);
 		}
 
 	}
@@ -142,14 +157,5 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	@Override
 	public List<DepartmentReportPeriod> listByDepartmentId(long departmentId) {
 		return departmentReportPeriodDao.getByDepartment(departmentId);
-	}
-
-	private static ReportPeriod findPeriodInListByPeriodDict(List<ReportPeriod> reportPeriods, int dictionaryTaxPeriodId) {
-		for (ReportPeriod reportPeriod : reportPeriods) {
-			if (reportPeriod.getDictTaxPeriodId() == dictionaryTaxPeriodId) {
-				return reportPeriod;
-			}
-		}
-		return null;
 	}
 }
