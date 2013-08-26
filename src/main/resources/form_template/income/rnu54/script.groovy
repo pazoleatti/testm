@@ -480,7 +480,27 @@ void importData() {
     if (xml == null) {
         return
     }
-    addData(xml)
+
+    // сохранить начальное состояние формы
+    def data = getData(formData)
+    def rowsOld = getRows(data)
+    try {
+        // добавить данные в форму
+        addData(xml)
+
+        // расчитать и проверить
+        calc()
+        logicalCheck(false)
+        checkNSI()
+    } catch(Exception e) {
+        logger.error('Во время загрузки данных произошла ошибка!')
+    }
+    // откатить загрузку если есть ошибки
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        data.clear()
+        data.insert(rowsOld, 1)
+    }
+    data.commit()
 }
 
 
@@ -899,7 +919,6 @@ void addData(def xml) {
     newRows.each { newRow ->
         insert(data, newRow)
     }
-    data.commit()
     logger.info('Данные загружены')
 }
 
