@@ -11,12 +11,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 @Service
-@Transactional
 public class MigrationServiceImpl implements MigrationService {
 
     private final Log logger = LogFactory.getLog(getClass());
@@ -54,16 +52,21 @@ public class MigrationServiceImpl implements MigrationService {
 
         for (Exemplar ex : list) {
             logger.debug("Start forming file. ExemplarId=" + ex.getExemplarId());
-            if (RNU_LIST.contains(ex.getRnuTypeId())) {
-                String filename = rnuService.getRnuFileName(ex);
-                logger.debug("Filename " + filename);
-                hashMap.put(filename, rnuService.generateRnuFileToString(ex));
-            } else if (XML_LIST.contains(ex.getRnuTypeId())) {
-                String filename = xmlService.getXmlFileName(ex);
-                logger.debug("Filename " + filename);
-                hashMap.put(filename, xmlService.generateXmlFileToString(ex));
+            try {
+                String filename = null;
+                String fileString = null;
+                if (RNU_LIST.contains(ex.getRnuTypeId())) {
+                    filename = rnuService.getRnuFileName(ex);
+                    fileString = rnuService.generateRnuFileToString(ex);
+                } else if (XML_LIST.contains(ex.getRnuTypeId())) {
+                    filename = xmlService.getXmlFileName(ex);
+                    fileString = xmlService.generateXmlFileToString(ex);
+                }
+                hashMap.put(filename, fileString);
+                logger.debug("Stop forming file. ExemplarId=" + ex.getExemplarId() + " Filename: " + filename);
+            } catch (Exception e) {
+                logger.debug("Error by forming file. ExemplarId=" + ex.getExemplarId() + " ErrorMessage: " + e.getMessage());
             }
-            logger.debug("Stop forming file. ExemplarId=" + ex.getExemplarId());
         }
         return hashMap;
     }
@@ -78,16 +81,21 @@ public class MigrationServiceImpl implements MigrationService {
 
         for (Exemplar ex : list) {
             logger.debug("Start forming file. ExemplarId=" + ex.getExemplarId());
-            if (RNU_LIST.contains(ex.getRnuTypeId())) {
-                String filename = rnuService.getRnuFileName(ex);
-                logger.debug("Filename " + filename);
-                hashMap.put(filename, rnuService.generateRnuFileToBytes(ex));
-            } else if (XML_LIST.contains(ex.getRnuTypeId())) {
-                String filename = xmlService.getXmlFileName(ex);
-                logger.debug("Filename " + filename);
-                hashMap.put(filename, xmlService.generateXmlFileToBytes(ex));
+            try {
+                String filename = null;
+                byte[] fileBytes = null;
+                if (RNU_LIST.contains(ex.getRnuTypeId())) {
+                    filename = rnuService.getRnuFileName(ex);
+                    fileBytes = rnuService.generateRnuFileToBytes(ex);
+                } else if (XML_LIST.contains(ex.getRnuTypeId())) {
+                    filename = xmlService.getXmlFileName(ex);
+                    fileBytes = xmlService.generateXmlFileToBytes(ex);
+                }
+                hashMap.put(filename, fileBytes);
+                logger.debug("Stop forming file. ExemplarId=" + ex.getExemplarId() + " Filename: " + filename);
+            } catch (Exception e) {
+                logger.debug("Error by forming file. ExemplarId=" + ex.getExemplarId() + " ErrorMessage: " + e.getMessage());
             }
-            logger.debug("Stop forming file. ExemplarId=" + ex.getExemplarId());
         }
         return hashMap;
     }
@@ -95,7 +103,7 @@ public class MigrationServiceImpl implements MigrationService {
     @Override
     public List<? extends AbstractRnuRow> getRnuList(Exemplar ex) {
         List<? extends AbstractRnuRow> list = new ArrayList<AbstractRnuRow>();
-        switch (NalogFormType.getByCode(ex.getRnuTypeId())) {
+        switch (NalogFormType.getById(ex.getRnuTypeId())) {
             case RNU25:
                 list = migrationDao.getRnu25RowList(ex);
                 break;

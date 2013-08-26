@@ -25,6 +25,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 @ContextConfiguration({"ReportPeriodDaoTest.xml"})
 @Transactional
 public class ReportPeriodDaoTest {
+
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
 
@@ -49,9 +50,6 @@ public class ReportPeriodDaoTest {
 	
 	@Test
 	public void listByTaxPeriodSuccessfulTest() {
-		
-
-		
 		ReportPeriod newReportPeriod = new ReportPeriod();
 		newReportPeriod.setName("MyTestName1");
 		newReportPeriod.setOrder(9);
@@ -65,7 +63,7 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setOrder(10);
 		newReportPeriod.setMonths(3);
 		newReportPeriod.setTaxPeriodId(taxPeriod.getId());
-		newReportPeriod.setDictTaxPeriodId(21);
+		newReportPeriod.setDictTaxPeriodId(22);
 		reportPeriodDao.add(newReportPeriod);
 		
 		List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(taxPeriod.getId());
