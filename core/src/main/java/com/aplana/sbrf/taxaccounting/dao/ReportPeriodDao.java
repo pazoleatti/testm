@@ -37,14 +37,6 @@ public interface ReportPeriodDao {
 	 */
 	List<ReportPeriod> listByTaxPeriod(int taxPeriodId);
 
-	/**
-	 *
-	 * @param taxPeriodId
-	 * @param departmentId
-	 * @return
-	 */
-	@Deprecated
-	public List<ReportPeriod> listByTaxPeriodAndDepartmentId(int taxPeriodId, long departmentId);
 
 	/**
 	 *

@@ -333,31 +333,22 @@ alter table department add constraint department_chk_parent_id check ((type = 1 
 create table report_period (
   id number(9) not null,
   name varchar2(50) not null,
-  is_active number(1) default 1,
   months  number(2) not null,
   tax_period_id number(9) not null,
   ord      number(2) not null,
-  department_id number(15),
-  is_balance_period number(1) default 0,
   dict_tax_period_id number(18) not null
 );
 
 alter table report_period add constraint report_period_pk primary key(id);
 alter table report_period add constraint report_period_fk_taxperiod foreign key (tax_period_id) references tax_period (id);
---alter table report_period add constraint report_period_chk_active check (is_active in (0, 1));
---alter table report_period add constraint report_period_chk_balance check (is_balance_period in (0, 1));
---alter table report_period add constraint report_period_fk_department_id foreign key (department_id) references department(id);
 alter table report_period add constraint report_period_fk_dtp_id foreign key (dict_tax_period_id) references ref_book_record(id);
 
 comment on table report_period is 'Отчетные периоды';
 comment on column report_period.id is 'Первичный ключ';
 comment on column report_period.name is 'Наименование периода';
-comment on column report_period.is_active is 'Признак активности';
 comment on column report_period.months is 'Количество месяцев в периоде';
 comment on column report_period.tax_period_id is 'Налоговый период';
 comment on column report_period.ord is 'Номер отчетного периода в налоговом';
-comment on column report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков';
-comment on column report_period.department_id is 'Подразделение';
 comment on column report_period.dict_tax_period_id is 'Ссылка на справочник отчетных периодов';
 
 create sequence seq_report_period start with 100;

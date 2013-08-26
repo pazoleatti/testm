@@ -65,6 +65,12 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.MigrationDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
