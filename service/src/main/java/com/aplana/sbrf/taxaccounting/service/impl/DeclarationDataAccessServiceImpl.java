@@ -4,9 +4,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +39,7 @@ public class DeclarationDataAccessServiceImpl implements
 	private ReportPeriodDao reportPeriodDao;
 
 	@Autowired
-	private DepartmentReportPeriodDao departmentReportPeriodDao;
+	private ReportPeriodService reportPeriodService;
 
 	/**
 	 * В сущности эта функция проверяет наличие прав на просмотр декларации,
@@ -56,8 +56,7 @@ public class DeclarationDataAccessServiceImpl implements
 	 */
 	private void checkRolesForReading(TAUserInfo userInfo,
 			int declarationDepartmentId, int reportPeriodId) {
-		Department declarationDepartment = departmentDao
-				.getDepartment(declarationDepartmentId);
+		Department declarationDepartment = departmentDao.getDepartment(declarationDepartmentId);
 		ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
 		checkRolesForReading(userInfo, declarationDepartment, reportPeriod);
 	}
@@ -80,11 +79,10 @@ public class DeclarationDataAccessServiceImpl implements
 	 */
 	private void checkRolesForReading(TAUserInfo userInfo,
 			Department declarationDepartment, ReportPeriod reportPeriod) {
-		DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriod.getId(), Long.valueOf(declarationDepartment.getId()));
 
 		// Нельзя работать с декларациями в отчетном периоде вида
 		// "ввод остатков"
-		if (departmentReportPeriod.isBalance()) {
+		if (reportPeriodService.isBalancePeriod(reportPeriod.getId(), Long.valueOf(declarationDepartment.getId()))) {
 			throw new AccessDeniedException("Декларациями в отчетном периоде вида 'ввод остатков'");
 		}
 

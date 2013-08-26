@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.test.FormTypeMockUtils;
 
 import org.junit.BeforeClass;
@@ -183,13 +184,36 @@ public class FormDataAccessServiceImplTest {
 
 		ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
 		ReportPeriod rp;
-		rp = mockReportPeriod(REPORT_PERIOD_ACTIVE_ID, REPORT_PERIOD_ACTIVE);
+		rp = mockReportPeriod(REPORT_PERIOD_ACTIVE_ID);
 		when(reportPeriodDao.get(REPORT_PERIOD_ACTIVE_ID)).thenReturn(rp);
-		rp = mockReportPeriod(REPORT_PERIOD_INACTIVE_ID, REPORT_PERIOD_INACTIVE);
+		rp = mockReportPeriod(REPORT_PERIOD_INACTIVE_ID);
 		when(reportPeriodDao.get(REPORT_PERIOD_INACTIVE_ID)).thenReturn(rp);
-		rp = mockReportPeriod(REPORT_PERIOD_BALANCED_ID, REPORT_PERIOD_ACTIVE, REPORT_PERIOD_BALANCED);
+		rp = mockReportPeriod(REPORT_PERIOD_BALANCED_ID);
 		when(reportPeriodDao.get(REPORT_PERIOD_BALANCED_ID)).thenReturn(rp);
 		ReflectionTestUtils.setField(service, "reportPeriodDao", reportPeriodDao);
+
+		ReportPeriodService reportPeriodService = mock(ReportPeriodService.class);
+		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ACTIVE_ID, TB1_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
+		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_ACTIVE_ID, TB1_ID)).thenReturn(false);
+		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ACTIVE_ID, TB2_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
+		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_ACTIVE_ID, TB2_ID)).thenReturn(false);
+		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ACTIVE_ID, Department.ROOT_BANK_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
+		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_ACTIVE_ID, Department.ROOT_BANK_ID)).thenReturn(false);
+
+		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_INACTIVE_ID, TB1_ID)).thenReturn(REPORT_PERIOD_INACTIVE);
+		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_INACTIVE_ID, TB1_ID)).thenReturn(false);
+		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_INACTIVE_ID, TB2_ID)).thenReturn(REPORT_PERIOD_INACTIVE);
+		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_INACTIVE_ID, TB2_ID)).thenReturn(false);
+		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_INACTIVE_ID, Department.ROOT_BANK_ID)).thenReturn(REPORT_PERIOD_INACTIVE);
+		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_INACTIVE_ID, Department.ROOT_BANK_ID)).thenReturn(false);
+
+		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_BALANCED_ID, TB1_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
+		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_BALANCED_ID, TB1_ID)).thenReturn(REPORT_PERIOD_BALANCED);
+		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_BALANCED_ID, TB2_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
+		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_BALANCED_ID, TB2_ID)).thenReturn(REPORT_PERIOD_BALANCED);
+		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_BALANCED_ID, Department.ROOT_BANK_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
+		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_BALANCED_ID, Department.ROOT_BANK_ID)).thenReturn(REPORT_PERIOD_BALANCED);
+		ReflectionTestUtils.setField(service, "reportPeriodService", reportPeriodService);
 	}
 
 	@Test
