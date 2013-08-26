@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.exception.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -11,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDat
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +62,7 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
 	    }
 	    res.setFilterValues(filterValues);
 	    res.setTaxPeriods(taxPeriodDao.listByTaxType(action.getTaxType()));
-	    res.setCurrentReportPeriod(getCurrentReportPeriod(action.getTaxType()));
+	    res.setCurrentReportPeriod(null);
 
         return res;
     }
@@ -70,15 +72,4 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
         //ничего не делаем
     }
 
-	private ReportPeriod getCurrentReportPeriod(TaxType taxType){
-		try {
-			ReportPeriod rp = reportPeriodDao.getCurrentPeriod(taxType);
-			if (rp != null) {
-				return rp;
-			}
-		} catch (DaoException e) {
-			logger.warn("Failed to find current report period for taxType = " + taxType + ", message is: " + e.getMessage());
-		}
-		return null;
-	}
 }
