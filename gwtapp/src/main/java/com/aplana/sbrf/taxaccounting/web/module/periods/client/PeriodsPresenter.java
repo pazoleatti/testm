@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreated;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog.OpenDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
 import com.google.gwt.user.client.Window;
@@ -27,9 +28,14 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, PeriodsPresenter.MyProxy>
-								implements PeriodsUiHandlers {
+								implements PeriodsUiHandlers, PeriodCreated.MyHandler {
 
 	private TaxType taxType;
+
+	@Override
+	public void onPeriodCreated(PeriodCreated event) {
+		find();
+	}
 
 	@ProxyCodeSplit
 	@NameToken(PeriodsTokens.PERIODS)

@@ -116,7 +116,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
 	@Override
 	public int getFromYear() {
-		return fromBox.decValue();
+		return fromBox.getValue();
 	}
 
 	@Override

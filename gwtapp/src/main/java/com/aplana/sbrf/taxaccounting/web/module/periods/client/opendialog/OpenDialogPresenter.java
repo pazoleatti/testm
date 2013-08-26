@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreated;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodResult;
 import com.google.inject.Inject;
@@ -86,6 +87,7 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 					@Override
 					public void onSuccess(OpenPeriodResult result) {
 						getView().hide();
+						PeriodCreated.fire(OpenDialogPresenter.this, true);
 						LogAddEvent.fire(OpenDialogPresenter.this, result.getLogEntries());
 					}
 				})
