@@ -17,6 +17,8 @@ insert into declaration_data(id, declaration_template_id, report_period_id, depa
 -- для проверки setAccepted 
 insert into report_period (id, name, months, tax_period_id, ord, dict_tax_period_id) values (3, 'Transport report period 1', 3, 1, 3, 21);
 insert into report_period (id, name, months, tax_period_id, ord, dict_tax_period_id) values (4, 'Transport report period 4', 3, 1, 4, 21);
+
+
 insert into declaration_data(id, declaration_template_id, report_period_id, department_id, data, is_accepted) values (3, 1, 3, 3, null, 1);
 insert into declaration_data(id, declaration_template_id, report_period_id, department_id, data, is_accepted) values (4, 1, 4, 1, null, 0);
 
