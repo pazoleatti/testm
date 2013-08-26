@@ -10,8 +10,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog.OpenDialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.ChangeActivePeriodAction;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.ChangeActivePeriodResult;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterData;
@@ -90,17 +88,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 			Window.alert("Период уже закрыт.");
 			return;
 		}
-		ChangeActivePeriodAction requestData = new ChangeActivePeriodAction();
-		requestData.setReportPeriodId(reportPeriod.getId());
-		requestData.setActive(false);
-		dispatcher.execute(requestData, CallbackUtils //TODO добавить апдейт таблицы
-				.defaultCallback(new AbstractCallback<ChangeActivePeriodResult>() {
-					@Override
-					public void onSuccess(ChangeActivePeriodResult result) {
-					}
-				}, PeriodsPresenter.this)
-		);
-
 	}
 
 	@Override
