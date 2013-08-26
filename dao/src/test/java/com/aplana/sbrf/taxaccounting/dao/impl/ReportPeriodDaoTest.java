@@ -56,7 +56,7 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setMonths(3);
 		newReportPeriod.setTaxPeriodId(taxPeriod.getId());
 		newReportPeriod.setDictTaxPeriodId(21);
-		reportPeriodDao.add(newReportPeriod);
+		reportPeriodDao.save(newReportPeriod);
 		
 		newReportPeriod = new ReportPeriod();
 		newReportPeriod.setName("MyTestName2");
@@ -64,7 +64,7 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setMonths(3);
 		newReportPeriod.setTaxPeriodId(taxPeriod.getId());
 		newReportPeriod.setDictTaxPeriodId(22);
-		reportPeriodDao.add(newReportPeriod);
+		reportPeriodDao.save(newReportPeriod);
 		
 		List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(taxPeriod.getId());
 		assertEquals(2, reportPeriodList.size());
@@ -84,7 +84,7 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setTaxPeriodId(taxPeriod.getId());
 		newReportPeriod.setDictTaxPeriodId(21);
 
-		int newReportPeriodId = reportPeriodDao.add(newReportPeriod);
+		int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
 		ReportPeriod reportPeriod = reportPeriodDao.get(newReportPeriodId);
 
 		assertEquals("MyTestName", reportPeriod.getName());
@@ -97,14 +97,14 @@ public class ReportPeriodDaoTest {
 
     @Test
     public void getReportPeriodByTaxPeriodAndDictTest1() {
-        ReportPeriod reportPeriod1 = reportPeriodDao.getReportPeriodByTaxPeriodAndDict(1, 21);
-        ReportPeriod reportPeriod2 = reportPeriodDao.getReportPeriodByTaxPeriodAndDict(1, 22);
+        ReportPeriod reportPeriod1 = reportPeriodDao.getByTaxPeriodAndDict(1, 21);
+        ReportPeriod reportPeriod2 = reportPeriodDao.getByTaxPeriodAndDict(1, 22);
         Assert.assertEquals(reportPeriod1.getId(), Integer.valueOf(1));
         Assert.assertEquals(reportPeriod2.getId(), Integer.valueOf(2));
     }
 
     @Test(expected = DaoException.class)
     public void getReportPeriodByTaxPeriodAndDictTest2() {
-        reportPeriodDao.getReportPeriodByTaxPeriodAndDict(-1, -1);
+        reportPeriodDao.getByTaxPeriodAndDict(-1, -1);
     }
 }

@@ -64,7 +64,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
 	@Override
 	@Transactional(readOnly = false)
-	public int add(ReportPeriod reportPeriod) {
+	public int save(ReportPeriod reportPeriod) {
 		JdbcTemplate jt = getJdbcTemplate();
 
 		Integer id = reportPeriod.getId();
@@ -88,7 +88,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 	}
 
     @Override
-    public ReportPeriod getReportPeriodByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {
+    public ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {
         try {
             return getJdbcTemplate().queryForObject(
                     "select * from report_period where tax_period_id = ? and dict_tax_period_id = ?",
@@ -101,8 +101,4 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
         }
     }
 
-	@Override
-	public void changeActive(int reportPeriodId, boolean active) {
-		throw new DaoException("Ошибок не заводить. В разработке");
-	}
 }

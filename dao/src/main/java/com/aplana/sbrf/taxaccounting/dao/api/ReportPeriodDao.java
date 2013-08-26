@@ -29,19 +29,10 @@ public interface ReportPeriodDao {
 
 	/**
 	 *
-	 * @param reportPeriodId
-	 * @param active
-	 */
-	@Deprecated
-	void changeActive(int reportPeriodId, boolean active);
-
-	/**
-	 *
 	 * @param reportPeriod отчётный период
 	 * @return идентификатор нового отчетного периода
 	 */
-	//TODO: Перименовать в save
-	int add(ReportPeriod reportPeriod);
+	int save(ReportPeriod reportPeriod);
 
 
     /**
@@ -50,5 +41,5 @@ public interface ReportPeriodDao {
      * @param dictTaxPeriodId
      * @return
      */
-    ReportPeriod getReportPeriodByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId);
+    ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId);
 }

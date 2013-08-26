@@ -58,17 +58,6 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 		return reportPeriodDao.listByTaxPeriod(taxPeriodId);
 	}
 
-	@Override
-	public void closePeriod(int reportPeriodId) {
-		reportPeriodDao.changeActive(reportPeriodId, false);
-	}
-
-	@Override
-	public void openPeriod(int reportPeriodId) {
-		reportPeriodDao.changeActive(reportPeriodId, true);
-	}
-
-
     @Override
     public DepartmentReportPeriod getLastReportPeriod(TaxType taxType, long departmentId) {
     	// TODO: Нужно получить последний открытый для этого подразделения и типа налога.
@@ -145,7 +134,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 			newReportPeriod.setName(record.get("NAME").getStringValue());
 			newReportPeriod.setOrder(4);
 			newReportPeriod.setMonths(4);//TODO заполнять из справочника
-			reportPeriodDao.add(newReportPeriod);
+			reportPeriodDao.save(newReportPeriod);
 
 		} else {
 			newReportPeriod = reportPeriods.get(0);
