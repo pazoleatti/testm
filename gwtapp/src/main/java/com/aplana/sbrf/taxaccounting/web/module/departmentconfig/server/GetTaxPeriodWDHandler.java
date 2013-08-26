@@ -1,12 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.*;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;

@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -18,6 +18,12 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
 import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 
+/**
+ * Сервис работы с периодами
+ * 
+ * Только этот сервис должен использоваться для работы с отчетными и налоговыми периодами
+ *
+ */
 @Service
 @Transactional
 public class ReportPeriodServiceImpl implements ReportPeriodService{

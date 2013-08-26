@@ -18,6 +18,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.test.FormTypeMockUtils;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -25,7 +26,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 
 public class FormDataAccessServiceImplTest {
