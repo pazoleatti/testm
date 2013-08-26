@@ -4,18 +4,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 
 /**
  * Реализация сервиса для проверки прав на доступ к декларациям
@@ -34,12 +39,9 @@ public class DeclarationDataAccessServiceImpl implements
 
 	@Autowired
 	private DeclarationDataDao declarationDataDao;
-
+	
 	@Autowired
-	private ReportPeriodDao reportPeriodDao;
-
-	@Autowired
-	private DepartmentReportPeriodDao departmentReportPeriodDao;
+	private ReportPeriodService reportPeriodService;
 
 	/**
 	 * В сущности эта функция проверяет наличие прав на просмотр декларации,
@@ -58,8 +60,8 @@ public class DeclarationDataAccessServiceImpl implements
 			int declarationDepartmentId, int reportPeriodId) {
 		Department declarationDepartment = departmentDao
 				.getDepartment(declarationDepartmentId);
-		ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-		checkRolesForReading(userInfo, declarationDepartment, reportPeriod);
+		//ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+		checkRolesForReading(userInfo, declarationDepartment, reportPeriodId);
 	}
 
 	/**
@@ -79,13 +81,15 @@ public class DeclarationDataAccessServiceImpl implements
 	 * @return true - права есть, false - прав нет
 	 */
 	private void checkRolesForReading(TAUserInfo userInfo,
-			Department declarationDepartment, ReportPeriod reportPeriod) {
-		DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriod.getId(), Long.valueOf(declarationDepartment.getId()));
+			Department declarationDepartment, int reportPeriodId) {
+		//DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriod.getId(), Long.valueOf(declarationDepartment.getId()));
 
+		
 		// Нельзя работать с декларациями в отчетном периоде вида
 		// "ввод остатков"
-		if (departmentReportPeriod.isBalance()) {
-			throw new AccessDeniedException("Декларациями в отчетном периоде вида 'ввод остатков'");
+		boolean isBalance = reportPeriodService.isBalancePeriod(reportPeriodId, declarationDepartment.getId());
+		if (isBalance) {
+			throw new AccessDeniedException("Декларация в отчетном периоде вида 'ввод остатков'");
 		}
 
 		// Контролёр УНП может просматривать все декларации
