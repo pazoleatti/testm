@@ -694,7 +694,6 @@ void setTotalStyle(def row) {
  * Получить данные за предыдущий отчетный период
  */
 def getFormDataOld() {
-    return null //TODO
     // предыдущий отчётный период
     def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
 
@@ -809,7 +808,6 @@ def getColumnName(def row, def alias) {
  * Проверить данные за предыдущий отчетный период.
  */
 def checkPrevPeriod() {
-    return true //TODO
     def formDataOld = getFormDataOld()
     def dataOld = getData(formDataOld)
 
