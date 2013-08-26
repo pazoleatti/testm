@@ -24,6 +24,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterData;
@@ -45,6 +46,8 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	private SecurityService securityService;
 	@Autowired
 	private DepartmentService departmentService;
+	@Autowired
+	private ReportPeriodService reportPeriodService;
 	@Autowired
 	TAUserService userService;
 	@Autowired
@@ -76,8 +79,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	    // По умолчанию отчетный период не выбран
 	    res.setCurrentReportPeriod(null);
 	    
-	    // TODO
-	    TaxPeriod lastTaxType = null;//taxPeriodDao.getLast(action.getTaxType());
+	    TaxPeriod lastTaxType = reportPeriodService.getLastTaxPeriod(action.getTaxType());
 
 		if (lastTaxType == null) {
 			Calendar current = Calendar.getInstance();

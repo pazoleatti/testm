@@ -85,6 +85,14 @@ public interface ReportPeriodService {
 	 */
 	TaxPeriod getTaxPeriod(int taxPeriodId);
 	
+	/**
+	 * Получает последний заведенный налоговый период для типа налога
+	 * 
+	 * @param taxPeriodId
+	 * @return
+	 */
+	TaxPeriod getLastTaxPeriod(TaxType taxType);
+	
 	
 	/**
 	 * Получает отчетный период по ID

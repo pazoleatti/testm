@@ -63,6 +63,8 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
     	// TODO: Нужно получить последний открытый для этого подразделения и типа налога.
     	return null;
     }
+    
+    
 
 	@Override
 	public boolean isActivePeriod(int reportPeriodId, long departmentId) {
@@ -260,6 +262,12 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	@Override
 	public ReportPeriod getReportPeriod(int reportPeriodId) {
 		return reportPeriodDao.get(reportPeriodId);
+	}
+
+	@Override
+	public TaxPeriod getLastTaxPeriod(TaxType taxType) {
+		// TODO Auto-generated method stub
+		return taxPeriodDao.getLast(taxType);
 	}
 
 
