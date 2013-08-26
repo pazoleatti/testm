@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.jms;
 
+import com.aplana.sbrf.taxaccounting.service.MappingService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -14,6 +16,9 @@ import javax.jms.MessageListener;
  * @author Dmitriy Levykin
  */
 public class TransportMessageListener implements MessageListener {
+
+    @Autowired
+    MappingService mappingService;
 
     public static final String FILENAME_PROPERTY_NAME = "FILENAME";
     public static final String DATA_PROPERTY_NAME = "DATA";
@@ -35,6 +40,9 @@ public class TransportMessageListener implements MessageListener {
 
             logger.debug("fileName = " + fileName);
             logger.debug("bodyFile.length = " + bodyFile.length);
+
+            mappingService.addFormData(fileName, bodyFile);
+
         } catch (JMSException e) {
             logger.error("Retrieving error message: " + e.getMessage(), e);
         }

@@ -15,9 +15,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.dao.DuplicateKeyException;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;

@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import static org.junit.Assert.assertEquals;
+
+import java.util.Date;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,10 +14,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
+import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"ReportPeriodDaoTest.xml"})

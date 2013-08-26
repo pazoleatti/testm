@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.Department;
@@ -59,7 +59,7 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 				.getDepartmentIds()).values()));
 		res.setTaxPeriods(taxPeriodDao.listByTaxType(action.getTaxType()));
 		res.setFilterValues(declarationFilterValues);
-		res.setCurrentReportPeriod(getCurrentReportPeriod(action.getTaxType()));
+		res.setCurrentReportPeriod(null);
 		return res;
 	}
 
@@ -68,15 +68,4 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 		//Do nothing
 	}
 
-	private ReportPeriod getCurrentReportPeriod(TaxType taxType){
-		try {
-			ReportPeriod rp = reportPeriodDao.getCurrentPeriod(taxType);
-			if (rp != null) {
-				return rp;
-			}
-		} catch (DaoException e) {
-			logger.warn("Failed to find current report period for taxType = " + taxType + ", message is: " + e.getMessage());
-		}
-		return null;
-	}
 }

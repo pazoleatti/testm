@@ -79,7 +79,6 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 	public void onContinue(OpenFilterData openFilterData) {
 		OpenPeriodAction action = new OpenPeriodAction();
 		action.setYear(openFilterData.getYear());
-
 		action.setEndDate(openFilterData.getEndDate());
 		action.setTaxType(this.taxType);
 		action.setDepartmentId(openFilterData.getDepartmentId());
