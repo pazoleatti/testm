@@ -9,12 +9,9 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog.OpenDialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterData;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.TableRow;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -46,6 +43,10 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		void setTableData(List<TableRow> data);
 		void setDepartmentPickerEnable(boolean enable);
 		void setFilterData(List<Department> departments, List<Integer> selectedDepartments, int yearFrom, int yearTo);
+		int getFromYear();
+		int getToYear();
+		long getDepartmentId();
+		TableRow getSelectedRow();
 	}
 
 	private final DispatchAsync dispatcher;
@@ -64,35 +65,45 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	}
 
 	@Override
-	public void applyFilter(int from, int to, long departmentId) {
-
-		GetPeriodDataAction requestData = new GetPeriodDataAction();
-		requestData.setTaxType(taxType);
-		requestData.setFrom(from);
-		requestData.setTo(to);
-		requestData.setDepartmentId(departmentId);
-		dispatcher.execute(requestData, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetPeriodDataResult>() {
-					@Override
-					public void onSuccess(GetPeriodDataResult result) {
-						getView().setTableData(result.getRows());
-
-					}
-				}, PeriodsPresenter.this));
-	}
-
-
-	@Override
-	public void closePeriod(TableRow reportPeriod) {
-		if (!reportPeriod.isOpen()) {
+	public void closePeriod() {
+		if (((taxType == TaxType.INCOME) || (taxType == TaxType.VAT)) && !getView().getSelectedRow().isOpen()) {
 			Window.alert("Период уже закрыт.");
 			return;
+		} else {
+			ClosePeriodAction requestData = new ClosePeriodAction();
+			requestData.setTaxType(taxType);
+			requestData.setReportPeriodId((int) getView().getSelectedRow().getReportPeriodId());
+			requestData.setDepartmentId(getView().getSelectedRow().getDepartmentId());
+			dispatcher.execute(requestData, CallbackUtils
+					.defaultCallback(new AbstractCallback<ClosePeriodResult>() {
+						@Override
+						public void onSuccess(ClosePeriodResult result) {
+							find();
+							LogAddEvent.fire(PeriodsPresenter.this, result.getLogEntries());
+						}
+					}, PeriodsPresenter.this));
 		}
 	}
 
 	@Override
 	public void openPeriod() {
 		addToPopupSlot(openDialogPresenter);
+	}
+
+	@Override
+	public void find() {
+		GetPeriodDataAction requestData = new GetPeriodDataAction();
+		requestData.setTaxType(taxType);
+		requestData.setFrom(getView().getFromYear());
+		requestData.setTo(getView().getToYear());
+		requestData.setDepartmentId(getView().getDepartmentId());
+		dispatcher.execute(requestData, CallbackUtils
+				.defaultCallback(new AbstractCallback<GetPeriodDataResult>() {
+					@Override
+					public void onSuccess(GetPeriodDataResult result) {
+						getView().setTableData(result.getRows());
+					}
+				}, PeriodsPresenter.this));
 	}
 
 	@Override
@@ -117,9 +128,8 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 						getView().setFilterData(departments, selectedDepartments, result.getYearFrom(), result.getYearTo());
 						getView().setDepartmentPickerEnable(result.isEnableDepartmentPicker());
 						openDialogPresenter.setDepartments(departments, selectedDepartments);
-//						openDialogPresenter.setDictionaryTaxPeriod(dictionaryTaxPeriods);
 						openDialogPresenter.setYear(result.getCurrentYear());
-						applyFilter(result.getYearFrom(), result.getYearTo(), result.getSelectedDepartment().getId());
+						find();
 					}
 				}, PeriodsPresenter.this)
 		);
