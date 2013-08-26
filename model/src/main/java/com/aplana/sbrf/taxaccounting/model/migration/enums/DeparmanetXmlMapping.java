@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Соотвествие подразделений
  *
  */
-public enum DeparmanetCode implements Serializable {
+public enum DeparmanetXmlMapping implements Serializable {
     DEP_118_1("996100010", 109, "00", 118),
     DEP_118_2("996100010", 701, "00", 118),
 
@@ -36,7 +36,7 @@ public enum DeparmanetCode implements Serializable {
     private final String subSysCode;
     private final int depCodeNew;
 
-    private DeparmanetCode(String depCodeOld, int sysCodeNew, String subSysCode, int depCodeNew) {
+    private DeparmanetXmlMapping(String depCodeOld, int sysCodeNew, String subSysCode, int depCodeNew) {
         this.depCodeOld = depCodeOld;
         this.sysCodeNew = sysCodeNew;
         this.subSysCode = subSysCode;
@@ -47,7 +47,7 @@ public enum DeparmanetCode implements Serializable {
         if (DEP_118_1.getDepCodeOld().equals(depCodeOld)) {
             return DEP_118_1.depCodeNew;
         }
-        for (DeparmanetCode t : values()) {
+        for (DeparmanetXmlMapping t : values()) {
 
             if (t.depCodeOld.equals(depCodeOld) && t.sysCodeNew == sysCodeNew && t.subSysCode.equals(subSysCode)) {
                 return t.depCodeNew;

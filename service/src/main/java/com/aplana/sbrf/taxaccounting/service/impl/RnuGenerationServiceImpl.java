@@ -23,7 +23,7 @@ public class RnuGenerationServiceImpl implements RnuGenerationService {
     @Autowired
     MigrationService migrationService;
 
-    private static final String CR = "\n\r";
+    private static final String CR = "\r\n";
     private static final String TOTAL_ROW = "TOTAL_P";
     private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
 

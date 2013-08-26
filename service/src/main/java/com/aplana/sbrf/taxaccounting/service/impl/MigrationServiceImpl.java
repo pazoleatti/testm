@@ -11,7 +11,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -104,7 +103,7 @@ public class MigrationServiceImpl implements MigrationService {
     @Override
     public List<? extends AbstractRnuRow> getRnuList(Exemplar ex) {
         List<? extends AbstractRnuRow> list = new ArrayList<AbstractRnuRow>();
-        switch (NalogFormType.getByCode(ex.getRnuTypeId())) {
+        switch (NalogFormType.getById(ex.getRnuTypeId())) {
             case RNU25:
                 list = migrationDao.getRnu25RowList(ex);
                 break;
