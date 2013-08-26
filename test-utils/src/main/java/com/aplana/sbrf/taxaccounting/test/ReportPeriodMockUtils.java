@@ -13,15 +13,10 @@ public final class ReportPeriodMockUtils {
 	private ReportPeriodMockUtils() {
 	}
 
-	public static ReportPeriod mockReportPeriod(int id, boolean isActive) {
+	public static ReportPeriod mockReportPeriod(int id) {
 		ReportPeriod reportPeriod = mock(ReportPeriod.class);
 		when(reportPeriod.getId()).thenReturn(id);
 		return reportPeriod;
 	}
 
-	public static ReportPeriod mockReportPeriod(int id, boolean isActive, boolean isBalancePeriod) {
-		ReportPeriod reportPeriod = mock(ReportPeriod.class);
-		when(reportPeriod.getId()).thenReturn(id);
-		return reportPeriod;
-	}
 }

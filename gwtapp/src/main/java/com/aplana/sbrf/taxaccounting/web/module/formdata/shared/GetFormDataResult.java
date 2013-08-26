@@ -40,6 +40,8 @@ public class GetFormDataResult implements Result {
 	private boolean numberedHeader;
 
 	private List<FormStyle> allStyles;
+	
+	private boolean balancePeriod;
 
 	/* Т.к. на GWT уровне сложно преобразовать Date в дату формата dd.mm.yyyy hh:mm (из-за того что функции работы
 	с временем в Date - Deprecated, а Calendar не поддерживается), то клиенту мы будем посылать уже сформировнную в
@@ -167,14 +169,21 @@ public class GetFormDataResult implements Result {
 		TaxPeriodEndDate = taxPeriodEndDate;
 	}
 
-	/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
+	public boolean isBalancePeriod() {
+		return balancePeriod;
+	}
+
+	public void setBalancePeriod(boolean balancePeriod) {
+		this.balancePeriod = balancePeriod;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("GetFormDataResult [formData=");
 		builder.append(formData);
+		builder.append(", templateFormName=");
+		builder.append(templateFormName);
 		builder.append(", logEntries=");
 		builder.append(logEntries);
 		builder.append(", departmenName=");
@@ -187,6 +196,8 @@ public class GetFormDataResult implements Result {
 		builder.append(numberedHeader);
 		builder.append(", allStyles=");
 		builder.append(allStyles);
+		builder.append(", balancePeriod=");
+		builder.append(balancePeriod);
 		builder.append(", lockDate=");
 		builder.append(lockDate);
 		builder.append(", lockedByUser=");
@@ -195,10 +206,13 @@ public class GetFormDataResult implements Result {
 		builder.append(formMode);
 		builder.append(", fixedRows=");
 		builder.append(fixedRows);
+		builder.append(", TaxPeriodStartDate=");
+		builder.append(TaxPeriodStartDate);
+		builder.append(", TaxPeriodEndDate=");
+		builder.append(TaxPeriodEndDate);
 		builder.append("]");
 		return builder.toString();
 	}
 	
 	
-
 }
