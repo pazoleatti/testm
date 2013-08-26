@@ -1,2 +1,0 @@
-insert into report_period (id, name, months, tax_period_id, ord, dict_tax_period_id) values (10, 'VAT report period 2', 3, 21, 3, 21);
-insert into report_period (id, name, months, tax_period_id, ord, dict_tax_period_id) values (11, 'VAT report period 3', 3, 21, 2, 21);
