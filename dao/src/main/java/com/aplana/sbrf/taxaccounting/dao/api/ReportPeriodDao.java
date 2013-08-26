@@ -1,9 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-
 import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 
 /**
  * Интерфейс DAO для работы с {@link ReportPeriod отчётными периодами} 
@@ -44,14 +43,6 @@ public interface ReportPeriodDao {
 	//TODO: Перименовать в save
 	int add(ReportPeriod reportPeriod);
 
-    /**
-     * Последний отчетный период для указанного вида налога и подразделения
-     * @param taxType Тип налога
-     * @param departmentId Подразделение
-     * @return
-     */
-	@Deprecated
-    ReportPeriod getLastReportPeriod(TaxType taxType, long departmentId);
 
     /**
      * Отчетный период по налоговому периоду и периоду в справочнике "Коды, определяющие налоговый (отчётный) период"

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 /**
  * Соотвествие номера квартала к значению в новой системе
+ * применяется для формирования информации о ТФ
  */
 public enum QuartalCode implements Serializable {
     ONE_1(1, "1", "D", "q03"),

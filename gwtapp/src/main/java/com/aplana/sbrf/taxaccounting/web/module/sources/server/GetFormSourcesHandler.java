@@ -1,6 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
-import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
@@ -10,14 +18,6 @@ import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetFormSourcesRes
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
@@ -25,9 +25,6 @@ public class GetFormSourcesHandler extends AbstractActionHandler<GetFormSourcesA
 
 	@Autowired
 	private DepartmentFormTypeService departmentFormTypeService;
-
-	@Autowired
-	private FormTypeDao formTypeDao;
 
     public GetFormSourcesHandler() {
         super(GetFormSourcesAction.class);
@@ -42,7 +39,7 @@ public class GetFormSourcesHandler extends AbstractActionHandler<GetFormSourcesA
 		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();
 		for (DepartmentFormType departmentFormType : sources) {
 			formTypes.put(departmentFormType.getFormTypeId(),
-					formTypeDao.getType(departmentFormType.getFormTypeId()));
+					departmentFormTypeService.getFormType(departmentFormType.getFormTypeId()));
 		}
 		result.setFormTypes(formTypes);
 

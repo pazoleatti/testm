@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.exception.*;
-import com.aplana.sbrf.taxaccounting.log.*;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.*;
-
 import java.util.Date;
+
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 /**
  * Сервис для работы с {@link DeclarationData налоговыми декларациями }
@@ -112,4 +112,16 @@ public interface DeclarationDataService {
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
 	Date getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo);
+	
+	/**
+	 * TODO: Колон script-support (sgoryachkin)
+	 * 
+	 * Ищет декларацию по заданным параметрам.
+	 * @param declarationTypeId идентификатор типа декларации
+	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
+	 * @param reportPeriodId идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
+	 * @return декларацию или null, если такой декларации не найдено
+	 * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
+	 */
+	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
 }

@@ -1,9 +1,24 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
-import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DictionaryTaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -16,14 +31,6 @@ import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterD
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
@@ -38,10 +45,6 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	private SecurityService securityService;
 	@Autowired
 	private DepartmentService departmentService;
-	@Autowired
-	private ReportPeriodDao reportPeriodDao;
-	@Autowired
-	TaxPeriodDao taxPeriodDao;
 	@Autowired
 	TAUserService userService;
 	@Autowired
@@ -72,7 +75,9 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	    res.setDictionaryTaxPeriods(convert(result));
 	    // По умолчанию отчетный период не выбран
 	    res.setCurrentReportPeriod(null);
-	    TaxPeriod lastTaxType = taxPeriodDao.getLast(action.getTaxType());
+	    
+	    // TODO
+	    TaxPeriod lastTaxType = null;//taxPeriodDao.getLast(action.getTaxType());
 
 		if (lastTaxType == null) {
 			Calendar current = Calendar.getInstance();

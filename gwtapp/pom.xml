@@ -33,19 +33,15 @@
 			<artifactId>dynacache-spring</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		 
 		<dependency>
+			<!-- Доступно только в рантайме!!!! -->
 			<groupId>${project.groupId}</groupId>
 			<artifactId>service</artifactId>
 			<version>${project.version}</version>
 			<scope>runtime</scope>
 		</dependency>
-		<dependency>
-			<!-- TODO: Нужно исправить. Реализация WEB приложения не должна зависеть 
-				в compile time от script-support. -->
-			<groupId>${project.groupId}</groupId>
-			<artifactId>script-support</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib</artifactId>

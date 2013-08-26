@@ -1,29 +1,3 @@
-create table dict_tax_period (
-  code varchar2(2) not null,
-  name varchar2(510) not null,
-  I    number(1,0) default 0 not null,
-  T    number(1,0) default 0 not null,
-  P    number(1,0) default 0 not null,
-  V    number(1,0) default 0 not null,
-  D    number(1,0) default 0 not null
-);
-alter table dict_tax_period add constraint dict_tax_period_pk primary key (code);
-
-alter table dict_tax_period add constraint dict_tax_period_chk_i check (I in (0, 1));
-alter table dict_tax_period add constraint dict_tax_period_chk_t check (T in (0, 1));
-alter table dict_tax_period add constraint dict_tax_period_chk_p check (P in (0, 1));
-alter table dict_tax_period add constraint dict_tax_period_chk_v check (V in (0, 1));
-alter table dict_tax_period add constraint dict_tax_period_chk_d check (D in (0, 1));
-
-comment on table dict_tax_period is 'Коды, определяющие налоговый (отчётный) период';
-comment on column dict_tax_period.code is 'Код';
-comment on column dict_tax_period.name is 'Наименование';
-comment on column dict_tax_period.I is 'Принадлежность к налогу на прибыль';
-comment on column dict_tax_period.T is 'Принадлежность к налогу на транспорт';
-comment on column dict_tax_period.P is 'Принадлежность к налогу на имущество';
-comment on column dict_tax_period.V is 'Принадлежность к налогу ндс';
-comment on column dict_tax_period.D is 'Принадлежность к ТЦО';
----------------------------------------------------------------------------------------------
 create table dict_region (
   code varchar2(2) not null,
   name varchar2(510) not null,
@@ -342,6 +316,7 @@ create table report_period (
 alter table report_period add constraint report_period_pk primary key(id);
 alter table report_period add constraint report_period_fk_taxperiod foreign key (tax_period_id) references tax_period (id);
 alter table report_period add constraint report_period_fk_dtp_id foreign key (dict_tax_period_id) references ref_book_record(id);
+alter table report_period add constraint report_period_uniq_tax_dict unique (tax_period_id, dict_tax_period_id);
 
 comment on table report_period is 'Отчетные периоды';
 comment on column report_period.id is 'Первичный ключ';

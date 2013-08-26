@@ -1,10 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentDeclarationTypeService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +21,9 @@ public class DepartmentDeclarationTypeServiceImpl implements DepartmentDeclarati
 
     @Autowired
 	DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
+    
+    @Autowired
+    DeclarationTypeDao declarationTypeDao;
 
 	@Override
 	public List<DepartmentDeclarationType> getDepartmentDeclarationTypes(int departmentId) {
@@ -42,5 +48,15 @@ public class DepartmentDeclarationTypeServiceImpl implements DepartmentDeclarati
 	@Override
 	public void save(int departmentId, List<DepartmentDeclarationType> departmentDeclarationTypes) {
 		departmentDeclarationTypeDao.save(departmentId, departmentDeclarationTypes);
+	}
+
+	@Override
+	public DeclarationType getDeclarationType(int declarationTypeId) {
+		return declarationTypeDao.get(declarationTypeId);
+	}
+
+	@Override
+	public List<DeclarationType> listAllByTaxType(TaxType taxType) {
+		return declarationTypeDao.listAllByTaxType(taxType);
 	}
 }

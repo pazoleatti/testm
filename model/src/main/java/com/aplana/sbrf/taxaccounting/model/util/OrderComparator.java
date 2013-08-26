@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.util;
+package com.aplana.sbrf.taxaccounting.model.util;
 
 import java.util.Comparator;
 

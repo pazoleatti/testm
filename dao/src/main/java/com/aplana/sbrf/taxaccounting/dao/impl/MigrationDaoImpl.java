@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.MigrationDao;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.dao.impl.util.MapperUtils;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
-import com.aplana.sbrf.taxaccounting.model.migration.row.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataRetrievalFailureException;
@@ -14,9 +12,17 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
+import com.aplana.sbrf.taxaccounting.dao.MigrationDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.MapperUtils;
+import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
+import com.aplana.sbrf.taxaccounting.model.migration.row.Rnu25Row;
+import com.aplana.sbrf.taxaccounting.model.migration.row.Rnu26Row;
+import com.aplana.sbrf.taxaccounting.model.migration.row.Rnu27Row;
+import com.aplana.sbrf.taxaccounting.model.migration.row.Rnu31Row;
+import com.aplana.sbrf.taxaccounting.model.migration.row.Rnu51Row;
+import com.aplana.sbrf.taxaccounting.model.migration.row.Rnu64Row;
+import com.aplana.sbrf.taxaccounting.model.migration.row.RnuCommonRow;
 
 @Repository
 @Transactional(readOnly = true)

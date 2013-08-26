@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.api.DaoException;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 /**

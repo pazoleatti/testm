@@ -14,9 +14,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -25,6 +25,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 @ContextConfiguration({"ReportPeriodDaoTest.xml"})
 @Transactional
 public class ReportPeriodDaoTest {
+
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
 
@@ -49,9 +50,6 @@ public class ReportPeriodDaoTest {
 	
 	@Test
 	public void listByTaxPeriodSuccessfulTest() {
-		
-
-		
 		ReportPeriod newReportPeriod = new ReportPeriod();
 		newReportPeriod.setName("MyTestName1");
 		newReportPeriod.setOrder(9);
@@ -65,7 +63,7 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setOrder(10);
 		newReportPeriod.setMonths(3);
 		newReportPeriod.setTaxPeriodId(taxPeriod.getId());
-		newReportPeriod.setDictTaxPeriodId(21);
+		newReportPeriod.setDictTaxPeriodId(22);
 		reportPeriodDao.add(newReportPeriod);
 		
 		List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(taxPeriod.getId());

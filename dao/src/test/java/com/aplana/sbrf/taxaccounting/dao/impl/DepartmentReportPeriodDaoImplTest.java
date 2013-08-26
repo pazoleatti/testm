@@ -15,9 +15,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.dao.DuplicateKeyException;
 
-import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
@@ -27,6 +27,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 @ContextConfiguration({ "DepartmentReportPeriodDaoImplTest.xml" })
 @Transactional
 public class DepartmentReportPeriodDaoImplTest {
+
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
 
@@ -64,7 +65,7 @@ public class DepartmentReportPeriodDaoImplTest {
 		reportPeriod2.setOrder(10);
 		reportPeriod2.setMonths(3);
 		reportPeriod2.setTaxPeriodId(taxPeriod.getId());
-		reportPeriod2.setDictTaxPeriodId(21);
+		reportPeriod2.setDictTaxPeriodId(22);
 		reportPeriodDao.add(reportPeriod2);
 
 	}
