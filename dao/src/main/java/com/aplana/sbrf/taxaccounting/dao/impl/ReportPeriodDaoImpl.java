@@ -1,20 +1,19 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
 
 /**
  * Реализация DAO для работы с {@link ReportPeriod отчётными периодами}
@@ -53,8 +52,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 		}
 	}
 
-
-
 	@Override
 	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
 		return getJdbcTemplate().query(
@@ -64,7 +61,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 				REPORT_PERIOD_MAPPER
 		);
 	}
-
 
 	@Override
 	@Transactional(readOnly = false)
@@ -95,16 +91,28 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     public ReportPeriod getLastReportPeriod(TaxType taxType, long departmentId) {
     	throw new DaoException("Ошибок не заводить. В разработке");
     }
-    
-	@Override
+
+    @Override
+    public ReportPeriod getReportPeriodByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "select * from report_period where tax_period_id = ? and dict_tax_period_id = ?",
+                    new Object[]{taxPeriodId, dictTaxPeriodId},
+                    new int[]{Types.NUMERIC, Types.NUMERIC},
+                    REPORT_PERIOD_MAPPER
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException("Не существует периода с tax_period_id=" + taxPeriodId + " и dict_tax_period_id = " + dictTaxPeriodId);
+        }
+    }
+
+    @Override
 	public ReportPeriod getCurrentPeriod(TaxType taxType) {
 		throw new DaoException("Ошибок не заводить. В разработке"); 
 	}
-	
 
 	@Override
 	public void changeActive(int reportPeriodId, boolean active) {
 		throw new DaoException("Ошибок не заводить. В разработке");
 	}
-
 }

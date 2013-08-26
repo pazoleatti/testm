@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Date;
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,12 +15,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import java.util.Date;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"ReportPeriodDaoTest.xml"})
@@ -76,7 +76,6 @@ public class ReportPeriodDaoTest {
 		assertEquals(0, reportPeriodList.size());
 	}
 
-
 	@Test
 	public void saveAndGetSuccessTest() {
 		ReportPeriod newReportPeriod = new ReportPeriod();
@@ -97,4 +96,16 @@ public class ReportPeriodDaoTest {
 		assertEquals(21, reportPeriod.getDictTaxPeriodId());
 	}
 
+    @Test
+    public void getReportPeriodByTaxPeriodAndDictTest1() {
+        ReportPeriod reportPeriod1 = reportPeriodDao.getReportPeriodByTaxPeriodAndDict(1, 21);
+        ReportPeriod reportPeriod2 = reportPeriodDao.getReportPeriodByTaxPeriodAndDict(1, 22);
+        Assert.assertEquals(reportPeriod1.getId(), Integer.valueOf(1));
+        Assert.assertEquals(reportPeriod2.getId(), Integer.valueOf(2));
+    }
+
+    @Test(expected = DaoException.class)
+    public void getReportPeriodByTaxPeriodAndDictTest2() {
+        reportPeriodDao.getReportPeriodByTaxPeriodAndDict(-1, -1);
+    }
 }
