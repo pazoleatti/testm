@@ -2,13 +2,14 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.util.FormTypeAlphanumericComparator;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

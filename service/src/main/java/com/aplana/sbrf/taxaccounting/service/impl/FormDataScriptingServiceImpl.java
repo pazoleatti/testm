@@ -12,12 +12,12 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;

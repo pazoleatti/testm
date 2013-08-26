@@ -14,13 +14,6 @@
 
 	<dependencies>
 		<dependency>
-			<!-- TODO: Нужно исправить. Реализация DAO не должна зависеть от модуля 
-				CORE, где находятся интерфейсы сервисов с которыми взаимодействуют пользователи -->
-			<groupId>${project.groupId}</groupId>
-			<artifactId>core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>model</artifactId>
 			<version>${project.version}</version>
@@ -41,6 +34,12 @@
 			<groupId>org.mybatis</groupId>
 			<artifactId>mybatis-spring</artifactId>
 		</dependency>
+		<dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>4.1</version>
+            <scope>compile</scope>
+        </dependency>
 
 		<!-- Зависимости для юнит-тестов -->
 		<dependency>

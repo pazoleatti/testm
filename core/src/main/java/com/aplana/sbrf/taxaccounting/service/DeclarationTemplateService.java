@@ -1,12 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-
-import java.util.List;
 
 /**
  * Сервис для работы с шаблонами деклараций 

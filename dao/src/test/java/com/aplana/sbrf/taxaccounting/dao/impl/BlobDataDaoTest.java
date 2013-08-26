@@ -1,8 +1,13 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.BlobData;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Date;
+import java.util.UUID;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,13 +18,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ClassUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Date;
-import java.util.UUID;
+import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DaoException;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
 
 /**
  * User: avanteev

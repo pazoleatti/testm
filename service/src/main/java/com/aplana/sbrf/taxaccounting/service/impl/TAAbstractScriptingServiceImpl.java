@@ -15,7 +15,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 /**
  * Базовый класс для сервисов, работающих с groovy-скриптами

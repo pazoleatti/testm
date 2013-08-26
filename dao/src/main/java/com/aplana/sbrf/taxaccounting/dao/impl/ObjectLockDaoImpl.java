@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.exception.LockException;
+import com.aplana.sbrf.taxaccounting.dao.api.LockException;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.ObjectLock;
 import com.aplana.sbrf.taxaccounting.model.TAUser;

@@ -1,8 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;

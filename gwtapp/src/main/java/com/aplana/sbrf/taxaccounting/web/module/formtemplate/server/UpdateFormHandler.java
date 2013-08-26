@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
-import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;

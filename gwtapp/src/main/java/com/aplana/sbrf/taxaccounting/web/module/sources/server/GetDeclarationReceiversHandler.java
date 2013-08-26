@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentDeclarationTypeService;
@@ -28,9 +27,6 @@ public class GetDeclarationReceiversHandler
 
 	@Autowired
 	private DepartmentDeclarationTypeService departmentDeclarationTypeService;
-
-	@Autowired
-	private DeclarationTypeDao declarationTypeDao;
 
 	@Autowired
 	private DepartmentService departmentService;
@@ -53,7 +49,7 @@ public class GetDeclarationReceiversHandler
 		Map<Integer, DeclarationType> declarationTypes = new HashMap<Integer, DeclarationType>();
 		for (DepartmentDeclarationType receiver : receivers) {
 			declarationTypes.put(receiver.getDeclarationTypeId(),
-					declarationTypeDao.get(receiver.getDeclarationTypeId()));
+					departmentDeclarationTypeService.getDeclarationType(receiver.getDeclarationTypeId()));
 		}
 		result.setDeclarationTypes(declarationTypes);
 

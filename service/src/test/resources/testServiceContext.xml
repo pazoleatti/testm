@@ -17,7 +17,7 @@
 		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao"/>
 	</bean>
 	<bean class="org.mockito.Mockito" factory-method="mock">
-		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormTypeDao"/>
+		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao"/>
 	</bean>
 	<bean class="org.mockito.Mockito" factory-method="mock">
 		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormTemplateDao"/>
@@ -47,7 +47,7 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao"/>
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.LogBusinessDao"/>
@@ -68,7 +68,7 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao"/>
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.MigrationDao"/>
