@@ -20,6 +20,7 @@ public enum NalogFormType implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final String ERROR = "NalogFormType id is not correct: ";
     private static final String ERROR_NNN = "NalogFormType nnn is not correct: ";
+    private static final String ERROR_CODE_NEW_XML = "NalogFormType codeNewXml is not correct: ";
 
     private final int id;
     private final int codeNew;
@@ -42,13 +43,13 @@ public enum NalogFormType implements Serializable {
         throw new IllegalArgumentException(ERROR_NNN + nnn);
     }
 
-    public static int getIdByNNN(String nnn) {
+    public static NalogFormType fromCodeNewXml(String codeNewXml) {
         for (NalogFormType t : values()) {
-            if (t.stringNNN.equals(nnn)) {
-                return t.id;
+            if (t.codeNewXml.equals(codeNewXml)) {
+                return t;
             }
         }
-        throw new IllegalArgumentException(ERROR_NNN + nnn);
+        throw new IllegalArgumentException(ERROR_CODE_NEW_XML + codeNewXml);
     }
 
     public static String getNewXmlCode(int id) {

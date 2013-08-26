@@ -4,19 +4,20 @@ import java.io.Serializable;
 
 /**
  * Соотвествие подразделений
+ * Используется при маппинге xml файлов
  *
  */
-public enum DeparmanetXmlMapping implements Serializable {
+public enum DepartmentXmlMapping implements Serializable {
     DEP_118_1("996100010", 109, "00", 118),
     DEP_118_2("996100010", 701, "00", 118),
 
     DEP_701_00("999300010", 701, "00", 123),
-    DEP_701_01("999300010", 701, "01", 801),       //TODO depCodeNew с 801 по 803 заменить на настоящее значение
+    DEP_701_01("999300010", 701, "01", 801),       //TODO departmentId с 801 по 803 заменить на настоящее значение
     DEP_701_02("999300010", 701, "02", 802),
     DEP_701_03("999300010", 701, "03", 803),
 
     DEP_109_00("999300020", 109, "00", 126),
-    DEP_109_01("999300020", 109, "01", 901),      //TODO depCodeNew с 901 по 912 заменить на настоящее значение
+    DEP_109_01("999300020", 109, "01", 901),      //TODO departmentId с 901 по 912 заменить на настоящее значение
     DEP_109_02("999300020", 109, "02", 902),
     DEP_109_03("999300020", 109, "03", 903),
     DEP_109_04("999300020", 109, "04", 904),
@@ -31,33 +32,33 @@ public enum DeparmanetXmlMapping implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final String depCodeOld;
+    private final String depCode;
     private final int sysCodeNew;
     private final String subSysCode;
-    private final int depCodeNew;
+    private final int departmentId;
 
-    private DeparmanetXmlMapping(String depCodeOld, int sysCodeNew, String subSysCode, int depCodeNew) {
-        this.depCodeOld = depCodeOld;
+    private DepartmentXmlMapping(String depCodeOld, int sysCodeNew, String subSysCode, int departmentId) {
+        this.depCode = depCodeOld;
         this.sysCodeNew = sysCodeNew;
         this.subSysCode = subSysCode;
-        this.depCodeNew = depCodeNew;
+        this.departmentId = departmentId;
     }
 
-    public static int getNewDepCode(String depCodeOld, int sysCodeNew, String subSysCode) {
-        if (DEP_118_1.getDepCodeOld().equals(depCodeOld)) {
-            return DEP_118_1.depCodeNew;
+    public static int getNewDepCode(String depCode, int sysCodeNew, String subSysCode) {
+        if (DEP_118_1.getDepCode().equals(depCode)) {
+            return DEP_118_1.departmentId;
         }
-        for (DeparmanetXmlMapping t : values()) {
+        for (DepartmentXmlMapping t : values()) {
 
-            if (t.depCodeOld.equals(depCodeOld) && t.sysCodeNew == sysCodeNew && t.subSysCode.equals(subSysCode)) {
-                return t.depCodeNew;
+            if (t.depCode.equals(depCode) && t.sysCodeNew == sysCodeNew && t.subSysCode.equals(subSysCode)) {
+                return t.departmentId;
             }
         }
-        throw new IllegalArgumentException("Incorrect parametres: depCodeOld -" + depCodeOld + " sysCodeNew - " + sysCodeNew + " subSysCode - " +subSysCode);
+        throw new IllegalArgumentException("Incorrect parametres: depCode -" + depCode+ " sysCodeNew - " + sysCodeNew + " subSysCode - " +subSysCode);
     }
 
-    public String getDepCodeOld() {
-        return depCodeOld;
+    public String getDepCode() {
+        return depCode;
     }
 
     public int getSysCodeNew() {
@@ -68,7 +69,7 @@ public enum DeparmanetXmlMapping implements Serializable {
         return subSysCode;
     }
 
-    public int getDepCodeNew() {
-        return depCodeNew;
+    public int getDepartmentId() {
+        return departmentId;
     }
 }

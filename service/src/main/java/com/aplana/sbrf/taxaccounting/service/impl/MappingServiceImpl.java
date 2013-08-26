@@ -7,14 +7,9 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.migration.RestoreExemplar;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.DepartmentRnuMapping;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.NalogFormType;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.PeriodRnuMapping;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.YearCode;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.*;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.RnuMappingService;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.MappingService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +23,7 @@ import java.text.SimpleDateFormat;
 
 @Service
 @Transactional
-public class RnuMappingServiceImpl implements RnuMappingService {
+public class MappingServiceImpl implements MappingService {
 
     private final Log log = LogFactory.getLog(getClass());
 
@@ -44,12 +39,24 @@ public class RnuMappingServiceImpl implements RnuMappingService {
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     private static SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
     private static String charSet = "UTF-8";
+    private static String RNU_EXT = "rnu";
+    private static String XML_EXT = "xml";
 
     @Override
-    public void addFormDataFromRnuFile(String filename, byte[] fileContent) {
+    public void addFormData(String filename, byte[] fileContent) {
 
         InputStream inputStream = new ByteArrayInputStream(fileContent);
-        RestoreExemplar restoreExemplar = restoreExemplar(filename, fileContent);
+
+        RestoreExemplar restoreExemplar;
+
+        String ext = filename.substring(filename.indexOf(".")).trim().toLowerCase();
+        if (RNU_EXT.equals(ext)) {
+            restoreExemplar = restoreExemplarFromRnu(filename, fileContent);
+        } else if (XML_EXT.equals(ext)) {
+            restoreExemplar = restoreExemplarFromXml(filename);
+        } else {
+            throw new ServiceException("Не правильное название файла");
+        }
 
         log.debug(restoreExemplar);
 
@@ -76,10 +83,25 @@ public class RnuMappingServiceImpl implements RnuMappingService {
                 FormDataKind.PRIMARY, reportPeriod.getId(), inputStream, filename);
     }
 
-    private RestoreExemplar restoreExemplar(String rnuFilename, byte[] fileContent) {
+    /**
+     * Возвращает объект с необходимой информацией для создания формы в нвоой системе
+     * Пример первой строки: 99|0013|01.01.2013|31.03.2013|640|90
+     *
+     * @param rnuFilename азвание файла с расширением rnu
+     * @param fileContent содержимое файла
+     * @return
+     */
+    private RestoreExemplar restoreExemplarFromRnu(String rnuFilename, byte[] fileContent) {
         RestoreExemplar exemplar = new RestoreExemplar();
 
-        String firstRow = getFirstRow(fileContent);
+        String firstRow = null;
+        try {
+            String str = new String(fileContent, charSet);
+            firstRow = str.substring(0, str.indexOf('\r'));
+        } catch (UnsupportedEncodingException e) {
+            throw new ServiceException("Ошибка получения первой строки", e);
+        }
+
         String[] params = firstRow.split("|");
         try {
 
@@ -107,9 +129,9 @@ public class RnuMappingServiceImpl implements RnuMappingService {
             // по коду отчетного периода 7 символа в назавании файла DICT_TAX_PERIOD
             String periodCode = rnuFilename.substring(7, 8);
             if (NalogFormType.RNU31.getCodeNew() == exemplar.getFormTemplateId()) {
-                exemplar.setDictTaxPeriodId(PeriodRnuMapping.fromCode(periodCode).getDictTaxPeriodIdForMonthly());
+                exemplar.setDictTaxPeriodId(PeriodMapping.fromCode(periodCode).getDictTaxPeriodIdForMonthly());
             } else {
-                exemplar.setDictTaxPeriodId(PeriodRnuMapping.fromCode(periodCode).getDictTaxPeriodId());
+                exemplar.setDictTaxPeriodId(PeriodMapping.fromCode(periodCode).getDictTaxPeriodId());
             }
 
             return exemplar;
@@ -119,20 +141,39 @@ public class RnuMappingServiceImpl implements RnuMappingService {
     }
 
     /**
-     * Возвращает заголовок файла (первая строчка в файле)
-     * Пример: 99|0013|01.01.2013|31.03.2013|640|901
+     * Возвращает объект с необходимой информацией для создания формы в нвоой системе
+     * Пример названия файла 852-64____996300020__10901q0613.xml
      *
-     * @param rnuFileContent массив байтов содержимого файла
-     * @return параметры в виде строки
+     * @param xmlFilename название файла
+     * @return
      */
-    private String getFirstRow(byte[] rnuFileContent) {
-        String firestRow = null;
+    private RestoreExemplar restoreExemplarFromXml(String xmlFilename) {
+        RestoreExemplar exemplar = new RestoreExemplar();
+
         try {
-            String str = new String(rnuFileContent, charSet);
-            firestRow = str.substring(0, str.indexOf('\r'));
-        } catch (UnsupportedEncodingException e) {
-            throw new ServiceException("Ошибка получения первой строки", e);
+            String nalogForm = xmlFilename.substring(0, 10).replace("_", "");
+            exemplar.setFormTemplateId(NalogFormType.fromCodeNewXml(nalogForm).getCodeNew());
+
+            String depCode = xmlFilename.substring(10, 19);
+            String systemCode = xmlFilename.substring(19, 24).replace("_", "");
+            String subSystemCode = xmlFilename.substring(24, 26);
+
+            exemplar.setDepartmentId(DepartmentXmlMapping.getNewDepCode(depCode, Integer.valueOf(systemCode), subSystemCode));
+
+            //по году определяем TAX_PERIOD
+            String yearCut = xmlFilename.substring(29, 31);
+            exemplar.setTaxPeriod(YearCode.fromYearCut(yearCut).getTaxPeriodId());
+
+            String period = xmlFilename.substring(26, 29);
+            if (NalogFormType.RNU31.getCodeNew() == exemplar.getFormTemplateId()) {
+                exemplar.setDictTaxPeriodId(PeriodMapping.fromCodeXml(period).getDictTaxPeriodIdForMonthly());
+            } else {
+                exemplar.setDictTaxPeriodId(PeriodMapping.fromCodeXml(period).getDictTaxPeriodId());
+            }
+
+            return exemplar;
+        } catch (Exception e) {
+            throw new ServiceException("Parsing Error", e);
         }
-        return firestRow;
     }
 }

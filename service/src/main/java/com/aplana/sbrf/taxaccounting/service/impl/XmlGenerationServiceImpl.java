@@ -122,11 +122,12 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
         StringBuilder sb = new StringBuilder();
 
         String type = NalogFormType.getNewXmlCode(ex.getRnuTypeId());
-        sb.append(completeStringLength(10, type));
+        sb.append(completeStringLength(10, type, null));
 
-        sb.append(completeStringLength(11, ex.getDepCode()));
+        sb.append(ex.getDepCode());
 
-        sb.append(SystemType.fromId(ex.getSystemId()).getCodeNew()).append(ex.getSubSystemId());
+        String systemCodeNew = String.valueOf(SystemType.fromId(ex.getSystemId()).getCodeNew());
+        sb.append(completeStringLength(5, systemCodeNew, true)).append(ex.getSubSystemId());
 
         DateFormat year = new SimpleDateFormat("yyyy");
         Integer month = Integer.valueOf(new SimpleDateFormat("MM").format(ex.getBeginDate()));
@@ -151,13 +152,27 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
         return sb.toString();
     }
 
-    private String completeStringLength(Integer lengthNeed, String str) {
+    /**
+     * Дополняет символами '_' до необходимого количества символов
+     * @param lengthNeed длина выходной строки
+     * @param str входная строка
+     * @param leftAppending true - добавлять слева, false или null - справа
+     * @return дополненная строка
+     */
+    private String completeStringLength(Integer lengthNeed, String str, Boolean leftAppending) {
         if (str == null || lengthNeed <= str.length()) {
             return str;
         } else {
+
             StringBuilder sb = new StringBuilder(str);
-            for (int i = 0; i < lengthNeed - str.length(); i++) {
-                sb.append('_');
+            if (leftAppending != null && leftAppending) {
+                for (int i = 0; i < lengthNeed - str.length(); i++) {
+                    sb.insert(0, '_');
+                }
+            } else {
+                for (int i = 0; i < lengthNeed - str.length(); i++) {
+                    sb.append('_');
+                }
             }
             return sb.toString();
         }
