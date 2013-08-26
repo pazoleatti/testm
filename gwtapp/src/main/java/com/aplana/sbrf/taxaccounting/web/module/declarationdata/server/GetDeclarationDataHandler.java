@@ -86,7 +86,7 @@ public class GetDeclarationDataHandler
 				.getDeclarationType().getName());
 		result.setDepartment(departmentService.getDepartment(
 				declaration.getDepartmentId()).getName());
-		result.setReportPeriod(reportPeriodService.get(
+		result.setReportPeriod(reportPeriodService.getReportPeriod(
 				declaration.getReportPeriodId()).getName());
 
 		result.setPdf(generatePdfViewerModel(action, userInfo));

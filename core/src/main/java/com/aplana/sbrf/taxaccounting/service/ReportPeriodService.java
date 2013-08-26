@@ -14,17 +14,12 @@ import java.util.List;
  */
 public interface ReportPeriodService {
 
-	ReportPeriod get(int reportPeriodId);
-	
-	TaxPeriod getTaxPeriod(int taxPeriodId);
 
-	List<ReportPeriod> listByTaxPeriod(int taxPeriodId);
-
+	@Deprecated
 	void closePeriod(int reportPeriodId);
 
+	@Deprecated
 	void openPeriod(int reportPeriodId);
-
-	int add(ReportPeriod reportPeriod);
 
     /**
      * Последний отчетный период для указанного вида налога и подразделения
@@ -42,9 +37,23 @@ public interface ReportPeriodService {
 	 * @param departmentId
 	 * @return
 	 */
-	boolean checkOpened(int reportPeriodId, long departmentId);
+	boolean isActivePeriod(int reportPeriodId, long departmentId);
+	
+	/**
+	 * Проверяем, период ли остатков
+	 * 
+	 * @param reportPeriodId
+	 * @param departmentId
+	 * @return true - если остатков иначе false (не существует тоже false)
+	 * 
+	 */
+	boolean isBalancePeriod(int reportPeriodId, long departmentId);
+
 
 	/**
+	 * Открываем отчетный период для департамента.
+	 * Логика описана в аналитике - Ведение периодов
+	 *
 	 *
 	 * @param reportPeriod
 	 * @param year
@@ -63,6 +72,34 @@ public interface ReportPeriodService {
 	 * @return
 	 */
 	List<TaxPeriod> listByTaxType(TaxType taxType);
+	
+	
+	/**
+	 * Получает список отчетных периодов по отчетному периоду.
+	 * 
+	 * @param taxPeriodId
+	 * @return
+	 */
+	List<ReportPeriod> listByTaxPeriod(int taxPeriodId);
+	
+	
+	/**
+	 * Получает налоговый период по ID
+	 * 
+	 * @param taxPeriodId
+	 * @return
+	 */
+	TaxPeriod getTaxPeriod(int taxPeriodId);
+	
+	
+	/**
+	 * Получает отчетный период по ID
+	 * 
+	 * @param reportPeriodId
+	 * @return
+	 */
+	ReportPeriod getReportPeriod(int reportPeriodId);
+	
 	
 	
     /**

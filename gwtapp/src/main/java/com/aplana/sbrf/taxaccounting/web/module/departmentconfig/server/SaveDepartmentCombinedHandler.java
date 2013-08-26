@@ -50,8 +50,8 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
         if (depCombined != null
                 && depCombined.getDepartmentId() != null
                 && depCombined.getTaxType() != null
-                && action.getPeriod() != null
-                && action.getPeriod().isActive()) {
+                && action.getPeriod() != null ){
+          //*      && action.getPeriod().isActive()) {
 
             RefBookDataProvider provider = null;
 

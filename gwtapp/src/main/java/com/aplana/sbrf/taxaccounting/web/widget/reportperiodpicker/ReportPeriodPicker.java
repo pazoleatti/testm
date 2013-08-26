@@ -177,9 +177,9 @@ public class ReportPeriodPicker extends Composite implements HasEnabled{
 	public void setReportPeriods(List<ReportPeriod> reportPeriods){
 		for(ReportPeriod reportPeriod : reportPeriods){
 			// Если период для ввода остатков, то добавляем к имени суффикс (ВО)
-			if (reportPeriod.isBalancePeriod()) {
-				reportPeriod.setName(reportPeriod.getName() + " (ВО)");
-			}
+			//if (reportPeriod.isBalancePeriod()) {
+			//	reportPeriod.setName(reportPeriod.getName() + " (ВО)");
+			//}
 			CheckBox checkBox;
 			if(multiselectTree){
 				checkBox = new CheckBox(reportPeriod.getName());

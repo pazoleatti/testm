@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,11 +52,6 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	private DepartmentService departmentService;
 
 	@Override
-	public ReportPeriod get(int reportPeriodId) {
-		return reportPeriodDao.get(reportPeriodId);
-	}
-
-	@Override
 	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
 		return reportPeriodDao.listByTaxPeriod(taxPeriodId);
 	}
@@ -70,10 +66,6 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 		reportPeriodDao.changeActive(reportPeriodId, true);
 	}
 
-	@Override
-	public int add(ReportPeriod reportPeriod) {
-		return reportPeriodDao.add(reportPeriod);
-	}
 
     @Override
     public DepartmentReportPeriod getLastReportPeriod(TaxType taxType, long departmentId) {
@@ -82,9 +74,23 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
     }
 
 	@Override
-	public boolean checkOpened(int reportPeriodId, long departmentId) {
-		// TODO
-		throw new UnsupportedOperationException("Не реализован метод проверки открытости периода TODO");
+	public boolean isActivePeriod(int reportPeriodId, long departmentId) {
+		DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriodId, departmentId);
+		if (drp == null || !drp.isActive()){
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	@Override
+	public boolean isBalancePeriod(int reportPeriodId, long departmentId) {
+		DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriodId, departmentId);
+		if (drp == null || !drp.isBalance()){
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	@Override
@@ -229,4 +235,12 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 
         return cal;
     }
+
+	@Override
+	public ReportPeriod getReportPeriod(int reportPeriodId) {
+		return reportPeriodDao.get(reportPeriodId);
+	}
+
+
+
 }

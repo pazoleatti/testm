@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 
 import org.apache.commons.logging.Log;
@@ -17,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 
 @Service
 public class FormDataAccessServiceImpl implements FormDataAccessService {
@@ -40,8 +40,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	private FormTemplateDao formTemplateDao;
 	@Autowired
 	private DepartmentFormTypeDao departmentFormTypeDao;
+	
 	@Autowired
-	private DepartmentReportPeriodDao departmentReportPeriodDao;
+	ReportPeriodService reportPeriodService;
 
 	@Override
 	public boolean canRead(TAUserInfo userInfo, long formDataId) {
@@ -165,13 +166,12 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 
 	private boolean canEdit(FormDataAccessRoles formDataAccess, FormData formData, ReportPeriod formDataReportPeriod) {
-		DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formDataReportPeriod.getId(), Long.valueOf(formData.getDepartmentId()));
 		WorkflowState state = formData.getState();
-		if(!departmentReportPeriod.isActive()){
-			//Нельзя редактировать НФ для неактивного налогового периода
+		if (!reportPeriodService.isActivePeriod(formDataReportPeriod.getId(), formData.getDepartmentId())){
 			return false;
 		}
-		if (departmentReportPeriod.isBalance()) {
+		boolean balancePeriod = reportPeriodService.isBalancePeriod(formDataReportPeriod.getId(), formData.getDepartmentId());
+		if (balancePeriod) {
 			/* В отчетных периодах для ввода остатков редактирование возможно только контролерами для
 			 НФ в статусе "Создана" */
 			switch (state){
@@ -323,10 +323,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 	
 	private boolean canCreate(FormDataAccessRoles formDataAccess, int formTypeId, FormDataKind kind, Department formDataDepartment, ReportPeriod reportPeriod) {
-		DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriod.getId(), Long.valueOf(formDataDepartment.getId()));
-		if(!departmentReportPeriod.isActive()){
+		
+		boolean activePeriod = reportPeriodService.isActivePeriod(reportPeriod.getId(), formDataDepartment.getId());
+		if(!activePeriod){
 			//Нельзя создавать НФ для неактивного налогового периода
-			logger.warn(String.format("Отчетный период (%d) закрыт!", reportPeriod.getId()));
 			return false;
 		}
 
@@ -339,10 +339,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			}
 		}
 		if (!found) {
-			logger.warn(String.format("Вид формы (%d) и ее тип (%d) отсутствует среди допустимых у подразделения (%d)", formTypeId, kind.getId(), formDataDepartment.getId()));
 			return false;
 		}
-		if (departmentReportPeriod.isBalance()) {
+		boolean balancePeriod = reportPeriodService.isBalancePeriod(reportPeriod.getId(), formDataDepartment.getId());
+		if (balancePeriod) {
 			return formDataAccess.isControllerOfCurrentLevel() ||
 					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
 		} else if((kind == FormDataKind.ADDITIONAL || kind == FormDataKind.PRIMARY) &&
@@ -422,18 +422,20 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
 	private List<WorkflowMove> getAvailableMoves(FormDataAccessRoles formDataAccess, FormData formData,
 			ReportPeriod formDataReportPeriod) {
-		DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formDataReportPeriod.getId(), Long.valueOf(formData.getDepartmentId()));
 		List<WorkflowMove> result = new ArrayList<WorkflowMove>();
 		// Для того, чтобы иметь возможность изменить статус, у пользователя должны быть права
 		// на чтение соответствующей карточки данных и отчетный период должен быть активным
-		if (!canRead(formDataAccess, formData) || !departmentReportPeriod.isActive()) {
+		boolean activePeriod = reportPeriodService.isActivePeriod(formDataReportPeriod.getId(), formData.getDepartmentId());
+		boolean balancePeriod = reportPeriodService.isBalancePeriod(formDataReportPeriod.getId(), formData.getDepartmentId());
+		
+		if (!canRead(formDataAccess, formData) || !activePeriod) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Report period is closed");
 			}
 			return result;
 		}
 		WorkflowState state = formData.getState();
-		if (departmentReportPeriod.isBalance()) {
+		if (balancePeriod) {
 			// Если отчетный период для ввода остатков, то сокращаем жц до Создана - Принята
 			switch (state) {
 				case CREATED:
