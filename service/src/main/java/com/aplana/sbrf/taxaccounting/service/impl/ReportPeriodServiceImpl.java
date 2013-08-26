@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DictionaryTaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
@@ -34,9 +32,6 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 
 	@Autowired
 	private DepartmentReportPeriodDao departmentReportPeriodDao;
-
-	@Autowired
-	private DictionaryTaxPeriodDao dictionaryTaxPeriodDao;
 
 	@Autowired
 	private RefBookDao refBookDao;
