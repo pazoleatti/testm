@@ -15,13 +15,6 @@ import java.util.List;
  */
 public interface ReportPeriodService {
 
-
-	@Deprecated
-	void closePeriod(int reportPeriodId);
-
-	@Deprecated
-	void openPeriod(int reportPeriodId);
-
     /**
      * Последний отчетный период для указанного вида налога и подразделения
      * @param taxType Тип налога
@@ -91,6 +84,14 @@ public interface ReportPeriodService {
 	 * @return
 	 */
 	TaxPeriod getTaxPeriod(int taxPeriodId);
+	
+	/**
+	 * Получает последний заведенный налоговый период для типа налога
+	 * 
+	 * @param taxPeriodId
+	 * @return
+	 */
+	TaxPeriod getLastTaxPeriod(TaxType taxType);
 	
 	
 	/**

@@ -71,7 +71,7 @@ public class MappingServiceImpl implements MappingService {
         userInfo.setUser(taUserService.getUser("admin"));
         userInfo.setIp("127.0.0.1");
 
-        ReportPeriod reportPeriod = reportPeriodDao.getReportPeriodByTaxPeriodAndDict(
+        ReportPeriod reportPeriod = reportPeriodDao.getByTaxPeriodAndDict(
                 restoreExemplar.getTaxPeriod(),
                 restoreExemplar.getDictTaxPeriodId());
 

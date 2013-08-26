@@ -40,6 +40,12 @@
             <version>4.1</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>dynacache-spring</artifactId>
+			<version>${project.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 
 		<!-- Зависимости для юнит-тестов -->
 		<dependency>

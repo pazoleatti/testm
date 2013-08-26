@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.script.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.api.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.script.Income102Dao;
 import com.aplana.sbrf.taxaccounting.model.Income102;
