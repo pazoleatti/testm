@@ -29,12 +29,7 @@ public class OpenPeriodHandler extends AbstractActionHandler<OpenPeriodAction, O
 
 	@Override
 	public OpenPeriodResult execute(OpenPeriodAction action, ExecutionContext executionContext) throws ActionException {
-		ReportPeriod newReportPeriod = new ReportPeriod();
-		newReportPeriod.setMonths(action.getMonths());
-		newReportPeriod.setOrder(1);
-		newReportPeriod.setDictTaxPeriodId((int) action.getDictionaryTaxPeriodId());
-
-		reportPeriodService.open(newReportPeriod, action.getYear(), (int) action.getDictionaryTaxPeriodId(),
+		reportPeriodService.open(action.getYear(), (int) action.getDictionaryTaxPeriodId(),
 				action.getTaxType(), securityService.currentUserInfo(), action.getDepartmentId());
 		OpenPeriodResult result = new OpenPeriodResult();
 		return result;
@@ -43,14 +38,5 @@ public class OpenPeriodHandler extends AbstractActionHandler<OpenPeriodAction, O
 	@Override
 	public void undo(OpenPeriodAction getPeriodDataAction, OpenPeriodResult getPeriodDataResult, ExecutionContext executionContext) throws ActionException {
 		//ничего не делаем
-	}
-
-	private ReportPeriod findPeriodInListByPeriodDict(List<ReportPeriod> reportPeriods, int dictionaryTaxPeriodId) {
-		for (ReportPeriod reportPeriod : reportPeriods) {
-			if (reportPeriod.getDictTaxPeriodId() == dictionaryTaxPeriodId) {
-				return reportPeriod;
-			}
-		}
-		return null;
 	}
 }

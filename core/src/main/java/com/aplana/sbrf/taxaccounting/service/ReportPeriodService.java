@@ -51,7 +51,7 @@ public interface ReportPeriodService {
 	 * @param dictionaryTaxPeriodId
 	 * @param taxType
 	 */
-	void open(ReportPeriod reportPeriod, int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId);
+	void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId);
 
 	List<DepartmentReportPeriod> listByDepartmentId(long departmentId);
 	
