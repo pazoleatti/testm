@@ -1,11 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodAction;
@@ -29,9 +30,11 @@ public class OpenPeriodHandler extends AbstractActionHandler<OpenPeriodAction, O
 
 	@Override
 	public OpenPeriodResult execute(OpenPeriodAction action, ExecutionContext executionContext) throws ActionException {
+		List<LogEntry> logs = new ArrayList<LogEntry>();
 		reportPeriodService.open(action.getYear(), (int) action.getDictionaryTaxPeriodId(),
-				action.getTaxType(), securityService.currentUserInfo(), action.getDepartmentId());
+				action.getTaxType(), securityService.currentUserInfo(), action.getDepartmentId(), logs);
 		OpenPeriodResult result = new OpenPeriodResult();
+		result.setLogEntries(logs);
 		return result;
 	}
 

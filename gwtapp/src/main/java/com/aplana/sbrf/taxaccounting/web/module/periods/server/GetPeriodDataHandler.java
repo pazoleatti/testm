@@ -57,6 +57,8 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 				TableRow row = new TableRow();
 				row.setPeriodName(period.getReportPeriod().getName());
 				row.setPeriodCondition(period.isActive());
+				row.setDepartmentId(action.getDepartmentId());
+				row.setReportPeriodId(period.getReportPeriod().getId());
 				per.get(taxPeriod.getStartDate().toString()).add(row);
 			}
 		}

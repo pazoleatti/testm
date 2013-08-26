@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 
 import java.util.Calendar;
 import java.util.List;
@@ -54,13 +55,13 @@ public interface ReportPeriodService {
 	 * Открываем отчетный период для департамента.
 	 * Логика описана в аналитике - Ведение периодов
 	 *
-	 *
-	 * @param reportPeriod
 	 * @param year
 	 * @param dictionaryTaxPeriodId
 	 * @param taxType
 	 */
-	void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId);
+	void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId, List<LogEntry> logs);
+
+	void close(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs);
 
 	List<DepartmentReportPeriod> listByDepartmentId(long departmentId);
 	

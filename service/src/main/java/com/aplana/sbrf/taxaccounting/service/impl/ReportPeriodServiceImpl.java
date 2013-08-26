@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import java.util.*;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +96,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	}
 
 	@Override
-	public void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId) {
+	public void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId, List<LogEntry> logs) {
 		Calendar from = Calendar.getInstance();
 		from.set(Calendar.YEAR, year);
 		from.set(Calendar.MONTH, Calendar.JANUARY);
@@ -157,7 +159,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 				depRP.setReportPeriod(newReportPeriod);
 				depRP.setDepartmentId(Long.valueOf(dep.getId()));
 				depRP.setActive(true);
-				saveOrUpdate(depRP);
+				saveOrUpdate(depRP, logs);
 			}
 		} else {
 			// Сохраняем для пользователя
@@ -166,7 +168,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 			departmentReportPeriod.setBalance(false); //TODO
 			departmentReportPeriod.setDepartmentId(Long.valueOf(user.getUser().getDepartmentId()));
 			departmentReportPeriod.setReportPeriod(newReportPeriod);
-			saveOrUpdate(departmentReportPeriod);
+			saveOrUpdate(departmentReportPeriod, logs);
 
 			// Сохраняем для источников
 			List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
@@ -177,20 +179,50 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 				depRP.setReportPeriod(newReportPeriod);
 				depRP.setDepartmentId(Long.valueOf(dft.getDepartmentId()));
 				depRP.setActive(true);
-				saveOrUpdate(depRP);
+				saveOrUpdate(depRP, logs);
 			}
 
 		}
 	}
 
-	private void saveOrUpdate(DepartmentReportPeriod departmentReportPeriod) {
-		if (departmentReportPeriodDao.get(departmentReportPeriod.getReportPeriod().getId(),
-				departmentReportPeriod.getDepartmentId()) == null) {
-
-			departmentReportPeriodDao.save(departmentReportPeriod);
+	@Override
+	public void close(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs) {
+		if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT)) {
+			for(Department dep : departmentService.listAll()) { //Закрываем для всех
+				closePeriodWithLog(reportPeriodId, dep.getId(), logs);
+			}
 		} else {
+			closePeriodWithLog(reportPeriodId, departmentId, logs);
+			List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
+			departmentFormTypes.addAll(departmentFormTypeService.getDepartmentFormSources((int) departmentId, taxType));
+			for (DepartmentFormType dft : departmentFormTypes) {
+				closePeriodWithLog(reportPeriodId, dft.getDepartmentId(), logs);
+			}
+		}
+	}
+
+	private void closePeriodWithLog(int reportPeriodId, long departmentId, List<LogEntry> logs) {
+		departmentReportPeriodDao.updateActive(reportPeriodId, departmentId, false);
+		logs.add(new LogEntry(LogLevel.INFO, "Период закрыт для подразделения \"" +
+				departmentService.getDepartment((int) departmentId).getName() +
+				"\""));
+	}
+
+	private void saveOrUpdate(DepartmentReportPeriod departmentReportPeriod, List<LogEntry> logs) {
+		DepartmentReportPeriod dp = departmentReportPeriodDao.get(departmentReportPeriod.getReportPeriod().getId(),
+				departmentReportPeriod.getDepartmentId());
+
+		if (dp == null) { //не существует
+			departmentReportPeriodDao.save(departmentReportPeriod);
+		} else if (!dp.isActive()) { // существует и не открыт
 			departmentReportPeriodDao.updateActive(departmentReportPeriod.getReportPeriod().getId(),
 				departmentReportPeriod.getDepartmentId(), true);
+		} else { // уже открыт
+			return;
+		}
+		if (logs != null) {
+			logs.add(new LogEntry(LogLevel.INFO,"Создан период для подразделения \" " +
+					departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName()+ "\""));
 		}
 	}
 
