@@ -258,6 +258,7 @@ void importData() {
     def xmlString = (isRnu ?
         importService.getData(is, fileName, 'cp866') :
         importService.getData(is, fileName, 'windows-1251', 'Вид ценных бумаг', null))
+
     if (xmlString == null) {
         return
     }
@@ -496,6 +497,33 @@ void addData(def xml, def startRow, def startColumn) {
 
             // графа 12
             newRow.corporateBonds = getNumber(row.cell[index].text())
+
+            // проверка итоговых данных
+            if (xml.rowTotal.size() > 0) {
+                def totalRow = formData.createDataRow()
+
+                def columnsAlias = ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds',
+                        'municipalBondsBefore', 'rtgageBondsBefore', 'ovgvz',
+                        'eurobondsRF', 'itherEurobonds', 'corporateBonds']
+
+                columnsAlias.each { alias ->
+                    totalRow.getCell(alias).setValue(0)
+                }
+                columnsAlias.each { alias ->
+                    def value = totalRow.getCell(alias).getValue() + (newRow.getCell(alias).getValue() ?: 0)
+                    totalRow.getCell(alias).setValue(value)
+                }
+
+                def xmlTotal = xml.rowTotal[0]
+                def i = 3
+                for (def alias : columnsAlias) {
+                    if (totalRow.getCell(alias).getValue() != getNumber(xmlTotal.cell[i].text())) {
+                        logger.error('Итоговые значения неправильные.')
+                        return
+                    }
+                    i++
+                }
+            }
 
             data.clear()
             data.insert(newRow, 1)
