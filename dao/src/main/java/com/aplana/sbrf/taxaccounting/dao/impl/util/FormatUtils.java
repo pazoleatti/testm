@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.util;
+package com.aplana.sbrf.taxaccounting.dao.impl.util;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;

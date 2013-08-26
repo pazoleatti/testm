@@ -1,9 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-
 import java.util.List;
-import java.util.Set;
+
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 /**
  * Интерфейс сервиса для работы с привязкой департаментов к подразделениям
@@ -170,4 +174,20 @@ public interface DepartmentFormTypeService {
      * @param id id на удаление
      */
     void deleteDeclaration(Long id);
+    
+	/**
+	 * Получить вид налоговой формы по идентификатору
+	 * @param typeId идентификатор вида
+	 * @return Объект, представляющий вид налоговой формы
+	 * @throws DaoException если в БД нет записи с соответствующим ключом
+	 */
+	FormType getFormType(int formTypeId);
+	
+    /**
+     * Получить все существующие виды налоговых форм по виду налога
+     * @param taxType вид налога
+     * @return список всех существующих видов налоговых форм по виду налога
+     */
+	List<FormType> listAllByTaxType(TaxType taxType);
+    
 }

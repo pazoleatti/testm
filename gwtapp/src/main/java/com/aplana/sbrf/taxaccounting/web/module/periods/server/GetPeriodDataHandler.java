@@ -1,9 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
-import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
@@ -13,11 +21,6 @@ import com.aplana.sbrf.taxaccounting.web.module.periods.shared.TableRow;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
@@ -27,8 +30,6 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 	@Autowired
 	private ReportPeriodService reportPeriodService;
 
-	@Autowired
-	TaxPeriodDao taxPeriodDao;
 
 	@Autowired
 	DepartmentService departmentService;
@@ -46,7 +47,7 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 		List<DepartmentReportPeriod> reportPeriods = reportPeriodService.listByDepartmentId(action.getDepartmentId());
 		Map<String, List<TableRow>> per = new HashMap<String, List<TableRow>>();
 		for (DepartmentReportPeriod period : reportPeriods) {
-			TaxPeriod taxPeriod = taxPeriodDao.get(period.getReportPeriod().getTaxPeriodId());
+			TaxPeriod taxPeriod = reportPeriodService.getTaxPeriod(period.getReportPeriod().getTaxPeriodId());
 			if (taxPeriod.getStartDate().after(from.getTime()) && taxPeriod.getStartDate().before(to.getTime())) {
 				if (per.get(taxPeriod.getStartDate().toString()) == null) {
 					List<TableRow> tableRows = new ArrayList<TableRow>();

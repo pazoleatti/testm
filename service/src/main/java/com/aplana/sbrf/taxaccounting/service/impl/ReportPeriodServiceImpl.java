@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
@@ -78,8 +78,9 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	}
 
     @Override
-    public ReportPeriod getLastReportPeriod(TaxType taxType, long departmentId) {
-        return reportPeriodDao.getLastReportPeriod(taxType, departmentId);
+    public DepartmentReportPeriod getLastReportPeriod(TaxType taxType, long departmentId) {
+    	// TODO: Нужно получить последний открытый для этого подразделения.
+    	return null;
     }
 
 	@Override
@@ -158,4 +159,41 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 		}
 		return null;
 	}
+
+	@Override
+	public List<TaxPeriod> listByTaxType(TaxType taxType) {
+		return taxPeriodDao.listByTaxType(taxType);
+	}
+
+	@Override
+	public TaxPeriod getTaxPeriod(int taxPeriodId) {
+		return taxPeriodDao.get(taxPeriodId);
+	}
+	
+    public Calendar getStartDate(int reportPeriodId){
+        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+        TaxPeriod taxPeriod = taxPeriodDao.get(reportPeriod.getTaxPeriodId());
+        // календарь
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(taxPeriod.getStartDate());
+
+        // для налога на прибыль, периоды вложены в друг дгруга, и начало всегда совпадает
+        if (taxPeriod.getTaxType() != TaxType.INCOME){
+            // получим отчетные периоды для данного налогового периода
+            List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriodId());
+            // смещение относительно налогового периода
+            int months = 0;
+            for (ReportPeriod cReportPeriod: reportPeriodList){
+                // если достигли текущего то выходим из цикла
+                if (cReportPeriod.getId() == reportPeriod.getId()){
+                    break;
+                }
+                // смещение в месяцах
+                months += cReportPeriod.getMonths();
+            }
+            cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + months);
+        }
+
+        return cal;
+    }
 }

@@ -3,8 +3,10 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -13,6 +15,8 @@ import java.util.List;
 public interface ReportPeriodService {
 
 	ReportPeriod get(int reportPeriodId);
+	
+	TaxPeriod getTaxPeriod(int taxPeriodId);
 
 	List<ReportPeriod> listByTaxPeriod(int taxPeriodId);
 
@@ -28,7 +32,7 @@ public interface ReportPeriodService {
      * @param departmentId Подразделение
      * @return
      */
-    ReportPeriod getLastReportPeriod(TaxType taxType, long departmentId);
+    DepartmentReportPeriod getLastReportPeriod(TaxType taxType, long departmentId);
     
 
 	/**
@@ -50,4 +54,27 @@ public interface ReportPeriodService {
 	void open(ReportPeriod reportPeriod, int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId);
 
 	List<DepartmentReportPeriod> listByDepartmentId(long departmentId);
+	
+	
+	/**
+	 * Получает список налоговых периодов по типу налога.
+	 * 
+	 * @param taxType
+	 * @return
+	 */
+	List<TaxPeriod> listByTaxType(TaxType taxType);
+	
+	
+    /**
+     * Возвращает дату начала отчетного периода
+     * Дата высчитывается прибавлением смещения в месяцах к дате налогового периода
+     * Смещение в месяцах вычисляется путем суммирования длительности предыдущих
+     * отчетных периодов в данном налоговом периоде.
+     *
+     * Для отчетных периодов относящихся к налоговому периоду с типом "налог на прибыль"
+     * смещение считается по другому алгоритму
+     * @param reportPeriodId
+     * @return
+     */
+    public Calendar getStartDate(int reportPeriodId);
 }

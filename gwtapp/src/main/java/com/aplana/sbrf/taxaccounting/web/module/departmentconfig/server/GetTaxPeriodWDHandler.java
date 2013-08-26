@@ -1,17 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
-import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.*;
-import com.gwtplatform.dispatch.server.ExecutionContext;
-import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
-import com.gwtplatform.dispatch.shared.ActionException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetTaxPeriodWDAction;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetTaxPeriodWDResult;
+import com.gwtplatform.dispatch.server.ExecutionContext;
+import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
+import com.gwtplatform.dispatch.shared.ActionException;
 
 /**
  * Получение параметров подразделения и списка доступных налоговых периодов
@@ -23,11 +22,6 @@ import org.springframework.stereotype.Service;
 public class GetTaxPeriodWDHandler extends AbstractActionHandler<GetTaxPeriodWDAction,
         GetTaxPeriodWDResult> {
 
-    @Autowired
-    TaxPeriodDao taxPeriodSDao;
-
-    @Autowired
-    ReportPeriodDao reportPeriodDao;
 
     @Autowired
     ReportPeriodService reportPeriodService;
@@ -40,7 +34,7 @@ public class GetTaxPeriodWDHandler extends AbstractActionHandler<GetTaxPeriodWDA
     public GetTaxPeriodWDResult execute(GetTaxPeriodWDAction action, ExecutionContext executionContext)
             throws ActionException {
         GetTaxPeriodWDResult result = new GetTaxPeriodWDResult();
-        result.setTaxPeriods(taxPeriodSDao.listByTaxType(action.getTaxType()));
+        result.setTaxPeriods(reportPeriodService.listByTaxType(action.getTaxType()));
         DepartmentReportPeriod drp = reportPeriodService.getLastReportPeriod(action.getTaxType(), action.getDepartmentId());
         result.setLastReportPeriod(drp == null ? null : drp.getReportPeriod());
         return result;

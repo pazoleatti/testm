@@ -1,13 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.aplana.sbrf.taxaccounting.service.DataRowService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RollbackDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RollbackDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * Откат изменений в таблице
@@ -15,9 +17,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class RollbackDataHandler extends
 		AbstractActionHandler<RollbackDataAction, RollbackDataResult> {
+	
+	@Autowired
+	private SecurityService securityService;
 
 	@Autowired
-	DataRowDao dataRowDao;
+	DataRowService dataRowService;
 
 	public RollbackDataHandler() {
 		super(RollbackDataAction.class);
@@ -25,7 +30,7 @@ public class RollbackDataHandler extends
 
 	@Override
 	public RollbackDataResult execute(RollbackDataAction action, ExecutionContext context) throws ActionException {
-		dataRowDao.rollback(action.getFormDataId());
+		dataRowService.rollback(securityService.currentUserInfo(), action.getFormDataId());
 		return new RollbackDataResult();
 	}
 
