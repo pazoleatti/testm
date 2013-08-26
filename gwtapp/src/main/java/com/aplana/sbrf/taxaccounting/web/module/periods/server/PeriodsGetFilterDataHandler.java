@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
-import com.aplana.sbrf.taxaccounting.dao.DictionaryTaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
@@ -12,8 +11,6 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;

@@ -6,6 +6,7 @@ import java.sql.Types;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -68,7 +69,7 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 	public List<TaxPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to) {
 		try {
 			return getJdbcTemplate().query(
-					"select * from tax_period where tax_type = ? and start_date>=? and start_date<=?",
+					"select * from tax_period where tax_type = ? and end_date>=? and start_date<=?",
 					new Object[]{taxType.getCode(), from, to},
 					new int[] { Types.VARCHAR, Types.DATE, Types.DATE },
 					new TaxPeriodRowMapper()
