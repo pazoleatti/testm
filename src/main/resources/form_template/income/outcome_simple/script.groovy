@@ -259,7 +259,7 @@ void checkDeclarationBankOnCancelAcceptance() {
  * @author rtimerbaev
  * @since 21.02.2013 13:50
  */
-void consolidationBank() {
+def consolidationBank() {
     def data = getData(formData)
     if (data == null) {
         return
@@ -302,7 +302,7 @@ void consolidationBank() {
 /**
  * Консолидация данных из рну-7 и рну-5 в сводные расходы простые уровня ОП.
  */
-void consolidationSummary() {
+def consolidationSummary() {
     def data = getData(formData)
     if (data == null) {
         return
