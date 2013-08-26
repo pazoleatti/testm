@@ -37,10 +37,12 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     @Override
     public void importXML(InputStream stream, Integer periodID, int typeID) throws IOException {
         // Проверка того, что пользователем указан открытый отчетный период
+    	//TODO (SBRFACCTAX-3722))
+    	/*
         if (!reportPeriodDao.get(periodID).isActive()) {
             throw new ServiceException("Указан закрытый период. Файл не может быть загружен.");
         }
-
+    	 */ 
         if (typeID == 1) {
             List<Income101> list = importIncome101(stream);
             bookerStatementsDao.delete101(periodID);

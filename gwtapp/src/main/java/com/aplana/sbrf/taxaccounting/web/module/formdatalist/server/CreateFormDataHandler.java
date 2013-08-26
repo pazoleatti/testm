@@ -53,7 +53,7 @@ public class CreateFormDataHandler extends
 						.getFormDataTypeId().intValue()), action
 						.getDepartmentId(), FormDataKind.fromId(action
 						.getFormDataKindId().intValue()),
-						reportPeriodService.get(action.getReportPeriodId().intValue())));
+						reportPeriodService.getReportPeriod(action.getReportPeriodId().intValue())));
 
 		return result;
 

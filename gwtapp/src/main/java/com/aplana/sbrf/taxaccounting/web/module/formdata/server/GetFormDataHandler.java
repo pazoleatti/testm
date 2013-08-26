@@ -111,7 +111,7 @@ public class GetFormDataHandler extends
 		FormTemplate formTemplate = formTemplateService.get(formData
 				.getFormTemplateId());
 
-		ReportPeriod reportPeriod = reportPeriodService.get(formData.getReportPeriodId());
+		ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
 		result.setReportPeriod(reportPeriod);
 		result.setDepartmenName(departmentService.getDepartment(
 				formData.getDepartmentId()).getName());
