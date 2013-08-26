@@ -24,7 +24,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 
 public class DeclarationDataAccessServiceImplTest {
@@ -152,10 +151,6 @@ public class DeclarationDataAccessServiceImplTest {
 		ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);
 
 		ReportPeriod reportPeriod = mockReportPeriod(REPORT_PERIOD_ID);
-
-		ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
-		when(reportPeriodDao.get(REPORT_PERIOD_ID)).thenReturn(reportPeriod);
-		ReflectionTestUtils.setField(service, "reportPeriodDao", reportPeriodDao);
 
 		DeclarationData declarationCreatedBank = mockDeclarationData(DECLARATION_CREATED_BANK_ID, Department.ROOT_BANK_ID, false, DECLARATION_TEMPLATE_1_ID, REPORT_PERIOD_ID);
 		DeclarationData declarationAcceptedBank = mockDeclarationData(DECLARATION_ACCEPTED_BANK_ID, Department.ROOT_BANK_ID, true, DECLARATION_TEMPLATE_1_ID, REPORT_PERIOD_ID);
