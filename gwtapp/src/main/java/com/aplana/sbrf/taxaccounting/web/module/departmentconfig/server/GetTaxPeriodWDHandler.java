@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.*;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -40,7 +41,8 @@ public class GetTaxPeriodWDHandler extends AbstractActionHandler<GetTaxPeriodWDA
             throws ActionException {
         GetTaxPeriodWDResult result = new GetTaxPeriodWDResult();
         result.setTaxPeriods(taxPeriodSDao.listByTaxType(action.getTaxType()));
-        result.setLastReportPeriod(reportPeriodService.getLastReportPeriod(action.getTaxType(), action.getDepartmentId()));
+        DepartmentReportPeriod drp = reportPeriodService.getLastReportPeriod(action.getTaxType(), action.getDepartmentId());
+        result.setLastReportPeriod(drp == null ? null : drp.getReportPeriod());
         return result;
     }
 
