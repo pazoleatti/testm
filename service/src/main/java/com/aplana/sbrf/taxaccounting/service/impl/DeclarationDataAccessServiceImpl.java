@@ -57,8 +57,7 @@ public class DeclarationDataAccessServiceImpl implements
 	private void checkRolesForReading(TAUserInfo userInfo,
 			int declarationDepartmentId, int reportPeriodId) {
 		Department declarationDepartment = departmentDao.getDepartment(declarationDepartmentId);
-		ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-		checkRolesForReading(userInfo, declarationDepartment, reportPeriod);
+		checkRolesForReading(userInfo, declarationDepartment, reportPeriodId);
 	}
 
 	/**
@@ -71,18 +70,19 @@ public class DeclarationDataAccessServiceImpl implements
 	 * 
 	 * @param userInfo
 	 *            информация о пользователе
+	 *
 	 * @param declarationDepartment
 	 *            подразделение, к которому относится декларация
-	 * @param reportPeriod
-	 *            отчетный период
+	 * @param reportPeriodId
+	 *            код отчетного периода
 	 * @return true - права есть, false - прав нет
 	 */
 	private void checkRolesForReading(TAUserInfo userInfo,
-			Department declarationDepartment, ReportPeriod reportPeriod) {
+			Department declarationDepartment, int reportPeriodId) {
 
 		// Нельзя работать с декларациями в отчетном периоде вида
 		// "ввод остатков"
-		if (reportPeriodService.isBalancePeriod(reportPeriod.getId(), Long.valueOf(declarationDepartment.getId()))) {
+		if (reportPeriodService.isBalancePeriod(reportPeriodId, Long.valueOf(declarationDepartment.getId()))) {
 			throw new AccessDeniedException("Декларациями в отчетном периоде вида 'ввод остатков'");
 		}
 
