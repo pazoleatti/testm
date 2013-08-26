@@ -80,7 +80,7 @@ public class RnuGenerationServiceImpl implements RnuGenerationService {
         //К
         switch (exemplar.getPeriodityId()) {
             case 1:            //Ежегодно
-                builder.append(YearCode.fromYear(year));
+                builder.append(YearCode.fromYear(year).getCode());
                 break;
             case 4:             //Ежеквартально
                 builder.append(QuartalCode.fromNum(month).getCodeIfQuartal());

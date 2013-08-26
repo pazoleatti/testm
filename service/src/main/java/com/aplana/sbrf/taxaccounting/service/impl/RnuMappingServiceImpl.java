@@ -5,8 +5,11 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.migration.RestoreExemplar;
 import com.aplana.sbrf.taxaccounting.model.migration.enums.DepartmentRnuMapping;
 import com.aplana.sbrf.taxaccounting.model.migration.enums.NalogFormType;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.PeriodRnuMapping;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.YearCode;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.RnuMappingService;
@@ -19,9 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 
 @Service
@@ -43,19 +44,18 @@ public class RnuMappingServiceImpl implements RnuMappingService {
     private RefBookFactory rbFactory;
 
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+    private static SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
     private static String charSet = "UTF-8";
 
     @Override
     public void addFormDataFromRnuFile(String filename, byte[] fileContent) {
 
         InputStream inputStream = new ByteArrayInputStream(fileContent);
-        String firstRow = getFirstRow(fileContent);
+        RestoreExemplar restoreExemplar = restoreExemplar(filename, fileContent);
 
-        int formTemplateId = getFormTemplateId(filename);
-        int departmentId = getDepartamentId(filename, firstRow);
         long formDataId;
 
-         //TODO сделать правильную загрузку данных текущего пользователя
+        //TODO сделать правильную загрузку данных текущего пользователя
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(taUserService.getUser("admin"));
         userInfo.setIp("127.0.0.1");
@@ -67,53 +67,54 @@ public class RnuMappingServiceImpl implements RnuMappingService {
         //reportPeriod = reportPeriodService.listByTaxPeriodAndDepartment();
 
         Logger logger = new Logger();
-        formDataId = formDataService.createFormData(logger, userInfo, formTemplateId, departmentId, FormDataKind.PRIMARY, reportPeriod);
+        formDataId = formDataService.createFormData(logger,
+                userInfo,
+                restoreExemplar.getFormTemplateId(),
+                restoreExemplar.getDepartmentId(),
+                FormDataKind.PRIMARY,
+                reportPeriod);
 
         // вызов скрипта
-        formDataService.importFormData(logger, userInfo, formDataId, formTemplateId, departmentId,
+        formDataService.importFormData(logger, userInfo, formDataId, restoreExemplar.getFormTemplateId(), restoreExemplar.getDepartmentId(),
                 FormDataKind.PRIMARY, reportPeriod.getId(), inputStream, filename);
     }
 
-    private Integer getFormTemplateId(String rnuFilename) {
-        return NalogFormType.getNewCodeByNNN(rnuFilename.substring(0, 3));
-    }
+    private RestoreExemplar restoreExemplar(String rnuFilename, byte[] fileContent) {
+        RestoreExemplar exemplar = new RestoreExemplar();
 
-    /**
-     * Возвращает номер месяца, если РНУ ежемесячное
-     *
-     * @param firstRow заголовок в файле
-     * @return номер или null, если РНУ не ежемесячное
-     */
-    private Integer getMonth(String firstRow) {
+        String firstRow = getFirstRow(fileContent);
         String[] params = firstRow.split("|");
-        DateFormat format = new SimpleDateFormat("MM");
         try {
-            Date start = dateFormat.parse(params[2]);
-            Date end = dateFormat.parse(params[3]);
-            String monthStart = format.format(start);
-            String monthEnd = format.format(end);
-            if (monthStart.equals(monthEnd))
-                return Integer.valueOf(monthStart);
-            else {
-                return null;
-            }
-        } catch (Exception e) {
-            throw new ServiceException("Ошибка при маппинге дат периодов");
-        }
-    }
 
-    /**
-     * Возвращает ид департамента новой системы
-     */
-    private Integer getDepartamentId(String filename, String firstRow) {
-        String depCode = filename.substring(3, 6);
-        String system = firstRow.split("|")[5].trim();
-        if (system.length() == 1) {
-            return DepartmentRnuMapping.getDepartmentId(depCode, system, null);
-        } else if (system.length() == 3) {
-            return DepartmentRnuMapping.getDepartmentId(depCode, system.substring(0, 1), system.substring(1, 2));
-        } else {
-            throw new ServiceException("Ошибка при маппинге кода подразделения");
+            exemplar.setBeginDate(dateFormat.parse(params[2]));
+            exemplar.setEndDate(dateFormat.parse(params[3]));
+
+            exemplar.setFormTemplateId(NalogFormType.getNewCodeByNNN(rnuFilename.substring(0, 3)));
+
+            // код подразделения
+            String system = params[5].trim();
+            String depCode = rnuFilename.substring(3, 6);
+            if (system.length() == 1) {
+                exemplar.setDepartmentId(DepartmentRnuMapping.getDepartmentId(depCode, system, null));
+            } else if (system.length() == 3) {
+                exemplar.setDepartmentId(DepartmentRnuMapping.getDepartmentId(depCode, system.substring(0, 1), system.substring(1, 2)));
+            } else {
+                throw new ServiceException("Ошибка при маппинге кода подразделения");
+            }
+
+            Integer year = Integer.valueOf(yearFormat.format(params[2]));
+            exemplar.setTaxPeriod(YearCode.fromYear(year).getTaxPeriodId());
+
+            String periodCode = rnuFilename.substring(7, 8);
+            if (NalogFormType.RNU31.getCodeNew() == exemplar.getFormTemplateId()) {
+                exemplar.setDictTaxPeriodId(PeriodRnuMapping.fromCode(periodCode).getDictTaxPeriodIdForMonthly());
+            } else {
+                exemplar.setDictTaxPeriodId(PeriodRnuMapping.fromCode(periodCode).getDictTaxPeriodId());
+            }
+
+            return exemplar;
+        } catch (Exception e) {
+            throw new ServiceException("Parsing Error", e);
         }
     }
 
