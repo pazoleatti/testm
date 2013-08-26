@@ -16,8 +16,6 @@ public interface ReportPeriodService {
 
 	List<ReportPeriod> listByTaxPeriod(int taxPeriodId);
 
-	List<ReportPeriod> listByTaxPeriodAndDepartment(int taxPeriodId, long departmentId);
-
 	void closePeriod(int reportPeriodId);
 
 	void openPeriod(int reportPeriodId);

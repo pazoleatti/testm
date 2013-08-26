@@ -106,9 +106,5 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 	public void changeActive(int reportPeriodId, boolean active) {
 		throw new DaoException("Ошибок не заводить. В разработке");
 	}
-	
-	@Override
-	public List<ReportPeriod> listByTaxPeriodAndDepartmentId(int taxPeriodId, long departmentId) {
-		throw new DaoException("Ошибок не заводить. В разработке");
-	}
+
 }
