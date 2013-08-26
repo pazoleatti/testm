@@ -1,9 +1,9 @@
-package com.aplana.sbrf.taxaccounting.dao;
-
-import java.util.List;
+package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+
+import java.util.List;
 
 /**
  * Интерфейс DAO для работы с {@link ReportPeriod отчётными периодами} 
@@ -18,16 +18,7 @@ public interface ReportPeriodDao {
 	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException если периода с заданным идентификатором не существует
 	 */
 	ReportPeriod get(int reportPeriodId);
-	
-	/**
-	 * Получить объект текущего отчётного периода по виду налога. Поиск ведется только по обычным периодам, то есть
-	 * периоды для ввода остатков исключены из поиска.
-	 * @param taxType вид налога
-	 * @return объект представляющий текущий отчётный период по заданному виду налога, или null, если такого периода нет (еще не открыли)
-	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException если в БД несколько открытых периодов по заданному виду налога
-	 */
-	ReportPeriod getCurrentPeriod(TaxType taxType);
-	
+		
 	/**
 	 * Возвращает список отчётных периодов, входящий в данный налоговый период. 
 	 * Список отсортирован по {@link ReportPeriod#getOrder() порядковым номерам} отчётных периодов
@@ -36,19 +27,13 @@ public interface ReportPeriodDao {
 	 */
 	List<ReportPeriod> listByTaxPeriod(int taxPeriodId);
 
-	/**
-	 *
-	 * @param taxPeriodId
-	 * @param departmentId
-	 * @return
-	 */
-	public List<ReportPeriod> listByTaxPeriodAndDepartmentId(int taxPeriodId, long departmentId);
 
 	/**
 	 *
 	 * @param reportPeriodId
 	 * @param active
 	 */
+	@Deprecated
 	void changeActive(int reportPeriodId, boolean active);
 
 	/**
@@ -56,6 +41,7 @@ public interface ReportPeriodDao {
 	 * @param reportPeriod отчётный период
 	 * @return идентификатор нового отчетного периода
 	 */
+	//TODO: Перименовать в save
 	int add(ReportPeriod reportPeriod);
 
     /**
@@ -64,5 +50,14 @@ public interface ReportPeriodDao {
      * @param departmentId Подразделение
      * @return
      */
+	@Deprecated
     ReportPeriod getLastReportPeriod(TaxType taxType, long departmentId);
+
+    /**
+     * Отчетный период по налоговому периоду и периоду в справочнике "Коды, определяющие налоговый (отчётный) период"
+     * @param taxPeriodId
+     * @param dictTaxPeriodId
+     * @return
+     */
+    ReportPeriod getReportPeriodByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId);
 }

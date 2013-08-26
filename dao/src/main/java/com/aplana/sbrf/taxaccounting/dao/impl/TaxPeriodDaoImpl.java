@@ -1,22 +1,22 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DictionaryTaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Date;
-import java.util.List;
+import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 /**
  * Реализация DAO для работы с {@link com.aplana.sbrf.taxaccounting.model.TaxPeriod налоговыми периодами}
@@ -24,9 +24,6 @@ import java.util.List;
 @Repository
 @Transactional(readOnly = true)
 public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
-
-	@Autowired
-	private DictionaryTaxPeriodDao dictionaryTaxPeriodDao;
 
 	private final class TaxPeriodRowMapper implements RowMapper<TaxPeriod> {
 		@Override
@@ -36,7 +33,6 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 			t.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
 			t.setStartDate(rs.getDate("start_date"));
 			t.setEndDate(rs.getDate("end_date"));
-			t.setDictionaryTaxPeriod(dictionaryTaxPeriodDao.getByTaxType(t.getTaxType()));
 			return t;
 		}
 	}
@@ -73,7 +69,7 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 	public List<TaxPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to) {
 		try {
 			return getJdbcTemplate().query(
-					"select * from tax_period where tax_type = ? and start_date>=? and start_date<=?",
+					"select * from tax_period where tax_type = ? and end_date>=? and start_date<=?",
 					new Object[]{taxType.getCode(), from, to},
 					new int[] { Types.VARCHAR, Types.DATE, Types.DATE },
 					new TaxPeriodRowMapper()
@@ -103,6 +99,7 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 				new int[]{Types.NUMERIC, Types.VARCHAR, Types.DATE, Types.DATE}
 
 		);
+		taxPeriod.setId(id);
 		return id;
 	}
 

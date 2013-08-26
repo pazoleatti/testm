@@ -77,7 +77,7 @@ switch (formDataEvent) {
 // графа 5  - lotSizeCurrent
 // графа 6  - reserve
 // графа 7  - cost
-// графа 8  - signSecurity
+// графа 8  - signSecurity Справочник
 // графа 9  - marketQuotation
 // графа 10 - costOnMarketQuotation
 // графа 11 - reserveCalcValue
@@ -177,7 +177,7 @@ void calc() {
         row.costOnMarketQuotation = (row.marketQuotation ? round(row.lotSizeCurrent * row.marketQuotation, 2) : 0)
 
         // графа 11
-        if (row.signSecurity == '+') {
+        if (getSign(row.signSecurity) == '+') {
             def a = (row.cost ?: 0)
             tmp = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
         } else {
@@ -340,24 +340,25 @@ def logicalCheck(def useLog) {
             }
 
             // 5. Проверка необращающихся акций (графа 8, 11, 12)
-            if (row.signSecurity == '-' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
+            def sign = getSign(row.signSecurity)
+            if (sign == '-' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
                 logger.warn('Облигации необращающиеся, графы 11 и 12 ненулевые!')
             }
 
             // 6. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 13)
-            if (row.signSecurity == '+' && row.reserveCalcValue - row.reserve > 0 && row.reserveRecovery != 0) {
+            if (sign == '+' && row.reserveCalcValue - row.reserve > 0 && row.reserveRecovery != 0) {
                 logger.error('Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
                 return false
             }
 
             // 7. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 12)
-            if (row.signSecurity == '+' && row.reserveCalcValue - row.reserve < 0 && row.reserveCreation != 0) {
+            if (sign == '+' && row.reserveCalcValue - row.reserve < 0 && row.reserveCreation != 0) {
                 logger.error('Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
                 return false
             }
 
             // 8. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 13)
-            if (row.signSecurity == '+' && row.reserveCalcValue - row.reserve == 0 &&
+            if (sign == '+' && row.reserveCalcValue - row.reserve == 0 &&
                     (row.reserveCreation != 0 || row.reserveRecovery != 0)) {
                 logger.error('Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
                 return false
@@ -423,7 +424,7 @@ def logicalCheck(def useLog) {
             }
 
             // графа 11
-            if (row.signSecurity == '+') {
+            if (sign == '+') {
                 def a = (row.cost == null ? 0 : row.cost)
                 tmp = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
             } else {
@@ -817,7 +818,7 @@ def getValueForColumn4(def dataOld, def formDataOld, def row) {
     if (dataOld != null && !getRows(dataOld).isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
         for (def rowOld : getRows(dataOld)) {
             if (rowOld.tradeNumber == row.tradeNumber) {
-                value = (rowOld.signSecurity == '+' && row.signSecurity == '-' ? rowOld.lotSizePrev : 0)
+                value = (getSign(rowOld.signSecurity) == '+' && getSign(row.signSecurity) == '-' ? rowOld.lotSizePrev : 0)
                 count += 1
             }
         }

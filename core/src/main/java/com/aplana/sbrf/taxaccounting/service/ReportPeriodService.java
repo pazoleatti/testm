@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 import java.util.List;
@@ -12,11 +14,7 @@ public interface ReportPeriodService {
 
 	ReportPeriod get(int reportPeriodId);
 
-	ReportPeriod getCurrentPeriod(TaxType taxType);
-
 	List<ReportPeriod> listByTaxPeriod(int taxPeriodId);
-
-	List<ReportPeriod> listByTaxPeriodAndDepartment(int taxPeriodId, long departmentId);
 
 	void closePeriod(int reportPeriodId);
 
@@ -41,5 +39,15 @@ public interface ReportPeriodService {
 	 * @return
 	 */
 	boolean checkOpened(int reportPeriodId, long departmentId);
-	
+
+	/**
+	 *
+	 * @param reportPeriod
+	 * @param year
+	 * @param dictionaryTaxPeriodId
+	 * @param taxType
+	 */
+	void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId);
+
+	List<DepartmentReportPeriod> listByDepartmentId(long departmentId);
 }

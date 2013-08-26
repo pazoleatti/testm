@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.incrementbutton.IncrementButton;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
@@ -50,22 +51,12 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	@UiField
 	CustomDateBox term;
 
-	@UiField(provided = true)
-	ListBoxWithTooltip<DictionaryTaxPeriod> period;
+	@UiField
+	RefBookPickerPopupWidget period;
 
 	@Inject
 	public OpenDialogView(Binder uiBinder, EventBus eventBus) {
 		super(eventBus);
-
-		period = new ListBoxWithTooltip<DictionaryTaxPeriod>(new AbstractRenderer<DictionaryTaxPeriod>() {
-			@Override
-			public String render(DictionaryTaxPeriod object) {
-				if (object == null) {
-					return "";
-				}
-				return object.getName();
-			}
-		});
 
 		widget = uiBinder.createAndBindUi(this);
 		widget.setAnimationEnabled(true);
@@ -89,11 +80,6 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	}
 
 	@Override
-	public void setDictionaryTaxPeriod(List<DictionaryTaxPeriod> dictionaryTaxPeriod) {
-		period.setAcceptableValues(dictionaryTaxPeriod);
-	}
-
-	@Override
 	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
 		periodPicker.setReportPeriods(reportPeriods);
 	}
@@ -101,6 +87,11 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	@Override
 	public void setYear(int year) {
 		yearBox.setValue(year);
+	}
+
+	@Override
+	public void setTaxType(TaxType taxType) {
+		period.setFilter(taxType.getCode() + "=1");
 	}
 
 	@Override
@@ -123,7 +114,7 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 		openFilterData.setYear(yearBox.getValue());
 		openFilterData.setBalancePeriod(balancePeriod.getValue());
 		openFilterData.setDepartmentId(departmentPicker.getValue().iterator().next());
-		openFilterData.setDictionaryTaxPeriod(period.getValue());
+	    openFilterData.setDictionaryTaxPeriodId(period.getValue());
 		openFilterData.setEndDate(term.getValue());
 
 		getUiHandlers().onContinue(openFilterData);

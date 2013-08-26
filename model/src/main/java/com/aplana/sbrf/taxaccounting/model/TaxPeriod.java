@@ -15,7 +15,7 @@ public class TaxPeriod extends IdentityObject<Integer> {
 	private TaxType taxType;
 	private Date startDate;
 	private Date endDate;
-	private List<DictionaryTaxPeriod> dictionaryTaxPeriod;
+
 	
 	/**
 	 * @return вид налога
@@ -62,11 +62,8 @@ public class TaxPeriod extends IdentityObject<Integer> {
 		this.endDate = endDate;
 	}
 
-	public List<DictionaryTaxPeriod> getDictionaryTaxPeriod() {
-		return dictionaryTaxPeriod;
-	}
-
+	@Deprecated
 	public void setDictionaryTaxPeriod(List<DictionaryTaxPeriod> dictionaryTaxPeriod) {
-		this.dictionaryTaxPeriod = dictionaryTaxPeriod;
+		throw new UnsupportedOperationException();
 	}
 }
