@@ -1,14 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.server;
 
-import com.aplana.sbrf.taxaccounting.service.script.TaxPeriodService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetTaxPeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetTaxPeriodResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
 
 /**
  * User: avanteev
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Service;
 public class GetTaxPeriodHandler extends AbstractActionHandler<GetTaxPeriodAction, GetTaxPeriodResult> {
 
     @Autowired
-    TaxPeriodService taxPeriodService;
+    ReportPeriodService taxPeriodService;
 
     public GetTaxPeriodHandler() {
         super(GetTaxPeriodAction.class);

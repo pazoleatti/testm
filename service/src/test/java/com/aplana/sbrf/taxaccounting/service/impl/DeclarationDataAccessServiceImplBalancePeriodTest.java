@@ -3,10 +3,10 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -149,11 +149,7 @@ public class DeclarationDataAccessServiceImplBalancePeriodTest {
 		when(declarationTemplateDao.get(DECLARATION_TEMPLATE_2_ID)).thenReturn(declarationTemplate2);
 		ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);
 
-		ReportPeriod reportPeriod = mockReportPeriod(REPORT_PERIOD_ID, true, true);
-
-		ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
-		when(reportPeriodDao.get(REPORT_PERIOD_ID)).thenReturn(reportPeriod);
-		ReflectionTestUtils.setField(service, "reportPeriodDao", reportPeriodDao);
+		ReportPeriod reportPeriod = mockReportPeriod(REPORT_PERIOD_ID);
 
 		DeclarationData declarationCreatedBank = mockDeclarationData(DECLARATION_CREATED_BANK_ID, Department.ROOT_BANK_ID, false, DECLARATION_TEMPLATE_1_ID, REPORT_PERIOD_ID);
 		DeclarationData declarationAcceptedBank = mockDeclarationData(DECLARATION_ACCEPTED_BANK_ID, Department.ROOT_BANK_ID, true, DECLARATION_TEMPLATE_1_ID, REPORT_PERIOD_ID);
@@ -169,6 +165,17 @@ public class DeclarationDataAccessServiceImplBalancePeriodTest {
 		when(declarationDataDao.get(DECLARATION_CREATED_TB2_ID)).thenReturn(declarationCreatedTB2);
 		when(declarationDataDao.get(DECLARATION_ACCEPTED_TB2_ID)).thenReturn(declarationAcceptedTB2);		
 		ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
+
+		ReportPeriodService reportPeriodService = mock(ReportPeriodService.class);
+		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ID, DEPARTMENT_TB1_ID)).thenReturn(true);
+		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_ID, DEPARTMENT_TB1_ID)).thenReturn(true);
+
+		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ID, DEPARTMENT_TB2_ID)).thenReturn(true);
+		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_ID, DEPARTMENT_TB2_ID)).thenReturn(true);
+
+		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ID, Department.ROOT_BANK_ID)).thenReturn(true);
+		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_ID, Department.ROOT_BANK_ID)).thenReturn(true);
+		ReflectionTestUtils.setField(service, "reportPeriodService", reportPeriodService);
 	}
 	
 	@Test

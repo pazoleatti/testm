@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script;
 
 
 
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataCollection;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;

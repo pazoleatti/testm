@@ -1,31 +1,37 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
-import com.aplana.sbrf.taxaccounting.dao.DictionaryTaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterData;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterDataResult;
-import com.gwtplatform.dispatch.server.ExecutionContext;
-import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
-import com.gwtplatform.dispatch.shared.ActionException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DictionaryTaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterData;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterDataResult;
+import com.gwtplatform.dispatch.server.ExecutionContext;
+import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
+import com.gwtplatform.dispatch.shared.ActionException;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
@@ -41,9 +47,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	@Autowired
 	private DepartmentService departmentService;
 	@Autowired
-	private ReportPeriodDao reportPeriodDao;
-	@Autowired
-	TaxPeriodDao taxPeriodDao;
+	private ReportPeriodService reportPeriodService;
 	@Autowired
 	TAUserService userService;
 	@Autowired
@@ -72,8 +76,10 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	    }
 	    res.setFilterValues(filterValues);
 	    res.setDictionaryTaxPeriods(convert(result));
-	    res.setCurrentReportPeriod(getCurrentReportPeriod(action.getTaxType()));
-	    TaxPeriod lastTaxType = taxPeriodDao.getLast(action.getTaxType());
+	    // По умолчанию отчетный период не выбран
+	    res.setCurrentReportPeriod(null);
+	    
+	    TaxPeriod lastTaxType = reportPeriodService.getLastTaxPeriod(action.getTaxType());
 
 		if (lastTaxType == null) {
 			Calendar current = Calendar.getInstance();
@@ -105,17 +111,6 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
         //ничего не делаем
     }
 
-	private ReportPeriod getCurrentReportPeriod(TaxType taxType){
-		try {
-			ReportPeriod rp = reportPeriodDao.getCurrentPeriod(taxType);
-			if (rp != null) {
-				return rp;
-			}
-		} catch (DaoException e) {
-			logger.warn("Failed to find current report period for taxType = " + taxType + ", message is: " + e.getMessage());
-		}
-		return null;
-	}
 
 	private List<DictionaryTaxPeriod> convert(PagingResult<Map<String, RefBookValue>> values) {
 		List<DictionaryTaxPeriod> result = new ArrayList<DictionaryTaxPeriod>();

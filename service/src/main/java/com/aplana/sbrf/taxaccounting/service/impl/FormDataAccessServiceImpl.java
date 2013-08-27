@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 
@@ -26,7 +28,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
 	private Log logger = LogFactory.getLog(getClass());
 
-	private final static String FORMDATA_KIND_STATE_ERROR = "Event type: \"%s\". Unsuppotable case for formData with \"%s\" kind and \"%s\" state!";
+	private static final String FORMDATA_KIND_STATE_ERROR = "Event type: \"%s\". Unsuppotable case for formData with \"%s\" kind and \"%s\" state!";
+	private static final String REPORT_PERIOD_IS_CLOSED = "Report period (%d) is closed!";
+	private static final String INCORRECT_DEPARTMENT_FORM_TYPE = "Form type(%d) and form kind(%d) is not applicated for department(%d)";
 
 	@Autowired
 	private FormDataDao formDataDao;
@@ -38,6 +42,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	private FormTemplateDao formTemplateDao;
 	@Autowired
 	private DepartmentFormTypeDao departmentFormTypeDao;
+	@Autowired
+	private ReportPeriodService reportPeriodService;
 
 	@Override
 	public boolean canRead(TAUserInfo userInfo, long formDataId) {
@@ -162,11 +168,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
 	private boolean canEdit(FormDataAccessRoles formDataAccess, FormData formData, ReportPeriod formDataReportPeriod) {
 		WorkflowState state = formData.getState();
-		if(!formDataReportPeriod.isActive()){
-			//Нельзя редактировать НФ для неактивного налогового периода
+		if (!reportPeriodService.isActivePeriod(formDataReportPeriod.getId(), formData.getDepartmentId())){
 			return false;
 		}
-		if (formDataReportPeriod.isBalancePeriod()) {
+		if (reportPeriodService.isBalancePeriod(formDataReportPeriod.getId(), formData.getDepartmentId())) {
 			/* В отчетных периодах для ввода остатков редактирование возможно только контролерами для
 			 НФ в статусе "Создана" */
 			switch (state){
@@ -318,8 +323,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 	
 	private boolean canCreate(FormDataAccessRoles formDataAccess, int formTypeId, FormDataKind kind, Department formDataDepartment, ReportPeriod reportPeriod) {
-		if(!reportPeriod.isActive()){
+		if(!reportPeriodService.isActivePeriod(reportPeriod.getId(), formDataDepartment.getId())){
 			//Нельзя создавать НФ для неактивного налогового периода
+			logger.warn(String.format(REPORT_PERIOD_IS_CLOSED, reportPeriod.getId()));
 			return false;
 		}
 
@@ -332,9 +338,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			}
 		}
 		if (!found) {
+			logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE, formTypeId, kind.getId(), formDataDepartment.getId()));
 			return false;
 		}
-		if (reportPeriod.isBalancePeriod()) {
+		if (reportPeriodService.isBalancePeriod(reportPeriod.getId(), formDataDepartment.getId())) {
+			// период ввода остатков
 			return formDataAccess.isControllerOfCurrentLevel() ||
 					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
 		} else if((kind == FormDataKind.ADDITIONAL || kind == FormDataKind.PRIMARY) &&
@@ -415,16 +423,17 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	private List<WorkflowMove> getAvailableMoves(FormDataAccessRoles formDataAccess, FormData formData,
 			ReportPeriod formDataReportPeriod) {
 		List<WorkflowMove> result = new ArrayList<WorkflowMove>();
+		boolean activePeriod = reportPeriodService.isActivePeriod(formDataReportPeriod.getId(), formData.getDepartmentId());
+		boolean balancePeriod = reportPeriodService.isBalancePeriod(formDataReportPeriod.getId(), formData.getDepartmentId());
+		
 		// Для того, чтобы иметь возможность изменить статус, у пользователя должны быть права
 		// на чтение соответствующей карточки данных и отчетный период должен быть активным
-		if (!canRead(formDataAccess, formData) || !formDataReportPeriod.isActive()) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Report period is closed");
-			}
+		if (!canRead(formDataAccess, formData) || !activePeriod) {
+			logger.warn(String.format(REPORT_PERIOD_IS_CLOSED, formDataReportPeriod.getId()));
 			return result;
 		}
 		WorkflowState state = formData.getState();
-		if (formDataReportPeriod.isBalancePeriod()) {
+		if (balancePeriod) {
 			// Если отчетный период для ввода остатков, то сокращаем жц до Создана - Принята
 			switch (state) {
 				case CREATED:

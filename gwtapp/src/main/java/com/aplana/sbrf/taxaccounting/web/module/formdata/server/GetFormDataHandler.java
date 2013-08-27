@@ -1,9 +1,28 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.script.TaxPeriodService;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.ObjectLock;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
@@ -11,13 +30,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResul
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
@@ -37,7 +49,7 @@ public class GetFormDataHandler extends
 	private ReportPeriodService reportPeriodService;
 
 	@Autowired
-	private TaxPeriodService taxPeriodService;
+	private ReportPeriodService taxPeriodService;
 
 	@Autowired
 	private DepartmentService departmentService;
@@ -99,7 +111,8 @@ public class GetFormDataHandler extends
 		FormTemplate formTemplate = formTemplateService.get(formData
 				.getFormTemplateId());
 
-		ReportPeriod reportPeriod = reportPeriodService.get(formData.getReportPeriodId());
+		ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+		result.setBalancePeriod(reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId()));
 		result.setReportPeriod(reportPeriod);
 		result.setDepartmenName(departmentService.getDepartment(
 				formData.getDepartmentId()).getName());
@@ -109,7 +122,7 @@ public class GetFormDataHandler extends
 		result.setTemplateFormName(formTemplate.getName());
 		result.setFormData(formData);
 
-		TaxPeriod taxPeriod = taxPeriodService.get(reportPeriod.getTaxPeriodId());
+		TaxPeriod taxPeriod = taxPeriodService.getTaxPeriod(reportPeriod.getTaxPeriodId());
 		result.setTaxPeriodStartDate(taxPeriod.getStartDate());
 		result.setTaxPeriodEndDate(taxPeriod.getEndDate());
 	}

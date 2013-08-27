@@ -1,11 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.BookerStatementsDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.Income101;
 import com.aplana.sbrf.taxaccounting.model.Income102;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BookerStatementsService;
+
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -36,10 +37,12 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     @Override
     public void importXML(InputStream stream, Integer periodID, int typeID) throws IOException {
         // Проверка того, что пользователем указан открытый отчетный период
+    	//TODO (SBRFACCTAX-3722))
+    	/*
         if (!reportPeriodDao.get(periodID).isActive()) {
             throw new ServiceException("Указан закрытый период. Файл не может быть загружен.");
         }
-
+    	 */ 
         if (typeID == 1) {
             List<Income101> list = importIncome101(stream);
             bookerStatementsDao.delete101(periodID);

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,9 +14,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -24,6 +25,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 @ContextConfiguration({"ReportPeriodDaoTest.xml"})
 @Transactional
 public class ReportPeriodDaoTest {
+
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
 
@@ -48,24 +50,21 @@ public class ReportPeriodDaoTest {
 	
 	@Test
 	public void listByTaxPeriodSuccessfulTest() {
-		
-
-		
 		ReportPeriod newReportPeriod = new ReportPeriod();
 		newReportPeriod.setName("MyTestName1");
 		newReportPeriod.setOrder(9);
 		newReportPeriod.setMonths(3);
 		newReportPeriod.setTaxPeriodId(taxPeriod.getId());
 		newReportPeriod.setDictTaxPeriodId(21);
-		reportPeriodDao.add(newReportPeriod);
+		reportPeriodDao.save(newReportPeriod);
 		
 		newReportPeriod = new ReportPeriod();
 		newReportPeriod.setName("MyTestName2");
 		newReportPeriod.setOrder(10);
 		newReportPeriod.setMonths(3);
 		newReportPeriod.setTaxPeriodId(taxPeriod.getId());
-		newReportPeriod.setDictTaxPeriodId(21);
-		reportPeriodDao.add(newReportPeriod);
+		newReportPeriod.setDictTaxPeriodId(22);
+		reportPeriodDao.save(newReportPeriod);
 		
 		List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(taxPeriod.getId());
 		assertEquals(2, reportPeriodList.size());
@@ -76,7 +75,6 @@ public class ReportPeriodDaoTest {
 		assertEquals(0, reportPeriodList.size());
 	}
 
-
 	@Test
 	public void saveAndGetSuccessTest() {
 		ReportPeriod newReportPeriod = new ReportPeriod();
@@ -86,7 +84,7 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setTaxPeriodId(taxPeriod.getId());
 		newReportPeriod.setDictTaxPeriodId(21);
 
-		int newReportPeriodId = reportPeriodDao.add(newReportPeriod);
+		int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
 		ReportPeriod reportPeriod = reportPeriodDao.get(newReportPeriodId);
 
 		assertEquals("MyTestName", reportPeriod.getName());
@@ -97,4 +95,16 @@ public class ReportPeriodDaoTest {
 		assertEquals(21, reportPeriod.getDictTaxPeriodId());
 	}
 
+    @Test
+    public void getReportPeriodByTaxPeriodAndDictTest1() {
+        ReportPeriod reportPeriod1 = reportPeriodDao.getByTaxPeriodAndDict(1, 21);
+        ReportPeriod reportPeriod2 = reportPeriodDao.getByTaxPeriodAndDict(1, 22);
+        Assert.assertEquals(reportPeriod1.getId(), Integer.valueOf(1));
+        Assert.assertEquals(reportPeriod2.getId(), Integer.valueOf(2));
+    }
+
+    @Test(expected = DaoException.class)
+    public void getReportPeriodByTaxPeriodAndDictTest2() {
+        reportPeriodDao.getByTaxPeriodAndDict(-1, -1);
+    }
 }

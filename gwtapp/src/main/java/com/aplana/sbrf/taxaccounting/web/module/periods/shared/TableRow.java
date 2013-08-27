@@ -5,6 +5,8 @@ import java.io.Serializable;
 public class TableRow implements Serializable {
 
 	private int id;
+	private long reportPeriodId;
+	private long departmentId;
 	private String periodKind;
 	private String periodName;
 	private Boolean periodCondition;
@@ -16,6 +18,22 @@ public class TableRow implements Serializable {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public long getReportPeriodId() {
+		return reportPeriodId;
+	}
+
+	public void setReportPeriodId(long reportPeriodId) {
+		this.reportPeriodId = reportPeriodId;
+	}
+
+	public long getDepartmentId() {
+		return departmentId;
+	}
+
+	public void setDepartmentId(long departmentId) {
+		this.departmentId = departmentId;
 	}
 
 	public String getPeriodKind() {

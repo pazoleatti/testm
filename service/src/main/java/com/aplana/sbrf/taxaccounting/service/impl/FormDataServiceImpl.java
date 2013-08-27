@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.service.*;
+
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,6 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
@@ -36,6 +36,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
@@ -198,16 +199,17 @@ public class FormDataServiceImpl implements FormDataService {
 		// Execute scripts for the form event CREATE
 		formDataScriptingService.executeScript(userInfo, formData,
 				importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger,null);
-		
-		formDataDao.save(formData);
-		// Заполняем начальные строки (но не сохраняем)
-		dataRowDao.saveRows(formData, formTemplate.getRows());
-		
+
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте создания налоговой формы",
 					logger.getEntries());
 		}
+
+		formDataDao.save(formData);
+		// Заполняем начальные строки (но не сохраняем)
+		dataRowDao.saveRows(formData, formTemplate.getRows());
+
 		dataRowDao.commit(formData.getId());
 		
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
@@ -454,13 +456,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 		FormData formData = formDataDao.get(formDataId);
 				
-
-        if (!checkDestinations(formData)) {
-            String message = "Переход \"" + workflowMove.getName() + "\" из текущего состояния невозможен," +
-                    " т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.";
-            logger.error(message);
-            throw new ServiceException(message);
-        }
+        checkDestinations(formData);
 
 		formDataScriptingService.executeScript(userInfo,
 				formData, workflowMove.getEvent(), logger, null);
@@ -483,11 +479,9 @@ public class FormDataServiceImpl implements FormDataService {
                     // compose для приемников после принятия формы или отмены
                     if (workflowMove.getToState() == WorkflowState.ACCEPTED ||
                             workflowMove.getFromState() == WorkflowState.ACCEPTED) {
-                        // отчётный период
-                        ReportPeriod reportPeriod = reportPeriodService.get(formData.getReportPeriodId());
+                        
                         // признак периода ввода остатков
-                        boolean isBalancePeriod = (reportPeriod != null && reportPeriod.isBalancePeriod());
-                        if (!isBalancePeriod) {
+                        if (reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
                             // вызвать compose у форм-приемников
                             List<DepartmentFormType> departmentFormTypes = departmentFormTypeDao.getFormDestinations(
                                     formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
@@ -607,11 +601,8 @@ public class FormDataServiceImpl implements FormDataService {
     /**
      * Проверка наличия и статуса приемника при осуществлении перевода формы
      * в статус "Подготовлена"/"Утверждена"/"Принята".
-     *
-     * @param formData объект с данными по налоговой форме
-     * @return true - все нормально, false - есть приемники в статусе отличном от "создана"
      */
-    private boolean checkDestinations(FormData formData) {
+    private void checkDestinations(FormData formData) {
         List<DepartmentFormType> departmentFormTypes =
                 departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
                         formData.getFormType().getId(), formData.getKind());
@@ -621,10 +612,12 @@ public class FormDataServiceImpl implements FormDataService {
                         department.getDepartmentId(), formData.getReportPeriodId());
                 // если форма существует и статус отличен от "создана"
                 if (form != null && form.getState() != WorkflowState.CREATED) {
-                    return false;
+                    throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
+                }
+                if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), department.getDepartmentId())){
+                	throw new ServiceException("Переход невозможен, т.к. у одного из приемников период не отрыт.");
                 }
             }
         }
-        return true;
     }
 }

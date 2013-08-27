@@ -278,8 +278,25 @@ void importData() {
         return
     }
 
-    // добавить данные в форму
-    addData(xml, startRow, startColumn)
+    // сохранить начальное состояние формы
+    def data = getData(formData)
+    def rowsOld = getRows(data)
+    try {
+        // добавить данные в форму
+        addData(xml, startRow, startColumn)
+
+        // расчитать и проверить
+        calc()
+        logicalCheck(false)
+    } catch(Exception e) {
+        logger.error('Во время загрузки данных произошла ошибка!')
+    }
+    // откатить загрузку если есть ошибки
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        data.clear()
+        data.insert(rowsOld, 1)
+    }
+    data.commit()
 }
 
 /*

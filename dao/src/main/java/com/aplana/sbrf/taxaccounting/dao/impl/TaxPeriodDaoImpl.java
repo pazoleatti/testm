@@ -12,8 +12,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
@@ -68,7 +68,7 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 	public List<TaxPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to) {
 		try {
 			return getJdbcTemplate().query(
-					"select * from tax_period where tax_type = ? and start_date>=? and start_date<=?",
+					"select * from tax_period where tax_type = ? and end_date>=? and start_date<=?",
 					new Object[]{taxType.getCode(), from, to},
 					new int[] { Types.VARCHAR, Types.DATE, Types.DATE },
 					new TaxPeriodRowMapper()

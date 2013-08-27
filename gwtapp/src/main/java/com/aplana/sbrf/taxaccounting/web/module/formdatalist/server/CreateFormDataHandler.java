@@ -4,12 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateFormData;
@@ -30,7 +30,7 @@ public class CreateFormDataHandler extends
 	private FormDataService formDataService;
 
 	@Autowired
-	private ReportPeriodDao reportPeriodDao;
+	private ReportPeriodService reportPeriodService;
 
 	@Autowired
 	FormTemplateService formTemplateService;
@@ -53,7 +53,7 @@ public class CreateFormDataHandler extends
 						.getFormDataTypeId().intValue()), action
 						.getDepartmentId(), FormDataKind.fromId(action
 						.getFormDataKindId().intValue()),
-						reportPeriodDao.get(action.getReportPeriodId().intValue())));
+						reportPeriodService.getReportPeriod(action.getReportPeriodId().intValue())));
 
 		return result;
 

@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserFull;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.WSException;
@@ -109,7 +110,7 @@ public class TAUserServiceImpl implements TAUserService {
 	}
 
     @Override
-    public List<TAUserFull> lisAllFullActiveUsers() {
+    public List<TAUserFull> listAllFullActiveUsers() {
         List<TAUserFull> taUserFullList = new ArrayList<TAUserFull>();
         for(Integer userId : userDao.getUserIds()){
             TAUserFull userFull = new TAUserFull();

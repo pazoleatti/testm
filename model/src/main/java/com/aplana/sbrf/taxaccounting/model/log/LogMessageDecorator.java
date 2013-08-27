@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.log;
+package com.aplana.sbrf.taxaccounting.model.log;
 
 /**
  * Интрефейс используется объектом {@Logger} для того, 

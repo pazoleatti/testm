@@ -266,7 +266,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     public void setReportPeriod(ReportPeriod reportPeriod) {
         currentReportPeriod = reportPeriod;
         period.setSelectedReportPeriods(Arrays.asList(currentReportPeriod));
-        editButton.setVisible(reportPeriod != null && reportPeriod.isActive());
+        //editButton.setVisible(reportPeriod != null && reportPeriod.isActive());
+        // TODO (SBRFACCTAX-3722)
     }
 
     @Override
@@ -357,9 +358,10 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @UiHandler("editButton")
     public void onEdit(ClickEvent event) {
-        if (currentReportPeriod != null && currentReportPeriod.isActive()) {
-            setEditMode(true);
-        }
+    	// TODO (SBRFACCTAX-3722)
+        //if (currentReportPeriod != null && currentReportPeriod.isActive()) {
+        //    setEditMode(true);
+        //}
     }
 
     /**
@@ -369,7 +371,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
      */
     private void setEditMode(boolean isEditMode) {
         this.isEditMode = isEditMode;
-        editButton.setVisible(!isEditMode && currentReportPeriod != null && currentReportPeriod.isActive());
+        // TODO (SBRFACCTAX-3722)
+        // editButton.setVisible(!isEditMode && currentReportPeriod != null && currentReportPeriod.isActive());
         saveButton.setVisible(isEditMode);
         cancelButton.setVisible(isEditMode);
         enableAllChildren(isEditMode, formPanel);
@@ -423,7 +426,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         this.currentReportPeriod = reportPeriod;
 
         // Редактировать можно только открытые периоды
-        editButton.setVisible(reportPeriod != null && reportPeriod.isActive());
+        // TODO (SBRFACCTAX-3722)
+        //editButton.setVisible(reportPeriod != null && reportPeriod.isActive());
 
         updateVisibility();
         reloadDepartmentParams();
