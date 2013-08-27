@@ -13,5 +13,5 @@ public final class RefBookListTokens {
 	private RefBookListTokens() {
 	}
 
-	public static final String refbookList = "!refbooklist";
+	public static final String REFBOOK_LIST = "!refbooklist";
 }

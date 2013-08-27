@@ -95,7 +95,7 @@ public class GetMainMenuActionHandler extends
 
                 nsiMenuItem.getSubMenu().add(new MenuItem("Бухгалтерская отчётность", NUMBER_SIGN + BookerStatementsTokens.bookerStatements));
 	            if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-	                nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.refbookList));
+	                nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
 	            }
             }
 			/*settingMenuItem.getSubMenu().add(new MenuItem("Тест РНУ 26",
