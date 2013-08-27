@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao;
+package com.aplana.sbrf.taxaccounting.dao.api;
 
 import java.util.Date;
 import java.util.List;
@@ -28,7 +28,8 @@ public interface TaxPeriodDao {
 	List<TaxPeriod> listByTaxType(TaxType taxType);
 
 	/**
-	 * Получить список всех налоговых периодов по заданному виду налога за период.
+	 * Получить список всех налоговых периодов по заданному виду налога за период. Алгоритм: ищет все налоговые периоды,
+	 * которые пересекаются с указанным временным интервалом
 	 * @param taxType вид налога
 	 * @param from дата начала
 	 * @param to дата конца

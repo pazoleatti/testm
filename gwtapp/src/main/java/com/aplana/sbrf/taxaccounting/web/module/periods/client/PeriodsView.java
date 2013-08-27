@@ -15,7 +15,6 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -109,34 +108,47 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 			available.add(dep.getId());
 		}
 		departmentPicker.setAvalibleValues(departments, available);
-		departmentPicker.setValue(selectedDepartments);
+		if ((selectedDepartments != null) && (!selectedDepartments.isEmpty())) {
+			departmentPicker.setValue(selectedDepartments);
+		}
 		fromBox.setValue(yearFrom);
 		toBox.setValue(yearTo);
 
 	}
 
+	@Override
+	public int getFromYear() {
+		return fromBox.getValue();
+	}
+
+	@Override
+	public int getToYear() {
+		return toBox.getValue();
+	}
+
+	@Override
+	public long getDepartmentId() {
+		return departmentPicker.getValue().get(0);
+	}
+
+	@Override
+	public TableRow getSelectedRow() {
+		return selectionModel.getSelectedObject();
+	}
+
 	@UiHandler("find")
 	void onFindClicked(ClickEvent event) {
-		if ( (fromBox.getValue() > toBox.getValue())) {
-			Window.alert("Интервал поиска периодов указан неверно!");
-			return;
-		}
-		if (getUiHandlers() != null) {
-			getUiHandlers().applyFilter(
-					Integer.valueOf(fromBox.getValue()),
-					Integer.valueOf(toBox.getValue()),
-					departmentPicker.getValue().isEmpty() ?
-							0 : departmentPicker.getValue().iterator().next()
-			);
-		}
+		getUiHandlers().find();
 	}
+
+
 
 	@UiHandler("closePeriod")
 	void onClosePeriodClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			TableRow selectedRow = selectionModel.getSelectedObject();
 			if (!selectedRow.isSubHeader()) {
-				getUiHandlers().closePeriod(selectedRow);
+				getUiHandlers().closePeriod();
 			}
 		}
 	}

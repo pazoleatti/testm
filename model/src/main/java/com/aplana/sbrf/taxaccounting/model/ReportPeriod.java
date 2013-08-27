@@ -14,12 +14,11 @@ public class ReportPeriod implements Serializable {
 	
 	private Integer id;
 	private String name;
-	private boolean active;
+
 	private int months;
 	private int order;
 	private int taxPeriodId;
-	private boolean balancePeriod;
-	private long departmentId;
+	
 	private int dictTaxPeriodId;
 
 	/**
@@ -48,20 +47,6 @@ public class ReportPeriod implements Serializable {
 		this.name = name;
 	}
 
-	/**
-	 * Возвращает значение признака активности отчётного перида
-	 * @return true - если период активен, false - в противном случае
-	 */
-	public boolean isActive() {
-		return active;
-	}
-	/**
-	 * Задать значение признака активности отчётного периода
-	 * @param active
-	 */
-	public void setActive(boolean active) {
-		this.active = active;
-	}
 	
 	/**
 	 * Получить количество месяцев в пероде
@@ -111,21 +96,6 @@ public class ReportPeriod implements Serializable {
 		this.taxPeriodId = taxPeriodId;
 	}
 
-	public boolean isBalancePeriod() {
-		return this.balancePeriod;
-	}
-
-	public void setBalancePeriod(boolean balancePeriod) {
-		this.balancePeriod = balancePeriod;
-	}
-
-	public long getDepartmentId() {
-		return departmentId;
-	}
-
-	public void setDepartmentId(long departmentId) {
-		this.departmentId = departmentId;
-	}
 
 	public int getDictTaxPeriodId() {
 		return dictTaxPeriodId;

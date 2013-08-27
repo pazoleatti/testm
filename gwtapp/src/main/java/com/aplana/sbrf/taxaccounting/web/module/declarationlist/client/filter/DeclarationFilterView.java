@@ -1,13 +1,20 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -16,8 +23,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-
-import java.util.*;
 
 public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterUIHandlers> implements DeclarationFilterPresenter.MyView,
         ReportPeriodSelectHandler {
@@ -45,23 +50,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
     public DeclarationFilterView(final MyBinder binder) {
 	    for (TaxType taxType : TaxType.values()){
 	    	final ReportPeriodPicker periodPiker = new ReportPeriodPicker(this);
-	    	periodPiker.setEnabled(false);
 		    taxTypeReportPeriodPickerMap.put(taxType, periodPiker);
-		    // Убрал мультивыбор подразделения (http://jira.aplana.com/browse/SBRFACCTAX-3401)
-		    DepartmentPickerPopupWidget depPiker = new DepartmentPickerPopupWidget("Выберите подразделение", false);
-		    depPiker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
-				@Override
-				public void onValueChange(ValueChangeEvent<List<Integer>> event) {
-					if (event.getValue().isEmpty()){
-						periodPiker.clearReportPeriods();
-						periodPiker.setEnabled(false);
-					} else {
-						periodPiker.clearReportPeriods();
-						periodPiker.setEnabled(true);
-					}
-					
-				}
-			});
+
+		    DepartmentPickerPopupWidget depPiker = new DepartmentPickerPopupWidget("Выберите подразделение", true);
 		    taxTypeDepartmentSelectionTree.put(taxType, depPiker);
 	    }
 
@@ -89,9 +80,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
 	@Override
 	public void setSelectedReportPeriods(List<ReportPeriod> reportPeriodList){
-		if(getUiHandlers() != null){
-			taxTypeReportPeriodPickerMap.get(getUiHandlers().getCurrentTaxType()).setSelectedReportPeriods(reportPeriodList);
-		}
+		taxTypeReportPeriodPickerMap.get(getUiHandlers().getCurrentTaxType()).setSelectedReportPeriods(reportPeriodList);
 	}
 
 	@Override
@@ -124,9 +113,8 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
 	@Override
 	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
-		DepartmentPicker depPiker = taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType());
-		if (taxPeriod!=null && !depPiker.getValue().isEmpty()){
-			getUiHandlers().onTaxPeriodSelected(taxPeriod, depPiker.getValue().iterator().next());
+		if (taxPeriod!=null){
+			getUiHandlers().onTaxPeriodSelected(taxPeriod);
 		}
 	}
 

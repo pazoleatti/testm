@@ -1,0 +1,2 @@
+insert into ref_book(id, name) values (8, 'Коды, определяющие налоговый (отчётный) период');
+insert into ref_book_record(id, record_id, ref_book_id, version, status) values (21, 1, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);

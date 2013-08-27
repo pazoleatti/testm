@@ -8,7 +8,7 @@ public class OpenFilterData {
 	int year;
 	boolean balancePeriod;
 	long departmentId;
-	DictionaryTaxPeriod dictionaryTaxPeriod;
+	long dictionaryTaxPeriodId;
 	Date endDate;
 
 	public int getYear() {
@@ -35,12 +35,12 @@ public class OpenFilterData {
 		this.departmentId = departmentId;
 	}
 
-	public DictionaryTaxPeriod getDictionaryTaxPeriod() {
-		return dictionaryTaxPeriod;
+	public long getDictionaryTaxPeriod() {
+		return dictionaryTaxPeriodId;
 	}
 
-	public void setDictionaryTaxPeriod(DictionaryTaxPeriod dictionaryTaxPeriod) {
-		this.dictionaryTaxPeriod = dictionaryTaxPeriod;
+	public void setDictionaryTaxPeriodId(long dictionaryTaxPeriodId) {
+		this.dictionaryTaxPeriodId = dictionaryTaxPeriodId;
 	}
 
 	public Date getEndDate() {

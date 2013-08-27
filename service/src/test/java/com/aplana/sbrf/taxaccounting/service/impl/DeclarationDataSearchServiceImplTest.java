@@ -1,24 +1,30 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+
 import static com.aplana.sbrf.taxaccounting.test.DeclarationTypeMockUtils.mockDeclarationType;
 import static com.aplana.sbrf.taxaccounting.test.DepartmentDeclarationTypeMockUtils.mockDepartmentDeclarationType;
 import static com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils.mockDepartment;
 import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**

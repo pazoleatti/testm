@@ -1,8 +1,8 @@
-package com.aplana.sbrf.taxaccounting.dao;
+package com.aplana.sbrf.taxaccounting.dao.api;
 
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 

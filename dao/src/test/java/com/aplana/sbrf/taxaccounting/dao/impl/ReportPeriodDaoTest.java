@@ -1,9 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Date;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,122 +14,97 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-
-import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"ReportPeriodDaoTest.xml"})
 @Transactional
 public class ReportPeriodDaoTest {
+
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
 
 	@Autowired
 	private TaxPeriodDao taxPeriodDao;
-
-	@Test
-	public void getSuccessfulTest() {
-		ReportPeriod reportPeriod = reportPeriodDao.get(1);
-		assertEquals("Transport report period 1", reportPeriod.getName());
-		assertTrue(reportPeriod.isActive());
-		assertEquals(3, reportPeriod.getMonths());
-		assertEquals(TaxType.TRANSPORT, taxPeriodDao.get(reportPeriod.getTaxPeriodId()).getTaxType());
-	}
+	
+	private TaxPeriod taxPeriod;
 
 	@Test(expected = DaoException.class)
 	public void getNotExistentTest() {
 		reportPeriodDao.get(-1);
 	}
-
-	@Test
-	public void getCurrentPeriodSuccessfulTest() {
-		ReportPeriod reportPeriod = reportPeriodDao.getCurrentPeriod(TaxType.TRANSPORT);
-		assertEquals("Transport report period 1", reportPeriod.getName());
-		assertTrue(reportPeriod.isActive());
-		assertEquals(TaxType.TRANSPORT, taxPeriodDao.get(reportPeriod.getTaxPeriodId()).getTaxType());
-	}
-
-	@Test
-	public void getCurrentPeriodEmptyTest() {
-		ReportPeriod reportPeriod = reportPeriodDao.getCurrentPeriod(TaxType.INCOME);
-		assertNull(reportPeriod);
+	
+	@Before
+	public void init(){
+		taxPeriod = new TaxPeriod();
+		taxPeriod.setStartDate(new Date());
+		taxPeriod.setEndDate(new Date());
+		taxPeriod.setTaxType(TaxType.TRANSPORT);
+		taxPeriodDao.add(taxPeriod);
 	}
 	
-	@Test(expected=DaoException.class)
-	public void getCurrentPeriodDuplicateTest() {
-		reportPeriodDao.getCurrentPeriod(TaxType.VAT);
-	}
-
 	@Test
 	public void listByTaxPeriodSuccessfulTest() {
-		List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(1);
+		ReportPeriod newReportPeriod = new ReportPeriod();
+		newReportPeriod.setName("MyTestName1");
+		newReportPeriod.setOrder(9);
+		newReportPeriod.setMonths(3);
+		newReportPeriod.setTaxPeriodId(taxPeriod.getId());
+		newReportPeriod.setDictTaxPeriodId(21);
+		reportPeriodDao.save(newReportPeriod);
+		
+		newReportPeriod = new ReportPeriod();
+		newReportPeriod.setName("MyTestName2");
+		newReportPeriod.setOrder(10);
+		newReportPeriod.setMonths(3);
+		newReportPeriod.setTaxPeriodId(taxPeriod.getId());
+		newReportPeriod.setDictTaxPeriodId(22);
+		reportPeriodDao.save(newReportPeriod);
+		
+		List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(taxPeriod.getId());
 		assertEquals(2, reportPeriodList.size());
-		assertEquals(1, reportPeriodList.get(0).getOrder());
-		assertEquals(2, reportPeriodList.get(1).getOrder());
-
-		reportPeriodList = reportPeriodDao.listByTaxPeriod(21);
-		assertEquals(3, reportPeriodList.size());
-		assertEquals(1, reportPeriodList.get(0).getOrder());
-		assertEquals(2, reportPeriodList.get(1).getOrder());
-		assertEquals(3, reportPeriodList.get(2).getOrder());
-
-		reportPeriodList = reportPeriodDao.listByTaxPeriod(31);
-		assertEquals(1, reportPeriodList.size());
-		assertEquals(1, reportPeriodList.get(0).getOrder());
+		assertEquals(9, reportPeriodList.get(0).getOrder());
+		assertEquals(10, reportPeriodList.get(1).getOrder());
 
 		reportPeriodList = reportPeriodDao.listByTaxPeriod(-1);
 		assertEquals(0, reportPeriodList.size());
 	}
 
 	@Test
-	public void closeReportPeriodTest() {
-		ReportPeriod reportPeriod = reportPeriodDao.get(1);
-		assertEquals(true, reportPeriod.isActive());
-		reportPeriodDao.changeActive(reportPeriod.getId(), false);
-		reportPeriod = reportPeriodDao.get(1);
-		assertEquals(false, reportPeriod.isActive());
-	}
-
-	@Test
-	public void openReportPeriodTest() {
-		ReportPeriod reportPeriod = reportPeriodDao.get(2);
-		assertEquals(false, reportPeriod.isActive());
-		reportPeriodDao.changeActive(reportPeriod.getId(), true);
-		reportPeriod = reportPeriodDao.get(2);
-		assertEquals(true, reportPeriod.isActive());
-	}
-
-	@Test
-	public void addTest() {
+	public void saveAndGetSuccessTest() {
 		ReportPeriod newReportPeriod = new ReportPeriod();
-		newReportPeriod.setBalancePeriod(true);
 		newReportPeriod.setName("MyTestName");
-		newReportPeriod.setOrder(reportPeriodDao.listByTaxPeriod(1).size() + 1);
-		newReportPeriod.setActive(true);
+		newReportPeriod.setOrder(9);
 		newReportPeriod.setMonths(3);
-		newReportPeriod.setDepartmentId(2);
-		newReportPeriod.setTaxPeriodId(1);
+		newReportPeriod.setTaxPeriodId(taxPeriod.getId());
 		newReportPeriod.setDictTaxPeriodId(21);
 
-		int newReportPeriodId = reportPeriodDao.add(newReportPeriod);
-
+		int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
 		ReportPeriod reportPeriod = reportPeriodDao.get(newReportPeriodId);
 
-		assertEquals(true, reportPeriod.isBalancePeriod());
 		assertEquals("MyTestName", reportPeriod.getName());
-		assertEquals(true, reportPeriod.isActive());
 		assertEquals(3, reportPeriod.getMonths());
-		assertEquals(2, reportPeriod.getDepartmentId());
-		assertEquals(1, reportPeriod.getTaxPeriodId());
+		assertEquals(taxPeriod.getId(), Integer.valueOf(reportPeriod.getTaxPeriodId()));
+		assertEquals(9, reportPeriod.getOrder());
+		assertEquals(taxPeriod.getId(), Integer.valueOf(reportPeriod.getTaxPeriodId()));
+		assertEquals(21, reportPeriod.getDictTaxPeriodId());
 	}
 
     @Test
-    public void getLastReportPeriodTest() {
-        ReportPeriod period = reportPeriodDao.getLastReportPeriod(TaxType.TRANSPORT, 1L);
-        assertNotNull(period);
+    public void getReportPeriodByTaxPeriodAndDictTest1() {
+        ReportPeriod reportPeriod1 = reportPeriodDao.getByTaxPeriodAndDict(1, 21);
+        ReportPeriod reportPeriod2 = reportPeriodDao.getByTaxPeriodAndDict(1, 22);
+        Assert.assertEquals(reportPeriod1.getId(), Integer.valueOf(1));
+        Assert.assertEquals(reportPeriod2.getId(), Integer.valueOf(2));
+    }
+
+    @Test(expected = DaoException.class)
+    public void getReportPeriodByTaxPeriodAndDictTest2() {
+        reportPeriodDao.getByTaxPeriodAndDict(-1, -1);
     }
 }

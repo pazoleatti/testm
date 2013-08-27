@@ -1,13 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,13 +16,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DeclarationDataDaoTest.xml"})

@@ -23,7 +23,7 @@ public class RnuGenerationServiceImpl implements RnuGenerationService {
     @Autowired
     MigrationService migrationService;
 
-    private static final String CR = "\n\r";
+    private static final String CR = "\r\n";
     private static final String TOTAL_ROW = "TOTAL_P";
     private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -80,7 +80,7 @@ public class RnuGenerationServiceImpl implements RnuGenerationService {
         //К
         switch (exemplar.getPeriodityId()) {
             case 1:            //Ежегодно
-                builder.append(YearCode.fromYear(year));
+                builder.append(YearCode.fromYear(year).getCode());
                 break;
             case 4:             //Ежеквартально
                 builder.append(QuartalCode.fromNum(month).getCodeIfQuartal());
@@ -106,7 +106,7 @@ public class RnuGenerationServiceImpl implements RnuGenerationService {
         if (str == null) {
             return null;
         } else if (lengthNeed < str.length()) {
-            return "XXX";   //  TODO нужно переделать
+            throw new NoSuchElementException("Departament code is not correct! It must be like 0013 or 0022. Current value=" + str);
         } else {
             StringBuilder sb = new StringBuilder(str);
             for (int i = 0; i < lengthNeed - str.length(); i++) {

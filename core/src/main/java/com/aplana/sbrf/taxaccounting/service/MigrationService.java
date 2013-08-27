@@ -33,7 +33,9 @@ public interface MigrationService {
     List<Exemplar> getActualExemplarByRnuType(List<Long> rnuIds);
 
     /**
-     * Основной метод для формирования содержимых файлов
+     * Основной метод для формирования содержимых файлов.
+     *
+     * !Применяется для отладки
      *
      * @param rnuIds список видов рну для которых надо сформировать ТФ
      * @return связную карту с названием файла и его содержимым
@@ -48,6 +50,11 @@ public interface MigrationService {
      * @return список строк + 2 итоговые строки
      */
     List<? extends AbstractRnuRow> getRnuList(Exemplar ex);
-
+    /**
+     * Основной метод для формирования содержимых файлов
+     *
+     * @param rnuIds список видов рну для которых надо сформировать ТФ
+     * @return связную карту с названием файла и его содержимым
+     */
     Map<String, byte[]> startMigrationProcess(List<Long> rnuIds);
 }

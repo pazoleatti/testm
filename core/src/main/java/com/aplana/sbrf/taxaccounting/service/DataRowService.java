@@ -39,5 +39,12 @@ public interface DataRowService {
 	 * @param dataRows
 	 */
 	void update(TAUserInfo userInfo, long formDataId, List<DataRow<Cell>> dataRows);
+	
+	
+	
+	void rollback(TAUserInfo userInfo, long formDataId);
+	
+	
+	
 
 }

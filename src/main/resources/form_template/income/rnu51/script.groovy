@@ -46,6 +46,9 @@ switch (formDataEvent) {
         // для сохранения изменений приемников
         getData(formData).commit()
         break
+    case FormDataEvent.IMPORT :
+        importData()
+        break
 }
 
 /**
@@ -54,8 +57,8 @@ switch (formDataEvent) {
  № графы	ALIAS                   Тип поля                Наименование поля
  0          fix                     Строка 255              Скрытое поле для строки итого
  1.		    rowNumber               Число/15/               № пп	            		                                                    Натуральное число( ≥1)
- 2.		    tradeNumber             Число/1/                Код сделки			                                                            Может принимать значения: 1 ИЛИ 2 ИЛИ 4 ИЛИ 5 1 - сделки на ОРЦБ, кроме переговорных; 2 - переговорные сделки на ОРЦБ; 4 - погашение, в т.ч. частичное; 5 - операции, связанные с открытием-закрытием короткой позиции.
- 3.		    singSecurirty           Строка /1/	            Признак ценной бумаги	                                                        Может принимать значения «+» или «-»
+ 2.		    tradeNumber             Число/1/                Код сделки			                                                            Справочник, Может принимать значения: 1 ИЛИ 2 ИЛИ 4 ИЛИ 5 1 - сделки на ОРЦБ, кроме переговорных; 2 - переговорные сделки на ОРЦБ; 4 - погашение, в т.ч. частичное; 5 - операции, связанные с открытием-закрытием короткой позиции.
+ 3.		    singSecurirty           Строка /1/	            Признак ценной бумаги	                                                        Справочник, Может принимать значения «+» или «-»
  4.		    issue                   Строка /255/            Выпуск
  5.		    acquisitionDate         Дата	ДД.ММ.ГГГГ      Дата приобретения, закрытия короткой позиции
  6.		    saleDate                Дата	ДД.ММ.ГГГГ      Дата реализации, погашения, прочего выбытия, открытия короткой позиции
@@ -113,7 +116,8 @@ void logicalCheck() {
              * Проверка цены реализации (выбытия) для целей налогообложения (графа 18)
              * Если «графа 2» = 1 или 2 или 5, и при этом «графа 14» > «графа 16» и «графа 15» > «графа 17», то «графа 18» = «графа 15»
              */
-            if ((row.tradeNumber == 1 || row.tradeNumber == 2 || row.tradeNumber == 5) && row.priceInFactPerc > row.marketPriceInPerc1
+            def code = getCode(row.tradeNumber)
+            if ((code == 1 || code == 2 || code == 5) && row.priceInFactPerc > row.marketPriceInPerc1
                     && row.priceInFactRub > row.marketPriceInRub1 && row.salePriceTax != row.priceInFactRub
             ) {
                 logger.error('Неверно определена цена реализации для целей налогообложения по сделкам на ОРЦБ!')
@@ -125,7 +129,7 @@ void logicalCheck() {
              * 1
              * Неверно определена цена реализации для целей налогообложения при погашении!
              */
-            if (row.tradeNumber == 4 && row.salePriceTax != row.redemptionValue) {
+            if (code == 4 && row.salePriceTax != row.redemptionValue) {
                 logger.error('Неверно определена цена реализации для целей налогообложения при погашении!')
             }
 
@@ -135,7 +139,7 @@ void logicalCheck() {
              * 1
              * Неверно определена цена реализации для целей налогообложения по переговорным сделкам на ОРЦБ и сделкам, связанным с открытием-закрытием короткой позиции!
              */
-            if ((row.tradeNumber == 2 || row.tradeNumber == 5) && row.tradeNumber < row.marketPriceInPerc1
+            if ((code == 2 || code == 5) && row.tradeNumber < row.marketPriceInPerc1
                     && row.priceInFactRub < row.marketPriceInRub1 && row.salePriceTax != row.marketPriceInRub1) {
                 logger.error('Неверно определена цена реализации для целей налогообложения по переговорным сделкам на ОРЦБ и сделкам, связанным с открытием-закрытием короткой позиции!')
             }
@@ -168,8 +172,8 @@ void logicalCheck() {
              1
              Неверно определено превышение цены реализации для целей налогообложения над фактической ценой реализации!
              */
-            if ((row.tradeNumber != 4 && row.excessSalePriceTax != (row.salePriceTax ?: 0) - (row.priceInFactRub ?: 0))
-                    || (row.tradeNumber == 4 && row.excessSalePriceTax != 0)
+            if ((code != 4 && row.excessSalePriceTax != (row.salePriceTax ?: 0) - (row.priceInFactRub ?: 0))
+                    || (code == 4 && row.excessSalePriceTax != 0)
                     || row.excessSalePriceTax < 0
             ) {
                 logger.error('Неверно определено превышение цены реализации для целей налогообложения над фактической ценой реализации!')
@@ -239,7 +243,7 @@ void logicalCheck() {
  * Вставка строки в случае если форма генирует динамически строки итого (на основе данных введённых пользователем)
  */
 void addNewRowwarnrmData() {
-    DataRow<Cell> newRow = formData.createDataRow()
+    DataRow<Cell> newRow = getNewRow()
     int index // Здесь будет позиция вставки
 
     def data = getData(formData).getAllCached()
@@ -279,13 +283,6 @@ void addNewRowwarnrmData() {
         // Форма пустая поэтому поставим строку в начало
         index = 0
     }
-    [
-            'tradeNumber', 'singSecurirty', 'issue', 'acquisitionDate', 'saleDate', 'amountBonds', 'acquisitionPrice', 'costOfAcquisition',
-            'marketPriceInPerc', 'marketPriceInRub', 'redemptionValue', 'priceInFactPerc', 'priceInFactRub', 'expensesOnSale'
-    ].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
     getData(formData).insert(newRow, index+1)
 }
 
@@ -314,6 +311,7 @@ DataRow<Cell> getItogo() {
             }
         }
     }
+    setTotalStyle(itogo)
     return itogo
 }
 
@@ -357,7 +355,20 @@ DataRow<Cell> getItogoKvartal() {
             }
         }
     }
+    setTotalStyle(itogo)
     return itogo
+}
+
+/**
+ * Установить стиль для итоговых строк.
+ */
+void setTotalStyle(def row) {
+    ['rowNumber', 'fix', 'tradeNumber', 'singSecurirty', 'issue', 'acquisitionDate', 'saleDate', 'amountBonds',
+            'acquisitionPrice', 'costOfAcquisition', 'marketPriceInPerc', 'marketPriceInRub', 'acquisitionPriceTax',
+            'redemptionValue', 'priceInFactPerc', 'priceInFactRub', 'marketPriceInPerc1', 'marketPriceInRub1',
+            'salePriceTax', 'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax'].each {
+        row.getCell(it).setStyleAlias('Контрольные суммы')
+    }
 }
 
 /**
@@ -396,13 +407,14 @@ BigDecimal calc17(DataRow row) {
  */
 BigDecimal calc18(DataRow row) {
     BigDecimal result = null
-    if ((row.tradeNumber == 1 || row.tradeNumber == 2 || row.tradeNumber == 5) && (row.priceInFactPerc > row.marketPriceInPerc1 && row.priceInFactRub > row.marketPriceInRub1)) {
+    def code = getCode(row.tradeNumber)
+    if ((code == 1 || code == 2 || code == 5) && (row.priceInFactPerc > row.marketPriceInPerc1 && row.priceInFactRub > row.marketPriceInRub1)) {
         result = row.priceInFactRub
     }
-    if (row.tradeNumber == 4) {
+    if (code == 4) {
         result = row.redemptionValue
     }
-    if ((row.tradeNumber == 2 || row.tradeNumber == 5) && (row.priceInFactPerc < row.marketPriceInPerc1 && row.priceInFactRub < row.marketPriceInRub1)) {
+    if ((code == 2 || code == 5) && (row.priceInFactPerc < row.marketPriceInPerc1 && row.priceInFactRub < row.marketPriceInRub1)) {
         result = row.marketPriceInRub1
     }
     if (result != null) result = roundTo2(result, 3)
@@ -439,7 +451,7 @@ BigDecimal calc21(DataRow row) {
  */
 BigDecimal calc22(DataRow row) {
     BigDecimal result = null
-    if (row.tradeNumber == 4) {
+    if (getCode(row.tradeNumber) == 4) {
         result = 0
     } else {
         result = (row.salePriceTax ?: 0) - (row.priceInFactRub ?: 0)
@@ -504,13 +516,15 @@ void deleteAllStatic() {
  */
 void sort() {
     getRows(getData(formData)).sort({ DataRow a, DataRow b ->
-        if (a.tradeNumber == b.tradeNumber && a.singSecurirty == b.singSecurirty) {
+        def codeA = getCode(a.tradeNumber)
+        def codeB = getCode(b.tradeNumber)
+        if (codeA == codeB && a.singSecurirty == b.singSecurirty) {
             return a.issue <=> b.issue
         }
-        if (a.tradeNumber == b.tradeNumber) {
+        if (codeA == codeB) {
             return a.singSecurirty <=> b.singSecurirty
         }
-        return a.tradeNumber <=> b.tradeNumber
+        return codeA <=> codeB
     })
 }
 
@@ -572,6 +586,19 @@ def checkRequiredColumns(def row, def columns) {
         def errorMsg = colNames.join(', ')
         logger.error("В строке $index не заполнены колонки : $errorMsg.")
     }
+}
+
+/**
+ * Получить название графы по псевдониму.
+ *
+ * @param row строка
+ * @param alias псевдоним графы
+ */
+def getColumnName(def row, def alias) {
+    if (row != null && alias != null) {
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
+    }
+    return ''
 }
 
 /**
@@ -677,4 +704,277 @@ def getCode(def code) {
  */
 def getSign(def sign) {
     return  refBookService.getStringValue(62,sign,'CODE')
+}
+
+/**
+ * Получение импортируемых данных.
+ * Транспортный файл формата xml.
+ */
+void importData() {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '' || !fileName.contains('.xml')) {
+        return
+    }
+
+    def is = ImportInputStream
+    if (is == null) {
+        return
+    }
+
+    def xmlString = importService.getData(is, fileName)
+    if (xmlString == null || xmlString == '') {
+        return
+    }
+
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        return
+    }
+
+    // сохранить начальное состояние формы
+    def data = getData(formData)
+    def rowsOld = getRows(data)
+    try {
+        // добавить данные в форму
+        addData(xml)
+
+        // расчитать и проверить
+        deleteAllStatic()
+        sort()
+        calc()
+        addAllStatic()
+        allCheck()
+    } catch(Exception e) {
+        logger.error('Во время загрузки данных произошла ошибка!')
+    }
+    // откатить загрузку если есть ошибки
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        data.clear()
+        data.insert(rowsOld, 1)
+    }
+    data.commit()
+}
+
+/**
+ * Заполнить форму данными.
+ *
+ * @param xml данные
+ */
+void addData(def xml) {
+    def data = getData(formData)
+
+    def tmp
+    def indexRow = 0
+    def newRows = []
+    def index
+    def refDataProvider61 = refBookFactory.getDataProvider(61)
+    def refDataProvider62 = refBookFactory.getDataProvider(62)
+
+    // TODO (Ramil Timerbaev) Проверка корректности данных
+    for (def row : xml.exemplar.table.detail.record) {
+        indexRow++
+        index = 1
+
+        def newRow = getNewRow()
+
+        // графа 1
+        newRow.rowNumber = row.field[index].@value.text()
+        index++
+
+        // графа 2 - справочник 61 "Коды сделок"
+        tmp = null
+        if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
+            tmp = getRecordId(refDataProvider61, 'CODE', getNumber(row.field[index].@value.text()))
+        }
+        newRow.tradeNumber = tmp
+        index++
+
+        // графа 3 - справочник 62 "Признаки ценных бумаг"
+        tmp = null
+        if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
+            tmp = getRecordId(refDataProvider62, 'CODE', row.field[index].@value.text())
+        }
+
+        newRow.singSecurirty = tmp
+        index++
+
+        // графа 4
+        newRow.issue = row.field[index].@value.text()
+        index++
+
+        // графа 5
+        newRow.acquisitionDate = row.field[index].@value.text()
+        index++
+
+        // графа 6
+        newRow.saleDate = row.field[index].@value.text()
+        index++
+
+        // графа 7
+        newRow.amountBonds = row.field[index].@value.text()
+        index++
+
+        // графа 8
+        newRow.acquisitionPrice = row.field[index].@value.text()
+        index++
+
+        // графа 9
+        newRow.costOfAcquisition = row.field[index].@value.text()
+        index++
+
+        // графа 10
+        newRow.marketPriceInPerc = row.field[index].@value.text()
+        index++
+
+        // графа 11
+        newRow.marketPriceInRub = row.field[index].@value.text()
+        index++
+
+        // графа 12
+        newRow.acquisitionPriceTax = row.field[index].@value.text()
+        index++
+
+        // графа 13
+        newRow.redemptionValue = row.field[index].@value.text()
+        index++
+
+        // графа 14
+        newRow.priceInFactPerc = row.field[index].@value.text()
+        index++
+
+        // графа 15
+        newRow.priceInFactRub = row.field[index].@value.text()
+        index++
+
+        // графа 16
+        newRow.marketPriceInPerc1 = row.field[index].@value.text()
+        index++
+
+        // графа 17
+        newRow.marketPriceInRub1 = row.field[index].@value.text()
+        index++
+
+        // графа 18
+        newRow.salePriceTax = row.field[index].@value.text()
+        index++
+
+        // графа 19
+        newRow.expensesOnSale = row.field[index].@value.text()
+        index++
+
+        // графа 20
+        newRow.expensesTotal = row.field[index].@value.text()
+        index++
+
+        // графа 21
+        newRow.profit = row.field[index].@value.text()
+        index++
+
+        // графа 22
+        newRow.excessSalePriceTax = row.field[index].@value.text()
+
+        newRows.add(newRow)
+    }
+    // проверка итоговых данных
+    if (xml.exemplar.table.total.record.field.size() > 0 && !newRows.isEmpty()) {
+        def totalRow = formData.createDataRow()
+
+        // графы 7-9, 11-13, 15, 17-22
+        def columnsAlias = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInRub',
+                'acquisitionPriceTax', 'redemptionValue', 'priceInFactRub', 'marketPriceInRub1',
+                'salePriceTax', 'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
+
+        // задать всем итоговым ячейкам 0
+        columnsAlias.each { alias ->
+            totalRow.getCell(alias).setValue(0)
+        }
+
+        // подсчитать суммы
+        def value
+        columnsAlias.each { alias ->
+            newRows.each { row ->
+                value = totalRow.getCell(alias).getValue() + (row.getCell(alias).getValue() ?: 0)
+                totalRow.getCell(alias).setValue(value)
+            }
+        }
+
+        // сравнить посчитанные суммы итогов с итогами из транспортного файла
+        def xmlTotal = xml.rowTotal[0]
+        // графы 7-9, 11-13, 15, 17-22
+        def check = true
+        ['amountBonds': 7, 'acquisitionPrice': 8, 'costOfAcquisition': 9, 'marketPriceInRub': 11,
+                'acquisitionPriceTax': 12, 'redemptionValue': 13, 'priceInFactRub': 15,
+                'marketPriceInRub1': 17, 'salePriceTax': 18, 'expensesOnSale': 19,
+                'expensesTotal': 20, 'profit': 21, 'excessSalePriceTax': 22].each { alias, i ->
+            if (check && totalRow.getCell(alias).getValue() != getNumber(xmlTotal.cell[i + 1].text())) {
+                logger.error('Итоговые значения неправильные.')
+                check = false
+                return
+            }
+        }
+    }
+    data.clear()
+    newRows.each { newRow ->
+        insert(data, newRow)
+    }
+    logger.info('Данные загружены')
+}
+
+/**
+ * Получить числовое значение.
+ *
+ * @param value строка
+ */
+def getNumber(def value) {
+    if (value == null) {
+        return null
+    }
+    def tmp = value.trim()
+    if ("".equals(tmp)) {
+        return null
+    }
+    // поменять запятую на точку и убрать пробелы
+    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
+    return new BigDecimal(tmp)
+}
+
+/**
+ * Вставить новыую строку в конец нф.
+ *
+ * @param data данные нф
+ * @param row строка
+ */
+void insert(def data, def row) {
+    data.insert(row, getRows(data).size() + 1)
+}
+
+/**
+ * Получить новую стролу с заданными стилями.
+ */
+def getNewRow() {
+    def row = formData.createDataRow()
+
+    // графа 2..11, 13..15, 19
+    ['tradeNumber', 'singSecurirty', 'issue', 'acquisitionDate', 'saleDate', 'amountBonds',
+            'acquisitionPrice', 'costOfAcquisition', 'marketPriceInPerc', 'marketPriceInRub',
+            'redemptionValue', 'priceInFactPerc', 'priceInFactRub', 'expensesOnSale'].each {
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return row
+}
+
+/**
+ * Получить идентификатор записи из справочника.
+ *
+ * @param provider справочник
+ * @param searchByAlias алиас атрибута справочника по которому ищется запись
+ * @param value значение по которому ищется запись
+ */
+def getRecordId(def provider, def searchByAlias, def value) {
+    def records = provider.getRecords(new Date(), null, searchByAlias + " = '" + value + "'", null);
+    if (records != null && !records.getRecords().isEmpty()) {
+        return records.getRecords().get(0).get('record_id').getNumberValue()
+    }
+    return null
 }

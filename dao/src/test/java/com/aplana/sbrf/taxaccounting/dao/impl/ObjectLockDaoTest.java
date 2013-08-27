@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
-import com.aplana.sbrf.taxaccounting.exception.LockException;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.LockException;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.ObjectLock;
 

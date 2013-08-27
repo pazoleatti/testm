@@ -1,9 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.script.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.script.Income102Dao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Income102;
+
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;

@@ -8,15 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterDataResult;
@@ -38,7 +34,7 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 	private SecurityService securityService;
 
 	@Autowired
-	private TaxPeriodDao taxPeriodDao;
+	private ReportPeriodService taxPeriodDao;
 
 	@Autowired
 	private DepartmentService departmentService;
@@ -46,8 +42,6 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 	@Autowired
 	private DeclarationDataSearchService declarationDataSearchService;	
 
-	@Autowired
-	private ReportPeriodDao reportPeriodDao;
 
 	@Override
 	public GetDeclarationFilterDataResult execute(GetDeclarationFilterData action, ExecutionContext executionContext) throws ActionException {
@@ -59,7 +53,7 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 				.getDepartmentIds()).values()));
 		res.setTaxPeriods(taxPeriodDao.listByTaxType(action.getTaxType()));
 		res.setFilterValues(declarationFilterValues);
-		res.setCurrentReportPeriod(getCurrentReportPeriod(action.getTaxType()));
+		res.setCurrentReportPeriod(null);
 		return res;
 	}
 
@@ -68,15 +62,4 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 		//Do nothing
 	}
 
-	private ReportPeriod getCurrentReportPeriod(TaxType taxType){
-		try {
-			ReportPeriod rp = reportPeriodDao.getCurrentPeriod(taxType);
-			if (rp != null) {
-				return rp;
-			}
-		} catch (DaoException e) {
-			logger.warn("Failed to find current report period for taxType = " + taxType + ", message is: " + e.getMessage());
-		}
-		return null;
-	}
 }

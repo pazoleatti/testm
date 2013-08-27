@@ -12,7 +12,7 @@ public class OpenPeriodAction extends UnsecuredActionImpl<OpenPeriodResult> {
 	boolean active;
 	long departmentId;
 	int months;
-	int dictionaryTaxPeriodId;
+	long dictionaryTaxPeriodId;
 	Date endDate;
 
 	public TaxType getTaxType() {
@@ -63,11 +63,11 @@ public class OpenPeriodAction extends UnsecuredActionImpl<OpenPeriodResult> {
 		this.months = months;
 	}
 
-	public int getDictionaryTaxPeriodId() {
+	public long getDictionaryTaxPeriodId() {
 		return dictionaryTaxPeriodId;
 	}
 
-	public void setDictionaryTaxPeriodId(int dictionaryTaxPeriodId) {
+	public void setDictionaryTaxPeriodId(long dictionaryTaxPeriodId) {
 		this.dictionaryTaxPeriodId = dictionaryTaxPeriodId;
 	}
 

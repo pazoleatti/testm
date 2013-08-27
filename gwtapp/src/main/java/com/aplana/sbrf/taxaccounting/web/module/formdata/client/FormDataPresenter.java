@@ -399,9 +399,11 @@ public class FormDataPresenter extends
                                                 .getName(),
 		                                result.getTaxPeriodStartDate(), result.getTaxPeriodEndDate());
                                 // Если период для ввода остатков, то делаем все ячейки редактируемыми
-                                if (!readOnlyMode && result.getReportPeriod().isBalancePeriod()) {
+                                
+                                if (!readOnlyMode && result.isBalancePeriod()) {
                                     forceEditMode = true;
                                 }
+                                
                                 getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
                                         + String.valueOf(result.getFormData().getFormType().getTaxType()));
                                 getView().setColumnsData(

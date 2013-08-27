@@ -23,6 +23,12 @@ public class ImportServiceImpl implements ImportService {
     private final String ENTER = "\r\n";
     private final String TAB = "\t";
     private final char SEPARATOR = '|';
+    /**
+     * Используется при обработке файла формата *.rnu (csv),
+     * чтобы избежать ошибку при разборе строки файла: в случаях когда есть открывающий (нечетный) двойной апостраф,
+     * но нет закрывающего (четного).
+     */
+    private final char QUOTE = '\'';
 
     private static HSSFDataFormatter formatter = new HSSFDataFormatter();
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
@@ -100,7 +106,7 @@ public class ImportServiceImpl implements ImportService {
     private String getXMLStringFromCSV(InputStream inputStream, String charset) {
         try {
             InputStreamReader isr = new InputStreamReader(inputStream, charset);
-            CSVReader reader = new CSVReader(isr, SEPARATOR);
+            CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE);
 
             StringBuilder sb = new StringBuilder();
             sb.append("<data>").append(ENTER);
