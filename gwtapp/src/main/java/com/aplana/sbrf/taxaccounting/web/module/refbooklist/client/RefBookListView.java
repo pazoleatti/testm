@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.refbooklist.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
-import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.Type;
-import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.dom.client.Style;
@@ -22,7 +20,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,21 +31,18 @@ public class RefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
         implements RefBookListPresenter.MyView {
 
     @UiField
-    Button findButton;
-    @UiField
-    Button loadButton;
+    Button  findButton,
+            loadButton;
     @UiField
     GenericDataGrid<TableModel> formDataTable;
     @UiField
-    FlexiblePager pager;
-    @UiField
     TextBox filterText;
     @UiField
-    RadioButton rbExternal;
-    @UiField
-    RadioButton rbInternal;
-    @UiField
-    RadioButton rbAll;
+    RadioButton rbExternal,
+                rbInternal,
+                rbAll;
+
+    private static final String[] COLUMN_NAMES = {"Наименование справочника", "Тип справочника"};
 
     interface Binder extends UiBinder<Widget, RefBookListView> {
     }
@@ -60,36 +54,16 @@ public class RefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
         initTable();
     }
 
-    @UiHandler("findButton")
-    void onFindClicked(ClickEvent event) {
-        Type type = null;
-        if (rbExternal.getValue()) {
-            type = Type.EXTERNAL;
-        } else if (rbInternal.getValue()) {
-            type = Type.INTERNAL;
-        }
-        getUiHandlers().init(type, filterText.getText());
-    }
-
-    @UiHandler("loadButton")
-    void onLoadClicked(ClickEvent event) {
-        // TODO загрузка справочников http://conf.aplana.com/pages/viewpage.action?pageId=9572224
-    }
-
     private void initTable() {
-
         Column<TableModel, TableModel> nameColumn = new Column<TableModel, TableModel>(
                 new AbstractCell<TableModel>() {
-
                     @Override
                     public void render(Context context, TableModel model, SafeHtmlBuilder sb) {
                         if (model == null) {
                             return;
                         }
                         sb.appendHtmlConstant("<a href=\"#" + RefBookDataTokens.refBookData + ";"
-                                // TODO поменять на токен
-                                + "id=" +
-                                +model.getId() + "\">"
+                                + RefBookDataTokens.REFBOOK_DATA_ID + "=" + model.getId() + "\">"
                                 + model.getName() + "</a>");
                     }
                 }) {
@@ -106,18 +80,42 @@ public class RefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
             }
         };
 
-        formDataTable.addColumn(nameColumn, "Наименование справочника");
-        formDataTable.addColumn(typeColumn, "Тип справочника");
+        formDataTable.addColumn(nameColumn, COLUMN_NAMES[0]);
+        formDataTable.addColumn(typeColumn, COLUMN_NAMES[1]);
         formDataTable.setColumnWidth(typeColumn, 400, Style.Unit.PX);
-
-        formDataTable.setRowCount(0);
-        pager.setDisplay(formDataTable);
     }
 
     @Override
-    public void init(List<TableModel> tableData) {
-        formDataTable.setRowCount(0);
-        if (tableData != null && tableData.size() > 0)
-            formDataTable.setRowData(tableData);
+    public void setTableData(List<TableModel> tableData) {
+        formDataTable.setRowData(tableData);
+    }
+
+    @Override
+    public boolean isExternalFilter(){
+        return rbExternal.getValue();
+    }
+
+    @Override
+    public boolean isInternalFilter(){
+        return rbInternal.getValue();
+    }
+
+    @Override
+    public String getFilter(){
+        return filterText.getText();
+    }
+
+    @UiHandler("findButton")
+    void onFindClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onFindClicked();
+        }
+    }
+
+    @UiHandler("loadButton")
+    void onLoadClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onLoadClicked();
+        }
     }
 }
