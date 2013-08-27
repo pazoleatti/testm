@@ -201,7 +201,8 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 
 	private void closePeriodWithLog(int reportPeriodId, long departmentId, List<LogEntry> logs) {
 		departmentReportPeriodDao.updateActive(reportPeriodId, departmentId, false);
-		logs.add(new LogEntry(LogLevel.INFO, "Период закрыт для подразделения \"" +
+		logs.add(new LogEntry(LogLevel.INFO, "Период" + " \"" + reportPeriodDao.get(reportPeriodId).getName() + "\" " +
+				"закрыт для подразделения \"" +
 				departmentService.getDepartment((int) departmentId).getName() +
 				"\""));
 	}
@@ -218,7 +219,8 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 			return;
 		}
 		if (logs != null) {
-			logs.add(new LogEntry(LogLevel.INFO,"Создан период для подразделения \" " +
+			logs.add(new LogEntry(LogLevel.INFO,"Создан период" + " \"" + departmentReportPeriod.getReportPeriod().getName() + "\" "
+					+ "для подразделения \" " +
 					departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName()+ "\""));
 		}
 	}
