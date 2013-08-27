@@ -1,24 +1,16 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.mapper.ReportPeriodMapper;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
-
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import java.sql.Types;
+import java.util.List;
 
 /**
  * Реализация DAO для работы с {@link ReportPeriod отчётными периодами}
@@ -36,7 +28,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 					"select * from report_period where id = ?",
 					new Object[]{id},
 					new int[]{Types.NUMERIC},
-					REPORT_PERIOD_MAPPER
+					new ReportPeriodMapper()
 		);
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Не существует периода с id=" + id);
@@ -49,7 +41,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 				"select * from report_period where tax_period_id = ? order by ord",
 				new Object[]{taxPeriodId},
 				new int[]{Types.NUMERIC},
-				REPORT_PERIOD_MAPPER
+				new ReportPeriodMapper()
 		);
 	}
 
@@ -85,7 +77,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                     "select * from report_period where tax_period_id = ? and dict_tax_period_id = ?",
                     new Object[]{taxPeriodId, dictTaxPeriodId},
                     new int[]{Types.NUMERIC, Types.NUMERIC},
-                    REPORT_PERIOD_MAPPER
+                    new ReportPeriodMapper()
             );
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException("Не существует периода с tax_period_id=" + taxPeriodId + " и dict_tax_period_id = " + dictTaxPeriodId);
