@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
-import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -62,7 +61,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		void addRowToEnd(RefBookDataRow newRow, boolean select);
 		Map<String, Object> getChangedValues();
 		void setRefBookNameDesc(String desc);
-	}
+        void resetRefBookElements();
+    }
 
 	@Inject
 	public RefBookDataPresenter(final EventBus eventBus, final MyView view, PlaceManager placeManager, final MyProxy proxy,
@@ -174,6 +174,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
+        getView().resetRefBookElements();
 		refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
 		GetRefBookTableDataAction action = new GetRefBookTableDataAction();
 		action.setRefbookId(refBookDataId);
