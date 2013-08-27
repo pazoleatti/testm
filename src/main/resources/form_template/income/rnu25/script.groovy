@@ -22,7 +22,7 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
 /** Признак периода ввода остатков. */
-def isBalancePeriod = (reportPeriod != null && reportPeriod.isBalancePeriod())
+def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
@@ -171,7 +171,6 @@ void calc() {
     getRows(data).sort { it.regNumber }
 
     def tmp
-
     def formDataOld = getFormDataOld()
     def dataOld = getData(formDataOld)
 
@@ -608,11 +607,42 @@ void importData() {
         return
     }
 
-    if (addData(xml)) {
+    def data = getData(formData)
+    def totalColumns = [4:'lotSizePrev', 5:'lotSizeCurrent', 7:'cost', 10:'costOnMarketQuotation', 11:'reserveCalcValue']
+    // добавить данные в форму
+    boolean canCommit = true
+//    {
+        def totalLoad = addData(xml)
+        if (totalLoad!=null) {
+            calc()
+//            logicalCheck(false)
+//            checkNSI()
+
+            def totalCalc
+            for (def row : getRows(data))
+                if (isTotal(row)) totalCalc = row
+
+            totalColumns.each{k, v->
+                if (totalCalc[v]!=totalLoad[v]) {
+                    logger.error("Итоговая сумма в графе $k в транспортном файле некорректна")
+                    //canCommit = false
+                }
+            }
+
+        } else {
+            logger.error("Нет итоговой строки.")
+            canCommit = false
+        }
         logger.info('Закончена загрузка файла ' + fileName)
-    } else {
+/*    } catch(Exception e) {
+        logger.error(""+e.message)
+        canCommit = false
+    }  */
+    //в случае ошибок откатить изменения
+    if (!canCommit) {
         logger.error("Загрузка файла $fileName завершилась ошибкой")
     }
+    data.commit()
 }
 
 /*
@@ -623,7 +653,7 @@ void importData() {
  * Проверка является ли строка итоговой.
  */
 def isTotal(def row) {
-    return row != null && row.getAlias() != null && row.getAlias().contains('total')
+    return row != null && row.getAlias() != null && row.getAlias().contains('tot')
 }
 
 /**
@@ -643,7 +673,7 @@ def getSum(def data, def columnAlias) {
  */
 def getNewRow(def alias, def totalColumns, def sums) {
     def newRow = formData.createDataRow()
-    newRow.setAlias('total' + alias)
+    newRow.setAlias('tot' + alias)
     newRow.regNumber = alias + ' итог'
     setTotalStyle(newRow)
     totalColumns.each {
@@ -921,20 +951,14 @@ def hasTotal(def data) {
  *
  * @param xml данные
  */
-boolean addData(def xml) {
+def addData(def xml) {
     Date date = new Date()
 
     def cache = [:]
     def data = getData(formData)
+    data.clear()
 
-    def newRows = []
-
-    boolean isTotal = true
     def total = formData.createDataRow()
-    def totalColumns = [4:'lotSizePrev', 5:'lotSizeCurrent', 7:'cost', 10:'costOnMarketQuotation', 11:'reserveCalcValue']
-    totalColumns.each{k,it->
-        total[it] = 0
-    }
 
     def indexRow = -1
     for (def row : xml.row) {
@@ -962,12 +986,10 @@ boolean addData(def xml) {
 
         // графа 4
         newRow.lotSizePrev = getNumber(row.cell[indexCell].text())
-        total.lotSizePrev = total.lotSizePrev + newRow.lotSizePrev
         indexCell++
 
         // графа 5
         newRow.lotSizeCurrent = getNumber(row.cell[indexCell].text())
-        total.lotSizeCurrent = total.lotSizeCurrent + newRow.lotSizeCurrent
         indexCell++
 
         // графа 6
@@ -976,7 +998,6 @@ boolean addData(def xml) {
 
         // графа 7
         newRow.cost = getNumber(row.cell[indexCell].text())
-        total.cost = total.cost + newRow.cost
         indexCell++
 
         // графа 8
@@ -989,12 +1010,10 @@ boolean addData(def xml) {
 
         // графа 10
         newRow.costOnMarketQuotation = getNumber(row.cell[indexCell].text())
-        total.costOnMarketQuotation = total.costOnMarketQuotation + newRow.costOnMarketQuotation
         indexCell++
 
         // графа 11
         newRow.reserveCalcValue = getNumber(row.cell[indexCell].text())
-        total.reserveCalcValue = total.reserveCalcValue + newRow.reserveCalcValue
         indexCell++
 
         // графа 12
@@ -1004,52 +1023,33 @@ boolean addData(def xml) {
         // графа 13
         newRow.reserveRecovery = getNumber(row.cell[indexCell].text())
 
-        newRows << newRow
+        insert(data, newRow)
     }
     // проверка итоговой строки
     if (xml.rowTotal.size()==1)
         for (def row : xml.rowTotal) {
-            def newRow = formData.createDataRow()
-            newRow.setAlias('total')
-            newRow.regNumber = 'Общий итог'
-            setTotalStyle(newRow)
 
             // графа 4
-            newRow.lotSizePrev = getNumber(row.cell[4].text())
+            total.lotSizePrev = getNumber(row.cell[4].text())
 
             // графа 5
-            newRow.lotSizeCurrent = getNumber(row.cell[5].text())
+            total.lotSizeCurrent = getNumber(row.cell[5].text())
 
             // графа 7
-            newRow.cost = getNumber(row.cell[7].text())
+            total.cost = getNumber(row.cell[7].text())
 
             // графа 10
-            newRow.costOnMarketQuotation = getNumber(row.cell[10].text())
+            total.costOnMarketQuotation = getNumber(row.cell[10].text())
 
             // графа 11
-            newRow.reserveCalcValue = getNumber(row.cell[11].text())
+            total.reserveCalcValue = getNumber(row.cell[11].text())
 
-            totalColumns.each{k,it->
-                if (newRow[it]!=total[it]) {
-                    logger.error("Итоговая сумма в графе $k в транспортном файле некорректна.")
-                    isTotal = false
-                }
-            }
-            //data.insert(newRow, indexRow-1)
         }
     else {
-        logger.error("Нет итоговой строки.")
-        isTotal = false
+        return null
     }
-    if (isTotal) {
-        data.clear()
-        newRows.each { newRow ->
-            insert(data, newRow)
-        }
-        data.commit()
-        return true
-    }
-    return false
+    data.commit()
+    return total
 }
 
 /**
@@ -1071,7 +1071,7 @@ def getNumber(def value) {
 }
 
 def getRecords(def ref_id, String code, String value, Date date, def cache) {
-    String filter = code + "= '"+ value.replaceAll('[ ]', '')+"'"
+    String filter = code + "= '"+ value.replaceAll(' ', '')+"'"
     if (cache[ref_id]!=null) {
         if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
     } else {

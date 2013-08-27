@@ -118,7 +118,7 @@ switch (formDataEvent) {
  */
 void acceptance() {
     for (target in departmentFormTypeService.getFormDestinations(formData.departmentId, formData.getFormType().getId(), formData.getKind())) {
-        formDataCompositionService.compose(formData, target.departmentId, target.formTypeId, target.kind, logger)
+        formDataCompositionService.compose(formData, target.departmentId, target.formTypeId, target.kind)
     }
 }
 
@@ -276,8 +276,19 @@ void logicalCheck(DataRowHelper form) {
 
     List<BigDecimal> uniq = new ArrayList<>(form.allCached.size())
     List<Map<Integer, Object>> docs = new ArrayList<>()
+    List<Map<Integer, Object>> uniq456 = new ArrayList<>(form.allCached.size())
     for (row in form.allCached) {
         if (row.getAlias() == null) {
+            // LC Проверка на уникальность записи по налоговому учету
+            Map<Integer, Object> m = new HashMap<>();
+            m.put(4, row.code );
+            m.put(5, row.docNumber);
+            m.put(6, row.docDate);
+            if (uniq456.contains(m)) {
+                logger.error("Несколько строки %s содержат записи в налоговом учете для балансового счета=%s, документа № %s от %s", row.number.toSting(), row.code.toString(), row.docNumber.toString(), row.docDate.toString())
+            }
+            uniq456.add(m)
+
             //logger.info('Проверка на заполнение поля «<Наименование поля>»')
             // LC Проверка на заполнение поля «<Наименование поля>»
             columns = ['number', 'kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
