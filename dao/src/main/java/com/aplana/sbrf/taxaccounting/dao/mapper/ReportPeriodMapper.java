@@ -15,12 +15,9 @@ public class ReportPeriodMapper implements RowMapper<ReportPeriod> {
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setId(rs.getInt("id"));
         reportPeriod.setName(rs.getString("name"));
-        reportPeriod.setActive(rs.getBoolean("is_active"));
         reportPeriod.setMonths(rs.getInt("months"));
         reportPeriod.setTaxPeriodId(rs.getInt("tax_period_id"));
         reportPeriod.setOrder(rs.getInt("ord"));
-        reportPeriod.setBalancePeriod(rs.getBoolean("is_balance_period"));
-        reportPeriod.setDepartmentId(rs.getLong("department_id"));
         reportPeriod.setDictTaxPeriodId(rs.getInt("dict_tax_period_id"));
         return reportPeriod;
     }
