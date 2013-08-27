@@ -196,7 +196,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			availableDepartments.add(department.getId());
 		}
 		departmentReceiverPicker.setAvalibleValues(departments, availableDepartments);
+		departmentReceiverPicker.setValue(new ArrayList<Integer>());
 		departmentSourcePicker.setAvalibleValues(departments, availableDepartments);
+		departmentSourcePicker.setValue(new ArrayList<Integer>());
 	}
 
 	public void setupReceiversTables() {

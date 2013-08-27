@@ -98,6 +98,7 @@ public class DepartmentPickerWidget extends Composite implements
 
 	@SuppressWarnings("unchecked")
 	private void selectItems(List<Integer> itemsIdToSelect) {
+		this.valueDereference = new ArrayList<String>();
 		List<TreeItem> allItems = new ArrayList<TreeItem>();
 		for (int i = 0; i < tree.getItemCount(); i++) {
 			allItems.addAll(hierarchyToFlat(tree.getItem(i)));
@@ -108,7 +109,6 @@ public class DepartmentPickerWidget extends Composite implements
 					&& itemsIdToSelect.contains(((Pair<Integer, String>) item
 							.getUserObject()).first)) {
 				checkBox.setValue(true);
-                this.valueDereference = new ArrayList<String>();
                 this.valueDereference.add(((Pair<Integer, String>) item
                         .getUserObject()).getSecond());
 			} else {

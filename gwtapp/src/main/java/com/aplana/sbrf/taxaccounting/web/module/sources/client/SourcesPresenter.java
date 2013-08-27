@@ -55,6 +55,18 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 		getView().init(Boolean.valueOf(request.getParameter("isForm", "")));
 		getDepartments();
 	}
+	
+
+	private void getDepartments() {
+		GetDepartmentsAction action = new GetDepartmentsAction();
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<GetDepartmentsResult>() {
+					@Override
+					public void onSuccess(GetDepartmentsResult result) {
+						getView().setDepartments(result.getDepartments());
+					}
+				}, this).addCallback(new ManualRevealCallback<GetDepartmentsResult>(SourcesPresenter.this)));
+	}
 
 	@Override
 	public boolean useManualReveal() {
@@ -141,16 +153,6 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 		}
 	}
 
-	private void getDepartments() {
-		GetDepartmentsAction action = new GetDepartmentsAction();
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetDepartmentsResult>() {
-					@Override
-					public void onSuccess(GetDepartmentsResult result) {
-						getView().setDepartments(result.getDepartments());
-					}
-				}, this).addCallback(new ManualRevealCallback<GetDepartmentsResult>(SourcesPresenter.this)));
-	}
 
 	@Override
 	public void updateFormSources(final DepartmentFormType departmentFormType, List<Long> sourceDepartmentFormTypeIds) {
