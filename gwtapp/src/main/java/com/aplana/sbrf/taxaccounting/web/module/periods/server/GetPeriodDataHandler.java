@@ -1,11 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,7 +40,7 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 		GregorianCalendar from = new GregorianCalendar(action.getFrom(), Calendar.JANUARY, 1);
 		GregorianCalendar to = new GregorianCalendar(action.getTo(), Calendar.DECEMBER, 31);
 		List<DepartmentReportPeriod> reportPeriods = reportPeriodService.listByDepartmentId(action.getDepartmentId());
-		Map<String, List<TableRow>> per = new HashMap<String, List<TableRow>>();
+		Map<String, List<TableRow>> per = new TreeMap<String, List<TableRow>>();
 		for (DepartmentReportPeriod period : reportPeriods) {
 			TaxPeriod taxPeriod = reportPeriodService.getTaxPeriod(period.getReportPeriod().getTaxPeriodId());
 			if ((taxPeriod.getStartDate().after(from.getTime()) || taxPeriod.getStartDate().equals(from.getTime()))

@@ -26,7 +26,6 @@ public class PeriodCreated extends
 	public static void fire(HasHandlers source,	boolean success) {
 		PeriodCreated event = new PeriodCreated();
 		event.setSuccess(success);
-		System.out.println("Fire event");
 		source.fireEvent(event);
 	}
 
