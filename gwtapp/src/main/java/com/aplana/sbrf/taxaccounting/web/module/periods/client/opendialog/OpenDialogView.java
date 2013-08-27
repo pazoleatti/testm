@@ -1,24 +1,31 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.incrementbutton.IncrementButton;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
-
-import java.util.*;
 
 
 public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers>
@@ -26,8 +33,6 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 
 	public interface Binder extends UiBinder<PopupPanel, OpenDialogView> {
 	}
-
-	private static final String DEPARTMENT_PICKER_HEADER = "Выбор подразделения";
 
 	private final PopupPanel widget;
 	private ReportPeriodPicker periodPicker;
@@ -69,9 +74,10 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	}
 
 	@Override
-	public void setDepartments(List<Department> departments, List<Integer> selectedDepartments) {
-		departmentPicker.setAvalibleValues(departments, new HashSet<Integer>());
+	public void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, boolean enable) {
+		departmentPicker.setAvalibleValues(departments, avalDepartments);
 		departmentPicker.setValue(selectedDepartments);
+		departmentPicker.setEnabled(enable);
 	}
 
 	@Override

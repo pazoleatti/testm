@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -42,7 +41,13 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	IncrementButton toBox;
 
 	@UiField
-	GenericCellTable periodsTable;
+	GenericCellTable<TableRow> periodsTable;
+	
+	@UiField
+	Widget openPeriod;
+	
+	@UiField
+	Widget closePeriod;
 
 	@UiField
 	DepartmentPickerPopupWidget departmentPicker;
@@ -102,12 +107,8 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	}
 
 	@Override
-	public void setFilterData(List<Department> departments, List<Integer> selectedDepartments, int yearFrom, int yearTo) {
-		Set<Integer> available = new HashSet<Integer>();
-		for (Department dep : departments) {
-			available.add(dep.getId());
-		}
-		departmentPicker.setAvalibleValues(departments, available);
+	public void setFilterData(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, int yearFrom, int yearTo) {
+		departmentPicker.setAvalibleValues(departments, avalDepartments);
 		departmentPicker.setValue(selectedDepartments);
 		fromBox.setValue(yearFrom);
 		toBox.setValue(yearTo);
@@ -156,5 +157,11 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 		if (getUiHandlers() != null) {
 			getUiHandlers().openPeriod();
 		}
+	}
+
+	@Override
+	public void setReadOnly(boolean readOnly) {
+		openPeriod.setVisible(!readOnly);
+		closePeriod.setVisible(!readOnly);
 	}
 }

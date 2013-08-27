@@ -206,7 +206,7 @@ public class DepartmentPickerWidget extends Composite implements
 			} else {
 				checkBox = new RadioButton(CHECKBOX_GROUP, department.getName());
 			}
-			if (!availableDepartments.contains(department.getId())) {
+			if (availableDepartments!=null && !availableDepartments.contains(department.getId())) {
 				checkBox.setEnabled(false);
 			}
 			TreeItem newItem = new TreeItem(checkBox);
