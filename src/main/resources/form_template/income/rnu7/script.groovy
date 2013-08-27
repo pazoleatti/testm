@@ -382,7 +382,7 @@ def logicalCheck(def useLog) {
                 def row = getRowByAlias(data, ('total' + codeName))
                 for (def alias : totalColumns) {
                     if (calcSumByCode(codeName, alias) != row.getCell(alias).getValue()) {
-                        logger.error("Неверное значение $codeName для графы $alias!")
+                        logger.error("Неверное значение " + getKnu(codeName) + " для графы $alias!")
                         return false
                     }
                 }
@@ -572,7 +572,7 @@ void checkCreation() {
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     //проверка периода ввода остатков
-    if (reportPeriod != null && reportPeriod.isBalancePeriod()) {
+    if (reportPeriod != null && reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
         logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
         return
     }

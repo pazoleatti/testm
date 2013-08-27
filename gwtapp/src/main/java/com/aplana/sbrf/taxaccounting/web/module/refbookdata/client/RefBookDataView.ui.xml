@@ -59,11 +59,13 @@
                     </g:DockLayoutPanel>
                 </g:center>
                 <g:east size="600">
-                    <g:VerticalPanel ui:field="content">
+                    <g:VerticalPanel>
                         <g:HorizontalPanel>
                             <g:Button ui:field="save">Сохранить</g:Button>
                             <g:Button ui:field="cancel">Отмена</g:Button>
                         </g:HorizontalPanel>
+                        <g:VerticalPanel ui:field="content">
+                        </g:VerticalPanel>
                     </g:VerticalPanel>
                 </g:east>
             </g:SplitLayoutPanel>

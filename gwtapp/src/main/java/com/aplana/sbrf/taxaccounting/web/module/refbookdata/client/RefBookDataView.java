@@ -198,6 +198,16 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		refbookDataTable.setRowData(start, dataRows);
 	}
 
+    @Override
+    public void resetRefBookElements() {
+        int i;
+        while ((i = refbookDataTable.getColumnCount()) != 0) {
+            refbookDataTable.removeColumn(i - 1);
+            content.remove(i - 1);
+        }
+        inputFields.clear();
+    }
+
 	@UiHandler("cancel")
 	void cancelButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {

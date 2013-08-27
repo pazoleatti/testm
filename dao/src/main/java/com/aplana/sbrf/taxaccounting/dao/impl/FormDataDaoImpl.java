@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
@@ -145,8 +146,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		} else {
 			formDataId = formData.getId();
 		}
+		
 		if (formData.getPerformer() != null &&
-				(!formData.getPerformer().getName().isEmpty() || !formData.getPerformer().getPhone().isEmpty())
+				(StringUtils.hasLength(formData.getPerformer().getName())
+						|| StringUtils.hasLength(formData.getPerformer().getPhone()))
 			) {
 			formPerformerDao.save(formDataId, formData.getPerformer());
 		} else {
