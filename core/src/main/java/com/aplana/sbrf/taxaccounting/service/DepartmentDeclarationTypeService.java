@@ -1,11 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import java.util.List;
+import java.util.Set;
+
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * Интерфейс сервиса для работы с привязкой департаментов к подразделениям
@@ -53,4 +54,18 @@ public interface DepartmentDeclarationTypeService {
 	 *            новые данные для обновления/добавления
 	 */
 	void save(int departmentId, List<DepartmentDeclarationType> departmentDeclarationTypes);
+	
+	/**
+	 * Получить описание вида декларации по идентификатору
+	 * @param declarationTypeId идентификатор вида декларации
+	 * @return описание вида декларации, с заданным идентификатором
+	 * @throws DaoException если в БД нет такой записи
+	 */
+	DeclarationType getDeclarationType(int declarationTypeId);
+	
+	/**
+	 * Получить список всех видов деклараций по типу налога
+	 * @return список видов деклараций
+	 */
+	List<DeclarationType> listAllByTaxType(TaxType taxType);
 }

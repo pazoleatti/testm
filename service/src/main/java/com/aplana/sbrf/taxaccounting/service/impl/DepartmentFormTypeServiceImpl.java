@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,10 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
 
     @Autowired
     DepartmentFormTypeDao departmentFormTypeDao;
+    
+    @Autowired
+    FormTypeDao formTypeDao;
+
 
     @Override
     public List<DepartmentFormType> getDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind) {
@@ -96,4 +102,14 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
     public void deleteDeclaration(Long id) {
         departmentFormTypeDao.deleteDepartmentDeclType(id);
     }
+
+	@Override
+	public FormType getFormType(int formTypeId) {
+		return formTypeDao.getType(formTypeId);
+	}
+
+	@Override
+	public List<FormType> listAllByTaxType(TaxType taxType) {
+		return formTypeDao.listAllByTaxType(taxType);
+	}
 }

@@ -30,7 +30,7 @@ switch (formDataEvent) {
         }
         break
     case FormDataEvent.CALCULATE:
-        orm = dataRowsHelperf
+        form = dataRowsHelper
         logicCheckBefore(form)
         if (!logger.containsLevel(LogLevel.ERROR)) {
             deleteAllStatic(form)
@@ -672,6 +672,17 @@ void addNewRow() {
     ].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    if (form.getAllCached().size()>0) {
+        for(int i = form.getAllCached().size()-1;i>=0;i--){
+            def row = form.getAllCached().get(i)
+            if(row.getAlias() == null){
+                newRow.number = row.number+1
+                break
+            }
+        }
+    } else {
+        newRow.number = 1
     }
     form.insert(newRow, index + 1)
 }

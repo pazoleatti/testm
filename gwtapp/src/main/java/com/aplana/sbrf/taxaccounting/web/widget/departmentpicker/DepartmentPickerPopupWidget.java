@@ -87,6 +87,9 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 
 
 	private String joinListToString(Collection<String> strings) {
+		if ((strings == null) || strings.isEmpty()) {
+			return "";
+		}
 		StringBuilder text = new StringBuilder();
 		for (String name : strings) {
 			text.append(name + "; ");

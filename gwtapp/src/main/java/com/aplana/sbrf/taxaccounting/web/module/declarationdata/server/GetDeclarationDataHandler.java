@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -15,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataResult;
@@ -24,9 +28,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.PdfPage;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
@@ -49,10 +50,11 @@ public class GetDeclarationDataHandler
 	private DeclarationTemplateService declarationTemplateService;
 
 	@Autowired
-	private ReportPeriodDao reportPeriodDao;
-
-	@Autowired
 	private SecurityService securityService;
+	
+	
+	@Autowired
+	private ReportPeriodService reportPeriodService;
 
 	public GetDeclarationDataHandler() {
 		super(GetDeclarationDataAction.class);
@@ -84,7 +86,7 @@ public class GetDeclarationDataHandler
 				.getDeclarationType().getName());
 		result.setDepartment(departmentService.getDepartment(
 				declaration.getDepartmentId()).getName());
-		result.setReportPeriod(reportPeriodDao.get(
+		result.setReportPeriod(reportPeriodService.getReportPeriod(
 				declaration.getReportPeriodId()).getName());
 
 		result.setPdf(generatePdfViewerModel(action, userInfo));

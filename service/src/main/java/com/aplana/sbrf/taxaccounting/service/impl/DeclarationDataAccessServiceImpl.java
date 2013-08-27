@@ -4,14 +4,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 
@@ -36,6 +38,9 @@ public class DeclarationDataAccessServiceImpl implements
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
 
+	@Autowired
+	private ReportPeriodService reportPeriodService;
+
 	/**
 	 * В сущности эта функция проверяет наличие прав на просмотр декларации,
 	 * логика вынесена в отдельный метод, так как используется в нескольких
@@ -51,10 +56,8 @@ public class DeclarationDataAccessServiceImpl implements
 	 */
 	private void checkRolesForReading(TAUserInfo userInfo,
 			int declarationDepartmentId, int reportPeriodId) {
-		Department declarationDepartment = departmentDao
-				.getDepartment(declarationDepartmentId);
-		ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-		checkRolesForReading(userInfo, declarationDepartment, reportPeriod);
+		Department declarationDepartment = departmentDao.getDepartment(declarationDepartmentId);
+		checkRolesForReading(userInfo, declarationDepartment, reportPeriodId);
 	}
 
 	/**
@@ -67,17 +70,19 @@ public class DeclarationDataAccessServiceImpl implements
 	 * 
 	 * @param userInfo
 	 *            информация о пользователе
+	 *
 	 * @param declarationDepartment
 	 *            подразделение, к которому относится декларация
-	 * @param reportPeriod
-	 *            отчетный период
+	 * @param reportPeriodId
+	 *            код отчетного периода
 	 * @return true - права есть, false - прав нет
 	 */
 	private void checkRolesForReading(TAUserInfo userInfo,
-			Department declarationDepartment, ReportPeriod reportPeriod) {
+			Department declarationDepartment, int reportPeriodId) {
+
 		// Нельзя работать с декларациями в отчетном периоде вида
 		// "ввод остатков"
-		if (reportPeriod.isBalancePeriod()) {
+		if (reportPeriodService.isBalancePeriod(reportPeriodId, Long.valueOf(declarationDepartment.getId()))) {
 			throw new AccessDeniedException("Декларациями в отчетном периоде вида 'ввод остатков'");
 		}
 

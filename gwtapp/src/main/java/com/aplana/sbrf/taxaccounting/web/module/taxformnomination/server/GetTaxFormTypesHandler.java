@@ -1,20 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.service.DepartmentDeclarationTypeService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTaxFormTypesAction;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTaxFormTypesResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
@@ -25,20 +26,20 @@ public class GetTaxFormTypesHandler extends AbstractActionHandler<GetTaxFormType
     }
 
     @Autowired
-    private FormTypeDao formTypeDao;
-
+    private DepartmentFormTypeService departmentFormTypeService;
+    
     @Autowired
-    private DeclarationTypeDao declarationTypeDao;
+    private DepartmentDeclarationTypeService departmentDeclarationTypeService;
 
     @Override
     public GetTaxFormTypesResult execute(GetTaxFormTypesAction action, ExecutionContext executionContext) throws ActionException {
         GetTaxFormTypesResult res = new GetTaxFormTypesResult();
         List<FormType> resultList = new ArrayList<FormType>();
         if (action.isForm()) {
-             resultList = formTypeDao.listAllByTaxType(action.getTaxType());
+             resultList = departmentFormTypeService.listAllByTaxType(action.getTaxType());
         }
         else {
-            List<DeclarationType> declarationTypeList = declarationTypeDao.listAllByTaxType(action.getTaxType());
+            List<DeclarationType> declarationTypeList = departmentDeclarationTypeService.listAllByTaxType(action.getTaxType());
             for (DeclarationType item : declarationTypeList){
                 FormType m = new FormType();
                 m.setId(item.getId());

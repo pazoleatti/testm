@@ -1,19 +1,19 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
+
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 
 /**
  * Реализация DAO для работы с {@link ReportPeriod отчётными периодами}
@@ -64,7 +64,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
 	@Override
 	@Transactional(readOnly = false)
-	public int add(ReportPeriod reportPeriod) {
+	public int save(ReportPeriod reportPeriod) {
 		JdbcTemplate jt = getJdbcTemplate();
 
 		Integer id = reportPeriod.getId();
@@ -88,12 +88,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 	}
 
     @Override
-    public ReportPeriod getLastReportPeriod(TaxType taxType, long departmentId) {
-    	throw new DaoException("Ошибок не заводить. В разработке");
-    }
-
-    @Override
-    public ReportPeriod getReportPeriodByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {
+    public ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {
         try {
             return getJdbcTemplate().queryForObject(
                     "select * from report_period where tax_period_id = ? and dict_tax_period_id = ?",
@@ -106,13 +101,4 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
         }
     }
 
-    @Override
-	public ReportPeriod getCurrentPeriod(TaxType taxType) {
-		throw new DaoException("Ошибок не заводить. В разработке"); 
-	}
-
-	@Override
-	public void changeActive(int reportPeriodId, boolean active) {
-		throw new DaoException("Ошибок не заводить. В разработке");
-	}
 }

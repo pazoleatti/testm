@@ -14,6 +14,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -33,7 +35,6 @@ import org.xml.sax.InputSource;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -335,6 +336,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		}
 	}
 	
+	
+	@Override
+	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
+		return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
+	}
 
 	
 	

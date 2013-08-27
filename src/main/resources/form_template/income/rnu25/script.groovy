@@ -91,6 +91,18 @@ def addNewRow() {
     def data = getData(formData)
 
     def newRow = getNewRow()
+    if (getRows(data).size()>0) {
+        for(int i = getRows(data).size()-1;i>=0;i--){
+            def row = getRows(data).get(i)
+            if(!isTotal(row)){
+                newRow.rowNumber = row.rowNumber+1
+                break
+            }
+        }
+    } else {
+        newRow.rowNumber = 1
+    }
+
     insert(data, newRow)
     // data.insert(newRow, getIndex(data, currentDataRow) + 1) // TODO (Ramil Timerbaev) проблемы с индексом
 
@@ -192,6 +204,7 @@ void calc() {
         // графа 13
         row.reserveRecovery = (tmp < 0 ? Math.abs(tmp) : 0)
     }
+    save(data)
 
     // графы для которых надо вычислять итого и итого по ГРН (графа 4..7, 10..13)
     def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserve', 'cost', 'costOnMarketQuotation',

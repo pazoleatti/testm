@@ -1,19 +1,25 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.*;
-import com.aplana.sbrf.taxaccounting.dao.mapper.*;
-import com.aplana.sbrf.taxaccounting.exception.*;
-import com.aplana.sbrf.taxaccounting.model.*;
-import org.apache.commons.logging.*;
-import org.springframework.beans.factory.annotation.*;
-import org.springframework.cache.annotation.*;
-import org.springframework.dao.*;
-import org.springframework.jdbc.core.*;
-import org.springframework.stereotype.*;
-import org.springframework.transaction.annotation.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
-import java.sql.*;
-import java.util.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.mapper.DepartmentMapper;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 
 @Repository
 @Transactional(readOnly = true)

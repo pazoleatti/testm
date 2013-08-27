@@ -3,20 +3,17 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DictionaryTaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.ChangeActivePeriodAction;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.ChangeActivePeriodResult;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenException;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreated;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodResult;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -79,7 +76,6 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 	public void onContinue(OpenFilterData openFilterData) {
 		OpenPeriodAction action = new OpenPeriodAction();
 		action.setYear(openFilterData.getYear());
-
 		action.setEndDate(openFilterData.getEndDate());
 		action.setTaxType(this.taxType);
 		action.setDepartmentId(openFilterData.getDepartmentId());
@@ -90,37 +86,9 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 				.simpleCallback(new AbstractCallback<OpenPeriodResult>() {
 					@Override
 					public void onSuccess(OpenPeriodResult result) {
+						PeriodCreated.fire(OpenDialogPresenter.this, true);
+						LogAddEvent.fire(OpenDialogPresenter.this, result.getLogEntries());
 						getView().hide();
-					}
-
-					@Override
-					public void onFailure(Throwable caught) {
-						if (caught instanceof OpenException) {
-							OpenException openException = (OpenException) caught;
-							switch (openException.getErrorCode()) {
-								case EXIST_OPEN:
-								case PREVIOUS_ACTIVE:
-									Window.alert(openException.getErrorMsg());
-									break;
-								case EXIST_CLOSED:
-									if (Window.confirm(openException.getErrorMsg())) {
-										ChangeActivePeriodAction requestData = new ChangeActivePeriodAction();
-										requestData.setReportPeriodId(openException.getReportPeriodId());
-										requestData.setActive(true);
-										dispatcher.execute(requestData, CallbackUtils //TODO добавить апдейт таблицы
-												.defaultCallback(new AbstractCallback<ChangeActivePeriodResult>() {
-													@Override
-													public void onSuccess(ChangeActivePeriodResult result) {
-														getView().hide();
-													}
-												}, OpenDialogPresenter.this)
-										);
-									}
-									break;
-							}
-						} else {
-							Window.alert(caught.getMessage());
-						}
 					}
 				})
 		);

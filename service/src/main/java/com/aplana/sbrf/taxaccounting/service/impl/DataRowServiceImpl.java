@@ -52,4 +52,9 @@ public class DataRowServiceImpl implements DataRowService {
 		}
 	}
 
+	@Override
+	public void rollback(TAUserInfo userInfo, long formDataId) {
+		dataRowDao.rollback(formDataId);
+	}
+
 }
