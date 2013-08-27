@@ -160,11 +160,11 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 
     @Override
     public boolean isActivePeriod(int reportPeriodId, long departmentId) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return reportPeriodService.isActivePeriod(reportPeriodId, departmentId);  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     public boolean isBalancePeriod(int reportPeriodId, long departmentId) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return reportPeriodService.isBalancePeriod(reportPeriodId, departmentId);
     }
 }
