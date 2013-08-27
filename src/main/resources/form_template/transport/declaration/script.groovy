@@ -224,7 +224,6 @@ def bildXml(){
                                         def region = getRegionByOkatoOrg(tOkato);
 
                                         def refBookProvider = refBookFactory.getDataProvider(7)
-                                        logger.info("region "+region)
 
                                         def query = "DICT_REGION_ID LIKE '"+region.record_id+"' AND TAX_BENEFIT_ID LIKE '"+tRow.taxBenefitCode+"'"
                                         def params = refBookProvider.getRecords(new Date(), null, query, null).getRecords()

@@ -338,7 +338,7 @@ void checkCreation() {
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     //проверка периода ввода остатков
-    if (reportPeriod != null && reportPeriod.isBalancePeriod()) {
+    if (reportPeriod != null && reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
         logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
         return
     }

@@ -44,6 +44,8 @@ switch (formDataEvent) {
             checkNSI()
             logicalChecks()
             sort()
+            // сохраним данные
+            getDataRowHelper().save(getDataRows())
         }
 
         break
@@ -62,6 +64,8 @@ switch (formDataEvent) {
         addRow()
         // проставляем порядковый номер №пп
         setRowIndex()
+        //
+        getDataRowHelper().save(getDataRows())
         break
 
     case FormDataEvent.DELETE_ROW:
@@ -69,6 +73,8 @@ switch (formDataEvent) {
         deleteRow()
         // проставляем порядковый номер №пп
         setRowIndex()
+
+        getDataRowHelper().save(getDataRows())
         break
 
 /**
@@ -131,6 +137,9 @@ switch (formDataEvent) {
         sort()
         //1.4.	Система должна заполнить значение графы «№ пп».
         setRowIndex()
+        getDataRowHelper().save(getDataRows())
+        getDataRowHelper().commit()
+
         break
 }
 
@@ -152,11 +161,11 @@ void addRow() {
  * Установка номера строки.
  */
 void setRowIndex() {
-    def index = 0
+    def index = 1
     for (def row : getDataRows()) {
-        row.rowNumber = index + 1
-        index += 1
+        row.rowNumber = index++
     }
+
 }
 
 /**
@@ -189,9 +198,8 @@ def checkRequiredField() {
             logger.error("В строке "+row.getIndex()+" не заполнены поля : $errorMsg.")
             return false;
         }
-
-        return true
     }
+    return true
 }
 
 /*
@@ -272,8 +280,6 @@ void fillForm() {
             row.tsType = row.tsTypeCode
         }
     }
-
-    getDataRowHelper().save(getDataRows())
 }
 
 /**
@@ -301,31 +307,26 @@ void sort() {
         }
         return val
     }
-    getDataRowHelper().save(getDataRows())
 }
 
 /**
  * Консолидация.
  */
 void consolidation() {
-
     // удаляем все строки
-    getDataRows.clear()
+    getDataRows().clear()
 
     // скопировать строки из источников в данную форму
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-
-                // todo 3.10.2.1 Обработка идентичных строк
-                source.dataRows.each { row ->
-
-                    if (isRowInDataRows(row)) {
-                        logger.error('Идентичные строки')
-                    } else {
-                        dataRowsHelper.insert(row)
-                    }
+                def sourceDataRowHelper = formDataService.getDataRowHelper(source)
+                def sourceDataRows = sourceDataRowHelper.getAllCached()
+                int cnt = 1
+                sourceDataRows.each { row ->
+                    row.rowNumber = cnt++
+                    dataRowHelper.insert(row, getDataRows().size() ?: 1)
                 }
             }
         }
@@ -445,7 +446,7 @@ def getDataRows() {
 }
 
 
-def getDataRowHelper () {
+def getDataRowHelper() {
     if (formData != null && formData.id != null) {
         return formDataService.getDataRowHelper(formData)
     } else {

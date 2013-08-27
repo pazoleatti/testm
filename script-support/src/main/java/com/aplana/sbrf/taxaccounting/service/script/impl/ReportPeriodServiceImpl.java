@@ -1,12 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
-import java.util.Calendar;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
@@ -14,6 +7,12 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Calendar;
+import java.util.List;
 
 
 /*
@@ -27,9 +26,11 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 	@Autowired
 	ReportPeriodDao reportPeriodDao;
 
-	
 	@Autowired
 	TaxPeriodDao taxPeriodDao;
+
+    @Autowired(required = false)
+    com.aplana.sbrf.taxaccounting.service.ReportPeriodService reportPeriodService;
 	
 	@Override
 	public ReportPeriod get(int reportPeriodId) {
@@ -155,5 +156,15 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
         }
 
         return cal;
+    }
+
+    @Override
+    public boolean isActivePeriod(int reportPeriodId, long departmentId) {
+        return reportPeriodService.isActivePeriod(reportPeriodId, departmentId);  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public boolean isBalancePeriod(int reportPeriodId, long departmentId) {
+        return reportPeriodService.isBalancePeriod(reportPeriodId, departmentId);
     }
 }
