@@ -75,7 +75,7 @@ def addNewRow() {
     def newRow = formData.createDataRow()
 
     // Графы 2-5 Заполняется вручную
-    ['balance', 'date', 'docNumber', 'docDate', 'currencyCode',
+    ['code', 'balance', 'date', 'docNumber', 'docDate', 'currencyCode',
             //'rateOfTheBankOfRussia',
             'taxAccountingCurrency', 'accountingCurrency'].each{ column ->
         newRow.getCell(column).setEditable(true)
@@ -125,7 +125,7 @@ void calc() {
     for (def row : getRows(data)) {
         if (!isTotal(row)) {
             // список проверяемых столбцов (графа ..)
-            def requiredColumns = ['balance', 'date', 'docNumber', 'docDate', 'currencyCode',
+            def requiredColumns = ['code', 'balance', 'date', 'docNumber', 'docDate', 'currencyCode',
                     //'rateOfTheBankOfRussia',
                     'taxAccountingCurrency', 'accountingCurrency']
             if (!checkRequiredColumns(row, requiredColumns, true)) {
@@ -157,7 +157,6 @@ void calc() {
 
     getRows(data).eachWithIndex { row, index ->
         // графа 1
-        row.code = row.balance
 
         def records = refDataProvider.getRecords(row.date, null, "CODE_NUMBER = " + row.currencyCode, null)
         if (records != null && records.getRecords() != null && records.getRecords().size() > 0) {
@@ -176,8 +175,7 @@ void calc() {
         row.ruble = round(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)
     }
     // отсортировать/группировать
-    //getRows(data).sort { refBookService.getStringValue(27, it.code, "CODE") }
-    getRows(data).sort { getCodeAttribute(it.code) }
+    data.save(getRows(data).sort { getCodeAttribute(it.code) })
 
     getRows(data).eachWithIndex { row, index ->
         row.rowNumber = index + 1
@@ -253,6 +251,7 @@ void calc() {
  *
  * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
+// TODO (Aydar Kadyrgulov) Логические проверки
 def logicalCheck(def useLog) {
     def data = getData(formData)
     def tmp
@@ -281,24 +280,14 @@ def logicalCheck(def useLog) {
                 hasTotal = true
                 continue
             }
-
-            // 4. Обязательность заполнения полей (графа 1..12)
+            // 1. Обязательность заполнения полей (графа 1..12)
             // список проверяемых столбцов (графа 1..12)
-            def requiredColumns = ['rowNumber', 'balance', 'date', 'docNumber',
-                    'docDate', 'currencyCode',
-                    //'rateOfTheBankOfRussia',
-                    'taxAccountingCurrency',
-                    //'taxAccountingRuble' ,
-                    'accountingCurrency'
-                     //,'ruble'
+            def requiredColumns = ['rowNumber', 'code', 'date', 'balance',
+                    'docNumber', 'docDate', 'currencyCode',
+                    'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble',
+                    'accountingCurrency', 'ruble'
             ]
             if (!checkRequiredColumns(row, requiredColumns, useLog)) {
-                return false
-            }
-
-            // 1. Проверка даты совершения операции и границ отчётного периода (графа 3)
-            if (row.date < a || b < row.date) {
-                logger.error('Дата совершения операции вне границ отчётного периода!')
                 return false
             }
 
@@ -309,33 +298,74 @@ def logicalCheck(def useLog) {
                 return false
             }
 
-            // 5. Проверка на уникальность поля «№ пп» (графа 1)
+            // 3. Проверка, что не отображаются данные одновременно по бухгалтерскому и по налоговому учету
+            // («Графа 10» >0 и «Графа 12»=0)
+            // ИЛИ
+            // («Графа 10»=0 и «Графа 12»>0)
+
+            if ((row.taxAccountingRuble > 0 && row.ruble == 0) ||
+                    (row.taxAccountingRuble == 0 && row.ruble > 0))  {
+                logger.warn('Одновременно указаны данные по налоговому (графа 10) и бухгалтерскому (графа 12) учету')
+                return false
+            }
+
+            // 4. Проверка даты совершения операции и границ отчётного периода (графа 3)
+            if (row.date < a || b < row.date) {
+                logger.error('Дата совершения операции вне границ отчётного периода!')
+                return false
+            }
+
+            // 6. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода
+            if (row.taxAccountingRuble > row.ruble) {
+                logger.warn('Сумма данных бухгалтерского учёта превышает сумму начисленных платежей для документа ' + row.docNumber + ' от ' + row.docDate)
+            }
+
+            // 8. Проверка на уникальность поля «№ пп» (графа 1)
             if (i != row.rowNumber) {
                 logger.error('Нарушена уникальность номера по порядку!')
                 return false
             }
             i += 1
 
-            // 7. Арифметические проверки граф 10, 12
-            // «Графа 10» = ОКРУГЛ((«графа 9»  «графа 8»);2)
-            // «Графа 12» =ОКРУГЛ( («графа 11»  «графа 8»);2)
-            if (row.taxAccountingRuble != null)
-            if (row.taxAccountingRuble != round(row.taxAccountingCurrency * row.rateOfTheBankOfRussia, 2)) {
-                logger.warn('Неверно рассчитана графа "Сумма расхода в налоговом учёте - Рубли"')
-                return false
-            }
-            if (row.ruble != null)
-            if (row.ruble != round(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)) {
-                logger.warn('Неверно рассчитана графа "Сумма расхода в бухгалтерском учёте - Рубли"')
-                return false
+            // 9. Проверка на уникальность записи по налоговому учету TODO (Aydar Kadyrgulov)
+
+
+            // 10. Проверка соответствия балансового счета коду налогового учета
+            if (row.code != row.balance) {
+                logger.error('Балансовый счет не соответствует коду налогового учета!')
             }
 
-            // 8. Проверка итоговых значений по кодам классификации дохода - нахождение кодов классификации
+            // 11. Арифметические проверки расчета неитоговых строк
+            if (row.taxAccountingRuble != round(row.taxAccountingCurrency * row.rateOfTheBankOfRussia, 2)) {
+                logger.error('Неверно рассчитана графа "Сумма расхода в налоговом учёте - Рубли"')
+                return false
+            }
+            if (row.ruble != round(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)) {
+                logger.error('Неверно рассчитана графа "Сумма расхода в бухгалтерском учёте - Рубли"')
+                return false
+            }
+            // 14,15. Проверка наличия суммы расхода в налоговом учете, для первичного документа, указанного для суммы расхода в бухгалтерском учёте
+
+            def checkSumm = checkDate(row)
+            // TODO (Aydar Kadyrgulov) раскомментарить
+/*
+
+            if (checkSumm == null) {
+                logger.error('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете за последние 3 года не проходила!')
+                return false
+            } else if (checkSumm >= row.ruble) {
+                logger.warn('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-7 в <отчетный период> отчетном периоде.')
+            }
+*/
+
+
+            // Проверка итоговых значений по кодам классификации дохода - нахождение кодов классификации
             if (!totalGroupsName.contains(row.code)) {
                 totalGroupsName.add(row.code)
             }
 
-            // 9. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
+            // Проверка итогового значений по всей форме - подсчет сумм для общих итогов
+            if (row.ruble != null && row.taxAccountingRuble != null)
             totalColumns.each { alias ->
                 if (totalSums[alias] == null) {
                     totalSums[alias] = 0
@@ -343,45 +373,29 @@ def logicalCheck(def useLog) {
                 totalSums[alias] += row.getCell(alias).getValue()
             }
 
-            // 10. Проверка наличия суммы расхода в налоговом учете, для первичного документа, указанного для суммы расхода в бухгалтерском учёте
-
-            def checkSumm = checkDate(row)
-            /*
-            if (checkSumm == null) {
-                logger.error('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете за последние 3 года не проходила!')
-                return false
-            } else if (checkSumm >= row.ruble) {
-                logger.warn('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-7 в <отчетный период> отчетном периоде.')
-            }
-            */
         }
-
         if (hasTotal) {
             def totalRow = getRowByAlias(data,'total')
 
-            // 3. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода (графа 10, 12)
-            if (totalRow.ruble > 0 && totalRow.taxAccountingRuble >= totalRow.ruble) {
-                logger.warn('Сумма данных бухгалтерского учёта превышает сумму начисленных платежей!')
-            }
-
-            // 8. Проверка итоговых значений по кодам классификации дохода
+            // 12. Арифметические проверки расчета итоговых строк «Итого по КНУ»
             for (def codeName : totalGroupsName) {
                 def row = getRowByAlias(data, ('total' + codeName))
                 for (def alias : totalColumns) {
                     if (calcSumByCode(codeName, alias) != row.getCell(alias).getValue()) {
-                        logger.error("Итоговые значения по коду $codeName рассчитаны неверно!")
+                        logger.error("Неверное значение $codeName для графы $alias!")
                         return false
                     }
                 }
             }
 
-            // 9. Проверка итогового значений по всей форме
+            // 13. Арифметические проверки расчета строки общих итогов
             for (def alias : totalColumns) {
                 if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
                     logger.error('Итоговые значения рассчитаны неверно!')
                     return false
                 }
             }
+
         }
     }
     return true
@@ -738,4 +752,11 @@ def getKnu(def code) {
  */
 def getCodeAttribute(def id) {
     return refBookService.getStringValue(27, id, 'CODE')
+}
+
+/**
+ * Проверка является ли строка итоговой (любой итоговой, т.е. по коду, либо основной)
+ */
+def isTotalRow(row){
+    row.getAlias()==~/total\d*/
 }
