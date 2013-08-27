@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
 import java.util.List;
+import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
@@ -32,14 +33,13 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 	public interface MyView extends PopupView, HasUiHandlers<OpenDialogUiHandlers> {
 		void setReportPeriods(List<ReportPeriod> reportPeriods);
 		void setTaxPeriods(List<TaxPeriod> taxPeriods);
-		void setDepartments(List<Department> departments, List<Integer> selectedDepartments);
+		void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, boolean enable);
 		void setCurrentReportPeriod(ReportPeriod reportPeriod);
 		void setYear(int year);
 		void setTaxType(TaxType taxType);
 	}
 
 	private DispatchAsync dispatcher;
-	private PlaceManager placeManager;
 	private TaxType taxType;
 
 	@Inject
@@ -47,7 +47,6 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 	                           DispatchAsync dispatcher, PlaceManager placeManager) {
 		super(eventBus, view);
 		this.dispatcher = dispatcher;
-		this.placeManager = placeManager;
 		getView().setUiHandlers(this);
 	}
 
@@ -60,8 +59,8 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		getView().setTaxPeriods(taxPeriods);
 	}
 
-	public void setDepartments(List<Department> departments, List<Integer> selectedDepartments) {
-		getView().setDepartments(departments, selectedDepartments);
+	public void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, boolean enable) {
+		getView().setDepartments(departments, avalDepartments, selectedDepartments, enable);
 	}
 
 	public void setCurrentReportPeriod(ReportPeriod currentReportPeriod) {

@@ -148,6 +148,9 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			departmentIds.add(dft.getDepartmentId());
 		}
 
+		// Подразделение пользователя должно быть доступно
+		departmentIds.add(userInfo.getUser().getDepartmentId());
+
 		result.setDepartmentIds(departmentIds);
 		
 		List<FormType> formTypesList = new ArrayList<FormType>(formTypes.values());

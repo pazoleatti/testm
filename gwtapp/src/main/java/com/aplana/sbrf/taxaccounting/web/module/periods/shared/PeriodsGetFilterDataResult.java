@@ -4,19 +4,24 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
+import java.util.Set;
 
 public class PeriodsGetFilterDataResult implements Result {
+	private static final long serialVersionUID = 3768478656977415062L;
 
 	private ReportPeriod currentReportPeriod;
-    private List<Department> departments;
-	private FormDataFilterAvailableValues filterValues;
+   
 	private List<DictionaryTaxPeriod> dictionaryTaxPeriods;
 	private int yearFrom;
 	private int yearTo;
 	private int currentYear;
-	private Department selectedDepartment;
+	private TaxType taxType;
+	
+	private List<Department> departments;
+	private Set<Integer> avalDepartments;
+	private Integer selectedDepartment;
 	private boolean enableDepartmentPicker;
-//	private List<>
+	private boolean readOnly;
 
     public PeriodsGetFilterDataResult(){
 
@@ -29,14 +34,6 @@ public class PeriodsGetFilterDataResult implements Result {
     public void setDepartments(List<Department> departments) {
         this.departments = departments;
     }
-
-	public FormDataFilterAvailableValues getFilterValues() {
-		return filterValues;
-	}
-
-	public void setFilterValues(FormDataFilterAvailableValues filterValues) {
-		this.filterValues = filterValues;
-	}
 
 	public ReportPeriod getCurrentReportPeriod() {
 		return currentReportPeriod;
@@ -78,13 +75,6 @@ public class PeriodsGetFilterDataResult implements Result {
 		this.currentYear = currentYear;
 	}
 
-	public Department getSelectedDepartment() {
-		return selectedDepartment;
-	}
-
-	public void setSelectedDepartment(Department selectedDepartment) {
-		this.selectedDepartment = selectedDepartment;
-	}
 
 	public boolean isEnableDepartmentPicker() {
 		return enableDepartmentPicker;
@@ -92,5 +82,37 @@ public class PeriodsGetFilterDataResult implements Result {
 
 	public void setEnableDepartmentPicker(boolean enableDepartmentPicker) {
 		this.enableDepartmentPicker = enableDepartmentPicker;
+	}
+
+	public Set<Integer> getAvalDepartments() {
+		return avalDepartments;
+	}
+
+	public void setAvalDepartments(Set<Integer> avalDepartments) {
+		this.avalDepartments = avalDepartments;
+	}
+
+	public Integer getSelectedDepartment() {
+		return selectedDepartment;
+	}
+
+	public void setSelectedDepartment(Integer selectedDepartment) {
+		this.selectedDepartment = selectedDepartment;
+	}
+
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
+	}
+
+	public TaxType getTaxType() {
+		return taxType;
+	}
+
+	public void setTaxType(TaxType taxType) {
+		this.taxType = taxType;
 	}
 }
