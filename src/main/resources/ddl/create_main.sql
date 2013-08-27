@@ -338,11 +338,13 @@ create table income_101 (
   credit_rate            number(22,4),
   outcome_debet_remains  number(22,4),
   outcome_credit_remains number(22,4),
-  account_name varchar2(255 char)
+  account_name           varchar2(255 char),
+  department_id          number(9) not null
 );
 
 alter table income_101 add constraint income_101_pk primary key (id);
 alter table income_101 add constraint income_101_fk_report_period_id foreign key (report_period_id) references report_period(id);
+alter table income_101 add constraint income_101_fk_department foreign key (department_id) references department(id);
 
 comment on table income_101 is 'Оборотная ведомость (Форма 0409101-СБ)';
 comment on column income_101.id is 'Код записи';
@@ -355,6 +357,7 @@ comment on column income_101.credit_rate is 'Обороты по кредиту'
 comment on column income_101.outcome_debet_remains is 'Исходящие остатки по дебету';
 comment on column income_101.outcome_credit_remains is 'Исходящие остатки по кредиту';
 comment on column income_101.account_name is 'Название счёта';
+comment on column income_101.department_id is 'Код подразделения';
 
 create sequence seq_income_101 start with 100;
 -------------------------------------------------------------------------------------------------------------------------------------------
@@ -363,11 +366,13 @@ create table income_102 (
   report_period_id number(9) not null,
   opu_code         varchar2(25 char) not null,
   total_sum        number(22,4),
-  item_name        varchar2(255 char)
+  item_name        varchar2(255 char),
+  department_id    number(9) not null
   );
 
 alter table income_102 add constraint income_102_pk primary key (id);
 alter table income_102 add constraint income_102_fk_report_period_id foreign key (report_period_id) references report_period(id);
+alter table income_102 add constraint income_102_fk_department foreign key (department_id) references department(id);
 
 comment on table income_102 is 'Отчет о прибылях и убытках (Форма 0409102-СБ)';
 comment on column income_102.id is 'Код записи';
@@ -375,6 +380,7 @@ comment on column income_102.report_period_id is 'Идентификатор о�
 comment on column income_102.opu_code is 'Код ОПУ';
 comment on column income_102.total_sum is 'Сумма';
 comment on column income_102.item_name is 'Наименование статьи';
+comment on column income_102.department_id is 'Код подразделения';
 
 create sequence seq_income_102 start with 100;
 ---------------------------------------------------------------------------------------------------
@@ -826,7 +832,8 @@ create table department_report_period (
   department_id       number(9) not null,
   report_period_id    number(9) not null,
   is_active           number(1) not null,
-  is_balance_period   number(1) default 0 not null
+  is_balance_period   number(1) default 0 not null,
+  report_date         date
 );
 
 alter table department_report_period add constraint department_report_period_pk primary key (department_id, report_period_id);
@@ -840,6 +847,7 @@ comment on column department_report_period.department_id is 'Код подраз
 comment on column department_report_period.report_period_id is 'Код отчетного периода';
 comment on column department_report_period.is_active is 'Признак активности (0 - период закрыт, 1 - период открыт)';
 comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
+comment on column department_report_period.report_date is 'Срок подачи отчётности';
 
 alter table department_report_period add constraint dep_rep_per_fk_department_id foreign key (department_id) references DEPARTMENT (id);
 alter table department_report_period add constraint dep_rep_per_fk_rep_period_id foreign key (report_period_id) references REPORT_PERIOD (id);

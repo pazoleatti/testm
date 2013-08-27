@@ -284,10 +284,10 @@ void logicalCheck(DataRowHelper form) {
             m.put(4, row.code );
             m.put(5, row.docNumber);
             m.put(6, row.docDate);
-            if (uniq456.contains(e)) {
+            if (uniq456.contains(m)) {
                 logger.error("Несколько строки %s содержат записи в налоговом учете для балансового счета=%s, документа № %s от %s", row.number.toSting(), row.code.toString(), row.docNumber.toString(), row.docDate.toString())
             }
-            uniq456.add(e)
+            uniq456.add(m)
 
             //logger.info('Проверка на заполнение поля «<Наименование поля>»')
             // LC Проверка на заполнение поля «<Наименование поля>»
