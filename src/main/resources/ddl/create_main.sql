@@ -832,7 +832,8 @@ create table department_report_period (
   department_id       number(9) not null,
   report_period_id    number(9) not null,
   is_active           number(1) not null,
-  is_balance_period   number(1) default 0 not null
+  is_balance_period   number(1) default 0 not null,
+  report_date         date
 );
 
 alter table department_report_period add constraint department_report_period_pk primary key (department_id, report_period_id);
@@ -846,6 +847,7 @@ comment on column department_report_period.department_id is 'Код подраз
 comment on column department_report_period.report_period_id is 'Код отчетного периода';
 comment on column department_report_period.is_active is 'Признак активности (0 - период закрыт, 1 - период открыт)';
 comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
+comment on column department_report_period.report_date is 'Срок подачи отчётности';
 
 alter table department_report_period add constraint dep_rep_per_fk_department_id foreign key (department_id) references DEPARTMENT (id);
 alter table department_report_period add constraint dep_rep_per_fk_rep_period_id foreign key (report_period_id) references REPORT_PERIOD (id);
