@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DictionaryTaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -37,7 +38,6 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGetFilterData, PeriodsGetFilterDataResult> {
 
-	private Log logger = LogFactory.getLog(getClass());
 	public static final long DICT_ID = 8L;
 	
 	@Autowired
@@ -61,20 +61,26 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
     public PeriodsGetFilterDataResult execute(PeriodsGetFilterData action, ExecutionContext executionContext) throws ActionException {
 	    PeriodsGetFilterDataResult res = new PeriodsGetFilterDataResult();
 	    TAUserInfo userInfo = securityService.currentUserInfo();
+	    res.setTaxType(action.getTaxType());
 	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(userInfo, action.getTaxType());
-	    RefBookDataProvider refBookDataProvider = refBookFactory
-			    .getDataProvider(DICT_ID);
-	    PagingResult<Map<String, RefBookValue>> result = refBookDataProvider.getRecords(new Date(), null,
-			    action.getTaxType().getCode()+"=1", null);
+
 	    if(filterValues.getDepartmentIds() == null) {
 		    //Контролер УНП
 		    res.setDepartments(departmentService.listAll());
+		    res.setAvalDepartments(null);
 	    } else {
 		    //Контролер или Оператор
 		    res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(filterValues
 				    .getDepartmentIds()).values()));
+		    res.setAvalDepartments(filterValues.getDepartmentIds());
 	    }
-	    res.setFilterValues(filterValues);
+	    
+
+	    
+	    RefBookDataProvider refBookDataProvider = refBookFactory
+			    .getDataProvider(DICT_ID);
+	    PagingResult<Map<String, RefBookValue>> result = refBookDataProvider.getRecords(new Date(), null,
+			    action.getTaxType().getCode()+"=1", null);
 	    res.setDictionaryTaxPeriods(convert(result));
 	    // По умолчанию отчетный период не выбран
 	    res.setCurrentReportPeriod(null);
@@ -93,16 +99,28 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 		}
 	    TaxType taxType = action.getTaxType();
 
-	    if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT)) {
-		    res.setSelectedDepartment(departmentService.getDepartmentBySbrfCode("99006200")); //УНП
+	    if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT) || (taxType == TaxType.DEAL)) {
+		    res.setSelectedDepartment(departmentService.getDepartmentBySbrfCode("99006200").getId()); //УНП
 		    res.setEnableDepartmentPicker(false);
 	    } else if ((taxType == TaxType.TRANSPORT) || (taxType == TaxType.PROPERTY)) {
-			res.setSelectedDepartment(departmentService.getDepartment(userInfo.getUser().getDepartmentId()));
+			res.setSelectedDepartment(userInfo.getUser().getDepartmentId());
 		    res.setEnableDepartmentPicker(true);
 	    }
 	    Calendar current = Calendar.getInstance();
 	    res.setCurrentYear(current.get(Calendar.YEAR));
-
+	    
+	    System.out.println(res.getDepartments());
+	    System.out.println(res.getAvalDepartments());
+	    System.out.println(res.getSelectedDepartment() + " " + userInfo.getUser().getDepartmentId());
+	    
+	    
+	    // Только чтение
+	    if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP) && (taxType == TaxType.INCOME) || (taxType == TaxType.VAT) || (taxType == TaxType.DEAL)){
+	    	res.setReadOnly(true);
+	    } else {
+	    	res.setReadOnly(false);
+    	}
+    
         return res;
     }
 

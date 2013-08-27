@@ -50,4 +50,23 @@ public interface ReportPeriodService {
      * @return
      */
     Calendar getEndDate(int reportPeriodId);
+
+    /**
+     * Проверяем, открыт ли период для департамента или нет
+     *
+     * @param reportPeriodId
+     * @param departmentId
+     * @return
+     */
+    boolean isActivePeriod(int reportPeriodId, long departmentId);
+
+    /**
+     * Проверяем, период ли остатков
+     *
+     * @param reportPeriodId
+     * @param departmentId
+     * @return true - если остатков иначе false (не существует тоже false)
+     *
+     */
+    boolean isBalancePeriod(int reportPeriodId, long departmentId);
 }

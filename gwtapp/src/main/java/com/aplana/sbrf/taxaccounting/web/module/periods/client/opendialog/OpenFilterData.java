@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
-import com.aplana.sbrf.taxaccounting.model.DictionaryTaxPeriod;
-
 import java.util.Date;
 
 public class OpenFilterData {
