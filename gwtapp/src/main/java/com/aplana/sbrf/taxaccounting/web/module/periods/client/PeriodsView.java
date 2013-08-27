@@ -102,17 +102,11 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	}
 
 	@Override
-	public void setDepartmentPickerEnable(boolean enable) {
-		departmentPicker.setEnabled(enable);
-	}
-
-	@Override
 	public void setFilterData(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, int yearFrom, int yearTo) {
 		departmentPicker.setAvalibleValues(departments, avalDepartments);
 		departmentPicker.setValue(selectedDepartments);
 		fromBox.setValue(yearFrom);
 		toBox.setValue(yearTo);
-
 	}
 
 	@Override

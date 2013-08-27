@@ -39,13 +39,12 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 
 	@Override
 	public boolean isEnabled() {
-		return (selectButton.isEnabled() && selected.isEnabled());
+		return (selectButton.isEnabled());
 	}
 
 	@Override
 	public void setEnabled(boolean enabled) {
 		selectButton.setEnabled(enabled);
-		selected.setEnabled(enabled);
 	}
 
 	interface Binder extends UiBinder<HTMLPanel, DepartmentPickerPopupWidget> {
