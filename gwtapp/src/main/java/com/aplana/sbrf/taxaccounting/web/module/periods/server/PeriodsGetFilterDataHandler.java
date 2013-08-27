@@ -64,17 +64,10 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	    // Используем сервис для инициализации фильтра форм даты (в аналитике ссылка)
 	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(userInfo, action.getTaxType());
 
-	    if(filterValues.getDepartmentIds() == null) {
-		    //Контролер УНП
-		    res.setDepartments(departmentService.listAll());
-		    res.setAvalDepartments(null);
-	    } else {
-		    //Контролер или Оператор
-		    res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(filterValues
-				    .getDepartmentIds()).values()));
-		    res.setAvalDepartments(filterValues.getDepartmentIds());
-	    }
-	    
+
+	    res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(filterValues
+			    .getDepartmentIds()).values()));
+	    res.setAvalDepartments(filterValues.getDepartmentIds());	    
 
 	    
 	    RefBookDataProvider refBookDataProvider = refBookFactory
