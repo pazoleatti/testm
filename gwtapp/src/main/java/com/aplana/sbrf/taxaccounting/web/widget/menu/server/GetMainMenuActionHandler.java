@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.server;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.service.MessageService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditToken;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.BookerStatementsTokens;
@@ -43,6 +44,9 @@ public class GetMainMenuActionHandler extends
 
 	@Autowired
 	private SecurityService securityService;
+
+    @Autowired
+    private MessageService messageService;
 
 	@Override
 	public GetMainMenuResult execute(GetMainMenuAction action,

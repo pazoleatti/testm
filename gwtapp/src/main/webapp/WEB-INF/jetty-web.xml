@@ -128,4 +128,12 @@
             </New>
         </Arg>
     </New>
+
+    <!-- Подмена EJB-модуля MigrationBean на maven-зависимость для dev-mode -->
+    <New class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>ejb/taxaccounting-ear/migration-ejb.jar/MigrationBean</Arg>
+        <Arg>
+            <New class="com.aplana.sbrf.taxaccounting.service.MigrationBean"/>
+        </Arg>
+    </New>
 </Configure>
