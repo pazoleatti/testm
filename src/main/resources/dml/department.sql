@@ -277,5 +277,39 @@ insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb
 values (2, 'ТБ1', 1, 2, null, null, null, '2');
 insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
 values (3, 'ТБ2', 1, 2, null, null, null, '3');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code) 
+values (143, 'Отдел сопровождения операций с ценными бумагами - субфедеральные облигации',  123, 6, null, '77', '99', '999300010');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code) 
+values (144, 'Отдел сопровождения операций с ценными бумагами -  корпоративные облигации',  123, 6, null, '77', '99', '999300010');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code) 
+values (145, 'Отдел сопровождения операций с ценными бумагами - валютные облигации',  123, 6, null, '77', '99', '999300010');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code) 
+values (146, 'Отдел сопровождения операций на фондовом рынке - ОФЗ',  121, 6, null, '77', '99', '999300020');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code) 
+values (147, 'Отдел сопровождения операций на фондовом рынке - ГКО', 121, 6, null, '77', '99', '999300020');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code) 
+values (148, 'Отдел сопровождения операций на фондовом рынке - бескупонные облигации ЦБ',  121, 6, null, '77', '99', '999300020');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code) 
+values (149, 'Отдел сопровождения операций на фондовом рынке - Субфедеральные и муниципальные облигации',  121, 6, null, '77', '99', '999300020');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code) 
+values (150, 'Отдел сопровождения операций на фондовом рынке - Корпоративные облигации',  121, 6, null, '77', '99', '999300020');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code) 
+values (151, 'Отдел сопровождения операций на фондовом рынке - Акции',  121, 6, null, '77', '99', '999300020');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code) 
+values (152, 'Отдел сопровождения операций на фондовом рынке - ОГВЗ и ОВГВЗ',  121, 6, null, '77', '99', '999300020');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code) 
+values (153, 'Отдел сопровождения операций на фондовом рынке - Еврооблигации',  121, 6, null, '77', '99', '999300020');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code) 
+values (154, 'Отдел сопровождения операций на фондовом рынке - Корпоративные еврооблигации',  121, 6, null, '77', '99', '999300020');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code) 
+values (155, 'Отдел сопровождения операций на фондовом рынке - Еврооблигации нерезидентов для РФ',  121, 6, null, '77', '99', '999300020');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
+values (156, 'Отдел сопровождения операций на фондовом рынке - Корпоративные облигации резидентов в инвалюте',  121, 6, null, '77', '99', '999300020');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code) 
+values (157, 'Отдел сопровождения операций на фондовом рынке - Суверенные Еврооблигации СНГ',  121, 6, null, '77', '99', '999300020');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code) 
+values (158, 'Отдел сопровождения операций на фондовом рынке - Суверенные облигации стран СНГ (рубли)',  121, 6, null, '77', '99', '999300020');
+insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
+values (159, 'Отдел сопровождения операций на фондовом рынке - Еврооблигации нерезидентов',  121, 6, null, '77', '99', '999300020');
 commit;
 
