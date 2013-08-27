@@ -76,7 +76,7 @@ public class RefBookIncome101 implements RefBookDataProvider {
 
     @Override
     public void deleteRecords(Date version, List<Long> recordIds) {
-        refBookIncome101Dao.deleete(recordIds);
+        refBookIncome101Dao.delete(recordIds);
     }
 
     @Override

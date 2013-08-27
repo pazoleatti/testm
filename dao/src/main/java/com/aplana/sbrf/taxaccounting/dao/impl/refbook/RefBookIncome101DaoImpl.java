@@ -214,7 +214,7 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
     }
 
     @Override
-    public void deleete(List<Long> ids) {
+    public void delete(List<Long> ids) {
         if (ids.size() == 0) {
             return;
         }

@@ -25,6 +25,6 @@ public interface RefBookIncome101Dao {
     public void deleteAll(Integer reportPeriod);
 
     public List<ReportPeriod> gerReportPeriods();
-    public void deleete(List<Long> ids);
+    public void delete(List<Long> ids);
     public void update(List<Map<String, RefBookValue>> records);
 }
