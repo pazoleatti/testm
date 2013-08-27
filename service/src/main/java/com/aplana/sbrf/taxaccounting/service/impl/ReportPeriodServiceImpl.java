@@ -87,7 +87,8 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	}
 
 	@Override
-	public void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId, List<LogEntry> logs) {
+	public void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
+	                 long departmentId, List<LogEntry> logs, boolean isBalance) {
 		Calendar from = Calendar.getInstance();
 		from.set(Calendar.YEAR, year);
 		from.set(Calendar.MONTH, Calendar.JANUARY);
@@ -100,7 +101,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 
 		List<TaxPeriod> taxPeriodList = taxPeriodDao.listByTaxTypeAndDate(taxType, from.getTime(), to.getTime());
 		if (taxPeriodList.size() > 1) {
-			throw new ServiceException("Слишком много TaxPeriod'ов"); //TODO
+			throw new ServiceException("Слишком много налоговых периодов");
 		}
 
 		TaxPeriod taxPeriod;
@@ -134,8 +135,8 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 			newReportPeriod.setTaxPeriodId(taxPeriod.getId());
 			newReportPeriod.setDictTaxPeriodId(dictionaryTaxPeriodId);
 			newReportPeriod.setName(record.get("NAME").getStringValue());
-			newReportPeriod.setOrder(4);
-			newReportPeriod.setMonths(4);//TODO заполнять из справочника
+			newReportPeriod.setOrder(4); //TODO взять из справочника
+			newReportPeriod.setMonths(record.get("MONTHS").getNumberValue().intValue());
 			reportPeriodDao.save(newReportPeriod);
 
 		} else {
@@ -155,8 +156,8 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 		} else if (user.getUser().getDepartmentId() == departmentId) {
 			// Сохраняем для пользователя
 			DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
-			departmentReportPeriod.setActive(true); //TODO
-			departmentReportPeriod.setBalance(false); //TODO
+			departmentReportPeriod.setActive(true);
+			departmentReportPeriod.setBalance(isBalance);
 			departmentReportPeriod.setDepartmentId(Long.valueOf(user.getUser().getDepartmentId()));
 			departmentReportPeriod.setReportPeriod(newReportPeriod);
 			saveOrUpdate(departmentReportPeriod, logs);
@@ -176,7 +177,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 		} else if (user.getUser().getDepartmentId() != departmentId) {
 			DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
 			departmentReportPeriod.setActive(true);
-			departmentReportPeriod.setBalance(false); //TODO
+			departmentReportPeriod.setBalance(isBalance);
 			departmentReportPeriod.setDepartmentId(departmentId);
 			departmentReportPeriod.setReportPeriod(newReportPeriod);
 			saveOrUpdate(departmentReportPeriod, logs);

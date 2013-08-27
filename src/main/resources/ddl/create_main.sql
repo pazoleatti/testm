@@ -480,6 +480,7 @@ alter table form_data add constraint form_data_fk_period_id foreign key (report_
 alter table form_data add constraint form_data_chk_kind check(kind in (1,2,3,4,5));
 alter table form_data add constraint form_data_chk_state check(state in (1,2,3,4));
 alter table form_data add constraint form_data_chk_return_sign check(return_sign in (0,1));
+alter table form_data add constraint form_data_chk_period_order check(period_order in (1,12));
 
 comment on table form_data is 'Данные по налоговым формам';
 comment on column form_data.id is 'Первичный ключ';
