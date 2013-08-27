@@ -8,24 +8,25 @@ import com.google.gwt.event.shared.HasHandlers;
  * @author Eugene Stetsenko
  */
 public class PeriodCreated extends
-		GwtEvent<PeriodCreated.MyHandler> {
+		GwtEvent<PeriodCreated.OpenPeriodHandler> {
 
-	public static interface MyHandler extends EventHandler {
+	public static interface OpenPeriodHandler extends EventHandler {
 		/**
 		 * @param event
 		 */
 		void onPeriodCreated(PeriodCreated event);
 	}
 
-	private static final Type<MyHandler> TYPE = new Type<MyHandler>();
+	private static final Type<OpenPeriodHandler> TYPE = new Type<OpenPeriodHandler>();
 
-	public static Type<MyHandler> getType() {
+	public static Type<OpenPeriodHandler> getType() {
 		return TYPE;
 	}
 
 	public static void fire(HasHandlers source,	boolean success) {
 		PeriodCreated event = new PeriodCreated();
 		event.setSuccess(success);
+		System.out.println("Fire event");
 		source.fireEvent(event);
 	}
 
@@ -35,12 +36,12 @@ public class PeriodCreated extends
 	}
 
 	@Override
-	protected void dispatch(MyHandler handler) {
+	protected void dispatch(OpenPeriodHandler handler) {
 		handler.onPeriodCreated(this);
 	}
 
 	@Override
-	public Type<MyHandler> getAssociatedType() {
+	public Type<OpenPeriodHandler> getAssociatedType() {
 		return getType();
 	}
 

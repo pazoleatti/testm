@@ -36,14 +36,9 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, PeriodsPresenter.MyProxy>
-								implements PeriodsUiHandlers, PeriodCreated.MyHandler {
+								implements PeriodsUiHandlers, PeriodCreated.OpenPeriodHandler {
 
 	private TaxType taxType;
-
-	@Override
-	public void onPeriodCreated(PeriodCreated event) {
-		find();
-	}
 
 	@ProxyCodeSplit
 	@NameToken(PeriodsTokens.PERIODS)
@@ -78,6 +73,11 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		this.dispatcher = dispatcher;
 		this.openDialogPresenter = openDialogPresenter;
 		getView().setUiHandlers(this);
+	}
+
+	@Override
+	public void onBind(){
+		addRegisteredHandler(PeriodCreated.getType(), this);
 	}
 
 	@Override
@@ -148,5 +148,10 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	@Override
 	public boolean useManualReveal() {
 		return true;
+	}
+	
+	@Override
+	public void onPeriodCreated(PeriodCreated event) {
+		find();
 	}
 }

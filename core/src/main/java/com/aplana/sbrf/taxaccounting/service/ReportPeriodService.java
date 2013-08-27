@@ -52,7 +52,8 @@ public interface ReportPeriodService {
 	 * @param dictionaryTaxPeriodId
 	 * @param taxType
 	 */
-	void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId, List<LogEntry> logs);
+	void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
+	          long departmentId, List<LogEntry> logs, boolean isBalance);
 
 	void close(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs);
 
