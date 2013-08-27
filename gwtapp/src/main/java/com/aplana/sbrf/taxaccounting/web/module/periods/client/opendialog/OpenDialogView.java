@@ -70,7 +70,11 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 
 	@Override
 	public void setDepartments(List<Department> departments, List<Integer> selectedDepartments) {
-		departmentPicker.setAvalibleValues(departments, new HashSet<Integer>());
+		Set<Integer> av = new HashSet<Integer>();
+		for (Department dep : departments) {
+			av.add(dep.getId());
+		}
+		departmentPicker.setAvalibleValues(departments, av);
 		departmentPicker.setValue(selectedDepartments);
 	}
 

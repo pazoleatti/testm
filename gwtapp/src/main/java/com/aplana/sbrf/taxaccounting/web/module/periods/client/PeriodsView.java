@@ -108,7 +108,9 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 			available.add(dep.getId());
 		}
 		departmentPicker.setAvalibleValues(departments, available);
-		departmentPicker.setValue(selectedDepartments);
+		if ((selectedDepartments != null) && (!selectedDepartments.isEmpty())) {
+			departmentPicker.setValue(selectedDepartments);
+		}
 		fromBox.setValue(yearFrom);
 		toBox.setValue(yearTo);
 

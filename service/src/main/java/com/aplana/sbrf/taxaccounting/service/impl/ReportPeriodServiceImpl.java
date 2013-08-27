@@ -152,7 +152,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 				depRP.setActive(true);
 				saveOrUpdate(depRP, logs);
 			}
-		} else {
+		} else if (user.getUser().getDepartmentId() == departmentId) {
 			// Сохраняем для пользователя
 			DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
 			departmentReportPeriod.setActive(true); //TODO
@@ -173,6 +173,13 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 				saveOrUpdate(depRP, logs);
 			}
 
+		} else if (user.getUser().getDepartmentId() != departmentId) {
+			DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+			departmentReportPeriod.setActive(true);
+			departmentReportPeriod.setBalance(false); //TODO
+			departmentReportPeriod.setDepartmentId(departmentId);
+			departmentReportPeriod.setReportPeriod(newReportPeriod);
+			saveOrUpdate(departmentReportPeriod, logs);
 		}
 	}
 
@@ -202,7 +209,6 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	private void saveOrUpdate(DepartmentReportPeriod departmentReportPeriod, List<LogEntry> logs) {
 		DepartmentReportPeriod dp = departmentReportPeriodDao.get(departmentReportPeriod.getReportPeriod().getId(),
 				departmentReportPeriod.getDepartmentId());
-
 		if (dp == null) { //не существует
 			departmentReportPeriodDao.save(departmentReportPeriod);
 		} else if (!dp.isActive()) { // существует и не открыт
