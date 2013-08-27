@@ -48,7 +48,8 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 		Map<String, List<TableRow>> per = new HashMap<String, List<TableRow>>();
 		for (DepartmentReportPeriod period : reportPeriods) {
 			TaxPeriod taxPeriod = reportPeriodService.getTaxPeriod(period.getReportPeriod().getTaxPeriodId());
-			if (taxPeriod.getStartDate().after(from.getTime()) && taxPeriod.getStartDate().before(to.getTime())
+			if ((taxPeriod.getStartDate().after(from.getTime()) || taxPeriod.getStartDate().equals(from.getTime()))
+					&& (taxPeriod.getStartDate().before(to.getTime()) || taxPeriod.getStartDate().equals(to.getTime()))
 					&& (taxPeriod.getTaxType() == action.getTaxType())) {
 				if (per.get(taxPeriod.getStartDate().toString()) == null) {
 					List<TableRow> tableRows = new ArrayList<TableRow>();
@@ -57,6 +58,8 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 				TableRow row = new TableRow();
 				row.setPeriodName(period.getReportPeriod().getName());
 				row.setPeriodCondition(period.isActive());
+				row.setDepartmentId(action.getDepartmentId());
+				row.setReportPeriodId(period.getReportPeriod().getId());
 				per.get(taxPeriod.getStartDate().toString()).add(row);
 			}
 		}

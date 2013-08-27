@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import java.util.*;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,22 +58,13 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 		return reportPeriodDao.listByTaxPeriod(taxPeriodId);
 	}
 
-	@Override
-	public void closePeriod(int reportPeriodId) {
-		reportPeriodDao.changeActive(reportPeriodId, false);
-	}
-
-	@Override
-	public void openPeriod(int reportPeriodId) {
-		reportPeriodDao.changeActive(reportPeriodId, true);
-	}
-
-
     @Override
     public DepartmentReportPeriod getLastReportPeriod(TaxType taxType, long departmentId) {
-    	// TODO: Нужно получить последний открытый для этого подразделения.
+    	// TODO: Нужно получить последний открытый для этого подразделения и типа налога.
     	return null;
     }
+    
+    
 
 	@Override
 	public boolean isActivePeriod(int reportPeriodId, long departmentId) {
@@ -94,7 +87,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	}
 
 	@Override
-	public void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId) {
+	public void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId, List<LogEntry> logs) {
 		Calendar from = Calendar.getInstance();
 		from.set(Calendar.YEAR, year);
 		from.set(Calendar.MONTH, Calendar.JANUARY);
@@ -143,7 +136,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 			newReportPeriod.setName(record.get("NAME").getStringValue());
 			newReportPeriod.setOrder(4);
 			newReportPeriod.setMonths(4);//TODO заполнять из справочника
-			reportPeriodDao.add(newReportPeriod);
+			reportPeriodDao.save(newReportPeriod);
 
 		} else {
 			newReportPeriod = reportPeriods.get(0);
@@ -157,16 +150,16 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 				depRP.setReportPeriod(newReportPeriod);
 				depRP.setDepartmentId(Long.valueOf(dep.getId()));
 				depRP.setActive(true);
-				saveOrUpdate(depRP);
+				saveOrUpdate(depRP, logs);
 			}
-		} else {
+		} else if (user.getUser().getDepartmentId() == departmentId) {
 			// Сохраняем для пользователя
 			DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
 			departmentReportPeriod.setActive(true); //TODO
 			departmentReportPeriod.setBalance(false); //TODO
 			departmentReportPeriod.setDepartmentId(Long.valueOf(user.getUser().getDepartmentId()));
 			departmentReportPeriod.setReportPeriod(newReportPeriod);
-			saveOrUpdate(departmentReportPeriod);
+			saveOrUpdate(departmentReportPeriod, logs);
 
 			// Сохраняем для источников
 			List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
@@ -177,20 +170,56 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 				depRP.setReportPeriod(newReportPeriod);
 				depRP.setDepartmentId(Long.valueOf(dft.getDepartmentId()));
 				depRP.setActive(true);
-				saveOrUpdate(depRP);
+				saveOrUpdate(depRP, logs);
 			}
 
+		} else if (user.getUser().getDepartmentId() != departmentId) {
+			DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+			departmentReportPeriod.setActive(true);
+			departmentReportPeriod.setBalance(false); //TODO
+			departmentReportPeriod.setDepartmentId(departmentId);
+			departmentReportPeriod.setReportPeriod(newReportPeriod);
+			saveOrUpdate(departmentReportPeriod, logs);
 		}
 	}
 
-	private void saveOrUpdate(DepartmentReportPeriod departmentReportPeriod) {
-		if (departmentReportPeriodDao.get(departmentReportPeriod.getReportPeriod().getId(),
-				departmentReportPeriod.getDepartmentId()) == null) {
-
-			departmentReportPeriodDao.save(departmentReportPeriod);
+	@Override
+	public void close(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs) {
+		if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT)) {
+			for(Department dep : departmentService.listAll()) { //Закрываем для всех
+				closePeriodWithLog(reportPeriodId, dep.getId(), logs);
+			}
 		} else {
+			closePeriodWithLog(reportPeriodId, departmentId, logs);
+			List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
+			departmentFormTypes.addAll(departmentFormTypeService.getDepartmentFormSources((int) departmentId, taxType));
+			for (DepartmentFormType dft : departmentFormTypes) {
+				closePeriodWithLog(reportPeriodId, dft.getDepartmentId(), logs);
+			}
+		}
+	}
+
+	private void closePeriodWithLog(int reportPeriodId, long departmentId, List<LogEntry> logs) {
+		departmentReportPeriodDao.updateActive(reportPeriodId, departmentId, false);
+		logs.add(new LogEntry(LogLevel.INFO, "Период закрыт для подразделения \"" +
+				departmentService.getDepartment((int) departmentId).getName() +
+				"\""));
+	}
+
+	private void saveOrUpdate(DepartmentReportPeriod departmentReportPeriod, List<LogEntry> logs) {
+		DepartmentReportPeriod dp = departmentReportPeriodDao.get(departmentReportPeriod.getReportPeriod().getId(),
+				departmentReportPeriod.getDepartmentId());
+		if (dp == null) { //не существует
+			departmentReportPeriodDao.save(departmentReportPeriod);
+		} else if (!dp.isActive()) { // существует и не открыт
 			departmentReportPeriodDao.updateActive(departmentReportPeriod.getReportPeriod().getId(),
 				departmentReportPeriod.getDepartmentId(), true);
+		} else { // уже открыт
+			return;
+		}
+		if (logs != null) {
+			logs.add(new LogEntry(LogLevel.INFO,"Создан период для подразделения \" " +
+					departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName()+ "\""));
 		}
 	}
 
@@ -239,6 +268,11 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	@Override
 	public ReportPeriod getReportPeriod(int reportPeriodId) {
 		return reportPeriodDao.get(reportPeriodId);
+	}
+
+	@Override
+	public TaxPeriod getLastTaxPeriod(TaxType taxType) {
+		return taxPeriodDao.getLast(taxType);
 	}
 
 

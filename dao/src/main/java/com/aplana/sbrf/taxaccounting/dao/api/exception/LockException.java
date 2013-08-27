@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.api;
+package com.aplana.sbrf.taxaccounting.dao.api.exception;
 
 
 /**

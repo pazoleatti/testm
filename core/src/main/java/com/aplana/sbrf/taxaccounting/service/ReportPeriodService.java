@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 
 import java.util.Calendar;
 import java.util.List;
@@ -13,13 +14,6 @@ import java.util.List;
  * Сервис для работы с отчетными периодами
  */
 public interface ReportPeriodService {
-
-
-	@Deprecated
-	void closePeriod(int reportPeriodId);
-
-	@Deprecated
-	void openPeriod(int reportPeriodId);
 
     /**
      * Последний отчетный период для указанного вида налога и подразделения
@@ -54,13 +48,13 @@ public interface ReportPeriodService {
 	 * Открываем отчетный период для департамента.
 	 * Логика описана в аналитике - Ведение периодов
 	 *
-	 *
-	 * @param reportPeriod
 	 * @param year
 	 * @param dictionaryTaxPeriodId
 	 * @param taxType
 	 */
-	void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId);
+	void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user, long departmentId, List<LogEntry> logs);
+
+	void close(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs);
 
 	List<DepartmentReportPeriod> listByDepartmentId(long departmentId);
 	
@@ -90,6 +84,14 @@ public interface ReportPeriodService {
 	 * @return
 	 */
 	TaxPeriod getTaxPeriod(int taxPeriodId);
+	
+	/**
+	 * Получает последний заведенный налоговый период для типа налога
+	 * 
+	 * @param taxPeriodId
+	 * @return
+	 */
+	TaxPeriod getLastTaxPeriod(TaxType taxType);
 	
 	
 	/**
