@@ -82,7 +82,8 @@ public abstract class AbstractXlsxReportBuilder {
             widthCellsMap.put(cellNumber, cellWidthMax);
         }
         else if(widthCellsMap.get(cellNumber) != null){
-            if (widthCellsMap.get(cellNumber).compareTo(length) < 0 && widthCellsMap.get(cellNumber).compareTo(cellWidthMin) > 0 )
+            if (length.compareTo(cellWidthMax) < 0 && length.compareTo(cellWidthMin) > 0 &&
+                    widthCellsMap.get(cellNumber).compareTo(length) < 0)
                 widthCellsMap.put(cellNumber, length);
         }
         else
