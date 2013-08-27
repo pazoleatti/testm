@@ -16,15 +16,15 @@ import java.util.Map;
 public interface RefBookIncome101Dao {
     public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
-    Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId);
+    public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId);
 
-    RefBookValue getValue(Long refBookId, Long recordId, Long attributeId);
+    public RefBookValue getValue(Long refBookId, Long recordId, Long attributeId);
 
-    void insert(Long refBookId, Integer reportPeriodId, List<Map<String, RefBookValue>> records);
+    public void insert(Long refBookId, Integer reportPeriodId, List<Map<String, RefBookValue>> records);
 
-    void deleteAll(Integer reportPeriod);
+    public void deleteAll(Integer reportPeriod);
 
-    List<ReportPeriod> gerReportPeriods();
+    public List<ReportPeriod> gerReportPeriods();
     public void deleete(List<Long> ids);
     public void update(List<Map<String, RefBookValue>> records);
 }
