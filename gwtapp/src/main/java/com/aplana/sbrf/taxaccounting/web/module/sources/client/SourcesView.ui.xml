@@ -101,6 +101,6 @@
             </g:FlowPanel>
         </g:HorizontalPanel>
 
-        <style:GenericDataGrid ui:field="receiverSourcesTable" width="100%" height="100%" />
+        <style:GenericDataGrid ui:field="currentSourcesTable" width="100%" height="100%" />
 	</g:FlowPanel>
 </ui:UiBinder>

@@ -3,7 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-public class GetFormReceiverSourcesAction extends UnsecuredActionImpl<GetFormReceiverSourcesResult> {
+public class GetCurrentSourcesForFormAction extends UnsecuredActionImpl<GetCurrentSourcesResult> {
+	
     private int departmentId;
 	private int formTypeId;
 	private FormDataKind kind;

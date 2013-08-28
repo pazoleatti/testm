@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 public class GetFormReceiversResult implements Result {
+	private static final long serialVersionUID = -5102125212590725720L;
+	
 	private Map<Integer, FormType> formTypes;
 	private List<DepartmentFormType> formReceivers;
 

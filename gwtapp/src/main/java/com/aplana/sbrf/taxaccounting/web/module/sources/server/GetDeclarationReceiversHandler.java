@@ -13,7 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentDeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.web.module.sources.server.comparators.DepartmentDeclarationTypeComparator;
+import com.aplana.sbrf.taxaccounting.web.module.sources.server.assembler.DepartmentDeclarationTypeComparator;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDeclarationReceiversAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDeclarationReceiversResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
