@@ -9,6 +9,9 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
  * @author ekuvshinov
  */
 
+/** Признак периода ввода остатков. */
+def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkCreation()
@@ -16,7 +19,7 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         formPrev
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+        if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
             return
         }
@@ -25,7 +28,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         formPrev
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+        if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
             return
         }
@@ -47,7 +50,7 @@ switch (formDataEvent) {
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
         formPrev
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+        if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
             return
         }
@@ -57,7 +60,7 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE :
         formPrev
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+        if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
             return
         }
@@ -328,13 +331,13 @@ def getReportDate() {
 void checkNSI() {
     getRows(getData(formData)).each{ DataRow row ->
         if (row.getAlias() == null) {
-            if (row.currencyCode!=null && getCurrency(row.currencyCode)==null){
+            if (row.currency != null && getCurrency(row.currency) == null){
                 logger.warn('Валюта выпуска облигации указана неверно!');
             }
             if (row.signSecurity!=null && getSign(row.signSecurity)==null){
                 logger.warn('Признак ценной бумаги в справочнике отсутствует!');
             }
-            if (row.currencyCode!=null && getCourse(row.currencyCode,reportDate)==null){
+            if (row.currency != null && getCourse(row.currency, reportDate) == null){
                 logger.warn('Неверный курс валют!');
             }
         }
@@ -657,7 +660,7 @@ BigDecimal calc11(DataRow row) {
  * Расчет графы 12
  */
 BigDecimal calc12(DataRow row) {
-    return getCourse(row.currencyCode,reportDate)
+    return getCourse(row.currency,reportDate)
 }
 
 /**
@@ -821,7 +824,7 @@ void setError(Column c) {
  */
 void addNewRowwarnrmData() {
     def data = getData(formData)
-    DataRow<Cell> newRow = formData.createDataRow()
+    DataRow<Cell> newRow = getNewRow()
     int index // Здесь будет позиция вставки
 
     if (data.getAllCached().size() > 0) {
@@ -833,6 +836,10 @@ void addNewRowwarnrmData() {
         } else {
             // Строку не выбрал поэтому добавляем в самый конец
             selectRow = data.getAllCached().get(data.getAllCached().size() - 1) // Вставим в конец
+
+            // добавил вставку тут, потому что по старому добавляет не в конец формы а перед последним элементом
+            insert(data, newRow)
+            return
         }
 
         int indexSelected = data.getAllCached().indexOf(selectRow)
@@ -845,7 +852,6 @@ void addNewRowwarnrmData() {
             // Для динимаческих строк итого идём вверх пока не встретим конец формы или строку не итого
 
             for (index = indexSelected; index >= 0; index--) {
-                logger.info("loop index = " + index.toString())
                 if (data.getAllCached().get(index).getAlias() == null) {
                     index++
                     break
@@ -860,13 +866,7 @@ void addNewRowwarnrmData() {
         // Форма пустая поэтому поставим строку в начало
         index = 0
     }
-    [
-            'currency', 'issuer', 'regNumber', 'tradeNumber', 'prev', 'current', 'reserveCalcValuePrev', 'cost', 'signSecurity',
-            'marketQuotation', 'rubCourse', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery'
-    ].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
+
     data.insert(newRow, index+1)
 }
 
@@ -1097,7 +1097,7 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
  * Получить буквенный код валюты
  */
 def getCurrency(def currencyCode) {
-    return  refBookService.getStringValue(15,currencyCode,'CODE_2')
+    return refBookService.getStringValue(15, currencyCode, 'CODE_2')
 }
 
 /**
@@ -1118,6 +1118,16 @@ void insert(def data, def row) {
 }
 
 /**
+ * Получить строки формы.
+ *
+ * @param formData форма
+ */
+def getRows(def data) {
+    def cached = data.getAllCached()
+    return cached
+}
+
+/**
  * Проверка валюты на рубли
  */
 def isRubleCurrency(def currencyCode) {
@@ -1131,7 +1141,7 @@ def getCourse(def currency, def date) {
     if (currency!=null && !isRubleCurrency(currency)) {
         def refCourseDataProvider = refBookFactory.getDataProvider(22)
         def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
-        return res.getRecords().get(0).RATE.getNumberValue()
+        return (res.getRecords().isEmpty() ? null : res.getRecords().get(0).RATE.getNumberValue())
     } else if (isRubleCurrency(currency)){
         return 1;
     } else {
@@ -1139,3 +1149,13 @@ def getCourse(def currency, def date) {
     }
 }
 
+def getNewRow() {
+    def row = formData.createDataRow()
+    ['currency', 'issuer', 'regNumber', 'tradeNumber', 'prev', 'current', 'reserveCalcValuePrev',
+            'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'costOnMarketQuotation',
+            'reserveCalcValue', 'reserveCreation', 'recovery'].each {
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return row
+}
