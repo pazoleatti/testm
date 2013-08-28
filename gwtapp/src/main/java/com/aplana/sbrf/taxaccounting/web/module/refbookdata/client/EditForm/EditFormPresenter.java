@@ -64,6 +64,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 			boolean confirmed = Window.confirm(DIALOG_MESSAGE);
 			if (confirmed) {
 				onSaveClicked();
+			} else {
+				onCancelClicked();
 			}
 		}
 		showRecord(refBookRecordId);
