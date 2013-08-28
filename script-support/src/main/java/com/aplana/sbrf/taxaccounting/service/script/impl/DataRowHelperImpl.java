@@ -184,6 +184,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
     @Override
     public void clear(){
-        save(new ArrayList<DataRow<Cell>>());
+        dataRows = new ArrayList<DataRow<Cell>>();
+        save(dataRows);
     }
 }

@@ -90,9 +90,13 @@ def addNewRow() {
     int index = (currentDataRow != null ? currentDataRow.getIndex() :
         (getRows(data).size() == 0 ? 1 : getRows(data).size()))
 
-    data.insert(newRow, index)
+    def i = getRows(data).size()
+    if (i>0)
+    while(i>0 && isTotal(getRows(data).get(i-1)) || i>0 && isCa(getRows(data).get(i-1))){i--}
+    data.insert(newRow, i+1)
+
     // проставление номеров строк
-    def i = 1;
+    i = 1;
     getRows(data).each{ row->
         if (!isTotal(row)) {
             row.number = i++
@@ -153,7 +157,7 @@ void calc() {
         }
     }
     delRow.each { row ->
-        getRows(data).remove(getIndex(data, row))
+        deleteRow(data, row)
     }
     if (getRows(data).isEmpty()) {
         return
@@ -422,6 +426,13 @@ void checkDeclaration() {
  */
 def isTotal(def row) {
     return row != null && row.getAlias() != null && row.getAlias().contains('total')
+}
+
+/**
+ * Проверка является ли строка итоговой для ЦА (скорректированный).
+ */
+def isCa(def row) {
+    return row != null && row.getAlias() != null && row.getAlias().contains('ca')
 }
 
 /**

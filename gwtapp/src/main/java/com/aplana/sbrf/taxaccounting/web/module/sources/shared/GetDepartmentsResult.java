@@ -6,7 +6,9 @@ import com.gwtplatform.dispatch.shared.Result;
 import java.util.List;
 
 public class GetDepartmentsResult implements Result {
-    private List<Department> departments;
+	private static final long serialVersionUID = 6889603073251885676L;
+	
+	private List<Department> departments;
 
 	public List<Department> getDepartments() {
 		return departments;
