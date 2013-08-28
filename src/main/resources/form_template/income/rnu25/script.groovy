@@ -22,7 +22,7 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
 /** Признак периода ввода остатков. */
-def isBalancePeriod = (reportPeriod != null && reportPeriod.isBalancePeriod())
+def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
@@ -47,9 +47,11 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
+        recalculateNumbers()
         break
     case FormDataEvent.DELETE_ROW :
         deleteRow()
+        recalculateNumbers()
         break
 // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
@@ -90,23 +92,30 @@ switch (formDataEvent) {
 def addNewRow() {
     def data = getData(formData)
 
-    def newRow = getNewRow()
-    if (getRows(data).size()>0) {
+    def index = 0
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+    }else if (getRows(data).size()>0) {
         for(int i = getRows(data).size()-1;i>=0;i--){
             def row = getRows(data).get(i)
             if(!isTotal(row)){
-                newRow.rowNumber = row.rowNumber+1
+                index = getRows(data).indexOf(row)+1
                 break
             }
         }
-    } else {
-        newRow.rowNumber = 1
     }
+    data.insert(newRow,index+1)
+}
 
-    insert(data, newRow)
-    // data.insert(newRow, getIndex(data, currentDataRow) + 1) // TODO (Ramil Timerbaev) проблемы с индексом
-
-    return newRow
+def recalculateNumbers(){
+    index = 1
+    def data = getData(formData)
+    getRows(data).each{row->
+        if (!isTotal(row)) {
+            row.rowNumber = index++
+        }
+    }
+    data.save(getRows(data))
 }
 
 /**
@@ -171,7 +180,6 @@ void calc() {
     getRows(data).sort { it.regNumber }
 
     def tmp
-
     def formDataOld = getFormDataOld()
     def dataOld = getData(formDataOld)
 
@@ -186,7 +194,7 @@ void calc() {
         row.reserve = getValueForColumn6(dataOld, row)
 
         // графа 10
-        row.costOnMarketQuotation = (row.marketQuotation ? round(row.lotSizeCurrent * row.marketQuotation, 2) : 0)
+        row.costOnMarketQuotation = (row.marketQuotation ? roundTo2(row.lotSizeCurrent * row.marketQuotation) : 0)
 
         // графа 11
         if (getSign(row.signSecurity) == '+') {
@@ -195,10 +203,10 @@ void calc() {
         } else {
             tmp = 0
         }
-        row.reserveCalcValue = round(tmp, 2)
+        row.reserveCalcValue = roundTo2(tmp)
 
         // графа 12
-        tmp = round(row.reserveCalcValue - row.reserve, 2)
+        tmp = roundTo2((row.reserveCalcValue?:0) - (row.reserve?:0))
         row.reserveCreation = (tmp > 0 ? tmp : 0)
 
         // графа 13
@@ -430,7 +438,7 @@ def logicalCheck(def useLog) {
             }
 
             // графа 10
-            tmp = (row.marketQuotation ? round(row.lotSizeCurrent * row.marketQuotation, 2) : 0)
+            tmp = (row.marketQuotation ? roundTo2(row.lotSizeCurrent * row.marketQuotation) : 0)
             if (row.costOnMarketQuotation != tmp) {
                 name = getColumnName(row, 'costOnMarketQuotation')
                 logger.warn("Неверно рассчитана графа «$name»!")
@@ -443,13 +451,13 @@ def logicalCheck(def useLog) {
             } else {
                 tmp = 0
             }
-            if (row.reserveCalcValue != round(tmp, 2)) {
+            if (row.reserveCalcValue != roundTo2(tmp)) {
                 name = getColumnName(row, 'reserveCalcValue')
                 logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 12
-            tmp = round(row.reserveCalcValue - row.reserve, 2)
+            tmp = roundTo2(row.reserveCalcValue - row.reserve)
             if (row.reserveCreation != (tmp > 0 ? tmp : 0)) {
                 name = getColumnName(row, 'reserveCreation')
                 logger.warn("Неверно рассчитана графа «$name»!")
@@ -479,7 +487,6 @@ def logicalCheck(def useLog) {
         if (dataOld != null && hasTotal) {
             def totalRow = getRowByAlias(data, 'total')
             def totalRowOld = getRowByAlias(dataOld, 'total')
-
             // 13. Проверка корректности заполнения РНУ (графа 4, 5 (за предыдущий период))
             if (totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
                 def curCol = 4
@@ -608,10 +615,41 @@ void importData() {
         return
     }
 
-    if (addData(xml)) {
-        logger.info('Закончена загрузка файла ' + fileName)
-    } else {
+    def data = getData(formData)
+    def totalColumns = [4:'lotSizePrev', 5:'lotSizeCurrent', 7:'cost', 10:'costOnMarketQuotation', 11:'reserveCalcValue']
+    // добавить данные в форму
+    boolean canCommit = true
+    try {
+        def totalLoad = addData(xml)
+        if (totalLoad!=null) {
+            calc()
+//            logicalCheck(false)
+//            checkNSI()
+
+            def totalCalc
+            for (def row : getRows(data))
+                if (isTotal(row)) totalCalc = row
+
+            totalColumns.each{k, v->
+                if (totalCalc[v]!=totalLoad[v]) {
+                    logger.error("Итоговая сумма в графе $k в транспортном файле некорректна")
+                    canCommit = false
+                }
+            }
+            logger.info('Закончена загрузка файла ' + fileName)
+        } else {
+            logger.error("Нет итоговой строки.")
+            canCommit = false
+        }
+    } catch(Exception e) {
+        logger.error(""+e.message)
+        canCommit = false
+    }
+    //в случае ошибок откатить изменения
+    if (!canCommit) {
         logger.error("Загрузка файла $fileName завершилась ошибкой")
+    } else {
+        data.commit()
     }
 }
 
@@ -623,7 +661,7 @@ void importData() {
  * Проверка является ли строка итоговой.
  */
 def isTotal(def row) {
-    return row != null && row.getAlias() != null && row.getAlias().contains('total')
+    return row != null && row.getAlias() != null && row.getAlias().contains('tot')
 }
 
 /**
@@ -643,7 +681,7 @@ def getSum(def data, def columnAlias) {
  */
 def getNewRow(def alias, def totalColumns, def sums) {
     def newRow = formData.createDataRow()
-    newRow.setAlias('total' + alias)
+    newRow.setAlias('tot' + alias)
     newRow.regNumber = alias + ' итог'
     setTotalStyle(newRow)
     totalColumns.each {
@@ -781,8 +819,10 @@ def getValueForColumn6(def dataOld, def row) {
     if (dataOld != null && !getRows(dataOld).isEmpty()) {
         for (def rowOld : getRows(dataOld)) {
             if (rowOld.tradeNumber == row.tradeNumber) {
-                value = round(rowOld.reserveCalcValue, 2)
-                count += 1
+                value = roundTo2(rowOld.reserveCalcValue)
+                if (value!=null) {
+                    count += 1
+                }
             }
         }
     }
@@ -921,20 +961,14 @@ def hasTotal(def data) {
  *
  * @param xml данные
  */
-boolean addData(def xml) {
+def addData(def xml) {
     Date date = new Date()
 
     def cache = [:]
     def data = getData(formData)
+    data.clear()
 
-    def newRows = []
-
-    boolean isTotal = true
     def total = formData.createDataRow()
-    def totalColumns = [4:'lotSizePrev', 5:'lotSizeCurrent', 7:'cost', 10:'costOnMarketQuotation', 11:'reserveCalcValue']
-    totalColumns.each{k,it->
-        total[it] = 0
-    }
 
     def indexRow = -1
     for (def row : xml.row) {
@@ -962,12 +996,10 @@ boolean addData(def xml) {
 
         // графа 4
         newRow.lotSizePrev = getNumber(row.cell[indexCell].text())
-        total.lotSizePrev = total.lotSizePrev + newRow.lotSizePrev
         indexCell++
 
         // графа 5
         newRow.lotSizeCurrent = getNumber(row.cell[indexCell].text())
-        total.lotSizeCurrent = total.lotSizeCurrent + newRow.lotSizeCurrent
         indexCell++
 
         // графа 6
@@ -976,7 +1008,6 @@ boolean addData(def xml) {
 
         // графа 7
         newRow.cost = getNumber(row.cell[indexCell].text())
-        total.cost = total.cost + newRow.cost
         indexCell++
 
         // графа 8
@@ -989,12 +1020,10 @@ boolean addData(def xml) {
 
         // графа 10
         newRow.costOnMarketQuotation = getNumber(row.cell[indexCell].text())
-        total.costOnMarketQuotation = total.costOnMarketQuotation + newRow.costOnMarketQuotation
         indexCell++
 
         // графа 11
         newRow.reserveCalcValue = getNumber(row.cell[indexCell].text())
-        total.reserveCalcValue = total.reserveCalcValue + newRow.reserveCalcValue
         indexCell++
 
         // графа 12
@@ -1004,42 +1033,30 @@ boolean addData(def xml) {
         // графа 13
         newRow.reserveRecovery = getNumber(row.cell[indexCell].text())
 
-        newRows << newRow
+        insert(data, newRow)
     }
     // проверка итоговой строки
     if (xml.rowTotal.size()==1)
         for (def row : xml.rowTotal) {
-            def newRow = formData.createDataRow()
-            newRow.setAlias('total')
-            newRow.regNumber = 'Общий итог'
-            setTotalStyle(newRow)
 
             // графа 4
-            newRow.lotSizePrev = getNumber(row.cell[4].text())
+            total.lotSizePrev = getNumber(row.cell[4].text())
 
             // графа 5
-            newRow.lotSizeCurrent = getNumber(row.cell[5].text())
+            total.lotSizeCurrent = getNumber(row.cell[5].text())
 
             // графа 7
-            newRow.cost = getNumber(row.cell[7].text())
+            total.cost = getNumber(row.cell[7].text())
 
             // графа 10
-            newRow.costOnMarketQuotation = getNumber(row.cell[10].text())
+            total.costOnMarketQuotation = getNumber(row.cell[10].text())
 
             // графа 11
-            newRow.reserveCalcValue = getNumber(row.cell[11].text())
+            total.reserveCalcValue = getNumber(row.cell[11].text())
 
-            totalColumns.each{k,it->
-                if (newRow[it]!=total[it]) {
-                    logger.error("Итоговая сумма в графе $k в транспортном файле некорректна.")
-                    isTotal = false
-                }
-            }
-            //data.insert(newRow, indexRow-1)
         }
     else {
-        logger.error("Нет итоговой строки.")
-        isTotal = false
+        return null
     }
     if (isTotal) {
         data.clear()
@@ -1071,7 +1088,7 @@ def getNumber(def value) {
 }
 
 def getRecords(def ref_id, String code, String value, Date date, def cache) {
-    String filter = code + "= '"+ value.replaceAll('[ ]', '')+"'"
+    String filter = code + "= '"+ value.replaceAll(' ', '')+"'"
     if (cache[ref_id]!=null) {
         if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
     } else {
@@ -1129,4 +1146,18 @@ def checkAlias(def list, def rowAlias) {
  */
 def getSign(def sign) {
     return  refBookService.getStringValue(62,sign,'CODE')
+}
+
+/**
+ * Хелпер для округления чисел
+ * @param value
+ * @param newScale
+ * @return
+ */
+BigDecimal roundTo2(BigDecimal value) {
+    if (value != null) {
+        return value.setScale(2, BigDecimal.ROUND_HALF_UP)
+    } else {
+        return value
+    }
 }

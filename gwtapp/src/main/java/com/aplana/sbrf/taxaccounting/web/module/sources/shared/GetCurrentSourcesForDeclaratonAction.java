@@ -2,7 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-public class GetDeclarationReceiverSourcesAction extends UnsecuredActionImpl<GetDeclarationReceiverSourcesResult> {
+public class GetCurrentSourcesForDeclaratonAction extends UnsecuredActionImpl<GetCurrentSourcesResult> {
+	
     private int departmentId;
 	private int declarationTypeId;
 

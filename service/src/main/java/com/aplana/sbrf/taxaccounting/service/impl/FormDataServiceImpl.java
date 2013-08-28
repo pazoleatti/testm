@@ -1,45 +1,35 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.io.*;
-import java.net.URL;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
-
+import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
+import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
+import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.ObjectLock;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
-import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
-import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}.
@@ -481,7 +471,7 @@ public class FormDataServiceImpl implements FormDataService {
                             workflowMove.getFromState() == WorkflowState.ACCEPTED) {
                         
                         // признак периода ввода остатков
-                        if (reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
+                        if (!reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
                             // вызвать compose у форм-приемников
                             List<DepartmentFormType> departmentFormTypes = departmentFormTypeDao.getFormDestinations(
                                     formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());

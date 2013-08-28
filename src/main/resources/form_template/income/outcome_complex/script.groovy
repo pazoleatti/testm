@@ -182,7 +182,7 @@ void calculationControlGraphs() {
             } else {
                 tmp = row.consumptionBuhSumAccepted
             }
-            row.opuSumByTableP = tmp
+            row.opuSumByEnclosure3 = tmp
 
             // графа 14
             row.opuSumByTableP = getSumFromSimple(formDataSimple, 'consumptionAccountNumber',
@@ -304,6 +304,8 @@ void consolidation() {
         checkAndCalc()
     }
     logger.info('Формирование сводной формы уровня Банка прошло успешно.')
+    dataRowsHelper.save()
+    dataRowsHelper.commit()
 }
 
 

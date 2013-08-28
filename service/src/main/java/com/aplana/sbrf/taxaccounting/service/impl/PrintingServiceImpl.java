@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsxReportBuilder;
@@ -47,6 +48,9 @@ public class PrintingServiceImpl implements PrintingService {
 
     @Autowired
     private DataRowDao dataRowDao;
+
+    @Autowired
+    RefBookHelper refBookHelper;
 	
 	@Override
 	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean isShowChecked) {
@@ -64,6 +68,7 @@ public class PrintingServiceImpl implements PrintingService {
 			data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
 			data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
             List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null, null);
+            refBookHelper.refBookDereference(dataRows, formTemplate.getColumns());
 			try {
 				FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,isShowChecked, dataRows);
 				return builder.createReport();

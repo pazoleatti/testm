@@ -56,15 +56,17 @@ switch (formDataEvent) {
  5 sumTax	Сумма налога, подлежащая уплате	Число /15/	0	—	—	—	Да	—
  */
 void calc() {
+    providerPaymentType = refBookFactory.getDataProvider(24L)
+
     for(DataRow row in dataRowsHelper.getAllCached()) {
         row.okatoCode = "45293554000"
-        if (row.paymentType == '1') {
+        if (providerPaymentType.getValue((Long) row.paymentType, 100L).getStringValue() == '1') {
             row.budgetClassificationCode = '18210101040011000110'
         }
-        if (row.paymentType == '3') {
+        if (providerPaymentType.getValue((Long) row.paymentType, 100L).getStringValue() == '3') {
             row.budgetClassificationCode = '18210101070011000110'
         }
-        if (row.paymentType == '4') {
+        if (providerPaymentType.getValue((Long) row.paymentType, 100L).getStringValue() == '4') {
             row.budgetClassificationCode = '18210101060011000110'
         }
     }

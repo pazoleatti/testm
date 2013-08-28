@@ -14,17 +14,31 @@ import java.util.Map;
  * User: ekuvshinov
  */
 public interface RefBookIncome101Dao {
-    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
+    /**
+     * Получение записей справочника
+     * @param pagingParams
+     * @param filter
+     * @param sortAttribute
+     * @return
+     */
+    public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
-    public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId);
+    /**
+     * Получение записи справочника по recordId
+     * @param recordId
+     * @return
+     */
+    public Map<String, RefBookValue> getRecordData(Long recordId);
 
-    public RefBookValue getValue(Long refBookId, Long recordId, Long attributeId);
-
-    public void insert(Long refBookId, Integer reportPeriodId, List<Map<String, RefBookValue>> records);
-
-    public void deleteAll(Integer reportPeriod);
-
+    /**
+     * Перечень имеющихся отчетных периодов среди записей
+     * @return
+     */
     public List<ReportPeriod> gerReportPeriods();
-    public void delete(List<Long> ids);
-    public void update(List<Map<String, RefBookValue>> records);
+
+    /**
+     * Обновление записей справочника
+     * @param records
+     */
+    public void updateRecords(List<Map<String, RefBookValue>> records);
 }

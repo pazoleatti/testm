@@ -174,7 +174,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
-        getView().resetRefBookElements();
 		refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
 		GetRefBookTableDataAction action = new GetRefBookTableDataAction();
 		action.setRefbookId(refBookDataId);
@@ -183,11 +182,14 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 						new AbstractCallback<GetRefBookTableDataResult>() {
 							@Override
 							public void onSuccess(GetRefBookTableDataResult result) {
+                                getView().resetRefBookElements();
 								getView().setTableColumns(result.getTableHeaders());
 								getView().createInputFields(result.getTableHeaders());
 								refBook = result.getTableHeaders();
 								getView().setRange(new Range(0, PAGE_SIZE));
 								getView().setRefBookNameDesc(result.getDesc());
+
+                                getProxy().manualReveal(RefBookDataPresenter.this);
 							}
 						}, this));
 
@@ -249,4 +251,9 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 							}, RefBookDataPresenter.this));
 		}
 	}
+
+    @Override
+    public boolean useManualReveal() {
+        return true;
+    }
 }

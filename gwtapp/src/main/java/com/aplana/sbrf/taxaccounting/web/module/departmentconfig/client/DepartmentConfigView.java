@@ -65,6 +65,9 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     // Выбранный тип налога
     private TaxType currentTaxType = TaxType.INCOME;
 
+    // Признак открытости выбранного отчетного периода
+    private boolean isReportPeriodActive = false;
+
     @UiField
     TextBox inn,
             kpp,
@@ -266,8 +269,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     public void setReportPeriod(ReportPeriod reportPeriod) {
         currentReportPeriod = reportPeriod;
         period.setSelectedReportPeriods(Arrays.asList(currentReportPeriod));
-        //editButton.setVisible(reportPeriod != null && reportPeriod.isActive());
-        // TODO (SBRFACCTAX-3722)
+        editButton.setVisible(reportPeriod != null && isReportPeriodActive);
     }
 
     @Override
@@ -358,10 +360,9 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @UiHandler("editButton")
     public void onEdit(ClickEvent event) {
-    	// TODO (SBRFACCTAX-3722)
-        //if (currentReportPeriod != null && currentReportPeriod.isActive()) {
-        //    setEditMode(true);
-        //}
+        if (currentReportPeriod != null && isReportPeriodActive) {
+            setEditMode(true);
+        }
     }
 
     /**
@@ -371,8 +372,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
      */
     private void setEditMode(boolean isEditMode) {
         this.isEditMode = isEditMode;
-        // TODO (SBRFACCTAX-3722)
-        // editButton.setVisible(!isEditMode && currentReportPeriod != null && currentReportPeriod.isActive());
+        editButton.setVisible(!isEditMode && currentReportPeriod != null && isReportPeriodActive);
         saveButton.setVisible(isEditMode);
         cancelButton.setVisible(isEditMode);
         enableAllChildren(isEditMode, formPanel);
@@ -426,8 +426,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         this.currentReportPeriod = reportPeriod;
 
         // Редактировать можно только открытые периоды
-        // TODO (SBRFACCTAX-3722)
-        //editButton.setVisible(reportPeriod != null && reportPeriod.isActive());
+        editButton.setVisible(reportPeriod != null && isReportPeriodActive);
 
         updateVisibility();
         reloadDepartmentParams();
@@ -494,5 +493,11 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             }
         }
         reloadDepartments();
+    }
+
+    @Override
+    public void setReportPeriodActive(boolean reportPeriodActive) {
+        isReportPeriodActive = reportPeriodActive;
+        editButton.setVisible(currentReportPeriod != null && isReportPeriodActive);
     }
 }

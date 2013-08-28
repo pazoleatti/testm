@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
-import com.aplana.sbrf.taxaccounting.web.module.sources.server.comparators.DepartmentFormTypeComparator;
+import com.aplana.sbrf.taxaccounting.web.module.sources.server.assembler.DepartmentFormTypeComparator;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetFormSourcesAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetFormSourcesResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;

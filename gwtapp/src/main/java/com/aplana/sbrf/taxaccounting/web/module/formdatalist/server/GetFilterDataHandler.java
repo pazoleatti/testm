@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
 import java.util.ArrayList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -23,8 +21,6 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, GetFilterDataResult> {
-
-	private Log logger = LogFactory.getLog(getClass());
 	
 	@Autowired
 	private FormDataSearchService formDataSearchService;
@@ -45,17 +41,12 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
     @Override
     public GetFilterDataResult execute(GetFilterData action, ExecutionContext executionContext) throws ActionException {
 	    GetFilterDataResult res = new GetFilterDataResult();
+	    
 	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(securityService
 			    .currentUserInfo(), action.getTaxType());
+		res.setDepartments(new ArrayList<Department>(
+				departmentService.getRequiredForTreeDepartments(filterValues.getDepartmentIds()).values()));
 
-	    if(filterValues.getDepartmentIds() == null) {
-		    //Контролер УНП
-		    res.setDepartments(departmentService.listAll());
-	    } else {
-		    //Контролер или Оператор
-		    res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(filterValues
-				    .getDepartmentIds()).values()));
-	    }
 	    res.setFilterValues(filterValues);
 	    res.setTaxPeriods(reportPeriodService.listByTaxType(action.getTaxType()));
 	    res.setCurrentReportPeriod(null);
