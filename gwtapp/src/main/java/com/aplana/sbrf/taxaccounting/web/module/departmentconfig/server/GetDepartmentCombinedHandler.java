@@ -1,14 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -23,6 +14,14 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepar
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Получение параметров подразделения и списка доступных налоговых периодов
@@ -125,6 +124,8 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         GetDepartmentCombinedResult result = new GetDepartmentCombinedResult();
         result.setDepartmentCombined(depCombined);
+        // Признак открытости
+        result.setReportPeriodActive(reportService.isActivePeriod(action.getReportPeriodId(), action.getDepartmentId()));
 
         // Получение текстовых значений справочника
         Map<Long, String> rbTextValues = new HashMap<Long, String>();

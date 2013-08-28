@@ -40,9 +40,11 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
+        recalculateNumbers()
         break
     case FormDataEvent.DELETE_ROW :
         deleteRow()
+        recalculateNumbers()
         break
     // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
@@ -87,12 +89,6 @@ switch (formDataEvent) {
 def addNewRow() {
     def data = getData(formData)
     def newRow = formData.createDataRow()
-    def index = 0
-    if(currentDataRow!=null){
-        if(currentDataRow.getAlias()==null){
-            index = getIndex(currentDataRow)+1
-        }
-    }
 
     // графа 2..7, 9..13
     ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
@@ -100,7 +96,30 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+    def index = 0
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+    }else if (getRows(data).size()>0) {
+        for(int i = getRows(data).size()-1;i>=0;i--){
+            def row = getRows(data).get(i)
+            if(!isTotal(row)){
+                index = getRows(data).indexOf(row)+1
+                break
+            }
+        }
+    }
     data.insert(newRow,index+1)
+}
+
+def recalculateNumbers(){
+    index = 1
+    def data = getData(formData)
+    getRows(data).each{row->
+        if (!isTotal(row)) {
+            row.rowNumber = index++
+        }
+    }
+    data.save(getRows(data))
 }
 
 /**
@@ -136,7 +155,7 @@ void calc() {
         if (!isTotal(row)) {
             // список проверяемых столбцов (графа 2..7, 9, 10, 11)
             def requiredColumns = ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev',
-                    'lotSizeCurrent', 'cost', 'signSecurity', 'marketQuotationInRub']
+                    'lotSizeCurrent', 'cost', 'signSecurity']
 
             if (!checkRequiredColumns(row, requiredColumns, true)) {
                 return
@@ -718,6 +737,7 @@ void setTotalStyle(def row) {
             'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation',
             'reserveCalcValue', 'reserveCreation', 'reserveRecovery'].each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
+        row.getCell(it).editable=false
     }
 }
 
@@ -1053,7 +1073,7 @@ def getCourse(def currency, def date) {
     if (currency!=null && !isRubleCurrency(currency)) {
         def refCourseDataProvider = refBookFactory.getDataProvider(22)
         def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
-        return res.getRecords().get(0).RATE.getNumberValue()
+        return (!res.getRecords().isEmpty())?res.getRecords().get(0).RATE.getNumberValue():0//Правильнее null, такой ситуации быть не должно, она должна отлавливаться проверками НСИ
     } else if (isRubleCurrency(currency)){
         return 1;
     } else {
