@@ -181,7 +181,7 @@ void calculationControlGraphs() {
         // графа 13
         def income102 = income102Dao.getIncome102(formData.reportPeriodId, row.accountingRecords)
         if (income102 == null || income102.isEmpty()) {
-            income102NotFound += getIndex(row)
+            income102NotFound += getIndex(row) + 1
             tmp = 0
         } else {
             tmp = (income102[0] != null ? income102[0].getTotalSum() : 0)
