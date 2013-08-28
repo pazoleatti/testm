@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
-import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.UpdateFormSourcesAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.UpdateSourcesResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class UpdateFormSourcesHandler extends AbstractActionHandler<UpdateFormSourcesAction, UpdateSourcesResult> {
 
 	@Autowired
-	private DepartmentFormTypeService departmentFormTypeService;
+	private SourceService departmentFormTypeService;
 
     public UpdateFormSourcesHandler() {
         super(UpdateFormSourcesAction.class);

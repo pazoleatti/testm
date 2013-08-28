@@ -219,11 +219,12 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     public void setBookerReportTypes(Map<String, String> bookerReportTypes) {
         bookerReportType.clear();
         if (bookerReportTypes != null) {
-            for (Map.Entry<String, String> e : bookerReportTypes.entrySet()) {
-                bookerReportType.addItem(e.getValue(), e.getKey());
+            List<String> keyList = new ArrayList<String>(bookerReportTypes.keySet());
+            Collections.sort(keyList);
+            for (String key : keyList) {
+                bookerReportType.addItem(bookerReportTypes.get(key), key);
             }
         }
-        bookerReportType.setSelectedIndex(bookerReportTypes.size() - 1);
         reloadTaxPeriods();
     }
 

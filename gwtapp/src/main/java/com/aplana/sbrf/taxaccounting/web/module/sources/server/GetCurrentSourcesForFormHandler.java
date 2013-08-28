@@ -7,7 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.server.assembler.DeparmentFormTypeAssembler;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetCurrentSourcesResult;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetCurrentSourcesForFormAction;
@@ -22,7 +22,7 @@ public class GetCurrentSourcesForFormHandler
 		AbstractActionHandler<GetCurrentSourcesForFormAction, GetCurrentSourcesResult> {
 
 	@Autowired
-	private DepartmentFormTypeService departmentFormTypeService;
+	private SourceService departmentFormTypeService;
 
 	@Autowired
 	private DeparmentFormTypeAssembler deparmentFormTypeAssembler;
@@ -36,7 +36,7 @@ public class GetCurrentSourcesForFormHandler
 			ExecutionContext context) throws ActionException {
 		GetCurrentSourcesResult result = new GetCurrentSourcesResult();
 		List<DepartmentFormType> departmentFormTypes = departmentFormTypeService
-				.getFormSources(action.getDepartmentId(),
+				.getDFTSourcesByDFT(action.getDepartmentId(),
 						action.getFormTypeId(), action.getKind());
 		result.setCurrentSources(deparmentFormTypeAssembler
 				.assemble(departmentFormTypes));

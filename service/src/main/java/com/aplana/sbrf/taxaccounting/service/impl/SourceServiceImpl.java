@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,28 +15,23 @@ import java.util.List;
 
 @Service
 @Transactional
-public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService {
+public class SourceServiceImpl implements SourceService {
 
     @Autowired
     DepartmentFormTypeDao departmentFormTypeDao;
     
     @Autowired
+    DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
+    
+    @Autowired
     FormTypeDao formTypeDao;
+    
+    @Autowired
+    DeclarationTypeDao declarationTypeDao;
 
 
     @Override
-    public List<DepartmentFormType> getDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind) {
-        return getFormDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind);
-    }
-
-    @Override
-    public List<DepartmentFormType> getSources(int departmentId, int formTypeId, FormDataKind kind) {
-        return getFormSources(departmentId, formTypeId, kind);
-    }
-
-
-    @Override
-    public List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind) {
+    public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind) {
         return departmentFormTypeDao.getFormSources(departmentId, formTypeId, kind);
     }
 
@@ -49,12 +46,12 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
     }
 
     @Override
-    public List<DepartmentFormType> getDepartmentFormSources(int departmentId, TaxType taxType) {
+    public List<DepartmentFormType> getDFTSourcesByDepartment(int departmentId, TaxType taxType) {
         return departmentFormTypeDao.getDepartmentSources(departmentId, taxType);
     }
 
     @Override
-    public List<DepartmentFormType> getDepartmentFormDestinations(int departmentId, TaxType taxType) {
+    public List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType) {
         return departmentFormTypeDao.getByTaxType(departmentId, taxType);
     }
 
@@ -64,7 +61,7 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
     }
 
     @Override
-    public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId) {
+    public List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId) {
         return departmentFormTypeDao.getDeclarationSources(departmentId, declarationTypeId);
     }
 
@@ -111,5 +108,15 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
 	@Override
 	public List<FormType> listAllByTaxType(TaxType taxType) {
 		return formTypeDao.listAllByTaxType(taxType);
+	}
+
+	@Override
+	public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType) {
+		return departmentDeclarationTypeDao.getByTaxType(departmentId, taxType);
+	}
+
+	@Override
+	public DeclarationType getDeclarationType(int declarationTypeId) {
+		return declarationTypeDao.get(declarationTypeId);
 	}
 }

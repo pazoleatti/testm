@@ -58,13 +58,13 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     RefBookFactory rbFactory;
 
     @Override
-    public void importXML(InputStream stream, Integer periodId, int typeId, int departmentId) throws IOException {
+    public void importXML(InputStream stream, Integer periodId, int typeId, int departmentId) throws IOException, ServiceException {
         // Проверка того, что пользователем указан открытый отчетный период
         if (!reportPeriodService.isActivePeriod(periodId, departmentId)) {
             throw new ServiceException("Указан закрытый период. Файл не может быть загружен.");
         }
 
-        if (typeId == 1) {
+        if (typeId == 0) {
             RefBookDataProvider provider = rbFactory.getDataProvider(INCOME_101);
             List<Income101> list = importIncome101(stream);
 
@@ -110,7 +110,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         }
     }
 
-    private List<Income101> importIncome101(InputStream stream) throws IOException {
+    private List<Income101> importIncome101(InputStream stream) throws IOException, ServiceException{
         String errMsg = "Формат файла не соответствуют ожидаемому формату. Файл не может быть загружен.";
         List<Income101> list = new ArrayList<Income101>();
         HSSFWorkbook wb = new HSSFWorkbook(stream);
@@ -210,7 +210,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         return list;
     }
 
-    private List<Income102> importIncome102(InputStream stream) throws IOException {
+    private List<Income102> importIncome102(InputStream stream) throws IOException, ServiceException {
         // строки со следующими кодами игнорируем
         Set<String> excludeCode = new HashSet<String>();
         excludeCode.add("");

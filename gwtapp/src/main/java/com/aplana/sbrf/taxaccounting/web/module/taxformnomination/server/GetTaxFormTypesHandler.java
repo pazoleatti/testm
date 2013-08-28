@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentDeclarationTypeService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTaxFormTypesAction;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTaxFormTypesResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -26,7 +26,7 @@ public class GetTaxFormTypesHandler extends AbstractActionHandler<GetTaxFormType
     }
 
     @Autowired
-    private DepartmentFormTypeService departmentFormTypeService;
+    private SourceService departmentFormTypeService;
     
     @Autowired
     private DepartmentDeclarationTypeService departmentDeclarationTypeService;

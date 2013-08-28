@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
-import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.UpdateDeclarationSourcesAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.UpdateSourcesResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -16,7 +16,7 @@ public class UpdateDeclarationSourcesHandler extends AbstractActionHandler<Updat
 		UpdateSourcesResult> {
 
 	@Autowired
-	private DepartmentFormTypeService departmentFormTypeService;
+	private SourceService departmentFormTypeService;
 
     public UpdateDeclarationSourcesHandler() {
         super(UpdateDeclarationSourcesAction.class);

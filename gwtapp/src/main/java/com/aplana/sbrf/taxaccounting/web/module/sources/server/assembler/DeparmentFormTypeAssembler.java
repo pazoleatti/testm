@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentFormTypeShared;
 
@@ -19,7 +19,7 @@ import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentF
 public class DeparmentFormTypeAssembler {
 	
 	@Autowired
-	private DepartmentFormTypeService departmentFormTypeService;
+	private SourceService departmentFormTypeService;
 	
 	@Autowired
 	private DepartmentService departmentService;

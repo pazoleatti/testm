@@ -1,3 +1,8 @@
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
+
 /**
  * Скрипт для
  * Форма "6.1.1	Сводная форма начисленных доходов уровня обособленного подразделения".  ("Доходы сложные")
@@ -60,6 +65,10 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK :
         checkAndCalc()
         break
+    case FormDataEvent.COMPOSE:
+        DataRowHelper form = formDataService.getDataRowHelper(formData)
+        consolidationBank(form)
+        break
 // утвердить
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :
         checkAndCalc()
@@ -99,6 +108,46 @@ switch (formDataEvent) {
 //        }
 //    }
 //}
+
+def consolidationBank(DataRowHelper formTarget) {
+    if (formTarget == null) {
+        return
+    }
+
+    // очистить форму
+    formTarget.getAllCached().each { row ->
+        ['incomeBuhSumAccepted', 'incomeBuhSumPrevTaxPeriod', 'incomeTaxSumS'].each { alias ->
+            row.getCell(alias).setValue(null)
+        }
+    }
+
+    def needCalc = false
+
+    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
+    departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
+        def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 304) {
+            needCalc = true
+            for (def row : formDataService.getDataRowHelper(child).allCached) {
+                if (row.getAlias() == null) {
+                    continue
+                }
+                def rowResult = formTarget.getDataRow(formTarget.getAllCached(), row.getAlias())
+                ['incomeBuhSumAccepted', 'incomeBuhSumPrevTaxPeriod', 'incomeTaxSumS'].each {
+                    if (row.getCell(it).getValue() != null) {
+                        rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)))
+                    }
+                }
+            }
+        }
+    }
+    if (needCalc) {
+        checkAndCalc()
+    }
+    formTarget.save(formTarget.allCached)
+    formTarget.commit()
+    logger.info('Формирование сводной формы уровня Банка прошло успешно.')
+}
 
 /**
  * В рамках выполнения  логических проверок система должна осуществлять расчет значений вычисляемых ячеек 

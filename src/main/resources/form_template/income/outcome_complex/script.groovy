@@ -304,6 +304,8 @@ void consolidation() {
         checkAndCalc()
     }
     logger.info('Формирование сводной формы уровня Банка прошло успешно.')
+    dataRowsHelper.save()
+    dataRowsHelper.commit()
 }
 
 

@@ -10,7 +10,11 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 /**
  * Интерфейс сервиса для работы с привязкой департаментов к подразделениям
+ * 
+ * @deprecated Нужно использовать SourceService и перенести всё отсюда туда.
+ * 
  */
+@Deprecated
 public interface DepartmentDeclarationTypeService {
 
 	/**
@@ -19,6 +23,7 @@ public interface DepartmentDeclarationTypeService {
 	 * @return список {@link DepartmentDeclarationType}, представляющий перечень деклараций, формируемых в подразделении,
 	 * 	задаваемом departmentId
 	 */
+	@Deprecated
 	List<DepartmentDeclarationType> getDepartmentDeclarationTypes(int departmentId);
 
 	/**
@@ -28,6 +33,7 @@ public interface DepartmentDeclarationTypeService {
 	 * @param sourceKind тип налоговой формы-источника
 	 * @return информация о декларациях-потребителях в виде списка {@link DepartmentDeclarationType}
 	 */
+	@Deprecated
 	List<DepartmentDeclarationType> getDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
 
 	/**
@@ -35,16 +41,8 @@ public interface DepartmentDeclarationTypeService {
 	 * @param taxType тип налога
 	 * @return набор идентификаторов подразделений
 	 */
+	@Deprecated
 	Set<Integer> getDepartmentIdsByTaxType(TaxType taxType);
-
-	/**
-	 * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
-	 * @param departmentId идентификатор подразделения
-	 * @param taxType вид налога
-	 * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
-	 */
-	List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType);
-
 	/**
 	 * Обновляет/добавляет список назначенных подразделению деклараций (с учётом вида и типа)
 	 * @param departmentId
@@ -53,19 +51,15 @@ public interface DepartmentDeclarationTypeService {
 	 * @param departmentDeclarationTypes
 	 *            новые данные для обновления/добавления
 	 */
+	@Deprecated
 	void save(int departmentId, List<DepartmentDeclarationType> departmentDeclarationTypes);
 	
-	/**
-	 * Получить описание вида декларации по идентификатору
-	 * @param declarationTypeId идентификатор вида декларации
-	 * @return описание вида декларации, с заданным идентификатором
-	 * @throws DaoException если в БД нет такой записи
-	 */
-	DeclarationType getDeclarationType(int declarationTypeId);
+
 	
 	/**
 	 * Получить список всех видов деклараций по типу налога
 	 * @return список видов деклараций
 	 */
+	@Deprecated
 	List<DeclarationType> listAllByTaxType(TaxType taxType);
 }
