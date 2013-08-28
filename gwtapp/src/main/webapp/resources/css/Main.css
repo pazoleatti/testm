@@ -20,19 +20,28 @@ h3{
 }
 
 .loadingStatusLabel {
-    background-color: #FFF1A8;
-    border-color: #FFF1A8 #FFF1A8;
-    border-radius: 0 0 4px 4px;
-    border-right: 2px solid #FFF1A8;
-    border-style: none solid solid;
-    border-width: 0 2px 2px;
-    color: #000000;
-    font-weight: bold;
-    left: 50%;
-    margin-left: -40px;
-    padding: 3px;
     position: absolute;
     z-index: 1100;
+    top: 50%;
+    height:1px;
+    width: 100%;
+}
+
+.loadingStatusLabel div {
+    background: none repeat scroll 0 0 #FFFFFF;
+    height: 64px;
+    margin: -32px auto;
+    width: 200px;
+    border: solid 1px #00940C;
+}
+
+.loadingStatusLabel img {
+    float: left;
+}
+
+.loadingStatusLabel span {
+    display: block;
+    padding: 23px 0 0 90px;
 }
 
 .topNavigation {
