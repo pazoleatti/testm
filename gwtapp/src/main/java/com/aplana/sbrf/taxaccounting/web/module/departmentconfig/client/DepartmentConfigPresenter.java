@@ -115,6 +115,12 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * Установка разыменованных значений для справочников
          */
         void setDereferenceValue(Map<Long, String> rbTextValues);
+
+        /**
+         * Признак открытости выбранного отчетного периода
+         * @param reportPeriodActive
+         */
+        void setReportPeriodActive(boolean reportPeriodActive);
     }
 
     @Inject
@@ -164,6 +170,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                     public void onSuccess(GetDepartmentCombinedResult result) {
                         getView().setDepartmentCombined(result.getDepartmentCombined());
                         getView().setDereferenceValue(result.getRbTextValues());
+                        getView().setReportPeriodActive(result.isReportPeriodActive());
                         result.getRbTextValues();
                     }
                 }, this));
