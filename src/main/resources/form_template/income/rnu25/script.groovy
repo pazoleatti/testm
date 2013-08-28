@@ -47,9 +47,11 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
+        recalculateNumbers()
         break
     case FormDataEvent.DELETE_ROW :
         deleteRow()
+        recalculateNumbers()
         break
 // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
@@ -90,23 +92,30 @@ switch (formDataEvent) {
 def addNewRow() {
     def data = getData(formData)
 
-    def newRow = getNewRow()
-    if (getRows(data).size()>0) {
+    def index = 0
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+    }else if (getRows(data).size()>0) {
         for(int i = getRows(data).size()-1;i>=0;i--){
             def row = getRows(data).get(i)
             if(!isTotal(row)){
-                newRow.rowNumber = row.rowNumber+1
+                index = getRows(data).indexOf(row)+1
                 break
             }
         }
-    } else {
-        newRow.rowNumber = 1
     }
+    data.insert(newRow,index+1)
+}
 
-    insert(data, newRow)
-    // data.insert(newRow, getIndex(data, currentDataRow) + 1) // TODO (Ramil Timerbaev) проблемы с индексом
-
-    return newRow
+def recalculateNumbers(){
+    index = 1
+    def data = getData(formData)
+    getRows(data).each{row->
+        if (!isTotal(row)) {
+            row.rowNumber = index++
+        }
+    }
+    data.save(getRows(data))
 }
 
 /**
@@ -185,7 +194,7 @@ void calc() {
         row.reserve = getValueForColumn6(dataOld, row)
 
         // графа 10
-        row.costOnMarketQuotation = (row.marketQuotation ? round(row.lotSizeCurrent * row.marketQuotation, 2) : 0)
+        row.costOnMarketQuotation = (row.marketQuotation ? roundTo2(row.lotSizeCurrent * row.marketQuotation) : 0)
 
         // графа 11
         if (getSign(row.signSecurity) == '+') {
@@ -194,10 +203,10 @@ void calc() {
         } else {
             tmp = 0
         }
-        row.reserveCalcValue = round(tmp, 2)
+        row.reserveCalcValue = roundTo2(tmp)
 
         // графа 12
-        tmp = round(row.reserveCalcValue - row.reserve, 2)
+        tmp = roundTo2((row.reserveCalcValue?:0) - (row.reserve?:0))
         row.reserveCreation = (tmp > 0 ? tmp : 0)
 
         // графа 13
@@ -429,7 +438,7 @@ def logicalCheck(def useLog) {
             }
 
             // графа 10
-            tmp = (row.marketQuotation ? round(row.lotSizeCurrent * row.marketQuotation, 2) : 0)
+            tmp = (row.marketQuotation ? roundTo2(row.lotSizeCurrent * row.marketQuotation) : 0)
             if (row.costOnMarketQuotation != tmp) {
                 name = getColumnName(row, 'costOnMarketQuotation')
                 logger.warn("Неверно рассчитана графа «$name»!")
@@ -442,13 +451,13 @@ def logicalCheck(def useLog) {
             } else {
                 tmp = 0
             }
-            if (row.reserveCalcValue != round(tmp, 2)) {
+            if (row.reserveCalcValue != roundTo2(tmp)) {
                 name = getColumnName(row, 'reserveCalcValue')
                 logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 12
-            tmp = round(row.reserveCalcValue - row.reserve, 2)
+            tmp = roundTo2(row.reserveCalcValue - row.reserve)
             if (row.reserveCreation != (tmp > 0 ? tmp : 0)) {
                 name = getColumnName(row, 'reserveCreation')
                 logger.warn("Неверно рассчитана графа «$name»!")
@@ -478,7 +487,6 @@ def logicalCheck(def useLog) {
         if (dataOld != null && hasTotal) {
             def totalRow = getRowByAlias(data, 'total')
             def totalRowOld = getRowByAlias(dataOld, 'total')
-
             // 13. Проверка корректности заполнения РНУ (графа 4, 5 (за предыдущий период))
             if (totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
                 def curCol = 4
@@ -811,8 +819,10 @@ def getValueForColumn6(def dataOld, def row) {
     if (dataOld != null && !getRows(dataOld).isEmpty()) {
         for (def rowOld : getRows(dataOld)) {
             if (rowOld.tradeNumber == row.tradeNumber) {
-                value = round(rowOld.reserveCalcValue, 2)
-                count += 1
+                value = roundTo2(rowOld.reserveCalcValue)
+                if (value!=null) {
+                    count += 1
+                }
             }
         }
     }
@@ -1048,8 +1058,15 @@ def addData(def xml) {
     else {
         return null
     }
-    data.commit()
-    return total
+    if (isTotal) {
+        data.clear()
+        newRows.each { newRow ->
+            insert(data, newRow)
+        }
+        data.commit()
+        return true
+    }
+    return false
 }
 
 /**
@@ -1129,4 +1146,18 @@ def checkAlias(def list, def rowAlias) {
  */
 def getSign(def sign) {
     return  refBookService.getStringValue(62,sign,'CODE')
+}
+
+/**
+ * Хелпер для округления чисел
+ * @param value
+ * @param newScale
+ * @return
+ */
+BigDecimal roundTo2(BigDecimal value) {
+    if (value != null) {
+        return value.setScale(2, BigDecimal.ROUND_HALF_UP)
+    } else {
+        return value
+    }
 }
