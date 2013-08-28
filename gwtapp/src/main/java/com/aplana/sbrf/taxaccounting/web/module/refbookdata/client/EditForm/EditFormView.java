@@ -108,22 +108,22 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			RefBookValueSerializable value = new RefBookValueSerializable();
 			switch (field.getKey().getAttributeType()) {
 				case NUMBER:
-					Number number = Long.valueOf((String) field.getValue().getValue());
+					Number number = field.getValue().getValue() == null ? null : (Double)field.getValue().getValue();
 					value.setAttributeType(RefBookAttributeType.NUMBER);
 					value.setNumberValue(number);
 					break;
 				case STRING:
-					String string = (String) field.getValue().getValue();
+					String string = field.getValue().getValue() == null ? null : (String)field.getValue().getValue();
 					value.setAttributeType(RefBookAttributeType.STRING);
 					value.setStringValue(string);
 					break;
 				case DATE:
-					Date date = (Date)field.getValue().getValue();
+					Date date = field.getValue().getValue() == null ? null : (Date)field.getValue().getValue();
 					value.setAttributeType(RefBookAttributeType.DATE);
 					value.setDateValue(date);
 					break;
 				case REFERENCE:
-					Long longValue = (Long)field.getValue().getValue();
+					Long longValue = field.getValue().getValue() == null ? null : (Long)field.getValue().getValue();
 					value.setAttributeType(RefBookAttributeType.REFERENCE);
 					value.setReferenceValue(longValue);
 					break;
