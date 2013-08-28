@@ -611,7 +611,7 @@ void importData() {
     def totalColumns = [4:'lotSizePrev', 5:'lotSizeCurrent', 7:'cost', 10:'costOnMarketQuotation', 11:'reserveCalcValue']
     // добавить данные в форму
     boolean canCommit = true
-//    {
+    try {
         def totalLoad = addData(xml)
         if (totalLoad!=null) {
             calc()
@@ -625,24 +625,24 @@ void importData() {
             totalColumns.each{k, v->
                 if (totalCalc[v]!=totalLoad[v]) {
                     logger.error("Итоговая сумма в графе $k в транспортном файле некорректна")
-                    //canCommit = false
+                    canCommit = false
                 }
             }
-
+            logger.info('Закончена загрузка файла ' + fileName)
         } else {
             logger.error("Нет итоговой строки.")
             canCommit = false
         }
-        logger.info('Закончена загрузка файла ' + fileName)
-/*    } catch(Exception e) {
+    } catch(Exception e) {
         logger.error(""+e.message)
         canCommit = false
-    }  */
+    }
     //в случае ошибок откатить изменения
     if (!canCommit) {
         logger.error("Загрузка файла $fileName завершилась ошибкой")
+    } else {
+        data.commit()
     }
-    data.commit()
 }
 
 /*
