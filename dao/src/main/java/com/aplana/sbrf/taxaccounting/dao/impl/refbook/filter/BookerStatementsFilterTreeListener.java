@@ -10,11 +10,11 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 /**
  * User: ekuvshinov
  */
-public class Income101FilterTreeListener implements FilterTreeListener {
+public class BookerStatementsFilterTreeListener implements FilterTreeListener {
     private RefBook refBook;
     private StringBuffer query;
 
-    public Income101FilterTreeListener(RefBook refBook, StringBuffer query){
+    public BookerStatementsFilterTreeListener(RefBook refBook, StringBuffer query){
         this.refBook = refBook;
         this.query = query;
     }
