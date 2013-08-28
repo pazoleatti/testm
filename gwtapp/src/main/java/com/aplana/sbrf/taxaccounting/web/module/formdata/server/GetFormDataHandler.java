@@ -23,6 +23,7 @@ import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
@@ -59,6 +60,9 @@ public class GetFormDataHandler extends
 
     @Autowired
     BlobDataService blobDataService;
+    
+    @Autowired 
+    TAUserService taUserService;
 
 	public GetFormDataHandler() {
 		super(GetFormData.class);
@@ -165,9 +169,9 @@ public class GetFormDataHandler extends
 		ObjectLock<Long> lockInformation = formDataService.getObjectLock(action
 				.getFormDataId());
 		if (lockInformation != null) {
+			
 			// Если данная форма уже заблокирована другим пользотелем
-
-			result.setLockedByUser(userInfo.getUser().getName());
+			result.setLockedByUser(taUserService.getUser(lockInformation.getUserId()).getName());
 			result.setLockDate(getFormedDate(lockInformation.getLockTime()));
 			if (lockInformation.getUserId() == userInfo.getUser().getId()) {
 				if (action.isReadOnly()) {

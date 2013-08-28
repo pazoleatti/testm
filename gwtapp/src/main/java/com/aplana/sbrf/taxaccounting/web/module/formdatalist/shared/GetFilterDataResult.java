@@ -6,7 +6,8 @@ import com.gwtplatform.dispatch.shared.Result;
 import java.util.List;
 
 public class GetFilterDataResult implements Result {
-
+	private static final long serialVersionUID = -3436595935051736909L;
+	
 	private ReportPeriod currentReportPeriod;
     private List<Department> departments;
 	private List<TaxPeriod> taxPeriods;

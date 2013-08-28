@@ -9,6 +9,9 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
  * @author ekuvshinov
  */
 
+/** Признак периода ввода остатков. */
+def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkCreation()
@@ -16,7 +19,7 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         formPrev
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+        if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
             return
         }
@@ -25,7 +28,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         formPrev
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+        if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
             return
         }
@@ -47,7 +50,7 @@ switch (formDataEvent) {
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
         formPrev
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+        if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
             return
         }
@@ -57,7 +60,7 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE :
         formPrev
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+        if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
             return
         }
@@ -141,7 +144,7 @@ void logicalCheck() {
                 logger.error("Резерв сформирован неверно!")
             }
             // LC • Проверка на положительные значения при наличии созданного резерва
-            if (row.reserveCreation > 0 && (row.current < 0 || row.cost || row.costOnMarketQuotation < 0 || row.reserveCalcValue < 0)) {
+            if (row.reserveCreation > 0 && (row.current < 0 || row.cost < 0 || row.costOnMarketQuotation < 0 || row.reserveCalcValue < 0)) {
                 logger.warn("Резерв сформирован. Графы 7, 9, 14 и 15 неположительные!")
             }
             // LC • Проверка корректности заполнения РНУ
@@ -181,7 +184,7 @@ void logicalCheck() {
             }
             // LC Арифметическая проверка графы 13
             if (row.marketQuotation != null && row.rubCourse
-                    && row.marketQuotationInRub != round((BigDecimal) (row.marketQuotation * row.rubCourse), 2)) {
+                    && row.marketQuotationInRub != roundValue((BigDecimal) (row.marketQuotation * row.rubCourse), 2)) {
                 logger.error("Неверно рассчитана графа «Рыночная котировка одной ценной бумаги в рублях»!")
             }
 
@@ -200,7 +203,7 @@ void logicalCheck() {
 
             for (String check in checks) {
                 if (row.getCell(check).value != value.get(check)) {
-                    logger.error("Неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '') + "!")
+                    logger.error("Неверно рассчитана графа \"" + row.getCell(check).column.name.replace('%', '') + "\"!")
                 }
             }
 
@@ -245,17 +248,12 @@ void logicalCheck() {
     }
 
     // LC • Проверка корректности заполнения РНУ
-    if (formPrev != null) {
-        DataRow itogoPrev = dataPrev.getDataRow(dataPrev.getAllCached(),'itogo')
-        DataRow itogo = data.getDataRow(data.getAllCached(),'itogo')
+    if (dataPrev != null && checkAlias(getRows(dataPrev), 'itogo') && checkAlias(getRows(data), 'itogo')) {
+        DataRow itogoPrev = getRowByAlias(dataPrev,'itogo')
+        DataRow itogo = getRowByAlias(dataPrev,'itogo')
         if (itogo != null && itogoPrev != null && itogo.prev != itogoPrev.current) {
             logger.error("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 = «Итого» по графе 7 формы РНУ-27 за предыдущий отчётный период")
         }
-    }
-    // LC • Проверка корректности заполнения РНУ
-    if (formPrev != null) {
-        DataRow itogoPrev = dataPrev.getDataRow(dataPrev.getAllCached(),'itogo')
-        DataRow itogo = data.getDataRow(data.getAllCached(),'itogo')
         if (itogo != null && itogoPrev != null && itogo.reserveCalcValuePrev != itogoPrev.reserveCalcValue) {
             logger.error("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 8 = «Итого» по графе 15 формы РНУ-27 за предыдущий отчётный период")
         }
@@ -264,10 +262,10 @@ void logicalCheck() {
     /** LC Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
      * http://jira.aplana.com/browse/SBRFACCTAX-2609
      */
-    if (formPrev != null) {
+    if (dataPrev != null) {
         List notFound = []
         List foundMany = []
-        for (DataRow rowPrev in getData(formPrev).getAllCached()) {
+        for (DataRow rowPrev in getRows(dataPrev)) {
             if (rowPrev.getAlias() != null && rowPrev.reserveCalcValue > 0) {
                 int count = 0
                 for (DataRow row in getData(formData).getAllCached()) {
@@ -328,13 +326,13 @@ def getReportDate() {
 void checkNSI() {
     getRows(getData(formData)).each{ DataRow row ->
         if (row.getAlias() == null) {
-            if (row.currencyCode!=null && getCurrency(row.currencyCode)==null){
+            if (row.currency != null && getCurrency(row.currency) == null){
                 logger.warn('Валюта выпуска облигации указана неверно!');
             }
             if (row.signSecurity!=null && getSign(row.signSecurity)==null){
                 logger.warn('Признак ценной бумаги в справочнике отсутствует!');
             }
-            if (row.currencyCode!=null && getCourse(row.currencyCode,reportDate)==null){
+            if (row.currency != null && getCourse(row.currency, reportDate) == null){
                 logger.warn('Неверный курс валют!');
             }
         }
@@ -595,7 +593,7 @@ void calc() {
     def data = getData(formData)
     for (row in data.getAllCached()) {
         // Проверим чтобы человек рукамми ввёл всё что необходимо
-        for (alias in ['issuer', 'regNumber', 'tradeNumber']) {
+        for (alias in ['issuer', 'regNumber', 'tradeNumber', 'currency']) {
             if (row.getCell(alias).value == null) {
                 setError(row.getCell(alias).column)
             }
@@ -636,7 +634,7 @@ BigDecimal calc8(DataRow row) {
         }
     }
     if (tempCount == 1) {
-        return round(temp, 2)
+        return roundValue(temp, 2)
     } else {
         return (BigDecimal) 0
     }
@@ -657,7 +655,7 @@ BigDecimal calc11(DataRow row) {
  * Расчет графы 12
  */
 BigDecimal calc12(DataRow row) {
-    return getCourse(row.currencyCode,reportDate)
+    return getCourse(row.currency,reportDate)
 }
 
 /**
@@ -667,7 +665,9 @@ BigDecimal calc12(DataRow row) {
 BigDecimal calc13(DataRow row) {
     // FIXME http://jira.aplana.com/browse/SBRFACCTAX-2995
     if (row.marketQuotation != null && row.rubCourse != null) {
-        return round((BigDecimal) (row.marketQuotation * row.rubCourse), 2)
+        return roundValue((BigDecimal) (row.marketQuotation * row.rubCourse), 2)
+    } else {
+        return null
     }
 }
 
@@ -676,11 +676,10 @@ BigDecimal calc13(DataRow row) {
  * @author ivildanov
  */
 BigDecimal calc14(DataRow row) {
-
     if (row.marketQuotationInRub == null) {
         return (BigDecimal) 0
     } else {
-        return round((BigDecimal) (row.current * row.marketQuotationInRub), 2)
+        return roundValue((BigDecimal) (row.current * row.marketQuotationInRub), 2)
     }
 }
 
@@ -717,7 +716,7 @@ BigDecimal calc15(DataRow row) {
 BigDecimal calc16(DataRow row) {
     if (row.reserveCalcValue!=null && row.reserveCalcValuePrev!=null) {
         if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
-            return round((BigDecimal) (row.marketQuotation - row.prev), 2)
+            return roundValue((BigDecimal) (row.reserveCalcValue - row.reserveCalcValuePrev), 2)
         } else {
             return (BigDecimal) 0
         }
@@ -744,7 +743,7 @@ BigDecimal calc17(DataRow row) {
             a = -a
         }
 
-        return round((BigDecimal) (a), 2)
+        return roundValue((BigDecimal) (a), 2)
     } else {
         return null;
     }
@@ -801,7 +800,7 @@ def getStaticRow(){
  * @param newScale
  * @return
  */
-BigDecimal round(BigDecimal value, int newScale) {
+BigDecimal roundValue(BigDecimal value, int newScale) {
     if (value != null) {
         return value.setScale(newScale, BigDecimal.ROUND_HALF_UP)
     } else {
@@ -821,7 +820,7 @@ void setError(Column c) {
  */
 void addNewRowwarnrmData() {
     def data = getData(formData)
-    DataRow<Cell> newRow = formData.createDataRow()
+    DataRow<Cell> newRow = getNewRow()
     int index // Здесь будет позиция вставки
 
     if (data.getAllCached().size() > 0) {
@@ -833,6 +832,10 @@ void addNewRowwarnrmData() {
         } else {
             // Строку не выбрал поэтому добавляем в самый конец
             selectRow = data.getAllCached().get(data.getAllCached().size() - 1) // Вставим в конец
+
+            // добавил вставку тут, потому что по старому добавляет не в конец формы а перед последним элементом
+            insert(data, newRow)
+            return
         }
 
         int indexSelected = data.getAllCached().indexOf(selectRow)
@@ -845,7 +848,6 @@ void addNewRowwarnrmData() {
             // Для динимаческих строк итого идём вверх пока не встретим конец формы или строку не итого
 
             for (index = indexSelected; index >= 0; index--) {
-                logger.info("loop index = " + index.toString())
                 if (data.getAllCached().get(index).getAlias() == null) {
                     index++
                     break
@@ -860,13 +862,7 @@ void addNewRowwarnrmData() {
         // Форма пустая поэтому поставим строку в начало
         index = 0
     }
-    [
-            'currency', 'issuer', 'regNumber', 'tradeNumber', 'prev', 'current', 'reserveCalcValuePrev', 'cost', 'signSecurity',
-            'marketQuotation', 'rubCourse', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery'
-    ].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
+
     data.insert(newRow, index+1)
 }
 
@@ -1097,7 +1093,7 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
  * Получить буквенный код валюты
  */
 def getCurrency(def currencyCode) {
-    return  refBookService.getStringValue(15,currencyCode,'CODE_2')
+    return refBookService.getStringValue(15, currencyCode, 'CODE_2')
 }
 
 /**
@@ -1118,6 +1114,16 @@ void insert(def data, def row) {
 }
 
 /**
+ * Получить строки формы.
+ *
+ * @param formData форма
+ */
+def getRows(def data) {
+    def cached = data.getAllCached()
+    return cached
+}
+
+/**
  * Проверка валюты на рубли
  */
 def isRubleCurrency(def currencyCode) {
@@ -1131,7 +1137,7 @@ def getCourse(def currency, def date) {
     if (currency!=null && !isRubleCurrency(currency)) {
         def refCourseDataProvider = refBookFactory.getDataProvider(22)
         def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
-        return res.getRecords().get(0).RATE.getNumberValue()
+        return (res.getRecords().isEmpty() ? null : res.getRecords().get(0).RATE.getNumberValue())
     } else if (isRubleCurrency(currency)){
         return 1;
     } else {
@@ -1139,3 +1145,42 @@ def getCourse(def currency, def date) {
     }
 }
 
+def getNewRow() {
+    def row = formData.createDataRow()
+    ['currency', 'issuer', 'regNumber', 'tradeNumber', 'prev', 'current', 'reserveCalcValuePrev',
+            'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'costOnMarketQuotation',
+            'reserveCalcValue', 'reserveCreation', 'recovery'].each {
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return row
+}
+
+/**
+ * Проверить существования строки по алиасу.
+ *
+ * @param list строки нф
+ * @param rowAlias алиас
+ * @return <b>true</b> - строка с указанным алиасом есть, иначе <b>false</b>
+ */
+def checkAlias(def list, def rowAlias) {
+    if (rowAlias == null || rowAlias == "" || list == null || list.isEmpty()) {
+        return false
+    }
+    for (def row : list) {
+        if (row.getAlias() == rowAlias) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Получить строку по алиасу.
+ *
+ * @param data данные нф (helper)
+ * @param alias алиас
+ */
+def getRowByAlias(def data, def alias) {
+    return data.getDataRow(getRows(data), alias)
+}

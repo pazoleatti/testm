@@ -1,15 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.gwtplatform.dispatch.shared.Result;
-
 import java.util.List;
 import java.util.Map;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.gwtplatform.dispatch.shared.Result;
+
 public class GetDeclarationReceiversResult implements Result {
+	private static final long serialVersionUID = 3110701297898380844L;
+	
 	private Map<Integer, DeclarationType> declarationTypes;
 	private List<DepartmentDeclarationType> declarationReceivers;
 

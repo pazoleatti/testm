@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.sources.server.comparators;
+package com.aplana.sbrf.taxaccounting.web.module.sources.server.assembler;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormType;

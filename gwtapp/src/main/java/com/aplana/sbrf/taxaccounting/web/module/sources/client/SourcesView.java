@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentFormTypeShared;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.CheckboxCell;
@@ -57,7 +58,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	private Map<Integer, FormType> sourcesFormTypes;
 	private Map<Integer, FormType> receiversFormTypes;
 	private Map<Integer, DeclarationType> receiversDeclarationTypes;
-	private Map<Integer, FormType> receiverSourcesFormType;
+
 	private final SingleSelectionModel<DepartmentDeclarationType> declarationReceiversSelectionModel =
 			new SingleSelectionModel<DepartmentDeclarationType>();
 	private final SingleSelectionModel<DepartmentFormType> formReceiversSelectionModel =
@@ -76,7 +77,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	@UiField
 	GenericDataGrid<DepartmentDeclarationType> declarationReceiversTable;
 	@UiField
-	GenericDataGrid<CheckedDepartmentFormType> receiverSourcesTable;
+	GenericDataGrid<DepartmentFormTypeShared> currentSourcesTable;
 
 	@UiField
 	DepartmentPickerPopupWidget departmentReceiverPicker;
@@ -114,7 +115,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			public void onValueChange(ValueChangeEvent<TaxType> event) {
 				setSources();
 				setReceivers();
-				receiverSourcesTable.setRowCount(0);
+				currentSourcesTable.setRowCount(0);
 			}
 		});
 		taxTypePicker.setAcceptableValues(TAX_TYPES);
@@ -150,11 +151,11 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		sourcesTable.setRowCount(0);
 		formReceiversTable.setRowCount(0);
 		declarationReceiversTable.setRowCount(0);
-		receiverSourcesTable.setRowCount(0);
+		currentSourcesTable.setRowCount(0);
 	}
 
 	@Override
-	public void setFormSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes) {
+	public void setAvalibleSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes) {
 		sourcesFormTypes = formTypes;
 		sourcesTable.setRowData(departmentFormTypes);
 	}
@@ -173,19 +174,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	}
 
 	@Override
-	public void setFormReceiverSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes) {
-		receiverSourcesFormType = formTypes;
-		List<CheckedDepartmentFormType> types = new ArrayList<CheckedDepartmentFormType>();
-		int index = 1;
-		for (DepartmentFormType type : departmentFormTypes) {
-			CheckedDepartmentFormType model = new CheckedDepartmentFormType();
-			model.setChecked(false);
-			model.setIndex(index);
-			model.setDepartmentFormType(type);
-			types.add(model);
-			index++;
-		}
-		receiverSourcesTable.setRowData(types);
+	public void setCurrentSources(List<DepartmentFormTypeShared> departmentFormTypes) {
+		currentSourcesTable.setRowData(departmentFormTypes);
 		enableButtonLink(cancelButton, false);
 	}
 
@@ -196,7 +186,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			availableDepartments.add(department.getId());
 		}
 		departmentReceiverPicker.setAvalibleValues(departments, availableDepartments);
+		departmentReceiverPicker.setValue(new ArrayList<Integer>());
 		departmentSourcePicker.setAvalibleValues(departments, availableDepartments);
+		departmentSourcePicker.setValue(new ArrayList<Integer>());
 	}
 
 	public void setupReceiversTables() {
@@ -297,21 +289,21 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		});
 
 		// Receiver Sources
-		Column<CheckedDepartmentFormType, Boolean> checkBoxColumn =
-				new Column<CheckedDepartmentFormType, Boolean>(new CheckboxCell()) {
+		Column<DepartmentFormTypeShared, Boolean> checkBoxColumn =
+				new Column<DepartmentFormTypeShared, Boolean>(new CheckboxCell()) {
 					@Override
-					public Boolean getValue(CheckedDepartmentFormType object) {
+					public Boolean getValue(DepartmentFormTypeShared object) {
 						return object.isChecked();
 					}
 				};
-		checkBoxColumn.setFieldUpdater(new FieldUpdater<CheckedDepartmentFormType, Boolean>() {
+				
+		checkBoxColumn.setFieldUpdater(new FieldUpdater<DepartmentFormTypeShared, Boolean>() {
 			@Override
-			public void update(int index, CheckedDepartmentFormType object, Boolean value) {
+			public void update(int index, DepartmentFormTypeShared object, Boolean value) {
 				canCancel = false;
 				enableButtonLink(cancelButton, false);
-				receiverSourcesTable.getVisibleItem(index).setChecked(value);
-
-				for(CheckedDepartmentFormType source : receiverSourcesTable.getVisibleItems()) {
+				currentSourcesTable.getVisibleItem(index).setChecked(value);
+				for(DepartmentFormTypeShared source : currentSourcesTable.getVisibleItems()) {
 					if (source.isChecked()) {
 						enableButtonLink(cancelButton, true);
 						canCancel = true;
@@ -321,43 +313,44 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			}
 		});
 
-		TextColumn<CheckedDepartmentFormType> indexColumn = new TextColumn<CheckedDepartmentFormType>() {
+		TextColumn<DepartmentFormTypeShared> indexColumn = new TextColumn<DepartmentFormTypeShared>() {
 			@Override
-			public String getValue(CheckedDepartmentFormType object) {
-				return "" + object.getIndex();
+			public String getValue(DepartmentFormTypeShared object) {
+				return String.valueOf(object.getIndex());
 			}
 		};
 		indexColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-
-		TextColumn<CheckedDepartmentFormType> receiverSourcesKindColumn = new TextColumn<CheckedDepartmentFormType>() {
+		
+		TextColumn<DepartmentFormTypeShared> departmentColumn = new TextColumn<DepartmentFormTypeShared>() {
 			@Override
-			public String getValue(CheckedDepartmentFormType object) {
-				if (object.getDepartmentFormType().getKind() != null) {
-					return object.getDepartmentFormType().getKind().getName();
-				} else {
-					return "";
-				}
+			public String getValue(DepartmentFormTypeShared object) {
+				return object.getDepartmentName();
 			}
 		};
 
-		TextColumn<CheckedDepartmentFormType> receiverSourcesTypeColumn = new TextColumn<CheckedDepartmentFormType>() {
+		TextColumn<DepartmentFormTypeShared> receiverSourcesKindColumn = new TextColumn<DepartmentFormTypeShared>() {
 			@Override
-			public String getValue(CheckedDepartmentFormType object) {
-				if (!receiverSourcesFormType.isEmpty() && object.getDepartmentFormType().getFormTypeId() != 0) {
-					return receiverSourcesFormType.get(object.getDepartmentFormType().getFormTypeId()).getName();
-				} else {
-					return "";
-				}
+			public String getValue(DepartmentFormTypeShared object) {
+				return object.getKind().getName();
 			}
 		};
 
-		receiverSourcesTable.addColumn(checkBoxColumn);
-		receiverSourcesTable.setColumnWidth(checkBoxColumn, 40, Style.Unit.PX);
-		receiverSourcesTable.addColumn(indexColumn, "№ пп");
-		receiverSourcesTable.setColumnWidth(indexColumn, 40, Style.Unit.PX);
-		receiverSourcesTable.addColumn(receiverSourcesKindColumn, "Тип налоговой формы");
-		receiverSourcesTable.setColumnWidth(receiverSourcesKindColumn, 150, Style.Unit.PX);
-		receiverSourcesTable.addColumn(receiverSourcesTypeColumn, "Вид налоговой формы");
+		TextColumn<DepartmentFormTypeShared> receiverSourcesTypeColumn = new TextColumn<DepartmentFormTypeShared>() {
+			@Override
+			public String getValue(DepartmentFormTypeShared object) {
+				return object.getFormTypeName();
+			}
+		};
+
+		currentSourcesTable.addColumn(checkBoxColumn);
+		currentSourcesTable.setColumnWidth(checkBoxColumn, 40, Style.Unit.PX);
+		currentSourcesTable.addColumn(indexColumn, "№ пп");
+		currentSourcesTable.setColumnWidth(indexColumn, 40, Style.Unit.PX);
+		currentSourcesTable.addColumn(departmentColumn, "Подразделение");
+		currentSourcesTable.setColumnWidth(departmentColumn, 250, Style.Unit.PX);
+		currentSourcesTable.addColumn(receiverSourcesKindColumn, "Тип налоговой формы");
+		currentSourcesTable.setColumnWidth(receiverSourcesKindColumn, 150, Style.Unit.PX);
+		currentSourcesTable.addColumn(receiverSourcesTypeColumn, "Вид налоговой формы");
 	}
 
 	@UiHandler("assignButton")
@@ -371,12 +364,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		List<Long> sourceIds = new ArrayList<Long>();
 		Long sourceId = sourcesSelectionModel.getSelectedObject().getId();
 
-		for (CheckedDepartmentFormType source : receiverSourcesTable.getVisibleItems()) {
-			if (sourceId.equals(source.getDepartmentFormType().getId())) {
+		for (DepartmentFormTypeShared source : currentSourcesTable.getVisibleItems()) {
+			if (sourceId.equals(source.getId())) {
 				getUiHandlers().showAssignErrorMessage(isForm);
 				return;
 			}
-			sourceIds.add(source.getDepartmentFormType().getId());
+			sourceIds.add(source.getId());
 		}
 
 		sourceIds.add(sourceId);
@@ -396,9 +389,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		}
 
 		List<Long> sourceIds = new ArrayList<Long>();
-		for (CheckedDepartmentFormType source: receiverSourcesTable.getVisibleItems()) {
+		for (DepartmentFormTypeShared source: currentSourcesTable.getVisibleItems()) {
 			if (!source.isChecked()) {
-				sourceIds.add(source.getDepartmentFormType().getId());
+				sourceIds.add(source.getId());
 			}
 		}
 
@@ -441,43 +434,13 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 
 	}
 
-	private class CheckedDepartmentFormType {
-		private boolean checked;
-		private int index;
-		private DepartmentFormType departmentFormType;
-
-		public boolean isChecked() {
-			return checked;
-		}
-
-		public void setChecked(boolean checked) {
-			this.checked = checked;
-		}
-
-		public DepartmentFormType getDepartmentFormType() {
-			return departmentFormType;
-		}
-
-		public void setDepartmentFormType(DepartmentFormType departmentFormType) {
-			this.departmentFormType = departmentFormType;
-		}
-
-		private int getIndex() {
-			return index;
-		}
-
-		private void setIndex(int index) {
-			this.index = index;
-		}
-	}
-
 	@Override
 	public void onValueChange(ValueChangeEvent<List<Integer>> event) {
 		if (departmentSourcePicker == event.getSource()) {
 			setSources();
 		} else if (departmentReceiverPicker == event.getSource()) {
 			setReceivers();
-			receiverSourcesTable.setRowCount(0);
+			currentSourcesTable.setRowCount(0);
 		}
 	}
 

@@ -45,8 +45,8 @@ public class GetMainMenuActionHandler extends
 	@Autowired
 	private SecurityService securityService;
 
-    @Autowired
-    private MessageService messageService;
+    /*@Autowired
+    private MessageService messageService;*/
 
 	@Override
 	public GetMainMenuResult execute(GetMainMenuAction action,
