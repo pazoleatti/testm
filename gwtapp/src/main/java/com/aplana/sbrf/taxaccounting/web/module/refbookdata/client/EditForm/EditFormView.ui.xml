@@ -3,12 +3,12 @@
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:pager='urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager'>
 
-    <g:VerticalPanel ui:field="editPanel">
-
+    <g:VerticalPanel>
         <g:HorizontalPanel>
-            <g:Button ui:field="save">Сохранить</g:Button>
-            <g:Button ui:field="cancel">Отмена</g:Button>
+            <g:Button ui:field="save" enabled="false">Сохранить</g:Button>
+            <g:Button ui:field="cancel" enabled="false">Отмена</g:Button>
         </g:HorizontalPanel>
+        <g:VerticalPanel ui:field="editPanel"/>
     </g:VerticalPanel>
 
 </ui:UiBinder>

@@ -44,32 +44,24 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	EditFormPresenter editFormPresenter;
 
-	private List<RefBookAttribute> refBook;
-
 	private final DispatchAsync dispatcher;
 	private final TaPlaceManager placeManager;
 
 	private static final int PAGE_SIZE = 20;
 	private final TableDataProvider dataProvider = new TableDataProvider();
 
-	private boolean isValueChanged = false;
 	private List<RefBookDataRow> rowsToDelete = new ArrayList<RefBookDataRow>();
 	private List<RefBookDataRow> rowsToInsert = new ArrayList<RefBookDataRow>();
 
 	public interface MyView extends View, HasUiHandlers<RefBookDataUiHandlers> {
 		void setTableColumns(List<RefBookAttribute> headers);
 		void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows);
-		void createInputFields(List<RefBookAttribute> headers);
-//		void fillInputFields(Map<String, RefBookAttributeSerializable> data);
 		void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data);
 		void setRange(Range range);
 		void updateTable();
-		void addRowToEnd(RefBookDataRow newRow, boolean select);
-		Map<String, Object> getChangedValues();
 		void setRefBookNameDesc(String desc);
         void resetRefBookElements();
 		RefBookDataRow getSelectedRow();
-		void clearInputFields();
     }
 
 	@Inject
@@ -101,25 +93,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	}
 
 	@Override
-	public void onCancelClicked() {
-		rowsToDelete.clear();
-		rowsToInsert.clear();
-		isValueChanged = false;
-		getView().updateTable();
-	}
-
-	@Override
 	public void onAddRowClicked() {
-		getView().clearInputFields();
-//		RefBookDataRow newRow = new RefBookDataRow();
-//		Map<String, String> newRowData = new HashMap<String, String>();
-//		for (RefBookAttribute attribute : refBook) {
-//			newRowData.put(attribute.getAlias(), "");
-//		}
-//		newRow.setValues(newRowData);
-//		getView().addRowToEnd(newRow, true);
-//		rowsToInsert.add(newRow);
-
+		editFormPresenter.show(null);
 	}
 
 	@Override
@@ -141,85 +116,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	@Override
 	public void onSelectionChanged() {
-		editFormPresenter.showRecord(refBookDataId, getView().getSelectedRow().getRefBookRowId());
-//		GetRefBookDataAction action = new GetRefBookDataAction();
-//		action.setRefbookId(refBookDataId);
-//		action.setRecordId(getView().getSelectedRow().getRefBookRowId());
-//		dispatcher.execute(action,
-//				CallbackUtils.defaultCallback(
-//						new AbstractCallback<GetRefBookDataResult>() {
-//							@Override
-//							public void onSuccess(GetRefBookDataResult result) {
-//								getView().fillInputFields(result.getRecord());
-//							}
-//						}, this));
-	}
-
-	@Override
-	public void onSaveClicked() {
-		SaveRefBookRowAction action = new SaveRefBookRowAction();
-		action.setRefbookId(refBookDataId);
-//		action.setValueToSave(convertValues(getView().getChangedValues()));
-		dispatcher.execute(action,
-				CallbackUtils.defaultCallback(
-						new AbstractCallback<SaveRefBookRowResult>() {
-						@Override
-						public void onSuccess(SaveRefBookRowResult result) {
-							getView().updateTable();
-						}
-					}, this));
-//		if (!rowsToDelete.isEmpty()) {
-//			DeleteRefBookRowAction action = new DeleteRefBookRowAction();
-//			action.setRefbookId(refBookDataId);
-//			List<Long> rowsId = new ArrayList<Long>();
-//			for (RefBookDataRow row : rowsToDelete) {
-//				rowsId.add(row.getRefBookRowId());
-//			}
-//			action.setRecordsId(rowsId);
-//			dispatcher.execute(action,
-//					CallbackUtils.defaultCallback(
-//							new AbstractCallback<DeleteRefBookRowResult>() {
-//								@Override
-//								public void onSuccess(DeleteRefBookRowResult result) {
-//									rowsToDelete.clear();
-//									getView().updateTable();
-//								}
-//							}, this));
-//		} else if (!rowsToInsert.isEmpty()) {
-//			AddRefBookRowAction action = new AddRefBookRowAction();
-//			action.setRefbookId(refBookDataId);
-//			List<Map<String, RefBookAttributeSerializable>> toInsert = new ArrayList<Map<String, RefBookAttributeSerializable>>();
-//			toInsert.add(convertValues(getView().getChangedValues()));
-//			action.setRecords(toInsert);
-//			dispatcher.execute(action,
-//					CallbackUtils.defaultCallback(
-//							new AbstractCallback<AddRefBookRowResult>() {
-//								@Override
-//								public void onSuccess(AddRefBookRowResult result) {
-//									rowsToInsert.clear();
-//									getView().updateTable();
-//								}
-//							}, this));
-//		} else if (isValueChanged) {
-//			SaveRefBookRowAction action = new SaveRefBookRowAction();
-//			action.setRefbookId(refBookDataId);
-//
-//			action.setValueToSave(convertValues(getView().getChangedValues()));
-//			dispatcher.execute(action,
-//					CallbackUtils.defaultCallback(
-//							new AbstractCallback<SaveRefBookRowResult>() {
-//							@Override
-//							public void onSuccess(SaveRefBookRowResult result) {
-//								getView().updateTable();
-//							}
-//						}, this));
-//		}
-
-	}
-
-	@Override
-	public void onValueChanged() {
-		isValueChanged = true;
+		editFormPresenter.show(getView().getSelectedRow().getRefBookRowId());
 	}
 
 	@Override
@@ -233,10 +130,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 						new AbstractCallback<GetRefBookAttributesResult>() {
 							@Override
 							public void onSuccess(GetRefBookAttributesResult result) {
-//                                getView().resetRefBookElements();
+                                getView().resetRefBookElements();
 								getView().setTableColumns(result.getAttributes());
-//								getView().createInputFields(result.getTableHeaders());
-//								refBook = result.getTableHeaders();
 								getView().setRange(new Range(0, PAGE_SIZE));
 //								getView().setRefBookNameDesc(result.getDesc());
 								editFormPresenter.init(refBookDataId);
@@ -250,42 +145,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	public void onBind(){
 		addRegisteredHandler(UpdateForm.getType(), this);
 	}
-
-//	private Map<String, RefBookAttributeSerializable> convertValues(Map<String, Object> valuesToConvert) {
-//		Map<String, RefBookAttributeSerializable> convertedValues =
-//				new HashMap<String, RefBookAttributeSerializable>();
-//
-//		for(RefBookAttribute attribute : refBook) {
-//			RefBookAttributeSerializable refBookAttributeSerializable =
-//					new RefBookAttributeSerializable();
-//			refBookAttributeSerializable.setAttributeType(attribute.getAttributeType());
-//			String alias = attribute.getAlias();
-//
-//			switch (attribute.getAttributeType()) {
-//				case STRING:
-//					refBookAttributeSerializable.setStringValue((String)valuesToConvert.get(alias));
-//					break;
-//				case DATE:
-//					refBookAttributeSerializable.setDateValue((Date) valuesToConvert.get(alias));
-//					break;
-//				case NUMBER:
-//					refBookAttributeSerializable.setNumberValue((Number) valuesToConvert.get(alias));
-//					break;
-//				case REFERENCE:
-//					refBookAttributeSerializable.setReferenceValue((Long)valuesToConvert.get(alias));
-//					break;
-//			}
-//
-//			convertedValues.put(alias, refBookAttributeSerializable);
-//		}
-//		RefBookAttributeSerializable recordId =
-//				new RefBookAttributeSerializable();
-//		recordId.setAttributeType(RefBookAttributeType.NUMBER);
-//		recordId.setNumberValue((Long)valuesToConvert.get(RefBook.RECORD_ID_ALIAS));
-//		convertedValues.put(RefBook.RECORD_ID_ALIAS, recordId);
-//
-//		return convertedValues;
-//	}
 
 	private class TableDataProvider extends AsyncDataProvider<RefBookDataRow> {
 
