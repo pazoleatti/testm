@@ -165,7 +165,7 @@ void calculationControlGraphs() {
         // графа 11
         row.opuSumByEnclosure2 = getSumFromComplex(formDataComplex,
                 'consumptionBuhSumAccountNumber', 'consumptionBuhSumAccepted', row.consumptionAccountNumber)
-        logger.info("alias = %s graph11 = %s", row.getAlias(), row.opuSumByEnclosure2.toString())
+        //logger.info("alias = %s graph11 = %s", row.getAlias(), row.opuSumByEnclosure2.toString())
         // графа 12
         if (row.getAlias() in ['R105', 'R209']) {
             tmp = calcColumn6(['R105', 'R209'])
