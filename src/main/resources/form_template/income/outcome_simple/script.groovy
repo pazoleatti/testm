@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 import javax.script.ScriptException
 import java.text.SimpleDateFormat
@@ -139,7 +140,7 @@ void calculationControlGraphs() {
     def income102NotFound = []
     for (def row : getRows(data)) {
         // исключить итоговые строки
-        if (row.getAlias() in ['R107', 'R212']) {
+        if (row.getAlias() in ['R107', 'R212', 'R1', 'R108']) {
             continue
         }
         //Строки 213-217 расчет 8-й графы
@@ -161,11 +162,10 @@ void calculationControlGraphs() {
             value = ((BigDecimal) tmp).setScale(2, BigDecimal.ROUND_HALF_UP)
             row.logicalCheck = (tmp < 0 ? message : value.toString())
         }
-
         // графа 11
         row.opuSumByEnclosure2 = getSumFromComplex(formDataComplex,
                 'consumptionBuhSumAccountNumber', 'consumptionBuhSumAccepted', row.consumptionAccountNumber)
-
+        logger.info("alias = %s graph11 = %s", row.getAlias(), row.opuSumByEnclosure2.toString())
         // графа 12
         if (row.getAlias() in ['R105', 'R209']) {
             tmp = calcColumn6(['R105', 'R209'])
