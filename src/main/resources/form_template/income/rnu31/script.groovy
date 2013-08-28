@@ -2,6 +2,7 @@ package form_template.income.rnu31
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 
 /**
@@ -99,7 +100,7 @@ void calc() {
             'ovgvz', 'eurobondsRF', 'itherEurobonds', 'corporateBonds']
 
     for (def row : getRows(data)) {
-        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
+        if (isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
             return
         }
     }
@@ -117,10 +118,10 @@ def logicalCheck(def useLog) {
     def dataOld = getData(formDataOld)
 
     /** Строка из предыдущего отчета. */
-    def rowOld = (formDataOld != null && !getRows(dataOld).isEmpty() ? dataOld.getDataRow(getRows(dataOld),'total') : null)
+    def rowOld = getTotalRow(dataOld)
 
     /** Строка из текущего отчета. */
-    def row = (formData != null && !getRows(data).isEmpty() ? data.getDataRow(getRows(data),'total') : null)
+    def row = getTotalRow(data)
     if (row == null) {
         return true
     }
@@ -214,11 +215,8 @@ void consolidation() {
  * Проверка при создании формы.
  */
 void checkCreation() {
-    // отчётный период
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-
     //проверка периода ввода остатков
-    if (reportPeriod != null && reportPeriod.isBalancePeriod()) {
+    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
         logger.error('Налоговая форма не может быть в периоде ввода остатков.')
         return
     }
@@ -283,18 +281,22 @@ void importData() {
     def rowsOld = getRows(data)
     try {
         // добавить данные в форму
-        addData(xml, startRow, startColumn)
+        addData(xml, startRow, startColumn, data)
 
         // расчитать и проверить
-        calc()
-        logicalCheck(false)
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+            logicalCheck(false)
+        }
     } catch(Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка!')
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
     }
     // откатить загрузку если есть ошибки
     if (logger.containsLevel(LogLevel.ERROR)) {
         data.clear()
         data.insert(rowsOld, 1)
+    } else {
+        logger.info('Данные загружены')
     }
     data.commit()
 }
@@ -428,6 +430,7 @@ def getRows(def data) {
  */
 def getNewRow() {
     def row = formData.createDataRow()
+    row.setAlias('total')
 
     // графа 3..12
     ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds',
@@ -447,11 +450,10 @@ def getNewRow() {
  * @param startRow номер строки с которой брать данные (что бы пропустить шапку таблицы или лишнюю информацию)
  * @param startColumn номер графы с которой брать данные (что бы пропустить нумерацию или лишнюю информацию)
  */
-void addData(def xml, def startRow, def startColumn) {
+void addData(def xml, def startRow, def startColumn, def data) {
     if (xml == null) {
         return
     }
-    def data = getData(formData)
 
     def tmp
 
@@ -545,7 +547,6 @@ void addData(def xml, def startRow, def startColumn) {
             data.clear()
             data.insert(newRow, 1)
             data.commit()
-            logger.info('Данные загружены')
             break
         }
     }
@@ -617,6 +618,37 @@ def getValue(def record, def alias) {
             return value.getStringValue()
         case RefBookAttributeType.REFERENCE :
             return value.getReferenceValue()
+    }
+    return null
+}
+
+/**
+ * Проверить существования строки по алиасу.
+ *
+ * @param list строки нф
+ * @param rowAlias алиас
+ * @return <b>true</b> - строка с указанным алиасом есть, иначе <b>false</b>
+ */
+def checkAlias(def list, def rowAlias) {
+    if (rowAlias == null || rowAlias == "" || list == null || list.isEmpty()) {
+        return false
+    }
+    for (def row : list) {
+        if (row.getAlias() == rowAlias) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Получить строку из формы.
+ *
+ * @param data форма
+ */
+def getTotalRow(def data) {
+    if (data != null && !getRows(data).isEmpty() && checkAlias(getRows(data), 'total')) {
+        return data.getDataRow(getRows(data), 'total')
     }
     return null
 }

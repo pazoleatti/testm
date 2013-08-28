@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.server.assembler.DepartmentFormTypeComparator;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetFormSourcesAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetFormSourcesResult;
@@ -24,7 +24,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 public class GetFormSourcesHandler extends AbstractActionHandler<GetFormSourcesAction, GetFormSourcesResult> {
 
 	@Autowired
-	private DepartmentFormTypeService departmentFormTypeService;
+	private SourceService departmentFormTypeService;
 
     public GetFormSourcesHandler() {
         super(GetFormSourcesAction.class);
@@ -34,7 +34,7 @@ public class GetFormSourcesHandler extends AbstractActionHandler<GetFormSourcesA
     public GetFormSourcesResult execute(GetFormSourcesAction action, ExecutionContext context) throws ActionException {
 		GetFormSourcesResult result = new GetFormSourcesResult();
 		List<DepartmentFormType> sources =
-				departmentFormTypeService.getDepartmentFormSources(action.getDepartmentId(), action.getTaxType());
+				departmentFormTypeService.getDFTSourcesByDepartment(action.getDepartmentId(), action.getTaxType());
 
 		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();
 		for (DepartmentFormType departmentFormType : sources) {

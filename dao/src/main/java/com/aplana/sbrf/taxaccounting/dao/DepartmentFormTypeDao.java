@@ -19,16 +19,6 @@ public interface DepartmentFormTypeDao {
     List<DepartmentFormType> get(int departmentId);
 
     /**
-     * Добавляет/удаляет налоговые формы, назначенные подразделению
-     *
-     * @param deleteIds    список id на удаление
-     * @param departmentId id подразделения
-     * @param typeId       id типа налоговой формы
-     * @param formId       id вида налоговой формы
-     */
-    //void saveForm(Set<Long> deleteIds, Long departmentId, int typeId, int formId);
-
-    /**
      * Возвращает информацию он назначенных подразделению формах по заданному виду налога
      *
      * @param departmentId идентификатор подразделения

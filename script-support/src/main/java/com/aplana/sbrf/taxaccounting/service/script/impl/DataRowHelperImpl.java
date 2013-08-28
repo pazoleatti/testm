@@ -85,9 +85,8 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	public void insert(DataRow<Cell> dataRow, int index) {
 		@SuppressWarnings("unchecked")
 		List<DataRow<Cell>> asList = Arrays.asList(dataRow);
-		dataRowDao.insertRows(fd, index, asList);
         getAllCached().add(index-1, dataRow);
-
+		dataRowDao.insertRows(fd, index, asList);
 	}
 
     /**
@@ -97,8 +96,8 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
      */
     @Override
 	public void insert(List<DataRow<Cell>> dataRows, int index) {
-		dataRowDao.insertRows(fd, index, dataRows);
         getAllCached().addAll(index-1, dataRows);
+        dataRowDao.insertRows(fd, index, dataRows);
 	}
 
 	@Override

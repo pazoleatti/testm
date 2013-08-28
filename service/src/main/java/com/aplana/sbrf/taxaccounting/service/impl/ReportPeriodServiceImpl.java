@@ -19,7 +19,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 
 /**
@@ -48,7 +48,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	private RefBookFactory rbFactory;
 
 	@Autowired
-	private DepartmentFormTypeService departmentFormTypeService;
+	private SourceService departmentFormTypeService;
 
 	@Autowired
 	private DepartmentService departmentService;
@@ -164,7 +164,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 
 			// Сохраняем для источников
 			List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
-			departmentFormTypes.addAll(departmentFormTypeService.getDepartmentFormSources((int) departmentId, taxType));
+			departmentFormTypes.addAll(departmentFormTypeService.getDFTSourcesByDepartment((int) departmentId, taxType));
 
 			for (DepartmentFormType dft : departmentFormTypes) {
 				DepartmentReportPeriod depRP = new DepartmentReportPeriod();
@@ -193,7 +193,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 		} else {
 			closePeriodWithLog(reportPeriodId, departmentId, logs);
 			List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
-			departmentFormTypes.addAll(departmentFormTypeService.getDepartmentFormSources((int) departmentId, taxType));
+			departmentFormTypes.addAll(departmentFormTypeService.getDFTSourcesByDepartment((int) departmentId, taxType));
 			for (DepartmentFormType dft : departmentFormTypes) {
 				closePeriodWithLog(reportPeriodId, dft.getDepartmentId(), logs);
 			}

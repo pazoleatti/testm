@@ -49,25 +49,32 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 				for (Map.Entry<String, RefBookValue> val : record.entrySet()) {
 
 					String tableCell;
-					switch (val.getValue().getAttributeType()) {
-						case NUMBER:
-							tableCell = val.getValue().getNumberValue().toString();
-							break;
-						case DATE:
-							tableCell = val.getValue().getDateValue().toString();
-							break;
-						case STRING:
-							tableCell = val.getValue().getStringValue();
-							break;
-						case REFERENCE:
-
-							if (val.getValue().getReferenceObject() != null) {
-								tableCell = val.getValue().getReferenceValue().toString();
+					if (val.getValue() == null) {
+						tableCell = "";
+					} else {
+						switch (val.getValue().getAttributeType()) {
+							case NUMBER:
+								if (val.getValue().getNumberValue() == null) tableCell = "";
+								else tableCell = val.getValue().getNumberValue().toString();
 								break;
-							}
-						default:
-							tableCell = "undefined";
-							break;
+							case DATE:
+								if (val.getValue().getDateValue() == null) tableCell = "";
+								else tableCell = val.getValue().getDateValue().toString();
+								break;
+							case STRING:
+								if (val.getValue().getStringValue() == null) tableCell = "";
+								else tableCell = val.getValue().getStringValue();
+								break;
+							case REFERENCE:
+
+								if (val.getValue().getReferenceObject() != null) {
+									tableCell = val.getValue().getReferenceValue().toString();
+									break;
+								}
+							default:
+								tableCell = "undefined";
+								break;
+						}
 					}
 					tableRowData.put(val.getKey(), tableCell);
 				}

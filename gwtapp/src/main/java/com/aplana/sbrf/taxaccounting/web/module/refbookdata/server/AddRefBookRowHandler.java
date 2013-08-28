@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRefBookRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRefBookRowResult;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttributeSerializable;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -33,9 +33,9 @@ public class AddRefBookRowHandler extends AbstractActionHandler<AddRefBookRowAct
 
 
 		List<Map<String, RefBookValue>> valuesToSaveList = new ArrayList<Map<String, RefBookValue>>();
-		for (Map<String, RefBookAttributeSerializable> map : action.getRecords()) {
+		for (Map<String, RefBookValueSerializable> map : action.getRecords()) {
 			Map<String, RefBookValue> valueToSave = new HashMap<String, RefBookValue>();
-			for(Map.Entry<String, RefBookAttributeSerializable> v : map.entrySet()) {
+			for(Map.Entry<String, RefBookValueSerializable> v : map.entrySet()) {
 				RefBookValue value = new RefBookValue(v.getValue().getAttributeType(), v.getValue().getValue());
 				valueToSave.put(v.getKey(), value);
 			}

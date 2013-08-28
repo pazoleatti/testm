@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.server.assembler.DepartmentFormTypeComparator;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetFormReceiversAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetFormReceiversResult;
@@ -24,7 +24,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 public class GetFormReceiversHandler extends AbstractActionHandler<GetFormReceiversAction, GetFormReceiversResult> {
 
 	@Autowired
-	private DepartmentFormTypeService departmentFormTypeService;
+	private SourceService departmentFormTypeService;
 	
 
     public GetFormReceiversHandler() {
@@ -35,7 +35,7 @@ public class GetFormReceiversHandler extends AbstractActionHandler<GetFormReceiv
     public GetFormReceiversResult execute(GetFormReceiversAction action, ExecutionContext context) throws ActionException {
 		GetFormReceiversResult result = new GetFormReceiversResult();
 		List<DepartmentFormType> receivers =
-				departmentFormTypeService.getDepartmentFormDestinations(action.getDepartmentId(), action.getTaxType());
+				departmentFormTypeService.getDFTByDepartment(action.getDepartmentId(), action.getTaxType());
 
 		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();
 		for (DepartmentFormType departmentFormType : receivers) {

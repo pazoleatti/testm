@@ -462,17 +462,13 @@ def checkNSI() {
             if (isTotal(row)) {
                 continue
             }
-            // 4. Проверка соответствия графы 2, 3, 4 одной записи в справочнике
-            if (row.code != row.balance) {
-                logger.warn('Код налогового учета не соответствует номеру балансового счета')
-            }
 
             // 1. Проверка графа «Код налогового учета» (графа 2)
             if (refBookService.getRecordData(expensesClassifierRefBookId, row.code) == null) {
                 logger.warn('Код налогового учёта в справочнике отсутствует!')
             }
 
-            // 1. Проверка графы «Номер балансового счета» (графа 3)
+            // 2. Проверка графы «Номер балансового счета» (графа 3)
             if (refBookService.getRecordData(expensesClassifierRefBookId, row.balance) == null) {
                 logger.error('Номер балансового счета в справочнике отсутствует!')
                 return false
