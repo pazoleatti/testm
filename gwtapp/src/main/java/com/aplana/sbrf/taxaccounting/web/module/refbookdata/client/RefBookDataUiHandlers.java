@@ -6,10 +6,7 @@ import com.gwtplatform.mvp.client.UiHandlers;
 import java.util.Map;
 
 public interface RefBookDataUiHandlers extends UiHandlers {
-	void onCancelClicked();
 	void onAddRowClicked();
 	void onDeleteRowClicked();
 	void onSelectionChanged();
-	void onSaveClicked();
-	void onValueChanged();
 }

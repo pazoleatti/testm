@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,7 +22,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class FormDataSearchServiceTest {
+	
 	private static FormDataSearchServiceImpl service;
+	private static SourceService sourceService;
 	private final static List<FormType> FORM_TYPES_BY_TAX_TYPE = new ArrayList<FormType>();
 	
 	private static final int CONTROL_UNP_USER_ID = 1;
@@ -31,6 +34,7 @@ public class FormDataSearchServiceTest {
 	@BeforeClass
 	public static void tearUp() {
 		service = new FormDataSearchServiceImpl();
+		sourceService = new SourceServiceImpl();
 
 		FormTypeDao formTypeDao = mock(FormTypeDao.class);
 		when(formTypeDao.listAllByTaxType(TaxType.TRANSPORT)).thenReturn(FORM_TYPES_BY_TAX_TYPE);
@@ -48,7 +52,8 @@ public class FormDataSearchServiceTest {
 		dfts.add(mockDepartmentFormType(3, 2, FormDataKind.SUMMARY));
 		when(departmentFormTypeDao.getDepartmentSources(1, TaxType.TRANSPORT)).thenReturn(dfts);
 
-		ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao);
+		ReflectionTestUtils.setField(sourceService, "departmentFormTypeDao", departmentFormTypeDao);
+		ReflectionTestUtils.setField(service, "sourceService", sourceService);
 	}
 
 	@Test

@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueS
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -29,6 +31,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	VerticalPanel editPanel;
 	@UiField
 	Button save;
+	@UiField
+	Button cancel;
 
 	@Inject
 	@UiConstructor
@@ -38,6 +42,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
 	@Override
 	public Map<RefBookAttribute, HasValue> createInputFields(List<RefBookAttribute> attributes) {
+		editPanel.clear();
+		if (widgets != null) widgets.clear();
 		Map<RefBookAttribute, HasValue> widgets = new HashMap<RefBookAttribute, HasValue>();
 		for (RefBookAttribute attr : attributes) {
 			HorizontalPanel oneField = new HorizontalPanel();
@@ -47,7 +53,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			Widget widget;
 			switch (attr.getAttributeType()) {
 				case NUMBER:
-					widget = new TextBox();
+					widget = new DoubleBox();
 					break;
 				case STRING:
 					widget = new TextBox();
@@ -64,6 +70,15 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					widget = new TextBox();
 					break;
 			}
+			HasValue hasValue = (HasValue)widget;
+			hasValue.addValueChangeHandler(new ValueChangeHandler() {
+				@Override
+				public void onValueChange(ValueChangeEvent event) {
+					if (getUiHandlers() != null) {
+						getUiHandlers().valueChanged();
+					}
+				}
+			});
 			oneField.add(widget);
 			editPanel.add(oneField);
 			widgets.put(attr, (HasValue)widget);
@@ -74,7 +89,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
 	@Override
 	public void fillInputFields(Map<String, RefBookValueSerializable> record) {
-		System.out.println("Fill " + record);
 		if (record == null) {
 			for (HasValue w : widgets.values()) {
 				w.setValue(null);
@@ -82,16 +96,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		} else {
 
 			for (Map.Entry<RefBookAttribute, HasValue> w : widgets.entrySet()) {
-//				if (w.getKey().getAlias().equals())
 				w.getValue().setValue(record.get(w.getKey().getAlias()).getValue());
 			}
-
-//			for (Map.Entry<String, RefBookValueSerializable> attr : record.entrySet()) {
-//				HasValue w = widgets.get(attr);
-//				if (w != null) {
-//					w.setValue(attr.getValue().getValue());
-//				}
-//			}
 		}
 	}
 
@@ -130,10 +136,27 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		return fieldsValues;
 	}
 
+	@Override
+	public void setSaveButtonEnabled(boolean enabled) {
+		save.setEnabled(enabled);
+	}
+
+	@Override
+	public void setCancelButtonEnabled(boolean enabled) {
+		cancel.setEnabled(enabled);
+	}
+
 	@UiHandler("save")
 	void saveButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onSaveClicked();
+		}
+	}
+
+	@UiHandler("cancel")
+	void cancelButtonClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			getUiHandlers().onCancelClicked();
 		}
 	}
 }
