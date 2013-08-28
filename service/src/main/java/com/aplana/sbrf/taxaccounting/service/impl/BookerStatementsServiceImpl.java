@@ -1,12 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.BookerStatementsDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.Income101;
 import com.aplana.sbrf.taxaccounting.model.Income102;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.BookerStatementsService;
-
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -29,28 +31,82 @@ import java.util.regex.Pattern;
 @Service
 @Transactional
 public class BookerStatementsServiceImpl implements BookerStatementsService {
+    private static long INCOME_101 = 50L;
+    private static long INCOME_102 = 52L;
+
+    private static String I_101_REPORT_PERIOD_ID = "REPORT_PERIOD_ID";
+    private static String I_101_ACCOUNT = "ACCOUNT";
+    private static String I_101_ACCOUNT_NAME = "ACCOUNT_NAME";
+    private static String I_101_INCOME_DEBET_REMAINS = "INCOME_DEBET_REMAINS";
+    private static String I_101_INCOME_CREDIT_REMAINS = "INCOME_CREDIT_REMAINS";
+    private static String I_101_DEBET_RATE = "DEBET_RATE";
+    private static String I_101_CREDIT_RATE = "CREDIT_RATE";
+    private static String I_101_OUTCOME_DEBET_REMAINS = "OUTCOME_DEBET_REMAINS";
+    private static String I_101_OUTCOME_CREDIT_REMAINS = "OUTCOME_CREDIT_REMAINS";
+    private static String I_101_DEPARTMENT_ID = "DEPARTMENT_ID";
+
+    private static String I_102_REPORT_PERIOD_ID = "REPORT_PERIOD_ID";
+    private static String I_102_OPU_CODE = "OPU_CODE";
+    private static String I_102_TOTAL_SUM = "TOTAL_SUM";
+    private static String I_102_ITEM_NAME = "ITEM_NAME";
+    private static String I_102_DEPARTMENT_ID = "DEPARTMENT_ID";
+
     @Autowired
-    ReportPeriodDao reportPeriodDao;
+    ReportPeriodService reportPeriodService;
+
     @Autowired
-    BookerStatementsDao bookerStatementsDao;
+    RefBookFactory rbFactory;
 
     @Override
-    public void importXML(InputStream stream, Integer periodID, int typeID) throws IOException {
+    public void importXML(InputStream stream, Integer periodId, int typeId, int departmentId) throws IOException {
         // Проверка того, что пользователем указан открытый отчетный период
-    	//TODO (SBRFACCTAX-3722))
-    	/*
-        if (!reportPeriodDao.get(periodID).isActive()) {
+        if (!reportPeriodService.isActivePeriod(periodId, departmentId)) {
             throw new ServiceException("Указан закрытый период. Файл не может быть загружен.");
         }
-    	 */ 
-        if (typeID == 1) {
+
+        if (typeId == 1) {
+            RefBookDataProvider provider = rbFactory.getDataProvider(INCOME_101);
             List<Income101> list = importIncome101(stream);
-            bookerStatementsDao.delete101(periodID);
-            bookerStatementsDao.create101(list, periodID);
+
+            if (list != null && !list.isEmpty()) {
+                List<Map<String, RefBookValue>> records = new LinkedList<Map<String, RefBookValue>>();
+
+                for (Income101 item : list) {
+                    Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                    map.put(I_101_REPORT_PERIOD_ID, new RefBookValue(RefBookAttributeType.NUMBER, periodId));
+                    map.put(I_101_ACCOUNT, new RefBookValue(RefBookAttributeType.STRING, item.getAccount()));
+                    map.put(I_101_ACCOUNT_NAME, new RefBookValue(RefBookAttributeType.STRING, item.getAccountName()));
+                    map.put(I_101_INCOME_DEBET_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getIncomeDebetRemains()));
+                    map.put(I_101_INCOME_CREDIT_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getIncomeCreditRemains()));
+                    map.put(I_101_DEBET_RATE, new RefBookValue(RefBookAttributeType.NUMBER, item.getDebetRate()));
+                    map.put(I_101_CREDIT_RATE, new RefBookValue(RefBookAttributeType.NUMBER, item.getCreditRate()));
+                    map.put(I_101_OUTCOME_DEBET_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getOutcomeDebetRemains()));
+                    map.put(I_101_OUTCOME_CREDIT_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getOutcomeCreditRemains()));
+                    map.put(I_101_DEPARTMENT_ID, new RefBookValue(RefBookAttributeType.REFERENCE, (long)departmentId));
+                    records.add(map);
+                }
+
+                provider.updateRecords(new Date(), records);
+            }
         } else {
+            RefBookDataProvider provider = rbFactory.getDataProvider(INCOME_102);
             List<Income102> list = importIncome102(stream);
-            bookerStatementsDao.delete102(periodID);
-            bookerStatementsDao.create102(list, periodID);
+
+            if (list != null && !list.isEmpty()) {
+                List<Map<String, RefBookValue>> records = new LinkedList<Map<String, RefBookValue>>();
+
+                for (Income102 item : list) {
+                    Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                    map.put(I_102_REPORT_PERIOD_ID, new RefBookValue(RefBookAttributeType.NUMBER, periodId));
+                    map.put(I_102_OPU_CODE, new RefBookValue(RefBookAttributeType.STRING, item.getOpuCode()));
+                    map.put(I_102_TOTAL_SUM, new RefBookValue(RefBookAttributeType.NUMBER, item.getTotalSum()));
+                    map.put(I_102_ITEM_NAME, new RefBookValue(RefBookAttributeType.STRING, item.getItemName()));
+                    map.put(I_102_DEPARTMENT_ID, new RefBookValue(RefBookAttributeType.REFERENCE, (long)departmentId));
+                    records.add(map);
+                }
+
+                provider.updateRecords(new Date(), records);
+            }
         }
     }
 

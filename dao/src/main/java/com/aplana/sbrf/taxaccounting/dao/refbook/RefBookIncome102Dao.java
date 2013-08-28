@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * DAO для работы справочника оборотной ведомости
- * User: ekuvshinov
+ * DAO для работы справочника "Отчет о прибылях и убытках (Форма 0409102-СБ)"
+ * @author Dmitriy Levykin
  */
-public interface RefBookIncome101Dao {
+public interface RefBookIncome102Dao {
     /**
      * Получение записей справочника
      * @param pagingParams
