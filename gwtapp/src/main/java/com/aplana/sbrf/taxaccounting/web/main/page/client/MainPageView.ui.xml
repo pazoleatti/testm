@@ -11,67 +11,71 @@
         }
     </ui:style>
 
-	<g:DockLayoutPanel ui:field="dockPanel" unit="PX" height="100%" width="100%">
-		<g:north size="44">
-			<g:HTMLPanel>
-				<div ui:field="loadingMessage" class="loadingStatusLabel">
-					<div>Загрузка...</div>
-				</div>
+    <g:HTMLPanel>
+        <div ui:field="loadingMessage" class="loadingStatusLabel">
+            <div>
+                <img src="resources/img/load-panel.gif" alt="" width="64px" height="64px"/>
+                <span>Загрузка...</span>
+            </div>
+        </div>
+        <g:DockLayoutPanel ui:field="dockPanel" unit="PX" height="100%" width="100%">
+            <g:north size="44">
+                <g:HTMLPanel>
+                    <div class="topNavigation">
+                        <div class="topHeader">
+                            <div class="topLeftLogo">
+                                <img style="height: 41x; width:126px;" height="41px" width="126px"
+                                    src="resources/img/header_left.png" />
+                            </div>
+                            <div class="topRightLogo">
+                                <img style="height: 41px; width:27px;" height="41px" width="27px"
+                                    src="resources/img/header_right.png" />
+                            </div>
+                            <g:HTMLPanel ui:field="signInContentPanel" />
+                            <div class="{style.about}">
+                                <b:LinkAnchor href="resources/About.pdf" target="_blank" title="Руководство пользователя" img="resources/img/exclamation_mark.png"/>
+                            </div>
+                            <div class="{style.about}">
+                                <b:LinkAnchor ui:field="aboutLink" target="_blank" title="О программе" img="resources/img/question_mark.png"/>
+                            </div>
+                            <g:HTMLPanel ui:field="mainMenuContentPanel" />
 
-				<div class="topNavigation">
-					<div class="topHeader">
-						<div class="topLeftLogo">
-							<img style="height: 41x; width:126px;" height="41px" width="126px"
-								src="resources/img/header_left.png" />
-						</div>
-						<div class="topRightLogo">
-							<img style="height: 41px; width:27px;" height="41px" width="27px"
-								src="resources/img/header_right.png" />
-						</div>
-						<g:HTMLPanel ui:field="signInContentPanel" />
-                        <div class="{style.about}">
-                            <b:LinkAnchor href="resources/About.pdf" target="_blank" title="Руководство пользователя" img="resources/img/exclamation_mark.png"/>
                         </div>
-                        <div class="{style.about}">
-                            <b:LinkAnchor ui:field="aboutLink" target="_blank" title="О программе" img="resources/img/question_mark.png"/>
+                    </div>
+                </g:HTMLPanel>
+            </g:north>
+
+            <g:center>
+                <g:HTMLPanel height="100%">
+                    <div class="topGradient">
+                        <div class="bodyTopLeft" />
+                        <div class="bodyTopRight" />
+                    </div>
+                    <g:HTMLPanel height="100%">
+                        <div class="rightGradient" />
+                        <div class="leftGradient" />
+                        <div class="bodyContent">
+                            <g:SplitLayoutPanel height="100%" ui:field="splitPanel">
+                                <g:center>
+                                    <g:ResizeLayoutPanel ui:field="mainContentPanel" />
+                                </g:center>
+                                <g:south size="0">
+                                    <g:FlowPanel ui:field="logAreaPanel" />
+                                </g:south>
+                            </g:SplitLayoutPanel>
                         </div>
-						<g:HTMLPanel ui:field="mainMenuContentPanel" />
+                    </g:HTMLPanel>
+                </g:HTMLPanel>
+            </g:center>
 
-					</div>
-				</div>
-			</g:HTMLPanel>
-		</g:north>
-
-		<g:center>
-			<g:HTMLPanel height="100%">
-				<div class="topGradient">
-					<div class="bodyTopLeft" />
-					<div class="bodyTopRight" />
-				</div>
-				<g:HTMLPanel height="100%">
-					<div class="rightGradient" />
-					<div class="leftGradient" />
-					<div class="bodyContent">
-						<g:SplitLayoutPanel height="100%" ui:field="splitPanel">
-							<g:center>
-								<g:ResizeLayoutPanel ui:field="mainContentPanel" />
-							</g:center>
-							<g:south size="0">
-								<g:FlowPanel ui:field="logAreaPanel" />
-							</g:south>
-						</g:SplitLayoutPanel>
-					</div>
-				</g:HTMLPanel>
-			</g:HTMLPanel>
-		</g:center>
-
-		<g:south size="32">
-			<g:HTMLPanel ui:field="footerPanel" styleName="footerGradient">
-				<div class="footerLeft" />
-				<div class="footerRight" />
-				<g:FlowPanel ui:field="projectVersion" styleName="versionProjectStyle" />
-			</g:HTMLPanel>
-		</g:south>
-	</g:DockLayoutPanel>
+            <g:south size="32">
+                <g:HTMLPanel ui:field="footerPanel" styleName="footerGradient">
+                    <div class="footerLeft" />
+                    <div class="footerRight" />
+                    <g:FlowPanel ui:field="projectVersion" styleName="versionProjectStyle" />
+                </g:HTMLPanel>
+            </g:south>
+        </g:DockLayoutPanel>
+    </g:HTMLPanel>
 
 </ui:UiBinder> 
