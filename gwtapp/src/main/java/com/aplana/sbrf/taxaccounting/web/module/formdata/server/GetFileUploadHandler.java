@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class GetFileUplodHandler extends
+public class GetFileUploadHandler extends
         AbstractActionHandler<GetFileUpload, GetFileUploadResult> {
 
     @Autowired
@@ -35,7 +35,7 @@ public class GetFileUplodHandler extends
     @Autowired
     private SecurityService securityService;
 
-    public GetFileUplodHandler() {
+    public GetFileUploadHandler() {
         super(GetFileUpload.class);
     }
 
