@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
-import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -19,7 +19,7 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
     }
 
     @Autowired
-    private DepartmentFormTypeService departmentFormTypeService;
+    private SourceService departmentFormTypeService;
 
     @Override
     public GetTableDataResult execute(GetTableDataAction action, ExecutionContext executionContext) throws ActionException {

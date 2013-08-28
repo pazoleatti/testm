@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetOpenDataAction;
@@ -31,7 +31,7 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
     private SecurityService securityService;
 
     @Autowired
-    DepartmentFormTypeService departmentFormTypService;
+    SourceService departmentFormTypService;
 
     public GetOpenDataHandler() {
         super(GetOpenDataAction.class);

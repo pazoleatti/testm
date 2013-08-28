@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentTreeDataAction;
@@ -29,7 +29,7 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
     private SecurityService securityService;
 
     @Autowired
-    DepartmentFormTypeService departmentFormTypService;
+    SourceService departmentFormTypService;
 
     public GetDepartmentTreeDataHandler() {
         super(GetDepartmentTreeDataAction.class);
@@ -55,7 +55,7 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
         Set<Integer> avSet = new HashSet<Integer>();
         if (!currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // Первичные и консолид. отчеты
-            List<DepartmentFormType> formSrcList =  departmentFormTypService.getDepartmentFormSources(currUser.getDepartmentId(), action.getTaxType());
+            List<DepartmentFormType> formSrcList =  departmentFormTypService.getDFTSourcesByDepartment(currUser.getDepartmentId(), action.getTaxType());
 
             for (DepartmentFormType ft : formSrcList) {
                 avSet.add(ft.getDepartmentId());

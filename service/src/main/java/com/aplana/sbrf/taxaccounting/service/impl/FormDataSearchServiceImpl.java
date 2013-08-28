@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.util.FormTypeAlphanumericComparator;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	private FormTypeDao formTypeDao;
 
     @Autowired
-    private DepartmentFormTypeDao departmentFormTypeDao;
+    private SourceService sourceService;
 
 	@Override
 	public PagingResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
@@ -129,10 +130,11 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		
 		// Собираем информацию о налоговых формах к которым имеет доступ пользователь
 		// К формам своего подразделения имеет доступ и контролёр и оператор
-		List<DepartmentFormType> dfts = departmentFormTypeDao.getByTaxType(userInfo.getUser().getDepartmentId(), taxType);
+		List<DepartmentFormType> dfts = sourceService.getDFTByDepartment(userInfo.getUser().getDepartmentId(), taxType);
+		
 		// Контролёр, вдобавок, имеет доступ к формам, которые являются источниками для форм и деклараций его подразделения 
 		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
-			dfts.addAll(departmentFormTypeDao.getDepartmentSources(userInfo.getUser().getDepartmentId(), taxType));
+			dfts.addAll(sourceService.getDFTSourcesByDepartment(userInfo.getUser().getDepartmentId(), taxType));
 		}
 		
 		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();

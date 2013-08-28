@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpenDataAction;
@@ -32,7 +32,7 @@ public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAct
     private SecurityService securityService;
 
     @Autowired
-    DepartmentFormTypeService departmentFormTypService;
+    SourceService departmentFormTypService;
 
     public GetBSOpenDataHandler() {
         super(GetBSOpenDataAction.class);
@@ -61,7 +61,7 @@ public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAct
         Set<Integer> avSet = new HashSet<Integer>();
         if (!currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // Первичные и консолид. отчеты для налога на прибыль
-            List<DepartmentFormType> formIncomeSrcList = departmentFormTypService.getDepartmentFormSources(currUser.getDepartmentId(), TaxType.INCOME);
+            List<DepartmentFormType> formIncomeSrcList = departmentFormTypService.getDFTSourcesByDepartment(currUser.getDepartmentId(), TaxType.INCOME);
 
             for (DepartmentFormType ft : formIncomeSrcList) {
                 avSet.add(ft.getDepartmentId());
