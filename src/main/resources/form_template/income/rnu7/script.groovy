@@ -334,7 +334,9 @@ def logicalCheck(def useLog) {
             m.put(5, row.docNumber);
             m.put(6, row.docDate);
             if (uniq456.contains(m)) {
-                logger.error("Несколько строк %s содержат записи в налоговом учете для балансового счета=%s, документа № %s от %s", row.balance.toSting(), row.code.toString(), row.docNumber.toString(), row.docDate.toString())
+                def index = ((Integer)(getRows(data).indexOf(row) + 1))
+                SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
+                logger.error("Для строки $index имеется  другая запись в налоговом учете с аналогичными значениями балансового счета=%s, документа № %s от %s.", getNumberAttribute(row.code).toString(), row.docNumber.toString(), dateFormat.format(row.docDate))
             }
             uniq456.add(m)
 
@@ -356,12 +358,12 @@ def logicalCheck(def useLog) {
 
             def checkSumm = checkDate(row)
 
-            if (checkSumm == null) {
+            /*if (checkSumm == null) {
                 logger.error('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете за последние 3 года не проходила!')
                 return false
             } else if (checkSumm >= row.ruble) {
                 logger.warn('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-7 в <отчетный период> отчетном периоде.')
-            }
+            }*/
 
 
 
@@ -756,6 +758,15 @@ void deleteRow(def data, def row) {
  */
 def getCodeAttribute(def id) {
     return refBookService.getStringValue(27, id, 'CODE')
+}
+
+/**
+ * Получить атрибут 130 - "Код налогового учёта" справочник 27 - "Классификатор расходов Сбербанка России для целей налогового учёта".
+ *
+ * @param id идентификатор записи справочника
+ */
+def getNumberAttribute(def id) {
+    return refBookService.getStringValue(27, id, 'NUMBER')
 }
 
 /**

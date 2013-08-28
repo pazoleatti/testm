@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
+import java.text.SimpleDateFormat
+
 /**
  * 6.3	(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения метода начисления
  */
@@ -285,7 +287,9 @@ void logicalCheck(DataRowHelper form) {
             m.put(5, row.docNumber);
             m.put(6, row.docDate);
             if (uniq456.contains(m)) {
-                logger.error("Несколько строки %s содержат записи в налоговом учете для балансового счета=%s, документа № %s от %s", row.number.toSting(), row.code.toString(), row.docNumber.toString(), row.docDate.toString())
+                def index = ((Integer)(form.allCached.indexOf(row) + 1))
+                SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
+                logger.error("Для строки $index имеется  другая запись в налоговом учете с аналогичными значениями балансового счета=%s, документа № %s от %s.", getNumberAttribute(row.code).toString(), row.docNumber.toString(), dateFormat.format(row.docDate))
             }
             uniq456.add(m)
 
@@ -717,4 +721,13 @@ void checkCreation() {
     if (findForm != null) {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
+}
+
+/**
+ * Получить атрибут 130 - "Код налогового учёта" справочник 27 - "Классификатор расходов Сбербанка России для целей налогового учёта".
+ *
+ * @param id идентификатор записи справочника
+ */
+def getNumberAttribute(def id) {
+    return refBookService.getStringValue(28, id, 'NUMBER')
 }
