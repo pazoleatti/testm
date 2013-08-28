@@ -671,7 +671,7 @@ void addNewRow() {
 }
 
 def recalculateNumbers(){
-    index = 1
+    def index = 1
     def data = dataRowsHelper
     def rows = data.getAllCached()
     rows.each{row->
