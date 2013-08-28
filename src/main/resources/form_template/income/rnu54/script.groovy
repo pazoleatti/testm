@@ -3,6 +3,7 @@ package form_template.income.rnu54
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
@@ -226,7 +227,12 @@ def logicalCheck(def useLog) {
     if (!getRows(data).isEmpty()) {
 
         // список проверяемых столбцов (графа 12, 13)
-        def requiredColumns = ['outcome269st', 'outcomeTax']
+        // + добавил проверку редактируемых графов (1..10 ) потому что без них невозможен расчет
+        def requiredColumns = ['tadeNumber', 'securityName', 'currencyCode',
+                'nominalPriceSecurities', 'salePrice', 'acquisitionPrice',
+                'part1REPODate', 'part2REPODate',
+                // графа 12, 13
+                'outcome269st', 'outcomeTax']
 
         /** Отчетная дата. */
         def reportDate = getReportDate()
@@ -250,13 +256,13 @@ def logicalCheck(def useLog) {
                 hasTotalRow = true
                 continue
             }
-            def currency = getCurrency(row.currencyCode)
-            course= getCourse(row.currencyCode,reportDate)
-
             // 1. Обязательность заполнения поля графы 12 и 13
-            if (!checkRequiredColumns(row, requiredColumns, true)) {
+            if (!checkRequiredColumns(row, requiredColumns, useLog)) {
                 return false
             }
+
+            def currency = getCurrency(row.currencyCode)
+            course= getCourse(row.currencyCode,reportDate)
 
             // 2. Проверка даты первой части РЕПО (графа 7)
             if (row.part1REPODate > reportDate) {
@@ -439,11 +445,8 @@ void consolidation() {
  * Проверка при создании формы.
  */
 void checkCreation() {
-    // отчётный период
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-
     //проверка периода ввода остатков
-    if (reportPeriod != null && reportPeriod.isBalancePeriod()) {
+    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
         logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
         return
     }
@@ -489,16 +492,20 @@ void importData() {
         addData(xml)
 
         // расчитать и проверить
-        calc()
-        logicalCheck(false)
-        checkNSI()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+            logicalCheck(false)
+            checkNSI()
+        }
     } catch(Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка!')
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
     }
     // откатить загрузку если есть ошибки
     if (logger.containsLevel(LogLevel.ERROR)) {
         data.clear()
         data.insert(rowsOld, 1)
+    } else {
+        logger.info('Данные загружены')
     }
     data.commit()
 }
@@ -598,7 +605,11 @@ def getSum(def columnAlias) {
     def data = getData(formData)
     def from = 0
     def rows = getRows(data)
-    def to = (rows.get(rows.size()-1)!=null && rows.get(rows.size()-1).getAlias()!=null)?rows.size() - 2:rows.size() - 1
+    if (rows.isEmpty()) {
+        return 0
+    }
+    def lastRow = rows.get(rows.size() - 1)
+    def to = (lastRow.getAlias() == null ? rows.size() - 1 : rows.size() - 2)
     if (from > to) {
         return 0
     }
@@ -838,8 +849,6 @@ def getCourse(def currency, def date) {
  * @param xml данные
  */
 void addData(def xml) {
-    def data = getData(formData)
-
     def tmp
     def indexRow = 0
     def newRows = []
@@ -915,11 +924,10 @@ void addData(def xml) {
             }
         }
     }
+    def data = getData(formData)
     data.clear()
-    newRows.each { newRow ->
-        insert(data, newRow)
-    }
-    logger.info('Данные загружены')
+    data.insert(newRows, 1)
+    data.commit()
 }
 
 /**
