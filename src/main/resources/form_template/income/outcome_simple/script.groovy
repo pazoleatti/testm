@@ -4,9 +4,11 @@ import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
+import javax.script.ScriptException
 import java.text.SimpleDateFormat
 
 /**
@@ -16,47 +18,48 @@ import java.text.SimpleDateFormat
  */
 
 switch (formDataEvent) {
-    // создать
-    case FormDataEvent.CREATE :
+// создать
+    case FormDataEvent.CREATE:
         checkCreation()
         break
-    // расчитать
-    case FormDataEvent.CALCULATE :
+// расчитать
+    case FormDataEvent.CALCULATE:
         checkAndCalc()
         save(getData(formData))
         break
-    // обобщить
-    case FormDataEvent.COMPOSE :
+// обобщить
+    case FormDataEvent.COMPOSE:
         isBank() ? consolidationBank() : consolidationSummary()
         break
-    // проверить
-    case FormDataEvent.CHECK :
+// проверить
+    case FormDataEvent.CHECK:
         checkAndCalc()
         //testFillForm()
         break
-    // проверить при переводе в утверждена
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :
+// проверить при переводе в утверждена
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:
         checkAndCalc()
         break
-    // принять из утверждена
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED :
+// принять из утверждена
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED:
         checkAndCalc()
         break
-    // принять из создана
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :
+// принять из создана
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
         checkAndCalc()
-        checkDeclarationBankOnAcceptance()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            checkDeclarationBankOnAcceptance()
+        }
         break
-    // вернуть из принята в создана
-    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED :
+// вернуть из принята в создана
+    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
         checkDeclarationBankOnCancelAcceptance()
         break
-    // после вернуть из "Принята" в "Утверждена"
-    case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED :
+// после вернуть из "Принята" в "Утверждена"
+    case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED:
         checkDeclarationBankOnCancelAcceptance()
         break
 }
-
 
 // графа  1 - consumptionTypeId
 // графа  2 - consumptionGroup
@@ -78,7 +81,9 @@ switch (formDataEvent) {
  */
 void checkAndCalc() {
     calculationBasicSum()
-    calculationControlGraphs()
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        calculationControlGraphs()
+    }
 }
 
 /**
@@ -138,11 +143,11 @@ void calculationControlGraphs() {
             continue
         }
         //Строки 213-217 расчет 8-й графы
-        if (row.getAlias() in ['R213','R214','R215','R216', 'R217']) {
+        if (row.getAlias() in ['R213', 'R214', 'R215', 'R216', 'R217']) {
             def formDataRNU14 = getFormDataRNU14()
             if (formDataRNU14 != null) {
-                for (def rowRNU14 : getData(formDataRNU14).getAllCached()){
-                    if(row.consumptionTypeId == rowRNU14.knu){
+                for (def rowRNU14 : getData(formDataRNU14).getAllCached()) {
+                    if (row.consumptionTypeId == rowRNU14.knu) {
                         row.rnu5Field5Accepted = rowRNU14.overApprovedNprms
                     }
                 }
@@ -176,7 +181,7 @@ void calculationControlGraphs() {
         // графа 13
         def income102 = income102Dao.getIncome102(formData.reportPeriodId, row.accountingRecords)
         if (income102 == null || income102.isEmpty()) {
-            income102NotFound += getIndex(row)
+            income102NotFound += getIndex(row) + 1
             tmp = 0
         } else {
             tmp = (income102[0] != null ? income102[0].getTotalSum() : 0)
@@ -261,7 +266,7 @@ def consolidationBank() {
 
     // очистить форму
     data.getAllCached().each { row ->
-        ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias->
+        ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
             row.getCell(alias).setValue(null)
         }
     }
@@ -303,7 +308,7 @@ def consolidationSummary() {
     }
     // очистить форму
     getRows(data).each { row ->
-        ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias->
+        ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
             row.getCell(alias).setValue(null)
         }
     }
@@ -352,8 +357,8 @@ def consolidationSummary() {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
             switch (child.formType.id) {
-                // рну 7
-                case 311 :
+            // рну 7
+                case 311:
                     ([3, 12] + (15..35) + (38..49) + (51..54) + (56..58) + (62..78) + (91..95) + (98..101) +
                             (103..106) + (181..183) + (190..194) + [199, 204, 205] + (207..211)).each {
                         def alias = 'R' + it
@@ -382,7 +387,7 @@ def consolidationSummary() {
                     break
 
             // рну 5
-                case 317 :
+                case 317:
                     ((2..106) + (109..211)).each {
                         def alias = 'R' + it
                         def row = getRowByAlias(data, alias)
@@ -406,8 +411,6 @@ def consolidationSummary() {
     data.commit()
     logger.info('Формирование сводной формы уровня обособленного подразделения прошло успешно.')
 }
-
-
 
 /*
  * Вспомогательные методы.
@@ -444,12 +447,12 @@ def isTerBank() {
  */
 def getSum(String columnAlias, String rowFromAlias, String rowToAlias) {
     def data = getData(formData)
-    def from = data.getDataRowIndex(data.getAll(),rowFromAlias) + 1
+    def from = data.getDataRowIndex(data.getAll(), rowFromAlias) + 1
     def to = data.getDataRowIndex(data.getAll(), rowToAlias) - 1
     if (from > to) {
         return 0
     }
-    return summ(formData, data.getAll(), new ColumnRange(columnAlias,  from, to))
+    return summ(formData, data.getAll(), new ColumnRange(columnAlias, from, to))
 }
 
 /**
@@ -571,9 +574,9 @@ def getValue(def value) {
 /**
  * Функция заполнения тестовыми данными
  */
-def testFillForm(){
+def testFillForm() {
     def data = getData(formData)
-    data.getAllCached().each{ row ->
+    data.getAllCached().each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
             cell = row.getCell(alias)
             if (cell.isEditable() && (cell.getValue() == null || cell.getValue() == '')) {
@@ -641,7 +644,7 @@ void deleteRow(def data, def row) {
  * @param data данные нф (helper)
  */
 def hasTotal(def data) {
-    for (def row: getRows(data)) {
+    for (def row : getRows(data)) {
         if (row.getAlias() == 'total') {
             return true
         }
@@ -686,13 +689,13 @@ def getRecordId(def refDataProvider, def value) {
 def getValue(def record, def alias) {
     def value = record.get(alias)
     switch (value.getAttributeType()) {
-        case RefBookAttributeType.DATE :
+        case RefBookAttributeType.DATE:
             return value.getDateValue()
-        case RefBookAttributeType.NUMBER :
+        case RefBookAttributeType.NUMBER:
             return value.getNumberValue()
-        case RefBookAttributeType.STRING :
+        case RefBookAttributeType.STRING:
             return value.getStringValue()
-        case RefBookAttributeType.REFERENCE :
+        case RefBookAttributeType.REFERENCE:
             return value.getReferenceValue()
     }
     return null
@@ -718,7 +721,7 @@ def getSumForColumn5or6or8(def form, def value1, def value2, def alias1, def ali
     def tmpValueB
     getRows(data).each { row ->
         tmpValueB = (row.getCell(alias2).getValue() ?
-                refBookService.getStringValue(27, row.getCell(alias2).getValue(), 'NUMBER') : null)
+            refBookService.getStringValue(27, row.getCell(alias2).getValue(), 'NUMBER') : null)
 
         if (value1 == row.getCell(alias1).getValue() && tmpValueA == tmpValueB) {
             sum += (row.getCell(resultAlias).getValue() ?: 0)
