@@ -50,7 +50,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 			HasUiHandlers<PeriodsUiHandlers> {
 		void setTitle(String title);
 		void setTableData(List<TableRow> data);
-		void setDepartmentPickerEnable(boolean enable);
 		void setFilterData(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, int yearFrom, int yearTo);
 		int getFromYear();
 		int getToYear();
@@ -62,7 +61,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	private final TaPlaceManager placeManager;
 	private final DispatchAsync dispatcher;
 	protected final OpenDialogPresenter openDialogPresenter;
-	private List<Department> departments;
 
 	@Inject
 	public PeriodsPresenter(final EventBus eventBus, final MyView view,
@@ -134,10 +132,9 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 						PeriodsPresenter.this.taxType = result.getTaxType();
 						getView().setTitle(taxType.getName() + " / Ведение периодов");
 						PeriodsPresenter.this.openDialogPresenter.setTaxType(result.getTaxType());
-						departments = result.getDepartments();
-						getView().setFilterData(departments, result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), result.getYearFrom(), result.getYearTo());
+						getView().setFilterData(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), result.getYearFrom(), result.getYearTo());
 						getView().setReadOnly(result.isReadOnly());
-						openDialogPresenter.setDepartments(departments, result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), result.isEnableDepartmentPicker());
+						openDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), result.isEnableDepartmentPicker());
 						openDialogPresenter.setYear(result.getCurrentYear());
 						find();
 					}

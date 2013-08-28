@@ -149,6 +149,9 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		}
 
 		// Подразделение пользователя должно быть доступно
+		// Этот викс пришлось сделать для Ведения периодов.
+		// Для поиска форм департаметнт текущего подразделения сюда попадает, т.к. ему должны быть назначены формы. 
+		// А если они не назначены?
 		departmentIds.add(userInfo.getUser().getDepartmentId());
 
 		result.setDepartmentIds(departmentIds);

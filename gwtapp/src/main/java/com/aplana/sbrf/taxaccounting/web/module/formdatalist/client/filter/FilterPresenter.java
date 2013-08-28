@@ -94,12 +94,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 					@Override
 					public void onSuccess(GetFilterDataResult result) {
 						FormDataFilterAvailableValues filterValues = result.getFilterValues();
-						if(filterValues.getDepartmentIds() == null){
-							//Контролер УНП
-							getView().setDepartmentsList(result.getDepartments(), convertDepartmentsToIds(result.getDepartments()));
-						} else {
-							getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
-						}
+						getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
 						getView().setKindList(fillFormKindList(filterValues.getKinds()));
 						getView().setFormTypesMap(fillFormTypesMap(filterValues.getFormTypes()));
 						getView().setTaxPeriods(result.getTaxPeriods());

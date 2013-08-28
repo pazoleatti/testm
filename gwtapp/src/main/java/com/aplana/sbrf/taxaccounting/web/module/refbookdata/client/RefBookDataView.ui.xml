@@ -28,6 +28,9 @@
     <g:DockLayoutPanel>
         <g:north size="100">
             <g:HorizontalPanel>
+                <g:cell width="25px">
+                    <style:LinkAnchor title="Перейти к списку справочников" img="resources/img/arrow-left-24.png" href="#!refbooklist"/>
+                </g:cell>
                 <g:cell width="335px">
                     <g:VerticalPanel width="310px" addStyleNames="{style.titlePanel}">
                         <g:cell height="45px">
@@ -59,11 +62,13 @@
                     </g:DockLayoutPanel>
                 </g:center>
                 <g:east size="600">
-                    <g:VerticalPanel ui:field="content">
+                    <g:VerticalPanel>
                         <g:HorizontalPanel>
                             <g:Button ui:field="save">Сохранить</g:Button>
                             <g:Button ui:field="cancel">Отмена</g:Button>
                         </g:HorizontalPanel>
+                        <g:VerticalPanel ui:field="content">
+                        </g:VerticalPanel>
                     </g:VerticalPanel>
                 </g:east>
             </g:SplitLayoutPanel>

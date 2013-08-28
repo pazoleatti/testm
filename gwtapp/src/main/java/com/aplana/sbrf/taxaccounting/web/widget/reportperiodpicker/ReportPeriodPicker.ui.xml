@@ -2,7 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <g:HTMLPanel>
         <g:HorizontalPanel >
-            <g:TextBox  enabled="false" ui:field="selected" width="170px"/>
+            <g:TextBox enabled="false" ui:field="selected" width="170px"/>
             <g:Button ui:field="selectButton" text="..."/>
         </g:HorizontalPanel>
     </g:HTMLPanel>

@@ -19,6 +19,7 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,14 +31,19 @@ public class RefBookListPresenter extends Presenter<RefBookListPresenter.MyView,
         RefBookListPresenter.MyProxy> implements RefBookListUiHandlers {
 
     @ProxyCodeSplit
-    @NameToken(RefBookListTokens.refbookList)
+    @NameToken(RefBookListTokens.REFBOOK_LIST)
     public interface MyProxy extends ProxyPlace<RefBookListPresenter>, Place {
     }
 
     private final DispatchAsync dispatcher;
+    private Type filterType;
+    private String filterText;
 
     public interface MyView extends View, HasUiHandlers<RefBookListUiHandlers> {
-        void init(List<TableModel> tableData);
+        void setTableData(List<TableModel> tableData);
+        String getFilter();
+        boolean isInternalFilter();
+        boolean isExternalFilter();
     }
 
     @Inject
@@ -51,11 +57,28 @@ public class RefBookListPresenter extends Presenter<RefBookListPresenter.MyView,
     @Override
     public void prepareFromRequest(final PlaceRequest request) {
         super.prepareFromRequest(request);
-        init(null, null);
+        loadData(filterType, filterText);
     }
 
     @Override
-    public void init(Type type, String filter) {
+    public void onFindClicked() {
+        filterText = getView().getFilter();
+        if (getView().isExternalFilter()) {
+            filterType = Type.EXTERNAL;
+        } else if (getView().isInternalFilter()) {
+            filterType = Type.INTERNAL;
+        } else {
+            filterType = null;
+        }
+        loadData(filterType, filterText);
+    }
+
+    @Override
+    public void onLoadClicked() {
+        // TODO загрузка справочников http://conf.aplana.com/pages/viewpage.action?pageId=9572224
+    }
+
+    private void loadData(Type type, String filter) {
         GetTableDataAction action = new GetTableDataAction();
         action.setType(type);
         action.setFilter(filter);
@@ -64,9 +87,27 @@ public class RefBookListPresenter extends Presenter<RefBookListPresenter.MyView,
                         new AbstractCallback<GetTableDataResult>() {
                             @Override
                             public void onSuccess(GetTableDataResult result) {
-                                getView().init(result.getTableData());
+                                List<TableModel> tableData = result.getTableData();
+                                if (tableData != null && tableData.size() > 0) {
+                                    getView().setTableData(tableData);
+                                } else {
+                                    getView().setTableData(new ArrayList<TableModel>());
+                                }
+                                getProxy().manualReveal(RefBookListPresenter.this);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                getProxy().manualRevealFailed();
                             }
                         }, this));
     }
+
+    @Override
+    public boolean useManualReveal() {
+        return true;
+    }
+
+
 
 }

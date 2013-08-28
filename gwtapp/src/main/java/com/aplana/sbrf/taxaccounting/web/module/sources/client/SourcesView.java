@@ -196,7 +196,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			availableDepartments.add(department.getId());
 		}
 		departmentReceiverPicker.setAvalibleValues(departments, availableDepartments);
+		departmentReceiverPicker.setValue(new ArrayList<Integer>());
 		departmentSourcePicker.setAvalibleValues(departments, availableDepartments);
+		departmentSourcePicker.setValue(new ArrayList<Integer>());
 	}
 
 	public void setupReceiversTables() {
@@ -328,6 +330,16 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			}
 		};
 		indexColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+		
+		TextColumn<CheckedDepartmentFormType> departmentColumn = new TextColumn<CheckedDepartmentFormType>() {
+			@Override
+			public String getValue(CheckedDepartmentFormType object) {
+				return "" + object.getDepartmentFormType().getDepartmentId();
+			}
+		};
+		departmentColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+		
+		indexColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
 		TextColumn<CheckedDepartmentFormType> receiverSourcesKindColumn = new TextColumn<CheckedDepartmentFormType>() {
 			@Override
@@ -355,6 +367,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		receiverSourcesTable.setColumnWidth(checkBoxColumn, 40, Style.Unit.PX);
 		receiverSourcesTable.addColumn(indexColumn, "№ пп");
 		receiverSourcesTable.setColumnWidth(indexColumn, 40, Style.Unit.PX);
+		receiverSourcesTable.addColumn(departmentColumn, "Подразделение");
+		receiverSourcesTable.setColumnWidth(departmentColumn, 200, Style.Unit.PX);
 		receiverSourcesTable.addColumn(receiverSourcesKindColumn, "Тип налоговой формы");
 		receiverSourcesTable.setColumnWidth(receiverSourcesKindColumn, 150, Style.Unit.PX);
 		receiverSourcesTable.addColumn(receiverSourcesTypeColumn, "Вид налоговой формы");

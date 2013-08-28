@@ -42,26 +42,38 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public Map<Integer, Department> getRequiredForTreeDepartments(Set<Integer> availableDepartments) {
         // TODO использовать древовидный запрос см. getAllChildren()
-        Map<Integer, Department> departmentSet = new HashMap<Integer, Department>();
-        for (Integer departmentId : availableDepartments) {
-            departmentSet.put(departmentId, getDepartment(departmentId));
-        }
-        for (Integer departmentId : availableDepartments) {
-            Integer searchFor = departmentId;
-            while (true) {
-                Department department = getParent(searchFor);
-                if (department == null) {
-                    break;
-                }
-                if (department.getParentId() == null || departmentSet.containsKey(department.getParentId())) {
-                    departmentSet.put(department.getId(), department);
-                    break;
-                } else {
-                    departmentSet.put(department.getId(), department);
-                    searchFor = department.getParentId();
-                }
-            }
-        }
+    	Map<Integer, Department> departmentSet = new HashMap<Integer, Department>();
+    	
+    	// Если NULL то считаем что доступны все департаменты
+    	if (availableDepartments == null){
+    		
+    		for (Department department : this.listAll()) {
+    			departmentSet.put(department.getId(), department);
+			};
+			
+    	} else { //Иначе рассчитываем необходимые для отображения
+    		
+	        for (Integer departmentId : availableDepartments) {
+	            departmentSet.put(departmentId, getDepartment(departmentId));
+	        }
+	        for (Integer departmentId : availableDepartments) {
+	            Integer searchFor = departmentId;
+	            while (true) {
+	                Department department = getParent(searchFor);
+	                if (department == null) {
+	                    break;
+	                }
+	                if (department.getParentId() == null || departmentSet.containsKey(department.getParentId())) {
+	                    departmentSet.put(department.getId(), department);
+	                    break;
+	                } else {
+	                    departmentSet.put(department.getId(), department);
+	                    searchFor = department.getParentId();
+	                }
+	            }
+	        }
+	        
+    	}
         return departmentSet;
     }
 

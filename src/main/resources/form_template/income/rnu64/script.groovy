@@ -3,6 +3,8 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 /**
  * РНУ-64
@@ -23,7 +25,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
  * Выполнение действий по событиям
  *
  */
-switch (formDataEvent){
+switch (formDataEvent) {
 // Инициирование Пользователем проверки данных формы в статусе «Создана», «Подготовлена», «Утверждена», «Принята»
     case FormDataEvent.CHECK:
         //1. Логические проверки значений налоговой формы
@@ -94,20 +96,24 @@ switch (formDataEvent){
         break
 
     case FormDataEvent.CALCULATE:
+        form = getData(formData)
+        deleteAllStatic(form)
+        sort()
         fillForm()
         logicalCheck()
-        sort()
         break
 
     case FormDataEvent.COMPOSE:
         consolidation()
+        deleteAllStatic(form)
+        sort()
         fillForm()
         logicalCheck()
         // для сохранения изменений приемников
         getData(formData).commit()
         break
-    // после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+// после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
         logicalCheck()
         break
 }
@@ -115,7 +121,7 @@ switch (formDataEvent){
 /**
  * Добавление новой строки
  */
-def addNewRow(){
+def addNewRow() {
     def data = getData(formData)
     DataRow<Cell> newRow = formData.createDataRow()
     int index // Здесь будет позиция вставки
@@ -174,7 +180,7 @@ def addNewRow(){
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    getData(formData).insert(newRow,index+1)
+    getData(formData).insert(newRow, index + 1)
 }
 
 def log(String message, Object... args) {
@@ -199,21 +205,11 @@ def deleteRow() {
  * Заполнение полей формы
  * 6.1.2.3  Алгоритмы заполнения полей формы
  */
-def fillForm(){
+def fillForm() {
     def data = getData(formData)
-    // удаляем строки итого
-    def delRow = []
-    getRows(data).each { row ->
-        if (isTotalRow(row)) {
-            delRow += row
-        }
-    }
-    delRow.each { row ->
-        data.delete(row)
-    }
 
-    def i=1
-    getRows(data).each{ row ->
+    def i = 1
+    getRows(data).each { row ->
         if (isTotalRow(row)) {
             row.number = i++
         }
@@ -229,7 +225,7 @@ def fillForm(){
     newRowQuarter.costs = getQuarterTotal()
     newRowQuarter.setAlias("totalQuarter")
     setTotalStyle(newRowQuarter)
-    data.insert(newRowQuarter, getRows(data).size()+1)
+    data.insert(newRowQuarter, getRows(data).size() + 1)
 
     // строка Итого за текущий отчетный (налоговый) период
     def newRowTotal = formData.createDataRow()
@@ -239,22 +235,37 @@ def fillForm(){
     newRowTotal.costs = getTotalValue()
     newRowTotal.setAlias("total")
     setTotalStyle(newRowTotal)
-    data.insert(newRowTotal, getRows(data).size()+1)
+    data.insert(newRowTotal, getRows(data).size() + 1)
+}
+
+/**
+ * Удаляет все статические строки(ИТОГО) во всей форме
+ */
+void deleteAllStatic(DataRowHelper form) {
+    List<DataRow<Cell>> forDelete = new ArrayList<>();
+    for (row in form.allCached) {
+        if (row.getAlias() != null) {
+            forDelete.add(row)
+        }
+    }
+    for (row in forDelete) {
+        form.delete(row)
+    }
 }
 
 /**
  * Логические проверки
  */
-def logicalCheck(){
+def logicalCheck() {
     def data = getData(formData)
     def totalQuarterRow = null
     def totalRow = null
-    getRows(data).each{ row ->
+    getRows(data).each { row ->
         // Обязательность заполнения поля графы (с 1 по 6); фатальная; Поле ”Наименование поля” не заполнено!
-        if(!isTotalRow(row)){
-            ['number', 'date', 'part', 'dealingNumber', 'bondKind', 'costs'].each{alias ->
-                if (!isTotalRow(row) && (row[alias] == null || row[alias] == '')){
-                    logger.error('Поле ”'+row.getCell(alias).getColumn().getName()+'” не заполнено!')
+        if (!isTotalRow(row)) {
+            ['number', 'date', 'part', 'dealingNumber', 'bondKind', 'costs'].each { alias ->
+                if (!isTotalRow(row) && (row[alias] == null || row[alias] == '')) {
+                    logger.error('Поле ”' + row.getCell(alias).getColumn().getName() + '” не заполнено!')
                 }
             }
 
@@ -262,9 +273,9 @@ def logicalCheck(){
             reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
             // Проверка даты совершения операции и границ отчетного периода; фатальная; Дата совершения операции вне границ отчетного периода!
             if (!isTotalRow(row) && row.date != null && !(
-                    (reportPeriodStartDate.getTime().equals(row.date) || row.date.after(reportPeriodStartDate.getTime())) &&
+            (reportPeriodStartDate.getTime().equals(row.date) || row.date.after(reportPeriodStartDate.getTime())) &&
                     (reportPeriodEndDate.getTime().equals(row.date) || row.date.before(reportPeriodEndDate.getTime()))
-            )){
+            )) {
                 logger.error('Дата совершения операции вне границ отчетного периода!')
             }
 
@@ -275,29 +286,29 @@ def logicalCheck(){
             }
 
             // Проверка на нулевые значения; фатальная; Все суммы по операции нулевые!
-            if (row.costs == 0){
+            if (row.costs == 0) {
                 logger.error('Все суммы по операции нулевые!')
             }
             // Проверка актуальности поля «Часть сделки»; не фатальная;
-            if (row.part!=null && getPart(row.part)==null){
+            if (row.part != null && getPart(row.part) == null) {
                 logger.warn('Поле ”Часть сделки” указано неверно!');
             }
-        } else if (isMainTotalRow(row)){
+        } else if (isMainTotalRow(row)) {
             totalRow = row
-        } else if (isQuarterTotal(row)){
+        } else if (isQuarterTotal(row)) {
             totalQuarterRow = row
         }
     }
 
     // проверка на наличие итоговых строк, иначе будет ошибка
-    if (totalQuarterRow!=null || totalRow!=null) {
+    if (totalQuarterRow != null || totalRow != null) {
         // Проверка итоговых значений за текущий квартал; фатальная; Итоговые значения за текущий квартал рассчитаны неверно!
-        if (totalQuarterRow!=null && totalQuarterRow.costs != getQuarterTotal()) {
+        if (totalQuarterRow != null && totalQuarterRow.costs != getQuarterTotal()) {
             logger.error('Итоговые значения за текущий квартал рассчитаны неверно!')
         }
 
         // Проверка итоговых значений за текущий отчётный (налоговый) период; фатальная; Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!
-        if (totalRow!=null && totalRow.costs != getTotalValue()) {
+        if (totalRow != null && totalRow.costs != getTotalValue()) {
             logger.error('Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!')
         }
     }
@@ -309,10 +320,10 @@ def logicalCheck(){
  */
 void checkBeforeCreate() {
     // отчётный период
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    //def reportPeriod = reportPeriodService.get()
 
     //проверка периода ввода остатков
-    if (reportPeriod != null && reportPeriod.isBalancePeriod()) {
+    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
         logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
         return
     }
@@ -328,40 +339,40 @@ void checkBeforeCreate() {
 /**
  * Проверка является ли строка итововой за текущий квартал
  */
-def isQuarterTotal(row){
-    row.getAlias()=='totalQuarter'
+def isQuarterTotal(row) {
+    row.getAlias() == 'totalQuarter'
 }
 
 /**
  * Проверка является ли строка итововой (последняя строка)
  */
-def isMainTotalRow(row){
-    row.getAlias()=='total'
+def isMainTotalRow(row) {
+    row.getAlias() == 'total'
 }
 
 /**
  * Проверка является ли строка итововой (любой итоговой, т.е. за квартал, либо основной)
  */
-def isTotalRow(row){
-    return row.getAlias()=='total' || row.getAlias()=='totalQuarter'
+def isTotalRow(row) {
+    return row.getAlias() == 'total' || row.getAlias() == 'totalQuarter'
 }
 
 // функция возвращает итоговые значения за текущий квартал
-def getQuarterTotal(){
+def getQuarterTotal() {
     def data = getData(formData)
     def row6val = 0
-    getRows(data).each{ row->
-        if (!isTotalRow(row)){
-            row6val += row.costs?:0
+    getRows(data).each { row ->
+        if (!isTotalRow(row)) {
+            row6val += row.costs ?: 0
         }
     }
     row6val
 }
 
 // Функция возвращает итоговые значения за текущий отчётный (налоговый) период
-def getTotalValue(){
+def getTotalValue() {
     def data = getData(formData)
-    quarterRow = data.getDataRow(getRows(data),'totalQuarter')
+    quarterRow = data.getDataRow(getRows(data), 'totalQuarter')
     // возьмем форму за предыдущий отчетный период
     def prevQuarter = quarterService.getPrevReportPeriod(formData.reportPeriodId)
     if (prevQuarter != null) {
@@ -371,7 +382,7 @@ def getTotalValue(){
 
         if (prevQuarterFormData != null && prevQuarterFormData.state == WorkflowState.ACCEPTED) {
             prevQuarterData = getData(prevQuarterFormData)
-            def prevQuarterTotalRow = prevQuarterData.getDataRow(getRows(prevQuarterData),"total")
+            def prevQuarterTotalRow = prevQuarterData.getDataRow(getRows(prevQuarterData), "total")
             return quarterRow.costs + prevQuarterTotalRow.costs
         } else {
             //  Если предыдущей формы нет (либо она не принята)  то B = 0
@@ -405,18 +416,13 @@ void setRowIndex() {
  * @author Ivildanov
  */
 void sort() {
-    def data = getData(formData)
-    // сортировка
-    // 1 - Дата сделки
-    // 2 - Номер сделки
-    getRows(data).sort { a, b ->
-        if (a == null || isTotalRow(a)) return 0
-        int val = (a.date).compareTo(b.date)
-        if (val == 0) {
-            val = (a.dealingNumber ?: "").compareTo(b.dealingNumber ?: "")
+    data = getData(formData)
+    data.allCached.sort({ DataRow a, DataRow b ->
+        if ((a.date as Date).time == (b.date as Date).time) {
+            return Integer.valueOf(a.dealingNumber as String) <=> Integer.valueOf(b.dealingNumber as String)
         }
-        return val
-    }
+        return (a.date as Date).time <=> (b.date as Date).time
+    })
 }
 
 /**
@@ -477,9 +483,9 @@ void consolidation() {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                getRows(getData(source)).each { row->
+                getRows(getData(source)).each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        data.insert(row,getRows(data).size()+1)
+                        data.insert(row, getRows(data).size() + 1)
                     }
                 }
             }
@@ -514,7 +520,7 @@ def getRows(def data) {
  * Получить код части сделки
  */
 def getPart(def part) {
-    return refBookService.getNumberValue(60,part,'CODE');
+    return refBookService.getNumberValue(60, part, 'CODE');
 }
 
 /**

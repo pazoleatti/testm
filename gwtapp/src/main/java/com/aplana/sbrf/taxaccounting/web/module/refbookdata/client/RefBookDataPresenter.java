@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
-import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -62,7 +61,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		void addRowToEnd(RefBookDataRow newRow, boolean select);
 		Map<String, Object> getChangedValues();
 		void setRefBookNameDesc(String desc);
-	}
+        void resetRefBookElements();
+    }
 
 	@Inject
 	public RefBookDataPresenter(final EventBus eventBus, final MyView view, PlaceManager placeManager, final MyProxy proxy,
@@ -182,11 +182,14 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 						new AbstractCallback<GetRefBookTableDataResult>() {
 							@Override
 							public void onSuccess(GetRefBookTableDataResult result) {
+                                getView().resetRefBookElements();
 								getView().setTableColumns(result.getTableHeaders());
 								getView().createInputFields(result.getTableHeaders());
 								refBook = result.getTableHeaders();
 								getView().setRange(new Range(0, PAGE_SIZE));
 								getView().setRefBookNameDesc(result.getDesc());
+
+                                getProxy().manualReveal(RefBookDataPresenter.this);
 							}
 						}, this));
 
@@ -248,4 +251,9 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 							}, RefBookDataPresenter.this));
 		}
 	}
+
+    @Override
+    public boolean useManualReveal() {
+        return true;
+    }
 }

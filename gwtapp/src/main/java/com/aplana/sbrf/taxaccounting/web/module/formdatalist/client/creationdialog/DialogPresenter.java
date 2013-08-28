@@ -121,18 +121,10 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 					@Override
 					public void onSuccess(GetFilterDataResult result) {
 						FormDataFilterAvailableValues filterValues = result.getFilterValues();
-
-						if (filterValues.getDepartmentIds() == null) {
-							//Контролер УНП
-							getView().setAvalibleDepartments(result.getDepartments(), convertDepartmentsToIds(result.getDepartments()));
-						} else {
-							getView().setAvalibleDepartments(result.getDepartments(), filterValues.getDepartmentIds());
-						}
+						getView().setAvalibleDepartments(result.getDepartments(), filterValues.getDepartmentIds());
 						getView().setKindList(fillFilterList(filterValues.getKinds()));
 						getView().setFormTypeList(fillFilterList(filterValues.getFormTypes()));
-
 						getView().setAvalibleTaxPeriods(result.getTaxPeriods());
-
 						fillDepartmentsMap(result.getDepartments());
 						fillFormTypeMap(filterValues.getFormTypes());
 						currentReportPeriod = result.getCurrentReportPeriod();

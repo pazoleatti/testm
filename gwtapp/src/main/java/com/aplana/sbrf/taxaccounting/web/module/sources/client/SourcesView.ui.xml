@@ -70,7 +70,7 @@
             </g:cell>
 
             <g:cell verticalAlignment="bottom">
-                <style:LinkAnchor ui:field="cancelButton" text="Оменить назначение" />
+                <style:LinkAnchor ui:field="cancelButton" text="Отменить назначение" />
             </g:cell>
         </g:HorizontalPanel>
 

@@ -192,7 +192,7 @@ public class ReportPeriodPicker extends Composite implements HasEnabled{
 
 			addValueChangeHandler(checkBox);
 			ReportPeriodItem treeItem = new ReportPeriodItem(checkBox);
-			treeItem.setReportPeriod(reportPeriod);
+			//treeItem.setReportPeriod(reportPeriod);
 			reportPeriodItems.put(reportPeriod.getId(), treeItem);
             cbToReportPeriod.put(checkBox, reportPeriod);
 			taxPeriodNodes.get(lastTimeSelectedTaxPeriod).addItem(treeItem);
@@ -281,21 +281,25 @@ public class ReportPeriodPicker extends Composite implements HasEnabled{
 	}
 
 	private final class ReportPeriodItem extends TreeItem{
-		private ReportPeriod reportPeriod;
+		//private ReportPeriod reportPeriod;
 		private CheckBox widget;
 		private ReportPeriodItem(CheckBox widget){
 			super(widget);
 			this.widget = widget;
 		}
+		/*
 		public ReportPeriod getReportPeriod() {
 			return reportPeriod;
 		}
+		*/
 		public CheckBox getCheckBox() {
 			return widget;
 		}
+		/*
 		public void setReportPeriod(ReportPeriod reportPeriod) {
 			this.reportPeriod = reportPeriod;
 		}
+		*/
 	}
 
 	private void addValueChangeHandler(final CheckBox checkBox){

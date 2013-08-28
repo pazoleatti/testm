@@ -6,8 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -62,19 +60,14 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	    PeriodsGetFilterDataResult res = new PeriodsGetFilterDataResult();
 	    TAUserInfo userInfo = securityService.currentUserInfo();
 	    res.setTaxType(action.getTaxType());
+	    
+	    // Используем сервис для инициализации фильтра форм даты (в аналитике ссылка)
 	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(userInfo, action.getTaxType());
 
-	    if(filterValues.getDepartmentIds() == null) {
-		    //Контролер УНП
-		    res.setDepartments(departmentService.listAll());
-		    res.setAvalDepartments(null);
-	    } else {
-		    //Контролер или Оператор
-		    res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(filterValues
-				    .getDepartmentIds()).values()));
-		    res.setAvalDepartments(filterValues.getDepartmentIds());
-	    }
-	    
+
+	    res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(filterValues
+			    .getDepartmentIds()).values()));
+	    res.setAvalDepartments(filterValues.getDepartmentIds());	    
 
 	    
 	    RefBookDataProvider refBookDataProvider = refBookFactory
@@ -108,13 +101,8 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	    }
 	    Calendar current = Calendar.getInstance();
 	    res.setCurrentYear(current.get(Calendar.YEAR));
-	    
-	    System.out.println(res.getDepartments());
-	    System.out.println(res.getAvalDepartments());
-	    System.out.println(res.getSelectedDepartment() + " " + userInfo.getUser().getDepartmentId());
-	    
-	    
-	    // Только чтение
+
+	    // Только чтение для НЕ контролера УНП для федеральных налогов
 	    if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP) && (taxType == TaxType.INCOME) || (taxType == TaxType.VAT) || (taxType == TaxType.DEAL)){
 	    	res.setReadOnly(true);
 	    } else {

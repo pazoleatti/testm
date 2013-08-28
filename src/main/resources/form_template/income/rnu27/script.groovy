@@ -70,6 +70,9 @@ switch (formDataEvent) {
         // для сохранения изменений приемников
         getData(formData).commit()
         break
+    case FormDataEvent.IMPORT :
+        importData()
+        break
 }
 
 // графа 1  - число  number № пп
@@ -351,6 +354,65 @@ void checkCreation() {
 
     if (findForm != null) {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
+    }
+}
+
+/**
+ * Получение импортируемых данных.
+ */
+void importData() {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        return
+    }
+
+    def is = ImportInputStream
+    if (is == null) {
+        return
+    }
+
+    if (!fileName.contains('.r')) {
+        logger.error("Некорректное расширение файла")
+        return
+    }
+
+    logger.info('Начата загрузка файла ' + fileName)
+
+    def xmlString = importService.getData(is, fileName, 'cp866')
+    if (xmlString == null) {
+        return
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        return
+    }
+    // номер строки с которой брать данные (что бы пропустить шапку таблицы или лишнюю информацию)
+    def startRow = 0
+
+    // номер графы с которой брать данные (что бы пропустить нумерацию или лишнюю информацию)
+    def startColumn = 1
+
+    def totalColumns = [6:'prev', 7:'current', 9:'cost', 14:'costOnMarketQuotation', 15:'reserveCalcValue']
+
+    // добавить данные в форму
+    boolean canCommit = true
+    try{
+        def total = addData(xml)
+        if (total!=null) {
+            calc()
+            logicalCheck(false)
+            checkNSI()
+        } else {
+            logger.error("Нет итоговой строки.")
+            canCommit = false
+        }
+        logger.info('Закончена загрузка файла ' + fileName)
+    } catch(Exception e) {
+        canCommit = false
+    }
+    //в случае ошибок откатить изменения
+    if (!canCommit) {
+        logger.error("Загрузка файла $fileName завершилась ошибкой")
     }
 }
 
@@ -861,6 +923,175 @@ def getData(def formData) {
     }
     return null
 }
+/**
+ * Заполнить форму данными.
+ *
+ * @param xml данные
+ */
+boolean addData(def xml, def startRow, def startColumn) {
+    if (xml == null) {
+        return
+    }
+
+    Date date = reportDate
+
+    def cache = [:]
+    def data = getData(formData)
+
+    def total = formData.createDataRow()
+
+    def indexRow = -1
+    for (def row : xml.row) {
+        indexRow++
+
+        // пропустить шапку таблицы
+        if (indexRow <= startRow) {// || indexRow>20) {
+            continue
+        }
+
+        def newRow = getNewRow()
+
+        def indexCell = startColumn
+
+        newRow.rowNumber = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 2
+        newRow.issuer = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 3
+        newRow.regNumber = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 4
+        newRow.tradeNumber = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 5
+        newRow.currency = getRecords(15, 'CODE_2', row.cell[indexCell].text(), date, cache)
+        indexCell++
+
+        // графа 6
+        newRow.prev = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 7
+        newRow.current = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 8
+        newRow.reserveCalcValuePrev = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 9
+        newRow.cost = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 10
+        newRow.signSecurity = getRecords(62, 'CODE', row.cell[indexCell].text(), date, cache)
+        indexCell++
+
+        // графа 11
+        newRow.marketQuotation = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 12
+        newRow.rubCourse = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 13
+        newRow.marketQuotationInRub = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 14
+        newRow.costOnMarketQuotation = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 15
+        newRow.reserveCalcValue = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 16
+        newRow.reserveCreation = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 17
+        newRow.recovery = getNumber(row.cell[indexCell].text())
+
+        insert(data, newRow)
+    }
+
+    if (xml.rowTotal.size()==1)
+        for (def row : xml.rowTotal) {
+            // графа 6
+            total.prev = getNumber(row.cell[6].text())
+
+            // графа 7
+            total.current = getNumber(row.cell[7].text())
+
+            // графа 8
+
+            // графа 9
+            total.cost = getNumber(row.cell[9].text())
+
+            // графа 10
+
+            // графа 11
+
+            // графа 12
+
+            // графа 13
+
+            // графа 14
+            total.costOnMarketQuotation = getNumber(row.cell[14].text())
+
+            // графа 15
+            total.reserveCalcValue = getNumber(row.cell[15].text())
+        }
+    else {
+        return null
+    }
+
+    data.commit()
+    return total
+}
+
+/**
+ * Получить числовое значение.
+ *
+ * @param value строка
+ */
+def getNumber(def value) {
+    if (value == null) {
+        return null
+    }
+    def tmp = value.trim()
+    if ("".equals(tmp)) {
+        return null
+    }
+    // поменять запятую на точку и убрать пробелы
+    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
+    return new BigDecimal(tmp)
+}
+
+def getRecords(def ref_id, String code, String value, Date date, def cache) {
+    String filter = code + "= '"+ value.replaceAll(' ', '')+"'"
+    if (cache[ref_id]!=null) {
+        if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    if (records.size() == 1){
+        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        return cache[ref_id][filter]
+    }
+    logger.error("Не удалось определить элемент справочника!")
+    return null;
+}
+
 
 /**
  * Получить буквенный код валюты
@@ -874,6 +1105,16 @@ def getCurrency(def currencyCode) {
  */
 def getSign(def sign) {
     return  refBookService.getStringValue(62,sign,'CODE')
+}
+
+/**
+ * Вставить новыую строку в конец нф.
+ *
+ * @param data данные нф
+ * @param row строка
+ */
+void insert(def data, def row) {
+    data.insert(row, getRows(data).size() + 1)
 }
 
 /**
