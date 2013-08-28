@@ -21,10 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
@@ -140,9 +137,11 @@ public class FormDataServiceImpl implements FormDataService {
                                int departmentId, FormDataKind kind, int reportPeriodId, InputStream inputStream, String fileName) {
         if (formDataAccessService.canCreate(userInfo, formTemplateId, kind,
                 departmentId, reportPeriodId)) {
+            System.out.println("Validate signature.");
 	        boolean checkSuccess = true;
 	        if ((signDataPath != null) && !signDataPath.toString().equals(IGNORE_URL)) { //TODO временное решение с IGNORE_URL
 		        try {
+                    System.out.println("Validate signature success.");
 			        OutputStream outputStream =
 					        new FileOutputStream(new File(TMP_FILE_NAME));
 			        IOUtils.copy(inputStream, outputStream);
@@ -157,12 +156,22 @@ public class FormDataServiceImpl implements FormDataService {
 	        if (!checkSuccess) {
 		        throw new ServiceException("Файл не подписан.");
 	        }
+            System.out.println("After validate signature");
+            int i = 0;
+            try {
+                while ((i = inputStream.read()) != -1)
+                    System.out.print(i);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             FormData fd = formDataDao.getWithoutRows(formDataId);
             fd.initFormTemplateParams(formTemplateDao.get(formTemplateId));
             Map<String, Object> additionalParameters = new HashMap<String, Object>();
             additionalParameters.put("ImportInputStream", inputStream);
             additionalParameters.put("UploadFileName", fileName);
+            System.out.println("Script executing.");
             formDataScriptingService.executeScript(userInfo, fd, FormDataEvent.IMPORT, logger, additionalParameters);
+            System.out.println("After script executing.");
             formDataDao.save(fd); //TODO: Когда переделаем пейджинг,переделать на сохранение во временную таблицу (спросить у Марата)
 
             logBusinessService.add(formDataId, null, userInfo, FormDataEvent.IMPORT, null);

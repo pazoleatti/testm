@@ -18,9 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -48,6 +46,7 @@ public class UploadXlsController {
     public void processUpload(HttpServletRequest request, HttpServletResponse response)
             throws FileUploadException, IOException, JSONException {
 
+        System.out.println("Start upload.");
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
         List<FileItem> items = upload.parseRequest(request);
@@ -62,8 +61,9 @@ public class UploadXlsController {
                 jo.getInt(JSON_ATTR1), jo.getInt(JSON_ATTR2), jo.getInt(JSON_ATTR3),
                 FormDataKind.fromId(jo.getInt(JSON_ATTR4)), jo.getInt(JSON_ATTR5), fileItem.getInputStream(), fileItem.getName());
         IOUtils.closeQuietly(fileItem.getInputStream());*/
-        response.getWriter().printf("{uuid : \"%s\"}", blobDataService.createTemporary(fileItem.getInputStream(), fileItem.getName()));
-
+        String uuid = blobDataService.createTemporary(fileItem.getInputStream(), fileItem.getName());
+        response.getWriter().printf("{uuid : \"%s\"}", uuid);
+        System.out.println("Finish upload, uuid: " + uuid);
     }
 
     // пример использования SignService
