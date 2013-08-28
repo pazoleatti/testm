@@ -144,7 +144,7 @@ void logicalCheck() {
                 logger.error("Резерв сформирован неверно!")
             }
             // LC • Проверка на положительные значения при наличии созданного резерва
-            if (row.reserveCreation > 0 && (row.current < 0 || row.cost || row.costOnMarketQuotation < 0 || row.reserveCalcValue < 0)) {
+            if (row.reserveCreation > 0 && (row.current < 0 || row.cost < 0 || row.costOnMarketQuotation < 0 || row.reserveCalcValue < 0)) {
                 logger.warn("Резерв сформирован. Графы 7, 9, 14 и 15 неположительные!")
             }
             // LC • Проверка корректности заполнения РНУ
@@ -184,7 +184,7 @@ void logicalCheck() {
             }
             // LC Арифметическая проверка графы 13
             if (row.marketQuotation != null && row.rubCourse
-                    && row.marketQuotationInRub != round((BigDecimal) (row.marketQuotation * row.rubCourse), 2)) {
+                    && row.marketQuotationInRub != roundValue((BigDecimal) (row.marketQuotation * row.rubCourse), 2)) {
                 logger.error("Неверно рассчитана графа «Рыночная котировка одной ценной бумаги в рублях»!")
             }
 
@@ -203,7 +203,7 @@ void logicalCheck() {
 
             for (String check in checks) {
                 if (row.getCell(check).value != value.get(check)) {
-                    logger.error("Неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '') + "!")
+                    logger.error("Неверно рассчитана графа \"" + row.getCell(check).column.name.replace('%', '') + "\"!")
                 }
             }
 
@@ -248,17 +248,12 @@ void logicalCheck() {
     }
 
     // LC • Проверка корректности заполнения РНУ
-    if (formPrev != null) {
-        DataRow itogoPrev = dataPrev.getDataRow(dataPrev.getAllCached(),'itogo')
-        DataRow itogo = data.getDataRow(data.getAllCached(),'itogo')
+    if (dataPrev != null && checkAlias(getRows(dataPrev), 'itogo') && checkAlias(getRows(data), 'itogo')) {
+        DataRow itogoPrev = getRowByAlias(dataPrev,'itogo')
+        DataRow itogo = getRowByAlias(dataPrev,'itogo')
         if (itogo != null && itogoPrev != null && itogo.prev != itogoPrev.current) {
             logger.error("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 = «Итого» по графе 7 формы РНУ-27 за предыдущий отчётный период")
         }
-    }
-    // LC • Проверка корректности заполнения РНУ
-    if (formPrev != null) {
-        DataRow itogoPrev = dataPrev.getDataRow(dataPrev.getAllCached(),'itogo')
-        DataRow itogo = data.getDataRow(data.getAllCached(),'itogo')
         if (itogo != null && itogoPrev != null && itogo.reserveCalcValuePrev != itogoPrev.reserveCalcValue) {
             logger.error("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 8 = «Итого» по графе 15 формы РНУ-27 за предыдущий отчётный период")
         }
@@ -267,10 +262,10 @@ void logicalCheck() {
     /** LC Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
      * http://jira.aplana.com/browse/SBRFACCTAX-2609
      */
-    if (formPrev != null) {
+    if (dataPrev != null) {
         List notFound = []
         List foundMany = []
-        for (DataRow rowPrev in getData(formPrev).getAllCached()) {
+        for (DataRow rowPrev in getRows(dataPrev)) {
             if (rowPrev.getAlias() != null && rowPrev.reserveCalcValue > 0) {
                 int count = 0
                 for (DataRow row in getData(formData).getAllCached()) {
@@ -598,7 +593,7 @@ void calc() {
     def data = getData(formData)
     for (row in data.getAllCached()) {
         // Проверим чтобы человек рукамми ввёл всё что необходимо
-        for (alias in ['issuer', 'regNumber', 'tradeNumber']) {
+        for (alias in ['issuer', 'regNumber', 'tradeNumber', 'currency']) {
             if (row.getCell(alias).value == null) {
                 setError(row.getCell(alias).column)
             }
@@ -639,7 +634,7 @@ BigDecimal calc8(DataRow row) {
         }
     }
     if (tempCount == 1) {
-        return round(temp, 2)
+        return roundValue(temp, 2)
     } else {
         return (BigDecimal) 0
     }
@@ -670,7 +665,9 @@ BigDecimal calc12(DataRow row) {
 BigDecimal calc13(DataRow row) {
     // FIXME http://jira.aplana.com/browse/SBRFACCTAX-2995
     if (row.marketQuotation != null && row.rubCourse != null) {
-        return round((BigDecimal) (row.marketQuotation * row.rubCourse), 2)
+        return roundValue((BigDecimal) (row.marketQuotation * row.rubCourse), 2)
+    } else {
+        return null
     }
 }
 
@@ -679,11 +676,10 @@ BigDecimal calc13(DataRow row) {
  * @author ivildanov
  */
 BigDecimal calc14(DataRow row) {
-
     if (row.marketQuotationInRub == null) {
         return (BigDecimal) 0
     } else {
-        return round((BigDecimal) (row.current * row.marketQuotationInRub), 2)
+        return roundValue((BigDecimal) (row.current * row.marketQuotationInRub), 2)
     }
 }
 
@@ -720,7 +716,7 @@ BigDecimal calc15(DataRow row) {
 BigDecimal calc16(DataRow row) {
     if (row.reserveCalcValue!=null && row.reserveCalcValuePrev!=null) {
         if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
-            return round((BigDecimal) (row.marketQuotation - row.prev), 2)
+            return roundValue((BigDecimal) (row.reserveCalcValue - row.reserveCalcValuePrev), 2)
         } else {
             return (BigDecimal) 0
         }
@@ -747,7 +743,7 @@ BigDecimal calc17(DataRow row) {
             a = -a
         }
 
-        return round((BigDecimal) (a), 2)
+        return roundValue((BigDecimal) (a), 2)
     } else {
         return null;
     }
@@ -804,7 +800,7 @@ def getStaticRow(){
  * @param newScale
  * @return
  */
-BigDecimal round(BigDecimal value, int newScale) {
+BigDecimal roundValue(BigDecimal value, int newScale) {
     if (value != null) {
         return value.setScale(newScale, BigDecimal.ROUND_HALF_UP)
     } else {
@@ -1158,4 +1154,33 @@ def getNewRow() {
         row.getCell(it).setStyleAlias('Редактируемая')
     }
     return row
+}
+
+/**
+ * Проверить существования строки по алиасу.
+ *
+ * @param list строки нф
+ * @param rowAlias алиас
+ * @return <b>true</b> - строка с указанным алиасом есть, иначе <b>false</b>
+ */
+def checkAlias(def list, def rowAlias) {
+    if (rowAlias == null || rowAlias == "" || list == null || list.isEmpty()) {
+        return false
+    }
+    for (def row : list) {
+        if (row.getAlias() == rowAlias) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Получить строку по алиасу.
+ *
+ * @param data данные нф (helper)
+ * @param alias алиас
+ */
+def getRowByAlias(def data, def alias) {
+    return data.getDataRow(getRows(data), alias)
 }

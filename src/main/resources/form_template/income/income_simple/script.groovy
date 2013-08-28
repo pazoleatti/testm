@@ -360,6 +360,7 @@ def isEditableField(Cell cell){
  */
 def consolidation(){
     isBank()?consolidationBank():consolidationSummary()
+    getData(formData).save()
     getData(formData).commit()
 }
 
