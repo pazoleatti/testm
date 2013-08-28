@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttributeSerializable;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -33,9 +33,9 @@ public class GetRefBookDataHandler extends AbstractActionHandler<GetRefBookDataA
 		Map<String, RefBookValue> record = refBookDataProvider.getRecordData(action.getRecordId());
 
 
-		Map<String, RefBookAttributeSerializable> resultItems = new HashMap<String, RefBookAttributeSerializable>();
+		Map<String, RefBookValueSerializable> resultItems = new HashMap<String, RefBookValueSerializable>();
 		for (Map.Entry<String, RefBookValue> val : record.entrySet()) {
-			RefBookAttributeSerializable refBookAttributeSerializable = new RefBookAttributeSerializable();
+			RefBookValueSerializable refBookAttributeSerializable = new RefBookValueSerializable();
 			refBookAttributeSerializable.setAttributeType(val.getValue().getAttributeType());
 			switch (val.getValue().getAttributeType()) {
 					case NUMBER:

@@ -8,8 +8,8 @@ import java.util.Map;
 public interface RefBookDataUiHandlers extends UiHandlers {
 	void onCancelClicked();
 	void onAddRowClicked();
-	void onDeleteRowClicked(RefBookDataRow row);
-	void onSelectionChanged(Long recordId);
+	void onDeleteRowClicked();
+	void onSelectionChanged();
 	void onSaveClicked();
 	void onValueChanged();
 }

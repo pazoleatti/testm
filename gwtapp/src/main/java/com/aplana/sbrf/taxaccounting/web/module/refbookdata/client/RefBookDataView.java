@@ -2,7 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttributeSerializable;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.EditFormPresenter;
+//import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookAttributeSerializable;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
@@ -37,9 +38,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	@UiField
 	FlexiblePager pager;
 	@UiField
-	VerticalPanel content;
-	@UiField
-	Button save;
+	VerticalPanel contentPanel;
 	@UiField
 	Label titleDesc;
 
@@ -55,19 +54,31 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
 			public void onSelectionChange(SelectionChangeEvent event) {
-				if (getUiHandlers() != null) {
-					if (selectionModel.getSelectedObject().getRefBookRowId() == null) {
-						for (Map.Entry<String, HasValue> field : inputFields.entrySet()) {
-							field.getValue().setValue(null);
-						}
-					} else {
-						getUiHandlers().onSelectionChanged(selectionModel.getSelectedObject().getRefBookRowId());
-					}
-				}
+//				if (getUiHandlers() != null) {
+//					if (selectionModel.getSelectedObject().getRefBookRowId() == null) {
+//						for (Map.Entry<String, HasValue> field : inputFields.entrySet()) {
+//							field.getValue().setValue(null);
+//						}
+//					} else {
+						getUiHandlers().onSelectionChanged();
+//					}
+//				}
 			}
 		});
 		pager.setDisplay(refbookDataTable);
-		save.setEnabled(false);
+	}
+
+	@Override
+	public void setInSlot(Object slot, IsWidget content) {
+		if (slot == RefBookDataPresenter.TYPE_editFormPresenter) {
+			contentPanel.clear();
+			if (content!=null){
+				contentPanel.add(content);
+			}
+		}
+		else {
+			super.setInSlot(slot, content);
+		}
 	}
 
 	@Override
@@ -127,66 +138,67 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
 	@Override
 	public void createInputFields(final List<RefBookAttribute> headers) {
-		for (final RefBookAttribute header : headers) {
-			// Сформируем поля ввода
-			HorizontalPanel hp = new HorizontalPanel();
-			Label label = new Label(header.getName());
-			label.setWidth("300px");
-			hp.add(label);
-			HasValue inputWidget;
-			switch (header.getAttributeType()) {
-				case STRING:
-					inputWidget = new TextBox();
-					break;
-				case DATE:
-					inputWidget = new CustomDateBox();
-					break;
-				case NUMBER:
-					inputWidget = new TextBox();
-					break;
-				case REFERENCE:
-					inputWidget = new RefBookPickerPopupWidget();
-					((RefBookPickerPopup)inputWidget).setAttributeId(header.getRefBookAttributeId());
-					break;
-				default:
-					inputWidget = new TextBox();
-					break;
-			}
-			inputWidget.addValueChangeHandler(new ValueChangeHandler() {
-				@Override
-				public void onValueChange(ValueChangeEvent event) {
-					save.setEnabled(true);
-					if (getUiHandlers() != null) {
-						getUiHandlers().onValueChanged();
-					}
-				}
-			});
-			inputFields.put(header.getAlias(), inputWidget);
-
-			hp.add((Widget)inputWidget);
-			content.add(hp);
-		}
+//		for (final RefBookAttribute header : headers) {
+//			// Сформируем поля ввода
+//			HorizontalPanel hp = new HorizontalPanel();
+//			Label label = new Label(header.getName());
+//			label.setWidth("300px");
+//			hp.add(label);
+//			HasValue inputWidget;
+//			switch (header.getAttributeType()) {
+//				case STRING:
+//					inputWidget = new TextBox();
+//					break;
+//				case DATE:
+//					inputWidget = new CustomDateBox();
+//					break;
+//				case NUMBER:
+//					inputWidget = new TextBox();
+//					break;
+//				case REFERENCE:
+//					inputWidget = new RefBookPickerPopupWidget();
+//					((RefBookPickerPopup)inputWidget).setAttributeId(header.getRefBookAttributeId());
+//					break;
+//				default:
+//					inputWidget = new TextBox();
+//					break;
+//			}
+//			inputWidget.addValueChangeHandler(new ValueChangeHandler() {
+//				@Override
+//				public void onValueChange(ValueChangeEvent event) {
+//					save.setEnabled(true);
+//					if (getUiHandlers() != null) {
+//						getUiHandlers().onValueChanged();
+//					}
+//				}
+//			});
+//			inputFields.put(header.getAlias(), inputWidget);
+//
+//			hp.add((Widget)inputWidget);
+//			content.add(hp);
+//		}
 	}
 
-	@Override
-	public void fillInputFields(Map<String, RefBookAttributeSerializable> data) {
-		for (Map.Entry<String, HasValue> w : inputFields.entrySet()) {
-			switch (data.get(w.getKey()).getAttributeType()) {
-				case STRING:
-					((TextBox)w.getValue()).setValue(data.get(w.getKey()).getStringValue());
-					break;
-				case DATE:
-					((CustomDateBox)w.getValue()).setValue(data.get(w.getKey()).getDateValue());
-					break;
-				case NUMBER:
-					((TextBox)w.getValue()).setValue(data.get(w.getKey()).getNumberValue().toString());
-					break;
-				case REFERENCE:
-					((RefBookPickerPopup)w.getValue()).setValue(data.get(w.getKey()).getReferenceValue());
-					break;
-			}
-		}
-	}
+//	@Override
+//	public void fillInputFields(Map<String, RefBookAttributeSerializable> data) {
+//		for (Map.Entry<String, HasValue> w : inputFields.entrySet()) {
+//			switch (data.get(w.getKey()).getAttributeType()) {
+//				case STRING:
+//					((TextBox)w.getValue()).setValue(data.get(w.getKey()).getStringValue());
+//					break;
+//				case DATE:
+//					((CustomDateBox)w.getValue()).setValue(data.get(w.getKey()).getDateValue());
+//					break;
+//				case NUMBER:
+//					if (data.get(w.getKey()).getNumberValue() == null) ((TextBox)w.getValue()).setValue("");
+//					else ((TextBox)w.getValue()).setValue(data.get(w.getKey()).getNumberValue().toString());
+//					break;
+//				case REFERENCE:
+//					((RefBookPickerPopup)w.getValue()).setValue(data.get(w.getKey()).getReferenceValue());
+//					break;
+//			}
+//		}
+//	}
 
 	@Override
 	public void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows) {
@@ -200,30 +212,43 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
     @Override
     public void resetRefBookElements() {
-        int i;
-        while ((i = refbookDataTable.getColumnCount()) != 0) {
-            refbookDataTable.removeColumn(i - 1);
-            content.remove(i - 1);
-        }
-        inputFields.clear();
+//        int i;
+//        while ((i = refbookDataTable.getColumnCount()) != 0) {
+//            refbookDataTable.removeColumn(i - 1);
+//            content.remove(i - 1);
+//        }
+//        inputFields.clear();
     }
 
-	@UiHandler("cancel")
-	void cancelButtonClicked(ClickEvent event) {
-		if (getUiHandlers() != null) {
-			boolean cancel = Window.confirm("Вы уверены, что хотите отменить изменения?");
-			if (cancel) {
-				getUiHandlers().onCancelClicked();
-			}
-		}
+	@Override
+	public RefBookDataRow getSelectedRow() {
+		return selectionModel.getSelectedObject();
 	}
 
-	@UiHandler("save")
-	void saveButtonClicked(ClickEvent event) {
-		if (getUiHandlers() != null) {
-			getUiHandlers().onSaveClicked();
+	@Override
+	public void clearInputFields() {
+		for (HasValue field : inputFields.values()) {
+			field.setValue(null);
 		}
+
 	}
+
+//	@UiHandler("cancel")
+//	void cancelButtonClicked(ClickEvent event) {
+//		if (getUiHandlers() != null) {
+//			boolean cancel = Window.confirm("Вы уверены, что хотите отменить изменения?");
+//			if (cancel) {
+//				getUiHandlers().onCancelClicked();
+//			}
+//		}
+//	}
+//
+//	@UiHandler("save")
+//	void saveButtonClicked(ClickEvent event) {
+//		if (getUiHandlers() != null) {
+//			getUiHandlers().onSaveClicked();
+//		}
+//	}
 
 	@UiHandler("addRow")
 	void addRowButtonClicked(ClickEvent event) {
@@ -237,8 +262,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		boolean confirm = Window.confirm("Удалить выбранную запись справочника?");
 		if (confirm) {
 			if (getUiHandlers() != null) {
-				save.setEnabled(true);
-				getUiHandlers().onDeleteRowClicked(selectionModel.getSelectedObject());
+				getUiHandlers().onDeleteRowClicked();
 			}
 		}
 	}
