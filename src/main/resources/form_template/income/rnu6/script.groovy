@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
+import java.text.SimpleDateFormat
+
 /**
  * 6.3	(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения метода начисления
  */
@@ -44,9 +46,11 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW:
         addNewRow()
+        recalculateNumbers()
         break
     case FormDataEvent.DELETE_ROW:
         deleteRow()
+        recalculateNumbers()
         break
     case FormDataEvent.COMPOSE:
         consolidation(dataRowsHelper)
@@ -285,7 +289,9 @@ void logicalCheck(DataRowHelper form) {
             m.put(5, row.docNumber);
             m.put(6, row.docDate);
             if (uniq456.contains(m)) {
-                logger.error("Несколько строки %s содержат записи в налоговом учете для балансового счета=%s, документа № %s от %s", row.number.toSting(), row.code.toString(), row.docNumber.toString(), row.docDate.toString())
+                def index = ((Integer)(form.allCached.indexOf(row) + 1))
+                SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
+                logger.error("Для строки $index имеется  другая запись в налоговом учете с аналогичными значениями балансового счета=%s, документа № %s от %s.", getNumberAttribute(row.code).toString(), row.docNumber.toString(), dateFormat.format(row.docDate))
             }
             uniq456.add(m)
 
@@ -641,61 +647,39 @@ void addNewRow() {
     DataRow<Cell> newRow = formData.createDataRow()
     int index // Здесь будет позиция вставки
 
-    form = dataRowsHelper
-    if (form.allCached.size() > 0) {
-        DataRow<Cell> selectRow
-        // Форма не пустая
-        if (currentDataRow != null && form.allCached.indexOf(currentDataRow) != -1) {
-            // Значит выбрал строку куда добавлять
-            selectRow = currentDataRow
-        } else {
-            // Строку не выбрал поэтому добавляем в самый конец
-            selectRow = form.allCached.get(form.allCached.size() - 1) // Вставим в конец
-        }
-
-        int indexSelected = form.allCached.indexOf(selectRow)
-
-        // Определим индекс для выбранного места
-        if (selectRow.getAlias() == null) {
-            // Выбрана строка не итого
-            index = indexSelected // Поставим на то место новую строку
-        } else {
-            // Выбрана строка итого, для статических строг итого тут проще и надо фиксить под свою форму
-            // Для динимаческих строк итого идём вверх пока не встретим конец формы или строку не итого
-
-            for (index = indexSelected; index >= 0; index--) {
-                if (form.allCached.get(index).getAlias() == null) {
-                    index++
-                    break
-                }
-            }
-            if (index < 0) {
-                // Значит выше строки итого нет строк, добавим новую в начало
-                index = 0
-            }
-        }
-    } else {
-        // Форма пустая поэтому поставим строку в начало
-        index = 0
-    }
+    def form = dataRowsHelper
     [
             'kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'taxAccountingCurrency', 'accountingCurrency'
     ].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    if (form.getAllCached().size()>0) {
-        for(int i = form.getAllCached().size()-1;i>=0;i--){
-            def row = form.getAllCached().get(i)
-            if(row.getAlias() == null){
-                newRow.number = row.number+1
+    index = 0
+    def rows = form.getAllCached()
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+    }else if (rows.size()>0) {
+        for(int i = rows.size()-1;i>=0;i--){
+            def row = rows.get(i)
+            if(row.getAlias()==null){
+                index = rows.indexOf(row)+1
                 break
             }
         }
-    } else {
-        newRow.number = 1
     }
-    form.insert(newRow, index + 1)
+    form.insert(newRow,index+1)
+}
+
+def recalculateNumbers(){
+    index = 1
+    def data = dataRowsHelper
+    def rows = data.getAllCached()
+    rows.each{row->
+        if(row.getAlias()==null){
+            row.number = index++
+        }
+    }
+    data.save(rows)
 }
 
 /**
@@ -717,4 +701,13 @@ void checkCreation() {
     if (findForm != null) {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
+}
+
+/**
+ * Получить атрибут 130 - "Код налогового учёта" справочник 28 - "Классификатор доходов Сбербанка России для целей налогового учёта".
+ *
+ * @param id идентификатор записи справочника
+ */
+def getNumberAttribute(def id) {
+    return refBookService.getStringValue(28, id, 'NUMBER')
 }
