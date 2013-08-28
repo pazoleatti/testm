@@ -161,6 +161,7 @@ public class ReportPeriodPicker extends Composite implements HasEnabled{
 		this.taxPeriods = taxPeriods;
 		taxPeriodNodes.clear();
 		tree.clear();
+        clearReportPeriods();
 	}
 	
 	public void clearReportPeriods(){
