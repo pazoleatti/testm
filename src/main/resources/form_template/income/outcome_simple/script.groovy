@@ -259,7 +259,7 @@ void checkDeclarationBankOnCancelAcceptance() {
  * @since 21.02.2013 13:50
  */
 def consolidationBank() {
-    def data = getData(formData)
+    DataRowHelper data = getData(formData)
     if (data == null) {
         return
     }
@@ -278,7 +278,8 @@ def consolidationBank() {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 304) {
             needCalc = true
-            for (def row : child.getDataRows()) {
+            DataRowHelper childData = getData(child)
+            for (def row : childData.allCached) {
                 if (row.getAlias() == null) {
                     continue
                 }
@@ -294,6 +295,7 @@ def consolidationBank() {
     if (needCalc) {
         checkAndCalc()
     }
+    data.save(data.allCached)
     data.commit()
     logger.info('Формирование сводной формы уровня Банка прошло успешно.')
 }
