@@ -25,12 +25,12 @@
             <version>${project.version}</version>
             <type>war</type>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>migration-ejb</artifactId>
             <version>${project.version}</version>
             <type>ejb</type>
-        </dependency>
+        </dependency>-->
 	</dependencies>
 
 	<build>
@@ -55,11 +55,11 @@
                             <!--<bundleFileName>migration.war</bundleFileName>-->
                             <!--<contextRoot>/taxaccounting/migration</contextRoot>-->
                         <!--</webModule>-->
-                        <ejbModule>
+                        <!--<ejbModule>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>migration-ejb</artifactId>
                             <bundleFileName>migration-ejb.jar</bundleFileName>
-                        </ejbModule>
+                        </ejbModule>-->
 					</modules>
 				</configuration>
 			</plugin>
