@@ -47,6 +47,8 @@ public class RefBookFactoryImpl implements RefBookFactory {
             refBookDataProvider = applicationContext.getBean("refBookDepartment", RefBookDataProvider.class);
         } else if (refBookId == RefBookIncome101.REF_BOOK_ID) {
             refBookDataProvider = applicationContext.getBean("refBookIncome101", RefBookDataProvider.class);
+        } else if (refBookId == RefBookIncome102.REF_BOOK_ID) {
+            refBookDataProvider = applicationContext.getBean("refBookIncome102", RefBookDataProvider.class);
         } else {
             refBookDataProvider = applicationContext.getBean("universal", RefBookDataProvider.class);   // Исправление Марата, надо сделать получать данные отдельно для конкретных провайдеров
             if (refBookDataProvider instanceof RefBookUniversal) {

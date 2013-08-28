@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
@@ -19,20 +19,20 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 /**
- * Провайдер для справочника "Оборотная ведомость (Форма 0409101-СБ)"
- * Таблица INCOME_101
- * User: ekuvshinov
+ * Провайдер для справочника "Отчет о прибылях и убытках (Форма 0409102-СБ)"
+ * Таблица INCOME_102
+ * @author Dmitriy Levykin
  */
-@Service("refBookIncome101")
+@Service("refBookIncome102")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class RefBookIncome101 implements RefBookDataProvider {
-    public final static long REF_BOOK_ID = 50L;
+public class RefBookIncome102 implements RefBookDataProvider {
+    public final static long REF_BOOK_ID = 52L;
 
     @Autowired
     RefBookDao rbDao;
 
     @Autowired
-    private RefBookIncome101Dao bookBookerStatemensDao;
+    private RefBookIncome102Dao bookBookerStatemensDao;
 
     @Autowired
     private TaxPeriodDao taxPeriodDao;

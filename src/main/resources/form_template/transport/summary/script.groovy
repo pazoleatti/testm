@@ -1,5 +1,7 @@
 package form_template.transport.summary
 
+import groovy.time.TimeCategory
+
 /**
  * Форма "Расчет суммы налога по каждому транспортному средству".
  */
@@ -27,6 +29,7 @@ switch (formDataEvent) {
         break
 // обобщить
     case FormDataEvent.COMPOSE :
+        consolidation()
         sort()
         break
 // проверить
@@ -803,3 +806,129 @@ def getRefBookValue(refBookID, recordId, alias){
 
     return records != null ? records.get(alias) : null;
 }
+
+/**
+ * Консолидация формы
+ * Собирает данные с консолидированных нф
+ */
+def consolidation(){
+    // очистить форму
+    def dataRowHelper = getData(formData)
+    def dataRows = List<DataRow<Cell>>()
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        if (source != null && source.state == WorkflowState.ACCEPTED) {
+            def sourceDataRowHelper = formDataService.getDataRowHelper(source)
+            def sourceDataRows = sourceDataRowHelper.allCached
+            sourceDataRows.each{ sRow ->
+                // новая строка
+                def newRow = formData.createDataRow()
+                // «Графа 2» принимает значение «графы 2» формы-источника
+                newRow.okato = sRow.codeOKATO
+                // «Графа 3» принимает значение «графы 4» формы-источника
+                newRow.tsTypeCode = sRow.tsTypeCode
+                // «Графа 4» принимает значение «графы 5» формы-источника
+                newRow.tsType = sRow.tsType
+                // «Графа 5» принимает значение «графы 6» формы-источника
+                newRow.vi = sRow.identNumber
+                // «Графа 6» принимает значение «графы 7» формы-источника
+                newRow.model = sRow.model
+                // «Графа 7» принимает значение «графы 9» формы-источника
+                newRow.regNumber = sRow.regNumber
+                // «Графа 8» принимает значение «графы 10» формы-источника
+                newRow.taxBase = sRow.powerVal
+                // «Графа 9» принимает значение «графы 11» формы-источника
+                newRow.taxBaseOkeiUnit = sRow.powerVal
+                // «Графа 10» принимает значение «графы 8» формы-источника
+                newRow.ecoClass = sRow.ecoClass
+
+
+                /**
+                 * «Графа 11» Рассчитывается автоматически по формуле:
+                 * Если («отчётный год YYYY» – «Графа 12» (формы-источника) – 1) <= 0
+                 * То
+                 * «Графа 11»  = 0
+                 * Иначе
+                 * «Графа 11»  = «отчётный год YYYY» – «Графа 12» (формы-источника) – + 1
+                 */
+                def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+                def taxPeriod = taxPeriodService.get(reportPeriod.taxPeriodId)
+                Calendar cl = Calendar.getInstance()
+                cl.setTime(taxPeriod.startDate);
+                def year = cl.get(Calendar.YEAR)
+                def diff = year - sRow.year - 1
+                newRow.years = diff <= 0 ? 0:diff
+
+                /*
+                 * Рассчитывается автоматически по формуле:
+                 * «Графа 12» =  ПОЛНЫХ_МЕСЯЦЕВ[(«Графа 14» (формы-источника) - «Графа 13» (формы-источника)) – (B-A)], где
+                 * B вычисляется согласно алгоритму:
+                 * Если  «графа 16» (формы-источника)> «графа 14», то
+                 * B=«графа 14»
+                 * Иначе
+                 * B= «графа 16» (формы-источника)
+                 * A вычисляется согласно алгоритму:
+                 * Если  «графа 15» (формы-источника)<«графа 13», то
+                 * B=«графа 13»
+                 * Иначе
+                 * B= «графа 15» (формы-источника)
+                 * ПОЛНЫХ_МЕСЯЦЕВ[] – операция получения количества полных месяцев.  Срок в месяцах округляется до наибольшего значения.   То есть, если рассчитанный срок владения равен 6,5 мес, операция должна возвратить значение 7
+                 */
+
+                // TODO http://jira.aplana.com/browse/SBRFACCTAX-3714
+                //newRow.ownMonths =  TimeCategory.minus(new Date(), new Date()).months
+
+                dataRows.add(newRow)
+            }
+        }
+    }
+    // сохраняем данные
+    dataRowHelper.save(dataRows)
+    dataRowHelper.commit()
+}
+
+// графа 1  - rowNumber
+// графа 2  - okato
+// графа 3  - tsTypeCode
+// графа 4  - tsType
+// графа 5  - vi
+// графа 6  - model
+// графа 7  - regNumber
+// графа 8  - taxBase
+// графа 9  - taxBaseOkeiUnit
+// графа 10 - ecoClass
+// графа 11 - years
+// графа 12 - ownMonths
+// графа 13 - coef362
+// графа 14 - taxRate
+// графа 15 - calculatedTaxSum
+// графа 16 - taxBenefitCode
+// графа 17 - benefitStartDate
+// графа 18 - benefitEndDate
+// графа 19 - coefKl
+// графа 20 - benefitSum
+// графа 21 - taxSumToPay
+
+
+/**
+ * Графы
+ * 1 № пп  -  rowNumber
+ * 2 Код ОКАТО  -  codeOKATO
+ * 3 Муниципальное образование, на территории которого зарегистрировано транспортное средство (ТС)  -  regionName
+ * 4 Код вида ТС  -  tsTypeCode
+ * 5 Вид ТС  -  tsType
+ * 6 Идентификационный номер  -  identNumber
+ * 7 Марка  -  model
+ * 8 Экологический класс  -  ecoClass
+ * 9 Регистрационный знак  -  regNumber
+ * 10 Мощность (величина)  -  powerVal
+ * 11 Мощность (ед. измерения)  -  baseUnit
+ * 12 Год изготовления  -  year
+ * 13 Регистрация (дата регистрации)  -  regDate
+ * 14 Регистрация (дата снятия с регистрации)  -  regDateEnd
+ * 15 Сведения об угоне (дата начала розыска ТС)  -  stealDateStart
+ * 16 Сведения об угоне (дата возврата ТС)  -  stealDateEnd
+ *
+ * ['rowNumber', 'codeOKATO', 'regionName', 'tsTypeCode', 'tsType', 'identNumber', 'model', 'ecoClass', 'regNumber', 'powerVal', 'baseUnit', 'year', 'regDate', 'regDateEnd', 'stealDateStart', 'stealDateEnd']
+ */
