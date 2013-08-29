@@ -51,6 +51,11 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     private static String I_102_ITEM_NAME = "ITEM_NAME";
     private static String I_102_DEPARTMENT_ID = "DEPARTMENT_ID";
 
+    // Ограничение по строкам для xls-файла
+    private static long MAX_FILE_ROW = 10000L;
+
+    private static String BAD_FILE_MSG = "Формат файла не соответствуют ожидаемому формату. Файл не может быть загружен.";
+
     @Autowired
     ReportPeriodService reportPeriodService;
 
@@ -101,7 +106,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     map.put(I_102_OPU_CODE, new RefBookValue(RefBookAttributeType.STRING, item.getOpuCode()));
                     map.put(I_102_TOTAL_SUM, new RefBookValue(RefBookAttributeType.NUMBER, item.getTotalSum()));
                     map.put(I_102_ITEM_NAME, new RefBookValue(RefBookAttributeType.STRING, item.getItemName()));
-                    map.put(I_102_DEPARTMENT_ID, new RefBookValue(RefBookAttributeType.REFERENCE, (long)departmentId));
+                    map.put(I_102_DEPARTMENT_ID, new RefBookValue(RefBookAttributeType.REFERENCE, (long) departmentId));
                     records.add(map);
                 }
 
@@ -111,13 +116,17 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     }
 
     private List<Income101> importIncome101(InputStream stream) throws IOException, ServiceException{
-        String errMsg = "Формат файла не соответствуют ожидаемому формату. Файл не может быть загружен.";
         List<Income101> list = new ArrayList<Income101>();
         HSSFWorkbook wb = new HSSFWorkbook(stream);
         Sheet sheet = wb.getSheetAt(0);
         Iterator<Row> it = sheet.iterator();
         boolean endOfFile = false;
+        long rowCounter = 1L;
         while (it.hasNext() && !endOfFile) {
+            if (rowCounter++ > MAX_FILE_ROW) {
+                throw new ServiceException(BAD_FILE_MSG);
+            }
+
             Row row = it.next();
             Iterator<Cell> cells = row.iterator();
 
@@ -132,7 +141,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                             || (colNum == 4 && !colName.equals("Входящие остатки"))
                             || (colNum == 6 && !colName.equals("Обороты за отчетный период"))
                             || (colNum == 8 && !colName.equals("Исходящие остатки")))
-                        throw new ServiceException(errMsg);
+                        throw new ServiceException(BAD_FILE_MSG);
                 }
             }
             // проверка ячеек в строке 12
@@ -143,7 +152,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     String colName = cell.getStringCellValue().trim();
                     if (((colNum == 4 || colNum == 6 || colNum == 8) && !colName.equals("по дебету"))
                             || ((colNum == 5 || colNum == 7 || colNum == 9) && !colName.equals("по кредиту")))
-                        throw new ServiceException(errMsg);
+                        throw new ServiceException(BAD_FILE_MSG);
                 }
             }
             // парсим с 18 строки
@@ -201,7 +210,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                 }
                 if (!endOfFile && isValid) {
                     if (!isModelValid(model)) {
-                        throw new ServiceException(errMsg);
+                        throw new ServiceException(BAD_FILE_MSG);
                     }
                     list.add(model);
                 }
@@ -225,7 +234,12 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         Sheet sheet = wb.getSheetAt(0);
         Iterator<Row> it = sheet.iterator();
         boolean isEndOfFile102 = false;
+        long rowCounter = 1L;
         while (it.hasNext() && !isEndOfFile102) {
+            if (rowCounter++ > MAX_FILE_ROW) {
+                throw new ServiceException(BAD_FILE_MSG);
+            }
+
             Row row = it.next();
             Iterator<Cell> cells = row.iterator();
 
@@ -313,7 +327,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
      */
     private ServiceException getServiceException(int columnIndex, int typeID) {
         String colName = "";
-        if (typeID == 1) {
+        if (typeID == 0) {
             switch (columnIndex) {
                 case 1:
                     colName = "Номер счета";

@@ -16,8 +16,15 @@ import java.util.Set;
 @Transactional
 public class DepartmentServiceImpl implements DepartmentService {
 
+	public static final int UNP_ID = 1;
+	
     @Autowired
     DepartmentDao departmentDao;
+    
+    @Override
+    public Department getUNPDepartment() {
+        return departmentDao.getDepartment(UNP_ID);
+    }
 
     @Override
     public Department getDepartment(int departmentId) {

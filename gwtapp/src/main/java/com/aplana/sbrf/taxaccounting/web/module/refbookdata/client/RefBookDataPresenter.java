@@ -139,6 +139,17 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 							}
 						}, this));
 
+		GetNameAction nameAction = new GetNameAction();
+		nameAction.setAttributeId(refBookDataId);
+		dispatcher.execute(nameAction,
+				CallbackUtils.defaultCallback(
+						new AbstractCallback<GetNameResult>() {
+							@Override
+							public void onSuccess(GetNameResult result) {
+								getView().setRefBookNameDesc(result.getName());
+							}
+						}, this));
+
 	}
 
 	@Override

@@ -66,11 +66,9 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 								else tableCell = val.getValue().getStringValue();
 								break;
 							case REFERENCE:
-
-								if (val.getValue().getReferenceObject() != null) {
-									tableCell = val.getValue().getReferenceValue().toString();
-									break;
-								}
+								if (val.getValue().getReferenceValue() == null) tableCell = "";
+								else tableCell = refBookDataProvider.getRecordData(val.getValue().getReferenceValue()).values().iterator().next().toString();
+								break;
 							default:
 								tableCell = "undefined";
 								break;
