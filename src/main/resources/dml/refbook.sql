@@ -1,4 +1,3 @@
-INSERT INTO REF_BOOK (ID, NAME) VALUES (1, 'Коды, определяющие способ представления налоговой декларации в налоговый орган');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (2, 'Коды представления налоговой декларации по месту нахождения (учёта)');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (3, 'Коды ОКАТО');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (4, 'Коды субъектов Российской Федерации');
@@ -57,10 +56,6 @@ INSERT INTO REF_BOOK (ID, NAME) VALUES (66, 'Коды основания при�
 INSERT INTO REF_BOOK (ID, NAME) VALUES (67, 'Коды наименования сделки');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (68, 'Коды  ОКП  на  основании  общероссийского  классификатора  продукции  (ОКП)');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (69, 'Признаки взаимозависимости');
-
-
-INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (1,	1,	'Код',										'CODE',				1,		0,		null,	null,	1,	null,	2);
-INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (2,	1,	'Наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
 
 INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (3,	2,	'Код',										'CODE',				1,		0,		null,	null,	1,	null,	3);
 INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (4,	2,	'Наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
