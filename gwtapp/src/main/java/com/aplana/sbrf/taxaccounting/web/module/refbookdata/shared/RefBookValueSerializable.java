@@ -14,6 +14,7 @@ public class RefBookValueSerializable implements Serializable {
 	Number numberValue;
 	Date dateValue;
 	Long referenceValue;
+	String dereferenceValue;
 
 	public RefBookAttributeType getAttributeType() {
 		return attributeType;
@@ -53,6 +54,14 @@ public class RefBookValueSerializable implements Serializable {
 
 	public void setReferenceValue(Long referenceValue) {
 		this.referenceValue = referenceValue;
+	}
+
+	public String getDereferenceValue() {
+		return dereferenceValue;
+	}
+
+	public void setDereferenceValue(String dereferenceValue) {
+		this.dereferenceValue = dereferenceValue;
 	}
 
 	public Object getValue() {

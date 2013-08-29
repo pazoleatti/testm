@@ -5,5 +5,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
 public interface PeriodsUiHandlers extends UiHandlers {
 	void closePeriod();
 	void openPeriod();
-	void find();
+	void onFindButton();
 }

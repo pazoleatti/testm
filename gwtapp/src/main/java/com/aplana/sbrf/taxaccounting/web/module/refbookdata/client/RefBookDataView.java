@@ -99,11 +99,12 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	@Override
 	public void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows) {
 		if (dataRows == null) {
-			refbookDataTable.setRowCount(totalCount);
+			refbookDataTable.setRowCount(0);
 			refbookDataTable.setRowData(new ArrayList<RefBookDataRow>());
+		} else {
+			refbookDataTable.setRowCount(totalCount);
+			refbookDataTable.setRowData(start, dataRows);
 		}
-		refbookDataTable.setRowCount(totalCount);
-		refbookDataTable.setRowData(start, dataRows);
 	}
 
     @Override

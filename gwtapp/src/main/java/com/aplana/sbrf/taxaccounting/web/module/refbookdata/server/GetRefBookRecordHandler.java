@@ -41,11 +41,11 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
 		Map<String, RefBookValue> record = refBookDataProvider.getRecordData(action.getRefBookRecordId());
 
 		GetRefBookRecordResult result = new GetRefBookRecordResult();
-		result.setRecord(convert(record));
+		result.setRecord(convert(record, action.getRefBookDataId(), action.getRefBookRecordId()));
 		return result;
 	}
 
-	private Map<String, RefBookValueSerializable> convert(Map<String, RefBookValue> record) {
+	private Map<String, RefBookValueSerializable> convert(Map<String, RefBookValue> record, Long refbookId, Long recordId) {
 		Map<String, RefBookValueSerializable> convertedRecord = new HashMap<String, RefBookValueSerializable>();
 		for (Map.Entry<String, RefBookValue> attr : record.entrySet()) {
 			RefBookValueSerializable serializedValue = new RefBookValueSerializable();
@@ -61,7 +61,14 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
 					serializedValue.setDateValue(attr.getValue().getDateValue());
 					break;
 				case REFERENCE:
-					serializedValue.setReferenceValue(attr.getValue().getReferenceValue());
+					if (attr.getValue().getReferenceValue() == null) {
+						serializedValue.setReferenceValue(null);
+						serializedValue.setDereferenceValue("");
+					} else {
+						serializedValue.setReferenceValue(attr.getValue().getReferenceValue());
+						RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refbookId);
+						serializedValue.setDereferenceValue(refBookDataProvider.getRecordData(attr.getValue().getReferenceValue()).values().iterator().next().toString());
+					}
 					break;
 				default:
 					serializedValue.setStringValue("");

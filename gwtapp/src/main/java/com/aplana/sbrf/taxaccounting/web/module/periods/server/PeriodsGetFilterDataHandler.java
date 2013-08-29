@@ -14,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DictionaryTaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -67,7 +66,8 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 
 	    res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(filterValues
 			    .getDepartmentIds()).values()));
-	    res.setAvalDepartments(filterValues.getDepartmentIds());	    
+	    res.setAvalDepartments(filterValues.getDepartmentIds());
+	    res.setSelectedDepartment(userInfo.getUser().getDepartmentId());
 
 	    
 	    RefBookDataProvider refBookDataProvider = refBookFactory
@@ -92,21 +92,19 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 		}
 	    TaxType taxType = action.getTaxType();
 
-	    if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT) || (taxType == TaxType.DEAL)) {
-		    res.setSelectedDepartment(departmentService.getDepartmentBySbrfCode("99006200").getId()); //УНП
-		    res.setEnableDepartmentPicker(false);
-	    } else if ((taxType == TaxType.TRANSPORT) || (taxType == TaxType.PROPERTY)) {
-			res.setSelectedDepartment(userInfo.getUser().getDepartmentId());
-		    res.setEnableDepartmentPicker(true);
-	    }
+	    
+	    
 	    Calendar current = Calendar.getInstance();
 	    res.setCurrentYear(current.get(Calendar.YEAR));
 
-	    // Только чтение для НЕ контролера УНП для федеральных налогов
-	    if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP) && (taxType == TaxType.INCOME) || (taxType == TaxType.VAT) || (taxType == TaxType.DEAL)){
-	    	res.setReadOnly(true);
+
+	    if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT) || (taxType == TaxType.DEAL)){
+	    	//Если контролеру назначено подразделение УНП, то ему доступно открытие периодов для федеральных налогов
+	    	res.setReadOnly(!(departmentService.getUNPDepartment().getId() == userInfo.getUser().getDepartmentId()));
+	    	res.setEnableDepartmentPicker(false);
 	    } else {
 	    	res.setReadOnly(false);
+	    	res.setEnableDepartmentPicker(true);
     	}
     
         return res;
