@@ -12,6 +12,15 @@ import com.aplana.sbrf.taxaccounting.model.Department;
  */
 public interface DepartmentService {
 	
+	
+	/**
+	 * Получаем подразделение UNP.
+	 * (Корень дерева, а не "Управление налогового планирования")
+	 * 
+	 * @return
+	 */
+	public Department getUNPDepartment();
+	
 
 	/**
 	 * Получить департамент
