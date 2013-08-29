@@ -450,9 +450,9 @@ def isTerBank() {
  * Получить сумму диапазона строк определенного столбца.
  */
 def getSum(String columnAlias, String rowFromAlias, String rowToAlias) {
-    def data = getData(formData)
-    def from = data.getDataRowIndex(data.getAll(), rowFromAlias) + 1
-    def to = data.getDataRowIndex(data.getAll(), rowToAlias) - 1
+    DataRowHelper data = getData(formData)
+    def from = data.getDataRowIndex(data.getAll(), rowFromAlias)
+    def to = data.getDataRowIndex(data.getAll(), rowToAlias)
     if (from > to) {
         return 0
     }
