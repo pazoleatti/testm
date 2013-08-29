@@ -56,6 +56,8 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		long getDepartmentId();
 		TableRow getSelectedRow();
 		void setReadOnly(boolean readOnly);
+		boolean isFromYearEmpty();
+		boolean isToYearEmpty();
 	}
 
 	private final TaPlaceManager placeManager;
@@ -105,6 +107,18 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	}
 
 	@Override
+	public void onFindButton() {
+		if (getView().isFromYearEmpty() || getView().isToYearEmpty()) {
+			Window.alert("Не заданы все обязательные параметры!");
+			return;
+		} else if (getView().getFromYear() > getView().getToYear()){
+			Window.alert("Интервал периода поиска указан неверно!");
+			return;
+		} else {
+			find();
+		}
+	}
+
 	public void find() {
 		GetPeriodDataAction requestData = new GetPeriodDataAction();
 		requestData.setTaxType(taxType);

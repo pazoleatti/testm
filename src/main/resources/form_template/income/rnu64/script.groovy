@@ -124,68 +124,32 @@ switch (formDataEvent) {
 def addNewRow() {
     def data = getData(formData)
     DataRow<Cell> newRow = formData.createDataRow()
-    int index // Здесь будет позиция вставки
-
-    if (getRows(data).size() > 0) {
-        DataRow<Cell> selectRow
-        // Форма не пустая
-        log("Форма не пустая")
-        log("size = " + getRows(data).size())
-        if (currentDataRow != null && getRows(data).indexOf(currentDataRow) != -1) {
-            // Значит выбрал строку куда добавлять
-            log("Строка вставки выбрана")
-            log("indexOf = " + getRows(data).indexOf(currentDataRow))
-            selectRow = currentDataRow
-        } else {
-            // Строку не выбрал поэтому добавляем в самый конец
-            log("Строка вставки не выбрана, поставим в конец формы")
-            selectRow = getRows(data).get(getRows(data).size() - 1) // Вставим в конец
-        }
-
-        int indexSelected = getRows(data).indexOf(selectRow)
-        log("indexSelected = " + indexSelected.toString())
-
-        // Определим индекс для выбранного места
-        if (selectRow.getAlias() == null) {
-            // Выбрана строка не итого
-            log("Выбрана строка не итого")
-            index = indexSelected // Поставим на то место новую строку
-        } else {
-            // Выбрана строка итого, для статических строг итого тут проще и надо фиксить под свою форму
-            // Для динимаческих строк итого идём вверх пока не встретим конец формы или строку не итого
-            log("Выбрана строка итого")
-
-            for (index = indexSelected; index >= 0; index--) {
-                log("loop index = " + index.toString())
-                if (getRows(data).get(index).getAlias() == null) {
-                    log("Нашел строку отличную от итого")
-                    index++
-                    break
-                }
-            }
-            if (index < 0) {
-                // Значит выше строки итого нет строк, добавим новую в начало
-                log("выше строки итого нет строк")
-                index = 0
-            }
-            log("result index = " + index.toString())
-        }
-    } else {
-        // Форма пустая поэтому поставим строку в начало
-        log("Форма пустая поэтому поставим строку в начало")
-        index = 0
-    }
-
     ['date', 'part', 'dealingNumber', 'bondKind', 'costs'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    getData(formData).insert(newRow, index + 1)
+    def index = 0
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def row = currentDataRow
+        while(row.getAlias()!=null && index>0){
+            row = getRows(data).get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
+            index++
+        }
+    }else if (getRows(data).size()>0) {
+        for(int i = getRows(data).size()-1;i>=0;i--){
+            def row = getRows(data).get(i)
+            if(row.getAlias()==null){
+                index = getRows(data).indexOf(row)+1
+                break
+            }
+        }
+    }
+    data.insert(newRow,index+1)
 }
 
-def log(String message, Object... args) {
-    //logger.info(message, args)
-}
 /**
  * Удаление строки
  *
@@ -376,8 +340,6 @@ def getTotalValue() {
     // возьмем форму за предыдущий отчетный период
     def prevQuarter = quarterService.getPrevReportPeriod(formData.reportPeriodId)
     if (prevQuarter != null) {
-        log('Текущий период Id:' + formData.reportPeriodId)
-        log('Предыдущий период найден Id:' + prevQuarter.id)
         prevQuarterFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, prevQuarter.id);
 
         if (prevQuarterFormData != null && prevQuarterFormData.state == WorkflowState.ACCEPTED) {
