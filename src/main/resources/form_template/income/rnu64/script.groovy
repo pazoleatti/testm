@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
+import java.text.SimpleDateFormat
+
 /**
  * РНУ-64
  * @author auldanov
@@ -115,6 +117,10 @@ switch (formDataEvent) {
 // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
         logicalCheck()
+        break
+    // загрузка xml
+    case FormDataEvent.IMPORT :
+        importData()
         break
 }
 
@@ -494,3 +500,190 @@ void setTotalStyle(def row) {
     }
 }
 
+/**
+ * Получение импортируемых данных.
+ * Транспортный файл формата xml.
+ */
+void importData() {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '' || !fileName.contains('.xml')) {
+        return
+    }
+
+    def is = ImportInputStream
+    if (is == null) {
+        return
+    }
+
+    def xmlString = importService.getData(is, fileName)
+    if (xmlString == null || xmlString == '') {
+        return
+    }
+
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        return
+    }
+
+    // сохранить начальное состояние формы
+    def data = getData(formData)
+    def rowsOld = getRows(data)
+    try {
+        // добавить данные в форму
+        addData(xml)
+
+        // расчитать и проверить
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+            logicalCheck()
+        }
+    } catch(Exception e) {
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
+    }
+    // откатить загрузку если есть ошибки
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        data.clear()
+        data.insert(rowsOld, 1)
+    } else {
+        logger.info('Данные загружены')
+    }
+    data.commit()
+}
+
+/**
+ * Заполнить форму данными.
+ *
+ * @param xml данные
+ */
+void addData(def xml) {
+    def tmp
+    def indexRow = 0
+    def newRows = []
+    def index
+    def refDataProvider = refBookFactory.getDataProvider(60)
+
+    // TODO (Aydar Kadyrgulov)  Проверка корректности данных
+    for (def row : xml.exemplar.table.detail.record) {
+        indexRow++
+        index = 0
+
+        def newRow = getNewRow()
+
+        // графа 1
+        newRow.number = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 2
+        newRow.date = getDate(row.field[index].@value.text())
+        index++
+
+        // графа 3 - справочник 15 "Общероссийский классификатор валют"
+        tmp = null
+        if (row.field[index].@value.text() != null &&
+                row.field[index].@value.text().trim() != '') {
+            def records = refDataProvider.getRecords(new Date(), null, "CODE = '" + row.field[index].@value.text() + "'", null);
+            if (records != null && !records.getRecords().isEmpty()) {
+                tmp = records.getRecords().get(0).get('record_id').getNumberValue()
+            }
+        }
+        newRow.part = tmp
+        index++
+
+        // графа 4
+        newRow.dealingNumber = row.field[index].@value.text()
+        index++
+
+        // графа 5
+        newRow.bondKind = row.field[index].@value.text()
+        index++
+
+        // графа 6
+        newRow.costs = getNumber(row.field[index].@value.text())
+
+        newRows.add(newRow)
+    }
+
+
+    // проверка итоговых данных
+    if (xml.exemplar.table.total.record.field.size() > 0 && !newRows.isEmpty()) {
+        def totalRow = formData.createDataRow()
+
+        totalRow.costs = 0
+
+        newRows.each { row ->
+            totalRow.costs += (row.costs != null ? row.costs : 0)
+        }
+
+        for (def row : xml.exemplar.table.total.record) {
+            // графа 6
+            if (totalRow.costs != getNumber(row.field[5].@value.text())) {
+                logger.error('Итоговые значения неправильные.')
+                return
+            }
+        }
+    }
+    def data = getData(formData)
+    data.clear()
+    data.insert(newRows, 1)
+    data.commit()
+}
+
+/**
+ * Получить новую строку с заданными стилями.
+ */
+def getNewRow() {
+    def row = formData.createDataRow()
+
+    // графа 1..10
+    ['date', 'part', 'dealingNumber', 'bondKind', 'costs'].each {
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return row
+}
+
+/**
+ * Получить числовое значение.
+ *
+ * @param value строка
+ */
+def getNumber(def value) {
+    if (value == null) {
+        return null
+    }
+    def tmp = value.trim()
+    if ("".equals(tmp)) {
+        return null
+    }
+    // поменять запятую на точку и убрать пробелы
+    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
+    return new BigDecimal(tmp)
+}
+
+/**
+ * Получить дату по строковому представлению (формата дд.ММ.гггг)
+ */
+def getDate(def value) {
+    if (isEmpty(value)) {
+        return null
+    }
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    return format.parse(value)
+}
+
+/**
+ * Проверка пустое ли значение.
+ */
+def isEmpty(def value) {
+    return value == null || value == '' || value == 0
+}
+
+/**
+ * Расчет полностью
+ */
+void calc() {
+    form = getData(formData)
+    deleteAllStatic(form)
+    sort()
+    fillForm()
+}

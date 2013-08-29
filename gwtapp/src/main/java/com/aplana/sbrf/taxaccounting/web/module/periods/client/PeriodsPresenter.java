@@ -51,8 +51,8 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		void setTitle(String title);
 		void setTableData(List<TableRow> data);
 		void setFilterData(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, int yearFrom, int yearTo);
-		int getFromYear();
-		int getToYear();
+		Integer getFromYear();
+		Integer getToYear();
 		long getDepartmentId();
 		TableRow getSelectedRow();
 		void setReadOnly(boolean readOnly);
@@ -111,7 +111,9 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		if (getView().isFromYearEmpty() || getView().isToYearEmpty()) {
 			Window.alert("Не заданы все обязательные параметры!");
 			return;
-		} else if (getView().getFromYear() > getView().getToYear()){
+		} else if ((getView().getFromYear() == null)
+				|| (getView().getToYear() == null)
+				|| (getView().getFromYear() > getView().getToYear())){
 			Window.alert("Интервал периода поиска указан неверно!");
 			return;
 		} else {
