@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
+import java.text.SimpleDateFormat
+
 /**
  * РНУ-64
  * @author auldanov
@@ -116,6 +118,10 @@ switch (formDataEvent) {
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
         logicalCheck()
         break
+    // загрузка xml
+    case FormDataEvent.IMPORT :
+        importData()
+        break
 }
 
 /**
@@ -124,68 +130,32 @@ switch (formDataEvent) {
 def addNewRow() {
     def data = getData(formData)
     DataRow<Cell> newRow = formData.createDataRow()
-    int index // Здесь будет позиция вставки
-
-    if (getRows(data).size() > 0) {
-        DataRow<Cell> selectRow
-        // Форма не пустая
-        log("Форма не пустая")
-        log("size = " + getRows(data).size())
-        if (currentDataRow != null && getRows(data).indexOf(currentDataRow) != -1) {
-            // Значит выбрал строку куда добавлять
-            log("Строка вставки выбрана")
-            log("indexOf = " + getRows(data).indexOf(currentDataRow))
-            selectRow = currentDataRow
-        } else {
-            // Строку не выбрал поэтому добавляем в самый конец
-            log("Строка вставки не выбрана, поставим в конец формы")
-            selectRow = getRows(data).get(getRows(data).size() - 1) // Вставим в конец
-        }
-
-        int indexSelected = getRows(data).indexOf(selectRow)
-        log("indexSelected = " + indexSelected.toString())
-
-        // Определим индекс для выбранного места
-        if (selectRow.getAlias() == null) {
-            // Выбрана строка не итого
-            log("Выбрана строка не итого")
-            index = indexSelected // Поставим на то место новую строку
-        } else {
-            // Выбрана строка итого, для статических строг итого тут проще и надо фиксить под свою форму
-            // Для динимаческих строк итого идём вверх пока не встретим конец формы или строку не итого
-            log("Выбрана строка итого")
-
-            for (index = indexSelected; index >= 0; index--) {
-                log("loop index = " + index.toString())
-                if (getRows(data).get(index).getAlias() == null) {
-                    log("Нашел строку отличную от итого")
-                    index++
-                    break
-                }
-            }
-            if (index < 0) {
-                // Значит выше строки итого нет строк, добавим новую в начало
-                log("выше строки итого нет строк")
-                index = 0
-            }
-            log("result index = " + index.toString())
-        }
-    } else {
-        // Форма пустая поэтому поставим строку в начало
-        log("Форма пустая поэтому поставим строку в начало")
-        index = 0
-    }
-
     ['date', 'part', 'dealingNumber', 'bondKind', 'costs'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    getData(formData).insert(newRow, index + 1)
+    def index = 0
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def row = currentDataRow
+        while(row.getAlias()!=null && index>0){
+            row = getRows(data).get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
+            index++
+        }
+    }else if (getRows(data).size()>0) {
+        for(int i = getRows(data).size()-1;i>=0;i--){
+            def row = getRows(data).get(i)
+            if(row.getAlias()==null){
+                index = getRows(data).indexOf(row)+1
+                break
+            }
+        }
+    }
+    data.insert(newRow,index+1)
 }
 
-def log(String message, Object... args) {
-    //logger.info(message, args)
-}
 /**
  * Удаление строки
  *
@@ -376,8 +346,6 @@ def getTotalValue() {
     // возьмем форму за предыдущий отчетный период
     def prevQuarter = quarterService.getPrevReportPeriod(formData.reportPeriodId)
     if (prevQuarter != null) {
-        log('Текущий период Id:' + formData.reportPeriodId)
-        log('Предыдущий период найден Id:' + prevQuarter.id)
         prevQuarterFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, prevQuarter.id);
 
         if (prevQuarterFormData != null && prevQuarterFormData.state == WorkflowState.ACCEPTED) {
@@ -532,3 +500,190 @@ void setTotalStyle(def row) {
     }
 }
 
+/**
+ * Получение импортируемых данных.
+ * Транспортный файл формата xml.
+ */
+void importData() {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '' || !fileName.contains('.xml')) {
+        return
+    }
+
+    def is = ImportInputStream
+    if (is == null) {
+        return
+    }
+
+    def xmlString = importService.getData(is, fileName)
+    if (xmlString == null || xmlString == '') {
+        return
+    }
+
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        return
+    }
+
+    // сохранить начальное состояние формы
+    def data = getData(formData)
+    def rowsOld = getRows(data)
+    try {
+        // добавить данные в форму
+        addData(xml)
+
+        // расчитать и проверить
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+            logicalCheck()
+        }
+    } catch(Exception e) {
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
+    }
+    // откатить загрузку если есть ошибки
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        data.clear()
+        data.insert(rowsOld, 1)
+    } else {
+        logger.info('Данные загружены')
+    }
+    data.commit()
+}
+
+/**
+ * Заполнить форму данными.
+ *
+ * @param xml данные
+ */
+void addData(def xml) {
+    def tmp
+    def indexRow = 0
+    def newRows = []
+    def index
+    def refDataProvider = refBookFactory.getDataProvider(60)
+
+    // TODO (Aydar Kadyrgulov)  Проверка корректности данных
+    for (def row : xml.exemplar.table.detail.record) {
+        indexRow++
+        index = 0
+
+        def newRow = getNewRow()
+
+        // графа 1
+        newRow.number = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 2
+        newRow.date = getDate(row.field[index].@value.text())
+        index++
+
+        // графа 3 - справочник 15 "Общероссийский классификатор валют"
+        tmp = null
+        if (row.field[index].@value.text() != null &&
+                row.field[index].@value.text().trim() != '') {
+            def records = refDataProvider.getRecords(new Date(), null, "CODE = '" + row.field[index].@value.text() + "'", null);
+            if (records != null && !records.getRecords().isEmpty()) {
+                tmp = records.getRecords().get(0).get('record_id').getNumberValue()
+            }
+        }
+        newRow.part = tmp
+        index++
+
+        // графа 4
+        newRow.dealingNumber = row.field[index].@value.text()
+        index++
+
+        // графа 5
+        newRow.bondKind = row.field[index].@value.text()
+        index++
+
+        // графа 6
+        newRow.costs = getNumber(row.field[index].@value.text())
+
+        newRows.add(newRow)
+    }
+
+
+    // проверка итоговых данных
+    if (xml.exemplar.table.total.record.field.size() > 0 && !newRows.isEmpty()) {
+        def totalRow = formData.createDataRow()
+
+        totalRow.costs = 0
+
+        newRows.each { row ->
+            totalRow.costs += (row.costs != null ? row.costs : 0)
+        }
+
+        for (def row : xml.exemplar.table.total.record) {
+            // графа 6
+            if (totalRow.costs != getNumber(row.field[5].@value.text())) {
+                logger.error('Итоговые значения неправильные.')
+                return
+            }
+        }
+    }
+    def data = getData(formData)
+    data.clear()
+    data.insert(newRows, 1)
+    data.commit()
+}
+
+/**
+ * Получить новую строку с заданными стилями.
+ */
+def getNewRow() {
+    def row = formData.createDataRow()
+
+    // графа 1..10
+    ['date', 'part', 'dealingNumber', 'bondKind', 'costs'].each {
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return row
+}
+
+/**
+ * Получить числовое значение.
+ *
+ * @param value строка
+ */
+def getNumber(def value) {
+    if (value == null) {
+        return null
+    }
+    def tmp = value.trim()
+    if ("".equals(tmp)) {
+        return null
+    }
+    // поменять запятую на точку и убрать пробелы
+    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
+    return new BigDecimal(tmp)
+}
+
+/**
+ * Получить дату по строковому представлению (формата дд.ММ.гггг)
+ */
+def getDate(def value) {
+    if (isEmpty(value)) {
+        return null
+    }
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    return format.parse(value)
+}
+
+/**
+ * Проверка пустое ли значение.
+ */
+def isEmpty(def value) {
+    return value == null || value == '' || value == 0
+}
+
+/**
+ * Расчет полностью
+ */
+void calc() {
+    form = getData(formData)
+    deleteAllStatic(form)
+    sort()
+    fillForm()
+}

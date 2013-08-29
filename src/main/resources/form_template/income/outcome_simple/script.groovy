@@ -1,5 +1,7 @@
 package form_template.income.outcome_simple
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -274,19 +276,19 @@ def consolidationBank() {
     def needCalc = false
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
-    departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
-        def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+    for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), FormDataKind.SUMMARY)){
+        def child = formDataService.find(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 304) {
             needCalc = true
             DataRowHelper childData = getData(child)
-            for (def row : childData.allCached) {
+            for (DataRow<Cell> row : childData.allCached) {
                 if (row.getAlias() == null) {
                     continue
                 }
-                def rowResult = data.getDataRow(data.getAllCached(), row.getAlias())
-                ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each {
-                    if (row.getCell(it).getValue() != null) {
-                        rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)))
+                DataRow<Cell> rowResult = data.getDataRow(data.getAllCached(), row.getAlias())
+                for (alias in ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']) {
+                    if (row.getCell(alias).getValue() != null) {
+                        rowResult.getCell(alias).setValue(summ(rowResult.getCell(alias), row.getCell(alias)))
                     }
                 }
             }
@@ -448,9 +450,9 @@ def isTerBank() {
  * Получить сумму диапазона строк определенного столбца.
  */
 def getSum(String columnAlias, String rowFromAlias, String rowToAlias) {
-    def data = getData(formData)
-    def from = data.getDataRowIndex(data.getAll(), rowFromAlias) + 1
-    def to = data.getDataRowIndex(data.getAll(), rowToAlias) - 1
+    DataRowHelper data = getData(formData)
+    def from = data.getDataRowIndex(data.getAll(), rowFromAlias)
+    def to = data.getDataRowIndex(data.getAll(), rowToAlias)
     if (from > to) {
         return 0
     }

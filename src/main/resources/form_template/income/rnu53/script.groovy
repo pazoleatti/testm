@@ -67,16 +67,34 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = formData.createDataRow()
     def data = getData(formData)
-
+    DataRow<Cell> newRow = formData.createDataRow()
     // графа 1..10
     ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
             'acquisitionPrice', 'salePrice', 'part1REPODate', 'part2REPODate'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    data.insert(newRow,getLastInsertIndex())
+    def index = 0
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def row = currentDataRow
+        while(row.getAlias()!=null && index>0){
+            row = getRows(data).get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
+            index++
+        }
+    }else if (getRows(data).size()>0) {
+        for(int i = getRows(data).size()-1;i>=0;i--){
+            def row = getRows(data).get(i)
+            if(row.getAlias()==null){
+                index = getRows(data).indexOf(row)+1
+                break
+            }
+        }
+    }
+    data.insert(newRow,index+1)
 }
 
 /**

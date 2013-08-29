@@ -100,7 +100,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 
 	    if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT) || (taxType == TaxType.DEAL)){
 	    	//Если контролеру назначено подразделение УНП, то ему доступно открытие периодов для федеральных налогов
-	    	res.setReadOnly(departmentService.getUNPDepartment().getId() == userInfo.getUser().getDepartmentId());
+	    	res.setReadOnly(!(departmentService.getUNPDepartment().getId() == userInfo.getUser().getDepartmentId()));
 	    	res.setEnableDepartmentPicker(false);
 	    } else {
 	    	res.setReadOnly(false);
