@@ -79,9 +79,9 @@ public class GetMainMenuActionHandler extends
 				if (!currentUser.hasRole(TARole.ROLE_OPERATOR)) {
 					menu.getSubMenu().add(new MenuItem(declarationItemName, NUMBER_SIGN + DeclarationListNameTokens.DECLARATION_LIST
 						+ ";" + TYPE + "=" + menu.getMeta()));
+                    menu.getSubMenu().add(new MenuItem("Ведение периодов", NUMBER_SIGN + PeriodsTokens.PERIODS
+                            + ";" + TYPE + "=" + menu.getMeta()));
 				}
-				menu.getSubMenu().add(new MenuItem("Ведение периодов", NUMBER_SIGN + PeriodsTokens.PERIODS
-						+ ";" + TYPE + "=" + menu.getMeta()));
 			}
 			menuItems.add(taxMenu);
 
@@ -107,7 +107,9 @@ public class GetMainMenuActionHandler extends
 					.append(";").append(FormDataImportPresenter.FORM_DATA_KIND_ID).append("=1")
 					.toString()
 					));*/
-			menuItems.add(settingMenuItem);
+            if (!currentUser.hasRole(TARole.ROLE_OPERATOR)) {
+                menuItems.add(settingMenuItem);
+            }
 		}
 		if (currentUser.hasRole(TARole.ROLE_CONF)) {
 			MenuItem settingMenuItem = new MenuItem("Настройки");
@@ -122,7 +124,6 @@ public class GetMainMenuActionHandler extends
         if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
             MenuItem settingMenuItem = new MenuItem("Настройки");
             settingMenuItem.getSubMenu().add(new MenuItem("Пользователи системы", NUMBER_SIGN + UserListTokens.secuserPage));
-            settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
             menuItems.add(settingMenuItem);
         }
 
@@ -137,6 +138,8 @@ public class GetMainMenuActionHandler extends
                                 NUMBER_SIGN + TaxFormNominationToken.taxFormNomination +
                                         ";" + TaxFormNominationToken.isForm + "=" + true));
             }
+
+            settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
 
             settingMenuItem.getSubMenu().add(
                     new MenuItem("Указание форм-источников",
