@@ -936,7 +936,7 @@ def addData(def xml) {
         return
     }
 
-    Date date = reportDate
+    Date date = new Date()
 
     def cache = [:]
     def data = getData(formData)
@@ -1077,6 +1077,11 @@ def getNumber(def value) {
     return new BigDecimal(tmp)
 }
 
+/**
+ * Получить record_id элемента справочника.
+ *
+ * @param value
+ */
 def getRecords(def ref_id, String code, String value, Date date, def cache) {
     String filter = code + " like '"+ value.replaceAll(' ', '')+ "%'"
     if (cache[ref_id]!=null) {
@@ -1090,7 +1095,7 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
-    logger.error("Не удалось определить элемент справочника!($filter)")
+    logger.error("Не удалось определить элемент справочника!")
     return null;
 }
 
