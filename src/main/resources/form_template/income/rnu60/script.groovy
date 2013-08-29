@@ -30,7 +30,7 @@ switch (formDataEvent) {
         allCheck()
         break
     case FormDataEvent.ADD_ROW:
-        addNewRowwarnrmData()
+        addNewRow()
         break
     case FormDataEvent.DELETE_ROW:
         deleteRow()
@@ -502,53 +502,33 @@ DataRow getRealItogo(){
 /**
  * Вставка строки в случае если форма генирует динамически строки итого (на основе данных введённых пользователем)
  */
-void addNewRowwarnrmData() {
+void addNewRow() {
     def data = getData(formData)
     DataRow<Cell> newRow = formData.createDataRow()
-    int index // Здесь будет позиция вставки
-
-    rows = getRows(data)
-    if (rows.size() > 0) {
-        DataRow<Cell> selectRow
-        // Форма не пустая
-        if (currentDataRow != null && rows.indexOf(currentDataRow) != -1) {
-            // Значит выбрал строку куда добавлять
-            selectRow = currentDataRow
-        } else {
-            // Строку не выбрал поэтому добавляем в самый конец
-            selectRow = rows.get(rows.size() - 1) // Вставим в конец
-        }
-
-        int indexSelected = rows.indexOf(selectRow)
-
-        // Определим индекс для выбранного места
-        if (selectRow.getAlias() == null) {
-            // Выбрана строка не итого
-            index = indexSelected // Поставим на то место новую строку
-        } else {
-            // Выбрана строка итого, для статических строг итого тут проще и надо фиксить под свою форму
-            // Для динимаческих строк итого идём вверх пока не встретим конец формы или строку не итого
-
-            for (index = indexSelected; index >= 0; index--) {
-                if (rows.get(index).getAlias() == null) {
-                    index++
-                    break
-                }
-            }
-            if (index < 0) {
-                // Значит выше строки итого нет строк, добавим новую в начало
-                index = 0
-            }
-        }
-    } else {
-        // Форма пустая поэтому поставим строку в начало
-        index = 0
-    }
     [
             'tradeNumber', 'securityName', 'currencyCode', 'nominalPrice', 'part1REPODate', 'part2REPODate', 'acquisitionPrice', 'salePrice'
     ].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    def index = 0
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def row = currentDataRow
+        while(row.getAlias()!=null && index>0){
+            row = getRows(data).get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
+            index++
+        }
+    }else if (getRows(data).size()>0) {
+        for(int i = getRows(data).size()-1;i>=0;i--){
+            def row = getRows(data).get(i)
+            if(row.getAlias()==null){
+                index = getRows(data).indexOf(row)+1
+                break
+            }
+        }
     }
     data.insert(newRow,index+1)
 }

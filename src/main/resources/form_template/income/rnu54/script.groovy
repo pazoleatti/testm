@@ -80,9 +80,22 @@ def addNewRow() {
     def data = getData(formData)
     def newRow = getNewRow()
     def index = 0
-    if(currentDataRow!=null){
-        if(currentDataRow.getAlias()==null){
-            index = getIndex(currentDataRow)+1
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def row = currentDataRow
+        while(row.getAlias()!=null && index>0){
+            row = getRows(data).get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
+            index++
+        }
+    }else if (getRows(data).size()>0) {
+        for(int i = getRows(data).size()-1;i>=0;i--){
+            def row = getRows(data).get(i)
+            if(row.getAlias()==null){
+                index = getRows(data).indexOf(row)+1
+                break
+            }
         }
     }
     data.insert(newRow,index+1)

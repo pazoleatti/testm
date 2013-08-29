@@ -56,6 +56,11 @@ public class IncrementButton extends Composite implements IncrementButtonView, H
 	}
 
 	@Override
+	public boolean isEmpty() {
+		return textBox.getValue().isEmpty();
+	}
+
+	@Override
 	public boolean isEnabled() {
 		return textBox.isEnabled() &&
 				upButton.isEnabled() &&
