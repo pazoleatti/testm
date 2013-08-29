@@ -6,6 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+
+import java.text.SimpleDateFormat
 
 /**
  * 6.5	(РНУ-51) Регистр налогового учёта финансового результата от реализации (выбытия) ОФЗ
@@ -33,11 +36,11 @@ switch (formDataEvent) {
         deleteRow()
         recalculateNumbers()
         break
-// после принятия из подготовлена
+    // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
         allCheck()
         break
-// обобщить
+    // обобщить
     case FormDataEvent.COMPOSE:
         consolidation()
         deleteAllStatic()
@@ -93,25 +96,31 @@ void logicalCheck() {
     for (DataRow row in data) {
         if (row.getAlias() == null) {
 
-            checkRequiredColumns(row, columns)
+            if (!checkRequiredColumns(row, columns)) {
+                return
+            }
 
             // 1.Проверка цены приобретения для целей налогообложения (графа 12)
             if (row.acquisitionPrice > row.marketPriceInRub && row.acquisitionPriceTax != row.marketPriceInRub) {
                 logger.error("Неверно определена цена приобретения для целей налогообложения")
+                return
             }
 
             if (row.acquisitionPrice <= row.marketPriceInRub && row.acquisitionPriceTax != row.acquisitionPrice) {
                 logger.error("Неверно определена цена приобретения для целей налогообложения")
+                return
             }
 
             // 2.Проверка рыночной цены в процентах при погашении (графа 16)
             if (row.redemptionValue != null && row.redemptionValue > 0 && !(row.marketPriceInPerc1 == 100)) {
                 logger.error("Неверно указана рыночная цена в процентах при погашении!")
+                return
             }
 
             // 3.Проверка рыночной цены в рублях при погашении (графа 17)
             if (row.redemptionValue != null && row.redemptionValue > 0 && !(row.marketPriceInRub1 == row.redemptionValue)) {
                 logger.error("Неверно указана рыночная цена в рублях при погашении!")
+                return
             }
 
             /**
@@ -123,6 +132,7 @@ void logicalCheck() {
                     && row.priceInFactRub > row.marketPriceInRub1 && row.salePriceTax != row.priceInFactRub
             ) {
                 logger.error('Неверно определена цена реализации для целей налогообложения по сделкам на ОРЦБ!')
+                return
             }
 
             /**
@@ -133,6 +143,7 @@ void logicalCheck() {
              */
             if (code == 4 && row.salePriceTax != row.redemptionValue) {
                 logger.error('Неверно определена цена реализации для целей налогообложения при погашении!')
+                return
             }
 
             /**
@@ -144,6 +155,7 @@ void logicalCheck() {
             if ((code == 2 || code == 5) && row.tradeNumber < row.marketPriceInPerc1
                     && row.priceInFactRub < row.marketPriceInRub1 && row.salePriceTax != row.marketPriceInRub1) {
                 logger.error('Неверно определена цена реализации для целей налогообложения по переговорным сделкам на ОРЦБ и сделкам, связанным с открытием-закрытием короткой позиции!')
+                return
             }
 
             /**
@@ -154,6 +166,7 @@ void logicalCheck() {
              */
             if (row.expensesTotal != (row.costOfAcquisition ?: 0) + (row.acquisitionPriceTax ?: 0) + (row.expensesOnSale ?: 0)) {
                 logger.error('Неверно определены расходы!')
+                return
             }
 
             /**
@@ -164,6 +177,7 @@ void logicalCheck() {
              */
             if (row.profit != (row.salePriceTax ?: 0) - (row.expensesTotal ?: 0)) {
                 logger.error('Неверно определен финансовый результат реализации (выбытия)!')
+                return
             }
 
             /**
@@ -179,6 +193,7 @@ void logicalCheck() {
                     || row.excessSalePriceTax < 0
             ) {
                 logger.error('Неверно определено превышение цены реализации для целей налогообложения над фактической ценой реализации!')
+                return
             }
 
             /**
@@ -199,6 +214,7 @@ void logicalCheck() {
             for (String check in checks) {
                 if (row.getCell(check).value != value.get(check)) {
                     logger.error("Неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '') + "!")
+                    return
                 }
             }
         }
@@ -217,7 +233,7 @@ void logicalCheck() {
             for (String alias in itogoSum) {
                 if (realItogoKvartal.getCell(alias).value != itogoKvartal.getCell(alias).value) {
                     logger.error("Итоговые значения за текущий квартал рассчитаны неверно!")
-                    break
+                    return
                 }
             }
         }
@@ -234,7 +250,7 @@ void logicalCheck() {
             for (String alias in itogoSum) {
                 if (realItogo.getCell(alias).value != itogo.getCell(alias).value) {
                     logger.error("Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!")
-                    break
+                    return
                 }
             }
         }
@@ -579,7 +595,9 @@ def checkRequiredColumns(def row, def columns) {
         def index = getRows(data).indexOf(row) + 1
         def errorMsg = colNames.join(', ')
         logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        return false
     }
+    return true
 }
 
 /**
@@ -733,18 +751,22 @@ void importData() {
         addData(xml)
 
         // расчитать и проверить
-        deleteAllStatic()
-        sort()
-        calc()
-        addAllStatic()
-        allCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            deleteAllStatic()
+            sort()
+            calc()
+            addAllStatic()
+            allCheck()
+        }
     } catch(Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка!')
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
     }
     // откатить загрузку если есть ошибки
     if (logger.containsLevel(LogLevel.ERROR)) {
         data.clear()
         data.insert(rowsOld, 1)
+    } else {
+        logger.info('Данные загружены')
     }
     data.commit()
 }
@@ -755,24 +777,22 @@ void importData() {
  * @param xml данные
  */
 void addData(def xml) {
-    def data = getData(formData)
-
     def tmp
-    def indexRow = 0
-    def newRows = []
     def index
     def refDataProvider61 = refBookFactory.getDataProvider(61)
     def refDataProvider62 = refBookFactory.getDataProvider(62)
 
+    def data = getData(formData)
+    data.clear()
+
     // TODO (Ramil Timerbaev) Проверка корректности данных
     for (def row : xml.exemplar.table.detail.record) {
-        indexRow++
         index = 1
 
         def newRow = getNewRow()
 
         // графа 1
-        newRow.rowNumber = row.field[index].@value.text()
+        newRow.rowNumber = getNumber(row.field[index].@value.text())
         index++
 
         // графа 2 - справочник 61 "Коды сделок"
@@ -788,7 +808,6 @@ void addData(def xml) {
         if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
             tmp = getRecordId(refDataProvider62, 'CODE', row.field[index].@value.text())
         }
-
         newRow.singSecurirty = tmp
         index++
 
@@ -797,121 +816,105 @@ void addData(def xml) {
         index++
 
         // графа 5
-        newRow.acquisitionDate = row.field[index].@value.text()
+        newRow.acquisitionDate = getDate(row.field[index].@value.text())
         index++
 
         // графа 6
-        newRow.saleDate = row.field[index].@value.text()
+        newRow.saleDate = getDate(row.field[index].@value.text())
         index++
 
         // графа 7
-        newRow.amountBonds = row.field[index].@value.text()
+        newRow.amountBonds = getNumber(row.field[index].@value.text())
         index++
 
         // графа 8
-        newRow.acquisitionPrice = row.field[index].@value.text()
+        newRow.acquisitionPrice = getNumber(row.field[index].@value.text())
         index++
 
         // графа 9
-        newRow.costOfAcquisition = row.field[index].@value.text()
+        newRow.costOfAcquisition = getNumber(row.field[index].@value.text())
         index++
 
         // графа 10
-        newRow.marketPriceInPerc = row.field[index].@value.text()
+        newRow.marketPriceInPerc = getNumber(row.field[index].@value.text())
         index++
 
         // графа 11
-        newRow.marketPriceInRub = row.field[index].@value.text()
+        newRow.marketPriceInRub = getNumber(row.field[index].@value.text())
         index++
 
         // графа 12
-        newRow.acquisitionPriceTax = row.field[index].@value.text()
+        newRow.acquisitionPriceTax = getNumber(row.field[index].@value.text())
         index++
 
         // графа 13
-        newRow.redemptionValue = row.field[index].@value.text()
+        newRow.redemptionValue = getNumber(row.field[index].@value.text())
         index++
 
         // графа 14
-        newRow.priceInFactPerc = row.field[index].@value.text()
+        newRow.priceInFactPerc = getNumber(row.field[index].@value.text())
         index++
 
         // графа 15
-        newRow.priceInFactRub = row.field[index].@value.text()
+        newRow.priceInFactRub = getNumber(row.field[index].@value.text())
         index++
 
         // графа 16
-        newRow.marketPriceInPerc1 = row.field[index].@value.text()
+        newRow.marketPriceInPerc1 = getNumber(row.field[index].@value.text())
         index++
 
         // графа 17
-        newRow.marketPriceInRub1 = row.field[index].@value.text()
+        newRow.marketPriceInRub1 = getNumber(row.field[index].@value.text())
         index++
 
         // графа 18
-        newRow.salePriceTax = row.field[index].@value.text()
+        newRow.salePriceTax = getNumber(row.field[index].@value.text())
         index++
 
         // графа 19
-        newRow.expensesOnSale = row.field[index].@value.text()
+        newRow.expensesOnSale = getNumber(row.field[index].@value.text())
         index++
 
         // графа 20
-        newRow.expensesTotal = row.field[index].@value.text()
+        newRow.expensesTotal = getNumber(row.field[index].@value.text())
         index++
 
         // графа 21
-        newRow.profit = row.field[index].@value.text()
+        newRow.profit = getNumber(row.field[index].@value.text())
         index++
 
         // графа 22
-        newRow.excessSalePriceTax = row.field[index].@value.text()
+        newRow.excessSalePriceTax = getNumber(row.field[index].@value.text())
 
-        newRows.add(newRow)
+        insert(data, newRow)
     }
     // проверка итоговых данных
-    if (xml.exemplar.table.total.record.field.size() > 0 && !newRows.isEmpty()) {
-        def totalRow = formData.createDataRow()
-
+    if (xml.exemplar.table.total.record.size() > 1 && !getRows(data).isEmpty()) {
         // графы 7-9, 11-13, 15, 17-22
-        def columnsAlias = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInRub',
-                'acquisitionPriceTax', 'redemptionValue', 'priceInFactRub', 'marketPriceInRub1',
-                'salePriceTax', 'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
+        // TODO (Ramil Timerbaev) убрал нередактируемые вычисляемые графы (их итоги)
+        def columnsAlias = ['amountBonds': 7, 'acquisitionPrice': 8, 'costOfAcquisition': 9,
+                'marketPriceInRub': 11, /*'acquisitionPriceTax': 12,*/ 'redemptionValue': 13,
+                'priceInFactRub': 15, /*'marketPriceInRub1': 17, 'salePriceTax': 18,*/ 'expensesOnSale': 19 /*,
+                'expensesTotal': 20, 'profit': 21, 'excessSalePriceTax': 22*/]
 
-        // задать всем итоговым ячейкам 0
-        columnsAlias.each { alias ->
-            totalRow.getCell(alias).setValue(0)
-        }
+        index = 0
+        for (def row : xml.exemplar.table.total.record) {
+            index++
+            def totalRow = (index == 1 ? getItogoKvartal() : getItogoKvartal())
 
-        // подсчитать суммы
-        def value
-        columnsAlias.each { alias ->
-            newRows.each { row ->
-                value = totalRow.getCell(alias).getValue() + (row.getCell(alias).getValue() ?: 0)
-                totalRow.getCell(alias).setValue(value)
+            // сравнить посчитанные суммы итогов с итогами из транспортного файла (графы 7-9, 11-13, 15, 17-22)
+            def exit = false
+            columnsAlias.each { alias, i ->
+                if (!exit && totalRow.getCell(alias).getValue() != getNumber(row.field[i].@value.text())) {
+                    logger.error('Итоговые значения неправильные.')
+                    exit = true
+                }
             }
-        }
-
-        // сравнить посчитанные суммы итогов с итогами из транспортного файла
-        def xmlTotal = xml.rowTotal[0]
-        // графы 7-9, 11-13, 15, 17-22
-        def check = true
-        ['amountBonds': 7, 'acquisitionPrice': 8, 'costOfAcquisition': 9, 'marketPriceInRub': 11,
-                'acquisitionPriceTax': 12, 'redemptionValue': 13, 'priceInFactRub': 15,
-                'marketPriceInRub1': 17, 'salePriceTax': 18, 'expensesOnSale': 19,
-                'expensesTotal': 20, 'profit': 21, 'excessSalePriceTax': 22].each { alias, i ->
-            if (check && totalRow.getCell(alias).getValue() != getNumber(xmlTotal.cell[i + 1].text())) {
-                logger.error('Итоговые значения неправильные.')
-                check = false
+            if (exit) {
                 return
             }
         }
     }
-    data.clear()
-    newRows.each { newRow ->
-        insert(data, newRow)
-    }
-    logger.info('Данные загружены')
 }
 
 /**
@@ -971,4 +974,15 @@ def getRecordId(def provider, def searchByAlias, def value) {
         return records.getRecords().get(0).get('record_id').getNumberValue()
     }
     return null
+}
+
+/**
+ * Получить дату по строковому представлению (формата дд.ММ.гггг)
+ */
+def getDate(def value) {
+    if (value == null || value == '') {
+        return null
+    }
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    return format.parse(value)
 }
