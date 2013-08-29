@@ -68,6 +68,10 @@ switch (formDataEvent) {
         getData(formData).commit()
         break
     case FormDataEvent.IMPORT :
+        if (!isBalancePeriod && !checkPrevPeriod()) {
+            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            return
+        }
         importData()
         break
 }
@@ -537,6 +541,14 @@ def logicalCheck(def useLog) {
 }
 
 /**
+ * Получить отчетную дату.
+ */
+def getReportDate() {
+    def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    return (tmp ? tmp.getTime() + 1 : null)
+}
+
+/**
  * Проверки соответствия НСИ.
  */
 def checkNSI() {
@@ -616,16 +628,12 @@ void importData() {
     }
 
     def data = getData(formData)
+    def rowsOld = getRows(data)
     def totalColumns = [4:'lotSizePrev', 5:'lotSizeCurrent', 7:'cost', 10:'costOnMarketQuotation', 11:'reserveCalcValue']
     // добавить данные в форму
-    boolean canCommit = true
     try {
         def totalLoad = addData(xml)
         if (totalLoad!=null) {
-/*            if (!isBalancePeriod && !checkPrevPeriod()) {
-                logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
-                return
-            }*/
             calc()
             logicalCheck(false)
             checkNSI()
@@ -634,27 +642,27 @@ void importData() {
             for (def row : getRows(data))
                 if (isTotal(row)) totalCalc = row
 
-            totalColumns.each{k, v->
-                if (totalCalc[v]!=totalLoad[v]) {
-                    logger.error("Итоговая сумма в графе $k в транспортном файле некорректна")
-                    canCommit = false
-                }
+            if (totalCalc!=null)
+                totalColumns.each{k, v->
+                    if (totalCalc[v]!=totalLoad[v]) {
+                        logger.error("Итоговая сумма в графе $k в транспортном файле некорректна")
+                    }
             }
         } else {
             logger.error("Нет итоговой строки.")
-            canCommit = false
         }
     } catch(Exception e) {
         logger.error(""+e.message)
-        canCommit = false
     }
     //в случае ошибок откатить изменения
-    if (!canCommit) {
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        data.clear()
+        data.insert(rowsOld, 1)
         logger.error("Загрузка файла $fileName завершилась ошибкой")
     } else {
         logger.info('Закончена загрузка файла ' + fileName)
-        data.commit()
     }
+    data.commit()
 }
 
 /*
@@ -966,7 +974,7 @@ def hasTotal(def data) {
  * @param xml данные
  */
 def addData(def xml) {
-    Date date = new Date()
+    Date date = reportDate
 
     def cache = [:]
     def data = getData(formData)

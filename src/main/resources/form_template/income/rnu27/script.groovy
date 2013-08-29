@@ -74,6 +74,12 @@ switch (formDataEvent) {
         getData(formData).commit()
         break
     case FormDataEvent.IMPORT :
+        formPrev
+        // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
+        if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
+            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+            return
+        }
         importData()
         break
 }
@@ -191,19 +197,19 @@ void logicalCheck() {
             // @author ivildanov
             // Арифметические проверки граф 5, 8, 11, 12, 13, 14, 15, 16, 17
             List checks = ['reserveCalcValuePrev', 'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
-            Map<String, Object> value = [:]
-            value.put('reserveCalcValuePrev', calc8(row))
-            value.put('marketQuotation', calc11(row))
-            value.put('rubCourse', calc12(row))
-            value.put('marketQuotationInRub', calc13(row))
-            value.put('costOnMarketQuotation', calc14(row))
-            value.put('reserveCalcValue', calc15(row))
-            value.put('reserveCreation', calc16(row))
-            value.put('recovery', calc17(row))
+            def value = formData.createDataRow()
+            value.reserveCalcValuePrev = calc8(row)
+            value.marketQuotation = calc11(row)
+            value.rubCourse = calc12(row)
+            value.marketQuotationInRub = calc13(row)
+            value.costOnMarketQuotation = calc14(row)
+            value.reserveCalcValue = calc15(row)
+            value.reserveCreation = calc16(row)
+            value.recovery = calc17(row)
 
             for (String check in checks) {
                 if (row.getCell(check).value != value.get(check)) {
-                    logger.error("Неверно рассчитана графа \"" + row.getCell(check).column.name.replace('%', '') + "\"!")
+                    logger.error("Неверно рассчитана графа \"" + row.getCell(check).column.name.replace('%', '') + "\"!(${row.getCell(check).value} != ${value.get(check)})")
                 }
             }
 
@@ -384,34 +390,47 @@ void importData() {
     if (xml == null) {
         return
     }
-    // номер строки с которой брать данные (что бы пропустить шапку таблицы или лишнюю информацию)
-    def startRow = 0
-
-    // номер графы с которой брать данные (что бы пропустить нумерацию или лишнюю информацию)
-    def startColumn = 1
-
+    def data = getData(formData)
+    def rowsOld = getRows(data)
     def totalColumns = [6:'prev', 7:'current', 9:'cost', 14:'costOnMarketQuotation', 15:'reserveCalcValue']
 
     // добавить данные в форму
-    boolean canCommit = true
-    try{
-        def total = addData(xml)
-        if (total!=null) {
+    try {
+        def totalLoad = addData(xml)
+        if (totalLoad!=null) {
+            formPrev
+            deleteAllStatic()
+            sort()
             calc()
-            logicalCheck(false)
-            checkNSI()
+            addAllStatic()
+            allCheck()
+
+            def totalCalc
+            for (def row : getRows(data))
+                if (isTotal(row)) totalCalc = row
+
+            if (totalCalc!=null) {
+                totalColumns.each{k, v->
+                    if (totalCalc[v]!=totalLoad[v]) {
+                        logger.error("Итоговая сумма в графе $k в транспортном файле некорректна")
+                    }
+                }
+            }
         } else {
             logger.error("Нет итоговой строки.")
-            canCommit = false
         }
-        logger.info('Закончена загрузка файла ' + fileName)
     } catch(Exception e) {
-        canCommit = false
+        logger.error(""+e.message)
     }
     //в случае ошибок откатить изменения
-    if (!canCommit) {
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        data.clear()
+        data.insert(rowsOld, 1)
         logger.error("Загрузка файла $fileName завершилась ошибкой")
+    } else {
+        logger.info('Закончена загрузка файла ' + fileName)
     }
+    data.commit()
 }
 
 // список столбцов, для которых нужно считать итоги
@@ -924,7 +943,7 @@ def getData(def formData) {
  *
  * @param xml данные
  */
-boolean addData(def xml, def startRow, def startColumn) {
+def addData(def xml) {
     if (xml == null) {
         return
     }
@@ -933,6 +952,7 @@ boolean addData(def xml, def startRow, def startColumn) {
 
     def cache = [:]
     def data = getData(formData)
+    data.clear()
 
     def total = formData.createDataRow()
 
@@ -941,15 +961,15 @@ boolean addData(def xml, def startRow, def startColumn) {
         indexRow++
 
         // пропустить шапку таблицы
-        if (indexRow <= startRow) {// || indexRow>20) {
+        if (indexRow <= 0) {// || indexRow>20) {
             continue
         }
 
         def newRow = getNewRow()
 
-        def indexCell = startColumn
+        def indexCell = 1
 
-        newRow.rowNumber = getNumber(row.cell[indexCell].text())
+        newRow.number = getNumber(row.cell[indexCell].text())
         indexCell++
 
         // графа 2
@@ -1048,8 +1068,6 @@ boolean addData(def xml, def startRow, def startColumn) {
     else {
         return null
     }
-
-    data.commit()
     return total
 }
 
@@ -1072,7 +1090,7 @@ def getNumber(def value) {
 }
 
 def getRecords(def ref_id, String code, String value, Date date, def cache) {
-    String filter = code + "= '"+ value.replaceAll(' ', '')+"'"
+    String filter = code + " like '"+ value.replaceAll(' ', '')+ "%'"
     if (cache[ref_id]!=null) {
         if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
     } else {
@@ -1084,7 +1102,7 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
-    logger.error("Не удалось определить элемент справочника!")
+    logger.error("Не удалось определить элемент справочника!($filter)")
     return null;
 }
 
@@ -1183,4 +1201,11 @@ def checkAlias(def list, def rowAlias) {
  */
 def getRowByAlias(def data, def alias) {
     return data.getDataRow(getRows(data), alias)
+}
+
+/**
+ * Проверка является ли строка итоговой.
+ */
+def isTotal(def row) {
+    return row != null && row.getAlias() != null && row.getAlias().contains('itogo')
 }
