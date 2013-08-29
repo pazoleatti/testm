@@ -111,6 +111,9 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		if (getView().isFromYearEmpty() || getView().isToYearEmpty()) {
 			Window.alert("Не заданы все обязательные параметры!");
 			return;
+		} else if (getView().getFromYear() > getView().getToYear()){
+			Window.alert("Интервал периода поиска указан неверно!");
+			return;
 		} else {
 			find();
 		}
