@@ -173,7 +173,7 @@ public class DeclarationListView extends
 
 		AbstractPager pager =  new FlexiblePager(FlexiblePager.TextLocation.CENTER, showFastForwardButton, fastForwardRows,
 				showLastPageButton);
-		pager.setRangeLimited(true);
+
 		pager.getElement().getStyle().setProperty("marginLeft", "auto");
 		pager.getElement().getStyle().setProperty("marginRight", "auto");
 		return pager;

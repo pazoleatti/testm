@@ -68,6 +68,10 @@ switch (formDataEvent) {
         getData(formData).commit()
         break
     case FormDataEvent.IMPORT :
+        if (!isBalancePeriod && !checkPrevPeriod()) {
+            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            return
+        }
         importData()
         break
 }
@@ -95,6 +99,13 @@ def addNewRow() {
     def index = 0
     if (currentDataRow!=null){
         index = currentDataRow.getIndex()
+        def row = currentDataRow
+        while(row.getAlias()!=null && index>0){
+            row = getRows(data).get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
+            index++
+        }
     }else if (getRows(data).size()>0) {
         for(int i = getRows(data).size()-1;i>=0;i--){
             def row = getRows(data).get(i)
@@ -108,7 +119,7 @@ def addNewRow() {
 }
 
 def recalculateNumbers(){
-    index = 1
+    def index = 1
     def data = getData(formData)
     getRows(data).each{row->
         if (!isTotal(row)) {
@@ -241,7 +252,7 @@ void calc() {
             }
             // если код расходы поменялся то создать новую строку "итого по ГРН:..."
             if (tmp != row.regNumber) {
-                totalRows.put(i, getNewRow(tmp, totalColumns, sums))
+                totalRows.put(i, getNewRow(tmp, totalColumns, sums, data))
                 totalColumns.each {
                     sums[it] = 0
                 }
@@ -251,7 +262,7 @@ void calc() {
                 totalColumns.each {
                     sums[it] += (row.getCell(it).getValue() ?: 0)
                 }
-                totalRows.put(i + 1, getNewRow(row.regNumber, totalColumns, sums))
+                totalRows.put(i + 1, getNewRow(row.regNumber, totalColumns, sums, data))
                 totalColumns.each {
                     sums[it] = 0
                 }
@@ -509,13 +520,13 @@ def logicalCheck(def useLog) {
 
             // 17. Проверка итоговых значений по ГРН
             for (def codeName : totalGroupsName) {
-                def totalRowAlias = 'total' + codeName
+                def totalRowAlias = 'total' + getRowNumber(codeName, data)
 
                 if (!checkAlias(getRows(data), totalRowAlias)) {
                     logger.warn("Итоговые значения по ГРН $codeName не рассчитаны! Необходимо расчитать данные формы.")
                     continue
                 }
-                def row = getRowByAlias(data, 'total' + codeName)
+                def row = getRowByAlias(data, 'total' + getRowNumber(codeName, data))
                 for (def alias : totalColumns) {
                     if (calcSumByCode(data, codeName, alias) != row.getCell(alias).getValue()) {
                         logger.error("Итоговые значения по ГРН $codeName рассчитаны неверно!")
@@ -534,6 +545,14 @@ def logicalCheck(def useLog) {
         }
     }
     return true
+}
+
+/**
+ * Получить отчетную дату.
+ */
+def getReportDate() {
+    def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    return (tmp ? tmp.getTime() + 1 : null)
 }
 
 /**
@@ -616,41 +635,41 @@ void importData() {
     }
 
     def data = getData(formData)
+    def rowsOld = getRows(data)
     def totalColumns = [4:'lotSizePrev', 5:'lotSizeCurrent', 7:'cost', 10:'costOnMarketQuotation', 11:'reserveCalcValue']
     // добавить данные в форму
-    boolean canCommit = true
     try {
         def totalLoad = addData(xml)
         if (totalLoad!=null) {
             calc()
-//            logicalCheck(false)
-//            checkNSI()
+            logicalCheck(false)
+            checkNSI()
 
             def totalCalc
             for (def row : getRows(data))
                 if (isTotal(row)) totalCalc = row
 
-            totalColumns.each{k, v->
-                if (totalCalc[v]!=totalLoad[v]) {
-                    logger.error("Итоговая сумма в графе $k в транспортном файле некорректна")
-                    canCommit = false
-                }
+            if (totalCalc!=null)
+                totalColumns.each{k, v->
+                    if (totalCalc[v]!=totalLoad[v]) {
+                        logger.error("Итоговая сумма в графе $k в транспортном файле некорректна")
+                    }
             }
-            logger.info('Закончена загрузка файла ' + fileName)
         } else {
             logger.error("Нет итоговой строки.")
-            canCommit = false
         }
     } catch(Exception e) {
         logger.error(""+e.message)
-        canCommit = false
     }
     //в случае ошибок откатить изменения
-    if (!canCommit) {
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        data.clear()
+        data.insert(rowsOld, 1)
         logger.error("Загрузка файла $fileName завершилась ошибкой")
     } else {
-        data.commit()
+        logger.info('Закончена загрузка файла ' + fileName)
     }
+    data.commit()
 }
 
 /*
@@ -661,7 +680,7 @@ void importData() {
  * Проверка является ли строка итоговой.
  */
 def isTotal(def row) {
-    return row != null && row.getAlias() != null && row.getAlias().contains('tot')
+    return row != null && row.getAlias() != null && row.getAlias().contains('total')
 }
 
 /**
@@ -679,9 +698,9 @@ def getSum(def data, def columnAlias) {
 /**
  * Получить новую строку.
  */
-def getNewRow(def alias, def totalColumns, def sums) {
+def getNewRow(def alias, def totalColumns, def sums, def data) {
     def newRow = formData.createDataRow()
-    newRow.setAlias('tot' + alias)
+    newRow.setAlias('total' + getRowNumber(alias, data))
     newRow.regNumber = alias + ' итог'
     setTotalStyle(newRow)
     totalColumns.each {
@@ -962,7 +981,7 @@ def hasTotal(def data) {
  * @param xml данные
  */
 def addData(def xml) {
-    Date date = new Date()
+    Date date = reportDate
 
     def cache = [:]
     def data = getData(formData)
@@ -975,7 +994,7 @@ def addData(def xml) {
         indexRow++
 
         // пропустить шапку таблицы
-        if (indexRow <= 0) {// || indexRow>20) {
+        if (indexRow <= 0) {
             continue
         }
         def newRow = getNewRow()
@@ -1058,15 +1077,8 @@ def addData(def xml) {
     else {
         return null
     }
-    if (isTotal) {
-        data.clear()
-        newRows.each { newRow ->
-            insert(data, newRow)
-        }
-        data.commit()
-        return true
-    }
-    return false
+//    data.commit()
+    return total
 }
 
 /**
@@ -1159,5 +1171,19 @@ BigDecimal roundTo2(BigDecimal value) {
         return value.setScale(2, BigDecimal.ROUND_HALF_UP)
     } else {
         return value
+    }
+}
+
+/**
+ * Получение первого rowNumber по regNumber
+ * @param alias
+ * @param data
+ * @return
+ */
+def getRowNumber(def alias, def data) {
+    for(def row: getRows(data)){
+        if (row.regNumber==alias) {
+            return row.rowNumber.toString()
+        }
     }
 }

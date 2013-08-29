@@ -141,8 +141,8 @@ public class FormDataServiceImpl implements FormDataService {
             File tmpFileName = null;
 	        if ((signDataPath != null) && !signDataPath.toString().equals(IGNORE_URL)) { //TODO временное решение с IGNORE_URL
 		        try {
-                    tmpFileName = File.createTempFile("", ".original");
-                    signFileName = File.createTempFile("", ".sign");
+                    tmpFileName = File.createTempFile("dataFile", ".original");
+                    signFileName = File.createTempFile("signature", ".sign");
                     System.out.println("Validate signature success.");
 			        OutputStream outputStream =
 					        new FileOutputStream(tmpFileName);
@@ -150,13 +150,14 @@ public class FormDataServiceImpl implements FormDataService {
 			        OutputStream outputSignStream =
 					        new FileOutputStream(signFileName);
 			        IOUtils.copy(signDataPath.openStream(), outputSignStream);
-                    System.out.println("tmpFileName: " + tmpFileName.getName() + " " + "signFileName: " + signFileName.getName());
-			        checkSuccess = signService.checkSign(tmpFileName.getName(), signFileName.getName(), 0);
+                    System.out.println("tmpFileName: " + tmpFileName.getAbsolutePath() + " " + "signFileName: " + signFileName.getAbsolutePath());
+			        checkSuccess = signService.checkSign(tmpFileName.getAbsolutePath(), signFileName.getAbsolutePath(), 0);
                     inputStream = new FileInputStream(tmpFileName);
 		        } catch (Exception e) {
 			        throw new ServiceException("Произошла ошибка при проверке подписи.", e);
 		        } finally {
-                    signFileName.delete();
+                    if(signFileName != null)
+                        signFileName.delete();
                 }
             }
 	        if (!checkSuccess) {

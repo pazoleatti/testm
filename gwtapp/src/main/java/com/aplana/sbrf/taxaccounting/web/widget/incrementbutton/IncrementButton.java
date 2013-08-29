@@ -56,6 +56,11 @@ public class IncrementButton extends Composite implements IncrementButtonView, H
 	}
 
 	@Override
+	public boolean isEmpty() {
+		return textBox.getValue().isEmpty();
+	}
+
+	@Override
 	public boolean isEnabled() {
 		return textBox.isEnabled() &&
 				upButton.isEnabled() &&
@@ -71,7 +76,11 @@ public class IncrementButton extends Composite implements IncrementButtonView, H
 
 	@Override
 	public Integer getValue() {
-		return Integer.parseInt(textBox.getValue().isEmpty() ? minValue.toString() : textBox.getValue());
+		try {
+			return textBox.getValue().isEmpty() ? minValue : Integer.parseInt(textBox.getValue());
+		} catch (NumberFormatException e) {
+			return null;
+		}
 	}
 
 	@Override

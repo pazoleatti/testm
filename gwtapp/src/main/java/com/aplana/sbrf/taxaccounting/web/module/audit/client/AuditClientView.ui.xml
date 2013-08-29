@@ -27,7 +27,7 @@
                 <g:cell height="10%">
                     <pager:FlexiblePager ui:field="pager" location="CENTER"
                                          showFastForwardButton="false" fastForwardRows="0"
-                                         showLastPageButton="true" rangeLimited="true" styleName="{style.pager}" />
+                                         showLastPageButton="true" styleName="{style.pager}" />
                 </g:cell>
 
             </g:VerticalPanel>

@@ -44,8 +44,7 @@ public class AddRefBookRowHandler extends AbstractActionHandler<AddRefBookRowAct
 
 		refBookDataProvider.insertRecords(new Date(), valuesToSaveList);
 
-		AddRefBookRowResult result = new AddRefBookRowResult();
-		return result;
+		return new AddRefBookRowResult();
 	}
 
 	@Override
