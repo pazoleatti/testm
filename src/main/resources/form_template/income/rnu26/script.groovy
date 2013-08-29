@@ -99,6 +99,13 @@ def addNewRow() {
     def index = 0
     if (currentDataRow!=null){
         index = currentDataRow.getIndex()
+        def row = currentDataRow
+        while(row.getAlias()!=null && index>0){
+            row = getRows(data).get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
+            index++
+        }
     }else if (getRows(data).size()>0) {
         for(int i = getRows(data).size()-1;i>=0;i--){
             def row = getRows(data).get(i)
@@ -112,7 +119,7 @@ def addNewRow() {
 }
 
 def recalculateNumbers(){
-    index = 1
+    def index = 1
     def data = getData(formData)
     getRows(data).each{row->
         if (!isTotal(row)) {
