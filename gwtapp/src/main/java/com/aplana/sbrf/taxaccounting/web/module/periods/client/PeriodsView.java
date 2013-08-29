@@ -131,7 +131,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
 	@UiHandler("find")
 	void onFindClicked(ClickEvent event) {
-		getUiHandlers().find();
+		getUiHandlers().onFindButton();
 	}
 
 
@@ -157,5 +157,15 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	public void setReadOnly(boolean readOnly) {
 		openPeriod.setVisible(!readOnly);
 		closePeriod.setVisible(!readOnly);
+	}
+
+	@Override
+	public boolean isFromYearEmpty() {
+		return fromBox.isEmpty();
+	}
+
+	@Override
+	public boolean isToYearEmpty() {
+		return toBox.isEmpty();
 	}
 }
