@@ -302,10 +302,13 @@ public class FlexiblePager extends AbstractPager {
 	public FlexiblePager(TextLocation location, Resources resources,
 						 boolean showFastForwardButton, final int fastForwardRows,
 						 boolean showLastPageButton, ImageButtonsConstants imageButtonConstants) {
+		super();
+		
 		this.resources = resources;
 		this.fastForwardRows = fastForwardRows;
 		this.style = resources.flexiblePagerStyle();
 		this.style.ensureInjected();
+		this.setRangeLimited(false);
 
 		// Create the buttons.
 		String disabledStyle = style.disabledButton();
@@ -485,7 +488,6 @@ public class FlexiblePager extends AbstractPager {
 
 	@Override
 	public void lastPage() {
-		pageNumber.setValue(getPageCount());
 		super.lastPage();
 	}
 
@@ -496,20 +498,7 @@ public class FlexiblePager extends AbstractPager {
 
 	@Override
 	public void nextPage() {
-		// Стандартное поведение пэйджера переопределено в соответствии с задачей "http://jira.aplana.com/browse/SBRFACCTAX-811"
-		// Суть изменений: если при нажатии на "nextPage", количество отображаемых данных меньше, чем размер страницы,
-		// то отобразить только "оставшиеся" данные на следующей странице.
-		// Стандартное поведение пэйджера при нажатии на кнопку "nextPage" - всегда отображать количество данных,
-		// равное размеру страницы, даже если данных для отображения меньше чем размер страницы.
-		Range range = getDisplay().getVisibleRange();
-		int totalNumberOfRecords = getDisplay().getRowCount();
-		int nextStartRecord = range.getStart() + range.getLength();
-		int numberOfRecordsToDisplay = range.getLength();
-		if((totalNumberOfRecords - nextStartRecord) < numberOfRecordsToDisplay){
-			lastPage();
-		} else if (getDisplay() != null) {
-			setPageStart(nextStartRecord);
-		}
+		super.nextPage();
 	}
 
 	@Override
@@ -535,14 +524,6 @@ public class FlexiblePager extends AbstractPager {
 	@Override
 	public void setPageSize(int pageSize) {
 		super.setPageSize(pageSize);
-	}
-
-	@Override
-	public void setPageStart(int index) {
-		if (index < 1) {
-			pageNumber.setValue(1);
-		}
-		super.setPageStart(index);
 	}
 
 	/**
@@ -582,7 +563,7 @@ public class FlexiblePager extends AbstractPager {
 		setPrevPageButtonsDisabled(!hasPreviousPage());
 
 		// Update the next and last buttons.
-		if (isRangeLimited() || !display.isRowCountExact()) {
+		if (display.isRowCountExact()) {
 			setNextPageButtonsDisabled(!hasNextPage());
 			setFastForwardDisabled(!hasNextPages(getFastForwardPages()));
 		}
