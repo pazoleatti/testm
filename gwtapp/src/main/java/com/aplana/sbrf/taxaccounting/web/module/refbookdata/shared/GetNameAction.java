@@ -4,14 +4,14 @@ import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class GetNameAction extends UnsecuredActionImpl<GetNameResult> implements ActionName {
-	Long attributeId;
+	Long refbookId;
 
-	public Long getAttributeId() {
-		return attributeId;
+	public Long getRefbookId() {
+		return refbookId;
 	}
 
-	public void setAttributeId(Long attributeId) {
-		this.attributeId = attributeId;
+	public void setRefbookId(Long refbookId) {
+		this.refbookId = refbookId;
 	}
 
 	@Override
