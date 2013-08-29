@@ -4,653 +4,653 @@
 	<property name="ireport.callouts" value="##Wed Feb 13 18:43:45 GMT+06:00 2013"/>
 	<subDataset name="Detali" uuid="225cebd8-e0f3-4b80-b41a-f9df42c461c5">
 		<queryString language="xPath">
-			<![CDATA[/Ôàéë/Äîêóìåíò/ÒðÍàëÍÄ/ÑóìÍàëÏÓ/ÑóìÏÓ]]>
+			<![CDATA[/Ð¤Ð°Ð¹Ð»/Ð”Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚/Ð¢Ñ€ÐÐ°Ð»ÐÐ”/Ð¡ÑƒÐ¼ÐÐ°Ð»ÐŸÐ£/Ð¡ÑƒÐ¼ÐŸÐ£]]>
 		</queryString>
-		<field name="ÀâÏÓÊâ1" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÀâÏÓÊâ1]]></fieldDescription>
+		<field name="ÐÐ²ÐŸÐ£ÐšÐ²1" class="java.lang.String">
+			<fieldDescription><![CDATA[@ÐÐ²ÐŸÐ£ÐšÐ²1]]></fieldDescription>
 		</field>
-		<field name="ÀâÏÓÊâ2" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÀâÏÓÊâ2]]></fieldDescription>
+		<field name="ÐÐ²ÐŸÐ£ÐšÐ²2" class="java.lang.String">
+			<fieldDescription><![CDATA[@ÐÐ²ÐŸÐ£ÐšÐ²2]]></fieldDescription>
 		</field>
-		<field name="ÀâÏÓÊâ3" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÀâÏÓÊâ3]]></fieldDescription>
+		<field name="ÐÐ²ÐŸÐ£ÐšÐ²3" class="java.lang.String">
+			<fieldDescription><![CDATA[@ÐÐ²ÐŸÐ£ÐšÐ²3]]></fieldDescription>
 		</field>
-		<field name="ÍàëÈñ÷èñë" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÍàëÈñ÷èñë]]></fieldDescription>
+		<field name="ÐÐ°Ð»Ð˜ÑÑ‡Ð¸ÑÐ»" class="java.lang.String">
+			<fieldDescription><![CDATA[@ÐÐ°Ð»Ð˜ÑÑ‡Ð¸ÑÐ»]]></fieldDescription>
 		</field>
-		<field name="ÍàëÏÓ" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÍàëÏÓ]]></fieldDescription>
+		<field name="ÐÐ°Ð»ÐŸÐ£" class="java.lang.String">
+			<fieldDescription><![CDATA[@ÐÐ°Ð»ÐŸÐ£]]></fieldDescription>
 		</field>
-		<field name="ÎÊÀÒÎ" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÎÊÀÒÎ]]></fieldDescription>
+		<field name="ÐžÐšÐÐ¢Ðž" class="java.lang.String">
+			<fieldDescription><![CDATA[@ÐžÐšÐÐ¢Ðž]]></fieldDescription>
 		</field>
 		<variable name="OKATO" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÎÊÀÒÎ}.length() < 11 ?
-($F{ÎÊÀÒÎ}+"00000000000").substring(0,11)
+			<variableExpression><![CDATA[$F{ÐžÐšÐÐ¢Ðž}.length() < 11 ?
+($F{ÐžÐšÐÐ¢Ðž}+"00000000000").substring(0,11)
 :
-$F{ÎÊÀÒÎ}]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÎÊÀÒÎ}.length() < 11 ?
-($F{ÎÊÀÒÎ}+"00000000000").substring(0,11)
+$F{ÐžÐšÐÐ¢Ðž}]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐžÐšÐÐ¢Ðž}.length() < 11 ?
+($F{ÐžÐšÐÐ¢Ðž}+"00000000000").substring(0,11)
 :
-$F{ÎÊÀÒÎ}]]></initialValueExpression>
+$F{ÐžÐšÐÐ¢Ðž}]]></initialValueExpression>
 		</variable>
 		<variable name="NalIsch" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÍàëÈñ÷èñë} == null ?
+			<variableExpression><![CDATA[$F{ÐÐ°Ð»Ð˜ÑÑ‡Ð¸ÑÐ»} == null ?
 "---------------"
 :
-($F{ÍàëÈñ÷èñë}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÍàëÈñ÷èñë} == null ?
+($F{ÐÐ°Ð»Ð˜ÑÑ‡Ð¸ÑÐ»}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐÐ°Ð»Ð˜ÑÑ‡Ð¸ÑÐ»} == null ?
 "---------------"
 :
-($F{ÍàëÈñ÷èñë}+"---------------").substring(0,15)]]></initialValueExpression>
+($F{ÐÐ°Ð»Ð˜ÑÑ‡Ð¸ÑÐ»}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="AV1" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÀâÏÓÊâ1} == null ?
+			<variableExpression><![CDATA[$F{ÐÐ²ÐŸÐ£ÐšÐ²1} == null ?
 "---------------"
 :
-($F{ÀâÏÓÊâ1}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÀâÏÓÊâ1} == null ?
+($F{ÐÐ²ÐŸÐ£ÐšÐ²1}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐÐ²ÐŸÐ£ÐšÐ²1} == null ?
 "---------------"
 :
-($F{ÀâÏÓÊâ1}+"---------------").substring(0,15)]]></initialValueExpression>
+($F{ÐÐ²ÐŸÐ£ÐšÐ²1}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="AV2" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÀâÏÓÊâ2} == null ?
+			<variableExpression><![CDATA[$F{ÐÐ²ÐŸÐ£ÐšÐ²2} == null ?
 "---------------"
 :
-($F{ÀâÏÓÊâ2}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÀâÏÓÊâ2} == null ?
+($F{ÐÐ²ÐŸÐ£ÐšÐ²2}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐÐ²ÐŸÐ£ÐšÐ²2} == null ?
 "---------------"
 :
-($F{ÀâÏÓÊâ2}+"---------------").substring(0,15)]]></initialValueExpression>
+($F{ÐÐ²ÐŸÐ£ÐšÐ²2}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="AV3" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÀâÏÓÊâ3} == null ?
+			<variableExpression><![CDATA[$F{ÐÐ²ÐŸÐ£ÐšÐ²3} == null ?
 "---------------"
 :
-($F{ÀâÏÓÊâ3}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÀâÏÓÊâ3} == null ?
+($F{ÐÐ²ÐŸÐ£ÐšÐ²3}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐÐ²ÐŸÐ£ÐšÐ²3} == null ?
 "---------------"
 :
-($F{ÀâÏÓÊâ3}+"---------------").substring(0,15)]]></initialValueExpression>
+($F{ÐÐ²ÐŸÐ£ÐšÐ²3}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="NalPUP" class="java.lang.String">
-			<variableExpression><![CDATA[($F{ÍàëÏÓ} == null) || (Integer.parseInt($F{ÍàëÏÓ})<0)  ?
+			<variableExpression><![CDATA[($F{ÐÐ°Ð»ÐŸÐ£} == null) || (Long.parseLong($F{ÐÐ°Ð»ÐŸÐ£})<0)  ?
 "---------------"
 :
-($F{ÍàëÏÓ}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[($F{ÍàëÏÓ} == null) || (Integer.parseInt($F{ÍàëÏÓ})<0)  ?
+($F{ÐÐ°Ð»ÐŸÐ£}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[($F{ÐÐ°Ð»ÐŸÐ£} == null) || (Long.parseLong($F{ÐÐ°Ð»ÐŸÐ£})<0)  ?
 "----------------"
 :
-($F{ÍàëÏÓ}+"---------------").substring(0,15)]]></initialValueExpression>
+($F{ÐÐ°Ð»ÐŸÐ£}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="NalPUO" class="java.lang.String">
-			<variableExpression><![CDATA[($F{ÍàëÏÓ} == null) || (Integer.parseInt($F{ÍàëÏÓ})>0)  ?
+			<variableExpression><![CDATA[($F{ÐÐ°Ð»ÐŸÐ£} == null) || (Long.parseLong($F{ÐÐ°Ð»ÐŸÐ£})>0)  ?
 "----------------"
 :
-($F{ÍàëÏÓ}+"----------------").substring(1,16)]]></variableExpression>
-			<initialValueExpression><![CDATA[($F{ÍàëÏÓ} == null) || (Integer.parseInt($F{ÍàëÏÓ})>0)  ?
+($F{ÐÐ°Ð»ÐŸÐ£}+"----------------").substring(1,16)]]></variableExpression>
+			<initialValueExpression><![CDATA[($F{ÐÐ°Ð»ÐŸÐ£} == null) || (Long.parseLong($F{ÐÐ°Ð»ÐŸÐ£})>0)  ?
 "----------------"
 :
-($F{ÍàëÏÓ}+"----------------").substring(1,16)]]></initialValueExpression>
+($F{ÐÐ°Ð»ÐŸÐ£}+"----------------").substring(1,16)]]></initialValueExpression>
 		</variable>
 	</subDataset>
 	<subDataset name="Cars" uuid="3c50e15c-2559-4ee8-abb9-f32674c07bf5">
 		<queryString language="xPath">
-			<![CDATA[/Ôàéë/Äîêóìåíò/ÒðÍàëÍÄ/ÑóìÍàëÏÓ/ÑóìÏÓ/Ðàñ÷ÍàëÒÑ]]>
+			<![CDATA[/Ð¤Ð°Ð¹Ð»/Ð”Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚/Ð¢Ñ€ÐÐ°Ð»ÐÐ”/Ð¡ÑƒÐ¼ÐÐ°Ð»ÐŸÐ£/Ð¡ÑƒÐ¼ÐŸÐ£/Ð Ð°ÑÑ‡ÐÐ°Ð»Ð¢Ð¡]]>
 		</queryString>
-		<field name="ÂëàäåíÒÑ" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÂëàäåíÒÑ]]></fieldDescription>
+		<field name="Ð’Ð»Ð°Ð´ÐµÐ½Ð¢Ð¡" class="java.lang.String">
+			<fieldDescription><![CDATA[@Ð’Ð»Ð°Ð´ÐµÐ½Ð¢Ð¡]]></fieldDescription>
 		</field>
-		<field name="ÂûïóñêÒÑ" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÂûïóñêÒÑ]]></fieldDescription>
+		<field name="Ð’Ñ‹Ð¿ÑƒÑÐºÐ¢Ð¡" class="java.lang.String">
+			<fieldDescription><![CDATA[@Ð’Ñ‹Ð¿ÑƒÑÐºÐ¢Ð¡]]></fieldDescription>
 		</field>
-		<field name="ÈäÍîìÒÑ" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÈäÍîìÒÑ]]></fieldDescription>
+		<field name="Ð˜Ð´ÐÐ¾Ð¼Ð¢Ð¡" class="java.lang.String">
+			<fieldDescription><![CDATA[@Ð˜Ð´ÐÐ¾Ð¼Ð¢Ð¡]]></fieldDescription>
 		</field>
-		<field name="ÌàðêàÒÑ" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÌàðêàÒÑ]]></fieldDescription>
+		<field name="ÐœÐ°Ñ€ÐºÐ°Ð¢Ð¡" class="java.lang.String">
+			<fieldDescription><![CDATA[@ÐœÐ°Ñ€ÐºÐ°Ð¢Ð¡]]></fieldDescription>
 		</field>
-		<field name="ÊîäÂèäÒÑ" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÊîäÂèäÒÑ]]></fieldDescription>
+		<field name="ÐšÐ¾Ð´Ð’Ð¸Ð´Ð¢Ð¡" class="java.lang.String">
+			<fieldDescription><![CDATA[@ÐšÐ¾Ð´Ð’Ð¸Ð´Ð¢Ð¡]]></fieldDescription>
 		</field>
-		<field name="ÊîýôÊâ" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÊîýôÊâ]]></fieldDescription>
+		<field name="ÐšÐ¾ÑÑ„ÐšÐ²" class="java.lang.String">
+			<fieldDescription><![CDATA[@ÐšÐ¾ÑÑ„ÐšÐ²]]></fieldDescription>
 		</field>
-		<field name="ÊîýôÊë" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÊîýôÊë]]></fieldDescription>
+		<field name="ÐšÐ¾ÑÑ„ÐšÐ»" class="java.lang.String">
+			<fieldDescription><![CDATA[@ÐšÐ¾ÑÑ„ÐšÐ»]]></fieldDescription>
 		</field>
-		<field name="ËüãîòÌåñÒÑ" class="java.lang.String">
-			<fieldDescription><![CDATA[@ËüãîòÌåñÒÑ]]></fieldDescription>
+		<field name="Ð›ÑŒÐ³Ð¾Ñ‚ÐœÐµÑÐ¢Ð¡" class="java.lang.String">
+			<fieldDescription><![CDATA[@Ð›ÑŒÐ³Ð¾Ñ‚ÐœÐµÑÐ¢Ð¡]]></fieldDescription>
 		</field>
-		<field name="ÍàëÁàçà" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÍàëÁàçà]]></fieldDescription>
+		<field name="ÐÐ°Ð»Ð‘Ð°Ð·Ð°" class="java.lang.String">
+			<fieldDescription><![CDATA[@ÐÐ°Ð»Ð‘Ð°Ð·Ð°]]></fieldDescription>
 		</field>
-		<field name="ÍàëÑòàâêà" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÍàëÑòàâêà]]></fieldDescription>
+		<field name="ÐÐ°Ð»Ð¡Ñ‚Ð°Ð²ÐºÐ°" class="java.lang.String">
+			<fieldDescription><![CDATA[@ÐÐ°Ð»Ð¡Ñ‚Ð°Ð²ÐºÐ°]]></fieldDescription>
 		</field>
-		<field name="ÎÊÅÈÍàëÁàçà" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÎÊÅÈÍàëÁàçà]]></fieldDescription>
+		<field name="ÐžÐšÐ•Ð˜ÐÐ°Ð»Ð‘Ð°Ð·Ð°" class="java.lang.String">
+			<fieldDescription><![CDATA[@ÐžÐšÐ•Ð˜ÐÐ°Ð»Ð‘Ð°Ð·Ð°]]></fieldDescription>
 		</field>
-		<field name="ÐåãÇíàêÒÑ" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÐåãÇíàêÒÑ]]></fieldDescription>
+		<field name="Ð ÐµÐ³Ð—Ð½Ð°ÐºÐ¢Ð¡" class="java.lang.String">
+			<fieldDescription><![CDATA[@Ð ÐµÐ³Ð—Ð½Ð°ÐºÐ¢Ð¡]]></fieldDescription>
 		</field>
-		<field name="ÑóìÈñ÷èñë" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÑóìÈñ÷èñë]]></fieldDescription>
+		<field name="Ð¡ÑƒÐ¼Ð˜ÑÑ‡Ð¸ÑÐ»" class="java.lang.String">
+			<fieldDescription><![CDATA[@Ð¡ÑƒÐ¼Ð˜ÑÑ‡Ð¸ÑÐ»]]></fieldDescription>
 		</field>
-		<field name="ÑóìÈñ÷èñëÓïë" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÑóìÈñ÷èñëÓïë]]></fieldDescription>
+		<field name="Ð¡ÑƒÐ¼Ð˜ÑÑ‡Ð¸ÑÐ»Ð£Ð¿Ð»" class="java.lang.String">
+			<fieldDescription><![CDATA[@Ð¡ÑƒÐ¼Ð˜ÑÑ‡Ð¸ÑÐ»Ð£Ð¿Ð»]]></fieldDescription>
 		</field>
-		<field name="ÝêîëîãÊë" class="java.lang.String">
-			<fieldDescription><![CDATA[@ÝêîëîãÊë]]></fieldDescription>
+		<field name="Ð­ÐºÐ¾Ð»Ð¾Ð³ÐšÐ»" class="java.lang.String">
+			<fieldDescription><![CDATA[@Ð­ÐºÐ¾Ð»Ð¾Ð³ÐšÐ»]]></fieldDescription>
 		</field>
-		<field name="ÊîäÎñâÍàë" class="java.lang.String">
-			<fieldDescription><![CDATA[ËüãîòÎñâÍàë/@ÊîäÎñâÍàë]]></fieldDescription>
+		<field name="ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»" class="java.lang.String">
+			<fieldDescription><![CDATA[Ð›ÑŒÐ³Ð¾Ñ‚ÐžÑÐ²ÐÐ°Ð»/@ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»]]></fieldDescription>
 		</field>
-		<field name="ÑóìÎñâÍàë" class="java.lang.String">
-			<fieldDescription><![CDATA[ËüãîòÎñâÍàë/@ÑóìÎñâÍàë]]></fieldDescription>
+		<field name="Ð¡ÑƒÐ¼ÐžÑÐ²ÐÐ°Ð»" class="java.lang.String">
+			<fieldDescription><![CDATA[Ð›ÑŒÐ³Ð¾Ñ‚ÐžÑÐ²ÐÐ°Ð»/@Ð¡ÑƒÐ¼ÐžÑÐ²ÐÐ°Ð»]]></fieldDescription>
 		</field>
-		<field name="ÊîäÑíèæÑòàâ" class="java.lang.String">
-			<fieldDescription><![CDATA[ËüãîòÑíèæÑòàâ/@ÊîäÑíèæÑòàâ]]></fieldDescription>
+		<field name="ÐšÐ¾Ð´Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²" class="java.lang.String">
+			<fieldDescription><![CDATA[Ð›ÑŒÐ³Ð¾Ñ‚Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²/@ÐšÐ¾Ð´Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²]]></fieldDescription>
 		</field>
-		<field name="ÑóìÑíèæÑòàâ" class="java.lang.String">
-			<fieldDescription><![CDATA[ËüãîòÑíèæÑòàâ/@ÑóìÑíèæÑòàâ]]></fieldDescription>
+		<field name="Ð¡ÑƒÐ¼Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²" class="java.lang.String">
+			<fieldDescription><![CDATA[Ð›ÑŒÐ³Ð¾Ñ‚Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²/@Ð¡ÑƒÐ¼Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²]]></fieldDescription>
 		</field>
-		<field name="ÎÊÀÒÎ" class="java.lang.String">
-			<fieldDescription><![CDATA[ancestor::ÑóìÏÓ/@ÎÊÀÒÎ]]></fieldDescription>
+		<field name="ÐžÐšÐÐ¢Ðž" class="java.lang.String">
+			<fieldDescription><![CDATA[ancestor::Ð¡ÑƒÐ¼ÐŸÐ£/@ÐžÐšÐÐ¢Ðž]]></fieldDescription>
 		</field>
-		<field name="ÊîäÓìåíÑóì" class="java.lang.String">
-			<fieldDescription><![CDATA[ËüãîòÓìåíÑóì/@ÊîäÓìåíÑóì]]></fieldDescription>
+		<field name="ÐšÐ¾Ð´Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼" class="java.lang.String">
+			<fieldDescription><![CDATA[Ð›ÑŒÐ³Ð¾Ñ‚Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼/@ÐšÐ¾Ð´Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼]]></fieldDescription>
 		</field>
-		<field name="ÑóìÓìåíÑóì" class="java.lang.String">
-			<fieldDescription><![CDATA[ËüãîòÓìåíÑóì/@ÑóìÓìåíÑóì]]></fieldDescription>
+		<field name="Ð¡ÑƒÐ¼Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼" class="java.lang.String">
+			<fieldDescription><![CDATA[Ð›ÑŒÐ³Ð¾Ñ‚Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼/@Ð¡ÑƒÐ¼Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼]]></fieldDescription>
 		</field>
 		<variable name="OKATO" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÎÊÀÒÎ} == null ?
+			<variableExpression><![CDATA[$F{ÐžÐšÐÐ¢Ðž} == null ?
 "-----------"
 :
-($F{ÎÊÀÒÎ}+"00000000000").substring(0,11)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÎÊÀÒÎ} == null ?
+($F{ÐžÐšÐÐ¢Ðž}+"00000000000").substring(0,11)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐžÐšÐÐ¢Ðž} == null ?
 "-----------"
 :
-($F{ÎÊÀÒÎ}+"00000000000").substring(0,11)]]></initialValueExpression>
+($F{ÐžÐšÐÐ¢Ðž}+"00000000000").substring(0,11)]]></initialValueExpression>
 		</variable>
 		<variable name="KodVidTS" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÊîäÂèäÒÑ} == null ?
+			<variableExpression><![CDATA[$F{ÐšÐ¾Ð´Ð’Ð¸Ð´Ð¢Ð¡} == null ?
 "-----"
 :
-($F{ÊîäÂèäÒÑ}+"-----").substring(0,5)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÊîäÂèäÒÑ} == null ?
+($F{ÐšÐ¾Ð´Ð’Ð¸Ð´Ð¢Ð¡}+"-----").substring(0,5)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐšÐ¾Ð´Ð’Ð¸Ð´Ð¢Ð¡} == null ?
 "-----"
 :
-($F{ÊîäÂèäÒÑ}+"-----").substring(0,5)]]></initialValueExpression>
+($F{ÐšÐ¾Ð´Ð’Ð¸Ð´Ð¢Ð¡}+"-----").substring(0,5)]]></initialValueExpression>
 		</variable>
 		<variable name="IdNomTS" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÈäÍîìÒÑ} == null ?
+			<variableExpression><![CDATA[$F{Ð˜Ð´ÐÐ¾Ð¼Ð¢Ð¡} == null ?
 "-------------------------"
 :
-($F{ÈäÍîìÒÑ}.toUpperCase()+"-----------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÈäÍîìÒÑ} == null ?
+($F{Ð˜Ð´ÐÐ¾Ð¼Ð¢Ð¡}.toUpperCase()+"-----------------------------").substring(0,25)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Ð˜Ð´ÐÐ¾Ð¼Ð¢Ð¡} == null ?
 "-------------------------"
 :
-($F{ÈäÍîìÒÑ}.toUpperCase()+"-----------------------------").substring(0,25)]]></initialValueExpression>
+($F{Ð˜Ð´ÐÐ¾Ð¼Ð¢Ð¡}.toUpperCase()+"-----------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="MarkaTS" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÌàðêàÒÑ} == null ?
+			<variableExpression><![CDATA[$F{ÐœÐ°Ñ€ÐºÐ°Ð¢Ð¡} == null ?
 "------------------------------"
 :
-($F{ÌàðêàÒÑ}.toUpperCase().replace( " ", "-" )+"------------------------------").substring(0,30)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÌàðêàÒÑ} == null ?
+($F{ÐœÐ°Ñ€ÐºÐ°Ð¢Ð¡}.toUpperCase().replace( " ", "-" )+"------------------------------").substring(0,30)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐœÐ°Ñ€ÐºÐ°Ð¢Ð¡} == null ?
 "------------------------------"
 :
-($F{ÌàðêàÒÑ}.toUpperCase().replace( " ", "-" )+"------------------------------").substring(0,30)]]></initialValueExpression>
+($F{ÐœÐ°Ñ€ÐºÐ°Ð¢Ð¡}.toUpperCase().replace( " ", "-" )+"------------------------------").substring(0,30)]]></initialValueExpression>
 		</variable>
 		<variable name="RegNumb" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÐåãÇíàêÒÑ} == null ?
+			<variableExpression><![CDATA[$F{Ð ÐµÐ³Ð—Ð½Ð°ÐºÐ¢Ð¡} == null ?
 "------------------------------"
 :
-($F{ÐåãÇíàêÒÑ}.toUpperCase()+"------------------------------").substring(0,30)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÐåãÇíàêÒÑ} == null ?
+($F{Ð ÐµÐ³Ð—Ð½Ð°ÐºÐ¢Ð¡}.toUpperCase()+"------------------------------").substring(0,30)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Ð ÐµÐ³Ð—Ð½Ð°ÐºÐ¢Ð¡} == null ?
 "------------------------------"
 :
-($F{ÐåãÇíàêÒÑ}.toUpperCase()+"------------------------------").substring(0,30)]]></initialValueExpression>
+($F{Ð ÐµÐ³Ð—Ð½Ð°ÐºÐ¢Ð¡}.toUpperCase()+"------------------------------").substring(0,30)]]></initialValueExpression>
 		</variable>
 		<variable name="NalBaza" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÍàëÁàçà} == null ?
+			<variableExpression><![CDATA[$F{ÐÐ°Ð»Ð‘Ð°Ð·Ð°} == null ?
 "-----------------"
 :
-($F{ÍàëÁàçà}+"-----------------").substring(0,17)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÍàëÁàçà} == null ?
+($F{ÐÐ°Ð»Ð‘Ð°Ð·Ð°}+"-----------------").substring(0,17)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐÐ°Ð»Ð‘Ð°Ð·Ð°} == null ?
 "-----------------"
 :
-($F{ÍàëÁàçà}+"-----------------").substring(0,17)]]></initialValueExpression>
+($F{ÐÐ°Ð»Ð‘Ð°Ð·Ð°}+"-----------------").substring(0,17)]]></initialValueExpression>
 		</variable>
 		<variable name="OKEI" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÎÊÅÈÍàëÁàçà} == null ?
+			<variableExpression><![CDATA[$F{ÐžÐšÐ•Ð˜ÐÐ°Ð»Ð‘Ð°Ð·Ð°} == null ?
 "---"
 :
-($F{ÎÊÅÈÍàëÁàçà}+"---").substring(0,3)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÎÊÅÈÍàëÁàçà} == null ?
+($F{ÐžÐšÐ•Ð˜ÐÐ°Ð»Ð‘Ð°Ð·Ð°}+"---").substring(0,3)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐžÐšÐ•Ð˜ÐÐ°Ð»Ð‘Ð°Ð·Ð°} == null ?
 "---"
 :
-($F{ÎÊÅÈÍàëÁàçà}+"---").substring(0,3)]]></initialValueExpression>
+($F{ÐžÐšÐ•Ð˜ÐÐ°Ð»Ð‘Ð°Ð·Ð°}+"---").substring(0,3)]]></initialValueExpression>
 		</variable>
 		<variable name="VipuskTS" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÂûïóñêÒÑ} == null ?
+			<variableExpression><![CDATA[$F{Ð’Ñ‹Ð¿ÑƒÑÐºÐ¢Ð¡} == null ?
 "---"
 :
-($F{ÂûïóñêÒÑ}+"---").substring(0,3)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÂûïóñêÒÑ} == null ?
+($F{Ð’Ñ‹Ð¿ÑƒÑÐºÐ¢Ð¡}+"---").substring(0,3)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Ð’Ñ‹Ð¿ÑƒÑÐºÐ¢Ð¡} == null ?
 "---"
 :
-($F{ÂûïóñêÒÑ}+"---").substring(0,3)]]></initialValueExpression>
+($F{Ð’Ñ‹Ð¿ÑƒÑÐºÐ¢Ð¡}+"---").substring(0,3)]]></initialValueExpression>
 		</variable>
 		<variable name="VladTS" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÂëàäåíÒÑ} == null ?
+			<variableExpression><![CDATA[$F{Ð’Ð»Ð°Ð´ÐµÐ½Ð¢Ð¡} == null ?
 "--"
 :
-($F{ÂëàäåíÒÑ}+"--").substring(0,2)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÂëàäåíÒÑ} == null ?
+($F{Ð’Ð»Ð°Ð´ÐµÐ½Ð¢Ð¡}+"--").substring(0,2)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Ð’Ð»Ð°Ð´ÐµÐ½Ð¢Ð¡} == null ?
 "--"
 :
-($F{ÂëàäåíÒÑ}+"--").substring(0,2)]]></initialValueExpression>
+($F{Ð’Ð»Ð°Ð´ÐµÐ½Ð¢Ð¡}+"--").substring(0,2)]]></initialValueExpression>
 		</variable>
 		<variable name="kv" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÊîýôÊâ} == null ?
+			<variableExpression><![CDATA[$F{ÐšÐ¾ÑÑ„ÐšÐ²} == null ?
 "------"
 :
-($F{ÊîýôÊâ}+"------").substring(0,6)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÊîýôÊâ} == null ?
+($F{ÐšÐ¾ÑÑ„ÐšÐ²}+"------").substring(0,6)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐšÐ¾ÑÑ„ÐšÐ²} == null ?
 "------"
 :
-($F{ÊîýôÊâ}+"------").substring(0,6)]]></initialValueExpression>
+($F{ÐšÐ¾ÑÑ„ÐšÐ²}+"------").substring(0,6)]]></initialValueExpression>
 		</variable>
 		<variable name="NalStavka" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÍàëÑòàâêà} == null?
+			<variableExpression><![CDATA[$F{ÐÐ°Ð»Ð¡Ñ‚Ð°Ð²ÐºÐ°} == null?
 "---------"
 :
-($F{ÍàëÑòàâêà}+"---------").substring(0,9)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÍàëÑòàâêà} == null?
+($F{ÐÐ°Ð»Ð¡Ñ‚Ð°Ð²ÐºÐ°}+"---------").substring(0,9)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐÐ°Ð»Ð¡Ñ‚Ð°Ð²ÐºÐ°} == null?
 "---------"
 :
-($F{ÍàëÑòàâêà}+"---------").substring(0,9)]]></initialValueExpression>
+($F{ÐÐ°Ð»Ð¡Ñ‚Ð°Ð²ÐºÐ°}+"---------").substring(0,9)]]></initialValueExpression>
 		</variable>
 		<variable name="LMonth" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ËüãîòÌåñÒÑ} == null ?
+			<variableExpression><![CDATA[$F{Ð›ÑŒÐ³Ð¾Ñ‚ÐœÐµÑÐ¢Ð¡} == null ?
 "--"
 :
-($F{ËüãîòÌåñÒÑ}+"--").substring(0,2)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ËüãîòÌåñÒÑ} == null ?
+($F{Ð›ÑŒÐ³Ð¾Ñ‚ÐœÐµÑÐ¢Ð¡}+"--").substring(0,2)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Ð›ÑŒÐ³Ð¾Ñ‚ÐœÐµÑÐ¢Ð¡} == null ?
 "--"
 :
-($F{ËüãîòÌåñÒÑ}+"--").substring(0,2)]]></initialValueExpression>
+($F{Ð›ÑŒÐ³Ð¾Ñ‚ÐœÐµÑÐ¢Ð¡}+"--").substring(0,2)]]></initialValueExpression>
 		</variable>
 		<variable name="kl" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÊîýôÊë} == null ?
+			<variableExpression><![CDATA[$F{ÐšÐ¾ÑÑ„ÐšÐ»} == null ?
 "------"
 :
-($F{ÊîýôÊë}+"------").substring(0,6)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÊîýôÊë} == null ?
+($F{ÐšÐ¾ÑÑ„ÐšÐ»}+"------").substring(0,6)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐšÐ¾ÑÑ„ÐšÐ»} == null ?
 "------"
 :
-($F{ÊîýôÊë}+"------").substring(0,6)]]></initialValueExpression>
+($F{ÐšÐ¾ÑÑ„ÐšÐ»}+"------").substring(0,6)]]></initialValueExpression>
 		</variable>
 		<variable name="KodOsv" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÊîäÎñâÍàë} == null || $F{ÊîäÎñâÍàë}.equals( "0" ) ?
+			<variableExpression><![CDATA[$F{ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»} == null || $F{ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»}.equals( "0" ) ?
 "------------------"
 :
-($F{ÊîäÎñâÍàë}.substring(0,5).equals( "30200" ) ?
-  $F{ÊîäÎñâÍàë}.substring(0,5)+"-------------"
+($F{ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»}.substring(0,5).equals( "30200" ) ?
+  $F{ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»}.substring(0,5)+"-------------"
   :
-  ($F{ÊîäÎñâÍàë}+"------------------").substring(0,18))]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÊîäÎñâÍàë} == null || $F{ÊîäÎñâÍàë}.equals( "0" ) ?
+  ($F{ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»}+"------------------").substring(0,18))]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»} == null || $F{ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»}.equals( "0" ) ?
 "------------------"
 :
-($F{ÊîäÎñâÍàë}.substring(0,5).equals( "30200" ) ?
-  $F{ÊîäÎñâÍàë}.substring(0,5)+"-------------"
+($F{ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»}.substring(0,5).equals( "30200" ) ?
+  $F{ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»}.substring(0,5)+"-------------"
   :
-  ($F{ÊîäÎñâÍàë}+"------------------").substring(0,18))]]></initialValueExpression>
+  ($F{ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»}+"------------------").substring(0,18))]]></initialValueExpression>
 		</variable>
 		<variable name="KodUm" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÊîäÓìåíÑóì} == null || $F{ÊîäÓìåíÑóì}.equals( "0" ) ?
+			<variableExpression><![CDATA[$F{ÐšÐ¾Ð´Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼} == null || $F{ÐšÐ¾Ð´Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼}.equals( "0" ) ?
 "------------------"
 :
-($F{ÊîäÓìåíÑóì}+"------------------").substring(0,18)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÊîäÓìåíÑóì} == null || $F{ÊîäÓìåíÑóì}.equals( "0" ) ?
+($F{ÐšÐ¾Ð´Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼}+"------------------").substring(0,18)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐšÐ¾Ð´Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼} == null || $F{ÐšÐ¾Ð´Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼}.equals( "0" ) ?
 "------------------"
 :
-($F{ÊîäÓìåíÑóì}+"------------------").substring(0,18)]]></initialValueExpression>
+($F{ÐšÐ¾Ð´Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼}+"------------------").substring(0,18)]]></initialValueExpression>
 		</variable>
 		<variable name="KodSnizh" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÊîäÑíèæÑòàâ} == null || $F{ÊîäÑíèæÑòàâ}.equals( "0" ) ?
+			<variableExpression><![CDATA[$F{ÐšÐ¾Ð´Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²} == null || $F{ÐšÐ¾Ð´Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²}.equals( "0" ) ?
 "------------------"
 :
-($F{ÊîäÑíèæÑòàâ}+"------------------").substring(0,18)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÊîäÑíèæÑòàâ} == null || $F{ÊîäÑíèæÑòàâ}.equals( "0" ) ?
+($F{ÐšÐ¾Ð´Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²}+"------------------").substring(0,18)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ÐšÐ¾Ð´Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²} == null || $F{ÐšÐ¾Ð´Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²}.equals( "0" ) ?
 "------------------"
 :
-($F{ÊîäÑíèæÑòàâ}+"------------------").substring(0,18)]]></initialValueExpression>
+($F{ÐšÐ¾Ð´Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²}+"------------------").substring(0,18)]]></initialValueExpression>
 		</variable>
 		<variable name="SumIsch" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÑóìÈñ÷èñë} == null ?
+			<variableExpression><![CDATA[$F{Ð¡ÑƒÐ¼Ð˜ÑÑ‡Ð¸ÑÐ»} == null ?
 "---------------"
 :
-($F{ÑóìÈñ÷èñë}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÑóìÈñ÷èñë} == null ?
+($F{Ð¡ÑƒÐ¼Ð˜ÑÑ‡Ð¸ÑÐ»}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Ð¡ÑƒÐ¼Ð˜ÑÑ‡Ð¸ÑÐ»} == null ?
 "---------------"
 :
-($F{ÑóìÈñ÷èñë}+"---------------").substring(0,15)]]></initialValueExpression>
+($F{Ð¡ÑƒÐ¼Ð˜ÑÑ‡Ð¸ÑÐ»}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="SumIschUpl" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÑóìÈñ÷èñëÓïë} == null ?
+			<variableExpression><![CDATA[$F{Ð¡ÑƒÐ¼Ð˜ÑÑ‡Ð¸ÑÐ»Ð£Ð¿Ð»} == null ?
 "---------------"
 :
-($F{ÑóìÈñ÷èñëÓïë}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÑóìÈñ÷èñëÓïë} == null ?
+($F{Ð¡ÑƒÐ¼Ð˜ÑÑ‡Ð¸ÑÐ»Ð£Ð¿Ð»}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Ð¡ÑƒÐ¼Ð˜ÑÑ‡Ð¸ÑÐ»Ð£Ð¿Ð»} == null ?
 "---------------"
 :
-($F{ÑóìÈñ÷èñëÓïë}+"---------------").substring(0,15)]]></initialValueExpression>
+($F{Ð¡ÑƒÐ¼Ð˜ÑÑ‡Ð¸ÑÐ»Ð£Ð¿Ð»}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="SumOsv" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÑóìÎñâÍàë} == null || (($F{ÊîäÎñâÍàë}.equals( "0" ) || $F{ÊîäÎñâÍàë}==null) && $F{ÑóìÎñâÍàë}.equals( "0" ))?
+			<variableExpression><![CDATA[$F{Ð¡ÑƒÐ¼ÐžÑÐ²ÐÐ°Ð»} == null || (($F{ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»}.equals( "0" ) || $F{ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»}==null) && $F{Ð¡ÑƒÐ¼ÐžÑÐ²ÐÐ°Ð»}.equals( "0" ))?
 "---------------"
 :
-($F{ÑóìÎñâÍàë}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÑóìÎñâÍàë} == null || (($F{ÊîäÎñâÍàë}.equals( "0" ) || $F{ÊîäÎñâÍàë}==null) && $F{ÑóìÎñâÍàë}.equals( "0" ))?
+($F{Ð¡ÑƒÐ¼ÐžÑÐ²ÐÐ°Ð»}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Ð¡ÑƒÐ¼ÐžÑÐ²ÐÐ°Ð»} == null || (($F{ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»}.equals( "0" ) || $F{ÐšÐ¾Ð´ÐžÑÐ²ÐÐ°Ð»}==null) && $F{Ð¡ÑƒÐ¼ÐžÑÐ²ÐÐ°Ð»}.equals( "0" ))?
 "---------------"
 :
-($F{ÑóìÎñâÍàë}+"---------------").substring(0,15)]]></initialValueExpression>
+($F{Ð¡ÑƒÐ¼ÐžÑÐ²ÐÐ°Ð»}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="SumUm" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÑóìÓìåíÑóì} == null || (($F{ÊîäÓìåíÑóì}.equals( "0" ) || $F{ÊîäÓìåíÑóì}==null) && $F{ÑóìÓìåíÑóì}.equals( "0" ))?
+			<variableExpression><![CDATA[$F{Ð¡ÑƒÐ¼Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼} == null || (($F{ÐšÐ¾Ð´Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼}.equals( "0" ) || $F{ÐšÐ¾Ð´Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼}==null) && $F{Ð¡ÑƒÐ¼Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼}.equals( "0" ))?
 "---------------"
 :
-($F{ÑóìÓìåíÑóì}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÑóìÓìåíÑóì} == null || (($F{ÊîäÓìåíÑóì}.equals( "0" ) || $F{ÊîäÓìåíÑóì}==null) && $F{ÑóìÓìåíÑóì}.equals( "0" ))?
+($F{Ð¡ÑƒÐ¼Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Ð¡ÑƒÐ¼Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼} == null || (($F{ÐšÐ¾Ð´Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼}.equals( "0" ) || $F{ÐšÐ¾Ð´Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼}==null) && $F{Ð¡ÑƒÐ¼Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼}.equals( "0" ))?
 "---------------"
 :
-($F{ÑóìÓìåíÑóì}+"---------------").substring(0,15)]]></initialValueExpression>
+($F{Ð¡ÑƒÐ¼Ð£Ð¼ÐµÐ½Ð¡ÑƒÐ¼}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="SumSnizh" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ÑóìÑíèæÑòàâ} == null || (($F{ÊîäÑíèæÑòàâ}.equals( "0" ) || $F{ÊîäÑíèæÑòàâ}==null) && $F{ÑóìÑíèæÑòàâ}.equals( "0" ))?
+			<variableExpression><![CDATA[$F{Ð¡ÑƒÐ¼Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²} == null || (($F{ÐšÐ¾Ð´Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²}.equals( "0" ) || $F{ÐšÐ¾Ð´Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²}==null) && $F{Ð¡ÑƒÐ¼Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²}.equals( "0" ))?
 "---------------"
 :
-($F{ÑóìÑíèæÑòàâ}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ÑóìÑíèæÑòàâ} == null || (($F{ÊîäÑíèæÑòàâ}.equals( "0" ) || $F{ÊîäÑíèæÑòàâ}==null) && $F{ÑóìÑíèæÑòàâ}.equals( "0" ))?
+($F{Ð¡ÑƒÐ¼Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Ð¡ÑƒÐ¼Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²} == null || (($F{ÐšÐ¾Ð´Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²}.equals( "0" ) || $F{ÐšÐ¾Ð´Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²}==null) && $F{Ð¡ÑƒÐ¼Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²}.equals( "0" ))?
 "---------------"
 :
-($F{ÑóìÑíèæÑòàâ}+"---------------").substring(0,15)]]></initialValueExpression>
+($F{Ð¡ÑƒÐ¼Ð¡Ð½Ð¸Ð¶Ð¡Ñ‚Ð°Ð²}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 	</subDataset>
 	<queryString language="xPath">
-		<![CDATA[/Ôàéë/Äîêóìåíò]]>
+		<![CDATA[/Ð¤Ð°Ð¹Ð»/Ð”Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚]]>
 	</queryString>
-	<field name="ÍîìÊîðð" class="java.lang.String">
-		<fieldDescription><![CDATA[@ÍîìÊîðð]]></fieldDescription>
+	<field name="ÐÐ¾Ð¼ÐšÐ¾Ñ€Ñ€" class="java.lang.String">
+		<fieldDescription><![CDATA[@ÐÐ¾Ð¼ÐšÐ¾Ñ€Ñ€]]></fieldDescription>
 	</field>
-	<field name="Îò÷åòÃîä" class="java.lang.String">
-		<fieldDescription><![CDATA[@Îò÷åòÃîä]]></fieldDescription>
+	<field name="ÐžÑ‚Ñ‡ÐµÑ‚Ð“Ð¾Ð´" class="java.lang.String">
+		<fieldDescription><![CDATA[@ÐžÑ‚Ñ‡ÐµÑ‚Ð“Ð¾Ð´]]></fieldDescription>
 	</field>
-	<field name="ÄàòàÄîê" class="java.lang.String">
-		<fieldDescription><![CDATA[@ÄàòàÄîê]]></fieldDescription>
+	<field name="Ð”Ð°Ñ‚Ð°Ð”Ð¾Ðº" class="java.lang.String">
+		<fieldDescription><![CDATA[@Ð”Ð°Ñ‚Ð°Ð”Ð¾Ðº]]></fieldDescription>
 	</field>
-	<field name="ÈÍÍÞË" class="java.lang.String">
-		<fieldDescription><![CDATA[ÑâÍÏ/ÍÏÞË/@ÈÍÍÞË]]></fieldDescription>
+	<field name="Ð˜ÐÐÐ®Ð›" class="java.lang.String">
+		<fieldDescription><![CDATA[Ð¡Ð²ÐÐŸ/ÐÐŸÐ®Ð›/@Ð˜ÐÐÐ®Ð›]]></fieldDescription>
 	</field>
-	<field name="ÊÏÏ" class="java.lang.String">
-		<fieldDescription><![CDATA[ÑâÍÏ/ÍÏÞË/@ÊÏÏ]]></fieldDescription>
+	<field name="ÐšÐŸÐŸ" class="java.lang.String">
+		<fieldDescription><![CDATA[Ð¡Ð²ÐÐŸ/ÐÐŸÐ®Ð›/@ÐšÐŸÐŸ]]></fieldDescription>
 	</field>
-	<field name="ÍàèìÎðã" class="java.lang.String">
-		<fieldDescription><![CDATA[ÑâÍÏ/ÍÏÞË/@ÍàèìÎðã]]></fieldDescription>
+	<field name="ÐÐ°Ð¸Ð¼ÐžÑ€Ð³" class="java.lang.String">
+		<fieldDescription><![CDATA[Ð¡Ð²ÐÐŸ/ÐÐŸÐ®Ð›/@ÐÐ°Ð¸Ð¼ÐžÑ€Ð³]]></fieldDescription>
 	</field>
-	<field name="ÊîäÍÎ" class="java.lang.String">
-		<fieldDescription><![CDATA[@ÊîäÍÎ]]></fieldDescription>
+	<field name="ÐšÐ¾Ð´ÐÐž" class="java.lang.String">
+		<fieldDescription><![CDATA[@ÐšÐ¾Ð´ÐÐž]]></fieldDescription>
 	</field>
-	<field name="Ïåðèîä" class="java.lang.String">
-		<fieldDescription><![CDATA[@Ïåðèîä]]></fieldDescription>
+	<field name="ÐŸÐµÑ€Ð¸Ð¾Ð´" class="java.lang.String">
+		<fieldDescription><![CDATA[@ÐŸÐµÑ€Ð¸Ð¾Ð´]]></fieldDescription>
 	</field>
-	<field name="ÏîÌåñòó" class="java.lang.String">
-		<fieldDescription><![CDATA[@ÏîÌåñòó]]></fieldDescription>
+	<field name="ÐŸÐ¾ÐœÐµÑÑ‚Ñƒ" class="java.lang.String">
+		<fieldDescription><![CDATA[@ÐŸÐ¾ÐœÐµÑÑ‚Ñƒ]]></fieldDescription>
 	</field>
-	<field name="ÎÊÂÝÄ" class="java.lang.String">
-		<fieldDescription><![CDATA[ÑâÍÏ/@ÎÊÂÝÄ]]></fieldDescription>
+	<field name="ÐžÐšÐ’Ð­Ð”" class="java.lang.String">
+		<fieldDescription><![CDATA[Ð¡Ð²ÐÐŸ/@ÐžÐšÐ’Ð­Ð”]]></fieldDescription>
 	</field>
-	<field name="ÏðÏîäï" class="java.lang.String">
-		<fieldDescription><![CDATA[Ïîäïèñàíò/@ÏðÏîäï]]></fieldDescription>
+	<field name="ÐŸÑ€ÐŸÐ¾Ð´Ð¿" class="java.lang.String">
+		<fieldDescription><![CDATA[ÐŸÐ¾Ð´Ð¿Ð¸ÑÐ°Ð½Ñ‚/@ÐŸÑ€ÐŸÐ¾Ð´Ð¿]]></fieldDescription>
 	</field>
-	<field name="Èìÿ" class="java.lang.String">
-		<fieldDescription><![CDATA[Ïîäïèñàíò/ÔÈÎ/@Èìÿ]]></fieldDescription>
+	<field name="Ð˜Ð¼Ñ" class="java.lang.String">
+		<fieldDescription><![CDATA[ÐŸÐ¾Ð´Ð¿Ð¸ÑÐ°Ð½Ñ‚/Ð¤Ð˜Ðž/@Ð˜Ð¼Ñ]]></fieldDescription>
 	</field>
-	<field name="Îò÷åñòâî" class="java.lang.String">
-		<fieldDescription><![CDATA[Ïîäïèñàíò/ÔÈÎ/@Îò÷åñòâî]]></fieldDescription>
+	<field name="ÐžÑ‚Ñ‡ÐµÑÑ‚Ð²Ð¾" class="java.lang.String">
+		<fieldDescription><![CDATA[ÐŸÐ¾Ð´Ð¿Ð¸ÑÐ°Ð½Ñ‚/Ð¤Ð˜Ðž/@ÐžÑ‚Ñ‡ÐµÑÑ‚Ð²Ð¾]]></fieldDescription>
 	</field>
-	<field name="Ôàìèëèÿ" class="java.lang.String">
-		<fieldDescription><![CDATA[Ïîäïèñàíò/ÔÈÎ/@Ôàìèëèÿ]]></fieldDescription>
+	<field name="Ð¤Ð°Ð¼Ð¸Ð»Ð¸Ñ" class="java.lang.String">
+		<fieldDescription><![CDATA[ÐŸÐ¾Ð´Ð¿Ð¸ÑÐ°Ð½Ñ‚/Ð¤Ð˜Ðž/@Ð¤Ð°Ð¼Ð¸Ð»Ð¸Ñ]]></fieldDescription>
 	</field>
-	<field name="ÍàèìÄîê" class="java.lang.String">
-		<fieldDescription><![CDATA[Ïîäïèñàíò/ÑâÏðåä/@ÍàèìÄîê]]></fieldDescription>
+	<field name="ÐÐ°Ð¸Ð¼Ð”Ð¾Ðº" class="java.lang.String">
+		<fieldDescription><![CDATA[ÐŸÐ¾Ð´Ð¿Ð¸ÑÐ°Ð½Ñ‚/Ð¡Ð²ÐŸÑ€ÐµÐ´/@ÐÐ°Ð¸Ð¼Ð”Ð¾Ðº]]></fieldDescription>
 	</field>
-	<field name="ÍàèìÎðã2" class="java.lang.String">
-		<fieldDescription><![CDATA[Ïîäïèñàíò/ÑâÏðåä/@ÍàèìÎðã]]></fieldDescription>
+	<field name="ÐÐ°Ð¸Ð¼ÐžÑ€Ð³2" class="java.lang.String">
+		<fieldDescription><![CDATA[ÐŸÐ¾Ð´Ð¿Ð¸ÑÐ°Ð½Ñ‚/Ð¡Ð²ÐŸÑ€ÐµÐ´/@ÐÐ°Ð¸Ð¼ÐžÑ€Ð³]]></fieldDescription>
 	</field>
-	<field name="Òëô" class="java.lang.String">
-		<fieldDescription><![CDATA[ÑâÍÏ/@Òëô]]></fieldDescription>
+	<field name="Ð¢Ð»Ñ„" class="java.lang.String">
+		<fieldDescription><![CDATA[Ð¡Ð²ÐÐŸ/@Ð¢Ð»Ñ„]]></fieldDescription>
 	</field>
-	<field name="ÈÍÍÞË2" class="java.lang.String">
-		<fieldDescription><![CDATA[ÑâÍÏ/ÍÏÞË/ÑâÐåîðãÞË/@ÈÍÍÞË]]></fieldDescription>
+	<field name="Ð˜ÐÐÐ®Ð›2" class="java.lang.String">
+		<fieldDescription><![CDATA[Ð¡Ð²ÐÐŸ/ÐÐŸÐ®Ð›/Ð¡Ð²Ð ÐµÐ¾Ñ€Ð³Ð®Ð›/@Ð˜ÐÐÐ®Ð›]]></fieldDescription>
 	</field>
-	<field name="ÊÏÏ2" class="java.lang.String">
-		<fieldDescription><![CDATA[ÑâÍÏ/ÍÏÞË/ÑâÐåîðãÞË/@ÊÏÏ]]></fieldDescription>
+	<field name="ÐšÐŸÐŸ2" class="java.lang.String">
+		<fieldDescription><![CDATA[Ð¡Ð²ÐÐŸ/ÐÐŸÐ®Ð›/Ð¡Ð²Ð ÐµÐ¾Ñ€Ð³Ð®Ð›/@ÐšÐŸÐŸ]]></fieldDescription>
 	</field>
-	<field name="ÔîðìÐåîðã" class="java.lang.String">
-		<fieldDescription><![CDATA[ÑâÍÏ/ÍÏÞË/ÑâÐåîðãÞË/@ÔîðìÐåîðã]]></fieldDescription>
+	<field name="Ð¤Ð¾Ñ€Ð¼Ð ÐµÐ¾Ñ€Ð³" class="java.lang.String">
+		<fieldDescription><![CDATA[Ð¡Ð²ÐÐŸ/ÐÐŸÐ®Ð›/Ð¡Ð²Ð ÐµÐ¾Ñ€Ð³Ð®Ð›/@Ð¤Ð¾Ñ€Ð¼Ð ÐµÐ¾Ñ€Ð³]]></fieldDescription>
 	</field>
-	<field name="ÊÁÊ" class="java.lang.String">
-		<fieldDescription><![CDATA[ÒðÍàëÍÄ/ÑóìÍàëÏÓ/@ÊÁÊ]]></fieldDescription>
+	<field name="ÐšÐ‘Ðš" class="java.lang.String">
+		<fieldDescription><![CDATA[Ð¢Ñ€ÐÐ°Ð»ÐÐ”/Ð¡ÑƒÐ¼ÐÐ°Ð»ÐŸÐ£/@ÐšÐ‘Ðš]]></fieldDescription>
 	</field>
 	<variable name="INN" class="java.lang.String">
-		<variableExpression><![CDATA[$F{ÈÍÍÞË}.length() < 12 ?
-($F{ÈÍÍÞË}+"------------").substring( 0,12)
+		<variableExpression><![CDATA[$F{Ð˜ÐÐÐ®Ð›}.length() < 12 ?
+($F{Ð˜ÐÐÐ®Ð›}+"------------").substring( 0,12)
 :
-$F{ÈÍÍÞË}]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{ÈÍÍÞË}.length() < 12 ?
-($F{ÈÍÍÞË}+"------------").substring( 0,12)
+$F{Ð˜ÐÐÐ®Ð›}]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{Ð˜ÐÐÐ®Ð›}.length() < 12 ?
+($F{Ð˜ÐÐÐ®Ð›}+"------------").substring( 0,12)
 :
-$F{ÈÍÍÞË}]]></initialValueExpression>
+$F{Ð˜ÐÐÐ®Ð›}]]></initialValueExpression>
 	</variable>
 	<variable name="ORG" class="java.lang.String">
-		<variableExpression><![CDATA[$F{ÍàèìÎðã}.length() < 160 ?
-($F{ÍàèìÎðã}.toUpperCase().replace( " ", "-" )+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)
+		<variableExpression><![CDATA[$F{ÐÐ°Ð¸Ð¼ÐžÑ€Ð³}.length() < 160 ?
+($F{ÐÐ°Ð¸Ð¼ÐžÑ€Ð³}.toUpperCase().replace( " ", "-" )+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)
 :
-$F{ÍàèìÎðã}.toUpperCase().replace( " ", "-" )]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{ÍàèìÎðã}.length() < 160 ?
-($F{ÍàèìÎðã}.toUpperCase().replace( " ", "-" )+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)
+$F{ÐÐ°Ð¸Ð¼ÐžÑ€Ð³}.toUpperCase().replace( " ", "-" )]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{ÐÐ°Ð¸Ð¼ÐžÑ€Ð³}.length() < 160 ?
+($F{ÐÐ°Ð¸Ð¼ÐžÑ€Ð³}.toUpperCase().replace( " ", "-" )+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)
 :
-$F{ÍàèìÎðã}.toUpperCase().replace( " ", "-" )]]></initialValueExpression>
+$F{ÐÐ°Ð¸Ð¼ÐžÑ€Ð³}.toUpperCase().replace( " ", "-" )]]></initialValueExpression>
 	</variable>
 	<variable name="KPP" class="java.lang.String">
-		<variableExpression><![CDATA[$F{ÊÏÏ}.length() < 9 ?
-($F{ÊÏÏ}+"----------").substring(0,9)
+		<variableExpression><![CDATA[$F{ÐšÐŸÐŸ}.length() < 9 ?
+($F{ÐšÐŸÐŸ}+"----------").substring(0,9)
 :
-$F{ÊÏÏ}]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{ÊÏÏ}.length() < 9 ?
-($F{ÊÏÏ}+"----------").substring(0,9)
+$F{ÐšÐŸÐŸ}]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{ÐšÐŸÐŸ}.length() < 9 ?
+($F{ÐšÐŸÐŸ}+"----------").substring(0,9)
 :
-$F{ÊÏÏ}]]></initialValueExpression>
+$F{ÐšÐŸÐŸ}]]></initialValueExpression>
 	</variable>
 	<variable name="NumbKorr" class="java.lang.String">
-		<variableExpression><![CDATA[$F{ÍîìÊîðð}.length() < 3 ?
-($F{ÍîìÊîðð}+"---").substring(0,3)
+		<variableExpression><![CDATA[$F{ÐÐ¾Ð¼ÐšÐ¾Ñ€Ñ€}.length() < 3 ?
+($F{ÐÐ¾Ð¼ÐšÐ¾Ñ€Ñ€}+"---").substring(0,3)
 :
-$F{ÍîìÊîðð}]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{ÍîìÊîðð}.length() < 3 ?
-($F{ÍîìÊîðð}+"---").substring(0,3)
+$F{ÐÐ¾Ð¼ÐšÐ¾Ñ€Ñ€}]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{ÐÐ¾Ð¼ÐšÐ¾Ñ€Ñ€}.length() < 3 ?
+($F{ÐÐ¾Ð¼ÐšÐ¾Ñ€Ñ€}+"---").substring(0,3)
 :
-$F{ÍîìÊîðð}]]></initialValueExpression>
+$F{ÐÐ¾Ð¼ÐšÐ¾Ñ€Ñ€}]]></initialValueExpression>
 	</variable>
 	<variable name="Nperiod" class="java.lang.String">
-		<variableExpression><![CDATA[$F{Ïåðèîä}.length() < 2 ?
-($F{Ïåðèîä}+"--").substring(0,2)
+		<variableExpression><![CDATA[$F{ÐŸÐµÑ€Ð¸Ð¾Ð´}.length() < 2 ?
+($F{ÐŸÐµÑ€Ð¸Ð¾Ð´}+"--").substring(0,2)
 :
-$F{Ïåðèîä}]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{Ïåðèîä}.length() < 2 ?
-($F{Ïåðèîä}+"--").substring(0,2)
+$F{ÐŸÐµÑ€Ð¸Ð¾Ð´}]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{ÐŸÐµÑ€Ð¸Ð¾Ð´}.length() < 2 ?
+($F{ÐŸÐµÑ€Ð¸Ð¾Ð´}+"--").substring(0,2)
 :
-$F{Ïåðèîä}]]></initialValueExpression>
+$F{ÐŸÐµÑ€Ð¸Ð¾Ð´}]]></initialValueExpression>
 	</variable>
 	<variable name="RepYear" class="java.lang.String">
-		<variableExpression><![CDATA[$F{Îò÷åòÃîä}.length() < 4 ?
-($F{Îò÷åòÃîä}+"----").substring(0,4)
+		<variableExpression><![CDATA[$F{ÐžÑ‚Ñ‡ÐµÑ‚Ð“Ð¾Ð´}.length() < 4 ?
+($F{ÐžÑ‚Ñ‡ÐµÑ‚Ð“Ð¾Ð´}+"----").substring(0,4)
 :
-$F{Îò÷åòÃîä}]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{Îò÷åòÃîä}.length() < 4 ?
-($F{Îò÷åòÃîä}+"----").substring(0,4)
+$F{ÐžÑ‚Ñ‡ÐµÑ‚Ð“Ð¾Ð´}]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{ÐžÑ‚Ñ‡ÐµÑ‚Ð“Ð¾Ð´}.length() < 4 ?
+($F{ÐžÑ‚Ñ‡ÐµÑ‚Ð“Ð¾Ð´}+"----").substring(0,4)
 :
-$F{Îò÷åòÃîä}]]></initialValueExpression>
+$F{ÐžÑ‚Ñ‡ÐµÑ‚Ð“Ð¾Ð´}]]></initialValueExpression>
 	</variable>
 	<variable name="KNO" class="java.lang.String">
-		<variableExpression><![CDATA[$F{ÊîäÍÎ}.length() < 4 ?
-($F{ÊîäÍÎ}+"----").substring(0,4)
+		<variableExpression><![CDATA[$F{ÐšÐ¾Ð´ÐÐž}.length() < 4 ?
+($F{ÐšÐ¾Ð´ÐÐž}+"----").substring(0,4)
 :
-$F{ÊîäÍÎ}]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{ÊîäÍÎ}.length() < 4 ?
-($F{ÊîäÍÎ}+"----").substring(0,4)
+$F{ÐšÐ¾Ð´ÐÐž}]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{ÐšÐ¾Ð´ÐÐž}.length() < 4 ?
+($F{ÐšÐ¾Ð´ÐÐž}+"----").substring(0,4)
 :
-$F{ÊîäÍÎ}]]></initialValueExpression>
+$F{ÐšÐ¾Ð´ÐÐž}]]></initialValueExpression>
 	</variable>
 	<variable name="PoMestu" class="java.lang.String">
-		<variableExpression><![CDATA[$F{ÏîÌåñòó}.length() < 3 ?
-($F{ÏîÌåñòó}+"---").substring(0,3)
+		<variableExpression><![CDATA[$F{ÐŸÐ¾ÐœÐµÑÑ‚Ñƒ}.length() < 3 ?
+($F{ÐŸÐ¾ÐœÐµÑÑ‚Ñƒ}+"---").substring(0,3)
 :
-$F{ÏîÌåñòó}]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{ÏîÌåñòó}.length() < 3 ?
-($F{ÏîÌåñòó}+"---").substring(0,3)
+$F{ÐŸÐ¾ÐœÐµÑÑ‚Ñƒ}]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{ÐŸÐ¾ÐœÐµÑÑ‚Ñƒ}.length() < 3 ?
+($F{ÐŸÐ¾ÐœÐµÑÑ‚Ñƒ}+"---").substring(0,3)
 :
-$F{ÏîÌåñòó}]]></initialValueExpression>
+$F{ÐŸÐ¾ÐœÐµÑÑ‚Ñƒ}]]></initialValueExpression>
 	</variable>
 	<variable name="OKVED" class="java.lang.String">
-		<variableExpression><![CDATA[$F{ÎÊÂÝÄ}.length() < 8 ?
-($F{ÎÊÂÝÄ}+"--------").substring(0,8)
+		<variableExpression><![CDATA[$F{ÐžÐšÐ’Ð­Ð”}.length() < 8 ?
+($F{ÐžÐšÐ’Ð­Ð”}+"--------").substring(0,8)
 :
-$F{ÎÊÂÝÄ}]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{ÎÊÂÝÄ}.length() < 8 ?
-($F{ÎÊÂÝÄ}+"--------").substring(0,8)
+$F{ÐžÐšÐ’Ð­Ð”}]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{ÐžÐšÐ’Ð­Ð”}.length() < 8 ?
+($F{ÐžÐšÐ’Ð­Ð”}+"--------").substring(0,8)
 :
-$F{ÎÊÂÝÄ}]]></initialValueExpression>
+$F{ÐžÐšÐ’Ð­Ð”}]]></initialValueExpression>
 	</variable>
 	<variable name="FormReorg" class="java.lang.String">
-		<variableExpression><![CDATA[$F{ÔîðìÐåîðã}.length() < 1 ?
-($F{ÔîðìÐåîðã}+"-").substring(0,1)
+		<variableExpression><![CDATA[$F{Ð¤Ð¾Ñ€Ð¼Ð ÐµÐ¾Ñ€Ð³}.length() < 1 ?
+($F{Ð¤Ð¾Ñ€Ð¼Ð ÐµÐ¾Ñ€Ð³}+"-").substring(0,1)
 :
-$F{ÔîðìÐåîðã}]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{ÔîðìÐåîðã}.length() < 1 ?
-($F{ÔîðìÐåîðã}+"-").substring(0,1)
+$F{Ð¤Ð¾Ñ€Ð¼Ð ÐµÐ¾Ñ€Ð³}]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{Ð¤Ð¾Ñ€Ð¼Ð ÐµÐ¾Ñ€Ð³}.length() < 1 ?
+($F{Ð¤Ð¾Ñ€Ð¼Ð ÐµÐ¾Ñ€Ð³}+"-").substring(0,1)
 :
-$F{ÔîðìÐåîðã}]]></initialValueExpression>
+$F{Ð¤Ð¾Ñ€Ð¼Ð ÐµÐ¾Ñ€Ð³}]]></initialValueExpression>
 	</variable>
 	<variable name="INNReorg" class="java.lang.String">
-		<variableExpression><![CDATA[$F{ÈÍÍÞË2}.equals("0") || $F{ÈÍÍÞË2} == null ?
+		<variableExpression><![CDATA[$F{Ð˜ÐÐÐ®Ð›2}.equals("0") || $F{Ð˜ÐÐÐ®Ð›2} == null ?
 "----------"
 :
-($F{ÈÍÍÞË2}+"----------").substring( 0,10)]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{ÈÍÍÞË2}.equals("0") || $F{ÈÍÍÞË2} == null ?
+($F{Ð˜ÐÐÐ®Ð›2}+"----------").substring( 0,10)]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{Ð˜ÐÐÐ®Ð›2}.equals("0") || $F{Ð˜ÐÐÐ®Ð›2} == null ?
 "----------"
 :
-($F{ÈÍÍÞË2}+"----------").substring( 0,10)]]></initialValueExpression>
+($F{Ð˜ÐÐÐ®Ð›2}+"----------").substring( 0,10)]]></initialValueExpression>
 	</variable>
 	<variable name="KPPReorg" class="java.lang.String">
-		<variableExpression><![CDATA[$F{ÊÏÏ2}.equals("0") || $F{ÊÏÏ2} == null ?
+		<variableExpression><![CDATA[$F{ÐšÐŸÐŸ2}.equals("0") || $F{ÐšÐŸÐŸ2} == null ?
 "---------"
 :
-($F{ÊÏÏ2}+"---------").substring( 0,9)]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{ÊÏÏ2}.equals("0") || $F{ÊÏÏ2} == null ?
+($F{ÐšÐŸÐŸ2}+"---------").substring( 0,9)]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{ÐšÐŸÐŸ2}.equals("0") || $F{ÐšÐŸÐŸ2} == null ?
 "---------"
 :
-($F{ÊÏÏ2}+"---------").substring( 0,9)]]></initialValueExpression>
+($F{ÐšÐŸÐŸ2}+"---------").substring( 0,9)]]></initialValueExpression>
 	</variable>
 	<variable name="StrAll" class="java.lang.String">
 		<variableExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5)]]></variableExpression>
 		<initialValueExpression><![CDATA[("0000"+2).substring(("0000"+2).length()-5)]]></initialValueExpression>
 	</variable>
 	<variable name="Tlf" class="java.lang.String">
-		<variableExpression><![CDATA[$F{Òëô} == null ?
+		<variableExpression><![CDATA[$F{Ð¢Ð»Ñ„} == null ?
 "--------------------"
 :
-($F{Òëô}.replace( " ", "-" )+"--------------------").substring(0,20)]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{Òëô} == null ?
+($F{Ð¢Ð»Ñ„}.replace( " ", "-" )+"--------------------").substring(0,20)]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{Ð¢Ð»Ñ„} == null ?
 "--------------------"
 :
-($F{Òëô}.replace( " ", "-" )+"--------------------").substring(0,20)]]></initialValueExpression>
+($F{Ð¢Ð»Ñ„}.replace( " ", "-" )+"--------------------").substring(0,20)]]></initialValueExpression>
 	</variable>
 	<variable name="Surname" class="java.lang.String">
-		<variableExpression><![CDATA[$F{Ôàìèëèÿ}.length() < 20 ?
-($F{Ôàìèëèÿ}.toUpperCase().replace( " ", "-" )+"--------------------").substring(0,20)
+		<variableExpression><![CDATA[$F{Ð¤Ð°Ð¼Ð¸Ð»Ð¸Ñ}.length() < 20 ?
+($F{Ð¤Ð°Ð¼Ð¸Ð»Ð¸Ñ}.toUpperCase().replace( " ", "-" )+"--------------------").substring(0,20)
 :
-$F{Ôàìèëèÿ}.toUpperCase().replace( " ", "-" )]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{Ôàìèëèÿ}.length() < 20 ?
-($F{Ôàìèëèÿ}.toUpperCase().replace( " ", "-" )+"--------------------").substring(0,20)
+$F{Ð¤Ð°Ð¼Ð¸Ð»Ð¸Ñ}.toUpperCase().replace( " ", "-" )]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{Ð¤Ð°Ð¼Ð¸Ð»Ð¸Ñ}.length() < 20 ?
+($F{Ð¤Ð°Ð¼Ð¸Ð»Ð¸Ñ}.toUpperCase().replace( " ", "-" )+"--------------------").substring(0,20)
 :
-$F{Ôàìèëèÿ}.toUpperCase().replace( " ", "-" )]]></initialValueExpression>
+$F{Ð¤Ð°Ð¼Ð¸Ð»Ð¸Ñ}.toUpperCase().replace( " ", "-" )]]></initialValueExpression>
 	</variable>
 	<variable name="FirstName" class="java.lang.String">
-		<variableExpression><![CDATA[$F{Èìÿ}.length() < 20 ?
-($F{Èìÿ}.toUpperCase().replace( " ", "-" )+"--------------------").substring(0,20)
+		<variableExpression><![CDATA[$F{Ð˜Ð¼Ñ}.length() < 20 ?
+($F{Ð˜Ð¼Ñ}.toUpperCase().replace( " ", "-" )+"--------------------").substring(0,20)
 :
-$F{Èìÿ}.toUpperCase().replace( " ", "-" )]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{Èìÿ}.length() < 20 ?
-($F{Èìÿ}.toUpperCase().replace( " ", "-" )+"--------------------").substring(0,20)
+$F{Ð˜Ð¼Ñ}.toUpperCase().replace( " ", "-" )]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{Ð˜Ð¼Ñ}.length() < 20 ?
+($F{Ð˜Ð¼Ñ}.toUpperCase().replace( " ", "-" )+"--------------------").substring(0,20)
 :
-$F{Èìÿ}.toUpperCase().replace( " ", "-" )]]></initialValueExpression>
+$F{Ð˜Ð¼Ñ}.toUpperCase().replace( " ", "-" )]]></initialValueExpression>
 	</variable>
 	<variable name="LastName" class="java.lang.String">
-		<variableExpression><![CDATA[$F{Îò÷åñòâî}.length() < 20 ?
-($F{Îò÷åñòâî}.toUpperCase().replace( " ", "-" )+"--------------------").substring(0,20)
+		<variableExpression><![CDATA[$F{ÐžÑ‚Ñ‡ÐµÑÑ‚Ð²Ð¾}.length() < 20 ?
+($F{ÐžÑ‚Ñ‡ÐµÑÑ‚Ð²Ð¾}.toUpperCase().replace( " ", "-" )+"--------------------").substring(0,20)
 :
-$F{Îò÷åñòâî}.toUpperCase().replace( " ", "-" )]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{Îò÷åñòâî}.length() < 20 ?
-($F{Îò÷åñòâî}.toUpperCase().replace( " ", "-" )+"--------------------").substring(0,20)
+$F{ÐžÑ‚Ñ‡ÐµÑÑ‚Ð²Ð¾}.toUpperCase().replace( " ", "-" )]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{ÐžÑ‚Ñ‡ÐµÑÑ‚Ð²Ð¾}.length() < 20 ?
+($F{ÐžÑ‚Ñ‡ÐµÑÑ‚Ð²Ð¾}.toUpperCase().replace( " ", "-" )+"--------------------").substring(0,20)
 :
-$F{Îò÷åñòâî}.toUpperCase().replace( " ", "-" )]]></initialValueExpression>
+$F{ÐžÑ‚Ñ‡ÐµÑÑ‚Ð²Ð¾}.toUpperCase().replace( " ", "-" )]]></initialValueExpression>
 	</variable>
 	<variable name="OrgPred" class="java.lang.String">
-		<variableExpression><![CDATA[$F{ÍàèìÎðã2}.equals( "0" ) || $F{ÍàèìÎðã2} == null ?
+		<variableExpression><![CDATA[$F{ÐÐ°Ð¸Ð¼ÐžÑ€Ð³2}.equals( "0" ) || $F{ÐÐ°Ð¸Ð¼ÐžÑ€Ð³2} == null ?
 "----------------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
-($F{ÍàèìÎðã2}.toUpperCase().replace( " ", "-" )+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{ÍàèìÎðã2}.equals( "0" ) || $F{ÍàèìÎðã2} == null ?
+($F{ÐÐ°Ð¸Ð¼ÐžÑ€Ð³2}.toUpperCase().replace( " ", "-" )+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{ÐÐ°Ð¸Ð¼ÐžÑ€Ð³2}.equals( "0" ) || $F{ÐÐ°Ð¸Ð¼ÐžÑ€Ð³2} == null ?
 "----------------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
-($F{ÍàèìÎðã2}.toUpperCase().replace( " ", "-" )+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></initialValueExpression>
+($F{ÐÐ°Ð¸Ð¼ÐžÑ€Ð³2}.toUpperCase().replace( " ", "-" )+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></initialValueExpression>
 	</variable>
 	<variable name="DataDoc" class="java.lang.String">
-		<variableExpression><![CDATA[$F{ÄàòàÄîê}.length() < 10 ?
-($F{ÄàòàÄîê}+"-----------").substring(0,10)
+		<variableExpression><![CDATA[$F{Ð”Ð°Ñ‚Ð°Ð”Ð¾Ðº}.length() < 10 ?
+($F{Ð”Ð°Ñ‚Ð°Ð”Ð¾Ðº}+"-----------").substring(0,10)
 :
-$F{ÄàòàÄîê}]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{ÄàòàÄîê}.length() < 10 ?
-($F{ÄàòàÄîê}+"-----------").substring(0,10)
+$F{Ð”Ð°Ñ‚Ð°Ð”Ð¾Ðº}]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{Ð”Ð°Ñ‚Ð°Ð”Ð¾Ðº}.length() < 10 ?
+($F{Ð”Ð°Ñ‚Ð°Ð”Ð¾Ðº}+"-----------").substring(0,10)
 :
-$F{ÄàòàÄîê}]]></initialValueExpression>
+$F{Ð”Ð°Ñ‚Ð°Ð”Ð¾Ðº}]]></initialValueExpression>
 	</variable>
 	<variable name="NameDoc" class="java.lang.String">
-		<variableExpression><![CDATA[$F{ÍàèìÄîê}.equals( "0" ) || $F{ÍàèìÄîê} == null ?
+		<variableExpression><![CDATA[$F{ÐÐ°Ð¸Ð¼Ð”Ð¾Ðº}.equals( "0" ) || $F{ÐÐ°Ð¸Ð¼Ð”Ð¾Ðº} == null ?
 "----------------------------------------"
 :
-($F{ÍàèìÄîê}.toUpperCase().replace( " ", "-" )+"----------------------------------------").substring(0,40)]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{ÍàèìÄîê}.equals( "0" ) || $F{ÍàèìÄîê} == null ?
+($F{ÐÐ°Ð¸Ð¼Ð”Ð¾Ðº}.toUpperCase().replace( " ", "-" )+"----------------------------------------").substring(0,40)]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{ÐÐ°Ð¸Ð¼Ð”Ð¾Ðº}.equals( "0" ) || $F{ÐÐ°Ð¸Ð¼Ð”Ð¾Ðº} == null ?
 "----------------------------------------"
 :
-($F{ÍàèìÄîê}.toUpperCase().replace( " ", "-" )+"----------------------------------------").substring(0,40)]]></initialValueExpression>
+($F{ÐÐ°Ð¸Ð¼Ð”Ð¾Ðº}.toUpperCase().replace( " ", "-" )+"----------------------------------------").substring(0,40)]]></initialValueExpression>
 	</variable>
 	<variable name="KBK" class="java.lang.String">
-		<variableExpression><![CDATA[$F{ÊÁÊ} == null ?
+		<variableExpression><![CDATA[$F{ÐšÐ‘Ðš} == null ?
 "--------------------"
 :
-($F{ÊÁÊ}+"--------------------").substring(0,20)]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{ÊÁÊ} == null ?
+($F{ÐšÐ‘Ðš}+"--------------------").substring(0,20)]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{ÐšÐ‘Ðš} == null ?
 "--------------------"
 :
-($F{ÊÁÊ}+"--------------------").substring(0,20)]]></initialValueExpression>
+($F{ÐšÐ‘Ðš}+"--------------------").substring(0,20)]]></initialValueExpression>
 	</variable>
 	<variable name="BarcodeImage" class="java.lang.String">
 		<variableExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAXwAAACfCAMAAADNnpJgAAAABGdBTUEAALGPC/xhBQAAAwBQTFRF AAAAAgQLBQkNCQQBDQkFDQ0OBQsUChIbFgcDFRENGxIMFRIQERYbFhodGhURHh0dCxYjEhsnFBww GiIrGSc4JBMFIBULJRgOLRwMIRYRJRoUIx4ZKRwRMB8UIyAdLCEWKyEaNSYZJCMjISguKSUiLygi KysrJi02JCs5KSwwKzQ9NSsjNDAsMjExMzg8Ozc0Ozg0Ozs7HS1AJzZGMDxIL0BROUJKNkZWO01h QjAeSDYlSTwzUD0sSUE4Vkc3YE48YlA+RkZGQkdMQkhNTkZDTU1NQk9cVEtDWVFKUFBQUFRYWlpa RFRmTV1zU15oTWFyW2JqVGZ5ZVRDZFVIaFZDa1lHbFxMY1tUcF5NaGNdcmBOe2lXYmJia2tra3B0 a3R+d29lc3Nze3t7X2+CXXCBYnSGZXmMaXuMbH2QdXyDboKTfYWMdoaXfI6gf5Cig3Bdi3lni310 kHprjYJ5koBtloRykId+loh6mYZ2m4l2nYt5oI57oZF+goKChYmNiYmJhY2WiY6Rh5KckYmBmI6C mpGJlJSUkJefmpaSn5mTnJycgpOlhZeoiZemi5uniJqsjZ6xkpykj6K0lqKtlKOzlae5lqu9nqu2 mKq8n7C9pZOCopiLqpeFqpiHrJqJpJuTqJ2SsZ2LqaSdsaCPuKeVpKSko6aqrqihqamppK23p7G5 tK+rua2jvrGis7OzsLS4na/An7LEwaybAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4bGi2wAAAQB0Uk5T//////////////////////// //////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////// ////////////AFP3ByUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAadEVYdFNvZnR3YXJlAFBhaW50 Lk5FVCB2My41LjEwMPRyoQAACqZJREFUeF7tmvtjHUUVxyckTUOEYKy0KNXYYqtSfGvRqgHxgRhU LFgeTdXGt/ioVkRbNShatL7fWlGxtFpF6uMfXM9rzu7dmbmZJDX7y/fzQ+6Zs7Nndz93d2Z3b0ID BgPyBwTyBwTyB2R98ldWVnqBQxnmojTOrKxckmDV0tJwLq+srGqULDqr/QvVvehlCSgjn5mAiRtn fL8cSShxMe1Xb9Ho7njA6AJFM7Q9DTyzBuuTH4L19yByljLMu6T12hCWJdhraWk4x0PYKwGvJYFD awrWjFh2SRr7QzguAWXkk4MzMZBP4TpexfA1Hf3+mJUQ7pLgmC2ShvB2y8iXc4kCyQrbdIlwVjK0 PZVOGflci7peEa+alId8yPcMA/mKNBzIV+p6RbxqUh7yId8zDOQr0nAgX6nrFfGqSXnIh3zPMJCv SMOBfKWuV8SrJuUhH/I9w0C+Ig0H8pW6XhGvmpSHfMj3DAP5ijQcyFfqekW8alIe8iHfMwzkK9Jw IF+p6xXxqkl5yId8zzCQr0jDgXylrlfEqyblIR/yPcNAviINB/KVul4Rr5qUh3zI9wwD+Yo0HMhX 6npFvGpSHvIh3zMM5CvScCBfqesV8apJeciHfM8wkK9Iw4F8pa5XxKsm5SEf8j3DQL4iDQfylbpe Ea+alId8yPcMA/mKNBzIV+p6RbxqUh7yId8zDOQr0nAgX6nrFfGqSXnIh3zPMJCvSMOBfKWuV8Sr JuUhH/I9w0C+Ig0H8pW6XhGvmpSHfMj3DAP5ijQcyFfqekW8alIe8iHfMwzkK9JwIF+p6xXxqkl5 yId8zzCQr0jDgXylrlfEqyblIR/yPcNAviINB/KVul4Rr5qUh3zI9wwD+Yo0HMhX6npFvGpSHvIh 3zMM5CvScCBfqesV8apJeciHfM8wkK9Iw4F8pa5XxKsm5SEf8j3DQL4iDQfylbpeEa+alId8yPcM A/mKNBzIV+p6RbxqUh7yId8zDOQr0nAgX6nrFfGqSXnIh3zPMJCvSMOBfKWuV8SrJuUhH/I9w0C+ Ig0H8pW6XhGvmpSHfMj3DAP5ijQcyFfqekW8alIe8iHfMwzkK9JwIF+p6xXxqkl5yId8zzCQr0jD gXylrlfEqyblIR/yPcNAviINB/KVul4Rr5qUh3zI9wwD+Yo0HMhX6npFvGpSHvIh3zMM5CvScCBf qesV8apJeciHfM8wkK9Iw4F8pa5XxKsm5SF/QPnNsqIOVpeXZXebFUtLw7m0vKx7yWtpEKE1BWtG LKsHSUUvSdDdHd0w9ZFPIW6c0TW/aS1GEsLluNsXk0VnRjIeMMd0iaCZ4eQPQSp/UCB/QCB/QCB/ QCB/QCB/QCB/QCB/QIaSv/ptCzbMn1ctSHmmVH2j8r+/+leLCpy3z/UxiPw/zIX9e8PLrJXydeqt /NAyKU+H8EkLe3x3Nux/cbjZWiNQRQ868g/LthhLjHJnuGb/1FUfsVaG790YfmNhhl1WOzzXEs4Q 8u8NL+eP2YkfSzOlvLstMyX5i+H19PfZmYlfabsLlfSgI39SNkbcaokRZsLn6O8RKZvjq3O0Zln+ aS1NcJkRBpB/b9iuQQi/06DHKd5TIdld5220NCt/MczL54UwIZ8j0EoetPLv400JlhhhKnxKPg/l 7X/plbwrY+TvlsqEHXWHrZd/LoTPa7QYpjXosevgRcMSKY/w0eTk04KfaXQoc910d6eVP3mPbS43 sC/Yl8nrfMyiHn+kakX5p8NjVt0SHbZe/qwrvxDC3RZ2OVWxicm7D+Xlz7jyP4XwQQud7u64/MPp KdlyItiJ3zR7cteSQNWK8ndnhzJly+XT0fju0FhrUZddY3bX2DNPJ3ZO/tHO9zmZyurujsufjHZz 0NRiUfPF/LlC0HGU5J/OHWFky+XTEPhpjZrmzZmTk4YlC8ocpS55+bM+pvGZ6idtJCf/gfzYp9Bs 6YvpQi10pW+oJH/cib/18in4tUZN81DwAbVld3jHZyws8Gz4REE++Wn37/YQnm9hpLsXUf7k9Hu/ ZWEKbaWtQSv91MJRyvKfDPP3/NzilK2WT6NOW+ErmY3SfExcO87/Tr7tyMqnUactSMNEv7pnKDD5 D1AYwk3f0VYfGlDaU5cc58edsvwFqX7wH9bssdXyF0NnJKY5MfzC4ki8M9te0EEl5OLPyqdkW53v WP9jsUEZD0x+vMffkRVEC9qBkXatfykpRfl8HyQctMQoWy3/hu7A+V/K+gRgLL/mpZRl3m2ZHufC j/gjK58stPeXf6EaPgEolPFA5f/zwVtIgZCZd5+k9GctlkkkP+gX5Z+8az8tY6Zz3+1Wyx/Rw9l0 xm2aZ+6X8zE/V83opZ+VTyu15yZPADQ5dKGMB3HMJ87Lc1L4uDVbeJBs33DQJvNHX5QvPL6Pi0/8 3podtlo+WX2eBAJlC3dvNDzlv5hDNkWX5L/OQpXfq0AZDzryiQOUiY9nLTyHtMkNym+ap66mNTMX zQDyO+MmZd9kYZ9HaVlmWydiriS/fQfA8t9nseElKRiV3xyhVPK0RbdjnVcgG5av3216IQ8uv3Dm 6wupdOFkHEjq5Fef+Wq/N0VcOfk8X6TrDiqfJ9wPWJxyW+ZUXHC3a8vnCbc3jHd3py+f/bzRwggP O63WrECmQj4f+OBvNWk/2+eqzJTYhfbXosiRduAsyW+/Wn5i6B1vd3cS+bQ3/VdxPOG2Y/6Lujey XWrk0/NEch3/n+UvLen/PHpAZ097On+DNir3jXlo0rXIuBBuOhaZDeFm+rAlxvXdr5Yf4fxhWvHd WY5Bl53JpMgXzxcs5uWZF6VMjXwSnAz6x5eW9N8Yfb/WYH3yE2gsaY9w5HE3hexZZHyZ+vewJcZb u9VHHndryLziphLt9UWOC3e/NfJnivcW9WxSPv9CaKHMccnhdjjXv8rXlD/ybdKFM656ykPdewGF tLaDBRXPvwCtkn9D5jlivWxSPh+B3z/QuJ0/lZRTyW9HZ1sWaF36sAWRrnwa4Yq3UlnuSx8sbu8+ OCTfdaRK/vXh3xZtnM3KJ+E+x9JOJ881HT405vfz/ITLwn2OperrO9w96bHRJOxX3yMjd8ldquRn XuCum83Kf7pzNzj2F3I6ph0W5MjLpyncr6WiqxK5y5C+TYt4GGsn3xFq5J8orbweNiufDieeSzRC jzm1m8NjN5WX3yz4OE/zbeb/F8awJ/dzIp368UlkJpROhhr5U/0hdCNsWj7dvtvQujO8QYMOB3yc PjrmfxeIgnw6321SnBk7n0TmtsX/x3nLVRaM4rdAyb1XCz2Q9N+MC6em5n9p4QvGXcXVbF7+KTv1 D2eGBX7s2v4wBT/YN/ETTRUoyT9hshb1n4PWgG9Hd/BPTSfnrtFMwkvsdJgqnwxUJLuMH4nlh5QH J9PTbCNsXn7zaJh+uPnbLdkz84W0v0L+54eWknyyv/2x5vy+0s8BPeikVd5viZQD4dZ/NR+dnC7+ HMhvYOdz7+u/pqXplnfsRVzPFZDfNO95Tth28O/WGOX+G+kG4xUftlaZk0tLv7Wwz51Xh+k7LF6T d86Rm1eN/dX48QN0eZT+W/ACPZ0qmRpPvXoqhGvveMKam+aKyAcbA/IHBPIHBPIHBPIHBPIHBPIH BPIHBPIHo2n+B4ISt8JOXjkOAAAAAElFTkSuQmCC"]]></variableExpression>
@@ -696,7 +696,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement verticalAlignment="Bottom">
 					<font fontName="Arial" size="10" isBold="false" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Ñòð.]]></text>
+				<text><![CDATA[Ð¡Ñ‚Ñ€.]]></text>
 			</staticText>
 			<textField>
 				<reportElement uuid="e97b0f6f-8c5d-4d72-a5d2-0cb26471227e" x="264" y="23" width="15" height="20"/>
@@ -899,7 +899,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ÈÍÍ]]></text>
+				<text><![CDATA[Ð˜ÐÐ]]></text>
 			</staticText>
 			<textField>
 				<reportElement uuid="3c170508-9471-40e0-8c18-288d24988a14" x="219" y="0" width="15" height="20"/>
@@ -934,7 +934,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ÊÏÏ]]></text>
+				<text><![CDATA[ÐšÐŸÐŸ]]></text>
 			</staticText>
 			<textField>
 				<reportElement uuid="484ec315-9d90-43c0-83f2-d1acccb7c99d" x="189" y="23" width="15" height="20"/>
@@ -1059,244 +1059,244 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement textAlignment="Center">
 					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[(íàëîãîïëàòåëüùèê)]]></text>
+				<text><![CDATA[(Ð½Ð°Ð»Ð¾Ð³Ð¾Ð¿Ð»Ð°Ñ‚ÐµÐ»ÑŒÑ‰Ð¸Ðº)]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="4c9c0c9a-320c-4432-9f47-b48555d47a2f" x="1" y="132" width="246" height="20"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Ïðåäñòàâëÿåòñÿ â íàëîãîâûé îðãàí (êîä)]]></text>
+				<text><![CDATA[ÐŸÑ€ÐµÐ´ÑÑ‚Ð°Ð²Ð»ÑÐµÑ‚ÑÑ Ð² Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ñ‹Ð¹ Ð¾Ñ€Ð³Ð°Ð½ (ÐºÐ¾Ð´)]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="22b9a727-483f-4677-8f07-077b0694abdf" x="241" y="103" width="120" height="22"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Íàëîãîâûé ïåðèîä (êîä)]]></text>
+				<text><![CDATA[ÐÐ°Ð»Ð¾Ð³Ð¾Ð²Ñ‹Ð¹ Ð¿ÐµÑ€Ð¸Ð¾Ð´ (ÐºÐ¾Ð´)]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="0c814df7-8a8b-480c-8051-d25ffe0687ee" x="376" y="132" width="144" height="20"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ïî ìåñòó íàõîæäåíèÿ (ó÷åòà)]]></text>
+				<text><![CDATA[Ð¿Ð¾ Ð¼ÐµÑÑ‚Ñƒ Ð½Ð°Ñ…Ð¾Ð¶Ð´ÐµÐ½Ð¸Ñ (ÑƒÑ‡ÐµÑ‚Ð°)]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="9edc8461-48ca-4dbe-83c9-f6b74909470e" x="0" y="67" width="593" height="30">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Ñòð.1"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Ð¡Ñ‚Ñ€.1"/>
 					<property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1.241f"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="12" isBold="true" pdfFontName="Arialbd.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Íàëîãîâàÿ äåêëàðàöèÿ ïî òðàíñïîðòíîìó íàëîãó]]></text>
+				<text><![CDATA[ÐÐ°Ð»Ð¾Ð³Ð¾Ð²Ð°Ñ Ð´ÐµÐºÐ»Ð°Ñ€Ð°Ñ†Ð¸Ñ Ð¿Ð¾ Ñ‚Ñ€Ð°Ð½ÑÐ¿Ð¾Ñ€Ñ‚Ð½Ð¾Ð¼Ñƒ Ð½Ð°Ð»Ð¾Ð³Ñƒ]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="0da54c1b-c536-441b-9ff1-b9a5acc030b8" x="7" y="103" width="116" height="22"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Íîìåð êîððåêòèðîâêè]]></text>
+				<text><![CDATA[ÐÐ¾Ð¼ÐµÑ€ ÐºÐ¾Ñ€Ñ€ÐµÐºÑ‚Ð¸Ñ€Ð¾Ð²ÐºÐ¸]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="a8e64afe-4a24-47d2-9c3a-779655bc622f" x="422" y="50" width="171" height="16"/>
 				<textElement textAlignment="Right">
 					<font fontName="Arial" size="9" isBold="true" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Ôîðìà ïî ÊÍÄ 1152004]]></text>
+				<text><![CDATA[Ð¤Ð¾Ñ€Ð¼Ð° Ð¿Ð¾ ÐšÐÐ” 1152004]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="6f86e2fb-f087-4602-9532-9969ef26178e" x="462" y="103" width="70" height="22"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Îò÷åòíûé ãîä]]></text>
+				<text><![CDATA[ÐžÑ‚Ñ‡ÐµÑ‚Ð½Ñ‹Ð¹ Ð³Ð¾Ð´]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="64d162c3-23be-4b6f-9bb2-3dd13318dbf2" x="1" y="260" width="400" height="20"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Êîä âèäà ýêîíîìè÷åñêîé äåÿòåëüíîñòè ïî êëàññèôèêàòîðó ÎÊÂÝÄ]]></text>
+				<text><![CDATA[ÐšÐ¾Ð´ Ð²Ð¸Ð´Ð° ÑÐºÐ¾Ð½Ð¾Ð¼Ð¸Ñ‡ÐµÑÐºÐ¾Ð¹ Ð´ÐµÑÑ‚ÐµÐ»ÑŒÐ½Ð¾ÑÑ‚Ð¸ Ð¿Ð¾ ÐºÐ»Ð°ÑÑÐ¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€Ñƒ ÐžÐšÐ’Ð­Ð”]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="3708cb77-9e15-4d40-abe6-60f8faf86c6c" x="1" y="280" width="123" height="32"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Ôîðìà ðåîðãàíèçàöèè
-(ëèêâèäàöèÿ) (êîä)]]></text>
+				<text><![CDATA[Ð¤Ð¾Ñ€Ð¼Ð° Ñ€ÐµÐ¾Ñ€Ð³Ð°Ð½Ð¸Ð·Ð°Ñ†Ð¸Ð¸
+(Ð»Ð¸ÐºÐ²Ð¸Ð´Ð°Ñ†Ð¸Ñ) (ÐºÐ¾Ð´)]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="c5d971fe-4056-4718-af14-2840590108bd" x="146" y="280" width="147" height="32"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ÈÍÍ/ÊÏÏ ðåîðãàíèçîâàííîé îðãàíèçàöèè]]></text>
+				<text><![CDATA[Ð˜ÐÐ/ÐšÐŸÐŸ Ñ€ÐµÐ¾Ñ€Ð³Ð°Ð½Ð¸Ð·Ð¾Ð²Ð°Ð½Ð½Ð¾Ð¹ Ð¾Ñ€Ð³Ð°Ð½Ð¸Ð·Ð°Ñ†Ð¸Ð¸]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="9c9401ea-9fd6-41f5-8c85-e01d03636e46" x="19" y="317" width="158" height="22"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Íîìåð êîíòàêòíîãî òåëåôîíà]]></text>
+				<text><![CDATA[ÐÐ¾Ð¼ÐµÑ€ ÐºÐ¾Ð½Ñ‚Ð°ÐºÑ‚Ð½Ð¾Ð³Ð¾ Ñ‚ÐµÐ»ÐµÑ„Ð¾Ð½Ð°]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="96d8b41d-b596-4ec9-9d94-f7b327cc3575" x="1" y="349" width="24" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Íà ]]></text>
+				<text><![CDATA[ÐÐ° ]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="6ab72354-4936-416a-a994-407e8cc1fc81" x="104" y="349" width="57" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ñòðàíèöàõ]]></text>
+				<text><![CDATA[ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ð°Ñ…]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="fb10337c-65d8-4b63-b9f4-a02c9ae9990f" x="189" y="349" width="315" height="20"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ñ ïðèëîæåíèåì ïîäòâåðæäàþùèõ äîêóìåíòîâ èëè èõ êîïèé íà]]></text>
+				<text><![CDATA[Ñ Ð¿Ñ€Ð¸Ð»Ð¾Ð¶ÐµÐ½Ð¸ÐµÐ¼ Ð¿Ð¾Ð´Ñ‚Ð²ÐµÑ€Ð¶Ð´Ð°ÑŽÑ‰Ð¸Ñ… Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚Ð¾Ð² Ð¸Ð»Ð¸ Ð¸Ñ… ÐºÐ¾Ð¿Ð¸Ð¹ Ð½Ð°]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="e573c6a8-13db-43bb-8f8a-2b5d56cc9782" x="551" y="349" width="40" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ëèñòàõ]]></text>
+				<text><![CDATA[Ð»Ð¸ÑÑ‚Ð°Ñ…]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="70f2ada9-83d7-4de4-ba9c-0371043248df" x="1" y="385" width="297" height="20"/>
 				<textElement textAlignment="Center" verticalAlignment="Bottom">
 					<font fontName="Arial" size="10" isBold="true" pdfFontName="Arialbd.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Äîñòîâåðíîñòü è ïîëíîòó ñâåäåíèé, óêàçàííûõ]]></text>
+				<text><![CDATA[Ð”Ð¾ÑÑ‚Ð¾Ð²ÐµÑ€Ð½Ð¾ÑÑ‚ÑŒ Ð¸ Ð¿Ð¾Ð»Ð½Ð¾Ñ‚Ñƒ ÑÐ²ÐµÐ´ÐµÐ½Ð¸Ð¹, ÑƒÐºÐ°Ð·Ð°Ð½Ð½Ñ‹Ñ…]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="c604eb9c-b488-4d22-af19-9f62c65b5f0f" x="1" y="405" width="297" height="20"/>
 				<textElement textAlignment="Center">
 					<font fontName="Arial" size="10" isBold="true" pdfFontName="Arialbd.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[â íàñòîÿùåé äåêëàðàöèè, ïîäòâåðæäàþ:]]></text>
+				<text><![CDATA[Ð² Ð½Ð°ÑÑ‚Ð¾ÑÑ‰ÐµÐ¹ Ð´ÐµÐºÐ»Ð°Ñ€Ð°Ñ†Ð¸Ð¸, Ð¿Ð¾Ð´Ñ‚Ð²ÐµÑ€Ð¶Ð´Ð°ÑŽ:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="6c7c31e9-8625-46a2-86a6-1b03ce25a1c6" x="308" y="385" width="284" height="20"/>
 				<textElement textAlignment="Center" verticalAlignment="Bottom">
 					<font fontName="Arial" size="10" isBold="true" pdfFontName="Arialbd.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Çàïîëíÿåòñÿ ðàáîòíèêîì íàëîãîâîãî îðãàíà]]></text>
+				<text><![CDATA[Ð—Ð°Ð¿Ð¾Ð»Ð½ÑÐµÑ‚ÑÑ Ñ€Ð°Ð±Ð¾Ñ‚Ð½Ð¸ÐºÐ¾Ð¼ Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ð¾Ð³Ð¾ Ð¾Ñ€Ð³Ð°Ð½Ð°]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="bb636db9-36c9-430e-8316-ab116c72f4ab" x="73" y="426" width="225" height="22"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[1 - íàëîãîïëàòåëüùèê,
-2 - ïðåäñòàâèòåëü íàëîãîïëàòåëüùèêà]]></text>
+				<text><![CDATA[1 - Ð½Ð°Ð»Ð¾Ð³Ð¾Ð¿Ð»Ð°Ñ‚ÐµÐ»ÑŒÑ‰Ð¸Ðº,
+2 - Ð¿Ñ€ÐµÐ´ÑÑ‚Ð°Ð²Ð¸Ñ‚ÐµÐ»ÑŒ Ð½Ð°Ð»Ð¾Ð³Ð¾Ð¿Ð»Ð°Ñ‚ÐµÐ»ÑŒÑ‰Ð¸ÐºÐ°]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="8ed313b9-be5b-4a48-abc0-eb4776868ac0" x="308" y="427" width="241" height="20"/>
 				<textElement textAlignment="Right">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Ñâåäåíèÿ î ïðåäñòàâëåíèè äåêëàðàöèè]]></text>
+				<text><![CDATA[Ð¡Ð²ÐµÐ´ÐµÐ½Ð¸Ñ Ð¾ Ð¿Ñ€ÐµÐ´ÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð¸Ð¸ Ð´ÐµÐºÐ»Ð°Ñ€Ð°Ñ†Ð¸Ð¸]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="a268214f-20e4-42e7-835e-16229857e280" x="308" y="447" width="240" height="20"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Äàííàÿ äåêëàðàöèÿ ïðåäñòàâëåíà (êîä)]]></text>
+				<text><![CDATA[Ð”Ð°Ð½Ð½Ð°Ñ Ð´ÐµÐºÐ»Ð°Ñ€Ð°Ñ†Ð¸Ñ Ð¿Ñ€ÐµÐ´ÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð° (ÐºÐ¾Ð´)]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="42757caf-dfcc-4b7e-b934-cce10aaea476" x="320" y="467" width="20" height="20"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[íà]]></text>
+				<text><![CDATA[Ð½Ð°]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="bd9331f3-7289-4a83-a31d-cc45da0dfb1a" x="465" y="467" width="128" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ ñòðàíèöàõ]]></text>
+				<text><![CDATA[ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ð°Ñ…]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="ca7c7249-2433-4eae-bb42-320f42b75949" x="317" y="515" width="142" height="14"/>
 				<textElement textAlignment="Right">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ èëè èõ êîïèé íà]]></text>
+				<text><![CDATA[ Ð¸Ð»Ð¸ Ð¸Ñ… ÐºÐ¾Ð¿Ð¸Ð¹ Ð½Ð°]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="7a740ef8-fc60-4afb-aa79-c97c97663883" x="351" y="487" width="108" height="14"/>
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ñ ïðèëîæåíèåì ]]></text>
+				<text><![CDATA[Ñ Ð¿Ñ€Ð¸Ð»Ð¾Ð¶ÐµÐ½Ð¸ÐµÐ¼ ]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="972a36d6-d3d7-4bb4-84ce-7e1e784e44a6" x="305" y="501" width="154" height="14"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ïîäòâåðæäàþùèõ äîêóìåíòîâ]]></text>
+				<text><![CDATA[Ð¿Ð¾Ð´Ñ‚Ð²ÐµÑ€Ð¶Ð´Ð°ÑŽÑ‰Ð¸Ñ… Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚Ð¾Ð²]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="8b29d03e-cd2c-4200-a024-9d22ed653875" x="541" y="501" width="50" height="14"/>
 				<textElement textAlignment="Center">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ëèñòàõ]]></text>
+				<text><![CDATA[Ð»Ð¸ÑÑ‚Ð°Ñ…]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="cd4378db-5a58-4b90-8322-d89036fd20c5" x="306" y="529" width="123" height="26"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Äàòà ïðåäñòàâëåíèÿ äåêëàðàöèè]]></text>
+				<text><![CDATA[Ð”Ð°Ñ‚Ð° Ð¿Ñ€ÐµÐ´ÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð¸Ñ Ð´ÐµÐºÐ»Ð°Ñ€Ð°Ñ†Ð¸Ð¸]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="a38a492a-fe9c-440f-a480-54b9e3986dbc" x="305" y="555" width="92" height="26"/>
 				<textElement textAlignment="Center">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Çàðåãèñòðèðîâàíà
-çà ¹]]></text>
+				<text><![CDATA[Ð—Ð°Ñ€ÐµÐ³Ð¸ÑÑ‚Ñ€Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð°
+Ð·Ð° â„–]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="56da9c7c-85b1-416a-b87f-7507ad6cf130" x="1" y="514" width="297" height="12"/>
 				<textElement textAlignment="Center">
 					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[(ôàìèëèÿ, èìÿ, îò÷åñòâî * ïîëíîñòüþ)]]></text>
+				<text><![CDATA[(Ñ„Ð°Ð¼Ð¸Ð»Ð¸Ñ, Ð¸Ð¼Ñ, Ð¾Ñ‚Ñ‡ÐµÑÑ‚Ð²Ð¾ * Ð¿Ð¾Ð»Ð½Ð¾ÑÑ‚ÑŒÑŽ)]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="69c2f151-ddc3-4ca3-93f4-3f1030ab9e88" x="4" y="705" width="294" height="12"/>
 				<textElement textAlignment="Center">
 					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[(íàèìåíîâàíèå îðãàíèçàöèè - ïðåäñòàâèòåëÿ íàëîãîïëàòåëüùèêà)]]></text>
+				<text><![CDATA[(Ð½Ð°Ð¸Ð¼ÐµÐ½Ð¾Ð²Ð°Ð½Ð¸Ðµ Ð¾Ñ€Ð³Ð°Ð½Ð¸Ð·Ð°Ñ†Ð¸Ð¸ - Ð¿Ñ€ÐµÐ´ÑÑ‚Ð°Ð²Ð¸Ñ‚ÐµÐ»Ñ Ð½Ð°Ð»Ð¾Ð³Ð¾Ð¿Ð»Ð°Ñ‚ÐµÐ»ÑŒÑ‰Ð¸ÐºÐ°)]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="3a928f8a-7004-45d8-92c1-9d9788e120a8" x="346" y="621" width="80" height="11"/>
 				<textElement verticalAlignment="Bottom">
 					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[(Ôàìèëèÿ, È.Î.*)]]></text>
+				<text><![CDATA[(Ð¤Ð°Ð¼Ð¸Ð»Ð¸Ñ, Ð˜.Ðž.*)]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="db8e9051-e6ec-484e-b725-3c2a54899144" x="470" y="621" width="100" height="11"/>
 				<textElement textAlignment="Center" verticalAlignment="Bottom">
 					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[(Ïîäïèñü)]]></text>
+				<text><![CDATA[(ÐŸÐ¾Ð´Ð¿Ð¸ÑÑŒ)]]></text>
 			</staticText>
 			<line>
 				<reportElement uuid="9d5c2a63-5a23-43c1-a464-f04897802536" x="1" y="376" width="591" height="1"/>
@@ -1327,7 +1327,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement>
 					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Ïîäïèñü]]></text>
+				<text><![CDATA[ÐŸÐ¾Ð´Ð¿Ð¸ÑÑŒ]]></text>
 			</staticText>
 			<line>
 				<reportElement uuid="ddde67c1-6cc6-4e92-ad80-c488461a7c59" x="38" y="729" width="82" height="1"/>
@@ -1340,35 +1340,35 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement>
 					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Äàòà]]></text>
+				<text><![CDATA[Ð”Ð°Ñ‚Ð°]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="f32b212f-48b2-47ac-b315-314055c3e62e" x="60" y="730" width="27" height="12"/>
 				<textElement>
 					<font fontName="Arial" size="7" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Ì.Ï.]]></text>
+				<text><![CDATA[Ðœ.ÐŸ.]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="6f7cd000-28b2-4f21-b5d6-6f3f839cd1ac" x="1" y="742" width="298" height="12"/>
 				<textElement textAlignment="Center">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Íàèìåíîâàíèå äîêóìåíòà,]]></text>
+				<text><![CDATA[ÐÐ°Ð¸Ð¼ÐµÐ½Ð¾Ð²Ð°Ð½Ð¸Ðµ Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚Ð°,]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="a4a30fd5-f28c-4734-bad5-893b11986768" x="0" y="754" width="299" height="12"/>
 				<textElement textAlignment="Center">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ïîäòâåðæäàþùåãî ïîëíîìî÷èÿ ïðåäñòàâèòåëÿ]]></text>
+				<text><![CDATA[Ð¿Ð¾Ð´Ñ‚Ð²ÐµÑ€Ð¶Ð´Ð°ÑŽÑ‰ÐµÐ³Ð¾ Ð¿Ð¾Ð»Ð½Ð¾Ð¼Ð¾Ñ‡Ð¸Ñ Ð¿Ñ€ÐµÐ´ÑÑ‚Ð°Ð²Ð¸Ñ‚ÐµÐ»Ñ]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="e6ecc0e1-fb74-4f28-aace-6a54c24126bd" x="3" y="813" width="130" height="12"/>
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[* Îò÷åñòâî ïðè íàëè÷èè.]]></text>
+				<text><![CDATA[* ÐžÑ‚Ñ‡ÐµÑÑ‚Ð²Ð¾ Ð¿Ñ€Ð¸ Ð½Ð°Ð»Ð¸Ñ‡Ð¸Ð¸.]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="6dcc5501-7e39-4e50-aa74-2949cabc55a5" x="445" y="286" width="13" height="20"/>
@@ -1389,7 +1389,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement>
 					<font fontName="Monospaced" size="15"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ÏðÏîäï}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ÐŸÑ€ÐŸÐ¾Ð´Ð¿}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement uuid="01e5fd94-9a2d-4dba-abe3-c5c566f839da" x="-1" y="160" width="15" height="20"/>
@@ -8843,7 +8843,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[(êîä)]]></text>
+				<text><![CDATA[(ÐºÐ¾Ð´)]]></text>
 			</staticText>
 			<image>
 				<reportElement uuid="d2ae7efc-c968-49bb-85b2-2fb6fb519287" x="16" y="1" width="115" height="48"/>
@@ -8884,7 +8884,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement verticalAlignment="Bottom">
 					<font fontName="Arial" size="10" isBold="false" pdfFontName="Arialbd.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Ñòð.]]></text>
+				<text><![CDATA[Ð¡Ñ‚Ñ€.]]></text>
 			</staticText>
 			<textField>
 				<reportElement uuid="e97b0f6f-8c5d-4d72-a5d2-0cb26471227e" x="264" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
@@ -9087,7 +9087,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ÈÍÍ]]></text>
+				<text><![CDATA[Ð˜ÐÐ]]></text>
 			</staticText>
 			<textField>
 				<reportElement uuid="3c170508-9471-40e0-8c18-288d24988a14" x="219" y="0" width="15" height="20" isPrintWhenDetailOverflows="true"/>
@@ -9122,7 +9122,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ÊÏÏ]]></text>
+				<text><![CDATA[ÐšÐŸÐŸ]]></text>
 			</staticText>
 			<textField>
 				<reportElement uuid="484ec315-9d90-43c0-83f2-d1acccb7c99d" x="189" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
@@ -9256,50 +9256,50 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[Êîä ïî ÎÊÀÒÎ]]></text>
+					<text><![CDATA[ÐšÐ¾Ð´ Ð¿Ð¾ ÐžÐšÐÐ¢Ðž]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="2c157254-7084-4422-95b2-f13f9a7e6e6f" x="17" y="55" width="250" height="24"/>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[â ò.÷. ñóììà àâàíñîâûõ ïëàòåæåé, èñ÷èñëåííàÿ ê
-óïëàòå â áþäæåò çà:]]></text>
+					<text><![CDATA[Ð² Ñ‚.Ñ‡. ÑÑƒÐ¼Ð¼Ð° Ð°Ð²Ð°Ð½ÑÐ¾Ð²Ñ‹Ñ… Ð¿Ð»Ð°Ñ‚ÐµÐ¶ÐµÐ¹, Ð¸ÑÑ‡Ð¸ÑÐ»ÐµÐ½Ð½Ð°Ñ Ðº
+ÑƒÐ¿Ð»Ð°Ñ‚Ðµ Ð² Ð±ÑŽÐ´Ð¶ÐµÑ‚ Ð·Ð°:]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="ac18d8a8-41ea-4cd5-9ea7-efdf9c7577b3" x="28" y="79" width="237" height="24"/>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[ïåðâûé êâàðòàë (ðóá.)]]></text>
+					<text><![CDATA[Ð¿ÐµÑ€Ð²Ñ‹Ð¹ ÐºÐ²Ð°Ñ€Ñ‚Ð°Ð» (Ñ€ÑƒÐ±.)]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="8747007c-e116-458e-8d59-31c6635e5e5b" x="28" y="103" width="237" height="24"/>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[âòîðîé êâàðòàë (ðóá.)]]></text>
+					<text><![CDATA[Ð²Ñ‚Ð¾Ñ€Ð¾Ð¹ ÐºÐ²Ð°Ñ€Ñ‚Ð°Ð» (Ñ€ÑƒÐ±.)]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="322f0884-d779-4d58-9269-842b03b5ad7f" mode="Opaque" x="28" y="128" width="237" height="24"/>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[òðåòèé êâàðòàë (ðóá.)]]></text>
+					<text><![CDATA[Ñ‚Ñ€ÐµÑ‚Ð¸Ð¹ ÐºÐ²Ð°Ñ€Ñ‚Ð°Ð» (Ñ€ÑƒÐ±.)]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="b7219b06-e420-4058-8eb6-c7f0c88da3b6" mode="Opaque" x="1" y="153" width="264" height="24"/>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[Ñóììà íàëîãà, èñ÷èñëåííàÿ ê óïëàòå â áþäæåò (ðóá.)]]></text>
+					<text><![CDATA[Ð¡ÑƒÐ¼Ð¼Ð° Ð½Ð°Ð»Ð¾Ð³Ð°, Ð¸ÑÑ‡Ð¸ÑÐ»ÐµÐ½Ð½Ð°Ñ Ðº ÑƒÐ¿Ð»Ð°Ñ‚Ðµ Ð² Ð±ÑŽÐ´Ð¶ÐµÑ‚ (Ñ€ÑƒÐ±.)]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="ad523f7d-863f-4249-96f8-d9a0ae513ed6" mode="Opaque" x="1" y="178" width="264" height="24"/>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[Ñóììà íàëîãà, èñ÷èñëåííàÿ ê óìåíüøåíèþ (ðóá.)]]></text>
+					<text><![CDATA[Ð¡ÑƒÐ¼Ð¼Ð° Ð½Ð°Ð»Ð¾Ð³Ð°, Ð¸ÑÑ‡Ð¸ÑÐ»ÐµÐ½Ð½Ð°Ñ Ðº ÑƒÐ¼ÐµÐ½ÑŒÑˆÐµÐ½Ð¸ÑŽ (Ñ€ÑƒÐ±.)]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="3412e5d6-a12d-43bb-8863-d9df6baf0456" x="266" y="0" width="30" height="24"/>
@@ -10762,8 +10762,8 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[Èñ÷èñëåííàÿ ñóììà íàëîãà, ïîäëåæàùàÿ óïëàòå â
-áþäæåò çà íàëîãîâûé ïåðèîä (ðóá.)]]></text>
+					<text><![CDATA[Ð˜ÑÑ‡Ð¸ÑÐ»ÐµÐ½Ð½Ð°Ñ ÑÑƒÐ¼Ð¼Ð° Ð½Ð°Ð»Ð¾Ð³Ð°, Ð¿Ð¾Ð´Ð»ÐµÐ¶Ð°Ñ‰Ð°Ñ ÑƒÐ¿Ð»Ð°Ñ‚Ðµ Ð²
+Ð±ÑŽÐ´Ð¶ÐµÑ‚ Ð·Ð° Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ñ‹Ð¹ Ð¿ÐµÑ€Ð¸Ð¾Ð´ (Ñ€ÑƒÐ±.)]]></text>
 				</staticText>
 			</frame>
 			<frame>
@@ -10780,50 +10780,50 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[Êîä ïî ÎÊÀÒÎ]]></text>
+					<text><![CDATA[ÐšÐ¾Ð´ Ð¿Ð¾ ÐžÐšÐÐ¢Ðž]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="bed5cb63-3055-4405-9163-fddebcc8d49c" x="17" y="55" width="250" height="24"/>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[â ò.÷. ñóììà àâàíñîâûõ ïëàòåæåé, èñ÷èñëåííàÿ ê
-óïëàòå â áþäæåò çà:]]></text>
+					<text><![CDATA[Ð² Ñ‚.Ñ‡. ÑÑƒÐ¼Ð¼Ð° Ð°Ð²Ð°Ð½ÑÐ¾Ð²Ñ‹Ñ… Ð¿Ð»Ð°Ñ‚ÐµÐ¶ÐµÐ¹, Ð¸ÑÑ‡Ð¸ÑÐ»ÐµÐ½Ð½Ð°Ñ Ðº
+ÑƒÐ¿Ð»Ð°Ñ‚Ðµ Ð² Ð±ÑŽÐ´Ð¶ÐµÑ‚ Ð·Ð°:]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="a70b8a84-5fc5-41e8-9e4a-b8e5b93a5813" x="28" y="79" width="237" height="24"/>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[ïåðâûé êâàðòàë (ðóá.)]]></text>
+					<text><![CDATA[Ð¿ÐµÑ€Ð²Ñ‹Ð¹ ÐºÐ²Ð°Ñ€Ñ‚Ð°Ð» (Ñ€ÑƒÐ±.)]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="7aa49c3b-e8b4-4095-9d5c-11a979fe6923" x="28" y="103" width="237" height="24"/>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[âòîðîé êâàðòàë (ðóá.)]]></text>
+					<text><![CDATA[Ð²Ñ‚Ð¾Ñ€Ð¾Ð¹ ÐºÐ²Ð°Ñ€Ñ‚Ð°Ð» (Ñ€ÑƒÐ±.)]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="43c75660-abf8-481a-a444-3575781ab452" mode="Opaque" x="28" y="128" width="237" height="24"/>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[òðåòèé êâàðòàë (ðóá.)]]></text>
+					<text><![CDATA[Ñ‚Ñ€ÐµÑ‚Ð¸Ð¹ ÐºÐ²Ð°Ñ€Ñ‚Ð°Ð» (Ñ€ÑƒÐ±.)]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="17bc3700-474c-4ff2-b7fc-e6083e61a61c" mode="Opaque" x="1" y="153" width="264" height="24"/>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[Ñóììà íàëîãà, èñ÷èñëåííàÿ ê óïëàòå â áþäæåò (ðóá.)]]></text>
+					<text><![CDATA[Ð¡ÑƒÐ¼Ð¼Ð° Ð½Ð°Ð»Ð¾Ð³Ð°, Ð¸ÑÑ‡Ð¸ÑÐ»ÐµÐ½Ð½Ð°Ñ Ðº ÑƒÐ¿Ð»Ð°Ñ‚Ðµ Ð² Ð±ÑŽÐ´Ð¶ÐµÑ‚ (Ñ€ÑƒÐ±.)]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="a63ee4a2-49df-4d0e-8046-997bdbb1da8d" mode="Opaque" x="1" y="178" width="264" height="24"/>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[Ñóììà íàëîãà, èñ÷èñëåííàÿ ê óìåíüøåíèþ (ðóá.)]]></text>
+					<text><![CDATA[Ð¡ÑƒÐ¼Ð¼Ð° Ð½Ð°Ð»Ð¾Ð³Ð°, Ð¸ÑÑ‡Ð¸ÑÐ»ÐµÐ½Ð½Ð°Ñ Ðº ÑƒÐ¼ÐµÐ½ÑŒÑˆÐµÐ½Ð¸ÑŽ (Ñ€ÑƒÐ±.)]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="632a6ccd-0544-499f-98ea-12d605d6e613" x="266" y="0" width="30" height="24"/>
@@ -12286,40 +12286,40 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[Èñ÷èñëåííàÿ ñóììà íàëîãà, ïîäëåæàùàÿ óïëàòå â
-áþäæåò çà íàëîãîâûé ïåðèîä (ðóá.)]]></text>
+					<text><![CDATA[Ð˜ÑÑ‡Ð¸ÑÐ»ÐµÐ½Ð½Ð°Ñ ÑÑƒÐ¼Ð¼Ð° Ð½Ð°Ð»Ð¾Ð³Ð°, Ð¿Ð¾Ð´Ð»ÐµÐ¶Ð°Ñ‰Ð°Ñ ÑƒÐ¿Ð»Ð°Ñ‚Ðµ Ð²
+Ð±ÑŽÐ´Ð¶ÐµÑ‚ Ð·Ð° Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ñ‹Ð¹ Ð¿ÐµÑ€Ð¸Ð¾Ð´ (Ñ€ÑƒÐ±.)]]></text>
 				</staticText>
 			</frame>
 			<staticText>
 				<reportElement uuid="17cf932c-1492-4624-ba45-691763a13a31" x="1" y="52" width="595" height="30" isPrintWhenDetailOverflows="true">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="ñòð.2_Ðàçä.1"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="ÑÑ‚Ñ€.2_Ð Ð°Ð·Ð´.1"/>
 					<property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1.061f"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="10" isBold="true" pdfFontName="Arialbd.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Ðàçäåë 1. Ñóììà òðàíñïîðòíîãî íàëîãà, ïîäëåæàùàÿ óïëàòå â áþäæåò]]></text>
+				<text><![CDATA[Ð Ð°Ð·Ð´ÐµÐ» 1. Ð¡ÑƒÐ¼Ð¼Ð° Ñ‚Ñ€Ð°Ð½ÑÐ¿Ð¾Ñ€Ñ‚Ð½Ð¾Ð³Ð¾ Ð½Ð°Ð»Ð¾Ð³Ð°, Ð¿Ð¾Ð´Ð»ÐµÐ¶Ð°Ñ‰Ð°Ñ ÑƒÐ¿Ð»Ð°Ñ‚Ðµ Ð² Ð±ÑŽÐ´Ð¶ÐµÑ‚]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="05529dee-52cd-42f9-bf14-28ef3815c59d" x="257" y="83" width="42" height="30" isPrintWhenDetailOverflows="true"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" isItalic="true" pdfFontName="Ariali.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Êîä ñòðîêè]]></text>
+				<text><![CDATA[ÐšÐ¾Ð´ ÑÑ‚Ñ€Ð¾ÐºÐ¸]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="e1146d25-3172-4f0d-9bc2-dbafa367a7b2" x="300" y="83" width="292" height="30" isPrintWhenDetailOverflows="true"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" isItalic="true" pdfFontName="Ariali.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Çíà÷åíèÿ ïîêàçàòåëåé]]></text>
+				<text><![CDATA[Ð—Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ Ð¿Ð¾ÐºÐ°Ð·Ð°Ñ‚ÐµÐ»ÐµÐ¹]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="1d02b40f-ba64-4f02-a384-7a706e2f5534" x="0" y="114" width="264" height="43" isPrintWhenDetailOverflows="true"/>
 				<textElement verticalAlignment="Top">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Êîä áþäæåòíîé êëàññèôèêàöèè]]></text>
+				<text><![CDATA[ÐšÐ¾Ð´ Ð±ÑŽÐ´Ð¶ÐµÑ‚Ð½Ð¾Ð¹ ÐºÐ»Ð°ÑÑÐ¸Ñ„Ð¸ÐºÐ°Ñ†Ð¸Ð¸]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="dab7a50f-12b2-4daa-9959-32e185790f55" x="265" y="114" width="30" height="20" isPrintWhenDetailOverflows="true"/>
@@ -12333,24 +12333,24 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" isBold="true" pdfFontName="Arialbd.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Äîñòîâåðíîñòü è ïîëíîòó ñâåäåíèé, óêàçàííûõ íà äàííîé ñòðàíèöå, ïîäòâåðæäàþ:]]></text>
+				<text><![CDATA[Ð”Ð¾ÑÑ‚Ð¾Ð²ÐµÑ€Ð½Ð¾ÑÑ‚ÑŒ Ð¸ Ð¿Ð¾Ð»Ð½Ð¾Ñ‚Ñƒ ÑÐ²ÐµÐ´ÐµÐ½Ð¸Ð¹, ÑƒÐºÐ°Ð·Ð°Ð½Ð½Ñ‹Ñ… Ð½Ð° Ð´Ð°Ð½Ð½Ð¾Ð¹ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ðµ, Ð¿Ð¾Ð´Ñ‚Ð²ÐµÑ€Ð¶Ð´Ð°ÑŽ:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="f9312f94-ca73-418e-9cf2-b8dc529dc5d7" x="230" y="822" width="63" height="13" isPrintWhenDetailOverflows="true"/>
 				<textElement verticalAlignment="Bottom">
 					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ (ïîäïèñü)]]></text>
+				<text><![CDATA[ (Ð¿Ð¾Ð´Ð¿Ð¸ÑÑŒ)]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="9e4d9ea2-34c7-4980-ab45-6093e6472cdf" x="428" y="822" width="35" height="13" isPrintWhenDetailOverflows="true"/>
 				<textElement verticalAlignment="Bottom">
 					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[(äàòà)]]></text>
+				<text><![CDATA[(Ð´Ð°Ñ‚Ð°)]]></text>
 			</staticText>
 			<break>
-				<reportElement uuid="d450638c-076d-480a-9b66-09f32c0b32aa" x="0" y="839" width="100" height="1" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="d450638c-076d-480a-9b66-09f32c0b32aa" x="0" y="841" width="100" height="1" isPrintWhenDetailOverflows="true"/>
 			</break>
 			<textField isBlankWhenNull="false">
 				<reportElement uuid="cfcecf33-a520-4d36-8156-141fd058943d" x="534" y="114" width="15" height="20" isPrintWhenDetailOverflows="true"/>
@@ -12637,7 +12637,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" isItalic="true" pdfFontName="Ariali.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Ïîêàçàòåëè]]></text>
+				<text><![CDATA[ÐŸÐ¾ÐºÐ°Ð·Ð°Ñ‚ÐµÐ»Ð¸]]></text>
 			</staticText>
 			<rectangle>
 				<reportElement uuid="26fddf09-95d1-4027-bee8-66454289bdc2" x="581" y="826" width="12" height="12" backcolor="#000000"/>
@@ -12661,7 +12661,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<reportElement uuid="6961bcd6-79fa-470a-8b92-2a1df4e58c09" mode="Opaque" x="0" y="157" width="595" height="214"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="Detali" uuid="e7f5eb5d-d29e-48b4-983f-76d657aee8a1">
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Äîêóìåíò/ÒðÍàëÍÄ/ÑóìÍàëÏÓ/ÑóìÏÓ")]]></dataSourceExpression>
+						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Ð”Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚/Ð¢Ñ€ÐÐ°Ð»ÐÐ”/Ð¡ÑƒÐ¼ÐÐ°Ð»ÐŸÐ£/Ð¡ÑƒÐ¼ÐŸÐ£")]]></dataSourceExpression>
 					</datasetRun>
 					<jr:listContents height="214" width="595">
 						<staticText>
@@ -12669,7 +12669,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[òðåòèé êâàðòàë (ðóá.)]]></text>
+							<text><![CDATA[Ñ‚Ñ€ÐµÑ‚Ð¸Ð¹ ÐºÐ²Ð°Ñ€Ñ‚Ð°Ð» (Ñ€ÑƒÐ±.)]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="f3c6d547-28e5-40e2-98eb-e8458831d64e" x="265" y="128" width="30" height="24"/>
@@ -12683,14 +12683,14 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Ñóììà íàëîãà, èñ÷èñëåííàÿ ê óìåíüøåíèþ (ðóá.)]]></text>
+							<text><![CDATA[Ð¡ÑƒÐ¼Ð¼Ð° Ð½Ð°Ð»Ð¾Ð³Ð°, Ð¸ÑÑ‡Ð¸ÑÐ»ÐµÐ½Ð½Ð°Ñ Ðº ÑƒÐ¼ÐµÐ½ÑŒÑˆÐµÐ½Ð¸ÑŽ (Ñ€ÑƒÐ±.)]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="52952040-c1a7-4dd5-8eff-c17ece0ff7cd" x="0" y="0" width="264" height="22"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Êîä ïî ÎÊÀÒÎ]]></text>
+							<text><![CDATA[ÐšÐ¾Ð´ Ð¿Ð¾ ÐžÐšÐÐ¢Ðž]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="ae82ef64-4648-47fc-b98f-cea9731d4ab4" x="265" y="153" width="30" height="24"/>
@@ -12732,15 +12732,15 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[âòîðîé êâàðòàë (ðóá.)]]></text>
+							<text><![CDATA[Ð²Ñ‚Ð¾Ñ€Ð¾Ð¹ ÐºÐ²Ð°Ñ€Ñ‚Ð°Ð» (Ñ€ÑƒÐ±.)]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="9f46291f-0e64-4117-b3ca-43ff60f8311f" x="17" y="54" width="250" height="24"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[â ò.÷. ñóììà àâàíñîâûõ ïëàòåæåé, èñ÷èñëåííàÿ ê
-óïëàòå â áþäæåò çà:]]></text>
+							<text><![CDATA[Ð² Ñ‚.Ñ‡. ÑÑƒÐ¼Ð¼Ð° Ð°Ð²Ð°Ð½ÑÐ¾Ð²Ñ‹Ñ… Ð¿Ð»Ð°Ñ‚ÐµÐ¶ÐµÐ¹, Ð¸ÑÑ‡Ð¸ÑÐ»ÐµÐ½Ð½Ð°Ñ Ðº
+ÑƒÐ¿Ð»Ð°Ñ‚Ðµ Ð² Ð±ÑŽÐ´Ð¶ÐµÑ‚ Ð·Ð°:]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="5ef87ae8-b68e-4e99-bf79-cba24d8e2762" x="265" y="0" width="30" height="22"/>
@@ -12754,14 +12754,14 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Ñóììà íàëîãà, èñ÷èñëåííàÿ ê óïëàòå â áþäæåò (ðóá.)]]></text>
+							<text><![CDATA[Ð¡ÑƒÐ¼Ð¼Ð° Ð½Ð°Ð»Ð¾Ð³Ð°, Ð¸ÑÑ‡Ð¸ÑÐ»ÐµÐ½Ð½Ð°Ñ Ðº ÑƒÐ¿Ð»Ð°Ñ‚Ðµ Ð² Ð±ÑŽÐ´Ð¶ÐµÑ‚ (Ñ€ÑƒÐ±.)]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="02c533ef-cec5-4d21-9462-a45ac2b35f15" x="28" y="79" width="237" height="24"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[ïåðâûé êâàðòàë (ðóá.)]]></text>
+							<text><![CDATA[Ð¿ÐµÑ€Ð²Ñ‹Ð¹ ÐºÐ²Ð°Ñ€Ñ‚Ð°Ð» (Ñ€ÑƒÐ±.)]]></text>
 						</staticText>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="30f07432-5c53-4d35-aca3-56a10f5f7a04" x="297" y="1" width="15" height="20"/>
@@ -14182,8 +14182,8 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Èñ÷èñëåííàÿ ñóììà íàëîãà, ïîäëåæàùàÿ óïëàòå â
-áþäæåò çà íàëîãîâûé ïåðèîä (ðóá.)]]></text>
+							<text><![CDATA[Ð˜ÑÑ‡Ð¸ÑÐ»ÐµÐ½Ð½Ð°Ñ ÑÑƒÐ¼Ð¼Ð° Ð½Ð°Ð»Ð¾Ð³Ð°, Ð¿Ð¾Ð´Ð»ÐµÐ¶Ð°Ñ‰Ð°Ñ ÑƒÐ¿Ð»Ð°Ñ‚Ðµ Ð²
+Ð±ÑŽÐ´Ð¶ÐµÑ‚ Ð·Ð° Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ñ‹Ð¹ Ð¿ÐµÑ€Ð¸Ð¾Ð´ (Ñ€ÑƒÐ±.)]]></text>
 						</staticText>
 					</jr:listContents>
 				</jr:list>
@@ -14227,7 +14227,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement verticalAlignment="Bottom">
 					<font fontName="Arial" size="10" isBold="false" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Ñòð.]]></text>
+				<text><![CDATA[Ð¡Ñ‚Ñ€.]]></text>
 			</staticText>
 			<textField>
 				<reportElement uuid="e97b0f6f-8c5d-4d72-a5d2-0cb26471227e" x="264" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
@@ -14430,7 +14430,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial"/>
 				</textElement>
-				<text><![CDATA[ÈÍÍ]]></text>
+				<text><![CDATA[Ð˜ÐÐ]]></text>
 			</staticText>
 			<textField>
 				<reportElement uuid="3c170508-9471-40e0-8c18-288d24988a14" x="219" y="0" width="15" height="20" isPrintWhenDetailOverflows="true"/>
@@ -14465,7 +14465,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ÊÏÏ]]></text>
+				<text><![CDATA[ÐšÐŸÐŸ]]></text>
 			</staticText>
 			<textField>
 				<reportElement uuid="484ec315-9d90-43c0-83f2-d1acccb7c99d" x="189" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
@@ -14586,76 +14586,76 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 				<reportElement uuid="33df9a4a-e50d-44d0-8e76-51741a5a7f26" x="132" y="1" width="12" height="12" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
 			</rectangle>
 			<componentElement>
-				<reportElement uuid="9a026b75-8c0e-418a-a78d-929c7d9c7268" x="-2" y="49" width="613" height="780"/>
+				<reportElement uuid="9a026b75-8c0e-418a-a78d-929c7d9c7268" x="-2" y="49" width="613" height="791"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="Cars" uuid="799991b1-54c5-4efb-89dc-f264afcf848c">
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Äîêóìåíò/ÒðÍàëÍÄ/ÑóìÍàëÏÓ/ÑóìÏÓ/Ðàñ÷ÍàëÒÑ")]]></dataSourceExpression>
+						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Ð”Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚/Ð¢Ñ€ÐÐ°Ð»ÐÐ”/Ð¡ÑƒÐ¼ÐÐ°Ð»ÐŸÐ£/Ð¡ÑƒÐ¼ÐŸÐ£/Ð Ð°ÑÑ‡ÐÐ°Ð»Ð¢Ð¡")]]></dataSourceExpression>
 					</datasetRun>
-					<jr:listContents height="780" width="613">
+					<jr:listContents height="791" width="613">
 						<staticText>
 							<reportElement uuid="7e679275-836f-4520-b281-6c633407d78d" x="0" y="3" width="595" height="39">
-								<property name="net.sf.jasperreports.export.xls.sheet.name" value="ñòð.3_Ðàçä.2"/>
+								<property name="net.sf.jasperreports.export.xls.sheet.name" value="ÑÑ‚Ñ€.3_Ð Ð°Ð·Ð´.2"/>
 							</reportElement>
 							<textElement textAlignment="Center" verticalAlignment="Middle">
 								<font fontName="Arial" size="9" isBold="true" pdfFontName="Arialbd.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Ðàçäåë 2. Ðàñ÷åò ñóììû òðàíñïîðòíîãî íàëîãà ïî êàæäîìó òðàíñïîðòíîìó ñðåäñòâó]]></text>
+							<text><![CDATA[Ð Ð°Ð·Ð´ÐµÐ» 2. Ð Ð°ÑÑ‡ÐµÑ‚ ÑÑƒÐ¼Ð¼Ñ‹ Ñ‚Ñ€Ð°Ð½ÑÐ¿Ð¾Ñ€Ñ‚Ð½Ð¾Ð³Ð¾ Ð½Ð°Ð»Ð¾Ð³Ð° Ð¿Ð¾ ÐºÐ°Ð¶Ð´Ð¾Ð¼Ñƒ Ñ‚Ñ€Ð°Ð½ÑÐ¿Ð¾Ñ€Ñ‚Ð½Ð¾Ð¼Ñƒ ÑÑ€ÐµÐ´ÑÑ‚Ð²Ñƒ]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="822c4198-13a6-4291-9f67-3e2bc29c21e5" x="0" y="42" width="136" height="34"/>
 							<textElement textAlignment="Center" verticalAlignment="Top">
 								<font fontName="Arial" size="9" isItalic="true" pdfFontName="Ariali.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Ïîêàçàòåëè]]></text>
+							<text><![CDATA[ÐŸÐ¾ÐºÐ°Ð·Ð°Ñ‚ÐµÐ»Ð¸]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="c2dc51cc-11c6-40d6-be91-0b353518255c" x="1" y="77" width="138" height="24"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Êîä ïî ÎÊÀÒÎ]]></text>
+							<text><![CDATA[ÐšÐ¾Ð´ Ð¿Ð¾ ÐžÐšÐÐ¢Ðž]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="1c4edc32-f741-465c-98c2-918ee555515a" x="1" y="102" width="138" height="24"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Êîä âèäà òðàíñïîðòíîãî                    ñðåäñòâà]]></text>
+							<text><![CDATA[ÐšÐ¾Ð´ Ð²Ð¸Ð´Ð° Ñ‚Ñ€Ð°Ð½ÑÐ¿Ð¾Ñ€Ñ‚Ð½Ð¾Ð³Ð¾                    ÑÑ€ÐµÐ´ÑÑ‚Ð²Ð°]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="00e7dc50-63be-4f0b-9a0f-bc8f58dfa802" x="1" y="127" width="138" height="24"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Èäåíòèôèêàöèîííûé íîìåð òðàíñïîðòíîãî ñðåäñòâà]]></text>
+							<text><![CDATA[Ð˜Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ†Ð¸Ð¾Ð½Ð½Ñ‹Ð¹ Ð½Ð¾Ð¼ÐµÑ€ Ñ‚Ñ€Ð°Ð½ÑÐ¿Ð¾Ñ€Ñ‚Ð½Ð¾Ð³Ð¾ ÑÑ€ÐµÐ´ÑÑ‚Ð²Ð°]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="ae188e63-defe-4a9b-80e5-49f125ab9083" x="0" y="152" width="140" height="24"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Ìàðêà òðàíñïîðòíîãî ñðåäñòâà]]></text>
+							<text><![CDATA[ÐœÐ°Ñ€ÐºÐ° Ñ‚Ñ€Ð°Ð½ÑÐ¿Ð¾Ñ€Ñ‚Ð½Ð¾Ð³Ð¾ ÑÑ€ÐµÐ´ÑÑ‚Ð²Ð°]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="73ef3dc6-e175-4513-b412-aff5ef4a8169" x="0" y="177" width="138" height="24"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Ðåãèñòðàöèîííûé çíàê òðàíñïîðòíîãî ñðåäñòâà]]></text>
+							<text><![CDATA[Ð ÐµÐ³Ð¸ÑÑ‚Ñ€Ð°Ñ†Ð¸Ð¾Ð½Ð½Ñ‹Ð¹ Ð·Ð½Ð°Ðº Ñ‚Ñ€Ð°Ð½ÑÐ¿Ð¾Ñ€Ñ‚Ð½Ð¾Ð³Ð¾ ÑÑ€ÐµÐ´ÑÑ‚Ð²Ð°]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="95fc1c2d-bd30-4c00-bec4-27987b605ca8" x="136" y="42" width="40" height="34"/>
 							<textElement textAlignment="Center" verticalAlignment="Top">
 								<font fontName="Arial" size="9" isItalic="true" pdfFontName="Ariali.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Êîä ñòðîêè]]></text>
+							<text><![CDATA[ÐšÐ¾Ð´ ÑÑ‚Ñ€Ð¾ÐºÐ¸]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="b2f103c0-6514-411e-876a-60f44e5d317e" x="176" y="42" width="422" height="34"/>
 							<textElement textAlignment="Center" verticalAlignment="Top">
 								<font fontName="Arial" size="9" isItalic="true" pdfFontName="Ariali.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Çíà÷åíèÿ ïîêàçàòåëåé]]></text>
+							<text><![CDATA[Ð—Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ Ð¿Ð¾ÐºÐ°Ð·Ð°Ñ‚ÐµÐ»ÐµÐ¹]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="7ee45581-2336-4da2-9ba7-33af842fb007" x="140" y="127" width="20" height="24"/>
@@ -14690,14 +14690,14 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Íàëîãîâàÿ áàçà]]></text>
+							<text><![CDATA[ÐÐ°Ð»Ð¾Ð³Ð¾Ð²Ð°Ñ Ð±Ð°Ð·Ð°]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="9a34ab44-580d-4515-9299-334e0651116b" x="0" y="227" width="138" height="24"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Åäèíèöà èçìåðåíèÿ íàëîãîâîé áàçû ïî ÎÊÅÈ]]></text>
+							<text><![CDATA[Ð•Ð´Ð¸Ð½Ð¸Ñ†Ð° Ð¸Ð·Ð¼ÐµÑ€ÐµÐ½Ð¸Ñ Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ð¾Ð¹ Ð±Ð°Ð·Ñ‹ Ð¿Ð¾ ÐžÐšÐ•Ð˜]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="4c7e77b6-6ffa-4e43-a029-8db642a46bfe" x="139" y="202" width="20" height="24"/>
@@ -14718,14 +14718,14 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Ýêîëîãè÷åñêèé êëàññ]]></text>
+							<text><![CDATA[Ð­ÐºÐ¾Ð»Ð¾Ð³Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹ ÐºÐ»Ð°ÑÑ]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="c64d0c4d-ead8-4b92-a322-8c0b2d751634" x="0" y="277" width="138" height="30"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Êîëè÷åñòâî ëåò, ïðîøåäøèõ ñ ãîäà âûïóñêà òðàíñïîðòíîãî ñðåäñòâà]]></text>
+							<text><![CDATA[ÐšÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ Ð»ÐµÑ‚, Ð¿Ñ€Ð¾ÑˆÐµÐ´ÑˆÐ¸Ñ… Ñ Ð³Ð¾Ð´Ð° Ð²Ñ‹Ð¿ÑƒÑÐºÐ° Ñ‚Ñ€Ð°Ð½ÑÐ¿Ð¾Ñ€Ñ‚Ð½Ð¾Ð³Ð¾ ÑÑ€ÐµÐ´ÑÑ‚Ð²Ð°]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="7d4d7cd9-1261-4be9-9b6d-5953a7633a36" x="139" y="277" width="20" height="30"/>
@@ -14746,7 +14746,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Êîëè÷åñòâî ïîëíûõ ìåñÿöåâ âëàäåíèÿ òðàíñïîðòíûì ñðåäñòâîì]]></text>
+							<text><![CDATA[ÐšÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ Ð¿Ð¾Ð»Ð½Ñ‹Ñ… Ð¼ÐµÑÑÑ†ÐµÐ² Ð²Ð»Ð°Ð´ÐµÐ½Ð¸Ñ Ñ‚Ñ€Ð°Ð½ÑÐ¿Ð¾Ñ€Ñ‚Ð½Ñ‹Ð¼ ÑÑ€ÐµÐ´ÑÑ‚Ð²Ð¾Ð¼]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="a014b8a9-da4b-4600-95ff-91c019c4e316" x="139" y="314" width="20" height="34"/>
@@ -14760,14 +14760,14 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Êîýôôèöèåíò Êâ]]></text>
+							<text><![CDATA[ÐšÐ¾ÑÑ„Ñ„Ð¸Ñ†Ð¸ÐµÐ½Ñ‚ ÐšÐ²]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="50e6114b-e6cd-40d7-9f2a-f62b6a276248" x="0" y="374" width="138" height="24"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Íàëîãîâàÿ ñòàâêà]]></text>
+							<text><![CDATA[ÐÐ°Ð»Ð¾Ð³Ð¾Ð²Ð°Ñ ÑÑ‚Ð°Ð²ÐºÐ°]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="85a2498b-b78d-4756-8f41-ff0f1aa745f3" x="139" y="349" width="20" height="24"/>
@@ -14788,7 +14788,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Ñóììà èñ÷èñëåííîãî íàëîãà (ðóá.)]]></text>
+							<text><![CDATA[Ð¡ÑƒÐ¼Ð¼Ð° Ð¸ÑÑ‡Ð¸ÑÐ»ÐµÐ½Ð½Ð¾Ð³Ð¾ Ð½Ð°Ð»Ð¾Ð³Ð° (Ñ€ÑƒÐ±.)]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="fb927885-70d0-4cbc-be84-5bcfdb3c7a18" x="139" y="399" width="20" height="24"/>
@@ -14802,7 +14802,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Êîëè÷åñòâî ïîëíûõ ìåñÿöåâ èñïîëüçîâàíèÿ ëüãîòû]]></text>
+							<text><![CDATA[ÐšÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ Ð¿Ð¾Ð»Ð½Ñ‹Ñ… Ð¼ÐµÑÑÑ†ÐµÐ² Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ð½Ð¸Ñ Ð»ÑŒÐ³Ð¾Ñ‚Ñ‹]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="246e691e-6825-4b0f-8ec6-a77d1eb0d203" x="139" y="424" width="20" height="24"/>
@@ -14816,7 +14816,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Êîýôôèöèåíò Êë]]></text>
+							<text><![CDATA[ÐšÐ¾ÑÑ„Ñ„Ð¸Ñ†Ð¸ÐµÐ½Ñ‚ ÐšÐ»]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="f6655930-cda5-4a54-b2c1-8826c15be777" x="139" y="449" width="20" height="24"/>
@@ -14830,7 +14830,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Êîä íàëîãîâîé ëüãîòû â âèäå îñâîáîæäåíèÿ îò íàëîãîîáëîæåíèÿ]]></text>
+							<text><![CDATA[ÐšÐ¾Ð´ Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ð¾Ð¹ Ð»ÑŒÐ³Ð¾Ñ‚Ñ‹ Ð² Ð²Ð¸Ð´Ðµ Ð¾ÑÐ²Ð¾Ð±Ð¾Ð¶Ð´ÐµÐ½Ð¸Ñ Ð¾Ñ‚ Ð½Ð°Ð»Ð¾Ð³Ð¾Ð¾Ð±Ð»Ð¾Ð¶ÐµÐ½Ð¸Ñ]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="c04a9c0f-8146-4984-aaa5-62c547bba35e" x="139" y="474" width="20" height="34"/>
@@ -14844,7 +14844,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Ñóììà íàëîãîâîé ëüãîòû (ðóá.)]]></text>
+							<text><![CDATA[Ð¡ÑƒÐ¼Ð¼Ð° Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ð¾Ð¹ Ð»ÑŒÐ³Ð¾Ñ‚Ñ‹ (Ñ€ÑƒÐ±.)]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="e25a43e9-0c1b-459e-8daf-b714cae23107" x="139" y="509" width="20" height="24"/>
@@ -14858,7 +14858,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Êîä íàëîãîâîé ëüãîòû â âèäå óìåíüøåíèÿ ñóììû íàëîãà]]></text>
+							<text><![CDATA[ÐšÐ¾Ð´ Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ð¾Ð¹ Ð»ÑŒÐ³Ð¾Ñ‚Ñ‹ Ð² Ð²Ð¸Ð´Ðµ ÑƒÐ¼ÐµÐ½ÑŒÑˆÐµÐ½Ð¸Ñ ÑÑƒÐ¼Ð¼Ñ‹ Ð½Ð°Ð»Ð¾Ð³Ð°]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="6423c096-1aed-4827-baa5-98e22292c8d4" x="139" y="534" width="20" height="24"/>
@@ -14872,7 +14872,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Ñóììà íàëîãîâîé ëüãîòû (ðóá.)]]></text>
+							<text><![CDATA[Ð¡ÑƒÐ¼Ð¼Ð° Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ð¾Ð¹ Ð»ÑŒÐ³Ð¾Ñ‚Ñ‹ (Ñ€ÑƒÐ±.)]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="38c6203b-2f8b-4223-883d-08fb8f4334e2" x="139" y="559" width="20" height="24"/>
@@ -14886,7 +14886,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Êîä íàëîãîâîé ëüãîòû â âèäå ñíèæåíèÿ íàëîãîâîé ñòàâêè]]></text>
+							<text><![CDATA[ÐšÐ¾Ð´ Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ð¾Ð¹ Ð»ÑŒÐ³Ð¾Ñ‚Ñ‹ Ð² Ð²Ð¸Ð´Ðµ ÑÐ½Ð¸Ð¶ÐµÐ½Ð¸Ñ Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ð¾Ð¹ ÑÑ‚Ð°Ð²ÐºÐ¸]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="245f002d-437d-4371-8741-feb029010db4" x="139" y="584" width="20" height="24"/>
@@ -14900,7 +14900,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Ñóììà íàëîãîâîé ëüãîòû (ðóá.)]]></text>
+							<text><![CDATA[Ð¡ÑƒÐ¼Ð¼Ð° Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ð¾Ð¹ Ð»ÑŒÐ³Ð¾Ñ‚Ñ‹ (Ñ€ÑƒÐ±.)]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="1ae19f90-7615-46d3-9c6b-9d7f8266b196" x="139" y="609" width="20" height="24"/>
@@ -14914,7 +14914,7 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Èñ÷èñëåííàÿ ñóììà íàëîãà, ïîäëåæàùàÿ óïëàòå â áþäæåò çà íàëîãîâûé ïåðèîä (ðóá.)]]></text>
+							<text><![CDATA[Ð˜ÑÑ‡Ð¸ÑÐ»ÐµÐ½Ð½Ð°Ñ ÑÑƒÐ¼Ð¼Ð° Ð½Ð°Ð»Ð¾Ð³Ð°, Ð¿Ð¾Ð´Ð»ÐµÐ¶Ð°Ñ‰Ð°Ñ ÑƒÐ¿Ð»Ð°Ñ‚Ðµ Ð² Ð±ÑŽÐ´Ð¶ÐµÑ‚ Ð·Ð° Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ñ‹Ð¹ Ð¿ÐµÑ€Ð¸Ð¾Ð´ (Ñ€ÑƒÐ±.)]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="2a1e2f60-8ceb-46dd-9a41-ee85dc786690" x="139" y="634" width="20" height="34"/>
@@ -14935,10 +14935,10 @@ $F{ÄàòàÄîê}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ÝêîëîãÊë} == null ?
+							<textFieldExpression><![CDATA[$F{Ð­ÐºÐ¾Ð»Ð¾Ð³ÐšÐ»} == null ?
 "-"
 :
-$F{ÝêîëîãÊë}]]></textFieldExpression>
+$F{Ð­ÐºÐ¾Ð»Ð¾Ð³ÐšÐ»}]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="f7971f54-569a-4520-8508-643d980dae3d" x="266" y="79" width="15" height="20"/>
@@ -18791,16 +18791,16 @@ $F{ÝêîëîãÊë}]]></textFieldExpression>
 							<text><![CDATA[050]]></text>
 						</staticText>
 						<rectangle>
-							<reportElement uuid="f9e1a46d-c070-4bac-8ad2-147082924db4" x="600" y="767" width="12" height="12" backcolor="#000000"/>
+							<reportElement uuid="f9e1a46d-c070-4bac-8ad2-147082924db4" x="600" y="779" width="12" height="12" backcolor="#000000"/>
 						</rectangle>
 						<rectangle>
-							<reportElement uuid="e7e81156-8ffc-4a9d-89dc-b7dfbe60b214" x="3" y="766" width="12" height="12" backcolor="#000000"/>
+							<reportElement uuid="e7e81156-8ffc-4a9d-89dc-b7dfbe60b214" x="3" y="779" width="12" height="12" backcolor="#000000"/>
 						</rectangle>
 					</jr:listContents>
 				</jr:list>
 			</componentElement>
 			<break>
-				<reportElement uuid="ffe3ea14-916d-4a02-ad16-bebd0e558158" x="0" y="784" width="100" height="1"/>
+				<reportElement uuid="ffe3ea14-916d-4a02-ad16-bebd0e558158" x="0" y="841" width="100" height="1"/>
 			</break>
 			<image>
 				<reportElement uuid="f5f0bac3-f673-4b93-8a7f-e4fb120ac900" x="16" y="1" width="115" height="48" isPrintWhenDetailOverflows="true"/>
