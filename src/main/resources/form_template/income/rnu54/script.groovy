@@ -850,14 +850,12 @@ def getCourse(def currency, def date) {
  */
 void addData(def xml) {
     def tmp
-    def indexRow = 0
     def newRows = []
     def index
     def refDataProvider = refBookFactory.getDataProvider(15)
 
     // TODO (Ramil Timerbaev) Проверка корректности данных
     for (def row : xml.exemplar.table.detail.record) {
-        indexRow++
         index = 0
 
         def newRow = getNewRow()
