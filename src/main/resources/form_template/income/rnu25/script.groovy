@@ -981,7 +981,7 @@ def hasTotal(def data) {
  * @param xml данные
  */
 def addData(def xml) {
-    Date date = reportDate
+    Date date = new Date()
 
     def cache = [:]
     def data = getData(formData)
@@ -1099,6 +1099,11 @@ def getNumber(def value) {
     return new BigDecimal(tmp)
 }
 
+/**
+ * Получить record_id элемента справочника.
+ *
+ * @param value
+ */
 def getRecords(def ref_id, String code, String value, Date date, def cache) {
     String filter = code + "= '"+ value.replaceAll(' ', '')+"'"
     if (cache[ref_id]!=null) {
