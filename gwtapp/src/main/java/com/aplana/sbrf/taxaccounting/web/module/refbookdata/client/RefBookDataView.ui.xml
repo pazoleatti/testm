@@ -39,10 +39,10 @@
                         <g:Label ui:field="titleDesc" styleName="{style.titleDesc}"/>
                     </g:VerticalPanel>
                 </g:cell>
-                <g:VerticalPanel width="100%">
+                <g:HorizontalPanel width="100%">
                     <style:LinkAnchor title="Добавить строку" text="Добавить строку" ui:field="addRow" img="resources/img/exclamation_mark.png"/>
                     <style:LinkAnchor title="Удалить строку" text="Удалить строку" ui:field="deleteRow" img="resources/img/exclamation_mark.png"/>
-                </g:VerticalPanel>
+                </g:HorizontalPanel>
             </g:HorizontalPanel>
         </g:north>
         <g:center>
@@ -62,14 +62,7 @@
                     </g:DockLayoutPanel>
                 </g:center>
                 <g:east size="600">
-                    <g:VerticalPanel>
-                        <g:HorizontalPanel>
-                            <g:Button ui:field="save">Сохранить</g:Button>
-                            <g:Button ui:field="cancel">Отмена</g:Button>
-                        </g:HorizontalPanel>
-                        <g:VerticalPanel ui:field="content">
-                        </g:VerticalPanel>
-                    </g:VerticalPanel>
+                    <g:VerticalPanel ui:field="contentPanel"/>
                 </g:east>
             </g:SplitLayoutPanel>
         </g:center>

@@ -21,10 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,8 +37,6 @@ import java.util.Map;
 @Transactional
 public class FormDataServiceImpl implements FormDataService {
 
-	public static final String TMP_FILE_NAME = "fileToCheck";
-	public static final String SIGN_FILE_NAME = "sign";
 	public static final String IGNORE_URL = "http://ignore/";
 
 	@Autowired
@@ -140,34 +135,49 @@ public class FormDataServiceImpl implements FormDataService {
                                int departmentId, FormDataKind kind, int reportPeriodId, InputStream inputStream, String fileName) {
         if (formDataAccessService.canCreate(userInfo, formTemplateId, kind,
                 departmentId, reportPeriodId)) {
+            System.out.println("Validate signature.");
 	        boolean checkSuccess = true;
+            File signFileName = null;
+            File tmpFileName = null;
 	        if ((signDataPath != null) && !signDataPath.toString().equals(IGNORE_URL)) { //TODO временное решение с IGNORE_URL
 		        try {
+                    tmpFileName = File.createTempFile("", ".original");
+                    signFileName = File.createTempFile("", ".sign");
+                    System.out.println("Validate signature success.");
 			        OutputStream outputStream =
-					        new FileOutputStream(new File(TMP_FILE_NAME));
+					        new FileOutputStream(tmpFileName);
 			        IOUtils.copy(inputStream, outputStream);
 			        OutputStream outputSignStream =
-					        new FileOutputStream(new File(SIGN_FILE_NAME));
+					        new FileOutputStream(signFileName);
 			        IOUtils.copy(signDataPath.openStream(), outputSignStream);
-			        checkSuccess = signService.checkSign(TMP_FILE_NAME, SIGN_FILE_NAME, 0);
+                    System.out.println("tmpFileName: " + tmpFileName.getName() + " " + "signFileName: " + signFileName.getName());
+			        checkSuccess = signService.checkSign(tmpFileName.getName(), signFileName.getName(), 0);
+                    inputStream = new FileInputStream(tmpFileName);
 		        } catch (Exception e) {
 			        throw new ServiceException("Произошла ошибка при проверке подписи.", e);
-		        }
-	        }
+		        } finally {
+                    signFileName.delete();
+                }
+            }
 	        if (!checkSuccess) {
 		        throw new ServiceException("Файл не подписан.");
 	        }
+            System.out.println("After validate signature");
             FormData fd = formDataDao.getWithoutRows(formDataId);
             fd.initFormTemplateParams(formTemplateDao.get(formTemplateId));
             Map<String, Object> additionalParameters = new HashMap<String, Object>();
             additionalParameters.put("ImportInputStream", inputStream);
             additionalParameters.put("UploadFileName", fileName);
+            System.out.println("Script executing.");
             formDataScriptingService.executeScript(userInfo, fd, FormDataEvent.IMPORT, logger, additionalParameters);
+            System.out.println("After script executing.");
             formDataDao.save(fd); //TODO: Когда переделаем пейджинг,переделать на сохранение во временную таблицу (спросить у Марата)
 
             logBusinessService.add(formDataId, null, userInfo, FormDataEvent.IMPORT, null);
             auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, reportPeriodId,
                     null, fd.getFormType().getId(), kind.getId(), fileName);
+            if (tmpFileName != null)
+                tmpFileName.delete();
         }else {
             throw new AccessDeniedException(
                     "Недостаточно прав для создания налоговой формы с указанными параметрами");

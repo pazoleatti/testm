@@ -40,20 +40,12 @@ public class DepartmentDeclarationTypeServiceImpl implements DepartmentDeclarati
 		return departmentDeclarationTypeDao.getDepartmentIdsByTaxType(taxType);
 	}
 
-	@Override
-	public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType) {
-		return departmentDeclarationTypeDao.getByTaxType(departmentId, taxType);
-	}
 
 	@Override
 	public void save(int departmentId, List<DepartmentDeclarationType> departmentDeclarationTypes) {
 		departmentDeclarationTypeDao.save(departmentId, departmentDeclarationTypes);
 	}
 
-	@Override
-	public DeclarationType getDeclarationType(int declarationTypeId) {
-		return declarationTypeDao.get(declarationTypeId);
-	}
 
 	@Override
 	public List<DeclarationType> listAllByTaxType(TaxType taxType) {

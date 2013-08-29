@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class GetFileUplodHandler extends
+public class GetFileUploadHandler extends
         AbstractActionHandler<GetFileUpload, GetFileUploadResult> {
 
     @Autowired
@@ -35,13 +35,14 @@ public class GetFileUplodHandler extends
     @Autowired
     private SecurityService securityService;
 
-    public GetFileUplodHandler() {
+    public GetFileUploadHandler() {
         super(GetFileUpload.class);
     }
 
     @Override
     public GetFileUploadResult execute(GetFileUpload action, ExecutionContext context) throws ActionException {
 
+        System.out.println("Start file parsing.");
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
         BlobData blobData = blobDataService.get(action.getUuid());

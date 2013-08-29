@@ -3,10 +3,16 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-public class GetRefBookDataAction extends UnsecuredActionImpl<GetRefBookDataResult> implements ActionName {
+/**
+ * Created with IntelliJ IDEA.
+ * User: Comp-1
+ * Date: 28.08.13
+ * Time: 13:32
+ * To change this template use File | Settings | File Templates.
+ */
+public class GetRefBookAttributesAction extends UnsecuredActionImpl<GetRefBookAttributesResult> implements ActionName {
 
 	long refbookId;
-	long recordId;
 
 	public long getRefbookId() {
 		return refbookId;
@@ -16,16 +22,8 @@ public class GetRefBookDataAction extends UnsecuredActionImpl<GetRefBookDataResu
 		this.refbookId = refbookId;
 	}
 
-	public long getRecordId() {
-		return recordId;
-	}
-
-	public void setRecordId(long recordId) {
-		this.recordId = recordId;
-	}
-
 	@Override
 	public String getName() {
-		return "Получить запись из справочника";
+		return "Получить список атрибутов";
 	}
 }

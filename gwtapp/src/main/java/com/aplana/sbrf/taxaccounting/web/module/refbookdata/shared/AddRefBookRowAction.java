@@ -8,14 +8,14 @@ import java.util.Map;
 
 public class AddRefBookRowAction extends UnsecuredActionImpl<AddRefBookRowResult> implements ActionName {
 
-	List<Map<String, RefBookAttributeSerializable>> records;
+	List<Map<String, RefBookValueSerializable>> records;
 	long refbookId;
 
-	public List<Map<String, RefBookAttributeSerializable>> getRecords() {
+	public List<Map<String, RefBookValueSerializable>> getRecords() {
 		return records;
 	}
 
-	public void setRecords(List<Map<String, RefBookAttributeSerializable>> records) {
+	public void setRecords(List<Map<String, RefBookValueSerializable>> records) {
 		this.records = records;
 	}
 

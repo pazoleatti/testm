@@ -8,7 +8,8 @@ import java.util.Map;
 public class SaveRefBookRowAction extends UnsecuredActionImpl<SaveRefBookRowResult> implements ActionName {
 
 	Long refbookId;
-	Map<String, RefBookAttributeSerializable> valueToSave;
+	Long recordId;
+	Map<String, RefBookValueSerializable> valueToSave;
 
 	public Long getRefbookId() {
 		return refbookId;
@@ -18,11 +19,19 @@ public class SaveRefBookRowAction extends UnsecuredActionImpl<SaveRefBookRowResu
 		this.refbookId = refbookId;
 	}
 
-	public Map<String, RefBookAttributeSerializable> getValueToSave() {
+	public Long getRecordId() {
+		return recordId;
+	}
+
+	public void setRecordId(Long recordId) {
+		this.recordId = recordId;
+	}
+
+	public Map<String, RefBookValueSerializable> getValueToSave() {
 		return valueToSave;
 	}
 
-	public void setValueToSave(Map<String, RefBookAttributeSerializable> valueToSave) {
+	public void setValueToSave(Map<String, RefBookValueSerializable> valueToSave) {
 		this.valueToSave = valueToSave;
 	}
 
