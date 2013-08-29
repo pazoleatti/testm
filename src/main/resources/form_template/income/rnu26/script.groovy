@@ -251,7 +251,7 @@ void calc() {
             }
             // если код расходы поменялся то создать новую строку "итого по Эмитента:..."
             if (tmp != row.issuer) {
-                totalRows.put(i, getNewRow(tmp, totalColumns, sums))
+                totalRows.put(i, getNewRow(tmp, totalColumns, sums, data))
                 totalColumns.each {
                     sums[it] = 0
                 }
@@ -261,7 +261,7 @@ void calc() {
                 totalColumns.each {
                     sums[it] += (row.getCell(it).getValue() ?: 0)
                 }
-                totalRows.put(i + 1, getNewRow(row.issuer, totalColumns, sums))
+                totalRows.put(i + 1, getNewRow(row.issuer, totalColumns, sums, data))
                 totalColumns.each {
                     sums[it] = 0
                 }
@@ -465,9 +465,9 @@ def logicalCheck(def useLog) {
             }
         }
 
-        if (formDataOld != null && hasTotal) {
+        if (dataOld != null && hasTotal) {
             totalRow = data.getDataRow(getRows(data),'total')
-            totalRowOld = data.getDataRow(getRows(data),'total')
+            totalRowOld = data.getDataRow(getRows(dataOld),'total')
 
             // 13. Проверка корректности заполнения РНУ (графа 6, 7 (за предыдущий период))
             if (totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
@@ -478,7 +478,7 @@ def logicalCheck(def useLog) {
             }
 
             // 14. Проверка корректности заполнения РНУ (графа 8, 15 (за предыдущий период))
-            if (totalRow.cost != totalRowOld.reserveCalcValue) {
+            if (totalRow.reserveCalcValuePrev != totalRowOld.reserveCalcValue) {
                 def curCol = 8
                 def prevCol = 15
                 logger.error("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе $curCol = «Итого» по графе $prevCol формы РНУ-26 за предыдущий отчётный период.")
@@ -491,7 +491,7 @@ def logicalCheck(def useLog) {
 
             // 18. Проверка итоговых значений по эмитенту
             for (def codeName : totalGroupsName) {
-                def row = data.getDataRow(getRows(data),'total' + codeName)
+                def row = data.getDataRow(getRows(data),'total' + getRowNumber(codeName, data))
                 for (def alias : totalColumns) {
                     if (calcSumByCode(codeName, alias) != row.getCell(alias).getValue()) {
                         logger.error("Итоговые значения по эмитенту $codeName рассчитаны неверно!")
@@ -586,12 +586,10 @@ void importData() {
         return
     }
 
-    if (!fileName.contains('.rnu')) {
+    if (!fileName.contains('.r')) {
         logger.error("Некорректное расширение файла")
         return
     }
-
-    logger.info('Начата загрузка файла ' + fileName)
 
     def xmlString = importService.getData(is, fileName, 'cp866')
     if (xmlString == null) {
@@ -601,35 +599,47 @@ void importData() {
     if (xml == null) {
         return
     }
-    // номер строки с которой брать данные (что бы пропустить шапку таблицы или лишнюю информацию)
-    def startRow = 0
 
-    // номер графы с которой брать данные (что бы пропустить нумерацию или лишнюю информацию)
-    def startColumn = 1
-
+    def data = getData(formData)
     def totalColumns = [6:'lotSizePrev', 7:'lotSizeCurrent', 9:'cost', 14:'costOnMarketQuotation', 15:'reserveCalcValue']
     // добавить данные в форму
     boolean canCommit = true
-    try{
-        def total = addData(xml)
-        if (total!=null) {
+    try {
+        def totalLoad = addData(xml)
+        if (totalLoad!=null) {
+/*            if (!isBalancePeriod && !checkPrevPeriod()) {
+                logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+                return
+            }*/
             calc()
             logicalCheck(false)
             checkNSI()
 
+            def totalCalc
+            for (def row : getRows(data))
+                if (isTotal(row)) totalCalc = row
+
+            totalColumns.each{k, v->
+                if (totalCalc[v]!=totalLoad[v]) {
+                    logger.error("Итоговая сумма в графе $k в транспортном файле некорректна")
+                    canCommit = false
+                }
+            }
         } else {
             logger.error("Нет итоговой строки.")
             canCommit = false
         }
-        logger.info('Закончена загрузка файла ' + fileName)
     } catch(Exception e) {
+        logger.error(""+e.message)
         canCommit = false
     }
     //в случае ошибок откатить изменения
     if (!canCommit) {
         logger.error("Загрузка файла $fileName завершилась ошибкой")
+    } else {
+        logger.info('Закончена загрузка файла ' + fileName)
+        data.commit()
     }
-
 }
 
 /*
@@ -660,9 +670,9 @@ def getSum(def columnAlias) {
 /**
  * Получить новую строку.
  */
-def getNewRow(def alias, def totalColumns, def sums) {
+def getNewRow(def alias, def totalColumns, def sums, def data) {
     def newRow = formData.createDataRow()
-    newRow.setAlias('total' + alias)
+    newRow.setAlias('total' + getRowNumber(alias, data))
     newRow.issuer = alias + ' итог'
     setTotalStyle(newRow)
     totalColumns.each {
@@ -874,7 +884,7 @@ def getData(def formData) {
  *
  * @param xml данные
  */
-def addData(def xml, def startRow, def startColumn) {
+def addData(def xml) {
     if (xml == null) {
         return
     }
@@ -883,22 +893,22 @@ def addData(def xml, def startRow, def startColumn) {
 
     def cache = [:]
     def data = getData(formData)
+    data.clear()
 
     def total = formData.createDataRow()
-    def totalColumns = [6:'lotSizePrev', 7:'lotSizeCurrent', 9:'cost', 14:'costOnMarketQuotation', 15:'reserveCalcValue']
 
     def indexRow = -1
     for (def row : xml.row) {
         indexRow++
 
         // пропустить шапку таблицы
-        if (indexRow <= startRow) {// || indexRow>20) {
+        if (indexRow <= 0) {
             continue
         }
 
         def newRow = getNewRow()
 
-        def indexCell = startColumn
+        def indexCell = 1
 
         newRow.rowNumber = getNumber(row.cell[indexCell].text())
         indexCell++
@@ -999,8 +1009,6 @@ def addData(def xml, def startRow, def startColumn) {
     else {
         return null
     }
-
-    data.commit()
     return total
 }
 
@@ -1101,5 +1109,19 @@ def getSign(def sign) {
  */
 def getCurrency(def currencyCode) {
     return  refBookService.getStringValue(15,currencyCode,'CODE_2')
+}
+
+/**
+ * Получение первого rowNumber по issuer
+ * @param alias
+ * @param data
+ * @return
+ */
+def getRowNumber(def alias, def data) {
+    for(def row: getRows(data)){
+        if (row.issuer==alias) {
+            return row.rowNumber.toString()
+        }
+    }
 }
 
