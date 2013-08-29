@@ -97,6 +97,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
 			for (Map.Entry<RefBookAttribute, HasValue> w : widgets.entrySet()) {
 				w.getValue().setValue(record.get(w.getKey().getAlias()).getValue());
+				if (w.getValue() instanceof RefBookPickerPopupWidget) {
+					RefBookPickerPopupWidget rbw = (RefBookPickerPopupWidget) w.getValue();
+					rbw.setDereferenceValue(record.get(w.getKey().getAlias()).getDereferenceValue());
+				}
 			}
 		}
 	}
