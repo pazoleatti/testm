@@ -9,10 +9,10 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 /**
  * Ячейка для вывода номера столбца
  */
-public class IndexCell extends AbstractCell<DataRow> {
+public class IndexCell extends AbstractCell<DataRow<?>> {
 
 	@Override
-	public void render(com.google.gwt.cell.client.Cell.Context context, DataRow value, SafeHtmlBuilder sb) {
+	public void render(com.google.gwt.cell.client.Cell.Context context, DataRow<?> value, SafeHtmlBuilder sb) {
 		if (value == null) {
 			return;
 		}

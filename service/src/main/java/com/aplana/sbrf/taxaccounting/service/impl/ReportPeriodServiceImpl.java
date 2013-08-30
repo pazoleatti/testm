@@ -151,6 +151,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 				depRP.setReportPeriod(newReportPeriod);
 				depRP.setDepartmentId(Long.valueOf(dep.getId()));
 				depRP.setActive(true);
+				depRP.setBalance(isBalance);
 				saveOrUpdate(depRP, logs);
 			}
 		} else if (user.getUser().getDepartmentId() == departmentId) {
@@ -171,6 +172,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 				depRP.setReportPeriod(newReportPeriod);
 				depRP.setDepartmentId(Long.valueOf(dft.getDepartmentId()));
 				depRP.setActive(true);
+				depRP.setBalance(isBalance);
 				saveOrUpdate(depRP, logs);
 			}
 

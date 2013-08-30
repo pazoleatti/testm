@@ -24,6 +24,7 @@ public class FormDataListView extends
 	public static final String DEPARTMENT_TITLE = "Подразделение";
 	public static final String REPORT_PERIOD_TITLE = "Отчетный период";
 	public static final String FORM_DATA_STATE_TITLE = "Состояние";
+	public static final String FORM_DATA_PERIOD_ORDER = "Очередность отчетного периода";
 
 	interface MyBinder extends UiBinder<Widget, FormDataListView> {
 	}
@@ -76,6 +77,14 @@ public class FormDataListView extends
 			}
 		};
 
+        TextColumn<FormDataSearchResultItem> periodOrderColumn = new TextColumn<FormDataSearchResultItem>() {
+            @Override
+            public String getValue(FormDataSearchResultItem object) {
+                Integer periodOrder = object.getPeriodOrder();
+                return periodOrder == null ? "—" : Formats.getRussianMonthNameWithTier(periodOrder);
+            }
+        };
+
 		Column<FormDataSearchResultItem, FormDataSearchResultItem> linkColumn = new Column<FormDataSearchResultItem, FormDataSearchResultItem>(
 				new AbstractCell<FormDataSearchResultItem>() {
 
@@ -103,6 +112,7 @@ public class FormDataListView extends
 		formDataTable.addColumn(linkColumn, getHeader(FORM_DATA_TYPE_TITLE));
 		formDataTable.addColumn(departmentColumn, getHeader(DEPARTMENT_TITLE));
 		formDataTable.addColumn(reportPeriodColumn, getHeader(REPORT_PERIOD_TITLE));
+		formDataTable.addColumn(periodOrderColumn, getHeader(FORM_DATA_PERIOD_ORDER));
 		formDataTable.addColumn(stateColumn, getHeader(FORM_DATA_STATE_TITLE));
 
 		pager.setDisplay(formDataTable);

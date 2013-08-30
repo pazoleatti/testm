@@ -19,36 +19,44 @@
 
         .titleDesc{
             font-size: 16px;
-        }
-
-        .titlePanel{
             padding-left: 10px
         }
+
+        .btnAddDel{
+            margin-top: 5px;
+            margin-left: 300px;
+        }
+
     </ui:style>
     <g:DockLayoutPanel>
         <g:north size="100">
-            <g:HorizontalPanel>
-                <g:cell width="25px">
-                    <style:LinkAnchor title="Перейти к списку справочников" img="resources/img/arrow-left-24.png" href="#!refbooklist"/>
-                </g:cell>
-                <g:cell width="335px">
-                    <g:VerticalPanel width="310px" addStyleNames="{style.titlePanel}">
-                        <g:cell height="45px">
-                            <g:Label styleName="{style.titleText}">Справочник</g:Label>
+            <g:VerticalPanel>
+                <g:cell height="30px">
+                    <g:HorizontalPanel >
+                        <g:cell width="26px">
+                            <style:LinkAnchor title="Перейти к списку справочников" img="resources/img/arrow-left-24.png"
+                                              href="#!refbooklist"/>
                         </g:cell>
-                        <g:Label ui:field="titleDesc" styleName="{style.titleDesc}"/>
-                    </g:VerticalPanel>
+                        <g:Label styleName="{style.titleText}">Справочник</g:Label>
+                    </g:HorizontalPanel>
                 </g:cell>
-                <g:HorizontalPanel width="100%">
-                    <style:LinkAnchor title="Добавить строку" text="Добавить строку" ui:field="addRow" img="resources/img/exclamation_mark.png"/>
-                    <style:LinkAnchor title="Удалить строку" text="Удалить строку" ui:field="deleteRow" img="resources/img/exclamation_mark.png"/>
-                </g:HorizontalPanel>
-            </g:HorizontalPanel>
+                <g:cell height="20px">
+                    <g:Label ui:field="titleDesc" styleName="{style.titleDesc}"/>
+                </g:cell>
+                <g:cell height="45px" verticalAlignment="bottom">
+                    <g:HorizontalPanel styleName="{style.btnAddDel}" spacing="5">
+                        <style:LinkAnchor title="Добавить строку" text="Добавить строку" ui:field="addRow"
+                                          img="resources/img/exclamation_mark.png"/>
+                        <style:LinkAnchor title="Удалить строку" text="Удалить строку" ui:field="deleteRow"
+                                          img="resources/img/exclamation_mark.png"/>
+                    </g:HorizontalPanel>
+                </g:cell>
+            </g:VerticalPanel>
         </g:north>
         <g:center>
             <g:SplitLayoutPanel>
                 <g:center>
-                    <g:DockLayoutPanel>
+                    <g:DockLayoutPanel width="100%" height="100%">
                         <g:center>
                             <g:ResizeLayoutPanel>
                                 <style:GenericDataGrid height="100%" ui:field="refbookDataTable"/>
@@ -61,8 +69,8 @@
                         </g:south>
                     </g:DockLayoutPanel>
                 </g:center>
-                <g:east size="600">
-                    <g:VerticalPanel ui:field="contentPanel"/>
+                <g:east size="500">
+                    <g:VerticalPanel width="100%" height="100%" ui:field="contentPanel"/>
                 </g:east>
             </g:SplitLayoutPanel>
         </g:center>

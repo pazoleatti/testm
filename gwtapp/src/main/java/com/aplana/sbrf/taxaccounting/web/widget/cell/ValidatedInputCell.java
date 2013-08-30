@@ -38,12 +38,12 @@ public class ValidatedInputCell extends KeyPressableTextInputCell {
 	public void onBrowserEvent(Context context, Element parent, String value,
 							   NativeEvent event, ValueUpdater<String> valueUpdater) {
 
-		DataRow<Cell> dataRow = (DataRow<Cell>)context.getKey();
-		if ((columnContext.getMode() == ColumnContext.Mode.EDIT_MODE)
-				|| ((columnContext.getMode() != ColumnContext.Mode.READONLY_MODE)
-				&& dataRow.getCell(columnContext.getColumn().getAlias()).isEditable())) {
+		@SuppressWarnings("unchecked")
+		boolean editableCell = ((DataRow<Cell>) context.getKey()).getCell(columnContext.getColumn().getAlias()).isEditable();
+		if (DataRowEditableCellUtils.editMode(columnContext, editableCell)) {
 			super.onBrowserEvent(context, parent, value, event, valueUpdater);
 		}
+					
 	}
 
 }

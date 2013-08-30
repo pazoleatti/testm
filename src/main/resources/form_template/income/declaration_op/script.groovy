@@ -57,20 +57,20 @@ def incomeParams = departmentParamIncomeRecords.getRecords().getAt(0)
 if (incomeParams == null) {
     throw new Exception("Ошибка при получении настроек обособленного подразделения.")
 }
-def reorgFormCode = getValue(incomeParams, 'REORG_FORM_CODE')
+def reorgFormCode = refBookService.getStringValue(5, getValue(incomeParams, 'REORG_FORM_CODE'), 'CODE')
 def taxOrganCode = getValue(incomeParams, 'TAX_ORGAN_CODE')
-def okvedCode =  getValue(incomeParams, 'OKVED_CODE')
+def okvedCode = refBookService.getStringValue(34, getValue(incomeParams, 'OKVED_CODE'), 'CODE')
 def phone = getValue(incomeParams, 'PHONE')
 def name = getValue(incomeParams, 'NAME')
 def inn = getValue(incomeParams, 'INN')
 def kpp = getValue(incomeParams, 'KPP')
 def reorgInn = getValue(incomeParams, 'REORG_INN')
 def reorgKpp = getValue(incomeParams, 'REORG_KPP')
-def okato = getValue(incomeParams, 'OKATO')
+def okato = refBookService.getStringValue(3, getValue(incomeParams, 'OKATO'), 'OKATO')
 def signatoryId = getValue(incomeParams, 'SIGNATORY_ID')
 def appVersion = getValue(incomeParams, 'APP_VERSION')
 def formatVersion = getValue(incomeParams, 'FORMAT_VERSION')
-def taxPlaceTypeCode = getValue(incomeParams, 'TAX_PLACE_TYPE_CODE')
+def taxPlaceTypeCode = refBookService.getStringValue(2, getValue(incomeParams, 'TAX_PLACE_TYPE_CODE'), 'CODE')
 def signatorySurname = getValue(incomeParams, 'SIGNATORY_SURNAME')
 def signatoryFirstName = getValue(incomeParams, 'SIGNATORY_FIRSTNAME')
 def signatoryLastName = getValue(incomeParams, 'SIGNATORY_LASTNAME')
@@ -385,13 +385,13 @@ xmlbuilder.Файл(
             // получение из нф авансовых платежей строки соответствующей текущему подразделению
             def tmpRow = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, kpp)
             if (tmpRow != null) {
-                obRasch = row.calcFlag
-                naimOP = row.regionBankDivision
-                kppop = row.kpp
-                obazUplNalOP = row.obligationPayTax
+                obRasch = refBookService.getNumberValue(26, row.calcFlag, 'CODE')
+                naimOP = refBookService.getStringValue(30, row.regionBankDivision, 'NAME')
+                kppop = refBookService.getStringValue(33, row.kpp, 'KPP')
+                obazUplNalOP = refBookService.getNumberValue(25, row.obligationPayTax, 'CODE')
                 dolaNalBaz = row.baseTaxOf
                 nalBazaDola = row.baseTaxOfRub
-                stavNalSubRF = row.subjectTaxStavka
+                stavNalSubRF = refBookService.getNumberValue(33, row.subjectTaxStavka, 'TAX_RATE')
                 sumNal = row.taxSum
                 nalNachislSubRF = row.subjectTaxCredit
                 sumNalP = row.taxSumToPay
@@ -731,7 +731,7 @@ def getRowAdvanceForCurrentDepartment(def dataRowsHelper, def kpp) {
         return null
     }
     for (row in dataRowsHelper.getAllCached()) {
-        if (kpp == row.kpp) {
+        if (kpp == refBookService.getStringValue(33, row.kpp, 'KPP')) {
             return row
         }
     }

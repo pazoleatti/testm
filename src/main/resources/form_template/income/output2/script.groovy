@@ -14,7 +14,6 @@ import java.text.SimpleDateFormat
  * 6.3.2    Расчет налога на прибыль с доходов, удерживаемого налоговым агентом
  *
  * TODO:
- *      - при импорте нет получения имени файла для определения типа файла (xls или csv)
  *      - проверки корректности данных проверить когда будут сделаны вывод сообщении
  */
 
@@ -154,21 +153,31 @@ void insert(def data, def row) {
  * Получение импортируемых данных.
  */
 void importData() {
-    // TODO (Ramil Timerbaev) Костыль! это значение должно передаваться в скрипт
-    def fileName = 'fileName.xls'
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        logger.error('Имя файла не должно быть пустым')
+        return
+    }
+    if (!fileName.contains('.xls')) {
+        logger.error('Формат файла должен быть *.xls')
+        return
+    }
 
     def is = ImportInputStream
     if (is == null) {
+        logger.error('Поток данных пуст')
         return
     }
 
     def xmlString = importService.getData(is, fileName, 'windows-1251', '№ стр.', null)
     if (xmlString == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
 
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
 
