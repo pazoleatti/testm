@@ -99,7 +99,6 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                     if(Formats.getById(((DateColumn)currColumn).getFormatId()).getFormat().equals("")){
                         style.setDataFormat(dataFormat.getFormat(dateFormater));
                     } else{
-                        System.out.println("dataFormat: " + Formats.getById(((DateColumn)currColumn).getFormatId()).getFormat());
                         style.setDataFormat(dataFormat.getFormat(Formats.getById(((DateColumn)currColumn).getFormatId()).getFormat()));
                     }
 
@@ -107,8 +106,6 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                 case BIGDECIMAL:
                     style.setAlignment(CellStyle.ALIGN_RIGHT);
                     style.setWrapText(true);
-                    System.out.println("numericFormat precision: " + ((NumericColumn)currColumn).getPrecision() + ", format: " +
-                            XlsxReportMetadata.Presision.getPresision(((NumericColumn)currColumn).getPrecision()));
                     style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.Presision.getPresision(((NumericColumn)currColumn).getPrecision())));
                     break;
                 case STRING:
@@ -250,7 +247,6 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.BIGDECIMAL,dataRow.getCell(column.getAlias()).getStyle(),
                             column));
 
-                    System.out.println("bd value: " + bd);
 					cell.setCellValue(bd!=null? bd.toString() :"");
 					fillWidth(cell.getColumnIndex(),String.valueOf(bd!=null?bd.doubleValue():"").length());
 				}else if(column instanceof RefBookColumn){
