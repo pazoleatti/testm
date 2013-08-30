@@ -47,18 +47,6 @@ public class RefBookFactoryImpl implements RefBookFactory {
     public List<RefBook> getAll() {
         return refBookDao.getAll();
     }
-    
-	@Override
-	public void importRefBook(TAUserInfo userInfo, Logger logger, Long refBookId, InputStream is) {
-        Map<String, Object> additionalParameters = new HashMap<String, Object>();
-        additionalParameters.put("ImportInputStream", is);
-		refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, null);
-		if (logger.containsLevel(LogLevel.ERROR)){
-				throw new ServiceLoggerException(
-						"Произошли ошибки в скрипте импорта справочника",
-						logger.getEntries());
-		}
-	}
 
     @Override
     public RefBook getByAttribute(Long attributeId) {
