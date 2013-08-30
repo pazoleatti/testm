@@ -71,13 +71,7 @@ switch (formDataEvent) {
  */
 def addNewRow() {
     def data = getData(formData)
-    DataRow<Cell> newRow = formData.createDataRow()
-    // графа 1..10
-    ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
-            'acquisitionPrice', 'salePrice', 'part1REPODate', 'part2REPODate'].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
+    DataRow<Cell> newRow = getNewRow()
     def index = 0
     if (currentDataRow!=null){
         index = currentDataRow.getIndex()
@@ -167,12 +161,12 @@ void calc() {
         b = 0
         c = 0
         if (a > 0) {
-            c = roundTo2(Math.abs(a))
+            c = roundTo2(a)
         } else if (a < 0) {
-            b = roundTo2(a)
+            b = roundTo2(-a)
         }
-        row.income = b
-        row.outcome = c
+        row.income = c
+        row.outcome = b
 
         def currency = getCurrency(row.currencyCode)
         // графа 11
@@ -297,12 +291,12 @@ def logicalCheck(def useLog) {
 
             // 5. Проверка финансового результата
             tmp = ((row.salePrice - row.acquisitionPrice) * (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
-            if (tmp > 0 && row.income != roundTo2(Math.abs(tmp))) {
+            if (tmp > 0 && row.income != roundTo2(tmp)) {
                 logger.warn('Неверно определены доходы')
             }
 
             // 6. Проверка финансового результата
-            if (tmp < 0 && row.outcome != roundTo2(Math.abs(tmp))) {
+            if (tmp < 0 && row.outcome != roundTo2(-tmp)) {
                 logger.warn('Неверно определены расходы')
             }
 
@@ -312,7 +306,7 @@ def logicalCheck(def useLog) {
             b = 0
             c = 0
             if (a < 0) {
-                c = roundTo2(Math.abs(a))
+                c = roundTo2(-a)
             } else if (a > 0) {
                 b = roundTo2(a)
             }
@@ -492,7 +486,7 @@ void importData() {
 
     def data = getData(formData)
     def rowsOld = getRows(data)
-    def totalColumns = [4:'nominalPriceSecurities', 5:'acquisitionPrice', 6:'salePrice', 9:'income', 10:'outcome', 11:'outcome269st', 12:'outcomeTax']
+    def totalColumns = [5:'acquisitionPrice', 6:'salePrice', 9:'income', 10:'outcome', 11:'outcome269st', 12:'outcomeTax']
 
     // добавить данные в форму
     try {
@@ -521,8 +515,8 @@ void importData() {
     }
     //в случае ошибок откатить изменения
     if (logger.containsLevel(LogLevel.ERROR)) {
-//        data.clear()
-//        data.insert(rowsOld, 1)
+        data.clear()
+        data.insert(rowsOld, 1)
         logger.error("Загрузка файла $fileName завершилась ошибкой")
     } else {
         logger.info('Закончена загрузка файла ' + fileName)
@@ -771,6 +765,20 @@ def getRows(def data) {
 }
 
 /**
+ * Получить новую стролу с заданными стилями.
+ */
+def getNewRow() {
+    def newRow = formData.createDataRow()
+    // графа 1..10
+    ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
+            'acquisitionPrice', 'salePrice', 'part1REPODate', 'part2REPODate'].each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return newRow
+}
+
+/**
  * Хелпер для округления чисел
  * @param value
  * @return
@@ -837,7 +845,6 @@ def addData(def xml) {
     def newRows = []
     def data = getData(formData)
     data.clear()
-
     def indexRow = 0
     def index
 
@@ -884,11 +891,11 @@ def addData(def xml) {
 
     // проверка итоговых данных
     def totalRow = formData.createDataRow()
-    if (xml.exemplar.table.total.record.field.size() == 1 && !newRows.isEmpty()) {
+    if (xml.exemplar.table.total.record.field.size() >= 0 && !newRows.isEmpty()) {
         for (def row : xml.exemplar.table.total.record) {
 
             // графа 4
-            totalRow.nominalPriceSecurities = getNumber(row.field[4].@value.text())
+            totalRow.nominalPriceSecurities = getNumber(row.field[3].@value.text())
 
             // графа 5
             totalRow.acquisitionPrice = getNumber(row.field[4].@value.text())
