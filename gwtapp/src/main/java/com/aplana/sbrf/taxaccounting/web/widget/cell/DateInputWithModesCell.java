@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.google.gwt.cell.client.*;
+import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -45,7 +45,7 @@ public class DateInputWithModesCell extends DateInputCell {
 	@Override
 	public void render(Context context, Date value, SafeHtmlBuilder sb) {
 		@SuppressWarnings("unchecked")
-		boolean editableCell = ((DataRow<Cell>) context.getKey()).getCell(columnContext.getColumn().getAlias()).isEditable();
+		AbstractCell editableCell = ((DataRow<?>) context.getKey()).getCell(columnContext.getColumn().getAlias());
 		if (DataRowEditableCellUtils.editMode(columnContext, editableCell)) {
 			super.render(context, value, sb);
 		} else if (value != null && !value.toString().isEmpty()) {
@@ -57,7 +57,7 @@ public class DateInputWithModesCell extends DateInputCell {
 	public void onBrowserEvent(Context context, Element parent, Date value,
 	                           NativeEvent event, ValueUpdater<Date> valueUpdater) {
 		@SuppressWarnings("unchecked")
-		boolean editableCell = ((DataRow<Cell>) context.getKey()).getCell(columnContext.getColumn().getAlias()).isEditable();
+		AbstractCell editableCell = ((DataRow<?>) context.getKey()).getCell(columnContext.getColumn().getAlias());
 		if (DataRowEditableCellUtils.editMode(columnContext, editableCell)) {
 			super.onBrowserEvent(context, parent, value, event, valueUpdater);
 		}
