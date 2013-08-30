@@ -140,7 +140,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 						}, this));
 
 		GetNameAction nameAction = new GetNameAction();
-		nameAction.setAttributeId(refBookDataId);
+		nameAction.setRefbookId(refBookDataId);
 		dispatcher.execute(nameAction,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<GetNameResult>() {

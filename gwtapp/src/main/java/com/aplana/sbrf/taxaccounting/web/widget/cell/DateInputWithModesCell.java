@@ -44,8 +44,9 @@ public class DateInputWithModesCell extends DateInputCell {
 
 	@Override
 	public void render(Context context, Date value, SafeHtmlBuilder sb) {
-		if (columnContext.getMode() == ColumnContext.Mode.DEFAULT_MODE ||
-				columnContext.getMode() == ColumnContext.Mode.EDIT_MODE) {
+		@SuppressWarnings("unchecked")
+		boolean editableCell = ((DataRow<Cell>) context.getKey()).getCell(columnContext.getColumn().getAlias()).isEditable();
+		if (DataRowEditableCellUtils.editMode(columnContext, editableCell)) {
 			super.render(context, value, sb);
 		} else if (value != null && !value.toString().isEmpty()) {
 			sb.appendEscaped(columnContext.getColumn().getFormatter().format(getFormattedDate(value)));
@@ -55,10 +56,9 @@ public class DateInputWithModesCell extends DateInputCell {
 	@Override
 	public void onBrowserEvent(Context context, Element parent, Date value,
 	                           NativeEvent event, ValueUpdater<Date> valueUpdater) {
-		DataRow<Cell> dataRow = (DataRow<Cell>)context.getKey();
-		if ((columnContext.getMode() == ColumnContext.Mode.EDIT_MODE) ||
-				((columnContext.getMode() != ColumnContext.Mode.READONLY_MODE) &&
-						dataRow.getCell(columnContext.getColumn().getAlias()).isEditable())) {
+		@SuppressWarnings("unchecked")
+		boolean editableCell = ((DataRow<Cell>) context.getKey()).getCell(columnContext.getColumn().getAlias()).isEditable();
+		if (DataRowEditableCellUtils.editMode(columnContext, editableCell)) {
 			super.onBrowserEvent(context, parent, value, event, valueUpdater);
 		}
 	}
