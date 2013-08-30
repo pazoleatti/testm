@@ -51,11 +51,13 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		void setTitle(String title);
 		void setTableData(List<TableRow> data);
 		void setFilterData(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, int yearFrom, int yearTo);
-		int getFromYear();
-		int getToYear();
+		Integer getFromYear();
+		Integer getToYear();
 		long getDepartmentId();
 		TableRow getSelectedRow();
 		void setReadOnly(boolean readOnly);
+		boolean isFromYearEmpty();
+		boolean isToYearEmpty();
 	}
 
 	private final TaPlaceManager placeManager;
@@ -105,6 +107,20 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	}
 
 	@Override
+	public void onFindButton() {
+		if (getView().isFromYearEmpty() || getView().isToYearEmpty()) {
+			Window.alert("Не заданы все обязательные параметры!");
+			return;
+		} else if ((getView().getFromYear() == null)
+				|| (getView().getToYear() == null)
+				|| (getView().getFromYear() > getView().getToYear())){
+			Window.alert("Интервал периода поиска указан неверно!");
+			return;
+		} else {
+			find();
+		}
+	}
+
 	public void find() {
 		GetPeriodDataAction requestData = new GetPeriodDataAction();
 		requestData.setTaxType(taxType);

@@ -86,8 +86,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 		
 		@SuppressWarnings("unchecked")
 		boolean editableCell = ((DataRow<Cell>) context.getKey()).getCell(column.getAlias()).isEditable();
-		if ((columnContext.getMode() == ColumnContext.Mode.READONLY_MODE)
-				|| (columnContext.getMode() != ColumnContext.Mode.DEFAULT_MODE && !editableCell)) {
+		if (!DataRowEditableCellUtils.editMode(columnContext, editableCell)) {
 			return;
 		}
 			

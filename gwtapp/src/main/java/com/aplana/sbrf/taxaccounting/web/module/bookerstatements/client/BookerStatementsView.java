@@ -136,12 +136,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
                 if (!error.toLowerCase().contains("error")) {
                     logs.add(new LogEntry(LogLevel.INFO, "Файл успешно загружен"));
                 } else {
-                    int index = error.indexOf("ServiceException: ");
-                    if (index != -1) {
-                        error = error.substring(index + 18);
-                        error = error.substring(0, error.indexOf("\n"));
-                    }
-                    logs.add(new LogEntry(LogLevel.ERROR, error));
+                    logs.add(new LogEntry(LogLevel.ERROR, error.substring(6)));
                 }
                 setLogMessages(logs);
                 LockInteractionEvent.fire((BookerStatementsPresenter) getUiHandlers(), false);
