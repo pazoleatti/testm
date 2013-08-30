@@ -367,7 +367,7 @@ def isCalcField(Cell cell) {
  */
 def consolidation(DataRowHelper form) {
     isBank() ? consolidationBank(form) : consolidationSummary()
-    form.save()
+    form.save(form.allCached)
     form.commit()
 }
 
