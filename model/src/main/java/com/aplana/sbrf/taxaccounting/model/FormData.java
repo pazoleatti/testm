@@ -19,6 +19,7 @@ public class FormData extends IdentityObject<Long> {
 	private FormDataKind kind;
 	private Integer departmentId;
 	private Integer reportPeriodId;
+    private Integer periodOrder;
 	
 	/**
 	 * Признак возврата
@@ -222,7 +223,15 @@ public class FormData extends IdentityObject<Long> {
 		this.returnSign = returnSign;
 	}
 
-	@Override
+    public Integer getPeriodOrder() {
+        return periodOrder;
+    }
+
+    public void setPeriodOrder(Integer periodOrder) {
+        this.periodOrder = periodOrder;
+    }
+
+    @Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("FormData [state=");
@@ -233,6 +242,8 @@ public class FormData extends IdentityObject<Long> {
 		builder.append(departmentId);
 		builder.append(", reportPeriodId=");
 		builder.append(reportPeriodId);
+        builder.append(", periodOrder=");
+        builder.append(periodOrder);
 		builder.append(", returnSign=");
 		builder.append(returnSign);
 		builder.append(", formTemplateId=");
