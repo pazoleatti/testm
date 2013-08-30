@@ -23,7 +23,7 @@ import java.util.Map;
  * @author Dmitriy Levykin
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"RefBookBookerStatemensDaoTest.xml"})
+@ContextConfiguration({"RefBookIncome102DaoImplTest.xml"})
 @Transactional
 public class RefBookIncome102DaoTest {
 
