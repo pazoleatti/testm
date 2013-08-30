@@ -116,7 +116,12 @@ switch (formDataEvent){
         // для сохранения изменений приемников
         getData(formData).commit()
         break
+    // загрузить
+    case FormDataEvent.IMPORT :
+        importData()
+        break
 }
+
 
 
 /**
@@ -179,7 +184,7 @@ def checkNSI() {
     if (!getRows(data).isEmpty()) {
 
         for (DataRow row : getRows(data)) {
-            if (isTotal(row)) {
+            if (isTotalRow(row)) {
                 continue
             }
 
@@ -621,4 +626,225 @@ void setTotalStyle(def row) {
             'income', 'outcome', 'rateBR', 'outcome269st', 'outcomeTax'].each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
     }
+}
+
+/**
+ * Получение импортируемых данных.
+ * Транспортный файл формата xml.
+ */
+void importData() {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '' || !fileName.contains('.xml')) {
+        return
+    }
+
+    def is = ImportInputStream
+    if (is == null) {
+        return
+    }
+
+    def xmlString = importService.getData(is, fileName)
+    if (xmlString == null || xmlString == '') {
+        return
+    }
+
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        return
+    }
+
+    // сохранить начальное состояние формы
+    def data = getData(formData)
+    def rowsOld = getRows(data)
+    try {
+        // добавить данные в форму
+        addData(xml)
+
+        // расчитать и проверить
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            fillForm()
+            logicalCheck()
+            checkNSI()
+        }
+    } catch(Exception e) {
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
+    }
+    // откатить загрузку если есть ошибки
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        data.clear()
+        data.insert(rowsOld, 1)
+    } else {
+        logger.info('Данные загружены')
+    }
+    data.commit()
+}
+
+/**
+ * Заполнить форму данными.
+ *
+ * @param xml данные
+ */
+void addData(def xml) {
+    def tmp
+    def newRows = []
+    def index
+    def refDataProvider = refBookFactory.getDataProvider(15)
+
+    for (def row : xml.exemplar.table.detail.record) {
+        index = 0
+
+        def newRow = getNewRow()
+
+        // графа 1
+        newRow.tradeNumber = row.field[index].@value.text()
+        index++
+
+        // графа 2
+        newRow.securityName = row.field[index].@value.text()
+        index++
+
+        // графа 3 - справочник 15 "Общероссийский классификатор валют"
+        tmp = null
+        if (row.field[index].@value.text() != null &&
+                row.field[index].@value.text().trim() != '') {
+            def records = refDataProvider.getRecords(new Date(), null, "CODE = '" + row.field[index].@value.text() + "'", null);
+            if (records != null && !records.getRecords().isEmpty()) {
+                tmp = records.getRecords().get(0).get('record_id').getNumberValue()
+            }
+        }
+        newRow.currencyCode = tmp
+        index++
+
+        // графа 4
+        newRow.nominalPrice = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 5
+        newRow.part1REPODate = getDate(row.field[index].@value.text())
+        index++
+
+        // графа 6
+        newRow.part2REPODate = getDate(row.field[index].@value.text())
+        index++
+
+        // графа 7
+        newRow.acquisitionPrice = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 8
+        newRow.salePrice = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 9
+        newRow.income = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 10
+        newRow.outcome = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 11
+        newRow.rateBR= getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 12
+        newRow.outcome269st = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 13
+        newRow.outcomeTax = getNumber(row.field[index].@value.text())
+
+        newRows.add(newRow)
+    }
+    // проверка итоговых данных
+    if (xml.exemplar.table.total.record.field.size() > 0 && !newRows.isEmpty()) {
+        def totalRow = formData.createDataRow()
+
+        totalRow.nominalPrice = 0
+        totalRow.acquisitionPrice = 0
+        totalRow.salePrice = 0
+        totalRow.income = 0
+        totalRow.outcome = 0
+        totalRow.outcome269st = 0
+        totalRow.outcomeTax = 0
+
+        newRows.each { row ->
+            totalRow.nominalPrice += (row.nominalPrice != null ? row.nominalPrice : 0)
+            totalRow.acquisitionPrice += (row.acquisitionPrice != null ? row.acquisitionPrice : 0)
+            totalRow.salePrice += (row.salePrice != null ? row.salePrice : 0)
+            totalRow.income += (row.income != null ? row.income : 0)
+            totalRow.outcome += (row.outcome != null ? row.outcome : 0)
+            totalRow.outcome269st += (row.outcome269st != null ? row.outcome269st : 0)
+            totalRow.outcomeTax += (row.outcomeTax != null ? row.outcomeTax : 0)
+        }
+
+        for (def row : xml.exemplar.table.total.record) {
+            // графа 4, 7, 8, 9, 10, 12, 13
+            if (totalRow.nominalPrice != getNumber(row.field[3].@value.text()) ||
+                    totalRow.acquisitionPrice != getNumber(row.field[6].@value.text()) ||
+                    totalRow.salePrice!= getNumber(row.field[7].@value.text()) ||
+                    totalRow.income != getNumber(row.field[8].@value.text()) ||
+                    totalRow.outcome != getNumber(row.field[9].@value.text()) ||
+                    totalRow.outcome269st != getNumber(row.field[11].@value.text()) ||
+                    totalRow.outcomeTax != getNumber(row.field[12].@value.text())
+            ) {
+                logger.error('Итоговые значения неправильные.')
+                return
+            }
+        }
+    }
+    def data = getData(formData)
+    data.clear()
+    data.insert(newRows, 1)
+    data.commit()
+}
+
+/**
+ * Получить числовое значение.
+ *
+ * @param value строка
+ */
+def getNumber(def value) {
+    if (value == null) {
+        return null
+    }
+    def tmp = value.trim()
+    if ("".equals(tmp)) {
+        return null
+    }
+    // поменять запятую на точку и убрать пробелы
+    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
+    return new BigDecimal(tmp)
+}
+
+/**
+ * Получить дату по строковому представлению (формата дд.ММ.гггг)
+ */
+def getDate(def value) {
+    if (isEmpty(value)) {
+        return null
+    }
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    return format.parse(value)
+}
+
+/**
+ * Проверка пустое ли значение.
+ */
+def isEmpty(def value) {
+    return value == null || value == '' || value == 0
+}
+
+/**
+ * Получить новую строку с заданными стилями.
+ */
+def getNewRow() {
+    def row = formData.createDataRow()
+
+    // Графы 1-10 Заполняется вручную
+    ['tradeNumber', 'securityName', 'currencyCode', 'nominalPrice', 'part1REPODate', 'part2REPODate', 'acquisitionPrice', 'salePrice'].each{ column ->
+        row.getCell(column).setEditable(true)
+        row.getCell(column).setStyleAlias('Редактируемая')
+    }
+    return row
 }

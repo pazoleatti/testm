@@ -50,4 +50,8 @@ public enum Formats {
 		return months[monthNum];
 
 	}
+
+    public static String getRussianMonthNameWithTier(int monthNum) {
+        return monthNum < 1 && monthNum > 12 ? "—" : Formats.getRussianMonthName(monthNum);
+    }
 }

@@ -62,22 +62,22 @@ def incomeParams = departmentParamIncomeRecords.getRecords().getAt(0)
 if (incomeParams == null) {
     throw new Exception("Ошибка при получении настроек обособленного подразделения.")
 }
-def reorgFormCode = getValue(incomeParams, 'REORG_FORM_CODE')
+def reorgFormCode = refBookService.getStringValue(5, getValue(incomeParams, 'REORG_FORM_CODE'), 'CODE')
 def taxOrganCode = getValue(incomeParams, 'TAX_ORGAN_CODE')
-def okvedCode =  getValue(incomeParams, 'OKVED_CODE')
+def okvedCode = refBookService.getStringValue(34, getValue(incomeParams, 'OKVED_CODE'), 'CODE')
 def phone = getValue(incomeParams, 'PHONE')
 def name = getValue(incomeParams, 'NAME')
 def inn = getValue(incomeParams, 'INN')
 def kpp = getValue(incomeParams, 'KPP')
 def reorgInn = getValue(incomeParams, 'REORG_INN')
 def reorgKpp = getValue(incomeParams, 'REORG_KPP')
-def okato = getValue(incomeParams, 'OKATO')
+def okato = refBookService.getStringValue(3, getValue(incomeParams, 'OKATO'), 'OKATO')
 def signatoryId = getValue(incomeParams, 'SIGNATORY_ID')
 def taxRate = getValue(incomeParams, 'TAX_RATE')
 def sumTax = getValue(incomeParams, 'SUM_TAX') // вместо departmentParamIncome.externalTaxSum
 def appVersion = getValue(incomeParams, 'APP_VERSION')
 def formatVersion = getValue(incomeParams, 'FORMAT_VERSION')
-def taxPlaceTypeCode = getValue(incomeParams, 'TAX_PLACE_TYPE_CODE')
+def taxPlaceTypeCode = refBookService.getStringValue(2, getValue(incomeParams, 'TAX_PLACE_TYPE_CODE'), 'CODE')
 def signatorySurname = getValue(incomeParams, 'SIGNATORY_SURNAME')
 def signatoryFirstName = getValue(incomeParams, 'SIGNATORY_FIRSTNAME')
 def signatoryLastName = getValue(incomeParams, 'SIGNATORY_LASTNAME')
@@ -830,12 +830,12 @@ xmlbuilder.Файл(
                     // Раздел 1. Подраздел 1.3
                     def listTaxSum = dataRowsHelperTaxSum.getAllCached()
                     listTaxSum.sort {
-                        it.paymentType + it.okatoCode + it.budgetClassificationCode
+                        refBookService.getStringValue(24, it.paymentType, 'CODE') + it.okatoCode + it.budgetClassificationCode
                     }
                     listTaxSum.each { row ->
                         // 0..n
                         НалПУПроц(
-                                ВидПлат : row.paymentType,
+                                ВидПлат : refBookService.getStringValue(24, row.paymentType, 'CODE'),
                                 ОКАТО : row.okatoCode,
                                 КБК : row.budgetClassificationCode) {
 
@@ -1078,13 +1078,13 @@ xmlbuilder.Файл(
                     if (dataRowsHelperAdvance != null) {
                         dataRowsHelperAdvance.getAllCached().each { row ->
                             if (row.getAlias() != 'total') {
-                                obRasch = row.calcFlag
-                                naimOP = row.regionBankDivision
-                                kppop = row.kpp
-                                obazUplNalOP = row.obligationPayTax
+                                obRasch = refBookService.getNumberValue(26, row.calcFlag, 'CODE')
+                                naimOP = refBookService.getStringValue(30, row.regionBankDivision, 'NAME')
+                                kppop = refBookService.getStringValue(33, row.kpp, 'KPP')
+                                obazUplNalOP = refBookService.getNumberValue(25, row.obligationPayTax, 'CODE')
                                 dolaNalBaz = row.baseTaxOf
                                 nalBazaDola = row.baseTaxOfRub
-                                stavNalSubRF = row.subjectTaxStavka
+                                stavNalSubRF = refBookService.getNumberValue(33, row.subjectTaxStavka, 'TAX_RATE')
                                 sumNal = row.taxSum
                                 nalNachislSubRF = row.subjectTaxCredit
                                 sumNalP = row.taxSumToPay
@@ -1149,13 +1149,13 @@ xmlbuilder.Файл(
                 // получение из нф авансовых платежей строки соответствующей текущему подразделению
                 def tmpRow = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, kpp)
                 if (tmpRow != null) {
-                    obRasch = row.calcFlag
-                    naimOP = row.regionBankDivision
-                    kppop = row.kpp
-                    obazUplNalOP = row.obligationPayTax
+                    obRasch = refBookService.getNumberValue(26, row.calcFlag, 'CODE')
+                    naimOP = refBookService.getStringValue(30, row.regionBankDivision, 'NAME')
+                    kppop = refBookService.getStringValue(33, row.kpp, 'KPP')
+                    obazUplNalOP = refBookService.getNumberValue(25, row.obligationPayTax, 'CODE')
                     dolaNalBaz = row.baseTaxOf
                     nalBazaDola = row.baseTaxOfRub
-                    stavNalSubRF = row.subjectTaxStavka
+                    stavNalSubRF = refBookService.getNumberValue(33, row.subjectTaxStavka, 'TAX_RATE')
                     sumNal = row.taxSum
                     nalNachislSubRF = row.subjectTaxCredit
                     sumNalP = row.taxSumToPay
@@ -1306,7 +1306,7 @@ xmlbuilder.Файл(
                                             (!isEmpty(row.phone) ? [Тлф : row.phone] : [:])) {
                                 МНПолуч(
                                         (!isEmpty(row.zipCode) ? [Индекс : row.zipCode] : [:]) +
-                                                [КодРегион : row.subdivisionRF] +
+                                                [КодРегион : refBookService.getStringValue(4, row.subdivisionRF, 'CODE')] +
                                                 (!isEmpty(row.area)? [Район : row.area] : [:]) +
                                                 (!isEmpty(row.city) ? [Город : row.city] : [:]) +
                                                 (!isEmpty(row.region) ? [НаселПункт : row.region] : [:]) +
@@ -1443,6 +1443,7 @@ xmlbuilder.Файл(
 
                     nalNachislPred = nalNachislPredOld + nalNachislPoslOld
                     nalNachislPosl = nalIschisl04 - nalDivNeRFPred - nalDivNeRF - nalNachislPred
+                    logger.info('===== НалНачислПред = ' + nalNachislPred + ', НалНачислПосл = ' + nalNachislPosl) // TODO (Ramil Timerbaev)
                 }
 
                 НалДохСтав(
@@ -1937,7 +1938,7 @@ def getRowAdvanceForCurrentDepartment(def dataRowsHelper, def kpp) {
         return null
     }
     for (row in dataRowsHelper.getAllCached()) {
-        if (kpp == row.kpp) {
+        if (kpp == refBookService.getStringValue(33, row.kpp, 'KPP')) {
             return row
         }
     }
