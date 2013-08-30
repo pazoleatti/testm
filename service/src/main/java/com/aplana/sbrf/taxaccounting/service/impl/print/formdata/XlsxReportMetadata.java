@@ -30,7 +30,7 @@ public final class XlsxReportMetadata {
 	public static final SimpleDateFormat sdf_y = new SimpleDateFormat("yy");
 	public static final SimpleDateFormat sdf_m = new SimpleDateFormat("MMMMMM");
 	public static final SimpleDateFormat sdf_d = new SimpleDateFormat("dd");
-	public static final SimpleDateFormat sdf = new SimpleDateFormat("dd,MMMMMM,yyyy");
+	public static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 	
 	/*
 	 * Patterns for printing in Exel. "###," shows that we must grouping by 3 characters
@@ -39,62 +39,62 @@ public final class XlsxReportMetadata {
 		DEFAULT {
 			@Override
 			public String pattern() {
-				return "###,0";
+				return "# ##,0.00";
 			}
 		},
 		UNUM {
 			@Override
 			protected String pattern() {
-				return "###,0.0";
+				return "# ##,0.0";
 			}
 		},
 		DUO {
 			@Override
 			protected String pattern() {
-				return "###,0.00";
+				return "# ##,0.00";
 			}
 		},
 		TRES {
 			@Override
 			protected String pattern() {
-				return "###,0.000";
+				return "# ##,0.000";
 			}
 		},
 		QUATTUOR {
 
 			@Override
 			protected String pattern() {
-				return "###,0.0000";
+				return "# ##,0.0000";
 			}
 		},
 		QUINQUE {
 			@Override
 			protected String pattern() {
-				return "###,0.00000";
+				return "# ##,0.00000";
 			}
 		},
 		SEX {
 			@Override
 			protected String pattern() {
-				return "###,0.000000";
+				return "# ##,0.000000";
 			}
 		},
 		SEPTEM {
 			@Override
 			protected String pattern() {
-				return "###,0.0000000";
+				return "# ##,0.0000000";
 			}
 		},
 		OCTO {
 			@Override
 			protected String pattern() {
-				return "###,0.00000000";
+				return "# ##,0.00000000";
 			}
 		};
 		
 		protected abstract String pattern();
 		public static String getPresision(int number){
-			Presision presision = null;
+			Presision presision;
 			switch (number) {
 			case 1:
 				presision = UNUM;
