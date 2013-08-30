@@ -908,7 +908,7 @@ void addData(def xml) {
         index = 0
         for (def row : xml.exemplar.table.total.record) {
             index++
-            def totalRow = (index == 1 ? getItogoKvartal() : getItogoKvartal())
+            def totalRow = (index == 1 ? getItogoKvartal() : getItogo())
 
             // сравнить посчитанные суммы итогов с итогами из транспортного файла (графы 7-9, 11-13, 15, 17-22)
             def exit = false
