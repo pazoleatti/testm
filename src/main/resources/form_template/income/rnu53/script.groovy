@@ -815,7 +815,7 @@ def getCurrency(def currencyCode) {
  * Проверка валюты на рубли
  */
 def isRubleCurrency(def currencyCode) {
-    return  refBookService.getStringValue(15,currencyCode,'CODE_2')=='810'
+    return  refBookService.getStringValue(15,currencyCode,'CODE')=='810'
 }
 
 /**
