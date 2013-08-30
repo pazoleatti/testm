@@ -159,15 +159,13 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             if (row.getRowNum() < 18) {
                 continue;
             }
-            // парсим каждую третью строку
-            if (row.getRowNum() % 3 == 0) {
-                boolean isValid = true;
-                Income101 model = new Income101();
-                endOfFile = true;
-                while (cells.hasNext()) {
-                    if (!isValid)
-                        break;
-                    Cell cell = cells.next();
+            // можно ориентироваться на не пустые ячейки столбца B, начиная с 19 строки
+            Income101 model = new Income101();
+            endOfFile = true;
+            boolean skipRow = false;
+            for(int cn=0;cn<row.getLastCellNum() && !skipRow;cn++){
+                Cell cell = row.getCell(cn,Row.RETURN_BLANK_AS_NULL);
+                if (cell!=null) {
                     try {
                         // заполняем модель для вставки в БД
                         switch (cell.getColumnIndex()) {
@@ -177,8 +175,9 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                                 String account = cell.getStringCellValue();
                                 Pattern p = Pattern.compile("[0-9.]+");
                                 Matcher m = p.matcher(account);
-                                if (!m.matches()) {
-                                    isValid = false;
+                                if(account==null || account.isEmpty() || !m.matches()){
+                                    skipRow = true;
+                                    break;
                                 }
                                 model.setAccount(cell.getStringCellValue());
                                 break;
@@ -208,12 +207,12 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                         throw getServiceException(cell.getColumnIndex(), 1);
                     }
                 }
-                if (!endOfFile && isValid) {
-                    if (!isModelValid(model)) {
-                        throw new ServiceException(BAD_FILE_MSG);
-                    }
-                    list.add(model);
+            }
+            if (!endOfFile && !skipRow) {
+                if (!isModelValid(model)) {
+                    throw new ServiceException(BAD_FILE_MSG);
                 }
+                list.add(model);
             }
         }
         return list;
@@ -223,64 +222,63 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         // строки со следующими кодами игнорируем
         Set<String> excludeCode = new HashSet<String>();
         excludeCode.add("");
-        excludeCode.add("0");
         excludeCode.add("10000");
         excludeCode.add("20000");
-        excludeCode.add("01000");
-        excludeCode.add("02000");
         // выходной лист с моделями для записи в бд
         List<Income102> list = new ArrayList<Income102>();
         HSSFWorkbook wb = new HSSFWorkbook(stream);
         Sheet sheet = wb.getSheetAt(0);
         Iterator<Row> it = sheet.iterator();
-        boolean isEndOfFile102 = false;
+        boolean endOfFile = false;
         long rowCounter = 1L;
-        while (it.hasNext() && !isEndOfFile102) {
+        while (it.hasNext() && !endOfFile) {
             if (rowCounter++ > MAX_FILE_ROW) {
                 throw new ServiceException(BAD_FILE_MSG);
             }
 
             Row row = it.next();
-            Iterator<Cell> cells = row.iterator();
 
             // парсим с 18 строки
             if (row.getRowNum() < 18) {
                 continue;
             }
 
-            boolean isValid = true;
+            boolean skipRow = false;
+            endOfFile = true;
             Income102 model = new Income102();
-            while (cells.hasNext()) {
-                if (!isValid)
-                    break;
-                Cell cell = cells.next();
-                try {
-                    // заполняем модель для вставки в БД
-                    switch (cell.getColumnIndex()) {
-                        case 2:
-                            model.setItemName(cell.getStringCellValue());
-                            break;
-                        case 3:
-                            //Пропускаем строки с "плохим" кодом
-                            String opCode = cell.getStringCellValue();
-                            if (opCode == null || excludeCode.contains(opCode.trim())) {
-                                isValid = false;
+            for(int cn=0;cn<row.getLastCellNum() && !skipRow;cn++){
+                Cell cell = row.getCell(cn,Row.RETURN_BLANK_AS_NULL);
+                if (cell!=null) {
+                    try {
+                        // заполняем модель для вставки в БД
+                        switch (cell.getColumnIndex()) {
+                            case 2:
+                                model.setItemName(cell.getStringCellValue());
                                 break;
-                            }
-                            model.setOpuCode(opCode.trim());
-                            break;
-                        case 6:
-                            model.setTotalSum(cell.getNumericCellValue());
-                            break;
+                            case 3:
+                                endOfFile = false;
+                                //Пропускаем строки с "плохим" кодом
+                                String opCode = cell.getStringCellValue();
+                                Pattern p = Pattern.compile("0[0-9]+");
+                                Matcher m = p.matcher(opCode.trim());
+                                if (opCode == null || excludeCode.contains(opCode.trim()) || m.matches()) {
+                                    skipRow = true;
+                                    break;
+                                }
+                                model.setOpuCode(opCode.trim());
+                                break;
+                            case 6:
+                                model.setTotalSum(cell.getNumericCellValue());
+                                break;
+                        }
+                    } catch (IllegalStateException e) {
+                        throw getServiceException(cell.getColumnIndex(), 1);
                     }
-                } catch (IllegalStateException e) {
-                    throw getServiceException(cell.getColumnIndex(), 1);
                 }
             }
-            isEndOfFile102 = isEndOfFile102(model);
-            if (!isEndOfFile102 && isValid) {
+            if (!endOfFile && !skipRow) {
                 if (!isModelValid(model)) {
-                    throw new ServiceException("Формат файла не соответствуют ожидаемому формату. Файл не может быть загружен.");
+                    throw new ServiceException(BAD_FILE_MSG);
                 }
                 list.add(model);
             }
@@ -311,12 +309,6 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         return model.getOpuCode() != null
                 && model.getTotalSum() != null &&
                 model.getItemName() != null;
-    }
-
-    private boolean isEndOfFile102(Income102 model) {
-        return model.getOpuCode() == null
-                && model.getTotalSum() == null &&
-                model.getItemName() == null;
     }
 
     /**

@@ -49,7 +49,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void setAdditionalFormInfo(String formType, TaxType taxType,
 				String formKind, String departmentId, String reportPeriod,
-				String state, Date startDate, Date endDate);
+				String periodOrder, String state, Date startDate, Date endDate);
 
 		void setWorkflowButtons(List<WorkflowMove> moves);
 
