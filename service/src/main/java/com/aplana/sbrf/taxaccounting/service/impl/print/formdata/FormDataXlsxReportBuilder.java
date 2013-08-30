@@ -168,7 +168,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                 HeaderCell headerCell = headerCellDataRow.getCell(formTemplate.getColumns().get(i).getAlias());
                 Cell workBookcell = mergedDataCells(headerCellDataRow.getCell(formTemplate.getColumns().get(i).getAlias()), row);
                 workBookcell.setCellStyle(cellStyleBuilder.cellStyle);
-                workBookcell.setCellValue(headerCell.getValue().toString());
+                workBookcell.setCellValue(String.valueOf(headerCell.getValue()));
                 if(headerCell.getColSpan() > 1){
                     i = i + headerCell.getColSpan() -1;
                 }
@@ -247,7 +247,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.BIGDECIMAL,dataRow.getCell(column.getAlias()).getStyle(),
                             column));
 
-					cell.setCellValue(bd!=null? bd.toString() :"");
+					cell.setCellValue(bd!=null ? String.valueOf(bd) : "");
 					fillWidth(cell.getColumnIndex(),String.valueOf(bd!=null?bd.doubleValue():"").length());
 				}else if(column instanceof RefBookColumn){
                     CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING,dataRow.getCell(column.getAlias()).getStyle(),
@@ -284,7 +284,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		c = r.getCell(ar.getFirstCell().getCol());
 		sb = new StringBuilder(c.getStringCellValue());
 		sb.append(" ").append(department.getName());
-		c.setCellValue(sb.toString());
+		c.setCellValue(String.valueOf(sb));
 
 		//Fill date
 		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_DATE_CREATE).getRefersToFormula());
@@ -310,7 +310,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		}
 		sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.format(printDate),
 				new String(arr), XlsxReportMetadata.sdf_y.format(printDate)));
-		c.setCellValue(sb.toString());
+		c.setCellValue(String.valueOf(sb));
 
 		//Fill report name
 		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_NAME).getRefersToFormula());
@@ -351,7 +351,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		sb = new StringBuilder(c.getStringCellValue());
 		if(data.getFormType().getTaxType() == TaxType.TRANSPORT || data.getFormType().getTaxType() == TaxType.INCOME)
 			sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName()));
-		c.setCellValue(sb.toString());
+		c.setCellValue(String.valueOf(sb));
 	}
 
 	protected void fillFooter(){
