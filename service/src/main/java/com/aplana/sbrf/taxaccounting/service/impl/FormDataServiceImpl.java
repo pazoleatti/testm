@@ -173,6 +173,11 @@ public class FormDataServiceImpl implements FormDataService {
             additionalParameters.put("ImportInputStream", inputStream);
             additionalParameters.put("UploadFileName", fileName);
             formDataScriptingService.executeScript(userInfo, fd, FormDataEvent.IMPORT, logger, additionalParameters);
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException(
+                        "Есть критические ошибки при выполнения скрипта",
+                        logger.getEntries());
+            }
             formDataDao.save(fd); //TODO: Когда переделаем пейджинг,переделать на сохранение во временную таблицу (спросить у Марата)
 
             logBusinessService.add(formDataId, null, userInfo, FormDataEvent.IMPORT, null);
