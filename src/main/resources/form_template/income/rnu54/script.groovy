@@ -171,7 +171,7 @@ void calc() {
         b = 0
         c = 0
         if (a < 0) {
-            c = roundTo2(Math.abs(a))
+            c = roundTo2(abs(a))
         } else if (a > 0) {
             b = roundTo2(a)
         }
@@ -302,12 +302,12 @@ def logicalCheck(def useLog) {
 
             // 6. Проверка финансового результата
             tmp = ((row.acquisitionPrice - row.salePrice) * (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
-            if (tmp < 0 && row.income != roundTo2(Math.abs(tmp))) {
+            if (tmp < 0 && row.income != roundTo2(abs(tmp))) {
                 logger.warn('Неверно определены доходы')
             }
 
             // 7. Проверка финансового результата
-            if (tmp > 0 && row.outcome != roundTo2(Math.abs(tmp))) {
+            if (tmp > 0 && row.outcome != roundTo2(abs(tmp))) {
                 logger.warn('Неверно определены расходы')
             }
 
@@ -317,7 +317,7 @@ def logicalCheck(def useLog) {
             b = 0
             c = 0
             if (a < 0) {
-                c = roundTo2(Math.abs(a))
+                c = roundTo2(abs(a))
             } else if (a > 0) {
                 b = roundTo2(a)
             }
@@ -479,21 +479,29 @@ void checkCreation() {
 void importData() {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
     if (fileName == null || fileName == '' || !fileName.contains('.xml')) {
+        logger.error('Имя файла не должно быть пустым')
+        return
+    }
+    if (!fileName.contains('.xml')) {
+        logger.error('Формат файла должен быть *.xml')
         return
     }
 
     def is = ImportInputStream
     if (is == null) {
+        logger.error('Поток данных пуст')
         return
     }
 
     def xmlString = importService.getData(is, fileName)
     if (xmlString == null || xmlString == '') {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
 
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
 
@@ -874,18 +882,18 @@ void addData(def xml) {
         def newRow = getNewRow()
 
         // графа 1
-        newRow.tadeNumber = row.field[index].@value.text()
+        newRow.tadeNumber = row.field[index].text()
         index++
 
         // графа 2
-        newRow.securityName = row.field[index].@value.text()
+        newRow.securityName = row.field[index].text()
         index++
 
         // графа 3 - справочник 15 "Общероссийский классификатор валют"
         tmp = null
         if (row.field[index].@value.text() != null &&
                 row.field[index].@value.text().trim() != '') {
-            def records = refDataProvider.getRecords(new Date(), null, "CODE = '" + row.field[index].@value.text() + "'", null);
+            def records = refDataProvider.getRecords(new Date(), null, "CODE = '" + row.field[index].text() + "'", null);
             if (records != null && !records.getRecords().isEmpty()) {
                 tmp = records.getRecords().get(0).get('record_id').getNumberValue()
             }
@@ -957,4 +965,11 @@ def getNumber(def value) {
     // поменять запятую на точку и убрать пробелы
     tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
     return new BigDecimal(tmp)
+}
+
+/**
+ * Получить модуль числа.
+ */
+def abs(def value) {
+    return value < 0 ? -value : value
 }
