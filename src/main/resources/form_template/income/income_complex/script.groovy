@@ -1,3 +1,5 @@
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
@@ -120,15 +122,14 @@ def consolidationBank(DataRowHelper formTarget) {
             row.getCell(alias).setValue(null)
         }
     }
-
     def needCalc = false
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 304) {
+        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 302) {
             needCalc = true
-            for (def row : formDataService.getDataRowHelper(child).allCached) {
+            for (DataRow<Cell> row : formDataService.getDataRowHelper(child).allCached) {
                 if (row.getAlias() == null) {
                     continue
                 }
@@ -146,7 +147,6 @@ def consolidationBank(DataRowHelper formTarget) {
     }
     formTarget.save(formTarget.allCached)
     formTarget.commit()
-    logger.info('Формирование сводной формы уровня Банка прошло успешно.')
 }
 
 /**
