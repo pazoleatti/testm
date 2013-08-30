@@ -48,7 +48,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		for (RefBookAttribute attr : attributes) {
 			HorizontalPanel oneField = new HorizontalPanel();
 			Label label = new Label(attr.getName());
-			label.setWidth("200px");
+            label.setWordWrap(true);
+			label.setWidth("100px");
 			oneField.add(label);
 			Widget widget;
 			switch (attr.getAttributeType()) {
@@ -70,6 +71,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					widget = new TextBox();
 					break;
 			}
+            widget.setWidth("300px");
 			HasValue hasValue = (HasValue)widget;
 			hasValue.addValueChangeHandler(new ValueChangeHandler() {
 				@Override
@@ -100,7 +102,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				if (w.getValue() instanceof RefBookPickerPopupWidget) {
 					RefBookPickerPopupWidget rbw = (RefBookPickerPopupWidget) w.getValue();
 					rbw.setDereferenceValue(record.get(w.getKey().getAlias()).getDereferenceValue());
-				}
+                    rbw.setTitle(String.valueOf(rbw.getDereferenceValue()));
+				} else if(w.getValue() instanceof HasText) {
+                    ((Widget)w.getValue()).setTitle(((HasText)w.getValue()).getText());
+                }
 			}
 		}
 	}
