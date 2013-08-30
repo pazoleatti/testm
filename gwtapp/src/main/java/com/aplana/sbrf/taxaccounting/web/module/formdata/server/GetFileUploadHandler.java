@@ -42,7 +42,6 @@ public class GetFileUploadHandler extends
     @Override
     public GetFileUploadResult execute(GetFileUpload action, ExecutionContext context) throws ActionException {
 
-        System.out.println("Start file parsing.");
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
         BlobData blobData = blobDataService.get(action.getUuid());

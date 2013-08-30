@@ -30,6 +30,8 @@ import java.util.List;
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class BookerStatementsController {
 
+    private static String BAD_FILE_MSG = "Формат файла не соответствуют ожидаемому формату. Файл не может быть загружен.";
+
     @Autowired
     BookerStatementsService service;
 
@@ -41,7 +43,11 @@ public class BookerStatementsController {
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
         List<FileItem> items = upload.parseRequest(request);
-        service.importXML(items.get(0).getInputStream(), periodId, typeId, departmentId);
+        if(getFileExtention(items.get(0).getName()).equals("xls")){
+            service.importXML(items.get(0).getInputStream(), periodId, typeId, departmentId);
+        } else {
+            throw new ServiceException(BAD_FILE_MSG);
+        }
     }
 
     @ExceptionHandler(Exception.class)
@@ -55,4 +61,8 @@ public class BookerStatementsController {
             logger.error(ioException.getMessage(), ioException);
         }
     }
-}
+
+    public static String getFileExtention(String filename){
+        int dotPos = filename.lastIndexOf(".") + 1;
+        return filename.substring(dotPos);
+    }}
