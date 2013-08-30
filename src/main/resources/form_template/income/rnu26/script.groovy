@@ -307,7 +307,7 @@ def logicalCheck(def useLog) {
 
         // список проверяемых столбцов (графа 1..3, 5..10, 13, 14)
         columns = ['issuer', 'shareType', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
-                'cost', 'signSecurity', 'marketQuotationInRub', 'costOnMarketQuotation']
+                'cost', 'signSecurity', 'costOnMarketQuotation']
 
         // суммы строки общих итогов
         def totalSums = [:]
@@ -1083,7 +1083,7 @@ void insert(def data, def row) {
  * Проверка валюты на рубли
  */
 def isRubleCurrency(def currencyCode) {
-    return  refBookService.getStringValue(15,currencyCode,'CODE_2')=='810'
+    return  refBookService.getStringValue(15,currencyCode,'CODE')=='810'
 }
 
 /**
@@ -1094,8 +1094,6 @@ def getCourse(def currency, def date) {
         def refCourseDataProvider = refBookFactory.getDataProvider(22)
         def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
         return (!res.getRecords().isEmpty())?res.getRecords().get(0).RATE.getNumberValue():0//Правильнее null, такой ситуации быть не должно, она должна отлавливаться проверками НСИ
-    } else if (isRubleCurrency(currency)){
-        return 1;
     } else {
         return null;
     }

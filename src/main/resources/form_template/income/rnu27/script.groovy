@@ -172,7 +172,7 @@ void logicalCheck() {
 
             // LC Проверка на заполнение поля «<Наименование поля>»
             for (alias in ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'reserveCalcValuePrev',
-                    'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']) {
+                    'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']) {
                 if (row.getCell(alias).value == null) {
                     setError(row.getCell(alias).column)
                 }
@@ -1138,7 +1138,7 @@ def getRows(def data) {
  * Проверка валюты на рубли
  */
 def isRubleCurrency(def currencyCode) {
-    return  refBookService.getStringValue(15,currencyCode,'CODE_2')=='810'
+    return  refBookService.getStringValue(15,currencyCode,'CODE')=='810'
 }
 
 /**
@@ -1149,8 +1149,6 @@ def getCourse(def currency, def date) {
         def refCourseDataProvider = refBookFactory.getDataProvider(22)
         def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
         return (res.getRecords().isEmpty() ? null : res.getRecords().get(0).RATE.getNumberValue())
-    } else if (isRubleCurrency(currency)){
-        return 1;
     } else {
         return null
     }

@@ -152,9 +152,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		}
 		
 		if (formData.getPerformer() != null &&
-				StringUtils.hasLength(formData.getPerformer().getName())
-						&& StringUtils.hasLength(formData.getPerformer().getPhone())
+				(StringUtils.hasLength(formData.getPerformer().getName())
+						|| StringUtils.hasLength(formData.getPerformer().getPhone()))
 			) {
+			// Плохой фикс: http://jira.aplana.com/browse/SBRFACCTAX-3627
+			formData.getPerformer().setPhone(formData.getPerformer().getPhone() == null ? "" : formData.getPerformer().getPhone());
+			formData.getPerformer().setName(formData.getPerformer().getName() == null ? "" : formData.getPerformer().getName());
 			formPerformerDao.save(formDataId, formData.getPerformer());
 		} else {
 			formPerformerDao.clear(formDataId);

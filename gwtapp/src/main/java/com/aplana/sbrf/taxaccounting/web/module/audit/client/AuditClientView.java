@@ -34,7 +34,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     @UiField
     AbstractPager pager;
 
-    private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm");
+    private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
 
     private static final String dateColumnHeader = "Дата-время";
     private static final String eventColumnHeader = "Событие";
