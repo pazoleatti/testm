@@ -36,9 +36,41 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
 	@Override
 	public PagingResult<LogSystemSearchResultItem> getLogs(LogSystemFilter filter) {
-		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from ( select * ");
-		appendSelectFromAndWhereClause(sql, filter);
-		sql.append(" order by id");
+		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from ( select ");
+        sql.append("ls.id, ");
+        sql.append("ls.log_date, ");
+        sql.append("ls.ip, ");
+        sql.append("ls.event_id, ");
+        sql.append("ls.user_id, ");
+        sql.append("ls.roles, ");
+        sql.append("ls.department_id, ");
+        sql.append("ls.report_period_id, ");
+        sql.append("ls.declaration_type_id, ");
+        sql.append("ls.form_type_id, ");
+        sql.append("ls.form_kind_id, ");
+        sql.append("ls.note, ");
+        sql.append("ls.user_department_id ");
+
+        sql.append(" from log_system ls ");
+
+        sql.append("left join department dep on ls.department_id=dep.\"ID\" ");
+        sql.append("left join form_type ft on ls.form_type_id=ft.\"ID\" ");
+        sql.append("left join declaration_type dt on ls.declaration_type_id=dt.\"ID\" ");
+        sql.append("left join sec_user su on ls.user_id=su.\"ID\" ");
+        sql.append("left join REPORT_PERIOD rp on ls.report_period_id=rp.\"ID\" ");
+        sql.append("left join TAX_PERIOD tp on rp.tax_period_id=tp.\"ID\" ");
+
+		appendSelectWhereClause(sql, filter);
+
+		sql.append(" order by ls.id desc,");
+		sql.append(" tp.start_date desc,");
+		sql.append(" rp.months desc,");
+		sql.append(" dep.name asc,");
+		sql.append(" dt.name asc,");
+		sql.append(" ft.name asc,");
+		sql.append(" ls.form_kind_id asc,");
+		sql.append(" su.name asc ");
+
 		sql.append(") dat) ordDat");
         List<LogSystemSearchResultItem> records;
         if(filter.getCountOfRecords() != 0){
@@ -98,8 +130,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		);
 	}
 
-	private void appendSelectFromAndWhereClause(StringBuilder sql, LogSystemFilter filter) {
-		sql.append(" FROM log_system WHERE log_date BETWEEN TO_DATE('").append
+	private void appendSelectWhereClause(StringBuilder sql, LogSystemFilter filter) {
+		sql.append(" WHERE log_date BETWEEN TO_DATE('").append
 				(formatter.format(filter.getFromSearchDate()))
 				.append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append
 				(formatter.format(filter.getToSearchDate()))
@@ -167,8 +199,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	}
 
 	private int getCount(LogSystemFilter filter) {
-		StringBuilder sql = new StringBuilder("select count(*) ");
-		appendSelectFromAndWhereClause(sql, filter);
+		StringBuilder sql = new StringBuilder("select count(*) from log_system");
+		appendSelectWhereClause(sql, filter);
 		return getJdbcTemplate().queryForInt(sql.toString());
 	}
 }
