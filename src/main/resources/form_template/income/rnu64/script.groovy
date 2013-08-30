@@ -233,10 +233,9 @@ def logicalCheck() {
     getRows(data).each { row ->
         // Обязательность заполнения поля графы (с 1 по 6); фатальная; Поле ”Наименование поля” не заполнено!
         if (!isTotalRow(row)) {
-            ['number', 'date', 'part', 'dealingNumber', 'bondKind', 'costs'].each { alias ->
-                if (!isTotalRow(row) && (row[alias] == null || row[alias] == '')) {
-                    logger.error('Поле ”' + row.getCell(alias).getColumn().getName() + '” не заполнено!')
-                }
+            def requiredColumns = ['number', 'date', 'part', 'dealingNumber', 'bondKind', 'costs']
+            if(!checkRequiredColumns(row, requiredColumns)){
+                return false;
             }
 
             reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
@@ -283,6 +282,46 @@ def logicalCheck() {
         }
     }
 
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ */
+def checkRequiredColumns(def row, def columns) {
+    def data = getData(formData)
+    def colNames = []
+
+    def cell
+    columns.each {
+        cell = row.getCell(it)
+        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+            def name = getColumnName(row, it)
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        def index = getRows(data).indexOf(row) + 1
+        def errorMsg = colNames.join(', ')
+        logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        return false
+    }
+    return true
+}
+
+/**
+ * Получить название графы по псевдониму.
+ *
+ * @param row строка
+ * @param alias псевдоним графы
+ */
+def getColumnName(def row, def alias) {
+    if (row != null && alias != null) {
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
+    }
+    return ''
 }
 
 /**
