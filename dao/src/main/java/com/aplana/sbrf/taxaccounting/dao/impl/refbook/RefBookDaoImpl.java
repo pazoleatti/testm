@@ -194,13 +194,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             // эту часть кода нельзя покрыть юнит тестами с использованием hsql потому что она не поддерживает row_number()
             sql.append("row_number()");
             // Надо делать сортировку
-            sql.append(" over (order by \'");
+            sql.append(" over (order by ");
             sql.append("a");
             sql.append(sortAttribute.getAlias());
             sql.append(".");
             sql.append(sortAttribute.getAttributeType().toString());
             sql.append("_value");
-            sql.append("\')");
+            sql.append(")");
             sql.append(" as row_number_over,\n");
         } else {
             // База тестовая и не поддерживает row_number() значит сортировка работать не будет

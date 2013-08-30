@@ -2,6 +2,7 @@ package form_template.income.income_simple
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
@@ -44,7 +45,6 @@ data = getData(formData)
  * formDataEvent (com.aplana.sbrf.taxaccounting.model.FormDataEvent)
  */
 switch (formDataEvent) {
-// TODO написать роутинг
 // создать
     case FormDataEvent.CREATE:
         checkCreation()
@@ -52,22 +52,12 @@ switch (formDataEvent) {
 // расчитать
     case FormDataEvent.CALCULATE:
         DataRowHelper form = getData(formData)
-        logger.info("MyformData = "+formData + "\n")
-        logger.info("Myform = "+form + "\n")
-        logger.info("form.allCached = "+form.allCached + "\n")
-        logger.info("form.all = "+form.all + "\n")
         logicalCheck()
         calcForm()
         break
 // обобщить
     case FormDataEvent.COMPOSE:
         DataRowHelper form = getData(formData)
-        System.out.print("MyformData = "+formData + "\n")
-        System.out.print("Myform = "+form + "\n")
-        System.out.print("form.allCached = "+form.allCached + "\n")
-        System.out.print("form.all = "+form.all + "\n")
-
-
         if (form != null) {
             System.out.print("System compose was started \n")
             consolidation(form)
@@ -159,7 +149,6 @@ def calcForm() {
         // «графа 8» =сумма значений  «графы 8» для строк с 55 по 155 (раздел «Внереализационные доходы»)
         row40002.rnu4Field5Accepted = (row40002.rnu4Field5Accepted ?: 0) + (row.rnu4Field5Accepted ?: 0)
     }
-    calculationControlGraphs()
     data.save(getRows(data))
 }
 
@@ -169,7 +158,9 @@ def calcForm() {
  * а-ля точное отображение аналитики
  */
 def logicalCheck() {
-    getRows(data).each { row ->
+    refBookIncome102 = refBookFactory.getDataProvider(52L)
+    refBookIncome101 = refBookFactory.getDataProvider(50L)
+    getRows(data).each {DataRow<Cell> row ->
 
         /*
          * Проверка объязательных полей
@@ -187,9 +178,18 @@ def logicalCheck() {
          * Если Сумма <0, то «графа 9»= «ТРЕБУЕТСЯ ОБЪЯСНЕНИЕ » Иначе «графа 9»= Сумма ,где
          * Сумма= ОКРУГЛ( «графа5»-(«графа 6»-«графа 7»);2)
          */
-        if (isCalcField(row.getCell('logicalCheck'))) {
-            row.logicalCheck = ((BigDecimal) ((row.rnu6Field10Sum ?: 0) - (row.rnu6Field12Accepted ?: 0) + (row.rnu6Field12PrevTaxPeriod ?: 0))).setScale(2, BigDecimal.ROUND_HALF_UP).toString() ?: "Требуется объяснение"
+        // Строки для которых считать графу 9
+        List calc9graph = ['R2', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R17', 'R18', 'R19', 'R20', 'R22',
+                'R24', 'R28', 'R29', 'R30', 'R48', 'R49', 'R51', 'R52', 'R65', 'R66', 'R67','R68', 'R69', 'R70', 'R139',
+                'R142', 'R143', 'R144', 'R145', 'R146', 'R147', 'R148', 'R149', 'R150', 'R151', 'R153', 'R154', 'R155'
+        ]
+
+        if (calc9graph.contains(row.getAlias())) {
+            summ = ((BigDecimal) ((row.rnu6Field10Sum ?: 0) - (row.rnu6Field12Accepted ?: 0) + (row.rnu6Field12PrevTaxPeriod ?: 0))).setScale(2, BigDecimal.ROUND_HALF_UP)
+            row.logicalCheck = summ < 0 ? "Требуется объяснение" : summ.toString()
         }
+
+        List<String> rowsNotCalc = ['R1', 'R53', 'R54', 'R156']
 
         /**
          * Графа 11
@@ -198,23 +198,20 @@ def logicalCheck() {
          * Алгоритм заполннеия:
          * «графа 11» = сумма значений «графы 6» формы «Сводная форма начисленных доходов уровня обособленного подразделения»(см. раздел 6.1.1)
          * для тех строк, для которых значение «графы 4»  равно значению «графы 4» текущей строки
-         *
-         * TODO Гриша сказал что строка там только одна будет и он изменит аналитику
-         * TODO При получении доходов сложных проверить статус нужно?
          */
-        if (isCalcField(row.getCell('opuSumByEnclosure2'))) {
+        if (!rowsNotCalc.contains(row.getAlias())) {
             // получим форму «Сводная форма начисленных доходов уровня обособленного подразделения»(см. раздел 6.1.1)
             def sum6ColumnOfForm302 = 0
-            def formData302 = formDataService.find(302, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
+            FormData formData302 = formDataService.find(302, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
             if (formData302 != null) {
                 data302 = formDataService.getDataRowHelper(formData302)
-                getRows(data302).each { rowOfForm302 ->
+                for (DataRow<Cell> rowOfForm302 in data302.allCached) {
                     if (rowOfForm302.incomeBuhSumAccountNumber == row.accountNo) {
                         sum6ColumnOfForm302 += rowOfForm302.incomeBuhSumAccepted ?: 0
                     }
                 }
-                row.opuSumByEnclosure2 = sum6ColumnOfForm302
             }
+            row.opuSumByEnclosure2 = sum6ColumnOfForm302
         }
 
         /**
@@ -225,9 +222,8 @@ def logicalCheck() {
          * «графа 12» = сумма значений «графы 8» для тех строк,
          * для которых значение «графы 4»  равно значению «графы 4» текущей строки.
          *
-         * TODO Гриша сказал что строка там только одна будет и он изменит аналитику
          */
-        if (isCalcField(row.getCell("opuSumByTableD"))) {
+        if (!rowsNotCalc.contains(row.getAlias())) {
             def sum8Column = 0
             getRows(data).each { irow ->
                 if (irow.accountNo == row.accountNo) {
@@ -248,9 +244,11 @@ def logicalCheck() {
          * Выбираются данные отчета за период, для которого сформирована текущая форма
          * Значение поля «Кода ОПУ» Отчета о прибылях и убытках совпадает со значением «графы 10» текущей строки текущей формы.
          */
-        if (isCalcField(row.getCell("opuSumTotal")) && !(row.getAlias() in ['R118', 'R119', 'R141', 'R142'])) {
-            income102Dao.getIncome102(formData.reportPeriodId, row.accountingRecords).each { income102 ->
-                row.opuSumTotal = (row.opuSumTotal ?: 0) + income102.totalSum
+
+        if (!rowsNotCalc.contains(row.getAlias()) && !(row.getAlias() in ['R118', 'R119', 'R141', 'R142'])) {
+            row.opuSumTotal = 0
+            for (income102 in refBookIncome102.getRecords(null, null, 'REPORT_PERIOD_ID = ' + formData.reportPeriodId.toString() + ' AND OPU_CODE = \'' + row.accountingRecords.toString() + '\'', null).getRecords()) {
+                row.opuSumTotal += income102.get("TOTAL_SUM").getNumberValue()
             }
         }
 
@@ -264,8 +262,9 @@ def logicalCheck() {
          * 	Значение поля «Номер счета» совпадает совпадает со значением «графы 10» текущей строки текущей формы.
          */
         if (row.getAlias() in ['R118', 'R119', 'R141', 'R142']) {
-            income101Dao.getIncome101(formData.reportPeriodId, row.accountingRecords).each { income101 ->
-                row.opuSumTotal = (row.opuSumTotal ?: 0) + income101.debetRate
+            row.opuSumTotal = 0
+            for (income101 in refBookIncome101.getRecords(null, null, 'REPORT_PERIOD_ID = ' + formData.reportPeriodId.toString() + ' AND ACCOUNT = \'' + row.accountingRecords.toString() + '\'', null).getRecords()) {
+                row.opuSumTotal += income101.get("DEBET_RATE").getNumberValue()
             }
         }
 
@@ -278,7 +277,7 @@ def logicalCheck() {
          * Алгоритм заполннеия:
          *  «графа 14» = («графа 11» + «графа 12») – «графа 13»
          */
-        if (isCalcField(row.getCell("difference")) && !(row.getAlias() in ['R118', 'R119', 'R141', 'R142'])) {
+        if (!rowsNotCalc.contains(row.getAlias()) && !(row.getAlias() in ['R118', 'R119', 'R141', 'R142'])) {
             row.difference = (row.opuSumByEnclosure2 ?: 0) + (row.opuSumByTableD ?: 0) - (row.opuSumTotal ?: 0)
         }
 
@@ -613,66 +612,6 @@ def getBalanceValue(def value) {
 
 boolean isEqualNum(String accNum, def balance) {
     return accNum.replace('.', '') == getBalanceValue(balance).replace('.', '')
-}
-
-/**
- * Заполнение контрольных полей.
- */
-void calculationControlGraphs() {
-    def data = getData(formData)
-    def message = 'ТРЕБУЕТСЯ ОБЪЯСНЕНИЕ'
-    def tmp
-    def value
-    def complexRows = getComplexRows()
-
-    // для  расчета графы 14
-    def row141 = getRowByAlias(data, 'R141')
-    def row142 = getRowByAlias(data, 'R142')
-    def aPlusB = (row141.rnu4Field5Accepted + row142.rnu4Field5Accepted)
-
-    for (def row : getRows(data)) {
-        // исключить итоговые строки
-        if (row.getAlias() in ['R1', 'R53', 'R54', 'R156']) {
-            continue
-        }
-
-        // графы 9 = ОКРУГЛ(«графа 5» - («графа 6» - «графа 7»); 2)
-        if (row.rnu6Field10Sum != null && row.rnu6Field12Accepted != null &&
-                row.rnu6Field12PrevTaxPeriod != null) {
-            tmp = round(row.rnu6Field10Sum - (row.rnu6Field12Accepted - row.rnu6Field12PrevTaxPeriod), 2)
-            value = ((BigDecimal) tmp).setScale(2, BigDecimal.ROUND_HALF_UP)
-            row.logicalCheck = (tmp < 0 ? message : value.toString())
-        }
-
-        // графа 11
-        row.opuSumByEnclosure2 = getSumFromData(complexRows,
-                'incomeBuhSumAccountNumber', 'incomeBuhSumAccepted', row.accountNo)
-
-        // графа 12
-        row.opuSumByTableD = getSumFromData(getRows(data), 'rnu4Field5Accepted', 'accountNo', row.accountNo)
-
-        // графа 13
-        // TODO (Ramil Timerbaev) справочники "Отчет о прибылях и убытках" и "Оборотная ведомость" еще не реализованы
-        if (row.getAlias() in ['R118', 'R119', 'R141', 'R142']) {
-            tmp = 0 // TODO (Ramil Timerbaev) костыль
-        } else {
-            tmp = 0 // TODO (Ramil Timerbaev) костыль
-        }
-        row.opuSumTotal = tmp
-
-        // графа 14
-        if (row.getAlias() in ['R118', 'R119']) {
-            // «графа 14» = «графа 13» - «графа 8»
-            tmp = getValue(row.opuSumTotal) - getValue(row.rnu4Field5Accepted)
-        } else if (row.getAlias() in ['R141', 'R142']) {
-            // «графа 14» = «графа 13» - (А + Б)
-            tmp = getValue(row.opuSumTotal) - aPlusB
-        } else {
-            // «графа 14» = («графа 11» + «графа 12») – «графа 13»
-            tmp = (getValue(row.opuSumByEnclosure2) + getValue(row.opuSumByTableD)) - getValue(row.opuSumTotal)
-        }
-        row.difference = tmp
-    }
 }
 
 /**

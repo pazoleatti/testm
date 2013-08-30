@@ -235,11 +235,13 @@ void checkCreation() {
 void importData() {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
     if (fileName == null || fileName == '') {
+        logger.error('Имя файла не должно быть пустым')
         return
     }
 
     def is = ImportInputStream
     if (is == null) {
+        logger.error('Поток данных пуст')
         return
     }
 
@@ -250,6 +252,7 @@ void importData() {
     } else if (fileName.contains('.r')) {
         isRnu = true
     } else {
+        logger.error('Формат файла должен быть *.rnu или *.xls')
         return
     }
 
@@ -258,10 +261,12 @@ void importData() {
         importService.getData(is, fileName, 'windows-1251', 'Вид ценных бумаг', null))
 
     if (xmlString == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
     // номер строки с которой брать данные (что бы пропустить шапку таблицы или лишнюю информацию)

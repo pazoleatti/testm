@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -29,6 +30,9 @@ import org.springframework.stereotype.Component;
 public class FormDataCompositionServiceImpl implements FormDataCompositionService, ScriptComponentContextHolder {
 	
 	private ScriptComponentContext scriptComponentContext;
+	
+	@Autowired
+	private DataRowDao dataRowDao;
 
 	@Autowired
 	private FormTypeDao formTypeDao;
@@ -100,6 +104,8 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 			formDataScriptingService.executeScript(scriptComponentContext.getUserInfo(), dformData, FormDataEvent.COMPOSE, scriptComponentContext.getLogger(), null);
 			
 			formDataDao.save(dformData);
+			// Коммитим строки после отработки скрипта. http://jira.aplana.com/browse/SBRFACCTAX-3637
+			dataRowDao.commit(dformData.getId());
             logBusinessService.add(dformData.getId(), null, scriptComponentContext.getUserInfo(), FormDataEvent.COMPOSE,
                     "Событие инициировано Системой");
 		} else {
