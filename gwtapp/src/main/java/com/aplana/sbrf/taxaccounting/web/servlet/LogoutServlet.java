@@ -31,7 +31,7 @@ public class LogoutServlet extends HttpServlet {
         }
         SecurityContextHolder.clearContext();
         if (Pattern.compile("Web\\s*Sphere", Pattern.CASE_INSENSITIVE).matcher(getServletContext().getServerInfo()).find()) {
-            response.sendRedirect(contextPath + "/ibm_security_logout?logoutExitPage=login");
+            response.sendRedirect("/pkmslogout");
 		} else {
 			response.sendRedirect(contextPath + "/login");
 		}
