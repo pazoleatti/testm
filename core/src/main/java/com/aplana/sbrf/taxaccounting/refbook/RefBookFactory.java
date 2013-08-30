@@ -1,8 +1,12 @@
 package com.aplana.sbrf.taxaccounting.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -21,6 +25,16 @@ public interface RefBookFactory {
 	 * @return
 	 */
 	RefBook get(Long refBookId);
+	
+	/**
+	 * Импортирует данные справочника
+	 * TODO: Метод временно размещается здесь, пока ему не найдется более подхлдящего места.
+	 * Я думаю это должен быть ещё один сервис.
+	 * 
+	 * @param refBookId код справочника
+	 * @return
+	 */
+	public void importRefBook(TAUserInfo userInfo, Logger logger, Long refBookId, InputStream is);
 
 	/**
 	 * Загружает список всех справочников
