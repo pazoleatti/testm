@@ -47,64 +47,11 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 			+ "/acctax.xlsx";
 
 	private enum CellType{
-		DATE {
-			@Override
-			public CellStyle createCellStyle(CellStyle style) {
-				style.setAlignment(CellStyle.ALIGN_CENTER);
-				style.setBorderBottom(CellStyle.BORDER_THIN);
-				style.setBorderTop(CellStyle.BORDER_THIN);
-				style.setBorderRight(CellStyle.BORDER_THIN);
-				style.setBorderLeft(CellStyle.BORDER_THIN);
-
-				return style;
-			}
-		},
-		STRING {
-			@Override
-			public CellStyle createCellStyle(CellStyle style) {
-				style.setAlignment(CellStyle.ALIGN_LEFT);
-				style.setWrapText(true);
-				style.setBorderBottom(CellStyle.BORDER_THIN);
-				style.setBorderTop(CellStyle.BORDER_THIN);
-				style.setBorderRight(CellStyle.BORDER_THIN);
-				style.setBorderLeft(CellStyle.BORDER_THIN);
-
-				return style;
-			}
-		},
-		BIGDECIMAL {
-			@Override
-			public CellStyle createCellStyle(CellStyle style) {
-				style.setAlignment(CellStyle.ALIGN_RIGHT);
-				style.setWrapText(true);
-				style.setBorderBottom(CellStyle.BORDER_THIN);
-				style.setBorderTop(CellStyle.BORDER_THIN);
-				style.setBorderRight(CellStyle.BORDER_THIN);
-				style.setBorderLeft(CellStyle.BORDER_THIN);
-
-				return style;
-			}
-		},
-		EMPTY {
-			@Override
-			public CellStyle createCellStyle(CellStyle style) {
-				style.setAlignment(CellStyle.ALIGN_CENTER);
-				style.setBorderBottom(CellStyle.BORDER_THIN);
-				style.setBorderTop(CellStyle.BORDER_THIN);
-				style.setBorderRight(CellStyle.BORDER_THIN);
-				style.setBorderLeft(CellStyle.BORDER_THIN);
-
-				return style;
-			}
-		},
-		DEFAULT {
-			@Override
-			public CellStyle createCellStyle(CellStyle style) {
-				return null;
-			}
-		};
-
-		public abstract CellStyle createCellStyle(CellStyle style);
+		DATE,
+		STRING,
+		BIGDECIMAL,
+		EMPTY ,
+		DEFAULT
 	}
 
 	private final class CellStyleBuilder{
@@ -126,7 +73,11 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 
 		public CellStyle createCellStyle(CellType value, FormStyle formStyle,Column currColumn){
 			DataFormat dataFormat = workBook.createDataFormat();
-			CellStyle style = value.createCellStyle(workBook.createCellStyle());
+			CellStyle style = workBook.createCellStyle();
+            style.setBorderBottom(CellStyle.BORDER_THIN);
+            style.setBorderTop(CellStyle.BORDER_THIN);
+            style.setBorderRight(CellStyle.BORDER_THIN);
+            style.setBorderLeft(CellStyle.BORDER_THIN);
 			if(formStyle != null){
 				((XSSFCellStyle)style).setFillForegroundColor(new XSSFColor(new java.awt.Color(
 						formStyle.getBackColor().getRed(),
@@ -142,16 +93,31 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 						);
 				style.setFillPattern(CellStyle.SOLID_FOREGROUND);
 			}
-			if(currColumn instanceof DateColumn){
-				DateColumn dateCurrColumn = (DateColumn)currColumn;
-				if(Formats.getById(dateCurrColumn.getFormatId()).getFormat().equals(""))
-					style.setDataFormat(dataFormat.getFormat(dateFormater));
-				else
-					style.setDataFormat(dataFormat.getFormat(Formats.getById(dateCurrColumn.getFormatId()).getFormat()));
-			}else if(currColumn instanceof NumericColumn){
-				NumericColumn nc = (NumericColumn)currColumn;
-				style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.Presision.getPresision(nc.getPrecision())));
-			}
+            switch (value){
+                case DATE:
+                    style.setAlignment(CellStyle.ALIGN_CENTER);
+                    if(Formats.getById(((DateColumn)currColumn).getFormatId()).getFormat().equals("")){
+                        style.setDataFormat(dataFormat.getFormat(dateFormater));
+                    } else{
+                        style.setDataFormat(dataFormat.getFormat(Formats.getById(((DateColumn)currColumn).getFormatId()).getFormat()));
+                    }
+
+                    break;
+                case BIGDECIMAL:
+                    style.setAlignment(CellStyle.ALIGN_RIGHT);
+                    style.setWrapText(true);
+                    style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.Presision.getPresision(((NumericColumn)currColumn).getPrecision())));
+                    break;
+                case STRING:
+                    style.setAlignment(CellStyle.ALIGN_LEFT);
+                    style.setWrapText(true);
+                    break;
+                case EMPTY:
+                    style.setAlignment(CellStyle.ALIGN_CENTER);
+                    break;
+                default:
+                    break;
+            }
 
 			return style;
 		}
@@ -251,7 +217,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                 }else if (!zeroColumnAlias.equals("empty")){
                     Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row);
                     CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING,dataRow.getCell(zeroColumnAlias).getStyle(),
-                            dataRow.getCell(zeroColumnAlias).getColumn());
+                            column);
                     cell.setCellStyle(cellStyle);
                     cell.setCellValue((String) dataRow.get(zeroColumnAlias));
                     zeroColumnAlias = "empty";
@@ -262,7 +228,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 				if(column instanceof StringColumn){
 					String str = (String)obj;
 					CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING,dataRow.getCell(column.getAlias()).getStyle(),
-							dataRow.getCell(column.getAlias()).getColumn());
+                            column);
 					cell.setCellStyle(cellStyle);
 					cell.setCellValue(str);
 					fillWidth(cell.getColumnIndex(),str != null?str.length():0);
@@ -270,14 +236,18 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 				else if(column instanceof DateColumn){
 					Date date = (Date)obj;
 					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DATE,dataRow.getCell(column.getAlias()).getStyle(),
-							dataRow.getCell(column.getAlias()).getColumn()));
-					cell.setCellValue(date!=null?String.valueOf(date):"");
+                            column));
+                    if (date!=null)
+					    cell.setCellValue(date);
+                    else
+                        cell.setCellValue("");
 				}
 				else if(column instanceof NumericColumn){
 					BigDecimal bd = (BigDecimal)obj;
 					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.BIGDECIMAL,dataRow.getCell(column.getAlias()).getStyle(),
-							dataRow.getCell(column.getAlias()).getColumn()));
-					cell.setCellValue(bd!=null?String.valueOf(bd.doubleValue()):"");
+                            column));
+
+					cell.setCellValue(bd!=null? bd.toString() :"");
 					fillWidth(cell.getColumnIndex(),String.valueOf(bd!=null?bd.doubleValue():"").length());
 				}else if(column instanceof RefBookColumn){
                     CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING,dataRow.getCell(column.getAlias()).getStyle(),
@@ -290,7 +260,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                 }
 				else if(obj == null){
 					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.EMPTY,dataRow.getCell(column.getAlias()).getStyle(),
-							dataRow.getCell(column.getAlias()).getColumn()));
+                            column));
 					cell.setCellValue("");
 				}
 			}

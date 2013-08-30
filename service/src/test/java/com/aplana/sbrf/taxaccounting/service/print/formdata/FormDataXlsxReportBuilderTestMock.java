@@ -39,14 +39,15 @@ public class FormDataXlsxReportBuilderTestMock {
 		Column colNum2 = new StringColumn();
 		Column colNum3 = new StringColumn();
 		Column colNum4 = new StringColumn();
-		Column colNum5 = new StringColumn();
+		Column colNum5 = new NumericColumn();
 		Column colNum6 = new StringColumn();
 		Column colNum7 = new StringColumn();
 		Column colNum8 = new StringColumn();
 		
 		Column colStr9 = new StringColumn();
-		Column colStr10 = new StringColumn();
-		Column colStr11 = new StringColumn();
+		Column colStr10 = new NumericColumn();
+		Column colStr11 = new NumericColumn();
+        Column colDate12 = new DateColumn();
 		
 		//setting alias
 		colNum.setAlias("number");
@@ -62,6 +63,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		colStr9.setAlias("eurobondsRF");
 		colStr10.setAlias("itherEurobonds");
 		colStr11.setAlias("corporateBonds");
+        colDate12.setAlias("dateInfo");
 		
 		//setting check
 		colNum.setChecking(false);
@@ -77,6 +79,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		colStr9.setChecking(true);
 		colStr10.setChecking(true);
 		colStr11.setChecking(true);
+        colDate12.setChecking(true);
 
         //set width
         colNum.setWidth(10);
@@ -91,6 +94,7 @@ public class FormDataXlsxReportBuilderTestMock {
         colStr9.setWidth(10);
         colStr10.setWidth(10);
         colStr11.setWidth(10);
+        colDate12.setWidth(10);
 		
 		columns.add(colNum);
 		columns.add(colNum1);
@@ -104,6 +108,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		columns.add(colStr9);
 		columns.add(colStr10);
 		columns.add(colStr11);
+        columns.add(colDate12);
 
         List<FormStyle> formStyles = new ArrayList<FormStyle>();
 		FormStyle formStyle1 = new FormStyle();
@@ -185,7 +190,7 @@ public class FormDataXlsxReportBuilderTestMock {
 
 	@Test
 	public void testReport() throws IOException{
-		FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,false, dataRows);
+		FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,true, dataRows);
 		try {
 			builder.createReport();
 		} catch (IOException e) {

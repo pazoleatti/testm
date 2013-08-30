@@ -13,6 +13,7 @@
         <cell alias="eurobondsRF" colSpan="3" rowSpan="1" value="Ставка налога на прибыль 20%"/>
         <cell alias="itherEurobonds" colSpan="1" rowSpan="1" value="Ставка налога на прибыль 20%"/>
         <cell alias="corporateBonds" colSpan="1" rowSpan="1" value="Ставка налога на прибыль 20%"/>
+        <cell alias="dateInfo" colSpan="1" rowSpan="1" value="Дата"/>
     </row>
     <row alias="">
         <cell alias="number" colSpan="1" rowSpan="1" value="№ пп"/>
@@ -31,6 +32,7 @@
         <cell alias="eurobondsRF" colSpan="1" rowSpan="1" value="Еврооблигации РФ"/>
         <cell alias="itherEurobonds" colSpan="1" rowSpan="1" value="Прочие еврооблигации"/>
         <cell alias="corporateBonds" colSpan="1" rowSpan="1" value="Корпоративные облигации"/>
+        <cell alias="dateInfo" colSpan="1" rowSpan="1" value="Дата"/>
     </row>
     <row alias="">
         <cell alias="number" colSpan="1" rowSpan="1" value="1"/>
@@ -45,5 +47,6 @@
         <cell alias="eurobondsRF" colSpan="1" rowSpan="1" value="10"/>
         <cell alias="itherEurobonds" colSpan="1" rowSpan="1" value="11"/>
         <cell alias="corporateBonds" colSpan="1" rowSpan="1" value="12"/>
+        <cell alias="dateInfo" colSpan="1" rowSpan="1" value="Дата"/>
     </row>
 </rows>
