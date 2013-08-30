@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -39,7 +39,7 @@ public class ValidatedInputCell extends KeyPressableTextInputCell {
 							   NativeEvent event, ValueUpdater<String> valueUpdater) {
 
 		@SuppressWarnings("unchecked")
-		boolean editableCell = ((DataRow<Cell>) context.getKey()).getCell(columnContext.getColumn().getAlias()).isEditable();
+		AbstractCell editableCell = ((DataRow<?>) context.getKey()).getCell(columnContext.getColumn().getAlias());
 		if (DataRowEditableCellUtils.editMode(columnContext, editableCell)) {
 			super.onBrowserEvent(context, parent, value, event, valueUpdater);
 		}

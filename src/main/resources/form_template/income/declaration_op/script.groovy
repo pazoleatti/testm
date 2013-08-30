@@ -169,17 +169,17 @@ def prPodp = signatoryId
 /** ВырРеалТовСоб. */
 def virRealTovSob = getVirRealTovSob(dataRowsHelperComplexIncome, dataRowsHelperSimpleIncome)
 /** ВырРеалИмПрав. Строка декларации 013. Код вида дохода = 10855, 10880, 10900. */
-def virRealImPrav = getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [10855, 10880, 10900])
+def virRealImPrav = getLong(getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [10855, 10880, 10900]))
 /** ВырРеалИмПроч. Строка декларации 014. Код вида дохода = 10850. */
-def virRealImProch = getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [10850])
+def virRealImProch = getLong(getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [10850]))
 /** ВырРеалВс. Код строки декларации 010. */
-def virRealVs = getLong(virRealTovSob + virRealImPrav + virRealImProch)
+def virRealVs = virRealTovSob + virRealImPrav + virRealImProch
 /** ВырРеалЦБВс. Код строки декларации 020. Код вида дохода = 11180, 11190, 11200, 11210, 11220, 11230, 11240, 11250, 11260. */
-def virRealCBVs = getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [11180, 11190, 11200, 11210, 11220, 11230, 11240, 11250, 11260])
+def virRealCBVs = getLong(getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [11180, 11190, 11200, 11210, 11220, 11230, 11240, 11250, 11260]))
 /** ВыручОп302Ит. Код строки декларации 340. */
 def viruchOp302It = getViruchOp302It(dataRowsHelperComplexIncome, viruchRealTov, dohDolgovDUI, dohDolgovDUI_VnR)
 /** ДохРеал, ВырРеалИтог. */
-def dohReal = getLong(virRealVs + virRealCBVs + virRealPred + viruchOp302It)
+def dohReal = virRealVs + virRealCBVs + virRealPred + viruchOp302It
 /** ДохВнереал. Код строки декларации 100. */
 def dohVnereal = getDohVnereal(dataRowsHelperComplexIncome, dataRowsHelperSimpleIncome)
 /** КосвРасхВс. Код строки декларации 040. */
@@ -189,37 +189,37 @@ def rashVnerealVs = getRashVnerealVs(dataRowsHelperComplexConsumption, dataRowsH
 /** РасхВнереал. Строка 200 + строка 300. */
 def rashVnereal = rashVnerealVs + ubitPriravnVs
 /** РеалИмущПрав. Код строки декларации 059. Код вида расхода = 21450, 21740, 21750. */
-def realImushPrav = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21450, 21740, 21750])
+def realImushPrav = getLong(getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21450, 21740, 21750]))
 /** ПриобрРеалИмущ. Код строки декларации 060. Код вида расхода = 21770. */
-def priobrRealImush = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21770])
+def priobrRealImush = getLong(getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21770]))
 /** ПриобРеалЦБ. Код строки декларации 070. Код вида расхода = 21662, 21664, 21666, 21668, 21670, 21672, 21674, 21676, 21678, 21680. */
-def priobrRealCB = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21662, 21664, 21666, 21668, 21670, 21672, 21674, 21676, 21678, 21680])
+def priobrRealCB = getLong(getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21662, 21664, 21666, 21668, 21670, 21672, 21674, 21676, 21678, 21680]))
 /** СтоимРеалПТДоСр. Код строки декларации 120. Код вида расхода = 21460. */
-def stoimRealPTDoSr = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21460])
+def stoimRealPTDoSr = getLong(getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21460]))
 /** СтоимРеалПТПосСр. Код строки декларации 130. Код вида расхода = 21470. */
-def stoimRealPTPosSr = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21470])
+def stoimRealPTPosSr = getLong(getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21470]))
 /** СумНевозмЗатрЗУ. Код строки декларации 250. Код вида расхода = 21385. */
 def sumNevozmZatrZU = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21385])
 /** ОстСтРеалАИ. Код строки декларации 040. Код вида расхода = 21760. */
-def ostStRealAI = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21760])
+def ostStRealAI = getLong(getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21760]))
 /** РасхОпер32, РасхОп302Ит. Код строки декларации = 080 или 350. */
-def rashOper32 = getLong(ostStRealAI + stoimRealPTDoSr + stoimRealPTPosSr +
-        rashRealTov + (rashDolgovDUI - rashDolgovDUI_VnR) + sumNevozmZatrZU)
+def rashOper32 = ostStRealAI + stoimRealPTDoSr + stoimRealPTPosSr +
+        rashRealTov + (rashDolgovDUI - rashDolgovDUI_VnR) + sumNevozmZatrZU
 /** УбытРеалАмИм. Код строки декларации 100. Код вида расхода = 21520, 21530. */
-def ubitRealAmIm = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21520, 21530])
+def ubitRealAmIm = getLong(getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21520, 21530]))
 /** УбытРеалЗемУч. Код строки декларации 110. */
 def ubitRealZemUch = empty
 /** РасхУмРеал, РасхПризнИтого. Код строки декларации 130. */
-def rashUmReal = getLong(pramRashReal + pramRashTorgVs + cosvRashVs + realImushPrav +
+def rashUmReal = pramRashReal + pramRashTorgVs + cosvRashVs + realImushPrav +
         priobrRealImush + activRealPred + priobrRealCB + rashOper32 + ubitProshObsl +
-        ubitRealAmIm + ubitRealZemUch + nadbPokPred)
+        ubitRealAmIm + ubitRealZemUch + nadbPokPred
 /** Убытки, УбытОп302. Код строки декларации 360. */
 def ubitki = getUbitki(dataRowsHelperComplexConsumption, ubitObObslNeobl, ubitDogovDUI)
 /** ПрибУб. */
-def pribUb = getLong(dohReal + dohVnereal - rashUmReal - rashVnereal + ubitki)
+def pribUb = dohReal + dohVnereal - rashUmReal - rashVnereal + ubitki
 /** ДохИсклПриб. */
 def dohIsklPrib = getDohIsklPrib(dataRowsHelperComplexIncome, dataRowsHelperSimpleIncome)
-def nalBaza = getLong(pribUb - dohIsklPrib - 0 - 0 + 0)
+def nalBaza = pribUb - dohIsklPrib - 0 - 0 + 0
 /** НалБазаИсч, НалБазаОрг. */
 def nalBazaIsch = getNalBazaIsch(nalBaza, 0)
 
@@ -434,7 +434,7 @@ def getLong(def value) {
     if (value == null) {
         return 0
     }
-    return (long) round(value, 0)
+    return roundValue(value, 0)
 }
 
 /**
@@ -464,7 +464,7 @@ def getSumRowsByCol(def dataRowsHelper, def columnCode, def columnSum, def codes
             result += getValue(cell.getValue())
         }
     }
-    return getLong(result)
+    return result
 }
 
 /**
@@ -523,7 +523,7 @@ def getCalculatedSimpleConsumption(def dataRowsHelperSimple, def codes) {
                         getValue(row.rnu7Field12Accepted)
         }
     }
-    return getLong(result)
+    return result
 }
 
 /**
@@ -835,4 +835,15 @@ def getValue(def record, def alias) {
             return value.getReferenceValue()
     }
     return null
+}
+
+/**
+ * Округляет число до требуемой точности.
+ *
+ * @param value округляемое число
+ * @param precision точность округления, знаки после запятой
+ * @return округленное число
+ */
+def roundValue(def value, def precision) {
+    ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
 }
