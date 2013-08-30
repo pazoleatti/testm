@@ -65,7 +65,7 @@
 
     <ui:with field="formDataProvider" type="com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataView"/>
 	<g:DockLayoutPanel ui:field="dockPanel" unit='PX' height="100%" width="100%">
-        <g:north size="100">
+        <g:north size="110">
             <g:HorizontalPanel height="100px" width="100%">
                 <g:FlowPanel>
                     <g:HorizontalPanel height="28px">
@@ -101,7 +101,7 @@
                     </style:Bar>
                 </g:FlowPanel>
                 <g:FlowPanel width="790px" addStyleNames="{style.attrPanel}">
-                    <g:FlowPanel height="63px">
+                    <g:FlowPanel height="78px">
                         <g:HorizontalPanel>
                             <g:Label width="100px" text="Подразделение:" addStyleNames="{style.headerAttrName}" />
                             <g:Label ui:field="departmentIdLabel" addStyleNames="{style.headerAttr}" />
@@ -113,6 +113,10 @@
                         <g:HorizontalPanel>
                             <g:Label width="100px" text="Период:" addStyleNames="{style.headerAttrName}" />
                             <g:Label ui:field="reportPeriodLabel" addStyleNames="{style.headerAttr}" />
+                        </g:HorizontalPanel>
+                        <g:HorizontalPanel>
+                            <g:Label width="100px" text="Очередность:" addStyleNames="{style.headerAttrName}" />
+                            <g:Label ui:field="periodOrderLabel" addStyleNames="{style.headerAttr}" />
                         </g:HorizontalPanel>
                         <g:HorizontalPanel>
                             <g:Label width="100px" text="Состояние:" addStyleNames="{style.headerAttrName}" />

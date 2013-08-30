@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.servlet;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -23,13 +25,14 @@ public class LogoutServlet extends HttpServlet {
 			FormDataService unlockFormData =(FormDataService)springContext.getBean("unlockFormData");
 			unlockFormData.unlockAllByUser(securityService.currentUserInfo());
 		}*/
-		if (Pattern.compile("Web\\s*Sphere", Pattern.CASE_INSENSITIVE).matcher(getServletContext().getServerInfo()).find()) {
-			response.sendRedirect(contextPath + "/ibm_security_logout?logoutExitPage=login");
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        SecurityContextHolder.clearContext();
+        if (Pattern.compile("Web\\s*Sphere", Pattern.CASE_INSENSITIVE).matcher(getServletContext().getServerInfo()).find()) {
+            response.sendRedirect("/pkmslogout");
 		} else {
-			HttpSession session = request.getSession();
-			if (session != null) {
-				session.invalidate();
-			}
 			response.sendRedirect(contextPath + "/login");
 		}
 	}
