@@ -50,6 +50,9 @@ switch (formDataEvent) {
         // для сохранения изменений приемников
         getData(formData).commit()
         break
+    case FormDataEvent.IMPORT :
+        importData()
+        break
 }
 
 /**
@@ -619,3 +622,334 @@ def isItogoRow(row){
     row.getAlias()=='itogo'
 }
 
+/**
+ * Получение импортируемых данных.
+ * Транспортный файл формата xml.
+ */
+void importData() {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '' || !fileName.contains('.xml')) {
+        return
+    }
+
+    def is = ImportInputStream
+    if (is == null) {
+        return
+    }
+
+    def xmlString = importService.getData(is, fileName)
+    if (xmlString == null || xmlString == '') {
+        return
+    }
+
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        return
+    }
+
+    // сохранить начальное состояние формы
+    def data = getData(formData)
+    def rowsOld = getRows(data)
+    try {
+        // добавить данные в форму
+        addData(xml)
+
+        // расчитать и проверить
+        deleteAllStatic()
+        sort()
+        calc()
+        addAllStatic()
+        allCheck()
+    } catch(Exception e) {
+        logger.error('Во время загрузки данных произошла ошибка!')
+    }
+    // откатить загрузку если есть ошибки
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        data.clear()
+        data.insert(rowsOld, 1)
+    }
+    data.commit()
+}
+
+/**
+ * Заполнить форму данными.
+ *
+ * @param xml данные
+ */
+void addData(def xml) {
+    def data = getData(formData)
+
+    def tmp
+    def indexRow = 0
+    def newRows = []
+    def index
+    // справочник 15 "Общероссийский классификатор валют"
+    def refDataProvider15 = refBookFactory.getDataProvider(15)
+
+    // TODO (Ramil Timerbaev) Проверка корректности данных
+    for (def row : xml.exemplar.table.detail.record) {
+        indexRow++
+        index = 1
+
+        def newRow = getNewRow()
+
+        // графа 1
+        newRow.tradeNumber = row.field[index].@value.text()
+        index++
+
+        // графа 2
+        newRow.securityName = row.field[index].@value.text()
+        index++
+
+        // графа 3 - справочник 15, атрибут 64
+        tmp = null
+        if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
+            tmp = getRecordId(refDataProvider15, 'CODE', getNumber(row.field[index].@value.text()))
+        }
+        newRow.currencyCode = tmp
+        index++
+
+        // графа 4
+        newRow.nominalPrice = row.field[index].@value.text()
+        index++
+
+        // графа 5
+        newRow.part1REPODate = row.field[index].@value.text()
+        index++
+
+        // графа 6
+        newRow.part2REPODate = row.field[index].@value.text()
+        index++
+
+        // графа 7
+        newRow.acquisitionPrice = row.field[index].@value.text()
+        index++
+
+        // графа 8
+        newRow.salePrice = row.field[index].@value.text()
+        index++
+
+        // графа 9
+        newRow.income = row.field[index].@value.text()
+        index++
+
+        // графа 10
+        newRow.outcome = row.field[index].@value.text()
+        index++
+
+        // графа 11
+        newRow.rateBR = row.field[index].@value.text()
+        index++
+
+        // графа 12
+        newRow.outcome269st = row.field[index].@value.text()
+        index++
+
+        // графа 13
+        newRow.outcomeTax = row.field[index].@value.text()
+        index++
+
+
+
+
+        // графа 1
+        newRow.rowNumber = row.field[index].@value.text()
+        index++
+
+        // графа 2 - справочник 61 "Коды сделок"
+        tmp = null
+        if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
+            tmp = getRecordId(refDataProvider61, 'CODE', getNumber(row.field[index].@value.text()))
+        }
+        newRow.tradeNumber = tmp
+        index++
+
+        // графа 3 - справочник 62 "Признаки ценных бумаг"
+        tmp = null
+        if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
+            tmp = getRecordId(refDataProvider62, 'CODE', row.field[index].@value.text())
+        }
+
+        newRow.singSecurirty = tmp
+        index++
+
+        // графа 4
+        newRow.issue = row.field[index].@value.text()
+        index++
+
+        // графа 5
+        newRow.acquisitionDate = row.field[index].@value.text()
+        index++
+
+        // графа 6
+        newRow.saleDate = row.field[index].@value.text()
+        index++
+
+        // графа 7
+        newRow.amountBonds = row.field[index].@value.text()
+        index++
+
+        // графа 8
+        newRow.acquisitionPrice = row.field[index].@value.text()
+        index++
+
+        // графа 9
+        newRow.costOfAcquisition = row.field[index].@value.text()
+        index++
+
+        // графа 10
+        newRow.marketPriceInPerc = row.field[index].@value.text()
+        index++
+
+        // графа 11
+        newRow.marketPriceInRub = row.field[index].@value.text()
+        index++
+
+        // графа 12
+        newRow.acquisitionPriceTax = row.field[index].@value.text()
+        index++
+
+        // графа 13
+        newRow.redemptionValue = row.field[index].@value.text()
+        index++
+
+        // графа 14
+        newRow.priceInFactPerc = row.field[index].@value.text()
+        index++
+
+        // графа 15
+        newRow.priceInFactRub = row.field[index].@value.text()
+        index++
+
+        // графа 16
+        newRow.marketPriceInPerc1 = row.field[index].@value.text()
+        index++
+
+        // графа 17
+        newRow.marketPriceInRub1 = row.field[index].@value.text()
+        index++
+
+        // графа 18
+        newRow.salePriceTax = row.field[index].@value.text()
+        index++
+
+        // графа 19
+        newRow.expensesOnSale = row.field[index].@value.text()
+        index++
+
+        // графа 20
+        newRow.expensesTotal = row.field[index].@value.text()
+        index++
+
+        // графа 21
+        newRow.profit = row.field[index].@value.text()
+        index++
+
+        // графа 22
+        newRow.excessSalePriceTax = row.field[index].@value.text()
+
+        newRows.add(newRow)
+    }
+    // проверка итоговых данных
+    if (xml.exemplar.table.total.record.field.size() > 0 && !newRows.isEmpty()) {
+        def totalRow = formData.createDataRow()
+
+        // графы 7-9, 11-13, 15, 17-22
+        def columnsAlias = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInRub',
+                'acquisitionPriceTax', 'redemptionValue', 'priceInFactRub', 'marketPriceInRub1',
+                'salePriceTax', 'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
+
+        // задать всем итоговым ячейкам 0
+        columnsAlias.each { alias ->
+            totalRow.getCell(alias).setValue(0)
+        }
+
+        // подсчитать суммы
+        def value
+        columnsAlias.each { alias ->
+            newRows.each { row ->
+                value = totalRow.getCell(alias).getValue() + (row.getCell(alias).getValue() ?: 0)
+                totalRow.getCell(alias).setValue(value)
+            }
+        }
+
+        // сравнить посчитанные суммы итогов с итогами из транспортного файла
+        def xmlTotal = xml.rowTotal[0]
+        // графы 7-9, 11-13, 15, 17-22
+        def check = true
+        ['amountBonds': 7, 'acquisitionPrice': 8, 'costOfAcquisition': 9, 'marketPriceInRub': 11,
+                'acquisitionPriceTax': 12, 'redemptionValue': 13, 'priceInFactRub': 15,
+                'marketPriceInRub1': 17, 'salePriceTax': 18, 'expensesOnSale': 19,
+                'expensesTotal': 20, 'profit': 21, 'excessSalePriceTax': 22].each { alias, i ->
+            if (check && totalRow.getCell(alias).getValue() != getNumber(xmlTotal.cell[i + 1].text())) {
+                logger.error('Итоговые значения неправильные.')
+                check = false
+                return
+            }
+        }
+    }
+    data.clear()
+    newRows.each { newRow ->
+        insert(data, newRow)
+    }
+    logger.info('Данные загружены')
+}
+
+/**
+ * Получить числовое значение.
+ *
+ * @param value строка
+ */
+def getNumber(def value) {
+    if (value == null) {
+        return null
+    }
+    def tmp = value.trim()
+    if ("".equals(tmp)) {
+        return null
+    }
+    // поменять запятую на точку и убрать пробелы
+    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
+    return new BigDecimal(tmp)
+}
+
+/**
+ * Вставить новыую строку в конец нф.
+ *
+ * @param data данные нф
+ * @param row строка
+ */
+void insert(def data, def row) {
+    data.insert(row, getRows(data).size() + 1)
+}
+
+/**
+ * Получить новую стролу с заданными стилями.
+ */
+def getNewRow() {
+    def row = formData.createDataRow()
+
+    // графа 2..11, 13..15, 19
+    ['tradeNumber', 'singSecurirty', 'issue', 'acquisitionDate', 'saleDate', 'amountBonds',
+            'acquisitionPrice', 'costOfAcquisition', 'marketPriceInPerc', 'marketPriceInRub',
+            'redemptionValue', 'priceInFactPerc', 'priceInFactRub', 'expensesOnSale'].each {
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return row
+}
+
+/**
+ * Получить идентификатор записи из справочника.
+ *
+ * @param provider справочник
+ * @param searchByAlias алиас атрибута справочника по которому ищется запись
+ * @param value значение по которому ищется запись
+ */
+def getRecordId(def provider, def searchByAlias, def value) {
+    def records = provider.getRecords(new Date(), null, searchByAlias + " = '" + value + "'", null);
+    if (records != null && !records.getRecords().isEmpty()) {
+        return records.getRecords().get(0).get('record_id').getNumberValue()
+    }
+    return null
+}

@@ -61,6 +61,10 @@ switch (formDataEvent) {
         getData(formData).commit()
         break
     case FormDataEvent.IMPORT :
+        if (!isBalancePeriod && !checkPrevPeriod()) {
+            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            return
+        }
         importData()
         break
 }
@@ -608,16 +612,12 @@ void importData() {
     }
 
     def data = getData(formData)
+    def rowsOld = getRows(data)
     def totalColumns = [6:'lotSizePrev', 7:'lotSizeCurrent', 9:'cost', 14:'costOnMarketQuotation', 15:'reserveCalcValue']
     // добавить данные в форму
-    boolean canCommit = true
     try {
         def totalLoad = addData(xml)
         if (totalLoad!=null) {
-/*            if (!isBalancePeriod && !checkPrevPeriod()) {
-                logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
-                return
-            }*/
             calc()
             logicalCheck(false)
             checkNSI()
@@ -626,27 +626,27 @@ void importData() {
             for (def row : getRows(data))
                 if (isTotal(row)) totalCalc = row
 
-            totalColumns.each{k, v->
-                if (totalCalc[v]!=totalLoad[v]) {
-                    logger.error("Итоговая сумма в графе $k в транспортном файле некорректна")
-                    canCommit = false
+            if (totalCalc!=null)
+                totalColumns.each{k, v->
+                    if (totalCalc[v]!=totalLoad[v]) {
+                        logger.error("Итоговая сумма в графе $k в транспортном файле некорректна")
+                    }
                 }
-            }
         } else {
             logger.error("Нет итоговой строки.")
-            canCommit = false
         }
     } catch(Exception e) {
         logger.error(""+e.message)
-        canCommit = false
     }
     //в случае ошибок откатить изменения
-    if (!canCommit) {
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        data.clear()
+        data.insert(rowsOld, 1)
         logger.error("Загрузка файла $fileName завершилась ошибкой")
     } else {
         logger.info('Закончена загрузка файла ' + fileName)
-        data.commit()
     }
+    data.commit()
 }
 
 /*
@@ -896,7 +896,7 @@ def addData(def xml) {
         return
     }
 
-    Date date = reportDate
+    Date date = new Date()
 
     def cache = [:]
     def data = getData(formData)
@@ -1037,6 +1037,11 @@ def getNumber(def value) {
     return new BigDecimal(tmp)
 }
 
+/**
+ * Получить record_id элемента справочника.
+ *
+ * @param value
+ */
 def getRecords(def ref_id, String code, String value, Date date, def cache) {
     String filter = code + " like '" + value.replaceAll(' ', '') + "%'"
     if (cache[ref_id]!=null) {
@@ -1050,7 +1055,7 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
-    logger.error("Не удалось определить элемент справочника! ($filter)")
+    logger.error("Не удалось определить элемент справочника!")
     return null;
 }
 

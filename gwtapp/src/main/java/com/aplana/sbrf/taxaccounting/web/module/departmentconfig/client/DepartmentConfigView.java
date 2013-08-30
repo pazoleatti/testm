@@ -203,8 +203,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                     public void onCancel() {
                         // Вернуть старое значение
                         for (int i = 0; i < taxType.getItemCount(); i++) {
-                            TaxType type = TaxType.fromCode(taxType.getValue(i).charAt(0));
-                            if (type == currentTaxType) {
+                            if (taxType.getValue(i).charAt(0) == currentTaxType.getCode()) {
                                 taxType.setSelectedIndex(i);
                                 break;
                             }

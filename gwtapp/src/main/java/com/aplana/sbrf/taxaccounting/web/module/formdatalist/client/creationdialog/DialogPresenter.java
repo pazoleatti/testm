@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.creationdia
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -160,14 +159,6 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 			}
 		}
 		getView().setReportPeriodValue(value);
-	}
-
-	private Set<Integer> convertDepartmentsToIds(List<Department> source){
-		Set<Integer> result = new HashSet<Integer>();
-		for(Department department : source){
-			result.add(department.getId());
-		}
-		return result;
 	}
 
 	private <T> List<T> fillFilterList(List<T> source){

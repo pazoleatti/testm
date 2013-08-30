@@ -65,7 +65,7 @@
                         <g:south size="30">
                             <pager:FlexiblePager ui:field="pager" location="CENTER"
                                                  showFastForwardButton="false" fastForwardRows="0"
-                                                 showLastPageButton="true" rangeLimited="true" styleName="{style.pager}"/>
+                                                 showLastPageButton="true" styleName="{style.pager}"/>
                         </g:south>
                     </g:DockLayoutPanel>
                 </g:center>
