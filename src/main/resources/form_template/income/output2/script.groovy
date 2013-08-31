@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat
  *      - проверки корректности данных проверить когда будут сделаны вывод сообщении
  */
 
-DataRowHelper getDataRowsHelper() {
+DataRowHelper getData() {
     DataRowHelper dataRowsHelper = null
     if (formData.id != null) {
         dataRowsHelper = formDataService.getDataRowHelper(formData)
@@ -79,12 +79,12 @@ switch (formDataEvent) {
 
 void deleteRow() {
     if (currentDataRow != null) {
-        dataRowsHelper.delete(currentDataRow)
+        data.delete(currentDataRow)
     }
 }
 
 void addRow() {
-    dataRowsHelper.insert(getNewRow(), dataRowsHelper.getAllCached().size() + 1)
+    data.insert(getNewRow(), getRows(data).size() + 1)
 }
 
 /**
@@ -117,7 +117,7 @@ void logicCheck() {
     // справочник "Коды субъектов Российской Федерации"
     def refDataProvider = refBookFactory.getDataProvider(4)
 
-    for (row in dataRowsHelper.getAllCached()) {
+    for (row in getRows(data)) {
 
         for (alias in ['title', 'subdivisionRF', 'surname', 'name', 'dividendDate', 'sumDividend', 'sumTax']) {
             if (row.getCell(alias).value == null) {
@@ -204,7 +204,7 @@ void addData(def xml, headRowCount) {
     if (xml == null) {
         return
     }
-    def data = getDataRowsHelper()
+    def data = getData()
 
     // количество графов в таблице
     def columnCount = 22
@@ -404,3 +404,8 @@ def getValue(def record, def alias) {
     }
     return null
 }
+
+def getRows(def data) {
+    return data.getAllCached();
+}
+
