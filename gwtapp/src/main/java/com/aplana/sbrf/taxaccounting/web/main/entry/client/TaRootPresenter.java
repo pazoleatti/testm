@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.main.entry.client;
 
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.RootPresenter;
@@ -9,8 +12,43 @@ public class TaRootPresenter extends RootPresenter {
 	
 	private int lockCount;
 
+
+	public static class OurView extends RootPresenter.RootView {
+		private Element glass;
+
+		@Override
+		public void ensureGlass() {
+			if (glass == null) {
+				glass = Document.get().createDivElement();
+
+				Style style = glass.getStyle();
+				style.setPosition(Style.Position.ABSOLUTE);
+				style.setLeft(0, Style.Unit.PX);
+				style.setTop(0, Style.Unit.PX);
+				style.setRight(0, Style.Unit.PX);
+				style.setBottom(0, Style.Unit.PX);
+				style.setZIndex(2147483647); // Maximum z-index
+				// SPECIAL FOR IE
+				style.setBackgroundColor("#FFFFFF");
+				style.setOpacity(0);
+			}
+		}
+
+		@Override
+		public void lockScreen() {
+			ensureGlass();
+			Document.get().getBody().appendChild(glass);
+		}
+
+		@Override
+		public void unlockScreen() {
+			ensureGlass();
+			Document.get().getBody().removeChild(glass);
+		}
+
+	}
 	@Inject
-	public TaRootPresenter(EventBus eventBus, RootView view) {
+	public TaRootPresenter(EventBus eventBus, final OurView view) {
 		super(eventBus, view);
 	}
 

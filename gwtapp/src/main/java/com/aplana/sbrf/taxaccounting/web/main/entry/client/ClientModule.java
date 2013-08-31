@@ -12,16 +12,17 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.Declarati
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateModule;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigModule;
 import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorModule;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataModule;
-import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListModule;
-import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdataimport.client.FormDataImportModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListClientModule;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.gin.AdminModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.migration.client.MigrationModule;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsModule;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataModule;
+import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListModule;
+import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesModule;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationModule;
 import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListModule;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryClientModule;
@@ -89,5 +90,6 @@ public class ClientModule extends AbstractPresenterModule {
         install(new RefBookListModule());
         install(new TaxFormNominationModule());
 		install(new RefBookDataModule());
+        install(new MigrationModule());
 	}
 }

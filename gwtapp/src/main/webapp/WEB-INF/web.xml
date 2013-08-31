@@ -8,7 +8,6 @@
 			/WEB-INF/applicationContext.xml
 			/WEB-INF/security.xml
 			/WEB-INF/security-preauth.xml
-            /WEB-INF/spring-jms.xml
             /WEB-INF/spring-ejb.xml
 			classpath:com/aplana/sbrf/taxaccounting/dao.xml
             classpath:com/aplana/sbrf/taxaccounting/script-support.xml
