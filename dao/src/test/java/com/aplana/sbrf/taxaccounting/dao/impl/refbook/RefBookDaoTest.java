@@ -373,21 +373,24 @@ public class RefBookDaoTest {
 		Assert.assertEquals(1, data.size());
 	}
 
-	/*@Test
+	@Test
 	public void testDeleteRecords2() {
+		String testName = "Незнайка на Луне";
+
 		RefBook refBook = refBookDao.get(1L);
 		Date version = getDate(1, 1, 2037);
 
 		List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
 		Map<String, RefBookValue> record = refBook.createRecord();
-		record.get(ATTRIBUTE_NAME).setValue("Незнайка на Луне");
-		record.get(ATTRIBUTE_PAGECOUNT).setValue(97);
-		record.get(ATTRIBUTE_AUTHOR).setValue(6L);
+		record.get(ATTRIBUTE_NAME).setValue(testName);
 		records.add(record);
 		refBookDao.createRecords(refBook.getId(), version, records);
 
-		PagingResult refBookDao.getRecords(1L, version, null, "", null);
-	}*/
+		PagingResult<Map<String, RefBookValue>> result = refBookDao.getRecords(1L, version, null, String.format("%s = '%s'", ATTRIBUTE_NAME, testName), null);
+		Assert.assertEquals(1, result.size());
+		final Long recordId = result.get(0).get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
+		refBookDao.deleteRecords(1L, version, new ArrayList<Long>(){{add(recordId);}});
+	}
 
     @Test
     public void testGetValue1() {
