@@ -43,7 +43,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 			PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider
 					.getRecords(new Date(), action.getPagingParams(), null, refBook.getAttributes().get(0));
 			List<RefBookDataRow> rows = new ArrayList<RefBookDataRow>();
-			for (Map<String, RefBookValue> record : refBookPage.getRecords()) {
+			for (Map<String, RefBookValue> record : refBookPage) {
 
 				Map<String, String> tableRowData = new HashMap<String, String>();
 				for (Map.Entry<String, RefBookValue> val : record.entrySet()) {

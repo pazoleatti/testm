@@ -171,7 +171,7 @@ public class DeclarationDataDaoTest {
 			pageParams.setStartIndex(0);
 			pageParams.setCount(requestedCount);
 			res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.ID, true, pageParams);
-			assertEquals(requestedCount, res.getRecords().size());
+			assertEquals(requestedCount, res.size());
 			assertEquals(TOTAL_RECORDS_COUNT, res.getTotalRecordCount());
 		}
 	}
@@ -184,20 +184,20 @@ public class DeclarationDataDaoTest {
 		PagingResult<DeclarationDataSearchResultItem> res;
 
 		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.ID, true, pageParams);
-		assertIdsEquals(new long[]{1, 2, 3, 4, 5}, res.getRecords());
+		assertIdsEquals(new long[]{1, 2, 3, 4, 5}, res);
 		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.ID, false, pageParams);
-		assertIdsEquals(new long[] {7, 5, 4, 3, 2}, res.getRecords());
+		assertIdsEquals(new long[] {7, 5, 4, 3, 2}, res);
 
 
 		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.REPORT_PERIOD_NAME, true, pageParams);
-		assertIdsEquals(new long[]{3, 1, 2, 4, 5}, res.getRecords());
+		assertIdsEquals(new long[]{3, 1, 2, 4, 5}, res);
 		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.REPORT_PERIOD_NAME, false, pageParams);
-		assertIdsEquals(new long[] {7, 5, 4, 2, 1}, res.getRecords());
+		assertIdsEquals(new long[] {7, 5, 4, 2, 1}, res);
 
 		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.DEPARTMENT_NAME, true, pageParams);
-		assertIdsEquals(new long[]{4, 3, 2, 5, 7}, res.getRecords());
+		assertIdsEquals(new long[]{4, 3, 2, 5, 7}, res);
 		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.DEPARTMENT_NAME, false, pageParams);
-		assertIdsEquals(new long[] {1, 7, 5, 2, 3}, res.getRecords());
+		assertIdsEquals(new long[] {1, 7, 5, 2, 3}, res);
 
 	}
 

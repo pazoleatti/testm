@@ -35,7 +35,7 @@ public class AuditDaoTest {
         filter.setToSearchDate(new Date(1369911365000l));
 
         PagingResult<LogSystemSearchResultItem> records = auditDao.getLogs(filter);
-        LogSystemSearchResultItem logSystem = records.getRecords().get(0);
+        LogSystemSearchResultItem logSystem = records.get(0);
         assertEquals(Long.valueOf(1), logSystem.getId());
         assertEquals("192.168.72.16", logSystem.getIp());
         assertEquals(FormDataEvent.getByCode(1), logSystem.getEvent());
@@ -80,7 +80,7 @@ public class AuditDaoTest {
         filter.setToSearchDate(new Date());
 
         PagingResult<LogSystemSearchResultItem> records = auditDao.getLogs(filter);
-        LogSystemSearchResultItem logSystemSearchResultItem = records.getRecords().get(0);
+        LogSystemSearchResultItem logSystemSearchResultItem = records.get(0);
         assertEquals(Long.valueOf(3), logSystemSearchResultItem.getId());
         assertEquals(formatter.format(date), formatter.format(logSystemSearchResultItem.getLogDate()));
         assertEquals("192.168.72.16", logSystemSearchResultItem.getIp());

@@ -43,7 +43,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
     public PrintAuditDataResult execute(PrintAuditDataAction printAuditDataAction, ExecutionContext executionContext) throws ActionException {
         try {
             PagingResult<LogSystemSearchResultItem> records = auditService.getLogsByFilter(printAuditDataAction.getLogSystemFilter());
-            String filePath = printingService.generateExcelLogSystem(records.getRecords());
+            String filePath = printingService.generateExcelLogSystem(records);
             InputStream fileInputStream = new FileInputStream(filePath);
 
             PrintAuditDataResult result = new PrintAuditDataResult();

@@ -57,7 +57,7 @@ public class GetRowsDataHandler extends
 		result.setDataRows(dataRowService.getDataRows(userInfo,
 				action.getFormDataId(), dataRowRange, action.isReadOnly()));
 
-        refBookHelper.refBookDereference(result.getDataRows().getRecords(),
+        refBookHelper.refBookDereference(result.getDataRows(),
                 formTemplate.getColumns());
 
 		return result;

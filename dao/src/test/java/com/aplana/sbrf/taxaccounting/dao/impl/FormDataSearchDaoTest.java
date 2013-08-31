@@ -125,7 +125,7 @@ public class FormDataSearchDaoTest {
 			pageParams.setStartIndex(0);
 			pageParams.setCount(requestedCount);
 			res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.ID, true, pageParams);
-			assertEquals(requestedCount, res.getRecords().size());
+			assertEquals(requestedCount, res.size());
 			assertEquals(TOTAL_RECORDS_COUNT, res.getTotalRecordCount());
 		}
 
@@ -145,34 +145,34 @@ public class FormDataSearchDaoTest {
 		PagingResult<FormDataSearchResultItem> res;
 		
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.ID, true, pageParams);
-		assertIdsEquals(new long[] {1, 2, 3, 4, 5}, res.getRecords());
+		assertIdsEquals(new long[] {1, 2, 3, 4, 5}, res);
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.ID, false, pageParams);
-		assertIdsEquals(new long[] {18, 17, 16, 15, 14}, res.getRecords());
+		assertIdsEquals(new long[] {18, 17, 16, 15, 14}, res);
 
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.DEPARTMENT_NAME, true, pageParams);
-		assertIdsEquals(new long[] {1, 4, 7, 10, 13}, res.getRecords());
+		assertIdsEquals(new long[] {1, 4, 7, 10, 13}, res);
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.DEPARTMENT_NAME, false, pageParams);
-		assertIdsEquals(new long[] {18, 15, 12, 9, 6}, res.getRecords());
+		assertIdsEquals(new long[] {18, 15, 12, 9, 6}, res);
 
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.FORM_TYPE_NAME, true, pageParams);
-		assertIdsEquals(new long[] {4, 8, 12, 16, 3}, res.getRecords());
+		assertIdsEquals(new long[] {4, 8, 12, 16, 3}, res);
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.FORM_TYPE_NAME, false, pageParams);
-		assertIdsEquals(new long[] {17, 13, 9, 5, 1}, res.getRecords());
+		assertIdsEquals(new long[] {17, 13, 9, 5, 1}, res);
 
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.KIND, true, pageParams);
-		assertIdsEquals(new long[] {1, 3, 5, 7, 9}, res.getRecords());
+		assertIdsEquals(new long[] {1, 3, 5, 7, 9}, res);
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.KIND, false, pageParams);
-		assertIdsEquals(new long[] {18, 16, 14, 12, 10}, res.getRecords());
+		assertIdsEquals(new long[] {18, 16, 14, 12, 10}, res);
 
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.REPORT_PERIOD_NAME, true, pageParams);
-		assertIdsEquals(new long[] {1, 4, 7, 10, 13}, res.getRecords());
+		assertIdsEquals(new long[] {1, 4, 7, 10, 13}, res);
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.REPORT_PERIOD_NAME, false, pageParams);
-		assertIdsEquals(new long[] {18, 15, 12, 9, 6}, res.getRecords());
+		assertIdsEquals(new long[] {18, 15, 12, 9, 6}, res);
 
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.STATE, true, pageParams);
-		assertIdsEquals(new long[] {1, 5, 9, 13, 17}, res.getRecords());
+		assertIdsEquals(new long[] {1, 5, 9, 13, 17}, res);
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.STATE, false, pageParams);
-		assertIdsEquals(new long[] {16, 12, 8, 4, 15}, res.getRecords());
+		assertIdsEquals(new long[] {16, 12, 8, 4, 15}, res);
 	}
 	
 	@Test
