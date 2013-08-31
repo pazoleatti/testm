@@ -267,7 +267,7 @@ void addNewRow() {
     if (currentDataRow!=null){
         index = currentDataRow.getIndex()
         def row = currentDataRow
-        while(row.getAlias()!=null && index>=0){
+        while(row.getAlias()!=null && index>0){
             row = getRows(data).get(--index)
         }
         if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
@@ -332,7 +332,7 @@ DataRow<Cell> getItogo() {
 DataRow<Cell> getPrevItogoKvartal() {
     FormData formPrev = getFormPrev()
     if (formPrev != null && formPrev.state == WorkflowState.ACCEPTED) {
-        return getData(formPrev).getDataRow(getData(formPrev).getAllCahced(),'itogoKvartal')
+        return getData(formPrev).getDataRow(getRows(getData(formPrev)),'itogoKvartal')
     }
     return null
 }

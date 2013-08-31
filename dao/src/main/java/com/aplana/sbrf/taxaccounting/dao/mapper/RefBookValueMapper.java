@@ -34,7 +34,7 @@ public class RefBookValueMapper implements RowMapper<Map<String, RefBookValue>> 
                     }
                     break;
                     case NUMBER: {
-                        value = rs.getDouble(attribute.getAlias());
+                        value = rs.getBigDecimal(attribute.getAlias()).setScale(attribute.getPrecision());
                     }
                     break;
                     case DATE: {
