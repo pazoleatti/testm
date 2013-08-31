@@ -4,11 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractXlsxReportBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.text.SimpleDateFormat;
@@ -64,8 +61,8 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
         cs.setBorderTop(CellStyle.BORDER_THIN);
         cs.setBorderRight(CellStyle.BORDER_THIN);
         cs.setBorderLeft(CellStyle.BORDER_THIN);
-        cs.setFillForegroundColor(HSSFColor.BRIGHT_GREEN.index);
-        cs.setFillBackgroundColor(HSSFColor.BRIGHT_GREEN.index);
+        cs.setFillForegroundColor(IndexedColors.GREEN.index);
+        cs.setFillBackgroundColor(IndexedColors.GREEN.index);
         cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
 
         Row row = sheet.createRow(rowNumber);
@@ -120,15 +117,29 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
         Font font = workBook.createFont();
         font.setBoldweight(Font.BOLDWEIGHT_BOLD);
         cs.setFont(font);
+        cs.setAlignment(CellStyle.ALIGN_CENTER);
 
         Row row = sheet.createRow(rowNumber++);
         Cell cell = row.createCell(cellNumber++);
+        CellRangeAddress regionTitle = new CellRangeAddress(
+                rowNumber - 1,
+                rowNumber - 1,
+                0,
+                9);
         cell.setCellValue("Журнал аудита");
         cell.setCellStyle(cs);
         cellNumber = 0;
         Row reportRow = sheet.createRow(rowNumber);
         Cell reportDate = reportRow.createCell(cellNumber);
         reportDate.setCellValue(new SimpleDateFormat(DATE_FORMAT).format(new Date()));
+        reportDate.setCellStyle(cs);
+        CellRangeAddress regionDate = new CellRangeAddress(
+                rowNumber,
+                rowNumber,
+                0,
+                9);
+        sheet.addMergedRegion(regionTitle);
+        sheet.addMergedRegion(regionDate);
 
         cellNumber = 0;
         rowNumber = rowNumber + 2;
