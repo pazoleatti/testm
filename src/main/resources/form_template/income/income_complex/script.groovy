@@ -199,7 +199,7 @@ def calc35to40() {
         def dataRow = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(),rowAlias)
 
         final income101Data = getIncome101Data(dataRow)
-
+        logger.info('income101Data = ' + income101Data)
         if (income101Data == null || income101Data.isEmpty()) {     //Нет данных об оборотной ведомости
             return
         }
@@ -207,6 +207,7 @@ def calc35to40() {
         dataRow.with{
 //          графа  14
             opuSumByTableD = getOpuSumByTableDFor35to40(dataRow, income101Data)
+            logger.info('opuSumByTableD = ' + opuSumByTableD)
 //          графа  15
             opuSumTotal = getOpuSumTotalFor35to40(dataRow, income101Data)
 //          графа  16
@@ -273,7 +274,10 @@ def getIncome101Data(def dataRow) {
     def account = dataRow.accountingRecords
     def reportPeriodId = formData.reportPeriodId
 
-    return income101Dao.getIncome101(reportPeriodId, account)
+    // Справочник 50 - "Оборотная ведомость (Форма 0409101-СБ)"
+    def refDataProvider = refBookFactory.getDataProvider(50)
+    def records = refDataProvider.getRecords(new Date(), null,  "ACCOUNT = '" + account + "' AND REPORT_PERIOD_ID = " + reportPeriodId, null)
+    return records.getRecords()
 }
 
 /**
