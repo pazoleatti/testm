@@ -101,6 +101,11 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	}
 
 	@Override
+	public boolean isYearEmpty() {
+		return yearBox.isEmpty();
+	}
+
+	@Override
 	public Widget asWidget() {
 		return widget;
 	}
@@ -117,9 +122,9 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
     @UiHandler("continueButton")
 	public void onContinue(ClickEvent event) {
 		OpenFilterData openFilterData = new OpenFilterData();
-		openFilterData.setYear(yearBox.getValue());
+		openFilterData.setYear(yearBox.isEmpty() ? null : yearBox.getValue());
 		openFilterData.setBalancePeriod(balancePeriod.getValue());
-		openFilterData.setDepartmentId(departmentPicker.getValue().iterator().next());
+		openFilterData.setDepartmentId(Long.valueOf(departmentPicker.getValue().iterator().next()));
 	    openFilterData.setDictionaryTaxPeriodId(period.getValue());
 		openFilterData.setEndDate(term.getValue());
 

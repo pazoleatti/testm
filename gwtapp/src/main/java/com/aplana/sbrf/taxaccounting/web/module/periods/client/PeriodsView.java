@@ -28,8 +28,6 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	interface Binder extends UiBinder<Widget, PeriodsView> { }
 
 	private static final String[] COLUMN_NAMES = {"Период", "Состояние"};
-	@UiField
-	Anchor returnAnchor;
 
 	@UiField
 	Label title;

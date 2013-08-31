@@ -3,17 +3,17 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 import java.util.Date;
 
 public class OpenFilterData {
-	int year;
+	Integer year;
 	boolean balancePeriod;
-	long departmentId;
-	long dictionaryTaxPeriodId;
+	Long departmentId;
+	Long dictionaryTaxPeriodId;
 	Date endDate;
 
-	public int getYear() {
+	public Integer getYear() {
 		return year;
 	}
 
-	public void setYear(int year) {
+	public void setYear(Integer year) {
 		this.year = year;
 	}
 
@@ -25,19 +25,19 @@ public class OpenFilterData {
 		this.balancePeriod = balancePeriod;
 	}
 
-	public long getDepartmentId() {
+	public Long getDepartmentId() {
 		return departmentId;
 	}
 
-	public void setDepartmentId(long departmentId) {
+	public void setDepartmentId(Long departmentId) {
 		this.departmentId = departmentId;
 	}
 
-	public long getDictionaryTaxPeriod() {
+	public Long getDictionaryTaxPeriod() {
 		return dictionaryTaxPeriodId;
 	}
 
-	public void setDictionaryTaxPeriodId(long dictionaryTaxPeriodId) {
+	public void setDictionaryTaxPeriodId(Long dictionaryTaxPeriodId) {
 		this.dictionaryTaxPeriodId = dictionaryTaxPeriodId;
 	}
 

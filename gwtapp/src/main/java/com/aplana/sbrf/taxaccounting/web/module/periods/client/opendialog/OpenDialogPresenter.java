@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReport
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreated;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodResult;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -37,6 +38,7 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		void setCurrentReportPeriod(ReportPeriod reportPeriod);
 		void setYear(int year);
 		void setTaxType(TaxType taxType);
+		boolean isYearEmpty();
 	}
 
 	private DispatchAsync dispatcher;
@@ -73,6 +75,10 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 
 	@Override
 	public void onContinue(final OpenFilterData openFilterData) {
+		if (getView().isYearEmpty() || (openFilterData.getDictionaryTaxPeriod() == null) || (openFilterData.getEndDate() == null)) {
+			Window.alert("Не заданы все обязательные параметры!");
+			return;
+		}
 		OpenPeriodAction action = new OpenPeriodAction();
 		action.setYear(openFilterData.getYear());
 		action.setEndDate(openFilterData.getEndDate());
