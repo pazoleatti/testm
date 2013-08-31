@@ -267,7 +267,7 @@ void addNewRow() {
     if (currentDataRow!=null){
         index = currentDataRow.getIndex()
         def row = currentDataRow
-        while(row.getAlias()!=null && index>=0){
+        while(row.getAlias()!=null && index>0){
             row = getRows(data).get(--index)
         }
         if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
