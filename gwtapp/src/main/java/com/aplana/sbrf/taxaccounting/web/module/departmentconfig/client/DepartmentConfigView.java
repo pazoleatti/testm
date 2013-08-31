@@ -279,6 +279,18 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @Override
     public void clear() {
+        if (dereferenceValues != null) {
+            dereferenceValues.clear();
+        }
+        dictRegionId.setDereferenceValue(null);
+        reorgFormCode.setDereferenceValue(null);
+        signatoryId.setDereferenceValue(null);
+        taxPlaceTypeCode.setDereferenceValue(null);
+        obligation.setDereferenceValue(null);
+        okato.setDereferenceValue(null);
+        okvedCode.setDereferenceValue(null);
+        type.setDereferenceValue(null);
+
         DepartmentCombined emptyParams = new DepartmentCombined();
         emptyParams.setTaxType(currentTaxType);
         driver.edit(emptyParams);
