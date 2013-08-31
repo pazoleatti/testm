@@ -21,16 +21,16 @@
 		</dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>migration</artifactId>
-            <version>${project.version}</version>
-            <type>war</type>
-        </dependency>
-        <!--<dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>migration-ejb</artifactId>
             <version>${project.version}</version>
             <type>ejb</type>
-        </dependency>-->
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mdb</artifactId>
+            <version>${project.version}</version>
+            <type>ejb</type>
+        </dependency>
 	</dependencies>
 
 	<build>
@@ -42,24 +42,24 @@
 				<configuration>
 					<version>5</version>
 					<defaultLibBundleDir>lib</defaultLibBundleDir>
+                    <skinnyWars>true</skinnyWars>
 					<modules>
 						<webModule>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>gwtapp</artifactId>
 							<bundleFileName>gwtapp.war</bundleFileName>
-							<contextRoot>/taxaccounting/gwtapp</contextRoot>
+							<contextRoot>/taxaccounting-sb3/gwtapp</contextRoot>
 						</webModule>
-                        <!--<webModule>-->
-                            <!--<groupId>${project.groupId}</groupId>-->
-                            <!--<artifactId>migration</artifactId>-->
-                            <!--<bundleFileName>migration.war</bundleFileName>-->
-                            <!--<contextRoot>/taxaccounting/migration</contextRoot>-->
-                        <!--</webModule>-->
-                        <!--<ejbModule>
+                        <ejbModule>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>migration-ejb</artifactId>
                             <bundleFileName>migration-ejb.jar</bundleFileName>
-                        </ejbModule>-->
+                        </ejbModule>
+                        <ejbModule>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>mdb</artifactId>
+                            <bundleFileName>mdb.jar</bundleFileName>
+                        </ejbModule>
 					</modules>
 				</configuration>
 			</plugin>

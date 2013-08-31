@@ -25,8 +25,7 @@
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.bookerstatements.BookerStatements"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.refbooklist.RefBookList"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.refbookdata.RefBookData"/>
-
-
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.migration.Migration"/>
 
     <set-configuration-property name="gin.ginjector.modules"
                                 value="com.aplana.sbrf.taxaccounting.web.main.entry.client"/>

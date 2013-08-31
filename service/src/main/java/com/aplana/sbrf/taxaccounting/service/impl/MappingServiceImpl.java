@@ -1,17 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.migration.RestoreExemplar;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.DepartmentRnuMapping;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.DepartmentXmlMapping;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.NalogFormType;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.PeriodMapping;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.YearCode;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.*;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.MappingService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -61,7 +57,7 @@ public class MappingServiceImpl implements MappingService {
         } else if (XML_EXT.equals(ext)) {
             restoreExemplar = restoreExemplarFromXml(filename);
         } else {
-            throw new ServiceException("Не правильное название файла");
+            throw new ServiceException("Неправильное имя файла");
         }
 
         log.debug(restoreExemplar);

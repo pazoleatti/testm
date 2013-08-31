@@ -211,14 +211,6 @@
 							<validateOnly>true</validateOnly>
 						</configuration>
 					</plugin>
-                    <plugin>
-                        <groupId>org.apache.activemq.tooling</groupId>
-                        <artifactId>maven-activemq-plugin</artifactId>
-                        <version>5.7.0</version>
-                        <configuration>
-                            <fork>true</fork>
-                        </configuration>
-                    </plugin>
 				</plugins>
 			</build>
 			<dependencies>
