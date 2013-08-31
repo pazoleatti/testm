@@ -82,8 +82,8 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 
 		if (lastTaxType == null) {
 			Calendar current = Calendar.getInstance();
-			res.setYearFrom(current.get(Calendar.YEAR) - 1900);
-			res.setYearTo(current.get(Calendar.YEAR) - 1900);
+			res.setYearFrom(current.get(Calendar.YEAR));
+			res.setYearTo(current.get(Calendar.YEAR));
 		} else {
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(lastTaxType.getStartDate());
