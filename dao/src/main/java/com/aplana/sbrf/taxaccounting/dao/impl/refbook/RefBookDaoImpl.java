@@ -556,7 +556,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         if (refBookId == null || version == null) {
             return;
         }
-		//TODO рассмотреть случай когда существуют записи с датой актуальности = дате удаления. Возникнет исключение (Marat Fayzullin 2013-08-31)
+		//TODO Отрефакторить http://jira.aplana.com/browse/SBRFACCTAX-3891 (Marat Fayzullin 2013-08-31)
         // Отметка записей ближайшей меньшей версии как удаленных
         getJdbcTemplate().update(DELETE_MARK_ALL_REF_BOOK_RECORD_SQL,
                 new Object[] {version, refBookId, version, refBookId},
