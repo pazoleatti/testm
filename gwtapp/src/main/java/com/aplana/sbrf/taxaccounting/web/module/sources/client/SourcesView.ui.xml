@@ -100,7 +100,6 @@
                 <style:GenericDataGrid ui:field="sourcesTable" width="100%" height="350px" />
             </g:FlowPanel>
         </g:HorizontalPanel>
-
-        <style:GenericDataGrid ui:field="currentSourcesTable" width="100%" height="100%" />
+        <style:GenericDataGrid ui:field="currentSourcesTable" width="100%" height="300px"/>
 	</g:FlowPanel>
 </ui:UiBinder>
