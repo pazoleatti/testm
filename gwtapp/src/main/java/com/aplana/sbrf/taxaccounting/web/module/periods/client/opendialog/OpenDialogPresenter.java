@@ -72,7 +72,7 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 	}
 
 	@Override
-	public void onContinue(OpenFilterData openFilterData) {
+	public void onContinue(final OpenFilterData openFilterData) {
 		OpenPeriodAction action = new OpenPeriodAction();
 		action.setYear(openFilterData.getYear());
 		action.setEndDate(openFilterData.getEndDate());
@@ -82,14 +82,14 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		action.setActive(true);
 		action.setDictionaryTaxPeriodId(openFilterData.getDictionaryTaxPeriod());
 		dispatcher.execute(action, CallbackUtils
-				.simpleCallback(new AbstractCallback<OpenPeriodResult>() {
+				.defaultCallback(new AbstractCallback<OpenPeriodResult>() {
 					@Override
 					public void onSuccess(OpenPeriodResult result) {
-						PeriodCreated.fire(OpenDialogPresenter.this, true);
+						PeriodCreated.fire(OpenDialogPresenter.this, true, openFilterData.getYear());
 						LogAddEvent.fire(OpenDialogPresenter.this, result.getLogEntries());
 						getView().hide();
 					}
-				})
+				}, OpenDialogPresenter.this)
 		);
 	}
 
