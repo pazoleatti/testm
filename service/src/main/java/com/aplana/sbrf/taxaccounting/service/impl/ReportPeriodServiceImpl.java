@@ -206,7 +206,12 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 		DepartmentReportPeriod period = departmentReportPeriodDao.get(reportPeriodId, departmentId);
 		if ((period == null) || period.isActive()) {
 			departmentReportPeriodDao.updateActive(reportPeriodId, departmentId, false);
-			logs.add(new LogEntry(LogLevel.INFO, "Период" + " \"" + reportPeriodDao.get(reportPeriodId).getName() + "\" " +
+			ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(taxPeriodDao.get(period.getReportPeriod().getTaxPeriodId()).getStartDate());
+			int year = calendar.get(Calendar.YEAR);
+			logs.add(new LogEntry(LogLevel.INFO, "Период" + " \"" + reportPeriod.getName() + "\" " +
+					"за " + year + " год " +
 					"закрыт для подразделения \"" +
 					departmentService.getDepartment((int) departmentId).getName() +
 					"\""));
@@ -225,7 +230,11 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 			return;
 		}
 		if (logs != null) {
-			logs.add(new LogEntry(LogLevel.INFO,"Создан период" + " \"" + departmentReportPeriod.getReportPeriod().getName() + "\" "
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(taxPeriodDao.get(departmentReportPeriod.getReportPeriod().getTaxPeriodId()).getStartDate());
+			int year = calendar.get(Calendar.YEAR);
+			logs.add(new LogEntry(LogLevel.INFO,"Создан период" + " \"" + departmentReportPeriod.getReportPeriod().getName() + "\" " +
+					" за " + year + " год "
 					+ "для подразделения \" " +
 					departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName()+ "\""));
 		}
