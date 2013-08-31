@@ -220,7 +220,7 @@ create table ref_book_value (
 
 alter table ref_book_value add constraint ref_book_value_pk primary key (record_id, attribute_id);
 
-alter table ref_book_value add constraint ref_book_value_fk_record_id foreign key (record_id) references ref_book_record (id);
+alter table ref_book_value add constraint ref_book_value_fk_record_id foreign key (record_id) references ref_book_record (id) on delete cascade;
 alter table ref_book_value add constraint ref_book_value_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
 
 comment on table ref_book_value is 'Значение записи справочника';
