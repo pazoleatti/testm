@@ -207,6 +207,7 @@ def calc35to40() {
         dataRow.with{
 //          графа  14
             opuSumByTableD = getOpuSumByTableDFor35to40(dataRow, income101Data)
+
 //          графа  15
             opuSumTotal = getOpuSumTotalFor35to40(dataRow, income101Data)
 //          графа  16
@@ -273,7 +274,10 @@ def getIncome101Data(def dataRow) {
     def account = dataRow.accountingRecords
     def reportPeriodId = formData.reportPeriodId
 
-    return income101Dao.getIncome101(reportPeriodId, account)
+    // Справочник 50 - "Оборотная ведомость (Форма 0409101-СБ)"
+    def refDataProvider = refBookFactory.getDataProvider(50)
+    def records = refDataProvider.getRecords(new Date(), null,  "ACCOUNT = '" + account + "' AND REPORT_PERIOD_ID = " + reportPeriodId, null)
+    return records.getRecords()
 }
 
 /**
@@ -370,10 +374,11 @@ def getSummaryIncomeSimpleFormHelper() {
     def formDataKind = FormDataKind.SUMMARY
     def departmentId = formData.departmentId
     def reportPeriodId = formData.reportPeriodId
-
+    // TODO (Aydar Kadyrgulov) Проверить, существует ли за этот же период простая форма. если нет, то вывести сообщение.
     def summaryIncomeSimpleFormData = formDataService.find(formId, formDataKind, departmentId, reportPeriodId)
     def summaryIncomeSimpleDataRowsHelper = null
-    if (summaryIncomeSimpleFormData.id != null) summaryIncomeSimpleDataRowsHelper = formDataService.getDataRowHelper(summaryIncomeSimpleFormData)
+
+    if (summaryIncomeSimpleFormData != null && summaryIncomeSimpleFormData.id != null) summaryIncomeSimpleDataRowsHelper = formDataService.getDataRowHelper(summaryIncomeSimpleFormData)
     if (summaryIncomeSimpleDataRowsHelper == null || summaryIncomeSimpleDataRowsHelper.getAllCached().isEmpty()) {
         logger.error('Нет информации в отчёте Доходы простые')
     }
@@ -542,6 +547,19 @@ void checkDeclarationBankOnAcceptance() {
             logger.error('Принятие налоговой формы невозможно, т.к. уже принята декларация Банка.')
         }
     }
+}
+
+/**
+ * Проверка на террбанк.
+ */
+def isTerBank() {
+    boolean isTerBank = false
+    departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
+        if (it.departmentId != formData.departmentId) {
+            isTerBank = true
+        }
+    }
+    return isTerBank
 }
 
 /**
