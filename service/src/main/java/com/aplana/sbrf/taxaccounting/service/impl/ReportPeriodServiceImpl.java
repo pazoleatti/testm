@@ -203,11 +203,14 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	}
 
 	private void closePeriodWithLog(int reportPeriodId, long departmentId, List<LogEntry> logs) {
-		departmentReportPeriodDao.updateActive(reportPeriodId, departmentId, false);
-		logs.add(new LogEntry(LogLevel.INFO, "Период" + " \"" + reportPeriodDao.get(reportPeriodId).getName() + "\" " +
-				"закрыт для подразделения \"" +
-				departmentService.getDepartment((int) departmentId).getName() +
-				"\""));
+		DepartmentReportPeriod period = departmentReportPeriodDao.get(reportPeriodId, departmentId);
+		if ((period == null) || period.isActive()) {
+			departmentReportPeriodDao.updateActive(reportPeriodId, departmentId, false);
+			logs.add(new LogEntry(LogLevel.INFO, "Период" + " \"" + reportPeriodDao.get(reportPeriodId).getName() + "\" " +
+					"закрыт для подразделения \"" +
+					departmentService.getDepartment((int) departmentId).getName() +
+					"\""));
+		}
 	}
 
 	private void saveOrUpdate(DepartmentReportPeriod departmentReportPeriod, List<LogEntry> logs) {
