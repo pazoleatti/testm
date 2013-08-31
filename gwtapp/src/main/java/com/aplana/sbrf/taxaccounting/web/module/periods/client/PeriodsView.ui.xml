@@ -48,9 +48,6 @@
             <g:HorizontalPanel height="100%" width="100%">
                 <g:FlowPanel>
                     <g:HorizontalPanel height="28px">
-                        <g:cell width="25px">
-                            <style:LinkAnchor title="Перейти к списку деклараций" ui:field="returnAnchor" img="resources/img/arrow-left-24.png"/>
-                        </g:cell>
                         <g:HorizontalPanel>
                             <g:Label ui:field="title" addStyleNames="{style.titleLabel}">OLOLO</g:Label>
                             <g:SimplePanel styleName="{style.titleGradient}"/>
