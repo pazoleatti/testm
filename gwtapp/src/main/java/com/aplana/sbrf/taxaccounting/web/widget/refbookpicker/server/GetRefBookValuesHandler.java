@@ -129,7 +129,7 @@ public class GetRefBookValuesHandler extends
 
 		List<RefBookItem> items = new ArrayList<RefBookItem>();
 
-		for (Map<String, RefBookValue> record : refBookPage.getRecords()) {
+		for (Map<String, RefBookValue> record : refBookPage) {
 			RefBookItem item = new RefBookItem();
 			List<String> values = new ArrayList<String>();
 

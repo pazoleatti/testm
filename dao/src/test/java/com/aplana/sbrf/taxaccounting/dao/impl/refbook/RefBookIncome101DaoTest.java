@@ -34,17 +34,17 @@ public class RefBookIncome101DaoTest {
     public void getRecordsTest() {
         // Без фильтра
         PagingResult<Map<String, RefBookValue>> records = dao.getRecords(null, null, null);
-        Assert.assertEquals(records.getRecords().size(), 4);
+        Assert.assertEquals(records.size(), 4);
         Assert.assertEquals(records.getTotalRecordCount(), 4);
 
         // REPORT_PERIOD_ID = 1
         records = dao.getRecords(null, "REPORT_PERIOD_ID = 1", null);
-        Assert.assertEquals(records.getRecords().size(), 3);
+        Assert.assertEquals(records.size(), 3);
         Assert.assertEquals(records.getTotalRecordCount(), 3);
 
         // REPORT_PERIOD_ID = 1 AND DEPARTMENT_ID = 2
         records = dao.getRecords(null, "REPORT_PERIOD_ID = 1 AND DEPARTMENT_ID = 2", null);
-        Assert.assertEquals(records.getRecords().size(), 1);
+        Assert.assertEquals(records.size(), 1);
         Assert.assertEquals(records.getTotalRecordCount(), 1);
     }
 
@@ -64,11 +64,11 @@ public class RefBookIncome101DaoTest {
     public void updateRecordsTest1() {
         // Обновление всех имеющихся записей без изменений
         PagingResult<Map<String, RefBookValue>> records = dao.getRecords(null, null, null);
-        List<Map<String, RefBookValue>> list1 = records.getRecords();
+        List<Map<String, RefBookValue>> list1 = records;
         Assert.assertEquals(list1.size(), 4);
-        dao.updateRecords(records.getRecords());
+        dao.updateRecords(records);
         records = dao.getRecords(null, null, null);
-        List<Map<String, RefBookValue>> list2 = records.getRecords();
+        List<Map<String, RefBookValue>> list2 = records;
         Assert.assertEquals(list2.size(), 4);
 
         for (int i = 0; i < list1.size(); i++) {
@@ -95,8 +95,8 @@ public class RefBookIncome101DaoTest {
         Double testVal2 = 100.56755d;
         Double testVal3 = 100.5676d;
         PagingResult<Map<String, RefBookValue>> records = dao.getRecords(null, null, null);
-        Assert.assertEquals(records.getRecords().size(), 4);
-        Map<String, RefBookValue> record = records.getRecords().get(0);
+        Assert.assertEquals(records.size(), 4);
+        Map<String, RefBookValue> record = records.get(0);
         long repId1 = record.get("REPORT_PERIOD_ID").getNumberValue().longValue();
         long depId1 = record.get("DEPARTMENT_ID").getReferenceValue().longValue();
 
@@ -105,10 +105,10 @@ public class RefBookIncome101DaoTest {
         record.put("OUTCOME_DEBET_REMAINS", new RefBookValue(RefBookAttributeType.NUMBER, null));
         dao.updateRecords(Arrays.asList(record));
         records = dao.getRecords(null, null, null);
-        Assert.assertEquals(records.getRecords().size(), 3);
+        Assert.assertEquals(records.size(), 3);
 
         boolean catcha = false;
-        for (Map<String, RefBookValue> map : records.getRecords()) {
+        for (Map<String, RefBookValue> map : records) {
             long repId2 = map.get("REPORT_PERIOD_ID").getNumberValue().longValue();
             long depId2 = map.get("DEPARTMENT_ID").getReferenceValue().longValue();
 
@@ -131,6 +131,6 @@ public class RefBookIncome101DaoTest {
         record.put("ACCOUNT", new RefBookValue(RefBookAttributeType.STRING, "a1"));
         dao.updateRecords(Arrays.asList(record));
         PagingResult<Map<String, RefBookValue>> records = dao.getRecords(null, null, null);
-        Assert.assertEquals(records.getRecords().size(), 5);
+        Assert.assertEquals(records.size(), 5);
     }
 }

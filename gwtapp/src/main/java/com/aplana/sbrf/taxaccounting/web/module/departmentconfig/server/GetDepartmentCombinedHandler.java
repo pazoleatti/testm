@@ -75,9 +75,9 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         PagingResult<Map<String, RefBookValue>> params = provider.getRecords(
                 calendarFrom.getTime(), pp, filter, null);
 
-        if (params.getRecords().size() != 0) {
-            Map<String, RefBookValue> paramsMap = params.getRecords().get(0);
-             if (params.getRecords().size() != 1) {
+        if (params.size() != 0) {
+            Map<String, RefBookValue> paramsMap = params.get(0);
+             if (params.size() != 1) {
                  throw new ActionException("Miltiple RefBook records (version = "+
                          new SimpleDateFormat("dd.MM.yyyy").format(calendarFrom.getTime()));
              }

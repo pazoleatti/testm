@@ -36,10 +36,10 @@ public class RefBookOkatoDaoTest {
         PagingResult<Map<String, RefBookValue>> result = rbDao.getRecords(3L, version,
                 new PagingParams(), null, null);
 
-        Assert.assertEquals(result.getRecords().size(), 3);
+        Assert.assertEquals(result.size(), 3);
 
         boolean catcha = false;
-        for (Map<String, RefBookValue> rec : result.getRecords()) {
+        for (Map<String, RefBookValue> rec : result) {
            if (rec.get("PARENT_ID").getNumberValue() != null) {
                catcha = true;
            }
@@ -50,9 +50,9 @@ public class RefBookOkatoDaoTest {
 
        result = rbDao.getRecords(3L, version, new PagingParams(), null, null);
 
-        Assert.assertEquals(result.getRecords().size(), 3);
+        Assert.assertEquals(result.size(), 3);
 
-        for (Map<String, RefBookValue> rec : result.getRecords()) {
+        for (Map<String, RefBookValue> rec : result) {
            Assert.assertNull(rec.get("PARENT_ID").getNumberValue());
         }
     }
@@ -102,9 +102,9 @@ public class RefBookOkatoDaoTest {
         PagingResult<Map<String, RefBookValue>> result = rbDao.getRecords(3L, version,
                 new PagingParams(), null, null);
 
-        Assert.assertEquals(result.getRecords().size(), 3);
+        Assert.assertEquals(result.size(), 3);
 
-        for (Map<String, RefBookValue> rec : result.getRecords()) {
+        for (Map<String, RefBookValue> rec : result) {
             if (rec.get("OKATO").getStringValue().equals(okato1)) {
                 Assert.assertEquals(rec.get("NAME").getStringValue(), name1);
             } else if (rec.get("OKATO").getStringValue().equals(okato2)) {

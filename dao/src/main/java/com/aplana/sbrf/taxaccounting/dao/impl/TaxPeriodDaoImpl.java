@@ -105,10 +105,11 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 	@Override
 	public TaxPeriod getLast(TaxType taxType) {
 		try {
-			return getJdbcTemplate().queryForObject(
-					"select * from tax_period where tax_type=? and start_date = (select max(start_date) from tax_period)",
-					new Object[]{taxType.getCode()},
-					new int[] { Types.VARCHAR},
+			return getJdbcTemplate().queryForObject( //TODO Вероятно, это можно оптимизировать
+					"select * from tax_period where tax_type = ? and " +
+							"start_date = (select max(start_date) from (select * from tax_period where tax_type=?))",
+					new Object[]{taxType.getCode(), taxType.getCode()},
+					new int[] { Types.VARCHAR, Types.VARCHAR},
 					new TaxPeriodRowMapper()
 			);
 

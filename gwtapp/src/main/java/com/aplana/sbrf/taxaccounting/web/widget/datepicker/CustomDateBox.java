@@ -76,7 +76,8 @@ public class CustomDateBox extends Composite implements HasEnabled, HasVisibilit
 
 	@Override
 	public Date getValue() {
-		return format.parse(dateBox.getValue());
+		if (dateBox.getValue().isEmpty()) return null;
+		else return format.parse(dateBox.getValue());
 	}
 
 	@Override

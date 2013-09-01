@@ -40,7 +40,7 @@
                             </div>
                             <div class="{style.about}" style="margin-right: 14px;">
                                 <a href="mailto:sbrf_tax_test@aplana.com?subject=Сообщить о проблеме" title="Сообщить о проблеме">
-                                    <img src="resources/img/email.png" width="16px" height="16px"/>
+                                    <img src="resources/img/email.png" width="16px" height="16px" style="border: none"/>
                                 </a>
                             </div>
                             <g:HTMLPanel ui:field="mainMenuContentPanel" />

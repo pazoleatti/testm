@@ -98,9 +98,9 @@ public class FormDataPresenter extends
 							if(result==null || result.getDataRows().getTotalRecordCount() == 0)
 								getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
 							else {
-								getView().setRowsData(start, (int) result.getDataRows().getTotalRecordCount(), result.getDataRows().getRecords());
-								if (result.getDataRows().getRecords().size() > PAGE_SIZE) {
-									getView().assignDataProvider(result.getDataRows().getRecords().size());
+								getView().setRowsData(start, (int) result.getDataRows().getTotalRecordCount(), result.getDataRows());
+								if (result.getDataRows().size() > PAGE_SIZE) {
+									getView().assignDataProvider(result.getDataRows().size());
 								}
 							}
 							modifiedRows.clear();

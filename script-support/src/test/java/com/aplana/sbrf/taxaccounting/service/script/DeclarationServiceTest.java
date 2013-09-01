@@ -3,6 +3,9 @@ package com.aplana.sbrf.taxaccounting.service.script;
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl;
 
 import org.junit.BeforeClass;
@@ -10,7 +13,9 @@ import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -73,10 +78,27 @@ public class DeclarationServiceTest {
         assertTrue(service.find(2, 1, 101) != null);
     }
 
-    @Test
+    // TODO (Aydar Kadyrgulov) Доделать тест
+    /*@Test
     public void generateXmlFileId() {
-        assertTrue(service.generateXmlFileId(2, 1) != null);
-    }
+        DeclarationType declarationType = new DeclarationType();
+        declarationType.setTaxType(TaxType.TRANSPORT);
+        DeclarationTypeDao declarationTypeDao = mock(DeclarationTypeDao.class);
+        when(declarationTypeDao.get(1)).thenReturn(declarationType);
+        ReflectionTestUtils.setField(service, "declarationTypeDao", declarationTypeDao);
+
+        Map<String, RefBookValue> departmentParam = new HashMap<String, RefBookValue>();
+        departmentParam.put();
+
+        RefBookDataProvider dataProvider = mock(RefBookDataProvider.class);
+        when(dataProvider.getRecords()).thenReturn(new List< Map<String, RefBookValue>>(){{add(departmentParam);}});
+
+        RefBookFactory factory = mock(RefBookFactory.class);
+        when(factory.getDataProvider(31L)).thenReturn(dataProvider);
+
+        String fileId = service.generateXmlFileId(1, 2);
+        assertTrue(fileId != null);
+    }*/
 
     @Test
     public void getAcceptedFormDataSources() {
