@@ -32,7 +32,9 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 
 public class FormDataAccessServiceImplTest {
 	private static FormDataAccessServiceImpl service = new FormDataAccessServiceImpl();
-	
+
+	private static final TAUserInfo userInfo = new TAUserInfo(){{setIp(LOCAL_IP);}};
+
 	private static final int TB1_ID = 2;
 	private static final int TB2_ID = 3;
 	private static final int GOSB_TB1_ID = 4;
@@ -218,11 +220,8 @@ public class FormDataAccessServiceImplTest {
 
 	@Test
 	public void testCanReadForFirstLifeCycle(){
-	/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
+		/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)*/
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
-
 		//Любой пользователь может читать Выходные формы данного жизненного цикла, находящиеся в любом состоянии
 		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
 		assertTrue(service.canRead(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
@@ -240,10 +239,8 @@ public class FormDataAccessServiceImplTest {
 
 	@Test
 	public void testCanReadForSecondLifeCycle(){
-	/*Жизненный цикл налоговых форм, формируемых автоматически
+		/*Жизненный цикл налоговых форм, формируемых автоматически
 			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)*/
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
 
 		//Контроллер текущего уровня, вышестоящего уровня и контроллер УНП имеют доступ на чтение НФ данного жизненного цикла
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
@@ -261,11 +258,8 @@ public class FormDataAccessServiceImplTest {
 
 	@Test
 	public void testCanReadForThirdLifeCycle(){
-	/*Жизненный цикл налоговых форм, формируемых автоматически
+		/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
-
 		//Контроллер текущего уровня, вышестоящего уровня и контроллер УНП имеют доступ на чтение НФ данного жизненного цикла
 		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
 		assertTrue(service.canRead(userInfo, TB1_CREATED_FORMDATA_ID));
@@ -285,10 +279,8 @@ public class FormDataAccessServiceImplTest {
 
 	@Test
 	public void testCanEditForFirstLifeCycle(){
-	/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
+		/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)*/
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
 
 		//Все могут редактировать форму в статусе "Создана"
 		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
@@ -314,10 +306,8 @@ public class FormDataAccessServiceImplTest {
 
 	@Test
 	public void testCanEditForSecondLifeCycle(){
-	/*Жизненный цикл налоговых форм, формируемых автоматически
+		/*Жизненный цикл налоговых форм, формируемых автоматически
 			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)*/
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
 
 		//Никто не может редактировать налоговые формы данного жизненного цикла
 		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
@@ -333,10 +323,9 @@ public class FormDataAccessServiceImplTest {
 
 	@Test
 	public void testCanEditForThirdLifeCycle(){
-	/*Жизненный цикл налоговых форм, формируемых автоматически
+		/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
+
 		//Контролер текущего уровня, Контролер вышестоящего уровня и Контролер УНП могут редактировать НФ в состоянии "Создана"
 		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
 		assertTrue(service.canEdit(userInfo, TB1_CREATED_FORMDATA_ID));
@@ -363,9 +352,6 @@ public class FormDataAccessServiceImplTest {
 
 	@Test
 	public void testCanDelete() {
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
-
 		// Удалять можно налоговые формы, находящиеся в состоянии "Создана" и для которых canEdit() == true
 		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
 		assertTrue(service.canDelete(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
@@ -384,8 +370,6 @@ public class FormDataAccessServiceImplTest {
 	
 	@Test 
 	public void testCanCreateOperator() {
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
 		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
 
 		// Оператор может создавать первичные и выходные в своём подразделении
@@ -405,8 +389,6 @@ public class FormDataAccessServiceImplTest {
 	
 	@Test 
 	public void testCanCreateControl() {
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
 
 		// Контролёр может создавать выходные формы
@@ -439,8 +421,6 @@ public class FormDataAccessServiceImplTest {
 	
 	@Test 
 	public void testCanCreateControlUnp() {
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
 		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
 
 		// Контролёр УНП может создавать любую разрешённую налоговую форму, в любом подразделении
@@ -468,9 +448,6 @@ public class FormDataAccessServiceImplTest {
 	public void testGetAvailableMovesForFirstLifeCycle(){
 		/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)*/
-
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
 
 		//Перевести из состояния "Создана" в "Подготовлена" может любой пользователь
 		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
@@ -509,9 +486,6 @@ public class FormDataAccessServiceImplTest {
 		/*Жизненный цикл налоговых форм, формируемых автоматически
 			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)*/
 
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
-
 		//Перевести из состояния "Создана" в "Принята" может контролер текущего уровня, контролер УНП
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_ACCEPTED },
@@ -543,13 +517,9 @@ public class FormDataAccessServiceImplTest {
 	}
 
 	@Test
-	public void testGetAvailableMovesForThirdLifeCycle(){
+	public void testGetAvailableMovesForThirdLifeCycle1(){
 		/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
-
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
-
 		//Переводить из состояния "Создана" в "Утверждена" может контролер текущего уровня, контролер вышестоящего уровня
 		// и контролер УНП
 		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
@@ -563,19 +533,26 @@ public class FormDataAccessServiceImplTest {
 				service.getAvailableMoves(userInfo, TB1_CREATED_FORMDATA_ID).toArray());
 		userInfo.setUser(mockUser(TB1_OPERATOR_USER_ID, TB1_ID, TARole.ROLE_OPERATOR));
 		assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, TB1_CREATED_FORMDATA_ID).toArray());
+	}
 
+	@Test
+	public void testGetAvailableMovesForThirdLifeCycle2(){
 		//Перевести из состояния "Утверждена" в "Создана" и из "Утверждена" в "Принята" контролер вышестоящего уровня или контролер УНП.
 		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
-		assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_ACCEPTED, WorkflowMove.APPROVED_TO_CREATED },
+		assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_CREATED, WorkflowMove.APPROVED_TO_ACCEPTED },
 				service.getAvailableMoves(userInfo, TB1_APPROVED_FORMDATA_ID).toArray());
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-		assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_ACCEPTED, WorkflowMove.APPROVED_TO_CREATED },
+		assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_CREATED, WorkflowMove.APPROVED_TO_ACCEPTED },
 				service.getAvailableMoves(userInfo, TB1_APPROVED_FORMDATA_ID).toArray());
 		userInfo.setUser(mockUser(TB1_OPERATOR_USER_ID, TB1_ID, TARole.ROLE_OPERATOR));
 		assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, TB1_APPROVED_FORMDATA_ID).toArray());
 		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
-		assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, TB1_APPROVED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_CREATED},
+				service.getAvailableMoves(userInfo, TB1_APPROVED_FORMDATA_ID).toArray());
+	}
 
+	@Test
+	public void testGetAvailableMovesForThirdLifeCycle3(){
 		//Перевести из состояния "Принята" в "Утверждена" контролер вышестоящего уровня или контролер УНП.
 		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
 		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_APPROVED},
@@ -591,8 +568,6 @@ public class FormDataAccessServiceImplTest {
 
 	@Test
 	public void testGetAvailableMovesCommon() {
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
 		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
 
 		// Контролёр ТБ не может изменять статус в чужом тербанке
@@ -608,8 +583,6 @@ public class FormDataAccessServiceImplTest {
 	
 	@Test
 	public void testGetAccessParams() {
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
 		// Проверяем только один случай, так как этот метод просто агрегирует результаты других методов,
 		// а мы их уже оттестировали отдельно
