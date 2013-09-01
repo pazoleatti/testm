@@ -139,7 +139,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	@Override
 	public void save(List<DataRow<Cell>> dataRows) {
 		dataRowDao.saveRows(fd, dataRows);
-		
+        this.dataRows = dataRows;
 	}
 
     @Override
