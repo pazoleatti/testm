@@ -180,7 +180,7 @@ def bildXml(){
 
                         resultMap.each{ okato, row ->
                             СумПУ(
-                                    ОКАТО: okato,
+                                    ОКАТО: getRefBookValue(3, okato, "OKATO") ,
                                     НалИсчисл:row.taxSumToPay,
                                     АвПУКв1: row.amountOfTheAdvancePayment1.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
                                     АвПУКв2: row.amountOfTheAdvancePayment2.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
@@ -198,14 +198,14 @@ def bildXml(){
                                                     МаркаТС: tRow.model, //
                                                     РегЗнакТС: tRow.regNumber,
                                                     НалБаза: tRow.taxBase,
-                                                    ОКЕИНалБаза: tRow.taxBaseOkeiUnit
+                                                    ОКЕИНалБаза: getRefBookValue(12, tRow.taxBaseOkeiUnit, "CODE"),
                                             ]
                                                     + (tRow.ecoClass ? [ЭкологКл: tRow.ecoClass]:[])+ //
                                                     [
                                                             ВыпускТС: tRow.years, //
                                                             ВладенТС: tRow.ownMonths,
                                                             КоэфКв: tRow.coef362,
-                                                            НалСтавка: tRow.taxRate,
+                                                            НалСтавка: getRefBookValue(41, tRow.taxRate, "VALUE"),
                                                             СумИсчисл: tRow.calculatedTaxSum,
                                                     ]
                                                     +   (tRow.benefitEndDate && tRow.benefitStartDate? [ЛьготМесТС:TimeCategory.minus(new Date(), new Date()).months]: [])+//
@@ -218,22 +218,24 @@ def bildXml(){
                                         /* 	2.2. Получить в справочнике «Параметры налоговых льгот» запись,
                                         *	соответствующую значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
                                         */
-                                        // TODO Переписать. Сервис удален, параметры перенесены в версионный справочник
-                                        // получения региона по кода ОКАТО по справочнику Регионов
-                                        def tOkato = getRefBookValue(3, tRow.okato, "OKATO")
-                                        def region = getRegionByOkatoOrg(tOkato);
+                                        def param = null;
+                                        if (tRow.taxBenefitCode != null){
+                                            // получения региона по кода ОКАТО по справочнику Регионов
+                                            def tOkato = getRefBookValue(3, tRow.okato, "OKATO")
+                                            def region = getRegionByOkatoOrg(tOkato);
 
-                                        def refBookProvider = refBookFactory.getDataProvider(7)
+                                            def refBookProvider = refBookFactory.getDataProvider(7)
 
-                                        def query = "DICT_REGION_ID LIKE '"+region.record_id+"' AND TAX_BENEFIT_ID LIKE '"+tRow.taxBenefitCode+"'"
-                                        def params = refBookProvider.getRecords(new Date(), null, query, null).getRecords()
-                                        def param;
-                                        if (params.size() == 1)
-                                            param = params.get(0)
-                                        else{
-                                            logger.error("Ошибка при получении данных из справочника «Параметры налоговых льгот» Query: "+query)
+                                            def query = "DICT_REGION_ID LIKE '"+region.record_id+"' AND TAX_BENEFIT_ID LIKE '"+tRow.taxBenefitCode+"'"
+                                            def params = refBookProvider.getRecords(new Date(), null, query, null).getRecords()
+
+                                            if (params.size() == 1)
+                                                param = params.get(0)
+                                            else{
+                                                logger.error("Ошибка при получении данных из справочника «Параметры налоговых льгот» Query: "+query)
+                                            }
                                         }
-                                        //logger.error("param "+param)
+
                                         // генерация КодОсвНал
                                         if ((taxBenefitCode != 20220 && taxBenefitCode != 20230 && taxBenefitCode != null)){
 
