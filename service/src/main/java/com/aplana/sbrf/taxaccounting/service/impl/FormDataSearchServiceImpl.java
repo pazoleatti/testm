@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -81,7 +80,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			formDataDaoFilter.setAccessFilterType(AccessFilterType.ALL);
 		} else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
 			formDataDaoFilter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT_AND_SOURCES);
-		} else if (userInfo.getUser().hasRole(TARole.ROLE_OPERATOR)) {
+		} else if (userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
 			formDataDaoFilter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT);
 		} else {
 			throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
@@ -124,7 +123,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			return result;
 		}
 		
-		if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL) && !userInfo.getUser().hasRole(TARole.ROLE_OPERATOR)) {
+		if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL) && !userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
 			throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
 		}
 		
@@ -173,7 +172,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	}
 
 	private void processKindListForCurrentUser(TAUser user, Set<FormDataKind> kindList){
-		if(user.hasRole(TARole.ROLE_OPERATOR)){
+		if(user.hasRole(TARole.ROLE_OPER)){
 			kindList.remove(FormDataKind.SUMMARY);
 		}
 	}

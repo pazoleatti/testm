@@ -606,7 +606,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		FormDataAccessRoles formDataAccessRoles = new FormDataAccessRoles();
 
 		// оператор текущего уровня
-		formDataAccessRoles.setOperatorOfCurrentLevel(user.hasRole(TARole.ROLE_OPERATOR) && user.getDepartmentId() == formDataDepartmentId);
+		formDataAccessRoles.setOperatorOfCurrentLevel(user.hasRole(TARole.ROLE_OPER) && user.getDepartmentId() == formDataDepartmentId);
 
 		// контроллер текущего уровня: имеет роль контроллера и текущая форма относится к его подразделению
 		formDataAccessRoles.setControllerOfCurrentLevel(

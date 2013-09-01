@@ -10,7 +10,7 @@ public class TARole implements Serializable {
 	/**
 	 * Алиас роли "Оператор"
 	 */
-	public static final String ROLE_OPERATOR = "ROLE_OPER";
+	public static final String ROLE_OPER = "ROLE_OPER";
 	/**
 	 * Алиас роли "Контролёр УНП"
 	 */

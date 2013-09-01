@@ -52,7 +52,7 @@ public class GetMainMenuActionHandler extends
 
         TAUser currentUser =  securityService.currentUserInfo().getUser();
 
-		if (currentUser.hasRole(TARole.ROLE_OPERATOR)
+		if (currentUser.hasRole(TARole.ROLE_OPER)
 				|| currentUser.hasRole(TARole.ROLE_CONTROL)
 				|| currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
 
@@ -72,7 +72,7 @@ public class GetMainMenuActionHandler extends
 
 				menu.getSubMenu().add(new MenuItem(formItemName, NUMBER_SIGN + FormDataListNameTokens.FORM_DATA_LIST
 					+ ";" + TYPE + "=" + menu.getMeta()));
-				if (!currentUser.hasRole(TARole.ROLE_OPERATOR)) {
+				if (!currentUser.hasRole(TARole.ROLE_OPER)) {
 					menu.getSubMenu().add(new MenuItem(declarationItemName, NUMBER_SIGN + DeclarationListNameTokens.DECLARATION_LIST
 						+ ";" + TYPE + "=" + menu.getMeta()));
                     menu.getSubMenu().add(new MenuItem("Ведение периодов", NUMBER_SIGN + PeriodsTokens.PERIODS
@@ -103,7 +103,7 @@ public class GetMainMenuActionHandler extends
 					.append(";").append(FormDataImportPresenter.FORM_DATA_KIND_ID).append("=1")
 					.toString()
 					));*/
-            if (!currentUser.hasRole(TARole.ROLE_OPERATOR)) {
+            if (!currentUser.hasRole(TARole.ROLE_OPER)) {
                 menuItems.add(settingMenuItem);
             }
 		}
