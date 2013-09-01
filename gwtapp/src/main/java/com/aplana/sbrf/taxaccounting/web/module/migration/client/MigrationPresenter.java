@@ -33,7 +33,7 @@ public class MigrationPresenter extends Presenter<MigrationPresenter.MyView,
     private final DispatchAsync dispatcher;
 
     public interface MyView extends View, HasUiHandlers<MigrationUiHandlers> {
-        public void setResult(String text);
+        public void setResult(MigrationResult sesult);
     }
 
     @Inject
@@ -51,7 +51,7 @@ public class MigrationPresenter extends Presenter<MigrationPresenter.MyView,
                 .defaultCallback(new AbstractCallback<MigrationResult>() {
                     @Override
                     public void onSuccess(MigrationResult result) {
-                         getView().setResult(result.getResult());
+                         getView().setResult(result);
                     }
                 }, this));
     }

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.migration.client;
 
+import com.aplana.sbrf.taxaccounting.web.module.migration.shared.MigrationResult;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -42,7 +43,9 @@ public class MigrationView extends ViewWithUiHandlers<MigrationUiHandlers>
     }
 
     @Override
-    public void setResult(String text) {
-        textArea.setValue(text);
+    public void setResult(MigrationResult result) {
+        String msg = "Актуальных экземпляров найдено: " + result.getExemplarList().size()+"\n";
+        msg += "Отправлено экземпляров: " + result.getSenFilesCount();
+        textArea.setValue(msg);
     }
 }

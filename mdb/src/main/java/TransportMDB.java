@@ -18,8 +18,9 @@ import javax.jms.MessageListener;
 //@Interceptors(SpringBeanAutowiringInterceptor.class)
 public class TransportMDB implements MessageListener {
 
-    //@Autowired
-    //MappingService mappingService;
+//    @Autowired
+//    @Qualifier("mappingService")
+//    MappingService mappingService;
 
     public static final String FILENAME_PROPERTY_NAME = "FILENAME";
     public static final String DATA_PROPERTY_NAME = "DATA";
@@ -28,7 +29,7 @@ public class TransportMDB implements MessageListener {
 
     @Override
     public void onMessage(Message message) {
-        logger.debug("onMessage: " + message);
+        logger.debug("TransportMDB#onMessage");
         if (message == null || !(message instanceof MapMessage)) {
             return;
         }
@@ -42,8 +43,7 @@ public class TransportMDB implements MessageListener {
             logger.debug("fileName = " + fileName);
             logger.debug("bodyFile.length = " + bodyFile.length);
 
-            // mappingService.addFormData(fileName, bodyFile);
-
+            //mappingService.addFormData(fileName, bodyFile);
         } catch (JMSException e) {
             logger.error("Retrieving error message: " + e.getMessage(), e);
         }
