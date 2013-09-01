@@ -55,6 +55,7 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 				row.setPeriodCondition(period.isActive());
 				row.setDepartmentId(action.getDepartmentId());
 				row.setReportPeriodId(period.getReportPeriod().getId());
+				row.setSubHeader(false);
 				per.get(taxPeriod.getStartDate().toString()).add(row);
 			}
 		}
@@ -62,6 +63,7 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 		for (Map.Entry<String, List<TableRow>> rec : per.entrySet()) {
 			TableRow header = new TableRow();
 			header.setPeriodName(rec.getKey());
+			header.setSubHeader(true);
 			resultRows.add(header);
 			resultRows.addAll(rec.getValue());
 		}
