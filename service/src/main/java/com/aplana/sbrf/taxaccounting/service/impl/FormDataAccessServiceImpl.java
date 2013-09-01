@@ -553,9 +553,12 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					}
 					break;
 				case APPROVED:
+					if(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+							formDataAccess.isControllerOfUNP()){
+						result.add(WorkflowMove.APPROVED_TO_CREATED);
+					}
 					if(formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP()){
 						result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
-						result.add(WorkflowMove.APPROVED_TO_CREATED);
 					}
 					break;
 				case ACCEPTED:
