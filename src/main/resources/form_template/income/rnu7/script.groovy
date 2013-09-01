@@ -328,7 +328,7 @@ def logicalCheck(def useLog) {
             }
             i += 1
 
-            // 9. Проверка на уникальность записи по налоговому учету TODO (Aydar Kadyrgulov)
+            // 9. Проверка на уникальность записи по налоговому учету
             Map<Integer, Object> m = new HashMap<>();
             m.put(4, row.code );
             m.put(5, row.docNumber);
@@ -358,12 +358,12 @@ def logicalCheck(def useLog) {
 
             def checkSumm = checkDate(row)
 
-            /*if (checkSumm == null) {
+            if (checkSumm == null) {
                 logger.error('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете за последние 3 года не проходила!')
                 return false
             } else if (checkSumm >= row.ruble) {
                 logger.warn('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-7 в <отчетный период> отчетном периоде.')
-            }*/
+            }
 
 
 
