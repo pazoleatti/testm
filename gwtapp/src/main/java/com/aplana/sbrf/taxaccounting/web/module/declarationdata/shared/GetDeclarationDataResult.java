@@ -10,6 +10,7 @@ public class GetDeclarationDataResult implements Result {
 	private TaxType taxType;
 	private String department;
 	private String reportPeriod;
+    private Integer reportPeriodYear;
 	private String declarationType;
 	private Date docDate;
 
@@ -102,4 +103,12 @@ public class GetDeclarationDataResult implements Result {
 	public void setDocDate(Date docDate) {
 		this.docDate = docDate;
 	}
+
+    public Integer getReportPeriodYear() {
+        return reportPeriodYear;
+    }
+
+    public void setReportPeriodYear(Integer reportPeriodYear) {
+        this.reportPeriodYear = reportPeriodYear;
+    }
 }

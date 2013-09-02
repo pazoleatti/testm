@@ -116,7 +116,7 @@ public class DeclarationDataPresenter
 								taxName = result.getTaxType().name();
 								getView().setType("Декларация");
 								getView().setReportPeriod(
-										result.getReportPeriod());
+										result.getReportPeriodYear() + ", " + result.getReportPeriod());
 								getView().setDocDate(result.getDocDate());
 								getView().setDepartment(result.getDepartment());
 								getView()

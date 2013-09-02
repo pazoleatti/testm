@@ -11,8 +11,8 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.inject.Inject;
 
 /**
  * User: avanteev
@@ -20,9 +20,10 @@ import com.google.inject.Inject;
 public class FileUploadWidget extends Composite implements HasHandlers{
 
     @UiField
-    FormPanel uploadFormDataXls;
+    FileUpload uploader;
 
-    private FileUploadHandler uploadHandler;
+    @UiField
+    FormPanel uploadFormDataXls;
 
     interface Binder extends UiBinder<FormPanel, FileUploadWidget>{
     }
@@ -44,9 +45,9 @@ public class FileUploadWidget extends Composite implements HasHandlers{
                 } else {
                     executeEvent(event.getResults().replaceFirst("error ", ""));
                 }
+                uploadFormDataXls.reset();
             }
         });
-        this.uploadHandler = uploadHandler;
     }
 
     @UiHandler("uploadButton")
