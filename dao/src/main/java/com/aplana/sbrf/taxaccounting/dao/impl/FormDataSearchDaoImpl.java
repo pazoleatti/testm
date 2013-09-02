@@ -18,9 +18,9 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
 public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearchDao {
 
 	private void appendFromAndWhereClause(StringBuilder sql, FormDataDaoFilter filter) {
-		sql.append(" FROM form_data fd, form_type ft, department dp, report_period rp")
+		sql.append(" FROM form_data fd, form_type ft, department dp, report_period rp, tax_period tp")
 			.append(" WHERE EXISTS (SELECT 1 FROM FORM_TEMPLATE t WHERE t.id = fd.form_template_id AND t.type_id = ft.id)")
-			.append(" AND dp.id = fd.department_id AND rp.id = fd.report_period_id");
+			.append(" AND dp.id = fd.department_id AND rp.id = fd.report_period_id AND tp.id=rp.tax_period_id");
 	
 		if (filter.getFormTypeIds() != null && !filter.getFormTypeIds().isEmpty()) {
 			sql.append(" AND ft.id in ").append(transformToSqlInStatement(filter.getFormTypeIds())); 
@@ -74,7 +74,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 	}
 	
 	private void appendSelectClause(StringBuilder sql) {
-		sql.append("SELECT fd.ID as form_data_id, fd.form_template_id, fd.KIND as form_data_kind_id, fd.STATE, fd.PERIOD_ORDER as period_order,")
+		sql.append("SELECT fd.ID as form_data_id, fd.form_template_id, fd.KIND as form_data_kind_id, fd.STATE, fd.PERIOD_ORDER as period_order, tp.START_DATE,")
 			.append(" ft.ID as form_type_id, ft.NAME as form_type_name, ft.TAX_TYPE,")		
 			.append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
 			.append(" rp.ID as report_period_id, rp.NAME as report_period_name");

@@ -38,8 +38,10 @@ public class FormDataSearchResultItem implements Serializable {
 	private Integer reportPeriodId;
 	// Название отчётного периода
 	private String reportPeriodName;
+    // Год отчётного периода
+    private Integer reportPeriodYear;
     // Очередность отчетного периода для ежемесячных НФ
-    private Integer periodOrder;
+    private Integer reportPeriodMonth;
 	
 	public Long getFormDataId() {
 		return formDataId;
@@ -113,10 +115,16 @@ public class FormDataSearchResultItem implements Serializable {
 	public void setReportPeriodName(String reportPeriodName) {
 		this.reportPeriodName = reportPeriodName;
 	}
-    public Integer getPeriodOrder() {
-        return periodOrder;
+    public Integer getReportPeriodMonth() {
+        return reportPeriodMonth;
     }
-    public void setPeriodOrder(Integer periodOrder) {
-        this.periodOrder = periodOrder;
+    public void setReportPeriodMonth(Integer reportPeriodMonth) {
+        this.reportPeriodMonth = reportPeriodMonth;
+    }
+    public Integer getReportPeriodYear() {
+        return reportPeriodYear;
+    }
+    public void setReportPeriodYear(Integer reportPeriodYear) {
+        this.reportPeriodYear = reportPeriodYear;
     }
 }
