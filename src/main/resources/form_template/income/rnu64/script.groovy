@@ -305,7 +305,7 @@ def checkRequiredColumns(def row, def columns) {
     if (!colNames.isEmpty()) {
         def index = getRows(data).indexOf(row) + 1
         def errorMsg = colNames.join(', ')
-        logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
         return false
     }
     return true
