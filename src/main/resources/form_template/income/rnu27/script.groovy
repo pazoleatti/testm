@@ -155,16 +155,16 @@ void logicalCheck() {
             }
             // LC • Проверка корректности заполнения РНУ
             if (formPrev != null) {
-                for (DataRow rowPrev in getData(formPrev).getAllCached()) {
-                    if (row.tradeNumber == rowPrev.tradeNumber && row.prev != rowPrev.current) {
+                for (DataRow rowPrev in dataPrev.getAllCached()) {
+                    if (!isTotal(rowPrev) && row.tradeNumber == rowPrev.tradeNumber && row.prev != rowPrev.current) {
                         logger.warn("РНУ сформирован некорректно! Не выполняется условие: Если  «графа  4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то «графа 6»  = «графа 7» формы РНУ-27 за предыдущий отчётный период")
                     }
                 }
             }
             // LC • Проверка корректности заполнения РНУ
             if (formPrev != null) {
-                for (DataRow rowPrev in getData(formPrev).getAllCached()) {
-                    if (row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
+                for (DataRow rowPrev in dataPrev.getAllCached()) {
+                    if (!isTotal(rowPrev) && row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
                         logger.error("РНУ сформирован некорректно! Не выполняется условие: Если  «графа  4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то графа 8  = графа 15 формы РНУ-27 за предыдущий отчётный период")
                     }
                 }
@@ -256,7 +256,7 @@ void logicalCheck() {
     // LC • Проверка корректности заполнения РНУ
     if (dataPrev != null && checkAlias(getRows(dataPrev), 'itogo') && checkAlias(getRows(data), 'itogo')) {
         DataRow itogoPrev = getRowByAlias(dataPrev,'itogo')
-        DataRow itogo = getRowByAlias(dataPrev,'itogo')
+        DataRow itogo = getRowByAlias(data,'itogo')
         if (itogo != null && itogoPrev != null && itogo.prev != itogoPrev.current) {
             logger.error("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 = «Итого» по графе 7 формы РНУ-27 за предыдущий отчётный период")
         }
