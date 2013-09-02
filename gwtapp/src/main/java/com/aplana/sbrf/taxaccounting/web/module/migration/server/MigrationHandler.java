@@ -21,8 +21,7 @@ import java.util.Map;
 @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 public class MigrationHandler extends AbstractActionHandler<MigrationAction, MigrationResult> {
 
-    // TODO Раскомментировать
-    private static long[] rnus = {/*25L, 26L, 27L, 31L, 51L, 53L, 54L, 59L,*/ 60L, /*64L*/};
+    private static long[] rnus = {25L, 26L, 27L, 31L, 51L, 53L, 54L, 59L, 60L, 64L};
 
     @Autowired
     MigrationService migrationService;

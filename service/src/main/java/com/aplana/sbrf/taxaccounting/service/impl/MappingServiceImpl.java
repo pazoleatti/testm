@@ -41,8 +41,8 @@ public class MappingServiceImpl implements MappingService {
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     private static SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
     private static String charSet = "UTF-8";
-    private static String RNU_EXT = "rnu";
-    private static String XML_EXT = "xml";
+    private static String RNU_EXT = ".rnu";
+    private static String XML_EXT = ".xml";
 
     @Override
     public void addFormData(String filename, byte[] fileContent) {
@@ -51,13 +51,12 @@ public class MappingServiceImpl implements MappingService {
 
         RestoreExemplar restoreExemplar;
 
-        String ext = filename.substring(filename.indexOf(".")).trim().toLowerCase();
-        if (RNU_EXT.equals(ext)) {
+        if (filename.toLowerCase().endsWith(RNU_EXT)) {
             restoreExemplar = restoreExemplarFromRnu(filename, fileContent);
-        } else if (XML_EXT.equals(ext)) {
+        } else if (filename.toLowerCase().endsWith(XML_EXT)) {
             restoreExemplar = restoreExemplarFromXml(filename);
         } else {
-            throw new ServiceException("Неправильное имя файла");
+            throw new ServiceException("Неправильное имя файла " + filename);
         }
 
         log.debug(restoreExemplar);
@@ -101,7 +100,7 @@ public class MappingServiceImpl implements MappingService {
             String str = new String(fileContent, charSet);
             firstRow = str.substring(0, str.indexOf('\r'));
         } catch (UnsupportedEncodingException e) {
-            throw new ServiceException("Ошибка получения первой строки", e);
+            throw new ServiceException("Ошибка получения первой строки файла "+rnuFilename, e);
         }
 
         String[] params = firstRow.split("|");
@@ -138,7 +137,7 @@ public class MappingServiceImpl implements MappingService {
 
             return exemplar;
         } catch (Exception e) {
-            throw new ServiceException("Parsing Error", e);
+            throw new ServiceException("Ошибка разбора файла "+rnuFilename, e);
         }
     }
 
@@ -175,7 +174,7 @@ public class MappingServiceImpl implements MappingService {
 
             return exemplar;
         } catch (Exception e) {
-            throw new ServiceException("Parsing Error", e);
+            throw new ServiceException("Ошибка разбора файла "+xmlFilename, e);
         }
     }
 }

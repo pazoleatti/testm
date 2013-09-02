@@ -1,8 +1,12 @@
+import com.aplana.sbrf.taxaccounting.service.MappingService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ejb.interceptor.SpringBeanAutowiringInterceptor;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
+import javax.interceptor.Interceptors;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
@@ -15,12 +19,11 @@ import javax.jms.MessageListener;
         propertyName = "destination",
         propertyValue = "jms/transportQueue"
 )})
-//@Interceptors(SpringBeanAutowiringInterceptor.class)
+@Interceptors(SpringBeanAutowiringInterceptor.class)
 public class TransportMDB implements MessageListener {
 
-//    @Autowired
-//    @Qualifier("mappingService")
-//    MappingService mappingService;
+    @Autowired
+    MappingService mappingService;
 
     public static final String FILENAME_PROPERTY_NAME = "FILENAME";
     public static final String DATA_PROPERTY_NAME = "DATA";
@@ -39,11 +42,10 @@ public class TransportMDB implements MessageListener {
         try {
             String fileName = mm.getString(FILENAME_PROPERTY_NAME);
             byte[] bodyFile = mm.getBytes(DATA_PROPERTY_NAME);
-
             logger.debug("fileName = " + fileName);
             logger.debug("bodyFile.length = " + bodyFile.length);
 
-            //mappingService.addFormData(fileName, bodyFile);
+            mappingService.addFormData(fileName, bodyFile);
         } catch (JMSException e) {
             logger.error("Retrieving error message: " + e.getMessage(), e);
         }

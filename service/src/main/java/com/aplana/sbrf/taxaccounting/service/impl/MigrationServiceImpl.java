@@ -70,7 +70,7 @@ public class MigrationServiceImpl implements MigrationService {
                 hashMap.put(filename, fileBytes);
                 logger.debug("Stop forming file. ExemplarId=" + ex.getExemplarId() + " Filename: " + filename);
             } catch (Exception e) {
-                logger.debug("Error by forming file. ExemplarId=" + ex.getExemplarId() + " ErrorMessage: " + e.getMessage());
+                logger.error("Error by forming file. ExemplarId=" + ex.getExemplarId() + " ErrorMessage: " + e.getMessage());
             }
         }
         return hashMap;
