@@ -14,5 +14,17 @@ public interface RefBookExternalService {
 	 * @return
 	 */
 	public void importRefBook(TAUserInfo userInfo, Logger logger, Long refBookId, InputStream is);
+	
+	
+	
+	/**
+	 * Ворк эраунд
+	 * http://jira.aplana.com/browse/SBRFACCTAX-3841
+	 * 
+	 * Это должно выполняться асинхронно шедуллером.
+	 * 
+	 * Реализация временная. Перебирает все папки в директории и грузит в ней все файлы как ОКАТО
+	 */
+	public void importRefBook(TAUserInfo userInfo, Logger logger);
 
 }
