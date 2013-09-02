@@ -7,6 +7,7 @@ import java.util.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +38,8 @@ import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder
 public class DeclarationServiceImpl implements DeclarationService, ScriptComponentContextHolder{
 
 	private static final String DATE_FORMAT = "yyyyMMdd";
+
+    private static final Long DEPARTMENT_PARAM_REF_BOOK_ID = 31L;
 	
 	private ScriptComponentContext context;
 
@@ -64,18 +67,22 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Autowired(required = false)
     private RefBookFactory factory;
 
+    @Autowired  (required = false)
+    private ReportPeriodService reportPeriodService;
+
 	@Override
 	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
 		return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
 	}
 
 	@Override
-	public String generateXmlFileId(int declarationTypeId, int departmentId) {
-		DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-		String declarationPrefix = declarationTypeDao.get(declarationTypeId).getTaxType().getDeclarationPrefix();
+	public String generateXmlFileId(int declarationTypeId, int departmentId, int reportPeriodId) {
+        Date startDate = reportPeriodService.getStartDate(reportPeriodId).getTime();
+        DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+        String declarationPrefix = declarationTypeDao.get(declarationTypeId).getTaxType().getDeclarationPrefix();
 		StringBuilder stringBuilder = new StringBuilder(declarationPrefix);
-		RefBookDataProvider tmp = factory.getDataProvider(31L);
-        List<Map<String, RefBookValue>> departmentParams = tmp.getRecords(new Date(), null, String.format("DEPARTMENT_ID = %d", departmentId), null);
+		RefBookDataProvider tmp = factory.getDataProvider(DEPARTMENT_PARAM_REF_BOOK_ID);
+        List<Map<String, RefBookValue>> departmentParams = tmp.getRecords(startDate, null, String.format("DEPARTMENT_ID = %d", departmentId), null);
         Map<String, RefBookValue>departmentParam = departmentParams.get(0);
 
         Calendar calendar = Calendar.getInstance();
