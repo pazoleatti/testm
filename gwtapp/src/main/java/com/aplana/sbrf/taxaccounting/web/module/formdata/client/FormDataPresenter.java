@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import java.util.ArrayList;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.Formats;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -37,6 +34,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataActi
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
@@ -395,8 +393,7 @@ public class FormDataPresenter extends
                                         result.getFormData().getKind()
                                                 .getName(),
                                         result.getDepartmenName(),
-                                        result.getReportPeriod().getName(),
-                                        result.getFormData().getPeriodOrder() != null ? Formats.getRussianMonthNameWithTier(result.getFormData().getPeriodOrder()) : "—",
+                                        buildPeriodName(result),
                                         result.getFormData().getState()
                                                 .getName(),
 		                                result.getTaxPeriodStartDate(), result.getTaxPeriodEndDate());
@@ -429,6 +426,19 @@ public class FormDataPresenter extends
 
                         }, this).addCallback(
                         		TaManualRevealCallback.create(this, placeManager)));
+    }
+
+    private String buildPeriodName(GetFormDataResult retFormDataResult) {
+        String year = DateTimeFormat.getFormat(Formats.YYYY.getFormat()).format(retFormDataResult.getTaxPeriodStartDate());
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(year).append(", ");
+        builder.append(retFormDataResult.getReportPeriod().getName());
+        Integer periodOrder = retFormDataResult.getFormData().getPeriodOrder();
+        if (periodOrder != null) {
+            builder.append(", ").append(Formats.getRussianMonthNameWithTier(retFormDataResult.getFormData().getPeriodOrder()));
+        }
+        return builder.toString();
     }
 
 }
