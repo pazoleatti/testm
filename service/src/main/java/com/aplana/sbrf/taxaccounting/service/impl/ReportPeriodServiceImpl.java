@@ -132,7 +132,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 			RefBookDataProvider provider = rbFactory.getDataProvider(8L);
 			Map<String, RefBookValue> record = provider.getRecordData(Long.valueOf(dictionaryTaxPeriodId));
 			newReportPeriod = new ReportPeriod();
-			newReportPeriod.setTaxPeriodId(taxPeriod.getId());
+			newReportPeriod.setTaxPeriod(taxPeriod);
 			newReportPeriod.setDictTaxPeriodId(dictionaryTaxPeriodId);
 			newReportPeriod.setName(record.get("NAME").getStringValue());
 			newReportPeriod.setOrder(4); //TODO взять из справочника
@@ -208,7 +208,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 			departmentReportPeriodDao.updateActive(reportPeriodId, departmentId, false);
 			ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
 			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(taxPeriodDao.get(period.getReportPeriod().getTaxPeriodId()).getStartDate());
+			calendar.setTime(period.getReportPeriod().getTaxPeriod().getStartDate());
 			int year = calendar.get(Calendar.YEAR);
 			logs.add(new LogEntry(LogLevel.INFO, "Период" + " \"" + reportPeriod.getName() + "\" " +
 					"за " + year + " год " +
@@ -231,7 +231,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 		}
 		if (logs != null) {
 			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(taxPeriodDao.get(departmentReportPeriod.getReportPeriod().getTaxPeriodId()).getStartDate());
+			calendar.setTime(departmentReportPeriod.getReportPeriod().getTaxPeriod().getStartDate());
 			int year = calendar.get(Calendar.YEAR);
 			logs.add(new LogEntry(LogLevel.INFO,"Создан период" + " \"" + departmentReportPeriod.getReportPeriod().getName() + "\" " +
 					" за " + year + " год "
@@ -257,7 +257,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	
     public Calendar getStartDate(int reportPeriodId){
         ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-        TaxPeriod taxPeriod = taxPeriodDao.get(reportPeriod.getTaxPeriodId());
+        TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
         // календарь
         Calendar cal = Calendar.getInstance();
         cal.setTime(taxPeriod.getStartDate());
@@ -265,7 +265,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
         // для налога на прибыль, периоды вложены в друг дгруга, и начало всегда совпадает
         if (taxPeriod.getTaxType() != TaxType.INCOME){
             // получим отчетные периоды для данного налогового периода
-            List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriodId());
+            List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriod().getId());
             // смещение относительно налогового периода
             int months = 0;
             for (ReportPeriod cReportPeriod: reportPeriodList){

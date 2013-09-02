@@ -17,7 +17,7 @@ public class ReportPeriod implements Serializable {
 
 	private int months;
 	private int order;
-	private int taxPeriodId;
+	private TaxPeriod taxPeriod;
 	
 	private int dictTaxPeriodId;
 
@@ -79,23 +79,6 @@ public class ReportPeriod implements Serializable {
 	public void setOrder(int order) {
 		this.order = order;
 	}
-	
-	/**
-	 * Возвращает идентификатор налогового периода к которому относится данный отчётный
-	 * @return идентфикатор налогового периода
-	 */
-	public int getTaxPeriodId() {
-		return taxPeriodId;
-	}
-	
-	/**
-	 * Задаёт идентфикатор налогвого периода к которому относится данный отчётный
-	 * @param taxPeriodId идентификатор налогового периода
-	 */
-	public void setTaxPeriodId(int taxPeriodId) {
-		this.taxPeriodId = taxPeriodId;
-	}
-
 
 	public int getDictTaxPeriodId() {
 		return dictTaxPeriodId;
@@ -103,5 +86,12 @@ public class ReportPeriod implements Serializable {
 
 	public void setDictTaxPeriodId(int dictTaxPeriodId) {
 		this.dictTaxPeriodId = dictTaxPeriodId;
+	}
+	
+	public TaxPeriod getTaxPeriod() {
+		return taxPeriod;
+	}
+	public void setTaxPeriod(TaxPeriod taxPeriod) {
+		this.taxPeriod = taxPeriod;
 	}
 }

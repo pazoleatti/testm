@@ -56,7 +56,7 @@ public class DepartmentReportPeriodDaoImplTest {
 		reportPeriod1.setName("MyTestName1");
 		reportPeriod1.setOrder(9);
 		reportPeriod1.setMonths(3);
-		reportPeriod1.setTaxPeriodId(taxPeriod.getId());
+		reportPeriod1.setTaxPeriod(taxPeriod);
 		reportPeriod1.setDictTaxPeriodId(21);
 		reportPeriodDao.save(reportPeriod1);
 
@@ -64,7 +64,7 @@ public class DepartmentReportPeriodDaoImplTest {
 		reportPeriod2.setName("MyTestName1");
 		reportPeriod2.setOrder(10);
 		reportPeriod2.setMonths(3);
-		reportPeriod2.setTaxPeriodId(taxPeriod.getId());
+		reportPeriod2.setTaxPeriod(taxPeriod);
 		reportPeriod2.setDictTaxPeriodId(22);
 		reportPeriodDao.save(reportPeriod2);
 
