@@ -346,7 +346,6 @@ def logicalCheck(def useLog) {
                 hasTotal = true
                 continue
             }
-            logger.info("row = $row")
 
             // 15. Обязательность заполнения поля графы 1..3, 5..13
             if (!checkRequiredColumns(row, columns, useLog)) {
