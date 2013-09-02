@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
@@ -98,6 +95,18 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	@Override
 	public void setTaxType(TaxType taxType) {
 		period.setFilter(taxType.getCode() + "=1");
+	}
+
+	@Override
+	public void setBalance(boolean balance) {
+		balancePeriod.setValue(balance);
+	}
+
+	@Override
+	public void setSelectedDepartment(Department dep) {
+		List<Integer> depId = new ArrayList<Integer>();
+		depId.add(dep.getId());
+		departmentPicker.setValue(depId);
 	}
 
 	@Override
