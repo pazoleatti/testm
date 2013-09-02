@@ -6,6 +6,8 @@ import com.gwtplatform.dispatch.shared.Result;
 import java.util.List;
 
 public class GoMoveResult implements Result {
+	private static final long serialVersionUID = -3399228518519012132L;
+	
 	private List<LogEntry> logEntries;
 
 	public List<LogEntry> getLogEntries() {
