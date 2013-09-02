@@ -2,23 +2,16 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DictionaryTaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
@@ -69,12 +62,6 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	    res.setAvalDepartments(filterValues.getDepartmentIds());
 	    res.setSelectedDepartment(userInfo.getUser().getDepartmentId());
 
-	    
-	    RefBookDataProvider refBookDataProvider = refBookFactory
-			    .getDataProvider(DICT_ID);
-	    PagingResult<Map<String, RefBookValue>> result = refBookDataProvider.getRecords(new Date(), null,
-			    action.getTaxType().getCode()+"=1", null);
-	    res.setDictionaryTaxPeriods(convert(result));
 	    // По умолчанию отчетный период не выбран
 	    res.setCurrentReportPeriod(null);
 	    
@@ -115,15 +102,4 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
         //ничего не делаем
     }
 
-
-	private List<DictionaryTaxPeriod> convert(PagingResult<Map<String, RefBookValue>> values) {
-		List<DictionaryTaxPeriod> result = new ArrayList<DictionaryTaxPeriod>();
-		for(Map<String, RefBookValue> rec : values) {
-			DictionaryTaxPeriod r = new DictionaryTaxPeriod();
-			r.setName(rec.get("NAME").getStringValue());
-			r.setCode(Integer.parseInt(rec.get("CODE").getStringValue()));
-			result.add(r);
-		}
-		return result;
-	}
 }
