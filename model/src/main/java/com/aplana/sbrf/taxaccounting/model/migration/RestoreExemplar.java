@@ -23,6 +23,8 @@ public class RestoreExemplar implements Serializable {
     private Integer taxPeriod;
     private Integer dictTaxPeriodId;
 
+    private Integer periodOrder;
+
     public Periodity getPeriodity() {
         return periodity;
     }
@@ -87,6 +89,14 @@ public class RestoreExemplar implements Serializable {
         this.dictTaxPeriodId = dictTaxPeriodId;
     }
 
+    public Integer getPeriodOrder() {
+        return periodOrder;
+    }
+
+    public void setPeriodOrder(Integer periodOrder) {
+        this.periodOrder = periodOrder;
+    }
+
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer();
@@ -99,6 +109,7 @@ public class RestoreExemplar implements Serializable {
         sb.append(", departmentId=").append(departmentId);
         sb.append(", taxPeriod=").append(taxPeriod);
         sb.append(", dictTaxPeriodId=").append(dictTaxPeriodId);
+        sb.append(", periodOrder=").append(periodOrder);
         sb.append('}');
         return sb.toString();
     }

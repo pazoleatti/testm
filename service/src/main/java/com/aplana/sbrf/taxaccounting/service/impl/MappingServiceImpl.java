@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -79,6 +80,15 @@ public class MappingServiceImpl implements MappingService {
                 FormDataKind.PRIMARY,
                 reportPeriod);
 
+        // Добавляем месяц, если форма ежемесячная
+        if (restoreExemplar.getPeriodOrder() != null) {
+            //FormData formData = formDataService.getFormData(userInfo, formDataId, logger);
+            //formData.setPeriodOrder(restoreExemplar.getPeriodOrder());
+            //formDataService.saveFormData(logger, userInfo, formData);
+            //TODO (Alexander Ivanov 2.09.13) нужно обновить поле PERIOD_ORDER
+            //в записи только что создавшейся форме, если форма ежемесячная
+        }
+
         // вызов скрипта
         formDataService.importFormData(logger, userInfo, formDataId, restoreExemplar.getFormTemplateId(), restoreExemplar.getDepartmentId(),
                 FormDataKind.PRIMARY, reportPeriod.getId(), inputStream, filename);
@@ -129,10 +139,11 @@ public class MappingServiceImpl implements MappingService {
 
             // по коду отчетного периода 7 символа в назавании файла DICT_TAX_PERIOD
             String periodCode = rnuFilename.substring(7, 8);
+            exemplar.setDictTaxPeriodId(PeriodMapping.fromCode(periodCode).getDictTaxPeriodId());
+
+            //Если форма ежемесячная, то заполняем месяц
             if (NalogFormType.RNU31.getCodeNew() == exemplar.getFormTemplateId()) {
-                exemplar.setDictTaxPeriodId(PeriodMapping.fromCode(periodCode).getDictTaxPeriodIdForMonthly());
-            } else {
-                exemplar.setDictTaxPeriodId(PeriodMapping.fromCode(periodCode).getDictTaxPeriodId());
+                exemplar.setPeriodOrder(PeriodMapping.fromCode(periodCode).getDictTaxPeriodIdForMonthly());
             }
 
             return exemplar;
@@ -166,10 +177,11 @@ public class MappingServiceImpl implements MappingService {
             exemplar.setTaxPeriod(YearCode.fromYearCut(yearCut).getTaxPeriodId());
 
             String period = xmlFilename.substring(26, 29);
+            exemplar.setDictTaxPeriodId(PeriodMapping.fromCodeXml(period).getDictTaxPeriodId());
+
+            //Если форма ежемесячная, то заполняем месяц
             if (NalogFormType.RNU31.getCodeNew() == exemplar.getFormTemplateId()) {
-                exemplar.setDictTaxPeriodId(PeriodMapping.fromCodeXml(period).getDictTaxPeriodIdForMonthly());
-            } else {
-                exemplar.setDictTaxPeriodId(PeriodMapping.fromCodeXml(period).getDictTaxPeriodId());
+                exemplar.setPeriodOrder(PeriodMapping.fromCodeXml(period).getDictTaxPeriodIdForMonthly());
             }
 
             return exemplar;
