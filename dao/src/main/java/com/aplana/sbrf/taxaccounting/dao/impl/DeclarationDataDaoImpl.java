@@ -279,9 +279,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	}
 
 	private void appendFromAndWhereClause(StringBuilder sql, DeclarationDataFilter filter) {
-		sql.append(" FROM declaration_data dec, declaration_type dectype, department dp, report_period rp")
+		sql.append(" FROM declaration_data dec, declaration_type dectype, department dp, report_period rp, tax_period tp")
 				.append(" WHERE EXISTS (SELECT 1 FROM DECLARATION_TEMPLATE dectemp WHERE dectemp.id = dec.declaration_template_id AND dectemp.declaration_type_id = dectype.id)")
-				.append(" AND dp.id = dec.department_id AND rp.id = dec.report_period_id");
+				.append(" AND dp.id = dec.department_id AND rp.id = dec.report_period_id AND tp.id=rp.tax_period_id");
 
 		if (filter.getTaxType() != null) {
 			sql.append(" AND dectype.tax_type = ").append("\'").append(filter.getTaxType().getCode()).append("\'");
@@ -304,7 +304,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 		sql.append("SELECT dec.ID as declaration_data_id, dec.declaration_template_id, dec.is_accepted,")
 				.append(" dectype.ID as declaration_type_id, dectype.NAME as declaration_type_name,")
 				.append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
-				.append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE");
+				.append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE, tp.start_date");
 	}
 
 	public void appendOrderByClause(StringBuilder sql, DeclarationDataSearchOrdering ordering, boolean ascSorting) {

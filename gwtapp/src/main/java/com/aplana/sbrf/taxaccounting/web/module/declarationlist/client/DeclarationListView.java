@@ -53,6 +53,13 @@ public class DeclarationListView extends
 			}
 		};
 
+        TextColumn<DeclarationDataSearchResultItem> reportPeriodYearColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                return String.valueOf(object.getReportPeriodYear());
+            }
+        };
+
 		TextColumn<DeclarationDataSearchResultItem> reportPeriodColumn = new TextColumn<DeclarationDataSearchResultItem>() {
 			@Override
 			public String getValue(DeclarationDataSearchResultItem object) {
@@ -100,7 +107,8 @@ public class DeclarationListView extends
 
 		declarationTable.addColumn(departmentColumn, getHeader("Подразделение"));
 		declarationTable.addColumn(linkColumn, getHeader("Вид налога"));
-		declarationTable.addColumn(reportPeriodColumn, getHeader("Отчетный период"));
+		declarationTable.addColumn(reportPeriodYearColumn, getHeader("Год"));
+		declarationTable.addColumn(reportPeriodColumn, getHeader("Период"));
 		declarationTable.addColumn(declarationTypeColumn, getHeader("Вид декларации"));
 		declarationTable.addColumn(stateColumn, getHeader("Состояние"));
 

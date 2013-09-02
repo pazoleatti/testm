@@ -62,7 +62,7 @@ def bildXml(){
 
     def builder = new MarkupBuilder(xml)
     if (!declarationData.isAccepted()) {
-        builder.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId), ВерсПрог: departmentParamTransport.APP_VERSION, ВерсФорм:departmentParamTransport.FORMAT_VERSION) {
+        builder.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId, declarationData.getReportPeriodId()), ВерсПрог: departmentParamTransport.APP_VERSION, ВерсФорм:departmentParamTransport.FORMAT_VERSION) {
             Документ(
                     КНД:"1152004",
                     // TODO обсудить всплывающее окно, вынести в конф. Трансп декл

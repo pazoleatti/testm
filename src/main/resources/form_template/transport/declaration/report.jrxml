@@ -2,6 +2,9 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="transport" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="d0e54755-432b-4ae9-b6f6-48b09fb2e1fb">
 	<property name="net.sf.jasperreports.export.xls.one.page.per.sheet" value="true"/>
 	<property name="ireport.callouts" value="##Wed Feb 13 18:43:45 GMT+06:00 2013"/>
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="Detali" uuid="225cebd8-e0f3-4b80-b41a-f9df42c461c5">
 		<queryString language="xPath">
 			<![CDATA[/Файл/Документ/ТрНалНД/СумНалПУ/СумПУ]]>
@@ -613,11 +616,11 @@ $F{Отчество}.toUpperCase().replace( " ", "-" )]]></variableExpression>
 $F{Отчество}.toUpperCase().replace( " ", "-" )]]></initialValueExpression>
 	</variable>
 	<variable name="OrgPred" class="java.lang.String">
-		<variableExpression><![CDATA[$F{НаимОрг2}.equals( "0" ) || $F{НаимОрг2} == null ?
+		<variableExpression><![CDATA[$F{НаимОрг2} == null || $F{НаимОрг2}.equals( "0" ) ?
 "----------------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
 ($F{НаимОрг2}.toUpperCase().replace( " ", "-" )+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{НаимОрг2}.equals( "0" ) || $F{НаимОрг2} == null ?
+		<initialValueExpression><![CDATA[$F{НаимОрг2} == null || $F{НаимОрг2}.equals( "0" )  ?
 "----------------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
 ($F{НаимОрг2}.toUpperCase().replace( " ", "-" )+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></initialValueExpression>
@@ -633,11 +636,11 @@ $F{ДатаДок}]]></variableExpression>
 $F{ДатаДок}]]></initialValueExpression>
 	</variable>
 	<variable name="NameDoc" class="java.lang.String">
-		<variableExpression><![CDATA[$F{НаимДок}.equals( "0" ) || $F{НаимДок} == null ?
+		<variableExpression><![CDATA[($F{НаимДок} == null) || $F{НаимДок}.equals( "0" )  ?
 "----------------------------------------"
 :
 ($F{НаимДок}.toUpperCase().replace( " ", "-" )+"----------------------------------------").substring(0,40)]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{НаимДок}.equals( "0" ) || $F{НаимДок} == null ?
+		<initialValueExpression><![CDATA[($F{НаимДок} == null) || $F{НаимДок}.equals( "0" )  ?
 "----------------------------------------"
 :
 ($F{НаимДок}.toUpperCase().replace( " ", "-" )+"----------------------------------------").substring(0,40)]]></initialValueExpression>

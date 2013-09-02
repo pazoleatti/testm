@@ -297,7 +297,7 @@ def logicalCheck(def useLog) {
         def missContract = []
         def severalContract = []
         getRows(dataOld).each { prevRow ->
-            if (prevRow.reserveCalcValue > 0) {
+            if (!isTotal(prevRow) && prevRow.reserveCalcValue > 0) {
                 count = 0
                 getRows(data).each { row ->
                     if (row.tradeNumber == prevRow.tradeNumber) {

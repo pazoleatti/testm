@@ -22,9 +22,10 @@ public class FormDataListView extends
 	public static final String FORM_DATA_KIND_TITLE = "Тип налоговой формы";
 	public static final String FORM_DATA_TYPE_TITLE = "Вид налоговой формы";
 	public static final String DEPARTMENT_TITLE = "Подразделение";
-	public static final String REPORT_PERIOD_TITLE = "Отчетный период";
+    public static final String PERIOD_YEAR_TITLE = "Год";
+	public static final String REPORT_PERIOD_TITLE = "Период";
+    public static final String PERIOD_MONTH_TITLE = "Месяц";
 	public static final String FORM_DATA_STATE_TITLE = "Состояние";
-	public static final String FORM_DATA_PERIOD_ORDER = "Очередность отчетного периода";
 
 	interface MyBinder extends UiBinder<Widget, FormDataListView> {
 	}
@@ -77,11 +78,18 @@ public class FormDataListView extends
 			}
 		};
 
-        TextColumn<FormDataSearchResultItem> periodOrderColumn = new TextColumn<FormDataSearchResultItem>() {
+        TextColumn<FormDataSearchResultItem> periodYearColumn = new TextColumn<FormDataSearchResultItem>() {
             @Override
             public String getValue(FormDataSearchResultItem object) {
-                Integer periodOrder = object.getPeriodOrder();
-                return periodOrder == null ? "—" : Formats.getRussianMonthNameWithTier(periodOrder);
+                return String.valueOf(object.getReportPeriodYear());
+            }
+        };
+
+        TextColumn<FormDataSearchResultItem> periodMonthColumn = new TextColumn<FormDataSearchResultItem>() {
+            @Override
+            public String getValue(FormDataSearchResultItem object) {
+                Integer periodOrder = object.getReportPeriodMonth();
+                return periodOrder == null ? "" : Formats.getRussianMonthNameWithTier(periodOrder);
             }
         };
 
@@ -111,8 +119,9 @@ public class FormDataListView extends
 		formDataTable.addColumn(formKindColumn, getHeader(FORM_DATA_KIND_TITLE));
 		formDataTable.addColumn(linkColumn, getHeader(FORM_DATA_TYPE_TITLE));
 		formDataTable.addColumn(departmentColumn, getHeader(DEPARTMENT_TITLE));
+        formDataTable.addColumn(periodYearColumn, getHeader(PERIOD_YEAR_TITLE));
 		formDataTable.addColumn(reportPeriodColumn, getHeader(REPORT_PERIOD_TITLE));
-		formDataTable.addColumn(periodOrderColumn, getHeader(FORM_DATA_PERIOD_ORDER));
+		formDataTable.addColumn(periodMonthColumn, getHeader(PERIOD_MONTH_TITLE));
 		formDataTable.addColumn(stateColumn, getHeader(FORM_DATA_STATE_TITLE));
 
 		pager.setDisplay(formDataTable);
