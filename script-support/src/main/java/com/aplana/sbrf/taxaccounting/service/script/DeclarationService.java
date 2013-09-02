@@ -27,7 +27,7 @@ public interface DeclarationService {
 	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
 	 * @return идентификатор xml файла
 	 */
-	String generateXmlFileId(int declarationTypeId, int departmentId);
+	String generateXmlFileId(int declarationTypeId, int departmentId, int reportPeriodId);
 	
 	/**
 	 * Возвращает список налоговых форм, являющихся источником для указанной декларации и находящихся в статусе
