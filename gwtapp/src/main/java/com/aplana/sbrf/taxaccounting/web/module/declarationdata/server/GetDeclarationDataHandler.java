@@ -2,11 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -86,8 +85,13 @@ public class GetDeclarationDataHandler
 				.getDeclarationType().getName());
 		result.setDepartment(departmentService.getDepartment(
 				declaration.getDepartmentId()).getName());
-		result.setReportPeriod(reportPeriodService.getReportPeriod(
-				declaration.getReportPeriodId()).getName());
+        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(
+                declaration.getReportPeriodId());
+		result.setReportPeriod(reportPeriod.getName());
+
+        Date reportPeriodStartDate = reportPeriodService.getTaxPeriod(reportPeriod.getTaxPeriodId()).getStartDate();
+        String year = new SimpleDateFormat("yyyy").format(reportPeriodStartDate);
+        result.setReportPeriodYear(Integer.valueOf(year));
 
 		result.setPdf(generatePdfViewerModel(action, userInfo));
 

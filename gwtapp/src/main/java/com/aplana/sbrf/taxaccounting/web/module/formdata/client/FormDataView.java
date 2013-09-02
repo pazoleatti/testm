@@ -122,8 +122,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     @UiField
     FileUploadWidget fileUploader;
-    @UiField
-    Label periodOrderLabel;
 
     @Inject
 	public FormDataView(final Binder binder) {
@@ -340,7 +338,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public void setAdditionalFormInfo(
 			String formType, TaxType taxType,
-			String formKind, String departmentId, String reportPeriod, String periodOrder,
+			String formKind, String departmentId, String reportPeriod,
 			String state, Date startDate, Date endDate) {
 		String taxFormType = taxType.getName() + " / " + formType;
 		title.setText(taxFormType);
@@ -348,7 +346,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		formKindLabel.setText(formKind);
 		departmentIdLabel.setText(departmentId);
 		reportPeriodLabel.setText(reportPeriod);
-		periodOrderLabel.setText(periodOrder);
 		stateLabel.setText(state);
 		factory.setDateRange(startDate, endDate);
 	}

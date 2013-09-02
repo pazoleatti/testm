@@ -24,8 +24,8 @@ import java.util.List;
  */
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP')")
-@Component("getRefBookListTableDataHandler")
-public class GetTableDataHandler extends AbstractActionHandler<GetTableDataAction, GetTableDataResult> {
+@Component
+public class GetRefBookTableDataHandler extends AbstractActionHandler<GetTableDataAction, GetTableDataResult> {
 
     @Autowired
     private DepartmentService departmentService;
@@ -36,7 +36,7 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
     @Autowired
     RefBookFactory refBookFactory;
 
-    public GetTableDataHandler() {
+    public GetRefBookTableDataHandler() {
         super(GetTableDataAction.class);
     }
 

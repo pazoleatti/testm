@@ -51,7 +51,12 @@ public enum Formats {
 
 	}
 
+    /**
+     * Возвращает название месяца
+     * @param monthNum номер месяца от 1 до 12
+     * @return
+     */
     public static String getRussianMonthNameWithTier(int monthNum) {
-        return monthNum < 1 && monthNum > 12 ? "—" : Formats.getRussianMonthName(monthNum);
+        return monthNum < 1 && monthNum > 12 ? "" : Formats.getRussianMonthName(monthNum - 1);
     }
 }

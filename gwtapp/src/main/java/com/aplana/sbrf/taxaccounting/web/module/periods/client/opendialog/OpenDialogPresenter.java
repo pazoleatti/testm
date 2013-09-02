@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -38,11 +39,14 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		void setCurrentReportPeriod(ReportPeriod reportPeriod);
 		void setYear(int year);
 		void setTaxType(TaxType taxType);
+		void setBalance(boolean balance);
+		void setSelectedDepartment(Department dep);
 		boolean isYearEmpty();
 	}
 
 	private DispatchAsync dispatcher;
 	private TaxType taxType;
+	private Department defaultDep;
 
 	@Inject
 	public OpenDialogPresenter(final EventBus eventBus, final MyView view,
@@ -57,12 +61,18 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		getView().hide();
 	}
 
+	@Override
+	protected void onReveal() {
+		resetToDefault();
+	}
+
 	public void setTaxPeriods(List<TaxPeriod> taxPeriods) {
 		getView().setTaxPeriods(taxPeriods);
 	}
 
 	public void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, boolean enable) {
 		getView().setDepartments(departments, avalDepartments, selectedDepartments, enable);
+		defaultDep = departments.get(0);
 	}
 
 	public void setCurrentReportPeriod(ReportPeriod currentReportPeriod) {
@@ -115,5 +125,12 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 	public void setTaxType(TaxType taxType) {
 		this.taxType = taxType;
 		getView().setTaxType(taxType);
+	}
+
+	public void resetToDefault() {
+		getView().setBalance(false);
+		getView().setSelectedDepartment(defaultDep);
+		Date current = new Date();
+		getView().setYear(current.getYear());
 	}
 }
