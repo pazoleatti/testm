@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -96,16 +97,19 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				w.setValue(null);
 			}
 		} else {
-
 			for (Map.Entry<RefBookAttribute, HasValue> w : widgets.entrySet()) {
-				w.getValue().setValue(record.get(w.getKey().getAlias()).getValue());
-				if (w.getValue() instanceof RefBookPickerPopupWidget) {
+				if (w.getValue() instanceof DoubleBox) {
+					w.getValue().setValue(((BigDecimal)record.get(w.getKey().getAlias()).getValue()).doubleValue());
+				} else if (w.getValue() instanceof RefBookPickerPopupWidget) {
 					RefBookPickerPopupWidget rbw = (RefBookPickerPopupWidget) w.getValue();
 					rbw.setDereferenceValue(record.get(w.getKey().getAlias()).getDereferenceValue());
                     rbw.setTitle(String.valueOf(rbw.getDereferenceValue()));
 				} else if(w.getValue() instanceof HasText) {
                     ((Widget)w.getValue()).setTitle(((HasText)w.getValue()).getText());
-                }
+					w.getValue().setValue(record.get(w.getKey().getAlias()).getValue());
+                } else {
+					w.getValue().setValue(record.get(w.getKey().getAlias()).getValue());
+				}
 			}
 		}
 	}
@@ -117,7 +121,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			RefBookValueSerializable value = new RefBookValueSerializable();
 			switch (field.getKey().getAttributeType()) {
 				case NUMBER:
-					Number number = field.getValue().getValue() == null ? null : (Double)field.getValue().getValue();
+					Number number = field.getValue().getValue() == null ? null : (Number)field.getValue().getValue();
 					value.setAttributeType(RefBookAttributeType.NUMBER);
 					value.setNumberValue(number);
 					break;
