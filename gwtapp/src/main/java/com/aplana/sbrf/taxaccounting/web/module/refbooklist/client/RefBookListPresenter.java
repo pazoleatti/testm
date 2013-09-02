@@ -1,10 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.GetTableDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.GetTableDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.LoadRefBookAction;
+import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.LoadRefBookResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.Type;
 import com.google.inject.Inject;
@@ -18,9 +25,6 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Presenter для формы списка справочников
@@ -75,7 +79,15 @@ public class RefBookListPresenter extends Presenter<RefBookListPresenter.MyView,
 
     @Override
     public void onLoadClicked() {
-        // TODO загрузка справочников http://conf.aplana.com/pages/viewpage.action?pageId=9572224
+    	LogCleanEvent.fire(this);
+        LoadRefBookAction action = new LoadRefBookAction();
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(new AbstractCallback<LoadRefBookResult>() {
+					@Override
+					public void onSuccess(LoadRefBookResult result) {
+						LogAddEvent.fire(RefBookListPresenter.this, result.getEntries());
+					}
+				}, this));
     }
 
     private void loadData(Type type, String filter) {

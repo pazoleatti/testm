@@ -155,16 +155,16 @@ void logicalCheck() {
             }
             // LC • Проверка корректности заполнения РНУ
             if (formPrev != null) {
-                for (DataRow rowPrev in getData(formPrev).getAllCached()) {
-                    if (row.tradeNumber == rowPrev.tradeNumber && row.prev != rowPrev.current) {
+                for (DataRow rowPrev in dataPrev.getAllCached()) {
+                    if (!isTotal(rowPrev) && row.tradeNumber == rowPrev.tradeNumber && row.prev != rowPrev.current) {
                         logger.warn("РНУ сформирован некорректно! Не выполняется условие: Если  «графа  4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то «графа 6»  = «графа 7» формы РНУ-27 за предыдущий отчётный период")
                     }
                 }
             }
             // LC • Проверка корректности заполнения РНУ
             if (formPrev != null) {
-                for (DataRow rowPrev in getData(formPrev).getAllCached()) {
-                    if (row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
+                for (DataRow rowPrev in dataPrev.getAllCached()) {
+                    if (!isTotal(rowPrev) && row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
                         logger.error("РНУ сформирован некорректно! Не выполняется условие: Если  «графа  4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то графа 8  = графа 15 формы РНУ-27 за предыдущий отчётный период")
                     }
                 }
@@ -256,7 +256,7 @@ void logicalCheck() {
     // LC • Проверка корректности заполнения РНУ
     if (dataPrev != null && checkAlias(getRows(dataPrev), 'itogo') && checkAlias(getRows(data), 'itogo')) {
         DataRow itogoPrev = getRowByAlias(dataPrev,'itogo')
-        DataRow itogo = getRowByAlias(dataPrev,'itogo')
+        DataRow itogo = getRowByAlias(data,'itogo')
         if (itogo != null && itogoPrev != null && itogo.prev != itogoPrev.current) {
             logger.error("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 = «Итого» по графе 7 формы РНУ-27 за предыдущий отчётный период")
         }
@@ -367,29 +367,32 @@ void checkCreation() {
 void importData() {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
     if (fileName == null || fileName == '') {
+        logger.error('Имя файла не должно быть пустым')
         return
     }
 
     def is = ImportInputStream
     if (is == null) {
+        logger.error('Поток данных пуст')
         return
     }
 
     if (!fileName.contains('.r')) {
-        logger.error("Некорректное расширение файла")
+        logger.error('Формат файла должен быть *.r??')
         return
     }
 
-    logger.info('Начата загрузка файла ' + fileName)
-
     def xmlString = importService.getData(is, fileName, 'cp866')
     if (xmlString == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
+
     def data = getData(formData)
     def rowsOld = getRows(data)
     def totalColumns = [6:'prev', 7:'current', 9:'cost', 14:'costOnMarketQuotation', 15:'reserveCalcValue']

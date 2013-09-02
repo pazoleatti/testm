@@ -43,5 +43,5 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onCellModified(DataRow<Cell> dataRow);
 
-    void onFileParse(String uuid);
+    void onUploadDataRow(String uuid);
 }

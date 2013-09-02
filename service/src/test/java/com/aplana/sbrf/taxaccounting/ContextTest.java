@@ -26,10 +26,11 @@ public class ContextTest implements ApplicationContextAware {
 	
 	@BeforeClass
 	public static void setUp() throws MalformedURLException, NamingException  {
-		URL url = new URL("http://ignore/");
-		SimpleNamingContextBuilder builder = SimpleNamingContextBuilder
-				.emptyActivatedContextBuilder();
-		builder.bind("url/Sign", url);
+		URL urlSign = new URL("http://ignore/");
+		URL urlRefBook = new URL("http://refBookImportPath/");
+		SimpleNamingContextBuilder builder = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
+		builder.bind("url/Sign", urlSign);
+		builder.bind("url/RefBookDirectory", urlRefBook);
 	}
 
 	@Test

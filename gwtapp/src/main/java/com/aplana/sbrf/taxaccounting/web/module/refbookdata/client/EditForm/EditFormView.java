@@ -99,7 +99,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		} else {
 			for (Map.Entry<RefBookAttribute, HasValue> w : widgets.entrySet()) {
 				if (w.getValue() instanceof DoubleBox) {
-					w.getValue().setValue(((BigDecimal)record.get(w.getKey().getAlias()).getValue()).doubleValue());
+					w.getValue().setValue(((BigDecimal)record.get(w.getKey().getAlias()).getValue()) == null ? null :
+							((BigDecimal)record.get(w.getKey().getAlias()).getValue()).doubleValue());
 				} else if (w.getValue() instanceof RefBookPickerPopupWidget) {
 					RefBookPickerPopupWidget rbw = (RefBookPickerPopupWidget) w.getValue();
 					rbw.setDereferenceValue(record.get(w.getKey().getAlias()).getDereferenceValue());

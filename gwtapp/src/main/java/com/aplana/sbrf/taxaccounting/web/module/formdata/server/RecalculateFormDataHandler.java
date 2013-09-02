@@ -12,7 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DataRowResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateDataRowsAction;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -23,7 +23,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class RecalculateFormDataHandler extends
-		AbstractActionHandler<RecalculateFormDataAction, DataRowResult> {
+		AbstractActionHandler<RecalculateDataRowsAction, DataRowResult> {
 
 	@Autowired
 	private FormDataService formDataService;
@@ -35,11 +35,11 @@ public class RecalculateFormDataHandler extends
 	private DataRowService dataRowService;
 
 	public RecalculateFormDataHandler() {
-		super(RecalculateFormDataAction.class);
+		super(RecalculateDataRowsAction.class);
 	}
 
 	@Override
-	public DataRowResult execute(RecalculateFormDataAction action,
+	public DataRowResult execute(RecalculateDataRowsAction action,
 			ExecutionContext context) throws ActionException {
 		TAUserInfo userInfo = securityService.currentUserInfo();
 		Logger logger = new Logger();
@@ -54,7 +54,7 @@ public class RecalculateFormDataHandler extends
 	}
 
 	@Override
-	public void undo(RecalculateFormDataAction action, DataRowResult result,
+	public void undo(RecalculateDataRowsAction action, DataRowResult result,
 			ExecutionContext context) throws ActionException {
 		// Ничего не делаем
 	}
