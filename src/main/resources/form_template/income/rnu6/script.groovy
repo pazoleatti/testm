@@ -130,7 +130,7 @@ List <FormData> getFormDataConsolidation() {
     List <FormData> result = new ArrayList<>()
     for (destionationFormType in departmentFormTypeService.getFormDestinations(formData.departmentId, formData.getFormType().getId(), formData.getKind())){
         if (destionationFormType.formTypeId == formData.getFormType().getId()) {
-            form = formDataService.find(destionationFormType.formTypeId, destionationFormType.kind, destionationFormType.departmentId, formData.reportPeriodId)
+            FormData form = formDataService.find(destionationFormType.formTypeId, destionationFormType.kind, destionationFormType.departmentId, formData.reportPeriodId)
             if (form != null) {
                 result.add(form)
             }
@@ -163,6 +163,8 @@ DataRowHelper getDataRowsHelper() {
 
 void logicCheckBefore(DataRowHelper form) {
     columns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'currencyCode']
+    logger.info("form = %s", form.toString())
+    logger.info("form.allCached = %s", form.allCached.toString())
     for (row in form.allCached) {
         if (row.getAlias() == null) {
             if (row.taxAccountingCurrency == null && row.accountingCurrency == null
