@@ -47,6 +47,9 @@ switch (formDataEvent) {
         // для сохранения изменений приемников
         getData(formData).commit()
         break
+    case FormDataEvent.IMPORT :
+        importData()
+        break
 }
 
 // графа 1  - tadeNumber
@@ -68,13 +71,7 @@ switch (formDataEvent) {
  */
 def addNewRow() {
     def data = getData(formData)
-    DataRow<Cell> newRow = formData.createDataRow()
-    // графа 1..10
-    ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
-            'acquisitionPrice', 'salePrice', 'part1REPODate', 'part2REPODate'].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
+    DataRow<Cell> newRow = getNewRow()
     def index = 0
     if (currentDataRow!=null){
         index = currentDataRow.getIndex()
@@ -164,12 +161,12 @@ void calc() {
         b = 0
         c = 0
         if (a > 0) {
-            c = roundTo2(Math.abs(a))
+            c = roundTo2(a)
         } else if (a < 0) {
-            b = roundTo2(a)
+            b = roundTo2(-a)
         }
-        row.income = b
-        row.outcome = c
+        row.income = c
+        row.outcome = b
 
         def currency = getCurrency(row.currencyCode)
         // графа 11
@@ -294,12 +291,12 @@ def logicalCheck(def useLog) {
 
             // 5. Проверка финансового результата
             tmp = ((row.salePrice - row.acquisitionPrice) * (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
-            if (tmp > 0 && row.income != roundTo2(Math.abs(tmp))) {
+            if (tmp > 0 && row.income != roundTo2(tmp)) {
                 logger.warn('Неверно определены доходы')
             }
 
             // 6. Проверка финансового результата
-            if (tmp < 0 && row.outcome != roundTo2(Math.abs(tmp))) {
+            if (tmp < 0 && row.outcome != roundTo2(-tmp)) {
                 logger.warn('Неверно определены расходы')
             }
 
@@ -309,7 +306,7 @@ def logicalCheck(def useLog) {
             b = 0
             c = 0
             if (a < 0) {
-                c = roundTo2(Math.abs(a))
+                c = roundTo2(-a)
             } else if (a > 0) {
                 b = roundTo2(a)
             }
@@ -461,6 +458,73 @@ void checkCreation() {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
 }
+
+/**
+ * Получение импортируемых данных.
+ * Транспортный файл формата xml.
+ */
+void importData() {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '' || !fileName.contains('.xml')) {
+        return
+    }
+
+    def is = ImportInputStream
+    if (is == null) {
+        return
+    }
+
+    def xmlString = importService.getData(is, fileName)
+    if (xmlString == null || xmlString == '') {
+        return
+    }
+
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        return
+    }
+
+    def data = getData(formData)
+    def rowsOld = getRows(data)
+    def totalColumns = [5:'acquisitionPrice', 6:'salePrice', 9:'income', 10:'outcome', 11:'outcome269st', 12:'outcomeTax']
+
+    // добавить данные в форму
+    try {
+        def totalLoad = addData(xml)
+        if (totalLoad!=null) {
+            calc()
+            logicalCheck(false)
+            checkNSI()
+
+            def totalCalc
+            for (def row : getRows(data))
+                if (isTotal(row)) totalCalc = row
+
+            if (totalCalc!=null) {
+                totalColumns.each{k, v->
+                    if (totalCalc[v]!=totalLoad[v]) {
+                        logger.error("Итоговая сумма в графе $k в транспортном файле некорректна")
+                    }
+                }
+            }
+        } else {
+            logger.error("Нет итоговой строки.")
+        }
+    } catch(Exception e) {
+        logger.error(""+e.message)
+    }
+    //в случае ошибок откатить изменения
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        data.clear()
+        data.insert(rowsOld, 1)
+        logger.error("Загрузка файла $fileName завершилась ошибкой")
+    } else {
+        logger.info('Закончена загрузка файла ' + fileName)
+    }
+    data.commit()
+}
+
+
 
 /*
  * Вспомогательные методы.
@@ -701,6 +765,20 @@ def getRows(def data) {
 }
 
 /**
+ * Получить новую стролу с заданными стилями.
+ */
+def getNewRow() {
+    def newRow = formData.createDataRow()
+    // графа 1..10
+    ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
+            'acquisitionPrice', 'salePrice', 'part1REPODate', 'part2REPODate'].each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return newRow
+}
+
+/**
  * Хелпер для округления чисел
  * @param value
  * @return
@@ -737,7 +815,7 @@ def getCurrency(def currencyCode) {
  * Проверка валюты на рубли
  */
 def isRubleCurrency(def currencyCode) {
-    return  refBookService.getStringValue(15,currencyCode,'CODE_2')=='810'
+    return  refBookService.getStringValue(15,currencyCode,'CODE')=='810'
 }
 
 /**
@@ -753,4 +831,134 @@ def getCourse(def currency, def date) {
     } else {
         return null
     }
+}
+
+
+/**
+ * Заполнить форму данными.
+ *
+ * @param xml данные
+ */
+def addData(def xml) {
+    def date = new Date()
+    def cache = [:]
+    def newRows = []
+    def data = getData(formData)
+    data.clear()
+    def indexRow = 0
+    def index
+
+    // TODO (Ramil Timerbaev) Проверка корректности данных
+    for (def row : xml.exemplar.table.detail.record) {
+        indexRow++
+        index = 0
+
+        def newRow = getNewRow()
+
+        // графа 1
+        newRow.tadeNumber = row.field[index].@value.text()
+        index++
+
+        // графа 2
+        newRow.securityName = row.field[index].@value.text()
+        index++
+
+        // графа 3 - справочник 15 "Общероссийский классификатор валют"
+        newRow.currencyCode = getRecords(15, 'CODE', row.field[index].@value.text(), date, cache)
+        index++
+
+        // графа 4
+        newRow.nominalPriceSecurities = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 5
+        newRow.acquisitionPrice = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 6
+        newRow.salePrice = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 7
+        newRow.part1REPODate = getDate(row.field[index].@value.text())
+        index++
+
+        // графа 8
+        newRow.part2REPODate = getDate(row.field[index].@value.text())
+
+        newRows.add(newRow)
+    }
+
+    // проверка итоговых данных
+    def totalRow = formData.createDataRow()
+    if (xml.exemplar.table.total.record.field.size() >= 0 && !newRows.isEmpty()) {
+        for (def row : xml.exemplar.table.total.record) {
+
+            // графа 4
+            totalRow.nominalPriceSecurities = getNumber(row.field[3].@value.text())
+
+            // графа 5
+            totalRow.acquisitionPrice = getNumber(row.field[4].@value.text())
+
+            // графа 6
+            totalRow.salePrice = getNumber(row.field[5].@value.text())
+
+            // графа 9
+            totalRow.income = getNumber(row.field[8].@value.text())
+
+            // графа 10
+            totalRow.outcome = getNumber(row.field[9].@value.text())
+
+            // графа 12
+            totalRow.outcome269st = getNumber(row.field[11].@value.text())
+
+            // графа 13
+            totalRow.outcomeTax = getNumber(row.field[12].@value.text())
+
+        }
+    } else {
+        return null
+    }
+    data.insert(newRows, 1)
+    return totalRow
+}
+
+/**
+ * Получить числовое значение.
+ *
+ * @param value строка
+ */
+def getNumber(def value) {
+    if (value == null) {
+        return null
+    }
+    def tmp = value.trim()
+    if ("".equals(tmp)) {
+        return null
+    }
+    // поменять запятую на точку и убрать пробелы
+    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
+    return new BigDecimal(tmp)
+}
+
+/**
+ * Получить record_id элемента справочника.
+ *
+ * @param value
+ */
+def getRecords(def ref_id, String code, String value, Date date, def cache) {
+    String filter = code + " like '" + value.replaceAll(' ', '') + "%'"
+    if (cache[ref_id]!=null) {
+        if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    if (records.size() == 1){
+        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        return cache[ref_id][filter]
+    }
+    logger.error("Не удалось определить элемент справочника!")
+    return null;
 }

@@ -14,11 +14,10 @@ import java.text.SimpleDateFormat
  * 6.3.2    Расчет налога на прибыль с доходов, удерживаемого налоговым агентом
  *
  * TODO:
- *      - при импорте нет получения имени файла для определения типа файла (xls или csv)
  *      - проверки корректности данных проверить когда будут сделаны вывод сообщении
  */
 
-DataRowHelper getDataRowsHelper() {
+DataRowHelper getData() {
     DataRowHelper dataRowsHelper = null
     if (formData.id != null) {
         dataRowsHelper = formDataService.getDataRowHelper(formData)
@@ -80,12 +79,12 @@ switch (formDataEvent) {
 
 void deleteRow() {
     if (currentDataRow != null) {
-        dataRowsHelper.delete(currentDataRow)
+        data.delete(currentDataRow)
     }
 }
 
 void addRow() {
-    dataRowsHelper.insert(getNewRow(), dataRowsHelper.getAllCached().size() + 1)
+    data.insert(getNewRow(), getRows(data).size() + 1)
 }
 
 /**
@@ -118,7 +117,7 @@ void logicCheck() {
     // справочник "Коды субъектов Российской Федерации"
     def refDataProvider = refBookFactory.getDataProvider(4)
 
-    for (row in dataRowsHelper.getAllCached()) {
+    for (row in getRows(data)) {
 
         for (alias in ['title', 'subdivisionRF', 'surname', 'name', 'dividendDate', 'sumDividend', 'sumTax']) {
             if (row.getCell(alias).value == null) {
@@ -154,21 +153,31 @@ void insert(def data, def row) {
  * Получение импортируемых данных.
  */
 void importData() {
-    // TODO (Ramil Timerbaev) Костыль! это значение должно передаваться в скрипт
-    def fileName = 'fileName.xls'
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        logger.error('Имя файла не должно быть пустым')
+        return
+    }
+    if (!fileName.contains('.xls')) {
+        logger.error('Формат файла должен быть *.xls')
+        return
+    }
 
     def is = ImportInputStream
     if (is == null) {
+        logger.error('Поток данных пуст')
         return
     }
 
     def xmlString = importService.getData(is, fileName, 'windows-1251', '№ стр.', null)
     if (xmlString == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
 
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
 
@@ -195,7 +204,7 @@ void addData(def xml, headRowCount) {
     if (xml == null) {
         return
     }
-    def data = getDataRowsHelper()
+    def data = getData()
 
     // количество графов в таблице
     def columnCount = 22
@@ -395,3 +404,8 @@ def getValue(def record, def alias) {
     }
     return null
 }
+
+def getRows(def data) {
+    return data.getAllCached();
+}
+

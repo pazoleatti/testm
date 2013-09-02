@@ -194,13 +194,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             // эту часть кода нельзя покрыть юнит тестами с использованием hsql потому что она не поддерживает row_number()
             sql.append("row_number()");
             // Надо делать сортировку
-            sql.append(" over (order by \'");
+            sql.append(" over (order by ");
             sql.append("a");
             sql.append(sortAttribute.getAlias());
             sql.append(".");
             sql.append(sortAttribute.getAttributeType().toString());
             sql.append("_value");
-            sql.append("\')");
+            sql.append(")");
             sql.append(" as row_number_over,\n");
         } else {
             // База тестовая и не поддерживает row_number() значит сортировка работать не будет
@@ -494,7 +494,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             // + REF_BOOK_VALUE
             jt.batchUpdate(INSERT_REF_BOOK_VALUE, listValues);
         } catch (Exception ex) {
-            ex.printStackTrace();
+			throw new DaoException("Не удалось обновить значения справочника", ex);
         }
     }
 
@@ -511,8 +511,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
-    private static final String DELETE_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, ref_book_id, version," +
+    private static final String DELETE_REF_BOOK_RECORD_SQL_I = "insert into ref_book_record (id, ref_book_id, version," +
             "status, record_id) values (seq_ref_book_record.nextval, %d, to_date('%s', 'DD.MM.YYYY'), -1, ?)";
+	private static final String DELETE_REF_BOOK_RECORD_SQL_D = "delete from ref_book_record where id = ?";
 
     @Override
     public void deleteRecords(Long refBookId, Date version, List<Long> recordIds) {
@@ -521,14 +522,25 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         if (recordIds.size() == 0) {
             return;
         }
-        List<Object[]> values = new ArrayList<Object[]>();
+        List<Object[]> insertValues = new ArrayList<Object[]>();
+		List<Object[]> deleteValues = new ArrayList<Object[]>();
         for (int i = 0; i < recordIds.size(); i++) {
-            // создаем строки справочника
-            Long rowId = getRowId(recordIds.get(i));
-            values.add(new Object[]{rowId});
+            Long id = recordIds.get(i);
+            Long rowId = getRowId(id);
+			Long recordId = checkRecordUnique(refBookId, version, rowId);
+			if (recordId == null) {
+            	insertValues.add(new Object[] {rowId});
+			} else {
+				deleteValues.add(new Object[] {id});
+			}
         }
         JdbcTemplate jt = getJdbcTemplate();
-        jt.batchUpdate(String.format(DELETE_REF_BOOK_RECORD_SQL, refBookId, sdf.format(version)), values);
+		if (insertValues.size() > 0) {
+        	jt.batchUpdate(String.format(DELETE_REF_BOOK_RECORD_SQL_I, refBookId, sdf.format(version)), insertValues);
+		}
+		if (deleteValues.size() > 0) {
+			jt.batchUpdate(String.format(DELETE_REF_BOOK_RECORD_SQL_D, refBookId, sdf.format(version)), deleteValues);
+		}
     }
 
     private static final String DELETE_MARK_ALL_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, ref_book_id, " +
@@ -544,6 +556,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         if (refBookId == null || version == null) {
             return;
         }
+		//TODO Отрефакторить http://jira.aplana.com/browse/SBRFACCTAX-3891 (Marat Fayzullin 2013-08-31)
         // Отметка записей ближайшей меньшей версии как удаленных
         getJdbcTemplate().update(DELETE_MARK_ALL_REF_BOOK_RECORD_SQL,
                 new Object[] {version, refBookId, version, refBookId},

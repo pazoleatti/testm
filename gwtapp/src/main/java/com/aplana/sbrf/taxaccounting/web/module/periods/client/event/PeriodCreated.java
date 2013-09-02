@@ -23,13 +23,15 @@ public class PeriodCreated extends
 		return TYPE;
 	}
 
-	public static void fire(HasHandlers source,	boolean success) {
+	public static void fire(HasHandlers source,	boolean success, int year) {
 		PeriodCreated event = new PeriodCreated();
 		event.setSuccess(success);
+		event.setYear(year);
 		source.fireEvent(event);
 	}
 
 	private boolean success;
+	private int year;
 
 	public PeriodCreated() {
 	}
@@ -50,5 +52,13 @@ public class PeriodCreated extends
 
 	public void setSuccess(boolean success) {
 		this.success = success;
+	}
+
+	public int getYear() {
+		return year;
+	}
+
+	public void setYear(int year) {
+		this.year = year;
 	}
 }

@@ -2,9 +2,11 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +61,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
 
+    @Autowired(required = false)
+    private RefBookFactory factory;
+
 	@Override
 	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
 		return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
@@ -69,15 +74,18 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 		DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 		String declarationPrefix = declarationTypeDao.get(declarationTypeId).getTaxType().getDeclarationPrefix();
 		StringBuilder stringBuilder = new StringBuilder(declarationPrefix);
-		//TODO: Удалил старые справочники. Необходимо переделать на новые (Marat Fayzullin 2013-08-02)
-		/*DepartmentParam departmentParam = departmentParamDao.getDepartmentParam(departmentId);
-		Calendar calendar = Calendar.getInstance();
+		RefBookDataProvider tmp = factory.getDataProvider(31L);
+        List<Map<String, RefBookValue>> departmentParams = tmp.getRecords(new Date(), null, String.format("DEPARTMENT_ID = %d", departmentId), null);
+        Map<String, RefBookValue>departmentParam = departmentParams.get(0);
+
+        Calendar calendar = Calendar.getInstance();
 		stringBuilder.append('_' +
-				departmentParam.getTaxOrganCode() + '_' +
-				departmentParam.getTaxOrganCode() + '_' +
-				departmentParam.getInn() + departmentParam.getKpp() + '_' +
+				departmentParam.get("TAX_ORGAN_CODE").toString() + '_' +
+				departmentParam.get("TAX_ORGAN_CODE").toString() + '_' +
+				departmentParam.get("INN").toString() + departmentParam.get("KPP").toString() + '_' +
 				dateFormat.format(calendar.getTime()) + '_' +
-				UUID.randomUUID().toString().toUpperCase());*/
+				UUID.randomUUID().toString().toUpperCase());
+
 		return stringBuilder.toString();
 	}
 	

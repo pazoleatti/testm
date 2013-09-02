@@ -157,6 +157,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         formKindPanel.setVisible(true);
         declarationTypePanel.setVisible(false);
         declarationTypeId.setValue(null);
+        formKind.setValue(FormDataKind.PRIMARY);
     }
 
     @Override

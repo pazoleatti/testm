@@ -35,7 +35,7 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
 		PagingResult<FormDataSearchResultItem> resultPage = formDataSearchService
 				.findDataByUserIdAndFilter(securityService.currentUserInfo(), action.getFormDataFilter());
 		res.setTotalCountOfRecords(resultPage.getTotalRecordCount());
-		res.setRecords(resultPage.getRecords());
+		res.setRecords(resultPage);
 		return res;
 	}
 

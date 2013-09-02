@@ -3,19 +3,16 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
 import com.aplana.sbrf.taxaccounting.model.migration.row.AbstractRnuRow;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Сервис для проекта Миграции данных
+ * Сервис формы "Миграция исторических данных" для подготовки данных для отправки в JMS-сообщений
  *
  * @author Alexande Ivanov
  */
 public interface MigrationService {
 
-    public static List<Integer> RNU_LIST = Arrays.asList(25, 26, 27, 31);
-    public static List<Integer> XML_LIST = Arrays.asList(51, 53, 54, 59, 60, 64);
     /**
      * Получение актуальных записей экземпляров конкретного типа рну
      *
@@ -30,17 +27,7 @@ public interface MigrationService {
      * @param rnuIds список типов рну
      * @return список экземпляров с необходимыми данными
      */
-    List<Exemplar> getActualExemplarByRnuType(List<Long> rnuIds);
-
-    /**
-     * Основной метод для формирования содержимых файлов.
-     *
-     * !Применяется для отладки
-     *
-     * @param rnuIds список видов рну для которых надо сформировать ТФ
-     * @return связную карту с названием файла и его содержимым
-     */
-    Map<String, String> startMigrationProcessDebug(List<Long> rnuIds);
+    List<Exemplar> getActualExemplarByRnuType(long[] rnuIds);
 
     /**
      * Получение списка строк налоговой формы
@@ -50,11 +37,12 @@ public interface MigrationService {
      * @return список строк + 2 итоговые строки
      */
     List<? extends AbstractRnuRow> getRnuList(Exemplar ex);
+
     /**
      * Основной метод для формирования содержимых файлов
      *
      * @param rnuIds список видов рну для которых надо сформировать ТФ
      * @return связную карту с названием файла и его содержимым
      */
-    Map<String, byte[]> startMigrationProcess(List<Long> rnuIds);
+    Map<String, byte[]> getFiles(long[] rnuIds);
 }

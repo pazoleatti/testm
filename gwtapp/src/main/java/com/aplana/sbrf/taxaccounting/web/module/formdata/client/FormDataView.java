@@ -3,13 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 import java.util.Date;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
@@ -128,6 +122,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     @UiField
     FileUploadWidget fileUploader;
+    @UiField
+    Label periodOrderLabel;
 
     @Inject
 	public FormDataView(final Binder binder) {
@@ -344,7 +340,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public void setAdditionalFormInfo(
 			String formType, TaxType taxType,
-			String formKind, String departmentId, String reportPeriod,
+			String formKind, String departmentId, String reportPeriod, String periodOrder,
 			String state, Date startDate, Date endDate) {
 		String taxFormType = taxType.getName() + " / " + formType;
 		title.setText(taxFormType);
@@ -352,6 +348,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		formKindLabel.setText(formKind);
 		departmentIdLabel.setText(departmentId);
 		reportPeriodLabel.setText(reportPeriod);
+		periodOrderLabel.setText(periodOrder);
 		stateLabel.setText(state);
 		factory.setDateRange(startDate, endDate);
 	}

@@ -46,7 +46,6 @@ public class UploadXlsController {
     public void processUpload(HttpServletRequest request, HttpServletResponse response)
             throws FileUploadException, IOException, JSONException {
 
-        System.out.println("Start upload.");
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
         List<FileItem> items = upload.parseRequest(request);
@@ -63,7 +62,6 @@ public class UploadXlsController {
         IOUtils.closeQuietly(fileItem.getInputStream());*/
         String uuid = blobDataService.createTemporary(fileItem.getInputStream(), fileItem.getName());
         response.getWriter().printf("{uuid : \"%s\"}", uuid);
-        System.out.println("Finish upload, uuid: " + uuid);
     }
 
     // пример использования SignService

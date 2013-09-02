@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.MigrationDao;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.*;
-import com.aplana.sbrf.taxaccounting.model.migration.row.AbstractRnuRow;
 import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.NalogFormType;
+import com.aplana.sbrf.taxaccounting.model.migration.row.AbstractRnuRow;
 import com.aplana.sbrf.taxaccounting.service.MigrationService;
 import com.aplana.sbrf.taxaccounting.service.RnuGenerationService;
 import com.aplana.sbrf.taxaccounting.service.XmlGenerationService;
@@ -16,6 +16,11 @@ import java.util.*;
 
 @Service
 public class MigrationServiceImpl implements MigrationService {
+
+    // Формат РНУ
+    private static List<Integer> RNU_LIST = Arrays.asList(25, 26, 27, 31);
+    // Формат XML
+    private static List<Integer> XML_LIST = Arrays.asList(51, 53, 54, 59, 60, 64);
 
     private final Log logger = LogFactory.getLog(getClass());
 
@@ -34,45 +39,16 @@ public class MigrationServiceImpl implements MigrationService {
     }
 
     @Override
-    public List<Exemplar> getActualExemplarByRnuType(List<Long> rnuIds) {
+    public List<Exemplar> getActualExemplarByRnuType(long[] rnuIds) {
         List<Exemplar> rnuList = new ArrayList<Exemplar>();
-        for (Long rnu : rnuIds) {
+        for (long rnu : rnuIds) {
             rnuList.addAll(getActualExemplarByRnuType(rnu));
         }
         return rnuList;
     }
 
     @Override
-    public Map<String, String> startMigrationProcessDebug(List<Long> rnuIds) {
-        List<Exemplar> list = getActualExemplarByRnuType(rnuIds);
-
-        logger.debug("Count of examples - " + list.size());
-
-        LinkedHashMap<String, String> hashMap = new LinkedHashMap<String, String>();
-
-        for (Exemplar ex : list) {
-            logger.debug("Start forming file. ExemplarId=" + ex.getExemplarId());
-            try {
-                String filename = null;
-                String fileString = null;
-                if (RNU_LIST.contains(ex.getRnuTypeId())) {
-                    filename = rnuService.getRnuFileName(ex);
-                    fileString = rnuService.generateRnuFileToString(ex);
-                } else if (XML_LIST.contains(ex.getRnuTypeId())) {
-                    filename = xmlService.getXmlFileName(ex);
-                    fileString = xmlService.generateXmlFileToString(ex);
-                }
-                hashMap.put(filename, fileString);
-                logger.debug("Stop forming file. ExemplarId=" + ex.getExemplarId() + " Filename: " + filename);
-            } catch (Exception e) {
-                logger.debug("Error by forming file. ExemplarId=" + ex.getExemplarId() + " ErrorMessage: " + e.getMessage());
-            }
-        }
-        return hashMap;
-    }
-
-    @Override
-    public Map<String, byte[]> startMigrationProcess(List<Long> rnuIds) {
+    public Map<String, byte[]> getFiles(long[] rnuIds) {
         List<Exemplar> list = getActualExemplarByRnuType(rnuIds);
 
         logger.debug("Count of examples - " + list.size());
@@ -94,7 +70,7 @@ public class MigrationServiceImpl implements MigrationService {
                 hashMap.put(filename, fileBytes);
                 logger.debug("Stop forming file. ExemplarId=" + ex.getExemplarId() + " Filename: " + filename);
             } catch (Exception e) {
-                logger.debug("Error by forming file. ExemplarId=" + ex.getExemplarId() + " ErrorMessage: " + e.getMessage());
+                logger.error("Error by forming file. ExemplarId=" + ex.getExemplarId() + " ErrorMessage: " + e.getMessage());
             }
         }
         return hashMap;

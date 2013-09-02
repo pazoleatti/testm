@@ -132,7 +132,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 			filter.setReportPeriodIds(Arrays.asList(periodPicker.
 					getSelectedReportPeriods().entrySet().iterator().next().getKey()));
 		}
-		if (departmentPicker.getValue().iterator().hasNext() ) {
+		if (departmentPicker.getValue() != null && departmentPicker.getValue().iterator().hasNext() ) {
 			filter.setDepartmentIds(departmentPicker.getValue().isEmpty() ? new ArrayList<Integer>() :
 					Arrays.asList(departmentPicker.
 							getValue().iterator().next()));

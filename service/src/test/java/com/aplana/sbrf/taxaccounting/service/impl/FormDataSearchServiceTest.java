@@ -69,7 +69,7 @@ public class FormDataSearchServiceTest {
 	@Test
 	public void testGetAvailableFilterValuesForOperator() {
 		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setUser(mockUser(OPERATOR_USER_ID, 1, TARole.ROLE_OPERATOR));
+		userInfo.setUser(mockUser(OPERATOR_USER_ID, 1, TARole.ROLE_OPER));
 		FormDataFilterAvailableValues values = service.getAvailableFilterValues(userInfo, TaxType.TRANSPORT);
 		assertEquals(2, values.getFormTypes().size());
 		assertEquals(0, values.getKinds().size());

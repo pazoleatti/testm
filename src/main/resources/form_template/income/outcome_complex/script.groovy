@@ -304,7 +304,7 @@ void consolidation() {
         checkAndCalc()
     }
     logger.info('Формирование сводной формы уровня Банка прошло успешно.')
-    dataRowsHelper.save()
+    dataRowsHelper.save(dataRowsHelper.allCached)
     dataRowsHelper.commit()
 }
 
@@ -384,8 +384,8 @@ def checkRequiredColumns(def row, def columns, def useLog) {
  * Получить сумму диапазона строк определенного столбца.
  */
 def getSum(String columnAlias, String rowFromAlias, String rowToAlias) {
-    def from = dataRowsHelper.getDataRowIndex(dataRowsHelper.getAllCached(), rowFromAlias) + 1
-    def to = dataRowsHelper.getDataRowIndex(dataRowsHelper.getAllCached(), rowToAlias) - 1
+    def from = dataRowsHelper.getDataRowIndex(dataRowsHelper.getAllCached(), rowFromAlias)
+    def to = dataRowsHelper.getDataRowIndex(dataRowsHelper.getAllCached(), rowToAlias)
     if (from > to) {
         return 0
     }

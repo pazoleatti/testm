@@ -70,6 +70,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			fd.setReturnSign(rs.getBoolean("return_sign"));
 			fd.setKind(FormDataKind.fromId(rs.getInt("kind")));
 			fd.setReportPeriodId(rs.getInt("report_period_id"));
+            Integer periodOrder = rs.getInt("period_order");
+            fd.setPeriodOrder(rs.wasNull() ? null : periodOrder);
 			fd.setSigners(formDataSignerDao.getSigners(fd.getId()));
 			fd.setPerformer(formPerformerDao.get(fd.getId()));
 
@@ -89,6 +91,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			result.setReturnSign(rs.getBoolean("return_sign"));
 			result.setKind(FormDataKind.fromId(rs.getInt("kind")));
 			result.setReportPeriodId(rs.getInt("report_period_id"));
+            Integer periodOrder = rs.getInt("period_order");
+			result.setPeriodOrder(rs.wasNull() ? null : periodOrder);
 			result.setFormType(formTypeDao.getType(rs.getInt("type_id")));
 			return result;
 		}
@@ -148,9 +152,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		}
 		
 		if (formData.getPerformer() != null &&
-				StringUtils.hasLength(formData.getPerformer().getName())
-						&& StringUtils.hasLength(formData.getPerformer().getPhone())
+				(StringUtils.hasLength(formData.getPerformer().getName())
+						|| StringUtils.hasLength(formData.getPerformer().getPhone()))
 			) {
+			// Плохой фикс: http://jira.aplana.com/browse/SBRFACCTAX-3627
+			formData.getPerformer().setPhone(formData.getPerformer().getPhone() == null ? "" : formData.getPerformer().getPhone());
+			formData.getPerformer().setName(formData.getPerformer().getName() == null ? "" : formData.getPerformer().getName());
 			formPerformerDao.save(formDataId, formData.getPerformer());
 		} else {
 			formPerformerDao.clear(formDataId);
@@ -220,7 +227,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		JdbcTemplate jt = getJdbcTemplate();
 		try{
 			return jt.queryForObject(
-					"SELECT fd.id, fd.department_id, fd.state, fd.kind, fd.report_period_id, fd.return_sign, " +
+					"SELECT fd.id, fd.department_id, fd.state, fd.kind, fd.report_period_id, fd.return_sign, fd.period_order, " +
 					"(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
 							"FROM form_data fd WHERE fd.id = ?",
 					new Object[] { id }, new int[] { Types.NUMERIC },

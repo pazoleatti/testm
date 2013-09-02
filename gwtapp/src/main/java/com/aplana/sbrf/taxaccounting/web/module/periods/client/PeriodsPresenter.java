@@ -51,6 +51,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		void setTitle(String title);
 		void setTableData(List<TableRow> data);
 		void setFilterData(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, int yearFrom, int yearTo);
+		void setYear(int year);
 		Integer getFromYear();
 		Integer getToYear();
 		long getDepartmentId();
@@ -165,6 +166,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	
 	@Override
 	public void onPeriodCreated(PeriodCreated event) {
+		getView().setYear(event.getYear());
 		find();
 	}
 }

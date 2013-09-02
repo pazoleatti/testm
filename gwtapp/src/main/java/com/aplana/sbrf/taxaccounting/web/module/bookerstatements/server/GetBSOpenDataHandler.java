@@ -22,7 +22,7 @@ import java.util.Set;
  * @author Dmitriy Levykin
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAction, GetBSOpenDataResult> {
 
     @Autowired

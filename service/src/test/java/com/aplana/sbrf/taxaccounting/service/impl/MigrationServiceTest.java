@@ -80,13 +80,13 @@ public class MigrationServiceTest {
 
     @Test
     public void getActualExemplarByRnuTypeArrayTest() {
-        List<Long> longList = Arrays.asList(25L, 64L);
+        long[] rnus = {25L, 64L};
         List<Exemplar> exemplarList25 = Arrays.asList(exemplar25);
         List<Exemplar> exemplarList64 = Arrays.asList(exemplar64);
 
         when(migrationDao.getActualExemplarByRnuType(25)).thenReturn(exemplarList25);
         when(migrationDao.getActualExemplarByRnuType(64)).thenReturn(exemplarList64);
-        Assert.assertEquals(2, migrationService.getActualExemplarByRnuType(longList).size());
+        Assert.assertEquals(2, migrationService.getActualExemplarByRnuType(rnus).size());
     }
 
     @Test
@@ -100,7 +100,7 @@ public class MigrationServiceTest {
 
     @Test
     public void startMigrationProcessTest() {
-        List<Long> longList = Arrays.asList(25L, 64L);
+        long[] rnus = {25L, 64L};
         List<Exemplar> exemplarList25 = Arrays.asList(exemplar25);
         List<Exemplar> exemplarList64 = Arrays.asList(exemplar64);
 
@@ -110,6 +110,6 @@ public class MigrationServiceTest {
         when(migrationDao.getRnu25RowList(exemplar25)).thenReturn(Arrays.asList(new Rnu25Row(), new Rnu25Row(), new Rnu25Row()));
         when(migrationDao.getRnu64RowList(exemplar64)).thenReturn(Arrays.asList(new Rnu64Row(), new Rnu64Row(), new Rnu64Row(), new Rnu64Row()));
 
-        Assert.assertEquals(2, migrationService.startMigrationProcess(longList).size());
+        Assert.assertEquals(2, migrationService.getFiles(rnus).size());
     }
 }

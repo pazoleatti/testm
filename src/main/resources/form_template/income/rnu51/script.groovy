@@ -267,7 +267,7 @@ void addNewRow() {
     if (currentDataRow!=null){
         index = currentDataRow.getIndex()
         def row = currentDataRow
-        while(row.getAlias()!=null && index>=0){
+        while(row.getAlias()!=null && index>0){
             row = getRows(data).get(--index)
         }
         if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
@@ -332,7 +332,7 @@ DataRow<Cell> getItogo() {
 DataRow<Cell> getPrevItogoKvartal() {
     FormData formPrev = getFormPrev()
     if (formPrev != null && formPrev.state == WorkflowState.ACCEPTED) {
-        return getData(formPrev).getDataRow(getData(formPrev).getAllCahced(),'itogoKvartal')
+        return getData(formPrev).getDataRow(getRows(getData(formPrev)),'itogoKvartal')
     }
     return null
 }
@@ -724,22 +724,30 @@ def getSign(def sign) {
  */
 void importData() {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '' || !fileName.contains('.xml')) {
+    if (fileName == null || fileName == '') {
+        logger.error('Имя файла не должно быть пустым')
+        return
+    }
+    if (!fileName.contains('.xml')) {
+        logger.error('Формат файла должен быть *.xml')
         return
     }
 
     def is = ImportInputStream
     if (is == null) {
+        logger.error('Поток данных пуст')
         return
     }
 
     def xmlString = importService.getData(is, fileName)
     if (xmlString == null || xmlString == '') {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
 
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
 
@@ -806,13 +814,13 @@ void addData(def xml) {
         // графа 3 - справочник 62 "Признаки ценных бумаг"
         tmp = null
         if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
-            tmp = getRecordId(refDataProvider62, 'CODE', row.field[index].@value.text())
+            tmp = getRecordId(refDataProvider62, 'CODE', row.field[index].text())
         }
         newRow.singSecurirty = tmp
         index++
 
         // графа 4
-        newRow.issue = row.field[index].@value.text()
+        newRow.issue = row.field[index].text()
         index++
 
         // графа 5
@@ -900,7 +908,7 @@ void addData(def xml) {
         index = 0
         for (def row : xml.exemplar.table.total.record) {
             index++
-            def totalRow = (index == 1 ? getItogoKvartal() : getItogoKvartal())
+            def totalRow = (index == 1 ? getItogoKvartal() : getItogo())
 
             // сравнить посчитанные суммы итогов с итогами из транспортного файла (графы 7-9, 11-13, 15, 17-22)
             def exit = false

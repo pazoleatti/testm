@@ -37,7 +37,7 @@ public class FileUploadWidget extends Composite implements HasHandlers{
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
                 if (!event.getResults().toLowerCase().contains("error") && event.getResults().toLowerCase().contains("uuid")) {
-                    String pattern = "(<pre>)(.+?)(</pre>)";
+                    String pattern = "(<pre.*>)(.+?)(</pre>)";
                     String uuid = event.getResults().replaceAll(pattern, "$2");
                     JSONValue jsonValue = JSONParser.parseLenient(uuid);
                     uploadHandler.onFileUploadSuccess(jsonValue.isObject().get("uuid").toString().replaceAll("\"","").trim());

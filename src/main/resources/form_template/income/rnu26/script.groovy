@@ -307,7 +307,7 @@ def logicalCheck(def useLog) {
 
         // список проверяемых столбцов (графа 1..3, 5..10, 13, 14)
         columns = ['issuer', 'shareType', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
-                'cost', 'signSecurity', 'marketQuotationInRub', 'costOnMarketQuotation']
+                'cost', 'signSecurity', 'costOnMarketQuotation']
 
         // суммы строки общих итогов
         def totalSums = [:]
@@ -896,7 +896,7 @@ def addData(def xml) {
         return
     }
 
-    Date date = reportDate
+    Date date = new Date()
 
     def cache = [:]
     def data = getData(formData)
@@ -1037,6 +1037,11 @@ def getNumber(def value) {
     return new BigDecimal(tmp)
 }
 
+/**
+ * Получить record_id элемента справочника.
+ *
+ * @param value
+ */
 def getRecords(def ref_id, String code, String value, Date date, def cache) {
     String filter = code + " like '" + value.replaceAll(' ', '') + "%'"
     if (cache[ref_id]!=null) {
@@ -1050,7 +1055,7 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
-    logger.error("Не удалось определить элемент справочника! ($filter)")
+    logger.error("Не удалось определить элемент справочника!")
     return null;
 }
 
@@ -1078,7 +1083,7 @@ void insert(def data, def row) {
  * Проверка валюты на рубли
  */
 def isRubleCurrency(def currencyCode) {
-    return  refBookService.getStringValue(15,currencyCode,'CODE_2')=='810'
+    return  refBookService.getStringValue(15,currencyCode,'CODE')=='810'
 }
 
 /**
@@ -1089,8 +1094,6 @@ def getCourse(def currency, def date) {
         def refCourseDataProvider = refBookFactory.getDataProvider(22)
         def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
         return (!res.getRecords().isEmpty())?res.getRecords().get(0).RATE.getNumberValue():0//Правильнее null, такой ситуации быть не должно, она должна отлавливаться проверками НСИ
-    } else if (isRubleCurrency(currency)){
-        return 1;
     } else {
         return null;
     }

@@ -172,7 +172,7 @@ void logicalCheck() {
 
             // LC Проверка на заполнение поля «<Наименование поля>»
             for (alias in ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'reserveCalcValuePrev',
-                    'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']) {
+                    'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']) {
                 if (row.getCell(alias).value == null) {
                     setError(row.getCell(alias).column)
                 }
@@ -936,7 +936,7 @@ def addData(def xml) {
         return
     }
 
-    Date date = reportDate
+    Date date = new Date()
 
     def cache = [:]
     def data = getData(formData)
@@ -1077,6 +1077,11 @@ def getNumber(def value) {
     return new BigDecimal(tmp)
 }
 
+/**
+ * Получить record_id элемента справочника.
+ *
+ * @param value
+ */
 def getRecords(def ref_id, String code, String value, Date date, def cache) {
     String filter = code + " like '"+ value.replaceAll(' ', '')+ "%'"
     if (cache[ref_id]!=null) {
@@ -1090,7 +1095,7 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
-    logger.error("Не удалось определить элемент справочника!($filter)")
+    logger.error("Не удалось определить элемент справочника!")
     return null;
 }
 
@@ -1133,7 +1138,7 @@ def getRows(def data) {
  * Проверка валюты на рубли
  */
 def isRubleCurrency(def currencyCode) {
-    return  refBookService.getStringValue(15,currencyCode,'CODE_2')=='810'
+    return  refBookService.getStringValue(15,currencyCode,'CODE')=='810'
 }
 
 /**
@@ -1144,8 +1149,6 @@ def getCourse(def currency, def date) {
         def refCourseDataProvider = refBookFactory.getDataProvider(22)
         def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
         return (res.getRecords().isEmpty() ? null : res.getRecords().get(0).RATE.getNumberValue())
-    } else if (isRubleCurrency(currency)){
-        return 1;
     } else {
         return null
     }

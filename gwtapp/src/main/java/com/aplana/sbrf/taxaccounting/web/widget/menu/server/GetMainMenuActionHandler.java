@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.server;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.service.MessageService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditToken;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.BookerStatementsTokens;
@@ -12,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.Decla
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
+import com.aplana.sbrf.taxaccounting.web.module.migration.client.MigrationTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesTokens;
@@ -36,7 +36,6 @@ public class GetMainMenuActionHandler extends
 	private static final String CLEAR_CACHE_LINK = "cache/clear-cache";
 	private static final String NUMBER_SIGN = "#";
 	private static final String TYPE = "nType";
-	private static final String MIGRATION_URL = "migration";
 
 	public GetMainMenuActionHandler() {
 		super(GetMainMenuAction.class);
@@ -44,9 +43,6 @@ public class GetMainMenuActionHandler extends
 
 	@Autowired
 	private SecurityService securityService;
-
-    /*@Autowired
-    private MessageService messageService;*/
 
 	@Override
 	public GetMainMenuResult execute(GetMainMenuAction action,
@@ -56,7 +52,7 @@ public class GetMainMenuActionHandler extends
 
         TAUser currentUser =  securityService.currentUserInfo().getUser();
 
-		if (currentUser.hasRole(TARole.ROLE_OPERATOR)
+		if (currentUser.hasRole(TARole.ROLE_OPER)
 				|| currentUser.hasRole(TARole.ROLE_CONTROL)
 				|| currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
 
@@ -76,12 +72,12 @@ public class GetMainMenuActionHandler extends
 
 				menu.getSubMenu().add(new MenuItem(formItemName, NUMBER_SIGN + FormDataListNameTokens.FORM_DATA_LIST
 					+ ";" + TYPE + "=" + menu.getMeta()));
-				if (!currentUser.hasRole(TARole.ROLE_OPERATOR)) {
+				if (!currentUser.hasRole(TARole.ROLE_OPER)) {
 					menu.getSubMenu().add(new MenuItem(declarationItemName, NUMBER_SIGN + DeclarationListNameTokens.DECLARATION_LIST
 						+ ";" + TYPE + "=" + menu.getMeta()));
+                    menu.getSubMenu().add(new MenuItem("Ведение периодов", NUMBER_SIGN + PeriodsTokens.PERIODS
+                            + ";" + TYPE + "=" + menu.getMeta()));
 				}
-				menu.getSubMenu().add(new MenuItem("Ведение периодов", NUMBER_SIGN + PeriodsTokens.PERIODS
-						+ ";" + TYPE + "=" + menu.getMeta()));
 			}
 			menuItems.add(taxMenu);
 
@@ -107,7 +103,9 @@ public class GetMainMenuActionHandler extends
 					.append(";").append(FormDataImportPresenter.FORM_DATA_KIND_ID).append("=1")
 					.toString()
 					));*/
-			menuItems.add(settingMenuItem);
+            if (!currentUser.hasRole(TARole.ROLE_OPER)) {
+                menuItems.add(settingMenuItem);
+            }
 		}
 		if (currentUser.hasRole(TARole.ROLE_CONF)) {
 			MenuItem settingMenuItem = new MenuItem("Настройки");
@@ -122,7 +120,8 @@ public class GetMainMenuActionHandler extends
         if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
             MenuItem settingMenuItem = new MenuItem("Настройки");
             settingMenuItem.getSubMenu().add(new MenuItem("Пользователи системы", NUMBER_SIGN + UserListTokens.secuserPage));
-            settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
+            settingMenuItem.getSubMenu().add(new MenuItem("Импорт данных", NUMBER_SIGN + MigrationTokens.migration));
+
             menuItems.add(settingMenuItem);
         }
 
@@ -138,12 +137,11 @@ public class GetMainMenuActionHandler extends
                                         ";" + TaxFormNominationToken.isForm + "=" + true));
             }
 
+            settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
+
             settingMenuItem.getSubMenu().add(
                     new MenuItem("Указание форм-источников",
                             NUMBER_SIGN + SourcesTokens.sources + ";" + SourcesTokens.form + "=" + true));
-
-            settingMenuItem.getSubMenu().add(
-                    new MenuItem("Импорт данных", MIGRATION_URL));
 
             menuItems.add(settingMenuItem);
         }

@@ -113,7 +113,7 @@ public class DeclarationDataSearchServiceImplTest {
 	public void testGetAvailableFilterValuesOperator() {
 		TAUserInfo userInfo = new TAUserInfo();
 		userInfo.setIp(LOCAL_IP);
-		userInfo.setUser(mockUser(OPERATOR_USER_ID, 1, TARole.ROLE_OPERATOR));
+		userInfo.setUser(mockUser(OPERATOR_USER_ID, 1, TARole.ROLE_OPER));
 
 		service.getFilterAvailableValues(userInfo, TaxType.INCOME);
 	}

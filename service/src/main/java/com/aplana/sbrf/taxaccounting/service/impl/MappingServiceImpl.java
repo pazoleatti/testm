@@ -1,17 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.migration.RestoreExemplar;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.DepartmentRnuMapping;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.DepartmentXmlMapping;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.NalogFormType;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.PeriodMapping;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.YearCode;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.*;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.MappingService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -45,8 +41,8 @@ public class MappingServiceImpl implements MappingService {
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     private static SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
     private static String charSet = "UTF-8";
-    private static String RNU_EXT = "rnu";
-    private static String XML_EXT = "xml";
+    private static String RNU_EXT = ".rnu";
+    private static String XML_EXT = ".xml";
 
     @Override
     public void addFormData(String filename, byte[] fileContent) {
@@ -55,13 +51,12 @@ public class MappingServiceImpl implements MappingService {
 
         RestoreExemplar restoreExemplar;
 
-        String ext = filename.substring(filename.indexOf(".")).trim().toLowerCase();
-        if (RNU_EXT.equals(ext)) {
+        if (filename.toLowerCase().endsWith(RNU_EXT)) {
             restoreExemplar = restoreExemplarFromRnu(filename, fileContent);
-        } else if (XML_EXT.equals(ext)) {
+        } else if (filename.toLowerCase().endsWith(XML_EXT)) {
             restoreExemplar = restoreExemplarFromXml(filename);
         } else {
-            throw new ServiceException("Не правильное название файла");
+            throw new ServiceException("Неправильное имя файла " + filename);
         }
 
         log.debug(restoreExemplar);
@@ -105,7 +100,7 @@ public class MappingServiceImpl implements MappingService {
             String str = new String(fileContent, charSet);
             firstRow = str.substring(0, str.indexOf('\r'));
         } catch (UnsupportedEncodingException e) {
-            throw new ServiceException("Ошибка получения первой строки", e);
+            throw new ServiceException("Ошибка получения первой строки файла "+rnuFilename, e);
         }
 
         String[] params = firstRow.split("|");
@@ -142,7 +137,7 @@ public class MappingServiceImpl implements MappingService {
 
             return exemplar;
         } catch (Exception e) {
-            throw new ServiceException("Parsing Error", e);
+            throw new ServiceException("Ошибка разбора файла "+rnuFilename, e);
         }
     }
 
@@ -179,7 +174,7 @@ public class MappingServiceImpl implements MappingService {
 
             return exemplar;
         } catch (Exception e) {
-            throw new ServiceException("Parsing Error", e);
+            throw new ServiceException("Ошибка разбора файла "+xmlFilename, e);
         }
     }
 }

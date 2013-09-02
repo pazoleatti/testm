@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.refbook;
 
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
-
-import java.util.List;
 
 /**
  * Фабрика для получения адаптеров справочников

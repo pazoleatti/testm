@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -97,9 +98,9 @@ public class FormDataPresenter extends
 							if(result==null || result.getDataRows().getTotalRecordCount() == 0)
 								getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
 							else {
-								getView().setRowsData(start, (int) result.getDataRows().getTotalRecordCount(), result.getDataRows().getRecords());
-								if (result.getDataRows().getRecords().size() > PAGE_SIZE) {
-									getView().assignDataProvider(result.getDataRows().getRecords().size());
+								getView().setRowsData(start, (int) result.getDataRows().getTotalRecordCount(), result.getDataRows());
+								if (result.getDataRows().size() > PAGE_SIZE) {
+									getView().assignDataProvider(result.getDataRows().size());
 								}
 							}
 							modifiedRows.clear();
@@ -395,6 +396,7 @@ public class FormDataPresenter extends
                                                 .getName(),
                                         result.getDepartmenName(),
                                         result.getReportPeriod().getName(),
+                                        result.getFormData().getPeriodOrder() != null ? Formats.getRussianMonthNameWithTier(result.getFormData().getPeriodOrder()) : "—",
                                         result.getFormData().getState()
                                                 .getName(),
 		                                result.getTaxPeriodStartDate(), result.getTaxPeriodEndDate());

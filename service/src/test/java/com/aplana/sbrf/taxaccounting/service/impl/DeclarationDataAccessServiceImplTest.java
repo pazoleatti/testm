@@ -204,7 +204,7 @@ public class DeclarationDataAccessServiceImplTest {
 		assertFalse(canGet(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может читать никаких деклараций
-		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPERATOR));
+		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPER));
 		assertFalse(canGet(userInfo, DECLARATION_CREATED_BANK_ID));
 		assertFalse(canGet(userInfo, DECLARATION_ACCEPTED_BANK_ID));
 		assertFalse(canGet(userInfo, DECLARATION_CREATED_TB1_ID));
@@ -238,7 +238,7 @@ public class DeclarationDataAccessServiceImplTest {
 		assertFalse(canRefresh(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может обновлять никаких деклараций
-		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPERATOR));
+		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPER));
 		assertFalse(canRefresh(userInfo, DECLARATION_CREATED_BANK_ID));
 		assertFalse(canRefresh(userInfo, DECLARATION_ACCEPTED_BANK_ID));
 		assertFalse(canRefresh(userInfo, DECLARATION_CREATED_TB1_ID));
@@ -272,7 +272,7 @@ public class DeclarationDataAccessServiceImplTest {
 		assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может принимать никаких деклараций
-		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPERATOR));
+		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPER));
 		assertFalse(canAccept(userInfo, DECLARATION_CREATED_BANK_ID));
 		assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_BANK_ID));
 		assertFalse(canAccept(userInfo, DECLARATION_CREATED_TB1_ID));
@@ -306,7 +306,7 @@ public class DeclarationDataAccessServiceImplTest {
 		assertFalse(canReject(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может отменять никаких деклараций
-		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPERATOR));
+		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPER));
 		assertFalse(canReject(userInfo, DECLARATION_CREATED_BANK_ID));
 		assertFalse(canReject(userInfo, DECLARATION_ACCEPTED_BANK_ID));
 		assertFalse(canReject(userInfo, DECLARATION_CREATED_TB1_ID));
@@ -340,7 +340,7 @@ public class DeclarationDataAccessServiceImplTest {
 		assertFalse(canGetXml(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не скачивать файл в формате законодателя ни у каких деклараций
-		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPERATOR));
+		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPER));
 		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_BANK_ID));
 		assertFalse(canGetXml(userInfo, DECLARATION_ACCEPTED_BANK_ID));
 		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_TB1_ID));
@@ -374,7 +374,7 @@ public class DeclarationDataAccessServiceImplTest {
 		assertFalse(canDelete(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может удалять никаких деклараций
-		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPERATOR));
+		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPER));
 		assertFalse(canDelete(userInfo, DECLARATION_CREATED_BANK_ID));
 		assertFalse(canDelete(userInfo, DECLARATION_ACCEPTED_BANK_ID));
 		assertFalse(canDelete(userInfo, DECLARATION_CREATED_TB1_ID));
@@ -406,7 +406,7 @@ public class DeclarationDataAccessServiceImplTest {
 		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB2_ID, 1));
 
 		// Оператор не может создавать декларации
-		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPERATOR));
+		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPER));
 		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, Department.ROOT_BANK_ID, 1));
 		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB1_ID, 1));
 		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB1_ID, 1));

@@ -1,11 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.service.SignService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
 import ru.infocrypt.bicrypt.Bicr4;
 
 @Service
 public class SignServiceImpl implements SignService {
+
+    private final Log logger = LogFactory.getLog(getClass());
 
     // 128 означает, что инициализации ДСЧ не будет
     private static final int FLAG_TM = 128;
@@ -32,17 +36,22 @@ public class SignServiceImpl implements SignService {
         StringBuffer userIdBuf = new StringBuffer("1");
 
         //-------------- грузим DLL --------------------------------
-        if (System.getProperty("os.arch", "?").equals("amd64"))
-        {   //64 бит
-            System.loadLibrary("grn64");
-            System.loadLibrary("bicr4_64");
-            System.loadLibrary("bicr_adm64");
-        }
-        else //32 бит
-        {
-            System.loadLibrary("grn");
-            System.loadLibrary("bicr4");
-            System.loadLibrary("bicr_adm");
+        //try-catch на случай если библиотека подгружена другим ClassLoader-ом
+        try {
+            if (System.getProperty("os.arch", "?").equals("amd64"))
+            {   //64 бит
+                System.loadLibrary("grn64");
+                System.loadLibrary("bicr4_64");
+                System.loadLibrary("bicr_adm64");
+            }
+            else //32 бит
+            {
+                System.loadLibrary("grn");
+                System.loadLibrary("bicr4");
+                System.loadLibrary("bicr_adm");
+            }
+        } catch (UnsatisfiedLinkError linkError){
+            logger.info("Библиотека уже загружена." + linkError.getMessage());
         }
 
         //-------------- инициализация --------------------------------

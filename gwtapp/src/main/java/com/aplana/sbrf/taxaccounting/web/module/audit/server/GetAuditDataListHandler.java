@@ -31,7 +31,7 @@ public class GetAuditDataListHandler extends AbstractActionHandler<GetAuditDataL
 
         GetAuditDataListResult result = new GetAuditDataListResult();
 		PagingResult<LogSystemSearchResultItem> records = auditService.getLogsByFilter(getAuditDataListAction.getLogSystemFilter());
-        result.setRecords(records.getRecords());
+        result.setRecords(records);
 		result.setTotalCountOfRecords(records.getTotalRecordCount());
 
         return result;

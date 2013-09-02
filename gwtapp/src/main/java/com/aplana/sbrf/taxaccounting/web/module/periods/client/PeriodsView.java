@@ -28,8 +28,6 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	interface Binder extends UiBinder<Widget, PeriodsView> { }
 
 	private static final String[] COLUMN_NAMES = {"Период", "Состояние"};
-	@UiField
-	Anchor returnAnchor;
 
 	@UiField
 	Label title;
@@ -107,6 +105,12 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 		departmentPicker.setValue(selectedDepartments);
 		fromBox.setValue(yearFrom);
 		toBox.setValue(yearTo);
+	}
+
+	@Override
+	public void setYear(int year) {
+		fromBox.setValue(year);
+		toBox.setValue(year);
 	}
 
 	@Override

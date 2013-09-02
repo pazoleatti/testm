@@ -147,11 +147,11 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 			MessageEvent.fire(this, "Для создания декларации необходимо выбрать вид декларации");
 			return false;
 		}
-		if(filter.getReportPeriodIds().size() != 1){
+		if(filter.getReportPeriodIds() == null || filter.getReportPeriodIds().isEmpty()){
 			MessageEvent.fire(this, "Для создания декларации необходимо выбрать один отчетный период");
 			return false;
 		}
-		if(filter.getDepartmentIds().size() != 1){
+		if(filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty()){
 			MessageEvent.fire(this, "Для создания декларации необходимо выбрать одно подразделение");
 			return false;
 		}

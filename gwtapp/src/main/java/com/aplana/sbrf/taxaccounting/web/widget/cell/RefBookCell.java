@@ -6,6 +6,7 @@ import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
+import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidget;
 import com.google.gwt.cell.client.AbstractEditableCell;
@@ -85,9 +86,8 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			final NativeEvent nevent, final ValueUpdater<Long> valueUpdater) {
 		
 		@SuppressWarnings("unchecked")
-		boolean editableCell = ((DataRow<Cell>) context.getKey()).getCell(column.getAlias()).isEditable();
-		if ((columnContext.getMode() == ColumnContext.Mode.READONLY_MODE)
-				|| (columnContext.getMode() != ColumnContext.Mode.DEFAULT_MODE && !editableCell)) {
+		AbstractCell editableCell = ((DataRow<?>) context.getKey()).getCell(column.getAlias());
+		if (!DataRowEditableCellUtils.editMode(columnContext, editableCell)) {
 			return;
 		}
 			

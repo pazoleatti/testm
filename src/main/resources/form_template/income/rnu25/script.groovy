@@ -198,9 +198,6 @@ void calc() {
         // графа 1
         row.rowNumber = index + 1
 
-        // графа 4
-        row.lotSizePrev = getValueForColumn4(dataOld, formDataOld, row)
-
         // графа 6
         row.reserve = getValueForColumn6(dataOld, row)
 
@@ -436,12 +433,6 @@ def logicalCheck(def useLog) {
             i += 1
 
             // 17. Арифметические проверки граф 6, 10, 11, 12, 13 =========================
-            // графа 4
-            if (row.lotSizePrev != getValueForColumn4(dataOld, formDataOld, row)) {
-                name = getColumnName(row, 'lotSizePrev')
-                logger.warn("Неверно рассчитана графа «$name»!")
-            }
-
             // графа 6
             if (row.reserve != getValueForColumn6(dataOld, row)) {
                 name = getColumnName(row, 'reserve')
@@ -981,7 +972,7 @@ def hasTotal(def data) {
  * @param xml данные
  */
 def addData(def xml) {
-    Date date = reportDate
+    Date date = new Date()
 
     def cache = [:]
     def data = getData(formData)
@@ -1099,6 +1090,11 @@ def getNumber(def value) {
     return new BigDecimal(tmp)
 }
 
+/**
+ * Получить record_id элемента справочника.
+ *
+ * @param value
+ */
 def getRecords(def ref_id, String code, String value, Date date, def cache) {
     String filter = code + "= '"+ value.replaceAll(' ', '')+"'"
     if (cache[ref_id]!=null) {

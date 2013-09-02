@@ -82,8 +82,8 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 
 		if (lastTaxType == null) {
 			Calendar current = Calendar.getInstance();
-			res.setYearFrom(current.get(Calendar.YEAR) - 1900);
-			res.setYearTo(current.get(Calendar.YEAR) - 1900);
+			res.setYearFrom(current.get(Calendar.YEAR));
+			res.setYearTo(current.get(Calendar.YEAR));
 		} else {
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(lastTaxType.getStartDate());
@@ -118,7 +118,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 
 	private List<DictionaryTaxPeriod> convert(PagingResult<Map<String, RefBookValue>> values) {
 		List<DictionaryTaxPeriod> result = new ArrayList<DictionaryTaxPeriod>();
-		for(Map<String, RefBookValue> rec : values.getRecords()) {
+		for(Map<String, RefBookValue> rec : values) {
 			DictionaryTaxPeriod r = new DictionaryTaxPeriod();
 			r.setName(rec.get("NAME").getStringValue());
 			r.setCode(Integer.parseInt(rec.get("CODE").getStringValue()));
