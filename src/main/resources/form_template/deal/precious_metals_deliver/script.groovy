@@ -18,7 +18,6 @@ switch (formDataEvent) {
         sort()
         calc()
         addAllStatic()
-        //calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
@@ -85,7 +84,7 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     // Налоговый период
-    def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
 
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
@@ -250,10 +249,14 @@ void logicCheck() {
             logger.warn("«$msg1» не может отличаться от «$msg2» сделки в строке $rowNum!")
         }
 
-        //Проверки соответствия НСИ
+        // Проверки соответствия НСИ
         checkNSI(row, "name", "Организации-участники контролируемых сделок", 9)
         checkNSI(row, "country", "ОКСМ", 10)
+        checkNSI(row, "unitCountryCode", "ОКСМ", 10)
         checkNSI(row, "countryCode1", "ОКСМ", 10)
+        checkNSI(row, "settlement1", "ОКСМ", 10)
+        checkNSI(row, "region1", "Коды субъектов Российской Федерации", 4)
+        checkNSI(row, "countryCode3", "Коды субъектов Российской Федерации", 4)
         checkNSI(row, "okpCode", "Коды драгоценных металлов", 17)
         checkNSI(row, "signPhis", "Признаки физической поставки", 18)
         checkNSI(row, "conditionCode", "Коды условий поставки", 21)

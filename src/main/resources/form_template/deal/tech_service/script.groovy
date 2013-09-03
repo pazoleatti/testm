@@ -80,7 +80,7 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     // Налоговый период
-    def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
 
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
