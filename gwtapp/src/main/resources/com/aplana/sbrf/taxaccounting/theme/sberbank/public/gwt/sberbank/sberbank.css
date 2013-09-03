@@ -1278,3 +1278,7 @@ td.datePickerMonth {
     background: #C0C0C0 url(images/splitPanelThumb.png) center center no-repeat;
     cursor: row-resize;
 }
+
+.gwt-CellTable-SubHeader {
+    background-color: #C0C0C0 !important;
+}

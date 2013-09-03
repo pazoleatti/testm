@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormType
 import com.aplana.sbrf.taxaccounting.model.TaxType
 
 /**
- * Матрица
+ * 400 - Матрица
  *
  * @author Dmitriy Levykin
  */

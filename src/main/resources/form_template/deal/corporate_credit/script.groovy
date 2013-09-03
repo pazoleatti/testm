@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Предоставление корпоративного кредита
+ * 387 - Предоставление корпоративного кредита
  *
  * похож на  software_development (Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий)
  * похож на  trademark (Предоставление права пользования товарным знаком)
@@ -111,7 +111,8 @@ void logicCheck() {
             logger.warn("В графе «$msg» в строке $rowNum может  быть указано только  значение «1»!")
         }
         //  Корректность даты договора
-        def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+        def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+
         def dFrom = taxPeriod.getStartDate()
         def dTo = taxPeriod.getEndDate()
         def dt = docDateCell.value

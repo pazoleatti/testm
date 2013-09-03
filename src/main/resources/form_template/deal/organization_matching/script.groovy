@@ -3,7 +3,7 @@ package form_template.deal.organization_matching
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Согласование организации
+ * 410 - Согласование организации
  *
  * @author Stanislav Yasinskiy
  */

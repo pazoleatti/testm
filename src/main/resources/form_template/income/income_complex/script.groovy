@@ -362,6 +362,8 @@ def getOpuSumByTableDFor4to5(def dataRow, def summaryIncomeSimpleFormHelper) {
             }
         }
         return sum;
+    } else {
+        return 0
     }
 }
 
@@ -379,9 +381,9 @@ def getSummaryIncomeSimpleFormHelper() {
     def summaryIncomeSimpleDataRowsHelper = null
 
     if (summaryIncomeSimpleFormData != null && summaryIncomeSimpleFormData.id != null) summaryIncomeSimpleDataRowsHelper = formDataService.getDataRowHelper(summaryIncomeSimpleFormData)
-    if (summaryIncomeSimpleDataRowsHelper == null || summaryIncomeSimpleDataRowsHelper.getAllCached().isEmpty()) {
+    /*if (summaryIncomeSimpleDataRowsHelper == null || summaryIncomeSimpleDataRowsHelper.getAllCached().isEmpty()) {
         logger.error('Нет информации в отчёте Доходы простые')
-    }
+    }*/
 
     return summaryIncomeSimpleDataRowsHelper
 }

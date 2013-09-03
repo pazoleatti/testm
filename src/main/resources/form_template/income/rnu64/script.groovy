@@ -424,12 +424,18 @@ void setRowIndex() {
  */
 void sort() {
     data = getData(formData)
-    data.allCached.sort({ DataRow a, DataRow b ->
-        if ((a.date as Date).time == (b.date as Date).time) {
-            return Integer.valueOf(a.dealingNumber as String) <=> Integer.valueOf(b.dealingNumber as String)
-        }
-        return (a.date as Date).time <=> (b.date as Date).time
-    })
+    if (data!=null && !data.getAllCached().isEmpty()) {
+        data.getAllCached().sort({ DataRow a, DataRow b ->
+            def aTime = a.date!=null?(a.date as Date).time:null
+            def bTime = b.date!=null?(b.date as Date).time:null
+            if (aTime == bTime) {
+                def aNumber = a.dealingNumber!=null?Integer.valueOf(a.dealingNumber as String):null;
+                def bNumber = b.dealingNumber!=null?Integer.valueOf(b.dealingNumber as String):null;
+                return aNumber <=> bNumber
+            }
+            return aTime <=> bTime
+        })
+    }
 }
 
 /**

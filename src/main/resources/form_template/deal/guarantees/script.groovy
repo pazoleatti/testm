@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 /**
- * Предоставление гарантий
+ * 388 - Предоставление гарантий
  *
  * (похож на letter_of_credit "Предоставление инструментов торгового финансирования и непокрытых аккредитивов")
  * (похож на  interbank_credits "Предоставление межбанковских кредитов")
@@ -110,7 +110,7 @@ void logicCheck() {
                 logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
             }
             //  Корректность даты договора
-            def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+            def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
             def dFrom = taxPeriod.getStartDate()
             def dTo = taxPeriod.getEndDate()
             def dt = docDateCell.value
