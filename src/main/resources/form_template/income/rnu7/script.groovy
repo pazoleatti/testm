@@ -454,7 +454,7 @@ def checkNSI() {
     if (!getRows(data).isEmpty()) {
         // справочник 27 - «Классификатор расходов Сбербанка России для целей налогового учёта»
         def expensesClassifierRefBookId = 27
-        def currencyRefBookId = 15
+        def currencyRefBookId = 15L
 
         // справочник 22 "Курсы Валют"
         def refDataProvider = refBookFactory.getDataProvider(22)
