@@ -68,7 +68,7 @@ def bildXml(){
                     // TODO обсудить всплывающее окно, вынести в конф. Трансп декл
                     ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"), //new Date().format("dd.MM.yyyy"),
                     Период: 34,
-                    ОтчетГод: taxPeriodService.get(reportPeriodService.get(declarationData.reportPeriodId).taxPeriodId).startDate.format('yyyy'),
+                    ОтчетГод: reportPeriodService.get(declarationData.reportPeriodId).taxPeriod.startDate.format('yyyy'),
                     КодНО: departmentParamTransport.TAX_ORGAN_CODE,
                     // TODO учесть что потом будут корректирующие периоды
                     НомКорр: "0",

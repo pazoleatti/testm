@@ -43,17 +43,6 @@ public class DateInputWithModesCell extends DateInputCell {
 	}
 
 	@Override
-	public void render(Context context, Date value, SafeHtmlBuilder sb) {
-		@SuppressWarnings("unchecked")
-		AbstractCell editableCell = ((DataRow<?>) context.getKey()).getCell(columnContext.getColumn().getAlias());
-		if (DataRowEditableCellUtils.editMode(columnContext, editableCell)) {
-			super.render(context, value, sb);
-		} else if (value != null && !value.toString().isEmpty()) {
-			sb.appendEscaped(columnContext.getColumn().getFormatter().format(getFormattedDate(value)));
-		}
-	}
-
-	@Override
 	public void onBrowserEvent(Context context, Element parent, Date value,
 	                           NativeEvent event, ValueUpdater<Date> valueUpdater) {
 		@SuppressWarnings("unchecked")

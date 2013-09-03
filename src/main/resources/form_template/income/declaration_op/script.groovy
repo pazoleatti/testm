@@ -88,7 +88,7 @@ def approveOrgName = getValue(incomeParams, 'APPROVE_ORG_NAME')
 def reportPeriod = reportPeriodService.get(reportPeriodId)
 
 /** Налоговый период. */
-def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.taxPeriodId) : null)
+def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.getTaxPeriod().getId()) : null)
 
 /** Признак налоговый ли это период. */
 def isTaxPeriod = (reportPeriod != null && reportPeriod.order == 4)
@@ -171,14 +171,8 @@ def ubitDogovDUI = empty;
 def virRealPred = empty
 
 // Приложение № 3 к Листу 02
-/** КолОбРеалАИ. Код строки декларации 010. Код вида дохода = 10. */
-def colObRealAI = getLong(getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [10]))
-/** КолОбРеалАИУб. Код строки декларации 020. Код вида дохода = 20. */
-def colObRealAIUb = getLong(getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [20]))
 /** ВыручРеалАИ. Код строки декларации 030. Код вида дохода = 10840. */
 def viruchRealAI = getLong(getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [10840]))
-/** ПрибРеалАИ. Код строки декларации 040. Код вида дохода = 10845. */
-def pribRealAI = getLong(getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [10845]))
 /** УбытРеалАИ. Код строки декларации 050. Код вида расхода = 21780. */
 def ubitRealAI = getLong(getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21780]))
 /** ЦенаРеалПравЗУ. Код строки декларации 240. Код вида дохода = 10890. */
@@ -189,14 +183,10 @@ def ubitRealZU = getLong(getComplexConsumptionSumRows9(dataRowsHelperComplexCons
 def viruchRealPTDoSr = getLong(getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [10860]))
 /** ВыручРеалПТПосСр. Код строки декларации 110. Код вида дохода = 10870. */
 def viruchRealPTPosSr = getLong(getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [10870]))
-/** Убыт1Соот269. Код строки декларации 140. Код вида расхода = 21490. */
-def ubit1Soot269 = getLong(getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21490]))
 /** Убыт1Прев269. Код строки декларации 150. Код вида расхода = 21500. */
 def ubit1Prev269 = getLong(getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21500]))
 /** Убыт2РеалПТ. Код строки декларации 160. Код вида расхода = 21510. */
 def ubit2RealPT = getLong(getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21510]))
-/** Убыт2ВнРасх. Код строки декларации 170. Код вида расхода = 22700. */
-def ubit2VnRash = getLong(getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [22700]))
 // Приложение № 3 к Листу 02 - конец
 
 /** ПрПодп. */
@@ -419,19 +409,19 @@ xmlbuilder.Файл(
             // получение из нф авансовых платежей строки соответствующей текущему подразделению
             def tmpRow = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, kpp)
             if (tmpRow != null) {
-                obRasch = refBookService.getNumberValue(26, row.calcFlag, 'CODE')
-                naimOP = refBookService.getStringValue(30, row.regionBankDivision, 'NAME')
-                kppop = refBookService.getStringValue(33, row.kpp, 'KPP')
-                obazUplNalOP = refBookService.getNumberValue(25, row.obligationPayTax, 'CODE')
-                dolaNalBaz = row.baseTaxOf
-                nalBazaDola = row.baseTaxOfRub
-                stavNalSubRF = refBookService.getNumberValue(33, row.subjectTaxStavka, 'TAX_RATE')
-                sumNal = row.taxSum
-                nalNachislSubRF = row.subjectTaxCredit
-                sumNalP = row.taxSumToPay
-                nalViplVneRF = row.taxSumOutside
-                mesAvPlat = row.everyMontherPaymentAfterPeriod
-                mesAvPlat1CvSled = row.everyMonthForKvartalNextPeriod
+                obRasch = refBookService.getNumberValue(26, tmpRow.calcFlag, 'CODE')
+                naimOP = refBookService.getStringValue(30, tmpRow.regionBankDivision, 'NAME')
+                kppop = refBookService.getStringValue(33, tmpRow.kpp, 'KPP')
+                obazUplNalOP = refBookService.getNumberValue(25, tmpRow.obligationPayTax, 'CODE')
+                dolaNalBaz = tmpRow.baseTaxOf
+                nalBazaDola = tmpRow.baseTaxOfRub
+                stavNalSubRF = refBookService.getNumberValue(33, tmpRow.subjectTaxStavka, 'TAX_RATE')
+                sumNal = tmpRow.taxSum
+                nalNachislSubRF = tmpRow.subjectTaxCredit
+                sumNalP = tmpRow.taxSumToPay
+                nalViplVneRF = tmpRow.taxSumOutside
+                mesAvPlat = tmpRow.everyMontherPaymentAfterPeriod
+                mesAvPlat1CvSled = tmpRow.everyMonthForKvartalNextPeriod
             }
 
             // 0..n - всегда один
