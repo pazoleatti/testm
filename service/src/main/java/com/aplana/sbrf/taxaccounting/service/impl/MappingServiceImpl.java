@@ -1,16 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.migration.RestoreExemplar;
 import com.aplana.sbrf.taxaccounting.model.migration.enums.*;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.MappingService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +18,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 
-
 @Service
 @Transactional
 public class MappingServiceImpl implements MappingService {
@@ -31,6 +26,12 @@ public class MappingServiceImpl implements MappingService {
 
     @Autowired
     private FormDataService formDataService;
+
+    @Autowired
+    FormTemplateService formTemplateService;
+
+    @Autowired
+    private AuditService auditService;
 
     @Autowired
     private TAUserService taUserService;
@@ -46,61 +47,85 @@ public class MappingServiceImpl implements MappingService {
 
     @Override
     public void addFormData(String filename, byte[] fileContent) {
-
-        InputStream inputStream = new ByteArrayInputStream(fileContent);
-
-        RestoreExemplar restoreExemplar;
-
-        if (filename.toLowerCase().endsWith(RNU_EXT)) {
-            restoreExemplar = restoreExemplarFromRnu(filename, fileContent);
-        } else if (filename.toLowerCase().endsWith(XML_EXT)) {
-            restoreExemplar = restoreExemplarFromXml(filename);
-        } else {
-            throw new ServiceException("Неправильное имя файла " + filename);
-        }
-
-        log.debug(restoreExemplar);
-
         //TODO сделать правильную загрузку данных текущего пользователя
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(taUserService.getUser("admin"));
         userInfo.setIp("127.0.0.1");
 
-        ReportPeriod reportPeriod = reportPeriodDao.getByTaxPeriodAndDict(
-                restoreExemplar.getTaxPeriod(),
-                restoreExemplar.getDictTaxPeriodId());
+        RestoreExemplar restoreExemplar;
+        Integer departmentId = null;
+        Integer formTypeId = null;
+        Integer reportPeriodId = null;
 
-        Logger logger = new Logger();
+        try {
+            InputStream inputStream = new ByteArrayInputStream(fileContent);
 
-        long formDataId = formDataService.createFormData(logger,
-                userInfo,
-                restoreExemplar.getFormTemplateId(),
-                restoreExemplar.getDepartmentId(),
-                FormDataKind.PRIMARY,
-                reportPeriod);
+            if (filename.toLowerCase().endsWith(RNU_EXT)) {
+                restoreExemplar = restoreExemplarFromRnu(filename, fileContent);
+            } else if (filename.toLowerCase().endsWith(XML_EXT)) {
+                restoreExemplar = restoreExemplarFromXml(filename);
+            } else {
+                throw new ServiceException("Неправильное имя файла " + filename);
+            }
 
-        // вызов скрипта
-        formDataService.importFormData(logger, userInfo, formDataId, restoreExemplar.getFormTemplateId(), restoreExemplar.getDepartmentId(),
-                FormDataKind.PRIMARY, reportPeriod.getId(), inputStream, filename);
+            if (restoreExemplar != null) {
+                FormTemplate template = formTemplateService.get(restoreExemplar.getFormTemplateId());
+                formTypeId = template.getType().getId();
+                departmentId = restoreExemplar.getDepartmentId();
+            }
+
+            log.debug(restoreExemplar);
+
+            ReportPeriod reportPeriod = reportPeriodDao.getByTaxPeriodAndDict(
+                    restoreExemplar.getTaxPeriod(),
+                    restoreExemplar.getDictTaxPeriodId());
+
+            if (reportPeriod != null) {
+                reportPeriodId = reportPeriod.getId();
+            }
+
+            Logger logger = new Logger();
+
+            long formDataId = formDataService.createFormData(logger,
+                    userInfo,
+                    restoreExemplar.getFormTemplateId(),
+                    restoreExemplar.getDepartmentId(),
+                    FormDataKind.PRIMARY,
+                    reportPeriod);
+
+            // Вызов скрипта
+            formDataService.importFormData(logger, userInfo, formDataId, restoreExemplar.getFormTemplateId(),
+                    restoreExemplar.getDepartmentId(), FormDataKind.PRIMARY, reportPeriod.getId(), inputStream,
+                    filename);
+        } catch (Exception e) {
+            // Ошибка импорта
+            auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, reportPeriodId, null, formTypeId,
+                    FormDataKind.PRIMARY.getId(), "Ошибка импорта файла " + filename + " : " + e.getMessage());
+
+            return;
+        }
+        // Успешный импорт
+        auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, reportPeriodId, null, formTypeId,
+                FormDataKind.PRIMARY.getId(), "Успешно импортирован файл " + filename);
     }
 
     /**
      * Возвращает объект с необходимой информацией для создания формы в нвоой системе
      * Пример первой строки: 99|0013|01.01.2013|31.03.2013|640|90
      *
-     * @param rnuFilename азвание файла с расширением rnu
+     * @param rnuFilename название файла с расширением rnu
      * @param fileContent содержимое файла
      * @return
      */
-    private RestoreExemplar restoreExemplarFromRnu(String rnuFilename, byte[] fileContent) {
+    private RestoreExemplar restoreExemplarFromRnu(String rnuFilename, byte[] fileContent) throws ServiceException {
         RestoreExemplar exemplar = new RestoreExemplar();
 
-        String firstRow = null;
+        String firstRow;
         try {
             String str = new String(fileContent, charSet);
             firstRow = str.substring(0, str.indexOf('\r'));
         } catch (UnsupportedEncodingException e) {
-            throw new ServiceException("Ошибка получения первой строки файла "+rnuFilename, e);
+            throw new ServiceException("Ошибка получения первой строки файла", e);
         }
 
         String[] params = firstRow.split("|");
@@ -137,7 +162,7 @@ public class MappingServiceImpl implements MappingService {
 
             return exemplar;
         } catch (Exception e) {
-            throw new ServiceException("Ошибка разбора файла "+rnuFilename, e);
+            throw new ServiceException("Ошибка разбора файла", e);
         }
     }
 
@@ -148,7 +173,7 @@ public class MappingServiceImpl implements MappingService {
      * @param xmlFilename название файла
      * @return
      */
-    private RestoreExemplar restoreExemplarFromXml(String xmlFilename) {
+    private RestoreExemplar restoreExemplarFromXml(String xmlFilename) throws ServiceException {
         RestoreExemplar exemplar = new RestoreExemplar();
 
         try {
@@ -174,7 +199,7 @@ public class MappingServiceImpl implements MappingService {
 
             return exemplar;
         } catch (Exception e) {
-            throw new ServiceException("Ошибка разбора файла "+xmlFilename, e);
+            throw new ServiceException("Ошибка разбора файла", e);
         }
     }
 }

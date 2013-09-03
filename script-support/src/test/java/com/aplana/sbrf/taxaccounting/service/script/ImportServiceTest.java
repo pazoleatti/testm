@@ -3,10 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.script;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ImportServiceImpl;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 
 import static org.junit.Assert.assertTrue;
 
@@ -34,12 +31,12 @@ public class ImportServiceTest {
     }
 
     @Test
-    public void getAllData() {
+    public void getAllData() throws IOException {
         assertTrue(service.getData(getInputStream(), "fileName.xls") != null);
     }
 
     @Test
-    public void getTableData() {
+    public void getTableData() throws IOException {
         assertTrue(service.getData(getInputStream(), "fileName.xls", "windows-1251",
                 "Государственный регистрационный номер", "Общий итог") != null);
     }

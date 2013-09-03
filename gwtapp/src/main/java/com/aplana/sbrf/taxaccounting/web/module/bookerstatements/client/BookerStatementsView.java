@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryMessageCell;
-import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.google.gwt.core.client.GWT;
@@ -60,9 +59,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     DataGrid<DataRow<Cell>> formDataTable;
 
     @UiField
-    FlexiblePager pager;
-
-    @UiField
     DepartmentPickerPopupWidget departmentPicker;
 
     @UiField
@@ -85,7 +81,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     public BookerStatementsView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
         reportPeriodPanel.add(period);
-        pager.setDisplay(formDataTable);
         initListeners();
         setAction();
         dockPanel.setWidgetHidden(logPanel, (logs == null || logs.isEmpty()));

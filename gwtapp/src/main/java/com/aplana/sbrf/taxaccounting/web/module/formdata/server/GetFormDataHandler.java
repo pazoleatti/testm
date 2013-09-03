@@ -126,7 +126,7 @@ public class GetFormDataHandler extends
 		result.setTemplateFormName(formTemplate.getName());
 		result.setFormData(formData);
 
-		TaxPeriod taxPeriod = taxPeriodService.getTaxPeriod(reportPeriod.getTaxPeriodId());
+		TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
 		result.setTaxPeriodStartDate(taxPeriod.getStartDate());
 		result.setTaxPeriodEndDate(taxPeriod.getEndDate());
 	}

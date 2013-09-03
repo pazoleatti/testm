@@ -191,10 +191,6 @@ public class FormDataXlsxReportBuilderTestMock {
 	@Test
 	public void testReport() throws IOException{
 		FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,true, dataRows);
-		try {
-			builder.createReport();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        builder.createReport();
 	}
 }

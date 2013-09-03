@@ -3,19 +3,19 @@ package com.aplana.sbrf.taxaccounting.service.script;
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -78,8 +78,7 @@ public class DeclarationServiceTest {
         assertTrue(service.find(2, 1, 101) != null);
     }
 
-    // TODO (Aydar Kadyrgulov) Доделать тест
-    /*@Test
+    @Test
     public void generateXmlFileId() {
         DeclarationType declarationType = new DeclarationType();
         declarationType.setTaxType(TaxType.TRANSPORT);
@@ -88,17 +87,25 @@ public class DeclarationServiceTest {
         ReflectionTestUtils.setField(service, "declarationTypeDao", declarationTypeDao);
 
         Map<String, RefBookValue> departmentParam = new HashMap<String, RefBookValue>();
-        departmentParam.put();
+        departmentParam.put("TAX_ORGAN_CODE", new RefBookValue(RefBookAttributeType.STRING, "тест"));
+        departmentParam.put("INN", new RefBookValue(RefBookAttributeType.STRING, "тест"));
+        departmentParam.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "тест"));
 
         RefBookDataProvider dataProvider = mock(RefBookDataProvider.class);
-        when(dataProvider.getRecords()).thenReturn(new List< Map<String, RefBookValue>>(){{add(departmentParam);}});
+        ReportPeriodService reportPeriodService = mock(ReportPeriodService.class);
+        when(reportPeriodService.getStartDate(48)).thenReturn(Calendar.getInstance());
+        PagingResult<Map<String, RefBookValue>> list = new PagingResult<Map<String, RefBookValue>>();
+        list.add(departmentParam);
+        when(dataProvider.getRecords(new Date(), null, String.format("DEPARTMENT_ID = %d", 2), null)).thenReturn(list);
 
         RefBookFactory factory = mock(RefBookFactory.class);
         when(factory.getDataProvider(31L)).thenReturn(dataProvider);
 
-        String fileId = service.generateXmlFileId(1, 2);
+        ReflectionTestUtils.setField(service, "reportPeriodService", reportPeriodService);
+        ReflectionTestUtils.setField(service, "factory", factory);
+        String fileId = service.generateXmlFileId(1, 2, 48);
         assertTrue(fileId != null);
-    }*/
+    }
 
     @Test
     public void getAcceptedFormDataSources() {

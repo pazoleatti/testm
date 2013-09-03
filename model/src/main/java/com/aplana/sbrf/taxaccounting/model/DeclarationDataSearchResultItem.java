@@ -32,6 +32,8 @@ public class DeclarationDataSearchResultItem implements Serializable {
 	private Integer reportPeriodId;
 	// Название отчётного периода
 	private String reportPeriodName;
+    // Год отчетного периода
+    private Integer reportPeriodYear;
 	// Идентификатор вида декларации
 	private String declarationType;
 
@@ -114,4 +116,12 @@ public class DeclarationDataSearchResultItem implements Serializable {
 	public void setDeclarationType(String declarationType) {
 		this.declarationType = declarationType;
 	}
+
+    public Integer getReportPeriodYear() {
+        return reportPeriodYear;
+    }
+
+    public void setReportPeriodYear(Integer reportPeriodYear) {
+        this.reportPeriodYear = reportPeriodYear;
+    }
 }

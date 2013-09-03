@@ -50,12 +50,8 @@ public class TAUsersReportBuilderTest {
     }
 
     @Test
-    public void createReportTest(){
+    public void createReportTest() throws IOException {
         TAUsersReportBuilder report = new TAUsersReportBuilder(taUserList);
-        try {
-            report.createReport();
-        }catch (IOException e){
-            e.printStackTrace();
-        }
+        report.createReport();
     }
 }

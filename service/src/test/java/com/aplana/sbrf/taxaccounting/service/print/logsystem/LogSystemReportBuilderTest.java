@@ -49,12 +49,8 @@ public class LogSystemReportBuilderTest {
     }
 
     @Test
-    public void test(){
+    public void test() throws IOException {
         LogSystemReportBuilder builder = new LogSystemReportBuilder(items);
-        try {
-            builder.createReport();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        builder.createReport();
     }
 }

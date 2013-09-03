@@ -137,9 +137,9 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 					Arrays.asList(departmentPicker.
 							getValue().iterator().next()));
 		}
-		if(declarationType.getValue() != null) {
-			filter.setDeclarationTypeId(declarationType.getValue().getId());
-		}
+        filter.setDeclarationTypeId(declarationType.getValue()!= null?declarationType.getValue().getId() :
+                null);
+
 
 		return filter;
 	}

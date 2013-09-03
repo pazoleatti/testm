@@ -62,7 +62,7 @@ void generateXML() {
     def notificationType = 6
 
     builder.Файл(
-            ИдФайл: declarationService.generateXmlFileId(notificationType, departmentId),
+            ИдФайл: declarationService.generateXmlFileId(notificationType, departmentId, declarationData.reportPeriodId),
             ВерсПрог: /*departmentParamDeal.appVersion*/'???',      // TODO
             ВерсФорм: /*departmentParamDeal.formatVersion*/'???') { // TODO
         Документ(
