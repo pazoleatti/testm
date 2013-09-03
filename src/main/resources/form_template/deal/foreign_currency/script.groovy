@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 /**
- * Купля-продажа иностранной валюты
+ * 390 - Купля-продажа иностранной валюты
  * (похож на nondeliverable " Беспоставочные срочные сделки")
  *
  * @author Stanislav Yasinskiy

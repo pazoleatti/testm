@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Беспоставочные срочные сделки
+ * 392 - Беспоставочные срочные сделки
  *
  * @author Dmitriy Levykin
  */
@@ -83,10 +83,8 @@ void deleteRow() {
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
-    // Отчётный период
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     // Налоговый период
-    def taxPeriod = taxPeriodService.get(reportPeriod.taxPeriodId)
+    def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
 
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()

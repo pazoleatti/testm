@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Оказание банковских услуг
+ * 382 - Оказание банковских услуг
  *
  * @author Dmitriy Levykin
  */
@@ -78,10 +78,8 @@ void deleteRow() {
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
-    // Отчётный период
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     // Налоговый период
-    def taxPeriod = taxPeriodService.get(reportPeriod.taxPeriodId)
+    def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)s
 
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()

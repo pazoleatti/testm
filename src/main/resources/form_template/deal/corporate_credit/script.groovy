@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Предоставление корпоративного кредита
+ * 387 - Предоставление корпоративного кредита
  *
  * похож на  software_development (Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий)
  * похож на  trademark (Предоставление права пользования товарным знаком)

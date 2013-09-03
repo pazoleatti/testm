@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Предоставление права пользования товарным знаком
+ * 379 - Предоставление права пользования товарным знаком
  *
  * похож на  software_development (Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий)
  * похож на corporate_credit (Предоставление корпоративного кредита)
@@ -86,7 +86,7 @@ void logicCheck() {
         def rowNum = row.getIndex()
         def docDateCell = row.getCell('docDate')
         [
-                'rowNumber',        // № п/п
+                'rowNumber',     // № п/п
                 'fullNamePerson',// Полное наименование юридического лица с указанием ОПФ
                 'inn',           // ИНН/КИО
                 'countryCode',   // Код страны регистрации по классификатору ОКСМ

@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Поставочные срочные сделки, базисным активом которых является иностранная валюта
+ * 391 - Поставочные срочные сделки, базисным активом которых является иностранная валюта
  *
  * @author Stanislav Yasinskiy
  */

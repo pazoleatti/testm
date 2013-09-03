@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 /**
- * Купля-продажа драгоценных металлов
+ * 394 - Купля-продажа драгоценных металлов
  *
  * @author Stanislav Yasinskiy
  */

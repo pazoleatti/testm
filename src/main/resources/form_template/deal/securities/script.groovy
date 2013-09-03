@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import java.math.RoundingMode
 
 /**
- * Приобретение и реализация ценных бумаг (долей в уставном капитале)
+ * 381 - Приобретение и реализация ценных бумаг (долей в уставном капитале)
  *
  * @author Stanislav Yasinskiy
  */

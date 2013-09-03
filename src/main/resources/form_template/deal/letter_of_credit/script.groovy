@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 /**
- * Предоставление инструментов торгового финансирования и непокрытых аккредитивов
+ * 386 - Предоставление инструментов торгового финансирования и непокрытых аккредитивов
  * (похож на guarantees "Предоставление гарантий")
  *
  * @author Stanislav Yasinskiy
