@@ -192,7 +192,7 @@ void checkNSI() {
          */
         //def refOkatoCodeDataProvider = refBookFactory.getDataProvider(3)
         if (row.okato != null && getRefBookValue(3, row.okato, "OKATO") == null){ // refOkatoCodeDataProvider.getRecords(new Date(), null, "OKATO like '"+getRefBookValue(3, row.okato, "OKATO")+"'", null).getRecords().size == 0){
-            logger.error('Неверный код ОКАТО')
+            logger.error("Неверный код ОКАТО. Строка: "+row.getIndex())
         }
 
         /*
@@ -203,7 +203,7 @@ void checkNSI() {
          */
 
         if (row.tsTypeCode != null && getRefBookValue(42, row.tsTypeCode, "CODE") == null){//refTransportCodeDataProvider.getRecords(new Date(), null, "CODE like '"+row.tsTypeCode+"'", null).getRecords().size == 0) {
-            logger.error('Неверный код вида транспортного средства!')
+            logger.error('Неверный код вида транспортного средства!. Строка: '+row.getIndex())
         }
 
         /**
@@ -218,7 +218,7 @@ void checkNSI() {
         def tsType = getRefBookValue(42, row.tsType, "NAME")
 
         if (row.tsType != null && row.tsTypeCode != null &&(tsTypeCode == null || tsType == null || refTransportCodeDataProvider.getRecords(new Date(), null, "CODE like '"+tsTypeCode+"' and NAME LIKE '"+tsType+"'", null).getRecords().size() == 0)){
-            logger.error('Название вида ТС не совпадает с Кодом вида ТС')
+            logger.error('Название вида ТС не совпадает с Кодом вида ТС. Строка: '+row.getIndex())
         }
 
         /*
@@ -229,7 +229,7 @@ void checkNSI() {
          */
         //def refTaxBaseCodeDataProvider = refBookFactory.getDataProvider(12)
         if (row.taxBaseOkeiUnit != null && getRefBookValue(12, row.taxBaseOkeiUnit, "CODE") == null) {//refTaxBaseCodeDataProvider.getRecords(new Date(), null, "CODE LIKE '"+row.taxBaseOkeiUnit+"'", null).getRecords().size == 0){
-            logger.error("Неверный код единицы измерения налоговой базы")
+            logger.error("Неверный код единицы измерения налоговой базы. Строка: "+row.getIndex())
         }
 
         /**
@@ -240,7 +240,7 @@ void checkNSI() {
          */
         def refEcoClassDataProvider = refBookFactory.getDataProvider(40)
         if (row.ecoClass!=null && getRefBookValue(40, row.ecoClass, "NAME") == null) {// refEcoClassDataProvider.getRecords(new Date(), null, "NAME LIKE '"+row.ecoClass+"'", null).getRecords().size == 0) {
-            logger.error("Неверный экологический класс")
+            logger.error("Неверный экологический класс. Строка: "+row.getIndex())
         }
 
         /**
@@ -251,7 +251,7 @@ void checkNSI() {
             def region = getRegionByOkatoOrg(row.okato)
             query = "TAX_BENEFIT_ID ="+row.taxBenefitCode+" AND DICT_REGION_ID = "+region.record_id
             if (refTaxBenefitParameters.getRecords(new Date(), null, query, null).getRecords().size() == 0){
-                logger.error("Выбранная льгота для текущего региона не предусмотрена")
+                logger.error("Выбранная льгота для текущего региона не предусмотрена . Строка: "+row.getIndex())
             }
         }
     }
@@ -293,7 +293,7 @@ def checkRequiredField() {
 
 
         if (!''.equals(errorMsg)) {
-            logger.error("Не заполнены поля в колонках : $errorMsg.")
+            logger.error("Не заполнены поля в колонках : $errorMsg. Строка: "+row.getIndex())
             return false
         }
     }
@@ -396,7 +396,7 @@ def fillForm() {
             def records = refDataProvideTaxBenefit.getRecords(new Date(), null, query, null).getRecords()
 
             if (records.size() == 0){
-                logger.error('Ошибка при получении параметров налоговых льгот')
+                logger.error("Ошибка при получении параметров налоговых льгот. Строка: "+row.getIndex())
                 return;
             } else{
                 reducingPerc = records.get(0).percent
@@ -436,7 +436,7 @@ def fillForm() {
             if (row.ownMonths == null) {
                 errors.add('"Срок владения ТС (полных месяцев)"')
             }
-            logger.error("\"Коэффициент Кв\" не может быть вычислена, т.к. поля $errors не были вычислены или заполнены.")
+            logger.error("\"Коэффициент Кв\" не может быть вычислена, т.к. поля $errors не были вычислены или заполнены. . Строка: "+row.getIndex())
         }
 
 
@@ -490,8 +490,6 @@ def fillForm() {
 
             if (record.size() != 0){
                 row.taxRate = record.get(0).record_id.numberValue
-            } else{
-                logger.error("Ошибка определения налоговой ставки")
             }
             // TODO удалить этот старый код -> row.taxRate = transportTaxDao.getTaxRate(row.tsTypeCode, row.years, row.taxBase, region.code)
         } else {
@@ -508,7 +506,7 @@ def fillForm() {
                 fields.add('"Налоговая база"')
             }
 
-            logger.error("Налоговая ставка не может быть вычислена, т.к. не заполнены поля: ${fields}.")
+            logger.error("Налоговая ставка не может быть вычислена, т.к. не заполнены поля: ${fields}. Строка: "+row.getIndex())
         }
 
 
@@ -532,7 +530,7 @@ def fillForm() {
                 errors.add('"Налоговая ставка"')
             }
 
-            logger.error("\"Сумма исчисления налога\" не может быть вычислена, т.к. поля $errors не были вычислены или заполнены.")
+            logger.error("\"Сумма исчисления налога\" не может быть вычислена, т.к. поля $errors не были вычислены или заполнены. Строка: "+row.getIndex())
         }
 
         /*
@@ -590,7 +588,7 @@ def fillForm() {
                 errors.add('"Сумма налоговой льготы (руб.)"')
             }
 
-            logger.error("\"Исчисленная сумма налога, подлежащая уплате в бюджет\" не может быть вычислена, т.к. поля $errors не были вычислены или заполнены.")
+            logger.error("\"Исчисленная сумма налога, подлежащая уплате в бюджет\" не может быть вычислена, т.к. поля $errors не были вычислены или заполнены.. Строка: "+row.getIndex())
         }
     }
     save(data)
@@ -619,22 +617,22 @@ def logicalChecks() {
 
         // 13 графа - Поверка на соответствие дат использования льготы
         if (row.taxBenefitCode && row.benefitEndDate != null && (row.benefitStartDate == null || row.benefitStartDate > row.benefitEndDate)) {
-            logger.error('Дата начала(окончания) использования льготы неверная!')
+            logger.error("Дата начала(окончания) использования льготы неверная!. Строка: "+row.getIndex())
         }
 
         // 14 граафа - Проверка, что Сумма исчисления налога больше или равна Сумма налоговой льготы
         if (row.calculatedTaxSum != null && row.benefitSum != null
                 && row.calculatedTaxSum < row.benefitSum) {
-            logger.error('Сумма исчисления налога меньше Суммы налоговой льготы.')
+            logger.error('Сумма исчисления налога меньше Суммы налоговой льготы. Строка: '+row.getIndex())
         }
 
         // 15 графа - Проверка Коэффициент Кв
         //logger.info('kv = ' + row.coef362)
         if (row.coef362 != null) {
             if (row.coef362 < 0.0) {
-                logger.error('Коэффициент Кв меньше нуля.')
+                logger.error('Коэффициент Кв меньше нуля. Строка: '+row.getIndex())
             } else if (row.coef362 > 1.0) {
-                logger.error('Коэффициент Кв больше единицы.')
+                logger.error('Коэффициент Кв больше единицы. Строка: '+row.getIndex())
             }
         }
 
@@ -642,9 +640,9 @@ def logicalChecks() {
         //logger.info('kl = ' + row.coefKl)
         if (row.coefKl != null) {
             if (row.coefKl < 0.0){
-                logger.error('Коэффициент Кл меньше нуля.')
+                logger.error('Коэффициент Кл меньше нуля. Строка: '+row.getIndex())
             } else if (row.coefKl > 1.0) {
-                logger.error('Коэффициент Кл больше единицы.')
+                logger.error('Коэффициент Кл больше единицы. Строка: '+row.getIndex())
             }
         }
 
@@ -655,7 +653,7 @@ def logicalChecks() {
          */
         def notNull17_20 = row.benefitStartDate != null && row.benefitEndDate != null && row.coefKl != null && row.benefitSum != null
         if ((row.taxBenefitCode != null) ^ notNull17_20){
-            logger.error("Данные о налоговой льготе указаны не полностью")
+            logger.error("Данные о налоговой льготе указаны не полностью. Строка: "+row.getIndex())
             return;
         }
 
@@ -767,7 +765,7 @@ def getRegionByOkatoOrg(okatoCell){
     if (records.size() == 1){
         return records.get(0);
     } else if (records.size() == 0){
-        logger.error("Не удалось определить регион по коду ОКАТО")
+        logger.error("Не удалось определить регион по коду ОКАТО. Строка: "+row.getIndex())
         return null;
     } else{
         /**
@@ -793,7 +791,7 @@ def getRegionByOkatoOrg(okatoCell){
         def reg83 = records.find{ it.OKATO.toString().substring(0, 4).equals("1110")}
         if (reg83 != null) return reg83;
 
-        logger.error("Не удалось определить регион по коду ОКАТО")
+        logger.error("Не удалось определить регион по коду ОКАТО. Строка: "+row.getIndex())
         return null;
     }
 }
