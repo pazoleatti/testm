@@ -116,7 +116,7 @@ def prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId)
 def xmlDataOld = getOldXmlData(prevReportPeriod, departmentId)
 
 /** Налоговый период. */
-def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.taxPeriodId) : null)
+def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.getTaxPeriod().getId()) : null)
 
 /** Признак налоговый ли это период. */
 def isTaxPeriod = (reportPeriod != null && reportPeriod.order == 4)
@@ -585,7 +585,7 @@ xmlbuilder.Файл(
                     // 0..1
                     СубБдж(
                             КБК : kbk2,
-                            НалПУ : getLong(nalPu))
+                            НалПУ : nalPu)
                 }
                 // Раздел 1. Подраздел 1.1 - конец
 
@@ -896,7 +896,7 @@ xmlbuilder.Файл(
 
                     if (dataRowsHelperAdvance != null) {
                         dataRowsHelperAdvance.getAllCached().each { row ->
-                            if (row.getAlias() != 'total') {
+                            if (row.getAlias() == null) {
                                 obRasch = refBookService.getNumberValue(26, row.calcFlag, 'CODE')
                                 naimOP = refBookService.getStringValue(30, row.regionBankDivision, 'NAME')
                                 kppop = refBookService.getStringValue(33, row.kpp, 'KPP')
@@ -968,19 +968,19 @@ xmlbuilder.Файл(
                 // получение из нф авансовых платежей строки соответствующей текущему подразделению
                 def tmpRow = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, kpp)
                 if (tmpRow != null) {
-                    obRasch = refBookService.getNumberValue(26, row.calcFlag, 'CODE')
-                    naimOP = refBookService.getStringValue(30, row.regionBankDivision, 'NAME')
-                    kppop = refBookService.getStringValue(33, row.kpp, 'KPP')
-                    obazUplNalOP = refBookService.getNumberValue(25, row.obligationPayTax, 'CODE')
-                    dolaNalBaz = row.baseTaxOf
-                    nalBazaDola = row.baseTaxOfRub
-                    stavNalSubRF = refBookService.getNumberValue(33, row.subjectTaxStavka, 'TAX_RATE')
-                    sumNal = row.taxSum
-                    nalNachislSubRF = row.subjectTaxCredit
-                    sumNalP = row.taxSumToPay
-                    nalViplVneRF = row.taxSumOutside
-                    mesAvPlat = row.everyMontherPaymentAfterPeriod
-                    mesAvPlat1CvSled = row.everyMonthForKvartalNextPeriod
+                    obRasch = refBookService.getNumberValue(26, tmpRow.calcFlag, 'CODE')
+                    naimOP = refBookService.getStringValue(30, tmpRow.regionBankDivision, 'NAME')
+                    kppop = refBookService.getStringValue(33, tmpRow.kpp, 'KPP')
+                    obazUplNalOP = refBookService.getNumberValue(25, tmpRow.obligationPayTax, 'CODE')
+                    dolaNalBaz = tmpRow.baseTaxOf
+                    nalBazaDola = tmpRow.baseTaxOfRub
+                    stavNalSubRF = refBookService.getNumberValue(33, tmpRow.subjectTaxStavka, 'TAX_RATE')
+                    sumNal = tmpRow.taxSum
+                    nalNachislSubRF = tmpRow.subjectTaxCredit
+                    sumNalP = tmpRow.taxSumToPay
+                    nalViplVneRF = tmpRow.taxSumOutside
+                    mesAvPlat = tmpRow.everyMontherPaymentAfterPeriod
+                    mesAvPlat1CvSled = tmpRow.everyMonthForKvartalNextPeriod
                 }
 
                 // 0..n - всегда один
@@ -1570,7 +1570,7 @@ def getNalBazaIsch(def row100, def row110) {
 def getNalDopl(def value1, def value2, value3) {
     def result = 0
     if ((value1 - value2 - value3) > 0) {
-        result = getLong(value1 - value2 - value3)
+        result = value1 - value2 - value3
     }
     return getLong(result)
 }
@@ -1597,7 +1597,6 @@ def getNalUmen(def value1, def value2, value3) {
     return getLong(result)
 }
 
-// TODO (Ramil Timerbaev) сделать в этом методе вывод в лог каждого слагаемого для Саши для отладки.
 /**
  * Косвенные расходы, всего (КосвРасхВс).
  *

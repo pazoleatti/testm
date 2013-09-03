@@ -190,8 +190,15 @@ void importData() {
         return
     }
 
-    // добавить данные в форму
-    addData(xml, headRowCount)
+    try {
+        // добавить данные в форму
+        addData(xml, headRowCount)
+    } catch(Exception e) {
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
+    }
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        logger.info('Данные загружены')
+    }
 }
 
 /**
@@ -309,8 +316,6 @@ void addData(def xml, headRowCount) {
     newRows.each { newRow ->
         insert(data, newRow)
     }
-    data.commit()
-    logger.info('Данные загружены')
 }
 
 /**
