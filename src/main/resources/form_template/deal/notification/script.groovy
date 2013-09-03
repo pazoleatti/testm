@@ -37,10 +37,10 @@ void generateXML() {
     !declarationData.isAccepted()
 
     // TODO Нужно ли проверять, что источник - "Матрица", а не другая форма?
-    if (formDataCollection == null || formDataCollection.records.isEmpty()) {
-        logger.error('Отсутствует "Матрица" в статусе "Принят". Формирование уведомления невозможно.')
-        return
-    }
+//    if (formDataCollection == null || formDataCollection.records.isEmpty()) {
+//        logger.error('Отсутствует "Матрица" в статусе "Принят". Формирование уведомления невозможно.')
+//        return
+//    }
 
     def departmentId = declarationData.departmentId
 
