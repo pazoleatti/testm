@@ -797,7 +797,7 @@ alter table log_system add constraint log_system_chk_event_id check (event_id in
 
 alter table log_system add constraint log_system_chk_dcl_form check (event_id in (501, 502) or
   declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
-alter table log_system add constraint log_system_chk_rp check (event_id in (501, 502) or report_period_id is not null);
+alter table log_system add constraint log_system_chk_rp check (event_id in (501, 502, 7) or report_period_id is not null);
 
 alter table log_system add constraint log_system_fk_user_id foreign key (user_id) references sec_user (id);
 alter table log_system add constraint log_system_fk_department_id foreign key (department_id) references department(id);
