@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 /**
- * Купля-продажа драгоценных металлов
+ * 394 - Купля-продажа драгоценных металлов
  *
  * @author Stanislav Yasinskiy
  */
@@ -116,7 +116,8 @@ void logicCheck() {
             }
         }
         //  Корректность даты договора
-        def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+        def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+
         def dFrom = taxPeriod.getStartDate()
         def dTo = taxPeriod.getEndDate()
         def dt = docDateCell.value
@@ -203,9 +204,9 @@ void logicCheck() {
         checkNSI(row, "countryCodeNumeric2", "ОКСМ", 10)
         checkNSI(row, "regionCode", "Коды субъектов Российской Федерации", 4)
         checkNSI(row, "region2", "Коды субъектов Российской Федерации", 4)
-        checkNSI(row, "metalName", "Коды драгоценных металлов", 40)
-        checkNSI(row, "deliverySign", "Признаки физической поставки", 44)
-        checkNSI(row, "deliveryCode", "Коды условий поставки", 47)
+        checkNSI(row, "metalName", "Коды драгоценных металлов", 17)
+        checkNSI(row, "deliverySign", "Признаки физической поставки", 18)
+        checkNSI(row, "deliveryCode", "Коды условий поставки", 21)
         checkNSI(row, "dealFocus", "Направленности сделок", 20)
     }
 }
