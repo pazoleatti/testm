@@ -42,7 +42,7 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 		List<DepartmentReportPeriod> reportPeriods = reportPeriodService.listByDepartmentId(action.getDepartmentId());
 		Map<String, List<TableRow>> per = new TreeMap<String, List<TableRow>>();
 		for (DepartmentReportPeriod period : reportPeriods) {
-			TaxPeriod taxPeriod = reportPeriodService.getTaxPeriod(period.getReportPeriod().getTaxPeriodId());
+			TaxPeriod taxPeriod = period.getReportPeriod().getTaxPeriod();
 			if ((taxPeriod.getStartDate().after(from.getTime()) || taxPeriod.getStartDate().equals(from.getTime()))
 					&& (taxPeriod.getStartDate().before(to.getTime()) || taxPeriod.getStartDate().equals(to.getTime()))
 					&& (taxPeriod.getTaxType() == action.getTaxType())) {

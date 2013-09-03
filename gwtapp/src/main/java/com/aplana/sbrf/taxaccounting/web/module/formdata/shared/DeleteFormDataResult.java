@@ -7,6 +7,7 @@ import com.gwtplatform.dispatch.shared.Result;
  * Результат запроса для удаления формы.
  *
  */
-public class DeleteFormDataResult implements Result {
+public class DeleteFormDataResult implements Result{
+	private static final long serialVersionUID = 5663096332754887482L;
 	
 }

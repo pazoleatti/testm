@@ -89,7 +89,7 @@ public class GetDeclarationDataHandler
                 declaration.getReportPeriodId());
 		result.setReportPeriod(reportPeriod.getName());
 
-        Date reportPeriodStartDate = reportPeriodService.getTaxPeriod(reportPeriod.getTaxPeriodId()).getStartDate();
+        Date reportPeriodStartDate = reportPeriod.getTaxPeriod().getStartDate();
         String year = new SimpleDateFormat("yyyy").format(reportPeriodStartDate);
         result.setReportPeriodYear(Integer.valueOf(year));
 
