@@ -507,7 +507,6 @@ void importData() {
 
     // сохранить начальное состояние формы
     def data = getData(formData)
-    def rowsOld = getRows(data)
     try {
         // добавить данные в форму
         addData(xml)
@@ -519,16 +518,11 @@ void importData() {
             checkNSI()
         }
     } catch(Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
-    // откатить загрузку если есть ошибки
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        data.clear()
-        data.insert(rowsOld, 1)
-    } else {
+    if (!logger.containsLevel(LogLevel.ERROR)) {
         logger.info('Данные загружены')
     }
-    data.commit()
 }
 
 
@@ -946,7 +940,6 @@ void addData(def xml) {
     def data = getData(formData)
     data.clear()
     data.insert(newRows, 1)
-    data.commit()
 }
 
 /**
