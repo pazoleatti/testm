@@ -125,10 +125,12 @@ public class PeriodPickerPopupWidget extends Composite implements
 	
 	private void dereference(List<Integer> value){
 		Collection<String> strings = new ArrayList<String>();
-		for (Integer val : value) {
-			String name = dereferenceValue.get(val);
-			if (name != null){
-				strings.add(name);
+		if (value!=null){
+			for (Integer val : value) {
+				String name = dereferenceValue.get(val);
+				if (name != null){
+					strings.add(name);
+				}
 			}
 		}
 		String txt = joinListToString(strings);
