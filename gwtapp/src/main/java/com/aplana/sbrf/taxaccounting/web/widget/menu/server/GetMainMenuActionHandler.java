@@ -135,9 +135,9 @@ public class GetMainMenuActionHandler extends
                         new MenuItem("Назначение форм и деклараций",
                                 NUMBER_SIGN + TaxFormNominationToken.taxFormNomination +
                                         ";" + TaxFormNominationToken.isForm + "=" + true));
+            }else{
+                settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
             }
-
-            settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
 
             settingMenuItem.getSubMenu().add(
                     new MenuItem("Указание форм-источников",
