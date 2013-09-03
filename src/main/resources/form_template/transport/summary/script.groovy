@@ -865,7 +865,7 @@ def consolidation(){
                 if (diff <= 0){
                     newRow.years = 0
                 } else{
-                    newRow.years = new Date(diff, cl.get(Calendar.MONTH), cl.get(Calendar.DAY_OF_MONTH))
+                    newRow.years = diff
                 }
 
                 /*

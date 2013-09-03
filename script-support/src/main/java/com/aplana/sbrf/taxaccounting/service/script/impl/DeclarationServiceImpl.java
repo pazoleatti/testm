@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
@@ -35,6 +37,7 @@ import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder
  */
 
 @Service("declarationService")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DeclarationServiceImpl implements DeclarationService, ScriptComponentContextHolder{
 
 	private static final String DATE_FORMAT = "yyyyMMdd";
@@ -64,10 +67,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
 
-    @Autowired(required = false)
+    @Autowired
     private RefBookFactory factory;
 
-    @Autowired  (required = false)
+    @Autowired
     private ReportPeriodService reportPeriodService;
 
 	@Override
@@ -77,11 +80,12 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
 	@Override
 	public String generateXmlFileId(int declarationTypeId, int departmentId, int reportPeriodId) {
-        Date startDate = reportPeriodService.getStartDate(reportPeriodId).getTime();
+
         DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
         String declarationPrefix = declarationTypeDao.get(declarationTypeId).getTaxType().getDeclarationPrefix();
 		StringBuilder stringBuilder = new StringBuilder(declarationPrefix);
 		RefBookDataProvider tmp = factory.getDataProvider(DEPARTMENT_PARAM_REF_BOOK_ID);
+        Date startDate = reportPeriodService.getStartDate(reportPeriodId).getTime();
         List<Map<String, RefBookValue>> departmentParams = tmp.getRecords(startDate, null, String.format("DEPARTMENT_ID = %d", departmentId), null);
         Map<String, RefBookValue>departmentParam = departmentParams.get(0);
 
