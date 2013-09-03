@@ -71,7 +71,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private RefBookFactory factory;
 
     @Autowired
-    private PeriodService reportPeriodService;
+    private PeriodService periodService;
 
 	@Override
 	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
@@ -85,9 +85,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         String declarationPrefix = declarationTypeDao.get(declarationTypeId).getTaxType().getDeclarationPrefix();
 		StringBuilder stringBuilder = new StringBuilder(declarationPrefix);
 		RefBookDataProvider tmp = factory.getDataProvider(DEPARTMENT_PARAM_REF_BOOK_ID);
-        Date startDate = reportPeriodService.getStartDate(reportPeriodId).getTime();
+        Date startDate = periodService.getStartDate(reportPeriodId).getTime();
         List<Map<String, RefBookValue>> departmentParams = tmp.getRecords(startDate, null, String.format("DEPARTMENT_ID = %d", departmentId), null);
-        Map<String, RefBookValue>departmentParam = departmentParams.get(0);
+        Map<String, RefBookValue> departmentParam = departmentParams.get(0);
 
         Calendar calendar = Calendar.getInstance();
 		stringBuilder.append('_' +
