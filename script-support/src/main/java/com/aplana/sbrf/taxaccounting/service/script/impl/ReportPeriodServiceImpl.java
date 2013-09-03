@@ -30,7 +30,7 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 	TaxPeriodDao taxPeriodDao;
 
     @Autowired(required = false)
-    com.aplana.sbrf.taxaccounting.service.ReportPeriodService reportPeriodService;
+    com.aplana.sbrf.taxaccounting.service.PeriodService reportPeriodService;
 	
 	@Override
 	public ReportPeriod get(int reportPeriodId) {

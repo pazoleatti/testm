@@ -20,7 +20,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 
 /**
  * Сервис работы с периодами
@@ -30,7 +30,7 @@ import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
  */
 @Service
 @Transactional
-public class ReportPeriodServiceImpl implements ReportPeriodService{
+public class PeriodServiceImpl implements PeriodService{
 
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
@@ -292,6 +292,18 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 		return taxPeriodDao.getLast(taxType);
 	}
 
+	@Override
+	public List<ReportPeriod> getAllPeriodsByTaxType(TaxType taxType) {
+		// TODO Оптимизировать!!!!
+		List<ReportPeriod> reportPeriods = new ArrayList<ReportPeriod>();
+		List<TaxPeriod> taxPeriods = taxPeriodDao.listByTaxType(taxType);
+		for (TaxPeriod taxPeriod : taxPeriods) {
+			reportPeriods.addAll(reportPeriodDao.listByTaxPeriod(taxPeriod.getId()));
+		}
+		return reportPeriods;
+	}
+
+	
 
 
 }

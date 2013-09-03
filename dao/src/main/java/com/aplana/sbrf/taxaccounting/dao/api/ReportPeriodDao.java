@@ -17,6 +17,14 @@ public interface ReportPeriodDao {
 	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.exception.DaoException если периода с заданным идентификатором не существует
 	 */
 	ReportPeriod get(int reportPeriodId);
+	
+    /**
+     * Отчетный период по налоговому периоду и периоду в справочнике "Коды, определяющие налоговый (отчётный) период"
+     * @param taxPeriodId
+     * @param dictTaxPeriodId
+     * @return
+     */
+    ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId);
 		
 	/**
 	 * Возвращает список отчётных периодов, входящий в данный налоговый период. 
@@ -35,11 +43,5 @@ public interface ReportPeriodDao {
 	int save(ReportPeriod reportPeriod);
 
 
-    /**
-     * Отчетный период по налоговому периоду и периоду в справочнике "Коды, определяющие налоговый (отчётный) период"
-     * @param taxPeriodId
-     * @param dictTaxPeriodId
-     * @return
-     */
-    ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId);
+
 }

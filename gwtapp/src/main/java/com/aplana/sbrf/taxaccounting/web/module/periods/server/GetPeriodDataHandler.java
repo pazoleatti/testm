@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.TableRow;
@@ -23,7 +23,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAction, GetPeriodDataResult> {
 
 	@Autowired
-	private ReportPeriodService reportPeriodService;
+	private PeriodService reportPeriodService;
 
 
 	@Autowired

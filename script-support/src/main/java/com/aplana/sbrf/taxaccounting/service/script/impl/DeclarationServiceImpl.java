@@ -7,7 +7,7 @@ import java.util.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -68,7 +68,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private RefBookFactory factory;
 
     @Autowired  (required = false)
-    private ReportPeriodService reportPeriodService;
+    private PeriodService reportPeriodService;
 
 	@Override
 	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
