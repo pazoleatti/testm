@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodMappingDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -39,6 +40,9 @@ public class MappingServiceImpl implements MappingService {
     private FormDataDao formDataDao;
 
     @Autowired
+    private ReportPeriodDao periodDao;
+
+    @Autowired
     private AuditService auditService;
 
     @Autowired
@@ -68,6 +72,7 @@ public class MappingServiceImpl implements MappingService {
         RestoreExemplar restoreExemplar;
         Integer departmentId = null;
         Integer formTypeId = null;
+        ReportPeriod reportPeriod = null;
         Integer reportPeriodId = null;
         Integer formTemplateId = null;
 
@@ -91,12 +96,12 @@ public class MappingServiceImpl implements MappingService {
 
             log.debug(restoreExemplar);
 
-            ReportPeriod reportPeriod = reportPeriodMappingDao.getByTaxPeriodAndDict(
+            reportPeriodId = reportPeriodMappingDao.getByTaxPeriodAndDict(
                     restoreExemplar.getTaxPeriod(),
                     restoreExemplar.getDictTaxPeriodId());
 
-            if (reportPeriod != null) {
-                reportPeriodId = reportPeriod.getId();
+            if (reportPeriodId != null) {
+                reportPeriod = periodDao.get(reportPeriodId);
             }
 
             Logger logger = new Logger();

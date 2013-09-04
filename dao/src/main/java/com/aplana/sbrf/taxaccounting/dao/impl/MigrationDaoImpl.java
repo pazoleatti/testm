@@ -290,12 +290,16 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
             row.setCodeTypePaper(MapperUtils.getLong(rs, 2));
             row.setTypePaper(MapperUtils.getString(rs, 3));
             row.setPercCashOfz(MapperUtils.getBD(rs, 4));
-            row.setPercCashEuro(MapperUtils.getBD(rs, 5));
-            row.setPercCashFed(MapperUtils.getBD(rs, 6));
-            row.setPercCashOgvz(MapperUtils.getBD(rs, 7));
-            row.setPercCashOther(MapperUtils.getBD(rs, 8));
-            row.setPercCashCorp(MapperUtils.getBD(rs, 9));
-            row.setTypeRow(MapperUtils.getString(rs, 10));
+            row.setPercCashFed(MapperUtils.getBD(rs, 5));
+            row.setPercCashBel(MapperUtils.getBD(rs, 6));
+            row.setPercCashIpotAfter(MapperUtils.getBD(rs, 7));
+            row.setPercCashMun(MapperUtils.getBD(rs, 8));
+            row.setPercCashIpotBefore(MapperUtils.getBD(rs, 9));
+            row.setPercCashOgvz(MapperUtils.getBD(rs, 10));
+            row.setPercCashEuroNew(MapperUtils.getBD(rs, 11));
+            row.setPercCashOther(MapperUtils.getBD(rs, 12));
+            row.setPercCashCorp(MapperUtils.getBD(rs, 13));
+            row.setTypeRow(MapperUtils.getString(rs, 14));
             return row;
         }
     }
@@ -310,9 +314,13 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "\"r31\".codetypepaper,\n" +
                             "\"r31\".typepaper,\n" +
                             "\"r31\".perccashofz,\n" +
-                            "\"r31\".perccasheuro,\n" +
                             "\"r31\".perccashfed,\n" +
+                            "\"r31\".perccashbel,\n" +
+                            "\"r31\".perccashipotafter,\n" +
+                            "\"r31\".perccashmun,\n" +
+                            "\"r31\".perccashipotbefore,\n" +
                             "\"r31\".perccashogvz,\n" +
+                            "\"r31\".perccasheuronew,\n" +
                             "\"r31\".perccashother,\n" +
                             "\"r31\".perccashcorp,\n" +
                             "\"r31\".typerow\n" +

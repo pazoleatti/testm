@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -44,8 +46,10 @@ public class MigrationHandler extends AbstractActionHandler<MigrationAction, Mig
         result.setExemplarList(migrationService.getActualExemplarByRnuType(action.getRnus()));
         Map<String, byte[]> map = migrationService.getFiles(action.getRnus());
 
+//        mappingService.setProperties(false, false);
 //        for (Map.Entry<String, byte[]> entry : map.entrySet()) {
-//            mappingService.addFormData(entry.getKey(), entry.getValue());
+//            createFile(entry.getKey(), entry.getValue());
+//            //mappingService.addFormData(entry.getKey(), entry.getValue());
 //        }
 
         result.setSenFilesCount(messageService.sendFiles(map));
@@ -56,5 +60,22 @@ public class MigrationHandler extends AbstractActionHandler<MigrationAction, Mig
     public void undo(MigrationAction action, MigrationResult result,
                      ExecutionContext executionContext) throws ActionException {
         // Не требуется
+    }
+
+    private void createFile(String filename, byte[] content) {
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream("C:/1/"+filename);
+            out.write(content);
+            out.close();
+        } catch (Exception ignored) {
+        } finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException ignored) {
+            }
+        }
     }
 }
