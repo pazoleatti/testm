@@ -305,8 +305,8 @@ def logicalCheck(def useLog) {
     if (formDataOld != null && !getRows(dataOld).isEmpty()) {
         def i = 1
 
-        // список проверяемых столбцов (графа 1..3, 5..10, 13, 14)
-        columns = ['issuer', 'shareType', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
+        // список проверяемых столбцов (графа 1..10, 13, 14)
+        columns = ['rowNumber', 'issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
                 'cost', 'signSecurity', 'costOnMarketQuotation']
 
         // суммы строки общих итогов
