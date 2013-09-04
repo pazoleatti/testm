@@ -1282,5 +1282,6 @@ td.datePickerMonth {
 .gwt-CellTable-SubHeader td {
     background-color: #C0C0C0 !important;
     font-weight: bold;
+    font-size: 12px;
     padding-left: 10px;
 }
