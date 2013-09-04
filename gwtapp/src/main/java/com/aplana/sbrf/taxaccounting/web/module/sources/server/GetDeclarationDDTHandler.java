@@ -14,16 +14,16 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.server.assembler.DepartmentDeclarationTypeComparator;
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDeclarationReceiversAction;
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDeclarationReceiversResult;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDeclarationDDTAction;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDeclarationDDTResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class GetDeclarationReceiversHandler
-		extends AbstractActionHandler<GetDeclarationReceiversAction, GetDeclarationReceiversResult> {
+public class GetDeclarationDDTHandler
+		extends AbstractActionHandler<GetDeclarationDDTAction, GetDeclarationDDTResult> {
 
 	@Autowired
 	private SourceService sourceService;
@@ -31,14 +31,14 @@ public class GetDeclarationReceiversHandler
 	@Autowired
 	private DepartmentService departmentService;
 
-    public GetDeclarationReceiversHandler() {
-        super(GetDeclarationReceiversAction.class);
+    public GetDeclarationDDTHandler() {
+        super(GetDeclarationDDTAction.class);
     }
 
     @Override
-    public GetDeclarationReceiversResult execute(GetDeclarationReceiversAction action, ExecutionContext context)
+    public GetDeclarationDDTResult execute(GetDeclarationDDTAction action, ExecutionContext context)
 			throws ActionException {
-		GetDeclarationReceiversResult result = new GetDeclarationReceiversResult();
+		GetDeclarationDDTResult result = new GetDeclarationDDTResult();
 		List<DepartmentDeclarationType> receivers =
 				sourceService.getDDTByDepartment(action.getDepartmentId(), action.getTaxType());
 
@@ -60,7 +60,7 @@ public class GetDeclarationReceiversHandler
     }
 
     @Override
-    public void undo(GetDeclarationReceiversAction action, GetDeclarationReceiversResult result, ExecutionContext context)
+    public void undo(GetDeclarationDDTAction action, GetDeclarationDDTResult result, ExecutionContext context)
 			throws ActionException {
         // Nothing!
     }

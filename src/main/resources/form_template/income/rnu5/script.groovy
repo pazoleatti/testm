@@ -370,7 +370,7 @@ def getNewTotalRow(def codeId, def sum) {
     newRow.setAlias('total' + codeId)
     newRow.sum = sum
     def alias = getCodeAttribute(codeId)
-    newRow.fix = 'Итого по коду ' + alias
+    newRow.fix = 'Итого по КНУ ' + alias
     newRow.getCell('fix').colSpan = 2
     setTotalStyle(newRow)
     return newRow
