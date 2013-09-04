@@ -205,6 +205,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
         if(performer == null){
             if(!name.getText().isEmpty()){
                 performer = new FormDataPerformer();
+                performer.setName(name.getText());
             }else{
                 Window.alert("Необходимо ввести ФИО исполнителя");
                 return;

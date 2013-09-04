@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +39,7 @@ public class DeclarationDataAccessServiceImpl implements
 	private ReportPeriodDao reportPeriodDao;
 
 	@Autowired
-	private ReportPeriodService reportPeriodService;
+	private PeriodService reportPeriodService;
 
 	/**
 	 * В сущности эта функция проверяет наличие прав на просмотр декларации,

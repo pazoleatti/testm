@@ -1,0 +1,29 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	xmlns:p="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
+
+	<g:FlowPanel>
+		<g:HorizontalPanel width="100%">
+			<g:cell width="100%">
+				<g:TextBox enabled="false" ui:field="text" width="100%" />
+			</g:cell>
+			<g:cell>
+				<g:Button text="..." ui:field="selectButton" />
+			</g:cell>
+		</g:HorizontalPanel>
+		<g:FlowPanel visible="false">
+			<g:PopupPanel ui:field="popupPanel" autoHideEnabled="true"
+				modal="true" width="300px" height="350px">
+				<g:VerticalPanel width="100%">
+					<g:cell>
+						<p:PeriodPickerWidget ui:field="periodPicker" />
+					</g:cell>
+					<g:cell>
+						<g:Button ui:field="okButton" text="ОК" />
+					</g:cell>
+				</g:VerticalPanel>
+			</g:PopupPanel>
+		</g:FlowPanel>
+	</g:FlowPanel>
+
+</ui:UiBinder>

@@ -8,6 +8,8 @@ import com.gwtplatform.dispatch.shared.Result;
 import java.util.List;
 
 public class GetFormDataListResult implements Result {
+	private static final long serialVersionUID = -7862353388101445807L;
+	
 	private List<FormDataSearchResultItem> records;
 	private List<Department> departments;
 	private List<ReportPeriod> reportPeriods;

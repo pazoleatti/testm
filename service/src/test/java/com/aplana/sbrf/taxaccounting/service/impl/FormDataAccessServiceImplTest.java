@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.test.FormTypeMockUtils;
 
 import org.junit.BeforeClass;
@@ -194,7 +194,7 @@ public class FormDataAccessServiceImplTest {
 		when(reportPeriodDao.get(REPORT_PERIOD_BALANCED_ID)).thenReturn(rp);
 		ReflectionTestUtils.setField(service, "reportPeriodDao", reportPeriodDao);
 
-		ReportPeriodService reportPeriodService = mock(ReportPeriodService.class);
+		PeriodService reportPeriodService = mock(PeriodService.class);
 		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ACTIVE_ID, TB1_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
 		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_ACTIVE_ID, TB1_ID)).thenReturn(false);
 		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ACTIVE_ID, TB2_ID)).thenReturn(REPORT_PERIOD_ACTIVE);

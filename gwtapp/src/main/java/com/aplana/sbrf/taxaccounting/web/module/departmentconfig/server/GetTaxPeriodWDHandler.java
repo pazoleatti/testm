@@ -5,7 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetTaxPeriodWDAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetTaxPeriodWDResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -24,7 +24,7 @@ public class GetTaxPeriodWDHandler extends AbstractActionHandler<GetTaxPeriodWDA
 
 
     @Autowired
-    ReportPeriodService reportPeriodService;
+    PeriodService reportPeriodService;
 
     public GetTaxPeriodWDHandler() {
         super(GetTaxPeriodWDAction.class);

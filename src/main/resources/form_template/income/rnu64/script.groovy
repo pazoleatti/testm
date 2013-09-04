@@ -245,22 +245,22 @@ def logicalCheck() {
             (reportPeriodStartDate.getTime().equals(row.date) || row.date.after(reportPeriodStartDate.getTime())) &&
                     (reportPeriodEndDate.getTime().equals(row.date) || row.date.before(reportPeriodEndDate.getTime()))
             )) {
-                logger.error('Дата совершения операции вне границ отчетного периода!')
+                logger.error("В строке \"№ пп\" равной " + row.number + " дата совершения операции вне границ отчетного периода!")
             }
 
             getRows(data).each { rowItem ->
                 if (!isTotalRow(row) && row.number == rowItem.number && !row.equals(rowItem)) {
-                    logger.error('Нарушена уникальность номера по порядку!')
+                    logger.error("В строке \"№ пп\" равной " + row.number + " нарушена уникальность номера по порядку!")
                 }
             }
 
             // Проверка на нулевые значения; фатальная; Все суммы по операции нулевые!
             if (row.costs == 0) {
-                logger.error('Все суммы по операции нулевые!')
+                logger.error("В строке \"№ пп\" равной " + row.number + " все суммы по операции нулевые!")
             }
             // Проверка актуальности поля «Часть сделки»; не фатальная;
             if (row.part != null && getPart(row.part) == null) {
-                logger.warn('Поле ”Часть сделки” указано неверно!');
+                logger.warn("В строке \"№ пп\" равной " + row.number + " поле ”Часть сделки” указано неверно!")
             }
         } else if (isMainTotalRow(row)) {
             totalRow = row
@@ -305,7 +305,7 @@ def checkRequiredColumns(def row, def columns) {
     if (!colNames.isEmpty()) {
         def index = getRows(data).indexOf(row) + 1
         def errorMsg = colNames.join(', ')
-        logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
         return false
     }
     return true
@@ -424,12 +424,18 @@ void setRowIndex() {
  */
 void sort() {
     data = getData(formData)
-    data.allCached.sort({ DataRow a, DataRow b ->
-        if ((a.date as Date).time == (b.date as Date).time) {
-            return Integer.valueOf(a.dealingNumber as String) <=> Integer.valueOf(b.dealingNumber as String)
-        }
-        return (a.date as Date).time <=> (b.date as Date).time
-    })
+    if (data!=null && !data.getAllCached().isEmpty()) {
+        data.getAllCached().sort({ DataRow a, DataRow b ->
+            def aTime = a.date!=null?(a.date as Date).time:null
+            def bTime = b.date!=null?(b.date as Date).time:null
+            if (aTime == bTime) {
+                def aNumber = a.dealingNumber!=null?Integer.valueOf(a.dealingNumber as String):null;
+                def bNumber = b.dealingNumber!=null?Integer.valueOf(b.dealingNumber as String):null;
+                return aNumber <=> bNumber
+            }
+            return aTime <=> bTime
+        })
+    }
 }
 
 /**

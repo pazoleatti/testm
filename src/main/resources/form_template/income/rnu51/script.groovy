@@ -753,7 +753,6 @@ void importData() {
 
     // сохранить начальное состояние формы
     def data = getData(formData)
-    def rowsOld = getRows(data)
     try {
         // добавить данные в форму
         addData(xml)
@@ -769,14 +768,9 @@ void importData() {
     } catch(Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
     }
-    // откатить загрузку если есть ошибки
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        data.clear()
-        data.insert(rowsOld, 1)
-    } else {
+    if (!logger.containsLevel(LogLevel.ERROR)) {
         logger.info('Данные загружены')
     }
-    data.commit()
 }
 
 /**

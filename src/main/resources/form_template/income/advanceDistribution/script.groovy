@@ -35,7 +35,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED :
-        calc()
         logicalCheck(false)
         checkNSI()
         checkDeclaration()

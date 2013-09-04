@@ -54,7 +54,7 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 	public List<TaxPeriod> listByTaxType(TaxType taxType) {
 		try {
 			return getJdbcTemplate().query(
-					"select * from tax_period where tax_type = ?",
+					"select * from tax_period where tax_type = ? order by start_date",
 					new Object[]{taxType.getCode()},
 					new int[] { Types.VARCHAR },
 					new TaxPeriodRowMapper()

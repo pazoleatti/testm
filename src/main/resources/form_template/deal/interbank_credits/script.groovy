@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Предоставление межбанковских кредитов
+ * 389 - Предоставление межбанковских кредитов
  *
  * (похож на letter_of_credit "Предоставление инструментов торгового финансирования и непокрытых аккредитивов")
  * (похож на  guarantees "Предоставление гарантий")
@@ -115,7 +115,8 @@ void logicCheck() {
             logger.warn("В графе «$msg» в строке $rowNum может  быть указано только  значение «1»!")
         }
         //  Корректность даты договора
-        def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+        def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+
         def dFrom = taxPeriod.getStartDate()
         def dTo = taxPeriod.getEndDate()
         def dt = docDateCell.value

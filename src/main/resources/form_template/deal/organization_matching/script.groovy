@@ -3,7 +3,7 @@ package form_template.deal.organization_matching
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Согласование организации
+ * 410 - Согласование организации
  *
  * @author Stanislav Yasinskiy
  */
@@ -64,7 +64,7 @@ void logicCheck() {
             continue
         }
         def rowNum = row.getIndex()
-        ['name', 'country', 'regNum', 'address', 'inn', 'code'].each {
+        ['rowNum', 'name', 'country', 'regNum', 'address', 'inn', 'code'].each {
             def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
@@ -130,6 +130,11 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
     for (row in dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        // Порядковый номер строки
+        row.rowNum = row.getIndex()
     }
     dataRowHelper.update(dataRows);
 }

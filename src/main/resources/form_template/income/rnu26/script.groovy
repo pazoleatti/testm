@@ -305,8 +305,8 @@ def logicalCheck(def useLog) {
     if (formDataOld != null && !getRows(dataOld).isEmpty()) {
         def i = 1
 
-        // список проверяемых столбцов (графа 1..3, 5..10, 13, 14)
-        columns = ['issuer', 'shareType', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
+        // список проверяемых столбцов (графа 1..10, 13, 14)
+        columns = ['rowNumber', 'issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
                 'cost', 'signSecurity', 'costOnMarketQuotation']
 
         // суммы строки общих итогов
@@ -589,25 +589,29 @@ void checkCreation() {
 void importData() {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
     if (fileName == null || fileName == '') {
+        logger.error('Имя файла не должно быть пустым')
         return
     }
 
     def is = ImportInputStream
     if (is == null) {
+        logger.error('Поток данных пуст')
         return
     }
 
     if (!fileName.contains('.r')) {
-        logger.error("Некорректное расширение файла")
+        logger.error('Формат файла должен быть *.r??')
         return
     }
 
     def xmlString = importService.getData(is, fileName, 'cp866')
     if (xmlString == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
 
