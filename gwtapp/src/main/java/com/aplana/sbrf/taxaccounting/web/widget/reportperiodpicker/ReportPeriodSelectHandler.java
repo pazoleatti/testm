@@ -5,6 +5,13 @@ import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 
 import java.util.Map;
 
+
+/**
+ * @author sgoryachkin
+ *
+ * @deprecated Нужно использовать PeriodPicker
+ */
+@Deprecated
 public interface ReportPeriodSelectHandler {
 
     /**

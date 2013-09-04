@@ -20,7 +20,11 @@ import java.util.*;
 /**
  * Компонент для выбора отчетного периода.
  * Период может быть выбран один или несколько.
+ * 
+ * @deprecated Нужно использовать PeriodPicker
+ * 
  */
+@Deprecated
 public class ReportPeriodPicker extends Composite implements HasEnabled{
 
 	interface SelectionUiBinder extends UiBinder<HTMLPanel, ReportPeriodPicker> {
