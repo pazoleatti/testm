@@ -261,7 +261,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @Override
     public void reloadDepartments() {
-        getUiHandlers().reloadDepartments(currentTaxType);
+        getUiHandlers().reloadDepartments(currentTaxType, currentDepartmentId);
     }
 
     @Override
