@@ -117,21 +117,6 @@ void calc() {
         return
     }
     /*
-     * Проверка объязательных полей.
-     */
-
-    // список проверяемых столбцов (графа 1..10)
-    def requiredColumns = ['tadeNumber', 'securityName', 'currencyCode',
-            'nominalPriceSecurities', 'salePrice', 'acquisitionPrice',
-            'part1REPODate', 'part2REPODate']
-
-    for (def row : getRows(data)) {
-        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
-            return
-        }
-    }
-
-    /*
      * Расчеты
      */
 
@@ -741,10 +726,14 @@ def getColumnName(def row, def alias) {
  * @param course курс
  */
 def calcAForColumn9or10(def row, def reportDate, def course) {
+    if (row.acquisitionPrice!=null && row.salePrice!=null && reportDate!=null && row.part1REPODate!=null && row.part2REPODate!=null && course!=null) {
     // ((«графа 6» - «графа 5») х (отчетная дата – «графа 7») / («графа 8» - «графа 7»)) х курс ЦБ РФ
-    def tmp = ((row.acquisitionPrice - row.salePrice) *
-            (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
-    return tmp
+        def tmp = ((row.acquisitionPrice - row.salePrice) *
+                (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
+        return tmp
+    } else {
+        return null
+    }
 }
 
 /**
@@ -964,5 +953,5 @@ def getNumber(def value) {
  * Получить модуль числа.
  */
 def abs(def value) {
-    return value < 0 ? -value : value
+    return (value!=null && value < 0) ? -value : value
 }
