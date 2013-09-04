@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -21,7 +21,7 @@ public class GetReportPeriodsHandler extends AbstractActionHandler<GetReportPeri
 	}
 
 	@Autowired
-	private ReportPeriodService reportPeriodService;
+	private PeriodService reportPeriodService;
 
 	@Override
 	public GetReportPeriodsResult execute(GetReportPeriods action, ExecutionContext executionContext) throws ActionException {

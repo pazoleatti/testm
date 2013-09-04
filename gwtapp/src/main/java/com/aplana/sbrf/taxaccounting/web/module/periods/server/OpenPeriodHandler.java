@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodResult;
@@ -19,7 +19,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 public class OpenPeriodHandler extends AbstractActionHandler<OpenPeriodAction, OpenPeriodResult> {
 
 	@Autowired
-	private ReportPeriodService reportPeriodService;
+	private PeriodService reportPeriodService;
 
 	@Autowired
 	private SecurityService securityService;

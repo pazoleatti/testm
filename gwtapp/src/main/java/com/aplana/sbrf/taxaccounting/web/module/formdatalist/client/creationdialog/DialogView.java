@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.creationdia
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
@@ -10,10 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -28,8 +25,7 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
-public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implements DialogPresenter.MyView,
-        ReportPeriodSelectHandler {
+public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implements DialogPresenter.MyView {
 
 	public interface Binder extends UiBinder<PopupPanel, DialogView> {
 	}
@@ -37,8 +33,8 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	@UiField
 	DepartmentPicker departmentPicker;
 
-	@UiField(provided=true)
-	ReportPeriodPicker reportPeriodPicker;
+	@UiField
+	PeriodPicker reportPeriodPicker;
 
 	@UiField(provided = true)
 	ValueListBox<FormDataKind> formKind;
@@ -77,23 +73,13 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 				return object.getName();
 			}
 		});
-
-		reportPeriodPicker = new ReportPeriodPicker(this, false);
-
 		
-		initWidget(uiBinder.createAndBindUi(this));
-		
-		
+		initWidget(uiBinder.createAndBindUi(this));		
 	}
 
 	@Override
 	public void setAvalibleDepartments(List<Department> list, Set<Integer> availableValues){
 		departmentPicker.setAvalibleValues(list, availableValues);
-	}
-
-	@Override
-	public void setAvalibleTaxPeriods(List<TaxPeriod> taxPeriods){
-		reportPeriodPicker.setTaxPeriods(taxPeriods);
 	}
 
 	@UiHandler("continueButton")
@@ -123,7 +109,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 		formDataFilter.setFormDataKind(formKind.getValue());
 		formDataFilter.setFormTypeId(formType.getValue() != null ? formType.getValue().getId() : null);
 		formDataFilter.setDepartmentId(new ArrayList<Integer>(departmentPicker.getValue()));
-		formDataFilter.setReportPeriodIds(new ArrayList<Integer>(reportPeriodPicker.getSelectedReportPeriods().keySet()));
+		formDataFilter.setReportPeriodIds(reportPeriodPicker.getValue());
 		return formDataFilter;
 	}
 
@@ -143,29 +129,18 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	}
 
 	@Override
-	public void setReportPeriodValue(List<ReportPeriod> value) {
-		reportPeriodPicker.setSelectedReportPeriods(value);
+	public void setReportPeriodValue(List<Integer> value) {
+		reportPeriodPicker.setValue(value);
 	}
-
-	@Override
-	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
-		if (taxPeriod!=null){
-			getUiHandlers().onTaxPeriodSelected(taxPeriod);
-		}
-	}
-
-    @Override
-    public void onReportPeriodsSelected(Map<Integer, ReportPeriod> selectedReportPeriods) {
-    }
 
     @Override
 	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
-		reportPeriodPicker.setReportPeriods(reportPeriods);
+		reportPeriodPicker.setPeriods(reportPeriods);
 	}
 
 	@Override
 	public void clearInput(){
-		reportPeriodPicker.setSelectedReportPeriods(null);
+		reportPeriodPicker.setValue(null);
 		departmentPicker.setValue(null);
 		formKind.setValue(null);
 		formType.setValue(null);

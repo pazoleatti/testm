@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.TableRow;
@@ -23,7 +23,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAction, GetPeriodDataResult> {
 
 	@Autowired
-	private ReportPeriodService reportPeriodService;
+	private PeriodService reportPeriodService;
 
 
 	@Autowired
@@ -40,15 +40,15 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 		GregorianCalendar from = new GregorianCalendar(action.getFrom(), Calendar.JANUARY, 1);
 		GregorianCalendar to = new GregorianCalendar(action.getTo(), Calendar.DECEMBER, 31);
 		List<DepartmentReportPeriod> reportPeriods = reportPeriodService.listByDepartmentId(action.getDepartmentId());
-		Map<String, List<TableRow>> per = new TreeMap<String, List<TableRow>>();
+		Map<Integer, List<TableRow>> per = new TreeMap<Integer, List<TableRow>>();
 		for (DepartmentReportPeriod period : reportPeriods) {
 			TaxPeriod taxPeriod = period.getReportPeriod().getTaxPeriod();
 			if ((taxPeriod.getStartDate().after(from.getTime()) || taxPeriod.getStartDate().equals(from.getTime()))
 					&& (taxPeriod.getStartDate().before(to.getTime()) || taxPeriod.getStartDate().equals(to.getTime()))
 					&& (taxPeriod.getTaxType() == action.getTaxType())) {
-				if (per.get(taxPeriod.getStartDate().toString()) == null) {
+				if (per.get(taxPeriod.getStartDate().getYear()) == null) {
 					List<TableRow> tableRows = new ArrayList<TableRow>();
-					per.put(taxPeriod.getStartDate().toString(), tableRows);
+					per.put(taxPeriod.getStartDate().getYear(), tableRows);
 				}
 				TableRow row = new TableRow();
 				row.setPeriodName(period.getReportPeriod().getName());
@@ -56,13 +56,13 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 				row.setDepartmentId(action.getDepartmentId());
 				row.setReportPeriodId(period.getReportPeriod().getId());
 				row.setSubHeader(false);
-				per.get(taxPeriod.getStartDate().toString()).add(row);
+				per.get(taxPeriod.getStartDate().getYear()).add(row);
 			}
 		}
 		List<TableRow> resultRows = new ArrayList<TableRow>();
-		for (Map.Entry<String, List<TableRow>> rec : per.entrySet()) {
+		for (Map.Entry<Integer, List<TableRow>> rec : per.entrySet()) {
 			TableRow header = new TableRow();
-			header.setPeriodName(rec.getKey());
+			header.setPeriodName("Календарный год " + (rec.getKey()+1900));
 			header.setSubHeader(true);
 			resultRows.add(header);
 			resultRows.addAll(rec.getValue());

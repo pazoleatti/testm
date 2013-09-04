@@ -64,7 +64,7 @@ public class FormDataServiceImpl implements FormDataService {
     @Autowired
     private FormDataCompositionService formDataCompositionService;
     @Autowired
-    private ReportPeriodService reportPeriodService;
+    private PeriodService reportPeriodService;
     @Autowired
     private EventLauncher eventHandlerLauncher;
 	@Autowired

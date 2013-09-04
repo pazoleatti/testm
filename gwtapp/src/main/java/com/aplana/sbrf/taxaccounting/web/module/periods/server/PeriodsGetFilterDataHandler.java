@@ -15,7 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterData;
@@ -37,7 +37,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	@Autowired
 	private DepartmentService departmentService;
 	@Autowired
-	private ReportPeriodService reportPeriodService;
+	private PeriodService reportPeriodService;
 	@Autowired
 	TAUserService userService;
 	@Autowired

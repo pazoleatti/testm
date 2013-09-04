@@ -1,25 +1,36 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import com.aplana.sbrf.taxaccounting.dao.*;
-import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.*;
-
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl;
 
 /**
  * Тест для сервиса работы с декларациями.
@@ -92,7 +103,7 @@ public class DeclarationServiceTest {
         departmentParam.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "тест"));
 
         RefBookDataProvider dataProvider = mock(RefBookDataProvider.class);
-        ReportPeriodService reportPeriodService = mock(ReportPeriodService.class);
+        PeriodService reportPeriodService = mock(PeriodService.class);
         when(reportPeriodService.getStartDate(48)).thenReturn(Calendar.getInstance());
         PagingResult<Map<String, RefBookValue>> list = new PagingResult<Map<String, RefBookValue>>();
         list.add(departmentParam);
@@ -101,7 +112,7 @@ public class DeclarationServiceTest {
         RefBookFactory factory = mock(RefBookFactory.class);
         when(factory.getDataProvider(31L)).thenReturn(dataProvider);
 
-        ReflectionTestUtils.setField(service, "reportPeriodService", reportPeriodService);
+        ReflectionTestUtils.setField(service, "periodService", reportPeriodService);
         ReflectionTestUtils.setField(service, "factory", factory);
         String fileId = service.generateXmlFileId(1, 2, 48);
         assertTrue(fileId != null);
