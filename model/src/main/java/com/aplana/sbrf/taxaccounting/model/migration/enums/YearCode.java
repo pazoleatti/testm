@@ -10,7 +10,8 @@ public enum YearCode implements Serializable {
     YEAR_09(2009, "09", "X", 10282),
     YEAR_10(2010, "10", "Y", 10283),
     YEAR_11(2011, "11", "Z", 10284),
-    YEAR_12(2012, "12", "+", 10080);
+    YEAR_12(2012, "12", "+", 10080),
+    YEAR_13(2013, "13", "-", 13);
 
     private static final long serialVersionUID = 1L;
 
@@ -32,7 +33,7 @@ public enum YearCode implements Serializable {
                 return t;
             }
         }
-        throw new IllegalArgumentException("Incorrect year: " + year);
+        throw new IllegalArgumentException("Is not contained in enum YearCode! year:" + year);
     }
 
     public static YearCode fromYearCut(String yearCut) {
@@ -41,7 +42,7 @@ public enum YearCode implements Serializable {
                 return t;
             }
         }
-        throw new IllegalArgumentException("Incorrect yearCut: " + yearCut);
+        throw new IllegalArgumentException("Is not contained in enum YearCode! yearCut: " + yearCut);
     }
 
     public int getYear() {

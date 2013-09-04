@@ -1,0 +1,25 @@
+package com.aplana.sbrf.taxaccounting.dao.mapper;
+
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import org.springframework.jdbc.core.RowMapper;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Вынес mapper (из ReportPeriodDao) чтобы использовать его в dao маппинга
+ * User: Alexander Ivanov
+ */
+public class ReportPeriodMapper implements RowMapper<ReportPeriod> {
+    @Override
+    public ReportPeriod mapRow(ResultSet rs, int index) throws SQLException {
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setId(rs.getInt("id"));
+        reportPeriod.setName(rs.getString("name"));
+        reportPeriod.setMonths(rs.getInt("months"));
+        reportPeriod.setTaxPeriodId(rs.getInt("tax_period_id"));
+        reportPeriod.setOrder(rs.getInt("ord"));
+        reportPeriod.setDictTaxPeriodId(rs.getInt("dict_tax_period_id"));
+        return reportPeriod;
+    }
+}

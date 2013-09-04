@@ -45,7 +45,7 @@ public enum SystemType implements Serializable {
                 return t;
             }
         }
-        throw new IllegalArgumentException("Bad Old System Type " + id);
+        throw new IllegalArgumentException("Is not contained in enum SystemType! id: " + id);
     }
 
     public int getId() {

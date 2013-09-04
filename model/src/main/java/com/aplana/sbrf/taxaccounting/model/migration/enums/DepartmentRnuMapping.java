@@ -60,10 +60,8 @@ public enum DepartmentRnuMapping implements Serializable {
                     }
                 }
             }
-
-
         }
-        throw new IllegalArgumentException("Error in DepartmentRnuMapping ");
+        throw new IllegalArgumentException("Incorrect parametres: stringPPP -" + stringPPP+ " systemSymbol - " + systemSymbol + " subSystemString - " + subSystemString);
     }
 
     public String getStringPPP() {

@@ -289,13 +289,13 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
             row.setNum(MapperUtils.getLong(rs, 1));
             row.setCodeTypePaper(MapperUtils.getLong(rs, 2));
             row.setTypePaper(MapperUtils.getString(rs, 3));
-            row.setPercCashOfz(MapperUtils.getBD(rs, 6));
-            row.setPercCashEuro(MapperUtils.getBD(rs, 6));
+            row.setPercCashOfz(MapperUtils.getBD(rs, 4));
+            row.setPercCashEuro(MapperUtils.getBD(rs, 5));
             row.setPercCashFed(MapperUtils.getBD(rs, 6));
-            row.setPercCashOgvz(MapperUtils.getBD(rs, 6));
-            row.setPercCashOther(MapperUtils.getBD(rs, 6));
-            row.setPercCashCorp(MapperUtils.getBD(rs, 6));
-            row.setTypeRow(MapperUtils.getString(rs, 18));
+            row.setPercCashOgvz(MapperUtils.getBD(rs, 7));
+            row.setPercCashOther(MapperUtils.getBD(rs, 8));
+            row.setPercCashCorp(MapperUtils.getBD(rs, 9));
+            row.setTypeRow(MapperUtils.getString(rs, 10));
             return row;
         }
     }

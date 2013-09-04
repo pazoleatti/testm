@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.migration.server;
 
+import com.aplana.sbrf.taxaccounting.service.MappingService;
 import com.aplana.sbrf.taxaccounting.service.MessageService;
 import com.aplana.sbrf.taxaccounting.service.MigrationService;
 import com.aplana.sbrf.taxaccounting.web.module.migration.shared.MigrationAction;
@@ -21,10 +22,11 @@ import java.util.Map;
 @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 public class MigrationHandler extends AbstractActionHandler<MigrationAction, MigrationResult> {
 
-    private static long[] rnus = {25L, 26L, 27L, 31L, 51L, 53L, 54L, 59L, 60L, 64L};
-
     @Autowired
     MigrationService migrationService;
+
+    @Autowired
+    MappingService mappingService;
 
     // EJB-модуль отправки JMS-сообщений
     @Autowired
@@ -39,8 +41,13 @@ public class MigrationHandler extends AbstractActionHandler<MigrationAction, Mig
     public MigrationResult execute(MigrationAction action, ExecutionContext executionContext)
             throws ActionException {
         MigrationResult result = new MigrationResult();
-        result.setExemplarList(migrationService.getActualExemplarByRnuType(rnus));
-        Map<String, byte[]> map = migrationService.getFiles(rnus);
+        result.setExemplarList(migrationService.getActualExemplarByRnuType(action.getRnus()));
+        Map<String, byte[]> map = migrationService.getFiles(action.getRnus());
+
+//        for (Map.Entry<String, byte[]> entry : map.entrySet()) {
+//            mappingService.addFormData(entry.getKey(), entry.getValue());
+//        }
+
         result.setSenFilesCount(messageService.sendFiles(map));
         return result;
     }

@@ -2,15 +2,13 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.mapper.ReportPeriodMapper;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
@@ -21,19 +19,6 @@ import java.util.List;
 @Repository
 @Transactional(readOnly = true)
 public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao {
-    private class ReportPeriodMapper implements RowMapper<ReportPeriod> {
-        @Override
-        public ReportPeriod mapRow(ResultSet rs, int index) throws SQLException {
-            ReportPeriod reportPeriod = new ReportPeriod();
-            reportPeriod.setId(rs.getInt("id"));
-            reportPeriod.setName(rs.getString("name"));
-            reportPeriod.setMonths(rs.getInt("months"));
-            reportPeriod.setTaxPeriodId(rs.getInt("tax_period_id"));
-            reportPeriod.setOrder(rs.getInt("ord"));
-            reportPeriod.setDictTaxPeriodId(rs.getInt("dict_tax_period_id"));
-            return reportPeriod;
-        }
-    }
 
 	@Override
 	public ReportPeriod get(int id) {

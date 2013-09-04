@@ -28,7 +28,7 @@ public enum Periodity implements Serializable {
                 return t;
             }
         }
-        throw new IllegalArgumentException("Incorrect Periodity id " + id);
+        throw new IllegalArgumentException("Is not contained in enum Periodity! id: " + id);
     }
 
 }
