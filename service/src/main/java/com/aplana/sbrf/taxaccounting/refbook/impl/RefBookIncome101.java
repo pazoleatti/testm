@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
@@ -8,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -36,7 +36,7 @@ public class RefBookIncome101 implements RefBookDataProvider {
     private TaxPeriodDao taxPeriodDao;
 
     @Autowired
-    private ReportPeriodService reportPeriodService;
+    private ReportPeriodDao reportPeriodDao;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
@@ -102,7 +102,7 @@ public class RefBookIncome101 implements RefBookDataProvider {
             throw new IllegalArgumentException("Invalid version for refbook");
         }
         TaxPeriod taxPeriod = taxPeriods.get(0);
-        List<ReportPeriod> reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.getId());
+        List<ReportPeriod> reportPeriods = reportPeriodDao.listByTaxPeriod(taxPeriod.getId());
         Calendar startCal = new GregorianCalendar();
         Long time = null;
         ReportPeriod reportPeriodResult = null;
