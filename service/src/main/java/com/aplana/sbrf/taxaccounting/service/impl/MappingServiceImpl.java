@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodMappingDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.migration.RestoreExemplar;
 import com.aplana.sbrf.taxaccounting.model.migration.enums.*;
@@ -28,7 +31,16 @@ public class MappingServiceImpl implements MappingService {
     private FormDataService formDataService;
 
     @Autowired
-    FormTemplateService formTemplateService;
+    private FormTemplateService formTemplateService;
+
+    @Autowired
+    private ReportPeriodMappingDao reportPeriodMappingDao;
+
+    @Autowired
+    private FormDataDao formDataDao;
+
+    @Autowired
+    private ReportPeriodDao periodDao;
 
     @Autowired
     private AuditService auditService;
@@ -36,30 +48,37 @@ public class MappingServiceImpl implements MappingService {
     @Autowired
     private TAUserService taUserService;
 
-    @Autowired
-    private ReportPeriodDao reportPeriodDao;
+    private boolean isAuditAddOn = true;
+    private boolean isImportOn = true;
 
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     private static SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
     private static String charSet = "UTF-8";
     private static String RNU_EXT = ".rnu";
     private static String XML_EXT = ".xml";
+    private static String USER_APPENDER = "controlUnp";
 
     @Override
     public void addFormData(String filename, byte[] fileContent) {
-        //TODO сделать правильную загрузку данных текущего пользователя
+
         TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(taUserService.getUser("admin"));
+        userInfo.setUser(taUserService.getUser(USER_APPENDER));
+        //TODO (alivanov 3.09.13) подставить правильного пользователя для создания форм при операции импорта "старых" данных
+        // Пользователя брать с некого конфигурационного файла (его пока нет)
+        // Это будет специальный пользователь для операции миграции (импорта "старых" данных)
+        // Сейчас же пока подставлен controlUnp
         userInfo.setIp("127.0.0.1");
 
         RestoreExemplar restoreExemplar;
         Integer departmentId = null;
         Integer formTypeId = null;
+        ReportPeriod reportPeriod = null;
         Integer reportPeriodId = null;
+        Integer formTemplateId = null;
 
         try {
             InputStream inputStream = new ByteArrayInputStream(fileContent);
-
+            log.debug("addFormData from filename: " + filename);
             if (filename.toLowerCase().endsWith(RNU_EXT)) {
                 restoreExemplar = restoreExemplarFromRnu(filename, fileContent);
             } else if (filename.toLowerCase().endsWith(XML_EXT)) {
@@ -69,44 +88,61 @@ public class MappingServiceImpl implements MappingService {
             }
 
             if (restoreExemplar != null) {
-                FormTemplate template = formTemplateService.get(restoreExemplar.getFormTemplateId());
+                formTemplateId = restoreExemplar.getFormTemplateId();
+                FormTemplate template = formTemplateService.get(formTemplateId);
                 formTypeId = template.getType().getId();
                 departmentId = restoreExemplar.getDepartmentId();
             }
 
             log.debug(restoreExemplar);
 
-            ReportPeriod reportPeriod = reportPeriodDao.getByTaxPeriodAndDict(
+            reportPeriodId = reportPeriodMappingDao.getByTaxPeriodAndDict(
                     restoreExemplar.getTaxPeriod(),
                     restoreExemplar.getDictTaxPeriodId());
 
-            if (reportPeriod != null) {
-                reportPeriodId = reportPeriod.getId();
+            if (reportPeriodId != null) {
+                reportPeriod = periodDao.get(reportPeriodId);
             }
 
             Logger logger = new Logger();
 
             long formDataId = formDataService.createFormData(logger,
                     userInfo,
-                    restoreExemplar.getFormTemplateId(),
-                    restoreExemplar.getDepartmentId(),
+                    formTemplateId,
+                    departmentId,
                     FormDataKind.PRIMARY,
                     reportPeriod);
 
-            // Вызов скрипта
-            formDataService.importFormData(logger, userInfo, formDataId, restoreExemplar.getFormTemplateId(),
-                    restoreExemplar.getDepartmentId(), FormDataKind.PRIMARY, reportPeriod.getId(), inputStream,
-                    filename);
-        } catch (Exception e) {
-            // Ошибка импорта
-            auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, reportPeriodId, null, formTypeId,
-                    FormDataKind.PRIMARY.getId(), "Ошибка импорта файла " + filename + " : " + e.getMessage());
+            log.debug("Form created! FormDataKind.PRIMARY, formDataId: " + formDataId + " formTemplateId: " + formTemplateId + " departmentId: " + departmentId + " period: " + reportPeriod.getName());
 
+            // Добавляем месяц, если форма ежемесячная
+            if (restoreExemplar.getPeriodOrder() != null) {
+                formDataDao.updatePeriodOrder(formDataId, restoreExemplar.getPeriodOrder());
+            }
+
+            //Вызов скрипта
+            if (isImportOn) {
+                formDataService.importFormData(logger, userInfo, formDataId, formTemplateId,
+                        departmentId, FormDataKind.PRIMARY, reportPeriodId, inputStream, filename);
+            }
+        } catch (Exception e) {
+            log.error(e.getLocalizedMessage());
+            if (e instanceof ServiceLoggerException) {
+                log.error(((ServiceLoggerException) e).getLogEntriesString());
+            }
+
+            // Ошибка импорта
+            if (isAuditAddOn && isImportOn) {
+                auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, reportPeriodId, null, formTypeId,
+                        FormDataKind.PRIMARY.getId(), "Ошибка импорта файла " + filename + " : " + e.getMessage());
+            }
             return;
         }
         // Успешный импорт
-        auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, reportPeriodId, null, formTypeId,
-                FormDataKind.PRIMARY.getId(), "Успешно импортирован файл " + filename);
+        if (isAuditAddOn && isImportOn) {
+            auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, reportPeriodId, null, formTypeId,
+                    FormDataKind.PRIMARY.getId(), "Успешно импортирован файл " + filename);
+        }
     }
 
     /**
@@ -124,11 +160,12 @@ public class MappingServiceImpl implements MappingService {
         try {
             String str = new String(fileContent, charSet);
             firstRow = str.substring(0, str.indexOf('\r'));
+            log.debug("firstRow: " + firstRow);
         } catch (UnsupportedEncodingException e) {
-            throw new ServiceException("Ошибка получения первой строки файла", e);
+            throw new ServiceException("Failure to get the file first line! " + e.getMessage(), e);
         }
 
-        String[] params = firstRow.split("|");
+        String[] params = firstRow.split("\\|");
         try {
 
             exemplar.setBeginDate(dateFormat.parse(params[2]));
@@ -143,26 +180,27 @@ public class MappingServiceImpl implements MappingService {
             if (system.length() == 1) {
                 exemplar.setDepartmentId(DepartmentRnuMapping.getDepartmentId(depCode, system, null));
             } else if (system.length() == 3) {
-                exemplar.setDepartmentId(DepartmentRnuMapping.getDepartmentId(depCode, system.substring(0, 1), system.substring(1, 2)));
+                exemplar.setDepartmentId(DepartmentRnuMapping.getDepartmentId(depCode, system.substring(0, 1), system.substring(1, 3)));
             } else {
-                throw new ServiceException("Ошибка при маппинге кода подразделения");
+                throw new ServiceException("Error by department code mapping! depCode: " + depCode);
             }
 
             //по году определяем TAX_PERIOD
-            Integer year = Integer.valueOf(yearFormat.format(params[2]));
+            Integer year = Integer.valueOf(yearFormat.format(exemplar.getBeginDate()));
             exemplar.setTaxPeriod(YearCode.fromYear(year).getTaxPeriodId());
 
             // по коду отчетного периода 7 символа в назавании файла DICT_TAX_PERIOD
             String periodCode = rnuFilename.substring(7, 8);
+            exemplar.setDictTaxPeriodId(PeriodMapping.fromCode(periodCode).getDictTaxPeriodId());
+
+            //Если форма ежемесячная, то заполняем месяц
             if (NalogFormType.RNU31.getCodeNew() == exemplar.getFormTemplateId()) {
-                exemplar.setDictTaxPeriodId(PeriodMapping.fromCode(periodCode).getDictTaxPeriodIdForMonthly());
-            } else {
-                exemplar.setDictTaxPeriodId(PeriodMapping.fromCode(periodCode).getDictTaxPeriodId());
+                exemplar.setPeriodOrder(PeriodMapping.fromCode(periodCode).getDictTaxPeriodIdForMonthly());
             }
 
             return exemplar;
         } catch (Exception e) {
-            throw new ServiceException("Ошибка разбора файла", e);
+            throw new ServiceException("Ошибка разбора файла:" + e.getLocalizedMessage(), e);
         }
     }
 
@@ -191,15 +229,33 @@ public class MappingServiceImpl implements MappingService {
             exemplar.setTaxPeriod(YearCode.fromYearCut(yearCut).getTaxPeriodId());
 
             String period = xmlFilename.substring(26, 29);
+            exemplar.setDictTaxPeriodId(PeriodMapping.fromCodeXml(period).getDictTaxPeriodId());
+
+            //Если форма ежемесячная, то заполняем месяц
             if (NalogFormType.RNU31.getCodeNew() == exemplar.getFormTemplateId()) {
-                exemplar.setDictTaxPeriodId(PeriodMapping.fromCodeXml(period).getDictTaxPeriodIdForMonthly());
-            } else {
-                exemplar.setDictTaxPeriodId(PeriodMapping.fromCodeXml(period).getDictTaxPeriodId());
+                exemplar.setPeriodOrder(PeriodMapping.fromCodeXml(period).getDictTaxPeriodIdForMonthly());
             }
 
             return exemplar;
         } catch (Exception e) {
-            throw new ServiceException("Ошибка разбора файла", e);
+            throw new ServiceException("Ошибка разбора файла:" + e.getLocalizedMessage(), e);
         }
     }
+
+    @Override
+    public boolean isAuditAddOn() {
+        return isAuditAddOn;
+    }
+
+    @Override
+    public boolean isImportOn() {
+        return isImportOn;
+    }
+
+    @Override
+    public void setProperties(boolean isAuditAddOn, boolean isImportOn){
+        this.isAuditAddOn = isAuditAddOn;
+        this.isImportOn = isImportOn;
+    }
+
 }

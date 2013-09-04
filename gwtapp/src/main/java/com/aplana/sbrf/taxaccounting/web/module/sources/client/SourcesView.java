@@ -161,13 +161,13 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	}
 
 	@Override
-	public void setFormReceivers(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes) {
+	public void setAvalibleFormReceivers(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes) {
 		receiversFormTypes = formTypes;
 		formReceiversTable.setRowData(departmentFormTypes);
 	}
 
 	@Override
-	public void setDeclarationReceivers(Map<Integer, DeclarationType> declarationTypes,
+	public void setAvalibleDeclarationReceivers(Map<Integer, DeclarationType> declarationTypes,
 										List<DepartmentDeclarationType> departmentDeclarationTypes) {
 		receiversDeclarationTypes = declarationTypes;
 		declarationReceiversTable.setRowData(departmentDeclarationTypes);

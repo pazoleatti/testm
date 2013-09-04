@@ -64,19 +64,20 @@ void logicCheck() {
             continue
         }
         def rowNum = row.getIndex()
-        ['rowNum', 'name', 'country', 'regNum', 'address', 'inn', 'code'].each {
+        ['rowNum', 'name', 'country', 'address', 'inn', 'code'].each {
             def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
                 logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
             }
         }
-        if (row.editSign == 1 && row.refBookRecord == null) {
+        // Проверка на заполнение атрибута «Запись справочника»
+        if (row.editSign !=null && row.refBookRecord == null && refBookService.getRecordData(38, row.editSign).CODE.numberValue == 1) {
             def msg = row.getCell('refBookRecord').column.name
             logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
         }
         // Проверка уникальности полей в рамках справочника «Организации – участники контролируемых сделок»
-        if (row.editSign == null || row.editSign == 0) {
+        if (row.editSign == null || refBookService.getRecordData(38, row.editSign).CODE.numberValue == 0) {
             def refDataProvider = refBookFactory.getDataProvider(9);
             // Рег. номер организации
             def val = row.regNum
@@ -132,6 +133,9 @@ void calc() {
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
+        }
+        if (row.refBookRecord != null && (row.editSign == null || refBookService.getRecordData(38, row.editSign).CODE.numberValue == 0)) {
+            row.refBookRecord = null
         }
         // Порядковый номер строки
         row.rowNum = row.getIndex()

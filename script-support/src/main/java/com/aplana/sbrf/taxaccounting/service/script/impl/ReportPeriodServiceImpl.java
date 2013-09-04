@@ -50,30 +50,29 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 		TaxPeriod thisTaxPeriod = thisReportPeriod.getTaxPeriod();
 		// список отчетных периодов в текущем налоговом периоде
 		List<ReportPeriod> reportPeriodlist = reportPeriodDao.listByTaxPeriod(thisReportPeriod.getTaxPeriod().getId());
-		
+
 		/**
 		 *  если это первый отчетный период в данном налоговом периоде
 		 *  то возвращать последний отчетный период с предыдущего налогово периода
 		 */
-		if (reportPeriodlist.size() > 0 && reportPeriodlist.get(0).getId() == reportPeriodId){
+		if (reportPeriodlist.size() > 0 && reportPeriodlist.get(reportPeriodlist.size() - 1).getId() == reportPeriodId){
 			List<TaxPeriod> taxPeriodlist = taxPeriodDao.listByTaxType(thisTaxPeriod.getTaxType());
-			for (int i = 0; i < taxPeriodlist.size()-1; i++){
+			for (int i = 0; i < taxPeriodlist.size(); i++){
 				if (taxPeriodlist.get(i).getId() == thisTaxPeriod.getId()){
 					// получим список отчетных периодов для данного налогового периода
-					reportPeriodlist = reportPeriodDao.listByTaxPeriod(taxPeriodlist.get(i+1).getId());
+					reportPeriodlist = reportPeriodDao.listByTaxPeriod(taxPeriodlist.get(i - 1).getId());
 					// вернем последний отчетный период
 					return reportPeriodlist.get(0);
 				}
 			}
 		}
-		
 		// не первый отчетный период в данныом налоговом
-		for (int i = 0; i < reportPeriodlist.size(); i++){
-			if (reportPeriodlist.get(i).getId() == reportPeriodId && i!=0){
-				return reportPeriodlist.get(i-1);
+		for (int i = 0; i < reportPeriodlist.size() - 1; i++){
+			if (reportPeriodlist.get(i).getId() == reportPeriodId) {
+				return reportPeriodlist.get(i + 1);
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -101,7 +100,8 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
              List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriod().getId());
              // смещение относительно налогового периода
              int months = 0;
-             for (ReportPeriod cReportPeriod: reportPeriodList){
+             for (int i = reportPeriodList.size() - 1; i >= 0; i--) {
+                 ReportPeriod cReportPeriod = reportPeriodList.get(i);
                  // если достигли текущего то выходим из цикла
                  if (cReportPeriod.getId() == reportPeriod.getId()){
                      break;
@@ -143,7 +143,8 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
             List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriod().getId());
             // смещение относительно налогового периода
             int months = 0;
-            for (ReportPeriod cReportPeriod: reportPeriodList){
+            for (int i = reportPeriodList.size() - 1; i >= 0; i--) {
+                ReportPeriod cReportPeriod = reportPeriodList.get(i);
                 // если достигли текущего то выходим из цикла
                 if (cReportPeriod.getId() == reportPeriod.getId()){
                     months += cReportPeriod.getMonths();

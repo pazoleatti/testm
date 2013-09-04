@@ -182,7 +182,6 @@ def fillForm(){
             sum += row.sum
             def code = getKnu(row.code)
             def totalRowCode =  getNewRow(code, sum)
-            setTotalStyle(totalRowCode)
             totalRows.put(i + 1, totalRowCode)
             sum = 0
         }
@@ -416,8 +415,9 @@ def getNewRow(def alias, def sum) {
     def newRow = formData.createDataRow()
     newRow.setAlias('total' + alias)
     newRow.sum = sum
-    newRow.fix = 'Итого по коду ' + alias
+    newRow.fix = 'Итого по КНУ ' + alias
     newRow.getCell('fix').colSpan = 2
+    setTotalStyle(newRow)
     return newRow
 }
 

@@ -63,18 +63,18 @@ public class ReportPeriodServiceTest {
 		
 		// подготовка списка отчетных периодов для 1 налогового периода 
 		List<ReportPeriod> reportPeriodListBy1Period= new ArrayList<ReportPeriod>();
-		reportPeriodListBy1Period.add(getReportPeriod(1, taxPeriod1, 1));
-		reportPeriodListBy1Period.add(getReportPeriod(2, taxPeriod1, 2));
-		reportPeriodListBy1Period.add(getReportPeriod(3, taxPeriod1, 3));
 		reportPeriodListBy1Period.add(getReportPeriod(4, taxPeriod1, 4));
+        reportPeriodListBy1Period.add(getReportPeriod(3, taxPeriod1, 3));
+        reportPeriodListBy1Period.add(getReportPeriod(2, taxPeriod1, 2));
+        reportPeriodListBy1Period.add(getReportPeriod(1, taxPeriod1, 1));
         // подготовка списка отчетных периодов для 2 налогового периода
         List<ReportPeriod> reportPeriodListBy2Period= new ArrayList<ReportPeriod>();
-        reportPeriodListBy2Period.add(getReportPeriod(5, taxPeriod2, 1));
         reportPeriodListBy2Period.add(getReportPeriod(6, taxPeriod2, 2));
+        reportPeriodListBy2Period.add(getReportPeriod(5, taxPeriod2, 1));
         // подготовка списка отчетных периодов для 3 налогового периода
         List<ReportPeriod> reportPeriodListBy3Period= new ArrayList<ReportPeriod>();
-        reportPeriodListBy2Period.add(getReportPeriod(7, taxPeriod3, 1));
-        reportPeriodListBy2Period.add(getReportPeriod(8, taxPeriod3, 2));
+        reportPeriodListBy3Period.add(getReportPeriod(8, taxPeriod3, 2));
+        reportPeriodListBy3Period.add(getReportPeriod(7, taxPeriod3, 1));
 
 		
 		when(reportPeriodDao.listByTaxPeriod(1)).thenReturn(reportPeriodListBy1Period);
@@ -93,8 +93,8 @@ public class ReportPeriodServiceTest {
         when(taxPeriodDao.get(3)).thenReturn(taxPeriod3);
 
         List<TaxPeriod> taxPeriodList = new ArrayList<TaxPeriod>();
-        taxPeriodList.add(taxPeriod2);
         taxPeriodList.add(taxPeriod1);
+        taxPeriodList.add(taxPeriod2);
 
         when(taxPeriodDao.listByTaxType(TaxType.TRANSPORT)).thenReturn(taxPeriodList);
 		
@@ -128,7 +128,7 @@ public class ReportPeriodServiceTest {
 	 */
 	@Test
 	public void getPrevReportPeriodOutSide(){
-		assertEquals(service.getPrevReportPeriod(5).getId().intValue(), 1);
+		assertEquals(service.getPrevReportPeriod(5).getId().intValue(), 4);
 	}
 
 
