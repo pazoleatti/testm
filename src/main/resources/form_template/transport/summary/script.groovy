@@ -852,7 +852,7 @@ def consolidation(){
                  * «Графа 11»  = «отчётный год YYYY» – «Графа 12» (формы-источника) – 1
                  */
                 def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-                def taxPeriod = taxPeriodService.get(reportPeriod.taxPeriodId)
+                def taxPeriod = reportPeriod.taxPeriod
                 Calendar cl = Calendar.getInstance()
                 cl.setTime(taxPeriod.startDate);
 
