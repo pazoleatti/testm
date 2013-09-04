@@ -59,7 +59,7 @@ public class RefBookIncome101 implements RefBookDataProvider {
         List<ReportPeriod> reportPeriods = refBookIncome101Dao.gerReportPeriods();
         Calendar cal = new GregorianCalendar();
         for (ReportPeriod reportPeriod: reportPeriods) {
-            TaxPeriod taxPeriod = taxPeriodDao.get(reportPeriod.getTaxPeriodId());
+            TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
             cal.setTime(taxPeriod.getStartDate());
             cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + reportPeriod.getMonths());
             if (startDate.after(cal.getTime()) && endDate.before(cal.getTime()) && !result.contains(cal.getTime())) {

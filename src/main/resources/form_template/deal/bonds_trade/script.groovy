@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import java.math.RoundingMode
 
 /**
- * Реализация и приобретение ценных бумаг
+ * 384 - Реализация и приобретение ценных бумаг
  *
  * @author Dmitriy Levykin
  */
@@ -81,10 +81,9 @@ void deleteRow() {
  */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    // Отчётный период
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+
     // Налоговый период
-    def taxPeriod = taxPeriodService.get(reportPeriod.taxPeriodId)
+    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
 
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()

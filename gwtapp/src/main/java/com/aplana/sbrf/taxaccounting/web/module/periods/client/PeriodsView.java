@@ -13,8 +13,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -85,6 +85,16 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
 		periodsTable.setSelectionModel(selectionModel);
 
+		periodsTable.setRowStyles(new RowStyles<TableRow>() {
+			@Override
+			public String getStyleNames(TableRow row, int rowIndex) {
+				if (row.isSubHeader()) {
+					return "gwt-CellTable-SubHeader";
+				} else {
+					return "";
+				}
+			}
+		});
 
 	}
 

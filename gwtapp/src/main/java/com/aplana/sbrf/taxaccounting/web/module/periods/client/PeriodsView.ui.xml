@@ -18,28 +18,6 @@
         height: 32px;
         right: 790px;
     }
-
-    .dateDoc {
-        max-height: 28px;
-        overflow: hidden;
-        line-height: 28px;
-    }
-
-    .headerRight {
-        float: right;
-    }
-
-    .headerAttr {
-        margin-left: 5px;
-        text-align: right;
-        font-size: 12px;
-        font-weight: bold;
-    }
-
-    .headerAttrName {
-        text-align: right;
-        font-size: 12px;
-    }
 </ui:style>
 
     <g:DockLayoutPanel unit='PX' height="100%" width="100%">
@@ -49,7 +27,7 @@
                 <g:FlowPanel>
                     <g:HorizontalPanel height="28px">
                         <g:HorizontalPanel>
-                            <g:Label ui:field="title" addStyleNames="{style.titleLabel}">OLOLO</g:Label>
+                            <g:Label ui:field="title" addStyleNames="{style.titleLabel}"/>
                             <g:SimplePanel styleName="{style.titleGradient}"/>
                         </g:HorizontalPanel>
 
@@ -79,8 +57,8 @@
             </g:HorizontalPanel>
         </g:north>
         <g:center>
-            <g:ScrollPanel>
-                <style:GenericCellTable ui:field="periodsTable" width="100%"/>
+            <g:ScrollPanel width="650px">
+                <style:GenericCellTable ui:field="periodsTable" width="630px"/>
             </g:ScrollPanel>
         </g:center>
 

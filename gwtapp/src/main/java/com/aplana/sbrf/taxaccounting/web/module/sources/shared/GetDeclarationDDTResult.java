@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.gwtplatform.dispatch.shared.Result;
 
-public class GetDeclarationReceiversResult implements Result {
+public class GetDeclarationDDTResult implements Result {
 	private static final long serialVersionUID = 3110701297898380844L;
 	
 	private Map<Integer, DeclarationType> declarationTypes;

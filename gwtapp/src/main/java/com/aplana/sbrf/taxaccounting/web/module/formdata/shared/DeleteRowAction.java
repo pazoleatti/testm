@@ -4,27 +4,15 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 
-import java.util.List;
+public class DeleteRowAction extends AbstractDataRowAction implements ActionName {
 
-public class DeleteRowAction extends AbstractFormDataAction implements ActionName {
+	private DataRow<Cell> currentDataRow;
 
-	List<DataRow<Cell>> modifiedRows;
-
-	private DataRow currentDataRow;
-
-	public List<DataRow<Cell>> getModifiedRows() {
-		return modifiedRows;
-	}
-
-	public void setModifiedRows(List<DataRow<Cell>> modifiedRows) {
-		this.modifiedRows = modifiedRows;
-	}
-
-	public DataRow getCurrentDataRow() {
+	public DataRow<Cell> getCurrentDataRow() {
 		return currentDataRow;
 	}
 
-	public void setCurrentDataRow(DataRow currentDataRow) {
+	public void setCurrentDataRow(DataRow<Cell> currentDataRow) {
 		this.currentDataRow = currentDataRow;
 	}
 

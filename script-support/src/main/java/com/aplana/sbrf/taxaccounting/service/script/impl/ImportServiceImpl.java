@@ -34,7 +34,7 @@ public class ImportServiceImpl implements ImportService {
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
-    public String getData(InputStream inputStream, String fileName, String charset) {
+    public String getData(InputStream inputStream, String fileName, String charset) throws IOException {
         if (inputStream == null) {
             throw new NullPointerException("inputStream cannot be null");
         }
@@ -63,12 +63,12 @@ public class ImportServiceImpl implements ImportService {
     }
 
     @Override
-    public String getData(InputStream inputStream, String fileName) {
+    public String getData(InputStream inputStream, String fileName) throws IOException {
         return getData(inputStream, fileName, DEFAULT_CHARSET);
     }
 
     @Override
-    public String getData(InputStream inputStream, String fileName, String charset, String startStr, String endStr) {
+    public String getData(InputStream inputStream, String fileName, String charset, String startStr, String endStr) throws IOException {
         if (inputStream == null) {
             throw new NullPointerException("inputStream cannot be null");
         }
@@ -91,6 +91,8 @@ public class ImportServiceImpl implements ImportService {
 
         if (XLS.equals(format)) {
             return getXMLStringFromXLS(inputStream, startStr, endStr);
+        } else if (XML.equals(format)) {
+            return getXMLStringFromXML(inputStream, charset);
         } else if (RNU.equals(format) || (format != null && format.matches("r[\\d]{2}"))) {
             return getXMLStringFromCSV(inputStream, charset);
         }
@@ -103,33 +105,28 @@ public class ImportServiceImpl implements ImportService {
      * @param inputStream данные из файла
      * @param charset кодировка
      */
-    private String getXMLStringFromCSV(InputStream inputStream, String charset) {
-        try {
-            InputStreamReader isr = new InputStreamReader(inputStream, charset);
-            CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE);
+    private String getXMLStringFromCSV(InputStream inputStream, String charset) throws IOException {
+        InputStreamReader isr = new InputStreamReader(inputStream, charset);
+        CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE);
 
-            StringBuilder sb = new StringBuilder();
-            sb.append("<data>").append(ENTER);
-            String [] rowCells;
-            int countEmptyRow = 0;
-            while ((rowCells = reader.readNext()) != null) {
-                // если встетилась вторая пустая строка, то дальше только строки итогов и ЦП
-                if (rowCells.length == 1 && rowCells[0].length() < 1) {
-                    if (countEmptyRow > 0) {
-                        addRow(sb, reader.readNext(), "rowTotal");
-                        break;
-                    }
-                    countEmptyRow++;
-                    continue;
+        StringBuilder sb = new StringBuilder();
+        sb.append("<data>").append(ENTER);
+        String [] rowCells;
+        int countEmptyRow = 0;
+        while ((rowCells = reader.readNext()) != null) {
+            // если встетилась вторая пустая строка, то дальше только строки итогов и ЦП
+            if (rowCells.length == 1 && rowCells[0].length() < 1) {
+                if (countEmptyRow > 0) {
+                    addRow(sb, reader.readNext(), "rowTotal");
+                    break;
                 }
-                addRow(sb, rowCells, "row");
+                countEmptyRow++;
+                continue;
             }
-            sb.append("</data>");
-            return sb.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            addRow(sb, rowCells, "row");
         }
+        sb.append("</data>");
+        return sb.toString();
     }
 
     /**
@@ -159,14 +156,9 @@ public class ImportServiceImpl implements ImportService {
      * @param endStr конец табцицы (надпись "итого" или значения после таблицы)
      * @param inputStream данные из файла
      */
-    private String getXMLStringFromXLS(InputStream inputStream, String startStr, String endStr) {
+    private String getXMLStringFromXLS(InputStream inputStream, String startStr, String endStr) throws IOException {
         HSSFWorkbook workbook;
-        try {
-            workbook = new HSSFWorkbook(inputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        workbook = new HSSFWorkbook(inputStream);
         HSSFSheet sheet = workbook.getSheetAt(0);
 
         // позиция начала таблицы
@@ -212,25 +204,21 @@ public class ImportServiceImpl implements ImportService {
      * @param inputStream данные из файла
      * @param charset кодировка
      */
-    private String getXMLStringFromXML(InputStream inputStream, String charset) {
+    private String getXMLStringFromXML(InputStream inputStream, String charset) throws IOException {
         StringBuilder sb = new StringBuilder();
-        try {
-            InputStreamReader isr = new InputStreamReader(inputStream, charset);
-            BufferedReader br = new BufferedReader(isr);
-            String endXML = "</form>";
-            String st;
-            while (null != (st = br.readLine())) {
-                // не брать цифровую подпись (после строки "</form>")
-                if (st.contains(endXML)) {
-                    int lastIndex = st.indexOf(endXML) + endXML.length();
-                    sb.append(st.substring(0, lastIndex));
-                    break;
-                }
-                sb.append(st);
-                sb.append("\n");
+        InputStreamReader isr = new InputStreamReader(inputStream, charset);
+        BufferedReader br = new BufferedReader(isr);
+        String endXML = "</form>";
+        String st;
+        while (null != (st = br.readLine())) {
+            // не брать цифровую подпись (после строки "</form>")
+            if (st.contains(endXML)) {
+                int lastIndex = st.indexOf(endXML) + endXML.length();
+                sb.append(st.substring(0, lastIndex));
+                break;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            sb.append(st);
+            sb.append("\n");
         }
         return sb.toString();
     }

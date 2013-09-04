@@ -1,7 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetOpenDataAction;
@@ -9,12 +19,6 @@ import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetOpen
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 /**
  * @author Stanislav Yasinskiy
@@ -29,9 +33,6 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
 
     @Autowired
     private SecurityService securityService;
-
-    @Autowired
-    SourceService departmentFormTypService;
 
     public GetOpenDataHandler() {
         super(GetOpenDataAction.class);
@@ -68,7 +69,7 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
             }
 
             // Необходимые для дерева подразделения
-            result.setDepartments(new ArrayList(departmentService.getRequiredForTreeDepartments(avSet).values()));
+            result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));
 
         } else {
             // Все подразделения

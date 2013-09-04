@@ -30,7 +30,7 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 	TaxPeriodDao taxPeriodDao;
 
     @Autowired(required = false)
-    com.aplana.sbrf.taxaccounting.service.ReportPeriodService reportPeriodService;
+    com.aplana.sbrf.taxaccounting.service.PeriodService reportPeriodService;
 	
 	@Override
 	public ReportPeriod get(int reportPeriodId) {
@@ -45,11 +45,11 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 	@Override
 	public ReportPeriod getPrevReportPeriod(int reportPeriodId) {
 		// текущий отчетный период
-		ReportPeriod thisReportPeriod= reportPeriodDao.get(reportPeriodId);
+		ReportPeriod thisReportPeriod = reportPeriodDao.get(reportPeriodId);
 		// текущий налоговый период
-		TaxPeriod thisTaxPeriod = taxPeriodDao.get(thisReportPeriod.getTaxPeriodId());
+		TaxPeriod thisTaxPeriod = thisReportPeriod.getTaxPeriod();
 		// список отчетных периодов в текущем налоговом периоде
-		List<ReportPeriod> reportPeriodlist = reportPeriodDao.listByTaxPeriod(thisReportPeriod.getTaxPeriodId());
+		List<ReportPeriod> reportPeriodlist = reportPeriodDao.listByTaxPeriod(thisReportPeriod.getTaxPeriod().getId());
 		
 		/**
 		 *  если это первый отчетный период в данном налоговом периоде
@@ -90,7 +90,7 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
      */
     public Calendar getStartDate(int reportPeriodId){
     	 ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-         TaxPeriod taxPeriod = taxPeriodDao.get(reportPeriod.getTaxPeriodId());
+         TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
          // календарь
          Calendar cal = Calendar.getInstance();
          cal.setTime(taxPeriod.getStartDate());
@@ -98,7 +98,7 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
          // для налога на прибыль, периоды вложены в друг дгруга, и начало всегда совпадает
          if (taxPeriod.getTaxType() != TaxType.INCOME){
              // получим отчетные периоды для данного налогового периода
-             List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriodId());
+             List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriod().getId());
              // смещение относительно налогового периода
              int months = 0;
              for (ReportPeriod cReportPeriod: reportPeriodList){
@@ -129,7 +129,7 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
      */
     public Calendar getEndDate(int reportPeriodId){
         ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-        TaxPeriod taxPeriod = taxPeriodDao.get(reportPeriod .getTaxPeriodId());
+        TaxPeriod taxPeriod = taxPeriodDao.get(reportPeriod .getTaxPeriod().getId());
         // календарь
         Calendar cal = Calendar.getInstance();
         cal.setTime(taxPeriod.getStartDate());
@@ -140,7 +140,7 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
         }
         else{
             // получим отчетные периоды для данного налогового периода
-            List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriodId());
+            List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriod().getId());
             // смещение относительно налогового периода
             int months = 0;
             for (ReportPeriod cReportPeriod: reportPeriodList){

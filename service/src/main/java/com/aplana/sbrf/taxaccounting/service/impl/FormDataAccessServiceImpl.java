@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	@Autowired
 	private DepartmentFormTypeDao departmentFormTypeDao;
 	@Autowired
-	private ReportPeriodService reportPeriodService;
+	private PeriodService reportPeriodService;
 
 	@Override
 	public boolean canRead(TAUserInfo userInfo, long formDataId) {

@@ -50,7 +50,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @Override
     public void onFileUploadSuccess(String uuid) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onFileParse(uuid);
+            getUiHandlers().onUploadDataRow(uuid);
         }
     }
 

@@ -1,28 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
-
-import java.util.List;
 
 /**
  * Действие сохарнения формы.
  *
  * @author Vitalii Samolovskikh
  */
-public class SaveFormDataAction extends AbstractFormDataAction implements ActionName {
-
-	List<DataRow<Cell>> modifiedRows;
-
-	public List<DataRow<Cell>> getModifiedRows() {
-		return modifiedRows;
-	}
-
-	public void setModifiedRows(List<DataRow<Cell>> modifiedRows) {
-		this.modifiedRows = modifiedRows;
-	}
-
+public class SaveFormDataAction extends AbstractDataRowAction implements ActionName {
+	
 	@Override
 	public String getName() {
 		return "Сохранение формы";

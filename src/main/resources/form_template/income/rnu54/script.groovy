@@ -117,21 +117,6 @@ void calc() {
         return
     }
     /*
-     * Проверка объязательных полей.
-     */
-
-    // список проверяемых столбцов (графа 1..10)
-    def requiredColumns = ['tadeNumber', 'securityName', 'currencyCode',
-            'nominalPriceSecurities', 'salePrice', 'acquisitionPrice',
-            'part1REPODate', 'part2REPODate']
-
-    for (def row : getRows(data)) {
-        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
-            return
-        }
-    }
-
-    /*
      * Расчеты
      */
 
@@ -507,7 +492,6 @@ void importData() {
 
     // сохранить начальное состояние формы
     def data = getData(formData)
-    def rowsOld = getRows(data)
     try {
         // добавить данные в форму
         addData(xml)
@@ -519,16 +503,11 @@ void importData() {
             checkNSI()
         }
     } catch(Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
-    // откатить загрузку если есть ошибки
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        data.clear()
-        data.insert(rowsOld, 1)
-    } else {
+    if (!logger.containsLevel(LogLevel.ERROR)) {
         logger.info('Данные загружены')
     }
-    data.commit()
 }
 
 
@@ -747,10 +726,14 @@ def getColumnName(def row, def alias) {
  * @param course курс
  */
 def calcAForColumn9or10(def row, def reportDate, def course) {
+    if (row.acquisitionPrice!=null && row.salePrice!=null && reportDate!=null && row.part1REPODate!=null && row.part2REPODate!=null && course!=null) {
     // ((«графа 6» - «графа 5») х (отчетная дата – «графа 7») / («графа 8» - «графа 7»)) х курс ЦБ РФ
-    def tmp = ((row.acquisitionPrice - row.salePrice) *
-            (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
-    return tmp
+        def tmp = ((row.acquisitionPrice - row.salePrice) *
+                (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
+        return tmp
+    } else {
+        return null
+    }
 }
 
 /**
@@ -946,7 +929,6 @@ void addData(def xml) {
     def data = getData(formData)
     data.clear()
     data.insert(newRows, 1)
-    data.commit()
 }
 
 /**
@@ -971,5 +953,5 @@ def getNumber(def value) {
  * Получить модуль числа.
  */
 def abs(def value) {
-    return value < 0 ? -value : value
+    return (value!=null && value < 0) ? -value : value
 }

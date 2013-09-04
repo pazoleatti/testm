@@ -11,7 +11,6 @@ public class PeriodsGetFilterDataResult implements Result {
 
 	private ReportPeriod currentReportPeriod;
    
-	private List<DictionaryTaxPeriod> dictionaryTaxPeriods;
 	private int yearFrom;
 	private int yearTo;
 	private int currentYear;
@@ -41,14 +40,6 @@ public class PeriodsGetFilterDataResult implements Result {
 
 	public void setCurrentReportPeriod(ReportPeriod currentReportPeriod) {
 		this.currentReportPeriod = currentReportPeriod;
-	}
-
-	public List<DictionaryTaxPeriod> getDictionaryTaxPeriods() {
-		return dictionaryTaxPeriods;
-	}
-
-	public void setDictionaryTaxPeriods(List<DictionaryTaxPeriod> dictionaryTaxPeriods) {
-		this.dictionaryTaxPeriods = dictionaryTaxPeriods;
 	}
 
 	public int getYearFrom() {

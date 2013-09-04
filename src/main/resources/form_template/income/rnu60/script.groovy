@@ -651,7 +651,6 @@ void importData() {
 
     // сохранить начальное состояние формы
     def data = getData(formData)
-    def rowsOld = getRows(data)
     try {
         // добавить данные в форму
         def totalLoad = addData(xml)
@@ -681,16 +680,11 @@ void importData() {
             logger.error("Нет итоговой строки.")
         }
     } catch(Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка!')
-        throw e
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.getMessage())
     }
-    // откатить загрузку если есть ошибки
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        data.clear()
-        data.insert(rowsOld, 1)
-        logger.error("Загрузка файла $fileName завершилась ошибкой")
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        logger.info('Закончена загрузка файла ' + fileName)
     }
-    data.commit()
 }
 
 /**

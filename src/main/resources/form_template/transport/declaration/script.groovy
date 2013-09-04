@@ -58,7 +58,14 @@ def bildXml(){
     department = getModRefBookValue(30, "ID = "+departmentId)
 
     // Получить параметры по транспортному налогу
-    departmentParamTransport = getModRefBookValue(31, "DEPARTMENT_ID = "+department.record_id)
+    /** Предпослденяя дата отчетного периода на которую нужно получить настройки подразделения из справочника. */
+    def reportDate = reportPeriodService.getEndDate(reportPeriodId)
+    if (reportDate != null) {
+        reportDate = reportDate.getTime() - 1
+    } else{
+        logger.error("Ошибка определения даты конца отчетного периода")
+    }
+    departmentParamTransport = getModRefBookValue(31, "DEPARTMENT_ID = "+department.record_id, reportDate)
 
     def builder = new MarkupBuilder(xml)
     if (!declarationData.isAccepted()) {
@@ -68,7 +75,7 @@ def bildXml(){
                     // TODO обсудить всплывающее окно, вынести в конф. Трансп декл
                     ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"), //new Date().format("dd.MM.yyyy"),
                     Период: 34,
-                    ОтчетГод: taxPeriodService.get(reportPeriodService.get(declarationData.reportPeriodId).taxPeriodId).startDate.format('yyyy'),
+                    ОтчетГод: reportPeriodService.get(declarationData.reportPeriodId).taxPeriod.startDate.format('yyyy'),
                     КодНО: departmentParamTransport.TAX_ORGAN_CODE,
                     // TODO учесть что потом будут корректирующие периоды
                     НомКорр: "0",
@@ -368,12 +375,12 @@ def getRegionByOkatoOrg(okato){
 /**
  * Получение полного справочника
  */
-def getModRefBookValue(refBookId, filter){
+def getModRefBookValue(refBookId, filter, date = new Date()){
     // провайдер для справочника
     def refBook = refBookFactory.get(refBookId);
     def refBookProvider = refBookFactory.getDataProvider(refBookId)
     // записи
-    def records = refBookProvider.getRecords(new Date(), null, filter, null).getRecords();
+    def records = refBookProvider.getRecords(date, null, filter, null).getRecords();
     if (records.size() != 1){
         throw new Exception("Ошибка получения значения из справочника refBookId = "+refBookId)
     }
