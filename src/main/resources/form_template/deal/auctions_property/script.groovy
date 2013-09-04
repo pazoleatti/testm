@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Приобретение услуг по организации и проведению торгов по реализации имущества
+ * 380 - Приобретение услуг по организации и проведению торгов по реализации имущества
  *
  * @author Stanislav Yasinskiy
  */

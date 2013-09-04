@@ -300,7 +300,7 @@
 		<field name="СумНал" class="java.lang.String">
 			<fieldDescription><![CDATA[@СумНал]]></fieldDescription>
 		</field>
-		<field name="СумНалП" class="java.lang.Integer">
+		<field name="СумНалП" class="java.lang.Long">
 			<fieldDescription><![CDATA[@СумНалП]]></fieldDescription>
 		</field>
 		<field name="ТипНП" class="java.lang.String">
