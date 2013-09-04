@@ -276,9 +276,9 @@ def consolidationBank() {
     def needCalc = false
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
-    for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), FormDataKind.SUMMARY)){
+    for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())){
         def child = formDataService.find(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId)
-        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 304) {
+        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
             needCalc = true
             DataRowHelper childData = getData(child)
             for (DataRow<Cell> row : childData.allCached) {
