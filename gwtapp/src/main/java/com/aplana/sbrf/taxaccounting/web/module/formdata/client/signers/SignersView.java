@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers;
 import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
 import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
@@ -49,10 +50,10 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	Button downSigner;
 
 	@UiField
-	Button addSigner;
+    LinkButton addSigner;
 
 	@UiField
-	Button removeSigner;
+    LinkButton removeSigner;
 
 	@UiField
 	Button saveButton;
@@ -61,7 +62,10 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	Button cancelButton;
 
 	@UiField
-	Bar columnActionsBar;
+	HorizontalPanel buttonPanel;
+
+	@UiField
+    VerticalPanel directionPanel;
 
 	private final PopupPanel widget;
 	private List<FormDataSigner> signers;
@@ -120,7 +124,8 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		this.readOnlyMode = readOnlyMode;
 		name.setEnabled(!readOnlyMode);
 		phone.setEnabled(!readOnlyMode);
-		columnActionsBar.setVisible(!readOnlyMode);
+        buttonPanel.setVisible(!readOnlyMode);
+		directionPanel.setVisible(!readOnlyMode);
 		if (readOnlyMode) {
 			cancelButton.setText("Закрыть");
 		}
