@@ -24,7 +24,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 		implements SourcesUiHandlers {
 
 	@ProxyCodeSplit
-	@NameToken(SourcesTokens.sources)
+	@NameToken(SourcesTokens.SOURCES)
 	public interface MyProxy extends ProxyPlace<SourcesPresenter>, Place {
 	}
 
@@ -34,9 +34,23 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 		void setDepartments(List<Department> departments);
 		
 		
-		void setFormReceivers(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes);
-		void setDeclarationReceivers(Map<Integer, DeclarationType> declarationTypes,
-									 List<DepartmentDeclarationType> departmentDeclarationTypes);
+		/**
+		 * Обновляет на фрме таблицу с доступными для выбора типами НФ приемников (НФ назначениями) (левая)
+		 * 
+		 * @param formTypes
+		 * @param departmentFormTypes
+		 */
+		void setAvalibleFormReceivers(Map<Integer, FormType> formTypes, 
+				List<DepartmentFormType> departmentFormTypes);
+		
+		/**
+		 * Обновляет на фрме таблицу с доступными для выбора типами деклараций приемников  (левая)
+		 * 
+		 * @param declarationTypes
+		 * @param departmentDeclarationTypes
+		 */
+		void setAvalibleDeclarationReceivers(Map<Integer, DeclarationType> declarationTypes,
+				List<DepartmentDeclarationType> departmentDeclarationTypes);
 		
 		/**
 		 * Обновляет на фрме таблицу с доступными для добавления источниками (которая справа)
@@ -93,28 +107,28 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 
 	@Override
 	public void getFormSources(int departmentId, TaxType taxType) {
-		GetFormSourcesAction action = new GetFormSourcesAction();
+		GetFormDFTAction action = new GetFormDFTAction();
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
 		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetFormSourcesResult>() {
+				.defaultCallback(new AbstractCallback<GetFormDFTResult>() {
 					@Override
-					public void onSuccess(GetFormSourcesResult result) {
-						getView().setAvalibleSources(result.getFormTypes(), result.getFormSources());
+					public void onSuccess(GetFormDFTResult result) {
+						getView().setAvalibleSources(result.getFormTypes(), result.getDepartmentFormTypes());
 					}
 				}, this));
 	}
 
 	@Override
 	public void getFormReceivers(int departmentId, TaxType taxType) {
-		GetFormReceiversAction action = new GetFormReceiversAction();
+		GetFormDFTAction action = new GetFormDFTAction();
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
 		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetFormReceiversResult>() {
+				.defaultCallback(new AbstractCallback<GetFormDFTResult>() {
 					@Override
-					public void onSuccess(GetFormReceiversResult result) {
-						getView().setFormReceivers(result.getFormTypes(), result.getFormReceivers());
+					public void onSuccess(GetFormDFTResult result) {
+						getView().setAvalibleFormReceivers(result.getFormTypes(), result.getDepartmentFormTypes());
 					}
 				}, this));
 	}
@@ -150,14 +164,14 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 
 	@Override
 	public void getDeclarationReceivers(int departmentId, TaxType taxType) {
-		GetDeclarationReceiversAction action = new GetDeclarationReceiversAction();
+		GetDeclarationDDTAction action = new GetDeclarationDDTAction();
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
 		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetDeclarationReceiversResult>() {
+				.defaultCallback(new AbstractCallback<GetDeclarationDDTResult>() {
 					@Override
-					public void onSuccess(GetDeclarationReceiversResult result) {
-						getView().setDeclarationReceivers(result.getDeclarationTypes(), result.getDeclarationReceivers());
+					public void onSuccess(GetDeclarationDDTResult result) {
+						getView().setAvalibleDeclarationReceivers(result.getDeclarationTypes(), result.getDeclarationReceivers());
 					}
 				}, this));
 	}

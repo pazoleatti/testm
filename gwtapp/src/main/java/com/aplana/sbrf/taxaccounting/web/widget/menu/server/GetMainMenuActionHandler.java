@@ -141,7 +141,7 @@ public class GetMainMenuActionHandler extends
 
             settingMenuItem.getSubMenu().add(
                     new MenuItem("Указание форм-источников",
-                            NUMBER_SIGN + SourcesTokens.sources + ";" + SourcesTokens.form + "=" + true));
+                            NUMBER_SIGN + SourcesTokens.SOURCES + ";" + SourcesTokens.FORM_FLAG + "=" + true));
 
             menuItems.add(settingMenuItem);
         }
