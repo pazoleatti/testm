@@ -18,9 +18,7 @@ public enum NalogFormType implements Serializable {
     RNU64(64, 355, "852-64", "640");
 
     private static final long serialVersionUID = 1L;
-    private static final String ERROR = "NalogFormType id is not correct: ";
-    private static final String ERROR_NNN = "NalogFormType nnn is not correct: ";
-    private static final String ERROR_CODE_NEW_XML = "NalogFormType codeNewXml is not correct: ";
+    private static final String ERROR = "Is not contained in enum NalogFormType! ";
 
     private final int id;
     private final int codeNew;
@@ -40,7 +38,7 @@ public enum NalogFormType implements Serializable {
                 return t.codeNew;
             }
         }
-        throw new IllegalArgumentException(ERROR_NNN + nnn);
+        throw new IllegalArgumentException(ERROR + "nnn: " + nnn);
     }
 
     public static NalogFormType fromCodeNewXml(String codeNewXml) {
@@ -49,7 +47,7 @@ public enum NalogFormType implements Serializable {
                 return t;
             }
         }
-        throw new IllegalArgumentException(ERROR_CODE_NEW_XML + codeNewXml);
+        throw new IllegalArgumentException(ERROR + "codeNewXml: " + codeNewXml);
     }
 
     public static String getNewXmlCode(int id) {
@@ -58,7 +56,7 @@ public enum NalogFormType implements Serializable {
                 return t.codeNewXml;
             }
         }
-        throw new IllegalArgumentException(ERROR + id);
+        throw new IllegalArgumentException(ERROR + "id: " + id);
     }
 
     public static NalogFormType getById(int id) {
@@ -67,7 +65,7 @@ public enum NalogFormType implements Serializable {
                 return t;
             }
         }
-        throw new IllegalArgumentException(ERROR + id);
+        throw new IllegalArgumentException(ERROR + "id: " + id);
     }
 
     public int getCodeNew() {
