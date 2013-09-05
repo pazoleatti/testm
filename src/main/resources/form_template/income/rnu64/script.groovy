@@ -429,8 +429,8 @@ void sort() {
             def aTime = a.date!=null?(a.date as Date).time:null
             def bTime = b.date!=null?(b.date as Date).time:null
             if (aTime == bTime) {
-                def aNumber = a.dealingNumber!=null?Integer.valueOf(a.dealingNumber as String):null;
-                def bNumber = b.dealingNumber!=null?Integer.valueOf(b.dealingNumber as String):null;
+                aNumber = a.dealingNumber!=null?a.dealingNumber as String:null;
+                bNumber = b.dealingNumber!=null?b.dealingNumber as String:null;
                 return aNumber <=> bNumber
             }
             return aTime <=> bTime
