@@ -189,7 +189,7 @@ def checkRequiredField() {
         def errorMsg = ''
 
         // 1-7,9-13
-        ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoClass', 'regNumber', 'powerVal', 'baseUnit', 'year', 'regDate', 'regDateEnd'].each { column ->
+        ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoClass', 'regNumber', 'powerVal', 'baseUnit', 'year', 'regDate'].each { column ->
             if (row.getCell(column) != null && (row.getCell(column).getValue() == null || ''.equals(row.getCell(column).getValue()))) {
                 errorMsg += (!''.equals(errorMsg) ? ', ' : '') + '"' + row.getCell(column).getColumn().getName() + '"'
             }
@@ -220,8 +220,13 @@ void logicalChecks() {
     for (def row : getDataRows()) {
 
         // Проверка на соответствие дат при постановке (снятия) с учёта
-        if (!(row.regDateEnd > row.regDate)) {
+        if (!(row.regDateEnd == null || row.regDateEnd.compareTo(row.regDate) > 0)) {
             logger.error("Строка $row.rowNumber : Дата постановки (снятия) с учёта неверная!")
+        }
+
+        //Если «графа 16» заполнена, то Заполнена  «графа 15»
+        if (row.stealDateEnd != null && row.stealDateStart == null){
+            logger.error("Не заполнено поле «Дата угона». Строка: "+row.getIndex())
         }
     }
 }
