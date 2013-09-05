@@ -250,4 +250,14 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			throw new DaoException(String.format(MSG_FORM_NOT_FOUND, id));
 		}
 	}
+
+    @Override
+    public void updatePeriodOrder(long id, int periodOrder) {
+        if (periodOrder < 1 && periodOrder > 12){
+            throw new DaoException(String.format("Неправильная очередность (месяц) периода: %s", periodOrder));
+        }
+        if (getJdbcTemplate().update("update form_data set period_order=? where id=?", periodOrder, id) == 0) {
+            throw new DaoException(String.format(MSG_FORM_NOT_FOUND, id));
+        }
+    }
 }

@@ -308,9 +308,14 @@ def logicalCheck(def useLog) {
 
     if (!getRows(data).isEmpty()) {
         // список проверяемых столбцов (графа 1..21)
-        def requiredColumns = ['number',
-                'regionBankDivision',
-                'propertyPrice', 'workersCount', 'subjectTaxCredit'
+        def requiredColumns = [
+                'number', 'regionBank', 'regionBankDivision',
+                'kpp', 'propertyPrice', 'workersCount',
+                'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
+                'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
+                'taxSum', 'taxSumOutside', 'taxSumToPay',
+                'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+                'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod', 'everyMonthForFourthKvartalNextPeriod'
                 ]
 
         for (def row : getRows(data)) {
@@ -320,7 +325,7 @@ def logicalCheck(def useLog) {
 
             // 1. Обязательность заполнения поля графы 1..21
             if (!checkRequiredColumns(row, requiredColumns, useLog)) {
-                return
+                return false
             }
         }
     }

@@ -66,10 +66,10 @@ public class RnuGenerationServiceImpl implements RnuGenerationService {
         StringBuilder builder = new StringBuilder();
 
         //NNN
-        builder.append(completeStringLength(3, exemplar.getRnuTypeId()));
+        builder.append(NalogFormType.getById(exemplar.getRnuTypeId()).getStringNNN());
 
         //ППП
-        builder.append(completeStringLength(3, Integer.valueOf(exemplar.getDepCode())));
+        builder.append(DepartmentCode.fromDataBaseCode(exemplar.getDepCode()).getFilenamePartCode());
 
         //И
         builder.append(SystemType.fromId(exemplar.getSystemId()).getSysCodeChar());
@@ -78,42 +78,24 @@ public class RnuGenerationServiceImpl implements RnuGenerationService {
         Integer year = Integer.valueOf(new SimpleDateFormat("yyyy").format(exemplar.getBeginDate()));
 
         //К
-        switch (exemplar.getPeriodityId()) {
-            case 1:            //Ежегодно
+        switch (Periodity.fromId(exemplar.getPeriodityId())) {
+            case YEAR:            //Ежегодно
                 builder.append(YearCode.fromYear(year).getCode());
                 break;
-            case 4:             //Ежеквартально
+            case QUARTER:             //Ежеквартально
                 builder.append(QuartalCode.fromNum(month).getCodeIfQuartal());
                 break;
-            case 5:            //Ежемесячно
+            case MONTH:            //Ежемесячно
                 builder.append(QuartalCode.fromNum(month).getCodeIfMonth());
                 break;
-            case 8:             //ежедневно и по рабочим дням
-            case 10:
+            case DAY:             //ежедневно и по рабочим дням
+            case WORKDAY:
             default:
         }
 
         builder.append(".RNU");
 
         return builder.toString();
-    }
-
-    private String completeStringLength(Integer lengthNeed, Integer value) {
-        return completeStringLength(lengthNeed, String.valueOf(value));
-    }
-
-    private String completeStringLength(Integer lengthNeed, String str) {
-        if (str == null) {
-            return null;
-        } else if (lengthNeed < str.length()) {
-            throw new NoSuchElementException("Departament code is not correct! It must be like 0013 or 0022. Current value=" + str);
-        } else {
-            StringBuilder sb = new StringBuilder(str);
-            for (int i = 0; i < lengthNeed - str.length(); i++) {
-                sb.append('0');
-            }
-            return sb.toString();
-        }
     }
 
     /**
@@ -143,7 +125,7 @@ public class RnuGenerationServiceImpl implements RnuGenerationService {
         builder.append(formatter.format(exemplar.getBeginDate())).append(sep);      //3
         builder.append(formatter.format(exemplar.getEndDate())).append(sep);        //4
 
-        builder.append(completeStringLength(3, Integer.valueOf(exemplar.getDepCode()))).append(sep);   //5
+        builder.append(DepartmentCode.fromDataBaseCode(exemplar.getDepCode()).getFilenamePartCode()).append(sep);   //5
 
         SystemType sysType = SystemType.fromId(exemplar.getSystemId());
 

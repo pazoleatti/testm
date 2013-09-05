@@ -114,7 +114,7 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 				}, this));
 	}
 
-	public void setSelectedFilterValues(FormDataFilter formDataFilter, List<ReportPeriod> periods){
+	public void setSelectedFilterValues(FormDataFilter formDataFilter){
 		if(formDataFilter.getFormTypeId() != null){
 			getView().setFormTypeValue(formTypeMap.get(formDataFilter.getFormTypeId()));
 		}

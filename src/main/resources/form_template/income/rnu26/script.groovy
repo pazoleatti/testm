@@ -1,3 +1,10 @@
+package form_template.income.rnu26
+
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+
 /**
  * Скрипт для РНУ-26 (rnu26.groovy).
  * Форма "(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций, РДР, ADR, GDR и опционов эмитента в целях налогообложения".
@@ -10,9 +17,6 @@
  *
  * @author rtimerbaev
  */
-
-/** Отчётный период. */
-def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
 /** Признак периода ввода остатков. */
 def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
@@ -1138,4 +1142,3 @@ def getRowNumber(def alias, def data) {
         }
     }
 }
-
