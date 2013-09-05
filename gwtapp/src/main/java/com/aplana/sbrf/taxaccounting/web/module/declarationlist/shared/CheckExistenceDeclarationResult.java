@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared;
 import com.gwtplatform.dispatch.shared.Result;
 
 public class CheckExistenceDeclarationResult implements Result {
+	private static final long serialVersionUID = 3267048502835351877L;
+
 	public static enum DeclarationStatus {
 		EXIST_ACCEPTED, // Существует и в статусе принята
 		EXIST_CREATED, // Существует и в статусе создана
