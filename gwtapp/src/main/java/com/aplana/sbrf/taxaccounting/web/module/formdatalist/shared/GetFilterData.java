@@ -5,10 +5,6 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class GetFilterData extends UnsecuredActionImpl<GetFilterDataResult> {
 
-    public GetFilterData(){
-
-    }
-
 	private TaxType taxType;
 
 	public TaxType getTaxType() {

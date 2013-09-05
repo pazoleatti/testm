@@ -22,9 +22,6 @@
     <listener>
         <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
     </listener>
-    <listener>
-        <listener-class>com.aplana.sbrf.taxaccounting.web.listner.SessionDestroyAttributeListener</listener-class>
-    </listener>
 
     <filter>
         <!--<filter-name>springSecurityFilterChain</filter-name>-->
@@ -48,6 +45,7 @@
 		<url-pattern>/download/*</url-pattern>
         <url-pattern>/upload/*</url-pattern>
         <url-pattern>/cache/*</url-pattern>
+        <url-pattern>/j_spring_security_logout</url-pattern>
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>dispatch</servlet-name>
@@ -58,14 +56,14 @@
 		<url-pattern>/dispatch/*</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
+<!--	<servlet>
 		<servlet-name>logout</servlet-name>
 		<servlet-class>com.aplana.sbrf.taxaccounting.web.servlet.LogoutServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>logout</servlet-name>
 		<url-pattern>/logout</url-pattern>
-	</servlet-mapping>
+	</servlet-mapping>-->
 
 	<servlet>
 		<servlet-name>login</servlet-name>

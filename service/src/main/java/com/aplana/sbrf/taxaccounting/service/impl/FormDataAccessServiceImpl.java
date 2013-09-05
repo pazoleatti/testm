@@ -26,11 +26,14 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	public static final String LOG_EVENT_EDIT = "EDIT";
 	public static final String LOG_EVENT_CREATE = "CREATE";
 
-	private Log logger = LogFactory.getLog(getClass());
+	private static final Log logger = LogFactory.getLog(FormDataAccessServiceImpl.class);
 
 	private static final String FORMDATA_KIND_STATE_ERROR = "Event type: \"%s\". Unsuppotable case for formData with \"%s\" kind and \"%s\" state!";
 	private static final String REPORT_PERIOD_IS_CLOSED = "Report period (%d) is closed!";
 	private static final String INCORRECT_DEPARTMENT_FORM_TYPE = "Form type(%d) and form kind(%d) is not applicated for department(%d)";
+
+    // id формы "Согласование организаций"
+    private static final int ORGANIZATION_FORM_TYPE = 410;
 
 	@Autowired
 	private FormDataDao formDataDao;
@@ -171,7 +174,37 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		if (!reportPeriodService.isActivePeriod(formDataReportPeriod.getId(), formData.getDepartmentId())){
 			return false;
 		}
-		if (reportPeriodService.isBalancePeriod(formDataReportPeriod.getId(), formData.getDepartmentId())) {
+        if(formData.getFormType().getId() == ORGANIZATION_FORM_TYPE){
+			/* Жизненный цикл формы "Согласование организации"
+             ------------------------------------------------------------------
+             |              |                Пользователь                     |
+             |  Состояние   |-------------------------------------------------|
+             |              |Оператор|Контролер ТУ|Контролер ВСУ|Контролер УНП|
+             ------------------------------------------------------------------
+             | Создана      |   +    |     +      |      +      |      +      |
+             ---------------|-------------------------------------------------|
+             | Подготовлена |   -    |     +      |      +      |      +      |
+             ---------------|-------------------------------------------------|
+             | Утверждена   |   -    |     -      |      -      |      +      |
+             ---------------|-------------------------------------------------|
+             | Принята      |   -    |     -      |      -      |      -      |
+             ---------------|--------------------------------------------------
+             *Контролер ТУ - Контролер текущего уровня
+             *Контролер ВСУ - Контролер вышестоящего уровня
+			 */
+            switch (formData.getState()){
+                case CREATED:
+                    return true;
+                case PREPARED:
+                    return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+                            formDataAccess.isControllerOfUNP();
+                case APPROVED:
+                    return formDataAccess.isControllerOfUNP();
+                case ACCEPTED:
+                    return false; //Нельзя редактировать в состоянии "Принята"
+            }
+            logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_EDIT, formData.getKind().getName(), state.getName()));
+        } else if (reportPeriodService.isBalancePeriod(formDataReportPeriod.getId(), formData.getDepartmentId())) {
 			/* В отчетных периодах для ввода остатков редактирование возможно только контролерами для
 			 НФ в статусе "Создана" */
 			switch (state){
@@ -321,7 +354,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		}
 		return result;
 	}
-	
+
 	private boolean canCreate(FormDataAccessRoles formDataAccess, int formTypeId, FormDataKind kind, Department formDataDepartment, ReportPeriod reportPeriod) {
 		if(!reportPeriodService.isActivePeriod(reportPeriod.getId(), formDataDepartment.getId())){
 			//Нельзя создавать НФ для неактивного налогового периода
@@ -403,7 +436,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		}
 		return result;
 	}
-	
+
 	private boolean canDelete(FormDataAccessRoles formDataAccess, FormData formData, ReportPeriod formDataReportPeriod) {
         return formData.getState() == WorkflowState.CREATED && canEdit(formDataAccess, formData, formDataReportPeriod);
     }
@@ -425,7 +458,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		List<WorkflowMove> result = new ArrayList<WorkflowMove>();
 		boolean activePeriod = reportPeriodService.isActivePeriod(formDataReportPeriod.getId(), formData.getDepartmentId());
 		boolean balancePeriod = reportPeriodService.isBalancePeriod(formDataReportPeriod.getId(), formData.getDepartmentId());
-		
+
 		// Для того, чтобы иметь возможность изменить статус, у пользователя должны быть права
 		// на чтение соответствующей карточки данных и отчетный период должен быть активным
 		if (!canRead(formDataAccess, formData) || !activePeriod) {
@@ -446,9 +479,12 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getName(), state.getName()));
 			}
 		} else if((formData.getKind() == FormDataKind.ADDITIONAL || formData.getKind() == FormDataKind.PRIMARY) &&
-				formDataAccess.isFormDataHasDestinations()){
+				formDataAccess.isFormDataHasDestinations() || formData.getFormType().getId() == ORGANIZATION_FORM_TYPE){
 			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и передаваемых на вышестоящий уровень.
+
+			 Так же для формы "Согласование организаций", у которой нет связей,
+			 но её необходимо прогонять через статус "Утверждена"
 
 			 Виды форм:
 				 Первичная налоговая форма;

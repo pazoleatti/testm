@@ -49,7 +49,7 @@ public enum PeriodMapping implements Serializable {
                 return t;
             }
         }
-        throw new IllegalArgumentException("Incorrect period code: " + code);
+        throw new IllegalArgumentException("Is not contained in enum PeriodMapping! code: " + code);
     }
 
     public static PeriodMapping fromCodeXml(String codeXml) {
@@ -58,7 +58,7 @@ public enum PeriodMapping implements Serializable {
                 return t;
             }
         }
-        throw new IllegalArgumentException("Incorrect period code: " + codeXml);
+        throw new IllegalArgumentException("Is not contained in enum PeriodMapping! codeXml " + codeXml);
     }
 
     public String getCode() {

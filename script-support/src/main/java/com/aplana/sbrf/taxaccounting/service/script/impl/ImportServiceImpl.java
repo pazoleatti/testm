@@ -50,7 +50,6 @@ public class ImportServiceImpl implements ImportService {
 
         // Получение расширения файла
         String format = getFileExtension(fileName.trim());
-        System.out.println("======== format = " + format);
 
         if (XLS.equals(format)) {
             return getXMLStringFromXLS(inputStream, null, null);

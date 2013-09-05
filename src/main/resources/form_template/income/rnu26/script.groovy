@@ -1,3 +1,10 @@
+package form_template.income.rnu26
+
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+
 /**
  * Скрипт для РНУ-26 (rnu26.groovy).
  * Форма "(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций, РДР, ADR, GDR и опционов эмитента в целях налогообложения".
@@ -10,9 +17,6 @@
  *
  * @author rtimerbaev
  */
-
-/** Отчётный период. */
-def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
 /** Признак периода ввода остатков. */
 def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
@@ -616,7 +620,6 @@ void importData() {
     }
 
     def data = getData(formData)
-    def rowsOld = getRows(data)
     def totalColumns = [6:'lotSizePrev', 7:'lotSizeCurrent', 9:'cost', 14:'costOnMarketQuotation', 15:'reserveCalcValue']
     // добавить данные в форму
     try {
@@ -643,14 +646,9 @@ void importData() {
         logger.error(""+e.message)
     }
     //в случае ошибок откатить изменения
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        data.clear()
-        data.insert(rowsOld, 1)
-        logger.error("Загрузка файла $fileName завершилась ошибкой")
-    } else {
+    if (!logger.containsLevel(LogLevel.ERROR)) {
         logger.info('Закончена загрузка файла ' + fileName)
     }
-    data.commit()
 }
 
 /*
@@ -1138,4 +1136,3 @@ def getRowNumber(def alias, def data) {
         }
     }
 }
-

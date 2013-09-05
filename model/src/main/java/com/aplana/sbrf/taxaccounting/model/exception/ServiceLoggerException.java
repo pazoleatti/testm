@@ -25,4 +25,12 @@ public class ServiceLoggerException extends ServiceException{
 		return logEntries;
 	}
 
+    public String getLogEntriesString(){
+        StringBuilder builder = new StringBuilder();
+        for(LogEntry entry : logEntries){
+            builder.append(entry.getLevel()).append(" ").append(entry.getMessage());
+        }
+        return builder.toString();
+    }
+
 }
