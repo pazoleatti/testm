@@ -163,8 +163,6 @@ DataRowHelper getDataRowsHelper() {
 
 void logicCheckBefore(DataRowHelper form) {
     columns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'currencyCode']
-    logger.info("form = %s", form.toString())
-    logger.info("form.allCached = %s", form.allCached.toString())
     for (row in form.allCached) {
         if (row.getAlias() == null) {
             if (row.taxAccountingCurrency == null && row.accountingCurrency == null
