@@ -25,6 +25,22 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 public class MigrationPresenter extends Presenter<MigrationPresenter.MyView,
         MigrationPresenter.MyProxy> implements MigrationUiHandlers {
 
+    //вынес из хендрела в презентер для ускорения отладки
+    private static long[] rnus = {25L, 26L, 27L, 31L, 51L, 53L, 54L, 59L, 60L, 64L};
+
+    //private static long[] rnus = {
+            //25L
+            //26L
+            //27L
+            // 31L
+            // 51L
+             //53L
+             //54L
+            //59L
+             // 60L
+             //64L
+    //};
+
     @ProxyCodeSplit
     @NameToken(MigrationTokens.migration)
     public interface MyProxy extends ProxyPlace<MigrationPresenter>, Place {
@@ -47,7 +63,7 @@ public class MigrationPresenter extends Presenter<MigrationPresenter.MyView,
     @Override
     public void runImport() {
 
-        dispatcher.execute(new MigrationAction(), CallbackUtils
+        dispatcher.execute(new MigrationAction(rnus), CallbackUtils
                 .defaultCallback(new AbstractCallback<MigrationResult>() {
                     @Override
                     public void onSuccess(MigrationResult result) {
