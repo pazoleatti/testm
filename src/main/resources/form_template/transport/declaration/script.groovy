@@ -432,7 +432,7 @@ def checkTransportParams(departmentParamTransport){
         errors.each{ e ->
             errorLabels += (errorLabels.equals('') ? '' : ', ')+ref.getAttribute(e).name
         }
-        logger.error("Для подразделения в форме настроек подразделения по транспортному налогу отсутствуют следующие данные: "+errorLabels)
+        logger.error("Для данного подразделения в форме настроек подразделения по транспортному налогу отсутствуют следующие данные: "+errorLabels)
         return false;
     }
 
