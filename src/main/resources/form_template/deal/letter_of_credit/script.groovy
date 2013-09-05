@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 /**
- * Предоставление инструментов торгового финансирования и непокрытых аккредитивов
+ * 386 - Предоставление инструментов торгового финансирования и непокрытых аккредитивов
  * (похож на guarantees "Предоставление гарантий")
  *
  * @author Stanislav Yasinskiy
@@ -111,7 +111,8 @@ void logicCheck() {
             }
         }
         //  Корректность даты договора
-        def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+        def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+
         def dFrom = taxPeriod.getStartDate()
         def dTo = taxPeriod.getEndDate()
         def dt = docDateCell.value

@@ -283,9 +283,9 @@ void consolidation() {
     def needCalc = false
 
     // получить консолидированные формы из источников
-    departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
+    departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 303) {
+        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
             needCalc = true
             for (def row : formDataService.getDataRowHelper(child).getAllCached()) {
                 if (row.getAlias() == null) {

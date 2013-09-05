@@ -107,20 +107,6 @@ def deleteRow() {
  */
 void calc() {
     def data = getData(formData)
-    /*
-     * Проверка объязательных полей.
-     */
-
-    // список проверяемых столбцов (графа 1..10)
-    def requiredColumns = ['tadeNumber', 'securityName', 'currencyCode',
-            'nominalPriceSecurities', 'acquisitionPrice', 'salePrice',
-            'part1REPODate', 'part2REPODate']
-
-    for (def row : getRows(data)) {
-        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
-            return
-        }
-    }
 
     /*
      * Расчеты
@@ -149,7 +135,7 @@ void calc() {
     /** Курс ЦБ РФ на отчётную дату. */
     def course = 1
 
-    def tmp
+    def tmp = 0
     def a, b ,c
 
     getRows(data).eachWithIndex { row, i ->
@@ -160,9 +146,9 @@ void calc() {
         a = calcAForColumn9or10(row, reportDate, course)
         b = 0
         c = 0
-        if (a > 0) {
+        if (a!=null && a > 0) {
             c = roundTo2(a)
-        } else if (a < 0) {
+        } else if (a!=null && a < 0) {
             b = roundTo2(-a)
         }
         row.income = c
@@ -230,9 +216,7 @@ def logicalCheck(def useLog) {
     if (!getRows(data).isEmpty()) {
 
         // список проверяемых столбцов (графа 12, 13)
-        def requiredColumns = ['tadeNumber', 'securityName', 'currencyCode',
-                'nominalPriceSecurities', 'acquisitionPrice', 'salePrice',
-                'part1REPODate', 'part2REPODate', 'income', 'outcome', 'outcome269st', 'outcomeTax']
+        def requiredColumns = ['outcome269st', 'outcomeTax']
 
         /** Отчетная дата. */
         def reportDate = getReportDate()
@@ -290,13 +274,15 @@ def logicalCheck(def useLog) {
             }
 
             // 5. Проверка финансового результата
-            tmp = ((row.salePrice - row.acquisitionPrice) * (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
-            if (tmp > 0 && row.income != roundTo2(tmp)) {
+            if (row.salePrice!=null && row.acquisitionPrice!=null && reportDate!=null && row.part1REPODate && row.part2REPODate!=null && course!=null) {
+                tmp = ((row.salePrice - row.acquisitionPrice) * (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
+            }
+            if (tmp!=null && tmp > 0 && row.income != roundTo2(tmp)) {
                 logger.warn('Неверно определены доходы')
             }
 
             // 6. Проверка финансового результата
-            if (tmp < 0 && row.outcome != roundTo2(-tmp)) {
+            if (tmp!=null && tmp < 0 && row.outcome != roundTo2(-tmp)) {
                 logger.warn('Неверно определены расходы')
             }
 
@@ -305,9 +291,9 @@ def logicalCheck(def useLog) {
             a = calcAForColumn9or10(row, reportDate, course)
             b = 0
             c = 0
-            if (a < 0) {
+            if (a!=null && a < 0) {
                 c = roundTo2(-a)
-            } else if (a > 0) {
+            } else if (a!=null && a > 0) {
                 b = roundTo2(a)
             }
             // графа 9
@@ -322,7 +308,7 @@ def logicalCheck(def useLog) {
             }
 
             // графа 11
-            def col11 = roundTo2(calculateColumn11(row, row.part2REPODate))
+            def col11 = roundTo2(calculateColumn11(row, reportDate))
             if (col11!=null && col11!=row.rateBR) {
                 name = getColumnName(row, 'rateBR')
                 logger.warn("Неверно рассчитана графа «$name»!")
@@ -405,7 +391,7 @@ def checkNSI() {
             }
 
             // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
-            def col11 = roundTo2(calculateColumn11(row, row.part2REPODate))
+            def col11 = roundTo2(calculateColumn11(row, reportDate))
             if (col11!=null && col11!=row.rateBR) {
                 logger.error('Неверно указана ставка Банка России!')
                 return false
@@ -712,10 +698,14 @@ def getColumnName(def row, def alias) {
  * @param course курс
  */
 def calcAForColumn9or10(def row, def reportDate, def course) {
+    if (row.acquisitionPrice!=null && row.salePrice!=null && reportDate!=null && row.part1REPODate!=null && row.part2REPODate!=null && course!=null) {
     // ((«графа 6» - «графа 5») х (отчетная дата – «графа 7») / («графа 8» - «графа 7»)) х курс ЦБ РФ
-    return ((row.salePrice - row.acquisitionPrice) *
-            (reportDate - row.part1REPODate) /
-            (row.part2REPODate - row.part1REPODate)) * course
+        return ((row.salePrice - row.acquisitionPrice) *
+                (reportDate - row.part1REPODate) /
+                (row.part2REPODate - row.part1REPODate)) * course
+    } else {
+        return null
+    }
 }
 
 /**

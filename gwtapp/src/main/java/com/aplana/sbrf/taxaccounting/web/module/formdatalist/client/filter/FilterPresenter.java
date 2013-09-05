@@ -1,16 +1,34 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.*;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.events.*;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.*;
-import com.google.inject.*;
-import com.google.web.bindery.event.shared.*;
-import com.gwtplatform.dispatch.shared.*;
-import com.gwtplatform.mvp.client.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import java.util.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
+import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.events.FormDataListApplyEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.events.FormDataListCreateEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDataResult;
+import com.google.inject.Inject;
+import com.google.web.bindery.event.shared.EventBus;
+import com.gwtplatform.dispatch.shared.DispatchAsync;
+import com.gwtplatform.mvp.client.HasUiHandlers;
+import com.gwtplatform.mvp.client.PresenterWidget;
+import com.gwtplatform.mvp.client.View;
 
 public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> implements FilterUIHandlers {
 
@@ -33,11 +51,9 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 
 		void setSelectedDepartments(List<Integer> values);
 
-		void setSelectedReportPeriods(List<ReportPeriod> reportPeriodList);
+		void setSelectedReportPeriods(List<Integer> reportPeriodList);
 
 		List<Integer> getSelectedDepartments();
-
-		void setTaxPeriods(List<TaxPeriod> taxPeriods);
 
 		void setReportPeriods(List<ReportPeriod> reportPeriods);
 
@@ -62,7 +78,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 
 	public FormDataFilter getFilterData() {
 		FormDataFilter formDataFilter = getView().getDataFilter();
-		formDataFilter.setReportPeriodIds(new ArrayList<Integer>(getView().getSelectedReportPeriods()));
+		formDataFilter.setReportPeriodIds(getView().getSelectedReportPeriods());
 		if (getView().getSelectedDepartments() == null) {
 			formDataFilter.setDepartmentId(new ArrayList<Integer>());
 		} else {
@@ -97,25 +113,10 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 						getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
 						getView().setKindList(fillFormKindList(filterValues.getKinds()));
 						getView().setFormTypesMap(fillFormTypesMap(filterValues.getFormTypes()));
-						getView().setTaxPeriods(result.getTaxPeriods());
+						getView().setReportPeriods(result.getReportPeriods());
 						getView().setFormStateList(fillFormStateList());
 						getView().setDataFilter(prepareFormDataFilter(result));
 						FilterReadyEvent.fire(FilterPresenter.this);
-					}
-				}, this));
-	}
-
-	@Override
-	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
-		GetReportPeriods action = new GetReportPeriods();
-		action.setTaxPeriod(taxPeriod);
-		//action.setDepartmentId(departmentId);
-		dispatchAsync.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
-					@Override
-					public void onSuccess(GetReportPeriodsResult result) {
-						periods.addAll(result.getReportPeriods());
-						getView().setReportPeriods(result.getReportPeriods());
 					}
 				}, this));
 	}
@@ -182,23 +183,6 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 		return formState;
 	}
 
-	private Set<Integer> convertDepartmentsToIds(List<Department> source){
-		Set<Integer> result = new HashSet<Integer>();
-		for(Department department : source){
-			result.add(department.getId());
-		}
-		return result;
-	}
-/*
-	private String getDepartmentNameById(List<Department> departmentList, Integer id){
-		for(Department department : departmentList){
-			if (department.getId() == id){
-				return department.getName();
-			}
-		}
-		return null;
-	}
-*/
 	private void initSavedFilterDataMap(){
 		for(TaxType value : TaxType.values()){
 			savedFilterData.put(value, null);

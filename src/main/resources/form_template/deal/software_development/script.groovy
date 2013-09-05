@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий
+ * 375 - Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий
  *
  * похож на  trademark (Предоставление права пользования товарным знаком)
  *
@@ -106,7 +106,8 @@ void logicCheck() {
             }
         }
         //  Корректность даты договора
-        def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+        def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+
         def dFrom = taxPeriod.getStartDate()
         def dTo = taxPeriod.getEndDate()
         def dt = docDateCell.value

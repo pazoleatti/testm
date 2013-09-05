@@ -19,6 +19,7 @@ public enum SystemType implements Serializable {
     GAMMA_10(52, 109, "10", "9"),
     GAMMA_11(58, 109, "11", "9"),
     GAMMA_12(59, 109, "12", "9"),
+    GAMMA_13(60, 109, "13", "9"),
     DC(36, 701, "00", "P"),
     DC_01(37, 701, "01", "Q"),
     DC_02(38, 701, "02", "R"),
@@ -44,7 +45,7 @@ public enum SystemType implements Serializable {
                 return t;
             }
         }
-        throw new IllegalArgumentException("Bad Old System Type " + id);
+        throw new IllegalArgumentException("Is not contained in enum SystemType! id: " + id);
     }
 
     public int getId() {

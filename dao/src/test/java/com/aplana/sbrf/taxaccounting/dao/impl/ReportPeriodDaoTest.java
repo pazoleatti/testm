@@ -68,8 +68,8 @@ public class ReportPeriodDaoTest {
 		
 		List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(taxPeriod.getId());
 		assertEquals(2, reportPeriodList.size());
-		assertEquals(9, reportPeriodList.get(0).getOrder());
-		assertEquals(10, reportPeriodList.get(1).getOrder());
+		assertEquals(10, reportPeriodList.get(0).getOrder());
+		assertEquals(9, reportPeriodList.get(1).getOrder());
 
 		reportPeriodList = reportPeriodDao.listByTaxPeriod(-1);
 		assertEquals(0, reportPeriodList.size());

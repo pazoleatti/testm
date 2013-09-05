@@ -150,7 +150,7 @@ def dataRowsHelperComplexConsumption = getDataRowHelper(formDataComplexConsumpti
 def formDataSimpleConsumption = formDataCollection.find(departmentId, 304, FormDataKind.SUMMARY)
 def dataRowsHelperSimpleConsumption = getDataRowHelper(formDataSimpleConsumption)
 
-/** Выходная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
+/** Сводная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
 def formDataAdvance = formDataCollection.find(departmentId, 500, FormDataKind.SUMMARY)
 def dataRowsHelperAdvance = getDataRowHelper(formDataAdvance)
 
@@ -518,7 +518,7 @@ if (xml == null) {
 import groovy.xml.MarkupBuilder;
 def xmlbuilder = new MarkupBuilder(xml)
 xmlbuilder.Файл(
-        ИдФайл : declarationService.generateXmlFileId(2, departmentId, declarationData.reportPeriodId),
+        ИдФайл : declarationService.generateXmlFileId(2, departmentId, reportPeriodId),
         ВерсПрог : appVersion,
         ВерсФорм : formatVersion) {
 
@@ -630,7 +630,7 @@ xmlbuilder.Файл(
                             // толи по КПП = 775001001), при формировании декларации подразделения
                             // надо брать строку appl5List02Row120 относящегося к этому подразделению
                             def rowForAvPlat = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, kpp)
-                            appl5List02Row120 = (rowForAvPlat ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
+                            def appl5List02Row120 = (rowForAvPlat ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
                             avPlat1 = (long) appl5List02Row120 / 3
                             avPlat2 = avPlat1
                             avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
@@ -1805,9 +1805,8 @@ def getOldXmlData(def prevReportPeriod, def departmentId) {
         // вид декларации 2 - декларация по налогу на прибыль уровня банка
         def declarationTypeId = 2
         DeclarationData declarationData = declarationService.find(declarationTypeId, departmentId, prevReportPeriod.id)
-        def declarationDataId = (declarationData != null ? declarationData.declarationTemplateId : null)
-        if (declarationDataId != null) {
-            def oldXmlString = declarationService.getXmlData(declarationDataId)
+        if (declarationData != null && declarationData.id != null) {
+            def oldXmlString = declarationService.getXmlData(declarationData.id)
             return new XmlSlurper().parseText(oldXmlString)
         }
     }

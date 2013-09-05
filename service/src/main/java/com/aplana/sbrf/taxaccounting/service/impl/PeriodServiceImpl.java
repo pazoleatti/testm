@@ -16,11 +16,12 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 
 /**
  * Сервис работы с периодами
@@ -30,7 +31,9 @@ import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
  */
 @Service
 @Transactional
-public class ReportPeriodServiceImpl implements ReportPeriodService{
+public class PeriodServiceImpl implements PeriodService{
+	
+	public static final Long PERIOD$CODE$REFBOOK = 8L;
 
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
@@ -129,14 +132,22 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 
 		ReportPeriod newReportPeriod;
 		if (reportPeriods.isEmpty()) {
-			RefBookDataProvider provider = rbFactory.getDataProvider(8L);
+			RefBook refBook = rbFactory.get(PERIOD$CODE$REFBOOK);
+			RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
 			Map<String, RefBookValue> record = provider.getRecordData(Long.valueOf(dictionaryTaxPeriodId));
 			newReportPeriod = new ReportPeriod();
 			newReportPeriod.setTaxPeriod(taxPeriod);
 			newReportPeriod.setDictTaxPeriodId(dictionaryTaxPeriodId);
-			newReportPeriod.setName(record.get("NAME").getStringValue());
-			newReportPeriod.setOrder(4); //TODO взять из справочника
-			newReportPeriod.setMonths(record.get("MONTHS").getNumberValue().intValue());
+			
+			String name = record.get("NAME").getStringValue();
+			Number ord = record.get("ORD").getNumberValue();
+			Number months = record.get("MONTHS").getNumberValue();
+			if (name == null || name.isEmpty() || ord == null || months == null){
+				throw new ServiceException("Не заполнен один из обязательных атрибутов справочника \"" + refBook.getName() + "\"");
+			}
+			newReportPeriod.setName(name);
+			newReportPeriod.setOrder(ord.intValue()); 
+			newReportPeriod.setMonths(months.intValue());
 			reportPeriodDao.save(newReportPeriod);
 
 		} else {
@@ -292,6 +303,18 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 		return taxPeriodDao.getLast(taxType);
 	}
 
+	@Override
+	public List<ReportPeriod> getAllPeriodsByTaxType(TaxType taxType) {
+		// TODO Оптимизировать!!!!
+		List<ReportPeriod> reportPeriods = new ArrayList<ReportPeriod>();
+		List<TaxPeriod> taxPeriods = taxPeriodDao.listByTaxType(taxType);
+		for (TaxPeriod taxPeriod : taxPeriods) {
+			reportPeriods.addAll(reportPeriodDao.listByTaxPeriod(taxPeriod.getId()));
+		}
+		return reportPeriods;
+	}
+
+	
 
 
 }

@@ -30,6 +30,8 @@ public class FormDataSearchResultItemMapper implements RowMapper<FormDataSearchR
         result.setReportPeriodYear(Integer.valueOf(YEAR_FORMATTER.format(rs.getDate("start_date"))));
         Integer reportPeriodMonth = rs.getInt("period_order");
         result.setReportPeriodMonth(rs.wasNull() ? null : reportPeriodMonth);
+        Integer returnSign = rs.getInt("return_sign");
+        result.setReturnSign(rs.wasNull() ? null : 1 == returnSign);
 
 		return result;
 	}

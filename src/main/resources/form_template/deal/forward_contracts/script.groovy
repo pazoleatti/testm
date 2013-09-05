@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Поставочные срочные сделки, базисным активом которых является иностранная валюта
+ * 391 - Поставочные срочные сделки, базисным активом которых является иностранная валюта
  *
  * @author Stanislav Yasinskiy
  */
@@ -125,7 +125,8 @@ void logicCheck() {
             logger.warn("Одна из граф «$msgIn» и «$msgOut» в строке $rowNum должна быть заполнена!")
         }
         //  Корректность даты договора
-        def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+        def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+
         def dFrom = taxPeriod.getStartDate()
         def dTo = taxPeriod.getEndDate()
         def dt = docDateCell.value

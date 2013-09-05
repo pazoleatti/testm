@@ -12,15 +12,12 @@ import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateFormDataResult;
@@ -44,22 +41,21 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 
 	private final PlaceManager placeManager;
 	private final DispatchAsync dispatchAsync;
-	private ReportPeriod currentReportPeriod;
 	private final Map<Integer, FormType> formTypeMap = new HashMap<Integer, FormType>();
 	private final Map<Integer, Department> departmentMap = new HashMap<Integer, Department>();
 
 	public interface MyView extends PopupView, HasUiHandlers<DialogUiHandlers> {
 		void clearInput();
-		void setReportPeriods(List<ReportPeriod> reportPeriods);
+		
 		void setAvalibleDepartments(List<Department> list, Set<Integer> availableValues);
-		void setAvalibleTaxPeriods(List<TaxPeriod> taxPeriods);
 		void setKindList(List<FormDataKind> list);
 		void setFormTypeList(List<FormType> list);
 		FormDataFilter getFilterData();
 		void setFormTypeValue(FormType value);
 		void setFormKindValue(FormDataKind value);
 		void setDepartmentValue(List<Integer> value);
-		void setReportPeriodValue(List<ReportPeriod> value);
+		void setReportPeriodValue(List<Integer> value);
+		void setReportPeriods(List<ReportPeriod> reportPeriods);
 	}
 
 	@Inject
@@ -99,18 +95,6 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 
 	}
 
-	@Override
-	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
-		GetReportPeriods action = new GetReportPeriods();
-		action.setTaxPeriod(taxPeriod);
-		dispatchAsync.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
-					@Override
-					public void onSuccess(GetReportPeriodsResult result) {
-						getView().setReportPeriods(result.getReportPeriods());
-					}
-				}, this));
-	}
 
 	public void initDialog(TaxType taxType){
 		GetFilterData action = new GetFilterData();
@@ -123,10 +107,9 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 						getView().setAvalibleDepartments(result.getDepartments(), filterValues.getDepartmentIds());
 						getView().setKindList(fillFilterList(filterValues.getKinds()));
 						getView().setFormTypeList(fillFilterList(filterValues.getFormTypes()));
-						getView().setAvalibleTaxPeriods(result.getTaxPeriods());
+						getView().setReportPeriods(result.getReportPeriods());
 						fillDepartmentsMap(result.getDepartments());
 						fillFormTypeMap(filterValues.getFormTypes());
-						currentReportPeriod = result.getCurrentReportPeriod();
 					}
 				}, this));
 	}
@@ -146,19 +129,7 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 			getView().setDepartmentValue(value);
 		}
 
-		List<ReportPeriod> value = new ArrayList<ReportPeriod>();
-		if(formDataFilter.getReportPeriodIds().size() == 1) {
-			for (ReportPeriod period : periods) {
-				if (period.getId() == formDataFilter.getReportPeriodIds().get(0)) {
-					value.add(period);
-				}
-			}
-
-			if (value.isEmpty()) {
-				value.add(currentReportPeriod);
-			}
-		}
-		getView().setReportPeriodValue(value);
+		getView().setReportPeriodValue(formDataFilter.getReportPeriodIds());
 	}
 
 	private <T> List<T> fillFilterList(List<T> source){

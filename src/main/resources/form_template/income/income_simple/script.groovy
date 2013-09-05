@@ -378,10 +378,9 @@ def consolidationBank(DataRowHelper form) {
         }
     }
     // получить данные из источников
-    for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), FormDataKind.SUMMARY)) {
+    for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())) {
         def child = formDataService.find(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == departmentFormType.formTypeId) {
-            DataRowHelper childHelper = getData(child)
             getRows(getData(child)).eachWithIndex() { DataRow<Cell> row, i ->
                 DataRow<Cell> rowResult = form.getDataRow(form.allCached, row.getAlias())
                 for (alias in ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted']) {

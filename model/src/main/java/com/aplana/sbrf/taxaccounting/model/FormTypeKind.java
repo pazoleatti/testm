@@ -2,6 +2,15 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
 
+/**
+ * @author sgoryachkin
+ * 
+ * @deprecated
+ * Непонятно зачем был создан этот модельный класс. Его использование обосновано только в ГУИ. 
+ * TODO (sgoryachkin) Нужен рефакторинг формы где он используется 
+ *
+ */
+@Deprecated
 public class FormTypeKind implements Serializable {
     private static final long serialVersionUID = 1L;
 

@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -166,7 +166,7 @@ public class DeclarationDataAccessServiceImplBalancePeriodTest {
 		when(declarationDataDao.get(DECLARATION_ACCEPTED_TB2_ID)).thenReturn(declarationAcceptedTB2);		
 		ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
 
-		ReportPeriodService reportPeriodService = mock(ReportPeriodService.class);
+		PeriodService reportPeriodService = mock(PeriodService.class);
 		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ID, DEPARTMENT_TB1_ID)).thenReturn(true);
 		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_ID, DEPARTMENT_TB1_ID)).thenReturn(true);
 

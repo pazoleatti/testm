@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentCombinedAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentCombinedResult;
@@ -34,7 +34,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         GetDepartmentCombinedResult> {
 
     @Autowired
-    private ReportPeriodService reportService;
+    private PeriodService reportService;
 
     @Autowired
     private RefBookFactory rbFactory;

@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Сервис для работы с отчетными периодами
  */
-public interface ReportPeriodService {
+public interface PeriodService {
 
     /**
      * Последний отчетный период для указанного вида налога и подразделения
@@ -117,4 +117,14 @@ public interface ReportPeriodService {
      * @return
      */
     public Calendar getStartDate(int reportPeriodId);
+    
+    
+    /**
+     * Получает все отчетные периоды в отсортированном порядке.
+     * 
+     * @param taxType
+     * @return
+     */
+    public List<ReportPeriod> getAllPeriodsByTaxType(TaxType taxType); 
+    
 }

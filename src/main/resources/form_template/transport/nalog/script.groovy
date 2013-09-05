@@ -149,12 +149,13 @@ switch (formDataEvent) {
 void addRow() {
     def newRow = formData.createDataRow()
 
-
     ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoClass', 'regNumber', 'powerVal', 'baseUnit', 'year', 'regDate', 'regDateEnd', 'stealDateStart', 'stealDateEnd'].each { column ->
         newRow.getCell(column).editable = true
         newRow.getCell(column).setStyleAlias("Редактируемое поле")
     }
-    dataRowHelper.insert(newRow, getDataRows().size() ?: 1)
+
+    def index = (currentDataRow != null ? currentDataRow.getIndex() : getDataRows().size())
+    dataRowHelper.insert(newRow, index + 1)
 }
 
 /**

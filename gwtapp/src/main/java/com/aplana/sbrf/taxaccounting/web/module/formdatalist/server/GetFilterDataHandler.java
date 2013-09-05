@@ -10,7 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDataResult;
@@ -32,7 +32,7 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
 	private DepartmentService departmentService;
 
 	@Autowired
-	private ReportPeriodService reportPeriodService;
+	private PeriodService periodService;
 
     public GetFilterDataHandler() {
         super(GetFilterData.class);
@@ -48,8 +48,7 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
 				departmentService.getRequiredForTreeDepartments(filterValues.getDepartmentIds()).values()));
 
 	    res.setFilterValues(filterValues);
-	    res.setTaxPeriods(reportPeriodService.listByTaxType(action.getTaxType()));
-	    res.setCurrentReportPeriod(null);
+	    res.setReportPeriods(periodService.getAllPeriodsByTaxType(action.getTaxType()));
 
         return res;
     }

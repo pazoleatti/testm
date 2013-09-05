@@ -7,10 +7,9 @@ import java.util.List;
 
 public class GetFilterDataResult implements Result {
 	private static final long serialVersionUID = -3436595935051736909L;
-	
-	private ReportPeriod currentReportPeriod;
+
     private List<Department> departments;
-	private List<TaxPeriod> taxPeriods;
+	private List<ReportPeriod> reportPeriods;
 	private FormDataFilterAvailableValues filterValues;
 
     public GetFilterDataResult(){
@@ -25,14 +24,6 @@ public class GetFilterDataResult implements Result {
         this.departments = departments;
     }
 
-	public List<TaxPeriod> getTaxPeriods() {
-		return taxPeriods;
-	}
-
-	public void setTaxPeriods(List<TaxPeriod> taxPeriods) {
-		this.taxPeriods = taxPeriods;
-	}
-
 	public FormDataFilterAvailableValues getFilterValues() {
 		return filterValues;
 	}
@@ -41,11 +32,11 @@ public class GetFilterDataResult implements Result {
 		this.filterValues = filterValues;
 	}
 
-	public ReportPeriod getCurrentReportPeriod() {
-		return currentReportPeriod;
+	public List<ReportPeriod> getReportPeriods() {
+		return reportPeriods;
 	}
 
-	public void setCurrentReportPeriod(ReportPeriod currentReportPeriod) {
-		this.currentReportPeriod = currentReportPeriod;
+	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
+		this.reportPeriods = reportPeriods;
 	}
 }
