@@ -224,6 +224,9 @@ void calc() {
 
     for (row in dataRows) {
 
+        // Порядковый номер строки
+        row.rowNum = row.getIndex()
+
         // Расчет поля "Населенный пункт"
         if (row.city != null && !row.city.toString().isEmpty()) {
             row.settlement = row.city
@@ -234,7 +237,7 @@ void calc() {
         // Расчет поля "Цена"
         row.price = count == null ? bankSum : bankSum / count
         // Расчет поля "Стоимость"
-        row.coste = bankSum
+        row.cost = bankSum
 
         // Расчет полей зависимых от справочников
         if (row.jurName != null) {
