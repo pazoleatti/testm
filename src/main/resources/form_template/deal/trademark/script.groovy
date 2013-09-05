@@ -247,6 +247,7 @@ void importData() {
             return
         }
         addData(xml)
+//        logicCheck()
     } catch(Exception e) {
         logger.error(""+e.message)
     }
@@ -300,7 +301,7 @@ def addData(def xml) {
         indexCell++
 
         // графа 5
-        newRow.sum = getNumber(row.cell[indexCell].text())
+        newRow.sum = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 
         // графа 6
@@ -308,19 +309,19 @@ def addData(def xml) {
         indexCell++
 
         // графа 7
-        newRow.docDate = getDate(row.cell[indexCell].text())
+        newRow.docDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 
         // графа 8
-        newRow.price = getNumber(row.cell[indexCell].text())
+//        newRow.price = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 
         // графа 9
-        newRow.cost = getNumber(row.cell[indexCell].text())
+//        newRow.cost = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 
         // графа 10
-        newRow.dealDate = getDate(row.cell[indexCell].text())
+        newRow.dealDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
 
         data.insert(newRow, indexRow - 2)
     }
@@ -374,7 +375,7 @@ def checkTableHead(def xml, def headRowCount) {
  *
  * @param value строка
  */
-def getNumber(def value) {
+def getNumber(def value, int indexRow, int indexCell) {
     if (value == null) {
         return null
     }
@@ -384,7 +385,11 @@ def getNumber(def value) {
     }
     // поменять запятую на точку и убрать пробелы
     tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
-    return new BigDecimal(tmp)
+    try {
+        return new BigDecimal(tmp)
+    } catch (Exception e) {
+        throw new Exception("Строка ${indexRow+14} столбец ${indexCell+2} содержит недопустимый тип данных!")
+    }
 }
 
 /**
@@ -406,17 +411,20 @@ def getRecordId(def ref_id, String code, String value, Date date, def cache, int
         return cache[ref_id][filter]
     }
     throw new Exception("Строка ${indexRow+14} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
-    return null;
 }
 
 
 /**
  * Получить дату по строковому представлению (формата дд.ММ.гггг)
  */
-def getDate(def value) {
+def getDate(def value, int indexRow, int indexCell) {
     if (value == null || value == '') {
         return null
     }
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    return format.parse(value)
+    try {
+        return format.parse(value)
+    } catch (Exception e) {
+        throw new Exception("Строка ${indexRow+14} столбец ${indexCell+2} содержит недопустимый тип данных!")
+    }
 }
