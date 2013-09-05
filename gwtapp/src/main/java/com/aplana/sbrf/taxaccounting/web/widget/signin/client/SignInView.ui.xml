@@ -21,6 +21,6 @@
             <g:Label height="15px" ui:field="roleAndDepartment"/>
             <g:Label height="15px" ui:field="userName"/>
         </div>
-	    <div style="float: right; margin-top: 5px"><g:Anchor styleName="{style.whiteColor}" href="logout" text="Выход"/></div>
+	    <div style="float: right; margin-top: 5px"><g:Anchor styleName="{style.whiteColor}" href="j_spring_security_logout" text="Выход"/></div>
 	</g:HTMLPanel>
 </ui:UiBinder> 
