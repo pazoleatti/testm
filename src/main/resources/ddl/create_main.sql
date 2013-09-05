@@ -418,11 +418,13 @@ create table declaration_template (
   create_script       clob,
   jrxml               clob,
   jasper              blob,
-  declaration_type_id number(9) not null
+  declaration_type_id number(9) not null,
+  XSD VARCHAR2(36) 
 );
 alter table declaration_template add constraint declaration_template_pk primary key (id);
 alter table declaration_template add constraint declaration_t_chk_is_active check (is_active in (0,1));
 alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type (id);
+alter table declaration_template add constraint declaration_tem_fk_blob_data foreign key (XSD) references blob_data (id);
 
 comment on table declaration_template is 'Шаблоны налоговых деклараций';
 comment on column declaration_template.id is 'Идентификатор (первичный ключ)';
@@ -433,6 +435,7 @@ comment on column declaration_template.create_script is 'Скрипт форми
 comment on column declaration_template.jrxml is 'Макет JasperReports для формирования печатного представления формы';
 comment on column declaration_template.jasper is 'Скомпилированный макет JasperReports для формирования печатного представления формы';
 comment on column declaration_template.declaration_type_id is 'Вид деклараций';
+comment on column declaration_template.XSD is 'XSD-схема';
 
 create sequence seq_declaration_template start with 10000;
 
