@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -23,8 +21,6 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.DetectUse
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.DetectUserRoleResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -42,7 +38,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
 		List<Integer> getSelectedReportPeriods();
 
-		void setSelectedReportPeriods(List<ReportPeriod> reportPeriodList);
+		void setSelectedReportPeriods(List<Integer> reportPeriodList);
 
 		void updateReportPeriodPicker();
 
@@ -53,8 +49,6 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		Integer getSelectedDeclarationTypeId();
 
 		void setDeclarationTypeMap(Map<Integer, String> declarationTypeMap);
-
-		void setTaxPeriods(List<TaxPeriod> taxPeriods);
 
 		void setReportPeriods(List<ReportPeriod> reportPeriods);
 
@@ -67,9 +61,8 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 	private static Map<TaxType, DeclarationDataFilter> savedFilterData = new HashMap<TaxType, DeclarationDataFilter>();
 	private static Map<TaxType, List<Integer>> savedDepartmentsMap = new HashMap<TaxType, List<Integer>>();
 	private List<TARole> userRoles = null;
-	private List<TaxPeriod> taxPeriods;
+	private List<ReportPeriod> reportPeriods;
 	private List<Department> departments;
-	private Set<ReportPeriod> periods = new HashSet<ReportPeriod>();
 	private DeclarationDataFilterAvailableValues filterValues;
 
 	@Inject
@@ -95,8 +88,8 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		return filterValues;
 	}
 
-	public List<TaxPeriod> getTaxPeriods() {
-		return taxPeriods;
+	public List<ReportPeriod> getReportPeriods() {
+		return reportPeriods;
 	}
 
 	public List<Department> getDepartments() {
@@ -105,9 +98,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
 	public void updateSavedFilterData(DeclarationDataFilter declarationFilter){
 		savedFilterData.put(this.taxType, declarationFilter);
-		List<Integer> selectedDepartments = new ArrayList<Integer>();
-		selectedDepartments.addAll(getView().getSelectedDepartments());
-		savedDepartmentsMap.put(this.taxType, selectedDepartments);
+		savedDepartmentsMap.put(this.taxType, getView().getSelectedDepartments());
 	}
 
 	public void initFilter(final TaxType taxType) {
@@ -122,11 +113,11 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 						@Override
 						public void onSuccess(GetDeclarationFilterDataResult result) {
 							filterValues = result.getFilterValues();
-							taxPeriods = result.getTaxPeriods();
 							departments = result.getDepartments();
 
 							getView().setDepartmentsList(departments, filterValues.getDepartmentIds());
-							getView().setTaxPeriods(taxPeriods);
+							getView().setReportPeriods(result.getPeriods());
+							reportPeriods = result.getPeriods();
 							getView().setDeclarationTypeMap(fillDeclarationTypesMap(filterValues));
 
 							getView().setDataFilter(prepareFormDataFilter(), taxType);
@@ -135,19 +126,6 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 					}, this));
 	}
 
-	@Override
-	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
-		GetReportPeriods action = new GetReportPeriods();
-		action.setTaxPeriod(taxPeriod);
-		dispatchAsync.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
-					@Override
-					public void onSuccess(GetReportPeriodsResult result) {
-						periods.addAll(result.getReportPeriods());
-						getView().setReportPeriods(result.getReportPeriods());
-					}
-				}, this));
-	}
 
 	@Override
 	public TaxType getCurrentTaxType(){
@@ -170,7 +148,6 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 			if(filterValues.getDepartmentIds() != null && !filterValues.getDepartmentIds().isEmpty()
 					&& !isControlOfUnp() ){
 				Integer departmentId = filterValues.getDefaultDepartmentId();
-				String departmentName = getDepartmentNameById(departments, departmentId);
 				//Если пользователь ни разу не выполнял фильтрацию, то ставим значения фильтра по-умолчанию
 				List<Integer> defaultDepartment = new ArrayList<Integer>(Arrays.asList(departmentId));
 				getView().setSelectedDepartments(Arrays.asList(departmentId));
@@ -184,15 +161,6 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 			getView().setSelectedDepartments(savedDepartmentsMap.get(taxType));
 		}
 		return formDataFilter;
-	}
-
-	private String getDepartmentNameById(List<Department> departmentList, Integer id){
-		for(Department department : departmentList){
-			if (department.getId() == id){
-				return department.getName();
-			}
-		}
-		return null;
 	}
 
 	private boolean isControlOfUnp(){

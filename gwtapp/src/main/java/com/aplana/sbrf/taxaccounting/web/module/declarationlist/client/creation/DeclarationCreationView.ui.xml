@@ -3,7 +3,7 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
     xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
-    xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker">   
+    xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">   
     <ui:style>
         .content {
             padding: 10px;
@@ -28,7 +28,7 @@
                 
                 <g:FlowPanel height="60px">
                     <g:Label text="Отчетный период" />
-                     <rep:ReportPeriodPicker ui:field="periodPicker"/>
+                     <rep:PeriodPickerPopupWidget ui:field="periodPicker"/>
                 </g:FlowPanel>
 
                 <g:FlowPanel height="60px">
