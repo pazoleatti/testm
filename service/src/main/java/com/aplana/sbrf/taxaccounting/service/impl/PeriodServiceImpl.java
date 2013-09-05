@@ -304,10 +304,13 @@ public class PeriodServiceImpl implements PeriodService{
 	}
 
 	@Override
-	public List<ReportPeriod> getAllPeriodsByTaxType(TaxType taxType) {
+	public List<ReportPeriod> getAllPeriodsByTaxType(TaxType taxType, boolean backOrder) {
 		// TODO Оптимизировать!!!!
 		List<ReportPeriod> reportPeriods = new ArrayList<ReportPeriod>();
 		List<TaxPeriod> taxPeriods = taxPeriodDao.listByTaxType(taxType);
+		if (backOrder){
+			Collections.reverse(taxPeriods);
+		}
 		for (TaxPeriod taxPeriod : taxPeriods) {
 			reportPeriods.addAll(reportPeriodDao.listByTaxPeriod(taxPeriod.getId()));
 		}
