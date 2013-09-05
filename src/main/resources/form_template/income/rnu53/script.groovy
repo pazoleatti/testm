@@ -479,7 +479,6 @@ void importData() {
     }
 
     def data = getData(formData)
-    def rowsOld = getRows(data)
     def totalColumns = [5:'acquisitionPrice', 6:'salePrice', 9:'income', 10:'outcome', 11:'outcome269st', 12:'outcomeTax']
 
     // добавить данные в форму
@@ -508,14 +507,9 @@ void importData() {
         logger.error(""+e.message)
     }
     //в случае ошибок откатить изменения
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        data.clear()
-        data.insert(rowsOld, 1)
-        logger.error("Загрузка файла $fileName завершилась ошибкой")
-    } else {
+    if (!logger.containsLevel(LogLevel.ERROR)) {
         logger.info('Закончена загрузка файла ' + fileName)
     }
-    data.commit()
 }
 
 
