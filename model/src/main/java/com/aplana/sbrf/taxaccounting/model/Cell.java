@@ -111,7 +111,7 @@ public class Cell extends AbstractCell {
 			}
 		} else if (getColumn() instanceof StringColumn) {
 			if (!getColumn().getValidationStrategy().matches((String) value)) {
-				throw new IllegalArgumentException(((String) value) + " длинее " + ((StringColumn)getColumn()).getMaxLength());
+				throw new IllegalArgumentException(((String) value) + " длиннее " + ((StringColumn)getColumn()).getMaxLength());
 			}
 		}
 

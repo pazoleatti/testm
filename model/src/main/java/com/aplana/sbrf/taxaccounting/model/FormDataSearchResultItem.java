@@ -42,6 +42,8 @@ public class FormDataSearchResultItem implements Serializable {
     private Integer reportPeriodYear;
     // Очередность отчетного периода для ежемесячных НФ
     private Integer reportPeriodMonth;
+    // Признак возврата
+    private Boolean returnSign;
 	
 	public Long getFormDataId() {
 		return formDataId;
@@ -126,5 +128,11 @@ public class FormDataSearchResultItem implements Serializable {
     }
     public void setReportPeriodYear(Integer reportPeriodYear) {
         this.reportPeriodYear = reportPeriodYear;
+    }
+    public Boolean getReturnSign() {
+        return returnSign;
+    }
+    public void setReturnSign(Boolean returnSign) {
+        this.returnSign = returnSign;
     }
 }
