@@ -852,6 +852,36 @@ comment on column department_report_period.report_date is 'Срок подачи
 alter table department_report_period add constraint dep_rep_per_fk_department_id foreign key (department_id) references DEPARTMENT (id);
 alter table department_report_period add constraint dep_rep_per_fk_rep_period_id foreign key (report_period_id) references REPORT_PERIOD (id);
 
+
+CREATE TABLE task_context
+(
+id  number(18,0) primary key,
+task_id number(18,0) NOT NULL,
+task_name varchar2(100) NOT NULL,
+user_task_jndi varchar2(500) NOT NULL,
+custom_params_exist number(9,0) NOT NULL,
+serialized_params blob NULL
+);
+
+alter table task_context add constraint task_context_uniq_task_id unique (task_id);
+alter table task_context add constraint task_context_uniq_task_name unique (task_name);
+
+create sequence seq_task_context start with 100;
+
+CREATE TABLE user_session
+(
+id  number(18,0) PRIMARY KEY,
+session_id varchar2(100) NOT NULL,
+user_login varchar2(500) NOT NULL,
+user_ip varchar2(100) NOT NULL,
+create_time date NOT NULL
+);
+
+alter table user_session add constraint user_session_uniq_session_id unique (session_id);
+alter table user_session add constraint user_session_uniq_user_login unique (user_login);
+
+create sequence seq_user_session start with 100;
+
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);
