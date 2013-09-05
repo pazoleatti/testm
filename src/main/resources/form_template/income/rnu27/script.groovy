@@ -285,10 +285,10 @@ void logicalCheck() {
         List notFound = []
         List foundMany = []
         for (DataRow rowPrev in getRows(dataPrev)) {
-            if (rowPrev.getAlias() != null && rowPrev.reserveCalcValue > 0) {
+            if (rowPrev.getAlias() == null && rowPrev.reserveCalcValue > 0) {
                 int count = 0
                 for (DataRow row in getData(formData).getAllCached()) {
-                    if (row.getAlias() != null && row.tradeNumber == rowPrev.tradeNumber) {
+                    if (row.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber) {
                         count++
                     }
                 }
