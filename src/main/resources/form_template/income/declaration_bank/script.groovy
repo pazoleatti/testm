@@ -1807,6 +1807,7 @@ def getOldXmlData(def prevReportPeriod, def departmentId) {
         DeclarationData declarationData = declarationService.find(declarationTypeId, departmentId, prevReportPeriod.id)
         if (declarationData != null && declarationData.id != null) {
             def oldXmlString = declarationService.getXmlData(declarationData.id)
+            oldXmlString = oldXmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
             return new XmlSlurper().parseText(oldXmlString)
         }
     }

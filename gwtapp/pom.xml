@@ -190,11 +190,6 @@
 				</dependencies>
 			</plugin>
 
-			<plugin>
-				<groupId>com.google.code.maven-svn-revision-number-plugin</groupId>
-				<artifactId>svn-revision-number-maven-plugin</artifactId>
-			</plugin>
-
 		</plugins>
 	</build>
 
