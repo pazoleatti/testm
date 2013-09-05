@@ -17,7 +17,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 public class GetProjectVersionHandler extends
 		AbstractActionHandler<GetProjectVersion, GetProjectVersionResult> {
 
-	private static final String RESOURCE_FOR_GETTING_VERSION = "version-info.txt";
+	private static final String RESOURCE_FOR_GETTING_VERSION = "/META-INF/MANIFEST.MF";
 
 	private Log log = LogFactory.getLog(getClass());
 
@@ -37,8 +37,8 @@ public class GetProjectVersionHandler extends
 					.getResourceAsStream(RESOURCE_FOR_GETTING_VERSION);
 			Properties prop = new Properties();
 			prop.load(inputStream);
-			version = prop.getProperty("version", "unknown");
-			revision = prop.getProperty("revision","unknown");
+			version = prop.getProperty("Implementation-Version", version);
+			revision = prop.getProperty("X-Git-Build-Number", revision);
 		} catch (Exception e) {
 			log.error("A error occurred during getting version from resource: "
 					+ RESOURCE_FOR_GETTING_VERSION, e);
