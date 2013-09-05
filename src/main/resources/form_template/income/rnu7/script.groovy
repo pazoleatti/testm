@@ -359,8 +359,7 @@ def logicalCheck(def useLog) {
             def checkSumm = checkDate(row)
 
             if (checkSumm == null) {
-                logger.error('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете за последние 3 года не проходила!')
-                return false
+                logger.warn('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете за последние 3 года не проходила!')
             } else if (checkSumm >= row.ruble) {
                 logger.warn('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-7 в <отчетный период> отчетном периоде.')
             }
