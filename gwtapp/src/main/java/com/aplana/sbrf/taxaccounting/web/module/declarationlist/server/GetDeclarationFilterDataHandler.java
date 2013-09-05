@@ -30,7 +30,7 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 	private SecurityService securityService;
 
 	@Autowired
-	private PeriodService taxPeriodDao;
+	private PeriodService periodService;
 
 	@Autowired
 	private DepartmentService departmentService;
@@ -48,7 +48,7 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 		res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(declarationFilterValues
 				.getDepartmentIds()).values()));
 		res.setFilterValues(declarationFilterValues);
-		res.setPeriods(taxPeriodDao.getAllPeriodsByTaxType(action.getTaxType()));
+		res.setPeriods(periodService.getAllPeriodsByTaxType(action.getTaxType(), true));
 		return res;
 	}
 
