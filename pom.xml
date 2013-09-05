@@ -26,6 +26,7 @@
 	</modules>
 
 	<properties>
+		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<gwt.version>2.5.1</gwt.version>
 		<gwtp.version>1.0</gwtp.version>
@@ -348,6 +349,7 @@
 		</dependency>
 	</dependencies>
 
+
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -367,15 +369,17 @@
 					<configuration>
 						<archive>
 							<manifest>
-							 	<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-							 	<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							</manifest>
 							<manifestEntries>
+								<Built-Date>${maven.build.timestamp}</Built-Date>
 								<X-Git-Branch>${git.branch}</X-Git-Branch>
 								<X-Git-Tag>${git.tag}</X-Git-Tag>
 								<X-Git-Commits-Count>${git.commitsCount}</X-Git-Commits-Count>
 								<X-Git-Revision>${git.revision}</X-Git-Revision>
 								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
+								<X-Git-Build-Number-And-Date>${git.buildnumber}.${maven.build.timestamp}</X-Git-Build-Number-And-Date>
 							</manifestEntries>
 						</archive>
 					</configuration>
@@ -387,15 +391,40 @@
 					<configuration>
 						<archive>
 							<manifest>
-							 	<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-							 	<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							</manifest>
 							<manifestEntries>
+								<Built-Date>${maven.build.timestamp}</Built-Date>
 								<X-Git-Branch>${git.branch}</X-Git-Branch>
 								<X-Git-Tag>${git.tag}</X-Git-Tag>
 								<X-Git-Commits-Count>${git.commitsCount}</X-Git-Commits-Count>
 								<X-Git-Revision>${git.revision}</X-Git-Revision>
 								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
+								<X-Git-Build-Number-And-Date>${git.buildnumber}.${maven.build.timestamp}</X-Git-Build-Number-And-Date>
+							</manifestEntries>
+						</archive>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-ear-plugin</artifactId>
+					<version>2.7</version>
+					<configuration>
+						<archive>
+							<manifest>
+								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							</manifest>
+							<manifestEntries>
+								<Built-Date>${maven.build.timestamp}</Built-Date>
+								<X-Git-Branch>${git.branch}</X-Git-Branch>
+								<X-Git-Tag>${git.tag}</X-Git-Tag>
+								<X-Git-Commits-Count>${git.commitsCount}</X-Git-Commits-Count>
+								<X-Git-Revision>${git.revision}</X-Git-Revision>
+								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
+								<X-Git-Build-Number-And-Date>${git.buildnumber}.${maven.build.timestamp}</X-Git-Build-Number-And-Date>
 							</manifestEntries>
 						</archive>
 					</configuration>
@@ -428,7 +457,7 @@
 					<version>2.9</version>
 				</plugin>
 
-				
+
 			</plugins>
 		</pluginManagement>
 		<plugins>

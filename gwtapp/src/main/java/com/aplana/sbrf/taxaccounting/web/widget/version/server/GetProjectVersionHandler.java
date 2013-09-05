@@ -38,7 +38,7 @@ public class GetProjectVersionHandler extends
 			Properties prop = new Properties();
 			prop.load(inputStream);
 			version = prop.getProperty("Implementation-Version", version);
-			revision = prop.getProperty("X-Git-Build-Number", revision);
+			revision = prop.getProperty("X-Git-Build-Number-And-Date", revision);
 		} catch (Exception e) {
 			log.error("A error occurred during getting version from resource: "
 					+ RESOURCE_FOR_GETTING_VERSION, e);
