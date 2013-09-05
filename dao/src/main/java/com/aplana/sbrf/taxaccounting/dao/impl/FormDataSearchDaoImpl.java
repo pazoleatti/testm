@@ -74,7 +74,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 	}
 	
 	private void appendSelectClause(StringBuilder sql) {
-		sql.append("SELECT fd.ID as form_data_id, fd.form_template_id, fd.KIND as form_data_kind_id, fd.STATE, fd.PERIOD_ORDER as period_order, tp.START_DATE,")
+		sql.append("SELECT fd.ID as form_data_id, fd.form_template_id, fd.return_sign, fd.KIND as form_data_kind_id, fd.STATE, fd.PERIOD_ORDER as period_order, tp.START_DATE,")
 			.append(" ft.ID as form_type_id, ft.NAME as form_type_name, ft.TAX_TYPE,")		
 			.append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
 			.append(" rp.ID as report_period_id, rp.NAME as report_period_name");
