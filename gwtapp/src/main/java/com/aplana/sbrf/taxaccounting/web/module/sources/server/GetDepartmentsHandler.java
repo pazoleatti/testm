@@ -21,39 +21,53 @@ import com.gwtplatform.dispatch.shared.ActionException;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class GetDepartmentsHandler extends AbstractActionHandler<GetDepartmentsAction, GetDepartmentsResult> {
-	
-	@Autowired 
+public class GetDepartmentsHandler extends
+		AbstractActionHandler<GetDepartmentsAction, GetDepartmentsResult> {
+
+	@Autowired
 	private SecurityService securityService;
 
 	@Autowired
 	private DepartmentService departmentService;
 
-    public GetDepartmentsHandler() {
-        super(GetDepartmentsAction.class);
-    }
+	public GetDepartmentsHandler() {
+		super(GetDepartmentsAction.class);
+	}
 
-    @Override
-    public GetDepartmentsResult execute(GetDepartmentsAction action, ExecutionContext context) throws ActionException {
+	@Override
+	public GetDepartmentsResult execute(GetDepartmentsAction action,
+			ExecutionContext context) throws ActionException {
 		GetDepartmentsResult result = new GetDepartmentsResult();
-		TAUserInfo userInfo  = securityService.currentUserInfo();
-		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)){
+		TAUserInfo userInfo = securityService.currentUserInfo();
+		// Система должна предоставлять пользователю с ролью "Контролер УНП"
+		// доступ к "Назначению форм и деклараций" и "Указанию форм-источников"
+		// для всех подразделений
+		//
+		// Система должна предоставлять пользователю с ролью "Контролер" доступ
+		// к "Назначению форм и деклараций" и "Указанию форм-источников" только
+		// для следующих подразделений: назначенное пользователю и вся иерархия
+		// подчиненных подразделений.
+		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
 			result.setDepartments(departmentService.listDepartments());
 			result.setAvailableDepartments(null);
-		} else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)){
-			Set<Integer> availableDepartments = new HashSet<Integer>(); 
+		} else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
+			Set<Integer> availableDepartments = new HashSet<Integer>();
 			availableDepartments.add(userInfo.getUser().getDepartmentId());
-			for (Department department : departmentService.getAllChildren(userInfo.getUser().getDepartmentId())) {
+			for (Department department : departmentService
+					.getAllChildren(userInfo.getUser().getDepartmentId())) {
 				availableDepartments.add(department.getId());
 			}
-			result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(availableDepartments).values()));
+			result.setDepartments(new ArrayList<Department>(departmentService
+					.getRequiredForTreeDepartments(availableDepartments)
+					.values()));
 			result.setAvailableDepartments(availableDepartments);
 		}
 		return result;
-    }
+	}
 
-    @Override
-    public void undo(GetDepartmentsAction action, GetDepartmentsResult result, ExecutionContext context) throws ActionException {
-        // Nothing!
-    }
+	@Override
+	public void undo(GetDepartmentsAction action, GetDepartmentsResult result,
+			ExecutionContext context) throws ActionException {
+		// Nothing!
+	}
 }
