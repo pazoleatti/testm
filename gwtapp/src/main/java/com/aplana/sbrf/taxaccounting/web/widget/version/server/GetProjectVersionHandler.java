@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.version.server;
 
-import java.io.InputStream;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.web.widget.version.shared.GetProjectVersion;
@@ -17,9 +15,8 @@ import com.gwtplatform.dispatch.shared.ActionException;
 public class GetProjectVersionHandler extends
 		AbstractActionHandler<GetProjectVersion, GetProjectVersionResult> {
 
-	private static final String RESOURCE_FOR_GETTING_VERSION = "META-INF/MANIFEST.MF";
-
-	private Log log = LogFactory.getLog(getClass());
+	@Autowired
+	private Properties manifestProperties;
 
 	public GetProjectVersionHandler() {
 		super(GetProjectVersion.class);
@@ -30,19 +27,9 @@ public class GetProjectVersionHandler extends
 			ExecutionContext executionContext) throws ActionException {
 
 		
-		String version = "unknown";
-		String revision = "unknown";
-		try {
-			InputStream inputStream = this.getClass().getClassLoader()
-					.getResourceAsStream(RESOURCE_FOR_GETTING_VERSION);
-			Properties prop = new Properties();
-			prop.load(inputStream);
-			version = prop.getProperty("Implementation-Version", version);
-			revision = prop.getProperty("X-Git-Build-Number-And-Date", revision);
-		} catch (Exception e) {
-			log.error("A error occurred during getting version from resource: "
-					+ RESOURCE_FOR_GETTING_VERSION, e);
-		}
+		String version = manifestProperties.getProperty("Implementation-Version", "unknown");
+		String revision = manifestProperties.getProperty("X-Git-Build-Number-And-Date", "unknown");
+
 		
 		GetProjectVersionResult result = new GetProjectVersionResult();
 		result.setProjectVersion(version + ", Ревизия: " + revision);

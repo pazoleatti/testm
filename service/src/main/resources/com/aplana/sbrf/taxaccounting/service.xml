@@ -11,5 +11,10 @@
 
     <jee:jndi-lookup id="signDataPath" jndi-name="url/Sign"/>
     <jee:jndi-lookup id="refBookDirectory" jndi-name="url/RefBookDirectory"/>
+    
+    <bean id="manifestProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="location" value="META-INF/MANIFEST.MF"/>
+		<property name="ignoreResourceNotFound" value="true"/>
+	</bean>
 
 </beans>
