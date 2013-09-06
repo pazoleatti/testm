@@ -57,6 +57,8 @@ public class GetFormDataResult implements Result {
 
 	private Date TaxPeriodEndDate;
 
+    private Integer reportPeriodYear;
+
 	public FormData getFormData() {
 		return formData;
 	}
@@ -177,7 +179,15 @@ public class GetFormDataResult implements Result {
 		this.balancePeriod = balancePeriod;
 	}
 
-	@Override
+    public Integer getReportPeriodYear() {
+        return reportPeriodYear;
+    }
+
+    public void setReportPeriodYear(Integer reportPeriodYear) {
+        this.reportPeriodYear = reportPeriodYear;
+    }
+
+    @Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("GetFormDataResult [formData=");
@@ -210,6 +220,8 @@ public class GetFormDataResult implements Result {
 		builder.append(TaxPeriodStartDate);
 		builder.append(", TaxPeriodEndDate=");
 		builder.append(TaxPeriodEndDate);
+        builder.append(", reportPeriodYear=");
+		builder.append(reportPeriodYear);
 		builder.append("]");
 		return builder.toString();
 	}
