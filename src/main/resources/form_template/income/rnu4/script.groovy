@@ -307,7 +307,7 @@ void consolidation() {
                         getRows(data).each{ rowB->
                             // в случае совпадения строк из разных источников,
                             // необходимо использовать суммирование значений ячеек строк форм-источников для «графы 5»
-                            if(row.code==rowB.code && row.balance==rowB.balance){
+                            if(row.code==rowB.code && row.balance==rowB.balance && row.name==rowB.name){
                                 rowB.sum+=row.sum
                                 found = true
                             }

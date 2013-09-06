@@ -117,7 +117,8 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
                 Number sumDividends = paramsMap.get(DepartmentParamAliases.SUM_DIVIDENDS.name()).getNumberValue();
                 depCombined.setSumDividends(sumDividends == null ? null : sumDividends.longValue());
                 depCombined.setObligation(paramsMap.get(DepartmentParamAliases.OBLIGATION.name()).getReferenceValue());
-                depCombined.setTaxRate((Double) paramsMap.get(DepartmentParamAliases.FORMAT_VERSION.name()).getNumberValue());
+                Number taxRate = paramsMap.get(DepartmentParamAliases.TAX_RATE.name()).getNumberValue();
+                depCombined.setTaxRate(taxRate == null ? null : taxRate.doubleValue());
                 depCombined.setType(paramsMap.get(DepartmentParamAliases.TYPE.name()).getReferenceValue());
             }
         }

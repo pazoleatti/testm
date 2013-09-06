@@ -197,7 +197,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     @Override
-    public void reloadDepartments(TaxType taxType) {
+    public void reloadDepartments(TaxType taxType, final Integer currentDepartmentId) {
         GetDepartmentTreeDataAction action = new GetDepartmentTreeDataAction();
         action.setTaxType(taxType);
 
@@ -213,8 +213,21 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                 else {
                                     getView().setDepartments(new ArrayList<Department>(), new HashSet<Integer>());
                                 }
-                                // Выбирается подразделение пользователя
-                                getView().setDepartment(userDepartment);
+
+                                if (result.getAvailableDepartments() != null
+                                        && result.getAvailableDepartments().contains(currentDepartmentId)) {
+                                    // Выбирается подразделение выбранное ранее
+                                    for (Department dep : result.getDepartments()) {
+                                        if (dep.getId() == currentDepartmentId) {
+                                            getView().setDepartment(dep);
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    // Выбирается подразделение пользователя
+                                    getView().setDepartment(userDepartment);
+                                }
+
                                 // Обновление налоговых периодов
                                 getView().reloadTaxPeriods();
                             }

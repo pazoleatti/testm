@@ -44,8 +44,10 @@ public class MigrationView extends ViewWithUiHandlers<MigrationUiHandlers>
 
     @Override
     public void setResult(MigrationResult result) {
-        String msg = "Актуальных экземпляров найдено: " + result.getExemplarList().size()+"\n";
-        msg += "Отправлено экземпляров: " + result.getSenFilesCount();
-        textArea.setValue(msg);
+        if (result.getExemplarList() != null) {
+            String msg = "Актуальных экземпляров найдено: " + result.getExemplarList().size()+"\n";
+            msg += "Отправлено экземпляров: " + result.getSendFilesCount();
+            textArea.setValue(msg);
+        }
     }
 }

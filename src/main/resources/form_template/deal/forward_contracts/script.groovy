@@ -179,12 +179,13 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
+    def int index = 1
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
         // Порядковый номер строки
-        row.rowNumber = row.getIndex()
+        row.rowNumber = index++
         // Расчет поля "Цена"
         row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
         // Расчет поля "Итого"
@@ -218,24 +219,20 @@ def calcItog(int i) {
     newRow.getCell('itog').colSpan = 12
     newRow.itog = 'Подитог:'
     newRow.setAlias('itg#'.concat(i.toString()))
-    newRow.rowNumber = i+2
 
     // Расчеты подитоговых значений
-    def BigDecimal incomeSumItg = 0, outcomeSumItg = 0, totalItg = 0
+    def BigDecimal priceItg = 0, totalItg = 0
     for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
         def row = dataRows.get(j)
 
-        def incomeSum = row.incomeSum
-        def outcomeSum = row.outcomeSum
+        def price = row.price
         def total = row.total
 
-        incomeSumItg += incomeSum != null ? incomeSum : 0
-        outcomeSumItg += outcomeSum != null ? outcomeSum : 0
+        priceItg += price != null ? price : 0
         totalItg += total != null ? total : 0
     }
 
-    newRow.incomeSum = incomeSumItg
-    newRow.outcomeSum = outcomeSumItg
+    newRow.price = priceItg
     newRow.total = totalItg
 
     newRow

@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import java.util.Map;
+import com.aplana.sbrf.taxaccounting.model.migration.MigrationSendResult;
 
 /**
  * Сервис отправки JMS-сообщений
@@ -8,8 +8,7 @@ import java.util.Map;
 public interface MessageService {
     /**
      * Отправка файлов JMS-сообщениями
-     * @param filesMap
-     * @return Количество отправленных файлов
+     * @return Результат миграции
      */
-    public int sendFiles(Map<String, byte[]> filesMap);
+    public MigrationSendResult sendFiles();
 }

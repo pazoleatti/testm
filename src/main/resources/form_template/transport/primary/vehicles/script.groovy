@@ -1,3 +1,5 @@
+package form_template.transport.primary.vehicles
+
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 /**
  * Форма "Сведения о транспортных средствах, по которым уплачивается транспортный налог".
