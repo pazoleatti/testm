@@ -3,8 +3,15 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
 	xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager">
 	<g:VerticalPanel>
-		<g:cell width="100%" horizontalAlignment="CENTER">
-			<g:ValueListBox ui:field="version" width="100%" />
+		<g:cell width="100%">
+			<g:HorizontalPanel width="100%" verticalAlignment="ALIGN_MIDDLE">
+				<g:cell>
+					<g:Label text="Дата актуальности:" wordWrap="false" />
+				</g:cell>
+				<g:cell width="100%">
+					<g:ValueListBox ui:field="version" width="100%" />
+				</g:cell>
+			</g:HorizontalPanel>
 		</g:cell>
 		<g:cell width="100%" horizontalAlignment="CENTER">
 			<g:HorizontalPanel width="100%">

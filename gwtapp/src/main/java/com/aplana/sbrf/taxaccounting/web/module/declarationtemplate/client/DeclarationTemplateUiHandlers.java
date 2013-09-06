@@ -11,4 +11,5 @@ public interface DeclarationTemplateUiHandlers extends UiHandlers {
 	void uploadJrxmlFail(String msg);
 	void uploadDectSuccess();
 	void uploadDectFail(String msg);
+    void setXsdId(String xsdId);
 }

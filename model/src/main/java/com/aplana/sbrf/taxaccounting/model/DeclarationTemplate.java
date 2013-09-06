@@ -11,6 +11,7 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 	private String version;
 	private boolean active;
 	private Integer edition;
+    private String xsdId;
 
 	private String createScript;
 
@@ -90,4 +91,19 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 			this.edition = edition;
 		}
 	}
+
+    /**
+     * Получить идентификатор записи с содержимым XSD файла для проверки декларации
+     * @return идентификатор записи
+     */
+    public String getXsdId() {
+        return xsdId;
+    }
+
+    /**
+     * Установить идентификатор записи с содержимым XSD файла для проверки декларации
+     */
+    public void setXsdId(String xsdId) {
+        this.xsdId = xsdId;
+    }
 }

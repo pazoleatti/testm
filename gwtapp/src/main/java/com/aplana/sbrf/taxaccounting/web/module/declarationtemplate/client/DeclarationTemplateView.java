@@ -2,23 +2,22 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiConstructor;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.uibinder.client.*;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTemplateUiHandlers>
-		implements DeclarationTemplatePresenter.MyView, Editor<DeclarationTemplate> {
+		implements DeclarationTemplatePresenter.MyView, Editor<DeclarationTemplate>, FileUploadHandler {
 
-	interface Binder extends UiBinder<Widget, DeclarationTemplateView> { }
+    interface Binder extends UiBinder<Widget, DeclarationTemplateView> { }
 
 	interface MyDriver extends SimpleBeanEditorDriver<DeclarationTemplate, DeclarationTemplateView> {
 	}
@@ -110,6 +109,12 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 		});
 	}
 
+    @Override
+    public void onFileUploadSuccess(String uuid) {
+        System.out.println("xsd uuid: "+uuid);
+        getUiHandlers().setXsdId(uuid);
+    }
+
 	@UiHandler("saveButton")
 	public void onSave(ClickEvent event){
 		driver.flush();
@@ -143,6 +148,12 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	public void onDownloadDectButton(ClickEvent event){
 		getUiHandlers().downloadDect();
 	}
+
+    @UiFactory
+    @Editor.Ignore
+    DeclarationTemplateView getView(){
+        return this;
+    }
 
 
 }
