@@ -19,6 +19,20 @@ import java.text.SimpleDateFormat
  * 6.3	(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения метода начисления
  */
 
+// графа 1  Число/15/                       number
+// helper   Строка/1000                     helper
+// графа 2  А140/CODE/Строка/15/            kny
+// графа 3  Дата                            date
+// графа 4  A350/NUMBER/Строка/12/          code
+// графа 5  Строка/15                       docNumber
+// графа 6  Дата/ДД.ММ.ГГГГ                 docDate
+// графа 7  A64/CODE/Строка/3/              currencyCode
+// графа 8  Число/19.4/                     rateOfTheBankOfRussia
+// графа 9  Число/17.2/                     taxAccountingCurrency
+// графа 10 Число/17.2/                     taxAccountingRuble
+// графа 11 Число/17.2/                     accountingCurrency
+// графа 12 Число/17.2/                     ruble
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkCreation()
@@ -96,7 +110,9 @@ switch (formDataEvent) {
             logicalCheck(form)
             NSICheck(form)
             if (!logger.containsLevel(LogLevel.ERROR)) {
-                acceptance()
+                // (Ramil Timerbaev) убрал compose потому что он выполяется в ядре.
+                // При выполнении на стороне скрипта compose доступен только для некоторых событии AFTER_MOVE_*
+                // acceptance()
             }
         }
         break
@@ -147,24 +163,8 @@ DataRowHelper getDataRowsHelper() {
     return dataRowsHelper
 }
 
-// графа 1  Число/15/                       number
-// helper   Строка/1000                     helper
-// графа 2  А140/CODE/Строка/15/            kny
-// графа 3  Дата                            date
-// графа 4  A350/NUMBER/Строка/12/          code
-// графа 5  Строка/15                       docNumber
-// графа 6  Дата/ДД.ММ.ГГГГ                 docDate
-// графа 7  A64/CODE/Строка/3/              currencyCode
-// графа 8  Число/19.4/                     rateOfTheBankOfRussia
-// графа 9  Число/17.2/                     taxAccountingCurrency
-// графа 10 Число/17.2/                     taxAccountingRuble
-// графа 11 Число/17.2/                     accountingCurrency
-// графа 12 Число/17.2/                     ruble
-
 void logicCheckBefore(DataRowHelper form) {
     columns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'currencyCode']
-    logger.info("form = %s", form.toString())
-    logger.info("form.allCached = %s", form.allCached.toString())
     for (row in form.allCached) {
         if (row.getAlias() == null) {
             if (row.taxAccountingCurrency == null && row.accountingCurrency == null
@@ -321,8 +321,8 @@ void logicalCheck(DataRowHelper form) {
 
             //logger.info('Проверка даты совершения операции и границ отчётного периода')
             // Проверка даты совершения операции и границ отчётного периода
-            if (reportPeriodService.getStartDate(formData.reportPeriodId).time.time <= row.date.time
-                    && row.date.time <= reportPeriodService.getEndDate(formData.reportPeriodId).time.time) {
+            if (reportPeriodService.getStartDate(formData.reportPeriodId).time.time > row.date.time
+                    || row.date.time > reportPeriodService.getEndDate(formData.reportPeriodId).time.time) {
                 logger.error('Дата совершения операции вне границ отчётного периода!')
             }
 
@@ -466,6 +466,7 @@ DataRow getItogo(DataRowHelper form) {
             }
         }
     }
+    setTotalStyle(newRow)
     return newRow
 }
 
@@ -508,6 +509,7 @@ DataRow itogoKNY(DataRowHelper form, int i) {
             }
         }
     }
+    setTotalStyle(newRow)
 
     return newRow
 }
@@ -712,4 +714,15 @@ void checkCreation() {
  */
 def getNumberAttribute(def id) {
     return refBookService.getStringValue(28, id, 'NUMBER')
+}
+
+/**
+ * Устаносить стиль для итоговых строк.
+ */
+void setTotalStyle(def row) {
+    ['number', 'helper', 'kny', 'date', 'code', 'docNumber', 'docDate',
+            'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency',
+            'taxAccountingRuble', 'accountingCurrency', 'ruble'].each {
+        row.getCell(it).setStyleAlias('Контрольные суммы')
+    }
 }

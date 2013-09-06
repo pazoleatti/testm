@@ -26,6 +26,7 @@ public class FormDataListView extends
 	public static final String REPORT_PERIOD_TITLE = "Период";
     public static final String PERIOD_MONTH_TITLE = "Месяц";
 	public static final String FORM_DATA_STATE_TITLE = "Состояние";
+	public static final String FORM_DATA_RETURN_TITLE = "Признак возрата";
 
 	interface MyBinder extends UiBinder<Widget, FormDataListView> {
 	}
@@ -78,6 +79,17 @@ public class FormDataListView extends
 			}
 		};
 
+        TextColumn<FormDataSearchResultItem> returnColumn = new TextColumn<FormDataSearchResultItem>() {
+            @Override
+            public String getValue(FormDataSearchResultItem object) {
+                Boolean isReturn = object.getReturnSign();
+                if (isReturn == null){
+                    return "";
+                }
+                return isReturn ? "Возвращена" : "Не возвращена";
+            }
+        };
+
         TextColumn<FormDataSearchResultItem> periodYearColumn = new TextColumn<FormDataSearchResultItem>() {
             @Override
             public String getValue(FormDataSearchResultItem object) {
@@ -123,6 +135,7 @@ public class FormDataListView extends
 		formDataTable.addColumn(reportPeriodColumn, getHeader(REPORT_PERIOD_TITLE));
 		formDataTable.addColumn(periodMonthColumn, getHeader(PERIOD_MONTH_TITLE));
 		formDataTable.addColumn(stateColumn, getHeader(FORM_DATA_STATE_TITLE));
+		formDataTable.addColumn(returnColumn, getHeader(FORM_DATA_RETURN_TITLE));
 
 		pager.setDisplay(formDataTable);
 

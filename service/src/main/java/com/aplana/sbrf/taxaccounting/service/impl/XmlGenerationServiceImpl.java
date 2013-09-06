@@ -238,6 +238,7 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
         record.appendChild(getFieldElement("DDEAL", formatDate(row.getDealDate()), doc));
         record.appendChild(getFieldElement("PARTDEAL", row.getPartDeal(), doc));
         record.appendChild(getFieldElement("NUMDEAL", row.getNumDeal(), doc, true));
+        record.appendChild(getFieldElement("DEFPAPER", row.getDefPaper(), doc, true));
         record.appendChild(getFieldElement("RCOST", row.getCost(), doc));
 
         return record;
@@ -246,14 +247,15 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
     private Element generateRecordXml(RnuCommonRow row, Document doc) {
         Element record = doc.createElement("record");
 
-        record.appendChild(getFieldElement("NUM", row.getNum(), doc));
+        //record.appendChild(getFieldElement("NUM", row.getNum(), doc));
         record.appendChild(getFieldElement("NUMDEAL", row.getNumDeal(), doc, true));
         record.appendChild(getFieldElement("DEFPAPER", row.getDefPaper(), doc, true));
         record.appendChild(getFieldElement("CODECURRENCY", row.getCodecurrency(), doc, true));
-        record.appendChild(getFieldElement("DREPO1", formatDate(row.getDrepo1()), doc));
-        record.appendChild(getFieldElement("DREPO2", formatDate(row.getDrepo2()), doc));
+        record.appendChild(getFieldElement("NOMPAPER", row.getNompaper(), doc));
         record.appendChild(getFieldElement("GETPRICENKD", row.getGetpricenkd(), doc));
         record.appendChild(getFieldElement("SALEPRICENKD", row.getSalepricenkd(), doc));
+        record.appendChild(getFieldElement("DREPO1", formatDate(row.getDrepo1()), doc));
+        record.appendChild(getFieldElement("DREPO2", formatDate(row.getDrepo2()), doc));
         record.appendChild(getFieldElement("COSTREPO", row.getCostrepo(), doc));
         record.appendChild(getFieldElement("IMPLREPO", row.getImplrepo(), doc));
         record.appendChild(getFieldElement("BANKRATE", row.getBankrate(), doc));
@@ -273,20 +275,20 @@ public class XmlGenerationServiceImpl implements XmlGenerationService {
         record.appendChild(getFieldElement("DGET", formatDate(row.getDget()), doc));
         record.appendChild(getFieldElement("DIMPL", formatDate(row.getDimpl()), doc));
         record.appendChild(getFieldElement("NUMPAPER", row.getNumpaper(), doc));
-        record.appendChild(getFieldElement("SALEPRICEPERC", row.getSalepriceperc(), doc));
-        record.appendChild(getFieldElement("RSALEPRICE", row.getRsaleprice(), doc));
-        record.appendChild(getFieldElement("GETSALEPRICETAX", row.getGetsalepricetax(), doc));
+        record.appendChild(getFieldElement("RGETPRICE", row.getRgetprice(), doc));
+        record.appendChild(getFieldElement("RGETCOST", row.getRgetcost(), doc));
         record.appendChild(getFieldElement("GETMPRICEPERC", row.getGetmpriceperc(), doc));
         record.appendChild(getFieldElement("GETMPRICE", row.getGetmprice(), doc));
-        record.appendChild(getFieldElement("RMARKETPRICE", row.getRmarketprice(), doc));
+        record.appendChild(getFieldElement("GETSALEPRICETAX", row.getGetsalepricetax(), doc));
+        record.appendChild(getFieldElement("RSUMEXT", row.getRsumext(), doc));
+        record.appendChild(getFieldElement("SALEPRICEPERC", row.getSalepriceperc(), doc));
+        record.appendChild(getFieldElement("RSALEPRICE", row.getRsaleprice(), doc));
         record.appendChild(getFieldElement("MARKETPRICEPERC", row.getMarketpriceperc(), doc));
+        record.appendChild(getFieldElement("RMARKETPRICE", row.getRmarketprice(), doc));
+        record.appendChild(getFieldElement("RSALEPRICETAX", row.getRsalepricetax(), doc));
         record.appendChild(getFieldElement("RCOST", row.getRcost(), doc));
         record.appendChild(getFieldElement("RTOTALCOST", row.getRtotalcost(), doc));
         record.appendChild(getFieldElement("RPROFITCOST", row.getRprofitcost(), doc));
-        record.appendChild(getFieldElement("RGETPRICE", row.getRgetprice(), doc));
-        record.appendChild(getFieldElement("RGETCOST", row.getRgetcost(), doc));
-        record.appendChild(getFieldElement("RSUMEXT", row.getRsumext(), doc));
-        record.appendChild(getFieldElement("RSALEPRICETAX", row.getRsalepricetax(), doc));
         record.appendChild(getFieldElement("ROVWRPRICE", row.getRovwrprice(), doc));
 
         return record;

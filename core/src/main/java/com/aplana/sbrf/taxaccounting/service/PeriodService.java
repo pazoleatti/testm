@@ -125,6 +125,6 @@ public interface PeriodService {
      * @param taxType
      * @return
      */
-    public List<ReportPeriod> getAllPeriodsByTaxType(TaxType taxType); 
+    public List<ReportPeriod> getAllPeriodsByTaxType(TaxType taxType, boolean backOrder); 
     
 }

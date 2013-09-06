@@ -19,6 +19,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -31,9 +32,8 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		void setDeclarationFilter(DeclarationDataFilter filter);
 		void setDeclarationFilterValues(DeclarationDataFilterAvailableValues filterValues);
 		void setReportPeriods(List<ReportPeriod> reportPeriods);
-		void setTaxPeriods(List<TaxPeriod> taxPeriods);
-		void setDepartments(List<Department> departments);
-		void setCurrentReportPeriod(ReportPeriod reportPeriod);
+		void setDepartments(List<Department> departments, Set<Integer> departmentsIds);
+		void setSelectedReportPeriod(Integer reportPeriodId);
 		DeclarationDataFilter updateAndGetDeclarationFilter();
 	}
 
@@ -53,7 +53,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 	protected void onHide() {
 		getView().hide();
 	}
-
+	
 	public void setDeclarationFilter(DeclarationDataFilter filter) {
 		getView().setDeclarationFilter(filter);
 	}
@@ -62,16 +62,12 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		getView().setDeclarationFilterValues(filterValues);
 	}
 
-	public void setTaxPeriods(List<TaxPeriod> taxPeriods) {
-		getView().setTaxPeriods(taxPeriods);
+	public void setDepartments(List<Department> departments, Set<Integer> departmentsIds) {
+		getView().setDepartments(departments, departmentsIds);
 	}
-
-	public void setDepartments(List<Department> departments) {
-		getView().setDepartments(departments);
-	}
-
-	public void setCurrentReportPeriod(ReportPeriod currentReportPeriod) {
-		getView().setCurrentReportPeriod(currentReportPeriod);
+	
+	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
+		getView().setReportPeriods(reportPeriods);
 	}
 
 	@Override
@@ -98,10 +94,10 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 												public void onSuccess(RefreshDeclarationResult result) {
 													onHide();
 													placeManager
-															.revealPlace(new PlaceRequest(DeclarationDataTokens.declarationData)
+															.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
 																	.with(DeclarationDataTokens.declarationId,
-																			String.valueOf(checkResult.getDeclarationDataId()))
-															);
+																			String.valueOf(checkResult.getDeclarationDataId())).build());
+															
 												}
 											}, DeclarationCreationPresenter.this));
 								}
@@ -118,9 +114,8 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 											public void onSuccess(CreateDeclarationResult result) {
 												onHide();
 												placeManager
-														.revealPlace(new PlaceRequest(DeclarationDataTokens.declarationData)
-																.with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId()))
-														);
+														.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
+																.with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId())).build());
 											}
 										}, DeclarationCreationPresenter.this));
 							}
@@ -129,18 +124,6 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		}
 	}
 
-	@Override
-	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
-		GetReportPeriods action = new GetReportPeriods();
-		action.setTaxPeriod(taxPeriod);
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
-					@Override
-					public void onSuccess(GetReportPeriodsResult result) {
-						getView().setReportPeriods(result.getReportPeriods());
-					}
-				}, DeclarationCreationPresenter.this));
-	}
 
 	private boolean isFilterDataCorrect(DeclarationDataFilter filter){
 		if(filter.getDeclarationTypeId() == null){

@@ -6,7 +6,8 @@ import com.gwtplatform.dispatch.shared.Result;
 import java.util.List;
 
 public class DetectUserRoleResult implements Result {
-
+	private static final long serialVersionUID = -6037420163541321038L;
+	
 	List<TARole> userRole;
 
 	public List<TARole> getUserRole() {

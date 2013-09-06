@@ -7,9 +7,13 @@ public class Rnu31Row extends AbstractRnuRow {
     private Long codeTypePaper;
     private String typePaper;
     private BigDecimal percCashOfz;
-    private BigDecimal percCashEuro;
     private BigDecimal percCashFed;
+    private BigDecimal percCashBel;
+    private BigDecimal percCashIpotAfter;
+    private BigDecimal percCashMun;
+    private BigDecimal percCashIpotBefore;
     private BigDecimal percCashOgvz;
+    private BigDecimal percCashEuroNew;
     private BigDecimal percCashOther;
     private BigDecimal percCashCorp;
 
@@ -41,14 +45,6 @@ public class Rnu31Row extends AbstractRnuRow {
         this.percCashOfz = percCashOfz;
     }
 
-    public BigDecimal getPercCashEuro() {
-        return percCashEuro;
-    }
-
-    public void setPercCashEuro(BigDecimal percCashEuro) {
-        this.percCashEuro = percCashEuro;
-    }
-
     public BigDecimal getPercCashFed() {
         return percCashFed;
     }
@@ -57,12 +53,52 @@ public class Rnu31Row extends AbstractRnuRow {
         this.percCashFed = percCashFed;
     }
 
+    public BigDecimal getPercCashBel() {
+        return percCashBel;
+    }
+
+    public void setPercCashBel(BigDecimal percCashBel) {
+        this.percCashBel = percCashBel;
+    }
+
+    public BigDecimal getPercCashIpotAfter() {
+        return percCashIpotAfter;
+    }
+
+    public void setPercCashIpotAfter(BigDecimal percCashIpotAfter) {
+        this.percCashIpotAfter = percCashIpotAfter;
+    }
+
+    public BigDecimal getPercCashMun() {
+        return percCashMun;
+    }
+
+    public void setPercCashMun(BigDecimal percCashMun) {
+        this.percCashMun = percCashMun;
+    }
+
+    public BigDecimal getPercCashIpotBefore() {
+        return percCashIpotBefore;
+    }
+
+    public void setPercCashIpotBefore(BigDecimal percCashIpotBefore) {
+        this.percCashIpotBefore = percCashIpotBefore;
+    }
+
     public BigDecimal getPercCashOgvz() {
         return percCashOgvz;
     }
 
     public void setPercCashOgvz(BigDecimal percCashOgvz) {
         this.percCashOgvz = percCashOgvz;
+    }
+
+    public BigDecimal getPercCashEuroNew() {
+        return percCashEuroNew;
+    }
+
+    public void setPercCashEuroNew(BigDecimal percCashEuroNew) {
+        this.percCashEuroNew = percCashEuroNew;
     }
 
     public BigDecimal getPercCashOther() {
@@ -88,9 +124,13 @@ public class Rnu31Row extends AbstractRnuRow {
         sb.append(getString(codeTypePaper)).append(SEP);
         sb.append(getString(typePaper)).append(SEP);
         sb.append(getString(percCashOfz)).append(SEP);
-        sb.append(getString(percCashEuro)).append(SEP);
         sb.append(getString(percCashFed)).append(SEP);
+        sb.append(getString(percCashBel)).append(SEP);
+        sb.append(getString(percCashIpotAfter)).append(SEP);
+        sb.append(getString(percCashMun)).append(SEP);
+        sb.append(getString(percCashIpotBefore)).append(SEP);
         sb.append(getString(percCashOgvz)).append(SEP);
+        sb.append(getString(percCashEuroNew)).append(SEP);
         sb.append(getString(percCashOther)).append(SEP);
         sb.append(getString(percCashCorp)).append(SEP);
         return sb.toString();

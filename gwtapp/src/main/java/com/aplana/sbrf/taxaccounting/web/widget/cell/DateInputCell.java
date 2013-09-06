@@ -21,6 +21,7 @@ import static com.google.gwt.dom.client.BrowserEvents.*;
 public class DateInputCell extends
 		AbstractEditableCell<Date, DateInputCell.ViewData> {
 
+	public static final String DATE_FORMAT = "dd.MM.yyyy";
 	private static final int popupRightOffset = 200;
 	private final PopupPanel datePickerPanel = new PopupPanel(true, true);
 	private final DatePickerWithYearSelector datePicker = new DatePickerWithYearSelector();
@@ -365,7 +366,7 @@ public class DateInputCell extends
 		clearInput(getInputElement(parent));
 		setValue(context, parent, viewData.getOriginal());
 		if (valueUpdater != null) {
-			valueUpdater.update(DateTimeFormat.getFormat("dd.MM.yyyy").parseStrict(value));
+			valueUpdater.update(DateTimeFormat.getFormat(DATE_FORMAT).parseStrict(value));
 		}
 	}
 
@@ -441,7 +442,7 @@ public class DateInputCell extends
 		InputElement input = (InputElement) parent.getFirstChild();
 		String value = input.getValue();
 		try {
-			viewData.setText(DateTimeFormat.getFormat("dd.MM.yyyy").parseStrict(value));
+			viewData.setText(DateTimeFormat.getFormat(DATE_FORMAT).parseStrict(value));
 		} catch (IllegalArgumentException ex) {
 			viewData.setText(viewData.getOriginal());
 		}
@@ -512,7 +513,10 @@ public class DateInputCell extends
 		InputElement input = (InputElement) parent.getFirstChild();
 		String inputted = input.getValue();
 		try{
-			DateTimeFormat.getFormat("dd.MM.yyyy").parseStrict(inputted);
+			if (inputted.length() > DATE_FORMAT.length()) {
+				throw new IllegalArgumentException();
+			}
+			DateTimeFormat.getFormat(DATE_FORMAT).parseStrict(inputted);
 		} catch (IllegalArgumentException ex){
 			return false;
 		}

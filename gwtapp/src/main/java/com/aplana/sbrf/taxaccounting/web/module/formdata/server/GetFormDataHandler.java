@@ -129,6 +129,8 @@ public class GetFormDataHandler extends
 		TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
 		result.setTaxPeriodStartDate(taxPeriod.getStartDate());
 		result.setTaxPeriodEndDate(taxPeriod.getEndDate());
+
+        result.setReportPeriodYear(Integer.valueOf(new SimpleDateFormat("yyyy").format(taxPeriod.getStartDate())));
 	}
 
 	/**

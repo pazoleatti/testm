@@ -1,3 +1,5 @@
+package form_template.transport.primary.vehicles
+
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 /**
  * Форма "Сведения о транспортных средствах, по которым уплачивается транспортный налог".
@@ -97,9 +99,9 @@ switch (formDataEvent) {
         //1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Принята».
         // (Ramil Timerbaev) проверка производится в ядре
         // 2.	Логические проверки значений налоговой формы.
-        //       logicalChecks()
+        logicalChecks()
         // 3.	Проверки соответствия НСИ.
-        //       checkNSI()
+        checkNSI()
 
         break
 
@@ -107,12 +109,14 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:    //..
         // 1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
         // (Ramil Timerbaev) проверка производится в ядре
-
         break
 
 // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:    //..
-        // (Ramil Timerbaev) проверка производится в ядре
+        // 2.	Логические проверки значений налоговой формы.
+        logicalChecks()
+        // 3.	Проверки соответствия НСИ.
+        checkNSI()
         break
 
 // после вернуть из принята в подготовлена
@@ -149,12 +153,13 @@ switch (formDataEvent) {
 void addRow() {
     def newRow = formData.createDataRow()
 
-
     ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoClass', 'regNumber', 'powerVal', 'baseUnit', 'year', 'regDate', 'regDateEnd', 'stealDateStart', 'stealDateEnd'].each { column ->
         newRow.getCell(column).editable = true
         newRow.getCell(column).setStyleAlias("Редактируемое поле")
     }
-    dataRowHelper.insert(newRow, getDataRows().size() ?: 1)
+
+    def index = (currentDataRow != null ? currentDataRow.getIndex() : getDataRows().size())
+    dataRowHelper.insert(newRow, index + 1)
 }
 
 /**
@@ -189,7 +194,7 @@ def checkRequiredField() {
         def errorMsg = ''
 
         // 1-7,9-13
-        ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoClass', 'regNumber', 'powerVal', 'baseUnit', 'year', 'regDate', 'regDateEnd'].each { column ->
+        ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoClass', 'regNumber', 'powerVal', 'baseUnit', 'year', 'regDate'].each { column ->
             if (row.getCell(column) != null && (row.getCell(column).getValue() == null || ''.equals(row.getCell(column).getValue()))) {
                 errorMsg += (!''.equals(errorMsg) ? ', ' : '') + '"' + row.getCell(column).getColumn().getName() + '"'
             }
@@ -220,8 +225,13 @@ void logicalChecks() {
     for (def row : getDataRows()) {
 
         // Проверка на соответствие дат при постановке (снятия) с учёта
-        if (!(row.regDateEnd > row.regDate)) {
+        if (!(row.regDateEnd == null || row.regDateEnd.compareTo(row.regDate) > 0)) {
             logger.error("Строка $row.rowNumber : Дата постановки (снятия) с учёта неверная!")
+        }
+
+        //Если «графа 16» заполнена, то Заполнена  «графа 15»
+        if (row.stealDateEnd != null && row.stealDateStart == null){
+            logger.error("Не заполнено поле «Дата угона». Строка: "+row.getIndex())
         }
     }
 }

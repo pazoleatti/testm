@@ -254,17 +254,20 @@ void addAllStatic() {
         newRow.getCell('fix').colSpan = 2
 
         // Расчеты подитоговых значений
-        def BigDecimal sumItg = 0, totalItg = 0
+        def BigDecimal sumItg = 0, priceItg = 0, totalItg = 0
         for (row in dataRows) {
 
             def sum = row.sum
             def total = row.total
+            def price = row.price
 
             sumItg += sum != null ? sum : 0
+            priceItg += price != null ? price : 0
             totalItg += total != null ? total : 0
         }
 
         newRow.sum = sumItg
+        newRow.price = priceItg
         newRow.total = totalItg
 
         dataRowHelper.insert(newRow, dataRows.size()+1)
