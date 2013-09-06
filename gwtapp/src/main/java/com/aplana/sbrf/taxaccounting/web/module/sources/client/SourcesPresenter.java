@@ -19,6 +19,7 @@ import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, SourcesPresenter.MyProxy>
 		implements SourcesUiHandlers {
@@ -31,7 +32,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	public interface MyView extends View, HasUiHandlers<SourcesUiHandlers> {
 		
 		void init(boolean isForm);
-		void setDepartments(List<Department> departments);
+		void setDepartments(List<Department> departments, Set<Integer> availableDepartments);
 		
 		
 		/**
@@ -93,7 +94,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 					@Override
 					public void onSuccess(GetDepartmentsResult result) {
 						getView().init(Boolean.valueOf(request.getParameter("isForm", "")));
-						getView().setDepartments(result.getDepartments());
+						getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
 					}
 				}, this).addCallback(new ManualRevealCallback<GetDepartmentsResult>(SourcesPresenter.this)));
 		
