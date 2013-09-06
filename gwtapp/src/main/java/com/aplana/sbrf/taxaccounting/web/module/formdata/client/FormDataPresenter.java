@@ -420,10 +420,8 @@ public class FormDataPresenter extends
     }
 
     private String buildPeriodName(GetFormDataResult retFormDataResult) {
-        String year = DateTimeFormat.getFormat(Formats.YYYY.getFormat()).format(retFormDataResult.getTaxPeriodStartDate());
-
         StringBuilder builder = new StringBuilder();
-        builder.append(year).append(", ");
+        builder.append(retFormDataResult.getReportPeriodYear()).append(", ");
         builder.append(retFormDataResult.getReportPeriod().getName());
         Integer periodOrder = retFormDataResult.getFormData().getPeriodOrder();
         if (periodOrder != null) {
