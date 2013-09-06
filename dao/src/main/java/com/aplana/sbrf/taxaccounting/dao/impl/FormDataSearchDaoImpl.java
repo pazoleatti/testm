@@ -45,6 +45,10 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		if (filter.getStates() != null && !filter.getStates().isEmpty()) {
 			sql.append(" AND fd.state in ").append(transformFormStatesToSqlInStatement(filter.getStates()));
 		}
+
+		if (filter.getReturnState() != null) {
+			sql.append(" AND fd.return_sign = ").append(filter.getReturnState() == Boolean.TRUE ? "1" : "0");
+		}
 		
 		// Добавляем условия для отбрасывания форм, на которые у пользователя нет прав доступа
 		// Эта реализация должна быть согласована с реализацией в FormDataAccessServiceImpl
