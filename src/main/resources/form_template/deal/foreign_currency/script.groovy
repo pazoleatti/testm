@@ -183,12 +183,13 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
+    def int index = 1
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
         // Порядковый номер строки
-        row.rowNumber = row.getIndex()
+        row.rowNumber = index++
         // Расчет поля "Цена"
         row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
         // Расчет поля "Итого"
@@ -241,7 +242,6 @@ void deleteAllStatic() {
         def row = (DataRow) iter.next()
         if (row.getAlias() != null) {
             dataRowHelper.delete(row)
-            break
         }
     }
 }
@@ -259,7 +259,6 @@ void addAllStatic() {
         newRow.setAlias('itg')
         newRow.itog = 'Подитог:'
         newRow.getCell('itog').colSpan = 11
-        newRow.rowNumber = dataRows.size()+1
 
         // Расчеты подитоговых значений
         def BigDecimal incomeSumItg = 0, outcomeSumItg = 0, totalItg = 0
@@ -278,7 +277,8 @@ void addAllStatic() {
         newRow.outcomeSum = outcomeSumItg
         newRow.total = totalItg
 
-       // dataRows.add(dataRows.size(), newRow)
         dataRowHelper.insert(newRow, dataRows.size()+1)
     }
 }
+
+
