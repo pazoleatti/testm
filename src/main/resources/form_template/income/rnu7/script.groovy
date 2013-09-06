@@ -359,8 +359,7 @@ def logicalCheck(def useLog) {
             def checkSumm = checkDate(row)
 
             if (checkSumm == null) {
-                logger.error('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете за последние 3 года не проходила!')
-                return false
+                logger.warn('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете за последние 3 года не проходила!')
             } else if (checkSumm >= row.ruble) {
                 logger.warn('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-7 в <отчетный период> отчетном периоде.')
             }
@@ -454,7 +453,7 @@ def checkNSI() {
     if (!getRows(data).isEmpty()) {
         // справочник 27 - «Классификатор расходов Сбербанка России для целей налогового учёта»
         def expensesClassifierRefBookId = 27
-        def currencyRefBookId = 15
+        def currencyRefBookId = 15L
 
         // справочник 22 "Курсы Валют"
         def refDataProvider = refBookFactory.getDataProvider(22)

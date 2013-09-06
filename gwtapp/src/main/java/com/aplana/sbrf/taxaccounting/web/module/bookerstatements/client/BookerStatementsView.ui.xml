@@ -2,16 +2,11 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:d='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
-             xmlns:pager='urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager'
              xmlns:c='urn:import:com.google.gwt.user.cellview.client'>
     <ui:style>
         .titleLabel {
             font-size: 26px;
             margin: 10px;
-        }
-        .pager {
-            margin-right: auto;
-            margin-left: auto;
         }
     </ui:style>
     <g:DockLayoutPanel ui:field="dockPanel">
@@ -57,11 +52,6 @@
                         <style:GenericDataGrid height="100%" ui:field="formDataTable"/>
                     </g:ResizeLayoutPanel>
                 </g:center>
-                <g:south size="30">
-                    <pager:FlexiblePager ui:field="pager" location="CENTER"
-                                         showFastForwardButton="false" fastForwardRows="0"
-                                         showLastPageButton="true" styleName="{style.pager}" />
-                </g:south>
             </g:DockLayoutPanel>
         </g:center>
 

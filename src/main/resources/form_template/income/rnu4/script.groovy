@@ -182,7 +182,6 @@ def fillForm(){
             sum += row.sum
             def code = getKnu(row.code)
             def totalRowCode =  getNewRow(code, sum)
-            setTotalStyle(totalRowCode)
             totalRows.put(i + 1, totalRowCode)
             sum = 0
         }
@@ -308,7 +307,7 @@ void consolidation() {
                         getRows(data).each{ rowB->
                             // в случае совпадения строк из разных источников,
                             // необходимо использовать суммирование значений ячеек строк форм-источников для «графы 5»
-                            if(row.code==rowB.code && row.balance==rowB.balance){
+                            if(row.code==rowB.code && row.balance==rowB.balance && row.name==rowB.name){
                                 rowB.sum+=row.sum
                                 found = true
                             }
@@ -416,8 +415,9 @@ def getNewRow(def alias, def sum) {
     def newRow = formData.createDataRow()
     newRow.setAlias('total' + alias)
     newRow.sum = sum
-    newRow.fix = 'Итого по коду ' + alias
+    newRow.fix = 'Итого по КНУ ' + alias
     newRow.getCell('fix').colSpan = 2
+    setTotalStyle(newRow)
     return newRow
 }
 

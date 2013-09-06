@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
 import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
-import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
@@ -16,14 +19,17 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Форма "Исполнитель и подписанты"
@@ -49,10 +55,10 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	Button downSigner;
 
 	@UiField
-	Button addSigner;
+    LinkButton addSigner;
 
 	@UiField
-	Button removeSigner;
+    LinkButton removeSigner;
 
 	@UiField
 	Button saveButton;
@@ -61,7 +67,10 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	Button cancelButton;
 
 	@UiField
-	Bar columnActionsBar;
+	HorizontalPanel buttonPanel;
+
+	@UiField
+    VerticalPanel directionPanel;
 
 	private final PopupPanel widget;
 	private List<FormDataSigner> signers;
@@ -120,7 +129,8 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		this.readOnlyMode = readOnlyMode;
 		name.setEnabled(!readOnlyMode);
 		phone.setEnabled(!readOnlyMode);
-		columnActionsBar.setVisible(!readOnlyMode);
+        buttonPanel.setVisible(!readOnlyMode);
+		directionPanel.setVisible(!readOnlyMode);
 		if (readOnlyMode) {
 			cancelButton.setText("Закрыть");
 		}
@@ -205,6 +215,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
         if(performer == null){
             if(!name.getText().isEmpty()){
                 performer = new FormDataPerformer();
+                performer.setName(name.getText());
             }else{
                 Window.alert("Необходимо ввести ФИО исполнителя");
                 return;
@@ -286,8 +297,8 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		signersTable.addColumn(idColumn, "№ пп");
 		signersTable.setColumnWidth(idColumn, 40, Style.Unit.PX);
 
-		AbstractCell nameCell;
-		AbstractCell positionCell;
+		AbstractCell<String> nameCell;
+		AbstractCell<String> positionCell;
 
 		if (readOnlyMode) {
 			nameCell = new TextCell();

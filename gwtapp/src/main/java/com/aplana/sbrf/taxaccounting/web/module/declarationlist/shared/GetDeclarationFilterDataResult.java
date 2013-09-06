@@ -7,10 +7,10 @@ import com.gwtplatform.dispatch.shared.Result;
 import java.util.List;
 
 public class GetDeclarationFilterDataResult implements Result {
-
-	private ReportPeriod currentReportPeriod;
+	private static final long serialVersionUID = 1304339398716140386L;
+	
 	private List<Department> departments;
-	private List<TaxPeriod> taxPeriods;
+	private List<ReportPeriod> periods;
 	private DeclarationDataFilterAvailableValues filterValues;
 
 	public List<Department> getDepartments() {
@@ -21,14 +21,6 @@ public class GetDeclarationFilterDataResult implements Result {
 		this.departments = departments;
 	}
 
-	public List<TaxPeriod> getTaxPeriods() {
-		return taxPeriods;
-	}
-
-	public void setTaxPeriods(List<TaxPeriod> taxPeriods) {
-		this.taxPeriods = taxPeriods;
-	}
-
 	public DeclarationDataFilterAvailableValues getFilterValues() {
 		return filterValues;
 	}
@@ -37,11 +29,12 @@ public class GetDeclarationFilterDataResult implements Result {
 		this.filterValues = filterValues;
 	}
 
-	public ReportPeriod getCurrentReportPeriod() {
-		return currentReportPeriod;
+	public List<ReportPeriod> getPeriods() {
+		return periods;
 	}
 
-	public void setCurrentReportPeriod(ReportPeriod currentReportPeriod) {
-		this.currentReportPeriod = currentReportPeriod;
+	public void setPeriods(List<ReportPeriod> periods) {
+		this.periods = periods;
 	}
+
 }

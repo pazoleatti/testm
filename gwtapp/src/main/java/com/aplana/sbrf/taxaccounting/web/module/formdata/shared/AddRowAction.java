@@ -4,32 +4,20 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 
-import java.util.List;
-
 /**
  * Действие добавления строки.
  *
  * @author Vitalii Samolovskikh
  */
-public class AddRowAction extends AbstractFormDataAction implements ActionName {
+public class AddRowAction extends AbstractDataRowAction implements ActionName {
 
-	List<DataRow<Cell>> modifiedRows;
+	private DataRow<Cell> currentDataRow;
 
-	public List<DataRow<Cell>> getModifiedRows() {
-		return modifiedRows;
-	}
-
-	public void setModifiedRows(List<DataRow<Cell>> modifiedRows) {
-		this.modifiedRows = modifiedRows;
-	}
-
-	private DataRow currentDataRow;
-
-	public DataRow getCurrentDataRow() {
+	public DataRow<Cell> getCurrentDataRow() {
 		return currentDataRow;
 	}
 
-	public void setCurrentDataRow(DataRow currentDataRow) {
+	public void setCurrentDataRow(DataRow<Cell> currentDataRow) {
 		this.currentDataRow = currentDataRow;
 	}
 

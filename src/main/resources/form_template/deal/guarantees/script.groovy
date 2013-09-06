@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 /**
- * Предоставление гарантий
+ * 388 - Предоставление гарантий
  *
  * (похож на letter_of_credit "Предоставление инструментов торгового финансирования и непокрытых аккредитивов")
  * (похож на  interbank_credits "Предоставление межбанковских кредитов")
@@ -20,6 +20,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         deleteAllStatic()
+        sort()
         calc()
         addAllStatic()
         logicCheck()
@@ -110,7 +111,7 @@ void logicCheck() {
                 logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
             }
             //  Корректность даты договора
-            def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+            def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
             def dFrom = taxPeriod.getStartDate()
             def dTo = taxPeriod.getEndDate()
             def dt = docDateCell.value
@@ -174,12 +175,13 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
+    def int index = 1
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
         // Порядковый номер строки
-        row.rowNumber = row.getIndex()
+        row.rowNumber = index++
         // Расчет поля "Цена"
         row.price = row.sum
         // Расчет поля "Итого"
@@ -219,6 +221,37 @@ void consolidation() {
     }
 }
 
+def calcItog(int i) {
+    def newRow = formData.createDataRow()
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+
+    newRow.getCell('itog').colSpan = 8
+    newRow.getCell('fix').colSpan = 2
+    newRow.itog = 'Подитог:'
+    newRow.setAlias('itg')
+
+    // Расчеты подитоговых значений
+    def BigDecimal sumItg = 0, priceitg = 0, totalItg = 0
+    for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
+        def row = dataRows.get(j)
+
+        def sum = row.sum
+        def price = row.price
+        def total = row.total
+
+        sumItg += sum != null ? sum : 0
+        priceitg += price != null ? price : 0
+        totalItg += total != null ? total : 0
+    }
+
+    newRow.sum = sumItg
+    newRow.price = priceitg
+    newRow.total = totalItg
+
+    newRow
+}
+
 /**
  * Удаление всех статическиех строк "Подитог" из списка строк
  */
@@ -243,28 +276,49 @@ void addAllStatic() {
 
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.getAllCached()
-        def newRow = formData.createDataRow()
 
-        newRow.getCell('itog').colSpan = 8
-        newRow.getCell('fix').colSpan = 2
-        newRow.itog = 'Подитог:'
-        newRow.setAlias('itg')
-        newRow.rowNumber = dataRows.size()+1
+        for (int i = 0; i < dataRows.size(); i++) {
+            def row = dataRows.get(i)
+            def nextRow = null
 
-        // Расчеты подитоговых значений
-        def BigDecimal sumItg = 0, totalItg = 0
-        for (row in dataRows) {
-
-            def sum = row.sum
-            def total = row.total
-
-            sumItg += sum != null ? sum : 0
-            totalItg += total != null ? total : 0
+            if (i < dataRows.size() - 1) {
+                nextRow = dataRows.get(i + 1)
+            }
+            if (row.getAlias() == null)
+                if (nextRow == null
+                        || row.fullName != nextRow.fullName
+                        || row.inn != nextRow.inn
+                        || row.docNumber != nextRow.docNumber
+                        || row.docDate != nextRow.docDate) {
+                    def itogRow = calcItog(i)
+                    dataRowHelper.insert(itogRow, ++i+1)
+                }
         }
-
-        newRow.sum = sumItg
-        newRow.total = totalItg
-
-        dataRowHelper.insert(newRow, dataRows.size()+1)
     }
+}
+
+/**
+ * Сортировка строк
+ */
+void sort() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+
+    dataRows.sort({ DataRow a, DataRow b ->
+        sortRow(['fullName', 'inn', 'docNumber', 'docDate'], a, b)
+    })
+
+    dataRowHelper.save(dataRows);
+}
+
+int sortRow(List<String> params, DataRow a, DataRow b) {
+    for (String param : params) {
+        def aD = a.getCell(param).value
+        def bD = b.getCell(param).value
+
+        if (aD != bD) {
+            return aD <=> bD
+        }
+    }
+    return 0
 }

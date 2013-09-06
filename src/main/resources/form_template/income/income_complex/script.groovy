@@ -125,9 +125,9 @@ def consolidationBank(DataRowHelper formTarget) {
     def needCalc = false
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
-    departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
+    departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 302) {
+        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
             needCalc = true
             for (DataRow<Cell> row : formDataService.getDataRowHelper(child).allCached) {
                 if (row.getAlias() == null) {
@@ -362,6 +362,8 @@ def getOpuSumByTableDFor4to5(def dataRow, def summaryIncomeSimpleFormHelper) {
             }
         }
         return sum;
+    } else {
+        return 0
     }
 }
 
@@ -379,9 +381,9 @@ def getSummaryIncomeSimpleFormHelper() {
     def summaryIncomeSimpleDataRowsHelper = null
 
     if (summaryIncomeSimpleFormData != null && summaryIncomeSimpleFormData.id != null) summaryIncomeSimpleDataRowsHelper = formDataService.getDataRowHelper(summaryIncomeSimpleFormData)
-    if (summaryIncomeSimpleDataRowsHelper == null || summaryIncomeSimpleDataRowsHelper.getAllCached().isEmpty()) {
+    /*if (summaryIncomeSimpleDataRowsHelper == null || summaryIncomeSimpleDataRowsHelper.getAllCached().isEmpty()) {
         logger.error('Нет информации в отчёте Доходы простые')
-    }
+    }*/
 
     return summaryIncomeSimpleDataRowsHelper
 }

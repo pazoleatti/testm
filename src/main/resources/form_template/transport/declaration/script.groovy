@@ -7,7 +7,7 @@
 
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 // Форма настроек обособленного подразделения: значение атрибута 11
 
 /*
@@ -47,18 +47,28 @@ def checkAndbildXml(){
         return
     }
     // формируем xml
-    bildXml()
-}
-
-def bildXml(){
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
-
-    def departmentId = declarationData.departmentId
-    // получаем подразделение так как в настройках хранится record_id а не значение
-    department = getModRefBookValue(30, "ID = "+departmentId)
 
     // Получить параметры по транспортному налогу
-    departmentParamTransport = getModRefBookValue(31, "DEPARTMENT_ID = "+department.record_id)
+    /** Предпослденяя дата отчетного периода на которую нужно получить настройки подразделения из справочника. */
+    def reportDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)
+    if (reportDate != null) {
+        reportDate = reportDate.getTime() - 1
+    } else{
+        logger.error("Ошибка определения даты конца отчетного периода")
+    }
+
+    // получаем подразделение так как в настройках хранится record_id а не значение
+    department = getModRefBookValue(30, "ID = "+declarationData.departmentId)
+    departmentParamTransport = getModRefBookValue(31, "DEPARTMENT_ID = "+department.record_id, reportDate)
+
+
+    if (checkTransportParams(departmentParamTransport)){
+        bildXml(departmentParamTransport, formDataCollection, department)
+    }
+}
+
+def bildXml(def departmentParamTransport, def formDataCollection, def department){
+    def departmentId = declarationData.departmentId
 
     def builder = new MarkupBuilder(xml)
     if (!declarationData.isAccepted()) {
@@ -68,13 +78,12 @@ def bildXml(){
                     // TODO обсудить всплывающее окно, вынести в конф. Трансп декл
                     ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"), //new Date().format("dd.MM.yyyy"),
                     Период: 34,
-                    ОтчетГод: taxPeriodService.get(reportPeriodService.get(declarationData.reportPeriodId).taxPeriodId).startDate.format('yyyy'),
+                    ОтчетГод: reportPeriodService.get(declarationData.reportPeriodId).taxPeriod.startDate.format('yyyy'),
                     КодНО: departmentParamTransport.TAX_ORGAN_CODE,
                     // TODO учесть что потом будут корректирующие периоды
                     НомКорр: "0",
                     ПоМесту: departmentParamTransport.TAX_PLACE_TYPE_CODE.CODE
             ){
-
                 Integer formReorg = departmentParamTransport.REORG_FORM_CODE.stringValue != null ? Integer.parseInt(departmentParamTransport.REORG_FORM_CODE.stringValue):0;
                 def svnp = [ОКВЭД: departmentParamTransport.OKVED_CODE.CODE]
                 if (departmentParamTransport.OKVED_CODE) {
@@ -89,7 +98,7 @@ def bildXml(){
 
                         if (departmentParamTransport.REORG_FORM_CODE){
                             СвРеоргЮЛ(
-                                    ФормРеорг:departmentParamTransport.REORG_FORM_CODE,
+                                    ФормРеорг:departmentParamTransport.REORG_FORM_CODE.CODE,
                                     ИННЮЛ: (formReorg in [1, 2, 3, 5, 6] ? departmentParamTransport.REORG_INN: 0),
                                     КПП: (formReorg in [1, 2, 3, 5, 6] ? departmentParamTransport.REORG_KPP: 0)
                             )
@@ -368,12 +377,12 @@ def getRegionByOkatoOrg(okato){
 /**
  * Получение полного справочника
  */
-def getModRefBookValue(refBookId, filter){
+def getModRefBookValue(refBookId, filter, date = new Date()){
     // провайдер для справочника
     def refBook = refBookFactory.get(refBookId);
     def refBookProvider = refBookFactory.getDataProvider(refBookId)
     // записи
-    def records = refBookProvider.getRecords(new Date(), null, filter, null).getRecords();
+    def records = refBookProvider.getRecords(date, null, filter, null).getRecords();
     if (records.size() != 1){
         throw new Exception("Ошибка получения значения из справочника refBookId = "+refBookId)
     }
@@ -399,4 +408,33 @@ def getRefBookValue(refBookID, recordId, alias){
     def records = refDataProvider.getRecordData(recordId)
 
     return records != null ? records.get(alias) : null;
+}
+
+/**
+ * Если не заполнены значения настроек по ТН то выдавать ошибку
+ * Поля кроме:
+ *  Номер контактного телефона
+ *  Код формы реорганизации и ликвидации
+ *  ИНН реорганизованного обособленного подразделения
+ *  КПП реорганизованного обособленного подразделения
+ */
+def checkTransportParams(departmentParamTransport){
+    def errors = []
+    departmentParamTransport.each{ key, value ->
+        if (!(key in ['PHONE', 'REORG_FORM_CODE', 'REORG_KPP', 'REORG_INN']) && (value.toString().equals(""))){
+            errors.add(key)
+        }
+    }
+
+    if (errors.size() > 0){
+        def ref = refBookFactory.get(31)
+        String errorLabels = ''
+        errors.each{ e ->
+            errorLabels += (errorLabels.equals('') ? '' : ', ')+ref.getAttribute(e).name
+        }
+        logger.error("Для данного подразделения в форме настроек подразделения по транспортному налогу отсутствуют следующие данные: "+errorLabels)
+        return false;
+    }
+
+    return true;
 }

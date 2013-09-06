@@ -85,7 +85,7 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 
 	@Override
 	public void onContinue(final OpenFilterData openFilterData) {
-		if (getView().isYearEmpty() || (openFilterData.getDictionaryTaxPeriod() == null) || (openFilterData.getEndDate() == null)) {
+		if (getView().isYearEmpty() || (openFilterData.getDictionaryTaxPeriod() == null)) {
 			Window.alert("Не заданы все обязательные параметры!");
 			return;
 		}

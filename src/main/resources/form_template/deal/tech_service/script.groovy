@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import java.math.RoundingMode
 
 /**
- * Техническое обслуживание нежилых помещений
+ * 377 - Техническое обслуживание нежилых помещений
  *
  * @author Dmitriy Levykin
  */
@@ -79,10 +79,8 @@ void deleteRow() {
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
-    // Отчётный период
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     // Налоговый период
-    def taxPeriod = taxPeriodService.get(reportPeriod.taxPeriodId)
+    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
 
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
@@ -226,6 +224,9 @@ void calc() {
 
     for (row in dataRows) {
 
+        // Порядковый номер строки
+        row.rowNum = row.getIndex()
+
         // Расчет поля "Населенный пункт"
         if (row.city != null && !row.city.toString().isEmpty()) {
             row.settlement = row.city
@@ -236,7 +237,7 @@ void calc() {
         // Расчет поля "Цена"
         row.price = count == null ? bankSum : bankSum / count
         // Расчет поля "Стоимость"
-        row.coste = bankSum
+        row.cost = bankSum
 
         // Расчет полей зависимых от справочников
         if (row.jurName != null) {

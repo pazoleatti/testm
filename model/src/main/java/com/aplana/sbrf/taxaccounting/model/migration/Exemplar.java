@@ -107,7 +107,6 @@ public class Exemplar implements Serializable {
         sb.append(", systemId=").append(systemId);
         sb.append(", subSystemId='").append(subSystemId).append('\'');
         sb.append(", terCode='").append(terCode).append('\'');
-        sb.append("}\n");
         return sb.toString();
     }
 }

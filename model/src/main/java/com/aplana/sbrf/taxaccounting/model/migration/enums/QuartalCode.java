@@ -40,7 +40,7 @@ public enum QuartalCode implements Serializable {
                 return t;
             }
         }
-        throw new IllegalArgumentException("Неверный номер квартала: " + num);
+        throw new IllegalArgumentException("Is not contained in enum QuartalCode!  num: " + num);
     }
 
     public int getNum() {

@@ -161,13 +161,13 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	}
 
 	@Override
-	public void setFormReceivers(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes) {
+	public void setAvalibleFormReceivers(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes) {
 		receiversFormTypes = formTypes;
 		formReceiversTable.setRowData(departmentFormTypes);
 	}
 
 	@Override
-	public void setDeclarationReceivers(Map<Integer, DeclarationType> declarationTypes,
+	public void setAvalibleDeclarationReceivers(Map<Integer, DeclarationType> declarationTypes,
 										List<DepartmentDeclarationType> departmentDeclarationTypes) {
 		receiversDeclarationTypes = declarationTypes;
 		declarationReceiversTable.setRowData(departmentDeclarationTypes);
@@ -180,15 +180,11 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	}
 
 	@Override
-	public void setDepartments(List<Department> departments) {
-		Set<Integer> availableDepartments = new HashSet<Integer>(departments.size());
-		for (Department department : departments) {
-			availableDepartments.add(department.getId());
-		}
+	public void setDepartments(List<Department> departments, Set<Integer> availableDepartments) {
 		departmentReceiverPicker.setAvalibleValues(departments, availableDepartments);
-		departmentReceiverPicker.setValue(new ArrayList<Integer>());
+		departmentReceiverPicker.setValue(null);
 		departmentSourcePicker.setAvalibleValues(departments, availableDepartments);
-		departmentSourcePicker.setValue(new ArrayList<Integer>());
+		departmentSourcePicker.setValue(null);
 	}
 
 	public void setupReceiversTables() {

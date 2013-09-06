@@ -106,12 +106,12 @@ public class Cell extends AbstractCell {
 			if (!getColumn().getValidationStrategy().matches(((BigDecimal) value).toPlainString())) {
 				throw new IllegalArgumentException("Число " + ((BigDecimal) value).toPlainString() +
 						" не соответствует формату " +
-						(((NumericColumn) getColumn()).getMaxLength() - ((NumericColumn) getColumn()).getPrecision()) + "." +
+						((NumericColumn) getColumn()).getMaxLength() + "." +
 						((NumericColumn) getColumn()).getPrecision());
 			}
 		} else if (getColumn() instanceof StringColumn) {
 			if (!getColumn().getValidationStrategy().matches((String) value)) {
-				throw new IllegalArgumentException(((String) value) + " длинее " + ((StringColumn)getColumn()).getMaxLength());
+				throw new IllegalArgumentException(((String) value) + " длиннее " + ((StringColumn)getColumn()).getMaxLength());
 			}
 		}
 

@@ -54,7 +54,7 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setName("MyTestName1");
 		newReportPeriod.setOrder(9);
 		newReportPeriod.setMonths(3);
-		newReportPeriod.setTaxPeriodId(taxPeriod.getId());
+		newReportPeriod.setTaxPeriod(taxPeriod);
 		newReportPeriod.setDictTaxPeriodId(21);
 		reportPeriodDao.save(newReportPeriod);
 		
@@ -62,14 +62,14 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setName("MyTestName2");
 		newReportPeriod.setOrder(10);
 		newReportPeriod.setMonths(3);
-		newReportPeriod.setTaxPeriodId(taxPeriod.getId());
+		newReportPeriod.setTaxPeriod(taxPeriod);
 		newReportPeriod.setDictTaxPeriodId(22);
 		reportPeriodDao.save(newReportPeriod);
 		
 		List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(taxPeriod.getId());
 		assertEquals(2, reportPeriodList.size());
-		assertEquals(9, reportPeriodList.get(0).getOrder());
-		assertEquals(10, reportPeriodList.get(1).getOrder());
+		assertEquals(10, reportPeriodList.get(0).getOrder());
+		assertEquals(9, reportPeriodList.get(1).getOrder());
 
 		reportPeriodList = reportPeriodDao.listByTaxPeriod(-1);
 		assertEquals(0, reportPeriodList.size());
@@ -81,7 +81,7 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setName("MyTestName");
 		newReportPeriod.setOrder(9);
 		newReportPeriod.setMonths(3);
-		newReportPeriod.setTaxPeriodId(taxPeriod.getId());
+		newReportPeriod.setTaxPeriod(taxPeriod);
 		newReportPeriod.setDictTaxPeriodId(21);
 
 		int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
@@ -89,9 +89,9 @@ public class ReportPeriodDaoTest {
 
 		assertEquals("MyTestName", reportPeriod.getName());
 		assertEquals(3, reportPeriod.getMonths());
-		assertEquals(taxPeriod.getId(), Integer.valueOf(reportPeriod.getTaxPeriodId()));
+		assertEquals(taxPeriod.getId(), Integer.valueOf(reportPeriod.getTaxPeriod().getId()));
 		assertEquals(9, reportPeriod.getOrder());
-		assertEquals(taxPeriod.getId(), Integer.valueOf(reportPeriod.getTaxPeriodId()));
+		assertEquals(taxPeriod.getId(), Integer.valueOf(reportPeriod.getTaxPeriod().getId()));
 		assertEquals(21, reportPeriod.getDictTaxPeriodId());
 	}
 

@@ -4,35 +4,43 @@
     xmlns:t="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 
 	<g:DialogBox height="100%" glassEnabled="true" text="Исполнитель и подписанты">
-        <g:VerticalPanel height="100%">
+        <g:VerticalPanel>
             <g:HorizontalPanel height="30px">
                 <g:Label width="100px">Исполнитель:</g:Label>
                 <g:TextBox maxLength="100" width="300px" ui:field="name"/>
             </g:HorizontalPanel>
-
             <g:HorizontalPanel height="30px">
                 <g:Label width="100px">Телефон:</g:Label>
                 <g:TextBox maxLength="20" width="300px" ui:field="phone"/>
             </g:HorizontalPanel>
-
-            <t:GenericDataGrid ui:field="signersTable" height="250px"/>
-            <t:Bar ui:field="columnActionsBar">
-                <t:LeftBar>
-                    <g:Button text="Вверх" ui:field="upSigner"/>
-                    <g:Button text="Вниз" ui:field="downSigner"/>
-                    <g:Button text="Добавить" ui:field="addSigner"/>
-                    <g:Button text="Удалить" ui:field="removeSigner"/>
-                </t:LeftBar>
-            </t:Bar>
-
-            <t:Bar>
-                <t:LeftBar>
-                    <g:Button text="Применить" ui:field="saveButton"/>
-                    <g:Button text="Отмена" ui:field="cancelButton"/>
-                </t:LeftBar>
-            </t:Bar>
+            <g:HorizontalPanel height="250px" width="100%">
+                <g:cell width="100%">
+                    <t:GenericDataGrid ui:field="signersTable" height="250px" width="100%"/>
+                </g:cell>
+                <g:cell width="40px">
+                    <g:VerticalPanel ui:field="directionPanel">
+                        <g:cell>
+                            <g:Button text="Вверх" ui:field="upSigner" width="100%"/>
+                        </g:cell>
+                        <g:cell>
+                            <g:Button text="Вниз" ui:field="downSigner" width="100%"/>
+                        </g:cell>
+                    </g:VerticalPanel>
+                </g:cell>
+            </g:HorizontalPanel>
+            <g:HorizontalPanel height="30px" ui:field="buttonPanel">
+                <g:cell verticalAlignment="middle">
+                    <t:LinkButton text="Добавить" ui:field="addSigner"/>
+                </g:cell>
+                <g:cell verticalAlignment="middle">
+                    <t:LinkButton text="Удалить" ui:field="removeSigner"/>
+                </g:cell>
+            </g:HorizontalPanel>
+            <g:HorizontalPanel height="30px">
+                <g:Button text="Сохранить" ui:field="saveButton"/>
+                <g:Button text="Отмена" ui:field="cancelButton"/>
+            </g:HorizontalPanel>
         </g:VerticalPanel>
-
 	</g:DialogBox>
 
 </ui:UiBinder> 

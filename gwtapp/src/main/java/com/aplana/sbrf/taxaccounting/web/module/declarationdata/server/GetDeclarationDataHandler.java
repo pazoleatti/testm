@@ -17,7 +17,7 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataResult;
@@ -53,7 +53,7 @@ public class GetDeclarationDataHandler
 	
 	
 	@Autowired
-	private ReportPeriodService reportPeriodService;
+	private PeriodService reportPeriodService;
 
 	public GetDeclarationDataHandler() {
 		super(GetDeclarationDataAction.class);
@@ -89,7 +89,7 @@ public class GetDeclarationDataHandler
                 declaration.getReportPeriodId());
 		result.setReportPeriod(reportPeriod.getName());
 
-        Date reportPeriodStartDate = reportPeriodService.getTaxPeriod(reportPeriod.getTaxPeriodId()).getStartDate();
+        Date reportPeriodStartDate = reportPeriod.getTaxPeriod().getStartDate();
         String year = new SimpleDateFormat("yyyy").format(reportPeriodStartDate);
         result.setReportPeriodYear(Integer.valueOf(year));
 

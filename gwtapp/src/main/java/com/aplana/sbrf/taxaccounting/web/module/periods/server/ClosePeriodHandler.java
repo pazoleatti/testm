@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.ClosePeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.ClosePeriodResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -23,7 +23,7 @@ public class ClosePeriodHandler extends AbstractActionHandler<ClosePeriodAction,
 	}
 
 	@Autowired
-	private ReportPeriodService reportPeriodService;
+	private PeriodService reportPeriodService;
 
 	@Override
 	public ClosePeriodResult execute(ClosePeriodAction action, ExecutionContext executionContext) throws ActionException {

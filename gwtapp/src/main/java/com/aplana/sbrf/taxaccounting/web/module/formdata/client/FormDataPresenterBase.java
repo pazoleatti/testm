@@ -86,6 +86,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		void assignDataProvider(int pageSize);
 
 		void updateData();
+		
+		void updateData(int pageNumber);
 	}
 
 	public static final String NAME_TOKEN = "!formData";

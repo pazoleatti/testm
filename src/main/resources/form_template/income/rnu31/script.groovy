@@ -42,6 +42,8 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicalCheck(false)
+        // для сохранения изменений приемников
+        getData(formData).commit()
         break
     case FormDataEvent.IMPORT :
         importData()
@@ -283,7 +285,6 @@ void importData() {
 
     // сохранить начальное состояние формы
     def data = getData(formData)
-    def rowsOld = getRows(data)
     try {
         // добавить данные в форму
         addData(xml, startRow, startColumn, data)
@@ -297,13 +298,9 @@ void importData() {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
     }
     // откатить загрузку если есть ошибки
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        data.clear()
-        data.insert(rowsOld, 1)
-    } else {
+    if (!logger.containsLevel(LogLevel.ERROR)) {
         logger.info('Данные загружены')
     }
-    data.commit()
 }
 
 /*
@@ -551,7 +548,6 @@ void addData(def xml, def startRow, def startColumn, def data) {
 
             data.clear()
             data.insert(newRow, 1)
-            data.commit()
             break
         }
     }

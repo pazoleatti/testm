@@ -372,7 +372,7 @@ BigDecimal calc12(DataRow row) {
     def countDaysInYear = getCountDaysInYear()
     def currency = getCurrency(row.currencyCode)
     if (row.outcome != null && row.outcome > 0) {
-        long difference = row.part2REPODate.getTime() - row.part1REPODate.getTime() / (1000 * 60 * 60 * 24) // необходимо получить кол-во в днях
+        long difference = (row.part2REPODate.getTime() - row.part1REPODate.getTime()) / (1000 * 60 * 60 * 24) // необходимо получить кол-во в днях
         difference = difference == 0 ? 1 : difference   // Эти вычисления для того чтобы получить разницу в днях, если она нулевая считаем равной 1 так написано в чтз
         if (currency == '810') {
             if (inPeriod(row.part2REPODate, '01.09.2008', '31.12.2009')) {
@@ -507,13 +507,7 @@ DataRow getRealItogo(){
  */
 void addNewRow() {
     def data = getData(formData)
-    DataRow<Cell> newRow = formData.createDataRow()
-    [
-            'tradeNumber', 'securityName', 'currencyCode', 'nominalPrice', 'part1REPODate', 'part2REPODate', 'acquisitionPrice', 'salePrice'
-    ].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
+    DataRow<Cell> newRow = getNewRow()
     def index = 0
     if (currentDataRow!=null){
         index = currentDataRow.getIndex()
@@ -657,26 +651,40 @@ void importData() {
 
     // сохранить начальное состояние формы
     def data = getData(formData)
-    def rowsOld = getRows(data)
     try {
         // добавить данные в форму
-        addData(xml)
+        def totalLoad = addData(xml)
+        if (totalLoad!=null) {
+            // расчитать и проверить
+            deleteAllStatic()
+            sort()
+            calc()
+            addAllStatic()
+            allCheck()
 
-        // расчитать и проверить
-        deleteAllStatic()
-        sort()
-        calc()
-        addAllStatic()
-        allCheck()
+            //проверка итоговой строки
+            def totalColumns = [4: 'nominalPrice', 7: 'acquisitionPrice', 8: 'salePrice',
+                    9: 'income', 10: 'outcome', 12: 'outcome269st', 13: 'outcomeTax']
+            def totalCalc
+            for (def row : getRows(data))
+                if (isItogoRow(row)) totalCalc = row
+
+            if (totalCalc!=null) {
+                totalColumns.each{i, v->
+                    if (totalCalc[v]!=totalLoad[v]) {
+                        logger.error("Итоговая сумма в графе $i в транспортном файле некорректна")
+                    }
+                }
+            }
+        } else {
+            logger.error("Нет итоговой строки.")
+        }
     } catch(Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка!')
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.getMessage())
     }
-    // откатить загрузку если есть ошибки
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        data.clear()
-        data.insert(rowsOld, 1)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        logger.info('Закончена загрузка файла ' + fileName)
     }
-    data.commit()
 }
 
 /**
@@ -684,18 +692,16 @@ void importData() {
  *
  * @param xml данные
  */
-void addData(def xml) {
+def addData(def xml) {
+    def date = new Date()
+    def cache = [:]
+    def newRows = []
     def data = getData(formData)
     data.clear()
-
-    def tmp
     def index
-    // справочник 15 "Общероссийский классификатор валют"
-    def refDataProvider15 = refBookFactory.getDataProvider(15)
 
-    // TODO (Ramil Timerbaev) Проверка корректности данных
     for (def row : xml.exemplar.table.detail.record) {
-        index = 1
+        index = 0
 
         def newRow = getNewRow()
 
@@ -708,11 +714,7 @@ void addData(def xml) {
         index++
 
         // графа 3 - справочник 15, атрибут 64
-        tmp = null
-        if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
-            tmp = getRecordId(refDataProvider15, 'CODE', getNumber(row.field[index].@value.text()))
-        }
-        newRow.currencyCode = tmp
+        newRow.currencyCode = getRecordId(15, 'CODE', row.field[index].@value.text(), date, cache)
         index++
 
         // графа 4
@@ -754,36 +756,24 @@ void addData(def xml) {
         // графа 13
         newRow.outcomeTax = getNumber(row.field[index].@value.text())
 
-        insert(data, newRow)
+        newRows.add(newRow)
     }
-    // проверка итоговых данных
-    // TODO (Ramil Timerbaev) переделать
-    if (false && xml.exemplar.table.total.record.size() > 1 && !getRows(data).isEmpty()) {
-        // графы 7-9, 11-13, 15, 17-22
-        // TODO (Ramil Timerbaev) убрал нередактируемые вычисляемые графы (их итоги)
-        def columnsAlias = ['amountBonds': 7, 'acquisitionPrice': 8, 'costOfAcquisition': 9,
-                'marketPriceInRub': 11, /*'acquisitionPriceTax': 12,*/ 'redemptionValue': 13,
-                'priceInFactRub': 15, /*'marketPriceInRub1': 17, 'salePriceTax': 18,*/ 'expensesOnSale': 19 /*,
-                'expensesTotal': 20, 'profit': 21, 'excessSalePriceTax': 22*/]
+    // получение итоговых данных
+    def totalRow = formData.createDataRow()
+    if (xml.exemplar.table.total.record.field.size() > 0 && !newRows.isEmpty()) {
+        def totalColumns = [4: 'nominalPrice', 7: 'acquisitionPrice', 8: 'salePrice',
+                9: 'income', 10: 'outcome', 12: 'outcome269st', 13: 'outcomeTax']
 
-        index = 0
         for (def row : xml.exemplar.table.total.record) {
-            index++
-            def totalRow = (index == 1 ? getItogoKvartal() : getItogoKvartal())
-
-            // сравнить посчитанные суммы итогов с итогами из транспортного файла (графы 7-9, 11-13, 15, 17-22)
-            def exit = false
-            columnsAlias.each { alias, i ->
-                if (!exit && totalRow.getCell(alias).getValue() != getNumber(row.field[i].@value.text())) {
-                    logger.error('Итоговые значения неправильные.')
-                    exit = true
-                }
-            }
-            if (exit) {
-                return
+            totalColumns.each {i, alias ->
+                totalRow[alias] = getNumber(row.field[i-1].@value.text())
             }
         }
+    } else {
+        return null
     }
+    data.insert(newRows, 1)
+    return totalRow
 }
 
 /**
@@ -819,11 +809,9 @@ void insert(def data, def row) {
  */
 def getNewRow() {
     def row = formData.createDataRow()
-
-    // графа 2..11, 13..15, 19
-    ['tradeNumber', 'singSecurirty', 'issue', 'acquisitionDate', 'saleDate', 'amountBonds',
-            'acquisitionPrice', 'costOfAcquisition', 'marketPriceInPerc', 'marketPriceInRub',
-            'redemptionValue', 'priceInFactPerc', 'priceInFactRub', 'expensesOnSale'].each {
+    [
+            'tradeNumber', 'securityName', 'currencyCode', 'nominalPrice', 'part1REPODate', 'part2REPODate', 'acquisitionPrice', 'salePrice'
+    ].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
@@ -833,16 +821,23 @@ def getNewRow() {
 /**
  * Получить идентификатор записи из справочника.
  *
- * @param provider справочник
- * @param searchByAlias алиас атрибута справочника по которому ищется запись
- * @param value значение по которому ищется запись
+ * @param value
  */
-def getRecordId(def provider, def searchByAlias, def value) {
-    def records = provider.getRecords(new Date(), null, searchByAlias + " = '" + value + "'", null);
-    if (records != null && !records.getRecords().isEmpty()) {
-        return records.getRecords().get(0).get('record_id').getNumberValue()
+def getRecordId(def ref_id, String code, String value, Date date, def cache) {
+    String filter = code + " like '" + value.replaceAll(' ', '') + "%'"
+    if (cache[ref_id]!=null) {
+        if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
+    } else {
+        cache[ref_id] = [:]
     }
-    return null
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    if (records.size() == 1){
+        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        return cache[ref_id][filter]
+    }
+    logger.error("Не удалось определить элемент справочника!")
+    return null;
 }
 
 /**

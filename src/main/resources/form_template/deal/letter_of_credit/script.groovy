@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 /**
- * Предоставление инструментов торгового финансирования и непокрытых аккредитивов
+ * 386 - Предоставление инструментов торгового финансирования и непокрытых аккредитивов
  * (похож на guarantees "Предоставление гарантий")
  *
  * @author Stanislav Yasinskiy
@@ -111,7 +111,8 @@ void logicCheck() {
             }
         }
         //  Корректность даты договора
-        def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+        def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+
         def dFrom = taxPeriod.getStartDate()
         def dTo = taxPeriod.getEndDate()
         def dt = docDateCell.value
@@ -174,13 +175,14 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
+    def int index = 1
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
 
         // Порядковый номер строки
-        row.rowNumber = row.getIndex()
+        row.rowNumber = index++
         // Расчет поля "Цена"
         row.price = row.sum
         // Расчет поля "Итог"
@@ -231,7 +233,6 @@ void deleteAllStatic() {
         def row = (DataRow) iter.next()
         if (row.getAlias() != null) {
             dataRowHelper.delete(row)
-            break
         }
     }
 }
@@ -249,21 +250,23 @@ void addAllStatic() {
         newRow.getCell('itog').colSpan = 8
         newRow.setAlias('itg')
         newRow.itog = 'Подитог:'
-        newRow.rowNumber = dataRows.size()+1
         newRow.getCell('fix').colSpan = 2
 
         // Расчеты подитоговых значений
-        def BigDecimal sumItg = 0, totalItg = 0
+        def BigDecimal sumItg = 0, priceItg = 0, totalItg = 0
         for (row in dataRows) {
 
             def sum = row.sum
             def total = row.total
+            def price = row.price
 
             sumItg += sum != null ? sum : 0
+            priceItg += price != null ? price : 0
             totalItg += total != null ? total : 0
         }
 
         newRow.sum = sumItg
+        newRow.price = priceItg
         newRow.total = totalItg
 
         dataRowHelper.insert(newRow, dataRows.size()+1)

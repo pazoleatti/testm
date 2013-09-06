@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import java.util.ArrayList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -12,7 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterDataResult;
@@ -28,13 +26,11 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 		super(GetDeclarationFilterData.class);
 	}
 
-	private Log logger = LogFactory.getLog(getClass());
-
 	@Autowired
 	private SecurityService securityService;
 
 	@Autowired
-	private ReportPeriodService taxPeriodDao;
+	private PeriodService periodService;
 
 	@Autowired
 	private DepartmentService departmentService;
@@ -51,9 +47,8 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 
 		res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(declarationFilterValues
 				.getDepartmentIds()).values()));
-		res.setTaxPeriods(taxPeriodDao.listByTaxType(action.getTaxType()));
 		res.setFilterValues(declarationFilterValues);
-		res.setCurrentReportPeriod(null);
+		res.setPeriods(periodService.getAllPeriodsByTaxType(action.getTaxType(), true));
 		return res;
 	}
 

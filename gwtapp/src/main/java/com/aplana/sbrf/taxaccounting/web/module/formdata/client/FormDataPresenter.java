@@ -2,7 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import java.util.ArrayList;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -19,18 +22,17 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DataRowResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteRowAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFileUpload;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFileUploadResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateDataRowsAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RollbackDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RollbackDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UploadDataRowsAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.core.client.GWT;
@@ -114,19 +116,11 @@ public class FormDataPresenter extends
 	}
 
     @Override
-    public void onFileParse(String uuid) {
-        GetFileUpload action = new GetFileUpload();
+    public void onUploadDataRow(String uuid) {
+        UploadDataRowsAction action = new UploadDataRowsAction();
         action.setUuid(uuid);
-        action.setFormDataId(formData.getId());
-        dispatcher.execute(action,
-                CallbackUtils.defaultCallback(new AbstractCallback<GetFileUploadResult>() {
-                    @Override
-                    public void onSuccess(GetFileUploadResult result) {
-                        revealFormData(true);
-                        LogAddEvent.fire(FormDataPresenter.this,
-                                result.getLogEntries());
-                    }
-                }, this));
+        action.setFormData(formData);
+        dispatcher.execute(action, createDataRowResultCallback());
     }
 
     @Override
@@ -205,6 +199,7 @@ public class FormDataPresenter extends
 
 	
 	private AsyncCallback<DataRowResult> createDataRowResultCallback(){ 
+			LogCleanEvent.fire(this);
 			return CallbackUtils.defaultCallback(new AbstractCallback<DataRowResult>() {
 				@Override
 				public void onSuccess(DataRowResult result) {
@@ -230,7 +225,6 @@ public class FormDataPresenter extends
 	 */
 	@Override
 	public void onSaveClicked() {
-		LogCleanEvent.fire(this);
 		SaveFormDataAction action = new SaveFormDataAction();
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
@@ -243,7 +237,6 @@ public class FormDataPresenter extends
 	 */
 	@Override
 	public void onAddRowClicked() {
-		LogCleanEvent.fire(this);
 		DataRow<Cell> dataRow = getView().getSelectedRow();
 		AddRowAction action = new AddRowAction();
 		action.setCurrentDataRow(dataRow);
@@ -257,7 +250,6 @@ public class FormDataPresenter extends
 	 */
 	@Override
 	public void onRemoveRowClicked() {
-		LogCleanEvent.fire(this);
 		DataRow<Cell> dataRow = getView().getSelectedRow();
 		DeleteRowAction action = new DeleteRowAction();
 		action.setCurrentDataRow(dataRow);
@@ -273,8 +265,7 @@ public class FormDataPresenter extends
 	 */
 	@Override
 	public void onRecalculateClicked() {
-		LogCleanEvent.fire(this);
-		RecalculateFormDataAction action = new RecalculateFormDataAction();
+		RecalculateDataRowsAction action = new RecalculateDataRowsAction();
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		dispatcher.execute(action, createDataRowResultCallback());
@@ -420,7 +411,7 @@ public class FormDataPresenter extends
                                                         : "Редактирование налоговой формы",
                                                 formData.getFormType()
                                                         .getName());
-	                            getView().updateData();
+	                            getView().updateData(0);
 
                             }
 
@@ -429,10 +420,8 @@ public class FormDataPresenter extends
     }
 
     private String buildPeriodName(GetFormDataResult retFormDataResult) {
-        String year = DateTimeFormat.getFormat(Formats.YYYY.getFormat()).format(retFormDataResult.getTaxPeriodStartDate());
-
         StringBuilder builder = new StringBuilder();
-        builder.append(year).append(", ");
+        builder.append(retFormDataResult.getReportPeriodYear()).append(", ");
         builder.append(retFormDataResult.getReportPeriod().getName());
         Integer periodOrder = retFormDataResult.getFormData().getPeriodOrder();
         if (periodOrder != null) {
