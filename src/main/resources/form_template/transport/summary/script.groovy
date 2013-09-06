@@ -882,65 +882,96 @@ def consolidation(){
                 int ownMonths
                 // Срока нахождения в угоне (Мугон)
                 int stealingMonths
+                // дата начала отчетного периода
+                Calendar reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+                // дата конца отчетного периода
+                Calendar reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
 
-                /**
-                 * 1.	Учесть возможное отсутствие значения в (графе 14»(источника)
-                 *  Если «графа 14»(источника) не заполнена, то
-                 *  Дcнятия = Дата завершения периода, за который создается форма
-                 *  Иначе
-                 *  Дпостановки = «графа 14»(источника)
-                 */
-                if (sRow.regDateEnd == null){
-                    removalDate = reportPeriodService.getEndDate(formData.reportPeriodId).getD
-                } else{
-                    removalDate = Calendar.getInstance()
-                    removalDate.setTime(sRow.regDateEnd)
-                }
+                System.out.println("sRow.regDateEnd -> "+sRow.regDateEnd)
+                System.out.println("sRow.regDate -> "+sRow.regDate)
+                System.out.println("sRow.stealDateStart -> "+sRow.stealDateStart)
+                System.out.println("reportPeriodStartDate -> "+reportPeriodStartDate.getTime())
+                System.out.println("reportPeriodEndDate -> "+reportPeriodEndDate.getTime())
 
-                /**
-                 * 2.	Учесть возможное отсутствие значения в «графе 16»(источника)
-                 *
-                 * Если «графа 16»(источника) не заполнена, то
-                 * Двозврата = Дата завершения периода, за который создается форма
-                 * Иначе
-                 * Двозврата = «графа 14»(источника)
+                /*
+                 * Если  [«графа 14»(источника) заполнена И «графа 14»(источника)< «Дата начала периода»]
+                 * ИЛИ [«графа 13»>«Дата окончания периода»], то
+                 * Графа 12=0
                  */
-                if (sRow.stealDateStart == null){
-                    returnDate = reportPeriodService.getEndDate(formData.reportPeriodId)
-                } else{
-                    returnDate = Calendar.getInstance()
-                    returnDate.setTime(sRow.stealDateStart)
-                }
-
-                /**
-                 *  3.	Проверить, что период владения ТС попадает на период, за который создается форма
-                 *  Если «графа 14» (источника)<»Дата начала периода» ИЛИ «графа 13» (источника)>»Дата окончания периода», то
-                 *  «графа 12» = 0
-                 */
-                if (sRow.regDateEnd.compareTo(reportPeriodService.getStartDate(formData.reportPeriodId).getTime()) < 0
-                    || sRow.regDate.compareTo(reportPeriodService.getStartDate(formData.reportPeriodId).getTime()) > 0){
+                System.out.println("ownMonths 11")
+                if ((sRow.regDateEnd != null && sRow.regDateEnd.compareTo(reportPeriodStartDate.getTime()) < 0)
+                    ||  sRow.regDate.compareTo(reportPeriodEndDate.getTime()) > 0){
+                    System.out.println("ownMonths 12")
                     newRow.ownMonths = 0
-                } else{
+                } else{ // иначе
+                    //Определяем Мугон
                     /**
-                     * 4.	Определить границы периодов владения и нахождения в угоне в рамках периода, за который подается отчет (отчетный или налоговый период).
+                     * Если «графа 15» (источника) не заполнена, то Мугон = 0
                      */
+                    if (sRow.stealDateStart == null){
+                        stealingMonths = 0
+                    } else { // инчае
+                        /**
+                         * Если «графа 15»(источника)< «Дата начала периода», то
+                         *  Дугона = «Дата начала периода»
+                         *  Иначе
+                         *  Дугона = «графа 15»(источника)
+                         */
+                        if (sRow.stealDateStart.compareTo(reportPeriodStartDate.getTime()) < 0){
+                            stealingDate = reportPeriodStartDate
+                        } else{
+                            stealingDate = sRow.stealDateStart
+                        }
 
+                        /**
+                         * Определяем Двозврат
+                         * Если [«графа 16»(источника) не заполнена] ИЛИ [«графа 16»(источника)> «Дата окончания периода»], то
+                         *  Двозврата = «Дата окончания периода»
+                         * Иначе
+                         * Двозврата = «графа 16»(источника)
+                         *
+                         */
+                        if (sRow.stealDateStart == null || sRow.stealDateStart.compareTo(reportPeriodEndDate.getTime()) > 0){
+                            returnDate = reportPeriodEndDate
+                        } else{
+                            returnDate = Calendar.getInstance()
+                            returnDate.setTime(sRow.stealDateStart)
+                        }
+
+                        /**
+                         * Определяем Мугон
+                         * Если (МЕСЯЦ(Двозврата)-МЕСЯЦ(Дугона)-1)<0, то
+                         *  Мугон = 0
+                         * Иначе
+                         *  Мугон = МЕСЯЦ(Двозврата)-МЕСЯЦ(Дугона)-1
+                         */
+                        def diff1 = returnDate.getMonth() - stealingDate.getMonth() - 1
+                        if (diff1 < 0){
+                            stealingMonths = 0
+                        } else{
+                            stealingMonths = diff1
+                        }
+                    }
+
+                    System.out.println("ownMonths 1")
                     /**
-                     * Если «графа 14»(источника)> «Дата окончания периода», то
+                     * Определяем Дснятия
+                     * Если «графа 14»(источника) не заполнена ИЛИ «графа 14»(источника)> «Дата окончания периода», то
                      *  Дснятия = «Дата окончания периода»
-                     *  Иначе
+                     * Иначе
                      *  Дснятия = «графа 14»(источника)
                      */
-                    if (sRow.regDateEnd.compareTo(reportPeriodService.getEndDate(formData.reportPeriodId)) > 0){
-                        removalDate = reportPeriodService.getEndDate(formData.reportPeriodId)
+                    if (sRow.regDateEnd == null || sRow.regDateEnd.compareTo(reportPeriodEndDate.getTime()) > 0){
+                        removalDate = reportPeriodEndDate
                     }   else{
                         removalDate = sRow.regDateEnd
                     }
 
                     /**
+                     * Определяем Дпостановки
                      * Если «графа 13»(источника)< «Дата начала периода», то
                      *  Дпостановки = «Дата начала периода»
-                     *  Иначе
+                     * Иначе
                      *  Дпостановки = «графа 13»(источника)
                      */
                     if (sRow.regDate.compareTo(reportPeriodService.getStartDate(formData.reportPeriodId)) < 0){
@@ -950,58 +981,16 @@ def consolidation(){
                     }
 
                     /**
-                     *  Если «графа 16»(источника)> «Дата окончания периода», то
-                     *  Двозврата = «Дата окончания периода»
-                     *  Иначе
-                     *  Двозврата = «графа 16»(источника)
+                     * Определяем Мвлад
+                     * Мвлад = МЕСЯЦ[Дснятия] - МЕСЯЦ[Дпостановки]+1
                      */
-                    if (sRow.stealDateEnd.compareTo(reportPeriodService.getEndDate(formData.reportPeriodId)) > 0){
-                        returnDate = reportPeriodService.getEndDate(formData.reportPeriodId)
-                    } else{
-                        returnDate = sRow.stealDateEnd
-                    }
+                    ownMonths = (removalDate.get(Calendar.YEAR)*12 + removalDate.get(Calendar.MONTH))
+                        - (deliveryDate.get(Calendar.YEAR) * 12 + deliveryDate.get(Calendar.MONTH) )
+                        + 1
 
                     /**
-                     * Если «графа 15»(источника)< «Дата начала периода», то
-                     *  Дугона = «Дата начала периода»
-                     *  Иначе
-                     *  Дугона = «графа 15»(источника)
-                     */
-                    if (sRow.stealDateStart.compareTo(reportPeriodService.getStartDate(formData.reportPeriodId)) < 0){
-                        stealingDate = reportPeriodService.getStartDate(formData.reportPeriodId)
-                    } else{
-                        stealingDate = sRow.stealDateStart
-                    }
-
-                    /**
-                     *  5.	Рассчитать значения Срока владения ТС без учета времени в угоне (Мвлад)
-                     *  Мвлад=МЕСЯЦ(Дснятия)-МЕСЯЦ(Дпостановки)+1
-                     */
-                    ownMonths = TimeCategory.minus(removalDate, deliveryDate).months + 1
-
-                    /**
-                     * 6.	Рассчитать значения Срока нахождения в угоне (Мугон)
-                     *  Если (МЕСЯЦ(Двозврата)-МЕСЯЦ(Дугона)-1)<0, то
-                     *  Мугон = 0
-                     *  Иначе
-                     *  Мугон = МЕСЯЦ(В)-МЕСЯЦ(А)-1
-                     */
-                    if ((TimeCategory.minus(returnDate, stealingDate).months - 1) < 0){
-                        stealingMonths = 0
-                    } else{
-                        stealingMonths = TimeCategory.minus(returnDate, stealingDate).months - 1
-                    }
-
-                    /**
-                     * 7.	Рассчитать значение графы 12:
-                     *
-                     * 1.	«Графа 12» =  Мвлад – Мугон
-                     *
-                     * МЕСЯЦ () – операция получения номера месяца в году.
-                     * Дугона – дата угона
-                     * Двозврата – дата возврата
-                     * Дпостановки – дата постановки ТС на учет
-                     * Дснятия – дата снятия ТС с учета
+                     * Определяем графу 12
+                     * Графа 12=Мвлад-Мугон
                      */
                     newRow.ownMonths = ownMonths - stealingMonths
                 }
@@ -1009,7 +998,5 @@ def consolidation(){
             }
         }
     }
-    // сохраняем данные
     dataRowHelper.save(dataRows)
-    //dataRowHelper.commit()
 }
