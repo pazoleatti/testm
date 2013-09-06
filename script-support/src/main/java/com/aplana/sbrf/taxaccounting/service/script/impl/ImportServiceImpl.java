@@ -111,10 +111,11 @@ public class ImportServiceImpl implements ImportService {
         StringBuilder sb = new StringBuilder();
         sb.append("<data>").append(ENTER);
         String [] rowCells;
+        // количество пустых строк
         int countEmptyRow = 0;
         while ((rowCells = reader.readNext()) != null) {
-            // если встетилась вторая пустая строка, то дальше только строки итогов и ЦП
-            if (rowCells.length == 1 && rowCells[0].length() < 1) {
+            // если еще не было пустых строк, то это первая строка - заголовок
+            if (rowCells.length == 1 && rowCells[0].length() < 1) { // если встетилась вторая пустая строка, то дальше только строки итогов и ЦП
                 if (countEmptyRow > 0) {
                     addRow(sb, reader.readNext(), "rowTotal");
                     break;
@@ -122,7 +123,11 @@ public class ImportServiceImpl implements ImportService {
                 countEmptyRow++;
                 continue;
             }
-            addRow(sb, rowCells, "row");
+            if (countEmptyRow == 0) {
+                addRow(sb, rowCells, "rowHead");
+            } else {
+                addRow(sb, rowCells, "row");
+            }
         }
         sb.append("</data>");
         return sb.toString();
