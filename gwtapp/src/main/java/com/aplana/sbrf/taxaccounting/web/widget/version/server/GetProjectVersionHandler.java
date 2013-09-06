@@ -17,7 +17,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 public class GetProjectVersionHandler extends
 		AbstractActionHandler<GetProjectVersion, GetProjectVersionResult> {
 
-	private static final String RESOURCE_FOR_GETTING_VERSION = "/META-INF/MANIFEST.MF";
+	private static final String RESOURCE_FOR_GETTING_VERSION = "META-INF/MANIFEST.MF";
 
 	private Log log = LogFactory.getLog(getClass());
 
