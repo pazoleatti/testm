@@ -58,7 +58,7 @@ void addRow() {
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
     ['fullName', 'interdependence', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealFocus', 'deliverySign', 'metalName',
-            'countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2',
+            'foreignDeal', 'countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2',
             'locality2', 'deliveryCode', 'incomeSum', 'outcomeSum', 'dealDoneDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
@@ -229,12 +229,13 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
+    def index = 1;
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
         // Порядковый номер строки
-        row.rowNum = row.getIndex()
+        row.rowNum = index++
         // Расчет поля "Цена"
         if (row.incomeSum != null && row.outcomeSum != null) {
             row.price = row.incomeSum - row.outcomeSum
@@ -310,7 +311,6 @@ void deleteAllStatic() {
         def row = (DataRow) iter.next()
         if (row.getAlias() != null) {
             dataRowHelper.delete(row)
-            break
         }
     }
 }
@@ -329,7 +329,6 @@ void addAllStatic() {
         newRow.itog = 'Подитог:'
         newRow.setAlias('itg')
         newRow.getCell('fix').colSpan = 2
-        newRow.rowNum = dataRows.size() + 1
 
         // Расчеты подитоговых значений
         def BigDecimal priceItg = 0, totalItg = 0

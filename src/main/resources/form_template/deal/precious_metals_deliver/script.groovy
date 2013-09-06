@@ -436,7 +436,6 @@ def calcItog(int i) {
     newRow.itog = 'Подитог:'
     newRow.setAlias('itg#'.concat(i.toString()))
     newRow.getCell('fix').colSpan = 2
-    //newRow.rowNum = i + 2
 
     // Расчеты подитоговых значений
     BigDecimal totalNdsItg = 0, priceOneItg = 0

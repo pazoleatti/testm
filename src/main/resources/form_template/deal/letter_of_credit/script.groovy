@@ -175,13 +175,14 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
+    def int index = 1
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
 
         // Порядковый номер строки
-        row.rowNumber = row.getIndex()
+        row.rowNumber = index++
         // Расчет поля "Цена"
         row.price = row.sum
         // Расчет поля "Итог"
@@ -232,7 +233,6 @@ void deleteAllStatic() {
         def row = (DataRow) iter.next()
         if (row.getAlias() != null) {
             dataRowHelper.delete(row)
-            break
         }
     }
 }
@@ -250,7 +250,6 @@ void addAllStatic() {
         newRow.getCell('itog').colSpan = 8
         newRow.setAlias('itg')
         newRow.itog = 'Подитог:'
-        newRow.rowNumber = dataRows.size()+1
         newRow.getCell('fix').colSpan = 2
 
         // Расчеты подитоговых значений
