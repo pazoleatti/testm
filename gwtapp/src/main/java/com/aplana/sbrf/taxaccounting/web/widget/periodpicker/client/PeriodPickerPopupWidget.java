@@ -35,6 +35,9 @@ public class PeriodPickerPopupWidget extends Composite implements
 	Button selectButton;
 	
 	@UiField
+	Button clearButton;
+	
+	@UiField
 	PopupPanel popupPanel;
 	
 	@UiField
@@ -101,6 +104,7 @@ public class PeriodPickerPopupWidget extends Composite implements
 	@Override
 	public void setEnabled(boolean enabled) {
 		selectButton.setEnabled(enabled);
+		clearButton.setEnabled(enabled);
 	}
 	
 	@UiHandler("okButton")
@@ -115,6 +119,11 @@ public class PeriodPickerPopupWidget extends Composite implements
 		popupPanel.setPopupPosition(text.getAbsoluteLeft(),
 				text.getAbsoluteTop() + text.getOffsetHeight());
 		popupPanel.show();
+	}
+	
+	@UiHandler("clearButton")
+	public void onClearClick(ClickEvent event){
+		this.setValue(null, true); 
 	}
 
 	@Override
