@@ -110,7 +110,9 @@ switch (formDataEvent) {
             logicalCheck(form)
             NSICheck(form)
             if (!logger.containsLevel(LogLevel.ERROR)) {
-                acceptance()
+                // (Ramil Timerbaev) убрал compose потому что он выполяется в ядре.
+                // При выполнении на стороне скрипта compose доступен только для некоторых событии AFTER_MOVE_*
+                // acceptance()
             }
         }
         break
