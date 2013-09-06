@@ -285,10 +285,22 @@ void calc() {
  * Логические проверки.
  */
 def logicalCheck() {
+    def data = getData(formData)
+    for (def row : getRows(data)) {
+        if (isFixedRow(row)) {
+            continue
+        }
+        // 15. Обязательность заполнения поля графы 1..3, 5..13
+        // список проверяемых столбцов
+        def columns = ['rowNumber', 'regNumber', 'tradeNumber', 'lotSizeCurrent', 'reserve',
+                'cost', 'signSecurity', 'costOnMarketQuotation',
+                'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
+        if (!checkRequiredColumns(row, columns)) {
+            return false
+        }
+    }
     def formDataOld = getFormDataOld()
     def dataOld = getData(formDataOld)
-
-    def data = getData(formData)
 
     if (dataOld != null && !getRows(dataOld).isEmpty()) {
         // 1. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 11)
@@ -324,10 +336,6 @@ def logicalCheck() {
     if (!getRows(data).isEmpty()) {
         def i = 1
 
-        // список проверяемых столбцов (графа ..)
-        def columns = ['rowNumber', 'regNumber', 'tradeNumber', 'lotSizeCurrent', 'reserve',
-                'cost', 'signSecurity', 'costOnMarketQuotation',
-                'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
         // суммы строки общих итогов
         def totalSums = [:]
         // графы для которых надо вычислять итого и итого по ГРН (графа 4..7, 10..13)
@@ -345,11 +353,6 @@ def logicalCheck() {
             if (isFixedRow(row)) {
                 hasTotal = true
                 continue
-            }
-
-            // 15. Обязательность заполнения поля графы 1..3, 5..13
-            if (!checkRequiredColumns(row, columns)) {
-                return false
             }
 
             // 2. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 5, 6, 13)

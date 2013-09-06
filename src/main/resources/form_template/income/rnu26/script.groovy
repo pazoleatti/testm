@@ -6,13 +6,11 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
- * Скрипт для РНУ-26 (rnu26.groovy).
  * Форма "(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций, РДР, ADR, GDR и опционов эмитента в целях налогообложения".
  *
  * @version 65
  *
  * TODO:
- *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *      - графа 8, 14-17 расчитываются, но в перечне полей они могут редактироваться
  *
  * @author rtimerbaev
@@ -93,14 +91,7 @@ switch (formDataEvent) {
  */
 def addNewRow() {
     def data = getData(formData)
-    def newRow = formData.createDataRow()
 
-    // графа 2..7, 9..13
-    ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
-            'cost', 'signSecurity', 'marketQuotation', 'rubCourse'].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
     def index = 0
     if (currentDataRow!=null){
         index = currentDataRow.getIndex()
@@ -120,7 +111,7 @@ def addNewRow() {
             }
         }
     }
-    data.insert(newRow,index+1)
+    data.insert(getNewRow(),index+1)
 }
 
 def recalculateNumbers(){
@@ -296,17 +287,24 @@ void calc() {
  * Логические проверки.
  */
 def logicalCheck() {
+    def data = getData(formData)
+    for (def row : getRows(data)) {
+        if (isFixedRow(row)) {
+            continue
+        }
+        // 15. Обязательность заполнения поля графы 1..3, 5..10, 13, 14
+        columns = ['rowNumber', 'issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
+                'reserveCalcValuePrev', 'cost', 'signSecurity', 'costOnMarketQuotation']
+        if (!checkRequiredColumns(row, columns)) {
+            return false
+        }
+    }
     // данные предыдущего отчетного периода
     def formDataOld = getFormDataOld()
-    def data = getData(formData)
     def dataOld = getData(formDataOld)
 
     if (formDataOld != null && !getRows(dataOld).isEmpty()) {
         def i = 1
-
-        // список проверяемых столбцов (графа 1..10, 13, 14)
-        columns = ['rowNumber', 'issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
-                'cost', 'signSecurity', 'costOnMarketQuotation']
 
         // суммы строки общих итогов
         def totalSums = [:]
@@ -327,11 +325,6 @@ def logicalCheck() {
             if (isFixedRow(row)) {
                 hasTotal = true
                 continue
-            }
-
-            // 15. Обязательность заполнения поля графы 1..3, 5..10, 13, 14
-            if (!checkRequiredColumns(row, columns)) {
-                return false
             }
 
             // 2. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 8, 17)
@@ -639,7 +632,7 @@ void importData() {
  * Проверка является ли строка итоговой.
  */
 def isTotal(def row) {
-    return row != null && row.getAlias() != null && row.getAlias().contains('total')
+    return row != null && row.getAlias() != null && row.getAlias() == 'total'
 }
 
 /**
