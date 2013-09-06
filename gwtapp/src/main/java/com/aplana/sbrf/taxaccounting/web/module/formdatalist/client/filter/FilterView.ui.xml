@@ -30,6 +30,12 @@
 						<g:ValueListBox width="200px" ui:field="formState" />
 					</g:VerticalPanel>
 				</g:cell>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+                        <g:Label width="200px" text="Признак возврата" />
+                        <g:ValueListBox width="200px" ui:field="returnState"/>
+                    </g:VerticalPanel>
+                </g:cell>
 			</g:HorizontalPanel>
 		</g:cell>
 		<g:cell height="50px">
