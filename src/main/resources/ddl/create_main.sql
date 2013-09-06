@@ -418,11 +418,13 @@ create table declaration_template (
   create_script       clob,
   jrxml               clob,
   jasper              blob,
-  declaration_type_id number(9) not null
+  declaration_type_id number(9) not null,
+  xsd varchar2(36) null
 );
 alter table declaration_template add constraint declaration_template_pk primary key (id);
 alter table declaration_template add constraint declaration_t_chk_is_active check (is_active in (0,1));
 alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type (id);
+alter table declaration_template add constraint declaration_template_fk_xsd foreign key (xsd) references blob_data(id);
 
 comment on table declaration_template is 'Шаблоны налоговых деклараций';
 comment on column declaration_template.id is 'Идентификатор (первичный ключ)';
