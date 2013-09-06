@@ -945,7 +945,7 @@ def addData(def xml) {
         def indexCell = 0
 
         // графа 1
-        newRow.rowNumber = indexRow
+        newRow.rowNumber = indexRow + 1
         indexCell++
 
         // графа 2
@@ -997,24 +997,29 @@ def addData(def xml) {
         insert(data, newRow)
     }
     // проверка итоговой строки
-    if (xml.rowTotal.size()==1)
+    if (xml.rowTotal.size() == 1)
         for (def row : xml.rowTotal) {
 
             // графа 4
-            total.lotSizePrev = getNumber(row.cell[4].text())
+            total.lotSizePrev = getNumber(row.cell[3].text())
 
             // графа 5
-            total.lotSizeCurrent = getNumber(row.cell[5].text())
+            total.lotSizeCurrent = getNumber(row.cell[4].text())
 
             // графа 7
-            total.cost = getNumber(row.cell[7].text())
+            total.cost = getNumber(row.cell[6].text())
 
             // графа 10
-            total.costOnMarketQuotation = getNumber(row.cell[10].text())
+            total.costOnMarketQuotation = getNumber(row.cell[9].text())
 
             // графа 11
-            total.reserveCalcValue = getNumber(row.cell[11].text())
+            total.reserveCalcValue = getNumber(row.cell[10].text())
 
+            // графа 12
+            total.reserveCreation = getNumber(row.cell[11].text())
+
+            // графа 13
+            total.reserveRecovery = getNumber(row.cell[12].text())
         }
     else {
         return null
@@ -1144,10 +1149,13 @@ void checkTotalRow(def totalRow) {
     calc()
     if (!hasError() && logicalCheck() && checkNSI()) {
         def data = getData(formData)
-        def totalColumns = [4:'lotSizePrev', 5:'lotSizeCurrent', 7:'cost', 10:'costOnMarketQuotation', 11:'reserveCalcValue']
-        def totalCalc
+        def totalColumns = [4 : 'lotSizePrev', 5 : 'lotSizeCurrent', 7 : 'cost', 10 : 'costOnMarketQuotation',
+                11 : 'reserveCalcValue', 12 : 'reserveCreation', 13 : 'reserveRecovery']
+        def totalCalc = null
         for (def row : getRows(data)) {
-            if (isTotal(row)) totalCalc = row
+            if (isTotal(row)) {
+                totalCalc = row
+            }
         }
         if (totalCalc != null) {
             totalColumns.each{ index, columnAlias ->
