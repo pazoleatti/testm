@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
-import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -36,13 +35,6 @@ public class GetUserDepartmentHandler extends AbstractActionHandler<GetUserDepar
 
         // Текущий пользователь
         TAUser currUser = securityService.currentUserInfo().getUser();
-
-        // Признак контролера
-        if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-            result.setControlUNP(true);
-        } else if (currUser.hasRole(TARole.ROLE_CONTROL)) {
-            result.setControlUNP(false);
-        }
 
         // Подразделение текущего пользователя
         result.setDepartment(departmentService.getDepartment(currUser.getDepartmentId()));
