@@ -236,7 +236,12 @@ void calc() {
         // Порядковый номер строки
         row.rowNum = row.getIndex()
         // Расчет поля "Цена"
-        row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
+        if (row.incomeSum != null && row.outcomeSum != null) {
+            row.price = row.incomeSum - row.outcomeSum
+            if (row.price < 0)
+                row.price = -row.price
+        } else
+            row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
         // Расчет поля "Итого"
         row.total = row.price
         // Расчет поля "Количество"
@@ -269,6 +274,7 @@ void calc() {
             row.foreignDeal = Long.valueOf(182633)
         }
     }
+
     dataRowHelper.update(dataRows);
 }
 
@@ -323,25 +329,22 @@ void addAllStatic() {
         newRow.itog = 'Подитог:'
         newRow.setAlias('itg')
         newRow.getCell('fix').colSpan = 2
-        newRow.rowNum = dataRows.size()+1
+        newRow.rowNum = dataRows.size() + 1
 
         // Расчеты подитоговых значений
-        def BigDecimal incomeSumItg = 0, outcomeSumItg = 0, totalItg = 0
+        def BigDecimal priceItg = 0, totalItg = 0
         for (row in dataRows) {
 
-            def incomeSum = row.incomeSum
-            def outcomeSum = row.outcomeSum
+            def price = row.price
             def total = row.total
 
-            incomeSumItg += incomeSum != null ? incomeSum : 0
-            outcomeSumItg += outcomeSum != null ? outcomeSum : 0
+            priceItg += price != null ? price : 0
             totalItg += total != null ? total : 0
         }
 
-        newRow.incomeSum = incomeSumItg
-        newRow.outcomeSum = outcomeSumItg
+        newRow.price = priceItg
         newRow.total = totalItg
 
-        dataRowHelper.insert(newRow, dataRows.size())
+        dataRowHelper.insert(newRow, dataRows.size() + 1)
     }
 }

@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
  * @author Stanislav Yasinskiy
  */
 
+logger.warn("formDataEvent = " + formDataEvent)
+
 switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
@@ -22,6 +24,36 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
+    case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
+        accepted()
+        break
+    case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED:
+        cancel()
+        break
+}
+
+void accepted(){
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    for (row in dataRows) {
+        if (row.refBookRecord != null) {
+            logger.warn("TODO обновить")
+        }else{
+            logger.warn("TODO добавить")
+        }
+    }
+}
+
+void cancel(){
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    for (row in dataRows) {
+        if (row.refBookRecord != null) {
+            logger.warn("TODO вернуть старую версию")
+        }else{
+            logger.warn("TODO удалить")
+        }
+    }
 }
 
 void deleteRow() {
