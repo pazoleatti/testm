@@ -411,7 +411,7 @@ public class FormDataPresenter extends
                                                         : "Редактирование налоговой формы",
                                                 formData.getFormType()
                                                         .getName());
-	                            getView().updateData();
+	                            getView().updateData(0);
 
                             }
 
