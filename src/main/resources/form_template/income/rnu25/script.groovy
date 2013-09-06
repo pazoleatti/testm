@@ -1,6 +1,7 @@
 package form_template.income.rnu25
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
@@ -8,18 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  *
  * @version 65
  *
- * TODO:
- *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *      - графа 4 заполняется автоматически при пересчете, но является редактируемой, возможно надо брать возможность редактировать
- *      - проблемы с индексами
- *      - получение имени файла при импорте
- *      - импорт данных сделан без чтз
- *
  * @author rtimerbaev
  */
-
-/** Отчётный период. */
-def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
 /** Признак периода ввода остатков. */
 def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
@@ -53,12 +44,28 @@ switch (formDataEvent) {
         deleteRow()
         recalculateNumbers()
         break
-// после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+    // проверка при "подготовить"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :
+        if (!isBalancePeriod && !checkPrevPeriod()) {
+            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            return
+        }
         logicalCheck(true)
         checkNSI()
         break
-// обобщить
+    // проверка при "принять"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
+        if (!isBalancePeriod && !checkPrevPeriod()) {
+            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            return
+        }
+        logicalCheck(true)
+        checkNSI()
+        break
+    // после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+        break
+    // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
@@ -539,14 +546,6 @@ def logicalCheck(def useLog) {
 }
 
 /**
- * Получить отчетную дату.
- */
-def getReportDate() {
-    def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
-    return (tmp ? tmp.getTime() + 1 : null)
-}
-
-/**
  * Проверки соответствия НСИ.
  */
 def checkNSI() {
@@ -630,7 +629,6 @@ void importData() {
     }
 
     def data = getData(formData)
-    def rowsOld = getRows(data)
     def totalColumns = [4:'lotSizePrev', 5:'lotSizeCurrent', 7:'cost', 10:'costOnMarketQuotation', 11:'reserveCalcValue']
     // добавить данные в форму
     try {
@@ -657,14 +655,9 @@ void importData() {
         logger.error(""+e.message)
     }
     //в случае ошибок откатить изменения
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        data.clear()
-        data.insert(rowsOld, 1)
-        logger.error("Загрузка файла $fileName завершилась ошибкой")
-    } else {
+    if (!logger.containsLevel(LogLevel.ERROR)) {
         logger.info('Закончена загрузка файла ' + fileName)
     }
-    data.commit()
 }
 
 /*
@@ -872,30 +865,6 @@ def checkPrevPeriod() {
 }
 
 /**
- * Получить значение за предыдущий отчетный период для графы 4
- *
- * @param dataOld данные за предыдущий период (helper)
- * @param formDataOld форма за предыдущий период
- * @param row строка текущего периода
- * @return возвращает найденое значение, иначе возвратит 0
- */
-def getValueForColumn4(def dataOld, def formDataOld, def row) {
-    def value = 0
-    def count = 0
-    if (dataOld != null && !getRows(dataOld).isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
-        for (def rowOld : getRows(dataOld)) {
-            if (rowOld.tradeNumber == row.tradeNumber) {
-                value = (getSign(rowOld.signSecurity) == '+' && getSign(row.signSecurity) == '-' ? rowOld.lotSizePrev : 0)
-                count += 1
-            }
-        }
-    }
-    // если count не равно 1, то или нет формы за предыдущий период,
-    // или нет соответствующей записи в предыдущем периода или записей несколько
-    return (count == 1 ? value : 0)
-}
-
-/**
  * Получить строку по алиасу.
  *
  * @param data данные нф (helper)
@@ -1072,7 +1041,6 @@ def addData(def xml) {
     else {
         return null
     }
-//    data.commit()
     return total
 }
 
@@ -1161,10 +1129,9 @@ def getSign(def sign) {
 }
 
 /**
- * Хелпер для округления чисел
- * @param value
- * @param newScale
- * @return
+ * Хелпер для округления чисел.
+ *
+ * @param value значение округляемое до целого
  */
 BigDecimal roundTo2(BigDecimal value) {
     if (value != null) {

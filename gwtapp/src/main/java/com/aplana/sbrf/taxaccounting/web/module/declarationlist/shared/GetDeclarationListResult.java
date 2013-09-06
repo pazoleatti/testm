@@ -6,6 +6,7 @@ import com.gwtplatform.dispatch.shared.Result;
 import java.util.List;
 
 public class GetDeclarationListResult implements Result {
+	private static final long serialVersionUID = 783660987579644789L;
 
 	private List<DeclarationDataSearchResultItem> records;
 

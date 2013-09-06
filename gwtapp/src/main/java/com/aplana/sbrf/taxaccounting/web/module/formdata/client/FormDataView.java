@@ -165,10 +165,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		//Create order column
 		NumericColumn numericColumn = new NumericColumn();
 		
-		DataRowColumn indexColumn = new DataRowColumn(new IndexCell(), numericColumn) {
+		DataRowColumn<Integer> indexColumn = new DataRowColumn<Integer>(new IndexCell(), numericColumn) {
 			@Override
-			public Object getValue(Object object) {
-				return object;
+			public Integer getValue(DataRow<Cell> object) {
+				return object.getIndex();
 			}
 		};
 		
@@ -188,7 +188,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 				com.google.gwt.user.cellview.client.Column<DataRow<Cell>, ?> tableCol = factory
 						.createTableColumn(col, formDataTable);
 				formDataTable.addColumn(tableCol, col.getName());
-				((DataRowColumn)tableCol).addCellModifiedEventHandler(new CellModifiedEventHandler() {
+				((DataRowColumn<?>)tableCol).addCellModifiedEventHandler(new CellModifiedEventHandler() {
 					@Override
 					public void onCellModified(CellModifiedEvent event) {
 						if(getUiHandlers()!=null){
@@ -465,5 +465,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     FormDataView getView(){
         return this;
     }
+
+	@Override
+	public void updateData(int pageNumber) {
+		if (pager.getPage() == pageNumber){
+			updateData();
+		} else {
+			pager.setPage(pageNumber);
+		}
+	}
 
 }

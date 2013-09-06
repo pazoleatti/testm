@@ -418,11 +418,13 @@ create table declaration_template (
   create_script       clob,
   jrxml               clob,
   jasper              blob,
-  declaration_type_id number(9) not null
+  declaration_type_id number(9) not null,
+  XSD VARCHAR2(36) 
 );
 alter table declaration_template add constraint declaration_template_pk primary key (id);
 alter table declaration_template add constraint declaration_t_chk_is_active check (is_active in (0,1));
 alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type (id);
+alter table declaration_template add constraint declaration_tem_fk_blob_data foreign key (XSD) references blob_data (id);
 
 comment on table declaration_template is 'Шаблоны налоговых деклараций';
 comment on column declaration_template.id is 'Идентификатор (первичный ключ)';
@@ -433,6 +435,7 @@ comment on column declaration_template.create_script is 'Скрипт форми
 comment on column declaration_template.jrxml is 'Макет JasperReports для формирования печатного представления формы';
 comment on column declaration_template.jasper is 'Скомпилированный макет JasperReports для формирования печатного представления формы';
 comment on column declaration_template.declaration_type_id is 'Вид деклараций';
+comment on column declaration_template.XSD is 'XSD-схема';
 
 create sequence seq_declaration_template start with 10000;
 
@@ -848,6 +851,36 @@ comment on column department_report_period.report_date is 'Срок подачи
 
 alter table department_report_period add constraint dep_rep_per_fk_department_id foreign key (department_id) references DEPARTMENT (id);
 alter table department_report_period add constraint dep_rep_per_fk_rep_period_id foreign key (report_period_id) references REPORT_PERIOD (id);
+
+
+CREATE TABLE task_context
+(
+id  number(18,0) primary key,
+task_id number(18,0) NOT NULL,
+task_name varchar2(100) NOT NULL,
+user_task_jndi varchar2(500) NOT NULL,
+custom_params_exist number(9,0) NOT NULL,
+serialized_params blob NULL
+);
+
+alter table task_context add constraint task_context_uniq_task_id unique (task_id);
+alter table task_context add constraint task_context_uniq_task_name unique (task_name);
+
+create sequence seq_task_context start with 100;
+
+CREATE TABLE user_session
+(
+id  number(18,0) PRIMARY KEY,
+session_id varchar2(100) NOT NULL,
+user_login varchar2(500) NOT NULL,
+user_ip varchar2(100) NOT NULL,
+create_time date NOT NULL
+);
+
+alter table user_session add constraint user_session_uniq_session_id unique (session_id);
+alter table user_session add constraint user_session_uniq_user_login unique (user_login);
+
+create sequence seq_user_session start with 100;
 
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);

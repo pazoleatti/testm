@@ -3,17 +3,15 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -28,7 +26,7 @@ import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
 
 public class DeclarationCreationView extends PopupViewWithUiHandlers<DeclarationCreationUiHandlers>
-		implements DeclarationCreationPresenter.MyView, ReportPeriodSelectHandler {
+		implements DeclarationCreationPresenter.MyView {
 
 	public interface Binder extends UiBinder<PopupPanel, DeclarationCreationView> {
 	}
@@ -36,8 +34,8 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 	private DeclarationDataFilter filter;
 	private DeclarationDataFilterAvailableValues filterValues;
 
-	@UiField(provided=true)
-	ReportPeriodPicker periodPicker;
+	@UiField
+	PeriodPicker periodPicker;
 
 	@UiField
 	DepartmentPicker departmentPicker;
@@ -64,8 +62,6 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 				return object.getName();
 			}
 		});
-
-		periodPicker = new ReportPeriodPicker(this, false);
 		
 		initWidget(uiBinder.createAndBindUi(this));
 		
@@ -74,12 +70,17 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 	@Override
 	public void setDeclarationFilter(DeclarationDataFilter filter) {
 		this.filter = filter;
+		if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()){
+			periodPicker.setValue(Arrays.asList(filter.getReportPeriodIds().iterator().next()));
+		} else {
+			periodPicker.setValue(null);
+		}
+		
 	}
 
 	@Override
 	public void setDeclarationFilterValues(DeclarationDataFilterAvailableValues filterValues) {
 		this.filterValues = filterValues;
-
 		setDeclarationType();
 	}
 
@@ -96,15 +97,10 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 			}
 		}
 	}
-
+	
 	@Override
-	public void setTaxPeriods(List<TaxPeriod> taxPeriods) {
-		periodPicker.setTaxPeriods(taxPeriods);
-	}
-
-	@Override
-	public void setDepartments(List<Department> departments) {
-		departmentPicker.setAvalibleValues(departments, filterValues.getDepartmentIds());
+	public void setDepartments(List<Department> departments, Set<Integer> departmentsIds) {
+		departmentPicker.setAvalibleValues(departments, departmentsIds);
 		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
 			Integer departmentId = filter.getDepartmentIds().iterator().next();
 			for (Department department : departments) {
@@ -117,21 +113,18 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 	}
 
 	@Override
-	public void setCurrentReportPeriod(ReportPeriod reportPeriod) {
-		periodPicker.setSelectedReportPeriods(Arrays.asList(reportPeriod));
+	public void setSelectedReportPeriod(Integer reportPeriodId){
+		periodPicker.setValue(Arrays.asList(reportPeriodId));
 	}
 
 	@Override
 	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
-		periodPicker.setReportPeriods(reportPeriods);
+		periodPicker.setPeriods(reportPeriods);
 	}
 
 	@Override
 	public DeclarationDataFilter updateAndGetDeclarationFilter() {
-		if (periodPicker.getSelectedReportPeriods().entrySet().iterator().hasNext()) {
-			filter.setReportPeriodIds(Arrays.asList(periodPicker.
-					getSelectedReportPeriods().entrySet().iterator().next().getKey()));
-		}
+		filter.setReportPeriodIds(periodPicker.getValue());
 		if (departmentPicker.getValue() != null && departmentPicker.getValue().iterator().hasNext() ) {
 			filter.setDepartmentIds(departmentPicker.getValue().isEmpty() ? new ArrayList<Integer>() :
 					Arrays.asList(departmentPicker.
@@ -139,21 +132,8 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 		}
         filter.setDeclarationTypeId(declarationType.getValue()!= null?declarationType.getValue().getId() :
                 null);
-
-
 		return filter;
 	}
-
-	@Override
-	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
-		if (taxPeriod!=null){
-			getUiHandlers().onTaxPeriodSelected(taxPeriod);
-		}
-	}
-
-    @Override
-    public void onReportPeriodsSelected(Map<Integer, ReportPeriod> selectedReportPeriods) {
-    }
 
     @UiHandler("continueButton")
 	public void onContinue(ClickEvent event) {

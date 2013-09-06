@@ -285,10 +285,10 @@ void logicalCheck() {
         List notFound = []
         List foundMany = []
         for (DataRow rowPrev in getRows(dataPrev)) {
-            if (rowPrev.getAlias() != null && rowPrev.reserveCalcValue > 0) {
+            if (rowPrev.getAlias() == null && rowPrev.reserveCalcValue > 0) {
                 int count = 0
                 for (DataRow row in getData(formData).getAllCached()) {
-                    if (row.getAlias() != null && row.tradeNumber == rowPrev.tradeNumber) {
+                    if (row.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber) {
                         count++
                     }
                 }
@@ -407,7 +407,6 @@ void importData() {
     }
 
     def data = getData(formData)
-    def rowsOld = getRows(data)
     def totalColumns = [6:'prev', 7:'current', 9:'cost', 14:'costOnMarketQuotation', 15:'reserveCalcValue']
 
     // добавить данные в форму
@@ -439,14 +438,9 @@ void importData() {
         logger.error(""+e.message)
     }
     //в случае ошибок откатить изменения
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        data.clear()
-        data.insert(rowsOld, 1)
-        logger.error("Загрузка файла $fileName завершилась ошибкой")
-    } else {
+    if (!logger.containsLevel(LogLevel.ERROR)) {
         logger.info('Закончена загрузка файла ' + fileName)
     }
-    data.commit()
 }
 
 // список столбцов, для которых нужно считать итоги

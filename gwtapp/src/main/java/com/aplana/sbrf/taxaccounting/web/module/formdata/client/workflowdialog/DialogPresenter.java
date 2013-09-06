@@ -59,10 +59,10 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 					.defaultCallback(new AbstractCallback<GoMoveResult>() {
 						@Override
 						public void onSuccess(GoMoveResult result) {
-							placeManager.revealPlace(new PlaceRequest(FormDataPresenterBase.NAME_TOKEN)
+							placeManager.revealPlace(new PlaceRequest.Builder().nameToken(FormDataPresenterBase.NAME_TOKEN)
 									.with(FormDataPresenterBase.READ_ONLY, READ_ONLY).with(
 											FormDataPresenterBase.FORM_DATA_ID,
-											formData.getId().toString()));
+											String.valueOf(formData.getId())).build());
 						}
 					}, this));
 		}
