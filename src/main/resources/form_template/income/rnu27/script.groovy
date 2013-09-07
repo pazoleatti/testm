@@ -46,6 +46,14 @@ switch (formDataEvent) {
         deleteRow()
         recalculateNumbers()
         break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        logicalCheck() && checkNSI()
+        break
     // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
         def formPrev = getFormPrev()
@@ -122,32 +130,38 @@ def logicalCheck() {
         return
     }
 
+    // Проверока наличия итоговой строки
+    if (!checkAlias(getRows(data), 'itogo')) {
+        logger.error('Итоговые значения не рассчитаны')
+        return false
+    }
+
     def formPrev = getFormPrev()
     def dataPrev = getData(formPrev)
 
     for (DataRow row in data.getAllCached()) {
         if (row.getAlias() == null) {
             if (row.current == 0) {
-                // LC Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7 = 0)
+                // 2. LC Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7 = 0)
                 if (row.reserveCalcValuePrev != row.current) {
                     logger.warn("Графы 8 и 17 неравны!")
                 }
-                // LC • Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7 = 0)
+                // 3. LC • Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7 = 0)
                 if (row.cost != row.costOnMarketQuotation || row.cost != row.reserveCalcValue || row.cost == 0) {
                     logger.warn("Графы 9, 14 и 15 ненулевые!")
                 }
             }
-            // LC • Проверка при нулевом значении размера лота на предыдущую отчётную дату (графа 6 = 0)
+            // 4. LC • Проверка при нулевом значении размера лота на предыдущую отчётную дату (графа 6 = 0)
             if (row.prev == 0 && (row.reserveCalcValuePrev != row.recovery || row.recovery != 0)) {
                 logger.error("Графы 8 и 17 ненулевые!")
                 return false
             }
-            // LC • Проверка необращающихся облигаций (графа 10 = «x»)
+            // 5. LC • Проверка необращающихся облигаций (графа 10 = «x»)
             if (getSign(row.signSecurity) == "x" && (row.reserveCalcValue != row.reserveCreation || row.reserveCreation != 0)) {
                 logger.warn("Облигации необращающиеся, графы 15 и 16 ненулевые!")
             }
             if (getSign(row.signSecurity) == "+") {
-                // LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
+                // 6. LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
                 if (row.reserveCalcValue - row.reserveCalcValuePrev > 0 && row.recovery != 0) {
                     logger.error("Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
                     return false
@@ -204,6 +218,7 @@ def logicalCheck() {
                     return false
                 }
             }
+            // TODO (Ramil Timerbaev) убрано потому что по чтз 12 графа не расчитывается
             // LC Арифметическая проверка графы 13
             if (row.marketQuotation != null && row.rubCourse
                     && row.marketQuotationInRub != roundValue((BigDecimal) (row.marketQuotation * row.rubCourse), 2)) {
@@ -268,7 +283,6 @@ def logicalCheck() {
                 }
             }
         }
-
     }
 
     // LC • Проверка корректности заполнения РНУ
@@ -285,7 +299,7 @@ def logicalCheck() {
         }
     }
 
-    /** LC Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
+    /** 1. LC Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
      * http://jira.aplana.com/browse/SBRFACCTAX-2609
      */
     if (dataPrev != null) {
@@ -411,18 +425,20 @@ void importData() {
         return
     }
 
-    // добавить данные в форму
     try {
+        // добавить данные в форму
         def totalLoad = addData(xml)
+
+        // расчетать, проверить и сравнить итоги
         if (totalLoad != null) {
             checkTotalRow(totalLoad)
         } else {
             logger.error("Нет итоговой строки.")
         }
     } catch(Exception e) {
-        logger.error(""+e.message)
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
-    //в случае ошибок откатить изменения
+
     if (!hasError()) {
         logger.info('Закончена загрузка файла ' + fileName)
     }
@@ -670,7 +686,11 @@ BigDecimal calc11(DataRow row) {
  * Расчет графы 12
  */
 BigDecimal calc12(DataRow row) {
-    return getCourse(row.currency,reportDate)
+    if (getCurrency(row.currency) == 'RUR') {
+        return null
+    }
+    return row.rubCourse
+    //return getCourse(row.currency,reportDate)
 }
 
 /**
@@ -927,21 +947,13 @@ def getData(def formData) {
  * @param xml данные
  */
 def addData(def xml) {
-    if (xml == null) {
-        return
-    }
-
     Date date = new Date()
 
     def cache = [:]
     def data = getData(formData)
     data.clear()
 
-    def total = formData.createDataRow()
-
-    def indexRow = -1
     for (def row : xml.row) {
-        indexRow++
         def newRow = getNewRow()
 
         def indexCell = 0
@@ -1015,33 +1027,35 @@ def addData(def xml) {
         insert(data, newRow)
     }
 
-    if (xml.rowTotal.size()==1)
-        for (def row : xml.rowTotal) {
-            // графа 6
-            total.prev = getNumber(row.cell[5].text())
+    if (xml.rowTotal.size() == 1) {
+        def row = xml.rowTotal[0]
+        def total = formData.createDataRow()
 
-            // графа 7
-            total.current = getNumber(row.cell[6].text())
+        // графа 6
+        total.prev = getNumber(row.cell[5].text())
 
-            // графа 9
-            total.cost = getNumber(row.cell[8].text())
+        // графа 7
+        total.current = getNumber(row.cell[6].text())
 
-            // графа 14
-            total.costOnMarketQuotation = getNumber(row.cell[13].text())
+        // графа 9
+        total.cost = getNumber(row.cell[8].text())
 
-            // графа 15
-            total.reserveCalcValue = getNumber(row.cell[14].text())
+        // графа 14
+        total.costOnMarketQuotation = getNumber(row.cell[13].text())
 
-            // графа 16
-            total.reserveCreation = getNumber(row.cell[15].text())
+        // графа 15
+        total.reserveCalcValue = getNumber(row.cell[14].text())
 
-            // графа 17
-            total.recovery = getNumber(row.cell[16].text())
-        }
-    else {
+        // графа 16
+        total.reserveCreation = getNumber(row.cell[15].text())
+
+        // графа 17
+        total.recovery = getNumber(row.cell[16].text())
+
+        return total
+    } else {
         return null
     }
-    return total
 }
 
 /**
@@ -1194,9 +1208,9 @@ def isFixedRow(def row) {
 }
 
 /**
- * Проверить итоговую строку.
+ * Расчетать, проверить и сравнить итоги.
  *
- * @param totalRow итоговая строка
+ * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
     deleteAllStatic()
@@ -1211,10 +1225,11 @@ void checkTotalRow(def totalRow) {
         for (def row : getRows(data)) {
             if (isTotal(row)) {
                 totalCalc = row
+                break
             }
         }
         if (totalCalc != null) {
-            totalColumns.each{ index, columnAlias ->
+            totalColumns.each { index, columnAlias ->
                 if (totalCalc[columnAlias] != totalRow[columnAlias]) {
                     logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
                 }

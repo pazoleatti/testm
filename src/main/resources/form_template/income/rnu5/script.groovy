@@ -30,14 +30,13 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW :
         deleteRow()
         break
-    // проверка при "подготовить"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :
-        break
-    // проверка при "принять"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
-        break
-    // проверка при "вернуть из принята в подготовлена"
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        logicalCheck(true) && checkNSI()
         break
     // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
@@ -198,68 +197,74 @@ void calc() {
  */
 def logicalCheck(def useLog) {
     def data = getData(formData)
-    if (!getRows(data).isEmpty()) {
-        def i = 1
 
-        // список проверяемых столбцов (графа 1..5)
-        requiredColumns = ['rowNumber', 'code', 'number', 'name', 'sum']
+    // Проверока наличия итоговой строки
+    if (!checkAlias(getRows(data), 'total')) {
+        logger.error('Итоговые значения не рассчитаны')
+        return false
+    }
 
-        def totalSum = 0
-        def hasTotal = false
-        def sums = [:]
+    def i = 1
 
-        for (def row : getRows(data)) {
-            if (isTotal(row)) {
-                hasTotal = true
-                continue
-            }
-            // 1. Обязательность заполнения полей (графа 1..5)
-            if (!checkRequiredColumns(row, requiredColumns, useLog)) {
-                return false
-            }
+    // список проверяемых столбцов (графа 1..5)
+    requiredColumns = ['rowNumber', 'code', 'number', 'name', 'sum']
 
-            // 2. Проверка на уникальность поля «№ пп» (графа 1)
-            if (i != row.rowNumber) {
-                logger.error('Нарушена уникальность номера по порядку!')
-                return false
-            }
-            i += 1
+    def totalSum = 0
+    def hasTotal = false
+    def sums = [:]
 
-            // 3. Проверка итогового значения по коду для графы 5
-            sums[row.code] = (sums[row.code] != null ? sums[row.code] : 0) + row.sum
-
-            totalSum += row.sum
+    for (def row : getRows(data)) {
+        if (isTotal(row)) {
+            hasTotal = true
+            continue
+        }
+        // 1. Обязательность заполнения полей (графа 1..5)
+        if (!checkRequiredColumns(row, requiredColumns, useLog)) {
+            return false
         }
 
-        if (hasTotal) {
-            // 3. Проверка итогового значения по коду для графы 5
-            def hindError = false
-            sums.each { code, sum ->
-                def totalRowAlias = 'total' + code
-                if (!checkAlias(getRows(data), totalRowAlias)) {
+        // 2. Проверка на уникальность поля «№ пп» (графа 1)
+        if (i != row.rowNumber) {
+            logger.error('Нарушена уникальность номера по порядку!')
+            return false
+        }
+        i += 1
+
+        // 3. Проверка итогового значения по коду для графы 5
+        sums[row.code] = (sums[row.code] != null ? sums[row.code] : 0) + row.sum
+
+        totalSum += row.sum
+    }
+
+    if (hasTotal) {
+        // 3. Проверка итогового значения по коду для графы 5
+        def hindError = false
+        sums.each { code, sum ->
+            def totalRowAlias = 'total' + code
+            if (!checkAlias(getRows(data), totalRowAlias)) {
+                def codeAttribute = getCodeAttribute(code)
+                logger.warn("Итоговые значения по коду $codeAttribute не рассчитаны! Необходимо расчитать данные формы.")
+            } else {
+                def row = getRowByAlias(data, totalRowAlias)
+                if (row.sum != sum && !hindError) {
+                    hindError = true
                     def codeAttribute = getCodeAttribute(code)
-                    logger.warn("Итоговые значения по коду $codeAttribute не рассчитаны! Необходимо расчитать данные формы.")
-                } else {
-                    def row = getRowByAlias(data, totalRowAlias)
-                    if (row.sum != sum && !hindError) {
-                        hindError = true
-                        def codeAttribute = getCodeAttribute(code)
-                        logger.error("Неверное итоговое значение по коду $codeAttribute графы «Сумма расходов за отчётный период (руб.)»!")
-                    }
+                    logger.error("Неверное итоговое значение по коду $codeAttribute графы «Сумма расходов за отчётный период (руб.)»!")
                 }
             }
-            if (hindError) {
-                return false
-            }
+        }
+        if (hindError) {
+            return false
+        }
 
-            // 4. Проверка итогового значения по всем строкам для графы 5
-            def totalRow = getRowByAlias(data,('total'))
-            if (totalRow.sum != totalSum) {
-                logger.error('Неверное итоговое значение графы «Сумма расходов за отчётный период (руб.)»!')
-                return false
-            }
+        // 4. Проверка итогового значения по всем строкам для графы 5
+        def totalRow = getRowByAlias(data,('total'))
+        if (totalRow.sum != totalSum) {
+            logger.error('Неверное итоговое значение графы «Сумма расходов за отчётный период (руб.)»!')
+            return false
         }
     }
+
     return true
 }
 
@@ -320,13 +325,25 @@ void consolidation() {
                 def sourceData = getData(source)
                 getRows(sourceData).each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        insert(data, row)
+                        def found = false
+                        getRows(data).each{ rowB ->
+                            // в случае совпадения строк из разных источников,
+                            // необходимо использовать суммирование значений ячеек строк форм-источников для «графы 5»
+                            if(row.code == rowB.code && row.number == rowB.number && row.name == rowB.name){
+                                rowB.sum += row.sum
+                                found = true
+                            }
+                        }
+                        if (found) {
+                            data.save(getRows(data))
+                        } else {
+                            insert(data, row)
+                        }
                     }
                 }
             }
         }
     }
-    data.commit()
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 

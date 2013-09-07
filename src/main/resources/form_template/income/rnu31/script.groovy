@@ -21,11 +21,11 @@ switch (formDataEvent) {
         checkCreation()
         break
     case FormDataEvent.CHECK :
-        logicalCheck(true)
+        logicalCheck()
         break
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck(false)
+        !hasError() && logicalCheck()
         break
     case FormDataEvent.ADD_ROW :
         // addNewRow()
@@ -35,15 +35,23 @@ switch (formDataEvent) {
         break
     // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
-        logicalCheck(true)
+        break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        logicalCheck()
         break
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        logicalCheck(false)
-        // для сохранения изменений приемников
-        getData(formData).commit()
+        if (!hasError() && logicalCheck()) {
+            // для сохранения изменений приемников
+            getData(formData).commit()
+        }
         break
     case FormDataEvent.IMPORT :
         importData()
@@ -95,14 +103,13 @@ void calc() {
     /*
      * Проверка объязательных полей.
      */
-
     // список проверяемых столбцов (графа 3..12)
     def requiredColumns = ['ofz', 'municipalBonds', 'governmentBonds',
             'mortgageBonds', 'municipalBondsBefore', 'rtgageBondsBefore',
             'ovgvz', 'eurobondsRF', 'itherEurobonds', 'corporateBonds']
 
     for (def row : getRows(data)) {
-        if (isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
+        if (!checkRequiredColumns(row, requiredColumns)) {
             return
         }
     }
@@ -110,10 +117,8 @@ void calc() {
 
 /**
  * Логические проверки.
- *
- * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-def logicalCheck(def useLog) {
+def logicalCheck() {
     // данные предыдущего отчета
     def formDataOld = getFormDataOld()
     def data = getData(formData)
@@ -134,7 +139,7 @@ def logicalCheck(def useLog) {
             'itherEurobonds', 'corporateBonds']
 
     // 22. Обязательность заполнения полей графы 1..12
-    if (!checkRequiredColumns(row, requiredColumns, useLog)) {
+    if (!checkRequiredColumns(row, requiredColumns)) {
         return false
     }
 
@@ -247,20 +252,12 @@ void importData() {
         return
     }
 
-    def isRnu
-    // TODO (Ramil Timerbaev) потом убрать загрузку из эксельки
-    if (fileName.contains('.xls')) {
-        isRnu = false
-    } else if (fileName.contains('.r')) {
-        isRnu = true
-    } else {
-        logger.error('Формат файла должен быть *.rnu или *.xls')
+    if (!fileName.contains('.r')) {
+        logger.error('Формат файла должен быть *.rnu')
         return
     }
 
-    def xmlString = (isRnu ?
-        importService.getData(is, fileName, 'cp866') :
-        importService.getData(is, fileName, 'windows-1251', 'Вид ценных бумаг', null))
+    def xmlString = importService.getData(is, fileName, 'cp866')
 
     if (xmlString == null) {
         logger.error('Отсутствие значении после обработки потока данных')
@@ -271,35 +268,23 @@ void importData() {
         logger.error('Отсутствие значении после обработки потока данных')
         return
     }
-    // номер строки с которой брать данные (что бы пропустить шапку таблицы или лишнюю информацию)
-    def startRow = (isRnu ? 1 : 4)
 
-    // номер графы с которой брать данные (что бы пропустить нумерацию или лишнюю информацию)
-    def startColumn = (isRnu ? 2 : 0)
-
-    // проверка заголовка таблицы (только при загрузке из эксельки)
-    if (!isRnu && !checkTableHead(xml, startRow)) {
-        logger.error('Заголовок таблицы не соответствует требуемой структуре!')
-        return
-    }
-
-    // сохранить начальное состояние формы
-    def data = getData(formData)
     try {
         // добавить данные в форму
-        addData(xml, startRow, startColumn, data)
+        def totalLoad = addData(xml)
 
-        // расчитать и проверить
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicalCheck(false)
+        // расчетать, проверить и сравнить итоги
+        if (totalLoad != null) {
+            checkTotalRow(totalLoad)
+        } else {
+            logger.error("Нет итоговой строки.")
         }
     } catch(Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
     }
-    // откатить загрузку если есть ошибки
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        logger.info('Данные загружены')
+
+    if (!hasError()) {
+        logger.info('Закончена загрузка файла ' + fileName)
     }
 }
 
@@ -362,11 +347,10 @@ def getIndex(def row) {
  * Проверить заполненость обязательных полей.
  *
  * @param row строка
- * @param columns список обязательных графов
  * @param useLog нужно ли записывать сообщения в лог
  * @return true - все хорошо, false - есть незаполненные поля
  */
-def checkRequiredColumns(def row, def columns, def useLog) {
+def checkRequiredColumns(def row, def columns) {
     def colNames = []
 
     columns.each {
@@ -376,9 +360,6 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         }
     }
     if (!colNames.isEmpty()) {
-        if (!useLog) {
-            return false
-        }
         def index = getIndex(row) + 1
         def errorMsg = colNames.join(', ')
         if (!isEmpty(index)) {
@@ -428,6 +409,15 @@ def getRows(def data) {
 }
 
 /**
+ * Сохранить измененные значения нф.
+ *
+ * @param data данные нф (helper)
+ */
+void save(def data) {
+    data.save(getRows(data))
+}
+
+/**
  * Получить новую стролу с заданными стилями.
  */
 def getNewRow() {
@@ -449,108 +439,118 @@ def getNewRow() {
  * Заполнить форму данными.
  *
  * @param xml данные
- * @param startRow номер строки с которой брать данные (что бы пропустить шапку таблицы или лишнюю информацию)
- * @param startColumn номер графы с которой брать данные (что бы пропустить нумерацию или лишнюю информацию)
  */
-void addData(def xml, def startRow, def startColumn, def data) {
-    if (xml == null) {
-        return
-    }
-
+def addData(def xml) {
     def tmp
 
-    def indexRow = 0
     // TODO (Ramil Timerbaev) Проверка корректности данных
-    for (def row : xml.row) {
-        indexRow++
+    if (xml.row.size() > 0) {
+        def row = xml.row[0]
+        def indexCell = 3
+        // def newRow = getNewRow()
+        def data = getData(formData)
+        def newRow = getRows(data).getAt(0)
 
-        // пропустить шапку таблицы
-        if (indexRow <= startRow) {
-            continue
-        }
+        // графа 1
+        newRow.number = 1
 
-        def index = startColumn + 0
-        if (row.cell[index].text() == 'Процентный (купонный) доход по облигациям') {
-            def newRow = getNewRow()
+        // графа 2
+        newRow.securitiesType = 'Процентный (купонный) доход по облигациям'
 
-            // графа 1
-            newRow.number = 1
+        // графа 3
+        newRow.ofz = getNumber(row.cell[indexCell].text())
+        indexCell++
 
-            // графа 2
-            newRow.securitiesType = row.cell[index].text()
-            index++
+        // графа 4
+        newRow.municipalBonds = getNumber(row.cell[indexCell].text())
+        indexCell++
 
-            // графа 3
-            newRow.ofz = getNumber(row.cell[index].text())
-            index++
+        // графа 5
+        newRow.governmentBonds = getNumber(row.cell[indexCell].text())
+        indexCell++
 
-            // графа 4
-            newRow.municipalBonds = getNumber(row.cell[index].text())
-            index++
+        // графа 6
+        newRow.mortgageBonds = getNumber(row.cell[indexCell].text())
+        indexCell++
 
-            // графа 5
-            newRow.governmentBonds = getNumber(row.cell[index].text())
-            index++
+        // графа 7
+        newRow.municipalBondsBefore = getNumber(row.cell[indexCell].text())
+        indexCell++
 
-            // графа 6
-            newRow.mortgageBonds = getNumber(row.cell[index].text())
-            index++
+        // графа 8
+        newRow.rtgageBondsBefore = getNumber(row.cell[indexCell].text())
+        indexCell++
 
-            // графа 7
-            newRow.municipalBondsBefore = getNumber(row.cell[index].text())
-            index++
+        // графа 9
+        newRow.ovgvz = getNumber(row.cell[indexCell].text())
+        indexCell++
 
-            // графа 8
-            newRow.rtgageBondsBefore = getNumber(row.cell[index].text())
-            index++
+        // графа 10
+        newRow.eurobondsRF = getNumber(row.cell[indexCell].text())
+        indexCell++
 
-            // графа 9
-            newRow.ovgvz = getNumber(row.cell[index].text())
-            index++
+        // графа 11
+        newRow.itherEurobonds = getNumber(row.cell[indexCell].text())
+        indexCell++
 
-            // графа 10
-            newRow.eurobondsRF = getNumber(row.cell[index].text())
-            index++
+        // графа 12
+        newRow.corporateBonds = getNumber(row.cell[indexCell].text())
 
-            // графа 11
-            newRow.itherEurobonds = getNumber(row.cell[index].text())
-            index++
-
-            // графа 12
-            newRow.corporateBonds = getNumber(row.cell[index].text())
-
-            // проверка итоговых данных
-            if (xml.rowTotal.size() > 0) {
-                def totalRow = formData.createDataRow()
-
-                def columnsAlias = ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds',
-                        'municipalBondsBefore', 'rtgageBondsBefore', 'ovgvz',
-                        'eurobondsRF', 'itherEurobonds', 'corporateBonds']
-
-                columnsAlias.each { alias ->
-                    totalRow.getCell(alias).setValue(0)
-                }
-                columnsAlias.each { alias ->
-                    def value = totalRow.getCell(alias).getValue() + (newRow.getCell(alias).getValue() ?: 0)
-                    totalRow.getCell(alias).setValue(value)
-                }
-
-                def xmlTotal = xml.rowTotal[0]
-                def i = 3
-                for (def alias : columnsAlias) {
-                    if (totalRow.getCell(alias).getValue() != getNumber(xmlTotal.cell[i].text())) {
-                        logger.error('Итоговые значения неправильные.')
-                        return
-                    }
-                    i++
-                }
-            }
-
-            data.clear()
-            data.insert(newRow, 1)
-            break
-        }
+        save(data)
+        // data.clear()
+        // data.insert(newRow, 1)
     }
+
+    // итоговая строка
+    if (xml.rowTotal.size() > 0) {
+        def row = xml.rowTotal[0]
+        def total = formData.createDataRow()
+        def indexCell = 3
+
+        // графа 3
+        total.ofz = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 4
+        total.municipalBonds = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 5
+        total.governmentBonds = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 6
+        total.mortgageBonds = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 7
+        total.municipalBondsBefore = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 8
+        total.rtgageBondsBefore = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 9
+        total.ovgvz = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 10
+        total.eurobondsRF = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 11
+        total.itherEurobonds = getNumber(row.cell[indexCell].text())
+        indexCell++
+
+        // графа 12
+        total.corporateBonds = getNumber(row.cell[indexCell].text())
+
+        return total
+    } else {
+        return null
+    }
+
 }
 
 /**
@@ -572,39 +572,8 @@ def getNumber(def value) {
 }
 
 /**
- * Проверить шапку таблицы.
- *
- * @param xml данные
- * @param headRowCount количество строк в шапке
- */
-def checkTableHead(def xml, def headRowCount) {
-    def colCount = 11
-    // проверить количество строк и колонок в шапке
-    if (xml.row.size() < headRowCount || xml.row[0].cell.size() < colCount) {
-        return false
-    }
-    def result = (xml.row[0].cell[0] == 'Вид ценных бумаг' &&
-            xml.row[0].cell[1] == 'Ставка налога на прибыль' &&
-            xml.row[1].cell[1] == '15' &&
-            xml.row[2].cell[1] == 'ОФЗ' &&
-            xml.row[2].cell[2] == 'Субфедеральные и муниципальные облигации, за исключением муниципальных облигаций, выпущенных до 1 января 2007 года на срок не менее 3 лет' &&
-            xml.row[2].cell[3] == 'Государственные облигации Республики Беларусь' &&
-            xml.row[2].cell[4] == 'Ипотечные облигации, выпущенные после  1 января 2007 года' &&
-            xml.row[1].cell[5] == '9' &&
-            xml.row[2].cell[5] == 'Муниципальные облигации, выпущенные до 1 января 2007 года на срок не менее 3 лет' &&
-            xml.row[2].cell[6] == 'Ипотечные облигации, выпущенные до  1 января 2007 года' &&
-            xml.row[1].cell[7] == '0' &&
-            xml.row[2].cell[7] == 'ОВГВЗ' &&
-            xml.row[1].cell[8] == '20' &&
-            xml.row[2].cell[8] == 'Еврооблигации РФ' &&
-            xml.row[2].cell[9] == 'Прочие еврооблигации' &&
-            xml.row[2].cell[10] == 'Корпоративные облигации')
-    return result
-}
-
-/**
  * Получить значение атрибута строки справочника.
-
+ *
  * @param record строка справочника
  * @param alias алиас
  */
@@ -652,4 +621,42 @@ def getTotalRow(def data) {
         return data.getDataRow(getRows(data), 'total')
     }
     return null
+}
+
+
+/**
+ * Расчетать, проверить и сравнить итоги.
+ *
+ * @param totalRow итоговая строка из транспортного файла
+ */
+void checkTotalRow(def totalRow) {
+    calc()
+
+    if (!hasError() && logicalCheck()) {
+        def data = getData(formData)
+        def totalColumns = [3 : 'ofz', 4 : 'municipalBonds', 5 : 'governmentBonds',
+                6 : 'mortgageBonds', 7 : 'municipalBondsBefore', 8 : 'rtgageBondsBefore',
+                9 : 'ovgvz', 10 : 'eurobondsRF', 11 : 'itherEurobonds', 12 :'corporateBonds']
+        def totalCalc = null
+        for (def row : getRows(data)) {
+            if (isTotal(row)) {
+                totalCalc = row
+                break
+            }
+        }
+        if (totalCalc != null) {
+            totalColumns.each { index, columnAlias ->
+                if (totalCalc[columnAlias] != totalRow[columnAlias]) {
+                    logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Имеются ли фатальные ошибки.
+ */
+def hasError() {
+    return logger.containsLevel(LogLevel.ERROR)
 }
