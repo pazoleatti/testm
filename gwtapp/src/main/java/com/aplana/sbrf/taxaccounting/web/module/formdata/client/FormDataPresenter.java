@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
@@ -36,7 +35,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UploadDataRowsAc
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
@@ -120,7 +118,7 @@ public class FormDataPresenter extends
         UploadDataRowsAction action = new UploadDataRowsAction();
         action.setUuid(uuid);
         action.setFormData(formData);
-        dispatcher.execute(action, createDataRowResultCallback());
+        dispatcher.execute(action, createDataRowResultCallback(true));
     }
 
     @Override
@@ -198,14 +196,13 @@ public class FormDataPresenter extends
 
 
 	
-	private AsyncCallback<DataRowResult> createDataRowResultCallback(){ 
+	private AsyncCallback<DataRowResult> createDataRowResultCallback(final boolean showMsg){ 
 			LogCleanEvent.fire(this);
-			return CallbackUtils.defaultCallback(new AbstractCallback<DataRowResult>() {
+			AbstractCallback<DataRowResult> callback = new AbstractCallback<DataRowResult>() {
 				@Override
 				public void onSuccess(DataRowResult result) {
 					modifiedRows.clear();
 					getView().updateData();
-					
 					LogAddEvent.fire(FormDataPresenter.this, result.getLogEntries());
 					getView().setSelectedRow(result.getCurrentRow(), true);
 				}
@@ -216,7 +213,18 @@ public class FormDataPresenter extends
 					getView().updateData();
 				}
 
-			}, this);
+			};
+			return showMsg ? CallbackUtils.defaultCallback(callback, this) : 
+				CallbackUtils.defaultCallbackNoModalError(callback, this);
+	}
+	
+	@Override
+	public void onCheckClicked() {
+		LogCleanEvent.fire(this);
+		CheckFormDataAction checkAction = new CheckFormDataAction();
+		checkAction.setFormData(formData);
+		checkAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
+		dispatcher.execute(checkAction, createDataRowResultCallback(false));
 	}
 	
 	
@@ -228,7 +236,7 @@ public class FormDataPresenter extends
 		SaveFormDataAction action = new SaveFormDataAction();
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
-		dispatcher.execute(action, createDataRowResultCallback());
+		dispatcher.execute(action, createDataRowResultCallback(true));
 	}
 	
 
@@ -242,7 +250,7 @@ public class FormDataPresenter extends
 		action.setCurrentDataRow(dataRow);
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
-		dispatcher.execute(action, createDataRowResultCallback());
+		dispatcher.execute(action, createDataRowResultCallback(true));
 	}
 
 	/* (non-Javadoc)
@@ -256,7 +264,7 @@ public class FormDataPresenter extends
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		if (dataRow != null) {
-			dispatcher.execute(action, createDataRowResultCallback());
+			dispatcher.execute(action, createDataRowResultCallback(true));
 		}
 	}
 
@@ -268,32 +276,10 @@ public class FormDataPresenter extends
 		RecalculateDataRowsAction action = new RecalculateDataRowsAction();
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
-		dispatcher.execute(action, createDataRowResultCallback());
+		dispatcher.execute(action, createDataRowResultCallback(true));
 	}
 
-	@Override
-	public void onCheckClicked() {
-		LogCleanEvent.fire(this);
-		CheckFormDataAction checkAction = new CheckFormDataAction();
-		checkAction.setFormData(formData);
-		checkAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
-		dispatcher.execute(checkAction, CallbackUtils
-				.defaultCallbackNoModalError(new AbstractCallback<DataRowResult>() {
-					@Override
-					public void onSuccess(DataRowResult result) {
-						modifiedRows.clear();
-						MessageEvent.fire(FormDataPresenter.this, "Ошибок не обнаружено");
-						LogAddEvent.fire(FormDataPresenter.this, result.getLogEntries());
-						getView().updateData();
-					}
 
-					@Override
-					public void onFailure(Throwable caught) {
-						modifiedRows.clear();
-						getView().updateData();
-					}
-				}, this));
-	}
 
 	@Override
 	public void onDeleteFormClicked() {
@@ -420,10 +406,8 @@ public class FormDataPresenter extends
     }
 
     private String buildPeriodName(GetFormDataResult retFormDataResult) {
-        String year = DateTimeFormat.getFormat(Formats.YYYY.getFormat()).format(retFormDataResult.getTaxPeriodStartDate());
-
         StringBuilder builder = new StringBuilder();
-        builder.append(year).append(", ");
+        builder.append(retFormDataResult.getReportPeriodYear()).append(", ");
         builder.append(retFormDataResult.getReportPeriod().getName());
         Integer periodOrder = retFormDataResult.getFormData().getPeriodOrder();
         if (periodOrder != null) {

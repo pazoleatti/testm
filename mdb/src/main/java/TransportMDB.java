@@ -1,8 +1,8 @@
 import com.aplana.sbrf.taxaccounting.service.MappingService;
+import com.aplana.sbrf.taxaccounting.service.TransportInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ejb.interceptor.SpringBeanAutowiringInterceptor;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
@@ -19,7 +19,7 @@ import javax.jms.MessageListener;
         propertyName = "destination",
         propertyValue = "jms/transportQueue"
 )})
-@Interceptors(SpringBeanAutowiringInterceptor.class)
+@Interceptors(TransportInterceptor.class)
 public class TransportMDB implements MessageListener {
 
     @Autowired

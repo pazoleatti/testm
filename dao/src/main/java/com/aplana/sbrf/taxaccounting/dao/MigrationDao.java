@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface MigrationDao {
 
-    List<Exemplar> getActualExemplarByRnuType(long rnuTypeId);
+    List<Exemplar> getExemplarByRnuType(long rnuTypeId);
 
     List<Rnu25Row> getRnu25RowList(Exemplar ex);
 

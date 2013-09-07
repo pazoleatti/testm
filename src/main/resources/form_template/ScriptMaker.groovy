@@ -45,12 +45,12 @@ def outFile = new File("out.sql")
 // Вывод sql-скрипта в файл
 outFile.withWriter { out ->
     out.println('DECLARE')
-    def Set<Integer> idSet = new HashSet<Integer>();
+    def Set<Integer> idSet = new HashSet<Integer>()
     map.each {
         def scriptFile = new File(scriptLocation + it.value + "\\script.groovy")
         // Пропускаем несуществующие файлы
         if (!scriptFile.exists()) {
-            println("Skip bad script address: " + scriptFile.absolutePath);
+            println("Skip bad script address: " + scriptFile.absolutePath)
             return
         }
         idSet.add(it.key)

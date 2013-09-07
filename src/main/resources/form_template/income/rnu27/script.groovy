@@ -17,16 +17,16 @@ switch (formDataEvent) {
         checkCreation()
         break
     case FormDataEvent.CHECK:
-        formPrev
+        def formPrev = getFormPrev()
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
         if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
             return
         }
-        allCheck()
+        logicalCheck() && checkNSI()
         break
     case FormDataEvent.CALCULATE:
-        formPrev
+        def formPrev = getFormPrev()
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
         if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
@@ -36,7 +36,7 @@ switch (formDataEvent) {
         sort()
         calc()
         addAllStatic()
-        allCheck()
+        !hasError() && logicalCheck() && checkNSI()
         break
     case FormDataEvent.ADD_ROW:
         addNewRow()
@@ -48,17 +48,17 @@ switch (formDataEvent) {
         break
     // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
-        formPrev
+        def formPrev = getFormPrev()
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
         if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
             return
         }
-        allCheck()
+        logicalCheck() && checkNSI()
         break
     // обобщить
     case FormDataEvent.COMPOSE :
-        formPrev
+        def formPrev = getFormPrev()
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
         if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
@@ -69,12 +69,13 @@ switch (formDataEvent) {
         sort()
         calc()
         addAllStatic()
-        allCheck()
-        // для сохранения изменений приемников
-        getData(formData).commit()
+        if (!hasError() && logicalCheck() && checkNSI()) {
+            // для сохранения изменений приемников
+            getData(formData).commit()
+        }
         break
     case FormDataEvent.IMPORT :
-        formPrev
+        def formPrev = getFormPrev()
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
         if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
@@ -105,9 +106,23 @@ switch (formDataEvent) {
 /**
  * 6.11.2.4.1   Логические проверки
  */
-void logicalCheck() {
-
+def logicalCheck() {
     def data = getData(formData)
+
+    // LC Проверка на заполнение поля «<Наименование поля>»
+    for (row in data.getAllCached()) {
+        for (alias in ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'reserveCalcValuePrev',
+                'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']) {
+            if (row.getAlias() == null && row.getCell(alias).value == null) {
+                setError(row.getCell(alias).column)
+            }
+        }
+    }
+    if (hasError()) {
+        return
+    }
+
+    def formPrev = getFormPrev()
     def dataPrev = getData(formPrev)
 
     for (DataRow row in data.getAllCached()) {
@@ -125,7 +140,7 @@ void logicalCheck() {
             // LC • Проверка при нулевом значении размера лота на предыдущую отчётную дату (графа 6 = 0)
             if (row.prev == 0 && (row.reserveCalcValuePrev != row.recovery || row.recovery != 0)) {
                 logger.error("Графы 8 и 17 ненулевые!")
-                return
+                return false
             }
             // LC • Проверка необращающихся облигаций (графа 10 = «x»)
             if (getSign(row.signSecurity) == "x" && (row.reserveCalcValue != row.reserveCreation || row.reserveCreation != 0)) {
@@ -135,24 +150,24 @@ void logicalCheck() {
                 // LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
                 if (row.reserveCalcValue - row.reserveCalcValuePrev > 0 && row.recovery != 0) {
                     logger.error("Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
-                    return
+                    return false
                 }
                 // LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
                 if (row.reserveCalcValue - row.reserveCalcValuePrev < 0 && row.reserveCreation != 0) {
                     logger.error("Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
-                    return
+                    return false
                 }
                 // LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
                 if (row.reserveCalcValue - row.reserveCalcValuePrev == 0 && (row.reserveCreation != 0 || row.recovery != 0)) {
                     logger.error("Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
-                    return
+                    return false
                 }
             }
             // 9. LC • Проверка корректности формирования резерва
             if (row.reserveCalcValuePrev != null && row.reserveCreation != null && row.reserveCalcValue != null && row.recovery != null
                     && row.reserveCalcValuePrev + row.reserveCreation != row.reserveCalcValue + row.recovery) {
                 logger.error("Резерв сформирован неверно!")
-                return
+                return false
             }
             // LC • Проверка на положительные значения при наличии созданного резерва
             if (row.reserveCreation > 0 && (row.current < 0 || row.cost < 0 || row.costOnMarketQuotation < 0 || row.reserveCalcValue < 0)) {
@@ -161,7 +176,7 @@ void logicalCheck() {
             // LC • Проверка корректности заполнения РНУ
             if (formPrev != null) {
                 for (DataRow rowPrev in dataPrev.getAllCached()) {
-                    if (!isTotal(rowPrev) && row.tradeNumber == rowPrev.tradeNumber && row.prev != rowPrev.current) {
+                    if (!isFixedRow(rowPrev) && row.tradeNumber == rowPrev.tradeNumber && row.prev != rowPrev.current) {
                         logger.warn("РНУ сформирован некорректно! Не выполняется условие: Если  «графа  4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то «графа 6»  = «графа 7» формы РНУ-27 за предыдущий отчётный период")
                     }
                 }
@@ -169,46 +184,38 @@ void logicalCheck() {
             // LC • Проверка корректности заполнения РНУ
             if (formPrev != null) {
                 for (DataRow rowPrev in dataPrev.getAllCached()) {
-                    if (!isTotal(rowPrev) && row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
+                    if (!isFixedRow(rowPrev) && row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
                         logger.error("РНУ сформирован некорректно! Не выполняется условие: Если  «графа  4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то графа 8  = графа 15 формы РНУ-27 за предыдущий отчётный период")
-                        return
+                        return false
                     }
                 }
             }
 
-            // LC Проверка на заполнение поля «<Наименование поля>»
-            for (alias in ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'reserveCalcValuePrev',
-                    'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']) {
-                if (row.getCell(alias).value == null) {
-                    setError(row.getCell(alias).column)
-                    return
-                }
-            }
             //Проверка на уникальность поля «№ пп»
             if (getCurrency(row.currency) == 'RUR') {
                 // LC Проверка графы 11
                 if (row.marketQuotation != null) {
                     logger.error("Неверно заполнена графа «Рыночная котировка одной ценной бумаги в иностранной валюте»!")
-                    return
+                    return false
                 }
                 // LC Проверка графы 12
                 if (row.rubCourse != null) {
                     logger.error("Неверно заполнена графы «Курс рубля к валюте рыночной котировки»!")
-                    return
+                    return false
                 }
             }
             // LC Арифметическая проверка графы 13
             if (row.marketQuotation != null && row.rubCourse
                     && row.marketQuotationInRub != roundValue((BigDecimal) (row.marketQuotation * row.rubCourse), 2)) {
                 logger.error("Неверно рассчитана графа «Рыночная котировка одной ценной бумаги в рублях»!")
-                return
+                return false
             }
 
             // @author ivildanov
             // Арифметические проверки граф 5, 8, 11, 12, 13, 14, 15, 16, 17
             List checks = ['reserveCalcValuePrev', 'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
             def value = formData.createDataRow()
-            value.reserveCalcValuePrev = calc8(row)
+            value.reserveCalcValuePrev = calc8(row, formPrev)
             value.marketQuotation = calc11(row)
             value.rubCourse = calc12(row)
             value.marketQuotationInRub = calc13(row)
@@ -220,7 +227,7 @@ void logicalCheck() {
             for (String check in checks) {
                 if (row.getCell(check).value != value.get(check)) {
                     logger.error("Неверно рассчитана графа \"${row.getCell(check).column.name.replace('%', '')}\"! (${row.getCell(check).value} != ${value.get(check)})")
-                    return
+                    return false
                 }
             }
 
@@ -233,7 +240,7 @@ void logicalCheck() {
             for (column in itogoColumns) {
                 if (row.get(column) != srow.get(column)) {
                     logger.error("Итоговые значения по «<"+ getPrevRowWithoutAlias(row).regNumber+">» рассчитаны неверно!")
-                    return
+                    return false
                 }
             }
         }
@@ -245,7 +252,7 @@ void logicalCheck() {
             for (column in itogoColumns) {
                 if (row.get(column) != srow.get(column)) {
                     logger.error("Итоговые значения для «"+ getPrevRowWithoutAlias(row).issuer+"» рассчитаны неверно!")
-                    return
+                    return false
                 }
             }
         }
@@ -257,7 +264,7 @@ void logicalCheck() {
             for (column in itogoColumns) {
                 if (row.get(column) != srow.get(column)) {
                     logger.error("Итоговые значения рассчитаны неверно!")
-                    return
+                    return false
                 }
             }
         }
@@ -270,11 +277,11 @@ void logicalCheck() {
         DataRow itogo = getRowByAlias(data,'itogo')
         if (itogo != null && itogoPrev != null && itogo.prev != itogoPrev.current) {
             logger.error("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 = «Итого» по графе 7 формы РНУ-27 за предыдущий отчётный период")
-            return
+            return false
         }
         if (itogo != null && itogoPrev != null && itogo.reserveCalcValuePrev != itogoPrev.reserveCalcValue) {
             logger.error("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 8 = «Итого» по графе 15 формы РНУ-27 за предыдущий отчётный период")
-            return
+            return false
         }
     }
 
@@ -317,6 +324,7 @@ void logicalCheck() {
             logger.warn(message.substring(0, message.length() - 1))
         }
     }
+    return true
 }
 
 /**
@@ -342,7 +350,7 @@ def getReportDate() {
     return (tmp ? tmp.getTime() + 1 : null)
 }
 
-void checkNSI() {
+def checkNSI() {
     getRows(getData(formData)).each{ DataRow row ->
         if (row.getAlias() == null) {
             if (row.currency != null && getCurrency(row.currency) == null){
@@ -356,10 +364,7 @@ void checkNSI() {
             }
         }
     }
-}
-
-void allCheck() {
-    logicalCheck()
+    return true
 }
 
 /**
@@ -406,31 +411,11 @@ void importData() {
         return
     }
 
-    def data = getData(formData)
-    def totalColumns = [6:'prev', 7:'current', 9:'cost', 14:'costOnMarketQuotation', 15:'reserveCalcValue']
-
     // добавить данные в форму
     try {
         def totalLoad = addData(xml)
-        if (totalLoad!=null) {
-            formPrev
-            deleteAllStatic()
-            sort()
-            calc()
-            addAllStatic()
-            allCheck()
-
-            def totalCalc
-            for (def row : getRows(data))
-                if (isTotal(row)) totalCalc = row
-
-            if (totalCalc!=null) {
-                totalColumns.each{k, v->
-                    if (totalCalc[v]!=totalLoad[v]) {
-                        logger.error("Итоговая сумма в графе $k в транспортном файле некорректна")
-                    }
-                }
-            }
+        if (totalLoad != null) {
+            checkTotalRow(totalLoad)
         } else {
             logger.error("Нет итоговой строки.")
         }
@@ -438,7 +423,7 @@ void importData() {
         logger.error(""+e.message)
     }
     //в случае ошибок откатить изменения
-    if (!logger.containsLevel(LogLevel.ERROR)) {
+    if (!hasError()) {
         logger.info('Закончена загрузка файла ' + fileName)
     }
 }
@@ -453,7 +438,7 @@ List getItogoColumns() {
  */
 void addAllStatic() {
     def data = getData(formData)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
+    if (!hasError()) {
 
         for (int i = 0; i < data.getAllCached().size(); i++) {
             DataRow<Cell> row = data.getAllCached().get(i)
@@ -628,13 +613,13 @@ void calc() {
             }
         }
     }
-    if (!logger.containsLevel(LogLevel.ERROR)) {
+    if (!hasError()) {
+        def formPrev = getFormPrev()
         BigDecimal i = 0
-        formPrev
         for (DataRow row in data.getAllCached()) {
             i++
             row.number = i  // @todo http://jira.aplana.com/browse/SBRFACCTAX-2548 блокирует
-            row.reserveCalcValuePrev = calc8(row)
+            row.reserveCalcValuePrev = calc8(row, formPrev)
             row.marketQuotation = calc11(row)
             row.rubCourse = calc12(row)
             row.marketQuotationInRub = calc13(row)
@@ -650,10 +635,11 @@ void calc() {
 /**
  * Расчет графы 8
  */
-BigDecimal calc8(DataRow row) {
+BigDecimal calc8(DataRow row, def formPrev) {
     // Расчет графы 8 в соответсвие коментарию Аванесова http://jira.aplana.com/browse/SBRFACCTAX-2562
     temp = new BigDecimal(0)
     tempCount = 0
+
     if (formPrev != null) {
         for (DataRow rowPrev in getData(formPrev).getAllCached()) {
             if (row.tradeNumber == rowPrev.tradeNumber) {
@@ -838,7 +824,6 @@ BigDecimal roundValue(BigDecimal value, int newScale) {
 }
 
 void setError(Column c) {
-
     if (!c.name.empty) {
         logger.error('Поле ' + c.name.replace('%', '') + ' не заполнено')
     }
@@ -957,15 +942,9 @@ def addData(def xml) {
     def indexRow = -1
     for (def row : xml.row) {
         indexRow++
-
-        // пропустить шапку таблицы
-        if (indexRow <= 0) {// || indexRow>20) {
-            continue
-        }
-
         def newRow = getNewRow()
 
-        def indexCell = 1
+        def indexCell = 0
 
         newRow.number = getNumber(row.cell[indexCell].text())
         indexCell++
@@ -1039,29 +1018,25 @@ def addData(def xml) {
     if (xml.rowTotal.size()==1)
         for (def row : xml.rowTotal) {
             // графа 6
-            total.prev = getNumber(row.cell[6].text())
+            total.prev = getNumber(row.cell[5].text())
 
             // графа 7
-            total.current = getNumber(row.cell[7].text())
-
-            // графа 8
+            total.current = getNumber(row.cell[6].text())
 
             // графа 9
-            total.cost = getNumber(row.cell[9].text())
-
-            // графа 10
-
-            // графа 11
-
-            // графа 12
-
-            // графа 13
+            total.cost = getNumber(row.cell[8].text())
 
             // графа 14
-            total.costOnMarketQuotation = getNumber(row.cell[14].text())
+            total.costOnMarketQuotation = getNumber(row.cell[13].text())
 
             // графа 15
-            total.reserveCalcValue = getNumber(row.cell[15].text())
+            total.reserveCalcValue = getNumber(row.cell[14].text())
+
+            // графа 16
+            total.reserveCreation = getNumber(row.cell[15].text())
+
+            // графа 17
+            total.recovery = getNumber(row.cell[16].text())
         }
     else {
         return null
@@ -1208,5 +1183,49 @@ def getRowByAlias(def data, def alias) {
  * Проверка является ли строка итоговой.
  */
 def isTotal(def row) {
+    return row != null && row.getAlias() != null && row.getAlias() == 'itogo'
+}
+
+/**
+ * Проверка является ли строка итоговой.
+ */
+def isFixedRow(def row) {
     return row != null && row.getAlias() != null && row.getAlias().contains('itogo')
+}
+
+/**
+ * Проверить итоговую строку.
+ *
+ * @param totalRow итоговая строка
+ */
+void checkTotalRow(def totalRow) {
+    deleteAllStatic()
+    sort()
+    calc()
+    addAllStatic()
+    if (!hasError() && logicalCheck() && checkNSI()) {
+        def data = getData(formData)
+        def totalColumns = [6:'prev', 7:'current', 9:'cost', 14:'costOnMarketQuotation', 15:'reserveCalcValue',
+                16 : 'reserveCreation', 17 : 'recovery']
+        def totalCalc
+        for (def row : getRows(data)) {
+            if (isTotal(row)) {
+                totalCalc = row
+            }
+        }
+        if (totalCalc != null) {
+            totalColumns.each{ index, columnAlias ->
+                if (totalCalc[columnAlias] != totalRow[columnAlias]) {
+                    logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Имеются ли фатальные ошибки.
+ */
+def hasError() {
+    return logger.containsLevel(LogLevel.ERROR)
 }

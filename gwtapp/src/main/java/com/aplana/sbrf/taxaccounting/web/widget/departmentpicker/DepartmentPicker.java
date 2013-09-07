@@ -16,7 +16,5 @@ public interface DepartmentPicker extends HasValue<List<Integer>>{
 	List<String> getValueDereference();
 	
 	void setHeader(String header);
-	
-	void setMultiselection(boolean multiselection);
 
 }

@@ -70,7 +70,7 @@ public class DepartmentPickerWidget extends Composite implements
 	public DepartmentPickerWidget(String header, boolean multiselection) {
 		this();
 		setHeader(header);
-		setMultiselection(multiselection);
+		this.multiselection = multiselection;
 	}
 	
 	public DepartmentPickerWidget() {
@@ -270,9 +270,5 @@ public class DepartmentPickerWidget extends Composite implements
 		this.header.setText(header);
 	}
 
-	@Override
-	public void setMultiselection(boolean multiselection) {
-		this.multiselection = multiselection;
-	}
 
 }

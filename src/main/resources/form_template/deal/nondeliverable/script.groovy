@@ -264,7 +264,6 @@ def calcItog(int i) {
     newRow.itog = 'Подитог:'
     newRow.setAlias('itg#'.concat(i.toString()))
     newRow.getCell('fix').colSpan = 2
-    newRow.rowNum = i+2
 
     // Расчеты подитоговых значений
     BigDecimal priceItg = 0, costItg = 0
@@ -289,13 +288,13 @@ def calcItog(int i) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
-
+    def int index = 1
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
         // Порядковый номер строки
-        row.rowNum = row.getIndex()
+        row.rowNum = index++
         // Графы 13 и 14 из 11 и 12
         incomeSum = row.incomeSum
         consumptionSum = row.consumptionSum

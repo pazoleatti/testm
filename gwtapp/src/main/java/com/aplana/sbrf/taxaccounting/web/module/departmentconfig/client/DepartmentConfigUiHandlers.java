@@ -46,8 +46,9 @@ public interface DepartmentConfigUiHandlers extends UiHandlers {
      * Перезагрузка дерева подразделений
      *
      * @param taxType
+     * @param currentDepartmentId
      */
-    void reloadDepartments(TaxType taxType);
+    void reloadDepartments(TaxType taxType, Integer currentDepartmentId);
 
     /**
      * Обработка выбора налогового периода
