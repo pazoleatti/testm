@@ -12,6 +12,9 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
  * 2 Код ОКАТО  -  codeOKATO
  * 3 Идентификационный номер  -  identNumber
  * 4 Регистрационный знак  -  regNumber
+ * 5 Код налоговой льготы - taxBenefitCode
+ * 6 Дата начала Использование льготы - benefitStartDate
+ * 7 Дата окончания Использование льготы - benefitEndDate
  *
  * ['rowNumber', 'codeOKATO', 'identNumber', 'regNumber', 'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
  */
@@ -226,10 +229,14 @@ void checkNSI() {
             logger.error("Неверный код ОКАТО. Строка: "+row.getIndex());
         }
 
-        // Проверка кода льготы
-// НУЖНО ДОПИСАТЬ ПРОВЕРКУ КОДА ЛЬГОТЫ
+        /**
+         * Проверка льготы
+         */
+        if (!checkBenefit(row.taxBenefitCode, row.codeOKATO)){
+            logger.error("Выбранная льгота для текущего региона не предусмотрена . Строка: "+row.getIndex())
+        }
 
-   }
+    }
 }
 
 /**
@@ -329,21 +336,16 @@ boolean checkOkato(codeOKATO){
  * Для выбранного значения в «графе 5» (20210, 20220, 20230) в справочнике «Параметры налоговых льгот» существует запись по текущему региону:
  * атрибут «Код региона» справочника «Параметры налоговых льгот» соответствует значению «графы 2» («Код по ОКАТО»).
  */
-boolean checkBenefit(taxBenefitCode){
-  //!!!   НУЖНО ДОБАВИТЬ ПРОВЕРКУ ДЛЯ КОДА ЛЬГОТЫ, АНАЛОГИЧНО СВОДНОЙ. 
-  	// (gavanesov) скопировано из сводной
- /* 
-	if (row.taxBenefitCode != null){
+boolean checkBenefit(taxBenefitCode, okato){
+	if (taxBenefitCode != null && getRefBookValue(6, taxBenefitCode, "CODE") in [20210, 20220, 20230]){
         def refTaxBenefitParameters = refBookFactory.getDataProvider(7)
-        def region = getRegionByOkatoOrg(row.okato)
-        query = "TAX_BENEFIT_ID ="+row.taxBenefitCode+" AND DICT_REGION_ID = "+region.record_id
+        def region = getRegionByOkatoOrg(okato)
+        query = "TAX_BENEFIT_ID ="+taxBenefitCode+" AND DICT_REGION_ID = "+region.record_id
         if (refTaxBenefitParameters.getRecords(new Date(), null, query, null).getRecords().size() == 0){
-                logger.error("Выбранная льгота для текущего региона не предусмотрена . Строка: "+row.getIndex())
+            return false;
     	}
-    }  
-  
-  */
-    return false;
+    }
+    return true;
 }
 
 
@@ -351,7 +353,6 @@ boolean checkBenefit(taxBenefitCode){
  * Получение значения (разменовываение)
  */
 def getRefBookValue(refBookID, recordId, alias){
-    //logger.info("refBookID, recordId, alias = "+refBookID+", "+ recordId+", "+alias)
     def  refDataProvider = refBookFactory.getDataProvider(refBookID)
     def record = refDataProvider.getRecordData(recordId)
 
@@ -369,5 +370,54 @@ def getDataRowHelper() {
         return formDataService.getDataRowHelper(formData)
     } else {
         throw new Exception("Ошибка получения dataRows")
+    }
+}
+
+/**
+ * Получение региона по коду ОКАТО
+ * @param okato
+ */
+def getRegionByOkatoOrg(okatoCell){
+    /*
+    * первые две цифры проверяемого кода ОКАТО
+    * совпадают со значением поля «Определяющая часть кода ОКАТО»
+    * справочника «Коды субъектов Российской Федерации»
+    */
+    // провайдер для справочника - Коды субъектов Российской Федерации
+    def okato =  getRefBookValue(3, okatoCell, "OKATO")
+    def  refDataProvider = refBookFactory.getDataProvider(4)
+    def records = refDataProvider.getRecords(new Date(), null, "OKATO_DEFINITION like '"+okato.toString().substring(0, 2)+"%'", null).getRecords()
+
+    if (records.size() == 1){
+        return records.get(0);
+    } else if (records.size() == 0){
+        logger.error("Не удалось определить регион по коду ОКАТО. Строка: "+row.getIndex())
+        return null;
+    } else{
+        /**
+         * Если первые пять цифр кода равны "71140" то код ОКАТО соответствует
+         * Ямало-ненецкому АО (код 89 в справочнике «Коды субъектов Российской Федерации»)
+         */
+        def reg89 = records.find{ it.OKATO.toString().substring(0, 4).equals("71140")}
+        if (reg89 != null) return reg89;
+
+        /**
+         * Если первые пять цифр кода равны "71100" то
+         * код ОКАТО соответствует Ханты-мансийскому АО
+         * (код 86 в справочнике «Коды субъектов Российской Федерации»)
+         */
+        def reg86 = records.find{ it.OKATO.toString().substring(0, 4).equals("71100")}
+        if (reg86 != null) return reg86;
+
+        /**
+         * Если первые четыре цифры кода равны "1110"
+         * то код ОКАТО соответствует Ненецкому АО
+         * (код 83 в справочнике «Коды субъектов Российской Федерации»)
+         */
+        def reg83 = records.find{ it.OKATO.toString().substring(0, 4).equals("1110")}
+        if (reg83 != null) return reg83;
+
+        logger.error("Не удалось определить регион по коду ОКАТО. Строка: "+row.getIndex())
+        return null;
     }
 }
