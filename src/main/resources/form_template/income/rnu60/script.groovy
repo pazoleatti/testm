@@ -35,6 +35,14 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        allCheck()
+        break
     // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
         allCheck()
@@ -46,9 +54,10 @@ switch (formDataEvent) {
         sort()
         calc()
         addAllStatic()
-        allCheck()
-        // для сохранения изменений приемников
-        getData(formData).commit()
+        if (allCheck()) {
+            // для сохранения изменений приемников
+            getData(formData).commit()
+        }
         break
     case FormDataEvent.IMPORT :
         importData()
@@ -74,9 +83,8 @@ switch (formDataEvent) {
 
  */
 
-void allCheck() {
-    logicalCheck()
-    checkNSI()
+def allCheck() {
+    return !hasError() && logicalCheck() && checkNSI()
 }
 
 /**
@@ -95,7 +103,7 @@ void checkCreation() {
  * 6.41.3.2.1   Логические проверки
  * Табл. 209 Логические проверки формы «Регистр налогового учёта закрытых сделок РЕПО с обязательством покупки по 2-й части»
  */
-void logicalCheck() {
+def logicalCheck() {
     def data = getData(formData)
     for (row in getRows(data)) {
         if (row.getAlias() == null) {
@@ -103,27 +111,32 @@ void logicalCheck() {
             for (alias in ['outcome269st', 'outcomeTax']) {
                 if (row.getCell(alias).value == null) {
                     setError(row.getCell(alias).column)
+                    return false
                 }
             }
             // 2. Проверка даты первой части РЕПО
             if (row.part1REPODate != null && reportDate.time.before((Date) row.part1REPODate)) {
                 logger.error("Неверно указана дата первой части сделки!")
+                return false
             }
             // 3. Проверка даты второй части РЕПО
             if (row.part2REPODate != null
                     && (reportPeriodService.getStartDate(formData.reportPeriodId).time.after((Date) row.part2REPODate) || reportPeriodService.getEndDate(formData.reportPeriodId).time.before((Date) row.part2REPODate)
             )) {
                 logger.error("Неверно указана дата второй части сделки!")
+                return false
             }
 
             // 4. Проверка финансового  результата на основе http://jira.aplana.com/browse/SBRFACCTAX-2870
             if (row.outcome > 0 && row.income > 0) {
                 logger.error("Задвоение финансового результата!")
+                return false
             }
 
             // 6. Проверка финансового результата
             if (row.outcome == 0 && !(row.outcome269st == 0 && row.outcomeTax == 0)) {
                 logger.error("Задвоение финансового результата!")
+                return false
             }
 
             // 7. Проверка финансового результата
@@ -147,7 +160,8 @@ void logicalCheck() {
             value.put('outcomeTax', calc13(row))
             for (String check in checks) {
                 if (row.getCell(check).value != value.get(check)) {
-                    logger.error("Неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '') + "!")
+                    logger.error("Неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '%%') + "!")
+                    return false
                 }
             }
         }
@@ -156,13 +170,15 @@ void logicalCheck() {
     List itogoSum = ['nominalPrice', 'acquisitionPrice', 'salePrice', 'income', 'outcome', 'outcome269st', 'outcomeTax']
     DataRow realItogo = getRealItogo()
     if (realItogo!=null) {
+        DataRow itogo = getItogo()
         for (String alias in itogoSum) {
             if (realItogo.getCell(alias).value != itogo.getCell(alias).value) {
                 logger.error("Итоговые значения рассчитаны неверно!")
-                break
+                return false
             }
         }
     }
+    return true
 }
 
 /**
@@ -196,7 +212,7 @@ def checkNSI() {
 void setError(Column c) {
 
     if (!c.name.empty) {
-        logger.error('Поле ' + c.name.replace('%', '') + ' не заполнено')
+        logger.error('Поле ' + c.name.replace('%', '%%') + ' не заполнено')
     }
 }
 
@@ -226,14 +242,13 @@ DataRow<Cell> getItogo() {
     itogo.setAlias('itogo')
     itogo.securityName = "Итого"
     List itogoSum = ['nominalPrice', 'acquisitionPrice', 'salePrice', 'income', 'outcome', 'outcome269st', 'outcomeTax']
+    itogoSum.each { name ->
+        itogo.getCell(name).value = 0
+    }
     for (DataRow row in getRows(getData(formData))) {
         if (row.getAlias() == null) {
             for (String name in itogoSum) {
-                if (itogo.getCell(name).value == null) {
-                    itogo.getCell(name).value = row.getCell(name).value ?: 0
-                } else {
-                    itogo.getCell(name).value += row.getCell(name).value ?: 0
-                }
+                itogo.getCell(name).value += row.getCell(name).value ?: 0
             }
         }
     }
@@ -252,7 +267,7 @@ void setTotalStyle(def row) {
 
 BigDecimal calc9(DataRow row) {
     BigDecimal result
-    BigDecimal a = (row.salePrice!=null ?row.salePrice: 0) - (row.acquisitionPrice!=null ?row.acquisitionPrice: 0)
+    BigDecimal a = (row.salePrice ?: 0) - (row.acquisitionPrice ?: 0)
     BigDecimal c = a.abs().setScale(2, BigDecimal.ROUND_HALF_UP)
 
     /**
@@ -340,7 +355,10 @@ BigDecimal calc10(DataRow row) {
  * @param row
  * @param rateDate
  */
-def calc11(DataRow row, def rateDate){
+def calc11(DataRow row, def rateDate) {
+    if (row.currencyCode == null) {
+        return null
+    }
     def currency = getCurrency(row.currencyCode)
     def rate = getRate(rateDate)
     // Если «графа 10» = 0, то « графа 11» не заполняется; && Если «графа 3» не заполнена, то « графа 11» не заполняется
@@ -366,6 +384,9 @@ def calc11(DataRow row, def rateDate){
 }
 
 BigDecimal calc12(DataRow row) {
+    if (row.currencyCode == null) {
+        return null
+    }
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     Date date01_11_2009 = format.parse('01.11.2009')
     BigDecimal result = null
@@ -381,30 +402,30 @@ BigDecimal calc12(DataRow row) {
                     «графа 12» = («графа 7» ? «графа 11» ? 1,5) ? ((«графа6» - «графа5») / 365 (366)) / 100;
 
                  */
-                result = (row.acquisitionPrice * (row.rateBR ?: 0) * 1.5) * (difference / countDaysInYear) / 100
+                result = ((row.acquisitionPrice ?: 0) * (row.rateBR ?: 0) * 1.5) * (difference / countDaysInYear) / 100
             } else if (inPeriod(row.part2REPODate, '01.01.2010', '30.06.2010') && row.part1REPODate.compareTo(date01_11_2009) < 0) {
                 /*
                 b.  Если «графа 6» принадлежит периоду с 01.01.2010 по 30.06.2010 и одновременно сделка открыта до 01.11.2009 («графа 5» < 01.11.2009 г.), то
                     «графа 12» = («графа 7» ? «графа 11» ? 2) ? ((«графа 6» - «графа 5») / 365 (366)) / 100;
                  */
-                result = (row.acquisitionPrice * (row.rateBR ?: 0) * 2) * (difference / countDaysInYear) / 100
+                result = ((row.acquisitionPrice ?: 0) * (row.rateBR ?: 0) * 2) * (difference / countDaysInYear) / 100
             } else if (inPeriod(row.part2REPODate, '01.01.2010', '31.12.2012')) {
                 /*
                 c.  Если «графа 6» принадлежит периоду с 01.01.2010 по 31.12.2012, то:
                     «графа 12» = («графа 7» ? «графа 11» ? 1,8) ? ((«графа6» - «графа5») / 365(366)) / 100.
                  */
-                result = (row.acquisitionPrice * (row.rateBR ?: 0) * 1.8) * (difference / countDaysInYear) / 100
+                result = ((row.acquisitionPrice ?: 0) * (row.rateBR ?: 0) * 1.8) * (difference / countDaysInYear) / 100
             } else {
                 /*
                 d.  Иначе
                     «графа 12» = («графа 7» ? «графа 11» ? 1,1) ? ((«графа 6» -« графа 5») / 365 (366)) / 100;.
                  */
-                result = (row.acquisitionPrice * (row.rateBR ?: 0) * 1.1) * (difference / countDaysInYear) / 100
+                result = ((row.acquisitionPrice ?: 0) * (row.rateBR ?: 0) * 1.1) * (difference / countDaysInYear) / 100
             }
         } else {
-            result = (row.acquisitionPrice * (row.rateBR ?: 0)) * (difference / countDaysInYear) / 100
+            result = ((row.acquisitionPrice ?: 0) * (row.rateBR ?: 0)) * (difference / countDaysInYear) / 100
             if (inPeriod(row.part2REPODate, '01.01.2011', '31.12.2012')) {
-                result = (row.acquisitionPrice * (row.rateBR ?: 0) * 0.8) * (difference / countDaysInYear) / 100
+                result = ((row.acquisitionPrice ?: 0) * (row.rateBR ?: 0) * 0.8) * (difference / countDaysInYear) / 100
             }
         }
     }
@@ -649,42 +670,32 @@ void importData() {
         return
     }
 
-    // сохранить начальное состояние формы
-    def data = getData(formData)
     try {
         // добавить данные в форму
         def totalLoad = addData(xml)
-        if (totalLoad!=null) {
-            // расчитать и проверить
-            deleteAllStatic()
-            sort()
-            calc()
-            addAllStatic()
-            allCheck()
 
-            //проверка итоговой строки
-            def totalColumns = [4: 'nominalPrice', 7: 'acquisitionPrice', 8: 'salePrice',
-                    9: 'income', 10: 'outcome', 12: 'outcome269st', 13: 'outcomeTax']
-            def totalCalc
-            for (def row : getRows(data))
-                if (isItogoRow(row)) totalCalc = row
-
-            if (totalCalc!=null) {
-                totalColumns.each{i, v->
-                    if (totalCalc[v]!=totalLoad[v]) {
-                        logger.error("Итоговая сумма в графе $i в транспортном файле некорректна")
-                    }
-                }
-            }
+        // рассчитать, проверить и сравнить итоги
+        if (totalLoad != null) {
+            checkTotalRow(totalLoad)
         } else {
             logger.error("Нет итоговой строки.")
         }
     } catch(Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка! ' + e.getMessage())
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
-    if (!logger.containsLevel(LogLevel.ERROR)) {
+
+    if (!hasError()) {
         logger.info('Закончена загрузка файла ' + fileName)
     }
+
+        // добавить данные в форму
+        def totalLoad = addData(xml)
+        if (totalLoad!=null) {
+
+        } else {
+            logger.error("Нет итоговой строки.")
+        }
+
 }
 
 /**
@@ -695,14 +706,12 @@ void importData() {
 def addData(def xml) {
     def date = new Date()
     def cache = [:]
-    def newRows = []
     def data = getData(formData)
     data.clear()
     def index
 
     for (def row : xml.exemplar.table.detail.record) {
         index = 0
-
         def newRow = getNewRow()
 
         // графа 1
@@ -714,11 +723,20 @@ def addData(def xml) {
         index++
 
         // графа 3 - справочник 15, атрибут 64
-        newRow.currencyCode = getRecordId(15, 'CODE', row.field[index].@value.text(), date, cache)
+        newRow.currencyCode = getRecordId(15, 'CODE', row.field[index].text(), date, cache)
         index++
 
         // графа 4
         newRow.nominalPrice = getNumber(row.field[index].@value.text())
+        index++
+
+        // в транспортном файле порядок колонок по другому (графа 1, 2, 3, 4, 7, 8, 5, 6, 9, 10, 11, 12, 13)
+        // графа 7
+        newRow.acquisitionPrice = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 8
+        newRow.salePrice = getNumber(row.field[index].@value.text())
         index++
 
         // графа 5
@@ -727,14 +745,6 @@ def addData(def xml) {
 
         // графа 6
         newRow.part2REPODate = getDate(row.field[index].@value.text())
-        index++
-
-        // графа 7
-        newRow.acquisitionPrice = getNumber(row.field[index].@value.text())
-        index++
-
-        // графа 8
-        newRow.salePrice = getNumber(row.field[index].@value.text())
         index++
 
         // графа 9
@@ -756,24 +766,45 @@ def addData(def xml) {
         // графа 13
         newRow.outcomeTax = getNumber(row.field[index].@value.text())
 
-        newRows.add(newRow)
+        insert(data, newRow)
     }
-    // получение итоговых данных
-    def totalRow = formData.createDataRow()
-    if (xml.exemplar.table.total.record.field.size() > 0 && !newRows.isEmpty()) {
-        def totalColumns = [4: 'nominalPrice', 7: 'acquisitionPrice', 8: 'salePrice',
-                9: 'income', 10: 'outcome', 12: 'outcome269st', 13: 'outcomeTax']
 
-        for (def row : xml.exemplar.table.total.record) {
-            totalColumns.each {i, alias ->
-                totalRow[alias] = getNumber(row.field[i-1].@value.text())
-            }
-        }
+    // итоговая строка
+    if (xml.exemplar.table.total.record.field.size() > 0) {
+        def row = xml.exemplar.table.total.record[0]
+        def totalRow = formData.createDataRow()
+
+        // графа 4
+        totalRow.nominalPrice = getNumber(row.field[3].@value.text())
+        index++
+
+        // графа 7
+        totalRow.acquisitionPrice = getNumber(row.field[4].@value.text())
+        index++
+
+        // графа 8
+        totalRow.salePrice = getNumber(row.field[5].@value.text())
+        index++
+
+        // графа 9
+        totalRow.income = getNumber(row.field[8].@value.text())
+        index++
+
+        // графа 10
+        totalRow.outcome = getNumber(row.field[9].@value.text())
+        index++
+
+        // графа 12
+        totalRow.outcome269st = getNumber(row.field[11].@value.text())
+        index++
+
+        // графа 13
+        totalRow.outcomeTax = getNumber(row.field[12].@value.text())
+
+        return totalRow
     } else {
         return null
     }
-    data.insert(newRows, 1)
-    return totalRow
 }
 
 /**
@@ -849,4 +880,43 @@ def getDate(def value) {
     }
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     return format.parse(value)
+}
+
+/**
+ * Рассчитать, проверить и сравнить итоги.
+ *
+ * @param totalRow итоговая строка из транспортного файла
+ */
+void checkTotalRow(def totalRow) {
+    deleteAllStatic()
+    sort()
+    calc()
+    addAllStatic()
+    if (!hasError() && allCheck()) {
+        def data = getData(formData)
+        def totalColumns = [4: 'nominalPrice', 7: 'acquisitionPrice', 8: 'salePrice',
+                9: 'income', 10: 'outcome', 12: 'outcome269st', 13: 'outcomeTax']
+
+        def totalCalc = null
+        for (def row : getRows(data)) {
+            if (isItogoRow(row)) {
+                totalCalc = row
+                break
+            }
+        }
+        if (totalCalc != null) {
+            totalColumns.each { index, columnAlias ->
+                if (totalCalc[columnAlias] != totalRow[columnAlias]) {
+                    logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Имеются ли фатальные ошибки.
+ */
+def hasError() {
+    return logger.containsLevel(LogLevel.ERROR)
 }

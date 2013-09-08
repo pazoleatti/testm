@@ -11,9 +11,6 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  *
  * @version 65
  *
- * TODO:
- *      - проверки корректности данных при загрузке данных из транспортного файла
- *
  * @author rtimerbaev
  */
 
@@ -226,12 +223,7 @@ def logicalCheck() {
     if (!getRows(data).isEmpty()) {
 
         // список проверяемых столбцов (графа 12, 13)
-        // + добавил проверку редактируемых графов (1..10 ) потому что без них невозможен расчет
-        def requiredColumns = ['tadeNumber', 'securityName', 'currencyCode',
-                'nominalPriceSecurities', 'salePrice', 'acquisitionPrice',
-                'part1REPODate', 'part2REPODate',
-                // графа 12, 13
-                'outcome269st', 'outcomeTax']
+        def requiredColumns = ['outcome269st', 'outcomeTax']
 
         /** Отчетная дата. */
         def reportDate = getReportDate()
@@ -461,7 +453,7 @@ void checkCreation() {
  */
 void importData() {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '' || !fileName.contains('.xml')) {
+    if (fileName == null || fileName == '') {
         logger.error('Имя файла не должно быть пустым')
         return
     }
@@ -492,7 +484,7 @@ void importData() {
         // добавить данные в форму
         def totalLoad = addData(xml)
 
-        // расчетать, проверить и сравнить итоги
+        // рассчитать, проверить и сравнить итоги
         if (totalLoad != null) {
             checkTotalRow(totalLoad)
         } else {
@@ -960,7 +952,7 @@ def abs(def value) {
 }
 
 /**
- * Расчетать, проверить и сравнить итоги.
+ * Рассчитать, проверить и сравнить итоги.
  *
  * @param totalRow итоговая строка из транспортного файла
  */

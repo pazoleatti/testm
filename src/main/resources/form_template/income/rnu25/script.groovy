@@ -632,7 +632,7 @@ void importData() {
         // добавить данные в форму
         def totalLoad = addData(xml)
 
-        // расчетать, проверить и сравнить итоги
+        // рассчитать, проверить и сравнить итоги
         if (totalLoad != null) {
             checkTotalRow(totalLoad)
         } else {
@@ -1150,7 +1150,7 @@ def getRowNumber(def alias, def data) {
 }
 
 /**
- * Расчетать, проверить и сравнить итоги.
+ * Рассчитать, проверить и сравнить итоги.
  *
  * @param totalRow итоговая строка из транспортного файла
  */
