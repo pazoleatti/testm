@@ -10,6 +10,12 @@
  * @author lhaziev
  */
 
+
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+
 import java.text.SimpleDateFormat
 
 switch (formDataEvent) {
@@ -635,7 +641,7 @@ def checkRequiredColumns(def row, def columns) {
         }
     }
     if (!colNames.isEmpty()) {
-        def index = getIndex(row) + 1
+        def index = row.tadeNumber
         def errorMsg = colNames.join(', ')
         if (!isEmpty(index)) {
             logger.error("В строке \"Номер сделки\" равной $index не заполнены колонки : $errorMsg.")

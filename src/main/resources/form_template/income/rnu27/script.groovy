@@ -119,11 +119,10 @@ def logicalCheck() {
 
     // LC Проверка на заполнение поля «<Наименование поля>»
     for (row in data.getAllCached()) {
-        for (alias in ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'reserveCalcValuePrev',
-                'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']) {
-            if (row.getAlias() == null && row.getCell(alias).value == null) {
-                setError(row.getCell(alias).column)
-            }
+        def requiredColumns = ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'reserveCalcValuePrev',
+                'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
+        if(!checkRequiredColumns(row,requiredColumns)){
+            return false
         }
     }
     if (hasError()) {
@@ -339,6 +338,50 @@ def logicalCheck() {
         }
     }
     return true
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ */
+def checkRequiredColumns(def row, def columns) {
+    def colNames = []
+
+    def cell
+    columns.each {
+        cell = row.getCell(it)
+        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+            def name = getColumnName(row, it)
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        def index = row.number
+        def errorMsg = colNames.join(', ')
+        if (index != null) {
+            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            index = getRows(getData(formData)).indexOf(row) + 1
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        }
+        return false
+    }
+    return true
+}
+
+/**
+ * Получить название графы по псевдониму.
+ *
+ * @param row строка
+ * @param alias псевдоним графы
+ */
+def getColumnName(def row, def alias) {
+    if (row != null && alias != null) {
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
+    }
+    return ''
 }
 
 /**
@@ -623,10 +666,9 @@ void calc() {
     def data = getData(formData)
     for (row in data.getAllCached()) {
         // Проверим чтобы человек рукамми ввёл всё что необходимо
-        for (alias in ['issuer', 'regNumber', 'tradeNumber', 'currency']) {
-            if (row.getCell(alias).value == null) {
-                setError(row.getCell(alias).column)
-            }
+        def requiredColumns = ['issuer', 'regNumber', 'tradeNumber', 'currency']
+        if(!checkRequiredColumns(row,requiredColumns)){
+            return
         }
     }
     if (!hasError()) {
@@ -840,12 +882,6 @@ BigDecimal roundValue(BigDecimal value, int newScale) {
         return value.setScale(newScale, BigDecimal.ROUND_HALF_UP)
     } else {
         return value
-    }
-}
-
-void setError(Column c) {
-    if (!c.name.empty) {
-        logger.error('Поле ' + c.name.replace('%', '') + ' не заполнено')
     }
 }
 

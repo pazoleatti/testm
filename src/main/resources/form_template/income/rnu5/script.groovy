@@ -403,14 +403,6 @@ void setTotalStyle(def row) {
 }
 
 /**
- * Получить номер строки в таблице.
- */
-def getIndex(def row) {
-    def data = getData(formData)
-    getRows(data).indexOf(row)
-}
-
-/**
  * Проверить заполненость обязательных полей.
  *
  * @param row строка
@@ -431,12 +423,12 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         if (!useLog) {
             return false
         }
-        def index = getIndex(row) + 1
+        def index = row.rowNumber
         def errorMsg = colNames.join(', ')
         if (index != null) {
             logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
         } else {
-            index = getIndex(row) + 1
+            index = getRows(getData(formData)).indexOf(row) + 1
             logger.error("В строке $index не заполнены колонки : $errorMsg.")
         }
         return false

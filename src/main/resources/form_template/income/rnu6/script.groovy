@@ -164,17 +164,11 @@ DataRowHelper getDataRowsHelper() {
 }
 
 void logicCheckBefore(DataRowHelper form) {
-    columns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'currencyCode']
+    columns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'taxAccountingCurrency', 'accountingCurrency']
     for (row in form.allCached) {
         if (row.getAlias() == null) {
-            if (row.taxAccountingCurrency == null && row.accountingCurrency == null
-                    || row.taxAccountingCurrency == 0 && row.accountingCurrency == 0) {
-                logger.error('Не заполнены оба поля «%s» и «%s>»', row.getCell('taxAccountingCurrency').column.name, row.getCell('taxAccountingCurrency').column.name)
-            }
-            for (alias in columns) {
-                if (row.getCell(alias).value == null) {
-                    logger.error('Поле %s не заполнено!', row.getCell(alias).column.name)
-                }
+            if(!checkRequiredColumns(row,columns)){
+                return
             }
         }
     }
@@ -300,10 +294,8 @@ void logicalCheck(DataRowHelper form) {
             //logger.info('Проверка на заполнение поля «<Наименование поля>»')
             // LC Проверка на заполнение поля «<Наименование поля>»
             columns = ['number', 'kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
-            for (alias in columns) {
-                if (row.getCell(alias).value == null) {
-                    logger.error('Поле %s не заполнено!', row.getCell(alias).column.name)
-                }
+            if (!checkRequiredColumns(row,columns)){
+                return
             }
 
             //logger.info('Проверка на нулевые значения')
@@ -311,6 +303,7 @@ void logicalCheck(DataRowHelper form) {
             if (row.taxAccountingCurrency == row.taxAccountingRuble && row.taxAccountingRuble == row.accountingCurrency
                     && row.accountingCurrency == row.ruble && row.ruble == 0) {
                 logger.error('Все суммы по операции нулевые!')
+                return
             }
 
             //logger.info('Проверка, что не  отображаются данные одновременно по бухгалтерскому и по налоговому учету')
@@ -423,6 +416,50 @@ void logicalCheck(DataRowHelper form) {
             }
         }
     }
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ */
+def checkRequiredColumns(def row, def columns) {
+    def colNames = []
+
+    def cell
+    columns.each {
+        cell = row.getCell(it)
+        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+            def name = getColumnName(row, it)
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        def index = row.number
+        def errorMsg = colNames.join(', ')
+        if (index != null) {
+            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            index = dataRowsHelper.allCached.indexOf(row) + 1
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        }
+        return false
+    }
+    return true
+}
+
+/**
+ * Получить название графы по псевдониму.
+ *
+ * @param row строка
+ * @param alias псевдоним графы
+ */
+def getColumnName(def row, def alias) {
+    if (row != null && alias != null) {
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
+    }
+    return ''
 }
 
 void addAllStatic(DataRowHelper form) {

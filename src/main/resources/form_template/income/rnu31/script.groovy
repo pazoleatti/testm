@@ -72,30 +72,6 @@ switch (formDataEvent) {
 // графа 12 - corporateBonds
 
 /**
- * Добавить новую строку.
- */
-def addNewRow() {
-    def data = getData(formData)
-    def newRow = getNewRow()
-    def index = 0
-    if (currentDataRow != null) {
-        if (currentDataRow.getAlias() == null) {
-            index = getIndex(currentDataRow)
-        } else {
-            index = getIndex(currentDataRow) - 1
-        }
-    }
-    data.insert(newRow, index + 1)
-}
-
-/**
- * Удалить строку.
- */
-def deleteRow() {
-    getData(formData).delete(currentDataRow)
-}
-
-/**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
@@ -360,7 +336,7 @@ def checkRequiredColumns(def row, def columns) {
         }
     }
     if (!colNames.isEmpty()) {
-        def index = getIndex(row) + 1
+        def index = row.number
         def errorMsg = colNames.join(', ')
         if (!isEmpty(index)) {
             logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
