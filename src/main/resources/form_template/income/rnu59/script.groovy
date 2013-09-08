@@ -19,6 +19,9 @@
  * 13. Расходы по сделке РЕПО, учитываемые для целей налогообложения (руб.коп.) - outcomeTax
  */
 
+
+import com.aplana.sbrf.taxaccounting.model.DataRow
+
 import java.text.SimpleDateFormat
 
 // дата начала отчетного периода
@@ -319,11 +322,8 @@ def logicalCheck(){
     data.getAllCached().each{ row ->
         if (!isTotalRow(row)) {
             // Обязательность заполнения поля графы 12 и 13. Текст ошибки - Поле “Наименование поля” не заполнено!
-            ['outcome269st', 'outcomeTax'].each{ alias ->
-                if (row[alias] == null){
-                    logger.error('Поле '+row.getCell(alias).getColumn().getName()+' не заполнено!')
-                    return false
-                }
+            if(!checkRequiredColumns(row,['outcome269st', 'outcomeTax'])){
+                return false
             }
 
             // графа 5 заполнена и «графа 5» ? «отчётная дата». Текст ошибки - Неверно указана дата первой части сделки! SBRFACCTAX-2575
@@ -912,9 +912,14 @@ def checkRequiredColumns(def row, def columns) {
         }
     }
     if (!colNames.isEmpty()) {
-        def index = getIndex(row) + 1
+        def index = row.tradeNumber
         def errorMsg = colNames.join(', ')
-        logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        if (!isEmpty(index)) {
+            logger.error("В строке \"Номер сделки\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            index = getIndex(row) + 1
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        }
         return false
     }
     return true

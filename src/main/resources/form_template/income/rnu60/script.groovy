@@ -108,11 +108,8 @@ def logicalCheck() {
     for (row in getRows(data)) {
         if (row.getAlias() == null) {
             // 1. Проверка на заполнение поля «<Наименование поля>»
-            for (alias in ['outcome269st', 'outcomeTax']) {
-                if (row.getCell(alias).value == null) {
-                    setError(row.getCell(alias).column)
-                    return false
-                }
+            if (!checkRequiredColumns(row,['outcome269st', 'outcomeTax'])){
+                return false
             }
             // 2. Проверка даты первой части РЕПО
             if (row.part1REPODate != null && reportDate.time.before((Date) row.part1REPODate)) {
@@ -182,6 +179,49 @@ def logicalCheck() {
 }
 
 /**
+ * Проверить заполненность обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ * @return true - все хорошо, false - есть незаполненные поля
+ */
+def checkRequiredColumns(def row, def columns) {
+    def colNames = []
+
+    columns.each {
+        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+            def name = getColumnName(row, it)
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        def index = row.tradeNumber
+        def errorMsg = colNames.join(', ')
+        if (index!=null && index!='') {
+            logger.error("В строке \"Номер сделки\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            index = row.getIndex()
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        }
+        return false
+    }
+    return true
+}
+
+/**
+ * Получить название графы по псевдониму.
+ *
+ * @param row строка
+ * @param alias псевдоним графы
+ */
+def getColumnName(def row, def alias) {
+    if (row != null && alias != null) {
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
+    }
+    return ''
+}
+
+/**
  * Проверки соответствия НСИ.
  */
 def checkNSI() {
@@ -207,13 +247,6 @@ def checkNSI() {
         }
     }
     return true
-}
-
-void setError(Column c) {
-
-    if (!c.name.empty) {
-        logger.error('Поле ' + c.name.replace('%', '%%') + ' не заполнено')
-    }
 }
 
 Calendar getReportDate() {
