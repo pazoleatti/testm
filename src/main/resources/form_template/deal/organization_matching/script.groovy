@@ -1,14 +1,15 @@
 package form_template.deal.organization_matching
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 
 /**
  * 410 - Согласование организации
  *
  * @author Stanislav Yasinskiy
  */
-
-logger.warn("formDataEvent = " + formDataEvent)
 
 switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
@@ -32,28 +33,52 @@ switch (formDataEvent) {
         break
 }
 
-void accepted(){
+void accepted() {
+    def refDataProvider = refBookFactory.getDataProvider(9)
+    List<Map<String, RefBookValue>> updateList = new ArrayList<Map<String, RefBookValue>>()
+    List<Map<String, RefBookValue>> insertList = new ArrayList<Map<String, RefBookValue>>()
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
     for (row in dataRows) {
         if (row.refBookRecord != null) {
-            logger.warn("TODO обновить")
-        }else{
-            logger.warn("TODO добавить")
+            // изменение существующей записи
+            updateList.add(getRecord(row.name, row.code, row.kpp, row.inn, row.address, row.taxpayerCode, row.regNum, row.country, row.refBookRecord))
+        } else {
+            // добавление новой записи
+            insertList.add(getRecord(row.name, row.code, row.kpp, row.inn, row.address, row.taxpayerCode, row.regNum, row.country, row.refBookRecord))
+        }
+    }
+    if (updateList.size() > 0)
+        refDataProvider.updateRecords(new Date(), updateList)
+    if (insertList.size() > 0)
+        refDataProvider.insertRecords(new Date(), insertList)
+}
+
+void cancel() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    for (row in dataRows) {
+        if (row.refBookRecord != null) {
+            println("TODO revert")
+        } else {
+            println("TODO delete")
         }
     }
 }
 
-void cancel(){
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    for (row in dataRows) {
-        if (row.refBookRecord != null) {
-            logger.warn("TODO вернуть старую версию")
-        }else{
-            logger.warn("TODO удалить")
-        }
-    }
+Map<String, RefBookValue> getRecord(String name, Number code, Number kpp, Number inn, String address, String taxpayerCode, String regNum, Long country, Long recordId) {
+    Map<String, RefBookValue> map = new HashMap<String, RefBookValue>()
+    map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, name))
+    map.put("ORGANIZATION", new RefBookValue(RefBookAttributeType.NUMBER, code))
+    map.put("KPP", new RefBookValue(RefBookAttributeType.NUMBER, kpp))
+    map.put("INN_KIO", new RefBookValue(RefBookAttributeType.NUMBER, inn))
+    map.put("ADDRESS", new RefBookValue(RefBookAttributeType.STRING, address))
+    map.put("TAXPAYER_CODE", new RefBookValue(RefBookAttributeType.STRING, taxpayerCode))
+    map.put("REG_NUM", new RefBookValue(RefBookAttributeType.STRING, regNum))
+    map.put("COUNTRY", new RefBookValue(RefBookAttributeType.REFERENCE, country))
+    map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId))
+
+    map
 }
 
 void deleteRow() {
@@ -104,13 +129,13 @@ void logicCheck() {
             }
         }
         // Проверка на заполнение атрибута «Запись справочника»
-        if (row.editSign !=null && row.refBookRecord == null && refBookService.getRecordData(38, row.editSign).CODE.numberValue == 1) {
+        if (row.editSign != null && row.refBookRecord == null && refBookService.getRecordData(38, row.editSign).CODE.numberValue == 1) {
             def msg = row.getCell('refBookRecord').column.name
             logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
         }
         // Проверка уникальности полей в рамках справочника «Организации – участники контролируемых сделок»
         if (row.editSign == null || refBookService.getRecordData(38, row.editSign).CODE.numberValue == 0) {
-            def refDataProvider = refBookFactory.getDataProvider(9);
+            def refDataProvider = refBookFactory.getDataProvider(9)
             // Рег. номер организации
             def val = row.regNum
             if (val != null && !val.isEmpty()) {
@@ -121,8 +146,8 @@ void logicCheck() {
                 }
             }
             // Код налогоплательщика
-            val =  row.taxpayerCode
-            if ( val!= null && !val.isEmpty()) {
+            val = row.taxpayerCode
+            if (val != null && !val.isEmpty()) {
                 def res = refDataProvider.getRecords(new Date(), null, "TAXPAYER_CODE = '$val'", null);
                 if (res.getRecords().size() > 0) {
                     def msg = row.getCell("taxpayerCode").column.name
@@ -130,7 +155,7 @@ void logicCheck() {
                 }
             }
             // ИНН
-            val =  row.inn
+            val = row.inn
             if (val != null) {
                 def res = refDataProvider.getRecords(new Date(), null, "INN_KIO = $val", null);
                 if (res.getRecords().size() > 0) {
@@ -139,7 +164,7 @@ void logicCheck() {
                 }
             }
             // КПП
-            val =  row.kpp
+            val = row.kpp
             if (row.kpp != null) {
                 def res = refDataProvider.getRecords(new Date(), null, "KPP = $val", null);
                 if (res.getRecords().size() > 0) {

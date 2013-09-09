@@ -251,12 +251,12 @@ void logicCheck() {
 
         // Проверки соответствия НСИ
         checkNSI(row, "name", "Организации-участники контролируемых сделок", 9)
-        checkNSI(row, "country", "ОКСМ", 10)
-        checkNSI(row, "unitCountryCode", "ОКСМ", 10)
         checkNSI(row, "countryCode1", "ОКСМ", 10)
-        checkNSI(row, "settlement1", "ОКСМ", 10)
+        checkNSI(row, "unitCountryCode", "ОКСМ", 10)
+        checkNSI(row, "country", "ОКСМ", 10)
+        checkNSI(row, "countryCode3", "ОКСМ", 10)
         checkNSI(row, "region1", "Коды субъектов Российской Федерации", 4)
-        checkNSI(row, "countryCode3", "Коды субъектов Российской Федерации", 4)
+        checkNSI(row, "region2", "Коды субъектов Российской Федерации", 4)
         checkNSI(row, "okpCode", "Коды драгоценных металлов", 17)
         checkNSI(row, "signPhis", "Признаки физической поставки", 18)
         checkNSI(row, "conditionCode", "Коды условий поставки", 63)
