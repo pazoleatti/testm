@@ -68,55 +68,20 @@ switch (formDataEvent) {
         getDataRowHelper().save(getDataRows())
         break
 
-/**
- * Проверки первичных / консолидированных налоговых форма
- */
-
-// Инициирование Пользователем перехода «Подготовить»     //..
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED:
-        //1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Подготовлена».
-        // (Ramil Timerbaev) проверка производится в ядре
-        // 2.	Логические проверки значений налоговой формы.
-        //       logicalChecks()
-        // 3.	Проверки соответствия НСИ.
-        //       checkNSI()
-
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        checkRequiredField()
+        logicalChecks()
+        checkNSI()
         break
-
-// Инициирование Пользователем  выполнение перехода в статус «Принята» из Подготовлена      //..
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
-        //1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Принята».
-        // (Ramil Timerbaev) проверка производится в ядре
-        // 2.	Логические проверки значений налоговой формы.
-        //       logicalChecks()
-        // 3.	Проверки соответствия НСИ.
-        //       checkNSI()
-
-        break
-
-// проверка при "вернуть из принята в подготовлена"
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:    //..
-        // 1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
-        // (Ramil Timerbaev) проверка производится в ядре
-
-        break
-
 // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:    //..
         // (Ramil Timerbaev) проверка производится в ядре
         break
-
-// после вернуть из принята в подготовлена
-    case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_PREPARED:    //..
-        // (Ramil Timerbaev) проверка производится в ядре
-        break
-
-//отменить принятие консолидированной формы
-    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:    //..
-        // 1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
-        // (Ramil Timerbaev) проверка производится в ядре
-        break
-
 // обобщить (3.10.1)
     case FormDataEvent.COMPOSE:
         // 1.	Объединение строк (см. раздел 3.10.2).
@@ -303,21 +268,6 @@ void consolidation() {
     }
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
-
-/**
- * 	Скрипт для определения наличия идентичных строк в форме строке nrow
- *
- * @param nrow строка
- */
-boolean isRowInDataRows(def nrow) {
-    getDataRows().each { row ->
-        if (row.equals(nrow)) {
-            return true
-        }
-    }
-    return false
-}
-
 
 /**
  * 1. Проверка ОКАТО
