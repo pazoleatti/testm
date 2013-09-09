@@ -1,5 +1,7 @@
 package form_template.transport.summary
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+
 /**
  * Форма "Расчет суммы налога по каждому транспортному средству".
  */
@@ -107,15 +109,19 @@ switch (formDataEvent) {
  */
 void addRow() {
     def data = getData(formData)
-
-    def row = formData.createDataRow()
+    def row = getNewRow()
     data.insert(row, data.getAllCached().size() + 1)
+}
+
+def getNewRow() {
+    def row = formData.createDataRow()
     ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase',
-            'taxBaseOkeiUnit', 'ecoClass', 'years', 'ownMonths',
+            'taxBaseOkeiUnit', 'ecoClass',
             'taxBenefitCode', 'benefitStartDate', 'benefitEndDate'].each { alias ->
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias("Редактируемое поле")
     }
+    return row
 }
 
 /**
@@ -271,7 +277,7 @@ def checkRequiredField() {
         def errorMsg = ''
 
         // 2, 3, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 20 , 21
-        ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase', 'ownMonths'].each {
+        ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase'].each {
             if (row.getCell(it) != null && (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue()))) {
                 errorMsg += (!''.equals(errorMsg) ? ', ' : '') + '"' + row.getCell(it).getColumn().getName() + '"'
             }
@@ -609,6 +615,7 @@ def logicalChecks() {
         def period = reportPeriodService.get(formData.reportPeriodId)
         if (period == null) {
             info.error('Не найден отчетный период для налоговой формы.')
+            return false
         } else {
             monthCountInPeriod = period.getMonths()
         }
@@ -616,12 +623,14 @@ def logicalChecks() {
         // 13 графа - Поверка на соответствие дат использования льготы
         if (row.taxBenefitCode && row.benefitEndDate != null && (row.benefitStartDate == null || row.benefitStartDate > row.benefitEndDate)) {
             logger.error("Дата начала(окончания) использования льготы неверная!. Строка: "+row.getIndex())
+            return false
         }
 
         // 14 граафа - Проверка, что Сумма исчисления налога больше или равна Сумма налоговой льготы
         if (row.calculatedTaxSum != null && row.benefitSum != null
                 && row.calculatedTaxSum < row.benefitSum) {
             logger.error('Сумма исчисления налога меньше Суммы налоговой льготы. Строка: '+row.getIndex())
+            return false
         }
 
         // 15 графа - Проверка Коэффициент Кв
@@ -629,8 +638,10 @@ def logicalChecks() {
         if (row.coef362 != null) {
             if (row.coef362 < 0.0) {
                 logger.error('Коэффициент Кв меньше нуля. Строка: '+row.getIndex())
+                return false
             } else if (row.coef362 > 1.0) {
                 logger.error('Коэффициент Кв больше единицы. Строка: '+row.getIndex())
+                return false
             }
         }
 
@@ -639,8 +650,10 @@ def logicalChecks() {
         if (row.coefKl != null) {
             if (row.coefKl < 0.0){
                 logger.error('Коэффициент Кл меньше нуля. Строка: '+row.getIndex())
+                return false
             } else if (row.coefKl > 1.0) {
                 logger.error('Коэффициент Кл больше единицы. Строка: '+row.getIndex())
+                return false
             }
         }
 
@@ -652,7 +665,7 @@ def logicalChecks() {
         def notNull17_20 = row.benefitStartDate != null && row.benefitEndDate != null && row.coefKl != null && row.benefitSum != null
         if ((row.taxBenefitCode != null) ^ notNull17_20){
             logger.error("Данные о налоговой льготе указаны не полностью. Строка: "+row.getIndex())
-            return;
+            return false
         }
 
         // дополнительная проверка для 12 графы
@@ -660,7 +673,7 @@ def logicalChecks() {
             logger.warn('Срок владение ТС не должен быть больше текущего налогового периода.')
         }
     }
-    return true;
+    return true
 }
 
 /**
@@ -848,7 +861,7 @@ def consolidation(){
             } else{
                 sourceDataRows.each{ sRow ->
                     // новая строка
-                    def newRow = formData.createDataRow()
+                    def newRow = getNewRow()
                     // «Графа 2» принимает значение «графы 2» формы-источника
                     newRow.okato = sRow.codeOKATO
                     // «Графа 3» принимает значение «графы 4» формы-источника
@@ -897,13 +910,13 @@ def consolidation(){
                      */
 
                     // Дугона – дата угона
-                    Calendar stealingDate
+                    Calendar stealingDate = Calendar.getInstance()
                     // Двозврата – дата возврата
-                    Calendar returnDate
+                    Calendar returnDate = Calendar.getInstance()
                     // Дпостановки – дата постановки ТС на учет
-                    Calendar deliveryDate
+                    Calendar deliveryDate = Calendar.getInstance()
                     // Дснятия – дата снятия ТС с учета
-                    Calendar removalDate
+                    Calendar removalDate = Calendar.getInstance()
                     // владенеи в месяцах
                     int ownMonths
                     // Срока нахождения в угоне (Мугон)
@@ -938,7 +951,7 @@ def consolidation(){
                             if (sRow.stealDateStart.compareTo(reportPeriodStartDate.getTime()) < 0){
                                 stealingDate = reportPeriodStartDate
                             } else{
-                                stealingDate = sRow.stealDateStart
+                                stealingDate.setTime(sRow.stealDateStart)
                             }
 
                             /**
@@ -949,11 +962,11 @@ def consolidation(){
                              * Двозврата = «графа 16»(источника)
                              *
                              */
-                            if (sRow.stealDateStart == null || sRow.stealDateStart.compareTo(reportPeriodEndDate.getTime()) > 0){
+                            if (sRow.stealDateEnd == null || sRow.stealDateEnd.compareTo(reportPeriodEndDate.getTime()) > 0){
                                 returnDate = reportPeriodEndDate
                             } else{
                                 returnDate = Calendar.getInstance()
-                                returnDate.setTime(sRow.stealDateStart)
+                                returnDate.setTime(sRow.stealDatEnd)
                             }
 
                             /**
@@ -963,7 +976,7 @@ def consolidation(){
                              * Иначе
                              *  Мугон = МЕСЯЦ(Двозврата)-МЕСЯЦ(Дугона)-1
                              */
-                            def diff1 = returnDate.getMonth() - stealingDate.getMonth() - 1
+                            def diff1 = returnDate.getTime().month - stealingDate.getTime().month - 1
                             if (diff1 < 0){
                                 stealingMonths = 0
                             } else{
@@ -981,7 +994,7 @@ def consolidation(){
                         if (sRow.regDateEnd == null || sRow.regDateEnd.compareTo(reportPeriodEndDate.getTime()) > 0){
                             removalDate = reportPeriodEndDate
                         }   else{
-                            removalDate = sRow.regDateEnd
+                            removalDate.setTime(sRow.regDateEnd)
                         }
 
                         /**
@@ -991,10 +1004,10 @@ def consolidation(){
                          * Иначе
                          *  Дпостановки = «графа 13»(источника)
                          */
-                        if (sRow.regDate.compareTo(reportPeriodService.getStartDate(formData.reportPeriodId).getTime()) < 0){
-                            deliveryDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+                        if (sRow.regDate.compareTo(reportPeriodStartDate.getTime()) < 0){
+                            deliveryDate = reportPeriodStartDate
                         } else{
-                            deliveryDate = sRow.regDate
+                            deliveryDate.setTime(sRow.regDate)
                         }
 
                         /**
