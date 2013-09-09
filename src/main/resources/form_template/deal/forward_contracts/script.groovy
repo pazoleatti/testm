@@ -216,9 +216,10 @@ def calcItog(int i) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    newRow.getCell('itog').colSpan = 12
+    newRow.getCell('itog').colSpan = 14
     newRow.itog = 'Подитог:'
     newRow.setAlias('itg#'.concat(i.toString()))
+    newRow.getCell('fix').colSpan = 2
 
     // Расчеты подитоговых значений
     def BigDecimal priceItg = 0, totalItg = 0

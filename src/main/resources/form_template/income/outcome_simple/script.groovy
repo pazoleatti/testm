@@ -2,6 +2,9 @@ package form_template.income.outcome_simple
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormData
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -11,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
-import javax.script.ScriptException
 import java.text.SimpleDateFormat
 
 /**
@@ -434,19 +436,6 @@ def isBank() {
 }
 
 /**
- * Проверка на террбанк.
- */
-def isTerBank() {
-    boolean isTerBank = false
-    departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
-        if (it.departmentId != formData.departmentId) {
-            isTerBank = true
-        }
-    }
-    return isTerBank
-}
-
-/**
  * Получить сумму диапазона строк определенного столбца.
  */
 def getSum(String columnAlias, String rowFromAlias, String rowToAlias) {
@@ -752,28 +741,31 @@ def getSumForColumn7(def form, def value1, def value2) {
     def tmpValueA = value2.replace('.', '')
     def tmpValueB
     getRows(data).each { row ->
-        tmpValueB = (row.balance ? row.balance.replace('.', '') : null)
-        if (value1 == row.code && tmpValueA == tmpValueB &&
-                row.ruble != null && row.ruble != 0) {
-            // получить (дату - 3 года)
-            dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(row.docDate)) - 3))
-            // получить налоговые и отчетные периоды за найденый промежуток времени [(дата - 3года)..дата]
-            def taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, dateFrom, row.docDate)
-            taxPeriods.each { taxPeriod ->
-                def id = taxPeriod.getId()
-                def reportPeriods = reportPeriodService.listByTaxPeriod(id)
-                reportPeriods.each { reportPeriod ->
-                    // в каждой форме относящейся к этим периодам ищем соответствующие строки и суммируем по 10 графе
-                    def f = formDataService.find(form.getFormType().getId(), FormDataKind.PRIMARY, form.getDepartmentId(), reportPeriod.getId())
-                    def d = getData(f)
-                    if (d != null) {
-                        getRows(d).each { r ->
-                            // графа  4 - balance
-                            // графа  5 - docNumber
-                            // графа  6 - docDate
-                            // графа 10 - taxAccountingRuble
-                            if (r.balance == row.balance && r.docNumber == row.docNumber && r.docDate == row.docDate) {
-                                sum += (r.taxAccountingRuble ?: 0)
+        if (row.getAlias()==null) {
+            def String balance = getBalanceValue(row.balance)
+            tmpValueB = (row.balance!=null && balance!=null ? balance.replace('.', '') : null)
+            if (value1 == row.code && tmpValueA == tmpValueB && row.ruble != null && row.ruble != 0) {
+                // получить (дату - 3 года)
+                def Date dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(row.docDate)) - 3))
+                // получить налоговые и отчетные периоды за найденый промежуток времени [(дата - 3года)..дата]
+                def List<TaxPeriod> taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, dateFrom, row.docDate)
+                taxPeriods.each { taxPeriod ->
+                    def List<ReportPeriod> reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.getId())
+                    reportPeriods.each { reportPeriod ->
+                        // в каждой форме относящейся к этим периодам ищем соответствующие строки и суммируем по 10 графе
+                        def FormData f = formDataService.find(form.getFormType().getId(), FormDataKind.PRIMARY, form.getDepartmentId(), reportPeriod.getId())
+                        if (f!=null) {
+                            def DataRowHelper d = getData(f)
+                            if (d != null) {
+                                getRows(d).each { r ->
+                                    // графа  4 - balance
+                                    // графа  5 - docNumber
+                                    // графа  6 - docDate
+                                    // графа 10 - taxAccountingRuble
+                                    if (r.balance == row.balance && r.docNumber == row.docNumber && r.docDate == row.docDate) {
+                                        sum += (r.taxAccountingRuble ?: 0)
+                                    }
+                                }
                             }
                         }
                     }
@@ -783,3 +775,8 @@ def getSumForColumn7(def form, def value1, def value2) {
     }
     return sum
 }
+
+def getBalanceValue(def value) {
+    return refBookService.getStringValue(27, value, 'NUMBER')
+}
+
