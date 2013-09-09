@@ -217,7 +217,7 @@ void logicalChecks() {
 
         //Если «графа 16» заполнена, то Заполнена  «графа 15»
         if (row.stealDateEnd != null && row.stealDateStart == null){
-            logger.error("Не заполнено поле «Дата угона». Строка: "+row.getIndex())
+            logger.error("Строка $row.rowNumber : Не заполнено поле «Дата угона».")
         }
     }
 }
