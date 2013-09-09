@@ -259,7 +259,7 @@ void logicCheck() {
         checkNSI(row, "countryCode3", "Коды субъектов Российской Федерации", 4)
         checkNSI(row, "okpCode", "Коды драгоценных металлов", 17)
         checkNSI(row, "signPhis", "Признаки физической поставки", 18)
-        checkNSI(row, "conditionCode", "Коды условий поставки", 21)
+        checkNSI(row, "conditionCode", "Коды условий поставки", 63)
     }
 }
 
