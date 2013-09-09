@@ -16,12 +16,14 @@ import java.util.Map;
 public interface RefBookIncome102Dao {
     /**
      * Получение записей справочника
+     *
+     * @param reportPeriodId
      * @param pagingParams
      * @param filter
      * @param sortAttribute
      * @return
      */
-    public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
+    public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
     /**
      * Получение записи справочника по recordId
