@@ -258,7 +258,7 @@ public class ImportServiceImpl implements ImportService {
      */
     private String getRowString(HSSFRow row, Integer colP) {
         if (row == null) {
-            return "";
+            return "<row/>";
         }
         StringBuilder sb = new StringBuilder();
         sb.append(TAB).append("<row>").append(ENTER);
