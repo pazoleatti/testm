@@ -246,7 +246,7 @@ def logicalCheck() {
 
         if (!rowsNotCalc.contains(row.getAlias()) && !(row.getAlias() in ['R118', 'R119', 'R141', 'R142'])) {
             row.opuSumTotal = 0
-            for (income102 in refBookIncome102.getRecords(null, null, 'REPORT_PERIOD_ID = ' + formData.reportPeriodId.toString() + ' AND OPU_CODE = \'' + row.accountingRecords.toString() + '\'', null).getRecords()) {
+            for (income102 in refBookIncome102.getRecords(reportPeriodService.getEndDate(formData.reportPeriodId).time, null, 'OPU_CODE = \'' + row.accountingRecords.toString() + '\'', null).getRecords()) {
                 row.opuSumTotal += income102.get("TOTAL_SUM").getNumberValue()
             }
         }
@@ -262,7 +262,7 @@ def logicalCheck() {
          */
         if (row.getAlias() in ['R118', 'R119', 'R141', 'R142']) {
             row.opuSumTotal = 0
-            for (income101 in refBookIncome101.getRecords(null, null, 'REPORT_PERIOD_ID = ' + formData.reportPeriodId.toString() + ' AND ACCOUNT = \'' + row.accountingRecords.toString() + '\'', null).getRecords()) {
+            for (income101 in refBookIncome101.getRecords(reportPeriodService.getEndDate(formData.reportPeriodId).time, null, 'ACCOUNT = \'' + row.accountingRecords.toString() + '\'', null).getRecords()) {
                 row.opuSumTotal += income101.get("DEBET_RATE").getNumberValue()
             }
         }
