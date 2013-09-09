@@ -1,7 +1,7 @@
+package form_template.income.rnu64
+
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
@@ -28,14 +28,14 @@ import java.text.SimpleDateFormat
  *
  */
 switch (formDataEvent) {
-// Инициирование Пользователем проверки данных формы в статусе «Создана», «Подготовлена», «Утверждена», «Принята»
+    // Инициирование Пользователем проверки данных формы в статусе «Создана», «Подготовлена», «Утверждена», «Принята»
     case FormDataEvent.CHECK:
         //1. Логические проверки значений налоговой формы
         logicalCheck()
         //2. Проверки соответствия НСИ
         //NCICheck()
         break
-// Инициирование Пользователем создания формы
+    // Инициирование Пользователем создания формы
     case FormDataEvent.CREATE:
         checkBeforeCreate()
         //1.    Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при создании формы.
@@ -43,78 +43,58 @@ switch (formDataEvent) {
         // ?? logicalCheck()
         //3.    Проверки соответствия НСИ.
         break
-// Инициирование Пользователем перехода «Подготовить»
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED:
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
         //1.    Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Подготовлена».
         //2.    Логические проверки значений налоговой формы.
         logicalCheck()
         //3.    Проверки соответствия НСИ.
         break
 
-// проверка при "вернуть из принята в подготовлена"
+    // проверка при "вернуть из принята в подготовлена"
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
         // 1.   Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
-        checkOnCancelAcceptance()
-
         break
 
-// после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
-        acceptance()
-        break
-
-// после вернуть из принята в подготовлена
+    // после вернуть из принята в подготовлена
     case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_PREPARED:
-        acceptance()
         break
 
-// Инициирование Пользователем  выполнение перехода в статус «Принята» из Подготовлена
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
-        //1.    Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Принята».
-        checkOnPrepareOrAcceptance('Принятие')
-        // 2.   Логические проверки значений налоговой формы.
-        //       logicalChecks()
-        // 3.   Проверки соответствия НСИ.
-        //       checkNSI()
-
-        break
-
-// отменить принятие
+    // отменить принятие
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
         // 1.   Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
-        checkOnCancelAcceptance()
         break
 
-// Событие добавить строку
+    // Событие добавить строку
     case FormDataEvent.ADD_ROW:
         addNewRow()
         setRowIndex()
         break
 
-// событие удалить строку
+    // событие удалить строку
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         setRowIndex()
         break
 
     case FormDataEvent.CALCULATE:
-        form = getData(formData)
-        deleteAllStatic(form)
-        sort()
-        fillForm()
+        calc()
         logicalCheck()
         break
 
     case FormDataEvent.COMPOSE:
         consolidation()
-        deleteAllStatic(form)
-        sort()
-        fillForm()
-        logicalCheck()
-        // для сохранения изменений приемников
-        getData(formData).commit()
+        calc()
+        if (!hasError() && logicalCheck()) {
+            // для сохранения изменений приемников
+            getData(formData).commit()
+        }
         break
-// после принятия из подготовлена
+    // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
         logicalCheck()
         break
@@ -230,12 +210,12 @@ def logicalCheck() {
     def data = getData(formData)
     def totalQuarterRow = null
     def totalRow = null
-    getRows(data).each { row ->
+    for (def row : getRows(data)) {
         // Обязательность заполнения поля графы (с 1 по 6); фатальная; Поле ”Наименование поля” не заполнено!
         if (!isTotalRow(row)) {
             def requiredColumns = ['number', 'date', 'part', 'dealingNumber', 'bondKind', 'costs']
             if(!checkRequiredColumns(row, requiredColumns)){
-                return false;
+                return false
             }
 
             reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
@@ -246,17 +226,20 @@ def logicalCheck() {
                     (reportPeriodEndDate.getTime().equals(row.date) || row.date.before(reportPeriodEndDate.getTime()))
             )) {
                 logger.error("В строке \"№ пп\" равной " + row.number + " дата совершения операции вне границ отчетного периода!")
+                return false
             }
 
             getRows(data).each { rowItem ->
                 if (!isTotalRow(row) && row.number == rowItem.number && !row.equals(rowItem)) {
                     logger.error("В строке \"№ пп\" равной " + row.number + " нарушена уникальность номера по порядку!")
+                    return false
                 }
             }
 
             // Проверка на нулевые значения; фатальная; Все суммы по операции нулевые!
             if (row.costs == 0) {
                 logger.error("В строке \"№ пп\" равной " + row.number + " все суммы по операции нулевые!")
+                return false
             }
             // Проверка актуальности поля «Часть сделки»; не фатальная;
             if (row.part != null && getPart(row.part) == null) {
@@ -274,14 +257,16 @@ def logicalCheck() {
         // Проверка итоговых значений за текущий квартал; фатальная; Итоговые значения за текущий квартал рассчитаны неверно!
         if (totalQuarterRow != null && totalQuarterRow.costs != getQuarterTotal()) {
             logger.error('Итоговые значения за текущий квартал рассчитаны неверно!')
+            return false
         }
 
         // Проверка итоговых значений за текущий отчётный (налоговый) период; фатальная; Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!
         if (totalRow != null && totalRow.costs != getTotalValue()) {
             logger.error('Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!')
+            return false
         }
     }
-
+    return true
 }
 
 /**
@@ -439,52 +424,6 @@ void sort() {
 }
 
 /**
- * Для перевода сводной налогой формы в статус "принят".
- */
-void acceptance() {
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.PRIMARY).each()
-            {
-                formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
-            }
-}
-
-/**
- * Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята".
- */
-void checkOnPrepareOrAcceptance(def value) {
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() { department ->
-        if (department.formTypeId == formData.getFormType().getId()) {
-            def form = formDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-            // если форма существует и статус "принята"
-            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
-                logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
-            }
-        }
-    }
-}
-
-/**
- * Проверки при переходе "Отменить принятие" в подготовлена.
- */
-void checkOnCancelAcceptance() {
-    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
-            formData.getFormType().getId(), formData.getKind());
-    DepartmentFormType department = departments.getAt(0);
-    if (department != null) {
-        FormData form = formDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-
-        if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
-            if (formData.getKind().getId() == 1) { // если форма первичная
-                logger.error("Нельзя отменить принятие налоговой формы, так как уже «Утверждена» или «Принята» консолидированная налоговая форма.")
-            } else {    // если форма консолидированая
-                logger.error("Нельзя отменить принятие налоговой формы, так как уже «Утверждена» или «Принята» консолидированная налоговая форма вышестоящего уровня.")
-            }
-        }
-    }
-}
-
-/**
  * Консолидация.
  */
 void consolidation() {
@@ -551,48 +490,50 @@ void setTotalStyle(def row) {
  */
 void importData() {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '' || !fileName.contains('.xml')) {
+    if (fileName == null || fileName == '') {
+        logger.error('Имя файла не должно быть пустым')
+        return
+    }
+    if (!fileName.contains('.xml')) {
+        logger.error('Формат файла должен быть *.xml')
         return
     }
 
     def is = ImportInputStream
     if (is == null) {
+        logger.error('Поток данных пуст')
         return
     }
 
     def xmlString = importService.getData(is, fileName)
     if (xmlString == null || xmlString == '') {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
 
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
 
-    // сохранить начальное состояние формы
-    def data = getData(formData)
-    def rowsOld = getRows(data)
     try {
         // добавить данные в форму
-        addData(xml)
+        def totalLoad = addData(xml)
 
-        // расчитать и проверить
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicalCheck()
+        // рассчитать, проверить и сравнить итоги
+        if (totalLoad != null) {
+            checkTotalRow(totalLoad)
+        } else {
+            logger.error("Нет итоговой строки.")
         }
     } catch(Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
-    // откатить загрузку если есть ошибки
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        data.clear()
-        data.insert(rowsOld, 1)
-    } else {
-        logger.info('Данные загружены')
+
+    if (!hasError()) {
+        logger.info('Закончена загрузка файла ' + fileName)
     }
-    data.commit()
 }
 
 /**
@@ -600,18 +541,16 @@ void importData() {
  *
  * @param xml данные
  */
-void addData(def xml) {
-    def tmp
-    def indexRow = 0
-    def newRows = []
+def addData(def xml) {
     def index
-    def refDataProvider = refBookFactory.getDataProvider(60)
+    def date = new Date()
+    def cache = [:]
 
-    // TODO (Aydar Kadyrgulov)  Проверка корректности данных
+    def data = getData(formData)
+    data.clear()
+
     for (def row : xml.exemplar.table.detail.record) {
-        indexRow++
         index = 0
-
         def newRow = getNewRow()
 
         // графа 1
@@ -622,55 +561,36 @@ void addData(def xml) {
         newRow.date = getDate(row.field[index].@value.text())
         index++
 
-        // графа 3 - справочник 15 "Общероссийский классификатор валют"
-        tmp = null
-        if (row.field[index].@value.text() != null &&
-                row.field[index].@value.text().trim() != '') {
-            def records = refDataProvider.getRecords(new Date(), null, "CODE = '" + row.field[index].@value.text() + "'", null);
-            if (records != null && !records.getRecords().isEmpty()) {
-                tmp = records.getRecords().get(0).get('record_id').getNumberValue()
-            }
-        }
-        newRow.part = tmp
+        // графа 3 - справочник 60 "Части сделок"
+        newRow.part = getRecords(60, 'CODE', row.field[index].@value.text(), date, cache)
         index++
 
         // графа 4
-        newRow.dealingNumber = row.field[index].@value.text()
+        newRow.dealingNumber = row.field[index].text()
         index++
 
         // графа 5
-        newRow.bondKind = row.field[index].@value.text()
+        newRow.bondKind = row.field[index].text()
         index++
 
         // графа 6
         newRow.costs = getNumber(row.field[index].@value.text())
 
-        newRows.add(newRow)
+        insert(data, newRow)
     }
 
-
-    // проверка итоговых данных
-    if (xml.exemplar.table.total.record.field.size() > 0 && !newRows.isEmpty()) {
+    // итоговая строка
+    if (xml.exemplar.table.total.record.field.size() > 0) {
+        def row = xml.exemplar.table.total.record[0]
         def totalRow = formData.createDataRow()
 
-        totalRow.costs = 0
+        // графа 6
+        totalRow.costs = getNumber(row.field[5].@value.text())
 
-        newRows.each { row ->
-            totalRow.costs += (row.costs != null ? row.costs : 0)
-        }
-
-        for (def row : xml.exemplar.table.total.record) {
-            // графа 6
-            if (totalRow.costs != getNumber(row.field[5].@value.text())) {
-                logger.error('Итоговые значения неправильные.')
-                return
-            }
-        }
+        return totalRow
+    } else {
+        return null
     }
-    def data = getData(formData)
-    data.clear()
-    data.insert(newRows, 1)
-    data.commit()
 }
 
 /**
@@ -731,4 +651,79 @@ void calc() {
     deleteAllStatic(form)
     sort()
     fillForm()
+}
+
+
+/**
+ * Рассчитать, проверить и сравнить итоги.
+ *
+ * @param totalRow итоговая строка из транспортного файла
+ */
+void checkTotalRow(def totalRow) {
+    calc()
+    if (!hasError() && logicalCheck()) {
+        def data = getData(formData)
+        def totalColumns = [6 : 'costs']
+
+        def totalCalc = null
+        for (def row : getRows(data)) {
+            if (isMainTotalRow(row)) {
+                totalCalc = row
+                break
+            }
+        }
+        if (totalCalc != null) {
+            totalColumns.each { index, columnAlias ->
+                if (totalCalc[columnAlias] != totalRow[columnAlias]) {
+                    logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Имеются ли фатальные ошибки.
+ */
+def hasError() {
+    return logger.containsLevel(LogLevel.ERROR)
+}
+
+/**
+ * Вставить новыую строку в конец нф.
+ *
+ * @param data данные нф
+ * @param row строка
+ */
+void insert(def data, def row) {
+    data.insert(row, getRows(data).size() + 1)
+}
+
+/**
+ * Получить id справочника.
+ *
+ * @param ref_id идентификатор справончика
+ * @param code атрибут справочника
+ * @param value значение для поиска
+ * @param date дата актуальности
+ * @param cache кеш
+ * @return
+ */
+def getRecords(def ref_id, String code, String value, Date date, def cache) {
+    String filter = code + "= '"+ value+"'"
+    if (cache[ref_id]!=null) {
+        if (cache[ref_id][filter] != null) {
+            return cache[ref_id][filter]
+        }
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    if (records.size() == 1){
+        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        return cache[ref_id][filter]
+    }
+    logger.error("Не удалось определить элемент справочника!")
+    return null
 }

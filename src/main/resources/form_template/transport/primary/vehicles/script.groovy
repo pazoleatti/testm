@@ -79,28 +79,14 @@ switch (formDataEvent) {
         getDataRowHelper().save(getDataRows())
         break
 
-/**
- * Проверки первичных / консолидированных налоговых форма
- */
-
-// Инициирование Пользователем перехода «Подготовить»     //..
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED:
-        //1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Подготовлена».
-        // (Ramil Timerbaev) проверка производится в ядре
-        // 2.	Логические проверки значений налоговой формы.
-        //       logicalChecks()
-        // 3.	Проверки соответствия НСИ.
-        //       checkNSI()
-
-        break
-
-// Инициирование Пользователем  выполнение перехода в статус «Принята» из Подготовлена      //..
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
-        //1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Принята».
-        // (Ramil Timerbaev) проверка производится в ядре
-        // 2.	Логические проверки значений налоговой формы.
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        checkRequiredField()
         logicalChecks()
-        // 3.	Проверки соответствия НСИ.
         checkNSI()
 
         break
@@ -231,7 +217,7 @@ void logicalChecks() {
 
         //Если «графа 16» заполнена, то Заполнена  «графа 15»
         if (row.stealDateEnd != null && row.stealDateStart == null){
-            logger.error("Не заполнено поле «Дата угона». Строка: "+row.getIndex())
+            logger.error("Строка $row.rowNumber : Не заполнено поле «Дата угона».")
         }
     }
 }

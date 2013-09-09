@@ -17,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.GetRefBookValuesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.GetRefBookValuesResult;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.RefBookItem;
@@ -35,6 +36,9 @@ public class GetRefBookValuesHandler extends
 
 	@Autowired
 	RefBookFactory refBookFactory;
+
+	@Autowired
+	RefBookHelper refBookHelper;
 
 	public GetRefBookValuesHandler() {
 		super(GetRefBookValuesAction.class);
@@ -60,7 +64,8 @@ public class GetRefBookValuesHandler extends
 						filter, sortAttribute);
 
 		GetRefBookValuesResult result = new GetRefBookValuesResult();
-		result.setPage(asseblRefBookPage(action, refBookPage, refBook));
+		result.setPage(asseblRefBookPage(action, refBookDataProvider,
+				refBookPage, refBook));
 		return result;
 	}
 
@@ -124,7 +129,7 @@ public class GetRefBookValuesHandler extends
 	}
 
 	private PagingResult<RefBookItem> asseblRefBookPage(
-			GetRefBookValuesAction action,
+			GetRefBookValuesAction action, RefBookDataProvider provider,
 			PagingResult<Map<String, RefBookValue>> refBookPage, RefBook refBook) {
 
 		List<RefBookItem> items = new ArrayList<RefBookItem>();
@@ -136,26 +141,20 @@ public class GetRefBookValuesHandler extends
 			item.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()
 					.longValue());
 			List<RefBookAttribute> attribute = refBook.getAttributes();
-			for (RefBookAttribute refBookAttribute : attribute) {
-				if (!RefBook.RECORD_ID_ALIAS
-						.equals(refBookAttribute.getAlias())) {
-					if (RefBookAttributeType.REFERENCE.equals(refBookAttribute
-							.getAttributeType())) {
-						// TODO: Необходимо разименовать значение ссылки
-						// (http://jira.aplana.com/browse/SBRFACCTAX-3220)
-						values.add("Не разименовано: "
-								+ record.get(refBookAttribute.getAlias()));
-					} else {
-						String derefValue = String.valueOf(record
-								.get(refBookAttribute.getAlias()));
-						values.add(derefValue);
-						if (refBookAttribute.getId().equals(
-								action.getRefBookAttrId())) {
-							item.setDereferenceValue(derefValue);
-						}
-					}
 
+			Map<String, String> dereferenceRecord = refBookHelper
+					.singleRecordDereference(refBook, provider, attribute, record);
+
+			for (RefBookAttribute refBookAttribute : attribute) {
+				String dereferanceValue = dereferenceRecord
+						.get(refBookAttribute.getAlias());
+				if (refBookAttribute.isVisible()) {
+					values.add(dereferanceValue);
 				}
+				if (refBookAttribute.getId().equals(action.getRefBookAttrId())) {
+					item.setDereferenceValue(dereferanceValue);
+				}
+
 			}
 			item.setValues(values);
 			items.add(item);
