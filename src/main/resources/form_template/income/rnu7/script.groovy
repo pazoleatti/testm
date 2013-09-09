@@ -359,8 +359,7 @@ def logicalCheck(def useLog) {
             def checkSumm = checkDate(row)
 
             if (checkSumm == null) {
-                logger.error('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете за последние 3 года не проходила!')
-                return false
+                logger.warn('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете за последние 3 года не проходила!')
             } else if (checkSumm >= row.ruble) {
                 logger.warn('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-7 в <отчетный период> отчетном периоде.')
             }
@@ -674,7 +673,7 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         if (!useLog) {
             return false
         }
-        def index = getIndex(row) + 1
+        def index = row.rowNumber
         def errorMsg = colNames.join(', ')
         if (index != null) {
             logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")

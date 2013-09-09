@@ -67,7 +67,14 @@ switch (formDataEvent) {
         recalculateNumbers()
         break
     case FormDataEvent.COMPOSE:
-        consolidation(dataRowsHelper)
+        def form = dataRowsHelper
+        consolidation(form)
+        sort(form)
+        form.save(form.getAllCached())
+        addAllStatic(form)
+        //if(logicalCheck(form)){//TODO падает
+            form.commit()
+        //}
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:
         form = dataRowsHelper
@@ -110,7 +117,9 @@ switch (formDataEvent) {
             logicalCheck(form)
             NSICheck(form)
             if (!logger.containsLevel(LogLevel.ERROR)) {
-                acceptance()
+                // (Ramil Timerbaev) убрал compose потому что он выполяется в ядре.
+                // При выполнении на стороне скрипта compose доступен только для некоторых событии AFTER_MOVE_*
+                // acceptance()
             }
         }
         break
@@ -162,17 +171,11 @@ DataRowHelper getDataRowsHelper() {
 }
 
 void logicCheckBefore(DataRowHelper form) {
-    columns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'currencyCode']
+    columns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'taxAccountingCurrency', 'accountingCurrency']
     for (row in form.allCached) {
         if (row.getAlias() == null) {
-            if (row.taxAccountingCurrency == null && row.accountingCurrency == null
-                    || row.taxAccountingCurrency == 0 && row.accountingCurrency == 0) {
-                logger.error('Не заполнены оба поля «%s» и «%s>»', row.getCell('taxAccountingCurrency').column.name, row.getCell('taxAccountingCurrency').column.name)
-            }
-            for (alias in columns) {
-                if (row.getCell(alias).value == null) {
-                    logger.error('Поле %s не заполнено!', row.getCell(alias).column.name)
-                }
+            if(!checkRequiredColumns(row,columns)){
+                return
             }
         }
     }
@@ -276,7 +279,7 @@ void consolidation(DataRowHelper form) {
     form.commit()
 }
 
-void logicalCheck(DataRowHelper form) {
+def logicalCheck(DataRowHelper form) {
 
     List<BigDecimal> uniq = new ArrayList<>(form.allCached.size())
     List<Map<Integer, Object>> docs = new ArrayList<>()
@@ -292,16 +295,15 @@ void logicalCheck(DataRowHelper form) {
                 def index = ((Integer)(form.allCached.indexOf(row) + 1))
                 SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
                 logger.error("Для строки $index имеется  другая запись в налоговом учете с аналогичными значениями балансового счета=%s, документа № %s от %s.", getNumberAttribute(row.code).toString(), row.docNumber.toString(), dateFormat.format(row.docDate))
+                return false
             }
             uniq456.add(m)
 
             //logger.info('Проверка на заполнение поля «<Наименование поля>»')
             // LC Проверка на заполнение поля «<Наименование поля>»
             columns = ['number', 'kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
-            for (alias in columns) {
-                if (row.getCell(alias).value == null) {
-                    logger.error('Поле %s не заполнено!', row.getCell(alias).column.name)
-                }
+            if (!checkRequiredColumns(row,columns)){
+                return false
             }
 
             //logger.info('Проверка на нулевые значения')
@@ -309,12 +311,14 @@ void logicalCheck(DataRowHelper form) {
             if (row.taxAccountingCurrency == row.taxAccountingRuble && row.taxAccountingRuble == row.accountingCurrency
                     && row.accountingCurrency == row.ruble && row.ruble == 0) {
                 logger.error('Все суммы по операции нулевые!')
+                return false
             }
 
             //logger.info('Проверка, что не  отображаются данные одновременно по бухгалтерскому и по налоговому учету')
             if (row.taxAccountingCurrency == null && row.accountingCurrency == null
                     || row.taxAccountingCurrency == 0 && row.accountingCurrency == 0) {
                 logger.error('Не заполнены оба поля «%s» и «%s>»', row.getCell('taxAccountingCurrency').column.name, row.getCell('taxAccountingCurrency').column.name)
+                return false
             }
 
             //logger.info('Проверка даты совершения операции и границ отчётного периода')
@@ -322,6 +326,7 @@ void logicalCheck(DataRowHelper form) {
             if (reportPeriodService.getStartDate(formData.reportPeriodId).time.time > row.date.time
                     || row.date.time > reportPeriodService.getEndDate(formData.reportPeriodId).time.time) {
                 logger.error('Дата совершения операции вне границ отчётного периода!')
+                return false
             }
 
             // @todo LC Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода
@@ -340,6 +345,7 @@ void logicalCheck(DataRowHelper form) {
                 }
                 if (!(c10 > c12)) {
                     logger.error('Сумма данных бухгалтерского учёта превышает сумму начисленных платежей для документа %s от %s!', row.docNumber as String, rowSum.docDate as String)
+                    return false
                 }
             }
 
@@ -347,6 +353,7 @@ void logicalCheck(DataRowHelper form) {
             // Проверка на уникальность поля «№ пп» SBRFACCTAX-3507
             if (uniq.contains(row.number)) {
                 logger.error('Нарушена уникальность номера по порядку!')
+                return false
             } else {
                 uniq.add(row.number as BigDecimal)
             }
@@ -354,13 +361,16 @@ void logicalCheck(DataRowHelper form) {
             // Проверка соответствия балансового счета коду налогового учета
             if (!(row.kny == row.code)) {
                 logger.error('Балансовый счет не соответствует коду налогового учета!')
+                return false
             }
             // Арифметические проверки расчета неитоговых граф
             if (row.docNumber != '0000' && !(row.taxAccountingRuble == calc10(row))) {
                 logger.error('Неверно рассчитана графа %s!', row.getCell('taxAccountingRuble').column.name)
+                return false
             }
             if (row.docNumber != '0000' && !(row.ruble == calc12(row))) {
                 logger.error('Неверно рассчитана графа %s!', row.getCell('ruble').column.name)
+                return false
             }
 
             // Проверка наличия суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
@@ -406,9 +416,11 @@ void logicalCheck(DataRowHelper form) {
                 itogoKNY = itogoKNY(form, form.getAllCached().indexOf(row) - 1)
                 if (row.taxAccountingRuble != itogoKNY.taxAccountingRuble) {
                     logger.error('Неверное значение %s для графы %s', row.helper as String, row.getCell('taxAccountingRuble').column.name)
+                    return false
                 }
                 if (row.ruble != itogoKNY.ruble) {
                     logger.error('Неверное значение %s для графы %s', row.helper as String, row.getCell('ruble').column.name)
+                    return false
                 }
             } else {
                 // Общее итого
@@ -417,10 +429,56 @@ void logicalCheck(DataRowHelper form) {
                 itogo = getItogo(form)
                 if (row.taxAccountingRuble != itogo.taxAccountingRuble || row.ruble != itogo.ruble) {
                     logger.error('Неверное итоговое значение')
+                    return false
                 }
             }
         }
     }
+    return true
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ */
+def checkRequiredColumns(def row, def columns) {
+    def colNames = []
+
+    def cell
+    columns.each {
+        cell = row.getCell(it)
+        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+            def name = getColumnName(row, it)
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        def index = row.number
+        def errorMsg = colNames.join(', ')
+        if (index != null) {
+            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            index = dataRowsHelper.allCached.indexOf(row) + 1
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        }
+        return false
+    }
+    return true
+}
+
+/**
+ * Получить название графы по псевдониму.
+ *
+ * @param row строка
+ * @param alias псевдоним графы
+ */
+def getColumnName(def row, def alias) {
+    if (row != null && alias != null) {
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
+    }
+    return ''
 }
 
 void addAllStatic(DataRowHelper form) {

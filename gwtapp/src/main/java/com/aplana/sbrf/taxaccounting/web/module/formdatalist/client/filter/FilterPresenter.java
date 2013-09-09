@@ -45,6 +45,8 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 
 		void setFormStateList(List<WorkflowState> list);
 
+		void setReturnStateList(List<Boolean> list);
+
 		void setFormTypesMap(Map<Integer, String> formTypesMap);
 
 		void setDepartmentsList(List<Department> list, Set<Integer> availableValues);
@@ -115,6 +117,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 						getView().setFormTypesMap(fillFormTypesMap(filterValues.getFormTypes()));
 						getView().setReportPeriods(result.getReportPeriods());
 						getView().setFormStateList(fillFormStateList());
+						getView().setReturnStateList(Arrays.asList(new Boolean[]{null, Boolean.TRUE, Boolean.FALSE}));
 						getView().setDataFilter(prepareFormDataFilter(result));
 						FilterReadyEvent.fire(FilterPresenter.this);
 					}

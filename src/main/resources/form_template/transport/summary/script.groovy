@@ -1,7 +1,5 @@
 package form_template.transport.summary
 
-import groovy.time.TimeCategory
-
 /**
  * Форма "Расчет суммы налога по каждому транспортному средству".
  */
@@ -30,6 +28,7 @@ switch (formDataEvent) {
 // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
+        fillForm()
         sort()
         setRowIndex()
         break
@@ -227,7 +226,6 @@ void checkNSI() {
          * В справочнике «Коды единиц измерения налоговой базы на основании ОКЕИ» должна быть строка, для которой выполняется условие:
          * «графа 9» текущей строки формы = «графа 1» строки справочника
          */
-        //def refTaxBaseCodeDataProvider = refBookFactory.getDataProvider(12)
         if (row.taxBaseOkeiUnit != null && getRefBookValue(12, row.taxBaseOkeiUnit, "CODE") == null) {//refTaxBaseCodeDataProvider.getRecords(new Date(), null, "CODE LIKE '"+row.taxBaseOkeiUnit+"'", null).getRecords().size == 0){
             logger.error("Неверный код единицы измерения налоговой базы. Строка: "+row.getIndex())
         }
@@ -238,15 +236,15 @@ void checkNSI() {
          * В справочнике «Экологические классы» должна быть строка, для которой выполняется условие:
          * «графа 10» текущей строки формы = «графа 1» строки справочника
          */
-        def refEcoClassDataProvider = refBookFactory.getDataProvider(40)
         if (row.ecoClass!=null && getRefBookValue(40, row.ecoClass, "NAME") == null) {// refEcoClassDataProvider.getRecords(new Date(), null, "NAME LIKE '"+row.ecoClass+"'", null).getRecords().size == 0) {
             logger.error("Неверный экологический класс. Строка: "+row.getIndex())
         }
 
         /**
          * Проверка льготы
+         * Проверка осуществляется только для кодов 20210, 20220, 20230
          */
-        if (row.taxBenefitCode != null){
+        if (row.taxBenefitCode != null && getRefBookValue(6, row.taxBenefitCode, "CODE") in [20210, 20220, 20230]){
             def refTaxBenefitParameters = refBookFactory.getDataProvider(7)
             def region = getRegionByOkatoOrg(row.okato)
             query = "TAX_BENEFIT_ID ="+row.taxBenefitCode+" AND DICT_REGION_ID = "+region.record_id
@@ -814,202 +812,243 @@ def consolidation(){
     // очистить форму
     def dataRowHelper = getData(formData)
     List dataRows = new ArrayList<DataRow<Cell>>()
+    Map<String, DataRow<Cell>> sourses202 = new HashMap()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
             def sourceDataRowHelper = formDataService.getDataRowHelper(source)
             def sourceDataRows = sourceDataRowHelper.allCached
-            sourceDataRows.each{ sRow ->
-                // новая строка
-                def newRow = formData.createDataRow()
-                // «Графа 2» принимает значение «графы 2» формы-источника
-                newRow.okato = sRow.codeOKATO
-                // «Графа 3» принимает значение «графы 4» формы-источника
-                newRow.tsTypeCode = sRow.tsTypeCode
-                // «Графа 4» принимает значение «графы 5» формы-источника
-                newRow.tsType = sRow.tsType
-                // «Графа 5» принимает значение «графы 6» формы-источника
-                newRow.vi = sRow.identNumber
-                // «Графа 6» принимает значение «графы 7» формы-источника
-                newRow.model = sRow.model
-                // «Графа 7» принимает значение «графы 9» формы-источника
-                newRow.regNumber = sRow.regNumber
-                // «Графа 8» принимает значение «графы 10» формы-источника
-                newRow.taxBase = sRow.powerVal
-                // «Графа 9» принимает значение «графы 11» формы-источника
-                newRow.taxBaseOkeiUnit = sRow.baseUnit
-                // «Графа 10» принимает значение «графы 8» формы-источника
-                newRow.ecoClass = sRow.ecoClass
+            // формы типа 202 собираем, проверяем на пересечение, для дальнейшего использования
+            if (source.formType.id == 202){
+                sourceDataRows.each{ sRow ->
+                    //КОД ОКАТО, Идентификационный номер, Регистрационный знак
+                    String key = getConsolidationLinkKey(sRow.codeOKATO, sRow.identNumber, sRow.regNumber)
+
+                    /**
+                     * Если нашлись две строки с одинаковыми данными то ее не добавляем
+                     * в общий список, и проверим остальные поля
+                     */
+                    if (sourses202.containsValue(key)){
+                        DataRow<Cell> row = sourses202.get(key)
+                        // если поля совпадают то ругаемся и убираем текущую совпавшую с коллекции
+                        if (row.taxBenefitCode == sRow.taxBenefitCode &&
+                            row.benefitStartDate.equal(sRow.benefitStartDate) &&
+                            row.benefitEndDate.equal(sRow.benefitEndDate)){
+
+                            logger.warn("Обнаружены несколько разных строк для Код Окато="+sRow.codeOKATO+",Идентификационный номер = "+sRow.identNumber+", Регистрационный знак="+sRow.regNumber+". Строки : "+sRow.getIndex()+", "+row.getIndex())
+                            sourses202.remove(key)
+                        }
+                    } else{
+                        sourses202.put(key, sRow)
+                    }
+                }
+                                                                    \
+
+            } else{
+                sourceDataRows.each{ sRow ->
+                    // новая строка
+                    def newRow = formData.createDataRow()
+                    // «Графа 2» принимает значение «графы 2» формы-источника
+                    newRow.okato = sRow.codeOKATO
+                    // «Графа 3» принимает значение «графы 4» формы-источника
+                    newRow.tsTypeCode = sRow.tsTypeCode
+                    // «Графа 4» принимает значение «графы 5» формы-источника
+                    newRow.tsType = sRow.tsType
+                    // «Графа 5» принимает значение «графы 6» формы-источника
+                    newRow.vi = sRow.identNumber
+                    // «Графа 6» принимает значение «графы 7» формы-источника
+                    newRow.model = sRow.model
+                    // «Графа 7» принимает значение «графы 9» формы-источника
+                    newRow.regNumber = sRow.regNumber
+                    // «Графа 8» принимает значение «графы 10» формы-источника
+                    newRow.taxBase = sRow.powerVal
+                    // «Графа 9» принимает значение «графы 11» формы-источника
+                    newRow.taxBaseOkeiUnit = sRow.baseUnit
+                    // «Графа 10» принимает значение «графы 8» формы-источника
+                    newRow.ecoClass = sRow.ecoClass
 
 
-                /**
-                 * «Графа 11» Рассчитывается автоматически по формуле:
-                 * Если («отчётный год YYYY» – «Графа 12» (формы-источника) – 1) <= 0
-                 * То
-                 * «Графа 11»  = 0
-                 * Иначе
-                 * «Графа 11»  = «отчётный год YYYY» – «Графа 12» (формы-источника) – 1
-                 */
-                def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-                def taxPeriod = reportPeriod.taxPeriod
-                Calendar cl = Calendar.getInstance()
-                cl.setTime(taxPeriod.startDate);
+                    /**
+                     * «Графа 11» Рассчитывается автоматически по формуле:
+                     * Если («отчётный год YYYY» – «Графа 12» (формы-источника) – 1) <= 0
+                     * То
+                     * «Графа 11»  = 0
+                     * Иначе
+                     * «Графа 11»  = «отчётный год YYYY» – «Графа 12» (формы-источника) – 1
+                     */
+                    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+                    def taxPeriod = reportPeriod.taxPeriod
+                    Calendar cl = Calendar.getInstance()
+                    cl.setTime(taxPeriod.startDate);
 
-                Calendar cl2 = Calendar.getInstance()
-                cl2.setTime(sRow.year);
+                    Calendar cl2 = Calendar.getInstance()
+                    cl2.setTime(sRow.year);
 
-                def diff = cl.get(Calendar.YEAR) - cl2.get(Calendar.YEAR) - 1
-                if (diff <= 0){
-                    newRow.years = 0
-                } else{
-                    newRow.years = diff
+                    def diff = cl.get(Calendar.YEAR) - cl2.get(Calendar.YEAR) - 1
+                    if (diff <= 0){
+                        newRow.years = 0
+                    } else{
+                        newRow.years = diff
+                    }
+
+                    /*
+                     * «Графа 12»
+                     */
+
+                    // Дугона – дата угона
+                    Calendar stealingDate
+                    // Двозврата – дата возврата
+                    Calendar returnDate
+                    // Дпостановки – дата постановки ТС на учет
+                    Calendar deliveryDate
+                    // Дснятия – дата снятия ТС с учета
+                    Calendar removalDate
+                    // владенеи в месяцах
+                    int ownMonths
+                    // Срока нахождения в угоне (Мугон)
+                    int stealingMonths
+                    // дата начала отчетного периода
+                    Calendar reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+                    // дата конца отчетного периода
+                    Calendar reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
+
+                    /*
+                     * Если  [«графа 14»(источника) заполнена И «графа 14»(источника)< «Дата начала периода»]
+                     * ИЛИ [«графа 13»>«Дата окончания периода»], то
+                     * Графа 12=0
+                     */
+                    if ((sRow.regDateEnd != null && sRow.regDateEnd.compareTo(reportPeriodStartDate.getTime()) < 0)
+                            ||  sRow.regDate.compareTo(reportPeriodEndDate.getTime()) > 0){
+                        newRow.ownMonths = 0
+                    } else{ // иначе
+                        //Определяем Мугон
+                        /**
+                         * Если «графа 15» (источника) не заполнена, то Мугон = 0
+                         */
+                        if (sRow.stealDateStart == null){
+                            stealingMonths = 0
+                        } else { // инчае
+                            /**
+                             * Если «графа 15»(источника)< «Дата начала периода», то
+                             *  Дугона = «Дата начала периода»
+                             *  Иначе
+                             *  Дугона = «графа 15»(источника)
+                             */
+                            if (sRow.stealDateStart.compareTo(reportPeriodStartDate.getTime()) < 0){
+                                stealingDate = reportPeriodStartDate
+                            } else{
+                                stealingDate = sRow.stealDateStart
+                            }
+
+                            /**
+                             * Определяем Двозврат
+                             * Если [«графа 16»(источника) не заполнена] ИЛИ [«графа 16»(источника)> «Дата окончания периода»], то
+                             *  Двозврата = «Дата окончания периода»
+                             * Иначе
+                             * Двозврата = «графа 16»(источника)
+                             *
+                             */
+                            if (sRow.stealDateStart == null || sRow.stealDateStart.compareTo(reportPeriodEndDate.getTime()) > 0){
+                                returnDate = reportPeriodEndDate
+                            } else{
+                                returnDate = Calendar.getInstance()
+                                returnDate.setTime(sRow.stealDateStart)
+                            }
+
+                            /**
+                             * Определяем Мугон
+                             * Если (МЕСЯЦ(Двозврата)-МЕСЯЦ(Дугона)-1)<0, то
+                             *  Мугон = 0
+                             * Иначе
+                             *  Мугон = МЕСЯЦ(Двозврата)-МЕСЯЦ(Дугона)-1
+                             */
+                            def diff1 = returnDate.getMonth() - stealingDate.getMonth() - 1
+                            if (diff1 < 0){
+                                stealingMonths = 0
+                            } else{
+                                stealingMonths = diff1
+                            }
+                        }
+
+                        /**
+                         * Определяем Дснятия
+                         * Если «графа 14»(источника) не заполнена ИЛИ «графа 14»(источника)> «Дата окончания периода», то
+                         *  Дснятия = «Дата окончания периода»
+                         * Иначе
+                         *  Дснятия = «графа 14»(источника)
+                         */
+                        if (sRow.regDateEnd == null || sRow.regDateEnd.compareTo(reportPeriodEndDate.getTime()) > 0){
+                            removalDate = reportPeriodEndDate
+                        }   else{
+                            removalDate = sRow.regDateEnd
+                        }
+
+                        /**
+                         * Определяем Дпостановки
+                         * Если «графа 13»(источника)< «Дата начала периода», то
+                         *  Дпостановки = «Дата начала периода»
+                         * Иначе
+                         *  Дпостановки = «графа 13»(источника)
+                         */
+                        if (sRow.regDate.compareTo(reportPeriodService.getStartDate(formData.reportPeriodId).getTime()) < 0){
+                            deliveryDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+                        } else{
+                            deliveryDate = sRow.regDate
+                        }
+
+                        /**
+                         * Определяем Мвлад
+                         * Мвлад = МЕСЯЦ[Дснятия] - МЕСЯЦ[Дпостановки]+1
+                         */
+                        ownMonths = (removalDate.get(Calendar.YEAR)*12 + removalDate.get(Calendar.MONTH))  - (deliveryDate.get(Calendar.YEAR) * 12 + deliveryDate.get(Calendar.MONTH) ) + 1
+                        /**
+                         * Определяем графу 12
+                         * Графа 12=Мвлад-Мугон
+                         */
+                        newRow.ownMonths = ownMonths - stealingMonths
+                    }
+                    dataRows.add(newRow)
+                }
+            }
+
+        }
+
+        /**
+         * Расставим соответствия для формы с 202
+         */
+        dataRows.each{ row ->
+            String key = getConsolidationLinkKey(row.okato, row.vi, row.regNumber)
+            if (sourses202.containsKey(key)){
+                DataRow<Cell> row202 = sourses202.get(key)
+                // 16=графа 5 (год налоговой льготы),графа 17=графа6, графа 18=графа 7.
+                row.taxBenefitCode = row202.taxBenefitCode
+                row.benefitStartDate = row202.benefitStartDate
+                row.benefitEndDate = row202.benefitEndDate
+            } else{
+                def ref = refBookFactory.getDataProvider(30)
+                def records = ref.getRecords(new Date(), null, "ID = "+formData.departmentId, null)
+
+                String name
+                if (records.size() == 1){
+                    name = records.get(0).NAME;
                 }
 
-                /*
-                 * «Графа 12»
-                 */
 
-                // Дугона – дата угона
-                Calendar stealingDate
-                // Двозврата – дата возврата
-                Calendar returnDate
-                // Дпостановки – дата постановки ТС на учет
-                Calendar deliveryDate
-                // Дснятия – дата снятия ТС с учета
-                Calendar removalDate
-                // владенеи в месяцах
-                int ownMonths
-                // Срока нахождения в угоне (Мугон)
-                int stealingMonths
-
-                /**
-                 * 1.	Учесть возможное отсутствие значения в (графе 14»(источника)
-                 *  Если «графа 14»(источника) не заполнена, то
-                 *  Дcнятия = Дата завершения периода, за который создается форма
-                 *  Иначе
-                 *  Дпостановки = «графа 14»(источника)
-                 */
-                if (sRow.regDateEnd == null){
-                    removalDate = reportPeriodService.getEndDate(formData.reportPeriodId).getD
-                } else{
-                    removalDate = Calendar.getInstance()
-                    removalDate.setTime(sRow.regDateEnd)
-                }
-
-                /**
-                 * 2.	Учесть возможное отсутствие значения в «графе 16»(источника)
-                 *
-                 * Если «графа 16»(источника) не заполнена, то
-                 * Двозврата = Дата завершения периода, за который создается форма
-                 * Иначе
-                 * Двозврата = «графа 14»(источника)
-                 */
-                if (sRow.stealDateStart == null){
-                    returnDate = reportPeriodService.getEndDate(formData.reportPeriodId)
-                } else{
-                    returnDate = Calendar.getInstance()
-                    returnDate.setTime(sRow.stealDateStart)
-                }
-
-                /**
-                 *  3.	Проверить, что период владения ТС попадает на период, за который создается форма
-                 *  Если «графа 14» (источника)<»Дата начала периода» ИЛИ «графа 13» (источника)>»Дата окончания периода», то
-                 *  «графа 12» = 0
-                 */
-                if (sRow.regDateEnd.compareTo(reportPeriodService.getStartDate(formData.reportPeriodId).getTime()) < 0
-                    || sRow.regDate.compareTo(reportPeriodService.getStartDate(formData.reportPeriodId).getTime()) > 0){
-                    newRow.ownMonths = 0
-                } else{
-                    /**
-                     * 4.	Определить границы периодов владения и нахождения в угоне в рамках периода, за который подается отчет (отчетный или налоговый период).
-                     */
-
-                    /**
-                     * Если «графа 14»(источника)> «Дата окончания периода», то
-                     *  Дснятия = «Дата окончания периода»
-                     *  Иначе
-                     *  Дснятия = «графа 14»(источника)
-                     */
-                    if (sRow.regDateEnd.compareTo(reportPeriodService.getEndDate(formData.reportPeriodId)) > 0){
-                        removalDate = reportPeriodService.getEndDate(formData.reportPeriodId)
-                    }   else{
-                        removalDate = sRow.regDateEnd
-                    }
-
-                    /**
-                     * Если «графа 13»(источника)< «Дата начала периода», то
-                     *  Дпостановки = «Дата начала периода»
-                     *  Иначе
-                     *  Дпостановки = «графа 13»(источника)
-                     */
-                    if (sRow.regDate.compareTo(reportPeriodService.getStartDate(formData.reportPeriodId)) < 0){
-                        deliveryDate = reportPeriodService.getStartDate(formData.reportPeriodId)
-                    } else{
-                        deliveryDate = sRow.regDate
-                    }
-
-                    /**
-                     *  Если «графа 16»(источника)> «Дата окончания периода», то
-                     *  Двозврата = «Дата окончания периода»
-                     *  Иначе
-                     *  Двозврата = «графа 16»(источника)
-                     */
-                    if (sRow.stealDateEnd.compareTo(reportPeriodService.getEndDate(formData.reportPeriodId)) > 0){
-                        returnDate = reportPeriodService.getEndDate(formData.reportPeriodId)
-                    } else{
-                        returnDate = sRow.stealDateEnd
-                    }
-
-                    /**
-                     * Если «графа 15»(источника)< «Дата начала периода», то
-                     *  Дугона = «Дата начала периода»
-                     *  Иначе
-                     *  Дугона = «графа 15»(источника)
-                     */
-                    if (sRow.stealDateStart.compareTo(reportPeriodService.getStartDate(formData.reportPeriodId)) < 0){
-                        stealingDate = reportPeriodService.getStartDate(formData.reportPeriodId)
-                    } else{
-                        stealingDate = sRow.stealDateStart
-                    }
-
-                    /**
-                     *  5.	Рассчитать значения Срока владения ТС без учета времени в угоне (Мвлад)
-                     *  Мвлад=МЕСЯЦ(Дснятия)-МЕСЯЦ(Дпостановки)+1
-                     */
-                    ownMonths = TimeCategory.minus(removalDate, deliveryDate).months + 1
-
-                    /**
-                     * 6.	Рассчитать значения Срока нахождения в угоне (Мугон)
-                     *  Если (МЕСЯЦ(Двозврата)-МЕСЯЦ(Дугона)-1)<0, то
-                     *  Мугон = 0
-                     *  Иначе
-                     *  Мугон = МЕСЯЦ(В)-МЕСЯЦ(А)-1
-                     */
-                    if ((TimeCategory.minus(returnDate, stealingDate).months - 1) < 0){
-                        stealingMonths = 0
-                    } else{
-                        stealingMonths = TimeCategory.minus(returnDate, stealingDate).months - 1
-                    }
-
-                    /**
-                     * 7.	Рассчитать значение графы 12:
-                     *
-                     * 1.	«Графа 12» =  Мвлад – Мугон
-                     *
-                     * МЕСЯЦ () – операция получения номера месяца в году.
-                     * Дугона – дата угона
-                     * Двозврата – дата возврата
-                     * Дпостановки – дата постановки ТС на учет
-                     * Дснятия – дата снятия ТС с учета
-                     */
-                    newRow.ownMonths = ownMonths - stealingMonths
-                }
-                dataRows.add(newRow)
+                logger.warn("Для строки "+row.getIndex()+" "+name+" \"Сведения о транспортных средствах, по которым уплачивается транспортный налог\" не найдены соответствующие строки в  формах \"Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог\" .")
             }
         }
     }
-    // сохраняем данные
     dataRowHelper.save(dataRows)
-    //dataRowHelper.commit()
+}
+
+/**
+ *
+ * @param okato
+ * @param identNumber
+ * @param regNumber
+ * @return
+ */
+String getConsolidationLinkKey(def okato, def identNumber, def regNumber){
+    return "key"+okato+"-"+identNumber+"-"+regNumber
 }

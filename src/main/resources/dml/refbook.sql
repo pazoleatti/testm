@@ -58,6 +58,7 @@ INSERT INTO REF_BOOK (ID, NAME) VALUES (68, 'Коды  ОКП  на  основ�
 INSERT INTO REF_BOOK (ID, NAME) VALUES (69, 'Признаки взаимозависимости');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (70, 'Сведения об организации');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (71, 'Амортизационные группы');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (72, 'Процентные ставки');
 
 INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (3,	2,	'Код',										'CODE',				1,		0,		null,	null,	1,	null,	3);
 INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (4,	2,	'Наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
@@ -347,6 +348,9 @@ INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENC
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 643, 71,'Группа','GROUP', 2, 1,null,null,1, 0, 1);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 644, 71,'Интервал согласно ст. 258 НК РФ','INTERVAL', 1, 2,null,null,1,null, 255);
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 645, 71,'Срок полезного использования (месяцев)','TERM', 2, 3,null,null,1,0, 3);
+
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 646, 72,'Код ставки','CODE', 1, 1,null,null,1, null, 5);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 647, 72,'Наименование ставки','NAME', 1, 2,null,null,1,null, 255);
 
 update ref_book_attribute
 set width=10

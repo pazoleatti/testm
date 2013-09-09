@@ -39,8 +39,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     // Признак режима редактирования
     private boolean isEditMode = false;
-    // Признак УНП
-    private boolean isUnp = false;
 
     interface Binder extends UiBinder<Widget, DepartmentConfigView> {
     }
@@ -189,6 +187,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                 // Очистка формы
                 clear();
 
+                updateVisibility();
+
                 // Обновление налоговых периодов
                 reloadTaxPeriods();
 			}
@@ -261,7 +261,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @Override
     public void reloadDepartments() {
-        getUiHandlers().reloadDepartments(currentTaxType);
+        getUiHandlers().reloadDepartments(currentTaxType, currentDepartmentId);
     }
 
     @Override
@@ -313,14 +313,15 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
      * Обновление видимости полей
      */
     private void updateVisibility() {
+        boolean isUnp = currentDepartmentId != null && currentDepartmentId == 1;
         // Ставка налога
         taxRatePanel.setVisible(currentTaxType == TaxType.INCOME);
         // Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде
-        sumTaxPanel.setVisible(isUnp && currentTaxType == TaxType.INCOME);
+        sumTaxPanel.setVisible(currentDepartmentId != null && isUnp && currentTaxType == TaxType.INCOME);
         // Сумма налога с выплаченных дивидендов за пределами Российской Федерации в последнем квартале отчётного периода
-        sumDividendsPanel.setVisible(isUnp && currentTaxType == TaxType.INCOME);
+        sumDividendsPanel.setVisible(currentDepartmentId != null && isUnp && currentTaxType == TaxType.INCOME);
         // Обязанность по уплате налога и Признак расчёта
-        payPanel.setVisible(!isUnp && currentTaxType == TaxType.INCOME);
+        payPanel.setVisible(currentDepartmentId != null && !isUnp && currentTaxType == TaxType.INCOME);
     }
 
     /**
@@ -336,10 +337,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         return null;
     }
 
-    @Override
-    public void setUnpFlag(boolean isUnp) {
-        this.isUnp = isUnp;
-    }
 
     @UiHandler("saveButton")
     public void onSave(ClickEvent event) {

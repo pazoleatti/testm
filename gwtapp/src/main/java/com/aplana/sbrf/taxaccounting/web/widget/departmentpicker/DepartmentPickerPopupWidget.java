@@ -16,10 +16,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Виджет для выбора подразделений
@@ -36,6 +36,9 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 
 	@UiField
 	Button selectButton;
+	
+	@UiField
+	Button clearButton;
 
 	@Override
 	public boolean isEnabled() {
@@ -45,9 +48,10 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 	@Override
 	public void setEnabled(boolean enabled) {
 		selectButton.setEnabled(enabled);
+		clearButton.setEnabled(enabled);
 	}
 
-	interface Binder extends UiBinder<HTMLPanel, DepartmentPickerPopupWidget> {
+	interface Binder extends UiBinder<Widget, DepartmentPickerPopupWidget> {
 	}
 
 	private static Binder uiBinder = GWT.create(Binder.class);
@@ -82,6 +86,11 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 		popup.setPopupPosition(selected.getAbsoluteLeft(),
 				selected.getAbsoluteTop() + selected.getOffsetHeight());
 		popup.show();
+	}
+	
+	@UiHandler("clearButton")
+	void onClearButtonClicked(ClickEvent event){
+		this.setValue(null);
 	}
 
 
@@ -136,8 +145,4 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 		departmentPiker.setHeader(header);
 	}
 
-	@Override
-	public void setMultiselection(boolean multiselection) {
-		departmentPiker.setMultiselection(multiselection);
-	}
 }

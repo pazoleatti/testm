@@ -7,7 +7,7 @@
 	<artifactId>taxaccounting</artifactId>
 
 	<description>АС "Учёт налогов" - Родительский модуль</description>
-    <version>0.2.2-SNAPSHOT</version>
+	<version>0.2.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -21,11 +21,12 @@
 		<module>test-utils</module>
 		<module>script-support</module>
 		<module>fonts</module>
-        <module>migration-ejb</module>
-        <module>mdb</module>
-    </modules>
+		<module>migration-ejb</module>
+		<module>mdb</module>
+	</modules>
 
 	<properties>
+		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<gwt.version>2.5.1</gwt.version>
 		<gwtp.version>1.0</gwtp.version>
@@ -223,11 +224,11 @@
 				<artifactId>mybatis-spring</artifactId>
 				<version>1.1.1</version>
 			</dependency>
-            <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>1.3.2</version>
-            </dependency>
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>1.3.2</version>
+			</dependency>
 			<dependency>
 				<groupId>commons-fileupload</groupId>
 				<artifactId>commons-fileupload</artifactId>
@@ -255,11 +256,11 @@
 				<artifactId>xmlunit</artifactId>
 				<version>1.4</version>
 			</dependency>
-            <dependency>
-                <groupId>org.hsqldb</groupId>
-                <artifactId>hsqldb</artifactId>
-                <version>2.3.0</version>
-            </dependency>
+			<dependency>
+				<groupId>org.hsqldb</groupId>
+				<artifactId>hsqldb</artifactId>
+				<version>2.3.0</version>
+			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
@@ -301,34 +302,34 @@
 				<artifactId>pdfbox</artifactId>
 				<version>1.8.0</version>
 			</dependency>
-            <dependency>
-                <groupId>javax.jms</groupId>
-                <artifactId>jms-api</artifactId>
-                <version>1.1-rev-1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.activemq</groupId>
-                <artifactId>activemq-core</artifactId>
-                <version>5.7.0</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-jms</artifactId>
-                <version>3.2.4.RELEASE</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.openejb</groupId>
-                <artifactId>openejb-core</artifactId>
-                <version>4.5.2</version>
-                <scope>provided</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-jdk14</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
+			<dependency>
+				<groupId>javax.jms</groupId>
+				<artifactId>jms-api</artifactId>
+				<version>1.1-rev-1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-core</artifactId>
+				<version>5.7.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-jms</artifactId>
+				<version>3.2.4.RELEASE</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.openejb</groupId>
+				<artifactId>openejb-core</artifactId>
+				<version>4.5.2</version>
+				<scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-jdk14</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -348,6 +349,7 @@
 		</dependency>
 	</dependencies>
 
+
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -360,6 +362,74 @@
 						<target>1.6</target>
 					</configuration>
 				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<configuration>
+						<archive>
+							<manifest>
+								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							</manifest>
+							<manifestEntries>
+								<Built-Date>${maven.build.timestamp}</Built-Date>
+								<X-Git-Branch>${git.branch}</X-Git-Branch>
+								<X-Git-Tag>${git.tag}</X-Git-Tag>
+								<X-Git-Commits-Count>${git.commitsCount}</X-Git-Commits-Count>
+								<X-Git-Revision>${git.revision}</X-Git-Revision>
+								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
+								<X-Git-Build-Number-And-Date>${git.buildnumber}.${maven.build.timestamp}</X-Git-Build-Number-And-Date>
+							</manifestEntries>
+						</archive>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<configuration>
+						<archive>
+							<manifest>
+								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							</manifest>
+							<manifestEntries>
+								<Built-Date>${maven.build.timestamp}</Built-Date>
+								<X-Git-Branch>${git.branch}</X-Git-Branch>
+								<X-Git-Tag>${git.tag}</X-Git-Tag>
+								<X-Git-Commits-Count>${git.commitsCount}</X-Git-Commits-Count>
+								<X-Git-Revision>${git.revision}</X-Git-Revision>
+								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
+								<X-Git-Build-Number-And-Date>${git.buildnumber}.${maven.build.timestamp}</X-Git-Build-Number-And-Date>
+							</manifestEntries>
+						</archive>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-ear-plugin</artifactId>
+					<version>2.7</version>
+					<configuration>
+						<archive>
+							<manifest>
+								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							</manifest>
+							<manifestEntries>
+								<Built-Date>${maven.build.timestamp}</Built-Date>
+								<X-Git-Branch>${git.branch}</X-Git-Branch>
+								<X-Git-Tag>${git.tag}</X-Git-Tag>
+								<X-Git-Commits-Count>${git.commitsCount}</X-Git-Commits-Count>
+								<X-Git-Revision>${git.revision}</X-Git-Revision>
+								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
+								<X-Git-Build-Number-And-Date>${git.buildnumber}.${maven.build.timestamp}</X-Git-Build-Number-And-Date>
+							</manifestEntries>
+						</archive>
+					</configuration>
+				</plugin>
+
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -387,60 +457,27 @@
 					<version>2.9</version>
 				</plugin>
 
-				<plugin>
-					<groupId>com.google.code.maven-svn-revision-number-plugin</groupId>
-					<artifactId>svn-revision-number-maven-plugin</artifactId>
-					<version>1.13</version>
-					<executions>
-						<execution>
-							<goals>
-								<goal>revision</goal>
-							</goals>
-							<configuration>
-								<entries>
-									<entry>
-										<prefix>prefix</prefix>
-									</entry>
-								</entries>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
 
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											com.google.code.maven-svn-revision-number-plugin
-										</groupId>
-										<artifactId>
-											svn-revision-number-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.13,)
-										</versionRange>
-										<goals>
-											<goal>revision</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<execute />
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
 			</plugins>
 		</pluginManagement>
+		<plugins>
+
+			<plugin>
+				<groupId>ru.concerteza.buildnumber</groupId>
+				<artifactId>maven-jgit-buildnumber-plugin</artifactId>
+				<version>1.2.6</version>
+				<executions>
+					<execution>
+						<id>git-buildnumber</id>
+						<goals>
+							<goal>extract-buildnumber</goal>
+						</goals>
+						<phase>prepare-package</phase>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
 	</build>
 
 	<repositories>
@@ -455,21 +492,21 @@
 			<url>http://aplana.datateh.ru:8181/nexus/content/repositories/thirdparty/</url>
 		</repository>
 	</repositories>
-	
+
 	<scm>
 		<connection>scm:git:https://git.aplana.com/git/sbrfacctax</connection>
 		<developerConnection>scm:git:https://git.aplana.com/git/sbrfacctax</developerConnection>
 		<url>https://git.aplana.com/git/sbrfacctax</url>
 	</scm>
-	
+
 	<issueManagement>
 		<url>http://jira.aplana.com/browse/SBRFACCTAX</url>
 		<system>JIRA</system>
 	</issueManagement>
-	
+
 	<ciManagement>
 		<url>http://172.16.127.19:8080/job/SBRF-NK-build</url>
 		<system>Jenkins</system>
 	</ciManagement>
-	
+
 </project>

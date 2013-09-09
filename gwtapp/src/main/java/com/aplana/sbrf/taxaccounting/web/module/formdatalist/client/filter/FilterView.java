@@ -51,6 +51,9 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 	@UiField(provided = true)
 	ValueListBox<WorkflowState> formState;
 
+	@UiField(provided = true)
+	ValueListBox<Boolean> returnState;
+
 	@UiField
 	Panel departmentSelectionTreePanel;
 
@@ -96,6 +99,19 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 				return formTypesMap.get(object);
 			}
 		});
+
+	    returnState = new ListBoxWithTooltip<Boolean>(new AbstractRenderer<Boolean>() {
+		    @Override
+		    public String render(Boolean object) {
+			    if (object == Boolean.TRUE) {
+				    return "Возвращена";
+			    } else if (object == Boolean.FALSE) {
+				    return "Не возвращена";
+			    } else {
+				    return "";
+			    }
+		    }
+	    });
 
 		initWidget(binder.createAndBindUi(this));
         this.driver = driver;
@@ -147,6 +163,11 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 	@Override
 	public void setFormStateList(List<WorkflowState> list){
 		formState.setAcceptableValues(list);
+	}
+
+	@Override
+	public void setReturnStateList(List<Boolean> list) {
+		returnState.setAcceptableValues(list);
 	}
 
 

@@ -1,3 +1,5 @@
+package form_template.transport.primary.vehicles
+
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 /**
  * Форма "Сведения о транспортных средствах, по которым уплачивается транспортный налог".
@@ -97,9 +99,9 @@ switch (formDataEvent) {
         //1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Принята».
         // (Ramil Timerbaev) проверка производится в ядре
         // 2.	Логические проверки значений налоговой формы.
-        //       logicalChecks()
+        logicalChecks()
         // 3.	Проверки соответствия НСИ.
-        //       checkNSI()
+        checkNSI()
 
         break
 
@@ -107,12 +109,14 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:    //..
         // 1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
         // (Ramil Timerbaev) проверка производится в ядре
-
         break
 
 // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:    //..
-        // (Ramil Timerbaev) проверка производится в ядре
+        // 2.	Логические проверки значений налоговой формы.
+        logicalChecks()
+        // 3.	Проверки соответствия НСИ.
+        checkNSI()
         break
 
 // после вернуть из принята в подготовлена

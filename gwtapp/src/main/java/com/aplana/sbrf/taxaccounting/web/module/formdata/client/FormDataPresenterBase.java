@@ -86,6 +86,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		void assignDataProvider(int pageSize);
 
 		void updateData();
+		
+		void updateData(int pageNumber);
 	}
 
 	public static final String NAME_TOKEN = "!formData";
@@ -180,7 +182,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.setLockInformation(true, lockDate, lockedBy);
 		
 		view.setWorkflowButtons(null);
-		view.showCheckButton(formDataAccessParams.isCanRead());
+		view.showCheckButton(false);
 
 	}
 

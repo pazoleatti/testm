@@ -108,7 +108,7 @@ public class GetMainMenuActionHandler extends
             }
 		}
 		if (currentUser.hasRole(TARole.ROLE_CONF)) {
-			MenuItem settingMenuItem = new MenuItem("Настройки");
+			MenuItem settingMenuItem = new MenuItem("Конфигурация");
 			settingMenuItem.getSubMenu().add(
 					new MenuItem("Шаблоны налоговых форм", NUMBER_SIGN + AdminConstants.NameTokens.adminPage));
 			settingMenuItem.getSubMenu().add(

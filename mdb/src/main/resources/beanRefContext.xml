@@ -3,7 +3,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="beanFactory" class="org.springframework.context.support.ClassPathXmlApplicationContext">
+    <bean id="mdbBeanFactory" class="org.springframework.context.support.ClassPathXmlApplicationContext">
         <constructor-arg value="mdb-resolver-service.xml" />
     </bean>
 </beans>

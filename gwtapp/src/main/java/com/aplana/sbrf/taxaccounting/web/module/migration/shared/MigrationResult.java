@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.migration.shared;
 
 import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
+import com.aplana.sbrf.taxaccounting.model.migration.MigrationSendResult;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
@@ -10,22 +11,19 @@ import java.util.List;
  */
 public class MigrationResult implements Result {
 
-    private List<Exemplar> exemplarList;
-    private int senFilesCount;
+    private MigrationSendResult result;
+
+    public int getSendFilesCount() {
+        if (result == null) return 0;
+        return result.getSendFilesCount();
+    }
 
     public List<Exemplar> getExemplarList() {
-        return exemplarList;
+        if (result == null) return null;
+        return result.getExemplarList();
     }
 
-    public void setExemplarList(List<Exemplar> exemplarList) {
-        this.exemplarList = exemplarList;
-    }
-
-    public int getSenFilesCount() {
-        return senFilesCount;
-    }
-
-    public void setSenFilesCount(int senFilesCount) {
-        this.senFilesCount = senFilesCount;
+    public void setResult(MigrationSendResult result) {
+        this.result = result;
     }
 }

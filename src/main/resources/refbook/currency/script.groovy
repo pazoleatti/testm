@@ -49,8 +49,8 @@ void importFromXML() {
     try {
 
         def XMLInputFactory factory = XMLInputFactory.newInstance();
-        // TODO падает из-за DTD (без следующей строки кода)
-        factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
+        factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
+        factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
         reader = factory.createXMLStreamReader(inputStream)
 
         while (reader.hasNext()) {

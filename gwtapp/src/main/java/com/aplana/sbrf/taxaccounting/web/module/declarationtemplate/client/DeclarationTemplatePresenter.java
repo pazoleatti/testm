@@ -154,4 +154,9 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 		MessageEvent.fire(this, "Не удалось импортировать шаблон. Ошибка: " + msg);
 	}
 
+    @Override
+    public void setXsdId(String xsdId) {
+        declarationTemplate.setXsdId(xsdId);
+    }
+
 }

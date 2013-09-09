@@ -42,6 +42,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			d.setVersion(rs.getString("version"));
 			d.setEdition(rs.getInt("edition"));
 			d.setDeclarationType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
+            d.setXsdId(rs.getString("XSD"));
 			return d;
 		}
 	}
@@ -100,14 +101,15 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		if (declarationTemplate.getId() == null) {
 			declarationTemplateId = generateId("seq_declaration_template", Integer.class);
 			count = getJdbcTemplate().update(
-					"insert into declaration_template (id, edition, version, is_active, create_script, declaration_type_id) values (?, ?, ?, ?, ?, ?)",
+					"insert into declaration_template (id, edition, version, is_active, create_script, declaration_type_id, xsd) values (?, ?, ?, ?, ?, ?, ?)",
 					new Object[] {
 							declarationTemplateId,
 							1,
 							declarationTemplate.getVersion(),
 							declarationTemplate.isActive(),
 							declarationTemplate.getCreateScript(),
-							declarationTemplate.getDeclarationType().getId()
+							declarationTemplate.getDeclarationType().getId(),
+                            declarationTemplate.getXsdId()
 					},
 					new int[] {
 							Types.NUMERIC,
@@ -115,7 +117,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							Types.VARCHAR,
 							Types.NUMERIC,
 							Types.VARCHAR,
-							Types.NUMERIC
+							Types.NUMERIC,
+                            Types.VARCHAR
 					}
 			);
 
@@ -128,13 +131,14 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 						" было изменено после того, как данные по ней были считаны");
 			}
 			count = getJdbcTemplate().update(
-					"update declaration_template set edition = ?, version = ?, is_active = ?, create_script = ?, declaration_type_id = ? where id = ?",
+					"update declaration_template set edition = ?, version = ?, is_active = ?, create_script = ?, declaration_type_id = ?, xsd = ? where id = ?",
 					new Object[] {
 							storedEdition + 1,
 							declarationTemplate.getVersion(),
 							declarationTemplate.isActive(),
 							declarationTemplate.getCreateScript(),
 							declarationTemplate.getDeclarationType().getId(),
+                            declarationTemplate.getXsdId(),
 							declarationTemplateId
 					},
 					new int[] {
@@ -143,6 +147,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							Types.NUMERIC,
 							Types.VARCHAR,
 							Types.NUMERIC,
+                            Types.VARCHAR,
 							Types.NUMERIC
 					}
 			);
