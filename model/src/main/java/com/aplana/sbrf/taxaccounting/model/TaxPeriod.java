@@ -18,7 +18,11 @@ public class TaxPeriod extends IdentityObject<Integer> {
 	
 	/**
 	 * @return вид налога
+	 * @deprecated Налоговый период скоро не будет существовать. 
+	 * Для типа налога отчетного периода используйте <code>ReportPeriod.getTaxType()</code>
+	 * 
 	 */
+	@Deprecated
 	public TaxType getTaxType() {
 		return taxType;
 	}
@@ -33,7 +37,11 @@ public class TaxPeriod extends IdentityObject<Integer> {
 	
 	/**
 	 * @return дата начала периода (включительно)
+	 * 
+	 * @deprecated Налоговый период скоро не будет существовать. 
+	 * Для получения года отчетного периода используйте <code>ReportPeriod.getYear()</code>
 	 */
+	@Deprecated
 	public Date getStartDate() {
 		return startDate;
 	}
@@ -48,7 +56,12 @@ public class TaxPeriod extends IdentityObject<Integer> {
 	
 	/**
 	 * @return дата окончания периода (включительно)
+	 * 
+	 * @deprecated Налоговый период скоро не будет существовать. 
+	 * Для получения года отчетного периода используйте <code>ReportPeriod.getYear()</code>
+	 * 
 	 */
+	@Deprecated
 	public Date getEndDate() {
 		return endDate;
 	}
