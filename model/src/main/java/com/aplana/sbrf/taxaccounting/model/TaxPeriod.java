@@ -18,7 +18,11 @@ public class TaxPeriod extends IdentityObject<Integer> {
 	
 	/**
 	 * @return вид налога
+	 * @deprecated Налоговый период скоро не будет существовать. 
+	 * Для типа налога отчетного периода используйте <code>ReportPeriod.getTaxType()</code>
+	 * 
 	 */
+	@Deprecated
 	public TaxType getTaxType() {
 		return taxType;
 	}

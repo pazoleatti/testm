@@ -89,6 +89,13 @@ public class ReportPeriod implements Serializable {
 		this.dictTaxPeriodId = dictTaxPeriodId;
 	}
 	
+	/**
+	 * @return
+	 * 
+	 * @deprecated Для получения типа отчетного периода используйте <code>getTaxType()</code>
+	 * 
+	 */
+	@Deprecated
 	public TaxPeriod getTaxPeriod() {
 		return taxPeriod;
 	}
@@ -105,6 +112,11 @@ public class ReportPeriod implements Serializable {
 		// Эти вычисления работают правильно только до 3344 года.
 		long milisPerYear = new BigInteger("31536000000").longValue();
 		return (int) Math.floor(getTaxPeriod().getStartDate().getTime() / milisPerYear) + 1970;
+	}
+	
+	@SuppressWarnings("deprecation")
+	public TaxType getTaxType(){
+		return getTaxPeriod().getTaxType();
 	}
 	
 }
