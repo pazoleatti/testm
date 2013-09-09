@@ -1,6 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
 	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
 	xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'
+    xmlns:fileuplod='urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload'
 	xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
 
 	<ui:style>
@@ -11,6 +12,7 @@
 	</ui:style>
 
 
+    <ui:with field="declarationTemplateProvider" type="com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateView"/>
 
 	<g:DockLayoutPanel unit='PX' height="100%" width="100%"
 		ui:field="dockPanel">
@@ -56,12 +58,17 @@
 							<g:CheckBox ui:field="active" />
 						</g:HorizontalPanel>
 
-						<g:HorizontalPanel height="30px">
-							<g:Label width="150px">Загузить jrxml файл</g:Label>
-							<g:FormPanel ui:field="uploadJrxmlForm" encoding="multipart/form-data" method="post">
-								<g:FileUpload name="uploadJrxmlFile" ui:field="uploadJrxml"/>
-							</g:FormPanel>
-						</g:HorizontalPanel>
+                        <g:HorizontalPanel height="30px">
+                            <g:Label width="150px">Загрузить jrxml файл</g:Label>
+                            <g:FormPanel ui:field="uploadJrxmlForm" encoding="multipart/form-data" method="post">
+                                <g:FileUpload name="uploadJrxmlFile" ui:field="uploadJrxml"/>
+                            </g:FormPanel>
+                        </g:HorizontalPanel>
+
+                        <g:HorizontalPanel height="30px">
+                            <g:Label width="150px">Загрузить файл xsd</g:Label>
+                            <fileuplod:FileUploadWidget uploadHandler="{declarationTemplateProvider.getView}" actionUrl="upload/uploadController/xsd/"/>
+                        </g:HorizontalPanel>
 
 
 						<g:Button ui:field="downloadJrxmlButton">Скачать jrxml файл</g:Button>

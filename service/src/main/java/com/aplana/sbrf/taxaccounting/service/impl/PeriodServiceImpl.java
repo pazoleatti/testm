@@ -160,7 +160,6 @@ public class PeriodServiceImpl implements PeriodService{
 			if ((user.getUser().hasRole("ROLE_CONTROL_UNP") || (user.getUser().hasRole("ROLE_CONTROL")))
 					&& (user.getUser().getDepartmentId() == UNP_ID)
 					&& (departmentId == UNP_ID)) {
-				System.out.println("Для всех");
 				for(Department dep : departmentService.listAll()) {
 					DepartmentReportPeriod depRP = new DepartmentReportPeriod();
 					depRP.setReportPeriod(newReportPeriod);
@@ -175,7 +174,6 @@ public class PeriodServiceImpl implements PeriodService{
 		} else if ((taxType == TaxType.TRANSPORT) || (taxType == TaxType.PROPERTY)) {
 			if ((user.getUser().hasRole("ROLE_CONTROL") && (user.getUser().getDepartmentId() == departmentId))
 					|| user.getUser().hasRole("ROLE_CONTROL_UNP")) {
-				System.out.println("Для выбраного и источников");
 				// Сохраняем для выбраного
 				DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
 				departmentReportPeriod.setActive(true);
@@ -197,7 +195,6 @@ public class PeriodServiceImpl implements PeriodService{
 					saveOrUpdate(depRP, logs);
 				}
 			} else if (user.getUser().hasRole("ROLE_CONTROL") && (user.getUser().getDepartmentId() != departmentId)) {
-				System.out.println("Для выбраного");
 				DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
 				departmentReportPeriod.setActive(true);
 				departmentReportPeriod.setBalance(isBalance);

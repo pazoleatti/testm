@@ -309,6 +309,9 @@ public class ImportServiceImpl implements ImportService {
                     value = value.replaceAll(",", ".").replaceAll("[^\\d.,-]+", "");
                 }
             }
+        } else if (type == HSSFCell.CELL_TYPE_FORMULA) {
+            HSSFFormulaEvaluator evaluator = new HSSFFormulaEvaluator(cell.getSheet().getWorkbook());
+            value = getCellValue(evaluator.evaluateInCell(cell));
         } else if (type == HSSFCell.CELL_TYPE_BLANK) {
             value = null;
         }

@@ -35,6 +35,8 @@ public class FormDataFilter implements Serializable{
 	/*true, если сортируем по возрастанию, false - по убыванию*/
 	private boolean ascSorting;
 
+	private Boolean returnState;
+
 	public List<Integer> getReportPeriodIds() {
 		return reportPeriodIds;
 	}
@@ -113,5 +115,13 @@ public class FormDataFilter implements Serializable{
 
 	public void setAscSorting(boolean ascSorting) {
 		this.ascSorting = ascSorting;
+	}
+
+	public Boolean getReturnState() {
+		return returnState;
+	}
+
+	public void setReturnState(Boolean returnState) {
+		this.returnState = returnState;
 	}
 }

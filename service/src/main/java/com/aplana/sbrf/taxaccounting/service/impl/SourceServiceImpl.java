@@ -37,6 +37,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public void saveFormSources(Long departmentFormTypeId, List<Long> sourceDepartmentFormTypeIds) {
+    	// TODO Добавить проверки на то что пользователь может сделать это назначение
         departmentFormTypeDao.saveFormSources(departmentFormTypeId, sourceDepartmentFormTypeIds);
     }
 
@@ -67,6 +68,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public void saveDeclarationSources(Long declarationTypeId, List<Long> sourceDepartmentFormTypeIds) {
+    	// TODO Добавить проверки на то что пользователь может сделать это назначение
         departmentFormTypeDao.saveDeclarationSources(declarationTypeId, sourceDepartmentFormTypeIds);
     }
 

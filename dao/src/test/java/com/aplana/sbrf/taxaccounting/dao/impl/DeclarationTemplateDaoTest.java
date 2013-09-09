@@ -5,6 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,8 @@ import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 
+import java.util.Date;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DeclarationTemplateDaoTest.xml"})
 @Transactional
@@ -27,6 +31,9 @@ public class DeclarationTemplateDaoTest {
 
 	@Autowired
 	private DeclarationTypeDao declarationTypeDao;
+
+    @Autowired
+    private BlobDataDao blobDataDao;
 
 	@Test
 	public void testListAll() {
@@ -70,6 +77,7 @@ public class DeclarationTemplateDaoTest {
 		assertEquals("MyScript", savedDeclarationTemplate.getCreateScript());
 		assertEquals(declarationType.getId(), savedDeclarationTemplate.getDeclarationType().getId());
 		assertTrue(savedDeclarationTemplate.isActive());
+        assertEquals(null, savedDeclarationTemplate.getXsdId());
 
 	}
 
@@ -91,7 +99,7 @@ public class DeclarationTemplateDaoTest {
 		assertEquals("0.01", savedDeclarationTemplate.getVersion());
 		assertEquals("MyScript", savedDeclarationTemplate.getCreateScript());
 		assertEquals(declarationType.getId(), savedDeclarationTemplate.getDeclarationType().getId());
-		assertTrue(savedDeclarationTemplate.isActive());
+        assertEquals(null, savedDeclarationTemplate.getXsdId());
 	}
 
 	@Test(expected = DaoException.class)

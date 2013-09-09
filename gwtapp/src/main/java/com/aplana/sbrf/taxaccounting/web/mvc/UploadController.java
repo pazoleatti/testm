@@ -28,7 +28,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/uploadController")
-public class UploadXlsController {
+public class UploadController {
 
     @Autowired
     private FormDataService formDataService;
@@ -43,7 +43,7 @@ public class UploadXlsController {
     private SignService signService;
 
     @RequestMapping(value = "/xls", method = RequestMethod.POST)
-    public void processUpload(HttpServletRequest request, HttpServletResponse response)
+    public void processUploadXls(HttpServletRequest request, HttpServletResponse response)
             throws FileUploadException, IOException, JSONException {
 
         FileItemFactory factory = new DiskFileItemFactory();
@@ -61,6 +61,18 @@ public class UploadXlsController {
                 FormDataKind.fromId(jo.getInt(JSON_ATTR4)), jo.getInt(JSON_ATTR5), fileItem.getInputStream(), fileItem.getName());
         IOUtils.closeQuietly(fileItem.getInputStream());*/
         String uuid = blobDataService.createTemporary(fileItem.getInputStream(), fileItem.getName());
+        response.getWriter().printf("{uuid : \"%s\"}", uuid);
+    }
+
+    @RequestMapping(value = "/xsd", method = RequestMethod.POST)
+    public void processUploadXsd(HttpServletRequest request, HttpServletResponse response)
+            throws FileUploadException, IOException {
+
+        FileItemFactory factory = new DiskFileItemFactory();
+        ServletFileUpload upload = new ServletFileUpload(factory);
+        List<FileItem> items = upload.parseRequest(request);
+        FileItem fileItem = items.get(0);
+        String uuid = blobDataService.create(fileItem.getInputStream(), fileItem.getName());
         response.getWriter().printf("{uuid : \"%s\"}", uuid);
     }
 

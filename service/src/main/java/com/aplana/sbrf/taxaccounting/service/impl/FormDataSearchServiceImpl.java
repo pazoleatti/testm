@@ -64,6 +64,8 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			formDataDaoFilter.setStates(Arrays.asList(formDataFilter.getFormState()));
 		}
 
+		formDataDaoFilter.setReturnState(formDataFilter.getReturnState());
+
 		if(formDataFilter.getTaxType() == null){
 			//В текущей реализации мы всегда идем по ветке else и сюда не попадаем, но  данное условие
 			//добавлено, на случай, если в дальнейщем будет функциональность выбора по всем типам налога.

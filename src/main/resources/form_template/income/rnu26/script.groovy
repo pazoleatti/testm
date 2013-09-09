@@ -6,13 +6,11 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
- * Скрипт для РНУ-26 (rnu26.groovy).
  * Форма "(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций, РДР, ADR, GDR и опционов эмитента в целях налогообложения".
  *
  * @version 65
  *
  * TODO:
- *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *      - графа 8, 14-17 расчитываются, но в перечне полей они могут редактироваться
  *
  * @author rtimerbaev
@@ -30,8 +28,7 @@ switch (formDataEvent) {
             logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
             return
         }
-        logicalCheck(true)
-        checkNSI()
+        logicalCheck() && checkNSI()
         break
     case FormDataEvent.CALCULATE :
         if (!isBalancePeriod && !checkPrevPeriod()) {
@@ -39,8 +36,7 @@ switch (formDataEvent) {
             return
         }
         calc()
-        logicalCheck(false)
-        checkNSI()
+        !hasError() && logicalCheck() && checkNSI()
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
@@ -50,19 +46,26 @@ switch (formDataEvent) {
         deleteRow()
         recalculateNumbers()
         break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        logicalCheck() && checkNSI()
+        break
     // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
-        logicalCheck(true)
-        checkNSI()
+        logicalCheck() && checkNSI()
         break
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        logicalCheck(false)
-        checkNSI()
-        // для сохранения изменений приемников
-        getData(formData).commit()
+        if (!hasError() && logicalCheck() && checkNSI()) {
+            // для сохранения изменений приемников
+            getData(formData).commit()
+        }
         break
     case FormDataEvent.IMPORT :
         if (!isBalancePeriod && !checkPrevPeriod()) {
@@ -96,14 +99,7 @@ switch (formDataEvent) {
  */
 def addNewRow() {
     def data = getData(formData)
-    def newRow = formData.createDataRow()
 
-    // графа 2..7, 9..13
-    ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
-            'cost', 'signSecurity', 'marketQuotation', 'rubCourse'].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
     def index = 0
     if (currentDataRow!=null){
         index = currentDataRow.getIndex()
@@ -117,20 +113,20 @@ def addNewRow() {
     }else if (getRows(data).size()>0) {
         for(int i = getRows(data).size()-1;i>=0;i--){
             def row = getRows(data).get(i)
-            if(!isTotal(row)){
+            if(!isFixedRow(row)){
                 index = getRows(data).indexOf(row)+1
                 break
             }
         }
     }
-    data.insert(newRow,index+1)
+    data.insert(getNewRow(),index+1)
 }
 
 def recalculateNumbers(){
     def index = 1
     def data = getData(formData)
     getRows(data).each{row->
-        if (!isTotal(row)) {
+        if (!isFixedRow(row)) {
             row.rowNumber = index++
         }
     }
@@ -167,12 +163,12 @@ void calc() {
      * Проверка объязательных полей.
      */
     for (def row : getRows(data)) {
-        if (!isTotal(row)) {
+        if (!isFixedRow(row)) {
             // список проверяемых столбцов (графа 2..7, 9, 10, 11)
             def requiredColumns = ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev',
                     'lotSizeCurrent', 'cost', 'signSecurity']
 
-            if (!checkRequiredColumns(row, requiredColumns, true)) {
+            if (!checkRequiredColumns(row, requiredColumns)) {
                 return
             }
         }
@@ -185,7 +181,7 @@ void calc() {
     // удалить строку "итого" и "итого по Эмитенту: ..."
     def delRow = []
     getRows(data).each { row ->
-        if (isTotal(row)) {
+        if (isFixedRow(row)) {
             delRow += row
         }
     }
@@ -260,7 +256,7 @@ void calc() {
         sums[it] = 0
     }
     getRows(data).eachWithIndex { row, i ->
-        if (!isTotal(row)) {
+        if (!isFixedRow(row)) {
             if (tmp == null) {
                 tmp = row.issuer
             }
@@ -297,21 +293,33 @@ void calc() {
 
 /**
  * Логические проверки.
- *
- * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-def logicalCheck(def useLog) {
+def logicalCheck() {
+    def data = getData(formData)
+    for (def row : getRows(data)) {
+        if (isFixedRow(row)) {
+            continue
+        }
+        // 15. Обязательность заполнения поля графы 1..3, 5..10, 13, 14
+        columns = ['rowNumber', 'issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
+                'reserveCalcValuePrev', 'cost', 'signSecurity', 'costOnMarketQuotation']
+        if (!checkRequiredColumns(row, columns)) {
+            return false
+        }
+    }
+
+    // Проверока наличия итоговой строки
+    if (!checkAlias(getRows(data), 'total')) {
+        logger.error('Итоговые значения не рассчитаны')
+        return false
+    }
+
     // данные предыдущего отчетного периода
     def formDataOld = getFormDataOld()
-    def data = getData(formData)
     def dataOld = getData(formDataOld)
 
     if (formDataOld != null && !getRows(dataOld).isEmpty()) {
         def i = 1
-
-        // список проверяемых столбцов (графа 1..10, 13, 14)
-        columns = ['rowNumber', 'issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
-                'cost', 'signSecurity', 'costOnMarketQuotation']
 
         // суммы строки общих итогов
         def totalSums = [:]
@@ -329,14 +337,9 @@ def logicalCheck(def useLog) {
 
         def tmp
         for (def row : getRows(data)) {
-            if (isTotal(row)) {
+            if (isFixedRow(row)) {
                 hasTotal = true
                 continue
-            }
-
-            // 15. Обязательность заполнения поля графы 1..3, 5..10, 13, 14
-            if (!checkRequiredColumns(row, columns, useLog)) {
-                return false
             }
 
             // 2. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 8, 17)
@@ -533,7 +536,7 @@ def logicalCheck(def useLog) {
 def checkNSI() {
     def data = getData(formData)
     getRows (data).each { row->
-        if (!isTotal(row)) {
+        if (!isFixedRow(row)) {
             // 1. Проверка актуальности поля «Валюта выпуска ценной бумаги»
             if (row.currency!=null && getCurrency(row.currency)==null) {
                 logger.warn('Валюта выпуска ценной бумаги указана неверно!')
@@ -619,34 +622,21 @@ void importData() {
         return
     }
 
-    def data = getData(formData)
-    def totalColumns = [6:'lotSizePrev', 7:'lotSizeCurrent', 9:'cost', 14:'costOnMarketQuotation', 15:'reserveCalcValue']
-    // добавить данные в форму
     try {
+        // добавить данные в форму
         def totalLoad = addData(xml)
-        if (totalLoad!=null) {
-            calc()
-            logicalCheck(false)
-            checkNSI()
 
-            def totalCalc
-            for (def row : getRows(data))
-                if (isTotal(row)) totalCalc = row
-
-            if (totalCalc!=null)
-                totalColumns.each{k, v->
-                    if (totalCalc[v]!=totalLoad[v]) {
-                        logger.error("Итоговая сумма в графе $k в транспортном файле некорректна")
-                    }
-                }
+        // расчетать, проверить и сравнить итоги
+        if (totalLoad != null) {
+            checkTotalRow(totalLoad)
         } else {
             logger.error("Нет итоговой строки.")
         }
     } catch(Exception e) {
-        logger.error(""+e.message)
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
-    //в случае ошибок откатить изменения
-    if (!logger.containsLevel(LogLevel.ERROR)) {
+
+    if (!hasError()) {
         logger.info('Закончена загрузка файла ' + fileName)
     }
 }
@@ -659,6 +649,13 @@ void importData() {
  * Проверка является ли строка итоговой.
  */
 def isTotal(def row) {
+    return row != null && row.getAlias() != null && row.getAlias() == 'total'
+}
+
+/**
+ * Проверка является ли строка итоговой.
+ */
+def isFixedRow(def row) {
     return row != null && row.getAlias() != null && row.getAlias().contains('total')
 }
 
@@ -740,7 +737,7 @@ def calcSumByCode(def value, def alias) {
     def data = getData(formData)
     def sum = 0
     getRows(data).each { row ->
-        if (!isTotal(row) && row.issuer == value) {
+        if (!isFixedRow(row) && row.issuer == value) {
             sum += (row.getCell(alias).getValue() ?: 0)
         }
     }
@@ -772,10 +769,9 @@ def getIndex(def row) {
  *
  * @param row строка
  * @param columns список обязательных графов
- * @param useLog нужно ли записывать сообщения в лог
  * @return true - все хорошо, false - есть незаполненные поля
  */
-def checkRequiredColumns(def row, def columns, def useLog) {
+def checkRequiredColumns(def row, def columns) {
     def colNames = []
 
     // если не заполнены графа 11 и графа 12, то графа 13 должна быть заполнена вручную
@@ -790,10 +786,7 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         }
     }
     if (!colNames.isEmpty()) {
-        if (!useLog) {
-            return false
-        }
-        def index = getIndex(row) + 1
+        def index = row.rowNumber
         def errorMsg = colNames.join(', ')
         if (index != null) {
             logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
@@ -894,30 +887,16 @@ def getData(def formData) {
  * @param xml данные
  */
 def addData(def xml) {
-    if (xml == null) {
-        return
-    }
-
     Date date = new Date()
 
     def cache = [:]
     def data = getData(formData)
     data.clear()
 
-    def total = formData.createDataRow()
-
-    def indexRow = -1
-    for (def row : xml.row) {
-        indexRow++
-
-        // пропустить шапку таблицы
-        if (indexRow <= 0) {
-            continue
-        }
-
+   for (def row : xml.row) {
         def newRow = getNewRow()
 
-        def indexCell = 1
+        def indexCell = 0
 
         newRow.rowNumber = getNumber(row.cell[indexCell].text())
         indexCell++
@@ -988,37 +967,36 @@ def addData(def xml) {
         insert(data, newRow)
     }
 
-    if (xml.rowTotal.size()==1)
-        for (def row : xml.rowTotal) {
-            // графа 6
-            total.lotSizePrev = getNumber(row.cell[6].text())
+    // итоговая строка
+    if (xml.rowTotal.size() == 1) {
+        def row = xml.rowTotal[0]
+        def total = formData.createDataRow()
 
-            // графа 7
-            total.lotSizeCurrent = getNumber(row.cell[7].text())
+        // графа 6
+        total.lotSizePrev = getNumber(row.cell[5].text())
 
-            // графа 8
+        // графа 7
+        total.lotSizeCurrent = getNumber(row.cell[6].text())
 
-            // графа 9
-            total.cost = getNumber(row.cell[9].text())
+        // графа 9
+        total.cost = getNumber(row.cell[8].text())
 
-            // графа 10
+        // графа 14
+        total.costOnMarketQuotation = getNumber(row.cell[13].text())
 
-            // графа 11
+        // графа 15
+        total.reserveCalcValue = getNumber(row.cell[14].text())
 
-            // графа 12
+        // графа 16
+        total.reserveCreation = getNumber(row.cell[15].text())
 
-            // графа 13
+        // графа 17
+        total.reserveRecovery = getNumber(row.cell[16].text())
 
-            // графа 14
-            total.costOnMarketQuotation = getNumber(row.cell[14].text())
-
-            // графа 15
-            total.reserveCalcValue = getNumber(row.cell[15].text())
-        }
-    else {
+        return total
+    } else {
         return null
     }
-    return total
 }
 
 /**
@@ -1058,7 +1036,7 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
         return cache[ref_id][filter]
     }
     logger.error("Не удалось определить элемент справочника!")
-    return null;
+    return null
 }
 
 /**
@@ -1135,4 +1113,58 @@ def getRowNumber(def alias, def data) {
             return row.rowNumber.toString()
         }
     }
+}
+
+/**
+ * Расчетать, проверить и сравнить итоги.
+ *
+ * @param totalRow итоговая строка из транспортного файла
+ */
+void checkTotalRow(def totalRow) {
+    calc()
+    if (!hasError() && logicalCheck() && checkNSI()) {
+        def data = getData(formData)
+        def totalColumns = [6 : 'lotSizePrev', 7 : 'lotSizeCurrent', 9 : 'cost', 14 : 'costOnMarketQuotation',
+                15 : 'reserveCalcValue', 16 : 'reserveCreation', 17: 'reserveRecovery']
+        def totalCalc = null
+        for (def row : getRows(data)) {
+            if (isTotal(row)) {
+                totalCalc = row
+                break
+            }
+        }
+        if (totalCalc != null) {
+            totalColumns.each { index, columnAlias ->
+                if (totalCalc[columnAlias] != totalRow[columnAlias]) {
+                    logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Имеются ли фатальные ошибки.
+ */
+def hasError() {
+    return logger.containsLevel(LogLevel.ERROR)
+}
+
+/**
+ * Проверить существования строки по алиасу.
+ *
+ * @param list строки нф
+ * @param rowAlias алиас
+ * @return <b>true</b> - строка с указанным алиасом есть, иначе <b>false</b>
+ */
+def checkAlias(def list, def rowAlias) {
+    if (rowAlias == null || rowAlias == "" || list == null || list.isEmpty()) {
+        return false
+    }
+    for (def row : list) {
+        if (row.getAlias() == rowAlias) {
+            return true
+        }
+    }
+    return false
 }
