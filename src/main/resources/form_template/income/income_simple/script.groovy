@@ -59,11 +59,9 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         DataRowHelper form = getData(formData)
         if (form != null) {
-            System.out.print("System compose was started \n")
             consolidation(form)
             logicalCheck()
             calcForm()
-            System.out.print("System compose was end\n")
         }
         break
 // проверить
