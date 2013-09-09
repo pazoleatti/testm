@@ -182,7 +182,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.setLockInformation(true, lockDate, lockedBy);
 		
 		view.setWorkflowButtons(null);
-		view.showCheckButton(formDataAccessParams.isCanRead());
+		view.showCheckButton(false);
 
 	}
 

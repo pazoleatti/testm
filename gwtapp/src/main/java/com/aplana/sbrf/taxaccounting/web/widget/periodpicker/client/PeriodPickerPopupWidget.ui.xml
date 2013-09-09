@@ -10,6 +10,9 @@
 			<g:cell>
 				<g:Button text="..." ui:field="selectButton" />
 			</g:cell>
+			<g:cell>
+				<g:Button text="X" ui:field="clearButton" />
+			</g:cell>
 		</g:HorizontalPanel>
 		<g:FlowPanel visible="false">
 			<g:PopupPanel ui:field="popupPanel" autoHideEnabled="true"

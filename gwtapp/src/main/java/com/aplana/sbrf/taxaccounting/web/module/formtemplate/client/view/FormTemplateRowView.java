@@ -217,10 +217,10 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		}
 		//Create order column
 		NumericColumn numericColumn = new NumericColumn();
-		DataRowColumn indexColumn = new DataRowColumn(new IndexCell(), numericColumn) {
+		DataRowColumn<Integer> indexColumn = new DataRowColumn<Integer>(new IndexCell(), numericColumn) {
 			@Override
-			public Object getValue(Object object) {
-				return object;
+			public Integer getValue(DataRow<Cell> object) {
+				return object.getIndex();
 			}
 		};
 		indexColumn.setCellStyleNames("order");

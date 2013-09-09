@@ -12,6 +12,9 @@ import java.text.SimpleDateFormat
 
 /**
  * 6.5	(РНУ-51) Регистр налогового учёта финансового результата от реализации (выбытия) ОФЗ
+ *
+ * TODO:
+ *      - неясности как рассчитывать графу 16 и 17
  */
 
 switch (formDataEvent) {
@@ -35,6 +38,14 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         recalculateNumbers()
+        break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        allCheck()
         break
     // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
@@ -88,6 +99,13 @@ switch (formDataEvent) {
 
 void logicalCheck() {
     def data = getData(formData).getAllCached()
+
+    // Проверока наличия итоговой строки
+    if (!checkAlias(data, 'itogo')) {
+        logger.error('Итоговые значения не рассчитаны')
+        return
+    }
+
     def columns = ['rowNumber', 'tradeNumber', 'singSecurirty', 'issue', 'acquisitionDate', 'saleDate', 'amountBonds',
             'acquisitionPrice', 'costOfAcquisition', 'marketPriceInPerc', 'marketPriceInRub', 'acquisitionPriceTax',
             'redemptionValue', 'priceInFactPerc', 'priceInFactRub', 'marketPriceInPerc1', 'marketPriceInRub1',
@@ -213,45 +231,47 @@ void logicalCheck() {
             value.put('excessSalePriceTax', calc22(row))
             for (String check in checks) {
                 if (row.getCell(check).value != value.get(check)) {
-                    logger.error("Неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '') + "!")
+                    logger.error("Неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '%%') + "!")
                     return
                 }
             }
         }
-        /**
-         * Проверка корректности расчета итоговых значений за текущий квартал
-         * Графы 7-9, 11-13, 15, 17-22  строки «Итого за текущий квартал» содержат значения, рассчитанные согласно алгоритму расчета из Табл. 173
-         * 1
-         * Итоговые значения за текущий квартал рассчитаны неверно!
-         */
-        List itogoSum = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInRub',
-                'acquisitionPriceTax', 'redemptionValue', 'priceInFactRub', 'priceInFactRub', 'salePriceTax',
-                'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
-        if (data.size()>=2) {
-            DataRow realItogoKvartal = getRealItogoKvartal()
-            itogoKvartal
-            for (String alias in itogoSum) {
-                if (realItogoKvartal.getCell(alias).value != itogoKvartal.getCell(alias).value) {
-                    logger.error("Итоговые значения за текущий квартал рассчитаны неверно!")
-                    return
-                }
-            }
-        }
+    }
 
-        /**
-         * Проверка корректности расчета итоговых значений за текущий отчётный (налоговый) период
-         * Графы 7-9, 11-13, 15, 17-22  строки «Итого за текущий отчётный (налоговый) период» содержат значения, рассчитанные согласно алгоритму расчета из Табл. 174
-         * 1
-         * Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!
-         */
-        if (data.size()>=1) {
-            DataRow realItogo = getRealItogo()
-            itogo
-            for (String alias in itogoSum) {
-                if (realItogo.getCell(alias).value != itogo.getCell(alias).value) {
-                    logger.error("Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!")
-                    return
-                }
+    /**
+     * Проверка корректности расчета итоговых значений за текущий квартал
+     * Графы 7-9, 11-13, 15, 17-22  строки «Итого за текущий квартал» содержат значения, рассчитанные согласно алгоритму расчета из Табл. 173
+     * 1
+     * Итоговые значения за текущий квартал рассчитаны неверно!
+     */
+    List itogoSum = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInRub',
+            'acquisitionPriceTax', 'redemptionValue', 'priceInFactRub', 'priceInFactRub', 'salePriceTax',
+            'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
+    def itogoKvartal = getItogoKvartal()
+    def prevItogoKvartal = getPrevItogoKvartal()
+    if (data.size()>=2) {
+        DataRow realItogoKvartal = getRealItogoKvartal()
+        for (String alias in itogoSum) {
+            if (realItogoKvartal.getCell(alias).value != itogoKvartal.getCell(alias).value) {
+                logger.error("Итоговые значения за текущий квартал рассчитаны неверно!")
+                return
+            }
+        }
+    }
+
+    /**
+     * Проверка корректности расчета итоговых значений за текущий отчётный (налоговый) период
+     * Графы 7-9, 11-13, 15, 17-22  строки «Итого за текущий отчётный (налоговый) период» содержат значения, рассчитанные согласно алгоритму расчета из Табл. 174
+     * 1
+     * Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!
+     */
+    if (data.size()>=1) {
+        DataRow realItogo = getRealItogo()
+        def itogo = getItogo(itogoKvartal, prevItogoKvartal)
+        for (String alias in itogoSum) {
+            if (realItogo.getCell(alias).value != itogo.getCell(alias).value) {
+                logger.error("Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!")
+                return
             }
         }
     }
@@ -296,15 +316,13 @@ def recalculateNumbers(){
     data.save(getRows(data))
 }
 
-DataRow<Cell> getItogo() {
+DataRow<Cell> getItogo(def itogoKvartal, def prevItogoKvartal) {
     DataRow<Cell> itogo = formData.createDataRow()
     itogo.setAlias("itogo")
     itogo.getCell('fix').colSpan = 7
     itogo.fix = "Итого за текущий отчетный (налоговый) период"
     sumColumns = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInRub', 'acquisitionPriceTax', 'redemptionValue', 'priceInFactRub',
             'marketPriceInRub1', 'salePriceTax', 'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
-    itogoKvartal
-    prevItogoKvartal
     for (String alias in sumColumns) {
         if (prevItogoKvartal != null) {
             if (itogo.getCell(alias).value == null) {
@@ -381,13 +399,18 @@ void setTotalStyle(def row) {
     }
 }
 
+/*
+ * TODO (Ramil Timerbaev) из чтз:
+ * ВОПРОС:  уточнить,  какое значение нужно указать, если «Графа 13»=0?
+ * Этот вопрос актуален и для графы 17. ....
+ */
 /**
  * Если «графа 13» > 0, то «графа 16» = 100
  * @param row
  * @return
  */
 BigDecimal calc16(DataRow row) {
-    BigDecimal result = null
+    BigDecimal result = row.marketPriceInPerc1 // TODO (Ramil Timerbaev) вместо null поставил значение 16 графы
     if (row.redemptionValue > 0) {
         result = 100
     }
@@ -395,13 +418,14 @@ BigDecimal calc16(DataRow row) {
     return result
 }
 
+// TODO (Ramil Timerbaev)
 /**
  * Если «графа 13» > 0, то «графа 17» = «графа 13»
  * @param row
  * @return
  */
 BigDecimal calc17(DataRow row) {
-    BigDecimal result = null
+    BigDecimal result = row.marketPriceInRub1 // TODO (Ramil Timerbaev) вместо null поставил значение 17 графы
     if (row.redemptionValue > 0) {
         result = row.redemptionValue
     }
@@ -539,8 +563,11 @@ void sort() {
 }
 
 void addAllStatic() {
-    getData(formData).insert(itogoKvartal,getData(formData).getAllCached().size()+1)
-    getData(formData).insert(itogo,getData(formData).getAllCached().size()+1)
+    def itogoKvartal = getItogoKvartal()
+    def prevItogoKvartal = getPrevItogoKvartal()
+    getData(formData).insert(itogoKvartal, getData(formData).getAllCached().size() + 1)
+
+    getData(formData).insert(getItogo(itogoKvartal, prevItogoKvartal), getData(formData).getAllCached().size() + 1)
 }
 
 void allCheck() {
@@ -592,9 +619,14 @@ def checkRequiredColumns(def row, def columns) {
         }
     }
     if (!colNames.isEmpty()) {
-        def index = getRows(data).indexOf(row) + 1
+        def index = row.rowNumber
         def errorMsg = colNames.join(', ')
-        logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        if (!isEmpty(index)) {
+            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            index = getRows(data).indexOf(row) + 1
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        }
         return false
     }
     return true
@@ -751,25 +783,21 @@ void importData() {
         return
     }
 
-    // сохранить начальное состояние формы
-    def data = getData(formData)
     try {
         // добавить данные в форму
-        addData(xml)
+        def totalLoad = addData(xml)
 
-        // расчитать и проверить
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            deleteAllStatic()
-            sort()
-            calc()
-            addAllStatic()
-            allCheck()
+        // расчетать, проверить и сравнить итоги
+        if (totalLoad != null) {
+            checkTotalRow(totalLoad)
+        } else {
+            logger.error("Нет итоговой строки.")
         }
     } catch(Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
     }
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        logger.info('Данные загружены')
+    if (!hasError()) {
+        logger.info('Закончена загрузка файла ' + fileName)
     }
 }
 
@@ -778,7 +806,7 @@ void importData() {
  *
  * @param xml данные
  */
-void addData(def xml) {
+def addData(def xml) {
     def tmp
     def index
     def refDataProvider61 = refBookFactory.getDataProvider(61)
@@ -789,7 +817,7 @@ void addData(def xml) {
 
     // TODO (Ramil Timerbaev) Проверка корректности данных
     for (def row : xml.exemplar.table.detail.record) {
-        index = 1
+        index = 0
 
         def newRow = getNewRow()
 
@@ -807,7 +835,7 @@ void addData(def xml) {
 
         // графа 3 - справочник 62 "Признаки ценных бумаг"
         tmp = null
-        if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
+        if (row.field[index].text() != null && row.field[index].text().trim() != '') {
             tmp = getRecordId(refDataProvider62, 'CODE', row.field[index].text())
         }
         newRow.singSecurirty = tmp
@@ -890,32 +918,66 @@ void addData(def xml) {
 
         insert(data, newRow)
     }
-    // проверка итоговых данных
-    if (xml.exemplar.table.total.record.size() > 1 && !getRows(data).isEmpty()) {
-        // графы 7-9, 11-13, 15, 17-22
-        // TODO (Ramil Timerbaev) убрал нередактируемые вычисляемые графы (их итоги)
-        def columnsAlias = ['amountBonds': 7, 'acquisitionPrice': 8, 'costOfAcquisition': 9,
-                'marketPriceInRub': 11, /*'acquisitionPriceTax': 12,*/ 'redemptionValue': 13,
-                'priceInFactRub': 15, /*'marketPriceInRub1': 17, 'salePriceTax': 18,*/ 'expensesOnSale': 19 /*,
-                'expensesTotal': 20, 'profit': 21, 'excessSalePriceTax': 22*/]
 
-        index = 0
-        for (def row : xml.exemplar.table.total.record) {
-            index++
-            def totalRow = (index == 1 ? getItogoKvartal() : getItogo())
+    // итоговая строка
+    if (xml.exemplar.table.total.record.size() > 1) {
+        def row = xml.exemplar.table.total.record[0]
+        def total = formData.createDataRow()
 
-            // сравнить посчитанные суммы итогов с итогами из транспортного файла (графы 7-9, 11-13, 15, 17-22)
-            def exit = false
-            columnsAlias.each { alias, i ->
-                if (!exit && totalRow.getCell(alias).getValue() != getNumber(row.field[i].@value.text())) {
-                    logger.error('Итоговые значения неправильные.')
-                    exit = true
-                }
-            }
-            if (exit) {
-                return
-            }
-        }
+        // графа 7
+        total.amountBonds = getNumber(row.field[6].@value.text())
+        index++
+
+        // графа 8
+        total.acquisitionPrice = getNumber(row.field[7].@value.text())
+        index++
+
+        // графа 9
+        total.costOfAcquisition = getNumber(row.field[8].@value.text())
+        index++
+
+        // графа 11
+        total.marketPriceInRub = getNumber(row.field[10].@value.text())
+        index++
+
+        // графа 12
+        total.acquisitionPriceTax = getNumber(row.field[11].@value.text())
+        index++
+
+        // графа 13
+        total.redemptionValue = getNumber(row.field[12].@value.text())
+        index++
+
+        // графа 15
+        total.priceInFactRub = getNumber(row.field[14].@value.text())
+        index++
+
+        // графа 17
+        total.marketPriceInRub1 = getNumber(row.field[16].@value.text())
+        index++
+
+        // графа 18
+        total.salePriceTax = getNumber(row.field[17].@value.text())
+        index++
+
+        // графа 19
+        total.expensesOnSale = getNumber(row.field[18].@value.text())
+        index++
+
+        // графа 20
+        total.expensesTotal = getNumber(row.field[19].@value.text())
+        index++
+
+        // графа 21
+        total.profit = getNumber(row.field[20].@value.text())
+        index++
+
+        // графа 22
+        total.excessSalePriceTax = getNumber(row.field[21].@value.text())
+
+        return total
+    } else {
+        return null
     }
 }
 
@@ -987,4 +1049,66 @@ def getDate(def value) {
     }
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     return format.parse(value)
+}
+
+/**
+ * Проверить существования строки по алиасу.
+ *
+ * @param list строки нф
+ * @param rowAlias алиас
+ * @return <b>true</b> - строка с указанным алиасом есть, иначе <b>false</b>
+ */
+def checkAlias(def list, def rowAlias) {
+    if (rowAlias == null || rowAlias == "" || list == null || list.isEmpty()) {
+        return false
+    }
+    for (def row : list) {
+        if (row.getAlias() == rowAlias) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Расчетать, проверить и сравнить итоги.
+ *
+ * @param totalRow итоговая строка из транспортного файла
+ */
+void checkTotalRow(def totalRow) {
+    deleteAllStatic()
+    sort()
+    calc()
+    addAllStatic()
+    allCheck()
+    if (!hasError()) {
+        def data = getData(formData)
+        // графы 7-9, 11-13, 15, 17-22
+        def totalColumns = [7: 'amountBonds', 8 : 'acquisitionPrice', 9 : 'costOfAcquisition',
+                11 : 'marketPriceInRub', 12 : 'acquisitionPriceTax', 13 : 'redemptionValue',
+                15 : 'priceInFactRub', 17 : 'marketPriceInRub1', 18 : 'salePriceTax', 19 : 'expensesOnSale',
+                20 : 'expensesTotal', 21 : 'profit', 22 : 'excessSalePriceTax']
+        def totalCalc = null
+        for (def row : getRows(data)) {
+            if (row.getAlias() == 'itogo') {
+                totalCalc = row
+                break
+            }
+        }
+        if (totalCalc != null) {
+            totalColumns.each { index, columnAlias ->
+                if (totalCalc[columnAlias] != totalRow[columnAlias]) {
+                    logger.info('===== ' + totalCalc[columnAlias] + ' - ' + totalRow[columnAlias]) // TODO (Ramil Timerbaev)
+                    logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Имеются ли фатальные ошибки.
+ */
+def hasError() {
+    return logger.containsLevel(LogLevel.ERROR)
 }

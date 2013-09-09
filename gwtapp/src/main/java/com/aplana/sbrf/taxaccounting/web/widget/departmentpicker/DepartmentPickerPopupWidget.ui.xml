@@ -1,10 +1,18 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:G="urn:import:com.google.gwt.user.client.ui">
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:G="urn:import:com.google.gwt.user.client.ui">
 
-    <g:HTMLPanel>
-        <g:HorizontalPanel >
-            <g:TextBox enabled="false" ui:field="selected" width="170px"/>
-            <g:Button ui:field="selectButton" text="..."/>
-        </g:HorizontalPanel>
-    </g:HTMLPanel>
+	<g:FlowPanel>
+		<g:HorizontalPanel width="100%">
+			<g:cell width="100%">
+				<g:TextBox enabled="false" ui:field="selected" width="100%" />
+			</g:cell>
+			<g:cell>
+				<g:Button ui:field="selectButton" text="..." />
+			</g:cell>
+			<g:cell>
+				<g:Button text="X" ui:field="clearButton" />
+			</g:cell>
+		</g:HorizontalPanel>
+	</g:FlowPanel>
+	
 </ui:UiBinder>

@@ -421,7 +421,7 @@ def getRefBookValue(refBookID, recordId, alias){
 def checkTransportParams(departmentParamTransport){
     def errors = []
     departmentParamTransport.each{ key, value ->
-        if (!(key in ['PHONE', 'REORG_FORM_CODE', 'REORG_KPP', 'REORG_INN']) && (value.toString().equals(""))){
+        if (!(key in ['PHONE', 'REORG_FORM_CODE', 'REORG_KPP', 'REORG_INN', 'SIGNATORY_LASTNAME', 'APPROVE_DOC_NAME', 'APPROVE_ORG_NAME']) && (value.toString().equals(""))){
             errors.add(key)
         }
     }

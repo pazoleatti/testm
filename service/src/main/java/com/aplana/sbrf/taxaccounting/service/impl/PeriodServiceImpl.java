@@ -35,6 +35,8 @@ public class PeriodServiceImpl implements PeriodService{
 	
 	public static final Long PERIOD$CODE$REFBOOK = 8L;
 
+	public static final int UNP_ID = 1;
+
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
 
@@ -154,47 +156,58 @@ public class PeriodServiceImpl implements PeriodService{
 			newReportPeriod = reportPeriods.get(0);
 		}
 
-		if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT)) {
-			// Сохраняем для всех
-			for(Department dep : departmentService.listAll()) {
-
-				DepartmentReportPeriod depRP = new DepartmentReportPeriod();
-				depRP.setReportPeriod(newReportPeriod);
-				depRP.setDepartmentId(Long.valueOf(dep.getId()));
-				depRP.setActive(true);
-				depRP.setBalance(isBalance);
-				saveOrUpdate(depRP, logs);
+		if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT) || (taxType == TaxType.DEAL)) {
+			if ((user.getUser().hasRole("ROLE_CONTROL_UNP") || (user.getUser().hasRole("ROLE_CONTROL")))
+					&& (user.getUser().getDepartmentId() == UNP_ID)
+					&& (departmentId == UNP_ID)) {
+				for(Department dep : departmentService.listAll()) {
+					DepartmentReportPeriod depRP = new DepartmentReportPeriod();
+					depRP.setReportPeriod(newReportPeriod);
+					depRP.setDepartmentId(Long.valueOf(dep.getId()));
+					depRP.setActive(true);
+					depRP.setBalance(isBalance);
+					saveOrUpdate(depRP, logs);
+				}
+			} else {
+				throw new ServiceException("Невозможно открыть период с такими параметрами");
 			}
-		} else if (user.getUser().getDepartmentId() == departmentId) {
-			// Сохраняем для пользователя
-			DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
-			departmentReportPeriod.setActive(true);
-			departmentReportPeriod.setBalance(isBalance);
-			departmentReportPeriod.setDepartmentId(Long.valueOf(user.getUser().getDepartmentId()));
-			departmentReportPeriod.setReportPeriod(newReportPeriod);
-			saveOrUpdate(departmentReportPeriod, logs);
+		} else if ((taxType == TaxType.TRANSPORT) || (taxType == TaxType.PROPERTY)) {
+			if ((user.getUser().hasRole("ROLE_CONTROL") && (user.getUser().getDepartmentId() == departmentId))
+					|| user.getUser().hasRole("ROLE_CONTROL_UNP")) {
+				// Сохраняем для выбраного
+				DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+				departmentReportPeriod.setActive(true);
+				departmentReportPeriod.setBalance(isBalance);
+				departmentReportPeriod.setDepartmentId(departmentId);
+				departmentReportPeriod.setReportPeriod(newReportPeriod);
+				saveOrUpdate(departmentReportPeriod, logs);
 
-			// Сохраняем для источников
-			List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
-			departmentFormTypes.addAll(departmentFormTypeService.getDFTSourcesByDepartment((int) departmentId, taxType));
+				// Сохраняем для источников
+				List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
+				departmentFormTypes.addAll(departmentFormTypeService.getDFTSourcesByDepartment((int) departmentId, taxType));
 
-			for (DepartmentFormType dft : departmentFormTypes) {
-				DepartmentReportPeriod depRP = new DepartmentReportPeriod();
-				depRP.setReportPeriod(newReportPeriod);
-				depRP.setDepartmentId(Long.valueOf(dft.getDepartmentId()));
-				depRP.setActive(true);
-				depRP.setBalance(isBalance);
-				saveOrUpdate(depRP, logs);
+				for (DepartmentFormType dft : departmentFormTypes) {
+					DepartmentReportPeriod depRP = new DepartmentReportPeriod();
+					depRP.setReportPeriod(newReportPeriod);
+					depRP.setDepartmentId(Long.valueOf(dft.getDepartmentId()));
+					depRP.setActive(true);
+					depRP.setBalance(isBalance);
+					saveOrUpdate(depRP, logs);
+				}
+			} else if (user.getUser().hasRole("ROLE_CONTROL") && (user.getUser().getDepartmentId() != departmentId)) {
+				DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+				departmentReportPeriod.setActive(true);
+				departmentReportPeriod.setBalance(isBalance);
+				departmentReportPeriod.setDepartmentId(departmentId);
+				departmentReportPeriod.setReportPeriod(newReportPeriod);
+				saveOrUpdate(departmentReportPeriod, logs);
+			} else {
+				throw new ServiceException("Невозможно открыть период с такими параметрами");
 			}
-
-		} else if (user.getUser().getDepartmentId() != departmentId) {
-			DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
-			departmentReportPeriod.setActive(true);
-			departmentReportPeriod.setBalance(isBalance);
-			departmentReportPeriod.setDepartmentId(departmentId);
-			departmentReportPeriod.setReportPeriod(newReportPeriod);
-			saveOrUpdate(departmentReportPeriod, logs);
+		} else {
+			throw new ServiceException("Вид налога не поддерживается");
 		}
+
 	}
 
 	@Override
