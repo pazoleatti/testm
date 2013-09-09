@@ -1,12 +1,10 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -32,14 +30,16 @@ public class RefBookIncome102 implements RefBookDataProvider {
     RefBookDao rbDao;
 
     @Autowired
-    private RefBookIncome102Dao bookBookerStatemensDao;
+    private RefBookIncome102Dao refBookIncome102Dao;
 
     @Autowired
     private TaxPeriodDao taxPeriodDao;
+    @Autowired
+    private ReportPeriodDao reportPeriodDao;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return bookBookerStatemensDao.getRecords(pagingParams, filter, sortAttribute);
+        return refBookIncome102Dao.getRecords(getReportPeriod(version).getId(), pagingParams, filter, sortAttribute);
     }
 
     @Override
@@ -49,13 +49,13 @@ public class RefBookIncome102 implements RefBookDataProvider {
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long recordId) {
-        return bookBookerStatemensDao.getRecordData(recordId);
+        return refBookIncome102Dao.getRecordData(recordId);
     }
 
     @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
         List<Date> result = new ArrayList<Date>();
-        List<ReportPeriod> reportPeriods = bookBookerStatemensDao.gerReportPeriods();
+        List<ReportPeriod> reportPeriods = refBookIncome102Dao.gerReportPeriods();
         Calendar cal = new GregorianCalendar();
         for (ReportPeriod reportPeriod: reportPeriods) {
             TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
@@ -75,7 +75,7 @@ public class RefBookIncome102 implements RefBookDataProvider {
 
     @Override
     public void updateRecords(Date version, List<Map<String, RefBookValue>> records) {
-        bookBookerStatemensDao.updateRecords(records);
+        refBookIncome102Dao.updateRecords(records);
     }
 
     @Override
@@ -92,6 +92,32 @@ public class RefBookIncome102 implements RefBookDataProvider {
     public RefBookValue getValue(Long recordId, Long attributeId) {
         RefBook refBook = rbDao.get(REF_BOOK_ID);
         RefBookAttribute attribute = refBook.getAttribute(attributeId);
-        return bookBookerStatemensDao.getRecordData(recordId).get(attribute.getAlias());
+        return refBookIncome102Dao.getRecordData(recordId).get(attribute.getAlias());
+    }
+
+    private ReportPeriod getReportPeriod(Date version) {
+        List<TaxPeriod> taxPeriods = taxPeriodDao.listByTaxTypeAndDate(TaxType.INCOME, version, version);    // Данный справочник будет применятся в налоге на прибыль (Ф. Марат)
+        if (taxPeriods.size() != 1) {
+            throw new IllegalArgumentException("Invalid version for refbook");
+        }
+        TaxPeriod taxPeriod = taxPeriods.get(0);
+        List<ReportPeriod> reportPeriods = reportPeriodDao.listByTaxPeriod(taxPeriod.getId());
+        Calendar startCal = new GregorianCalendar();
+        Long time = null;
+        ReportPeriod reportPeriodResult = null;
+        Long resultTime;
+        for (ReportPeriod reportPeriod : reportPeriods) {
+            startCal.setTime(taxPeriod.getStartDate());
+            startCal.set(Calendar.MONTH, startCal.get(Calendar.MONTH) + reportPeriod.getMonths());
+            resultTime = startCal.getTime().getTime() - version.getTime();
+            if (resultTime > 0 && ((reportPeriodResult == null) || (time > resultTime))) {
+                time = resultTime;
+                reportPeriodResult = reportPeriod;
+            }
+        }
+        if (reportPeriodResult == null) {
+            throw new IllegalArgumentException("Invalid version repord period not found");
+        }
+        return reportPeriodResult;
     }
 }

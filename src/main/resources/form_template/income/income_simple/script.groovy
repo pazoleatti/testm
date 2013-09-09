@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
@@ -51,7 +52,6 @@ switch (formDataEvent) {
         break
 // расчитать
     case FormDataEvent.CALCULATE:
-        DataRowHelper form = getData(formData)
         logicalCheck()
         calcForm()
         break
@@ -246,7 +246,7 @@ def logicalCheck() {
 
         if (!rowsNotCalc.contains(row.getAlias()) && !(row.getAlias() in ['R118', 'R119', 'R141', 'R142'])) {
             row.opuSumTotal = 0
-            for (income102 in refBookIncome102.getRecords(null, null, 'REPORT_PERIOD_ID = ' + formData.reportPeriodId.toString() + ' AND OPU_CODE = \'' + row.accountingRecords.toString() + '\'', null).getRecords()) {
+            for (income102 in refBookIncome102.getRecords(reportPeriodService.getEndDate(formData.reportPeriodId).time, null, 'OPU_CODE = \'' + row.accountingRecords.toString() + '\'', null).getRecords()) {
                 row.opuSumTotal += income102.get("TOTAL_SUM").getNumberValue()
             }
         }
@@ -262,7 +262,7 @@ def logicalCheck() {
          */
         if (row.getAlias() in ['R118', 'R119', 'R141', 'R142']) {
             row.opuSumTotal = 0
-            for (income101 in refBookIncome101.getRecords(null, null, 'REPORT_PERIOD_ID = ' + formData.reportPeriodId.toString() + ' AND ACCOUNT = \'' + row.accountingRecords.toString() + '\'', null).getRecords()) {
+            for (income101 in refBookIncome101.getRecords(reportPeriodService.getEndDate(formData.reportPeriodId).time, null, 'ACCOUNT = \'' + row.accountingRecords.toString() + '\'', null).getRecords()) {
                 row.opuSumTotal += income101.get("DEBET_RATE").getNumberValue()
             }
         }
@@ -448,13 +448,15 @@ def consolidationSummary() {
                                     taxPeriodList.each { TaxPeriod taxPeriod ->
                                         List<ReportPeriod> reportPeriodList = reportPeriodService.listByTaxPeriod(taxPeriod.getId())
                                         reportPeriodList.each { ReportPeriod reportPeriod ->
-                                            def primaryRNU6 = formDataService.find(source.formTypeId, FormDataKind.PRIMARY, source.departmentId, reportPeriod.getId())//TODO подразделение
-                                            def dataPrimary = getData(primaryRNU6)
-                                            getRows(dataPrimary).each { DataRow rowPrimary ->
-                                                if (rowPrimary.code != null && rowPrimary.code == rowRNU6.code &&
-                                                        rowPrimary.docNumber != null && rowPrimary.docNumber == rowRNU6.docNumber &&
-                                                        rowPrimary.docDate != null && rowPrimary.docDate == rowRNU6.docDate) {
-                                                    graph7 += rowPrimary.taxAccountingRuble
+                                            def primaryRNU6 = formDataService.find(source.formType.id, FormDataKind.PRIMARY, source.departmentId, reportPeriod.getId())//TODO подразделение
+                                            if (primaryRNU6!=null) {
+                                                def dataPrimary = getData(primaryRNU6)
+                                                getRows(dataPrimary).each { DataRow rowPrimary ->
+                                                    if (rowPrimary.code != null && rowPrimary.code == rowRNU6.code &&
+                                                            rowPrimary.docNumber != null && rowPrimary.docNumber == rowRNU6.docNumber &&
+                                                            rowPrimary.docDate != null && rowPrimary.docDate == rowRNU6.docDate) {
+                                                        graph7 += rowPrimary.taxAccountingRuble
+                                                    }
                                                 }
                                             }
                                         }
@@ -519,19 +521,6 @@ void checkCreation() {
     if (formData.kind != FormDataKind.SUMMARY) {
         logger.error("Нельзя создавать форму с типом ${formData.kind?.name}")
     }
-}
-
-/**
- * Проверка на террбанк.
- */
-def isTerBank() {
-    boolean isTerBank = false
-    departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
-        if (it.departmentId != formData.departmentId) {
-            isTerBank = true
-        }
-    }
-    return isTerBank
 }
 
 //// обертка предназначенная для прямых вызовов функции без formData
