@@ -85,12 +85,12 @@ public class PeriodPickerWidget extends Composite implements PeriodPicker{
 	public void setPeriods(List<ReportPeriod> periods) {
 		tree.clear();
 		
-		Map<Integer, TaxPeriodTreeItem> taxPeriodsMap = new LinkedHashMap<Integer, TaxPeriodTreeItem>();
+		Map<Integer, YearTreeItem> taxPeriodsMap = new LinkedHashMap<Integer, YearTreeItem>();
 		
 		for(ReportPeriod reportPeriod : periods){
 			
 			if (!taxPeriodsMap.containsKey(reportPeriod.getTaxPeriod().getId())){
-				TaxPeriodTreeItem taxPeriodItem = new TaxPeriodTreeItem(reportPeriod.getTaxPeriod());
+				YearTreeItem taxPeriodItem = new YearTreeItem(reportPeriod.getYear());
 				taxPeriodsMap.put(reportPeriod.getTaxPeriod().getId(), taxPeriodItem);
 			}
 
@@ -105,7 +105,7 @@ public class PeriodPickerWidget extends Composite implements PeriodPicker{
 			taxPeriodsMap.get(reportPeriod.getTaxPeriod().getId()).addItem(reportPeriodItem);
 		}
 		
-		for (TaxPeriodTreeItem taxPeriodTreeItem : taxPeriodsMap.values()) {
+		for (YearTreeItem taxPeriodTreeItem : taxPeriodsMap.values()) {
 			tree.addItem(taxPeriodTreeItem);
 		}
 		
