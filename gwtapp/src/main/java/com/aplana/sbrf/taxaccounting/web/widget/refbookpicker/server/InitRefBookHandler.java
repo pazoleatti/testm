@@ -41,7 +41,7 @@ public class InitRefBookHandler extends
 
 		RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
 		for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
-			if (!RefBook.RECORD_ID_ALIAS.equals(refBookAttribute.getAlias())) {
+			if (refBookAttribute.isVisible()) {
 				headers.add(refBookAttribute.getName());
 			}
 		}
