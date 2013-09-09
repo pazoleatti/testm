@@ -1,3 +1,5 @@
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+
 /**
  * РНУ-4
  * @author auldanov
@@ -64,9 +66,7 @@ switch (formDataEvent){
         break
 
     case FormDataEvent.CALCULATE:
-        fillForm()
-        logicalCheck()
-        checkNSI()
+        fillForm() && logicalCheck() && checkNSI()
         break
 
     case FormDataEvent.COMPOSE:
@@ -119,6 +119,15 @@ def deleteRow() {
  * 6.1.2.3	Алгоритмы заполнения полей формы
  */
 def fillForm(){
+    def data = getData(formData)
+    getRows(data).each{ row ->
+        if (!isTotalRow(row)){
+            def requiredColumns = ['balance', 'sum']
+            if (!checkRequiredColumns(row, requiredColumns)) {
+                return false
+            }
+        }
+    }
     /**
      * Табл. 3 Алгоритмы заполнения полей формы «Регистр налогового учёта «доходы»»
      * реализации не требудет т.к. номер у нас проставляется при добавлении строки
@@ -134,7 +143,6 @@ def fillForm(){
      * для этого соберем алиасы, затем удалим все
      */
     def totalAlases = []
-    def data = getData(formData)
     getRows(data).each{row->
         if (row.getAlias() != null && isTotalRow(row)) {
             totalAlases += row.getAlias()
@@ -160,7 +168,7 @@ def fillForm(){
     // нумерация (графа 1) и посчитать "итого"
     getRows(data).eachWithIndex { row, i ->
         row.rowNumber = i + 1
-        total += row.sum
+        total += row.sum?:0
     }
 
     // посчитать "итого по коду"
@@ -186,7 +194,7 @@ def fillForm(){
             sum = 0
         }
 
-        sum += row.sum
+        sum += (row.sum?:0)
         tmp = row.code
     }
     // добавить "итого по коду" в таблицу
@@ -221,9 +229,9 @@ def logicalCheck(){
     def data = getData(formData)
     getRows(data).each{ row ->
         if (!isTotalRow(row)){
-            ['rowNumber', 'balance', 'sum'].each{ alias ->
-                if (row[alias] == null || row[alias] == '')
-                    logger.error('Поле «'+row.getCell(alias).getColumn().getName()+'» не заполнено! Строка №пп - '+row.rowNumber)
+            def requiredColumns = ['rowNumber', 'balance', 'code', 'name', 'sum']
+            if (!checkRequiredColumns(row, requiredColumns)) {
+                return false
             }
             //TODO Проверка на уникальность поля «№ пп»
             getRows(data).each{ rowB ->
@@ -256,7 +264,7 @@ def logicalCheck(){
             } else {
                 sumRowsByCode[code]=row.sum?:0
             }
-            sumAllTotalByCodeRows+=row.sum
+            sumAllTotalByCodeRows+=(row.sum?:0)
         }
     }
     totalRows.keys.each{key->
@@ -268,6 +276,50 @@ def logicalCheck(){
     if(sumTotalRow!=null && sumTotalRow!=sumAllTotalByCodeRows){
         logger.error("Неверное итоговое значение графы «Сумма доходов за отчётный период (руб.)»!")
     }
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ */
+def checkRequiredColumns(def row, def columns) {
+    def colNames = []
+
+    def cell
+    columns.each {
+        cell = row.getCell(it)
+        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+            def name = getColumnName(row, it)
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        def index = row.rowNumber
+        def errorMsg = colNames.join(', ')
+        if (index != null) {
+            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            index = getRows(getData(formData)).indexOf(row) + 1
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        }
+        return false
+    }
+    return true
+}
+
+/**
+ * Получить название графы по псевдониму.
+ *
+ * @param row строка
+ * @param alias псевдоним графы
+ */
+def getColumnName(def row, def alias) {
+    if (row != null && alias != null) {
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
+    }
+    return ''
 }
 
 def checkNSI(){
