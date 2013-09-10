@@ -360,6 +360,8 @@ public class FormDataServiceImpl implements FormDataService {
 	public void doCheck(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
 		lockCoreService.checkNoLockedAnother(FormData.class, formData.getId(), userInfo);
+		// Временный срез формы должен быть в актуальном состоянии
+		dataRowDao.rollback(formData.getId());
 		
 		if (!formDataAccessService.canRead(userInfo, formData.getId())) {
 			throw new AccessDeniedException(
@@ -493,8 +495,10 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	public void doMove(long formDataId, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
-		// Форма не должна быть заблокирована для редактирования другим пользователем
-		lockCoreService.checkNoLockedAnother(FormData.class, formDataId, userInfo);
+		// Форма не должна быть заблокирована даже текущим пользователем;
+		lockCoreService.checkUnlocked(FormData.class, formDataId, userInfo);
+		// Временный срез формы должен быть в актуальном состоянии
+		dataRowDao.rollback(formDataId);
 		
 		List<WorkflowMove> availableMoves = formDataAccessService
 				.getAvailableMoves(userInfo, formDataId);
@@ -513,57 +517,58 @@ public class FormDataServiceImpl implements FormDataService {
 
 		formDataScriptingService.executeScript(userInfo,
 				formData, workflowMove.getEvent(), logger, null);
-		if (!logger.containsLevel(LogLevel.ERROR)) {
-			
-			eventHandlerLauncher.process(userInfo, formData, workflowMove.getEvent(), logger, null);
-
-			if (workflowMove.getAfterEvent() != null) {
-				formDataScriptingService.executeScript(
-						userInfo, formData,
-						workflowMove.getAfterEvent(), logger, null);
-				if (logger.containsLevel(LogLevel.ERROR)) {
-					throw new ServiceLoggerException(
-							"Произошли ошибки в скрипте, который выполняется после перехода",
-							logger.getEntries());
-				} else {
-					// TODO: Непонятно что этот код здесь делает. Он должен быть в script-support и вызываться из
-					// вызываться из скриптов
-					
-                    // compose для приемников после принятия формы или отмены
-                    if (workflowMove.getToState() == WorkflowState.ACCEPTED ||
-                            workflowMove.getFromState() == WorkflowState.ACCEPTED) {
-                        
-                        // признак периода ввода остатков
-                        if (!reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
-                            // вызвать compose у форм-приемников
-                            List<DepartmentFormType> departmentFormTypes = departmentFormTypeDao.getFormDestinations(
-                                    formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
-                            if (departmentFormTypes != null && !departmentFormTypes.isEmpty()) {
-                                for (DepartmentFormType i: departmentFormTypes) {
-
-                                    ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
-                                    scriptComponentContext.setUserInfo(userInfo);
-                                    scriptComponentContext.setLogger(logger);
-                                    ((ScriptComponentContextHolder)formDataCompositionService).setScriptComponentContext(scriptComponentContext);
-
-                                    formDataCompositionService.compose(formData, i.getDepartmentId(),
-                                            i.getFormTypeId(), i.getKind());
-                                }
-                            }
-                        }
-                    }
-                }
-			}
-
-			logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
-			auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-					null, formData.getFormType().getId(), formData.getKind().getId(), note);
-
-		} else {
+		
+		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте, который выполняется перед переходом",
 					logger.getEntries());
 		}
+	
+		eventHandlerLauncher.process(userInfo, formData, workflowMove.getEvent(), logger, null);
+
+		if (workflowMove.getAfterEvent() != null) {
+			formDataScriptingService.executeScript(
+					userInfo, formData,
+					workflowMove.getAfterEvent(), logger, null);
+			if (logger.containsLevel(LogLevel.ERROR)) {
+				throw new ServiceLoggerException(
+						"Произошли ошибки в скрипте, который выполняется после перехода",
+						logger.getEntries());
+			} else {
+				// TODO: Непонятно что этот код здесь делает. Он должен быть в script-support и вызываться из
+				// вызываться из скриптов
+				
+                // compose для приемников после принятия формы или отмены
+                if (workflowMove.getToState() == WorkflowState.ACCEPTED ||
+                        workflowMove.getFromState() == WorkflowState.ACCEPTED) {
+                    
+                    // признак периода ввода остатков
+                    if (!reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
+                        // вызвать compose у форм-приемников
+                        List<DepartmentFormType> departmentFormTypes = departmentFormTypeDao.getFormDestinations(
+                                formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
+                        if (departmentFormTypes != null && !departmentFormTypes.isEmpty()) {
+                            for (DepartmentFormType i: departmentFormTypes) {
+
+                                ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
+                                scriptComponentContext.setUserInfo(userInfo);
+                                scriptComponentContext.setLogger(logger);
+                                ((ScriptComponentContextHolder)formDataCompositionService).setScriptComponentContext(scriptComponentContext);
+
+                                formDataCompositionService.compose(formData, i.getDepartmentId(),
+                                        i.getFormTypeId(), i.getKind());
+                            }
+                        }
+                    }
+                }
+            }
+		}
+
+		logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
+		auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+				null, formData.getFormType().getId(), formData.getKind().getId(), note);
+
+
 	}
 
 

@@ -55,7 +55,7 @@ public interface FormDataService {
      * 
      * TODO (sgoryachkin) заменить параметры is и fileName на uid блоба
      */
-    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream is, String fileName);
+    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream is, String fileName);
 	
 	
 	/**
