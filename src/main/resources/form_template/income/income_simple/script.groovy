@@ -475,10 +475,10 @@ def consolidationSummary() {
                     def dataRNU4 = getData(source)
                     getRows(dataRNU4).each { rowRNU4 ->
                         if (rowRNU4.getAlias() == null) {
-                            def knu = getKNUValue(rowRNU4.kny)
+                            def knu = getKNUValue(rowRNU4.code)
                             if (row.incomeTypeId != null && row.accountNo != null && row.incomeTypeId == knu && isEqualNum(row.accountNo, rowRNU4.balance)) {
                                 //«графа 8» =  сумма значений по «графе 5» (столбец «Сумма дохода за отчётный квартал») всех форм источников вида «(РНУ-4)
-                                graph8 += rowRNU4.sum
+                                grap    h8 += rowRNU4.sum
                             }
                         }
                     }
