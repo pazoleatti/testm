@@ -978,7 +978,7 @@ def consolidation(){
                              * Иначе
                              *  Мугон = МЕСЯЦ(Двозврата)-МЕСЯЦ(Дугона)-1
                              */
-                            def diff1 = returnDate.getTime().month - stealingDate.getTime().month - 1
+                            def diff1 = (returnDate.getTime().year*12 + returnDate.getTime().month) - (stealingDate.getTime().year*12 +stealingDate.getTime().month)  - 1
                             if (diff1 < 0){
                                 stealingMonths = 0
                             } else{
