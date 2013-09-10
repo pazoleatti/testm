@@ -184,13 +184,13 @@ def avNachislSubOld = 0
 /** АвПлатМесФБ. Код строки декларации 300. */
 def avPlatMesFBOld = 0
 if (xmlDataOld != null) {
-    nalVipl311FBOld = xmlDataOld.Документ.Прибыль.РасчНал.@НалВыпл311ФБ
-    nalVipl311SubOld = xmlDataOld.Документ.Прибыль.РасчНал.@НалВыпл311Суб
-    nalIschislFBOld = xmlDataOld.Документ.Прибыль.РасчНал.@НалИсчислФБ
-    nalIschislSubOld = xmlDataOld.Документ.Прибыль.РасчНал.@НалИсчислСуб
-    avPlatMesSubOld = xmlDataOld.Документ.Прибыль.РасчНал.@АвПлатМесСуб
-    avNachislSubOld = xmlDataOld.Документ.Прибыль.РасчНал.@АвНачислСуб
-    avPlatMesFBOld = xmlDataOld.Документ.Прибыль.РасчНал.@АвПлатМесФБ
+    nalVipl311FBOld = new BigDecimal(xmlDataOld.Документ.Прибыль.РасчНал.@НалВыпл311ФБ.text() ?: 0)
+    nalVipl311SubOld = new BigDecimal(xmlDataOld.Документ.Прибыль.РасчНал.@НалВыпл311Суб.text() ?: 0)
+    nalIschislFBOld = new BigDecimal(xmlDataOld.Документ.Прибыль.РасчНал.@НалИсчислФБ.text() ?: 0)
+    nalIschislSubOld = new BigDecimal(xmlDataOld.Документ.Прибыль.РасчНал.@НалИсчислСуб.text() ?: 0)
+    avPlatMesSubOld = new BigDecimal(xmlDataOld.Документ.Прибыль.РасчНал.@АвПлатМесСуб.text() ?: 0)
+    avNachislSubOld = new BigDecimal(xmlDataOld.Документ.Прибыль.РасчНал.@АвНачислСуб.text() ?: 0)
+    avPlatMesFBOld = new BigDecimal(xmlDataOld.Документ.Прибыль.РасчНал.@АвПлатМесФБ.text() ?: 0)
 }
 
 /*

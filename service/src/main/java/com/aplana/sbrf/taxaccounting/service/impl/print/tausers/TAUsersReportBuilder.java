@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.tausers;
 
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserFull;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractXlsxReportBuilder;
 import org.apache.poi.hssf.util.HSSFColor;
@@ -35,7 +34,6 @@ public class TAUsersReportBuilder extends AbstractXlsxReportBuilder {
 
 
     public TAUsersReportBuilder(List<TAUserFull> taUserList) {
-        super();
         this.taUserList = taUserList;
         this.workBook = new XSSFWorkbook();
         this.sheet = workBook.createSheet("Список пользователей");

@@ -51,7 +51,7 @@ public class ReportPeriodServiceTest {
 		ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
 		
 		// подготовим модели reportPeriod
-		ReportPeriod reportPeriod2 = getReportPeriod(2, taxPeriod1, 2);
+		ReportPeriod reportPeriod2 = getReportPeriod(2, taxPeriod1, 3);
 		// подготовим модель reportPeriod для 1 отчетного периода в 2 налоговом периоде
 		ReportPeriod reportPeriod5 = getReportPeriod(5, taxPeriod2, 2);
 
@@ -63,14 +63,14 @@ public class ReportPeriodServiceTest {
 		
 		// подготовка списка отчетных периодов для 1 налогового периода 
 		List<ReportPeriod> reportPeriodListBy1Period= new ArrayList<ReportPeriod>();
-		reportPeriodListBy1Period.add(getReportPeriod(4, taxPeriod1, 4));
+		reportPeriodListBy1Period.add(getReportPeriod(4, taxPeriod1, 12));
         reportPeriodListBy1Period.add(getReportPeriod(3, taxPeriod1, 3));
-        reportPeriodListBy1Period.add(getReportPeriod(2, taxPeriod1, 2));
-        reportPeriodListBy1Period.add(getReportPeriod(1, taxPeriod1, 1));
+        reportPeriodListBy1Period.add(getReportPeriod(2, taxPeriod1, 3));
+        reportPeriodListBy1Period.add(getReportPeriod(1, taxPeriod1, 3));
         // подготовка списка отчетных периодов для 2 налогового периода
         List<ReportPeriod> reportPeriodListBy2Period= new ArrayList<ReportPeriod>();
-        reportPeriodListBy2Period.add(getReportPeriod(6, taxPeriod2, 2));
-        reportPeriodListBy2Period.add(getReportPeriod(5, taxPeriod2, 1));
+        reportPeriodListBy2Period.add(getReportPeriod(6, taxPeriod2, 12));
+        reportPeriodListBy2Period.add(getReportPeriod(5, taxPeriod2, 6));
         // подготовка списка отчетных периодов для 3 налогового периода
         List<ReportPeriod> reportPeriodListBy3Period= new ArrayList<ReportPeriod>();
         reportPeriodListBy3Period.add(getReportPeriod(8, taxPeriod3, 2));
@@ -135,7 +135,7 @@ public class ReportPeriodServiceTest {
     @Test
     public void getStartDate(){
         Calendar cl = Calendar.getInstance();
-        cl.set(2012, 2, 1);
+        cl.set(2012, 3, 1);
 
         assertEquals(service.getStartDate(2).get(Calendar.MONTH), cl.get(Calendar.MONTH));
     }
@@ -143,7 +143,7 @@ public class ReportPeriodServiceTest {
     @Test
     public void getEndDate(){
         Calendar cl = Calendar.getInstance();
-        cl.set(2012, 4, 1);
+        cl.set(2012, 6, 1);
 
         assertEquals(service.getEndDate(2).get(Calendar.MONTH), cl.get(Calendar.MONTH));
     }
@@ -159,7 +159,7 @@ public class ReportPeriodServiceTest {
     @Test
     public void getEndDateIncome(){
         Calendar cl = Calendar.getInstance();
-        cl.set(2012, 2, 1);
+        cl.set(2012, 1, 1);
 
         assertEquals(service.getEndDate(8).get(Calendar.MONTH), cl.get(Calendar.MONTH));
     }

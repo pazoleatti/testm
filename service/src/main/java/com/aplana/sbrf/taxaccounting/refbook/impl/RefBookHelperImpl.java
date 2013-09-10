@@ -6,11 +6,13 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +30,7 @@ public class RefBookHelperImpl implements RefBookHelper {
     @Autowired
     RefBookFactory refBookFactory;
 
-    public void refBookDereference(Collection<DataRow<Cell>> dataRows,
+    public void dataRowsDereference(Collection<DataRow<Cell>> dataRows,
                                    List<Column> columns){
         Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers = new HashMap<Long, Pair<RefBookDataProvider, RefBookAttribute>>();
         for (DataRow<Cell> dataRow : dataRows) {
@@ -60,4 +62,30 @@ public class RefBookHelperImpl implements RefBookHelper {
 
         }
     }
+    
+
+	@Override
+	public Map<String, String> singleRecordDereference(RefBook refBook, RefBookDataProvider provider,
+			List<RefBookAttribute> attributes, Map<String, RefBookValue> record) {
+		Map<String, String> result = new HashMap<String, String>();
+		for (RefBookAttribute refBookAttribute : attributes) {
+			RefBookAttributeType type = record.get(refBookAttribute.getAlias()).getAttributeType();
+			String alias = refBookAttribute.getAlias();
+			if (RefBookAttributeType.REFERENCE.equals(type)) {
+				if (refBook.getId().equals(refBookAttribute.getRefBookId())){
+					RefBookValue val = provider.getValue(record.get(alias).getReferenceValue(), refBookAttribute.getRefBookAttributeId());
+					result.put(alias, String.valueOf(val));
+				} else {
+					// TODO: Необходимо разименовать значение ссылки
+					// (http://jira.aplana.com/browse/SBRFACCTAX-3220)
+					result.put(alias, "Не разименовано: " + String.valueOf(record.get(alias)));
+				}
+			} else {
+				String derefValue = String.valueOf(record.get(alias));
+				result.put(alias, derefValue);
+			}
+		}
+		return result;
+	}
+	
 }

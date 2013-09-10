@@ -176,7 +176,7 @@ public class FormDataXlsxReportBuilderTestMock {
 
         formData.setKind(FormDataKind.CONSOLIDATED);
         formData.setDepartmentId(1);
-        formData.setState(WorkflowState.APPROVED);
+        formData.setState(WorkflowState.CREATED);
         formData.setPerformer(formDataperformer);
         formData.setSigners(formDataSigners);
 
@@ -184,7 +184,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		data.setDepartment(department);
 		data.setReportPeriod(reportPeriod);
 		data.setFormTemplate(formTemplate);
-        data.setAcceptanceDate(new Date());
+        data.setAcceptanceDate(null);
         data.setCreationDate(new Date(324234));
 	}
 
