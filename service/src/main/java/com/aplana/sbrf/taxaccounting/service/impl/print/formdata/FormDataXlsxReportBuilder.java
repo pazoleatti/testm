@@ -411,7 +411,6 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                 dataRows.size() + data.getSigners().size() + formTemplate.getHeaders().size() + 15);
         sheet.setFitToPage(true);
         sheet.setAutobreaks(true);
-        System.out.println(formTemplate.getHeaders().get(0).size() + " " + ((dataRows.size()%rowBreakSize)>0?dataRows.size()/rowBreakSize + 1:dataRows.size()/rowBreakSize));
         sheet.getPrintSetup().setFitHeight((short) 0);
         sheet.getPrintSetup().setFitWidth((short) 1);
         /*sheet.getPrintSetup().setScale((short) 400);*/
