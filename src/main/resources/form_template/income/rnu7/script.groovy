@@ -322,9 +322,11 @@ def logicalCheck(def useLog) {
             }
 
             // 8. Проверка на уникальность поля «№ пп» (графа 1)
-            if (i != row.rowNumber) {
-                logger.error('Нарушена уникальность номера по порядку!')
-                return false
+            for (def rowB : getRows(data)) {
+                if(!row.equals(rowB) && row.rowNumber ==rowB.rowNumber){
+                    logger.error('Нарушена уникальность номера по порядку!')
+                    return false
+                }
             }
             i += 1
 
