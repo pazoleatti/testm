@@ -673,7 +673,7 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         if (!useLog) {
             return false
         }
-        def index = getIndex(row) + 1
+        def index = row.rowNumber
         def errorMsg = colNames.join(', ')
         if (index != null) {
             logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")

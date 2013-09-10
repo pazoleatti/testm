@@ -217,7 +217,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                                             НалСтавка: getRefBookValue(41, tRow.taxRate, "VALUE"),
                                                             СумИсчисл: tRow.calculatedTaxSum,
                                                     ]
-                                                    +   (tRow.benefitEndDate && tRow.benefitStartDate? [ЛьготМесТС:TimeCategory.minus(new Date(), new Date()).months]: [])+//
+                                                    +   (tRow.benefitEndDate && tRow.benefitStartDate? [ЛьготМесТС: (tRow.benefitEndDate.year*12 + tRow.benefitEndDate.month) - (tRow.benefitStartDate.year*12 + tRow.benefitStartDate.month)]: [])+
                                                     [
                                                             СумИсчислУпл: tRow.taxSumToPay,
                                                     ]+
@@ -421,7 +421,7 @@ def getRefBookValue(refBookID, recordId, alias){
 def checkTransportParams(departmentParamTransport){
     def errors = []
     departmentParamTransport.each{ key, value ->
-        if (!(key in ['PHONE', 'REORG_FORM_CODE', 'REORG_KPP', 'REORG_INN']) && (value.toString().equals(""))){
+        if (!(key in ['PHONE', 'REORG_FORM_CODE', 'REORG_KPP', 'REORG_INN', 'SIGNATORY_LASTNAME', 'APPROVE_DOC_NAME', 'APPROVE_ORG_NAME']) && (value.toString().equals(""))){
             errors.add(key)
         }
     }

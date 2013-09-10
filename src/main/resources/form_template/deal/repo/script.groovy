@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
+import java.text.SimpleDateFormat
+
 /**
  * 383 - Сделки РЕПО
  *
@@ -39,6 +41,9 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        break
+    case FormDataEvent.IMPORT:
+        importData()
         break
 }
 
@@ -245,5 +250,292 @@ void consolidation() {
                 }
             }
         }
+    }
+}
+
+/**
+ * Получение импортируемых данных.
+ */
+void importData() {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        logger.error('Имя файла не должно быть пустым')
+        return
+    }
+
+    def is = ImportInputStream
+    if (is == null) {
+        logger.error('Поток данных пуст')
+        return
+    }
+
+    if (!fileName.contains('.xls')) {
+        logger.error('Формат файла должен быть *.xls')
+        return
+    }
+
+    def xmlString = importService.getData(is, fileName, 'windows-1251', 'Полное наименование с указанием ОПФ', null)
+    if (xmlString == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
+        return
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
+        return
+    }
+
+    // добавить данные в форму
+    try{
+        if (!checkTableHead(xml, 3)) {
+            logger.error('Заголовок таблицы не соответствует требуемой структуре!')
+            return
+        }
+        addData(xml,2)
+//        logicCheck()
+    } catch(Exception e) {
+        logger.error(""+e.message)
+    }
+}
+
+/**
+ * Заполнить форму данными.
+ *
+ * @param xml данные
+ */
+def addData(def xml, int headRowCount) {
+    Date date = new Date()
+
+    def cache = [:]
+    def data = formDataService.getDataRowHelper(formData)
+    data.clear()
+
+    def indexRow = -1
+    for (def row : xml.row) {
+        indexRow++
+
+        // пропустить шапку таблицы
+        if (indexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find{it.text()!=""}.toString())=="") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        ['jurName', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'dealsMode',
+                'date1', 'date2', 'percentIncomeSum', 'percentConsumptionSum', 'priceFirstCurrency', 'currencyCode',
+                'courseCB', 'priceFirstRub', 'transactionDate'].each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        def indexCell = 0
+        // графа 1
+        newRow.rowNum = indexRow - headRowCount
+
+        // графа 2
+        newRow.jurName = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        indexCell++
+
+        // графа 3
+//        newRow.innKio =
+        indexCell++
+
+        // графа 4
+//        newRow.country =
+        indexCell++
+
+        // графа 5
+        //newRow.countryCode =
+        indexCell++
+
+        // графа 6
+        newRow.contractNum = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 7
+        newRow.contractDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 8
+        newRow.transactionNum = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 9
+        newRow.transactionDeliveryDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 10
+        newRow.dealsMode = getRecordId(14, 'MODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        indexCell++
+
+        // графа 11
+        newRow.date1 = getDate(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 12
+        newRow.date2 = getDate(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 13
+        newRow.percentIncomeSum = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 14
+        newRow.percentConsumptionSum = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 15
+        newRow.priceFirstCurrency = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 16
+        newRow.currencyCode = getRecordId(15, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        indexCell++
+
+        // графа 17
+        newRow.courseCB = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 18
+        newRow.priceFirstRub = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 19
+        newRow.transactionDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
+
+        data.insert(newRow, indexRow - headRowCount)
+    }
+}
+
+
+/**
+ * Проверить шапку таблицы.
+ *
+ * @param xml данные
+ * @param headRowCount количество строк в шапке
+ */
+def checkTableHead(def xml, int headRowCount) {
+    def colCount = 18
+    // проверить количество строк и колонок в шапке
+    if (xml.row.size() < headRowCount || xml.row[0].cell.size() < colCount) {
+        return false
+    }
+    def result = (xml.row[0].cell[0] == 'Полное наименование с указанием ОПФ' &&
+            xml.row[1].cell[0] ==  '2' &&
+            xml.row[2].cell[0] ==  'Гр. 2' &&
+            xml.row[0].cell[1] == 'ИНН/ КИО' &&
+            xml.row[1].cell[1] ==  '3' &&
+            xml.row[2].cell[1] ==  'Гр. 3' &&
+            xml.row[0].cell[2] == 'Наименование страны регистрации' &&
+            xml.row[1].cell[2] ==  '4' &&
+            xml.row[2].cell[2] ==  'Гр. 4.1' &&
+            xml.row[0].cell[3] == 'Код страны регистрации по классификатору ОКСМ' &&
+            xml.row[1].cell[3] ==  '5' &&
+            xml.row[2].cell[3] ==  'Гр. 4.2' &&
+            xml.row[0].cell[4] == 'Номер договора' &&
+            xml.row[1].cell[4] ==  '6' &&
+            xml.row[2].cell[4] ==  'Гр. 5' &&
+            xml.row[0].cell[5] == 'Дата договора' &&
+            xml.row[1].cell[5] ==  '7' &&
+            xml.row[2].cell[5] ==  'Гр. 6' &&
+            xml.row[0].cell[6] == 'Номер сделки' &&
+            xml.row[1].cell[6] ==  '8' &&
+            xml.row[2].cell[6] ==  'Гр. 7' &&
+            xml.row[0].cell[7] == 'Дата (заключения) сделки ' &&
+            xml.row[1].cell[7] ==  '9' &&
+            xml.row[2].cell[7] ==  'Гр. 8' &&
+            xml.row[0].cell[8] == 'Режим переговорных сделок' &&
+            xml.row[1].cell[8] ==  '10' &&
+            xml.row[2].cell[8] ==  'Гр. 9' &&
+            xml.row[0].cell[9] == 'Дата исполнения  1-ой части сделки ' &&
+            xml.row[1].cell[9] ==  '11' &&
+            xml.row[2].cell[9] ==  'Гр. 10.1' &&
+            xml.row[0].cell[10] == 'Дата исполнения  2-ой части сделки ' &&
+            xml.row[1].cell[10] ==  '12' &&
+            xml.row[2].cell[10] ==  'Гр. 10.2' &&
+            xml.row[0].cell[11] == 'Сумма процентного дохода (руб.)' &&
+            xml.row[1].cell[11] ==  '13' &&
+            xml.row[2].cell[11] ==  'Гр. 11.1' &&
+            xml.row[0].cell[12] == 'Сумма процентного расхода (руб.)' &&
+            xml.row[1].cell[12] ==  '14' &&
+            xml.row[2].cell[12] ==  'Гр. 11.2' &&
+            xml.row[0].cell[13] == 'Цена 1-ой части сделки, ед. валюты' &&
+            xml.row[1].cell[13] ==  '15' &&
+            xml.row[2].cell[13] ==  'Гр. 12' &&
+            xml.row[0].cell[14] == 'Код валюты расчетов по сделке' &&
+            xml.row[1].cell[14] ==  '16' &&
+            xml.row[2].cell[14] ==  'Гр. 13' &&
+            xml.row[0].cell[15] == 'Курс ЦБ РФ' &&
+            xml.row[1].cell[15] ==  '17' &&
+            xml.row[2].cell[15] ==  'Гр. 14' &&
+            xml.row[0].cell[16] == 'Цена 1-ой части сделки, руб.' &&
+            xml.row[1].cell[16] ==  '18' &&
+            xml.row[2].cell[16] ==  'Гр. 15' &&
+            xml.row[0].cell[17] == 'Дата совершения сделки' &&
+            xml.row[1].cell[17] ==  '19' &&
+            xml.row[2].cell[17] ==  'Гр. 16')
+    return result
+}
+
+/**
+ * Получить числовое значение.
+ *
+ * @param value строка
+ */
+def getNumber(def value, int indexRow, int indexCell) {
+    if (value == null) {
+        return null
+    }
+    def tmp = value.trim()
+    if ("".equals(tmp)) {
+        return null
+    }
+    // поменять запятую на точку и убрать пробелы
+    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
+    try {
+        return new BigDecimal(tmp)
+    } catch (Exception e) {
+        throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит недопустимый тип данных!")
+    }
+}
+
+/**
+ * Получить record_id элемента справочника.
+ *
+ * @param value
+ */
+def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
+    String filter = code + "= '"+ value+"'"
+    if (value=='') filter = "$code is null"
+    if (cache[ref_id]!=null) {
+        if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    if (records.size() == 1){
+        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        return cache[ref_id][filter]
+    }
+    throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!($filter)")
+}
+
+
+/**
+ * Получить дату по строковому представлению (формата дд.ММ.гггг)
+ */
+def getDate(def value, int indexRow, int indexCell) {
+    if (value == null || value == '') {
+        return null
+    }
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    try {
+        return format.parse(value)
+    } catch (Exception e) {
+        throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит недопустимый тип данных!")
     }
 }

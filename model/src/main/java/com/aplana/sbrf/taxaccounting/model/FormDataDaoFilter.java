@@ -46,6 +46,8 @@ public class FormDataDaoFilter implements Serializable {
 	
 	private AccessFilterType accessFilterType;
 
+	private Boolean returnState;
+
 	public List<Integer> getReportPeriodIds() {
 		return reportPeriodIds;
 	}
@@ -126,5 +128,13 @@ public class FormDataDaoFilter implements Serializable {
 	 */
 	public void setAccessFilterType(AccessFilterType accessFilter) {
 		this.accessFilterType = accessFilter;
+	}
+
+	public Boolean getReturnState() {
+		return returnState;
+	}
+
+	public void setReturnState(Boolean returnState) {
+		this.returnState = returnState;
 	}
 }

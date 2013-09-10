@@ -17,7 +17,6 @@ INSERT INTO ref_book(ID, NAME) VALUES (16,'Типы сделок');
 INSERT INTO ref_book(ID, NAME) VALUES (17,'Коды драгоценных металлов');
 INSERT INTO ref_book(ID, NAME) VALUES (18,'Признаки физической поставки');
 INSERT INTO ref_book(ID, NAME) VALUES (20,'Направленности сделок');
-INSERT INTO ref_book(ID, NAME) VALUES (21,'Коды условий поставки');
 
 INSERT INTO REF_BOOK (ID, NAME) VALUES (22, 'Курсы Валют');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (23, 'Ставки рефинансирования ЦБ РФ');

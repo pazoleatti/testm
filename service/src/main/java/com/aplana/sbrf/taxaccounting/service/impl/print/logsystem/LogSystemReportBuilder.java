@@ -44,7 +44,6 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
     private Log logger = LogFactory.getLog(getClass());
 
     public LogSystemReportBuilder(List<LogSystemSearchResultItem> items) {
-        super();
         this.workBook = new SXSSFWorkbook(50);
         this.sheet = workBook.createSheet("Журнал аудита");
         sheet.getLastRowNum();

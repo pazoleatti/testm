@@ -2,7 +2,10 @@ package form_template.deal.tech_service
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
+import groovy.util.slurpersupport.GPathResult
 
 import java.math.RoundingMode
 
@@ -42,6 +45,122 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT:
+        logger.info("start")
+        importData(UploadFileName, ImportInputStream, formDataService.getDataRowHelper(formData))
+        break
+}
+
+Integer getXmlHeaderCount() {
+    return 16
+}
+
+boolean isValid(GPathResult xml, DataRowHelper form) {
+    if (xml.row.size() < xmlHeaderCount || xml.row[xmlHeaderCount].cell.size() < formData.createDataRow().size()) {
+        return false
+    }
+    String alias = 'alias'
+    String row = 'row'
+    String cell = 'cell'
+    Map value = new HashMap<String, Object>()
+    List<Map<String, Object>> checks = new ArrayList()
+    value[alias] = 'rowNum'
+    value[row] = 12
+    value[cell] = 0
+    checks.add(value)
+    value[alias] = 'jurName'
+    value[row] = 12
+    value[cell] = 1
+    checks.add(value)
+    value[alias] = 'innKio'
+    value[row] = 12
+    value[cell] = 2
+    checks.add(value)
+    value[alias] = 'countryCode'
+    value[row] = 12
+    value[cell] = 3
+    checks.add(value)
+    value[alias] = 'bankSum'
+    value[row] = 12
+    value[cell] = 4
+    checks.add(value)
+    value[alias] = 'contractNum'
+    value[row] = 12
+    value[cell] = 5
+    checks.add(value)
+    value[alias] = 'contractDate'
+    value[row] = 12
+    value[cell] = 6
+    checks.add(value)
+    value[alias] = 'country'
+    value[row] = 12
+    value[cell] = 7
+    checks.add(value)
+    value[alias] = 'region'
+    value[row] = 13
+    value[cell] = 8
+    checks.add(value)
+    value[alias] = 'city'
+    value[row] = 13
+    value[cell] = 9
+    checks.add(value)
+    value[alias] = 'settlement'
+    value[row] = 13
+    value[cell] = 10
+    checks.add(value)
+    value[alias] = 'count'
+    value[row] = 13
+    value[cell] = 11
+    checks.add(value)
+    value[alias] = 'price'
+    value[row] = 12
+    value[cell] = 12
+    checks.add(value)
+    value[alias] = 'cost'
+    value[row] = 12
+    value[cell] = 13
+    checks.add(value)
+    value[alias] = 'transactionDate'
+    value[row] = 12
+    value[cell] = 14
+    checks.add(value)
+    for (check in checks) {
+
+    }
+    return true;
+}
+
+void importData(String fileName, InputStream stream, DataRowHelper form) {
+    logger.info("import started")
+    fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        logger.error('Имя файла не должно быть пустым')
+        return
+    }
+    if (!fileName.contains('.xls')) {
+        logger.error('Формат файла должен быть *.xls')
+        return
+    }
+    if (stream == null) {
+        logger.error('Поток данных пуст')
+        return
+    }
+    String xmlString = importService.getData(stream, fileName, 'windows-1251', '№ стр.', null)
+    logger.info(xmlString)
+    if (xmlString == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
+        return
+    }
+    GPathResult xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
+        return
+    }
+
+    if (!isValid(xml, form)) {
+        logger.error('Заголовок таблицы не соответствует требуемой структуре!')
+        return
+    }
 }
 
 /**

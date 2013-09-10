@@ -206,7 +206,7 @@ void logicCheck() {
         checkNSI(row, "region2", "Коды субъектов Российской Федерации", 4)
         checkNSI(row, "metalName", "Коды драгоценных металлов", 17)
         checkNSI(row, "deliverySign", "Признаки физической поставки", 18)
-        checkNSI(row, "deliveryCode", "Коды условий поставки", 21)
+        checkNSI(row, "deliveryCode", "Коды условий поставки", 63)
         checkNSI(row, "dealFocus", "Направленности сделок", 20)
     }
 }
@@ -325,7 +325,7 @@ void addAllStatic() {
         def dataRows = dataRowHelper.getAllCached()
         def newRow = formData.createDataRow()
 
-        newRow.getCell('itog').colSpan = 23
+        newRow.getCell('itog').colSpan = 26
         newRow.itog = 'Подитог:'
         newRow.setAlias('itg')
         newRow.getCell('fix').colSpan = 2
