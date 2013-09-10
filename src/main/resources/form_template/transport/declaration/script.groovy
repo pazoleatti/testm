@@ -217,7 +217,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                                             НалСтавка: getRefBookValue(41, tRow.taxRate, "VALUE"),
                                                             СумИсчисл: tRow.calculatedTaxSum,
                                                     ]
-                                                    +   (tRow.benefitEndDate && tRow.benefitStartDate? [ЛьготМесТС:TimeCategory.minus(new Date(), new Date()).months]: [])+//
+                                                    +   (tRow.benefitEndDate && tRow.benefitStartDate? [ЛьготМесТС: (tRow.benefitEndDate.year*12 + tRow.benefitEndDate.month) - (tRow.benefitStartDate.year*12 + tRow.benefitStartDate.month)]: [])+
                                                     [
                                                             СумИсчислУпл: tRow.taxSumToPay,
                                                     ]+
