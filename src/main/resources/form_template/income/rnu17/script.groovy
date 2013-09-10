@@ -289,10 +289,10 @@ def checkRequiredColumns(def DataRow row, ArrayList<String> columns, def useLog)
         if (!useLog) {
             return false
         }
-        def index = getRows(data).indexOf(row) + 1
+        def index = row.rowNumber
         def errorMsg = colNames.join(', ')
         if (index != null) {
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
         } else {
             index = getRows(data).indexOf(row) + 1
             logger.error("В строке $index не заполнены колонки : $errorMsg.")

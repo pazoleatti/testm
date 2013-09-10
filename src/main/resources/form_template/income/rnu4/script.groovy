@@ -120,7 +120,7 @@ def deleteRow() {
  */
 def fillForm(){
     def data = getData(formData)
-    getRows(data).each{ row ->
+    for (def row : getRows(data)){
         if (!isTotalRow(row)){
             def requiredColumns = ['balance', 'sum']
             if (!checkRequiredColumns(row, requiredColumns)) {
@@ -196,6 +196,14 @@ def fillForm(){
 
         sum += (row.sum?:0)
         tmp = row.code
+
+    }
+
+    // отсортировать/группировать
+    data.save(getRows(data).sort { getKnu(it.code) })
+
+    getRows(data).eachWithIndex { row, index ->
+        row.rowNumber = index + 1
     }
     // добавить "итого по коду" в таблицу
     def i = 0

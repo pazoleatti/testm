@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
+import java.text.SimpleDateFormat
+
 /**
  * 392 - Беспоставочные срочные сделки
  *
@@ -43,6 +45,10 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        break
+// Импорт
+    case FormDataEvent.IMPORT:
+        importData()
         break
 }
 
@@ -386,5 +392,277 @@ void consolidation() {
                 }
             }
         }
+    }
+}
+
+/**
+ * Получение импортируемых данных.
+ */
+void importData() {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        logger.error('Имя файла не должно быть пустым')
+        return
+    }
+
+    def is = ImportInputStream
+    if (is == null) {
+        logger.error('Поток данных пуст')
+        return
+    }
+
+    if (!fileName.contains('.xls')) {
+        logger.error('Формат файла должен быть *.xls')
+        return
+    }
+
+    def xmlString = importService.getData(is, fileName, 'windows-1251', 'Полное наименование с указанием ОПФ', 'Подитог:')
+    if (xmlString == null) {
+        logger.error('Отсутствие значения после обработки потока данных')
+        return
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        logger.error('Ошибка в обработке данных!')
+        return
+    }
+
+    // добавить данные в форму
+    try {
+        if (!checkTableHead(xml, 4)) {
+            logger.error('Заголовок таблицы не соответствует требуемой структуре!')
+            return
+        }
+        addData(xml)
+    } catch (Exception e) {
+        logger.error("Ошибка при заполнении данных с файла! " + e.message)
+    }
+}
+
+/**
+ * Проверить шапку таблицы.
+ *
+ * @param xml данные
+ * @param headRowCount количество строк в шапке
+ */
+def checkTableHead(def xml, def headRowCount) {
+    def colCount = 13
+    // проверить количество строк и колонок в шапке
+    if (xml.row.size() < headRowCount || xml.row[0].cell.size() < colCount) {
+        return false
+    }
+
+    def names = (
+            xml.row[0].cell[0] == 'Полное наименование с указанием ОПФ' &&
+            xml.row[0].cell[1] == 'ИНН/ КИО' &&
+            xml.row[0].cell[2] == 'Наименование страны регистрации' &&
+            xml.row[0].cell[3] == 'Код страны регистрации по классификатору ОКСМ' &&
+            xml.row[0].cell[4] == 'Номер договора' &&
+            xml.row[0].cell[5] == 'Дата договора' &&
+            xml.row[0].cell[6] == 'Номер сделки' &&
+            xml.row[0].cell[7] == 'Дата заключения сделки' &&
+            xml.row[0].cell[8] == 'Вид срочной сделки' &&
+            xml.row[0].cell[9] == 'Сумма доходов Банка по данным бухгалтерского учета, руб.' &&
+            xml.row[0].cell[10] == 'Сумма расходов Банка по данным бухгалтерского учета, руб.' &&
+            xml.row[0].cell[11] == 'Цена (тариф) за единицу измерения, руб.' &&
+            xml.row[0].cell[12] == 'Итого стоимость, руб.' &&
+            xml.row[0].cell[13] == 'Дата совершения сделки'
+    )
+    if (!names) return false
+
+    // пустая строка
+    xml.row[1].cell.each { it ->
+        if (it.text() != '') {
+            if (it.text() == 'Вариант 2') {     //TODO (alivanov 9.09.13) выпилить проверку
+            } else {
+                return false
+            }
+        }
+    }
+
+    //строка с нумерацией
+    for (int i = 0; i <= colCount; i++) {
+        if (xml.row[2].cell[i] != ('' + (i + 2))) {
+            return false
+        }
+    }
+
+    // строка с нумерацией граф
+    def grafRow = (
+    xml.row[3].cell[0] == 'гр. 2' &&
+    xml.row[3].cell[1] == 'гр. 3' &&
+    xml.row[3].cell[2] == 'гр. 4.1' &&
+    xml.row[3].cell[3] == 'гр. 4.2' &&
+    xml.row[3].cell[4] == 'гр. 5' &&
+    xml.row[3].cell[5] == 'гр. 6' &&
+    xml.row[3].cell[6] == 'гр. 7' &&
+    xml.row[3].cell[7] == 'гр. 8' &&
+    xml.row[3].cell[8] == 'гр. 9' &&
+    xml.row[3].cell[9] == 'гр. 10' &&
+    xml.row[3].cell[10] == 'гр. 11' &&
+    xml.row[3].cell[11] == 'гр. 12' &&
+    xml.row[3].cell[12] == 'гр. 13' &&
+    xml.row[3].cell[13] == 'гр. 14'
+    )
+
+    return grafRow
+}
+
+/**
+ * Заполнить форму данными.
+ *
+ * @param xml данные
+ */
+def addData(def xml) {
+    Date date = new Date()
+
+    def cache = [:]
+    def data = formDataService.getDataRowHelper(formData)
+    data.clear()
+
+    def indexRow = -1
+    for (def row : xml.row) {
+        indexRow++
+
+        // пропустить шапку таблицы
+        if (indexRow <= 3) {
+            continue
+        }
+
+        if ((row.cell.find {it.text() != ""}.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate',
+                'transactionType', 'incomeSum', 'consumptionSum', 'transactionDate'].each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        def indexCell = 0
+        // графа 1
+        newRow.rowNum = indexRow - 3
+
+        // графа 2
+        newRow.name = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        indexCell++
+
+        // графа 3
+        //newRow.inn = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 4.1
+        newRow.country = getRecordId(10, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        indexCell++
+
+        // графа 4.2
+        //newRow.countryCode = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        indexCell++
+
+        // графа 5
+        newRow.contractNum = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 6
+        newRow.contractDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 7
+        newRow.transactionNum = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 8
+        newRow.transactionDeliveryDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 9
+        newRow.transactionType = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 10
+        newRow.incomeSum = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 11
+        newRow.consumptionSum = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 12
+        newRow.price = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 13
+        newRow.cost = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 14
+        newRow.transactionDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
+
+        data.insert(newRow, indexRow - 3)
+    }
+}
+
+/**
+ * Получить числовое значение.
+ *
+ * @param value строка
+ */
+def getNumber(def value, int indexRow, int indexCell) {
+    if (value == null) {
+        return null
+    }
+    def tmp = value.trim()
+    if ("".equals(tmp)) {
+        return null
+    }
+    // поменять запятую на точку и убрать пробелы
+    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
+    try {
+        return new BigDecimal(tmp)
+    } catch (Exception e) {
+        throw new Exception("Строка ${indexRow - 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
+    }
+}
+
+/**
+ * Получить record_id элемента справочника.
+ *
+ * @param value
+ */
+def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
+
+    String filter;
+    if (value == null || value.equals("")) {
+        filter = code + " is null"
+    } else {
+        filter = code + "= '" + value + "'"
+    }
+    if (cache[ref_id] != null) {
+        if (cache[ref_id][filter] != null) return cache[ref_id][filter]
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    if (records.size() == 1) {
+        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        return cache[ref_id][filter]
+    }
+    throw new Exception("Строка ${indexRow - 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
+}
+
+/**
+ * Получить дату по строковому представлению (формата дд.ММ.гггг)
+ */
+def getDate(def value, int indexRow, int indexCell) {
+    if (value == null || value == '') {
+        return null
+    }
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    try {
+        return format.parse(value)
+    } catch (Exception e) {
+        throw new Exception("Строка ${indexRow - 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }

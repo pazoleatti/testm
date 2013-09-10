@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
@@ -51,7 +52,6 @@ switch (formDataEvent) {
         break
 // расчитать
     case FormDataEvent.CALCULATE:
-        DataRowHelper form = getData(formData)
         logicalCheck()
         calcForm()
         break
@@ -59,11 +59,9 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         DataRowHelper form = getData(formData)
         if (form != null) {
-            System.out.print("System compose was started \n")
             consolidation(form)
             logicalCheck()
             calcForm()
-            System.out.print("System compose was end\n")
         }
         break
 // проверить
@@ -448,13 +446,15 @@ def consolidationSummary() {
                                     taxPeriodList.each { TaxPeriod taxPeriod ->
                                         List<ReportPeriod> reportPeriodList = reportPeriodService.listByTaxPeriod(taxPeriod.getId())
                                         reportPeriodList.each { ReportPeriod reportPeriod ->
-                                            def primaryRNU6 = formDataService.find(source.formTypeId, FormDataKind.PRIMARY, source.departmentId, reportPeriod.getId())//TODO подразделение
-                                            def dataPrimary = getData(primaryRNU6)
-                                            getRows(dataPrimary).each { DataRow rowPrimary ->
-                                                if (rowPrimary.code != null && rowPrimary.code == rowRNU6.code &&
-                                                        rowPrimary.docNumber != null && rowPrimary.docNumber == rowRNU6.docNumber &&
-                                                        rowPrimary.docDate != null && rowPrimary.docDate == rowRNU6.docDate) {
-                                                    graph7 += rowPrimary.taxAccountingRuble
+                                            def primaryRNU6 = formDataService.find(source.formType.id, FormDataKind.PRIMARY, source.departmentId, reportPeriod.getId())//TODO подразделение
+                                            if (primaryRNU6!=null) {
+                                                def dataPrimary = getData(primaryRNU6)
+                                                getRows(dataPrimary).each { DataRow rowPrimary ->
+                                                    if (rowPrimary.code != null && rowPrimary.code == rowRNU6.code &&
+                                                            rowPrimary.docNumber != null && rowPrimary.docNumber == rowRNU6.docNumber &&
+                                                            rowPrimary.docDate != null && rowPrimary.docDate == rowRNU6.docDate) {
+                                                        graph7 += rowPrimary.taxAccountingRuble
+                                                    }
                                                 }
                                             }
                                         }
@@ -475,7 +475,7 @@ def consolidationSummary() {
                     def dataRNU4 = getData(source)
                     getRows(dataRNU4).each { rowRNU4 ->
                         if (rowRNU4.getAlias() == null) {
-                            def knu = getKNUValue(rowRNU4.kny)
+                            def knu = getKNUValue(rowRNU4.code)
                             if (row.incomeTypeId != null && row.accountNo != null && row.incomeTypeId == knu && isEqualNum(row.accountNo, rowRNU4.balance)) {
                                 //«графа 8» =  сумма значений по «графе 5» (столбец «Сумма дохода за отчётный квартал») всех форм источников вида «(РНУ-4)
                                 graph8 += rowRNU4.sum
@@ -519,19 +519,6 @@ void checkCreation() {
     if (formData.kind != FormDataKind.SUMMARY) {
         logger.error("Нельзя создавать форму с типом ${formData.kind?.name}")
     }
-}
-
-/**
- * Проверка на террбанк.
- */
-def isTerBank() {
-    boolean isTerBank = false
-    departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
-        if (it.departmentId != formData.departmentId) {
-            isTerBank = true
-        }
-    }
-    return isTerBank
 }
 
 //// обертка предназначенная для прямых вызовов функции без formData

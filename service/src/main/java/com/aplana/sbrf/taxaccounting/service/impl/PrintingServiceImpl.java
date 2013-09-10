@@ -68,7 +68,7 @@ public class PrintingServiceImpl implements PrintingService {
 			data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
 			data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
             List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null, null);
-            refBookHelper.refBookDereference(dataRows, formTemplate.getColumns());
+            refBookHelper.dataRowsDereference(dataRows, formTemplate.getColumns());
 			try {
 				FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,isShowChecked, dataRows);
 				return builder.createReport();

@@ -22,17 +22,15 @@ public abstract class AbstractXlsxReportBuilder {
 
     protected static final int cellWidthMin = 20;
     protected static final int cellWidthMax = 100;
+    protected static final int rowBreakSize = 80;
 
-    protected Map<Integer, Integer> widthCellsMap;
+
+    protected Map<Integer, Integer> widthCellsMap = new HashMap<Integer, Integer>();
 
     /*
      * Нужно создать в классе наследнике блок static, для определения в нем имени файла
      */
     protected static String fileName;
-
-    protected AbstractXlsxReportBuilder() {
-        widthCellsMap = new HashMap<Integer, Integer>();
-    }
 
     public final String createReport() throws IOException {
         fillHeader();
@@ -40,6 +38,7 @@ public abstract class AbstractXlsxReportBuilder {
         createDataForTable();
         cellAlignment();
         fillFooter();
+        setPrintSetup();
         return flush();
     }
 
@@ -57,6 +56,13 @@ public abstract class AbstractXlsxReportBuilder {
     protected abstract void createDataForTable();
 
     protected abstract void fillFooter();
+
+    /**
+     * Выставляем область печати. Она может маштабироваться самим Excel, в зависимости от ширины области печати.
+     */
+    protected void setPrintSetup(){
+
+    }
 
     private String flush() throws IOException {
         File file = File.createTempFile(fileName, ".xlsx");
