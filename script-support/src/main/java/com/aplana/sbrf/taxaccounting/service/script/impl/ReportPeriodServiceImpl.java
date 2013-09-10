@@ -94,8 +94,12 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
          Calendar cal = Calendar.getInstance();
          cal.setTime(taxPeriod.getStartDate());
 
-         // для налога на прибыль, периоды вложены в друг дгруга, и начало всегда совпадает
-         if (taxPeriod.getTaxType() != TaxType.INCOME){
+        /**
+         * Начало всегда совпадает
+         *  1. Для налога на прибыль (т.к. периоды вложены в друг дгруга)
+         *  2. Для 4го периода налога на транспорт (он включает все три предыдущие http://conf.aplana.com/pages/viewpage.action?pageId=9600466)
+         */
+         if (taxPeriod.getTaxType() != TaxType.INCOME && reportPeriod.getOrder() != 4){
              // получим отчетные периоды для данного налогового периода
              List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriod().getId());
              // смещение относительно налогового периода
