@@ -24,7 +24,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck(false)
+        logicalCheck(true)
         checkNSI()
         break
     case FormDataEvent.ADD_ROW :
@@ -33,9 +33,13 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW :
         deleteRow()
         break
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :
-    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED :
-        logicalCheck(false)
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        logicalCheck(true)
         checkNSI()
         checkDeclaration()
         break
@@ -49,7 +53,7 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        logicalCheck(false)
+        logicalCheck(true)
         checkNSI()
         // для сохранения изменении приемников
         getData(formData).commit()
@@ -178,8 +182,7 @@ void calc() {
     def tmp = null
 
     /** Распределяемая налоговая база за отчетный период. */
-    def taxBase = getTaxBase()
-
+    def taxBase = roundValue(getTaxBase(), 0)
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
@@ -195,7 +198,6 @@ void calc() {
     if (sumTaxRecords != null && !sumTaxRecords.getRecords().isEmpty()) {
         sumNal = new BigDecimal(getValue(sumTaxRecords.getRecords().getAt(0), 'SUM_TAX').doubleValue())
     }
-
     // расчет графы 1..4, 8..21
     getRows(data).eachWithIndex { row, i ->
 
@@ -240,10 +242,10 @@ void calc() {
 
         // графа 10
         tmp = ((((row.propertyPrice / propertyPriceSumm) * 100) + ((row.workersCount / workersCountSumm) * 100)) / 2)
-        row.baseTaxOf = round(tmp, 8)
+        row.baseTaxOf = roundValue(tmp, 8)
 
         // графа 11
-        row.baseTaxOfRub = round(taxBase * row.baseTaxOf / 100, 0)
+        row.baseTaxOfRub = roundValue(taxBase * row.baseTaxOf / 100, 0)
 
         // графа 12
         row.subjectTaxStavka = row.kpp
@@ -871,10 +873,10 @@ void calcColumnFrom13To21(def row, def sumNal, def reportPeriod) {
     def tmp
 
     // графа 13
-    row.taxSum = (row.baseTaxOfRub > 0 ? round(row.baseTaxOfRub * row.subjectTaxStavka / 100, 0) : 0)
+    row.taxSum = (row.baseTaxOfRub > 0 ? roundValue(row.baseTaxOfRub * getTaxRateAttribute(row.subjectTaxStavka) / 100, 0) : 0)
 
     // графа 14
-    row.taxSumOutside = round(sumNal * row.baseTaxOf / 100, 0)
+    row.taxSumOutside = roundValue(sumNal * row.baseTaxOf / 100, 0)
 
     // графа 15
     row.taxSumToPay = (row.taxSum > row.subjectTaxCredit + row.taxSumOutside ?
@@ -952,4 +954,24 @@ def getValue(def record, def alias) {
             return value.getReferenceValue()
     }
     return null
+}
+
+/**
+ * Округляет число до требуемой точности.
+ *
+ * @param value округляемое число
+ * @param precision точность округления, знаки после запятой
+ * @return округленное число
+ */
+def roundValue(def value, def precision) {
+    ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
+}
+
+/**
+ * Получить атрибут 200 - "Ставка налога" справочник 33 - "Параметры подразделения по налогу на прибыль".
+ *
+ * @param id идентификатор записи справочника
+ */
+def getTaxRateAttribute(def id) {
+    return refBookService.getNumberValue(33, id, 'TAX_RATE')
 }

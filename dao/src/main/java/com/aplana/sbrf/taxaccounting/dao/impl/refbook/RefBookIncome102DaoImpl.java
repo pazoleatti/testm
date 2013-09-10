@@ -44,29 +44,33 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
     private ReportPeriodDao reportPeriodDao;
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter,
+    public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter,
                                                               RefBookAttribute sortAttribute) {
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
 
         StringBuilder sql = new StringBuilder("select * from income_102 ");
+
+        Map<String, Integer> params = new HashMap<String, Integer>();
+
+        sql.append("WHERE report_period_id = :reportPeriodId ");
+        params.put("reportPeriodId", reportPeriodId);
 
         // Фильтрация
         StringBuffer sb = new StringBuffer();
         Filter.getFilterQuery(filter, new BookerStatementsFilterTreeListener(refBook, sb));
 
         if (sb.length() > 0) {
-            sql.append("where ");
+            sql.append("AND ");
             sql.append(sb.toString());
+            sql.append(" ");
         }
-
-        Map<String, Integer> params = new HashMap<String, Integer>();
 
         if (pagingParams != null) {
             if (sb.length() == 0) {
                 sql.append("where ");
             }
             // Тестовая база не поддерживает такой синтаксис
-            sql.append("row_number_over between :offset and :count ");
+            sql.append("AND row_number_over between :offset and :count ");
             params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
             params.put("offset", pagingParams.getStartIndex());
         }
@@ -79,9 +83,9 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
         List<Map<String, RefBookValue>> records = getNamedParameterJdbcTemplate().query(sql.toString(), params,
                 new RefBookValueMapper(refBook));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-        result.setRecords(records);
+        result.addAll(records);
 
-        result.setTotalRecordCount(getJdbcTemplate().queryForInt("select count(*) from (" + sql.toString() + ")"));
+        result.setTotalRecordCount(getNamedParameterJdbcTemplate().queryForInt("select count(*) from (" + sql.toString() + ")", params));
         return result;
     }
 
