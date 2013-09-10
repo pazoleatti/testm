@@ -79,7 +79,8 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         TextColumn<LogSystemSearchResultItem> reportPeriodColumn = new TextColumn<LogSystemSearchResultItem>() {
             @Override
             public String getValue(LogSystemSearchResultItem object) {
-                return object.getReportPeriod()!=null?object.getReportPeriod().getName() : "";
+                return object.getReportPeriod()!=null?object.getReportPeriod().getName() + " " + object.getReportPeriod().getYear()
+                        : "";
             }
         };
 
