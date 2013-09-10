@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="profit" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="51e0391e-a4e9-4915-94d2-e157bf16ccfe">
 	<property name="net.sf.jasperreports.export.xls.one.page.per.sheet" value="true"/>
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="2629"/>
 	<style name="KL" mode="Transparent" pattern="">
 		<box>
 			<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -307,20 +310,24 @@
 			<fieldDescription><![CDATA[@ТипНП]]></fieldDescription>
 		</field>
 		<variable name="ДоляНалБаз" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДоляНалБаз} == null ?
-"---------------"
+			<variableExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")?
+"-----"
 :
-($F{ДоляНалБаз}.indexOf(".")==2?
-("-"+$F{ДоляНалБаз}+"--------------").substring(0,15)
+($F{ДоляНалБаз}.lastIndexOf(".")==-1?$F{ДоляНалБаз}.concat( "--" ):$F{ДоляНалБаз}.substring( 0, $F{ДоляНалБаз}.lastIndexOf(".")).concat( "--" ))]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")?
+"-----"
 :
-($F{ДоляНалБаз}.indexOf(".")==1?
-("--"+$F{ДоляНалБаз}+"-------------").substring(0,15)
+($F{ДоляНалБаз}.lastIndexOf(".")==-1?$F{ДоляНалБаз}.concat( "--" ):$F{ДоляНалБаз}.substring( 0, $F{ДоляНалБаз}.lastIndexOf(".")).concat( "--" ))]]></initialValueExpression>
+		</variable>
+		<variable name="ДоляНалБазт" class="java.lang.String">
+			<variableExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")?
+"---------------------"
 :
-($F{ДоляНалБаз}+"---------------").substring(0,15)))]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДоляНалБаз} == null ?
-"-------------------------"
+($F{ДоляНалБаз}.lastIndexOf(".")==-1?"0-----------":$F{ДоляНалБаз}.substring($F{ДоляНалБаз}.lastIndexOf(".")+1).concat( "--------------" ))]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")?
+"---------------------"
 :
-($F{ДоляНалБаз}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ДоляНалБаз}.lastIndexOf(".")==-1?"0-----------":$F{ДоляНалБаз}.substring($F{ДоляНалБаз}.lastIndexOf(".")+1).concat( "--------------" ))]]></initialValueExpression>
 		</variable>
 		<variable name="КППОП" class="java.lang.String">
 			<variableExpression><![CDATA[$F{КППОП} == null ?
@@ -433,14 +440,24 @@
 ($F{ОбязУплНалОП}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="СтавНалСубРФ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СтавНалСубРФ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")?
+"-----"
 :
-($F{СтавНалСубРФ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СтавНалСубРФ} == null ?
-"-------------------------"
+($F{СтавНалСубРФ}.lastIndexOf(".")==-1?$F{СтавНалСубРФ}.concat( "-" ):$F{СтавНалСубРФ}.substring( 0, $F{СтавНалСубРФ}.lastIndexOf(".")).concat( "-" ))]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")?
+"-----"
 :
-($F{СтавНалСубРФ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СтавНалСубРФ}.lastIndexOf(".")==-1?$F{СтавНалСубРФ}.concat( "-" ):$F{СтавНалСубРФ}.substring( 0, $F{СтавНалСубРФ}.lastIndexOf(".")).concat( "-" ))]]></initialValueExpression>
+		</variable>
+		<variable name="СтавНалСубРФт" class="java.lang.String">
+			<variableExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")?
+"-----"
+:
+($F{СтавНалСубРФ}.lastIndexOf(".")==-1?"0-":$F{СтавНалСубРФ}.substring($F{СтавНалСубРФ}.lastIndexOf(".")+1).concat( "-" ))]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")?
+"-----"
+:
+($F{СтавНалСубРФ}.lastIndexOf(".")==-1?"0-":$F{СтавНалСубРФ}.substring($F{СтавНалСубРФ}.lastIndexOf(".")+1).concat( "-" ))]]></initialValueExpression>
 		</variable>
 		<variable name="СумНал" class="java.lang.String">
 			<variableExpression><![CDATA[$F{СумНал} == null || $F{СумНал}.equals("0")?
@@ -14067,21 +14084,21 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ДоляНалБаз}.charAt(5)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДоляНалБазт}.charAt(1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="5d97c0cc-d40d-4ea4-b40b-da3dc81ab942" style="KL" x="508" y="453" width="15" height="20"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ДоляНалБаз}.charAt(9)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДоляНалБазт}.charAt(5)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="1c5cd5fa-4001-4ddc-8e50-f1795ebee892" style="KL" x="478" y="453" width="15" height="20"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ДоляНалБаз}.charAt(7)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДоляНалБазт}.charAt(3)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="5698ab90-3c16-4f5d-aff7-91ead794532c" style="KL" x="373" y="453" width="15" height="20"/>
@@ -14095,14 +14112,14 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ДоляНалБаз}.charAt(10)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДоляНалБазт}.charAt(6)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="22ac95e9-9b9f-40d0-9fd9-0e880d2d5c58" style="KL" x="433" y="453" width="15" height="20"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ДоляНалБаз}.charAt(4)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДоляНалБазт}.charAt(0)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="a35e480c-edf5-4526-bc3a-d553cba8af1b" style="KL" x="403" y="453" width="15" height="20"/>
@@ -14116,49 +14133,49 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ДоляНалБаз}.charAt(13)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДоляНалБазт}.charAt(9)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="25df5c0e-34d8-4688-8c05-2bd578644629" style="KL" x="553" y="453" width="15" height="20"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ДоляНалБаз}.charAt(12)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДоляНалБазт}.charAt(8)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="b3a35483-404c-4334-8404-3a1289672cbf" style="KL" x="493" y="453" width="15" height="20"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ДоляНалБаз}.charAt(8)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДоляНалБазт}.charAt(4)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="da78f972-e15b-4601-b6e3-cbce0f58546e" style="KL" x="463" y="453" width="15" height="20"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ДоляНалБаз}.charAt(6)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДоляНалБазт}.charAt(2)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="e4907bad-3006-4879-82fc-21cacc128981" style="KL" x="388" y="453" width="15" height="20"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ДоляНалБаз}.charAt(1)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДоляНалБазт}.charAt(1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="b42a1727-aaa5-4189-a287-c9b54378fe5c" style="KL" x="538" y="453" width="15" height="20"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ДоляНалБаз}.charAt(11)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДоляНалБазт}.charAt(7)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="85839d76-6a8b-4512-bf56-159f34eb259b" style="KL" x="583" y="453" width="15" height="20"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ДоляНалБаз}.charAt(14)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДоляНалБазт}.charAt(10)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="49c07d93-d6c4-4ea0-94cf-b67e734eab3a" style="KL" x="463" y="478" width="15" height="20"/>
@@ -14270,7 +14287,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{СтавНалСубРФ}.charAt(4)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СтавНалСубРФт}.charAt(1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="a51e5a6a-1d74-4eda-80e5-6f76aa6c198f" style="KL" x="388" y="502" width="15" height="20"/>
@@ -14284,7 +14301,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{СтавНалСубРФ}.charAt(3)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СтавНалСубРФт}.charAt(0)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="368aef97-5128-48eb-9e65-0565eb88635f" style="KL" x="373" y="502" width="15" height="20"/>
