@@ -59,7 +59,7 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
     ['fullNamePerson', 'sum', 'docNumber', 'docDate', 'dealDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')

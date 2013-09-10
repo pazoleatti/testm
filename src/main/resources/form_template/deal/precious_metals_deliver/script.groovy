@@ -74,14 +74,32 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = 0
     ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode',
             'unitCountryCode', 'signPhis', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
             'city2', 'settlement2', 'conditionCode', 'count', 'incomeSum', 'consumptionSum', 'transactionDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.insert(row, index)
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def pointRow = currentDataRow
+        while(pointRow.getAlias()!=null && index>0){
+            pointRow = dataRows.get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && dataRows.get(index).getAlias()==null){
+            index++
+        }
+    }else if (size>0) {
+        for(int i = size-1;i>=0;i--){
+            def pointRow = dataRows.get(i)
+            if(pointRow.getAlias()==null){
+                index = dataRows.indexOf(pointRow)+1
+                break
+            }
+        }
+    }
+    dataRowHelper.insert(row, index+1)
 }
 
 void deleteRow() {
