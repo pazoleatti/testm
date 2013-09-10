@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -32,8 +33,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 	@Override
 	public GetRefBookTableDataResult execute(GetRefBookTableDataAction action, ExecutionContext executionContext) throws ActionException {
 
-		RefBookDataProvider refBookDataProvider = refBookFactory
-				.getDataProvider(action.getRefbookId());
+		RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefbookId());
 
 		GetRefBookTableDataResult result = new GetRefBookTableDataResult();
 		RefBook refBook = refBookFactory.get(action.getRefbookId());
@@ -43,38 +43,53 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 			PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider
 					.getRecords(new Date(), action.getPagingParams(), null, refBook.getAttributes().get(0));
 			List<RefBookDataRow> rows = new ArrayList<RefBookDataRow>();
+
+			//кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
+			Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
+			Map<String, String> refAliases = new HashMap<String, String>();
+			for (RefBookAttribute attribute : refBook.getAttributes()) {
+				if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+					refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
+					RefBook refRefBook = refBookFactory.get(attribute.getRefBookId());
+					RefBookAttribute refAttribute = refRefBook.getAttribute(attribute.getRefBookAttributeId());
+					refAliases.put(attribute.getAlias(), refAttribute.getAlias());
+				}
+			}
+
 			for (Map<String, RefBookValue> record : refBookPage) {
-
 				Map<String, String> tableRowData = new HashMap<String, String>();
-				for (Map.Entry<String, RefBookValue> val : record.entrySet()) {
-
+				for (RefBookAttribute attribute : refBook.getAttributes()) {
+					RefBookValue value = record.get(attribute.getAlias());
 					String tableCell;
-					if (val.getValue() == null) {
+					if (value == null) {
 						tableCell = "";
 					} else {
-						switch (val.getValue().getAttributeType()) {
+						switch (value.getAttributeType()) {
 							case NUMBER:
-								if (val.getValue().getNumberValue() == null) tableCell = "";
-								else tableCell = val.getValue().getNumberValue().toString();
+								if (value.getNumberValue() == null) tableCell = "";
+								else tableCell = value.getNumberValue().toString();
 								break;
 							case DATE:
-								if (val.getValue().getDateValue() == null) tableCell = "";
-								else tableCell = val.getValue().getDateValue().toString();
+								if (value.getDateValue() == null) tableCell = "";
+								else tableCell = value.getDateValue().toString();
 								break;
 							case STRING:
-								if (val.getValue().getStringValue() == null) tableCell = "";
-								else tableCell = val.getValue().getStringValue();
+								if (value.getStringValue() == null) tableCell = "";
+								else tableCell = value.getStringValue();
 								break;
 							case REFERENCE:
-								if (val.getValue().getReferenceValue() == null) tableCell = "";
-								else tableCell = refBookDataProvider.getRecordData(val.getValue().getReferenceValue()).values().iterator().next().toString();
+								if (value.getReferenceValue() == null) tableCell = "";
+								else  {
+									Map<String, RefBookValue> refValue = refProviders.get(attribute.getAlias()).getRecordData(value.getReferenceValue());
+									tableCell = refValue.get(refAliases.get(attribute.getAlias())).toString();
+								}
 								break;
 							default:
 								tableCell = "undefined";
 								break;
 						}
 					}
-					tableRowData.put(val.getKey(), tableCell);
+					tableRowData.put(attribute.getAlias(), tableCell);
 				}
 				RefBookDataRow tableRow = new RefBookDataRow();
 				tableRow.setValues(tableRowData);
