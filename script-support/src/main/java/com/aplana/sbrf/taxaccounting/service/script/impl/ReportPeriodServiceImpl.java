@@ -83,7 +83,11 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
      * отчетных периодов в данном налоговом периоде.
      *
      * Для отчетных периодов относящихся к налоговому периоду с типом "налог на прибыль"
-     * смещение считается по другому алгоритму
+     * смещение считается по другому алгоритму.
+     *
+     * <p>Информация о периодах в конфлюенсе
+     * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=9600466">Как считать отчетные периоды для разных налогов</a><p/>
+     *
      * @param reportPeriodId
      * @return
      */
@@ -127,6 +131,9 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
      *
      * Для отчетных периодов относящихся к налоговому периоду с типом "налог на прибыль"
      * смещение считается по другому алгоритму
+     *
+     * <p>Информация о периодах в конфлюенсе
+     * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=9600466">Как считать отчетные периоды для разных налогов</a><p/>
      *
      * @param reportPeriodId
      * @return
