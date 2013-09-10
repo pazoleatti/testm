@@ -58,7 +58,7 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 		if (reportPeriodlist.size() > 0 && reportPeriodlist.get(reportPeriodlist.size() - 1).getId() == reportPeriodId){
 			List<TaxPeriod> taxPeriodlist = taxPeriodDao.listByTaxType(thisTaxPeriod.getTaxType());
 			for (int i = 0; i < taxPeriodlist.size(); i++){
-				if (taxPeriodlist.get(i).getId().equals(thisTaxPeriod.getId())){
+				if (taxPeriodlist.get(i).getId() == thisTaxPeriod.getId()){
 					// получим список отчетных периодов для данного налогового периода
 					reportPeriodlist = reportPeriodDao.listByTaxPeriod(taxPeriodlist.get(i - 1).getId());
 					// вернем последний отчетный период
@@ -92,36 +92,35 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
      * @return
      */
     public Calendar getStartDate(int reportPeriodId){
-        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-        TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
-        // календарь
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(taxPeriod.getStartDate());
+    	 ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+         TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
+         // календарь
+         Calendar cal = Calendar.getInstance();
+         cal.setTime(taxPeriod.getStartDate());
 
-        // для налога на прибыль, периоды вложены в друг дгруга, и начало всегда совпадает
-        if (taxPeriod.getTaxType() != TaxType.INCOME){
-            // получим отчетные периоды для данного налогового периода
-            List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriod().getId());
-            // если это последний или первый период в налоговом периоде то возвращаем дату начала налогого периода
-            if (reportPeriodList.get(0).getId().equals(reportPeriod.getId()) ||
-                    reportPeriodList.get(reportPeriodList.size() - 1).getId().equals(reportPeriod.getId())) {
-                return cal;
-            }
-            // второй период, то вернуть 1 апреля
-            if (reportPeriodList.get(2).getId().equals(reportPeriod.getId())) {
-                cal.set(Calendar.MONTH, 3);
-                cal.set(Calendar.DAY_OF_MONTH, 1);
-                return cal;
-            }
-            // третий период, то вернуть 1 июля
-            if (reportPeriodList.get(1).getId().equals(reportPeriod.getId())) {
-                cal.set(Calendar.MONTH, 6);
-                cal.set(Calendar.DAY_OF_MONTH, 1);
-                return cal;
-            }
-        }
+        /**
+         * Начало всегда совпадает
+         *  1. Для налога на прибыль (т.к. периоды вложены в друг дгруга)
+         *  2. Для 4го периода налога на транспорт (он включает все три предыдущие http://conf.aplana.com/pages/viewpage.action?pageId=9600466)
+         */
+         if (taxPeriod.getTaxType() != TaxType.INCOME && reportPeriod.getOrder() != 4){
+             // получим отчетные периоды для данного налогового периода
+             List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriod().getId());
+             // смещение относительно налогового периода
+             int months = 0;
+             for (int i = reportPeriodList.size() - 1; i >= 0; i--) {
+                 ReportPeriod cReportPeriod = reportPeriodList.get(i);
+                 // если достигли текущего то выходим из цикла
+                 if (cReportPeriod.getId() == reportPeriod.getId()){
+                     break;
+                 }
+                 // смещение в месяцах
+                 months += cReportPeriod.getMonths();
+             }
+             cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + months);
+         }
 
-        return cal;
+         return cal;
     }
 
     /**
@@ -146,11 +145,11 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
         Calendar cal = Calendar.getInstance();
         cal.setTime(taxPeriod.getStartDate());
 
-        // для налога на прибыль, периоды вложены в друг дгруга
+        // для налога на прибыль, периоды вложены в друг дгруга, и начало всегда совпадает
         if (taxPeriod.getTaxType() == TaxType.INCOME){
             cal.set(Calendar.MONTH,  reportPeriod.getMonths());
-            cal.add(Calendar.DAY_OF_MONTH, -1);
-        } else {
+        }
+        else{
             // получим отчетные периоды для данного налогового периода
             List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriod().getId());
             // смещение относительно налогового периода
@@ -158,18 +157,14 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
             for (int i = reportPeriodList.size() - 1; i >= 0; i--) {
                 ReportPeriod cReportPeriod = reportPeriodList.get(i);
                 // если достигли текущего то выходим из цикла
-                if (cReportPeriod.getId().equals(reportPeriod.getId())){
+                if (cReportPeriod.getId() == reportPeriod.getId()){
                     months += cReportPeriod.getMonths();
                     break;
                 }
                 // смещение в месяцах
                 months += cReportPeriod.getMonths();
             }
-            if (months > 12) {
-                months = 12;
-            }
             cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + months);
-            cal.add(Calendar.DAY_OF_MONTH, -1);
         }
 
         return cal;
