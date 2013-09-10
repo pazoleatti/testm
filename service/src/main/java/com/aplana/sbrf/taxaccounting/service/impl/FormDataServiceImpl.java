@@ -582,7 +582,6 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void unlock(long formDataId, TAUserInfo userInfo) {
-			System.out.println("Unlok:" + userInfo.getUser().getName());
 			lockCoreService.unlock(FormData.class, formDataId, userInfo);
 			dataRowDao.rollback(formDataId);
 	}
