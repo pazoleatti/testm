@@ -325,7 +325,7 @@ void addAllStatic() {
         def dataRows = dataRowHelper.getAllCached()
         def newRow = formData.createDataRow()
 
-        newRow.getCell('itog').colSpan = 23
+        newRow.getCell('itog').colSpan = 26
         newRow.itog = 'Подитог:'
         newRow.setAlias('itg')
         newRow.getCell('fix').colSpan = 2

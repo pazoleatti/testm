@@ -87,7 +87,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     map.put(I_101_CREDIT_RATE, new RefBookValue(RefBookAttributeType.NUMBER, item.getCreditRate()));
                     map.put(I_101_OUTCOME_DEBET_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getOutcomeDebetRemains()));
                     map.put(I_101_OUTCOME_CREDIT_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getOutcomeCreditRemains()));
-                    map.put(I_101_DEPARTMENT_ID, new RefBookValue(RefBookAttributeType.REFERENCE, (long)departmentId));
+                    map.put(I_101_DEPARTMENT_ID, new RefBookValue(RefBookAttributeType.REFERENCE, (long) departmentId));
                     records.add(map);
                 }
 
@@ -115,7 +115,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         }
     }
 
-    private List<Income101> importIncome101(InputStream stream) throws IOException, ServiceException{
+    private List<Income101> importIncome101(InputStream stream) throws IOException, ServiceException {
         List<Income101> list = new ArrayList<Income101>();
         HSSFWorkbook wb = new HSSFWorkbook(stream);
         Sheet sheet = wb.getSheetAt(0);
@@ -168,7 +168,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     if (!isValid)
                         break;
 
-                    Cell cell = row.getCell(cells.next().getColumnIndex(),Row.RETURN_BLANK_AS_NULL);
+                    Cell cell = row.getCell(cells.next().getColumnIndex(), Row.RETURN_BLANK_AS_NULL);
 
                     if (cell == null) {
                         continue;
@@ -211,7 +211,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                                 break;
                         }
                     } catch (IllegalStateException e) {
-                        throw getServiceException(cell.getColumnIndex(), 1);
+                        throw getServiceException(cell.getColumnIndex(), INCOME_101);
                     }
                 }
                 if (!endOfFile && isValid) {
@@ -247,7 +247,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             Iterator<Cell> cells = row.iterator();
 
             // парсим с 18 строки
-            if (row.getRowNum() < 18) {
+            if (row.getRowNum() < 9) {
                 continue;
             }
 
@@ -287,7 +287,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                             break;
                     }
                 } catch (IllegalStateException e) {
-                    throw getServiceException(cell.getColumnIndex(), 1);
+                    throw getServiceException(cell.getColumnIndex(), INCOME_102);
                 }
             }
             endOfFile = isEndOfFile102(model);
@@ -312,14 +312,14 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
      * @return true если ячейки в столбцах, указанные в описании формата, не пустые (нет ни одной пустой ячейки), иначе - false
      */
     private boolean isModelValid(Income101 model) {
-        return model.getAccount() != null &&  !model.getAccount().isEmpty()
+        return model.getAccount() != null && !model.getAccount().isEmpty()
                 && model.getIncomeDebetRemains() != null
                 && model.getIncomeCreditRemains() != null
                 && model.getDebetRate() != null
                 && model.getCreditRate() != null
                 && model.getOutcomeDebetRemains() != null
                 && model.getOutcomeCreditRemains() != null
-                && model.getAccountName() != null  &&  !model.getAccountName().isEmpty();
+                && model.getAccountName() != null && !model.getAccountName().isEmpty();
     }
 
     /**
@@ -327,9 +327,9 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
      * @return true если ячейки в столбцах, указанные в описании формата, не пустые (нет ни одной пустой ячейки), иначе - false
      */
     private boolean isModelValid(Income102 model) {
-        return model.getOpuCode() != null
-                && model.getTotalSum() != null &&
-                model.getItemName() != null;
+        return model.getOpuCode() != null && !model.getOpuCode().isEmpty()
+                && model.getTotalSum() != null
+                && model.getItemName() != null && !model.getItemName().isEmpty();
     }
 
     /**
@@ -338,9 +338,9 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
      * @param columnIndex индекс колонки (для определения текста ошибки)
      * @param typeID      тип бух отчетности
      */
-    private ServiceException getServiceException(int columnIndex, int typeID) {
+    private ServiceException getServiceException(int columnIndex, long typeID) {
         String colName = "";
-        if (typeID == 0) {
+        if (typeID == INCOME_101) {
             switch (columnIndex) {
                 case 1:
                     colName = "Номер счета";
