@@ -478,7 +478,7 @@ def consolidationSummary() {
                             def knu = getKNUValue(rowRNU4.code)
                             if (row.incomeTypeId != null && row.accountNo != null && row.incomeTypeId == knu && isEqualNum(row.accountNo, rowRNU4.balance)) {
                                 //«графа 8» =  сумма значений по «графе 5» (столбец «Сумма дохода за отчётный квартал») всех форм источников вида «(РНУ-4)
-                                grap    h8 += rowRNU4.sum
+                                graph8 += rowRNU4.sum
                             }
                         }
                     }
