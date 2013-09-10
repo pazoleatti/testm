@@ -253,8 +253,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {
             //Валидация
-            InputStreamReader xsdStream = new InputStreamReader(blobDataDao.get(declarationTemplate.getXsdId()).getInputStream());
-            InputStream xmlStream = new ByteArrayInputStream(xml.getBytes(Charset.forName("windows-1251")));
+            InputStreamReader xsdStream = new InputStreamReader(
+                    blobDataDao.get(declarationTemplate.getXsdId()).getInputStream());
+            InputStreamReader xmlStream = new InputStreamReader(
+                    new ByteArrayInputStream(xml.getBytes()));
             if (validateDeclaration(xmlStream, xsdStream)) {
                 setReportData(declarationData, xml);
             } else {
@@ -279,7 +281,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 exportXLSX(jasperPrint));
     }
 
-    private boolean validateDeclaration(InputStream declaration, InputStreamReader xsd) {
+    private boolean validateDeclaration(InputStreamReader declaration, InputStreamReader xsd) {
         try {
             SchemaFactory factory =
                     SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
