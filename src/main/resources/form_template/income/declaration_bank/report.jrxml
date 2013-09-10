@@ -800,49 +800,81 @@ Arrays.asList(1)]]></variableExpression>
 			<variableExpression><![CDATA[$F{СтавНалФБ} == null || $F{СтавНалФБ}.equals("0")?
 "-----"
 :
-($F{СтавНалФБ}.length()==3?
-$F{СтавНалФБ}+"0-"
-:
-($F{СтавНалФБ}.length()==2?
-$F{СтавНалФБ}+"-0-"
-:
-($F{СтавНалФБ}.length()==1?
-$F{СтавНалФБ}+"--0-"
-:
-$F{СтавНалФБ}+"-----".substring(0,5))))]]></variableExpression>
+($F{СтавНалФБ}.lastIndexOf(".")==-1?$F{СтавНалФБ}.concat( "-" ):$F{СтавНалФБ}.substring( 0, $F{СтавНалФБ}.lastIndexOf(".")).concat( "-" ))]]>
+			</variableExpression>
 			<initialValueExpression><![CDATA[$F{СтавНалФБ} == null || $F{СтавНалФБ}.equals("0")?
 "-----"
 :
-($F{СтавНалФБ}.length()==3?
-$F{СтавНалФБ}+"0-"
+($F{СтавНалФБ}.lastIndexOf(".")==-1?$F{СтавНалФБ}.concat( "--" ):$F{СтавНалФБ}.substring( 0, $F{СтавНалФБ}.lastIndexOf(".")).concat( "-" ))]]>
+			</initialValueExpression>
+		</variable>
+		<variable name="СтавНалФБт" class="java.lang.String">
+			<variableExpression><![CDATA[$F{СтавНалФБ} == null || $F{СтавНалФБ}.equals("0")?
+"-----"
 :
-($F{СтавНалФБ}.length()==2?
-$F{СтавНалФБ}+"-0-"
+($F{СтавНалФБ}.lastIndexOf(".")==-1?"0-":$F{СтавНалФБ}.substring($F{СтавНалФБ}.lastIndexOf(".")+1).concat( "-" ))]]>
+			</variableExpression>
+			<initialValueExpression><![CDATA[$F{СтавНалФБ} == null || $F{СтавНалФБ}.equals("0")?
+"-----"
 :
-($F{СтавНалФБ}.length()==1?
-$F{СтавНалФБ}+"--0-"
-:
-$F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
+($F{СтавНалФБ}.lastIndexOf(".")==-1?"0-":$F{СтавНалФБ}.substring($F{СтавНалФБ}.lastIndexOf(".")+1).concat( "-" ))]]>
+			</initialValueExpression>
 		</variable>
 		<variable name="СтавНалСуб284" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СтавНалСуб284} == null || $F{СтавНалСуб284}.equals("0")?
+			<variableExpression>
+				<![CDATA[$F{СтавНалСуб284} == null || $F{СтавНалСуб284}.equals("0")?
 "-----"
 :
-($F{СтавНалСуб284}+"-----").substring(0,5)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СтавНалСуб284} == null || $F{СтавНалСуб284}.equals("0")?
+($F{СтавНалСуб284}.lastIndexOf(".")==-1?$F{СтавНалСуб284}.concat( "-" ):$F{СтавНалСуб284}.substring( 0, $F{СтавНалСуб284}.lastIndexOf(".")).concat( "-" ))]]>
+			</variableExpression>
+			<initialValueExpression>
+				<![CDATA[$F{СтавНалСуб284} == null || $F{СтавНалСуб284}.equals("0")?
 "-----"
 :
-($F{СтавНалСуб284}+"-----").substring(0,5)]]></initialValueExpression>
+($F{СтавНалСуб284}.lastIndexOf(".")==-1?$F{СтавНалСуб284}.concat( "-" ):$F{СтавНалСуб284}.substring( 0, $F{СтавНалСуб284}.lastIndexOf(".")).concat( "-" ))]]>
+			</initialValueExpression>
+		</variable>
+		<variable name="СтавНалСуб284т" class="java.lang.String">
+			<variableExpression>
+				<![CDATA[$F{СтавНалСуб284} == null || $F{СтавНалСуб284}.equals("0")?
+"-----"
+:
+($F{СтавНалСуб284}.lastIndexOf(".")==-1?"0-":$F{СтавНалСуб284}.substring($F{СтавНалСуб284}.lastIndexOf(".")+1).concat( "-" ))]]>
+			</variableExpression>
+			<initialValueExpression>
+				<![CDATA[$F{СтавНалСуб284} == null || $F{СтавНалСуб284}.equals("0")?
+"-----"
+:
+($F{СтавНалСуб284}.lastIndexOf(".")==-1?"0-":$F{СтавНалСуб284}.substring($F{СтавНалСуб284}.lastIndexOf(".")+1).concat( "-" ))]]>
+			</initialValueExpression>
 		</variable>
 		<variable name="СтавНалСуб" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СтавНалСуб} == null || $F{СтавНалСуб}.equals("0")?
+			<variableExpression>
+				<![CDATA[$F{СтавНалСуб} == null || $F{СтавНалСуб}.equals("0")?
 "-----"
 :
-($F{СтавНалСуб}+"-----").substring(0,5)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СтавНалСуб} == null || $F{СтавНалСуб}.equals("0")?
+($F{СтавНалСуб}.lastIndexOf(".")==-1?$F{СтавНалСуб}.concat( "-" ):$F{СтавНалСуб}.substring( 0, $F{СтавНалСуб}.lastIndexOf(".")).concat( "-" ))]]>
+			</variableExpression>
+			<initialValueExpression>
+				<![CDATA[$F{СтавНалСуб} == null || $F{СтавНалСуб}.equals("0")?
 "-----"
 :
-($F{СтавНалСуб}+"-----").substring(0,5)]]></initialValueExpression>
+($F{СтавНалСуб}.lastIndexOf(".")==-1?$F{СтавНалСуб}.concat( "-" ):$F{СтавНалСуб}.substring( 0, $F{СтавНалСуб}.lastIndexOf(".")).concat( "-" ))]]>
+			</initialValueExpression>
+		</variable>
+		<variable name="СтавНалСубт" class="java.lang.String">
+			<variableExpression>
+				<![CDATA[$F{СтавНалСуб} == null || $F{СтавНалСуб}.equals("0")?
+"-----"
+:
+($F{СтавНалСуб}.lastIndexOf(".")==-1?"0-":$F{СтавНалСуб}.substring($F{СтавНалСуб}.lastIndexOf(".")+1).concat( "-" ))]]>
+			</variableExpression>
+			<initialValueExpression>
+				<![CDATA[$F{СтавНалСуб} == null || $F{СтавНалСуб}.equals("0")?
+"-----"
+:
+($F{СтавНалСуб}.lastIndexOf(".")==-1?"0-":$F{СтавНалСуб}.substring($F{СтавНалСуб}.lastIndexOf(".")+1).concat( "-" ))]]>
+			</initialValueExpression>
 		</variable>
 		<variable name="НалИсчисл" class="java.lang.String">
 			<variableExpression><![CDATA[$F{НалИсчисл} == null?
@@ -1035,14 +1067,32 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 ($F{АвПлатУпл1КвСуб}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="СтавНалВсего" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СтавНалВсего} == null || $F{СтавНалВсего}.equals("0")?
+			<variableExpression>
+				<![CDATA[$F{СтавНалВсего} == null || $F{СтавНалВсего}.equals("0")?
 "-----"
 :
-($F{СтавНалВсего}+"-----").substring(0,5)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СтавНалВсего} == null || $F{СтавНалВсего}.equals("0")?
+($F{СтавНалВсего}.lastIndexOf(".")==-1?$F{СтавНалВсего}.concat( "-" ):$F{СтавНалВсего}.substring( 0, $F{СтавНалВсего}.lastIndexOf(".")).concat( "-" ))]]>
+			</variableExpression>
+			<initialValueExpression>				
+				<![CDATA[$F{СтавНалВсего} == null || $F{СтавНалВсего}.equals("0")?
 "-----"
 :
-($F{СтавНалВсего}+"-----").substring(0,5)]]></initialValueExpression>
+($F{СтавНалВсего}.lastIndexOf(".")==-1?$F{СтавНалВсего}.concat( "-" ):$F{СтавНалВсего}.substring( 0, $F{СтавНалВсего}.lastIndexOf(".")).concat( "-" ))]]>
+			</initialValueExpression>
+		</variable>
+		<variable name="СтавНалВсегот" class="java.lang.String">
+			<variableExpression>
+				<![CDATA[$F{СтавНалВсего} == null || $F{СтавНалВсего}.equals("0")?
+"-----"
+:
+($F{СтавНалВсего}.lastIndexOf(".")==-1?"0-":$F{СтавНалВсего}.substring($F{СтавНалВсего}.lastIndexOf(".")+1).concat( "-" ))]]>
+			</variableExpression>
+			<initialValueExpression>				
+				<![CDATA[$F{СтавНалВсего} == null || $F{СтавНалВсего}.equals("0")?
+"-----"
+:
+($F{СтавНалВсего}.lastIndexOf(".")==-1?"0-":$F{СтавНалВсего}.substring($F{СтавНалВсего}.lastIndexOf(".")+1).concat( "-" ))]]>
+			</initialValueExpression>
 		</variable>
 	</subDataset>
 	<subDataset name="str7" uuid="e0fb394c-8283-4cc0-88e3-ecc0594015eb">
@@ -19718,14 +19768,14 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{СтавНалФБ}.charAt(3)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СтавНалФБт}.charAt(0)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="024872f5-ddc4-4fc8-9670-4f78ccd6b3c3" style="KL" x="431" y="579" width="15" height="19"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{СтавНалФБ}.charAt(4)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СтавНалФБт}.charAt(1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="3396df8a-8e29-4e57-9861-3b6c1ce93907" style="KL" x="371" y="579" width="15" height="19"/>
@@ -19746,14 +19796,14 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{СтавНалСуб}.charAt(3)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СтавНалСубт}.charAt(0)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="8b721117-6b4e-4ca3-8825-4653b425ad4d" style="KL" x="431" y="602" width="15" height="19"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{СтавНалСуб}.charAt(4)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СтавНалСубт}.charAt(1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="d162aeab-af78-4b8c-8335-324785bef124" style="KL" x="371" y="602" width="15" height="19"/>
@@ -19774,14 +19824,14 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{СтавНалСуб284}.charAt(3)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СтавНалСуб284т}.charAt(0)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="76b3abb4-f1b7-40e2-ae8c-9b271a637f53" style="KL" x="431" y="625" width="15" height="19"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{СтавНалСуб284}.charAt(4)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СтавНалСуб284т}.charAt(1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="7483c819-2da0-4481-9fdd-209ef540aa18" style="KL" x="371" y="625" width="15" height="19"/>
@@ -20187,7 +20237,7 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{СтавНалВсего}.charAt(3)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СтавНалВсегот}.charAt(0)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="4fd5f78a-0250-4436-b12a-a5d58ed3ccba" style="KL" x="371" y="555" width="15" height="19"/>
@@ -20201,7 +20251,7 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{СтавНалВсего}.charAt(4)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СтавНалВсегот}.charAt(1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="31318fe2-3dc0-44d2-9bf6-ea7827c3b2be" style="KL" x="386" y="555" width="15" height="19"/>

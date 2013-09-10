@@ -54,6 +54,9 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 			GoMoveAction action = new GoMoveAction();
 			action.setFormDataId(formData.getId());
 			action.setMove(workflowMove);
+			if (reasonForReturn.length() > 255) {
+				reasonForReturn = reasonForReturn.substring(0, 255);
+			}
 			action.setReasonToWorkflowMove(reasonForReturn);
 			dispatchAsync.execute(action, CallbackUtils
 					.defaultCallback(new AbstractCallback<GoMoveResult>() {
