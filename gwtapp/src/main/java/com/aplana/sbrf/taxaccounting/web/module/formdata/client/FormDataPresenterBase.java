@@ -6,7 +6,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -105,7 +113,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 	public static final String WORK_FLOW_ID = "goWorkFlowId";
 
-	private HandlerRegistration closeFormDataHandlerRegistration;
+	protected HandlerRegistration closeFormDataHandlerRegistration;
 
 	protected final DispatchAsync dispatcher;
 	protected final TaPlaceManager placeManager;
@@ -144,18 +152,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	}
 
 	@Override
-	protected void onReveal() {
-		super.onReveal();
-		closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
-			@Override
-			public void onClose(CloseEvent<Window> event) {
-				unlockForm(formData.getId());
-				closeFormDataHandlerRegistration.removeHandler();
-			}
-		});
-	}
-
-	@Override
 	public boolean useManualReveal() {
 		return true;
 	}
@@ -163,7 +159,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	@Override
 	protected void onHide() {
 		super.onHide();
-		closeFormDataHandlerRegistration.removeHandler();
+		if (closeFormDataHandlerRegistration !=null ){
+			closeFormDataHandlerRegistration.removeHandler();
+		}
 		unlockForm(formData.getId());
 	}
 	
@@ -231,6 +229,14 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.setSelectedRow(null, true);
 
 		placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
+		closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
+			@Override
+			public void onClose(CloseEvent<Window> event) {
+				closeFormDataHandlerRegistration.removeHandler();
+				unlockForm(formData.getId());
+			}
+		});
+
 	}
 
 
@@ -248,10 +254,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 	@SuppressWarnings("unchecked")
 	protected void unlockForm(Long formId){
-		if (!readOnlyMode && formData.getId()!=null){
-			UnlockFormData action = new UnlockFormData();
-			action.setFormId(formId);
-			dispatcher.execute(action, CallbackUtils.emptyCallback());
-		}
+		UnlockFormData action = new UnlockFormData();
+		action.setFormId(formId);
+		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}
 }

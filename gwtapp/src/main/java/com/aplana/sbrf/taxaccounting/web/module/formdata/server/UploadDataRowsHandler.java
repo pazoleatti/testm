@@ -55,8 +55,7 @@ public class UploadDataRowsHandler extends
         BlobData blobData = blobDataService.get(action.getUuid());
         //Парсит загруженный в фаловое хранилище xls-файл
         formDataService.importFormData(logger, userInfo,
-                formData.getId(),formData.getFormTemplateId(), formData.getDepartmentId(), formData.getKind(), formData.getReportPeriodId(),
-                blobData.getInputStream(), blobData.getName());
+                formData.getId(), blobData.getInputStream(), blobData.getName());
 
 
         DataRowResult result = new DataRowResult();

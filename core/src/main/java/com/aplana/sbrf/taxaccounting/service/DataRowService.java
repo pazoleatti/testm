@@ -42,6 +42,10 @@ public interface DataRowService {
 	
 	
 	
+	/**
+	 * @param userInfo
+	 * @param formDataId
+	 */
 	void rollback(TAUserInfo userInfo, long formDataId);
 	
 	

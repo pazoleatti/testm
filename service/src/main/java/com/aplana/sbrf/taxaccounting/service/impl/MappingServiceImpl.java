@@ -1,25 +1,38 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodMappingDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.migration.RestoreExemplar;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.*;
-import com.aplana.sbrf.taxaccounting.service.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodMappingDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.migration.RestoreExemplar;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.DepartmentRnuMapping;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.DepartmentXmlMapping;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.NalogFormType;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.PeriodMapping;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.YearCode;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.MappingService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 
 @Service
 @Transactional
@@ -47,6 +60,7 @@ public class MappingServiceImpl implements MappingService {
 
     @Autowired
     private TAUserService taUserService;
+    
 
     private boolean isAuditAddOn = true;
     private boolean isImportOn = true;
@@ -122,8 +136,9 @@ public class MappingServiceImpl implements MappingService {
 
             //Вызов скрипта
             if (isImportOn) {
-                formDataService.importFormData(logger, userInfo, formDataId, formTemplateId,
-                        departmentId, FormDataKind.PRIMARY, reportPeriodId, inputStream, filename);
+            	formDataService.lock(formDataId, userInfo);
+                formDataService.importFormData(logger, userInfo, formDataId, inputStream, filename);
+                // TODO (sgoryachkin) Неожиданно не нашел, где же делается saveFormData? Не скриптами ли удумали коммиты формам делать?
             }
         } catch (Exception e) {
             log.error(e.getLocalizedMessage());
