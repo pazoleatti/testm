@@ -56,14 +56,32 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = 0
     ['fullName', 'interdependence', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealFocus', 'deliverySign', 'metalName',
             'foreignDeal', 'countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2',
             'locality2', 'deliveryCode', 'incomeSum', 'outcomeSum', 'dealDoneDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.insert(row, index)
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def pointRow = currentDataRow
+        while(pointRow.getAlias()!=null && index>0){
+            pointRow = dataRows.get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && dataRows.get(index).getAlias()==null){
+            index++
+        }
+    }else if (size>0) {
+        for(int i = size-1;i>=0;i--){
+            def pointRow = dataRows.get(i)
+            if(pointRow.getAlias()==null){
+                index = dataRows.indexOf(pointRow)+1
+                break
+            }
+        }
+    }
+    dataRowHelper.insert(row, index+1)
 }
 /**
  * Проверяет уникальность в отчётном периоде и вид
@@ -325,7 +343,7 @@ void addAllStatic() {
         def dataRows = dataRowHelper.getAllCached()
         def newRow = formData.createDataRow()
 
-        newRow.getCell('itog').colSpan = 23
+        newRow.getCell('itog').colSpan = 26
         newRow.itog = 'Подитог:'
         newRow.setAlias('itg')
         newRow.getCell('fix').colSpan = 2

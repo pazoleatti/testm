@@ -45,13 +45,14 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT :
         importData()
+        calc()
+        logicCheck()
         break
 }
 
 void deleteRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.delete(currentDataRow)
-    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 void addRow() {
@@ -59,7 +60,7 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
     ['fullNamePerson', 'sum', 'docNumber', 'docDate', 'count', 'date'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
@@ -108,7 +109,7 @@ void logicCheck() {
             }
         }
         //  Корректность даты договора
-        def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+        def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
         def dFrom = taxPeriod.getStartDate()
         def dTo = taxPeriod.getEndDate()
         def dt = docDateCell.value
@@ -165,9 +166,11 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
+    def index = 1
     for (row in dataRows) {
         // Порядковый номер строки
-        row.rowNumber = row.getIndex()
+        row.rowNumber = index
+        index++
         // Расчет поля "Цена"
         row.price = row.sum
         // Расчет поля "Стоимость"
@@ -317,6 +320,7 @@ def addData(def xml) {
         // графа 11
         newRow.date = getDate(row.cell[indexCell].text(), indexRow, indexCell)
         data.insert(newRow, indexRow - 2)
+
     }
 }
 

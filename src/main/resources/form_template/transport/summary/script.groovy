@@ -1,6 +1,10 @@
 package form_template.transport.summary
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
  * Форма "Расчет суммы налога по каждому транспортному средству".
@@ -856,12 +860,10 @@ def consolidation(){
                         sourses202.put(key, sRow)
                     }
                 }
-                                                                    \
-
             } else{
                 sourceDataRows.each{ sRow ->
                     // новая строка
-                    def newRow = getNewRow()
+                    def newRow = formData.createDataRow()
                     // «Графа 2» принимает значение «графы 2» формы-источника
                     newRow.okato = sRow.codeOKATO
                     // «Графа 3» принимает значение «графы 4» формы-источника
@@ -966,7 +968,7 @@ def consolidation(){
                                 returnDate = reportPeriodEndDate
                             } else{
                                 returnDate = Calendar.getInstance()
-                                returnDate.setTime(sRow.stealDatEnd)
+                                returnDate.setTime(sRow.stealDateEnd)
                             }
 
                             /**
@@ -976,7 +978,7 @@ def consolidation(){
                              * Иначе
                              *  Мугон = МЕСЯЦ(Двозврата)-МЕСЯЦ(Дугона)-1
                              */
-                            def diff1 = returnDate.getTime().month - stealingDate.getTime().month - 1
+                            def diff1 = (returnDate.getTime().year*12 + returnDate.getTime().month) - (stealingDate.getTime().year*12 +stealingDate.getTime().month)  - 1
                             if (diff1 < 0){
                                 stealingMonths = 0
                             } else{

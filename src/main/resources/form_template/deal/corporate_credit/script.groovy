@@ -46,6 +46,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -60,7 +62,7 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
     ['fullNamePerson', 'sum', 'docNumber', 'docDate', 'dealDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
@@ -84,11 +86,12 @@ void checkCreation() {
  */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int index = 1
     for (row in dataRowHelper.getAllCached()) {
         if (row.getAlias() != null) {
             continue
         }
-        def rowNum = row.getIndex()
+        def rowNum = index++
         def docDateCell = row.getCell('docDate')
         [
                 'rowNumber',     // № п/п
@@ -173,9 +176,13 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
+    def int index = 1
     for (row in dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
         // Порядковый номер строки
-        row.rowNumber = row.getIndex()
+        row.rowNumber = index++
         // В поле "Количество" подставляется значение «1»
         row.count = 1
         // Расчет поля "Цена"
@@ -255,7 +262,7 @@ void importData() {
             logger.error('Заголовок таблицы не соответствует требуемой структуре!')
             return
         }
-        addData(xml)
+        addData(xml, 2)
 //        logicCheck()
     } catch (Exception e) {
         logger.error("" + e.message)
@@ -304,7 +311,7 @@ def checkTableHead(def xml, def headRowCount) {
  *
  * @param xml данные
  */
-def addData(def xml) {
+def addData(def xml, int headRowCount) {
     Date date = new Date()
 
     def cache = [:]
@@ -316,7 +323,7 @@ def addData(def xml) {
         indexRow++
 
         // пропустить шапку таблицы
-        if (indexRow <= 2) {
+        if (indexRow <= headRowCount) {
             continue
         }
 
@@ -332,7 +339,7 @@ def addData(def xml) {
 
         def indexCell = 0
         // графа 1
-        newRow.rowNumber = indexRow - 2
+        newRow.rowNumber = indexRow - headRowCount
 
         // графа 2
         newRow.fullNamePerson = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
@@ -374,7 +381,7 @@ def addData(def xml) {
 
         // графа 11
         newRow.dealDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
-        data.insert(newRow, indexRow - 2)
+        data.insert(newRow, indexRow - headRowCount)
     }
 }
 
@@ -396,7 +403,7 @@ def getNumber(def value, int indexRow, int indexCell) {
     try {
         return new BigDecimal(tmp)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow + 4} столбец ${indexCell + 3} содержит недопустимый тип данных!")
+        logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
 
@@ -417,8 +424,9 @@ def getRecordId(def ref_id, String code, String value, Date date, def cache, int
     if (records.size() == 1) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
+    } else {
+        logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
-    throw new Exception("Строка ${indexRow + 4} столбец ${indexCell + 3} содержит значение, отсутствующее в справочнике!")
 }
 
 /**
@@ -432,6 +440,6 @@ def getDate(def value, int indexRow, int indexCell) {
     try {
         return format.parse(value)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow + 4} столбец ${indexCell + 3} содержит недопустимый тип данных!")
+        logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }

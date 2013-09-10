@@ -1,5 +1,7 @@
 package form_template.deal.organization_matching
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
@@ -28,55 +30,41 @@ switch (formDataEvent) {
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
         accepted()
         break
-    case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED:
-        cancel()
-        break
 }
 
 void accepted() {
-    def refDataProvider = refBookFactory.getDataProvider(9)
-    List<Map<String, RefBookValue>> updateList = new ArrayList<Map<String, RefBookValue>>()
-    List<Map<String, RefBookValue>> insertList = new ArrayList<Map<String, RefBookValue>>()
+    def List<Map<String, RefBookValue>> updateList = new ArrayList<Map<String, RefBookValue>>()
+    def List<Map<String, RefBookValue>> insertList = new ArrayList<Map<String, RefBookValue>>()
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
     for (row in dataRows) {
         if (row.refBookRecord != null) {
             // изменение существующей записи
-            updateList.add(getRecord(row.name, row.code, row.kpp, row.inn, row.address, row.taxpayerCode, row.regNum, row.country, row.refBookRecord))
+            updateList.add(getRecord(row))
         } else {
             // добавление новой записи
-            insertList.add(getRecord(row.name, row.code, row.kpp, row.inn, row.address, row.taxpayerCode, row.regNum, row.country, row.refBookRecord))
+            insertList.add(getRecord(row))
         }
     }
+
+    def refDataProvider = refBookFactory.getDataProvider(9)
     if (updateList.size() > 0)
         refDataProvider.updateRecords(new Date(), updateList)
     if (insertList.size() > 0)
         refDataProvider.insertRecords(new Date(), insertList)
 }
 
-void cancel() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    for (row in dataRows) {
-        if (row.refBookRecord != null) {
-            println("TODO revert")
-        } else {
-            println("TODO delete")
-        }
-    }
-}
-
-Map<String, RefBookValue> getRecord(String name, Number code, Number kpp, Number inn, String address, String taxpayerCode, String regNum, Long country, Long recordId) {
-    Map<String, RefBookValue> map = new HashMap<String, RefBookValue>()
-    map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, name))
-    map.put("ORGANIZATION", new RefBookValue(RefBookAttributeType.NUMBER, code))
-    map.put("KPP", new RefBookValue(RefBookAttributeType.NUMBER, kpp))
-    map.put("INN_KIO", new RefBookValue(RefBookAttributeType.NUMBER, inn))
-    map.put("ADDRESS", new RefBookValue(RefBookAttributeType.STRING, address))
-    map.put("TAXPAYER_CODE", new RefBookValue(RefBookAttributeType.STRING, taxpayerCode))
-    map.put("REG_NUM", new RefBookValue(RefBookAttributeType.STRING, regNum))
-    map.put("COUNTRY", new RefBookValue(RefBookAttributeType.REFERENCE, country))
-    map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId))
+Map<String, RefBookValue> getRecord(DataRow<Cell> row) {
+    def Map<String, RefBookValue> map = new HashMap<String, RefBookValue>()
+    map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, row.name))
+    map.put("ORGANIZATION", new RefBookValue(RefBookAttributeType.NUMBER, row.code))
+    map.put("KPP", new RefBookValue(RefBookAttributeType.NUMBER, row.kpp))
+    map.put("INN_KIO", new RefBookValue(RefBookAttributeType.NUMBER, row.inn))
+    map.put("ADDRESS", new RefBookValue(RefBookAttributeType.STRING, row.address))
+    map.put("TAXPAYER_CODE", new RefBookValue(RefBookAttributeType.STRING, row.taxpayerCode))
+    map.put("REG_NUM", new RefBookValue(RefBookAttributeType.STRING, row.regNum))
+    map.put("COUNTRY", new RefBookValue(RefBookAttributeType.REFERENCE, row.country))
+    map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, row.refBookRecord))
 
     map
 }
@@ -92,7 +80,7 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
     ['name', 'country', 'regNum', 'taxpayerCode', 'address', 'inn', 'kpp', 'code', 'editSign', 'refBookRecord'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
