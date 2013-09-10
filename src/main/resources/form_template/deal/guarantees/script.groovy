@@ -52,6 +52,8 @@ switch (formDataEvent) {
 // Импорт
     case FormDataEvent.IMPORT:
         importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -458,7 +460,7 @@ def addData(def xml) {
 
         def indexCell = 0
         // графа 1
-        newRow.rowNumber = indexRow - 2
+        newRow.rowNumber = newRow.index = indexRow - 2
 
         // графа 2
         newRow.fullName = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
