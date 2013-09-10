@@ -16,7 +16,7 @@
 	<g:DialogBox height="100%" glassEnabled="true" text="Укажите причину возврата">
         <g:DockPanel addStyleNames="{style.dataLayout}">
             <g:Dock direction="NORTH" size="40px">
-                <g:Label>Причина возврата:</g:Label>
+                <g:Label>Причина возврата(макс. 255):</g:Label>
             </g:Dock>
             <g:Dock direction="CENTER">
                 <g:TextArea addStyleNames="{style.textArea}" focus="true" ui:field="data"/>

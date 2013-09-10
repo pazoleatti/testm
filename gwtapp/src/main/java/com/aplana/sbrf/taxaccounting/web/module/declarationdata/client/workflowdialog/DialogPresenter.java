@@ -54,6 +54,9 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 			AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
 			action.setAccepted(false);
 			action.setDeclarationId(declarationId);
+			if (comment.length() > 255) {
+				comment = comment.substring(0, 255);
+			}
 			action.setReasonForReturn(comment);
 			dispatchAsync.execute(action, CallbackUtils
 					.defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
