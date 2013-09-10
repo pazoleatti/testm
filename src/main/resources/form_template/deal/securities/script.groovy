@@ -47,6 +47,8 @@ switch (formDataEvent) {
 // Импорт
     case FormDataEvent.IMPORT:
         importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -208,11 +210,12 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
     for (row in dataRows) {
         // Порядковый номер строки
-        row.rowNumber = row.getIndex()
+        if (row.getIndex() != null) {
+            row.rowNumber = row.getIndex()
+        }
         // Расчет поля "Цена"
         def priceValue = row.incomeSum != null ? row.incomeSum : row.outcomeSum
         def okei =  row.okeiCode!= null ? refBookService.getRecordData(12, row.okeiCode).CODE.stringValue : null
-        println("okei = " + okei)
         if (okei == '744') {
             row.price = priceValue
         } else if (okei == '796' && row.count != 0 && row.count != null) {
