@@ -88,13 +88,14 @@ void logicCheck() {
 
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
+    int index = 1
 
     for (row in dataRowHelper.getAllCached()) {
         if (row.getAlias() != null) {
             continue
         }
 
-        def rowNum = row.getIndex()
+        def rowNum = index++
 
         [
                 'rowNum', // № п/п
@@ -185,9 +186,9 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    for (row in dataRows) {
+    dataRows.eachWithIndex { row, index ->
         // Порядковый номер строки
-        row.rowNum = row.getIndex()
+        row.rowNum = index + 1
         // Количество
         row.count = 1
         // Итого стоимость без учета НДС, акцизов и пошлин, руб.
@@ -275,7 +276,10 @@ void importData() {
             return
         }
         addData(xml,2)
-//        logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+            logicCheck()
+        }
     } catch(Exception e) {
         logger.error(""+e.message)
     }

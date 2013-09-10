@@ -90,13 +90,14 @@ void logicCheck() {
 
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
+    int index = 1
 
     for (row in dataRowHelper.getAllCached()) {
         if (row.getAlias() != null) {
             continue
         }
 
-        def rowNum = row.getIndex()
+        def rowNum = index++
         [
                 'rowNum', // № п/п
                 'jurName', // Полное наименование юридического лица с указанием ОПФ
@@ -212,9 +213,9 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    for (row in dataRows) {
+    dataRows.eachWithIndex { row, index ->
         // Порядковый номер строки
-        row.rowNum = row.getIndex()
+        row.rowNum = index + 1
         // Расчет полей зависимых от справочников
         if (row.jurName != null) {
             def map = refBookService.getRecordData(9, row.jurName)
@@ -292,7 +293,10 @@ void importData() {
             return
         }
         addData(xml,2)
-//        logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+            logicCheck()
+        }
     } catch(Exception e) {
         logger.error(""+e.message)
     }
@@ -307,8 +311,8 @@ def addData(def xml, int headRowCount) {
     Date date = new Date()
 
     def cache = [:]
-    def data = formDataService.getDataRowHelper(formData)
-    data.clear()
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.clear()
 
     def indexRow = -1
     for (def row : xml.row) {
@@ -406,7 +410,7 @@ def addData(def xml, int headRowCount) {
         // графа 19
         newRow.transactionDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
 
-        data.insert(newRow, indexRow - headRowCount)
+        dataRowHelper.insert(newRow, indexRow - headRowCount)
     }
 }
 
