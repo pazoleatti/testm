@@ -49,6 +49,8 @@ switch (formDataEvent) {
 // импорт из xls
     case FormDataEvent.IMPORT :
         importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -64,7 +66,14 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
-    ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'dealDoneDate'].each {
+    [       'fullName',
+            'docNumber',
+            'docDate',
+            'dealNumber',
+            'dealDate',
+            'sum',
+            'dealDoneDate'
+    ].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
@@ -186,9 +195,13 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
+    def int index = 1
     for (row in dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
         // Порядковый номер строки
-        row.rowNumber = row.getIndex()
+        row.rowNumber = index++
         // Расчет поля " Количество"
         row.count = 1
         // Расчет поля "Цена"
