@@ -510,7 +510,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					}
 					break;
 				case ACCEPTED:
-					if(formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP()){
+					if(formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP() &&  formData.getFormType().getId() != ORGANIZATION_FORM_TYPE){
 						result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
 					}
 					break;

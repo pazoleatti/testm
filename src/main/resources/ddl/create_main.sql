@@ -111,7 +111,7 @@ create sequence seq_form_style start with 10000;
 ------------------------------------------------------------------------------------------------------
 create table blob_data (
   id            varchar2(36) not null,
-  name          varchar2(520) null,
+  name          varchar2(530) null,
   data          blob not null,
   creation_date date not null,
   type          number(1) default 0 not null,
