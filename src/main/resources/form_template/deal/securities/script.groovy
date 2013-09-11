@@ -215,7 +215,7 @@ void calc() {
         }
         // Расчет поля "Цена"
         def priceValue = row.incomeSum != null ? row.incomeSum : row.outcomeSum
-        def okei =  row.okeiCode!= null ? refBookService.getRecordData(12, row.okeiCode).CODE.stringValue : null
+        def okei =  row.okeiCode!= null ? refBookService.getStringValue(12, row.okeiCode, 'CODE') : null
         if (okei == '744') {
             row.price = priceValue
         } else if (okei == '796' && row.count != 0 && row.count != null) {
