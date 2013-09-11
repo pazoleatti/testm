@@ -77,7 +77,6 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
         builder.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId, declarationData.getReportPeriodId()), ВерсПрог: departmentParamTransport.APP_VERSION, ВерсФорм:departmentParamTransport.FORMAT_VERSION) {
             Документ(
                     КНД:"1152004",
-                    // TODO обсудить всплывающее окно, вынести в конф. Трансп декл
                     ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"), //new Date().format("dd.MM.yyyy"),
                     Период: 34,
                     ОтчетГод: reportPeriodService.get(declarationData.reportPeriodId).taxPeriod.startDate.format('yyyy'),
