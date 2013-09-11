@@ -5,6 +5,7 @@ public final class CacheConstants {
 	private CacheConstants(){	
 	}
 	
+	public static final String DEPARTMENT = "Department";
 	public static final String DECLARATION_TEMPLATE = "DeclarationType";
 	
 }

@@ -323,7 +323,7 @@ def addData(def xml, int headRowCount) {
             continue
         }
 
-        if ((row.cell.find{it.text()!=""}.toString())=="") {
+        if (row.cell.findAll{it.text()!=""}.size()<=2) {
             break
         }
 

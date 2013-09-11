@@ -14,7 +14,10 @@ public class TreeUtils {
 
 	private static List<Integer> getHierarchy(Department department, Map<Integer, Department> idToDepMap) {
 		List<Integer> result = new ArrayList<Integer>();
-		if (department.getParentId() != null) {
+		if (department == null){
+			return result;
+		}
+		if (department !=null && department.getParentId() != null) {
 			result.addAll(getHierarchy(idToDepMap.get(department.getParentId()), idToDepMap));
 			result.add(department.getId());
 		} else {

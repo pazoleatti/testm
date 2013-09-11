@@ -46,6 +46,8 @@ switch (formDataEvent) {
             checkNSI()
             logicalChecks()
             sort()
+            // проставляем порядковый номер №пп
+            setRowIndex()
             // сохраним данные
             getDataRowHelper().save(getDataRows())
         }
