@@ -178,9 +178,6 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
     def int index = 1
     for (row in dataRows) {
-        if (row.getAlias() != null) {
-            continue
-        }
         // Порядковый номер строки
         row.rowNumber = index++
         // В поле "Количество" подставляется значение «1»
@@ -263,7 +260,6 @@ void importData() {
             return
         }
         addData(xml, 2)
-//        logicCheck()
     } catch (Exception e) {
         logger.error("" + e.message)
     }
@@ -403,7 +399,7 @@ def getNumber(def value, int indexRow, int indexCell) {
     try {
         return new BigDecimal(tmp)
     } catch (Exception e) {
-        logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
 
@@ -413,7 +409,12 @@ def getNumber(def value, int indexRow, int indexCell) {
  * @param value
  */
 def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
-    String filter = code + "= '" + value + "'"
+    String filter;
+    if (value == null || value.equals("")) {
+        filter = code + " is null"
+    } else {
+        filter = code + "= '" + value + "'"
+    }
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
     } else {
@@ -425,7 +426,7 @@ def getRecordId(def ref_id, String code, String value, Date date, def cache, int
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     } else {
-        logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
+        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
 }
 
@@ -440,6 +441,6 @@ def getDate(def value, int indexRow, int indexCell) {
     try {
         return format.parse(value)
     } catch (Exception e) {
-        logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }

@@ -129,7 +129,10 @@ void calc() {
         deleteRow(data, it)
     }
 
-    getRows(data).each { row ->
+    getRows(data).eachWithIndex { row, index ->
+        // графа 1
+        row.rowNumber = index + 1
+
         // графа 2
         row.code = row.number
 

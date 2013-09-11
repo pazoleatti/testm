@@ -32,19 +32,29 @@
                                     src="resources/img/header_right.png" />
                             </div>
                             <g:HTMLPanel ui:field="signInContentPanel" />
-                            <div class="{style.about}">
-                                <b:LinkAnchor href="resources/help.pdf" target="_blank" title="Руководство пользователя" img="resources/img/question_mark.png"/>
-                            </div>
-                            <div class="{style.about}">
-                                <b:LinkAnchor ui:field="aboutLink" target="_blank" title="О программе" img="resources/img/exclamation_mark.png"/>
-                            </div>
-                            <div class="{style.about}" style="margin-right: 14px;">
-                                <a href="mailto:sbrf_tax_test@aplana.com?subject=Сообщить о проблеме" title="Сообщить о проблеме">
-                                    <img src="resources/img/email.png" width="16px" height="16px" style="border: none"/>
-                                </a>
+                            <div style="float: right">
+                                <g:MenuBar id="helpMenu">
+                                    <g:MenuItem >
+                                        <a href="mailto:sbrf_tax_test@aplana.com?subject=Сообщить о проблеме" title="Сообщить о проблеме">
+                                            <img src="resources/img/email.png" style="border: none"/>
+                                        </a>
+                                    </g:MenuItem>
+
+                                    <g:MenuItem>
+                                        <a href="#!about"  target="_blank" title="О программе">
+                                            <img src="resources/img/exclamation_mark.png" style="border: none"/>
+                                        </a>
+                                    </g:MenuItem>
+
+                                    <g:MenuItem><img src="resources/img/question_mark.png" title="Руководство пользователя"/>
+                                        <g:MenuBar vertical="true">
+                                            <g:MenuItem><a href="resources/help.pdf" target="_blank" title="Руководство пользователя" style="color:#000000; text-decoration:none;">Учет налогов</a></g:MenuItem>
+                                            <g:MenuItem><a href="resources/help.pdf" target="_blank" style="color:#000000; text-decoration:none;">Учет КС</a></g:MenuItem>
+                                        </g:MenuBar>
+                                    </g:MenuItem>
+                                </g:MenuBar>
                             </div>
                             <g:HTMLPanel ui:field="mainMenuContentPanel" />
-
                         </div>
                     </div>
                 </g:HTMLPanel>
