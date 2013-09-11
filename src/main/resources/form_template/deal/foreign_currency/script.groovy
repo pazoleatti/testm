@@ -49,6 +49,10 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
+        deleteAllStatic()
+        calc()
+        addAllStatic()
+        logicCheck()
         break
 }
 
@@ -62,13 +66,31 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = 0
     ['fullName', 'docNum', 'docDate', 'dealNumber', 'dealDate', 'currencyCode',
             'countryDealCode', 'incomeSum', 'outcomeSum', 'dealDoneDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.insert(row, index)
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def pointRow = currentDataRow
+        while(pointRow.getAlias()!=null && index>0){
+            pointRow = dataRows.get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && dataRows.get(index).getAlias()==null){
+            index++
+        }
+    }else if (size>0) {
+        for(int i = size-1;i>=0;i--){
+            def pointRow = dataRows.get(i)
+            if(pointRow.getAlias()==null){
+                index = dataRows.indexOf(pointRow)+1
+                break
+            }
+        }
+    }
+    dataRowHelper.insert(row, index+1)
 }
 
 /**
@@ -87,11 +109,12 @@ void checkUniq() {
  */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int index = 1
     for (row in dataRowHelper.getAllCached()) {
         if (row.getAlias() != null) {
             continue
         }
-        def rowNum = row.getIndex()
+        def rowNum = index++
         def docDateCell = row.getCell('docDate')
         [
                 'rowNumber',        // № п/п
@@ -507,7 +530,7 @@ def getNumber(def value, int indexRow, int indexCell) {
     try {
         return new BigDecimal(tmp)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow + 6} столбец ${indexCell + 2} содержит недопустимый тип данных!")
+        logger.warn("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
 
@@ -528,8 +551,9 @@ def getRecordId(def ref_id, String code, String value, Date date, def cache, int
     if (records.size() == 1) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
+    } else {
+        logger.warn("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
-    throw new Exception("Строка ${indexRow + 6} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
 }
 
 /**
@@ -543,6 +567,6 @@ def getDate(def value, int indexRow, int indexCell) {
     try {
         return format.parse(value)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow + 6} столбец ${indexCell + 2} содержит недопустимый тип данных!")
+        logger.warn("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }

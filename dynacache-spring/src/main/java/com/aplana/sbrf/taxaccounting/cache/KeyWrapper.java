@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.cache;
 
+import java.io.Serializable;
+
 
 /**
  * Обертка для ключа. Нужна для того чтобы можно было использовать 
@@ -8,7 +10,8 @@ package com.aplana.sbrf.taxaccounting.cache;
  * @author sgoryachkin
  *
  */
-public class KeyWrapper{
+public class KeyWrapper implements Serializable{
+	private static final long serialVersionUID = -1226857549549457874L;
 	
 	private String cacheName; 
 	private Object key;

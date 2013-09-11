@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
@@ -19,6 +20,9 @@ import com.aplana.sbrf.taxaccounting.service.DataRowService;
 @Service
 @Transactional(readOnly = true)
 public class DataRowServiceImpl implements DataRowService {
+	
+	@Autowired
+	LockCoreService lockCoreService;
 	
 	@Autowired
 	private DataRowDao dataRowDao;
@@ -46,6 +50,7 @@ public class DataRowServiceImpl implements DataRowService {
 	@Override
 	@Transactional(readOnly = false)
 	public void update(TAUserInfo userInfo, long formDataId, List<DataRow<Cell>> dataRows) {
+		lockCoreService.checkLockedMe(FormData.class, formDataId, userInfo);
 		if ((dataRows != null) && (!dataRows.isEmpty())) {
 			FormData fd = formDataDao.get(formDataId);
 			dataRowDao.updateRows(fd, dataRows);
@@ -54,6 +59,7 @@ public class DataRowServiceImpl implements DataRowService {
 
 	@Override
 	public void rollback(TAUserInfo userInfo, long formDataId) {
+		lockCoreService.checkLockedMe(FormData.class, formDataId, userInfo);
 		dataRowDao.rollback(formDataId);
 	}
 

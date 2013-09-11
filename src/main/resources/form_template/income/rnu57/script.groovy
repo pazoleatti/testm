@@ -200,7 +200,8 @@ def getPercentInRuble(def dataRow, def rnu55DataRow, def rnu56DataRow) {
             def N = rnu56DataRow.nominal
             def K = rnu56DataRow.price
             def T = getT(dataRow, rnu56DataRow)
-            def D = TimeCategory.minus(dataRow.implementationDate, rnu56DataRow.buyDate)
+            // TODO протестировать TimeCategory.minus и возможно использовать другое решение
+            //def D = TimeCategory.minus(dataRow.implementationDate, rnu56DataRow.buyDate)
 
             //в ЧТЗ, похоже, два условия: для рублей и для нерублей. условия отличаются только домножением на курс валют,
             // но для рубля курс всегда берется равным единице, так что условия можно объединить

@@ -73,6 +73,25 @@ public class GetFormDataHandler extends
 			ExecutionContext context) throws ActionException {
 
 		TAUserInfo userInfo = securityService.currentUserInfo();
+		
+		// UNLOCK: Попытка разблокировать ту форму которая была открыта ранее
+		try {
+			if (action.getOldFormDataId() != null) {
+				formDataService.unlock(action.getOldFormDataId(), userInfo);
+			}
+		} catch (Exception e){
+			//
+		}
+
+		
+		// LOCK: Попытка заблокировать форму которую хотим получить для редактирования
+		if (!action.isReadOnly()) {
+			try {
+				formDataService.lock(action.getFormDataId(), userInfo);
+			} catch (Exception e){
+				//
+			}
+		}
 
 		GetFormDataResult result = new GetFormDataResult();
 		Logger logger = new Logger();
@@ -103,17 +122,10 @@ public class GetFormDataHandler extends
 	 */
 	private void fillFormAndTemplateData(GetFormData action, TAUserInfo userInfo,
 			Logger logger, GetFormDataResult result) {
-		FormData formData;
+
+		FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), logger);
 		
-		if (!action.isReadOnly()) {
-			formDataService.lock(action.getFormDataId(), userInfo);
-		}
-		
-		formData = formDataService.getFormData(userInfo,
-				action.getFormDataId(), logger);
-		
-		FormTemplate formTemplate = formTemplateService.get(formData
-				.getFormTemplateId());
+		FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
 
 		ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
 		result.setBalancePeriod(reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId()));
@@ -130,7 +142,7 @@ public class GetFormDataHandler extends
 		result.setTaxPeriodStartDate(taxPeriod.getStartDate());
 		result.setTaxPeriodEndDate(taxPeriod.getEndDate());
 
-        result.setReportPeriodYear(Integer.valueOf(new SimpleDateFormat("yyyy").format(taxPeriod.getStartDate())));
+        result.setReportPeriodYear(reportPeriod.getYear());
 	}
 
 	/**
@@ -169,7 +181,7 @@ public class GetFormDataHandler extends
 		FormMode formMode = FormMode.READ_LOCKED;
 
 		ObjectLock<Long> lockInformation = formDataService.getObjectLock(action
-				.getFormDataId());
+				.getFormDataId(), securityService.currentUserInfo());
 		if (lockInformation != null) {
 			
 			// Если данная форма уже заблокирована другим пользотелем

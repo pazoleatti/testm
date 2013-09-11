@@ -31,30 +31,30 @@ import java.util.regex.Pattern;
 @Service
 @Transactional
 public class BookerStatementsServiceImpl implements BookerStatementsService {
-    private static long INCOME_101 = 50L;
-    private static long INCOME_102 = 52L;
+    private static final long INCOME_101 = 50L;
+    private static final long INCOME_102 = 52L;
 
-    private static String I_101_REPORT_PERIOD_ID = "REPORT_PERIOD_ID";
-    private static String I_101_ACCOUNT = "ACCOUNT";
-    private static String I_101_ACCOUNT_NAME = "ACCOUNT_NAME";
-    private static String I_101_INCOME_DEBET_REMAINS = "INCOME_DEBET_REMAINS";
-    private static String I_101_INCOME_CREDIT_REMAINS = "INCOME_CREDIT_REMAINS";
-    private static String I_101_DEBET_RATE = "DEBET_RATE";
-    private static String I_101_CREDIT_RATE = "CREDIT_RATE";
-    private static String I_101_OUTCOME_DEBET_REMAINS = "OUTCOME_DEBET_REMAINS";
-    private static String I_101_OUTCOME_CREDIT_REMAINS = "OUTCOME_CREDIT_REMAINS";
-    private static String I_101_DEPARTMENT_ID = "DEPARTMENT_ID";
+    private static final String I_101_REPORT_PERIOD_ID = "REPORT_PERIOD_ID";
+    private static final String I_101_ACCOUNT = "ACCOUNT";
+    private static final String I_101_ACCOUNT_NAME = "ACCOUNT_NAME";
+    private static final String I_101_INCOME_DEBET_REMAINS = "INCOME_DEBET_REMAINS";
+    private static final String I_101_INCOME_CREDIT_REMAINS = "INCOME_CREDIT_REMAINS";
+    private static final String I_101_DEBET_RATE = "DEBET_RATE";
+    private static final String I_101_CREDIT_RATE = "CREDIT_RATE";
+    private static final String I_101_OUTCOME_DEBET_REMAINS = "OUTCOME_DEBET_REMAINS";
+    private static final String I_101_OUTCOME_CREDIT_REMAINS = "OUTCOME_CREDIT_REMAINS";
+    private static final String I_101_DEPARTMENT_ID = "DEPARTMENT_ID";
 
-    private static String I_102_REPORT_PERIOD_ID = "REPORT_PERIOD_ID";
-    private static String I_102_OPU_CODE = "OPU_CODE";
-    private static String I_102_TOTAL_SUM = "TOTAL_SUM";
-    private static String I_102_ITEM_NAME = "ITEM_NAME";
-    private static String I_102_DEPARTMENT_ID = "DEPARTMENT_ID";
+    private static final String I_102_REPORT_PERIOD_ID = "REPORT_PERIOD_ID";
+    private static final String I_102_OPU_CODE = "OPU_CODE";
+    private static final String I_102_TOTAL_SUM = "TOTAL_SUM";
+    private static final String I_102_ITEM_NAME = "ITEM_NAME";
+    private static final String I_102_DEPARTMENT_ID = "DEPARTMENT_ID";
 
     // Ограничение по строкам для xls-файла
-    private static long MAX_FILE_ROW = 10000L;
+    private static final long MAX_FILE_ROW = 10000L;
 
-    private static String BAD_FILE_MSG = "Формат файла не соответствуют ожидаемому формату. Файл не может быть загружен.";
+    private static final String BAD_FILE_MSG = "Формат файла не соответствуют ожидаемому формату. Файл не может быть загружен.";
 
     @Autowired
     PeriodService reportPeriodService;
