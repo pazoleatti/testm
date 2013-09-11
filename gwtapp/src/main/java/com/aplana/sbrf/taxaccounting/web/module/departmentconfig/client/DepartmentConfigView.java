@@ -226,7 +226,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                 reloadDepartments();
 
                 // Обновление налоговых периодов
-                // reloadTaxPeriods();
+                // reloadReportPeriods();
             }
         });
     }

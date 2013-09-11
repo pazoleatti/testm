@@ -1,14 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryMessageCell;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -33,7 +34,7 @@ import java.util.*;
  * @author Dmitriy Levykin
  */
 public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiHandlers>
-        implements BookerStatementsPresenter.MyView, ReportPeriodSelectHandler {
+        implements BookerStatementsPresenter.MyView {
 
     interface Binder extends UiBinder<Widget, BookerStatementsView> {
     }
@@ -49,11 +50,8 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     // Выбранный период
     private ReportPeriod currentReportPeriod;
 
-    // Контейнер для справочника периодов
     @UiField
-    @Editor.Ignore
-    SimplePanel reportPeriodPanel;
-    ReportPeriodPicker period = new ReportPeriodPicker(this, false);
+    PeriodPickerPopup periodPickerPopup;
 
     @UiField
     DataGrid<DataRow<Cell>> formDataTable;
@@ -80,7 +78,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     @UiConstructor
     public BookerStatementsView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
-        reportPeriodPanel.add(period);
         initListeners();
         setAction();
         dockPanel.setWidgetHidden(logPanel, (logs == null || logs.isEmpty()));
@@ -109,9 +106,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
                 currentReportPeriod = null;
 
                 setAction();
-
-                // Обновление налоговых периодов
-                reloadTaxPeriods();
             }
         });
 
@@ -175,34 +169,19 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
         if (department != null) {
             departmentPicker.setValue(new ArrayList<Integer>() {{
                 add(department.getId());
-                reloadTaxPeriods();
             }});
         }
         this.currentDepartmentId = department != null ? department.getId() : null;
     }
 
     @Override
-    public void setTaxPeriods(List<TaxPeriod> taxPeriods) {
-        reportPeriodPanel.clear();
-        period = new ReportPeriodPicker(this, false);
-        period.setTaxPeriods(taxPeriods);
-        reportPeriodPanel.add(period);
-    }
-
-    @Override
     public void setReportPeriods(List<ReportPeriod> reportPeriods) {
-        period.setReportPeriods(reportPeriods);
-    }
-
-    @Override
-    public void reloadTaxPeriods() {
-        getUiHandlers().reloadTaxPeriods(currentDepartmentId);
+        periodPickerPopup.setPeriods(reportPeriods);
     }
 
     @Override
     public void setReportPeriod(ReportPeriod reportPeriod) {
         currentReportPeriod = reportPeriod;
-        period.setSelectedReportPeriods(Arrays.asList(currentReportPeriod));
     }
 
     @Override
@@ -215,21 +194,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
                 bookerReportType.addItem(bookerReportTypes.get(key), key);
             }
         }
-        reloadTaxPeriods();
-    }
-
-    @Override
-    public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
-        getUiHandlers().onTaxPeriodSelected(taxPeriod, currentDepartmentId);
-    }
-
-    @Override
-    public void onReportPeriodsSelected(Map<Integer, ReportPeriod> selectedReportPeriods) {
-        currentReportPeriod = null;
-        if (!selectedReportPeriods.isEmpty()) {
-            currentReportPeriod = selectedReportPeriods.values().iterator().next();
-        }
-        setAction();
     }
 
     private void setLogMessages(List<LogEntry> entries) {
