@@ -361,7 +361,10 @@ public class FormDataServiceImpl implements FormDataService {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
 		lockCoreService.checkNoLockedAnother(FormData.class, formData.getId(), userInfo);
 		// Временный срез формы должен быть в актуальном состоянии
-		dataRowDao.rollback(formData.getId());
+		// Если не заблокировано то откат среза на всякий случай
+		if (getObjectLock(formData.getId(), userInfo)==null){
+			dataRowDao.rollback(formData.getId());
+		}
 		
 		if (!formDataAccessService.canRead(userInfo, formData.getId())) {
 			throw new AccessDeniedException(
