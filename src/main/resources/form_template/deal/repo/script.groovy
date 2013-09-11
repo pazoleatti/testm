@@ -64,7 +64,7 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
     ['jurName', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'dealsMode',
             'date1', 'date2', 'percentIncomeSum', 'percentConsumptionSum', 'priceFirstCurrency', 'currencyCode',
             'courseCB', 'priceFirstRub', 'transactionDate'].each {
@@ -323,7 +323,7 @@ def addData(def xml, int headRowCount) {
             continue
         }
 
-        if ((row.cell.find{it.text()!=""}.toString())=="") {
+        if (row.cell.findAll{it.text()!=""}.size()<=2) {
             break
         }
 

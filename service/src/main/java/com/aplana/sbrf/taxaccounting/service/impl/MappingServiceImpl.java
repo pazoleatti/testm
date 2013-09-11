@@ -14,7 +14,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -22,7 +21,6 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 
 @Service
-@Transactional
 public class MappingServiceImpl implements MappingService {
 
     private final Log log = LogFactory.getLog(getClass());
@@ -48,9 +46,6 @@ public class MappingServiceImpl implements MappingService {
     @Autowired
     private TAUserService taUserService;
 
-    private boolean isAuditAddOn = true;
-    private boolean isImportOn = true;
-
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     private static SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
     private static String charSet = "UTF-8";
@@ -60,6 +55,7 @@ public class MappingServiceImpl implements MappingService {
 
     @Override
     public void addFormData(String filename, byte[] fileContent) {
+        log.info("Принят файл " + filename + ", размер = " + fileContent == null ? null : fileContent.length);
 
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(taUserService.getUser(USER_APPENDER));
@@ -78,7 +74,6 @@ public class MappingServiceImpl implements MappingService {
 
         try {
             InputStream inputStream = new ByteArrayInputStream(fileContent);
-            log.debug("addFormData from filename: " + filename);
             if (filename.toLowerCase().endsWith(RNU_EXT)) {
                 restoreExemplar = restoreExemplarFromRnu(filename, fileContent);
             } else if (filename.toLowerCase().endsWith(XML_EXT)) {
@@ -113,35 +108,60 @@ public class MappingServiceImpl implements MappingService {
                     FormDataKind.PRIMARY,
                     reportPeriod);
 
-            log.debug("Form created! FormDataKind.PRIMARY, formDataId: " + formDataId + " formTemplateId: " + formTemplateId + " departmentId: " + departmentId + " period: " + reportPeriod.getName());
-
             // Добавляем месяц, если форма ежемесячная
             if (restoreExemplar.getPeriodOrder() != null) {
                 formDataDao.updatePeriodOrder(formDataId, restoreExemplar.getPeriodOrder());
             }
 
-            //Вызов скрипта
-            if (isImportOn) {
-                formDataService.importFormData(logger, userInfo, formDataId, formTemplateId,
-                        departmentId, FormDataKind.PRIMARY, reportPeriodId, inputStream, filename);
-            }
+            // Вызов скрипта
+            formDataService.lock(formDataId, userInfo);
+            formDataService.importFormData(logger, userInfo, formDataId, inputStream, filename);
+            // TODO (sgoryachkin) Неожиданно не нашел, где же делается saveFormData? Не скриптами ли удумали коммиты формам делать?
+            // TODO (sgoryachkin) После сохранения добавьте разблокировку. 
+            // -- Если не разблокировать, то будут проблемы.
+            // -- Если разблокировку добавить без сохранения, то она откатит изменения которые были сделаны скриптом.
+            // Так что нужно добавить следующее:
+            //
+            // formDataService.saveFormData(logger, userInfo, formDataDao.get(formDataId));
+            // formDataService.unlock(formDataId, userInfo);
+            // Будет имитация работы импорта через GUI
+            
+            
+
         } catch (Exception e) {
-            log.error(e.getLocalizedMessage());
             if (e instanceof ServiceLoggerException) {
                 log.error(((ServiceLoggerException) e).getLogEntriesString());
             }
 
             // Ошибка импорта
-            if (isAuditAddOn && isImportOn) {
-                auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, reportPeriodId, null, formTypeId,
-                        FormDataKind.PRIMARY.getId(), "Ошибка импорта файла " + filename + " : " + e.getMessage());
-            }
+            log.error("Ошибка импорта файла " + filename + ": " + e.getMessage(), e);
+            addLog(userInfo, departmentId, reportPeriodId, formTypeId, "Ошибка импорта файла " + filename + ": "
+                        + e.getMessage());
+
             return;
         }
         // Успешный импорт
-        if (isAuditAddOn && isImportOn) {
+        log.info("Успешно импортирован файл " + filename + " departmentId = " + departmentId + " reportPeriodId = "
+                + reportPeriodId + " formTypeId = " + formTypeId);
+        addLog(userInfo, departmentId, reportPeriodId, formTypeId, "Успешно импортирован файл " + filename);
+    }
+
+    /**
+     * Запись в журнал аудита
+     * @param userInfo
+     * @param departmentId
+     * @param reportPeriodId
+     * @param formTypeId
+     * @param msg
+     */
+    private void addLog(TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId, Integer formTypeId,
+                        String msg) {
+        try {
+            // Ошибка записи в журнал аудита не должна откатывать импорт
             auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, reportPeriodId, null, formTypeId,
-                    FormDataKind.PRIMARY.getId(), "Успешно импортирован файл " + filename);
+                    FormDataKind.PRIMARY.getId(), msg);
+        } catch (Exception e) {
+            log.error("Ошибка записи в журнал аудита", e);
         }
     }
 
@@ -241,21 +261,4 @@ public class MappingServiceImpl implements MappingService {
             throw new ServiceException("Ошибка разбора файла:" + e.getLocalizedMessage(), e);
         }
     }
-
-    @Override
-    public boolean isAuditAddOn() {
-        return isAuditAddOn;
-    }
-
-    @Override
-    public boolean isImportOn() {
-        return isImportOn;
-    }
-
-    @Override
-    public void setProperties(boolean isAuditAddOn, boolean isImportOn){
-        this.isAuditAddOn = isAuditAddOn;
-        this.isImportOn = isImportOn;
-    }
-
 }

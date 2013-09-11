@@ -28,8 +28,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataResul
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateDataRowsAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RollbackDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RollbackDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UploadDataRowsAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
@@ -75,6 +73,9 @@ public class FormDataPresenter extends
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
 		GetFormData action = new GetFormData();
+		if ( formData!=null ){
+			action.setOldFormDataId(formData.getId());
+		}
 		action.setFormDataId(Long.parseLong(request.getParameter(FORM_DATA_ID, null)));
 		action.setReadOnly(Boolean.parseBoolean(request.getParameter(READ_ONLY, "true")));
         executeAction(action);
@@ -177,22 +178,8 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onCancelClicked() {
-			RollbackDataAction action = new RollbackDataAction();
-			action.setFormDataId(formData.getId());
-			dispatcher.execute(action, CallbackUtils
-					.defaultCallback(new AbstractCallback<RollbackDataResult>() {
-						@Override
-						public void onSuccess(RollbackDataResult result) {
-							revealFormData(true);
-						}
-						
-						public void onFailure(Throwable caught) {
-							modifiedRows.clear();
-							getView().updateData();
-						}
-						
-				}, this));
-		}
+		revealFormData(true);
+	}
 
 
 	
@@ -338,11 +325,19 @@ public class FormDataPresenter extends
 
                                 LogAddEvent.fire(FormDataPresenter.this,
                                         result.getLogEntries());
+                               
                                 
                     			// Очищаем возможные изменения на форме перед открытием.
                     			modifiedRows.clear();
                     			
-                                formData = result.getFormData();
+                    			formData = result.getFormData();
+                    			
+                    			// Регистрируем хендлер на закрытие
+                    			if (closeFormDataHandlerRegistration !=null ){
+                    				closeFormDataHandlerRegistration.removeHandler();
+                    			}
+                    			
+                                
                                 formDataAccessParams = result
                                         .getFormDataAccessParams();
                                 fixedRows = result.isFixedRows();

@@ -56,11 +56,11 @@ public class MapCache implements Cache {
 	}
 
 	public ValueWrapper get(Object key) {
+		Object value = this.store.get(new KeyWrapper(this.name, key));
 		if (log.isDebugEnabled()) {
 			log.debug("Get element with key = " + key + " from cache '" + name
-					+ "'");
+					+ "'. Value present: " + (value != null));
 		}
-		Object value = this.store.get(new KeyWrapper(this.name, key));
 		return (value != null ? new SimpleValueWrapper(fromStoreValue(value))
 				: null);
 	}

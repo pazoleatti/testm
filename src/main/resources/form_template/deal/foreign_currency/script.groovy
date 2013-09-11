@@ -66,13 +66,31 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = 0
     ['fullName', 'docNum', 'docDate', 'dealNumber', 'dealDate', 'currencyCode',
             'countryDealCode', 'incomeSum', 'outcomeSum', 'dealDoneDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.insert(row, index)
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def pointRow = currentDataRow
+        while(pointRow.getAlias()!=null && index>0){
+            pointRow = dataRows.get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && dataRows.get(index).getAlias()==null){
+            index++
+        }
+    }else if (size>0) {
+        for(int i = size-1;i>=0;i--){
+            def pointRow = dataRows.get(i)
+            if(pointRow.getAlias()==null){
+                index = dataRows.indexOf(pointRow)+1
+                break
+            }
+        }
+    }
+    dataRowHelper.insert(row, index+1)
 }
 
 /**
@@ -251,6 +269,7 @@ void deleteAllStatic() {
     for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
         def row = (DataRow) iter.next()
         if (row.getAlias() != null) {
+            iter.remove()
             dataRowHelper.delete(row)
         }
     }
@@ -264,11 +283,17 @@ void addAllStatic() {
 
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.getAllCached()
+
+        if (dataRows.size()<1){
+            return
+        }
+
         def newRow = formData.createDataRow()
 
         newRow.setAlias('itg')
         newRow.itog = 'Подитог:'
         newRow.getCell('itog').colSpan = 11
+        newRow.getCell('fix').colSpan = 2
 
         // Расчеты подитоговых значений
         def BigDecimal priceItg = 0, totalItg = 0
@@ -327,7 +352,6 @@ void importData() {
             return
         }
         addData(xml, 3)
-//        logicCheck()
     } catch (Exception e) {
         logger.error("" + e.message)
     }
@@ -465,12 +489,12 @@ def addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 9
-        newRow.currencyCode = getRecordId(15, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.currencyCode = getRecordId(15, 'CODE_2', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
         indexCell++
         indexCell++
 
         // графа 10
-        newRow.countryDealCode = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.countryDealCode = getRecordId(10, 'CODE_2', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
         indexCell++
         indexCell++
 
@@ -512,7 +536,7 @@ def getNumber(def value, int indexRow, int indexCell) {
     try {
         return new BigDecimal(tmp)
     } catch (Exception e) {
-        logger.warn("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
 
@@ -534,7 +558,7 @@ def getRecordId(def ref_id, String code, String value, Date date, def cache, int
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     } else {
-        logger.warn("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
+        throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
 }
 
@@ -549,6 +573,6 @@ def getDate(def value, int indexRow, int indexCell) {
     try {
         return format.parse(value)
     } catch (Exception e) {
-        logger.warn("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
