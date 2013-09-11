@@ -268,6 +268,7 @@ void deleteAllStatic() {
     for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
         def row = (DataRow) iter.next()
         if (row.getAlias() != null) {
+            iter.remove()
             dataRowHelper.delete(row)
         }
     }
@@ -282,6 +283,10 @@ void addAllStatic() {
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.getAllCached()
         def newRow = formData.createDataRow()
+
+        if (dataRows.size()<1){
+            return
+        }
 
         newRow.getCell('itog').colSpan = 8
         newRow.setAlias('itg')

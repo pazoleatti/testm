@@ -269,6 +269,7 @@ void deleteAllStatic() {
     for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
         def row = (DataRow) iter.next()
         if (row.getAlias() != null) {
+            iter.remove()
             dataRowHelper.delete(row)
         }
     }
@@ -282,11 +283,17 @@ void addAllStatic() {
 
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.getAllCached()
+
+        if (dataRows.size()<1){
+            return
+        }
+
         def newRow = formData.createDataRow()
 
         newRow.setAlias('itg')
         newRow.itog = 'Подитог:'
         newRow.getCell('itog').colSpan = 11
+        newRow.getCell('fix').colSpan = 2
 
         // Расчеты подитоговых значений
         def BigDecimal priceItg = 0, totalItg = 0
