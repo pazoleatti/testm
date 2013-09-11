@@ -17,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.mapper.DepartmentMapper;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
@@ -36,7 +37,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 	DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
 	
 	@Override
-	@Cacheable("Department")
+	@Cacheable(CacheConstants.DEPARTMENT)
 	public Department getDepartment(int id) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Fetching department with id = " + id  + " from database");
