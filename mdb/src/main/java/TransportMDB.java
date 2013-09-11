@@ -6,20 +6,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
-import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 
-@MessageDriven(activationConfig = {@ActivationConfigProperty(
-        propertyName = "destinationType",
-        propertyValue = "javax.jms.Queue"
-), @ActivationConfigProperty(
-        propertyName = "destination",
-        propertyValue = "jms/transportQueue"
-)})
+@MessageDriven(activationConfig = {
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/transportQueue")})
 @Interceptors(TransportInterceptor.class)
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class TransportMDB implements MessageListener {
 
     @Autowired
@@ -32,7 +30,6 @@ public class TransportMDB implements MessageListener {
 
     @Override
     public void onMessage(Message message) {
-        logger.debug("TransportMDB#onMessage");
         if (message == null || !(message instanceof MapMessage)) {
             return;
         }
@@ -46,8 +43,8 @@ public class TransportMDB implements MessageListener {
             logger.debug("bodyFile.length = " + bodyFile.length);
 
             mappingService.addFormData(fileName, bodyFile);
-        } catch (JMSException e) {
-            logger.error("Retrieving error message: " + e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error("Ошибка при получении сообщения: " + e.getMessage(), e);
         }
     }
 }

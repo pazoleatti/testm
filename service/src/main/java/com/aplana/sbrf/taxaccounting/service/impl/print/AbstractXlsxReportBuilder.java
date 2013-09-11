@@ -22,7 +22,6 @@ public abstract class AbstractXlsxReportBuilder {
 
     protected static final int cellWidthMin = 20;
     protected static final int cellWidthMax = 100;
-    protected static final int rowBreakSize = 80;
 
 
     protected Map<Integer, Integer> widthCellsMap = new HashMap<Integer, Integer>();

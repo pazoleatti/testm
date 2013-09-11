@@ -101,6 +101,11 @@ public class MappingServiceImpl implements MappingService {
 
             Logger logger = new Logger();
 
+            // TODO Debug
+            System.out.println(">> CreateFormData from file = " + filename + " departmentId = "
+                    + departmentId + " reportPeriodId = " + reportPeriodId + " formTypeId = " + formTypeId
+                    + " formTemplateId = " + formTemplateId);
+
             long formDataId = formDataService.createFormData(logger,
                     userInfo,
                     formTemplateId,
@@ -116,18 +121,8 @@ public class MappingServiceImpl implements MappingService {
             // Вызов скрипта
             formDataService.lock(formDataId, userInfo);
             formDataService.importFormData(logger, userInfo, formDataId, inputStream, filename);
-            // TODO (sgoryachkin) Неожиданно не нашел, где же делается saveFormData? Не скриптами ли удумали коммиты формам делать?
-            // TODO (sgoryachkin) После сохранения добавьте разблокировку. 
-            // -- Если не разблокировать, то будут проблемы.
-            // -- Если разблокировку добавить без сохранения, то она откатит изменения которые были сделаны скриптом.
-            // Так что нужно добавить следующее:
-            //
-            // formDataService.saveFormData(logger, userInfo, formDataDao.get(formDataId));
-            // formDataService.unlock(formDataId, userInfo);
-            // Будет имитация работы импорта через GUI
-            
-            
-
+            formDataService.saveFormData(logger, userInfo, formDataDao.get(formDataId));
+            formDataService.unlock(formDataId, userInfo);
         } catch (Exception e) {
             if (e instanceof ServiceLoggerException) {
                 log.error(((ServiceLoggerException) e).getLogEntriesString());
@@ -143,6 +138,7 @@ public class MappingServiceImpl implements MappingService {
         // Успешный импорт
         log.info("Успешно импортирован файл " + filename + " departmentId = " + departmentId + " reportPeriodId = "
                 + reportPeriodId + " formTypeId = " + formTypeId);
+
         addLog(userInfo, departmentId, reportPeriodId, formTypeId, "Успешно импортирован файл " + filename);
     }
 
