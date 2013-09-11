@@ -47,14 +47,10 @@ public class MainPageView extends ViewImpl implements MyView {
 	@UiField
 	Panel projectVersion;
 
-	@UiField
-	Anchor aboutLink;
-
 	@Inject
 	public MainPageView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
 		splitPanel.setWidgetHidden(logAreaPanel, true);
-		aboutLink.setHref("#" + AboutNameTokens.ABOUT_PAGE);
 	}
 
 	@Override
