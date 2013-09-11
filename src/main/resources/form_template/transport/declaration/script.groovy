@@ -8,6 +8,8 @@
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+
 // Форма настроек обособленного подразделения: значение атрибута 11
 
 /*
@@ -96,7 +98,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                             КПП: (departmentParamTransport.KPP)){
 
 
-                        if (departmentParamTransport.REORG_FORM_CODE){
+                        if (!departmentParamTransport.REORG_FORM_CODE.toString().equals("")){
                             СвРеоргЮЛ(
                                     ФормРеорг:departmentParamTransport.REORG_FORM_CODE.CODE,
                                     ИННЮЛ: (formReorg in [1, 2, 3, 5, 6] ? departmentParamTransport.REORG_INN: 0),
@@ -421,8 +423,16 @@ def getRefBookValue(refBookID, recordId, alias){
 def checkTransportParams(departmentParamTransport){
     def errors = []
     departmentParamTransport.each{ key, value ->
-        if (!(key in ['PHONE', 'REORG_FORM_CODE', 'REORG_KPP', 'REORG_INN', 'SIGNATORY_LASTNAME', 'APPROVE_DOC_NAME', 'APPROVE_ORG_NAME']) && (value.toString().equals(""))){
-            errors.add(key)
+        if (!(key in ['PHONE', 'REORG_FORM_CODE', 'REORG_KPP', 'REORG_INN', 'SIGNATORY_LASTNAME', 'APPROVE_DOC_NAME', 'APPROVE_ORG_NAME'])){
+            if (
+                    (value instanceof List && value.size() == 0) ||
+                    (value instanceof RefBookValue && value.equals(new RefBookAttribute())) ||
+                    (value instanceof Number && value.equals(0)) ||
+                    (value instanceof String && value.equals("")) ||
+                    (value instanceof Date && value.equals(null))
+            ){
+                errors.add(key)
+            }
         }
     }
 
