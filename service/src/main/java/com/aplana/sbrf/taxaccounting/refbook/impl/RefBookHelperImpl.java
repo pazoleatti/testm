@@ -87,7 +87,7 @@ public class RefBookHelperImpl implements RefBookHelper {
 						// (http://jira.aplana.com/browse/SBRFACCTAX-3220)
 						result.put(
 								alias,
-								"Не разименовано: "
+								"Не разыменовано: "
 										+ String.valueOf(longRefValue));
 					}
 				}
