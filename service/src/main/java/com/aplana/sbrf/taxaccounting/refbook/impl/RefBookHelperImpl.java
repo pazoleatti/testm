@@ -30,8 +30,7 @@ public class RefBookHelperImpl implements RefBookHelper {
 	@Autowired
 	RefBookFactory refBookFactory;
 
-	public void dataRowsDereference(Collection<DataRow<Cell>> dataRows,
-			List<Column> columns) {
+	public void dataRowsDereference(Collection<DataRow<Cell>> dataRows, List<Column> columns) {
 		Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers = new HashMap<Long, Pair<RefBookDataProvider, RefBookAttribute>>();
 		for (DataRow<Cell> dataRow : dataRows) {
 			for (Map.Entry<String, Object> entry : dataRow.entrySet()) {
