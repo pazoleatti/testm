@@ -6,4 +6,5 @@ public interface EditFormUiHandlers extends UiHandlers {
 	void onSaveClicked();
 	void onCancelClicked();
 	void valueChanged();
+	void onRelevanceDateChanged();
 }

@@ -276,7 +276,7 @@ def getIncome101Data(def dataRow) {
 
     // Справочник 50 - "Оборотная ведомость (Форма 0409101-СБ)"
     def refDataProvider = refBookFactory.getDataProvider(50)
-    def records = refDataProvider.getRecords(new Date(), null,  "ACCOUNT = '" + account + "' AND REPORT_PERIOD_ID = " + reportPeriodId, null)
+    def records = refDataProvider.getRecords(reportPeriodService.getEndDate(formData.reportPeriodId).time, null,  "ACCOUNT = '" + account, null)
     return records.getRecords()
 }
 
