@@ -78,7 +78,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 			return;
 		}
 		GetRefBookRecordAction action = new GetRefBookRecordAction();
-		action.setRefBookDataId(currentRefBookId);
+		action.setRefBookId(currentRefBookId);
 		action.setRefBookRecordId(refBookRecordId);
 		dispatchAsync.execute(action,
 				CallbackUtils.defaultCallback(

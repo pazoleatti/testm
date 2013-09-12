@@ -1,7 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.model.*;
+
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -274,7 +277,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     @Transactional(readOnly = false)
-    public void createDepartmentFormType(Long departmentId, int typeId, int formId) {
+    // TODO (временно): SBRFACCTAX-4009
+    @CacheEvict(value = CacheConstants.DEPARTMENT, key="#departmentId")
+    public void createDepartmentFormType(int departmentId, int typeId, int formId) {
         getJdbcTemplate().update(
                 "insert into department_form_type (department_id, form_type_id, id, kind) " +
                         " values (?, ?, seq_department_form_type.nextval, ?)",
@@ -298,7 +303,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     @Transactional(readOnly = false)
-    public void createDepartmentDeclType(Long departmentId, int formId) {
+    // TODO (временно): SBRFACCTAX-4009
+    @CacheEvict(value = CacheConstants.DEPARTMENT, key="#departmentId")
+    public void createDepartmentDeclType(int departmentId, int formId) {
         getJdbcTemplate().update(
                 "insert into department_declaration_type (id, department_id, declaration_type_id) " +
                         " values (SEQ_DEPT_DECLARATION_TYPE.nextval, ?, ?)",

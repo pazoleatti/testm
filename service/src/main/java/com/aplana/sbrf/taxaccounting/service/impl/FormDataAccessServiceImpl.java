@@ -232,6 +232,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              ---------------|-------------------------------------------------|
              | Подготовлена |   -    |     +      |      +      |      +      |
              ---------------|-------------------------------------------------|
+             | Утверждена   |   -    |     -      |      +      |      +      |
+             ---------------|-------------------------------------------------|
              | Принята      |   -    |     -      |      -      |      -      |
              ---------------|--------------------------------------------------
              *Контролер ТУ - Контролер текущего уровня
@@ -243,6 +245,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				case PREPARED:
 					return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
 							formDataAccess.isControllerOfUNP();
+                case APPROVED:
+                    return formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
 				case ACCEPTED:
 					return false; //Нельзя редактировать НФ в состоянии "Принята"
 			}

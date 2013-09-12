@@ -129,7 +129,10 @@ void calc() {
         deleteRow(data, it)
     }
 
-    getRows(data).each { row ->
+    getRows(data).eachWithIndex { row, index ->
+        // графа 1
+        row.rowNumber = index + 1
+
         // графа 2
         row.code = row.number
 
@@ -318,7 +321,7 @@ void consolidation() {
     def data = getData(formData)
 
     // удалить все строки и собрать из источников их строки
-    getRows(data).clear()
+    data.clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
