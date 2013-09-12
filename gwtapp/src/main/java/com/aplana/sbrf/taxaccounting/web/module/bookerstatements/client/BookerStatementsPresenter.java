@@ -64,12 +64,6 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
         void setReportPeriods(List<ReportPeriod> reportPeriods);
 
         /**
-         * Установка выбранного отчетного периода
-         * @param reportPeriod
-         */
-        void setReportPeriod(ReportPeriod reportPeriod);
-
-        /**
          * Установка списка достуных видов бухгалтерской отчётности
          * @param bookerReportTypes
          */

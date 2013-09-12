@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicke
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryMessageCell;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,6 +20,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.ui.*;
@@ -47,10 +49,8 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     // Выбранное подразделение
     private Integer currentDepartmentId;
 
-    // Выбранный период
-    private ReportPeriod currentReportPeriod;
-
     @UiField
+    @Editor.Ignore
     PeriodPickerPopup periodPickerPopup;
 
     @UiField
@@ -103,8 +103,13 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
                 BookerStatementsView.this.currentDepartmentId = selDepartmentId;
 
-                currentReportPeriod = null;
+                setAction();
+            }
+        });
 
+        periodPickerPopup.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Integer>> event) {
                 setAction();
             }
         });
@@ -141,14 +146,14 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     }
 
     private void setAction() {
-        boolean isReady = currentReportPeriod != null && bookerReportType.getSelectedIndex() != -1 && uploader.getFilename() != null
+        boolean isReady = periodPickerPopup.getValue() != null && bookerReportType.getSelectedIndex() != -1 && uploader.getFilename() != null
                 && !uploader.getFilename().isEmpty() && currentDepartmentId != null;
         uploadButton.setEnabled(isReady);
-        if (isReady) {
+        if (isReady && periodPickerPopup.getValue().size() == 1) {
             uploadFormPanel.setAction(GWT.getHostPageBaseURL() + "upload/bookerstatements/"
                     + currentDepartmentId
                     + "/"
-                    + currentReportPeriod.getId()
+                    + periodPickerPopup.getValue().get(0)
                     + "/"
                     + bookerReportType.getSelectedIndex());
         }
@@ -177,11 +182,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     @Override
     public void setReportPeriods(List<ReportPeriod> reportPeriods) {
         periodPickerPopup.setPeriods(reportPeriods);
-    }
-
-    @Override
-    public void setReportPeriod(ReportPeriod reportPeriod) {
-        currentReportPeriod = reportPeriod;
     }
 
     @Override
