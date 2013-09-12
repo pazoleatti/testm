@@ -746,14 +746,6 @@ void importData() {
     if (!hasError()) {
         logger.info('Закончена загрузка файла ' + fileName)
     }
-
-        // добавить данные в форму
-        def totalLoad = addData(xml)
-        if (totalLoad!=null) {
-            checkTotalRow(totalLoad)
-        } else {
-            logger.error("Нет итоговой строки.")
-        }
 }
 
 /**
@@ -925,7 +917,7 @@ def getRecordId(def ref_id, String code, String value, Date date, def cache) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
-    logger.error("Не удалось определить элемент справочника!")
+    logger.error("Не удалось найти в справочнике (id=$ref_id) строку с id = $value!")
     return null;
 }
 
@@ -941,7 +933,7 @@ def getDate(def value) {
 }
 
 /**
- * Рассчитать, проверить и сравнить итоги.
+ * Cравнить итоги.
  *
  * @param totalRow итоговая строка из транспортного файла
  */
