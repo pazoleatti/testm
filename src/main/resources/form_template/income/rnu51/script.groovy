@@ -101,7 +101,7 @@ void logicalCheck() {
     def data = getData(formData).getAllCached()
 
     // Проверока наличия итоговой строки
-    if (!checkAlias(data, 'itogo')) {
+    if (!data.isEmpty() && checkAlias(data, 'itogo')) {
         logger.error('Итоговые значения не рассчитаны')
         return
     }
@@ -571,11 +571,15 @@ void sort() {
 }
 
 void addAllStatic() {
+    def data = getData(formData)
+    if (getRows(data).isEmpty()) {
+        return
+    }
     def itogoKvartal = getItogoKvartal()
     def prevItogoKvartal = getPrevItogoKvartal()
-    getData(formData).insert(itogoKvartal, getData(formData).getAllCached().size() + 1)
+    data.insert(itogoKvartal, data.getAllCached().size() + 1)
 
-    getData(formData).insert(getItogo(itogoKvartal, prevItogoKvartal), getData(formData).getAllCached().size() + 1)
+    data.insert(getItogo(itogoKvartal, prevItogoKvartal), data.getAllCached().size() + 1)
 }
 
 void allCheck() {

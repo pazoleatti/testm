@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -27,6 +28,9 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
 
     @Autowired
     private SecurityService securityService;
+
+    @Autowired
+    private PeriodService periodService;
 
     @Autowired
     SourceService departmentFormTypService;
@@ -76,6 +80,7 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
             }
         }
         result.setAvailableDepartments(avSet);
+        result.setReportPeriods(periodService.getAllPeriodsByTaxType(action.getTaxType(), false));
 
         return result;
     }

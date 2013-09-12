@@ -71,7 +71,22 @@ switch (formDataEvent) {
             return
         }
         importData()
+        if (!hasError()) {
+            calc()
+            !hasError() && logicalCheck() && checkNSI()
+        }
         break
+    case FormDataEvent.MIGRATION :
+        if (!isBalancePeriod && !checkPrevPeriod()) {
+            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            return
+        }
+        importData()
+        if (!hasError()) {
+            def total = getCalcTotalRow()
+            def data = getData(formData)
+            insert(data, total)
+        }
 }
 
 // графа 1  - rowNumber
@@ -220,18 +235,13 @@ void calc() {
     }
     save(data)
 
+    // добавить строку "итого"
+    def totalRow = getCalcTotalRow()
+    insert(data, totalRow)
+
     // графы для которых надо вычислять итого и итого по ГРН (графа 4..7, 10..13)
     def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserve', 'cost', 'costOnMarketQuotation',
             'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
-    // добавить строку "итого"
-    def totalRow = formData.createDataRow()
-    insert(data, totalRow)
-    totalRow.setAlias('total')
-    totalRow.regNumber = 'Общий итог'
-    setTotalStyle(totalRow)
-    totalColumns.each { alias ->
-        totalRow.getCell(alias).setValue(getSum(data, alias))
-    }
 
     // посчитать "итого по ГРН:..."
     def totalRows = [:]
@@ -544,6 +554,7 @@ def logicalCheck() {
             // 18. Проверка итогового значений по всей форме
             for (def alias : totalColumns) {
                 if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
+                    logger.info('===== alias = ' + alias + ' = '  + totalSums[alias] + ', ' + totalRow.getCell(alias).getValue()) // TODO (Ramil Timerbaev)
                     logger.error('Итоговые значения рассчитаны неверно!')
                     return false
                 }
@@ -684,7 +695,7 @@ def isFixedRow(def row) {
  */
 def getSum(def data, def columnAlias) {
     def from = 0
-    def to = getRows(data).size() - 2
+    def to = getRows(data).size() - 1
     if (from > to) {
         return 0
     }
@@ -1069,9 +1080,14 @@ def getNumber(def value) {
 }
 
 /**
- * Получить record_id элемента справочника.
+ * Получить id справочника.
  *
- * @param value
+ * @param ref_id идентификатор справончика
+ * @param code атрибут справочника
+ * @param value значение для поиска
+ * @param date дата актуальности
+ * @param cache кеш
+ * @return
  */
 def getRecords(def ref_id, String code, String value, Date date, def cache) {
     String filter = code + "= '"+ value.replaceAll(' ', '')+"'"
@@ -1088,7 +1104,7 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
-    logger.error("Не удалось определить элемент справочника!")
+    logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
     return null
 }
 
@@ -1164,30 +1180,25 @@ def getRowNumber(def alias, def data) {
 }
 
 /**
- * Рассчитать, проверить и сравнить итоги.
+ * Cравнить итоги.
  *
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    calc()
-    if (!hasError() && logicalCheck() && checkNSI()) {
-        def data = getData(formData)
-        def totalColumns = [4 : 'lotSizePrev', 5 : 'lotSizeCurrent', 7 : 'cost', 10 : 'costOnMarketQuotation',
-                11 : 'reserveCalcValue', 12 : 'reserveCreation', 13 : 'reserveRecovery']
-        def totalCalc = null
-        for (def row : getRows(data)) {
-            if (isTotal(row)) {
-                totalCalc = row
-                break
+    def totalColumns = [4 : 'lotSizePrev', 5 : 'lotSizeCurrent', 7 : 'cost', 10 : 'costOnMarketQuotation',
+            11 : 'reserveCalcValue', 12 : 'reserveCreation', 13 : 'reserveRecovery']
+    def totalCalc = getCalcTotalRow()
+    def errorColums = []
+    if (totalCalc != null) {
+        totalColumns.each { index, columnAlias ->
+            if (totalCalc[columnAlias] != totalRow[columnAlias]) {
+                errorColums.add(index)
             }
         }
-        if (totalCalc != null) {
-            totalColumns.each { index, columnAlias ->
-                if (totalCalc[columnAlias] != totalRow[columnAlias]) {
-                    logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
-                }
-            }
-        }
+    }
+    if (!errorColums.isEmpty()) {
+        def columns = errorColums.join(', ')
+        logger.error("Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
 }
 
@@ -1196,4 +1207,23 @@ void checkTotalRow(def totalRow) {
  */
 def hasError() {
     return logger.containsLevel(LogLevel.ERROR)
+}
+
+/**
+ * Получить итоговую строку с суммами.
+ */
+def getCalcTotalRow() {
+    // графы для которых надо вычислять итого и итого по ГРН (графа 4..7, 10..13)
+    def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserve', 'cost', 'costOnMarketQuotation',
+            'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
+    def totalRow = formData.createDataRow()
+
+    totalRow.setAlias('total')
+    totalRow.regNumber = 'Общий итог'
+    setTotalStyle(totalRow)
+    def data = getData(formData)
+    totalColumns.each { alias ->
+        totalRow.getCell(alias).setValue(getSum(data, alias))
+    }
+    return totalRow
 }
