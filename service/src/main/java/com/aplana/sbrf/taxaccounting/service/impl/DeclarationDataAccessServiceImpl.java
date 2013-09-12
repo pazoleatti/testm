@@ -5,8 +5,9 @@ import java.util.List;
 import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,9 @@ public class DeclarationDataAccessServiceImpl implements
 
 	@Autowired
 	private PeriodService reportPeriodService;
+	
+	@Autowired
+	private SourceService sourceService;
 
 	/**
 	 * В сущности эта функция проверяет наличие прав на просмотр декларации,
@@ -119,9 +123,7 @@ public class DeclarationDataAccessServiceImpl implements
 		int declarationTypeId = declarationTemplate.getDeclarationType()
 				.getId();
 
-		Department department = departmentDao.getDepartment(departmentId);
-		List<DepartmentDeclarationType> ddts = department
-				.getDepartmentDeclarationTypes();
+		List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentId, declarationTemplate.getDeclarationType().getTaxType());
 		boolean found = false;
 		for (DepartmentDeclarationType ddt : ddts) {
 			if (ddt.getDeclarationTypeId() == declarationTypeId) {

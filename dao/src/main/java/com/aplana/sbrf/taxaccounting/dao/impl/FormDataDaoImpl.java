@@ -93,7 +93,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			result.setReportPeriodId(rs.getInt("report_period_id"));
             Integer periodOrder = rs.getInt("period_order");
 			result.setPeriodOrder(rs.wasNull() ? null : periodOrder);
-			result.setFormType(formTypeDao.getType(rs.getInt("type_id")));
+			result.setFormType(formTypeDao.get(rs.getInt("type_id")));
 			return result;
 		}
 
@@ -214,7 +214,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		} catch (IncorrectResultSizeDataAccessException e) {
 			throw new DaoException(
 				"Для заданного сочетания параметров найдено несколько налоговых форм: вид \"%s\", тип \"%s\", подразделение \"%s\", отчетный период \"%s\"",
-				formTypeDao.getType(formTypeId).getName(),
+				formTypeDao.get(formTypeId).getName(),
 				kind.getName(),
 				departmentDao.getDepartment(departmentId).getName(),
 				reportPeriodDao.get(reportPeriodId).getName()

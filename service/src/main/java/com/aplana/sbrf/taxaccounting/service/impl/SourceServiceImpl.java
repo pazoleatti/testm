@@ -104,12 +104,12 @@ public class SourceServiceImpl implements SourceService {
 
 	@Override
 	public FormType getFormType(int formTypeId) {
-		return formTypeDao.getType(formTypeId);
+		return formTypeDao.get(formTypeId);
 	}
 
 	@Override
 	public List<FormType> listAllByTaxType(TaxType taxType) {
-		return formTypeDao.listAllByTaxType(taxType);
+		return formTypeDao.getByTaxType(taxType);
 	}
 
 	@Override

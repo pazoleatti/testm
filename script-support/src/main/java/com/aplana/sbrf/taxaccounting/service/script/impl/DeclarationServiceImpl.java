@@ -124,7 +124,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 			if (formData != null) {
 				if (formData.getState() != WorkflowState.ACCEPTED) {
 					Department department = departmentDao.getDepartment(dft.getDepartmentId());
-					FormType formType = formTypeDao.getType(dft.getFormTypeId());
+					FormType formType = formTypeDao.get(dft.getFormTypeId());
 					context.getLogger().warn(
 							"Форма-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", тип формы: \"%s\", подразделение: \"%s\"",
 							formType.getName(),
