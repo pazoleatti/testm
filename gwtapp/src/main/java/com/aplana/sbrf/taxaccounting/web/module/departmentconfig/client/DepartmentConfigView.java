@@ -144,7 +144,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         initWidget(uiBinder.createAndBindUi(this));
         driver.initialize(this);
         enableAllChildren(false, formPanel);
-        departmentPicker.setWidth(500);
+        departmentPicker.setWidth("500px");
         reportPeriodPanel.add(period);
         initListeners();
     }

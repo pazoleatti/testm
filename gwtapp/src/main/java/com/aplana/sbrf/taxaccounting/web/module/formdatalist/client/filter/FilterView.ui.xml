@@ -6,10 +6,10 @@
 		<g:cell height="50px">
 			<g:HorizontalPanel>
 				<g:cell width="250px">
-					<g:FlowPanel ui:field="departmentSelectionTreePanel" width="200px">
+					<g:FlowPanel>
 						<g:Label width="200px" text="Подразделение" />
+						<g:SimplePanel ui:field="departmentSelectionTreePanel" width="200px" />
 					</g:FlowPanel>
-
 				</g:cell>
 				<g:cell width="250px">
 					<g:VerticalPanel>
@@ -30,20 +30,21 @@
 						<g:ValueListBox width="200px" ui:field="formState" />
 					</g:VerticalPanel>
 				</g:cell>
-                <g:cell width="250px">
-                    <g:VerticalPanel>
-                        <g:Label width="200px" text="Признак возврата" />
-                        <g:ValueListBox width="200px" ui:field="returnState"/>
-                    </g:VerticalPanel>
-                </g:cell>
+				<g:cell width="250px">
+					<g:VerticalPanel>
+						<g:Label width="200px" text="Признак возврата" />
+						<g:ValueListBox width="200px" ui:field="returnState" />
+					</g:VerticalPanel>
+				</g:cell>
 			</g:HorizontalPanel>
 		</g:cell>
 		<g:cell height="50px">
 			<g:HorizontalPanel>
 				<g:cell width="250px" verticalAlignment="bottom">
-					<g:VerticalPanel ui:field="reportPeriodPanel" width="200px">
+					<g:FlowPanel>
 						<g:Label width="200px" text="Отчетный период" />
-					</g:VerticalPanel>
+						<g:SimplePanel ui:field="reportPeriodPanel" width="200px" />
+					</g:FlowPanel>
 				</g:cell>
 				<g:cell verticalAlignment="bottom">
 					<style:Bar>
