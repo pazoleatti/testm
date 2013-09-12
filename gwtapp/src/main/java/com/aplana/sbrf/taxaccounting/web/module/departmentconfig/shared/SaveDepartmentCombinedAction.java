@@ -11,7 +11,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class SaveDepartmentCombinedAction extends UnsecuredActionImpl<SaveDepartmentCombinedResult> implements ActionName {
 
     private DepartmentCombined departmentCombined;
-    private ReportPeriod period;
+    private Integer period;
 
     public DepartmentCombined getDepartmentCombined() {
         return departmentCombined;
@@ -21,11 +21,11 @@ public class SaveDepartmentCombinedAction extends UnsecuredActionImpl<SaveDepart
         this.departmentCombined = departmentCombined;
     }
 
-    public ReportPeriod getPeriod() {
+    public Integer getReportPeriodId() {
         return period;
     }
 
-    public void setPeriod(ReportPeriod period) {
+    public void setReportPeriodId(Integer period) {
         this.period = period;
     }
 

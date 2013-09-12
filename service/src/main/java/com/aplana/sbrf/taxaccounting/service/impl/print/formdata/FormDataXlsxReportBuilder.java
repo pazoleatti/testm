@@ -261,8 +261,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
         r = sheet.getRow(ar.getFirstCell().getRow());
         c = r.getCell(ar.getFirstCell().getCol());
         sb = new StringBuilder(c.getStringCellValue());
-        if(data.getFormType().getTaxType() == TaxType.TRANSPORT || data.getFormType().getTaxType() == TaxType.INCOME)
-            sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName()));
+        sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName()));
         c.setCellValue(String.valueOf(sb));
     }
 
@@ -433,17 +432,21 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
         int currColumn = currRow.getLastCellNum()!=-1?currRow.getLastCellNum():0;
 		Cell currCell = currRow.createCell(currColumn);
 		if(cell != null && (cell.getColSpan() > 1 || cell.getRowSpan() > 1)){
-			if(currColumn + cell.getColSpan() > formTemplate.getColumns().size()){
-                tableBorders(currColumn, formTemplate.getColumns().size(), currRow.getRowNum(), currRow.getRowNum() + cell.getRowSpan() - 1, isHeader);
-			}else if(currColumn + cell.getColSpan() > formTemplate.getColumns().size() - 1){
-                tableBorders(currColumn, formTemplate.getColumns().size() - 1, currRow.getRowNum(), currRow.getRowNum() + cell.getRowSpan() - 1, isHeader);
-			}
-			else{
-                tableBorders(currColumn, currColumn + cell.getColSpan() - 1, currRow.getRowNum(), currRow.getRowNum() + cell.getRowSpan() - 1, isHeader);
-			}
+            int endColumn = getEndColumnSkippingZeroWidthColumn(currColumn, currColumn + cell.getColSpan() - 1);
+            tableBorders(currColumn, endColumn, currRow.getRowNum(), currRow.getRowNum() + cell.getRowSpan() - 1, isHeader);
 		}
 		return currCell;
 	}
+
+    private int getEndColumnSkippingZeroWidthColumn(int start, int end) {
+        int endColumn = end;
+        for(int column = start;column<=end;column++){
+            if (formTemplate.getColumns().get(column).getWidth()==0) {
+                endColumn--;
+            }
+        }
+        return endColumn;
+    }
 
     /*
     * Create new merge region, or if we have intersections return null
@@ -451,7 +454,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
     private void tableBorders(int startCell,int endCell, int startRow, int endRow, boolean isHeader){
         for (int i = 0; i < sheet.getNumMergedRegions(); i++){
             CellRangeAddress cellRangeAddressTemp = sheet.getMergedRegion(i);
-            if (cellRangeAddressTemp.isInRange(startRow, startCell) || cellRangeAddressTemp.isInRange(endCell, endCell))
+            if (cellRangeAddressTemp.isInRange(startRow, startCell) || cellRangeAddressTemp.isInRange(endRow, endCell))
                 return;
         }
         CellRangeAddress region = new CellRangeAddress(

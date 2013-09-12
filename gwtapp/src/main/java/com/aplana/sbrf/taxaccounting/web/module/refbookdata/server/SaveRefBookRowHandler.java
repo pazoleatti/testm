@@ -44,7 +44,7 @@ public class SaveRefBookRowHandler extends AbstractActionHandler<SaveRefBookRowA
 		valuesToSaveList.add(valueToSave);
 
 
-		refBookDataProvider.updateRecords(new Date(), valuesToSaveList);
+		refBookDataProvider.updateRecords(action.getRelevanceDate(), valuesToSaveList);
 		return new SaveRefBookRowResult();
 	}
 
