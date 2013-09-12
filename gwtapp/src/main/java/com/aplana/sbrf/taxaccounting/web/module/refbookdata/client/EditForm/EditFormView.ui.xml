@@ -7,16 +7,19 @@
         }
     </ui:style>
     <g:VerticalPanel styleName="{style.editPadding}" width="100%" height="100%">
-
-        <g:ScrollPanel>
-            <g:VerticalPanel spacing="10" ui:field="editPanel" verticalAlignment="ALIGN_TOP"/>
-        </g:ScrollPanel>
-        <g:HorizontalPanel width="100%" height="100%" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_BOTTOM">
-            <g:HorizontalPanel  spacing="5">
-                <g:Button ui:field="save" enabled="false">Сохранить</g:Button>
-                <g:Button ui:field="cancel" enabled="false">Отмена</g:Button>
+        <g:cell height="100%">
+            <g:ScrollPanel height="100%">
+                <g:VerticalPanel spacing="10" ui:field="editPanel" verticalAlignment="ALIGN_TOP"/>
+            </g:ScrollPanel>
+        </g:cell>
+        <g:cell>
+            <g:HorizontalPanel width="100%" height="50px" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_BOTTOM">
+                <g:HorizontalPanel  spacing="5">
+                    <g:Button ui:field="save" enabled="false">Сохранить</g:Button>
+                    <g:Button ui:field="cancel" enabled="false">Отмена</g:Button>
+                </g:HorizontalPanel>
             </g:HorizontalPanel>
-        </g:HorizontalPanel>
+        </g:cell>
     </g:VerticalPanel>
 
 </ui:UiBinder>
