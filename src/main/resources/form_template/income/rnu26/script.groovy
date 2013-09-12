@@ -10,9 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  *
  * @version 65
  *
- * TODO:
- *      - графа 8, 14-17 расчитываются, но в перечне полей они могут редактироваться
- *
  * @author rtimerbaev
  */
 
