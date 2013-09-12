@@ -261,7 +261,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                 Cell cell = row.getCell(index, Row.RETURN_BLANK_AS_NULL);
 
                 if (cell == null) {
-                    if (index == 4) {
+                    if (index == 3) {
                         isValid = false;
                     }
                     continue;
