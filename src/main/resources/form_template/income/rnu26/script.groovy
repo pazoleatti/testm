@@ -1047,9 +1047,14 @@ def getNumber(def value) {
 }
 
 /**
- * Получить record_id элемента справочника.
+ * Получить id справочника.
  *
- * @param value
+ * @param ref_id идентификатор справончика
+ * @param code атрибут справочника
+ * @param value значение для поиска
+ * @param date дата актуальности
+ * @param cache кеш
+ * @return
  */
 def getRecords(def ref_id, String code, String value, Date date, def cache) {
     String filter = code + " like '" + value.replaceAll(' ', '') + "%'"
@@ -1064,7 +1069,7 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
-    logger.error("Не удалось найти в справочнике (id=$ref_id) строку с id = $value!")
+    logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
     return null
 }
 
