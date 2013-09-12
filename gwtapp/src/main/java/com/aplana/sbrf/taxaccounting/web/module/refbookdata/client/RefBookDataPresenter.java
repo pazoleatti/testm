@@ -166,6 +166,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 			GetRefBookTableDataAction action = new GetRefBookTableDataAction();
 			action.setRefbookId(refBookDataId);
 			action.setPagingParams(new PagingParams(range.getStart()+1, range.getLength()));
+			action.setRelevanceDate(editFormPresenter.getView().getRelevanceDate());
 			dispatcher.execute(action,
 					CallbackUtils.defaultCallback(
 							new AbstractCallback<GetRefBookTableDataResult>() {

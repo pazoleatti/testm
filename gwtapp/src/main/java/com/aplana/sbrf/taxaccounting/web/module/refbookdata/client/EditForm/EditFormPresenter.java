@@ -16,6 +16,7 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		Map<String, RefBookValueSerializable> getFieldsValues();
 		void setSaveButtonEnabled(boolean enabled);
 		void setCancelButtonEnabled(boolean enabled);
+		Date getRelevanceDate();
 	}
 
 	@Inject
@@ -116,6 +118,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 			action.setRefbookId(currentRefBookId);
 			action.setRecordId(currentRecordId);
 			action.setValueToSave(getView().getFieldsValues());
+			action.setRelevanceDate(getView().getRelevanceDate());
 			dispatchAsync.execute(action,
 					CallbackUtils.defaultCallback(
 							new AbstractCallback<SaveRefBookRowResult>() {
@@ -141,6 +144,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		getView().setCancelButtonEnabled(true);
 		getView().setSaveButtonEnabled(true);
 		isFormModified = true;
+	}
+
+	@Override
+	public void onRelevanceDateChanged() {
+		isFormModified = false;
+		UpdateForm.fire(EditFormPresenter.this, true);
 	}
 
 }

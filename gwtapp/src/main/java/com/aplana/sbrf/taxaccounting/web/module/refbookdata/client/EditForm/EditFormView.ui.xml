@@ -1,4 +1,5 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:date="urn:import:com.google.gwt.user.datepicker.client"
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <ui:style>
@@ -6,8 +7,12 @@
             padding: 5px;
         }
     </ui:style>
-    <g:VerticalPanel styleName="{style.editPadding}"  width="100%" height="100%">
-        <g:ScrollPanel height="">
+    <g:VerticalPanel styleName="{style.editPadding}" width="100%" height="100%">
+        <g:HorizontalPanel height="5px" verticalAlignment="ALIGN_TOP">
+            <g:Label>Дата актуальности: </g:Label>
+            <date:DateBox ui:field="relevanceDate"/>
+        </g:HorizontalPanel>
+        <g:ScrollPanel>
             <g:VerticalPanel spacing="10" ui:field="editPanel" verticalAlignment="ALIGN_TOP"/>
         </g:ScrollPanel>
         <g:HorizontalPanel width="100%" height="100%" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_BOTTOM">

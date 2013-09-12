@@ -18,14 +18,6 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created with IntelliJ IDEA.
- * User: Comp-1
- * Date: 28.08.13
- * Time: 14:52
- * To change this template use File | Settings | File Templates.
- */
-
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP')")
 public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRecordAction, GetRefBookRecordResult> {
