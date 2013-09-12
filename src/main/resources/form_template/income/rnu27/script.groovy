@@ -1326,12 +1326,11 @@ def hasError() {
  * Получить итоговую строку с суммами.
  */
 def getCalcTotalRow() {
-    // графы для которых надо вычислять итого и итого по ГРН (графа 4..7, 10..13)
     def totalColumns = getItogoColumns()
     def totalRow = formData.createDataRow()
 
     totalRow.setAlias('itogo')
-    totalRow.regNumber = 'Общий итог'
+    totalRow.issuer = "Общий итог"
     setTotalStyle(totalRow)
     def data = getData(formData)
     totalColumns.each { alias ->
