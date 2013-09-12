@@ -51,9 +51,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		Map<RefBookAttribute, HasValue> widgets = new HashMap<RefBookAttribute, HasValue>();
 		for (RefBookAttribute attr : attributes) {
 			HorizontalPanel oneField = new HorizontalPanel();
+			oneField.setWidth("100%");
 			Label label = new Label(attr.getName());
             label.setWordWrap(true);
-			label.setWidth("100px");
+			HorizontalPanel panel = new HorizontalPanel();
+			panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+			panel.setWidth("100%");
 			oneField.add(label);
 			Widget widget;
 			switch (attr.getAttributeType()) {
@@ -76,6 +79,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					break;
 			}
             widget.setWidth("300px");
+			panel.add(widget);
 			HasValue hasValue = (HasValue)widget;
 			hasValue.addValueChangeHandler(new ValueChangeHandler() {
 				@Override
@@ -85,7 +89,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					}
 				}
 			});
-			oneField.add(widget);
+			oneField.add(panel);
 			editPanel.add(oneField);
 			widgets.put(attr, (HasValue)widget);
 		}
