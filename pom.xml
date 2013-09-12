@@ -379,7 +379,7 @@
 								<X-Git-Commits-Count>${git.commitsCount}</X-Git-Commits-Count>
 								<X-Git-Revision>${git.revision}</X-Git-Revision>
 								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
-								<X-Git-Build-Number-And-Date>${git.buildnumber}.${maven.build.timestamp}</X-Git-Build-Number-And-Date>
+								<X-Git>${git.buildnumber}.${maven.build.timestamp}</X-Git>
 							</manifestEntries>
 						</archive>
 					</configuration>
@@ -401,7 +401,7 @@
 								<X-Git-Commits-Count>${git.commitsCount}</X-Git-Commits-Count>
 								<X-Git-Revision>${git.revision}</X-Git-Revision>
 								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
-								<X-Git-Build-Number-And-Date>${git.buildnumber}.${maven.build.timestamp}</X-Git-Build-Number-And-Date>
+								<X-Git>${git.buildnumber}.${maven.build.timestamp}</X-Git>
 							</manifestEntries>
 						</archive>
 					</configuration>
@@ -424,7 +424,7 @@
 								<X-Git-Commits-Count>${git.commitsCount}</X-Git-Commits-Count>
 								<X-Git-Revision>${git.revision}</X-Git-Revision>
 								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
-								<X-Git-Build-Number-And-Date>${git.buildnumber}.${maven.build.timestamp}</X-Git-Build-Number-And-Date>
+								<X-Git>${git.buildnumber}.${maven.build.timestamp}</X-Git>
 							</manifestEntries>
 						</archive>
 					</configuration>
