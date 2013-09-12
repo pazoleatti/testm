@@ -6,4 +6,5 @@ public interface RefBookDataUiHandlers extends UiHandlers {
 	void onAddRowClicked();
 	void onDeleteRowClicked();
 	void onSelectionChanged();
+	void onRelevanceDateChanged();
 }

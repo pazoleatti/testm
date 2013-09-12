@@ -62,6 +62,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		void setRefBookNameDesc(String desc);
         void resetRefBookElements();
 		RefBookDataRow getSelectedRow();
+		Date getRelevanceDate();
     }
 
 	@Inject
@@ -120,6 +121,12 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	}
 
 	@Override
+	public void onRelevanceDateChanged() {
+		getView().updateTable();
+		editFormPresenter.setRelevanceDate(getView().getRelevanceDate());
+	}
+
+	@Override
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
 		GetRefBookAttributesAction action = new GetRefBookAttributesAction();
@@ -165,8 +172,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 			final Range range = display.getVisibleRange();
 			GetRefBookTableDataAction action = new GetRefBookTableDataAction();
 			action.setRefbookId(refBookDataId);
-			action.setPagingParams(new PagingParams(range.getStart()+1, range.getLength()));
-			action.setRelevanceDate(editFormPresenter.getView().getRelevanceDate());
+			action.setPagingParams(new PagingParams(range.getStart() + 1, range.getLength()));
+			action.setRelevanceDate(getView().getRelevanceDate());
 			dispatcher.execute(action,
 					CallbackUtils.defaultCallback(
 							new AbstractCallback<GetRefBookTableDataResult>() {

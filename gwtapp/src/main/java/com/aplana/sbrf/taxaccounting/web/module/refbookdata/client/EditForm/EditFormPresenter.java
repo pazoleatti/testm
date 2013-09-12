@@ -26,6 +26,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	private Long currentRefBookId;
 	private Long currentRecordId;
 	private boolean isFormModified = false;
+	private Date relevanceDate;
 	private static final String DIALOG_MESSAGE = "Сохранить изменения в справочнике?";
 
 	public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
@@ -34,7 +35,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		Map<String, RefBookValueSerializable> getFieldsValues();
 		void setSaveButtonEnabled(boolean enabled);
 		void setCancelButtonEnabled(boolean enabled);
-		Date getRelevanceDate();
 	}
 
 	@Inject
@@ -58,6 +58,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 								currentRefBookId = refbookId;
 							}
 						}, this));
+	}
+
+	public void setRelevanceDate(Date relevanceDate) {
+		this.relevanceDate = relevanceDate;
 	}
 
 	public void show(final Long refBookRecordId) {
@@ -118,7 +122,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 			action.setRefbookId(currentRefBookId);
 			action.setRecordId(currentRecordId);
 			action.setValueToSave(getView().getFieldsValues());
-			action.setRelevanceDate(getView().getRelevanceDate());
+			action.setRelevanceDate(relevanceDate);
 			dispatchAsync.execute(action,
 					CallbackUtils.defaultCallback(
 							new AbstractCallback<SaveRefBookRowResult>() {
@@ -145,11 +149,4 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		getView().setSaveButtonEnabled(true);
 		isFormModified = true;
 	}
-
-	@Override
-	public void onRelevanceDateChanged() {
-		isFormModified = false;
-		UpdateForm.fire(EditFormPresenter.this, true);
-	}
-
 }

@@ -37,23 +37,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	Button save;
 	@UiField
 	Button cancel;
-	@UiField
-	DateBox relevanceDate;
 
 	@Inject
 	@UiConstructor
 	public EditFormView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
-		relevanceDate.setFormat(new DateBox.DefaultFormat(DateTimeFormat.getFormat("dd.MM.yyyy")));
-		relevanceDate.setValue(new Date());
-		relevanceDate.addValueChangeHandler(new ValueChangeHandler<Date>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Date> event) {
-				if (getUiHandlers() != null) {
-					getUiHandlers().onRelevanceDateChanged();
-				}
-			}
-		});
 	}
 
 	@Override
@@ -176,11 +164,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	@Override
 	public void setCancelButtonEnabled(boolean enabled) {
 		cancel.setEnabled(enabled);
-	}
-
-	@Override
-	public Date getRelevanceDate() {
-		return relevanceDate.getValue();
 	}
 
 	@UiHandler("save")
