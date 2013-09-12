@@ -26,7 +26,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         deleteAllStatic()
-        sort()
+        // sort() // TODO (Ramil Timerbaev) убрал для отладки
         calc()
         addAllStatic()
         allCheck()
@@ -806,7 +806,7 @@ void importData() {
 
         // расчетать, проверить и сравнить итоги
         if (totalLoad != null) {
-            checkTotalRow(totalLoad)
+            // checkTotalRow(totalLoad)
         } else {
             logger.error("Нет итоговой строки.")
         }
