@@ -543,20 +543,17 @@ public class FlexiblePager extends AbstractPager {
 	protected void onRangeOrRowCountChanged() {
 		HasRows display = getDisplay();
 		Range range = display.getVisibleRange();
-		int pageStart = range.getStart() + 1;
-		int pageSize = range.getLength();
-		int dataSize = display.getRowCount();
-		int endIndex = Math.min(dataSize, pageStart + pageSize - 1);
-		int pageCount = dataSize / pageSize;
-		if (dataSize % pageSize != 0) {
-			pageCount++;
-		}
-		endIndex = Math.max(pageStart, endIndex);
+		
+		int pageCount = Math.max(1, (display.getRowCount() / range.getLength()) + ((display.getRowCount() % range.getLength() != 0) ? 1 : 0));		
+		int startIntex = Math.min(display.getRowCount(), range.getStart() + 1);
+		int endIndex = Math.min(display.getRowCount(), range.getStart() + range.getLength());
+		int page = range.getStart() / range.getLength() + 1;
+
 		boolean exact = display.isRowCountExact();
 
-		leftLabel.setHTML(templates.leftLabel(pageStart + "-" + endIndex, dataSize));
+		leftLabel.setHTML(templates.leftLabel(startIntex + "-" + endIndex, display.getRowCount()));
 		middleLeftLabel.setText("Страница ");
-		pageNumber.setValue((pageStart / pageSize) + 1);
+		pageNumber.setValue(page);
 		middleRightLabel.setText((exact ? " из " : " более ") + pageCount);
 
 		// Update the prev and first buttons.
