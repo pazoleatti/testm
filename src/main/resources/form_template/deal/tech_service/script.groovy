@@ -140,7 +140,7 @@ void logicCheck() {
         def transactionDate = row.transactionDate
         def contractDate = row.contractDate
 
-        if (price == null || count == null && cost != price * count) {
+        if (price == null || count != null && cost != price * count) {
             def msg1 = row.getCell('cost').column.name
             def msg2 = row.getCell('price').column.name
             def msg3 = row.getCell('count').column.name
