@@ -56,7 +56,18 @@ public interface FormDataService {
      * TODO (sgoryachkin) заменить параметры is и fileName на uid блоба
      */
     void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream is, String fileName);
-	
+
+    /**
+     * Метод для импорта данных из модуля миграции
+     *
+     * @param logger
+     * @param userInfo
+     * @param formDataId
+     * @param is
+     * @param fileName
+     *
+     */
+    void migrationFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream is, String fileName);
 	
 	/**
 	 * Выполнить расчёты по налоговой форме
