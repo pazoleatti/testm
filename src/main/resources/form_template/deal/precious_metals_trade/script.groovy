@@ -164,7 +164,7 @@ void logicCheck() {
         // Зависимости от признака физической поставки
         if (getDeliverySign(row.deliverySign) == 1) {
             def msg1 = row.getCell('deliverySign').column.name
-            ['countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2', 'locality2'].each {
+            ['countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2', 'locality2', 'deliveryCode'].each {
                 def cell = row.getCell(it)
                 if (cell.value != null && !cell.value.toString().isEmpty()) {
                     def msg2 = cell.column.name
