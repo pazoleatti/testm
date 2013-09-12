@@ -86,6 +86,7 @@ switch (formDataEvent) {
             def data = getData(formData)
             insert(data, total)
         }
+        break
 }
 
 // графа 1  - rowNumber
@@ -1156,13 +1157,13 @@ def getRowNumber(def alias, def data) {
  */
 void checkTotalRow(def totalRow) {
     def data = getData(formData)
-    def totalColumns = [6 : 'lotSizePrev', 7 : 'lotSizeCurrent', 9 : 'cost', 14 : 'costOnMarketQuotation',
+    def totalColumns = [6 : 'lotSizePrev', 7 : 'lotSizeCurrent', 8: 'reserveCalcValuePrev', 9 : 'cost', 14 : 'costOnMarketQuotation',
             15 : 'reserveCalcValue', 16 : 'reserveCreation', 17: 'reserveRecovery']
     def totalCalc = getCalcTotalRow()
     def errorColums = []
     if (totalCalc != null) {
         totalColumns.each { index, columnAlias ->
-            if (totalCalc[columnAlias] != totalRow[columnAlias]) {
+            if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
                 errorColums.add(index)
             }
         }

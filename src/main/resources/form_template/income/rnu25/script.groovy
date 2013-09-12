@@ -87,6 +87,7 @@ switch (formDataEvent) {
             def data = getData(formData)
             insert(data, total)
         }
+        break
 }
 
 // графа 1  - rowNumber
@@ -1191,7 +1192,7 @@ void checkTotalRow(def totalRow) {
     def errorColums = []
     if (totalCalc != null) {
         totalColumns.each { index, columnAlias ->
-            if (totalCalc[columnAlias] != totalRow[columnAlias]) {
+            if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
                 errorColums.add(index)
             }
         }

@@ -120,7 +120,7 @@ public class MappingServiceImpl implements MappingService {
 
             // Вызов скрипта
             formDataService.lock(formDataId, userInfo);
-            formDataService.importFormData(logger, userInfo, formDataId, inputStream, filename);
+            formDataService.migrationFormData(logger, userInfo, formDataId, inputStream, filename);
             formDataService.saveFormData(logger, userInfo, formDataDao.get(formDataId));
             formDataService.unlock(formDataId, userInfo);
         } catch (Exception e) {
@@ -154,7 +154,7 @@ public class MappingServiceImpl implements MappingService {
                         String msg) {
         try {
             // Ошибка записи в журнал аудита не должна откатывать импорт
-            auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, reportPeriodId, null, formTypeId,
+            auditService.add(FormDataEvent.MIGRATION, userInfo, departmentId, reportPeriodId, null, formTypeId,
                     FormDataKind.PRIMARY.getId(), msg);
         } catch (Exception e) {
             log.error("Ошибка записи в журнал аудита", e);
