@@ -12,9 +12,6 @@ import java.text.SimpleDateFormat
 
 /**
  * 6.3.2    Расчет налога на прибыль с доходов, удерживаемого налоговым агентом
- *
- * TODO:
- *      - проверки корректности данных проверить когда будут сделаны вывод сообщении
  */
 
 DataRowHelper getData() {
@@ -225,7 +222,7 @@ void addData(def xml, headRowCount) {
     def indexRow = 0
 
     SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
-    // TODO (Ramil Timerbaev) Проверка корректности данных
+
     for (def row : xml.row) {
         indexRow++
 

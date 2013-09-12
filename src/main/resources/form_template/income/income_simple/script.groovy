@@ -5,17 +5,19 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.PagingResult
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 import java.text.SimpleDateFormat
 
 /**
  * Сводная форма " Доходы, учитываемые в простых РНУ" уровня обособленного подразделения
- *
+ * "Расшифровка видов доходов, учитываемых в простых РНУ (доходы простые)"
  * TODO:
  *      - не сделан подсчет графы 13 (контрольные графы) потому что справочники "Отчет о прибылях и убытках" и "Оборотная ведомость" еще не реализованы
  *
@@ -244,7 +246,8 @@ def logicalCheck() {
 
         if (!rowsNotCalc.contains(row.getAlias()) && !(row.getAlias() in ['R118', 'R119', 'R141', 'R142'])) {
             row.opuSumTotal = 0
-            for (income102 in refBookIncome102.getRecords(reportPeriodService.getEndDate(formData.reportPeriodId).time, null, 'OPU_CODE = \'' + row.accountingRecords.toString() + '\'', null).getRecords()) {
+            PagingResult<Map<String, RefBookValue>> income102Records = refBookIncome102.getRecords(reportPeriodService.getEndDate(formData.reportPeriodId).time, null, 'OPU_CODE = \'' + row.accountingRecords.toString() + '\'', null).getRecords()
+            for (income102 in income102Records) {
                 row.opuSumTotal += income102.get("TOTAL_SUM").getNumberValue()
             }
         }

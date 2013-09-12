@@ -261,7 +261,7 @@ RefBookDataProvider getProviderClassValut() {
 void consolidation(DataRowHelper form) {
 
     // удалить все строки и собрать из источников их строки
-    form.allCached.clear()
+    form.clear()
 
     for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())) {
         if (formDataSource.formTypeId == formData.getFormType().getId()) {

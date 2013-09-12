@@ -80,7 +80,16 @@ public class MigrationBean implements MessageService {
         logger.debug("Count of examples = " + list.size());
         int count = 0;
 
+        Set<Integer> typesDebugSet = new HashSet<Integer>();
+
         for (Exemplar ex : list) {
+            // TODO Пропускаем для проверки. Иначе будет слишком много файлов отправлено.
+            if (typesDebugSet.contains(ex.getRnuTypeId())) {
+                continue;
+            } else {
+                typesDebugSet.add(ex.getRnuTypeId());
+            }
+
             logger.debug("Start forming file. ExemplarId = " + ex.getExemplarId());
             try {
                 String filename = null;

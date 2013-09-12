@@ -107,44 +107,54 @@ def logicalCheck() {
     def data = getData(formData)
     for (row in getRows(data)) {
         if (row.getAlias() == null) {
+
+            def index = row.tradeNumber
+            def errorMsg
+            if (index!=null && index!='') {
+                errorMsg = "В строке \"Номер сделки\" равной $index "
+            } else {
+                index = row.getIndex()
+                errorMsg = "В строке $index "
+            }
+
             // 1. Проверка на заполнение поля «<Наименование поля>»
             if (!checkRequiredColumns(row,['outcome269st', 'outcomeTax'])){
                 return false
             }
             // 2. Проверка даты первой части РЕПО
             if (row.part1REPODate != null && reportDate.time.before((Date) row.part1REPODate)) {
-                logger.error("Неверно указана дата первой части сделки!")
+                logger.error(errorMsg + "неверно указана дата первой части сделки!")
                 return false
             }
             // 3. Проверка даты второй части РЕПО
             if (row.part2REPODate != null
                     && (reportPeriodService.getStartDate(formData.reportPeriodId).time.after((Date) row.part2REPODate) || reportPeriodService.getEndDate(formData.reportPeriodId).time.before((Date) row.part2REPODate)
             )) {
-                logger.error("Неверно указана дата второй части сделки!")
+                logger.error(errorMsg + "неверно указана дата второй части сделки!")
                 return false
             }
 
             // 4. Проверка финансового  результата на основе http://jira.aplana.com/browse/SBRFACCTAX-2870
             if (row.outcome > 0 && row.income > 0) {
-                logger.error("Задвоение финансового результата!")
+                logger.error(errorMsg + "задвоение финансового результата!")
                 return false
             }
 
             // 6. Проверка финансового результата
             if (row.outcome == 0 && !(row.outcome269st == 0 && row.outcomeTax == 0)) {
-                logger.error("Задвоение финансового результата!")
+                logger.error(errorMsg + "задвоение финансового результата!")
                 return false
             }
 
             // 7. Проверка финансового результата
             BigDecimal temp = (row.salePrice ?: 0) - (row.acquisitionPrice ?: 0)
             if (temp < 0 && !(temp.abs() == row.income)) {
-                logger.warn("Неверно определены доходы")
+                logger.warn(errorMsg + "неверно определены доходы")
             }
 
             // 8. Проверка финансового результата
             if (temp > 0 && !(temp == row.outcome)) {
-                logger.warn("Неверно определены расходы")
+                logger.warn(errorMsg + "неверно определены расходы")
             }
 
             // 9. Арифметические проверки граф 9, 10, 11, 12, 13
@@ -157,7 +167,7 @@ def logicalCheck() {
             value.put('outcomeTax', calc13(row))
             for (String check in checks) {
                 if (row.getCell(check).value != value.get(check)) {
-                    logger.error("Неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '%%') + "!")
+                    logger.error(errorMsg + "неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '%%') + "!")
                     return false
                 }
             }

@@ -11,15 +11,15 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  * To change this template use File | Settings | File Templates.
  */
 public class GetRefBookRecordAction extends UnsecuredActionImpl<GetRefBookRecordResult> implements ActionName {
-	Long refBookDataId;
+	Long refBookId;
 	Long refBookRecordId;
 
-	public Long getRefBookDataId() {
-		return refBookDataId;
+	public Long getRefBookId() {
+		return refBookId;
 	}
 
-	public void setRefBookDataId(Long refBookDataId) {
-		this.refBookDataId = refBookDataId;
+	public void setRefBookId(Long refBookId) {
+		this.refBookId = refBookId;
 	}
 
 	public Long getRefBookRecordId() {

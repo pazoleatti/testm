@@ -111,7 +111,7 @@ public class RefBookIncome101 implements RefBookDataProvider {
             startCal.setTime(taxPeriod.getStartDate());
             startCal.set(Calendar.MONTH, startCal.get(Calendar.MONTH) + reportPeriod.getMonths());
             resultTime = startCal.getTime().getTime() - version.getTime();
-            if (resultTime > 0 && ((reportPeriodResult == null) || (time > resultTime))) {
+            if (resultTime >= 0 && ((reportPeriodResult == null) || (time > resultTime))) {
                 time = resultTime;
                 reportPeriodResult = reportPeriod;
             }

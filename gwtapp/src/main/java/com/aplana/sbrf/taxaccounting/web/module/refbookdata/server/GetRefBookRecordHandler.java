@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -37,44 +39,53 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
 
 	@Override
 	public GetRefBookRecordResult execute(GetRefBookRecordAction action, ExecutionContext executionContext) throws ActionException {
-		RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookDataId());
+		RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
 		Map<String, RefBookValue> record = refBookDataProvider.getRecordData(action.getRefBookRecordId());
-
+		RefBook refBook = refBookFactory.get(action.getRefBookId());
 		GetRefBookRecordResult result = new GetRefBookRecordResult();
-		result.setRecord(convert(record, action.getRefBookDataId(), action.getRefBookRecordId()));
+		result.setRecord(convert(refBook, record));
 		return result;
 	}
 
-	private Map<String, RefBookValueSerializable> convert(Map<String, RefBookValue> record, Long refbookId, Long recordId) {
+	private Map<String, RefBookValueSerializable> convert(RefBook refBook, Map<String, RefBookValue> record) {
 		Map<String, RefBookValueSerializable> convertedRecord = new HashMap<String, RefBookValueSerializable>();
-		for (Map.Entry<String, RefBookValue> attr : record.entrySet()) {
+		for (Map.Entry<String, RefBookValue> recordValue : record.entrySet()) {
 			RefBookValueSerializable serializedValue = new RefBookValueSerializable();
-			serializedValue.setAttributeType(attr.getValue().getAttributeType());
-			switch (attr.getValue().getAttributeType()) {
+			serializedValue.setAttributeType(recordValue.getValue().getAttributeType());
+			switch (recordValue.getValue().getAttributeType()) {
 				case NUMBER:
-					serializedValue.setNumberValue(attr.getValue().getNumberValue());
+					serializedValue.setNumberValue(recordValue.getValue().getNumberValue());
 					break;
 				case STRING:
-					serializedValue.setStringValue(attr.getValue().getStringValue());
+					serializedValue.setStringValue(recordValue.getValue().getStringValue());
 					break;
 				case DATE:
-					serializedValue.setDateValue(attr.getValue().getDateValue());
+					serializedValue.setDateValue(recordValue.getValue().getDateValue());
 					break;
 				case REFERENCE:
-					if (attr.getValue().getReferenceValue() == null) {
+					if (recordValue.getValue().getReferenceValue() == null) {
 						serializedValue.setReferenceValue(null);
 						serializedValue.setDereferenceValue("");
 					} else {
-						serializedValue.setReferenceValue(attr.getValue().getReferenceValue());
-						RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refbookId);
-						serializedValue.setDereferenceValue(refBookDataProvider.getRecordData(attr.getValue().getReferenceValue()).values().iterator().next().toString());
+						serializedValue.setReferenceValue(recordValue.getValue().getReferenceValue());
+						// получаем текущий атрибут
+						RefBookAttribute attribute = refBook.getAttribute(recordValue.getKey());
+						// получаем сам справочник, на который ссылаемся, и его провайдер данных
+						RefBook refRefBook = refBookFactory.get(attribute.getRefBookId());
+						RefBookDataProvider refDataProvider = refBookFactory.getDataProvider(refRefBook.getId());
+						// запрашиваем строку, на которую у нас установлена ссылка
+						Map<String, RefBookValue> refValue = refDataProvider.getRecordData(recordValue.getValue().getReferenceValue());
+						// извлекаем значение отображаемого свойства (разыменовывание)
+						RefBookAttribute refAttribute = refRefBook.getAttribute(attribute.getRefBookAttributeId());
+						String dereferenceValue  = refValue.get(refAttribute.getAlias()).toString();
+						serializedValue.setDereferenceValue(dereferenceValue);
 					}
 					break;
 				default:
 					serializedValue.setStringValue("");
 					break;
 			}
-			convertedRecord.put(attr.getKey(), serializedValue);
+			convertedRecord.put(recordValue.getKey(), serializedValue);
 		}
 
 		return convertedRecord;

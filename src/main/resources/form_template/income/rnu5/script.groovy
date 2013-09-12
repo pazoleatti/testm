@@ -321,7 +321,7 @@ void consolidation() {
     def data = getData(formData)
 
     // удалить все строки и собрать из источников их строки
-    getRows(data).clear()
+    data.clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
