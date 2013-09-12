@@ -1,11 +1,15 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-        <g:FlowPanel width="100%" height="100">
-            <g:Label text="Выберите отчетный период"/>
-            <g:ScrollPanel width="100%" height="350px">
-                <g:Tree ui:field="tree" width="100%" height="350px"/>
-            </g:ScrollPanel>
-        </g:FlowPanel>
-        
+	<g:VerticalPanel width="300px" height="250px">
+		<g:cell>
+			<g:Label text="Выберите отчетный период" />
+		</g:cell>
+		<g:cell height="100%">
+			<g:ScrollPanel width="100%" height="100%">
+				<g:Tree ui:field="tree"/>
+			</g:ScrollPanel>
+		</g:cell>
+	</g:VerticalPanel>
+
 </ui:UiBinder>
