@@ -342,58 +342,67 @@ def logicalCheck() {
                 continue
             }
 
+            def index = row.rowNumber
+            def errorMsg
+            if (index!=null && index!='') {
+                errorMsg = "В строке \"№ пп\" равной $index "
+            } else {
+                index = row.getIndex()
+                errorMsg = "В строке $index "
+            }
+
             // 2. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 8, 17)
             if (row.lotSizeCurrent == 0 && row.reserveCalcValuePrev != row.reserveRecovery) {
-                logger.warn('Графы 8 и 17 неравны!')
+                logger.warn(errorMsg + 'графы 8 и 17 неравны!')
             }
 
             // 3. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 9, 14, 15)
             if (row.lotSizeCurrent == 0 && (row.cost != 0 || row.costOnMarketQuotation != 0 || row.reserveCalcValue != 0)) {
-                logger.warn('Графы 9, 14 и 15 ненулевые!')
+                logger.warn(errorMsg + 'графы 9, 14 и 15 ненулевые!')
             }
 
             // 4. Проверка при нулевом значении размера лота на предыдущую отчётную дату (графа 6, 8, 17)
             if (row.lotSizePrev == 0 && (row.reserveCalcValuePrev != 0 || row.reserveRecovery != 0)) {
-                logger.error('Графы 8 и 17 ненулевые!')
+                logger.error(errorMsg + 'графы 8 и 17 ненулевые!')
                 return false
             }
 
             // 5. Проверка необращающихся акций (графа 10, 15, 16)
             def sign = getSign(row.signSecurity)
             if (sign == '-' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
-                logger.warn('Акции необращающиеся, графы 15 и 16 ненулевые!')
+                logger.warn(errorMsg + 'акции необращающиеся, графы 15 и 16 ненулевые!')
             }
 
             // 6. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 17)
             tmp = (row.reserveCalcValue ?: 0) - row.reserveCalcValuePrev
             if (sign == '+' && tmp > 0 && row.reserveRecovery != 0) {
-                logger.error('Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
+                logger.error(errorMsg + 'акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
                 return false
             }
 
             // 7. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 16)
             if (sign == '+' && tmp < 0 && row.reserveCreation != 0) {
-                logger.error('Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
+                logger.error(errorMsg + 'акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
                 return false
             }
 
             // 8. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 17)
             if (sign == '+' && tmp == 0 &&
                     (row.reserveCreation != 0 || row.reserveRecovery != 0)) {
-                logger.error('Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
+                logger.error(errorMsg + 'акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
                 return false
             }
 
             // 9. Проверка корректности формирования резерва (графа 8, 15, 16, 17)
             if (row.reserveCalcValuePrev + (row.reserveCreation ?: 0) != (row.reserveCalcValue ?: 0) + (row.reserveRecovery ?: 0)) {
-                logger.error('Резерв сформирован неверно!')
+                logger.error(errorMsg + 'резерв сформирован неверно!')
                 return false
             }
 
             // 10. Проверка на положительные значения при наличии созданного резерва
             if (row.reserveCreation > 0 && row.lotSizeCurrent < 0 && row.cost < 0 &&
                     row.costOnMarketQuotation < 0 && row.reserveCalcValue < 0) {
-                logger.warn('Резерв сформирован. Графы 7, 9, 14 и 15 неположительные!')
+                logger.warn(errorMsg + 'резерв сформирован. Графы 7, 9, 14 и 15 неположительные!')
             }
 
             // 11. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 6, 7 (за предыдущий период) )
@@ -402,7 +411,7 @@ def logicalCheck() {
                 def curCol2 = 6
                 def prevCol = 4
                 def prevCol2 = 7
-                logger.warn("РНУ сформирован некорректно! Не выполняется условие: Если «графа $curCol» = «графа $prevCol» формы РНУ-26 за предыдущий отчётный период, то «графа $curCol2»  = «графа $prevCol2» формы РНУ-26 за предыдущий отчётный период.")
+                logger.warn("РНУ сформирован некорректно! " + errorMsg + "не выполняется условие: Если «графа $curCol» = «графа $prevCol» формы РНУ-26 за предыдущий отчётный период, то «графа $curCol2»  = «графа $prevCol2» формы РНУ-26 за предыдущий отчётный период.")
             }
 
             // 12. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 8, 15 (за предыдущий период) )
@@ -411,36 +420,37 @@ def logicalCheck() {
                 def curCol2 = 4
                 def prevCol = 8
                 def prevCol2 = 15
-                logger.error("РНУ сформирован некорректно! Не выполняется условие: Если «графа $curCol» = «графа $prevCol» формы РНУ-26 за предыдущий отчётный период, то «графа $curCol2»  = «графа $prevCol2» формы РНУ-26 за предыдущий отчётный период.")
+                logger.error("РНУ сформирован некорректно! " + errorMsg + "не выполняется условие: Если «графа $curCol» = «графа $prevCol» формы РНУ-26 за предыдущий отчётный период, то «графа $curCol2»  = «графа $prevCol2» формы РНУ-26 за предыдущий отчётный период.")
                 return false
             }
 
             // 16. Проверка на уникальность поля «№ пп» (графа 1)
-            if (i != row.rowNumber) {
-                logger.error('Нарушена уникальность номера по порядку!')
-                return false
+            for (def rowB : getRows(data)) {
+                if(!row.equals(rowB) && row.rowNumber ==rowB.rowNumber){
+                    logger.error('Нарушена уникальность номера по порядку!')
+                    return false
+                }
             }
-            i += 1
 
             // 17. Арифметическая проверка графы 8, 14..17
             // графа 8
             if (row.reserveCalcValuePrev != getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)) {
                 name = getColumnName(row, 'reserveCalcValuePrev')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
 
             // графа 13
             if (row.marketQuotation != null && row.rubCourse != null &&
                     row.marketQuotationInRub != round(row.marketQuotation * row.rubCourse, 2)) {
                 name = getColumnName(row, 'marketQuotationInRub')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
 
             // графа 14
             tmp = (row.marketQuotationInRub == null ? 0 : round(row.lotSizeCurrent * row.marketQuotationInRub, 2))
             if (row.costOnMarketQuotation != tmp) {
                 name = getColumnName(row, 'costOnMarketQuotation')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
 
             // графа 15
@@ -452,20 +462,20 @@ def logicalCheck() {
             }
             if (row.reserveCalcValue != tmp) {
                 name = getColumnName(row, 'reserveCalcValue')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
 
             // графа 16
             tmp = (row.reserveCalcValue ?: 0) - row.reserveCalcValuePrev
             if (row.reserveCreation != (tmp > 0 ? tmp : 0)) {
                 name = getColumnName(row, 'reserveCreation')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
 
             // графа 17
             if (row.reserveRecovery != (tmp < 0 ? Math.abs(tmp) : 0)) {
                 name = getColumnName(row, 'reserveRecovery')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
             // 17. конец=========================================
 
@@ -537,19 +547,29 @@ def checkNSI() {
     def data = getData(formData)
     getRows (data).each { row->
         if (!isFixedRow(row)) {
+
+            def index = row.rowNumber
+            def errorMsg
+            if (index!=null && index!='') {
+                errorMsg = "В строке \"№ пп\" равной $index "
+            } else {
+                index = row.getIndex()
+                errorMsg = "В строке $index "
+            }
+
             // 1. Проверка актуальности поля «Валюта выпуска ценной бумаги»
             if (row.currency!=null && getCurrency(row.currency)==null) {
-                logger.warn('Валюта выпуска ценной бумаги указана неверно!')
+                logger.warn(errorMsg + 'валюта выпуска ценной бумаги указана неверно!')
             }
 
             // 1. Проверка курса валюты со справочным - Проверка актуальности значения» графы 6» на дату по «графе 5»
             if (row.rubCourse!=null && row.rubCourse!=getCourse(row.currency,reportDate)) {
-                logger.warn('Неверный курс валюты!')
+                logger.warn(errorMsg + 'неверный курс валюты!')
             }
 
             // 2. Проверка актуальности поля «Признак ценной бумаги на текущую отчётную дату»
             if (row.signSecurity!=null && getSign(row.signSecurity)==null) {
-                logger.warn('Признак ценной бумаги в справочнике отсутствует!')
+                logger.warn(errorMsg + 'признак ценной бумаги в справочнике отсутствует!')
             }
         }
     }

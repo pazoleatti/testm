@@ -118,26 +118,35 @@ void logicalCheck() {
                 return
             }
 
+            def index = row.rowNumber
+            def errorMsg
+            if (index!=null && index!='') {
+                errorMsg = "В строке \"№ пп\" равной $index "
+            } else {
+                index = row.getIndex()
+                errorMsg = "В строке $index "
+            }
+
             // 1.Проверка цены приобретения для целей налогообложения (графа 12)
             if (row.acquisitionPrice > row.marketPriceInRub && row.acquisitionPriceTax != row.marketPriceInRub) {
-                logger.error("Неверно определена цена приобретения для целей налогообложения")
+                logger.error(errorMsg + "неверно определена цена приобретения для целей налогообложения")
                 return
             }
 
             if (row.acquisitionPrice <= row.marketPriceInRub && row.acquisitionPriceTax != row.acquisitionPrice) {
-                logger.error("Неверно определена цена приобретения для целей налогообложения")
+                logger.error(errorMsg + "неверно определена цена приобретения для целей налогообложения")
                 return
             }
 
             // 2.Проверка рыночной цены в процентах при погашении (графа 16)
             if (row.redemptionValue != null && row.redemptionValue > 0 && !(row.marketPriceInPerc1 == 100)) {
-                logger.error("Неверно указана рыночная цена в процентах при погашении!")
+                logger.error(errorMsg + "Неверно указана рыночная цена в процентах при погашении!")
                 return
             }
 
             // 3.Проверка рыночной цены в рублях при погашении (графа 17)
             if (row.redemptionValue != null && row.redemptionValue > 0 && !(row.marketPriceInRub1 == row.redemptionValue)) {
-                logger.error("Неверно указана рыночная цена в рублях при погашении!")
+                logger.error(errorMsg + "неверно указана рыночная цена в рублях при погашении!")
                 return
             }
 
@@ -149,7 +158,7 @@ void logicalCheck() {
             if ((code == 1 || code == 2 || code == 5) && row.priceInFactPerc > row.marketPriceInPerc1
                     && row.priceInFactRub > row.marketPriceInRub1 && row.salePriceTax != row.priceInFactRub
             ) {
-                logger.error('Неверно определена цена реализации для целей налогообложения по сделкам на ОРЦБ!')
+                logger.error(errorMsg + "неверно определена цена реализации для целей налогообложения по сделкам на ОРЦБ!")
                 return
             }
 
@@ -160,7 +169,7 @@ void logicalCheck() {
              * Неверно определена цена реализации для целей налогообложения при погашении!
              */
             if (code == 4 && row.salePriceTax != row.redemptionValue) {
-                logger.error('Неверно определена цена реализации для целей налогообложения при погашении!')
+                logger.error(errorMsg + "неверно определена цена реализации для целей налогообложения при погашении!")
                 return
             }
 
@@ -172,7 +181,7 @@ void logicalCheck() {
              */
             if ((code == 2 || code == 5) && row.tradeNumber < row.marketPriceInPerc1
                     && row.priceInFactRub < row.marketPriceInRub1 && row.salePriceTax != row.marketPriceInRub1) {
-                logger.error('Неверно определена цена реализации для целей налогообложения по переговорным сделкам на ОРЦБ и сделкам, связанным с открытием-закрытием короткой позиции!')
+                logger.error(errorMsg + "неверно определена цена реализации для целей налогообложения по переговорным сделкам на ОРЦБ и сделкам, связанным с открытием-закрытием короткой позиции!")
                 return
             }
 
@@ -183,7 +192,7 @@ void logicalCheck() {
              * Неверно определены расходы!
              */
             if (row.expensesTotal != (row.costOfAcquisition ?: 0) + (row.acquisitionPriceTax ?: 0) + (row.expensesOnSale ?: 0)) {
-                logger.error('Неверно определены расходы!')
+                logger.error(errorMsg + "неверно определены расходы!")
                 return
             }
 
@@ -194,7 +203,7 @@ void logicalCheck() {
              * Неверно определен финансовый результат реализации (выбытия)!
              */
             if (row.profit != (row.salePriceTax ?: 0) - (row.expensesTotal ?: 0)) {
-                logger.error('Неверно определен финансовый результат реализации (выбытия)!')
+                logger.error(errorMsg + "неверно определен финансовый результат реализации (выбытия)!")
                 return
             }
 
@@ -210,7 +219,7 @@ void logicalCheck() {
                     || (code == 4 && row.excessSalePriceTax != 0)
                     || row.excessSalePriceTax < 0
             ) {
-                logger.error('Неверно определено превышение цены реализации для целей налогообложения над фактической ценой реализации!')
+                logger.error(errorMsg + "неверно определено превышение цены реализации для целей налогообложения над фактической ценой реализации!")
                 return
             }
 
@@ -231,7 +240,7 @@ void logicalCheck() {
             value.put('excessSalePriceTax', calc22(row))
             for (String check in checks) {
                 if (row.getCell(check).value != value.get(check)) {
-                    logger.error("Неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '%%') + "!")
+                    logger.error(errorMsg + "неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '%%') + "!")
                     return
                 }
             }
@@ -589,12 +598,21 @@ void checkCreation() {
 
 void checkNSI() {
     getRows(getData(formData)).each{ DataRow row ->
+
+        def index = row.rowNumber
+        def errorMsg
+        if (index!=null && index!='') {
+            errorMsg = "В строке \"№ пп\" равной $index "
+        } else {
+            index = row.getIndex()
+            errorMsg = "В строке $index "
+        }
         if (row.getAlias()==null) {
             if (row.tradeNumber!=null && getCode(row.tradeNumber)==null){
-                logger.warn('Код сделки в справочнике отсутствует!');
+                logger.warn(errorMsg + "код сделки в справочнике отсутствует!");
             }
             if (row.singSecurirty!=null && getSign(row.singSecurirty)==null){
-                logger.warn('Признак ценной бумаги в справочнике отсутствует!');
+                logger.warn(errorMsg + "признак ценной бумаги в справочнике отсутствует!");
             }
         }
     }

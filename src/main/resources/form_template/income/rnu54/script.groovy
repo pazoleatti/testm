@@ -247,6 +247,16 @@ def logicalCheck() {
                 hasTotalRow = true
                 continue
             }
+
+            def index = row.tadeNumber
+            def errorMsg
+            if (index!=null && index!='') {
+                errorMsg = "В строке \"Номер сделки\" равной $index "
+            } else {
+                index = row.getIndex()
+                errorMsg = "В строке $index "
+            }
+
             // 1. Обязательность заполнения поля графы 12 и 13
             if (!checkRequiredColumns(row, requiredColumns)) {
                 return false
@@ -257,36 +267,36 @@ def logicalCheck() {
 
             // 2. Проверка даты первой части РЕПО (графа 7)
             if (row.part1REPODate > reportDate) {
-                logger.error('Неверно указана дата первой части сделки!')
+                logger.error(errorMsg + 'неверно указана дата первой части сделки!')
                 return false
             }
             // 3. Проверка даты второй части РЕПО (графа 8)
             if (row.part2REPODate <= reportDate) {
-                logger.error('Неверно указана дата второй части сделки!')
+                logger.error(errorMsg + 'неверно указана дата второй части сделки!')
                 return false
             }
 
             // 4. Проверка финансового результата (графа 9, 10, 12, 13)
             if (row.income != 0 && row.outcome != 0) {
-                logger.error('Задвоение финансового результата!')
+                logger.error(errorMsg + 'задвоение финансового результата!')
                 return false
             }
 
             // 5. Проверка финансого результата
             if (row.outcome == 0 && (row.outcome269st != 0 || row.outcomeTax != 0)) {
-                logger.error('Задвоение финансового результата!')
+                logger.error(errorMsg + 'задвоение финансового результата!')
                 return false
             }
 
             // 6. Проверка финансового результата
             tmp = ((row.acquisitionPrice - row.salePrice) * (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
             if (tmp < 0 && row.income != roundTo2(abs(tmp))) {
-                logger.warn('Неверно определены доходы')
+                logger.warn(errorMsg + 'неверно определены доходы')
             }
 
             // 7. Проверка финансового результата
             if (tmp > 0 && row.outcome != roundTo2(abs(tmp))) {
-                logger.warn('Неверно определены расходы')
+                logger.warn(errorMsg + 'неверно определены расходы')
             }
 
             // 8. Арифметическая проверка графы 9, 10, 11, 12, 13 ===============================Начало
@@ -302,19 +312,19 @@ def logicalCheck() {
             // графа 9
             if (row.income != b) {
                 name = getColumnName(row, 'income')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
             // графа 10
             if (row.outcome != c) {
                 name = getColumnName(row, 'outcome')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
 
             // графа 11
             def col11 = roundTo2(calc11Value(row, row.part2REPODate))
             if (col11!=null && col11!=row.rateBR) {
                 name = getColumnName(row, 'rateBR')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
 
             // графа 12
@@ -339,7 +349,7 @@ def logicalCheck() {
             }
             if (row.outcome269st != tmp) {
                 name = getColumnName(row, 'outcome269st')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
 
             // графа 13
@@ -352,7 +362,7 @@ def logicalCheck() {
             }
             if (row.outcomeTax != tmp) {
                 name = getColumnName(row, 'outcomeTax')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
             // 8. Арифметическая проверка графы 9, 10, 11, 12, 13 ===============================Конец
         }
@@ -386,16 +396,24 @@ def checkNSI() {
             if (isTotal(row)) {
                 continue
             }
+            def index = row.tadeNumber
+            def errorMsg
+            if (index!=null && index!='') {
+                errorMsg = "В строке \"Номер сделки\" равной $index "
+            } else {
+                index = row.getIndex()
+                errorMsg = "В строке $index "
+            }
 
             // 1. Проверка кода валюты со справочным (графа 3)
             if (row.currencyCode!=null && getCurrency(row.currencyCode)==null) {
-                logger.warn('Неверный код валюты!')
+                logger.warn(errorMsg + 'неверный код валюты!')
             }
 
             // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
             def col11 = roundTo2(calc11Value(row, row.part2REPODate))
             if (col11!=null && col11!=row.rateBR) {
-                logger.error('Неверно указана ставка Банка России!')
+                logger.error(errorMsg + 'неверно указана ставка Банка России!')
                 return false
             }
         }
