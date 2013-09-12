@@ -21,26 +21,36 @@
 
 	<g:DialogBox height="100%" width="250px" glassEnabled="true" text="Открыть период">
         <g:VerticalPanel height="100%" width="250px">
-            <g:FlowPanel styleName="{style.content}">
+            <g:FlowPanel styleName="{style.content}" width="100%">
 
-                <g:HorizontalPanel height="10px" >
-                    <g:Label text="Подразделение: " />
-                    <picker:DepartmentPickerPopupWidget header="Подразделение"  ui:field="departmentPicker"  multiselection="false"/>
+                <g:HorizontalPanel height="10px" width="100%">
+                    <g:cell horizontalAlignment="ALIGN_RIGHT" width="50px" verticalAlignment="ALIGN_MIDDLE">
+                        <g:Label text="Подразделение: " width="150px" />
+                    </g:cell>
+                    <g:cell horizontalAlignment="ALIGN_LEFT">
+                        <picker:DepartmentPickerPopupWidget header="Подразделение"  ui:field="departmentPicker"  multiselection="false"/>
+                    </g:cell>
                 </g:HorizontalPanel>
 
-                <g:HorizontalPanel height="10px">
-                    <g:Label text="Год: " />
+                <g:HorizontalPanel height="10px" width="100%">
+                    <g:cell horizontalAlignment="ALIGN_RIGHT" width="50px" verticalAlignment="ALIGN_MIDDLE">
+                        <g:Label text="Год: " horizontalAlignment="ALIGN_RIGHT" width="150px" />
+                    </g:cell>
                     <w:IncrementButton ui:field="yearBox"   minValue="1900" maxValue="2100"/>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel height="10px">
-                    <g:Label text="Период: " />
+                	<g:Cell horizontalAlignment="ALIGN_RIGHT" verticalAlignment="ALIGN_MIDDLE">
+                		<g:Label text="Период: " width="150px" />
+                	</g:Cell>
                     <!--<style:ListBoxWithTooltip width="200px" ui:field="period" showTooltip="true"/>-->
                     <r:RefBookPickerPopupWidget ui:field="period" width="100px" attributeIdInt="26"/>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel height="10px">
-                    <g:Label text="Срок сдачи отчетности: " />
+                	<g:Cell verticalAlignment="ALIGN_MIDDLE">
+                		<g:Label text="Срок сдачи отчетности: " />
+                	</g:Cell>
                     <date:CustomDateBox width="60px" ui:field="term"/>
                 </g:HorizontalPanel>
 
