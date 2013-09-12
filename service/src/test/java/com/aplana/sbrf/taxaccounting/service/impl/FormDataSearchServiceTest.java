@@ -37,7 +37,7 @@ public class FormDataSearchServiceTest {
 		sourceService = new SourceServiceImpl();
 
 		FormTypeDao formTypeDao = mock(FormTypeDao.class);
-		when(formTypeDao.listAllByTaxType(TaxType.TRANSPORT)).thenReturn(FORM_TYPES_BY_TAX_TYPE);
+		when(formTypeDao.getByTaxType(TaxType.TRANSPORT)).thenReturn(FORM_TYPES_BY_TAX_TYPE);
 		ReflectionTestUtils.setField(service, "formTypeDao", formTypeDao);
 		
 		DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
