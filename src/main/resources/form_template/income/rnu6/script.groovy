@@ -201,11 +201,21 @@ void NSICheck(DataRowHelper form) {
                     break
                 }
             }
+
+            def index = row.number
+            def errorMsg
+            if (index != null) {
+                errorMsg = "В строке \"№ пп\" равной $index "
+            } else {
+                index = getIndex(row) + 1
+                errorMsg = "В строке $index "
+            }
+
             if (!isFind) {
-                logger.warn('Балансовый счёт в справочнике отсутствует!')
+                logger.warn(errorMsg + 'балансовый счёт в справочнике отсутствует!')
             }
             if (!isFind2) {
-                logger.warn('Балансовый счёт в справочнике отсутствует!')
+                logger.warn(errorMsg + 'балансовый счёт в справочнике отсутствует!')
             }
             // ПС 3
             records = providerClassValut.getRecords(reportDate.time, null, null, null).records
@@ -217,7 +227,7 @@ void NSICheck(DataRowHelper form) {
                 }
             }
             if (!isFind) {
-                logger.warn('Неверно заполнена графа %s!', row.getCell('currencyCode').column.name)
+                logger.warn(errorMsg + 'неверно заполнена графа %s!', row.getCell('currencyCode').column.name)
             }
             // ПС 4
             records = getProviderCurrency().getRecords(row.date as Date, null,  'CODE_NUMBER = ' + row.currencyCode, null).records
@@ -229,7 +239,7 @@ void NSICheck(DataRowHelper form) {
                 }
             }
             if (!isFind) {
-                logger.warn('Неверно заполнена графа %s!', row.getCell('rateOfTheBankOfRussia').column.name)
+                logger.warn(errorMsg + 'неверно заполнена графа %s!', row.getCell('rateOfTheBankOfRussia').column.name)
             }
         }
     }
@@ -299,6 +309,15 @@ def logicalCheck(DataRowHelper form) {
             }
             uniq456.add(m)
 
+            def index = row.number
+            def errorMsg
+            if (index != null) {
+                errorMsg = "В строке \"№ пп\" равной $index "
+            } else {
+                index = getIndex(row) + 1
+                errorMsg = "В строке $index "
+            }
+
             //logger.info('Проверка на заполнение поля «<Наименование поля>»')
             // LC Проверка на заполнение поля «<Наименование поля>»
             columns = ['number', 'kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
@@ -310,14 +329,14 @@ def logicalCheck(DataRowHelper form) {
             // Проверка на нулевые значения
             if (row.taxAccountingCurrency == row.taxAccountingRuble && row.taxAccountingRuble == row.accountingCurrency
                     && row.accountingCurrency == row.ruble && row.ruble == 0) {
-                logger.error('Все суммы по операции нулевые!')
+                logger.error(errorMsg + 'все суммы по операции нулевые!')
                 return false
             }
 
             //logger.info('Проверка, что не  отображаются данные одновременно по бухгалтерскому и по налоговому учету')
             if (row.taxAccountingCurrency == null && row.accountingCurrency == null
                     || row.taxAccountingCurrency == 0 && row.accountingCurrency == 0) {
-                logger.error('Не заполнены оба поля «%s» и «%s>»', row.getCell('taxAccountingCurrency').column.name, row.getCell('taxAccountingCurrency').column.name)
+                logger.error(errorMsg + 'не заполнены оба поля «%s» и «%s>»', row.getCell('taxAccountingCurrency').column.name, row.getCell('taxAccountingCurrency').column.name)
                 return false
             }
 
@@ -325,7 +344,7 @@ def logicalCheck(DataRowHelper form) {
             // Проверка даты совершения операции и границ отчётного периода
             if (reportPeriodService.getStartDate(formData.reportPeriodId).time.time > row.date.time
                     || row.date.time > reportPeriodService.getEndDate(formData.reportPeriodId).time.time) {
-                logger.error('Дата совершения операции вне границ отчётного периода!')
+                logger.error(errorMsg + 'дата совершения операции вне границ отчётного периода!')
                 return false
             }
 
@@ -344,7 +363,7 @@ def logicalCheck(DataRowHelper form) {
                     }
                 }
                 if (!(c10 > c12)) {
-                    logger.error('Сумма данных бухгалтерского учёта превышает сумму начисленных платежей для документа %s от %s!', row.docNumber as String, rowSum.docDate as String)
+                    logger.error(errorMsg + 'cумма данных бухгалтерского учёта превышает сумму начисленных платежей для документа %s от %s!', row.docNumber as String, rowSum.docDate as String)
                     return false
                 }
             }
@@ -365,11 +384,11 @@ def logicalCheck(DataRowHelper form) {
             }
             // Арифметические проверки расчета неитоговых граф
             if (row.docNumber != '0000' && !(row.taxAccountingRuble == calc10(row))) {
-                logger.error('Неверно рассчитана графа %s!', row.getCell('taxAccountingRuble').column.name)
+                logger.error(errorMsg + 'неверно рассчитана графа %s!', row.getCell('taxAccountingRuble').column.name)
                 return false
             }
             if (row.docNumber != '0000' && !(row.ruble == calc12(row))) {
-                logger.error('Неверно рассчитана графа %s!', row.getCell('ruble').column.name)
+                logger.error(errorMsg + 'неверно рассчитана графа %s!', row.getCell('ruble').column.name)
                 return false
             }
 
@@ -415,11 +434,11 @@ def logicalCheck(DataRowHelper form) {
                 // Арифметические проверки расчета итоговых строк «Итого по КНУ»
                 itogoKNY = itogoKNY(form, form.getAllCached().indexOf(row) - 1)
                 if (row.taxAccountingRuble != itogoKNY.taxAccountingRuble) {
-                    logger.error('Неверное значение %s для графы %s', row.helper as String, row.getCell('taxAccountingRuble').column.name)
+                    logger.error('Неверное итоговое значение %s для графы %s', row.helper as String, row.getCell('taxAccountingRuble').column.name)
                     return false
                 }
                 if (row.ruble != itogoKNY.ruble) {
-                    logger.error('Неверное значение %s для графы %s', row.helper as String, row.getCell('ruble').column.name)
+                    logger.error('Неверное итоговое значение %s для графы %s', row.helper as String, row.getCell('ruble').column.name)
                     return false
                 }
             } else {
