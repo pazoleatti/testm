@@ -184,14 +184,7 @@ void logicCheck() {
         def dt = contractDate
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = row.getCell('contractDate').column.name
-
-            if (dt > dTo) {
-                logger.warn("«$msg» не может быть больше даты окончания отчётного периода в строке $rowNum!")
-            }
-
-            if (dt < dFrom) {
-                logger.warn("«$msg» не может быть меньше даты начала отчётного периода в строке $rowNum!")
-            }
+            logger.warn("«$msg» в строке $rowNum не может быть вне налогового периода!")
         }
 
         // Корректность даты заключения сделки

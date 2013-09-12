@@ -387,9 +387,9 @@ def fillForm() {
     def data = getData(formData)
 
     /** Уменьшающий процент. */
-    def reducingPerc = 1 // TODO (Ramil Timerbaev)
+    def reducingPerc
     /** Пониженная ставка. */
-    def loweringRates = 0 // TODO (Ramil Timerbaev)
+    def loweringRates
 
     def index = 1
     data.getAllCached().each { row ->

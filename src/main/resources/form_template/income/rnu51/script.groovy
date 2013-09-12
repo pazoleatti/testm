@@ -427,7 +427,6 @@ BigDecimal calc16(DataRow row) {
     return result
 }
 
-// TODO (Ramil Timerbaev)
 /**
  * Если «графа 13» > 0, то «графа 17» = «графа 13»
  * @param row
@@ -833,7 +832,6 @@ def addData(def xml) {
     def data = getData(formData)
     data.clear()
 
-    // TODO (Ramil Timerbaev) Проверка корректности данных
     for (def row : xml.exemplar.table.detail.record) {
         index = 0
 
@@ -1116,7 +1114,6 @@ void checkTotalRow(def totalRow) {
         if (totalCalc != null) {
             totalColumns.each { index, columnAlias ->
                 if (totalCalc[columnAlias] != totalRow[columnAlias]) {
-                    logger.info('===== ' + totalCalc[columnAlias] + ' - ' + totalRow[columnAlias]) // TODO (Ramil Timerbaev)
                     logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
                 }
             }

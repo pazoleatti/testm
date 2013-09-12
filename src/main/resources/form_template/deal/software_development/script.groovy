@@ -87,6 +87,11 @@ void checkUniq() {
  */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+    def dFrom = taxPeriod.getStartDate()
+    def dTo = taxPeriod.getEndDate()
+
     def int index = 1
     for (row in dataRowHelper.getAllCached()) {
         def rowNum = index++
@@ -110,21 +115,14 @@ void logicCheck() {
                 logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
             }
         }
-        //  Корректность даты договора
-        def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
 
-        def dFrom = taxPeriod.getStartDate()
-        def dTo = taxPeriod.getEndDate()
+        // Корректность даты договора
         def dt = docDateCell.value
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = docDateCell.column.name
-            if (dt > dTo) {
-                logger.warn("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
-            }
-            if (dt < dFrom) {
-                logger.warn("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
-            }
+            logger.warn("«$msg» в строке $rowNum не может быть вне налогового периода!")
         }
+
         // Проверка расходов
         def sumCell = row.getCell('expensesSum')
         def priceCell = row.getCell('price')

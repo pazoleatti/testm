@@ -863,7 +863,6 @@ def addData(def xml) {
     def data = getData(formData)
     data.clear()
 
-    // TODO (Ramil Timerbaev) Проверка корректности данных
     for (def row : xml.exemplar.table.detail.record) {
         index = 0
         def newRow = getNewRow()
