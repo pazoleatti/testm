@@ -62,7 +62,7 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
     ['fullNamePerson', 'sum', 'docNumber', 'docDate', 'dealDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
@@ -86,6 +86,11 @@ void checkCreation() {
  */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+    def dFrom = taxPeriod.getStartDate()
+    def dTo = taxPeriod.getEndDate()
+
     def int index = 1
     for (row in dataRowHelper.getAllCached()) {
         if (row.getAlias() != null) {
@@ -118,19 +123,10 @@ void logicCheck() {
             logger.warn("В графе «$msg» в строке $rowNum может  быть указано только  значение «1»!")
         }
         //  Корректность даты договора
-        def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-
-        def dFrom = taxPeriod.getStartDate()
-        def dTo = taxPeriod.getEndDate()
         def dt = docDateCell.value
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = docDateCell.column.name
-            if (dt > dTo) {
-                logger.warn("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
-            }
-            if (dt < dFrom) {
-                logger.warn("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
-            }
+            logger.warn("«$msg» в строке $rowNum не может быть вне налогового периода!")
         }
         // Проверка доходов
         def sumCell = row.getCell('sum')
@@ -178,9 +174,6 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
     def int index = 1
     for (row in dataRows) {
-        if (row.getAlias() != null) {
-            continue
-        }
         // Порядковый номер строки
         row.rowNumber = index++
         // В поле "Количество" подставляется значение «1»
@@ -263,7 +256,6 @@ void importData() {
             return
         }
         addData(xml, 2)
-//        logicCheck()
     } catch (Exception e) {
         logger.error("" + e.message)
     }
@@ -403,7 +395,7 @@ def getNumber(def value, int indexRow, int indexCell) {
     try {
         return new BigDecimal(tmp)
     } catch (Exception e) {
-        logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
 
@@ -413,7 +405,12 @@ def getNumber(def value, int indexRow, int indexCell) {
  * @param value
  */
 def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
-    String filter = code + "= '" + value + "'"
+    String filter;
+    if (value == null || value.equals("")) {
+        filter = code + " is null"
+    } else {
+        filter = code + "= '" + value + "'"
+    }
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
     } else {
@@ -425,7 +422,7 @@ def getRecordId(def ref_id, String code, String value, Date date, def cache, int
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     } else {
-        logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
+        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
 }
 
@@ -440,6 +437,6 @@ def getDate(def value, int indexRow, int indexCell) {
     try {
         return format.parse(value)
     } catch (Exception e) {
-        logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }

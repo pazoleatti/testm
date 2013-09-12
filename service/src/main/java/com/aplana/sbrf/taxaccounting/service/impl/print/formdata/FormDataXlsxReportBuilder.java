@@ -12,7 +12,6 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
@@ -182,8 +181,100 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		creationDate = data.getCreationDate();
 	}
 
-	protected void createTableHeaders(){
+    protected void fillHeader(){
+        logger.debug(workBook.getName(XlsxReportMetadata.RANGE_DATE_CREATE).getRefersToFormula());
+        StringBuilder sb;
+        AreaReference ar;
+        char[] arr;
+        Date printDate;
+        Row r;
+        Cell c;
 
+        //Fill subdivision
+        ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_SUBDIVISION).getRefersToFormula());
+        r = sheet.getRow(ar.getFirstCell().getRow());
+        c = r.getCell(ar.getFirstCell().getCol());
+        sb = new StringBuilder(c.getStringCellValue());
+        sb.append(" ").append(department.getName());
+        c.setCellValue(String.valueOf(sb));
+
+        //Fill date
+        ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_DATE_CREATE).getRefersToFormula());
+        r = sheet.getRow(ar.getFirstCell().getRow());
+        c = r.getCell(ar.getFirstCell().getCol());
+        sb = new StringBuilder(c.getStringCellValue());
+
+        /*1. Если статус налоговой формы "Утверждена", "Принята" - дата присвоения статуса "Утверждена".
+        2. Если статус формы "Создана", "Подготовлена" - дата создания налоговой формы.*/
+        printDate = ((data.getState() == WorkflowState.ACCEPTED || data.getState() == WorkflowState.APPROVED) && acceptanceDate!=null)
+                ? acceptanceDate :
+                ((data.getState() == WorkflowState.CREATED || data.getState() == WorkflowState.PREPARED) && creationDate!=null)
+                        ? creationDate : null;
+
+        arr = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().toCharArray();
+        if(XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("март") ||
+                XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("август"))
+        {
+            String month = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase() + "а";
+            arr = month.toCharArray();
+        } else {
+            arr[arr.length - 1] = 'я';
+        }
+        sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.format(printDate),
+                new String(arr), XlsxReportMetadata.sdf_y.format(printDate)));
+        c.setCellValue(String.valueOf(sb));
+
+        //Fill report name
+        ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_NAME).getRefersToFormula());
+        r = sheet.getRow(ar.getFirstCell().getRow());
+        c = r.getCell(ar.getFirstCell().getCol());
+        c.setCellValue(formTemplate.getFullName());
+
+        //Fill code
+        ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_CODE).getRefersToFormula());
+
+        StringTokenizer sToK = new StringTokenizer(formTemplate.getCode(), XlsxReportMetadata.REPORT_DELIMITER);//This needed because we can have not only one delimiter
+        int j = 0;
+        while(sToK.hasMoreTokens()){
+            r = sheet.getRow(ar.getFirstCell().getRow() + j);
+            if(r == null)
+                r = sheet.createRow(ar.getFirstCell().getRow() + j);
+            c = r.getCell(ar.getFirstCell().getCol());
+            if(c == null)
+                c = r.createCell(ar.getFirstCell().getCol());
+
+            if(j != 0){
+                CellStyle style = workBook.createCellStyle();
+                Font font = workBook.createFont();
+                font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+                style.setFont(font);
+                c.setCellStyle(style);
+            }
+            c.setCellValue(sToK.nextToken());
+
+            j++;
+        }
+
+
+        //Fill period
+        ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_PERIOD).getRefersToFormula());
+        r = sheet.getRow(ar.getFirstCell().getRow());
+        c = r.getCell(ar.getFirstCell().getCol());
+        sb = new StringBuilder(c.getStringCellValue());
+        sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName()));
+        c.setCellValue(String.valueOf(sb));
+    }
+
+	protected void createTableHeaders(){
+        AreaReference ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_POSITION).getRefersToFormula());
+        Row r = sheet.getRow(ar.getFirstCell().getRow());
+        if (rowNumber + formTemplate.getHeaders().size() >= r.getRowNum()){
+            int rowBreakes = rowNumber + formTemplate.getHeaders().size() - r.getRowNum();
+            if(0 == rowBreakes)
+                sheet.shiftRows(r.getRowNum(), r.getRowNum() + 1, 1);
+            else
+                sheet.shiftRows(r.getRowNum(), r.getRowNum(), rowBreakes);
+        }
         for (DataRow<HeaderCell> headerCellDataRow : formTemplate.getHeaders()){
             Row row = sheet.createRow(rowNumber);
             for (int i=0; i<formTemplate.getColumns().size(); i++){
@@ -275,91 +366,6 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 
 	}
 
-	protected void fillHeader(){
-		logger.debug(workBook.getName(XlsxReportMetadata.RANGE_DATE_CREATE).getRefersToFormula());
-		StringBuilder sb;
-		AreaReference ar;
-		char[] arr;
-		Date printDate;
-		Row r;
-		Cell c;
-
-		//Fill subdivision
-		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_SUBDIVISION).getRefersToFormula());
-		r = sheet.getRow(ar.getFirstCell().getRow());
-		c = r.getCell(ar.getFirstCell().getCol());
-		sb = new StringBuilder(c.getStringCellValue());
-		sb.append(" ").append(department.getName());
-		c.setCellValue(String.valueOf(sb));
-
-		//Fill date
-		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_DATE_CREATE).getRefersToFormula());
-		r = sheet.getRow(ar.getFirstCell().getRow());
-		c = r.getCell(ar.getFirstCell().getCol());
-		sb = new StringBuilder(c.getStringCellValue());
-
-        /*1. Если статус налоговой формы "Утверждена", "Принята" - дата присвоения статуса "Утверждена".
-        2. Если статус формы "Создана", "Подготовлена" - дата создания налоговой формы.*/
-        printDate = ((data.getState() == WorkflowState.ACCEPTED || data.getState() == WorkflowState.APPROVED) && acceptanceDate!=null)
-                ? acceptanceDate :
-                ((data.getState() == WorkflowState.CREATED || data.getState() == WorkflowState.PREPARED) && creationDate!=null)
-                        ? creationDate : null;
-
-		arr = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().toCharArray();
-		if(XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("март") ||
-				XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("август"))
-		{
-			String month = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase() + "а";
-			arr = month.toCharArray();
-		} else {
-			arr[arr.length - 1] = 'я';
-		}
-		sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.format(printDate),
-				new String(arr), XlsxReportMetadata.sdf_y.format(printDate)));
-		c.setCellValue(String.valueOf(sb));
-
-		//Fill report name
-		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_NAME).getRefersToFormula());
-		r = sheet.getRow(ar.getFirstCell().getRow());
-		c = r.getCell(ar.getFirstCell().getCol());
-		c.setCellValue(formTemplate.getFullName());
-
-		//Fill code
-		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_CODE).getRefersToFormula());
-
-		StringTokenizer sToK = new StringTokenizer(formTemplate.getCode(), XlsxReportMetadata.REPORT_DELIMITER);//This needed because we can have not only one delimiter
-		int j = 0;
-		while(sToK.hasMoreTokens()){
-			r = sheet.getRow(ar.getFirstCell().getRow() + j);
-			if(r == null)
-				r = sheet.createRow(ar.getFirstCell().getRow() + j);
-			c = r.getCell(ar.getFirstCell().getCol());
-			if(c == null)
-				c = r.createCell(ar.getFirstCell().getCol());
-
-			if(j != 0){
-				CellStyle style = workBook.createCellStyle();
-				Font font = workBook.createFont();
-				font.setBoldweight(Font.BOLDWEIGHT_BOLD);
-				style.setFont(font);
-				c.setCellStyle(style);
-			}
-			c.setCellValue(sToK.nextToken());
-
-			j++;
-		}
-
-
-		//Fill period
-		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_PERIOD).getRefersToFormula());
-		r = sheet.getRow(ar.getFirstCell().getRow());
-		c = r.getCell(ar.getFirstCell().getCol());
-		sb = new StringBuilder(c.getStringCellValue());
-		if(data.getFormType().getTaxType() == TaxType.TRANSPORT || data.getFormType().getTaxType() == TaxType.INCOME)
-			sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName()));
-		c.setCellValue(String.valueOf(sb));
-	}
-
 	protected void fillFooter(){
 		AreaReference ar;
 		Row r;
@@ -383,18 +389,19 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 			crsP.setCellStyle(cs);
 			crsS.setCellStyle(cs);
 			crsFio.setCellStyle(cs);
-			rowNumber++;
-			sheet.shiftRows(rowNumber, sheet.getLastRowNum(), 1);
+			/*sheet.shiftRows(rowNumber, sheet.getLastRowNum(), 1);*/
+            rowNumber++;
 		}
 
 		//Fill performer
 		if(data.getPerformer()!=null){
-			r = sheet.getRow(sheet.getLastRowNum());
+			r = sheet.createRow(rowNumber);
 			c = r.createCell(0);
             c.setCellValue("Исполнитель:");
             c = r.createCell(1);
 			c.setCellValue((data.getPerformer().getName()!=null?data.getPerformer().getName():"") + "/" +
                     (data.getPerformer().getPhone()!=null?data.getPerformer().getPhone():""));
+            sheet.shiftRows(sheet.getLastRowNum(), sheet.getLastRowNum(), 1);
 		}
 
 	}
@@ -411,7 +418,6 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                 dataRows.size() + data.getSigners().size() + formTemplate.getHeaders().size() + 15);
         sheet.setFitToPage(true);
         sheet.setAutobreaks(true);
-        System.out.println(formTemplate.getHeaders().get(0).size() + " " + ((dataRows.size()%rowBreakSize)>0?dataRows.size()/rowBreakSize + 1:dataRows.size()/rowBreakSize));
         sheet.getPrintSetup().setFitHeight((short) 0);
         sheet.getPrintSetup().setFitWidth((short) 1);
         /*sheet.getPrintSetup().setScale((short) 400);*/
@@ -426,17 +432,21 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
         int currColumn = currRow.getLastCellNum()!=-1?currRow.getLastCellNum():0;
 		Cell currCell = currRow.createCell(currColumn);
 		if(cell != null && (cell.getColSpan() > 1 || cell.getRowSpan() > 1)){
-			if(currColumn + cell.getColSpan() > formTemplate.getColumns().size()){
-                tableBorders(currColumn, formTemplate.getColumns().size(), currRow.getRowNum(), currRow.getRowNum() + cell.getRowSpan() - 1, isHeader);
-			}else if(currColumn + cell.getColSpan() > formTemplate.getColumns().size() - 1){
-                tableBorders(currColumn, formTemplate.getColumns().size() - 1, currRow.getRowNum(), currRow.getRowNum() + cell.getRowSpan() - 1, isHeader);
-			}
-			else{
-                tableBorders(currColumn, currColumn + cell.getColSpan() - 1, currRow.getRowNum(), currRow.getRowNum() + cell.getRowSpan() - 1, isHeader);
-			}
+            int endColumn = getEndColumnSkippingZeroWidthColumn(currColumn, currColumn + cell.getColSpan() - 1);
+            tableBorders(currColumn, endColumn, currRow.getRowNum(), currRow.getRowNum() + cell.getRowSpan() - 1, isHeader);
 		}
 		return currCell;
 	}
+
+    private int getEndColumnSkippingZeroWidthColumn(int start, int end) {
+        int endColumn = end;
+        for(int column = start;column<=end;column++){
+            if (formTemplate.getColumns().get(column).getWidth()==0) {
+                endColumn--;
+            }
+        }
+        return endColumn;
+    }
 
     /*
     * Create new merge region, or if we have intersections return null
@@ -444,7 +454,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
     private void tableBorders(int startCell,int endCell, int startRow, int endRow, boolean isHeader){
         for (int i = 0; i < sheet.getNumMergedRegions(); i++){
             CellRangeAddress cellRangeAddressTemp = sheet.getMergedRegion(i);
-            if (cellRangeAddressTemp.isInRange(startRow, startCell) || cellRangeAddressTemp.isInRange(endCell, endCell))
+            if (cellRangeAddressTemp.isInRange(startRow, startCell) || cellRangeAddressTemp.isInRange(endRow, endCell))
                 return;
         }
         CellRangeAddress region = new CellRangeAddress(

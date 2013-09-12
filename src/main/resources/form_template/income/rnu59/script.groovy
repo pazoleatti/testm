@@ -326,27 +326,36 @@ def logicalCheck(){
                 return false
             }
 
+            def index = row.tradeNumber
+            def errorMsg
+            if (index!=null && index!='') {
+                errorMsg = "В строке \"Номер сделки\" равной $index "
+            } else {
+                index = row.getIndex()
+                errorMsg = "В строке $index "
+            }
+
             // графа 5 заполнена и «графа 5» ? «отчётная дата». Текст ошибки - Неверно указана дата первой части сделки! SBRFACCTAX-2575
             if (!(row.part1REPODate != null && (row.part1REPODate.compareTo(reportingDate.getTime())  <= 0))){
-                logger.error('Неверно указана дата первой части сделки!')
+                logger.error(errorMsg + 'неверно указана дата первой части сделки!')
                 return false
             }
 
             // графа 6 заполнена и графа 6 в рамках отчётного периода. Текст ошибки - Неверно указана дата второй части сделки!
             if (!(row.part2REPODate != null && (row.part2REPODate.compareTo(periodStartDate.getTime()) >=0 && row.part2REPODate.compareTo(periodEndDate.getTime()) <=0))){
-                logger.error('Неверно указана дата второй части сделки!')
+                logger.error(errorMsg + 'неверно указана дата второй части сделки!')
                 return false
             }
 
             // если«графа 9» = 0 ИЛИ  «графа 10» = 0. = Задвоение финансового результата!
             if (!(row.income == 0 || row.outcome == 0)){
-                logger.error("Задвоение финансового результата!")
+                logger.error(errorMsg + "задвоение финансового результата!")
                 return false
             }
 
             // если «графа 10» = 0, то «графа 12» = 0 и «графа 13» = 0
             if (row.outcome == 0 && !(row.outcome269st == 0 && row.outcomeTax == 0)){
-                logger.error("Задвоение финансового результата!")
+                logger.error(errorMsg + "задвоение финансового результата!")
                 return false
             }
 
@@ -354,31 +363,31 @@ def logicalCheck(){
             def price = row.salePrice?:0
             def acqPrice = row.acquisitionPrice?:0
             if (price - acqPrice > 0 && !(price - acqPrice == row.income)){
-                logger.warn('Неверно определены доходы')
+                logger.warn(errorMsg + 'неверно определены доходы')
             }
 
             // «графа 10» =|«графа 8» - «графа 7»|, при условии («графа 8» - «графа 7») < 0.  = Неверно определены расходы
             if ((price - acqPrice) < 0 && !(row.outcome == (price - acqPrice).abs())){
-                logger.warn('Неверно определены расходы')
+                logger.warn(errorMsg + 'неверно определены расходы')
             }
 
             // Арифметическая проверка графы 11
             def col11 = roundTo2(calculateColumn11(row,row.part2REPODate))
             if (col11 != null && col11 != row.rateBR){
-                logger.error('Неверно рассчитана графа «Ставка Банка России (%%)»!')
+                logger.error(errorMsg + 'неверно рассчитана графа «Ставка Банка России (%%)»!')
                 return false
             }
 
             // Арифметическая проверка графы 12
             def col12 = roundTo2(calculateColumn12(row))
             if (col12 != null && col12 != row.outcome269st){
-                logger.error('Неверно рассчитана графа «Расходы по сделке РЕПО, рассчитанные с учётом ст. 269 НК РФ (руб.коп.)»!')
+                logger.error(errorMsg + 'неверно рассчитана графа «Расходы по сделке РЕПО, рассчитанные с учётом ст. 269 НК РФ (руб.коп.)»!')
             }
 
             // Арифметическая проверка графы 13
             def col13 = roundTo2(calculateColumn13(row))
             if (col13 != null && col13 != row.outcomeTax){
-                logger.error('Неверно рассчитана графа «Расходы по сделке РЕПО, учитываемые для целей налогообложения (руб.коп.)»!')
+                logger.error(errorMsg + 'неверно рассчитана графа «Расходы по сделке РЕПО, учитываемые для целей налогообложения (руб.коп.)»!')
                 return false
             }
             // экономим на итерациях, подсчитаем сумму для граф 4,7-10, 12-13, суммы нужны для проверок

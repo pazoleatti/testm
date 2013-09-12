@@ -13,16 +13,4 @@ public interface MappingService {
      * @param fileContent содержимое файла
      */
     public void addFormData(String filename, byte[] fileContent);
-
-    /*
-   Включено ли добавление успеха или ошибки импорта в журнал аудита
-    */
-    boolean isAuditAddOn();
-
-    /*
-   Включен ли импорт данных
-    */
-    boolean isImportOn();
-
-    void setProperties(boolean isAuditAddOn, boolean isImportOn);
 }

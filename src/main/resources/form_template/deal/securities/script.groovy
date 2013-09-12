@@ -47,6 +47,8 @@ switch (formDataEvent) {
 // Импорт
     case FormDataEvent.IMPORT:
         importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -76,7 +78,7 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
     ['fullNamePerson', 'dealSign', 'incomeSum', 'outcomeSum', 'docNumber', 'docDate', 'okeiCode', 'count', 'dealDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
@@ -99,6 +101,11 @@ void checkCreation() {
  */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+    def dFrom = taxPeriod.getStartDate()
+    def dTo = taxPeriod.getEndDate()
+
     for (row in dataRowHelper.getAllCached()) {
         if (row.getAlias() != null) {
             continue
@@ -144,20 +151,12 @@ void logicCheck() {
         }
 
         //  Корректность даты договора
-        def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-
-        def dFrom = taxPeriod.getStartDate()
-        def dTo = taxPeriod.getEndDate()
         def dt = docDateCell.value
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = docDateCell.column.name
-            if (dt > dTo) {
-                logger.warn("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
-            }
-            if (dt < dFrom) {
-                logger.warn("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
-            }
+            logger.warn("«$msg» в строке $rowNum не может быть вне налогового периода!")
         }
+
         // Проверка цены
         def sumCell = row.incomeSum != null ? row.getCell('incomeSum') : row.getCell('outcomeSum')
         def countCell = row.getCell('count')
@@ -208,11 +207,12 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
     for (row in dataRows) {
         // Порядковый номер строки
-        row.rowNumber = row.getIndex()
+        if (row.getIndex() != null) {
+            row.rowNumber = row.getIndex()
+        }
         // Расчет поля "Цена"
         def priceValue = row.incomeSum != null ? row.incomeSum : row.outcomeSum
-        def okei =  row.okeiCode!= null ? refBookService.getRecordData(12, row.okeiCode).CODE.stringValue : null
-        println("okei = " + okei)
+        def okei =  row.okeiCode!= null ? refBookService.getStringValue(12, row.okeiCode, 'CODE') : null
         if (okei == '744') {
             row.price = priceValue
         } else if (okei == '796' && row.count != 0 && row.count != null) {

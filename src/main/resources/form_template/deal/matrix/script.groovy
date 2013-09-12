@@ -1,10 +1,8 @@
 package form_template.deal.matrix
 
 import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormType
-import com.aplana.sbrf.taxaccounting.model.TaxType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 
 /**
  * 400 - Матрица
@@ -44,61 +42,61 @@ switch (formDataEvent) {
         break
 }
 
-// 1.	dealNum1
-// 2.	interdependenceSing
-// 3.	f121
-// 4.	f122
-// 5.	f123
-// 6.	f124
-// 7.	f131
-// 8.	f132
-// 9.	f133
-// 10.	f134
-// 11.	f135
-// 12.	similarTransactionsGroup
-// 13.	dealNameCode
-// 14.	taxpayerSideCode
-// 15.	dealPriceSign
-// 16.	dealPriceCode
-// 17.	dealMemberCount
-// 18.	income
-// 19.	incomeIncludingRegulation
-// 20.	outcome
-// 21.	outcomeIncludingRegulation
-// 22.	dealNum2
-// 23.	dealType
-// 24.	dealSubjectName
-// 25.	dealSubjectCode1
-// 26.	dealSubjectCode2
-// 27.	dealSubjectCode3
-// 28.	otherNum
-// 29.	contractNum
-// 30.	contractDate
-// 31.	countryCode
-// 32.	countryCode1
-// 33.	region1
-// 34.	city1
-// 35.	locality1
-// 36.	countryCode2
-// 37.	region2
-// 38.	city2
-// 39.	locality2
-// 40.	deliveryCode
-// 41.	okeiCode
-// 42.	count
-// 43.	price
-// 44.	total
-// 45.	dealDoneDate
-// 46.	dealNum3
-// 47.	dealMemberNum
-// 48.	organInfo
-// 49.	countryCode3
-// 50.	organName
-// 51.	organINN
-// 52.	organKPP
-// 53.	organRegNum
-// 54.	taxpayerCode
-// 55.	address
+// 1.	dealNum1	п. 010 "Порядковый номер сделки по уведомлению"
+// 2.	interdependenceSing	п. 100
+// 3.	f121	п. 121
+// 4.	f122	п. 122
+// 5.	f123	п. 123
+// 6.	f124	п. 124
+// 7.	f131	п. 131
+// 8.	f132	п. 132
+// 9.	f133	п. 133
+// 10.	f134	п. 134
+// 11.	f135	п. 135 (до 2014 г. / после 2014 г.)
+// 12.	similarDealGroup	п. 200 "Группа однородных сделок"
+// 13.	dealNameCode	п. 210 "Код наименования сделки"
+// 14.	taxpayerSideCode	п. 211 "Код стороны сделки, которой является налогоплательщик"
+// 15.	dealPriceSign	п. 220 "Признак определения цены сделки с учетом особенностей, предусмотренных статьей 105.4 НК РФ (регулируемые цены)"
+// 16.	dealPriceCode	п. 230 "Код определения цены сделки"
+// 17.	dealMemberCount	п. 260 "Количество участников сделки"
+// 18.	income	п. 300 "Сумма доходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях"
+// 19.	incomeIncludingRegulation	п. 301 "в том числе сумма доходов по сделкам, цены которых подлежат регулированию"
+// 20.	outcome	п. 310 "Сумма расходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях"
+// 21.	outcomeIncludingRegulation	п. 311 "в том числе сумма расходов по сделкам, цены которых подлежат регулированию"
+// 22.	dealNum2	п. 010 "Порядковый номер сделки по уведомлению (из раздела 1А)"
+// 23.	dealType	п. 020 "Тип предмета сделки"
+// 24.	dealSubjectName	п. 030 "Наименование предмета сделки"
+// 25.	dealSubjectCode1	п. 040 "Код предмета сделки (код по ТН ВЭД)"
+// 26.	dealSubjectCode2	п. 043 "Код предмета сделки (код по ОКП)"
+// 27.	dealSubjectCode3	п. 045 "Код предмета сделки (код по ОКВЭД)"
+// 28.	otherNum	п. 050 "Номер другого участника сделки"
+// 29.	contractNum	п. 060 "Номер договора"
+// 30.	contractDate	п. 065 "Дата договора"
+// 31.	countryCode	п. 070 "Код страны происхождения предмета сделки по классификатору ОКСМ (цифровой)"
+// 32.	countryCode1	Код страны по классификатору ОКСМ (цифровой)
+// 33.	region1	Регион (код)
+// 34.	city1	Город
+// 35.	locality1	Населенный пункт (село, поселок и т.д.)
+// 36.	countryCode2	Код страны по классификатору ОКСМ (цифровой)
+// 37.	region2	Регион (код)
+// 38.	city2	Город
+// 39.	locality2	Населенный пункт (село, поселок и т.д.)
+// 40.	deliveryCode	п. 100 "Код условия поставки (заполняется только для товаров)"
+// 41.	okeiCode	п. 110 "Код единицы измерения по ОКЕИ"
+// 42.	count	п. 120 "Количество"
+// 43.	price	п. 130 "Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб."
+// 44.	total	п. 140 "Итого стоимость без учета НДС, акцизов и пошлины, руб."
+// 45.	dealDoneDate	п. 150 "Дата совершения сделки (цифрами день, месяц, год)"
+// 46.	dealNum3	п. 010 "Порядковый номер сделки (из раздела 1А)"
+// 47.	dealMemberNum	п. 015 "Порядковый номер участника сделки (из раздела 1Б)"
+// 48.	organInfo	п. 020 "Сведения об организации"
+// 49.	countryCode3	п. 030 "Код страны по классификатору ОКСМ"
+// 50.	organName	п. 040 "Наименование организации"
+// 51.	organINN	п. 050 "ИНН организации"
+// 52.	organKPP	п. 060 "КПП организации"
+// 53.	organRegNum	п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
+// 54.	taxpayerCode	п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
+// 55.	address	п. 090 "Адрес"
 
 /**
  * Проверка при создании формы.
@@ -159,15 +157,17 @@ void logicCheck() {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
-
+    def int index = 1
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
+
         // Порядковый номер строки
-        row.dealNum1 = row.getIndex()
-        row.dealNum2 = row.getIndex()
-        row.dealNum3 = row.getIndex()
+        row.dealNum1 = index
+        row.dealNum2 = index
+        row.dealNum3 = index
+        index++
         // TODO расчет полей по справочникам
     }
 
@@ -179,8 +179,7 @@ void calc() {
  */
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    dataRows.clear()
+    dataRowHelper.clear()
 
     int index = 1;
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
@@ -194,6 +193,7 @@ void consolidation() {
             }
         }
     }
+    dataRowHelper.commit()
 }
 
 /**
@@ -202,130 +202,170 @@ void consolidation() {
  * @param type
  */
 def buildRow(DataRow<Cell> srcRow, FormType type) {
+    println(">>> buildRow type = "+type.id+" "+type.name+" srcRow = "+srcRow)
+    // Общие значения
+
+    // "Да"
+    def Long recYesId = null;
+    // "Нет"
+    def Long recNoId = null;
+
+    def valYes = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 0", null)
+    def valNo = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 1", null)
+    if (valYes != null && valYes.size() == 1) {
+        recYesId = valYes.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+    }
+    if (valNo != null && valNo.size() == 1) {
+        recNoId = valNo.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+    }
+
+    // Графа 1
     def row = formData.createDataRow()
-    // TODO Заполнить справочные поля
     // Графа 2
-    // row.interdependenceSing // справочное
+    def val2 = refBookFactory.getDataProvider(69L).getRecords(new Date(), null, "CODE = 1", null)
+    if (val2 != null && val2.size() == 1) {
+        row.interdependenceSing = val2.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+    }
     // Графа 3
-    // row.f121 // справочное
+    // row.f121, заполняется после графы 50
     // Графа 4
-    // row.f122 // справочное
+    row.f122 = recNoId
     // Графа 5
-    // row.f123 // справочное
+    // row.f123, заполняется после графы 50
     // Графа 6
-    // row.f124 // справочное
+    row.f124 = recNoId
     // Графа 7
-    // row.f131 // справочное
+    // row.f131, заполняется после графы 50
     // Графа 8
-    // row.f132 // справочное
+    // row.f132, заполняется после графы 50
     // Графа 9
-    // row.f133 // справочное
+    // row.f133, заполняется после графы 50
     // Графа 10
-    // row.f134 // справочное
+    // row.f134, заполняется после графы 50
     // Графа 11
-    // row.f135 // справочное
+    // row.f135, заполняется после графы 45
     // Графа 12
-    // similarTransactionsGroup // справочное
+    row.similarDealGroup = recNoId
     // Графа 13
-
+    // TODO вопрос Жене
+    def String val13 = null
     switch (type.id) {
         case 376:
-            row.dealNameCode = '002'
+            val13 = '002'
             break
         case 377:
         case 380:
         case 382:
-            row.dealNameCode = '019'
-            break
         case 375:
-            // TODO значение справочника
-            // dealNameCode = srcRow.serviceType
+            val13 = '019'
             break
         case 379:
         case 381:
         case 393:
         case 394:
-            row.dealNameCode = '016'
+            val13 = '016'
             break
         case 383:
         case 391:
         case 392:
-            row.dealNameCode = '032'
+            val13 = '032'
             break
         case 384:
-            row.dealNameCode = '015'
+            val13 = '015'
             break
         case 385:
-            row.dealNameCode = '029'
+            val13 = '029'
             break
         case 386:
         case 388:
-            row.dealNameCode = '003'
+            val13 = '003'
             break
         case 387:
         case 389:
-            row.dealNameCode = '012'
+            val13 = '012'
             break
         case 390:
-            row.dealNameCode = '017'
+            val13 = '017'
             break
     }
-
+    if (val13 != null && type.id != 375) {
+        def values13 = refBookFactory.getDataProvider(67L).getRecords(new Date(), null, "NAME = '$val13'", null)
+        if (values13 != null && values13.size() == 1) {
+            row.dealNameCode = values13.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        }
+    }
     // Графа 14
+    def String val14 = null
     switch (type.id) {
         case 376:
-            row.taxpayerSideCode = '004'
+            val14 = '004'
             break
         case 377:
         case 375:
         case 380:
-            row.taxpayerSideCode = '012'
+            val14 = '012'
             break
         case 379:
-            row.taxpayerSideCode = '029'
+            val14 = '029'
             break
         case 381:
             if (srcRow.outcomeSum == null) {
-                row.taxpayerSideCode = '027'
+                val14 = '027'
             }
             if (srcRow.incomeSum == null) {
-                row.taxpayerSideCode = '026'
+                val14 = '026'
             }
             break
         case 382:
-            row.taxpayerSideCode = '011'
+            val14 = '011'
             break
         case 383:
         case 391:
         case 392:
         case 393:
-            row.taxpayerSideCode = '052'
+            val14 = '052'
             break
         case 384:
-            // TODO значение справочника (S, B)
-            // row.taxpayerSideCode = srcRow.transactionType
+            if (srcRow.transactionType != null) {
+                def val14Rec = refBookFactory.getDataProvider(16L).getRecordData(srcRow.transactionType)
+                if (val14Rec.CODE != null) {
+                    if (val14Rec.CODE.equals('S')) {
+                        val14 = '027'
+                    } else if (val14Rec.CODE.equals('B')) {
+                        val14 = '026'
+                    }
+                }
+            }
             break
         case 385:
         case 387:
         case 389:
-            row.taxpayerSideCode = '022'
+            val14 = '022'
             break
         case 386:
         case 388:
-            row.taxpayerSideCode = '005'
+            val14 = '005'
             break
         case 390:
-            row.taxpayerSideCode = '030'
+            val14 = '030'
             break
         case 394:
             if (srcRow.outcomeSum == null) {
-                row.taxpayerSideCode = '027'
+                val14 = '027'
             }
             if (srcRow.incomeSum == null) {
-                row.taxpayerSideCode = '026'
+                val14 = '026'
             }
             break
     }
+    if (val14 != null) {
+        def values14 = refBookFactory.getDataProvider(65L).getRecords(new Date(), null, "CODE = '$val14'", null)
+        if (values14 != null && values14.size() == 1) {
+            row.taxpayerSideCode = values14.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        }
+    }
+
+    /*
     // Графа 15
     // dealPriceSign // справочное
     // Графа 16
@@ -749,6 +789,8 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
 
+    // TODO заполнить далее графа_11
+
     // Графа 47
     row.dealMemberNum = row.otherNum
 
@@ -829,6 +871,13 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
 
+    // TODO заполнить далее графа_3 row.f121 =
+    // TODO заполнить далее графа_5
+    // TODO заполнить далее графа_7
+    // TODO заполнить далее графа_8
+    // TODO заполнить далее графа_9
+    // TODO заполнить далее графа_10
+
     // Графа 51
     // row.organINN = // Справочное TODO из графы 50
 
@@ -843,4 +892,6 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
 
     // Графа 55
     // row.address = // Справочное TODO из графы 50
+    */
+    return row;
 }

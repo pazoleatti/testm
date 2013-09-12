@@ -99,12 +99,20 @@ public interface DataRowHelper {
 
 	/**
 	 * Сохранение строк НФ
+	 * 
+	 * @deprecated Не должен вызываться из скриптов
+	 * 
 	 */
+	@Deprecated
 	void commit();
 
 	/**
 	 * Отмена изменений сток НФ
+	 * 
+	 * @deprecated Не должен вызываться из скриптов
+	 * 
 	 */
+	@Deprecated
 	void rollback();
 
     /**

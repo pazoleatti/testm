@@ -55,7 +55,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			Widget widget;
 			switch (attr.getAttributeType()) {
 				case NUMBER:
-					widget = new DoubleBox();
+					widget = new TextBox();
 					break;
 				case STRING:
 					widget = new TextBox();
@@ -98,18 +98,21 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			}
 		} else {
 			for (Map.Entry<RefBookAttribute, HasValue> w : widgets.entrySet()) {
-				if (w.getValue() instanceof DoubleBox) {
-					w.getValue().setValue(((BigDecimal)record.get(w.getKey().getAlias()).getValue()) == null ? null :
-							((BigDecimal)record.get(w.getKey().getAlias()).getValue()).doubleValue());
-				} else if (w.getValue() instanceof RefBookPickerPopupWidget) {
+				RefBookValueSerializable recordValue = record.get(w.getKey().getAlias());
+				if (w.getValue() instanceof RefBookPickerPopupWidget) {
 					RefBookPickerPopupWidget rbw = (RefBookPickerPopupWidget) w.getValue();
-					rbw.setDereferenceValue(record.get(w.getKey().getAlias()).getDereferenceValue());
+					rbw.setDereferenceValue(recordValue.getDereferenceValue());
+					rbw.setValue(recordValue.getReferenceValue());
                     rbw.setTitle(String.valueOf(rbw.getDereferenceValue()));
 				} else if(w.getValue() instanceof HasText) {
                     ((Widget)w.getValue()).setTitle(((HasText)w.getValue()).getText());
-					w.getValue().setValue(record.get(w.getKey().getAlias()).getValue());
+					if (w.getKey().getAttributeType() == RefBookAttributeType.NUMBER) {
+						w.getValue().setValue(((BigDecimal)recordValue.getValue()).toPlainString());
+					} else {
+						w.getValue().setValue(recordValue.getValue());
+					}
                 } else {
-					w.getValue().setValue(record.get(w.getKey().getAlias()).getValue());
+					w.getValue().setValue(recordValue.getValue());
 				}
 			}
 		}
@@ -122,7 +125,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			RefBookValueSerializable value = new RefBookValueSerializable();
 			switch (field.getKey().getAttributeType()) {
 				case NUMBER:
-					Number number = field.getValue().getValue() == null ? null : (Number)field.getValue().getValue();
+					Number number = field.getValue().getValue() == null ? null : new BigDecimal((String)field.getValue().getValue());
 					value.setAttributeType(RefBookAttributeType.NUMBER);
 					value.setNumberValue(number);
 					break;

@@ -52,6 +52,8 @@ switch (formDataEvent) {
 // Импорт
     case FormDataEvent.IMPORT:
         importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -66,12 +68,30 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = 0
     ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'dealDoneDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.insert(row, index)
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def pointRow = currentDataRow
+        while(pointRow.getAlias()!=null && index>0){
+            pointRow = dataRows.get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && dataRows.get(index).getAlias()==null){
+            index++
+        }
+    }else if (size>0) {
+        for(int i = size-1;i>=0;i--){
+            def pointRow = dataRows.get(i)
+            if(pointRow.getAlias()==null){
+                index = dataRows.indexOf(pointRow)+1
+                break
+            }
+        }
+    }
+    dataRowHelper.insert(row, index+1)
 }
 /**
  * Проверяет уникальность в отчётном периоде и вид
@@ -89,6 +109,11 @@ void checkUniq() {
  */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+    def dFrom = taxPeriod.getStartDate()
+    def dTo = taxPeriod.getEndDate()
+
     for (row in dataRowHelper.getAllCached()) {
         if (row.getAlias() != null) {
             continue
@@ -116,18 +141,10 @@ void logicCheck() {
                 logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
             }
             //  Корректность даты договора
-            def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-            def dFrom = taxPeriod.getStartDate()
-            def dTo = taxPeriod.getEndDate()
             def dt = docDateCell.value
             if (dt != null && (dt < dFrom || dt > dTo)) {
                 def msg = docDateCell.column.name
-                if (dt > dTo) {
-                    logger.warn("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
-                }
-                if (dt < dFrom) {
-                    logger.warn("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
-                }
+                logger.warn("«$msg» в строке $rowNum не может быть вне налогового периода!")
             }
             // Корректность даты заключения сделки
             if (docDateCell.value > dealDateCell.value) {
@@ -458,7 +475,7 @@ def addData(def xml) {
 
         def indexCell = 0
         // графа 1
-        newRow.rowNumber = indexRow - 2
+        newRow.rowNumber = newRow.index = indexRow - 2
 
         // графа 2
         newRow.fullName = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)

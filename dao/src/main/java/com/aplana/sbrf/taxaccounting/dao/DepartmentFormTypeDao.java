@@ -127,7 +127,7 @@ public interface DepartmentFormTypeDao {
     /**
      * Добавляет налоговые формы, назначенные подразделению
      */
-    void createDepartmentFormType(Long departmentId, int typeId, int formId);
+    void createDepartmentFormType(int departmentId, int typeId, int formId);
 
     /**
      * Удаляет налоговые формы, назначенные подразделению
@@ -137,7 +137,7 @@ public interface DepartmentFormTypeDao {
     /**
      * Добавляет декларации, назначенные подразделению
      */
-    void createDepartmentDeclType(Long departmentId, int declarationId);
+    void createDepartmentDeclType(int departmentId, int declarationId);
 
     /**
      * Удаляет декларации, назначенные подразделению

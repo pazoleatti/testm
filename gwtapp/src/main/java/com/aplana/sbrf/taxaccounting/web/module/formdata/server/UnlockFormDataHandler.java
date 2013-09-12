@@ -28,8 +28,11 @@ public class UnlockFormDataHandler extends AbstractActionHandler<UnlockFormData,
 	@Override
 	public UnlockFormDataResult execute(UnlockFormData action, ExecutionContext executionContext) throws ActionException {
 		UnlockFormDataResult result = new UnlockFormDataResult();
-		result.setUnlockedSuccessfully(formDataService.unlock(action.getFormId(), securityService.currentUserInfo()));
-
+		try{
+			formDataService.unlock(action.getFormId(), securityService.currentUserInfo());
+		} catch (Exception e){
+			//
+		}
 		return result;
 	}
 

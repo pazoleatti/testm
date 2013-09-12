@@ -64,7 +64,7 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
     ['name', 'contractNum', 'contractDate', 'okeiCode', 'price', 'transactionDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
@@ -85,16 +85,17 @@ void logicCheck() {
 
     // Налоговый период
     def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
+
+    int index = 1
 
     for (row in dataRowHelper.getAllCached()) {
         if (row.getAlias() != null) {
             continue
         }
 
-        def rowNum = row.getIndex()
+        def rowNum = index++
 
         [
                 'rowNum', // № п/п
@@ -135,14 +136,7 @@ void logicCheck() {
         def dt = contractDate
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = row.getCell('contractDate').column.name
-
-            if (dt > dTo) {
-                logger.warn("«$msg» не может быть больше даты окончания отчётного периода в строке $rowNum!")
-            }
-
-            if (dt < dFrom) {
-                logger.warn("«$msg» не может быть меньше даты начала отчётного периода в строке $rowNum!")
-            }
+            logger.warn("«$msg» в строке $rowNum не может быть вне налогового периода!")
         }
 
         // Корректность даты совершения сделки
@@ -185,9 +179,9 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    for (row in dataRows) {
+    dataRows.eachWithIndex { row, index ->
         // Порядковый номер строки
-        row.rowNum = row.getIndex()
+        row.rowNum = index + 1
         // Количество
         row.count = 1
         // Итого стоимость без учета НДС, акцизов и пошлин, руб.
@@ -275,7 +269,10 @@ void importData() {
             return
         }
         addData(xml,2)
-//        logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+            logicCheck()
+        }
     } catch(Exception e) {
         logger.error(""+e.message)
     }

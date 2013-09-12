@@ -61,7 +61,19 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT :
         importData()
+        if (!hasError()) {
+            deleteAllStatic()
+            sort()
+            calc()
+            addAllStatic()
+            !hasError() && allCheck()
+        }
         break
+    case FormDataEvent.MIGRATION :
+        importData()
+        if (!hasError()) {
+            addAllStatic()
+        }
 }
 
 /**
@@ -107,44 +119,54 @@ def logicalCheck() {
     def data = getData(formData)
     for (row in getRows(data)) {
         if (row.getAlias() == null) {
+
+            def index = row.tradeNumber
+            def errorMsg
+            if (index!=null && index!='') {
+                errorMsg = "В строке \"Номер сделки\" равной $index "
+            } else {
+                index = row.getIndex()
+                errorMsg = "В строке $index "
+            }
+
             // 1. Проверка на заполнение поля «<Наименование поля>»
             if (!checkRequiredColumns(row,['outcome269st', 'outcomeTax'])){
                 return false
             }
             // 2. Проверка даты первой части РЕПО
             if (row.part1REPODate != null && reportDate.time.before((Date) row.part1REPODate)) {
-                logger.error("Неверно указана дата первой части сделки!")
+                logger.error(errorMsg + "неверно указана дата первой части сделки!")
                 return false
             }
             // 3. Проверка даты второй части РЕПО
             if (row.part2REPODate != null
                     && (reportPeriodService.getStartDate(formData.reportPeriodId).time.after((Date) row.part2REPODate) || reportPeriodService.getEndDate(formData.reportPeriodId).time.before((Date) row.part2REPODate)
             )) {
-                logger.error("Неверно указана дата второй части сделки!")
+                logger.error(errorMsg + "неверно указана дата второй части сделки!")
                 return false
             }
 
             // 4. Проверка финансового  результата на основе http://jira.aplana.com/browse/SBRFACCTAX-2870
             if (row.outcome > 0 && row.income > 0) {
-                logger.error("Задвоение финансового результата!")
+                logger.error(errorMsg + "задвоение финансового результата!")
                 return false
             }
 
             // 6. Проверка финансового результата
             if (row.outcome == 0 && !(row.outcome269st == 0 && row.outcomeTax == 0)) {
-                logger.error("Задвоение финансового результата!")
+                logger.error(errorMsg + "задвоение финансового результата!")
                 return false
             }
 
             // 7. Проверка финансового результата
             BigDecimal temp = (row.salePrice ?: 0) - (row.acquisitionPrice ?: 0)
             if (temp < 0 && !(temp.abs() == row.income)) {
-                logger.warn("Неверно определены доходы")
+                logger.warn(errorMsg + "неверно определены доходы")
             }
 
             // 8. Проверка финансового результата
             if (temp > 0 && !(temp == row.outcome)) {
-                logger.warn("Неверно определены расходы")
+                logger.warn(errorMsg + "неверно определены расходы")
             }
 
             // 9. Арифметические проверки граф 9, 10, 11, 12, 13
@@ -157,7 +179,7 @@ def logicalCheck() {
             value.put('outcomeTax', calc13(row))
             for (String check in checks) {
                 if (row.getCell(check).value != value.get(check)) {
-                    logger.error("Неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '%%') + "!")
+                    logger.error(errorMsg + "неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '%%') + "!")
                     return false
                 }
             }
@@ -389,29 +411,28 @@ BigDecimal calc10(DataRow row) {
  * @param rateDate
  */
 def calc11(DataRow row, def rateDate) {
-    if (row.currencyCode == null) {
+    // Если «графа 10» = 0, то « графа 11» не заполняется;
+    // Если «графа 3» не заполнена, то « графа 11» не заполняется
+    if (row.outcome == 0 || row.currencyCode == null) {
         return null
     }
     def currency = getCurrency(row.currencyCode)
-    def rate = getRate(rateDate)
-    // Если «графа 10» = 0, то « графа 11» не заполняется; && Если «графа 3» не заполнена, то « графа 11» не заполняется
-    if (!isItogoRow(row) && row.outcome != 0 && row.currencyCode != null){
-        // Если «графа 3» = 810, то «графа 11» = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на дату «графа 6»,
-        if (currency == '810')    {
-            return rate
-        } else{ // Если «графа 3» ≠ 810), то
-            // Если «графа 6» принадлежит периоду с 01.09.2008 по 31.12.2009 (включительно), то «графа 11» = 22;
-            if (inPeriod(rateDate, '01.09.2008', '31.12.2009')){
-                return 22
-            } else if (inPeriod(rateDate, '01.01.2011', '31.12.2012')){
-                // Если «графа 6» принадлежит периоду с 01.01.2011 по 31.12.2012 (включительно), то
-                // графа 11 = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на дату «графа 6»;
-                return rate
-            } else{
-                //Если  «графа 6» не принадлежит отчётным периодам с 01.09.2008 по 31.12.2009 (включительно), с 01.01.2011 по 31.12.2012 (включительно)),
-                //то  «графа 11» = 15.
-                return 15
-            }
+
+    // Если «графа 3» = 810, то «графа 11» = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на дату «графа 6»,
+    if (currency == '810') {
+        return getRate(rateDate)
+    } else { // Если «графа 3» ? 810), то
+        // Если «графа 6» принадлежит периоду с 01.09.2008 по 31.12.2009 (включительно), то «графа 11» = 22;
+        if (inPeriod(rateDate, '01.09.2008', '31.12.2009')){
+            return 22
+        } else if (inPeriod(rateDate, '01.01.2011', '31.12.2012')){
+            // Если «графа 6» принадлежит периоду с 01.01.2011 по 31.12.2012 (включительно), то
+            // графа 11 = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на дату «графа 6»;
+            return getRate(rateDate)
+        } else{
+            //Если  «графа 6» не принадлежит отчётным периодам с 01.09.2008 по 31.12.2009 (включительно), с 01.01.2011 по 31.12.2012 (включительно)),
+            //то  «графа 11» = 15.
+            return 15
         }
     }
 }
@@ -426,23 +447,28 @@ BigDecimal calc12(DataRow row) {
     def countDaysInYear = getCountDaysInYear()
     def currency = getCurrency(row.currencyCode)
     if (row.outcome != null && row.outcome > 0) {
-        long difference = (row.part2REPODate.getTime() - row.part1REPODate.getTime()) / (1000 * 60 * 60 * 24) // необходимо получить кол-во в днях
+        long difference = 0
+        if (row.part2REPODate != null && row.part1REPODate != null) {
+            difference = (row.part2REPODate.getTime() - row.part1REPODate.getTime()) / (1000 * 60 * 60 * 24)
+        }
+        // необходимо получить кол-во в днях
         difference = difference == 0 ? 1 : difference   // Эти вычисления для того чтобы получить разницу в днях, если она нулевая считаем равной 1 так написано в чтз
         if (currency == '810') {
-            if (inPeriod(row.part2REPODate, '01.09.2008', '31.12.2009')) {
+            if (row.part2REPODate != null && inPeriod(row.part2REPODate, '01.09.2008', '31.12.2009')) {
                 /*
                 a.  Если «графа 6» принадлежит периоду с 01.09.2008 по 31.12.2009, то:
                     «графа 12» = («графа 7» ? «графа 11» ? 1,5) ? ((«графа6» - «графа5») / 365 (366)) / 100;
 
                  */
                 result = ((row.acquisitionPrice ?: 0) * (row.rateBR ?: 0) * 1.5) * (difference / countDaysInYear) / 100
-            } else if (inPeriod(row.part2REPODate, '01.01.2010', '30.06.2010') && row.part1REPODate.compareTo(date01_11_2009) < 0) {
+            } else if (row.part2REPODate != null && row.part1REPODate!= null &&
+                    inPeriod(row.part2REPODate, '01.01.2010', '30.06.2010') && row.part1REPODate.compareTo(date01_11_2009) < 0) {
                 /*
                 b.  Если «графа 6» принадлежит периоду с 01.01.2010 по 30.06.2010 и одновременно сделка открыта до 01.11.2009 («графа 5» < 01.11.2009 г.), то
                     «графа 12» = («графа 7» ? «графа 11» ? 2) ? ((«графа 6» - «графа 5») / 365 (366)) / 100;
                  */
                 result = ((row.acquisitionPrice ?: 0) * (row.rateBR ?: 0) * 2) * (difference / countDaysInYear) / 100
-            } else if (inPeriod(row.part2REPODate, '01.01.2010', '31.12.2012')) {
+            } else if (row.part2REPODate != null && inPeriod(row.part2REPODate, '01.01.2010', '31.12.2012')) {
                 /*
                 c.  Если «графа 6» принадлежит периоду с 01.01.2010 по 31.12.2012, то:
                     «графа 12» = («графа 7» ? «графа 11» ? 1,8) ? ((«графа6» - «графа5») / 365(366)) / 100.
@@ -457,7 +483,7 @@ BigDecimal calc12(DataRow row) {
             }
         } else {
             result = ((row.acquisitionPrice ?: 0) * (row.rateBR ?: 0)) * (difference / countDaysInYear) / 100
-            if (inPeriod(row.part2REPODate, '01.01.2011', '31.12.2012')) {
+            if (row.part2REPODate != null && inPeriod(row.part2REPODate, '01.01.2011', '31.12.2012')) {
                 result = ((row.acquisitionPrice ?: 0) * (row.rateBR ?: 0) * 0.8) * (difference / countDaysInYear) / 100
             }
         }
@@ -653,7 +679,7 @@ def getCurrency(def currencyCode) {
 /**
  * Проверить попадает ли указанная дата в период
  */
-def inPeriod(def date, def from, to) {
+def inPeriod(def date, def from, def to) {
     if (date == null) {
         return false
     }
@@ -720,15 +746,6 @@ void importData() {
     if (!hasError()) {
         logger.info('Закончена загрузка файла ' + fileName)
     }
-
-        // добавить данные в форму
-        def totalLoad = addData(xml)
-        if (totalLoad!=null) {
-
-        } else {
-            logger.error("Нет итоговой строки.")
-        }
-
 }
 
 /**
@@ -883,9 +900,14 @@ def getNewRow() {
 }
 
 /**
- * Получить идентификатор записи из справочника.
+ * Получить id справочника.
  *
- * @param value
+ * @param ref_id идентификатор справончика
+ * @param code атрибут справочника
+ * @param value значение для поиска
+ * @param date дата актуальности
+ * @param cache кеш
+ * @return
  */
 def getRecordId(def ref_id, String code, String value, Date date, def cache) {
     String filter = code + " like '" + value.replaceAll(' ', '') + "%'"
@@ -900,7 +922,7 @@ def getRecordId(def ref_id, String code, String value, Date date, def cache) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
-    logger.error("Не удалось определить элемент справочника!")
+    logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
     return null;
 }
 
@@ -916,34 +938,26 @@ def getDate(def value) {
 }
 
 /**
- * Рассчитать, проверить и сравнить итоги.
+ * Cравнить итоги.
  *
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    deleteAllStatic()
-    sort()
-    calc()
-    addAllStatic()
-    if (!hasError() && allCheck()) {
-        def data = getData(formData)
-        def totalColumns = [4: 'nominalPrice', 7: 'acquisitionPrice', 8: 'salePrice',
-                9: 'income', 10: 'outcome', 12: 'outcome269st', 13: 'outcomeTax']
+    def totalColumns = [4: 'nominalPrice', 7: 'acquisitionPrice', 8: 'salePrice',
+            9: 'income', 10: 'outcome', 12: 'outcome269st', 13: 'outcomeTax']
 
-        def totalCalc = null
-        for (def row : getRows(data)) {
-            if (isItogoRow(row)) {
-                totalCalc = row
-                break
+    def totalCalc = getItogo()
+    def errorColums = []
+    if (totalCalc != null) {
+        totalColumns.each { index, columnAlias ->
+            if (totalCalc[columnAlias] != totalRow[columnAlias]) {
+                errorColums.add(index)
             }
         }
-        if (totalCalc != null) {
-            totalColumns.each { index, columnAlias ->
-                if (totalCalc[columnAlias] != totalRow[columnAlias]) {
-                    logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
-                }
-            }
-        }
+    }
+    if (!errorColums.isEmpty()) {
+        def columns = errorColums.join(', ')
+        logger.error("Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
 }
 

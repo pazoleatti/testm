@@ -281,6 +281,16 @@ def logicalCheck(def useLog) {
                 hasTotal = true
                 continue
             }
+
+            def index = row.rowNumber
+            def errorMsg
+            if (index != null) {
+                errorMsg = "В строке \"№ пп\" равной $index "
+            } else {
+                index = getIndex(row) + 1
+                errorMsg = "В строке $index "
+            }
+
             // 1. Обязательность заполнения полей (графа 1..12)
             // список проверяемых столбцов (графа 1..12)
             def requiredColumns = ['rowNumber', 'code', 'date', 'balance',
@@ -295,7 +305,7 @@ def logicalCheck(def useLog) {
             // 2. Проверка на нулевые значения (графа 9, 10, 11, 12)
             if (row.taxAccountingCurrency == 0 && row.taxAccountingRuble == 0 &&
                     row.accountingCurrency == 0 && row.ruble == 0) {
-                logger.error('Все суммы по операции нулевые!')
+                logger.error(errorMsg + 'все суммы по операции нулевые!')
                 return false
             }
 
@@ -306,19 +316,19 @@ def logicalCheck(def useLog) {
 
             if ((row.taxAccountingRuble > 0 && row.ruble == 0) ||
                     (row.taxAccountingRuble == 0 && row.ruble > 0))  {
-                logger.warn('Одновременно указаны данные по налоговому (графа 10) и бухгалтерскому (графа 12) учету')
+                logger.warn(errorMsg + 'одновременно указаны данные по налоговому (графа 10) и бухгалтерскому (графа 12) учету')
                 return false
             }
 
             // 4. Проверка даты совершения операции и границ отчётного периода (графа 3)
             if (row.date < a || b < row.date) {
-                logger.error('Дата совершения операции вне границ отчётного периода!')
+                logger.error(errorMsg + 'дата совершения операции вне границ отчётного периода!')
                 return false
             }
 
             // 6. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода
             if (row.taxAccountingRuble > row.ruble) {
-                logger.warn('Сумма данных бухгалтерского учёта превышает сумму начисленных платежей для документа ' + row.docNumber + ' от ' + row.docDate)
+                logger.warn(errorMsg + 'сумма данных бухгалтерского учёта превышает сумму начисленных платежей для документа ' + row.docNumber + ' от ' + row.docDate)
             }
 
             // 8. Проверка на уникальность поля «№ пп» (графа 1)
@@ -336,7 +346,6 @@ def logicalCheck(def useLog) {
             m.put(5, row.docNumber);
             m.put(6, row.docDate);
             if (uniq456.contains(m)) {
-                def index = ((Integer)(getRows(data).indexOf(row) + 1))
                 SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
                 logger.error("Для строки $index имеется  другая запись в налоговом учете с аналогичными значениями балансового счета=%s, документа № %s от %s.", getNumberAttribute(row.code).toString(), row.docNumber.toString(), dateFormat.format(row.docDate))
             }
@@ -344,16 +353,16 @@ def logicalCheck(def useLog) {
 
             // 10. Проверка соответствия балансового счета коду налогового учета
             if (row.code != row.balance) {
-                logger.error('Балансовый счет не соответствует коду налогового учета!')
+                logger.error(errorMsg + 'балансовый счет не соответствует коду налогового учета!')
             }
 
             // 11. Арифметические проверки расчета неитоговых строк
             if (row.taxAccountingRuble != round(row.taxAccountingCurrency * row.rateOfTheBankOfRussia, 2)) {
-                logger.error('Неверно рассчитана графа "Сумма расхода в налоговом учёте - Рубли"')
+                logger.error(errorMsg + 'неверно рассчитана графа "Сумма расхода в налоговом учёте - Рубли"')
                 return false
             }
             if (row.ruble != round(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)) {
-                logger.error('Неверно рассчитана графа "Сумма расхода в бухгалтерском учёте - Рубли"')
+                logger.error(errorMsg + 'неверно рассчитана графа "Сумма расхода в бухгалтерском учёте - Рубли"')
                 return false
             }
             // 14,15. Проверка наличия суммы расхода в налоговом учете, для первичного документа, указанного для суммы расхода в бухгалтерском учёте
@@ -391,8 +400,8 @@ def logicalCheck(def useLog) {
                 def row = getRowByAlias(data, ('total' + codeName))
                 for (def alias : totalColumns) {
                     if (calcSumByCode(codeName, alias) != row.getCell(alias).getValue()) {
-                        if (alias == 'taxAccountingRuble') logger.error("Неверное значение " + getCodeAttribute(codeName) + " для графы \"Рубли\" (Сумма расхода в налоговом учёте)!")
-                        else logger.error("Неверное значение " + getCodeAttribute(codeName) + " для графы \"Рубли\" (Сумма расхода в бухгалтерском учёте)!")
+                        if (alias == 'taxAccountingRuble') logger.error("Неверное итоговое значение " + getCodeAttribute(codeName) + " для графы \"Рубли\" (Сумма расхода в налоговом учёте)!")
+                        else logger.error("Неверное итоговое значение " + getCodeAttribute(codeName) + " для графы \"Рубли\" (Сумма расхода в бухгалтерском учёте)!")
                         return false
                     }
                 }
@@ -464,14 +473,24 @@ def checkNSI() {
                 continue
             }
 
+            def index = row.rowNumber
+            def errorMsg
+            if (index != null) {
+                errorMsg = "В строке \"№ пп\" равной $index "
+            } else {
+                index = getIndex(row) + 1
+                errorMsg = "В строке $index "
+            }
+
+
             // 1. Проверка графа «Код налогового учета» (графа 2)
             if (refBookService.getRecordData(expensesClassifierRefBookId, row.code) == null) {
-                logger.warn('Код налогового учёта в справочнике отсутствует!')
+                logger.warn(errorMsg + 'код налогового учёта в справочнике отсутствует!')
             }
 
             // 2. Проверка графы «Номер балансового счета» (графа 3)
             if (refBookService.getRecordData(expensesClassifierRefBookId, row.balance) == null) {
-                logger.error('Номер балансового счета в справочнике отсутствует!')
+                logger.error(errorMsg + 'номер балансового счета в справочнике отсутствует!')
                 return false
             }
 
@@ -480,7 +499,7 @@ def checkNSI() {
             if (row.date != null)
             {
                 if (currCode == null) {
-                    logger.error('Код валюты в справочнике отсутствует!')
+                    logger.error(errorMsg + 'код валюты в справочнике отсутствует!')
                     return false
                 } else {
                     def records = refDataProvider.getRecords(row.date, null, "CODE_NUMBER = " + row.currencyCode, null)
@@ -488,10 +507,10 @@ def checkNSI() {
                         def record = records.getRecords().getAt(0)
                         def rate = record.get('RATE') // атрибут "Курс валюты"
                         if (row.rateOfTheBankOfRussia != rate.getNumberValue()) {
-                            logger.warn('Неверный курс валюты!')
+                            logger.warn(errorMsg + 'неверный курс валюты!')
                         }
                     } else {
-                        logger.warn('Неверный курс валюты!')
+                        logger.warn(errorMsg + 'неверный курс валюты!')
                     }
                 }
             }
@@ -523,7 +542,7 @@ void consolidation() {
     def data = getData(formData)
 
     // удалить все строки и собрать из источников их строки
-    getRows(data).clear()
+    data.clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {

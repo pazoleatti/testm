@@ -41,22 +41,21 @@ public interface FormDataService {
      * @param kind
      * @param reportPeriodId
      */
+	@Deprecated
 	void importFormDataTest(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId);
 
     /**
      * Метод для импорта данных из xls-файлов
+     * 
      * @param logger
      * @param userInfo
      * @param formDataId
-     * @param formTemplateId
-     * @param departmentId
-     * @param kind
-     * @param reportPeriodId
-     * @param inputStream
+     * @param is
      * @param fileName
+     * 
+     * TODO (sgoryachkin) заменить параметры is и fileName на uid блоба
      */
-    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId,int formTemplateId,
-                               int departmentId, FormDataKind kind, int reportPeriodId, InputStream inputStream, String fileName);
+    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream is, String fileName);
 	
 	
 	/**
@@ -154,7 +153,7 @@ public interface FormDataService {
 	 * @param userInfo информация о пользователе
 	 * @return true - если удалось заблокировать налоговую форму, иначе - false
 	 * */
-	boolean lock(long formDataId, TAUserInfo userInfo);
+	void lock(long formDataId, TAUserInfo userInfo);
 	
 	/**
 	 * Снять блокировку с FormData.
@@ -162,13 +161,14 @@ public interface FormDataService {
 	 * @param userInfo информация о пользователе
 	 * @return true - если удалось разблокировать налоговую форму, иначе - false
 	 * */
-	boolean unlock(long formDataId, TAUserInfo userInfo);
+	void unlock(long formDataId, TAUserInfo userInfo);
 
 	/**
 	 * Снять все блокировки с FormData для пользователя
 	 * @param userInfo информация о пользователе
 	 * @return true - если удалось разблокировать, иначе - false
 	 */
+	@Deprecated
 	boolean unlockAllByUser(TAUserInfo userInfo);
 
 	/**
@@ -176,5 +176,5 @@ public interface FormDataService {
 	 * @param formDataId - идентификатор налоговой формы
 	 * @return информацию о блокировке объекта
 	 */
-	ObjectLock<Long> getObjectLock(long formDataId);
+	ObjectLock<Long> getObjectLock(long formDataId, TAUserInfo userInfo);
 }

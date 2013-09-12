@@ -2,11 +2,13 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
@@ -33,7 +35,7 @@ import java.util.*;
  * @author Dmitriy Levykin
  */
 public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiHandlers>
-        implements DepartmentConfigPresenter.MyView, Editor<DepartmentCombined> {
+        implements DepartmentConfigPresenter.MyView, Editor<DepartmentCombined>, ReportPeriodSelectHandler {
 
     // Признак режима редактирования
     private boolean isEditMode = false;
@@ -56,7 +58,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     private Integer currentDepartmentId;
 
     // Выбранный период
-    private Integer currentReportPeriodId;
+    private ReportPeriod currentReportPeriod;
 
     // Выбранный тип налога
     private TaxType currentTaxType = TaxType.INCOME;
@@ -104,8 +106,9 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     // Контейнер для справочника периодов
     @UiField
-    @Editor.Ignore
-    PeriodPickerPopup periodPickerPopup;
+    @Ignore
+    SimplePanel reportPeriodPanel;
+    ReportPeriodPicker period = new ReportPeriodPicker(this, false);
 
     @UiField
     @Ignore
@@ -141,25 +144,18 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         initWidget(uiBinder.createAndBindUi(this));
         driver.initialize(this);
         enableAllChildren(false, formPanel);
+        departmentPicker.setWidth("500px");
+        reportPeriodPanel.add(period);
         departmentPicker.setWidth(500);
         initListeners();
     }
 
     private void initListeners() {
-        periodPickerPopup.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<List<Integer>> event) {
-                if (event.getValue().size() == 1) {
-                    onReportPeriodsSelected(event.getValue().get(0));
-                    editButton.setVisible(isReportPeriodActive);
-                }
-            }
-        });
         // Подразделение
         departmentPicker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+			
+			@Override
+			public void onValueChange(ValueChangeEvent<List<Integer>> event) {
 
                 if (event == null || event.getValue().isEmpty()) {
                     return;
@@ -187,15 +183,18 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
                 DepartmentConfigView.this.currentDepartmentId = selDepartmentId;
 
-                currentReportPeriodId = null;
+                currentReportPeriod = null;
 
                 // Очистка формы
                 clear();
 
                 updateVisibility();
-            }
-        });
 
+                // Обновление налоговых периодов
+                reloadTaxPeriods();
+			}
+		});
+        		
 
         // Вид налога
         taxType.addChangeHandler(new ChangeHandler() {
@@ -221,14 +220,14 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
                 // Очистка формы
                 clear();
-                currentReportPeriodId = null;
+                currentReportPeriod = null;
                 updateVisibility();
 
                 // Обновление дерева подразделений
                 reloadDepartments();
 
                 // Обновление налоговых периодов
-                // reloadReportPeriods();
+                // reloadTaxPeriods();
             }
         });
     }
@@ -257,14 +256,26 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     }
 
     @Override
+    public void reloadTaxPeriods() {
+        getUiHandlers().reloadTaxPeriods(currentTaxType, currentDepartmentId);
+    }
+
+    @Override
     public void reloadDepartments() {
         getUiHandlers().reloadDepartments(currentTaxType, currentDepartmentId);
     }
 
     @Override
+    public void setReportPeriod(ReportPeriod reportPeriod) {
+        currentReportPeriod = reportPeriod;
+        period.setSelectedReportPeriods(Arrays.asList(currentReportPeriod));
+        editButton.setVisible(reportPeriod != null && isReportPeriodActive);
+    }
+
+    @Override
     public void reloadDepartmentParams() {
         getUiHandlers().reloadDepartmentParams(currentDepartmentId, currentTaxType,
-                currentReportPeriodId == null ? null : currentReportPeriodId);
+                currentReportPeriod == null ? null : currentReportPeriod.getId());
     }
 
     @Override
@@ -330,10 +341,11 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @UiHandler("saveButton")
     public void onSave(ClickEvent event) {
-        getUiHandlers().save(driver.flush(), currentReportPeriodId);
+        getUiHandlers().save(driver.flush(), currentReportPeriod);
         driver.edit(data);
 
-        if (dereferenceValues != null) {
+        if (dereferenceValues != null)
+        {
             // Обновление разыменованных значений
             dereferenceValues.clear();
             dereferenceValues.put(dictRegionId.getAttributeId(), dictRegionId.getDereferenceValue());
@@ -357,7 +369,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @UiHandler("editButton")
     public void onEdit(ClickEvent event) {
-        if (currentReportPeriodId != null && isReportPeriodActive) {
+        if (currentReportPeriod != null && isReportPeriodActive) {
             setEditMode(true);
         }
     }
@@ -369,7 +381,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
      */
     private void setEditMode(boolean isEditMode) {
         this.isEditMode = isEditMode;
-        editButton.setVisible(!isEditMode && currentReportPeriodId != null && isReportPeriodActive);
+        editButton.setVisible(!isEditMode && currentReportPeriod != null && isReportPeriodActive);
         saveButton.setVisible(isEditMode);
         cancelButton.setVisible(isEditMode);
         enableAllChildren(isEditMode, formPanel);
@@ -394,16 +406,25 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         }
     }
 
-    public void onReportPeriodsSelected(Integer reportPeriodId) {
+    @Override
+    public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
+        getUiHandlers().onTaxPeriodSelected(taxPeriod, currentDepartmentId);
+    }
+
+    @Override
+    public void onReportPeriodsSelected(Map<Integer, ReportPeriod> selectedReportPeriods) {
+        ReportPeriod reportPeriod = getReportPeriod(selectedReportPeriods);
 
         // Проверка совпадения выбранного подразделения с текущим
-        if (this.currentReportPeriodId != null && reportPeriodId != null && this.currentReportPeriodId.equals(reportPeriodId)) {
+        if (this.currentReportPeriod != null && reportPeriod != null && this.currentReportPeriod.getId().equals(reportPeriod.getId())) {
             return;
         }
 
         boolean checkPass = checkUnsaved(new CheckUnsavedHandler() {
             @Override
             public void onCancel() {
+                // Вернуть старое значение
+                period.setSelectedReportPeriods(Arrays.asList(DepartmentConfigView.this.currentReportPeriod));
             }
         });
 
@@ -411,10 +432,10 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             return;
         }
 
-        this.currentReportPeriodId = reportPeriodId;
+        this.currentReportPeriod = reportPeriod;
 
         // Редактировать можно только открытые периоды
-        editButton.setVisible(reportPeriodId != null && isReportPeriodActive);
+        editButton.setVisible(reportPeriod != null && isReportPeriodActive);
 
         updateVisibility();
         reloadDepartmentParams();
@@ -428,17 +449,25 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     @Override
     public void setDepartment(final Department department) {
         if (department != null) {
-            departmentPicker.setValue(Arrays.asList(department.getId()), true);
+        	departmentPicker.setValue(Arrays.asList(department.getId()), true);
             updateVisibility();
             reloadDepartmentParams();
         }
-
+        
         this.currentDepartmentId = department != null ? department.getId() : null;
     }
 
     @Override
+    public void setTaxPeriods(List<TaxPeriod> taxPeriods) {
+        reportPeriodPanel.clear();
+        period = new ReportPeriodPicker(this, false);
+        period.setTaxPeriods(taxPeriods);
+        reportPeriodPanel.add(period);
+    }
+
+    @Override
     public void setReportPeriods(List<ReportPeriod> reportPeriods) {
-        periodPickerPopup.setPeriods(reportPeriods);
+        period.setReportPeriods(reportPeriods);
     }
 
     @Override
@@ -449,8 +478,9 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @Override
     public void setDereferenceValue(Map<Long, String> rbTextValues) {
-        this.dereferenceValues = rbTextValues;
-        if (dereferenceValues != null) {
+        this.dereferenceValues =  rbTextValues;
+        if (dereferenceValues != null)
+        {
             // Заполнение текстовых значений справочников
             dictRegionId.setDereferenceValue(rbTextValues.get(dictRegionId.getAttributeId()));
             reorgFormCode.setDereferenceValue(rbTextValues.get(reorgFormCode.getAttributeId()));
@@ -477,6 +507,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     @Override
     public void setReportPeriodActive(boolean reportPeriodActive) {
         isReportPeriodActive = reportPeriodActive;
-        editButton.setVisible(currentReportPeriodId != null && isReportPeriodActive);
+        editButton.setVisible(currentReportPeriod != null && isReportPeriodActive);
     }
 }

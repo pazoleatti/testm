@@ -9,18 +9,10 @@ import com.aplana.sbrf.taxaccounting.model.util.FormTypeAlphanumericComparator;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class FormDataSearchServiceImpl implements FormDataSearchService {
@@ -116,7 +108,12 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 				kinds.remove(FormDataKind.ADDITIONAL);
 				kinds.remove(FormDataKind.UNP);
 			}
-			result.setKinds(kinds);
+            // TODO Временное решение, пункт 21 http://conf.aplana.com/pages/viewpage.action?pageId=8790172
+            if (taxType == TaxType.DEAL) {
+                kinds.remove(FormDataKind.CONSOLIDATED);
+                kinds.remove(FormDataKind.SUMMARY);
+            }
+            result.setKinds(kinds);
 			
 			// все виды налоговых форм по заданному виду налога
 			List<FormType> formTypesList = formTypeDao.listAllByTaxType(taxType); 
@@ -151,6 +148,12 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			departmentIds.add(dft.getDepartmentId());
 		}
 
+        // TODO Временное решение, пункт 21 http://conf.aplana.com/pages/viewpage.action?pageId=8790172
+        if (taxType == TaxType.DEAL) {
+            kinds.remove(FormDataKind.CONSOLIDATED);
+            kinds.remove(FormDataKind.SUMMARY);
+        }
+
 		// Подразделение пользователя должно быть доступно
 		// Этот викс пришлось сделать для Ведения периодов.
 		// Для поиска форм департаметнт текущего подразделения сюда попадает, т.к. ему должны быть назначены формы. 
@@ -162,9 +165,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		List<FormType> formTypesList = new ArrayList<FormType>(formTypes.values());
 		Collections.sort(formTypesList, new FormTypeAlphanumericComparator());
 		result.setFormTypeIds(formTypesList);
-		
 		processKindListForCurrentUser(userInfo.getUser(), kinds);
-
 		List<FormDataKind> kindsList = new ArrayList<FormDataKind>(kinds);
 		Collections.sort(kindsList);
 		result.setKinds(kindsList);

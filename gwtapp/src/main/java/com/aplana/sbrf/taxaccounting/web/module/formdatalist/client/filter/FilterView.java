@@ -13,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.editor.client.Editor;
@@ -26,7 +25,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ValueListBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -58,7 +56,7 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 	Panel departmentSelectionTreePanel;
 
 	@UiField
-	VerticalPanel reportPeriodPanel;
+	Panel reportPeriodPanel;
 
 	private final Map<TaxType, PeriodPicker> taxTypeReportPeriodPickerMap = new HashMap<TaxType, PeriodPicker>();
 	private final Map<TaxType, DepartmentPickerPopupWidget> taxTypeDepartmentSelectionTree = new HashMap<TaxType, DepartmentPickerPopupWidget>();
@@ -118,10 +116,12 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
         this.driver.initialize(this);
 
 	    for (TaxType taxType : TaxType.values()){
-	    	PeriodPickerPopup periodPiker = new PeriodPickerPopupWidget(true);
+	    	PeriodPickerPopupWidget periodPiker = new PeriodPickerPopupWidget(true);
+	    	periodPiker.setWidth("100%");
 		    taxTypeReportPeriodPickerMap.put(taxType, periodPiker);
 		    
 		    DepartmentPickerPopupWidget depPiker = new DepartmentPickerPopupWidget("Выберите подразделение", true);
+		    depPiker.setWidth("100%");
 		    taxTypeDepartmentSelectionTree.put(taxType, depPiker);
 	    }
     }

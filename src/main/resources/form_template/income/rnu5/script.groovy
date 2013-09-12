@@ -129,7 +129,10 @@ void calc() {
         deleteRow(data, it)
     }
 
-    getRows(data).each { row ->
+    getRows(data).eachWithIndex { row, index ->
+        // графа 1
+        row.rowNumber = index + 1
+
         // графа 2
         row.code = row.number
 
@@ -282,28 +285,38 @@ def checkNSI() {
             if (isTotal(row)) {
                 continue
             }
+
+            def index = row.rowNumber
+            def errorMsg
+            if (index != null) {
+                errorMsg = "В строке \"№ пп\" равной $index "
+            } else {
+                index = getIndex(row) + 1
+                errorMsg = "В строке $index "
+            }
+
             // 4. Проверка соответствия графы 2, 3, 4 одной записи в справочнике
             if (row.code != row.number) {
-                logger.warn('Код налогового учета не соответствует номеру балансового счета')
+                logger.warn(errorMsg + 'код налогового учета не соответствует номеру балансового счета')
             }
             if (row.code != row.name) {
-                logger.warn('Наименование балансового счета не соответствует номеру балансового счета')
+                logger.warn(errorMsg + 'наименование балансового счета не соответствует номеру балансового счета')
             }
 
             // 1. Проверка графа «Код налогового учета» (графа 2)
             if (refBookService.getRecordData(refBookId, row.code) == null) {
-                logger.warn('Код налогового учёта в справочнике отсутствует!')
+                logger.warn(errorMsg + 'код налогового учёта в справочнике отсутствует!')
             }
 
             // 1. Проверка графы «Номер балансового счета» (графа 3)
             if (refBookService.getRecordData(refBookId, row.number) == null) {
-                logger.error('Номер балансового счета в справочнике отсутствует!')
+                logger.error(errorMsg + 'номер балансового счета в справочнике отсутствует!')
                 return false
             }
 
             // 3. Проверка графы «Наименование балансового счета» (графа 4)
             if (refBookService.getRecordData(refBookId, row.name) == null) {
-                logger.warn('Наименование балансового счета в справочнике отсутствует!')
+                logger.warn(errorMsg + 'наименование балансового счета в справочнике отсутствует!')
                 return false
             }
         }
@@ -318,7 +331,7 @@ void consolidation() {
     def data = getData(formData)
 
     // удалить все строки и собрать из источников их строки
-    getRows(data).clear()
+    data.clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {

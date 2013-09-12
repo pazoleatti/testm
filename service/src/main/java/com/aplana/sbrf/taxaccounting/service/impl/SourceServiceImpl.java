@@ -84,7 +84,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public void saveForm(Long departmentId, int typeId, int formId) {
-        departmentFormTypeDao.createDepartmentFormType(departmentId, typeId, formId);
+        departmentFormTypeDao.createDepartmentFormType(departmentId.intValue(), typeId, formId);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public void saveDeclaration(Long departmentId, int declarationId) {
-        departmentFormTypeDao.createDepartmentDeclType(departmentId, declarationId);
+        departmentFormTypeDao.createDepartmentDeclType(departmentId.intValue(), declarationId);
     }
 
     @Override

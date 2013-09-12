@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -122,8 +121,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 
 		initWidget(uiBinder.createAndBindUi(this));
 
-		departmentReceiverPicker.setWidth(500);
-		departmentSourcePicker.setWidth(500);
 		departmentReceiverPicker.addValueChangeHandler(this);
 		departmentSourcePicker.addValueChangeHandler(this);
 

@@ -5,6 +5,11 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implements ActionName {
 	
+	/**
+	 * Старые данные формы для разблокировки
+	 */
+	private Long oldFormDataId;
+	
 	private Long formDataId;
 
 	private boolean readOnly;
@@ -24,6 +29,15 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implemen
 	public void setReadOnly(boolean lockFormData) {
 		this.readOnly = lockFormData;
 	}
+
+	public Long getOldFormDataId() {
+		return oldFormDataId;
+	}
+
+	public void setOldFormDataId(Long oldFormDataId) {
+		this.oldFormDataId = oldFormDataId;
+	}
+	
 
 	@Override
 	public String getName() {
