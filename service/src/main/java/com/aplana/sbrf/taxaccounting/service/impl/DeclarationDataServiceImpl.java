@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
@@ -49,6 +50,8 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
  * Сервис для работы с декларациями
@@ -130,15 +133,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	public void check(Logger logger, long id, TAUserInfo userInfo) {
-		declarationDataScriptingService.executeScript(userInfo, declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
-		// Проверяем ошибки при пересчете
-		if (logger.containsLevel(LogLevel.ERROR)) {
-			throw new ServiceLoggerException(
-					"Найдены ошибки при выполнении проверки декларации",
-					logger.getEntries());
-		} else {
-			logger.info("Проверка завершена, ошибок не обнаружено");
-		}
+        if (isDeclarationValid(id, logger)) {
+            declarationDataScriptingService.executeScript(userInfo, declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
+            // Проверяем ошибки при пересчете
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException(
+                        "Найдены ошибки при выполнении проверки декларации",
+                        logger.getEntries());
+            } else {
+                logger.info("Проверка завершена, ошибок не обнаружено");
+            }
+        }
 	}
 
 	@Override
@@ -168,18 +173,21 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 		// TODO (sgoryachkin) Это 2 метода должо быть
 		if (accepted) {
-			declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
+            DeclarationData declarationData  = declarationDataDao.get(id);
 
-			DeclarationData declarationData  = declarationDataDao.get(id);
-			declarationData.setAccepted(true);
+            if (isDeclarationValid(id, logger)) {
+                declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
-			Map<String, Object> exchangeParams = new HashMap<String, Object>();
-			declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
+                declarationData.setAccepted(true);
 
-			Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId();
-			logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
-			auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED , userInfo, declarationData.getDepartmentId(),
-					declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
+                Map<String, Object> exchangeParams = new HashMap<String, Object>();
+                declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
+
+                Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId();
+                logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
+                auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED , userInfo, declarationData.getDepartmentId(),
+                        declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
+            }
 		} else {
 			declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
 
@@ -248,48 +256,62 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CREATE, logger, exchangeParams);
 
 		String xml = XML_HEADER.concat(writer.toString());
+        declarationDataDao.setXmlData(declarationData.getId(), xml);
 
-        DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
-
-        if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {
-            //Валидация
-            InputStreamReader xsdStream = new InputStreamReader(
-                    blobDataDao.get(declarationTemplate.getXsdId()).getInputStream());
-            InputStreamReader xmlStream = new InputStreamReader(
-                    new ByteArrayInputStream(xml.getBytes()));
-            if (validateDeclaration(xmlStream, xsdStream)) {
-                setReportData(declarationData, xml);
-            } else {
-                throw new ServiceException("Декларация не прошла проверку валидации");
-            }
-        } else {
-            //Нет схемы для валидации
-            setReportData(declarationData, xml);
+        if (isDeclarationValid(declarationData.getId(), logger)) {
+            // Заполнение отчета и экспорт в формате PDF и XLSX
+            JasperPrint jasperPrint = fillReport(xml,
+                    declarationTemplateDao.getJasper(declarationData
+                            .getDeclarationTemplateId()));
+            declarationDataDao.setPdfData(declarationData.getId(),
+                    exportPDF(jasperPrint));
+            declarationDataDao.setXlsxData(declarationData.getId(),
+                    exportXLSX(jasperPrint));
         }
 	}
 
-    private void setReportData(DeclarationData declarationData, String xml) {
-        declarationDataDao.setXmlData(declarationData.getId(), xml);
+    private boolean isDeclarationValid(Long declarationDataId, Logger logger) {
+        DeclarationData declarationData  = declarationDataDao.get(declarationDataId);
+        String xml = declarationDataDao.getXmlData(declarationData.getId());
+        DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
 
-        // Заполнение отчета и экспорт в формате PDF и XLSX
-        JasperPrint jasperPrint = fillReport(xml,
-                declarationTemplateDao.getJasper(declarationData
-                        .getDeclarationTemplateId()));
-        declarationDataDao.setPdfData(declarationData.getId(),
-                exportPDF(jasperPrint));
-        declarationDataDao.setXlsxData(declarationData.getId(),
-                exportXLSX(jasperPrint));
-    }
+        if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {
+            InputStreamReader xsdStream = new InputStreamReader(
+                    blobDataDao.get(declarationTemplate.getXsdId()).getInputStream(), Charset.forName("windows-1251"));
+            InputStreamReader xmlStream = new InputStreamReader(
+                    new ByteArrayInputStream(xml.getBytes()), Charset.forName("windows-1251"));
 
-    private boolean validateDeclaration(InputStreamReader declaration, InputStreamReader xsd) {
-        try {
-            SchemaFactory factory =
-                    SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            Schema schema = factory.newSchema(new StreamSource(xsd));
-            Validator validator = schema.newValidator();
-            validator.validate(new StreamSource(declaration));
-        } catch (Exception e) {
-            throw new ServiceException("Невозможно выполнить валидацию декларации", e);
+            try {
+                SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                Schema schema = factory.newSchema(new StreamSource(xsdStream));
+                Validator validator = schema.newValidator();
+                validator.setErrorHandler(new ErrorHandler() {
+                    @Override
+                    public void warning(SAXParseException e) throws SAXException {
+                        wrapException(e);
+                    }
+
+                    @Override
+                    public void error(SAXParseException e) throws SAXException {
+                        wrapException(e);
+                    }
+
+                    @Override
+                    public void fatalError(SAXParseException e) throws SAXException {
+                        wrapException(e);
+                    }
+
+                    private void wrapException(SAXParseException e) throws SAXException {
+                        throw new SAXException(e.getLocalizedMessage()+" Строка: "+e.getLineNumber()+"; Столбец: "+e.getColumnNumber());
+                    }
+                });
+                validator.validate(new StreamSource(xmlStream));
+            } catch (Exception e) {
+                logger.error(e);
+                throw new ServiceLoggerException(
+                        "Декларация / Уведомление не может быть создана, т.к. шаблон некорректен. Обратитесь к настройщику шаблонов",
+                        logger.getEntries());
+            }
         }
         return true;
     }
