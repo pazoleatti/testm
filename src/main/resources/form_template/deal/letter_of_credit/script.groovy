@@ -400,14 +400,7 @@ def addData(def xml) {
         newRow.rowNumber = indexRow - 2
 
         // графа 2
-        def val1 = refBookFactory.getDataProvider(9L).getRecords(
-                new Date(),
-                null,
-                "NAME = '"+row.cell[indexCell].text()+"'",
-                null)
-        if (val1 != null && val1.size() == 1) {
-            newRow.fullName = val1.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        }
+        newRow.fullName = getRecordId(9, 'NAME',  row.cell[indexCell].text(), date, cache, indexRow, indexCell)
         indexCell++
 
         // графа 3
@@ -535,4 +528,27 @@ def getDate(def value, int indexRow, int indexCell) {
     } catch (Exception e) {
         throw new Exception("Строка ${indexRow+3} столбец ${indexCell+1} содержит недопустимый тип данных!")
     }
+}
+
+
+/**
+ * Получить record_id элемента справочника.
+ *
+ * @param value
+ */
+def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell) {
+    String filter = alias + "= '"+ value+"'"
+    if (value=='') filter = "$alias is null"
+    if (cache[ref_id]!=null) {
+        if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null)
+    if (records.size() == 1){
+        cache[ref_id][filter] = (records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue)
+        return cache[ref_id][filter]
+    }
+    throw new Exception("Строка ${indexRow+3} столбец ${indexCell+1} содержит значение, отсутствующее в справочнике!")
 }
