@@ -19,6 +19,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         deleteAllStatic()
+        sort()
         calc()
         addAllStatic()
         logicCheck()
@@ -72,25 +73,25 @@ void addRow() {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    if (currentDataRow!=null){
+    if (currentDataRow != null) {
         index = currentDataRow.getIndex()
         def pointRow = currentDataRow
-        while(pointRow.getAlias()!=null && index>0){
+        while (pointRow.getAlias() != null && index > 0) {
             pointRow = dataRows.get(--index)
         }
-        if(index!=currentDataRow.getIndex() && dataRows.get(index).getAlias()==null){
+        if (index != currentDataRow.getIndex() && dataRows.get(index).getAlias() == null) {
             index++
         }
-    }else if (size>0) {
-        for(int i = size-1;i>=0;i--){
+    } else if (size > 0) {
+        for (int i = size - 1; i >= 0; i--) {
             def pointRow = dataRows.get(i)
-            if(pointRow.getAlias()==null){
-                index = dataRows.indexOf(pointRow)+1
+            if (pointRow.getAlias() == null) {
+                index = dataRows.indexOf(pointRow) + 1
                 break
             }
         }
     }
-    dataRowHelper.insert(row, index+1)
+    dataRowHelper.insert(row, index + 1)
 }
 /**
  * Проверяет уникальность в отчётном периоде и вид
@@ -108,6 +109,11 @@ void checkUniq() {
  */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+    def dFrom = taxPeriod.getStartDate()
+    def dTo = taxPeriod.getEndDate()
+
     def index = 1;
     for (row in dataRowHelper.getAllCached()) {
         if (row.getAlias() != null) {
@@ -144,19 +150,10 @@ void logicCheck() {
             }
         }
         //  Корректность даты договора
-        def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-
-        def dFrom = taxPeriod.getStartDate()
-        def dTo = taxPeriod.getEndDate()
         def dt = docDateCell.value
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = docDateCell.column.name
-            if (dt > dTo) {
-                logger.warn("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
-            }
-            if (dt < dFrom) {
-                logger.warn("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
-            }
+            logger.warn("«$msg» в строке $rowNum не может быть вне налогового периода!")
         }
         // Корректность даты заключения сделки
         if (docDateCell.value > dealDateCell.value) {
@@ -192,7 +189,7 @@ void logicCheck() {
         def msgIn = incomeSumCell.column.name
         def msgOut = outcomeSumCell.column.name
         if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            logger.warn("«$msgIn» и «$msgOut» в строке $rowNum не могут быть одновременно заполнены!")
+            logger.warn("Поля «$msgIn» и «$msgOut» в строке $rowNum не могут быть одновременно заполнены!")
         }
         if (incomeSumCell.value == null && outcomeSumCell.value == null) {
             logger.warn("Одна из граф «$msgIn» и «$msgOut» в строке $rowNum должна быть заполнена!")
@@ -336,7 +333,7 @@ void deleteAllStatic() {
     def dataRows = dataRowHelper.getAllCached()
 
     for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
-        def row = (DataRow) iter.next()
+        row = (DataRow) iter.next()
         if (row.getAlias() != null) {
             iter.remove()
             dataRowHelper.delete(row)
@@ -345,35 +342,96 @@ void deleteAllStatic() {
 }
 
 /**
+ * Сортировка строк по гр.
+ */
+void sort() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    dataRows.sort({ DataRow a, DataRow b ->
+        // гр. 2.1, гр. 3, гр. 5, гр. 6, гр. 9, гр. 10, гр. 11, гр. 12, гр. 15
+        sortRow(['fullName', 'inn', 'docNumber', 'docDate', 'dealFocus',
+                'deliverySign', 'metalName', 'foreignDeal', 'deliveryCode'], a, b)
+    })
+    dataRowHelper.save(dataRows);
+}
+
+int sortRow(List<String> params, DataRow a, DataRow b) {
+    for (String param : params) {
+        aD = a.getCell(param).value
+        bD = b.getCell(param).value
+
+        if (aD != bD) {
+            return aD <=> bD
+        }
+    }
+    return 0
+}
+
+/**
+ * Расчет подитогового значения
+ * @param i
+ * @return
+ */
+def calcItog(int i) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    def newRow = formData.createDataRow()
+
+    newRow.getCell('itog').colSpan = 26
+    newRow.itog = 'Подитог:'
+    newRow.setAlias('itg#'.concat(i.toString()))
+    newRow.getCell('fix').colSpan = 2
+
+    // Расчеты подитоговых значений
+    def BigDecimal priceItg = 0, totalItg = 0
+    for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
+        row = dataRows.get(j)
+
+        def price = row.price
+        def total = row.total
+
+        priceItg += price != null ? price : 0
+        totalItg += total != null ? total : 0
+    }
+
+    newRow.price = priceItg
+    newRow.total = totalItg
+
+    newRow
+}
+
+/**
  * Проставляет статические строки
  */
 void addAllStatic() {
     if (!logger.containsLevel(LogLevel.ERROR)) {
-
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.getAllCached()
-        def newRow = formData.createDataRow()
 
-        newRow.getCell('itog').colSpan = 26
-        newRow.itog = 'Подитог:'
-        newRow.setAlias('itg')
-        newRow.getCell('fix').colSpan = 2
+        for (int i = 0; i < dataRows.size(); i++) {
+            def row = dataRows.get(i)
+            def nextRow = null
 
-        // Расчеты подитоговых значений
-        def BigDecimal priceItg = 0, totalItg = 0
-        for (row in dataRows) {
+            if (i < dataRows.size() - 1) {
+                nextRow = dataRows.get(i + 1)
+            }
 
-            def price = row.price
-            def total = row.total
+            if (row.getAlias() == null)
+                if (nextRow == null
+                        || row.fullName != nextRow.fullName
+                        || row.inn != nextRow.inn
+                        || row.docNumber != nextRow.docNumber
+                        || row.docDate != nextRow.docDate
+                        || row.dealFocus != nextRow.dealFocus
+                        || row.deliverySign != nextRow.deliverySign
+                        || row.metalName != nextRow.metalName
+                        || row.foreignDeal != nextRow.foreignDeal
+                        || row.deliveryCode != nextRow.deliveryCode) {
 
-            priceItg += price != null ? price : 0
-            totalItg += total != null ? total : 0
+                    def itogRow = calcItog(i)
+                    dataRowHelper.insert(itogRow, ++i + 1)
+                }
         }
-
-        newRow.price = priceItg
-        newRow.total = totalItg
-
-        dataRowHelper.insert(newRow, dataRows.size() + 1)
     }
 }
 
@@ -628,7 +686,7 @@ def addData(def xml, int headRowCount) {
 
         // графа 13.2
         String code = row.cell[indexCell].text()
-        if (code.length() == 1){    //для кодов 1, 2, 3...9
+        if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
         newRow.regionCode = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell)
@@ -648,7 +706,7 @@ def addData(def xml, int headRowCount) {
 
         // графа 14.2
         code = row.cell[indexCell].text()
-        if (code.length() == 1){    //для кодов 1, 2, 3...9
+        if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
         newRow.region2 = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell)

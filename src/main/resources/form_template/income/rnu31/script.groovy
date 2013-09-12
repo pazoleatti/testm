@@ -10,9 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
  *
  * @version 59
  *
- * TODO:
- *      - проверки корректности данных при загрузке данных из транспортного файла
- *
  * @author rtimerbaev
  */
 
@@ -419,7 +416,6 @@ def getNewRow() {
 def addData(def xml) {
     def tmp
 
-    // TODO (Ramil Timerbaev) Проверка корректности данных
     if (xml.row.size() > 0) {
         def row = xml.row[0]
         def indexCell = 3
