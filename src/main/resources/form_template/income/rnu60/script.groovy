@@ -746,14 +746,6 @@ void importData() {
     if (!hasError()) {
         logger.info('Закончена загрузка файла ' + fileName)
     }
-
-        // добавить данные в форму
-        def totalLoad = addData(xml)
-        if (totalLoad!=null) {
-            checkTotalRow(totalLoad)
-        } else {
-            logger.error("Нет итоговой строки.")
-        }
 }
 
 /**
@@ -941,7 +933,7 @@ def getDate(def value) {
 }
 
 /**
- * Рассчитать, проверить и сравнить итоги.
+ * Cравнить итоги.
  *
  * @param totalRow итоговая строка из транспортного файла
  */
