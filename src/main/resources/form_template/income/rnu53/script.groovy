@@ -3,10 +3,6 @@
  *
  * @version 1
  *
- * TODO:
- *      - поведение в основном совпадает с формой 54, отличия в ЧТЗ в 4 сравнениях: при заполениии формы для графов 9-10, в логических проверках 5-6
- *                                                    так же есть отличия при реализации из-за разных псевдонимов у графов 5-6
- *
  * @author lhaziev
  */
 
@@ -276,15 +272,13 @@ def logicalCheck() {
                 return false
             }
 
-            // 5. Проверка финансового результата
-            if (row.salePrice!=null && row.acquisitionPrice!=null && reportDate!=null && row.part1REPODate && row.part2REPODate!=null && course!=null) {
-                tmp = ((row.salePrice - row.acquisitionPrice) * (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
-            }
+            // 6. Проверка финансового результата
+            tmp = calcAForColumn9or10(row, reportDate, course)
             if (tmp!=null && tmp > 0 && row.income != roundTo2(tmp)) {
                 logger.warn('Неверно определены доходы')
             }
 
-            // 6. Проверка финансового результата
+            // 7. Проверка финансового результата
             if (tmp!=null && tmp < 0 && row.outcome != roundTo2(-tmp)) {
                 logger.warn('Неверно определены расходы')
             }
