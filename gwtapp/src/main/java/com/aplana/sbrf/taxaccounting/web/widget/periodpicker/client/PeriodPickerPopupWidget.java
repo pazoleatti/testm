@@ -17,8 +17,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 
 public class PeriodPickerPopupWidget extends Composite implements
@@ -41,7 +43,10 @@ public class PeriodPickerPopupWidget extends Composite implements
 	PopupPanel popupPanel;
 	
 	@UiField
-	TextBox text;
+	Panel panel;
+	
+	@UiField
+	HasText text;
 	 
 	
 	private List<Integer> value;
@@ -116,8 +121,8 @@ public class PeriodPickerPopupWidget extends Composite implements
 	@UiHandler("selectButton")
 	public void onSelectClick(ClickEvent event){
 		periodPicker.setValue(this.value); 
-		popupPanel.setPopupPosition(text.getAbsoluteLeft(),
-				text.getAbsoluteTop() + text.getOffsetHeight());
+		popupPanel.setPopupPosition(panel.getAbsoluteLeft(),
+				panel.getAbsoluteTop() + panel.getOffsetHeight());
 		popupPanel.show();
 	}
 	
@@ -144,7 +149,7 @@ public class PeriodPickerPopupWidget extends Composite implements
 		}
 		String txt = joinListToString(strings);
 		this.text.setText(txt);
-		this.text.setTitle(txt);
+		((UIObject) this.text).setTitle(txt);
 	}
 	
 	private String joinListToString(Collection<String> strings) {
