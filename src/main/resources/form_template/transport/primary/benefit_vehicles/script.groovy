@@ -175,12 +175,67 @@ void deleteRow() {
  */
 void logicalChecks() {
     for (def row : getDataRows()) {
-
         // Поверка на соответствие дат использования льготы
         if (!(row.benefitEndDate > row.benefitStartDate)) {
             logger.error("Строка $row.rowNumber : Неверно указаны Даты начала и Дата окончания использования льготы! !")
         }
     }
+
+    /**
+     * Во вторую форму по транспорту (202) добавить лог. проверку того,
+     * что форма не содержит записей с разными льготами для одинаковых ТС
+     * (ТС с одинаковым кодом ОКАТО, Идентификационным номером, рег. номером).
+     */
+
+    // Ошибки которые возникли
+    def errors = [];
+
+    for (def row : getDataRows()){
+        // текущий вариант проверки
+        def variant = [
+            okato : row.codeOKATO,
+            identNumber : row.identNumber,
+            regNumber: row.regNumber,
+            lines: []
+        ]
+        variant.lines.add(row.getIndex())
+
+
+        // проверка с остальными строками
+        for (def r : getDataRows()) {
+
+            if (!r.getIndex().equals(row.getIndex())){
+                if (r.codeOKATO.equals(row.codeOKATO)
+                        && r.identNumber.equals(row.identNumber)
+                        && r.regNumber.equals(row.regNumber)
+                        && (
+                         r.taxBenefitCode != row.taxBenefitCode ||
+                        !r.benefitStartDate.equals(row.benefitStartDate) ||
+                        !r.benefitEndDate.equals(row.benefitEndDate)
+                )
+                ){
+                    variant.lines.add(r.getIndex())
+                }
+            }
+        }
+
+        def contains = errors.findAll{ el ->
+            el.codeOKATO.equals(row.codeOKATO)
+            el.identNumber.equals(row.identNumber)
+            el.regNumber.equals(row.regNumber)
+        }
+        if (contains.size() == 0){
+            errors.add(variant)
+        }
+    }
+
+    // показ ошибок
+    errors.each{ e ->
+        if (e.lines.size() > 1){
+            logger.error("Форма содержит записи с разными льготами для одинаковых ТС. Строки: "+e.lines.join(', '))
+        }
+    }
+
 }
 
 /**
