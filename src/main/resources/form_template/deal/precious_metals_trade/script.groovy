@@ -165,7 +165,7 @@ void logicCheck() {
             logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
         // Зависимости от признака физической поставки
-        if (row.deliverySign == 1) {
+        if (getDeliverySign(row.deliverySign) == 1) {
             def msg1 = row.getCell('deliverySign').column.name
             ['countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2', 'locality2'].each {
                 def cell = row.getCell(it)
@@ -338,6 +338,7 @@ void deleteAllStatic() {
     for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
         def row = (DataRow) iter.next()
         if (row.getAlias() != null) {
+            iter.remove()
             dataRowHelper.delete(row)
         }
     }
@@ -749,4 +750,12 @@ def getDate(def value, int indexRow, int indexCell) {
     } catch (Exception e) {
         throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
+}
+
+
+/**
+ * Получить признак физической поставки драгоценного металла
+ */
+def getDeliverySign(def deliverySign) {
+    return  refBookService.getNumberValue(18,deliverySign,'CODE')
 }
