@@ -116,7 +116,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
             result.setKinds(kinds);
 			
 			// все виды налоговых форм по заданному виду налога
-			List<FormType> formTypesList = formTypeDao.listAllByTaxType(taxType); 
+			List<FormType> formTypesList = formTypeDao.getByTaxType(taxType); 
 			Collections.sort(formTypesList, new FormTypeAlphanumericComparator());
 			result.setFormTypeIds(formTypesList);
 			return result;
@@ -141,7 +141,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		for (DepartmentFormType dft: dfts) {
 			int formTypeId = dft.getFormTypeId();
 			if (!formTypes.containsKey(formTypeId)) {
-				formTypes.put(formTypeId, formTypeDao.getType(formTypeId));
+				formTypes.put(formTypeId, formTypeDao.get(formTypeId));
 			}
 			
 			kinds.add(dft.getKind());

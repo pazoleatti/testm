@@ -18,7 +18,7 @@ public interface DepartmentConfigUiHandlers extends UiHandlers {
      * @param combinedDepartmentParam
      * @param period
      */
-    void save(DepartmentCombined combinedDepartmentParam, ReportPeriod period);
+    void save(DepartmentCombined combinedDepartmentParam, Integer period);
 
     /**
      * Очистка формы
@@ -35,14 +35,6 @@ public interface DepartmentConfigUiHandlers extends UiHandlers {
     void reloadDepartmentParams(Integer departmentId, TaxType taxType, Integer reportPeriodId);
 
     /**
-     * Перезагрузка налоговых периодов
-     *
-     * @param taxType
-     * @param departmentId
-     */
-    void reloadTaxPeriods(TaxType taxType, Integer departmentId);
-
-    /**
      * Перезагрузка дерева подразделений
      *
      * @param taxType
@@ -50,11 +42,4 @@ public interface DepartmentConfigUiHandlers extends UiHandlers {
      */
     void reloadDepartments(TaxType taxType, Integer currentDepartmentId);
 
-    /**
-     * Обработка выбора налогового периода
-     *
-     * @param taxPeriod
-     * @param departmentId
-     */
-    void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId);
 }

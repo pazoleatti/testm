@@ -39,6 +39,7 @@ public interface SourceService {
      */
     List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType);
     
+    
 	/**
 	 * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
 	 * 

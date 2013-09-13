@@ -29,11 +29,6 @@ public final class DepartmentMockUtils {
 		when(department.getParentId()).thenReturn(parentId);
 		return department;
 	}
-	
-	public static Department mockDepartment(int id, Integer parentId, DepartmentType type, List<DepartmentFormType> dfts) {
-		Department department = mockDepartment(id, parentId, type);
-		when(department.getDepartmentFormTypes()).thenReturn(dfts);
-		return department;
-	}
+
 	
 }

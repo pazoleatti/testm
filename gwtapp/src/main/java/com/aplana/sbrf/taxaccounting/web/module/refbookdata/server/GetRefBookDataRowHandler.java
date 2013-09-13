@@ -41,7 +41,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 		result.setDesc(refBook.getName());
 		if (action.getPagingParams() != null) {//TODO перенести в отдельный хэндлер
 			PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider
-					.getRecords(new Date(), action.getPagingParams(), null, refBook.getAttributes().get(0));
+					.getRecords(action.getRelevanceDate(), action.getPagingParams(), null, refBook.getAttributes().get(0));
 			List<RefBookDataRow> rows = new ArrayList<RefBookDataRow>();
 
 			//кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать

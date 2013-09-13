@@ -2,16 +2,12 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.*;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -41,7 +37,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
 
     private Department userDepartment;
 
-    public interface MyView extends View, HasUiHandlers<DepartmentConfigUiHandlers>, ReportPeriodSelectHandler {
+    public interface MyView extends View, HasUiHandlers<DepartmentConfigUiHandlers> {
         /**
          * Данные справочника "Подразделения"
          * @param departments Список подразделений дерева справочника
@@ -54,12 +50,6 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * @param department
          */
         void setDepartment(Department department);
-
-        /**
-         * Установка доступных налоговых периодов
-         * @param taxPeriods
-         */
-        void setTaxPeriods(List<TaxPeriod> taxPeriods);
 
         /**
          * Установка доступных налоговых периодов
@@ -90,20 +80,9 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         void clear();
 
         /**
-         * Обновление списка налоговых периодов
-         */
-        void reloadTaxPeriods();
-
-        /**
          * Обновление дерева подразделений
          */
         void reloadDepartments();
-
-        /**
-         * Установка выбранного отчетного периода
-         * @param reportPeriod
-         */
-        void setReportPeriod(ReportPeriod reportPeriod);
 
         /**
          * Установка разыменованных значений для справочников
@@ -126,14 +105,14 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     @Override
-    public void save(DepartmentCombined combinedDepartmentParam, ReportPeriod period) {
+    public void save(DepartmentCombined combinedDepartmentParam, Integer period) {
         if (combinedDepartmentParam == null || period == null) {
             return;
         }
 
         SaveDepartmentCombinedAction action = new SaveDepartmentCombinedAction();
         action.setDepartmentCombined(combinedDepartmentParam);
-        action.setPeriod(period);
+        action.setReportPeriodId(period);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<SaveDepartmentCombinedResult>() {
                     @Override
@@ -171,26 +150,6 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     @Override
-    public void reloadTaxPeriods(TaxType taxType, Integer departmentId) {
-        if (taxType == null || departmentId == null) {
-            return;
-        }
-
-        GetTaxPeriodWDAction action = new GetTaxPeriodWDAction();
-        action.setDepartmentId(departmentId);
-        action.setTaxType(taxType);
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetTaxPeriodWDResult>() {
-                    @Override
-                    public void onSuccess(GetTaxPeriodWDResult result) {
-                        getView().setTaxPeriods(result.getTaxPeriods());
-                        getView().setReportPeriod(result.getLastReportPeriod());
-                        getView().reloadDepartmentParams();
-                    }
-                }, this));
-    }
-
-    @Override
     public void reloadDepartments(TaxType taxType, final Integer currentDepartmentId) {
         GetDepartmentTreeDataAction action = new GetDepartmentTreeDataAction();
         action.setTaxType(taxType);
@@ -221,29 +180,9 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                     // Выбирается подразделение пользователя
                                     getView().setDepartment(userDepartment);
                                 }
-
-                                // Обновление налоговых периодов
-                                getView().reloadTaxPeriods();
+                                getView().setReportPeriods(result.getReportPeriods());
                             }
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
-    }
-
-    @Override
-    public void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId) {
-        if (taxPeriod == null || departmentId == null) {
-            return;
-        }
-
-        GetReportPeriods action = new GetReportPeriods();
-        action.setTaxPeriod(taxPeriod);
-        action.setDepartmentId(departmentId);
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
-                    @Override
-                    public void onSuccess(GetReportPeriodsResult result) {
-                        getView().setReportPeriods(result.getReportPeriods());
-                    }
-                }, this));
     }
 
     @Override
@@ -254,7 +193,6 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     @Override
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
-
         dispatcher.execute(new GetUserDepartmentAction(),
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetUserDepartmentResult>() {

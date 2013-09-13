@@ -33,7 +33,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 
 	@Override
 	@Cacheable("FormType")
-	public FormType getType(int typeId) {
+	public FormType get(int typeId) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Fetching FormType with id = " + typeId);	
 		}		
@@ -50,12 +50,12 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 	}
 
 	@Override
-    public List<FormType> listFormTypes(){
+    public List<FormType> getAll(){
         return getJdbcTemplate().query("select * from form_type", new FormTypeMapper());
     }
 
     @Override
-	public List<FormType> listAllByTaxType(TaxType taxType){
+	public List<FormType> getByTaxType(TaxType taxType){
 		return getJdbcTemplate().query(
 			"select * from form_type ft where ft.tax_type = ?",
 			new Object[]{String.valueOf(taxType.getCode())},

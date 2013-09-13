@@ -277,8 +277,6 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     @Transactional(readOnly = false)
-    // TODO (временно): SBRFACCTAX-4009
-    @CacheEvict(value = CacheConstants.DEPARTMENT, key="#departmentId")
     public void createDepartmentFormType(int departmentId, int typeId, int formId) {
         getJdbcTemplate().update(
                 "insert into department_form_type (department_id, form_type_id, id, kind) " +
@@ -303,8 +301,6 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     @Transactional(readOnly = false)
-    // TODO (временно): SBRFACCTAX-4009
-    @CacheEvict(value = CacheConstants.DEPARTMENT, key="#departmentId")
     public void createDepartmentDeclType(int departmentId, int formId) {
         getJdbcTemplate().update(
                 "insert into department_declaration_type (id, department_id, declaration_type_id) " +

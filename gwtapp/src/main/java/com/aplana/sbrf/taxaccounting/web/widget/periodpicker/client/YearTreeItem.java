@@ -9,7 +9,7 @@ public class YearTreeItem  extends TreeItem{
 	
 	public YearTreeItem(int year) {
 		super();
-		Widget widget = new Label("Календарный год "+ String.valueOf(year));
+		Widget widget = new Label(String.valueOf(year));
 		setWidget(widget);
 	}
 
