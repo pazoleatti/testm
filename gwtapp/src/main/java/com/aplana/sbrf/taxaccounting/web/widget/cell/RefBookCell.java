@@ -38,9 +38,6 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	
 	protected static final SafeHtmlRenderer<String> renderer = SimpleSafeHtmlRenderer.getInstance();
 
-	private int offsetX = 10;
-	private int offsetY = 10;
-
 	private PopupPanel panel;
 	private RefBookPicker refBookPiker = new RefBookPickerWidget();
 	
@@ -133,21 +130,19 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 					int windowHeight = Window.getClientHeight();
 					int windowWidth = Window.getClientWidth();
 
-					int exceedOffsetX = offsetX;
-					int exceedOffsetY = offsetY;
+					int exceedOffsetX = parent.getParentElement().getAbsoluteLeft();
+					int exceedOffsetY = parent.getParentElement().getAbsoluteBottom();					
 
 					// Сдвигаем попап, если он не помещается в окно
-					if ((parent.getAbsoluteRight() + panel.getOffsetWidth()) > windowWidth) {
+					if ((panel.getAbsoluteLeft() + panel.getOffsetWidth()) > windowWidth) {
 						exceedOffsetX -= panel.getOffsetWidth();
 					}
 
 					if ((parent.getAbsoluteTop() + panel.getOffsetHeight()) > windowHeight) {
-						exceedOffsetY -= panel.getOffsetHeight();
+						exceedOffsetY -= panel.getOffsetHeight() + parent.getParentElement().getOffsetHeight();
 					}
+					panel.setPopupPosition(exceedOffsetX, exceedOffsetY);
 
-					panel.setPopupPosition(parent.getAbsoluteLeft()
-							+ exceedOffsetX, parent.getAbsoluteTop()
-							+ exceedOffsetY);
 				}
 			});
 			
