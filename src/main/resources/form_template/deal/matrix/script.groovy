@@ -15,7 +15,10 @@ switch (formDataEvent) {
         checkCreation()
         break
     case FormDataEvent.CALCULATE:
+        deleteAllStatic()
+        sort()
         calc()
+        addAllStatic()
         logicCheck()
         break
     case FormDataEvent.CHECK:
@@ -121,15 +124,17 @@ void addRow(DataRow<Cell> row, DataRow<Cell> currentRow) {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
-    dataRowHelper.insert(row, index)
+
     // TODO пересмотреть редактируемость (пока все редактируемо)
     for (column in formData.getFormColumns()) {
-        if (column.alias.equals('dealNum1') || column.alias.equals('dealNum2') || column.alias.equals('dealNum3')) {
+        if (column.alias.equals('dealNum1') || column.alias.equals('dealNum2') || column.alias.equals('dealNum3')
+                || column.alias.equals('groupName')) {
             continue
         }
         row.getCell(column.alias).editable = true
         row.getCell(column.alias).setStyleAlias('Редактируемая')
     }
+    dataRowHelper.insert(row, index)
 }
 
 void deleteRow() {
@@ -146,6 +151,9 @@ void logicCheck() {
     def String OKSM = "ОКСМ"
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     for (row in dataRowHelper.getAllCached()) {
+        if (row.getAlias() != null) {
+            continue
+        }
 
         // 1. Обязательные поля
         // TODO нет в ТЗ
@@ -226,6 +234,63 @@ void calc() {
     }
 
     dataRowHelper.update(dataRows)
+}
+
+/**
+ * Сортировка строк по графе п. 040 "Наименование организации"
+ */
+void sort() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    dataRows.sort { it.organName }
+    dataRowHelper.save(dataRows);
+}
+/**
+ * Проставляет статические строки
+ */
+void addAllStatic() {
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        def dataRowHelper = formDataService.getDataRowHelper(formData)
+        def dataRows = dataRowHelper.getAllCached()
+        def int index = 1
+        for (int i = 0; i < dataRows.size(); i++) {
+            def row = dataRows.get(i)
+            def nextRow = null
+
+            if (i < dataRows.size() - 1) {
+                nextRow = dataRows.get(i + 1)
+            }
+            if (row.getAlias() == null) {
+            }
+            if (nextRow == null || row.organName != nextRow.organName) {
+
+                def newRow = formData.createDataRow()
+                newRow.getCell('groupName').colSpan = 56
+                if (row.organName != null)
+                    newRow.groupName = refBookService.getRecordData(9, row.organName).NAME.stringValue
+                newRow.setAlias('grp#'.concat(i.toString()))
+                dataRowHelper.insert(newRow, ++i +1 - index)
+                index = 1
+            } else {
+                index++
+            }
+        }
+    }
+}
+/**
+ * Удаление всех статическиех строк
+ */
+void deleteAllStatic() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+
+    for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
+        row = (DataRow) iter.next()
+        if (row.getAlias() != null) {
+            iter.remove()
+            dataRowHelper.delete(row)
+        }
+    }
 }
 
 /**

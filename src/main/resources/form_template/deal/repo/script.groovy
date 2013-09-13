@@ -172,9 +172,9 @@ void logicCheck() {
         }
 
         // Корректность даты совершения сделки
-        if (transactionDeliveryDate < transactionDate) {
-            def msg1 = row.getCell('transactionDeliveryDate').column.name
-            def msg2 = row.getCell('transactionDate').column.name
+        if (transactionDate< transactionDeliveryDate) {
+            def msg1 = row.getCell('transactionDate').column.name
+            def msg2 = row.getCell('transactionDeliveryDate').column.name
             logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
 
