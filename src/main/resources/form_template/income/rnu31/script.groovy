@@ -55,10 +55,14 @@ switch (formDataEvent) {
         if (!hasError()) {
             calc()
             !hasError() && logicalCheck()
+            if (!hasError()) {
+                logger.info('Закончена загрузка файла ' + UploadFileName)
+            }
         }
         break
     case FormDataEvent.MIGRATION :
         importData()
+        logger.info('Закончена загрузка файла ' + UploadFileName)
         break
 }
 
@@ -261,10 +265,6 @@ void importData() {
         }
     } catch(Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
-    }
-
-    if (!hasError()) {
-        logger.info('Закончена загрузка файла ' + fileName)
     }
 }
 
