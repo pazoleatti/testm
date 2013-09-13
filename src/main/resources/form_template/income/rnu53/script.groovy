@@ -56,6 +56,9 @@ switch (formDataEvent) {
         if (!hasError()) {
             calc()
             !hasError() && logicalCheck() && checkNSI()
+            if (!hasError()) {
+                logger.info('Закончена загрузка файла ' + UploadFileName)
+            }
         }
         break
     case FormDataEvent.MIGRATION :
@@ -64,6 +67,7 @@ switch (formDataEvent) {
             def total = getCalcTotalRow()
             def data = getData(formData)
             insert(data, total)
+            logger.info('Закончена загрузка файла ' + UploadFileName)
         }
         break
 }
@@ -517,10 +521,6 @@ void importData() {
         }
     } catch(Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
-    }
-
-    if (!hasError()) {
-        logger.info('Закончена загрузка файла ' + fileName)
     }
 }
 
@@ -990,19 +990,18 @@ void checkTotalRow(def totalRow) {
     def data = getData(formData)
     def totalColumns = [5 : 'acquisitionPrice', 6 : 'salePrice', 9 : 'income', 10 : 'outcome', 12 : 'outcome269st', 13 : 'outcomeTax']
 
-    def totalCalc = null
-    for (def row : getRows(data)) {
-        if (isTotal(row)) {
-            totalCalc = row
-            break
-        }
-    }
+    def totalCalc = getCalcTotalRow()
+    def errorColums = []
     if (totalCalc != null) {
         totalColumns.each { index, columnAlias ->
-            if (totalCalc[columnAlias] != totalRow[columnAlias]) {
-                logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
+            if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
+                errorColums.add(index)
             }
         }
+    }
+    if (!errorColums.isEmpty()) {
+        def columns = errorColums.join(', ')
+        logger.error("Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
 }
 

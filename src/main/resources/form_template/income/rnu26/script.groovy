@@ -73,6 +73,9 @@ switch (formDataEvent) {
         if (!hasError()) {
             calc()
             !hasError() && logicalCheck() && checkNSI()
+            if (!hasError()) {
+                logger.info('Закончена загрузка файла ' + UploadFileName)
+            }
         }
         break
     case FormDataEvent.MIGRATION :
@@ -85,6 +88,7 @@ switch (formDataEvent) {
             def total = getCalcTotalRow()
             def data = getData(formData)
             insert(data, total)
+            logger.info('Закончена загрузка файла ' + UploadFileName)
         }
         break
 }
@@ -661,10 +665,6 @@ void importData() {
         }
     } catch(Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
-    }
-
-    if (!hasError()) {
-        logger.info('Закончена загрузка файла ' + fileName)
     }
 }
 
