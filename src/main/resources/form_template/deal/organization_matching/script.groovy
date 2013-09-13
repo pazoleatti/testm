@@ -104,7 +104,9 @@ void checkUniq() {
  */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in dataRowHelper.getAllCached()) {
+    def dataRows = dataRowHelper.getAllCached()
+    def isHaveDuplicates = false
+    for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
@@ -166,7 +168,11 @@ void logicCheck() {
             def msg = row.getCell('refBookRecord').column.name
             logger.warn("В справочнике «Организации – участники контролируемых сделок» не найден элемент $msg, указанный в строке $rowNum!")
         }
+
+        // Проверка уникальности ссылки на элемент справочника
+        isHaveDuplicates = row.refBookRecord != null && dataRows.find { it.refBookRecord == row.refBookRecord && it != row } != null
     }
+    if (isHaveDuplicates) logger.warn("Одна запись справочника не может быть отредактирована более одного раза в одной и той же форме!")
 }
 
 /**
