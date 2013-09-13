@@ -2,8 +2,8 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
 	xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager">
-	<g:VerticalPanel>
-		<g:cell width="100%">
+	<g:VerticalPanel  height="350px" width="500px">
+		<g:cell>
 			<g:HorizontalPanel width="100%" verticalAlignment="ALIGN_MIDDLE">
 				<g:cell>
 					<g:Label text="Дата актуальности:" wordWrap="false" />
@@ -13,27 +13,25 @@
 				</g:cell>
 			</g:HorizontalPanel>
 		</g:cell>
-		<g:cell width="100%" horizontalAlignment="CENTER">
-			<g:HorizontalPanel width="100%">
-				<g:cell horizontalAlignment="LEFT">
+		<g:cell horizontalAlignment="CENTER">
+			<g:HorizontalPanel width="100%" verticalAlignment="ALIGN_MIDDLE" spacing="2">
+				<g:cell width="100%">
 					<g:TextBox width="100%" ui:field="txtFind" text="" />
 				</g:cell>
-				<g:cell horizontalAlignment="RIGHT" width="12px">
-					<g:FlowPanel />
-				</g:cell>
-				<g:cell horizontalAlignment="RIGHT" width="60px">
-					<g:Button text="Найти" ui:field="searchButton" width="100%"/>
+				<g:cell>
+					<g:Button text="Найти" ui:field="searchButton"/>
 				</g:cell>
 			</g:HorizontalPanel>
 		</g:cell>
-		<g:cell width="200px">
-			<style:GenericCellTable width="100%" ui:field="cellTable"
-				styleName="dictionaryPickerTable" />
+		<g:cell height="100%" width="100%">
+			<g:ScrollPanel height="100%" width="100%">
+				<style:GenericCellTable ui:field="cellTable" styleName="dictionaryPickerTable" />
+			</g:ScrollPanel>
 		</g:cell>
 		<g:cell>
 			<g:HorizontalPanel verticalAlignment='ALIGN_BOTTOM'
 				width="100%">
-				<g:cell>
+				<g:cell width="100%">
 					<pager:FlexiblePager ui:field='pager' location='CENTER'
 						showFastForwardButton="false" fastForwardRows="0"
 						showLastPageButton="true" />

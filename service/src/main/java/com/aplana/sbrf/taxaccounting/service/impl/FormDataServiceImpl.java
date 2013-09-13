@@ -336,7 +336,7 @@ public class FormDataServiceImpl implements FormDataService {
 					"Найдены ошибки при выполнении расчета формы",
 					logger.getEntries());
 		} else {
-			logger.info("Расчет завершен, ошибок не обнаружено");
+			logger.info("Расчет завершен, фатальных ошибок не обнаружено");
 		}
 
 	}
