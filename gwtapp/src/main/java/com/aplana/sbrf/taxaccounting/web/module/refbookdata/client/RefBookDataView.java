@@ -34,7 +34,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	@UiField
 	FlexiblePager pager;
 	@UiField
-	VerticalPanel contentPanel;
+	Panel contentPanel;
 	@UiField
 	Label titleDesc;
 	@UiField

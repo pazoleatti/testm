@@ -73,7 +73,7 @@
                     </g:DockLayoutPanel>
                 </g:center>
                 <g:east size="500">
-                    <g:VerticalPanel width="100%" height="100%" ui:field="contentPanel"/>
+                    <g:SimplePanel width="100%" height="100%" ui:field="contentPanel"/>
                 </g:east>
             </g:SplitLayoutPanel>
         </g:center>
