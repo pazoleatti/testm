@@ -101,9 +101,24 @@ switch (formDataEvent){
             getData(formData).commit()
         }
         break
-// загрузить
     case FormDataEvent.IMPORT :
         importData()
+        if (!hasError()) {
+            fillForm()
+            !hasError() && logicalCheck() && checkNSI()
+            if (!hasError()) {
+                logger.info('Закончена загрузка файла ' + UploadFileName)
+            }
+        }
+        break
+    case FormDataEvent.MIGRATION :
+        importData()
+        if (!hasError()) {
+            def total = getCalcTotalRow()
+            def data = getData(formData)
+            insert(data, total)
+            logger.info('Закончена загрузка файла ' + UploadFileName)
+        }
         break
 }
 
@@ -213,17 +228,6 @@ def fillForm(){
         }
     }
 
-    // строка для Итого
-    def newRow = formData.createDataRow()
-    newRow.alias = "total"
-    newRow.securityName = "Итого"
-    setTotalStyle(newRow)
-
-    // проставим 0ми
-    ['nominalPrice', 'acquisitionPrice', 'salePrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each{ alias ->
-        newRow[alias] = 0
-    }
-
     data.getAllCached().each{ DataRow row ->
         /**
          * Табл. 199 Алгоритмы заполнения полей формы «Регистр налогового учёта закрытых сделок РЕПО с обязательством продажи по 2-й части»
@@ -257,7 +261,6 @@ def fillForm(){
             row.outcome = 0
         }
 
-
         // Графа 11
         row.rateBR = roundTo2(calculateColumn11(row,row.part2REPODate))
 
@@ -266,22 +269,13 @@ def fillForm(){
 
         // Графа 13
         row.outcomeTax = roundTo2(calculateColumn13(row))
-
-        // экономим на итерациях, подсчитаем сумму для граф 7-10, 12-13
-        newRow.nominalPrice += row.nominalPrice ?:0
-        newRow.acquisitionPrice += row.acquisitionPrice ?:0
-        newRow.salePrice += row.salePrice ?:0
-        newRow.income += row.income ?:0
-        newRow.outcome += row.outcome ?:0
-        newRow.outcome269st += row.outcome269st ?:0
-        newRow.outcomeTax += row.outcomeTax ?:0
     }
-
     data.save(data.getAllCached())
 
     if (data.getAllCached().size()>0) {
-        // вставка строки итого
-        data.insert(newRow, data.getAllCached().size()+1);
+        // строка для Итого
+        def totalRow = getCalcTotalRow()
+        insert(data, totalRow)
     }
 }
 
@@ -701,10 +695,6 @@ void importData() {
     } catch(Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
-
-    if (!hasError()) {
-        logger.info('Закончена загрузка файла ' + fileName)
-    }
 }
 
 /**
@@ -875,25 +865,20 @@ def getNewRow() {
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    fillForm()
-    if (!hasError() && logicalCheck() && checkNSI()) {
-        def data = getData(formData)
-        def totalColumns = [4 : 'nominalPrice', 7 : 'acquisitionPrice', 8 : 'salePrice', 9 : 'income', 10 : 'outcome', 12 : 'outcome269st', 13 : 'outcomeTax']
+    def totalColumns = [4 : 'nominalPrice', 7 : 'acquisitionPrice', 8 : 'salePrice', 9 : 'income', 10 : 'outcome', 12 : 'outcome269st', 13 : 'outcomeTax']
 
-        def totalCalc = null
-        for (def row : getRows(data)) {
-            if (isTotalRow(row)) {
-                totalCalc = row
-                break
+    def totalCalc = getCalcTotalRow()
+    def errorColums = []
+    if (totalCalc != null) {
+        totalColumns.each { index, columnAlias ->
+            if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
+                errorColums.add(index)
             }
         }
-        if (totalCalc != null) {
-            totalColumns.each { index, columnAlias ->
-                if (totalCalc[columnAlias] != totalRow[columnAlias]) {
-                    logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
-                }
-            }
-        }
+    }
+    if (!errorColums.isEmpty()) {
+        def columns = errorColums.join(', ')
+        logger.error("Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
 }
 
@@ -952,4 +937,33 @@ def getColumnName(def row, def alias) {
  */
 def getIndex(def row) {
     getRows(getData(formData)).indexOf(row)
+}
+
+
+/**
+ * Получить итоговую строку с суммами.
+ */
+def getCalcTotalRow() {
+    def totalRow = formData.createDataRow()
+    totalRow.alias = "total"
+    totalRow.securityName = "Итого"
+    setTotalStyle(totalRow)
+
+    // проставим 0ми
+    ['nominalPrice', 'acquisitionPrice', 'salePrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each{ alias ->
+        totalRow[alias] = 0
+    }
+
+    def data = getData(formData)
+    getRows(data).each{ DataRow row ->
+        totalRow.nominalPrice += row.nominalPrice ?:0
+        totalRow.acquisitionPrice += row.acquisitionPrice ?:0
+        totalRow.salePrice += row.salePrice ?:0
+        totalRow.income += row.income ?:0
+        totalRow.outcome += row.outcome ?:0
+        totalRow.outcome269st += row.outcome269st ?:0
+        totalRow.outcomeTax += row.outcomeTax ?:0
+    }
+
+    return totalRow
 }
