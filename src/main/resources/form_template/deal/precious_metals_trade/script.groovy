@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 
 import java.text.SimpleDateFormat
 
@@ -49,10 +50,12 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        deleteAllStatic()
-        calc()
-        addAllStatic()
-        logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            deleteAllStatic()
+            calc()
+            addAllStatic()
+            logicCheck()
+        }
         break
 }
 
@@ -114,12 +117,12 @@ void logicCheck() {
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
 
-    def index = 1;
+    def rowNum = 0;
     for (row in dataRowHelper.getAllCached()) {
+        rowNum++
         if (row.getAlias() != null) {
             continue
         }
-        def rowNum = index++
         def docDateCell = row.getCell('docDate')
         def dealDateCell = row.getCell('dealDate')
         [
@@ -681,7 +684,7 @@ def addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 13.1
-        newRow.countryCodeNumeric = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.countryCodeNumeric = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // графа 13.2
@@ -689,7 +692,7 @@ def addData(def xml, int headRowCount) {
         if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
-        newRow.regionCode = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell)
+        newRow.regionCode = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell, false)
         indexCell++
 
         // графа 13.3
@@ -701,7 +704,7 @@ def addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 14.1
-        newRow.countryCodeNumeric2 = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.countryCodeNumeric2 = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // графа 14.2
@@ -709,7 +712,7 @@ def addData(def xml, int headRowCount) {
         if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
-        newRow.region2 = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell)
+        newRow.region2 = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell, false)
         indexCell++
 
         // графа 14.3
@@ -721,7 +724,7 @@ def addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 15
-        newRow.deliveryCode = getRecordId(63, 'STRCODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.deliveryCode = getRecordId(63, 'STRCODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // графа 16
@@ -778,21 +781,23 @@ def getNumber(def value, int indexRow, int indexCell) {
  *
  * @param value
  */
-def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
-    String filter = code + "= '" + value + "'"
+def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory=true) {
+    String filter = alias + "= '" + value + "'"
+    if (value=='') filter = "$alias is null"
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
     } else {
         cache[ref_id] = [:]
     }
     def refDataProvider = refBookFactory.getDataProvider(ref_id)
-    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    def records = refDataProvider.getRecords(date, null, filter, null)
     if (records.size() == 1) {
-        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
-    } else {
+    } else if (mandatory || value!='') {
         throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
+    return null
 }
 
 /**
