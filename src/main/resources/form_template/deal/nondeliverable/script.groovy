@@ -43,7 +43,10 @@ switch (formDataEvent) {
 // Консолидация
     case FormDataEvent.COMPOSE:
         consolidation()
+        deleteAllStatic()
+        sort()
         calc()
+        addAllStatic()
         logicCheck()
         break
 // Импорт
@@ -280,6 +283,8 @@ void logicCheck() {
     def testItogRows = testRows.findAll { it -> it.getAlias() != null }
     def itogRows = dataRows.findAll { it -> it.getAlias() != null }
 
+    Date date = new Date()
+    def cache = [:]
 
     if (testItogRows.size() > itogRows.size()) {            //если удалили итоговые строки
 
@@ -289,7 +294,7 @@ void logicCheck() {
             if (row.getAlias() == null) {
                 if (nextRow == null ||
                         nextRow.getAlias() == null && isDiffRow(row, nextRow, getGroupColumns())) {
-                    logger.error("Отсутствует итоговое значение по группе ${row.innKio}")
+                    logger.error("Отсутствует итоговое значение по группе «${getValuesByGroupColumn(row, date, cache)}»")
                 }
             }
         }
@@ -306,28 +311,31 @@ void logicCheck() {
     } else {
         def costName = getAtributes().cost[2]
         def priceName = getAtributes().price[2]
-        Date date = new Date()
-        def cache = [:]
+
         for (int i = 0; i < testItogRows.size(); i++) {
             def testItogRow = testItogRows[i]
             def realItogRow = itogRows[i]
             int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
             def index = realItogRow.getIndex()
             if (testItogRow.price != realItogRow.price) {
-                logger.error("Неверное итоговое значение по группе '${getValuesByGroupColumn(dataRows[itg], date, cache)}' в графе '${priceName}' в строке ${index}")
+                logger.error("Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg], date, cache)}» в графе «${priceName}» в строке ${index}")
             }
             if (testItogRow.cost != realItogRow.cost) {
-                logger.error("Неверное итоговое значение по группе '${getValuesByGroupColumn(dataRows[itg], date, cache)}' в графе '${costName}' в строке ${index}")
+                logger.error("Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg], date, cache)}» в графе «${costName}» в строке ${index}")
             }
         }
     }
 }
 
-// ['name', 'innKio', 'contractNum', 'contractDate', 'transactionType']
+/*
+     Возвращает строку со значениями полей строки по которым идет группировка
+     ['name', 'innKio', 'contractNum', 'contractDate', 'transactionType']
+ */
 def getValuesByGroupColumn(DataRow row, Date date, def cache) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    builder.append(refBookService.getRecordData(9, row.name).NAME.stringValue).append(sep)
+    def map = refBookService.getRecordData(9, row.name)
+    builder.append(map == null ? 'null' : map.NAME.stringValue).append(sep)
     builder.append(row.innKio).append(sep)
     builder.append(row.contractNum).append(sep)
     builder.append(row.contractDate).append(sep)
@@ -368,6 +376,10 @@ void addAllStatic() {
     if (!logger.containsLevel(LogLevel.ERROR)) {
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.getAllCached()
+
+        if (dataRows.size()<1){
+            return
+        }
 
         for (int i = 0; i < dataRows.size(); i++) {
             def row = dataRows.get(i)
@@ -465,7 +477,7 @@ void sort() {
     def dataRows = dataRowHelper.getAllCached()
 
     dataRows.sort({ DataRow a, DataRow b ->
-        sortRow(['name', 'innKio', 'contractNum', 'contractDate', 'transactionType'], a, b)
+        sortRow(getGroupColumns(), a, b)
     })
 
     dataRowHelper.save(dataRows);
