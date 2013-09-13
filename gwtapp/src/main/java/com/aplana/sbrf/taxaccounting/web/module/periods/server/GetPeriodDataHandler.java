@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataAction;
@@ -51,7 +52,8 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 		Map<Integer, List<TableRow>> per = new TreeMap<Integer, List<TableRow>>();
 		for (DepartmentReportPeriod period : reportPeriods) {
 			int periodYear = period.getReportPeriod().getYear(); 
-			if (periodYear >= action.getFrom() && periodYear <= action.getTo()) {
+			TaxType periodTaxType = period.getReportPeriod().getTaxType();
+			if (periodYear >= action.getFrom() && periodYear <= action.getTo() && periodTaxType == action.getTaxType()) {
 				if (per.get(periodYear) == null) {
 					List<TableRow> tableRows = new ArrayList<TableRow>();
 					per.put(periodYear, tableRows);
