@@ -27,7 +27,11 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED:
+        logicCheck()
+        break
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
+        println("AFTER_MOVE_APPROVED_TO_ACCEPTED")
         accepted()
         break
 }
@@ -172,7 +176,7 @@ void logicCheck() {
         // Проверка уникальности ссылки на элемент справочника
         isHaveDuplicates = row.refBookRecord != null && dataRows.find { it.refBookRecord == row.refBookRecord && it != row } != null
     }
-    if (isHaveDuplicates) logger.warn("Одна запись справочника не может быть отредактирована более одного раза в одной и той же форме!")
+    if (isHaveDuplicates) logger.error("Одна запись справочника не может быть отредактирована более одного раза в одной и той же форме!")
 }
 
 /**
