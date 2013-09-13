@@ -1,6 +1,7 @@
 package form_template.deal.matrix
 
 import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 
@@ -111,16 +112,20 @@ void checkCreation() {
 }
 
 void addRow() {
+    addRow(formData.createDataRow(), currentDataRow)
+}
+
+void addRow(DataRow<Cell> row, DataRow<Cell> currentRow) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def row = formData.createDataRow()
+
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = currentRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
     dataRowHelper.insert(row, index)
     // TODO пересмотреть редактируемость (пока все редактируемо)
     for (column in formData.getFormColumns()) {
-        if (column.alias.equals('dealNum1')) {
-            continue;
+        if (column.alias.equals('dealNum1') || column.alias.equals('dealNum2') || column.alias.equals('dealNum3')) {
+            continue
         }
         row.getCell(column.alias).editable = true
         row.getCell(column.alias).setStyleAlias('Редактируемая')
@@ -137,18 +142,68 @@ void deleteRow() {
  * Логические проверки
  */
 void logicCheck() {
-    // TODO
-    // 1. Обязательные поля
-    // 2. Проверка наличия элемента справочника «Да/Нет»
-    // 3. Проверка наличия элемента справочника «Коды сторон сделки»
-    // 4. Проверка наличия элемента справочника «Коды типов предмета сделки»
-    // 5. Проверка наличия элемента справочника «ОКП»
-    // 6. Проверка наличия элемента справочника «ОКСМ»
-    // 7. Проверка наличия элемента справочника «Коды субъектов Российской Федерации» для атрибута 33
-    // 8. Проверка наличия элемента справочника «Коды субъектов Российской Федерации» для атрибута 37
-    // 9. Проверка наличия элемента справочника «Коды условий поставки»
-    // 10. Проверка наличия элемента «Коды единиц измерения на основании ОКЕИ»справочника «Коды единиц измерения на основании ОКЕИ»
-    // 11. Проверка наличия элемента справочника «Коды сведений об организации»
+    def String YES_NO = "Да/Нет"
+    def String OKSM = "ОКСМ"
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    for (row in dataRowHelper.getAllCached()) {
+
+        // 1. Обязательные поля
+        // TODO нет в ТЗ
+
+        // 2. Проверка наличия элемента справочника «Да/Нет» (графы 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15)
+        checkNSI(row, "f121", YES_NO, 38)
+        checkNSI(row, "f122", YES_NO, 38)
+        checkNSI(row, "f123", YES_NO, 38)
+        checkNSI(row, "f124", YES_NO, 38)
+        checkNSI(row, "f131", YES_NO, 38)
+        checkNSI(row, "f132", YES_NO, 38)
+        checkNSI(row, "f133", YES_NO, 38)
+        checkNSI(row, "f134", YES_NO, 38)
+        checkNSI(row, "f135", YES_NO, 38)
+        checkNSI(row, "similarDealGroup", YES_NO, 38)
+        // TODO графа 13 не того типа в ТЗ
+        checkNSI(row, "dealPriceSign", YES_NO, 38)
+
+        // 3. Проверка наличия элемента справочника «Коды сторон сделки» (графа 14)
+        checkNSI(row, "taxpayerSideCode", "Коды стороны сделки", 65)
+
+        // 4 и 5. Проверка наличия элемента справочника «Коды типов предмета сделки» (графы 23, 26)
+        checkNSI(row, "dealType", "Коды типов предмета сделки", 64)
+        // TODO одно из двух:
+        //checkNSI(row, "dealSubjectCode2", "Коды типов предмета сделки", 64)
+        //checkNSI(row, "dealSubjectCode2", "Коды ОКП на основании общероссийского классификатора продукции (ОКП)", 68)
+
+        // 6. Проверка наличия элемента справочника «ОКСМ» (графы 31, 32, 36, 49)
+        checkNSI(row, "countryCode", OKSM, 10)
+        checkNSI(row, "countryCode1", OKSM, 10)
+        checkNSI(row, "countryCode2", OKSM, 10)
+        checkNSI(row, "countryCode3", OKSM, 10)
+
+        // 7 и 8. Проверка наличия элемента справочника «Коды субъектов Российской Федерации» (графы 33, 37)
+        checkNSI(row, "region1", "Коды субъектов Российской Федерации", 4)
+        checkNSI(row, "region2", "Коды субъектов Российской Федерации", 4)
+
+        // 9. Проверка наличия элемента справочника «Коды условий поставки»  в графе 40)
+        checkNSI(row, "deliveryCode", "Коды условий поставки", 63)
+
+        // 10. Проверка наличия элемента справочника «Коды единиц измерения на основании ОКЕИ»  (графа 41)
+        checkNSI(row, "okeiCode", "Коды единиц измерения на основании ОКЕИ", 12)
+
+        // 11. Проверка наличия элемента справочника «Сведения об организации» (графа 48)
+        checkNSI(row, "organInfo", "Сведения об организации", 70)
+    }
+}
+
+/**
+ * Проверка соответствия НСИ
+ */
+void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
+    def cell = row.getCell(alias)
+    if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
+        def msg2 = cell.column.name
+        def rowNum = row.getIndex()
+        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
+    }
 }
 
 /**
@@ -168,10 +223,9 @@ void calc() {
         row.dealNum2 = index
         row.dealNum3 = index
         index++
-        // TODO расчет полей по справочникам
     }
 
-    dataRowHelper.update(dataRows);
+    dataRowHelper.update(dataRows)
 }
 
 /**
@@ -181,19 +235,17 @@ void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.clear()
 
-    int index = 1;
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.getFormType().getTaxType() == TaxType.DEAL) {
             formDataService.getDataRowHelper(source).getAllCached().each { srcRow ->
                 if (srcRow.getAlias() == null) {
                     def row = buildRow(srcRow, source.getFormType())
-                    dataRowHelper.insert(row, index++)
+                    addRow(row, null)
                 }
             }
         }
     }
-    dataRowHelper.commit()
 }
 
 /**
@@ -201,14 +253,14 @@ void consolidation() {
  * @param row
  * @param type
  */
-def buildRow(DataRow<Cell> srcRow, FormType type) {
+DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     println(">>> buildRow type = "+type.id+" "+type.name+" srcRow = "+srcRow)
     // Общие значения
 
     // "Да"
-    def Long recYesId = null;
+    def Long recYesId = null
     // "Нет"
-    def Long recNoId = null;
+    def Long recNoId = null
 
     def valYes = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 0", null)
     def valNo = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 1", null)
@@ -219,35 +271,45 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
         recNoId = valNo.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
     }
 
-    // Графа 1
-    def row = formData.createDataRow()
+    def DataRow<Cell> row = formData.createDataRow()
+    /*
     // Графа 2
     def val2 = refBookFactory.getDataProvider(69L).getRecords(new Date(), null, "CODE = 1", null)
     if (val2 != null && val2.size() == 1) {
         row.interdependenceSing = val2.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
     }
+
     // Графа 3
     // row.f121, заполняется после графы 50
+
     // Графа 4
     row.f122 = recNoId
+
     // Графа 5
     // row.f123, заполняется после графы 50
+
     // Графа 6
     row.f124 = recNoId
+
     // Графа 7
     // row.f131, заполняется после графы 50
+
     // Графа 8
     // row.f132, заполняется после графы 50
+
     // Графа 9
     // row.f133, заполняется после графы 50
+
     // Графа 10
     // row.f134, заполняется после графы 50
+
     // Графа 11
     // row.f135, заполняется после графы 45
+
     // Графа 12
     row.similarDealGroup = recNoId
+
     // Графа 13
-    // TODO вопрос Жене
     def String val13 = null
     switch (type.id) {
         case 376:
@@ -294,6 +356,7 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
             row.dealNameCode = values13.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         }
     }
+
     // Графа 14
     def String val14 = null
     switch (type.id) {
@@ -365,13 +428,33 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
         }
     }
 
-    /*
     // Графа 15
-    // dealPriceSign // справочное
+    // справочное, заполняется после графы 50, по-умолчанию 0
+    row.dealPriceSign = recNoId
+
     // Графа 16
-    // dealPriceCode // справочное
+    def int val16 = 0
+    switch (type.id) {
+        case 385:
+            val16 = 3
+            break
+        case 384:
+            if (srcRow.transactionMode != null) {
+                def val16Rec = refBookFactory.getDataProvider(14L).getRecordData(srcRow.transactionMode)
+                if (val16Rec.ID != null && val16Rec.ID == 1) {
+                    val16 = 2
+                }
+            }
+            break
+    }
+    def values16 = refBookFactory.getDataProvider(66L).getRecords(new Date(), null, "CODE = $val16", null)
+    if (values16 != null && values16.size() == 1) {
+        row.dealPriceCode = values16.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+    }
+
     // Графа 17
     row.dealMemberCount = 2
+
     // Графа 18
     switch (type.id) {
         case 376:
@@ -433,7 +516,21 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
     }
 
     // Графа 23
-    // row.dealType // справочное
+    def int val23 = 2
+    switch (type.id) {
+        case 379:
+        case 385:
+            val23 = 3
+            break
+        case 393:
+        case 394:
+            val23 = 1
+            break
+    }
+    def values23 = refBookFactory.getDataProvider(64L).getRecords(new Date(), null, "CODE = $val23", null)
+    if (values23 != null && values23.size() == 1) {
+        row.dealType = values23.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+    }
 
     // Графа 24
     switch (type.id) {
@@ -486,37 +583,26 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
 
-    // Графа 25
-    // TODO В аналитике не описан алгоритм
-    // if (row.dealType == 1) // См. справочник
-
     // Графа 26
-    switch (type.id) {
-        case 390:
-            // TODO Добавить значение "000000" в справочник и выбрать его
-            // row.dealSubjectCode2 = '000000'
-            break
-        case 393:
-            // TODO Выбрать значение по значению из отчета
-            // row.dealSubjectCode2 = srcRow.okpCode
-            break
+    if (type.id == 393) {
+        dealSubjectCode2 = srcRow.okpCode
     }
 
     // Графа 27
-    // TODO Заполнение конкретными значениями из справочника
+    def String val27 = null
     switch (type.id) {
         case 376:
-            // row.dealSubjectCode3 = '70.20.2'
+            val27 = '70.20.2'
             break
         case 377:
-            // row.dealSubjectCode3 = '70.32.2'
+            val27 = '70.32.2'
             break
         case 375:
-            // row.dealSubjectCode3 = '72.2'
+            val27 = '72.2'
             break
         case 379:
         case 380:
-            // row.dealSubjectCode3 = '74.8'
+            val27 = '74.8'
             break
         case 381:
         case 384:
@@ -526,20 +612,27 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
         case 392:
         case 393:
         case 394:
-            // row.dealSubjectCode3 = '65.23'
+            val27 = '65.23'
             break
         case 382:
-            // row.dealSubjectCode3 = '67.12'
+            val27 = '67.12'
             break
         case 383:
         case 385:
         case 387:
         case 389:
-            // row.dealSubjectCode3 = '65.22'
+            val27 = '65.22'
             break
         case 390:
-            // row.dealSubjectCode3 = '65.12'
+            val27 = '65.12'
             break
+    }
+
+    if (val27 != null) {
+        def values27 = refBookFactory.getDataProvider(34L).getRecords(new Date(), null, "CODE = '$val27'", null)
+        if (values27 != null && values27.size() == 1) {
+            row.dealSubjectCode3 = values27.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        }
     }
 
     // Графа 28
@@ -597,103 +690,144 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
         case 390:
         case 391:
         case 394:
-            row.docDate = srcRow.docDate
+            row.contractDate = srcRow.docDate
             break
+    }
+
+    // Заполнение графы 15
+    Calendar compareCalendar15 = Calendar.getInstance()
+    compareCalendar15.set(2011, 12, 28)
+    if (compareCalendar15.getTime().equals(row.contractDate) && "123".equals(row.contractNum)) {
+        row.dealPriceSign = recYesId
     }
 
     // Графа 31
     switch (type.id) {
         case 393:
+            row.countryCode = srcRow.unitCountryCode
+            break
         case 394:
-            // TODO Разобраться в аналитике. Справочники.
+            row.countryCode = srcRow.countryCodeNumeric
             break
     }
 
-    // Графа 32
-    // if (row.dealType == 1) // TODO См. справочник
-    // if (type.id == 393 && srcRow.signPhis == 'физическая поставка') {
-    //     row.countryCode1 =  srcRow.countryCode2
-    // }
-    //
-    // if (type.id == 394 && srcRow.deliverySign == 'физическая поставка') {
-    //     row.countryCode1 = srcRow.countryCodeNumeric
-    // }
-
-    // Графа 33
-    // if (row.dealType == 1) // TODO См. справочник
-    // if (type.id == 393 && srcRow.signPhis == 'физическая поставка') {
-    //     row.region1 =  srcRow.region1
-    // }
-    //
-    // if (type.id == 394 && srcRow.deliverySign == 'физическая поставка') {
-    //     row.region1 = srcRow.regionCode
-    // }
-
-    // Графа 34
-    // if (row.dealType == 1) // TODO См. справочник
-    // if (type.id == 393 && srcRow.signPhis == 'физическая поставка') {
-    //     row.city1 = srcRow.city1
-    // }
-    //
-    // if (type.id == 394 && srcRow.deliverySign == 'физическая поставка') {
-    //     row.city1 = srcRow.city
-    // }
-
-    // Графа 35
-    // if (row.dealType == 1) // TODO См. справочник
-    // if (type.id == 393 && srcRow.signPhis == 'физическая поставка') {
-    //     row.locality1 = srcRow.settlement1
-    // }
-    //
-    // if (type.id == 394 && srcRow.deliverySign == 'физическая поставка') {
-    //     row.locality1 = srcRow.locality
-    // }
-
-    // Графа 36
-    if (type.id == 393) {
-        // row.countryCode2 = srcRow.countryCode3 // Справочник
-    }
-
-    if (type.id == 394) {
-        // row.countryCode2 = srcRow.countryCodeNumeric2 // Справочник
-    }
-
-    // Графа 37
+    // Графа 32, Графа 33, Графа 34, Графа 35
     if (type.id == 393 || type.id == 394) {
-        // row.region2 = srcRow.region2 // Справочник
+        def values32 = refBookFactory.getDataProvider(18L).getRecordData(srcRow.signPhis)
+        if (values32 != null && values32.SIGN.stringValue.equals("Физическая поставка")) {
+            if (type.id == 393) {
+                row.countryCode1 = srcRow.countryCode2
+                row.region1 = srcRow.region1
+                row.city1 = srcRow.city1
+                row.locality1 = srcRow.settlement1
+            }
+
+            if (type.id == 394) {
+                row.countryCode1 = srcRow.countryCodeNumeric
+                row.region1 = srcRow.regionCode
+                row.city1 = srcRow.city
+                row.locality1 = srcRow.locality
+            }
+        }
     }
 
-    // Графа 38
-    if (type.id == 393 || type.id == 394) {
-        // row.city2 = srcRow.city2 // Справочник
-    }
-
-    // Графа 39
-    if (type.id == 393) {
-        // row.locality2 = srcRow.settlement2 // Справочник
-    }
-
-    if (type.id == 394) {
-        // row.locality2 = srcRow.locality2 // Справочник
+    // Графа 36, Графа 37, Графа 38, Графа 39
+    switch (type.id) {
+        case 376:
+        case 377:
+            row.countryCode2 = srcRow.country
+            row.region2 = srcRow.region
+            row.city2 = srcRow.city
+            row.locality2 = srcRow.settlement
+            break
+        case 393:
+            row.countryCode2 = srcRow.countryCode3
+            row.region2 = srcRow.region2
+            row.city2 = srcRow.city2
+            row.locality2 = srcRow.settlement2
+            break
+        case 394:
+            row.countryCode2 = srcRow.countryCodeNumeric2
+            row.region2 = srcRow.region2
+            row.city2 = srcRow.city2
+            row.locality2 = srcRow.locality2
+            break
+        default:
+            def values36 = refBookFactory.getDataProvider(10L).getRecords(new Date(), null, "CODE = '643'", null)
+            if (values36 != null && values36.size() == 1) {
+                row.countryCode2 = values36.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+            }
+            def values37 = refBookFactory.getDataProvider(4L).getRecords(new Date(), null, "CODE = '77'", null)
+            if (values37 != null && values37.size() == 1) {
+                row.region2 = values37.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+            }
+            row.city2 = 'Москва'
+            row.locality2 = row.city2
+            break
     }
 
     // Графа 40
     if (type.id == 393) {
-        // row.deliveryCode = srcRow.conditionCode // Справочник
+        row.deliveryCode = srcRow.conditionCode
     }
-
     if (type.id == 394) {
-        // row.deliveryCode = srcRow.deliveryCode // Справочник
+        row.deliveryCode = srcRow.deliveryCode
     }
 
     // Графа 41
     if (type.id == 381 || type.id == 385) {
-        // row.okeiCode = srcRow.okeiCode // Справочник
+        row.okeiCode = srcRow.okeiCode
+    } else {
+        def String val41 = null;
+        switch (type.id) {
+            case 376:
+            case 377:
+                val41 = '055'
+                break
+            case 375:
+            case 379:
+            case 380:
+            case 382:
+            case 383:
+            case 384:
+            case 390:
+            case 391:
+            case 392:
+            case 386:
+            case 387:
+            case 388:
+            case 389:
+            case 393:
+            case 394:
+                val41 = '796'
+                break
+        }
+        if (val41 != null ) {
+            def values41 = refBookFactory.getDataProvider(12L).getRecords(new Date(), null, "CODE = '$val41'", null)
+            if (values41 != null && values41.size() == 1) {
+                row.okeiCode = values41.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+            }
+        }
     }
 
     // Графа 42
-    if ([376, 377, 381, 385, 387, 389, 393, 394].contains(type.id)) {
-        row.count = srcRow.count
+    switch (type.id) {
+        case 376:
+        case 377:
+        case 381:
+        case 385:
+        case 387:
+        case 389:
+        case 393:
+        case 394:
+            row.count = srcRow.count
+            break
+        case 384:
+            row.count = srcRow.bondCount
+            break
+        default:
+            row.count = 1
+            breal
     }
 
     // Графа 43
@@ -788,8 +922,7 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
             row.dealDoneDate = srcRow.transactionDeliveryDate
             break
     }
-
-    // TODO заполнить далее графа_11
+    */
 
     // Графа 47
     row.dealMemberNum = row.otherNum
@@ -844,22 +977,22 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
         case 377:
         case 382:
         case 383:
-            // row.organName = srcRow.jurName // Справочное
+            row.organName = srcRow.jurName
             break
         case 375:
         case 379:
         case 380:
         case 381:
         case 387:
-            // row.organName = srcRow.fullNamePerson // Справочное
+            row.organName = srcRow.fullNamePerson
             break
         case 384:
-            // row.organName = srcRow.contraName // Справочное
+            row.organName = srcRow.contraName
             break
         case 385:
         case 392:
         case 393:
-            // row.organName = srcRow.name // Справочное
+            row.organName = srcRow.name
             break
         case 386:
         case 388:
@@ -867,7 +1000,7 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
         case 390:
         case 391:
         case 394:
-            // row.organName = srcRow.fullName // Справочное
+            row.organName = srcRow.fullName
             break
     }
 
@@ -877,6 +1010,16 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
     // TODO заполнить далее графа_8
     // TODO заполнить далее графа_9
     // TODO заполнить далее графа_10
+    // Графа 11
+    if (row.dealDoneDate != null || row.organName != null) {
+        Calendar compareCalendar11 = Calendar.getInstance()
+        compareCalendar11.set(2014, 1, 1)
+
+        //        refBookFactory.getDataProvider(9L).
+        //
+        //        if (row.dealDoneDate.before(compareCalendar11.getTime())) {
+        //        }
+    }
 
     // Графа 51
     // row.organINN = // Справочное TODO из графы 50
@@ -892,6 +1035,6 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
 
     // Графа 55
     // row.address = // Справочное TODO из графы 50
-    */
-    return row;
+
+    return row
 }

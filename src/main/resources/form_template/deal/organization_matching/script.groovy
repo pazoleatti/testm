@@ -27,7 +27,11 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED:
+        logicCheck()
+        break
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
+        println("AFTER_MOVE_APPROVED_TO_ACCEPTED")
         accepted()
         break
 }
@@ -104,7 +108,9 @@ void checkUniq() {
  */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in dataRowHelper.getAllCached()) {
+    def dataRows = dataRowHelper.getAllCached()
+    def isHaveDuplicates = false
+    for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
@@ -166,7 +172,11 @@ void logicCheck() {
             def msg = row.getCell('refBookRecord').column.name
             logger.warn("В справочнике «Организации – участники контролируемых сделок» не найден элемент $msg, указанный в строке $rowNum!")
         }
+
+        // Проверка уникальности ссылки на элемент справочника
+        isHaveDuplicates = row.refBookRecord != null && dataRows.find { it.refBookRecord == row.refBookRecord && it != row } != null
     }
+    if (isHaveDuplicates) logger.error("Одна запись справочника не может быть отредактирована более одного раза в одной и той же форме!")
 }
 
 /**

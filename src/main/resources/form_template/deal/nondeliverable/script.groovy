@@ -49,7 +49,42 @@ switch (formDataEvent) {
 // Импорт
     case FormDataEvent.IMPORT:
         importData()
+        deleteAllStatic()
+        sort()
+        calc()
+        addAllStatic()
+        calc()
+        logicCheck()
         break
+}
+
+def getAtributes(){
+    [
+        rowNum:                   ['rowNum', 'гр. 1',   '№ п/п'],
+        name:                     ['name', 'гр. 2',   'Полное наименование с указанием ОПФ'],
+        innKio:                   ['innKio', 'гр. 3',   'ИНН/КИО'],
+        country:                  ['country','гр. 4.1', 'Наименование страны регистрации'],
+        countryCode:              ['countryCode', 'гр. 4.2', 'Код страны по классификатору ОКСМ'],
+        contractNum:              ['contractNum','гр. 5',   'Номер договора'],
+        contractDate:             ['contractDate','гр. 6',   'Дата договора'],
+        transactionNum:           ['transactionNum','гр. 7',   'Номер сделки'],
+        transactionDeliveryDate:  ['transactionDeliveryDate','гр. 8',   'Дата заключения сделки'],
+        transactionType:          ['transactionType','гр. 9',   'Вид срочной сделки'],
+        incomeSum:                ['incomeSum','гр. 10',  'Сумма доходов Банка по данным бухгалтерского учета, руб.'],
+        consumptionSum:           ['consumptionSum','гр. 11',  'Сумма расходов Банка по данным бухгалтерского учета, руб.'],
+        price:                    ['price','гр. 12',  'Цена (тариф) за единицу измерения, руб.'],
+        cost:                     ['cost','гр. 13',  'Итого стоимость, руб.'],
+        transactionDate:          ['transactionDate','гр. 14',  'Дата совершения сделки']
+    ]
+}
+
+def getGroupColumns(){
+    ['name', 'innKio', 'contractNum', 'contractDate', 'transactionType']
+}
+
+def getEditColumns(){
+    ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate',
+            'transactionType', 'incomeSum', 'consumptionSum', 'transactionDate']
 }
 
 /**
@@ -70,8 +105,7 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = 0
-    ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate',
-            'transactionType', 'incomeSum', 'consumptionSum', 'transactionDate'].each {
+    getEditColumns().each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
@@ -113,7 +147,9 @@ void logicCheck() {
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
 
-    for (row in dataRowHelper.getAllCached()) {
+    def dataRows = dataRowHelper.getAllCached();
+
+    for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
@@ -223,6 +259,80 @@ void logicCheck() {
         checkNSI(row, "country", "ОКСМ", 10)
         checkNSI(row, "countryCode", "ОКСМ", 10)
     }
+
+    //Проверки подитоговых сумм
+    def testRows = dataRows.findAll{it -> it.getAlias() == null}
+    //добавляем итоговые строки для проверки
+    for (int i = 0; i < testRows.size(); i++) {
+        def testRow = testRows.get(i)
+        def nextRow = null
+
+        if (i < testRows.size() - 1) {
+            nextRow = testRows.get(i + 1)
+        }
+
+        if (testRow.getAlias() == null && nextRow == null || isDiffRow(testRow, nextRow, getGroupColumns())) {
+            def itogRow = calcItog(i, testRows)
+            testRows.add(++i, itogRow)
+        }
+    }
+
+    def testItogRows = testRows.findAll { it -> it.getAlias() != null }
+    def itogRows = dataRows.findAll { it -> it.getAlias() != null }
+
+
+    if (testItogRows.size() > itogRows.size()) {            //если удалили итоговые строки
+
+        for (int i = 0; i < dataRows.size(); i++) {
+            def row = dataRows[i]
+            def nextRow = dataRows[i + 1]
+            if (row.getAlias() == null) {
+                if (nextRow == null ||
+                        nextRow.getAlias() == null && isDiffRow(row, nextRow, getGroupColumns())) {
+                    logger.error("Отсутствует итоговое значение по группе ${row.innKio}")
+                }
+            }
+        }
+
+    } else if (testItogRows.size() < itogRows.size()) {     //если удалили все обычные строки, значит где то 2 подряд подитог.строки
+
+        for (int i = 0; i < dataRows.size(); i++) {
+            if (dataRows[i].getAlias() != null) {
+                if(i - 1 < -1 || dataRows[i - 1].getAlias() != null){
+                    logger.error("Лишняя итоговая строка " + dataRows[i].getIndex())
+                }
+            }
+        }
+    } else {
+        def costName = getAtributes().cost[2]
+        def priceName = getAtributes().price[2]
+        Date date = new Date()
+        def cache = [:]
+        for (int i = 0; i < testItogRows.size(); i++) {
+            def testItogRow = testItogRows[i]
+            def realItogRow = itogRows[i]
+            int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
+            def index = realItogRow.getIndex()
+            if (testItogRow.price != realItogRow.price) {
+                logger.error("Неверное итоговое значение по группе '${getValuesByGroupColumn(dataRows[itg], date, cache)}' в графе '${priceName}' в строке ${index}")
+            }
+            if (testItogRow.cost != realItogRow.cost) {
+                logger.error("Неверное итоговое значение по группе '${getValuesByGroupColumn(dataRows[itg], date, cache)}' в графе '${costName}' в строке ${index}")
+            }
+        }
+    }
+}
+
+// ['name', 'innKio', 'contractNum', 'contractDate', 'transactionType']
+def getValuesByGroupColumn(DataRow row, Date date, def cache) {
+    def sep = ", "
+    StringBuilder builder = new StringBuilder()
+    builder.append(refBookService.getRecordData(9, row.name).NAME.stringValue).append(sep)
+    builder.append(row.innKio).append(sep)
+    builder.append(row.contractNum).append(sep)
+    builder.append(row.contractDate).append(sep)
+    builder.append(row.transactionType)
+    builder.toString()
 }
 
 /**
@@ -235,6 +345,20 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
         def rowNum = row.getIndex()
         logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
     }
+}
+
+/**
+ * проверяет разные ли строки по значениям полей группировки
+ * @param a первая  строка
+ * @param b вторая строка
+ * @return true - разные, false = одинаковые
+ */
+boolean isDiffRow(DataRow row, DataRow nextRow, def groupColumns) {
+    def rez = false
+    groupColumns.each { def n ->
+        rez = rez || (row.get(n) != nextRow.get(n))
+    }
+    return rez
 }
 
 /**
@@ -253,14 +377,8 @@ void addAllStatic() {
                 nextRow = dataRows.get(i + 1)
             }
 
-            if (row.getAlias() == null && nextRow == null
-                    || row.name != nextRow.name
-                    || row.innKio != nextRow.innKio
-                    || row.contractNum != nextRow.contractNum
-                    || row.contractDate != nextRow.contractDate
-                    || row.transactionType != nextRow.transactionType) {
-
-                def itogRow = calcItog(i)
+            if (row.getAlias() == null && nextRow == null || isDiffRow(row, newRow, getGroupColumns())) {
+                def itogRow = calcItog(i, dataRows)
                 dataRowHelper.insert(itogRow, ++i+1)
             }
         }
@@ -272,9 +390,7 @@ void addAllStatic() {
  * @param i
  * @return
  */
-def calcItog(int i) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+def calcItog(int i, def dataRows) {
     def newRow = formData.createDataRow()
 
     newRow.getCell('itog').colSpan = 12
@@ -545,8 +661,7 @@ def addData(def xml) {
         }
 
         def newRow = formData.createDataRow()
-        ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate',
-                'transactionType', 'incomeSum', 'consumptionSum', 'transactionDate'].each {
+        getEditColumns().each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
@@ -614,12 +729,37 @@ def addData(def xml) {
     }
 }
 
+
+def getNumber(def value, int indexRow, int indexCell) {
+    try {
+        return getNumber(value)
+    } catch (Exception e) {
+        throw new Exception("Строка ${indexRow - 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
+    }
+}
+
+def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
+    def rez = getRecordId(ref_id, code, value, date, cache)
+    if (rez == null) {
+        throw new Exception("Строка ${indexRow - 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
+    }
+    rez
+}
+
+def getDate(def value, int indexRow, int indexCell) {
+    try {
+        return getDate(value)
+    } catch (Exception e) {
+        throw new Exception("Строка ${indexRow - 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
+    }
+}
+
 /**
  * Получить числовое значение.
  *
  * @param value строка
  */
-def getNumber(def value, int indexRow, int indexCell) {
+def getNumber(def value) {
     if (value == null) {
         return null
     }
@@ -629,11 +769,7 @@ def getNumber(def value, int indexRow, int indexCell) {
     }
     // поменять запятую на точку и убрать пробелы
     tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
-    try {
-        return new BigDecimal(tmp)
-    } catch (Exception e) {
-        throw new Exception("Строка ${indexRow - 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
-    }
+    return new BigDecimal(tmp)
 }
 
 /**
@@ -641,8 +777,7 @@ def getNumber(def value, int indexRow, int indexCell) {
  *
  * @param value
  */
-def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
-
+def getRecordId(def ref_id, String code, String value, Date date, def cache) {
     String filter;
     if (value == null || value.equals("")) {
         filter = code + " is null"
@@ -660,20 +795,14 @@ def getRecordId(def ref_id, String code, String value, Date date, def cache, int
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
-    throw new Exception("Строка ${indexRow - 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
 }
 
 /**
  * Получить дату по строковому представлению (формата дд.ММ.гггг)
  */
-def getDate(def value, int indexRow, int indexCell) {
+def getDate(def value) {
     if (value == null || value == '') {
         return null
     }
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    try {
-        return format.parse(value)
-    } catch (Exception e) {
-        throw new Exception("Строка ${indexRow - 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
-    }
+    return new SimpleDateFormat('dd.MM.yyyy').parse(value)
 }
