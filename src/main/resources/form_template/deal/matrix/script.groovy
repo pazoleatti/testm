@@ -577,10 +577,21 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     switch (type.id) {
         case 377:
             row.outcome = srcRow.bankSum
+            break
         case 375:
             row.outcome = srcRow.expensesSum
+            break
         case 380:
             row.outcome = srcRow.sum
+            break
+        case 390:
+        case 391:
+        case 394:
+            row.outcome = srcRow.outcomeSum
+            break
+        case 392:
+        case 393:
+            row.outcome = srcRow.consumptionSum
             break
     }
 
@@ -896,7 +907,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
         default:
             row.count = 1
-            breal
+            break
     }
 
     // Графа 43
