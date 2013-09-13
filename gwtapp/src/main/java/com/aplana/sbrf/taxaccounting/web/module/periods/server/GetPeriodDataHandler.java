@@ -1,13 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataAction;
@@ -19,15 +23,14 @@ import com.gwtplatform.dispatch.shared.ActionException;
 
 
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-@Service
+@Component
 public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAction, GetPeriodDataResult> {
 
 	@Autowired
-	private PeriodService reportPeriodService;
-
+	private	PeriodService periodService;
 
 	@Autowired
-	DepartmentService departmentService;
+	private DepartmentService departmentService;
 
 	public GetPeriodDataHandler() {
 		super(GetPeriodDataAction.class);
@@ -37,18 +40,21 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 	public GetPeriodDataResult execute(GetPeriodDataAction action, ExecutionContext executionContext) throws ActionException {
 		GetPeriodDataResult res = new GetPeriodDataResult();
 		//TODO Перенести фильтрацию по датам в сервисы
-		GregorianCalendar from = new GregorianCalendar(action.getFrom(), Calendar.JANUARY, 1);
-		GregorianCalendar to = new GregorianCalendar(action.getTo(), Calendar.DECEMBER, 31);
-		List<DepartmentReportPeriod> reportPeriods = reportPeriodService.listByDepartmentId(action.getDepartmentId());
+		List<DepartmentReportPeriod> reportPeriods = periodService.listByDepartmentId(action.getDepartmentId());
+		Collections.sort(reportPeriods, new Comparator<DepartmentReportPeriod>(){
+			@Override
+			public int compare(DepartmentReportPeriod o1,
+					DepartmentReportPeriod o2) {
+			    return Integer.compare(o1.getReportPeriod().getOrder(), o2.getReportPeriod().getOrder());
+			}
+		});
 		Map<Integer, List<TableRow>> per = new TreeMap<Integer, List<TableRow>>();
 		for (DepartmentReportPeriod period : reportPeriods) {
-			TaxPeriod taxPeriod = period.getReportPeriod().getTaxPeriod();
-			if ((taxPeriod.getStartDate().after(from.getTime()) || taxPeriod.getStartDate().equals(from.getTime()))
-					&& (taxPeriod.getStartDate().before(to.getTime()) || taxPeriod.getStartDate().equals(to.getTime()))
-					&& (taxPeriod.getTaxType() == action.getTaxType())) {
-				if (per.get(taxPeriod.getStartDate().getYear()) == null) {
+			int periodYear = period.getReportPeriod().getYear(); 
+			if (periodYear >= action.getFrom() && periodYear <= action.getTo()) {
+				if (per.get(periodYear) == null) {
 					List<TableRow> tableRows = new ArrayList<TableRow>();
-					per.put(taxPeriod.getStartDate().getYear(), tableRows);
+					per.put(periodYear, tableRows);
 				}
 				TableRow row = new TableRow();
 				row.setPeriodName(period.getReportPeriod().getName());
@@ -56,13 +62,13 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 				row.setDepartmentId(action.getDepartmentId());
 				row.setReportPeriodId(period.getReportPeriod().getId());
 				row.setSubHeader(false);
-				per.get(taxPeriod.getStartDate().getYear()).add(row);
+				per.get(periodYear).add(row);
 			}
 		}
 		List<TableRow> resultRows = new ArrayList<TableRow>();
 		for (Map.Entry<Integer, List<TableRow>> rec : per.entrySet()) {
 			TableRow header = new TableRow();
-			header.setPeriodName("Календарный год " + (rec.getKey()+1900));
+			header.setPeriodName("Календарный год " + (rec.getKey()));
 			header.setSubHeader(true);
 			resultRows.add(header);
 			resultRows.addAll(rec.getValue());
