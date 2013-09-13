@@ -3,6 +3,7 @@ package form_template.deal.precious_metals_deliver
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 
 import java.text.SimpleDateFormat
 
@@ -48,12 +49,13 @@ switch (formDataEvent) {
 // Импорт
     case FormDataEvent.IMPORT:
         importData()
-        deleteAllStatic()
-        sort()
-        calc()
-        addAllStatic()
-        logicCheck()
-
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            deleteAllStatic()
+            sort()
+            calc()
+            addAllStatic()
+            logicCheck()
+        }
         break
 }
 
@@ -118,13 +120,12 @@ void logicCheck() {
 
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
-
+    def rowNum = 0
     for (row in dataRowHelper.getAllCached()) {
+        rowNum++
         if (row.getAlias() != null) {
             continue
         }
-
-        def rowNum = row.getIndex()
 
         [
                 'rowNum', // № п/п
@@ -738,7 +739,7 @@ def addData(def xml) {
         indexCell++
 
         // столбец 23
-        newRow.conditionCode = getRecordId(63, 'STRCODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.conditionCode = getRecordId(63, 'STRCODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // столбец 24
@@ -796,25 +797,23 @@ def getNumber(def value, int indexRow, int indexCell) {
  *
  * @param value
  */
-def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
-    String filter;
-    if (value == null || value.equals("")) {
-        filter = code + " is null"
-    } else {
-        filter = code + "= '" + value + "'"
-    }
+def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory=true) {
+    String filter = alias + "= '" + value + "'"
+    if (value=='') filter = "$alias is null"
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
     } else {
         cache[ref_id] = [:]
     }
     def refDataProvider = refBookFactory.getDataProvider(ref_id)
-    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    def records = refDataProvider.getRecords(date, null, filter, null)
     if (records.size() == 1) {
-        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
+    } else if (mandatory || value!='') {
+        throw new Exception("Строка ${indexRow - (getHeaderRowCount() - 1)} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
-    throw new Exception("Строка ${indexRow - (getHeaderRowCount() - 1)} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
+    return null
 }
 
 /**
