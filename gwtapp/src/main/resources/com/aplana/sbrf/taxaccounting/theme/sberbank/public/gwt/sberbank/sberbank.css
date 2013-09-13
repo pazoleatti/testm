@@ -121,8 +121,8 @@ a, a:visited, a:hover {
 .gwt-DecoratorPanel .topRightInner,
 .gwt-DecoratorPanel .bottomLeftInner,
 .gwt-DecoratorPanel .bottomRightInner {
-    width: 5px;
-    height: 5px;
+    width: 1px;
+    height: 1px;
 }
 
 .gwt-DecoratorPanel .topLeft {
@@ -145,8 +145,8 @@ a, a:visited, a:hover {
 * html .gwt-DecoratorPanel .topRightInner,
 * html .gwt-DecoratorPanel .bottomLeftInner,
 * html .gwt-DecoratorPanel .bottomRightInner {
-    width: 5px;
-    height: 5px;
+    width: 1px;
+    height: 1px;
     overflow: hidden;
 }
 
