@@ -206,14 +206,8 @@ void logicalChecks() {
 
             if (!r.getIndex().equals(row.getIndex())){
                 if (r.codeOKATO.equals(row.codeOKATO)
-                        && r.identNumber.equals(row.identNumber)
-                        && r.regNumber.equals(row.regNumber)
-                        && (
-                         r.taxBenefitCode != row.taxBenefitCode ||
-                        !r.benefitStartDate.equals(row.benefitStartDate) ||
-                        !r.benefitEndDate.equals(row.benefitEndDate)
-                )
-                ){
+                    && r.identNumber.equals(row.identNumber)
+                    && r.regNumber.equals(row.regNumber)){
                     variant.lines.add(r.getIndex())
                 }
             }
@@ -232,7 +226,7 @@ void logicalChecks() {
     // показ ошибок
     errors.each{ e ->
         if (e.lines.size() > 1){
-            logger.error("Форма содержит записи с разными льготами для одинаковых ТС. Строки: "+e.lines.join(', '))
+            logger.error("\"Форма содержит несколько записей для ТС ("+e.okato+", "+e.identNumber+", "+e.regNumber+"). Строки: "+e.lines.join(', '))
         }
     }
 

@@ -64,6 +64,24 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT :
         importData()
+        if (!hasError()) {
+            deleteAllStatic()
+            sort()
+            calc()
+            addAllStatic()
+            if (!hasError()) {
+                logicalCheck()
+                checkNSI()
+            }
+        }
+        break
+    case FormDataEvent.MIGRATION :
+        importData()
+        if (!hasError()) {
+            def total = getCalcTotalRow()
+            def data = getData(formData)
+            insert(data, total)
+        }
         break
 }
 
@@ -101,7 +119,7 @@ void logicalCheck() {
     def data = getData(formData).getAllCached()
 
     // Проверока наличия итоговой строки
-    if (!data.isEmpty() && checkAlias(data, 'itogo')) {
+    if (!data.isEmpty() && !checkAlias(data, 'itogo')) {
         logger.error('Итоговые значения не рассчитаны')
         return
     }
@@ -1096,32 +1114,23 @@ def checkAlias(def list, def rowAlias) {
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    deleteAllStatic()
-    sort()
-    calc()
-    addAllStatic()
-    allCheck()
-    if (!hasError()) {
-        def data = getData(formData)
-        // графы 7-9, 11-13, 15, 17-22
-        def totalColumns = [7: 'amountBonds', 8 : 'acquisitionPrice', 9 : 'costOfAcquisition',
-                11 : 'marketPriceInRub', 12 : 'acquisitionPriceTax', 13 : 'redemptionValue',
-                15 : 'priceInFactRub', 17 : 'marketPriceInRub1', 18 : 'salePriceTax', 19 : 'expensesOnSale',
-                20 : 'expensesTotal', 21 : 'profit', 22 : 'excessSalePriceTax']
-        def totalCalc = null
-        for (def row : getRows(data)) {
-            if (row.getAlias() == 'itogo') {
-                totalCalc = row
-                break
+    // графы 7-9, 11-13, 15, 17-22
+    def totalColumns = [7: 'amountBonds', 8 : 'acquisitionPrice', 9 : 'costOfAcquisition',
+            11 : 'marketPriceInRub', 12 : 'acquisitionPriceTax', 13 : 'redemptionValue',
+            15 : 'priceInFactRub', 17 : 'marketPriceInRub1', 18 : 'salePriceTax', 19 : 'expensesOnSale',
+            20 : 'expensesTotal', 21 : 'profit', 22 : 'excessSalePriceTax']
+    def totalCalc = getCalcTotalRow()
+    def errorColums = []
+    if (totalCalc != null) {
+        totalColumns.each { index, columnAlias ->
+            if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
+                errorColums.add(index)
             }
         }
-        if (totalCalc != null) {
-            totalColumns.each { index, columnAlias ->
-                if (totalCalc[columnAlias] != totalRow[columnAlias]) {
-                    logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
-                }
-            }
-        }
+    }
+    if (!errorColums.isEmpty()) {
+        def columns = errorColums.join(', ')
+        logger.error("Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
 }
 
@@ -1130,4 +1139,36 @@ void checkTotalRow(def totalRow) {
  */
 def hasError() {
     return logger.containsLevel(LogLevel.ERROR)
+}
+
+/**
+ * Получить итоговую строку с суммами.
+ */
+def getCalcTotalRow() {
+    def totalColumns = sumColumns = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInRub',
+            'acquisitionPriceTax', 'redemptionValue', 'priceInFactRub', 'marketPriceInRub1', 'salePriceTax',
+            'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
+    def totalRow = formData.createDataRow()
+
+    totalRow.setAlias('itogo')
+    totalRow.getCell('fix').colSpan = 7
+    totalRow.fix = "Итого за текущий отчетный (налоговый) период"
+    setTotalStyle(totalRow)
+    def data = getData(formData)
+    totalColumns.each { alias ->
+        totalRow.getCell(alias).setValue(getSum(data, alias))
+    }
+    return totalRow
+}
+
+/**
+ * Получить сумму столбца.
+ */
+def getSum(def data, def columnAlias) {
+    def from = 0
+    def to = getRows(data).size() - 1
+    if (from > to) {
+        return 0
+    }
+    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
 }

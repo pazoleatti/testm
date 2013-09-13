@@ -137,7 +137,7 @@ public class ReportPeriodServiceTest {
     @Test
     public void getStartDate(){
         Calendar cl = Calendar.getInstance();
-        cl.set(2012, 2, 1);
+        cl.set(2012, 1, 1);
 
         assertEquals(service.getStartDate(2).get(Calendar.MONTH), cl.get(Calendar.MONTH));
     }
@@ -145,7 +145,7 @@ public class ReportPeriodServiceTest {
     @Test
     public void getEndDate(){
         Calendar cl = Calendar.getInstance();
-        cl.set(2012, 4, 1);
+        cl.set(2012, 2, 1);
 
         assertEquals(service.getEndDate(2).get(Calendar.MONTH), cl.get(Calendar.MONTH));
     }
@@ -161,7 +161,7 @@ public class ReportPeriodServiceTest {
     @Test
     public void getEndDateIncome(){
         Calendar cl = Calendar.getInstance();
-        cl.set(2012, 3, 1);
+        cl.set(2012, 2, 1);
 
         assertEquals(service.getEndDate(8).get(Calendar.MONTH), cl.get(Calendar.MONTH));
     }
