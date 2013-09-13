@@ -46,7 +46,10 @@ switch (formDataEvent) {
 // Консолидация
     case FormDataEvent.COMPOSE:
         consolidation()
+        deleteAllStatic()
         calc()
+        sort()
+        addAllStatic()
         logicCheck()
         break
 // Импорт
