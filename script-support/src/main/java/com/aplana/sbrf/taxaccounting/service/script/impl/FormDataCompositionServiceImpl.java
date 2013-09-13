@@ -84,7 +84,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 	 */
 	@Override
 	public void compose(FormData sformData, int departmentId, int formTypeId, FormDataKind kind) {
-		TaxType taxType = formTypeDao.getType(formTypeId).getTaxType();
+		TaxType taxType = formTypeDao.get(formTypeId).getTaxType();
 
 		// Find form data.
 		FormData dformData = formDataDao.find(formTypeId, kind, departmentId, sformData.getReportPeriodId());

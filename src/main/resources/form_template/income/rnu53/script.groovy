@@ -53,6 +53,22 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT :
         importData()
+        if (!hasError()) {
+            calc()
+            !hasError() && logicalCheck() && checkNSI()
+            if (!hasError()) {
+                logger.info('Закончена загрузка файла ' + UploadFileName)
+            }
+        }
+        break
+    case FormDataEvent.MIGRATION :
+        importData()
+        if (!hasError()) {
+            def total = getCalcTotalRow()
+            def data = getData(formData)
+            insert(data, total)
+            logger.info('Закончена загрузка файла ' + UploadFileName)
+        }
         break
 }
 
@@ -194,15 +210,8 @@ void calc() {
 
     // строка итого
     if (getRows(data).size()>0) {
-        def totalRow = formData.createDataRow()
-        totalRow.setAlias('total')
-        totalRow.tadeNumber = 'Итого'
-        totalRow.getCell('tadeNumber').colSpan = 2
-        setTotalStyle(totalRow)
-        ['acquisitionPrice', 'salePrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each { alias ->
-            totalRow.getCell(alias).setValue(getSum(alias))
-        }
-        data.insert(totalRow,getRows(data).size()+1)
+        def totalRow = getCalcTotalRow()
+        insert(data, totalRow)
     }
 }
 
@@ -513,10 +522,6 @@ void importData() {
     } catch(Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
-
-    if (!hasError()) {
-        logger.info('Закончена загрузка файла ' + fileName)
-    }
 }
 
 
@@ -586,7 +591,7 @@ def getSum(def columnAlias) {
     if (from > to) {
         return 0
     }
-    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
+    return roundTo2(summ(formData, getRows(data), new ColumnRange(columnAlias, from, to)))
 }
 
 /**
@@ -875,8 +880,26 @@ def addData(def xml) {
 
         // графа 8
         newRow.part2REPODate = getDate(row.field[index].@value.text())
+        index++
 
-        // TODO (Ramil Timerbaev) остальные поля нередактируемые, надо ли их грузить
+        // графа 9
+        newRow.income = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 10
+        newRow.outcome = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 11
+        newRow.rateBR = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 12
+        newRow.outcome269st = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 13
+        newRow.outcomeTax = getNumber(row.field[index].@value.text())
 
         insert(data, newRow)
     }
@@ -932,9 +955,14 @@ def getNumber(def value) {
 }
 
 /**
- * Получить record_id элемента справочника.
+ * Получить id справочника.
  *
- * @param value
+ * @param ref_id идентификатор справончика
+ * @param code атрибут справочника
+ * @param value значение для поиска
+ * @param date дата актуальности
+ * @param cache кеш
+ * @return
  */
 def getRecords(def ref_id, String code, String value, Date date, def cache) {
     String filter = code + " like '" + value.replaceAll(' ', '') + "%'"
@@ -949,7 +977,7 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
-    logger.error("Не удалось определить элемент справочника!")
+    logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
     return null;
 }
 
@@ -959,25 +987,21 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    calc()
-    if (!hasError() && logicalCheck() && checkNSI()) {
-        def data = getData(formData)
-        def totalColumns = [5 : 'acquisitionPrice', 6 : 'salePrice', 9 : 'income', 10 : 'outcome', 12 : 'outcome269st', 13 : 'outcomeTax']
+    def data = getData(formData)
+    def totalColumns = [5 : 'acquisitionPrice', 6 : 'salePrice', 9 : 'income', 10 : 'outcome', 12 : 'outcome269st', 13 : 'outcomeTax']
 
-        def totalCalc = null
-        for (def row : getRows(data)) {
-            if (isTotal(row)) {
-                totalCalc = row
-                break
+    def totalCalc = getCalcTotalRow()
+    def errorColums = []
+    if (totalCalc != null) {
+        totalColumns.each { index, columnAlias ->
+            if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
+                errorColums.add(index)
             }
         }
-        if (totalCalc != null) {
-            totalColumns.each { index, columnAlias ->
-                if (totalCalc[columnAlias] != totalRow[columnAlias]) {
-                    logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
-                }
-            }
-        }
+    }
+    if (!errorColums.isEmpty()) {
+        def columns = errorColums.join(', ')
+        logger.error("Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
 }
 
@@ -996,4 +1020,19 @@ def hasError() {
  */
 void insert(def data, def row) {
     data.insert(row, getRows(data).size() + 1)
+}
+
+/**
+ * Получить итоговую строку с суммами.
+ */
+def getCalcTotalRow() {
+    def totalRow = formData.createDataRow()
+    totalRow.setAlias('total')
+    totalRow.tadeNumber = 'Итого'
+    totalRow.getCell('tadeNumber').colSpan = 2
+    setTotalStyle(totalRow)
+    ['acquisitionPrice', 'salePrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each { alias ->
+        totalRow.getCell(alias).setValue(getSum(alias))
+    }
+    return totalRow
 }

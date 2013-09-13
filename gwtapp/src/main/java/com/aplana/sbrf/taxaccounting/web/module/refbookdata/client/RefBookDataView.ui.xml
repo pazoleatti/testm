@@ -1,5 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:date="urn:import:com.google.gwt.user.datepicker.client"
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:pager='urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager'>
     <ui:style>
@@ -45,6 +46,8 @@
                 </g:cell>
                 <g:cell height="45px" verticalAlignment="bottom">
                     <g:HorizontalPanel styleName="{style.btnAddDel}" spacing="5">
+                        <g:Label>Дата актуальности: </g:Label>
+                        <date:DateBox ui:field="relevanceDate"/>
                         <style:LinkAnchor title="Добавить строку" text="Добавить строку" ui:field="addRow"
                                           img="resources/img/exclamation_mark.png"/>
                         <style:LinkAnchor title="Удалить строку" text="Удалить строку" ui:field="deleteRow"
@@ -56,10 +59,10 @@
         <g:center>
             <g:SplitLayoutPanel>
                 <g:center>
-                    <g:DockLayoutPanel width="100%" height="100%">
+                    <g:DockLayoutPanel height="100%">
                         <g:center>
                             <g:ResizeLayoutPanel>
-                                <style:GenericDataGrid height="100%" ui:field="refbookDataTable"/>
+                                <style:GenericDataGrid ui:field="refbookDataTable"/>
                             </g:ResizeLayoutPanel>
                         </g:center>
                         <g:south size="30">

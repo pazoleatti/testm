@@ -52,6 +52,17 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT :
         importData()
+        if (!hasError()) {
+            calc()
+            !hasError() && logicalCheck()
+            if (!hasError()) {
+                logger.info('Закончена загрузка файла ' + UploadFileName)
+            }
+        }
+        break
+    case FormDataEvent.MIGRATION :
+        importData()
+        logger.info('Закончена загрузка файла ' + UploadFileName)
         break
 }
 
@@ -254,10 +265,6 @@ void importData() {
         }
     } catch(Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
-    }
-
-    if (!hasError()) {
-        logger.info('Закончена загрузка файла ' + fileName)
     }
 }
 
@@ -602,27 +609,22 @@ def getTotalRow(def data) {
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    calc()
-
-    if (!hasError() && logicalCheck()) {
-        def data = getData(formData)
-        def totalColumns = [3 : 'ofz', 4 : 'municipalBonds', 5 : 'governmentBonds',
-                6 : 'mortgageBonds', 7 : 'municipalBondsBefore', 8 : 'rtgageBondsBefore',
-                9 : 'ovgvz', 10 : 'eurobondsRF', 11 : 'itherEurobonds', 12 :'corporateBonds']
-        def totalCalc = null
-        for (def row : getRows(data)) {
-            if (isTotal(row)) {
-                totalCalc = row
-                break
+    def data = getData(formData)
+    def totalColumns = [3 : 'ofz', 4 : 'municipalBonds', 5 : 'governmentBonds',
+            6 : 'mortgageBonds', 7 : 'municipalBondsBefore', 8 : 'rtgageBondsBefore',
+            9 : 'ovgvz', 10 : 'eurobondsRF', 11 : 'itherEurobonds', 12 :'corporateBonds']
+    def totalCalc = getRows(data).getAt(0)
+    def errorColums = []
+    if (totalCalc != null) {
+        totalColumns.each { index, columnAlias ->
+            if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
+                errorColums.add(index)
             }
         }
-        if (totalCalc != null) {
-            totalColumns.each { index, columnAlias ->
-                if (totalCalc[columnAlias] != totalRow[columnAlias]) {
-                    logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
-                }
-            }
-        }
+    }
+    if (!errorColums.isEmpty()) {
+        def columns = errorColums.join(', ')
+        logger.error("Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
 }
 

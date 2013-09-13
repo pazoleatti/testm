@@ -2,17 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpenDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpenDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetTaxPeriodWDAction;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetTaxPeriodWDResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -65,26 +59,9 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
 
         /**
          * Установка доступных налоговых периодов
-         * @param taxPeriods
-         */
-        void setTaxPeriods(List<TaxPeriod> taxPeriods);
-
-        /**
-         * Установка доступных налоговых периодов
          * @param reportPeriods
          */
         void setReportPeriods(List<ReportPeriod> reportPeriods);
-
-        /**
-         * Обновление списка налоговых периодов
-         */
-        void reloadTaxPeriods();
-
-        /**
-         * Установка выбранного отчетного периода
-         * @param reportPeriod
-         */
-        void setReportPeriod(ReportPeriod reportPeriod);
 
         /**
          * Установка списка достуных видов бухгалтерской отчётности
@@ -104,43 +81,6 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
     @Override
     public boolean useManualReveal() {
         return true;
-    }
-
-    @Override
-    public void reloadTaxPeriods(Integer departmentId) {
-        if (departmentId == null) {
-            return;
-        }
-
-        GetTaxPeriodWDAction action = new GetTaxPeriodWDAction();
-        action.setDepartmentId(departmentId);
-        action.setTaxType(TaxType.INCOME);
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetTaxPeriodWDResult>() {
-                    @Override
-                    public void onSuccess(GetTaxPeriodWDResult result) {
-                        getView().setTaxPeriods(result.getTaxPeriods());
-                        // getView().setReportPeriod(result.getLastReportPeriod());
-                    }
-                }, this));
-    }
-
-    @Override
-    public void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId) {
-        if (taxPeriod == null || departmentId == null) {
-            return;
-        }
-
-        GetReportPeriods action = new GetReportPeriods();
-        action.setTaxPeriod(taxPeriod);
-        action.setDepartmentId(departmentId);
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
-                    @Override
-                    public void onSuccess(GetReportPeriodsResult result) {
-                        getView().setReportPeriods(result.getReportPeriods());
-                    }
-                }, this));
     }
 
     @Override
@@ -167,6 +107,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                                     put("101", "Форма 101");
                                     put("102", "Форма 102");
                                 }});
+                                getView().setReportPeriods(result.getReportPeriods());
                             }
                         }, this).addCallback(new ManualRevealCallback<GetBSOpenDataAction>(this)));
     }

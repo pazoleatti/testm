@@ -1,68 +1,81 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
-    xmlns:w='urn:import:com.aplana.sbrf.taxaccounting.web.widget.incrementbutton'
-    xmlns:date="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
-    xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client'
-    xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
-    <ui:style>
-        .content {
-            padding: 10px;
-            border: 1px solid #949494;
-            border-radius: 3px;
-            margin: 10px 0px;
-        }
+	xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+	xmlns:w='urn:import:com.aplana.sbrf.taxaccounting.web.widget.incrementbutton'
+	xmlns:date="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
+	xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client'
+	xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 
-        .buttonBar {
-            margin-left: 25%;
-        }
-    </ui:style>
+	<g:DialogBox width="400px" glassEnabled="true" text="Открыть период">
+		<g:VerticalPanel width="100%" spacing="3">
+			<g:DecoratorPanel>
+				<g:VerticalPanel>
+					<g:VerticalPanel>
+						<g:HorizontalPanel verticalAlignment="middle" width="100%" spacing="3">
+							<g:cell horizontalAlignment="right">
+								<g:Label text="Подразделение: " width="150px" />
+							</g:cell>
+							<g:cell width="100%" horizontalAlignment="left">
+								<picker:DepartmentPickerPopupWidget width="100%" header="Подразделение" ui:field="departmentPicker"	multiselection="false" />
+							</g:cell>
+						</g:HorizontalPanel>
 
-	<g:DialogBox height="100%" width="250px" glassEnabled="true" text="Открыть период">
-        <g:VerticalPanel height="100%" width="250px">
-            <g:FlowPanel styleName="{style.content}">
+						<g:HorizontalPanel verticalAlignment="middle"
+							width="100%" spacing="3">
+							<g:cell horizontalAlignment="right">
+								<g:Label text="Год: " width="150px" />
+							</g:cell>
+							<g:cell width="100%" horizontalAlignment="left">
+								<w:IncrementButton ui:field="yearBox" minValue="1900" maxValue="2100" />
+							</g:cell>
+						</g:HorizontalPanel>
 
-                <g:HorizontalPanel height="10px" >
-                    <g:Label text="Подразделение: " />
-                    <picker:DepartmentPickerPopupWidget header="Подразделение"  ui:field="departmentPicker"  multiselection="false"/>
-                </g:HorizontalPanel>
+						<g:HorizontalPanel verticalAlignment="middle"
+							width="100%" spacing="3">
+							<g:cell horizontalAlignment="right">
+								<g:Label text="Период: " width="150px" />
+							</g:cell>
+							<g:cell width="100%" horizontalAlignment="left">
+								<r:RefBookPickerPopupWidget ui:field="period" width="100%" attributeIdInt="26" />
+							</g:cell>
+						</g:HorizontalPanel>
 
-                <g:HorizontalPanel height="10px">
-                    <g:Label text="Год: " />
-                    <w:IncrementButton ui:field="yearBox"   minValue="1900" maxValue="2100"/>
-                </g:HorizontalPanel>
+						<g:HorizontalPanel verticalAlignment="middle"
+							width="100%" spacing="3">
+							<g:cell horizontalAlignment="right">
+								<g:Label text="Срок сдачи отчетности: " width="150px" />
+							</g:cell>
+							<g:cell width="100%" horizontalAlignment="left">
+								<date:CustomDateBox width="60px" ui:field="term" />
+							</g:cell>
+						</g:HorizontalPanel>
+					</g:VerticalPanel>
 
-                <g:HorizontalPanel height="10px">
-                    <g:Label text="Период: " />
-                    <!--<style:ListBoxWithTooltip width="200px" ui:field="period" showTooltip="true"/>-->
-                    <r:RefBookPickerPopupWidget ui:field="period" width="100px" attributeIdInt="26"/>
-                </g:HorizontalPanel>
+					<g:VerticalPanel>
+						<g:HorizontalPanel spacing="3">
+							<g:CheckBox ui:field="balancePeriod" />
+							<g:Label text="Ввод остатков" />
+						</g:HorizontalPanel>
 
-                <g:HorizontalPanel height="10px">
-                    <g:Label text="Срок сдачи отчетности: " />
-                    <date:CustomDateBox width="60px" ui:field="term"/>
-                </g:HorizontalPanel>
+						<g:HorizontalPanel spacing="3">
+							<g:CheckBox ui:field="correctPeriod" enabled="false" />
+							<g:Label text="Корректирующий" />
+						</g:HorizontalPanel>
+					</g:VerticalPanel>
+				</g:VerticalPanel>
 
-                <g:HorizontalPanel height="10px">
-                    <g:CheckBox width="60px" ui:field="balancePeriod"/>
-                    <g:Label text="Ввод остатков" />
-                </g:HorizontalPanel>
+			</g:DecoratorPanel>
 
-                <g:HorizontalPanel height="10px">
-                    <g:CheckBox width="60px" ui:field="correctPeriod" enabled="false"/>
-                    <g:Label text="Корректирующий" />
-                </g:HorizontalPanel>
-            </g:FlowPanel>
+			<style:Bar>
+				<style:LeftBar>
+					<g:Button ui:field="continueButton" text="Открыть период"
+						width="150px" />
+					<g:Button ui:field="cancelButton" text="Отмена" />
+				</style:LeftBar>
+			</style:Bar>
 
-            <style:Bar>
-                <style:LeftBar addStyleNames="{style.buttonBar}">
-                    <g:Button ui:field="continueButton" text="Открыть период" width="150px"/>
-                    <g:Button ui:field="cancelButton" text="Отмена"/>
-                </style:LeftBar>
-            </style:Bar>
-
-        </g:VerticalPanel>
+		</g:VerticalPanel>
 
 	</g:DialogBox>
 

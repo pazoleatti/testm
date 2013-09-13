@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
 
 /**
  * Подразделение банка
@@ -13,7 +12,7 @@ import java.util.*;
  * @author dsultanbekov
  */
 public class Department implements Serializable {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2144891300700432727L;
 
 	/**
 	 * Идентификатор подразделения "Банк", представляющего весь СБРФ
@@ -27,8 +26,6 @@ public class Department implements Serializable {
 	private DepartmentType type;
 	private String tbIndex;
 	private String sbrfCode;
-	private List<DepartmentFormType> departmentFormTypes;
-	private List<DepartmentDeclarationType> departmentDeclarationTypes;
 
 	/**
 	 * Получить идентификатор подразделения
@@ -105,40 +102,6 @@ public class Department implements Serializable {
 	 */
 	public void setType(DepartmentType type) {
 		this.type = type;
-	}
-
-	/**
-	 * Получить список назначений департамента с налоговыми формами
-	 * 
-	 * @return список назначений НФ
-	 */
-	public List<DepartmentFormType> getDepartmentFormTypes() {
-		return departmentFormTypes;
-	}
-
-	/**
-	 * Установить список назначений департамента с налоговыми формами
-	 */
-	public void setDepartmentFormTypes(
-			List<DepartmentFormType> departmentFormTypes) {
-		this.departmentFormTypes = departmentFormTypes;
-	}
-
-	/**
-	 * Получить список назначений департамента с декларациями формами
-	 * 
-	 * @return список назначений Деклараций
-	 */
-	public List<DepartmentDeclarationType> getDepartmentDeclarationTypes() {
-		return departmentDeclarationTypes;
-	}
-
-	/**
-	 * Установить список назначений департамента с декларациями формами
-	 */
-	public void setDepartmentDeclarationTypes(
-			List<DepartmentDeclarationType> departmentDeclarationTypes) {
-		this.departmentDeclarationTypes = departmentDeclarationTypes;
 	}
 
 	/**

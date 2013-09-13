@@ -15,10 +15,12 @@ import java.util.Collections;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
@@ -126,16 +128,13 @@ public class DeclarationDataAccessServiceImplTest {
 
 		// На уровне Банка разрешена работа с декларациями DECLARATION_TYPE_1_ID
 		Department departmentBank = mockDepartment(Department.ROOT_BANK_ID, Department.ROOT_BANK_ID, DepartmentType.ROOT_BANK);
-		List<DepartmentDeclarationType> bankDeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(Department.ROOT_BANK_ID, DECLARATION_TYPE_1_ID));
-		when(departmentBank.getDepartmentDeclarationTypes()).thenReturn(bankDeclarationTypes);
+
 		// В подразделении DEPARTMENT_TB1_ID разрешена работа с декларациями DECLARATION_TYPE_1_ID
 		Department departmentTB1 = mockDepartment(DEPARTMENT_TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
-		List<DepartmentDeclarationType> departmentTB1DeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(DEPARTMENT_TB1_ID, DECLARATION_TYPE_1_ID));
-		when(departmentTB1.getDepartmentDeclarationTypes()).thenReturn(departmentTB1DeclarationTypes);
+
 		// В подразделении DEPARTMENT_TB2_ID разрешена работа с декларациями DECLARATION_TYPE_2_ID
 		Department departmentTB2 = mockDepartment(DEPARTMENT_TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
-		List<DepartmentDeclarationType> departmentTB2DeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(DEPARTMENT_TB2_ID, DECLARATION_TYPE_2_ID));
-		when(departmentTB2.getDepartmentDeclarationTypes()).thenReturn(departmentTB2DeclarationTypes);
+
 
 		DepartmentDao departmentDao = mock(DepartmentDao.class);
 		when(departmentDao.getDepartment(Department.ROOT_BANK_ID)).thenReturn(departmentBank);
@@ -177,6 +176,17 @@ public class DeclarationDataAccessServiceImplTest {
 		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ID, Department.ROOT_BANK_ID)).thenReturn(true);
 		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_ID, Department.ROOT_BANK_ID)).thenReturn(false);
 		ReflectionTestUtils.setField(service, "reportPeriodService", reportPeriodService);
+		
+		SourceService sourceService = mock(SourceService.class);
+		List<DepartmentDeclarationType> bankDeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(Department.ROOT_BANK_ID, DECLARATION_TYPE_1_ID));
+		when(sourceService.getDDTByDepartment(Matchers.eq(Department.ROOT_BANK_ID), Matchers.any(TaxType.class))).thenReturn(bankDeclarationTypes);
+		
+		List<DepartmentDeclarationType> departmentTB1DeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(DEPARTMENT_TB1_ID, DECLARATION_TYPE_1_ID));
+		when(sourceService.getDDTByDepartment(Matchers.eq(DEPARTMENT_TB1_ID), Matchers.any(TaxType.class))).thenReturn(departmentTB1DeclarationTypes);
+		
+		List<DepartmentDeclarationType> departmentTB2DeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(DEPARTMENT_TB2_ID, DECLARATION_TYPE_2_ID));
+		when(sourceService.getDDTByDepartment(Matchers.eq(DEPARTMENT_TB2_ID), Matchers.any(TaxType.class))).thenReturn(departmentTB2DeclarationTypes);
+		ReflectionTestUtils.setField(service, "sourceService", sourceService);
 	}
 
 	@Test

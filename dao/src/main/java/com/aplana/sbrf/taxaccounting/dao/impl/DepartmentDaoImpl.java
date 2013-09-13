@@ -46,8 +46,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 		if (result == null) {
 			throw new DaoException("Не удалось найти подразделение банка с id = " + id);
 		}
-		result.setDepartmentFormTypes(departmentFormTypeDao.get(id));
-		result.setDepartmentDeclarationTypes(departmentDeclarationTypeDao.getDepartmentDeclarationTypes(id));
 		return result;
 	}
 

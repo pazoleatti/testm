@@ -50,8 +50,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
         if (depCombined != null
                 && depCombined.getDepartmentId() != null
                 && depCombined.getTaxType() != null
-                && action.getPeriod() != null ){
-          //*      && action.getPeriod().isActive()) {
+                && action.getReportPeriodId() != null ){
 
             RefBookDataProvider provider = null;
 
@@ -67,7 +66,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                     break;
             }
 
-            Calendar calendarFrom = reportService.getStartDate(action.getPeriod().getId());
+            Calendar calendarFrom = reportService.getStartDate(action.getReportPeriodId());
 
             Map<String, RefBookValue> paramsMap = new HashMap<String, RefBookValue>();
             // Id записи

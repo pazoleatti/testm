@@ -56,6 +56,22 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT :
         importData()
+        if (!hasError()) {
+            calc()
+            !hasError() && logicalCheck() && checkNSI()
+            if (!hasError()) {
+                logger.info('Закончена загрузка файла ' + UploadFileName)
+            }
+        }
+        break
+    case FormDataEvent.MIGRATION :
+        importData()
+        if (!hasError()) {
+            def total = getCalcTotalRow()
+            def data = getData(formData)
+            insert(data, total)
+            logger.info('Закончена загрузка файла ' + UploadFileName)
+        }
         break
 }
 
@@ -201,14 +217,7 @@ void calc() {
     save(data)
 
     // строка итого
-    def totalRow = formData.createDataRow()
-    totalRow.setAlias('total')
-    totalRow.tadeNumber = 'Итого'
-    totalRow.getCell('tadeNumber').colSpan = 2
-    setTotalStyle(totalRow)
-    ['salePrice', 'acquisitionPrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each { alias ->
-        totalRow.getCell(alias).setValue(getSum(alias))
-    }
+    def totalRow = getCalcTotalRow()
     insert(data, totalRow)
 }
 
@@ -511,10 +520,6 @@ void importData() {
     } catch(Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
-
-    if (!hasError()) {
-        logger.info('Закончена загрузка файла ' + fileName)
-    }
 }
 
 
@@ -620,7 +625,7 @@ def getSum(def columnAlias) {
     if (from > to) {
         return 0
     }
-    return summ(formData, rows, new ColumnRange(columnAlias, from, to))
+    return roundTo2(summ(formData, rows, new ColumnRange(columnAlias, from, to)))
 }
 
 /**
@@ -891,12 +896,13 @@ def addData(def xml) {
         newRow.nominalPriceSecurities = getNumber(row.field[index].@value.text())
         index++
 
-        // графа 5
-        newRow.salePrice = getNumber(row.field[index].@value.text())
-        index++
-
+        // графа 5 - 6 поменяты местами, потому что в тф и в настройках у них места перепутаны
         // графа 6
         newRow.acquisitionPrice = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 5
+        newRow.salePrice = getNumber(row.field[index].@value.text())
         index++
 
         // графа 7
@@ -905,8 +911,26 @@ def addData(def xml) {
 
         // графа 8
         newRow.part2REPODate = getDate(row.field[index].@value.text())
+        index++
 
-        // TODO (Ramil Timerbaev) остальные поля нередактируемые, надо ли их грузить
+        // графа 9
+        newRow.income = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 10
+        newRow.outcome = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 11
+        newRow.rateBR = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 12
+        newRow.outcome269st = getNumber(row.field[index].@value.text())
+        index++
+
+        // графа 13
+        newRow.outcomeTax = getNumber(row.field[index].@value.text())
 
         insert(data, newRow)
     }
@@ -919,11 +943,12 @@ def addData(def xml) {
         // графа 4
         totalRow.nominalPriceSecurities = getNumber(row.field[3].@value.text())
 
-        // графа 5
-        totalRow.salePrice = getNumber(row.field[4].@value.text())
-
+        // графа 5 - 6 поменяты местами, потому что в тф и в настройках у них места перепутаны
         // графа 6
-        totalRow.acquisitionPrice = getNumber(row.field[5].@value.text())
+        totalRow.acquisitionPrice = getNumber(row.field[4].@value.text())
+
+        // графа 5
+        totalRow.salePrice = getNumber(row.field[5].@value.text())
 
         // графа 9
         totalRow.income = getNumber(row.field[8].@value.text())
@@ -974,25 +999,19 @@ def abs(def value) {
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    calc()
-    if (!hasError() && logicalCheck() && checkNSI()) {
-        def data = getData(formData)
-        def totalColumns = [5 : 'salePrice', 6 : 'acquisitionPrice', 9 : 'income', 10 : 'outcome', 12 : 'outcome269st', 13 : 'outcomeTax']
-
-        def totalCalc = null
-        for (def row : getRows(data)) {
-            if (isTotal(row)) {
-                totalCalc = row
-                break
+    def totalColumns = [5 : 'salePrice', 6 : 'acquisitionPrice', 9 : 'income', 10 : 'outcome', 12 : 'outcome269st', 13 : 'outcomeTax']
+    def totalCalc = getCalcTotalRow()
+    def errorColums = []
+    if (totalCalc != null) {
+        totalColumns.each { index, columnAlias ->
+            if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
+                errorColums.add(index)
             }
         }
-        if (totalCalc != null) {
-            totalColumns.each { index, columnAlias ->
-                if (totalCalc[columnAlias] != totalRow[columnAlias]) {
-                    logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
-                }
-            }
-        }
+    }
+    if (!errorColums.isEmpty()) {
+        def columns = errorColums.join(', ')
+        logger.error("Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
 }
 
@@ -1001,4 +1020,20 @@ void checkTotalRow(def totalRow) {
  */
 def hasError() {
     return logger.containsLevel(LogLevel.ERROR)
+}
+
+/**
+ * Получить итоговую строку с суммами.
+ */
+def getCalcTotalRow() {
+    def totalRow = formData.createDataRow()
+    totalRow.setAlias('total')
+    totalRow.tadeNumber = 'Итого'
+    totalRow.getCell('tadeNumber').colSpan = 2
+    setTotalStyle(totalRow)
+    // графа  5, 6, 9, 10, 12, 13
+    ['salePrice', 'acquisitionPrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each { alias ->
+        totalRow.getCell(alias).setValue(getSum(alias))
+    }
+    return totalRow
 }
