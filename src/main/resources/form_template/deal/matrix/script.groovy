@@ -156,9 +156,11 @@ void logicCheck() {
         }
 
         // 1. Обязательные поля
-        // TODO нет в ТЗ
+        // [13/09/13] Евгений Ломоносов: пока нет, Матрица сейчас должна формироваться только автоматически,
+        // поэтому нет смысл проверять обязательные поля
 
-        // 2. Проверка наличия элемента справочника «Да/Нет» (графы 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15)
+
+        // 2. Проверка наличия элемента справочника «Да/Нет» (графы 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15)
         checkNSI(row, "f121", YES_NO, 38)
         checkNSI(row, "f122", YES_NO, 38)
         checkNSI(row, "f123", YES_NO, 38)
@@ -169,17 +171,19 @@ void logicCheck() {
         checkNSI(row, "f134", YES_NO, 38)
         checkNSI(row, "f135", YES_NO, 38)
         checkNSI(row, "similarDealGroup", YES_NO, 38)
-        // TODO графа 13 не того типа в ТЗ
         checkNSI(row, "dealPriceSign", YES_NO, 38)
+
+        //Проверка наличия элемента справочника "Коды наименования сделки" (графа 13)
+        checkNSI(row, "similarDealGroup", "Коды наименования сделки", 67)
 
         // 3. Проверка наличия элемента справочника «Коды сторон сделки» (графа 14)
         checkNSI(row, "taxpayerSideCode", "Коды стороны сделки", 65)
 
-        // 4 и 5. Проверка наличия элемента справочника «Коды типов предмета сделки» (графы 23, 26)
+        // 4. Проверка наличия элемента справочника «Коды типов предмета сделки» (графа 23)
         checkNSI(row, "dealType", "Коды типов предмета сделки", 64)
-        // TODO одно из двух:
-        //checkNSI(row, "dealSubjectCode2", "Коды типов предмета сделки", 64)
-        //checkNSI(row, "dealSubjectCode2", "Коды ОКП на основании общероссийского классификатора продукции (ОКП)", 68)
+
+        // 5. Проверка наличия элемента справочника «Коды ОКП на основании общероссийского классификатора продукции (ОКП)» (графа  26)
+        checkNSI(row, "dealSubjectCode2", "Коды ОКП на основании общероссийского классификатора продукции (ОКП)", 68)
 
         // 6. Проверка наличия элемента справочника «ОКСМ» (графы 31, 32, 36, 49)
         checkNSI(row, "countryCode", OKSM, 10)
@@ -337,7 +341,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     }
 
     def DataRow<Cell> row = formData.createDataRow()
-    /*
+
     // Графа 2
     def val2 = refBookFactory.getDataProvider(69L).getRecords(new Date(), null, "CODE = 1", null)
     if (val2 != null && val2.size() == 1) {
@@ -573,10 +577,21 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     switch (type.id) {
         case 377:
             row.outcome = srcRow.bankSum
+            break
         case 375:
             row.outcome = srcRow.expensesSum
+            break
         case 380:
             row.outcome = srcRow.sum
+            break
+        case 390:
+        case 391:
+        case 394:
+            row.outcome = srcRow.outcomeSum
+            break
+        case 392:
+        case 393:
+            row.outcome = srcRow.consumptionSum
             break
     }
 
@@ -892,7 +907,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
         default:
             row.count = 1
-            breal
+            break
     }
 
     // Графа 43
@@ -1064,31 +1079,37 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             row.organName = srcRow.fullName
             break
     }
-    */
-    // Графа 3
-    // TODO Вопрос по атрибуту
-    // def val2 = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
-    row.f121 = recYesId
+    if (row.organName != null) {
+        // Графа 3
+        /**
+         * Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
+         * «Организации – участники контролируемых сделок» атрибут «Резидент оффшорной зоны» = 1,
+         * то заполняется значением «0». В ином случае заполняется значением «1».
+         */
+        def val = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
+        row.f121 = val.OFFSHORE.numberValue == 1 ? recNoId : recYesId
 
-    // Графа 5
-    // TODO Вопрос по атрибуту
-    row.f123 = recYesId
+        // Графа 5 (логига, обратная графе 3)
+        row.f123 = row.f121 == recYesId ? recNoId : recYesId
 
-    // Графа 7
-    // TODO Вопрос по атрибуту
-    row.f131 = recYesId
+        // Графа 7 (та же логига, что у графы 3)
+        row.f131 = row.f121
 
-    // Графа 8
-    // TODO Вопрос по атрибуту
-    row.f132 = recYesId
+        // Графа 8 (та же логига, что у графы 3, но вместо "Да" не заполняется)
+        row.f132 = row.f121 == recNoId ? recNoId : null
 
-    // Графа 9
-    // TODO Вопрос по атрибуту
-    row.f133 = recYesId
+        // Графа 9 (та же логига, что у графы 3)
+        row.f133 = row.f121
 
-    // Графа 10
+        // Графа 10
+        /**
+         * Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
+         * «Организации – участники контролируемых сделок» атрибут «Освобождена от налога на прибыль либо является резидентом Сколково» = 1,
+         * то заполняется значением «1».    В ином случае не Не заполняется.
+         */
+        row.f134 = val.SKOLKOVO.numberValue == 1 ? recYesId : null
+    }
 
-    // TODO заполнить далее графа_10
     // Графа 11
     if (row.dealDoneDate != null || row.organName != null) {
         Calendar compareCalendar11 = Calendar.getInstance()
@@ -1102,26 +1123,27 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         //}
     }
 
-    // Графа 48
     if (row.organName != null) {
-        def val48 = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
-        row.organInfo = val48.ORGANIZATION.stringValue;
+        def organ = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
+
+        // Графа 48
+        row.organInfo = organ.ORGANIZATION.stringValue;
+
+        // Графа 51
+         row.organINN = organ.INN_KIO.numberValue;
+
+        // Графа 52
+         row.organKPP = organ.KPP.numberValue;
+
+        // Графа 53
+         row.organRegNum = organ.REG_NUM.stringValue;
+
+        // Графа 54
+         row.taxpayerCode = organ.TAXPAYER_CODE.stringValue;
+
+        // Графа 55
+         row.address =  organ.ADDRESS.stringValue;
     }
-
-    // Графа 51
-    // row.organINN = // Справочное TODO из графы 50
-
-    // Графа 52
-    // row.organKPP = // Справочное TODO из графы 50
-
-    // Графа 53
-    // row.organRegNum = // Справочное TODO из графы 50
-
-    // Графа 54
-    // row.taxpayerCode = // Справочное TODO из графы 50
-
-    // Графа 55
-    // row.address = // Справочное TODO из графы 50
 
     return row
 }
