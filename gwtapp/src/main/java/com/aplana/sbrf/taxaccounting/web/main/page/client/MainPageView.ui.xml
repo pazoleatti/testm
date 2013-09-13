@@ -33,7 +33,7 @@
                             </div>
                             <g:HTMLPanel ui:field="signInContentPanel" />
                             <div style="float: right">
-                                <g:MenuBar id="helpMenu">
+                                <g:MenuBar  ui:field="helpMenu">
                                     <g:MenuItem >
                                         <a href="mailto:sbrf_tax_test@aplana.com?subject=Сообщить о проблеме" title="Сообщить о проблеме">
                                             <img src="resources/img/email.png" style="border: none"/>
