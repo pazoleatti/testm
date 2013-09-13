@@ -87,6 +87,7 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 						@Override
 						public void onSuccess(final CreateFormDataResult createResult) {
 							getView().hide();
+							getView().clearInput();
 							placeManager.revealPlace(new Builder().nameToken(FormDataPresenter.NAME_TOKEN).with(FormDataPresenter.READ_ONLY, "false").with(FormDataPresenter.FORM_DATA_ID, String.valueOf(createResult.getFormDataId())).build());
 						}
 					}, DialogPresenter.this)
