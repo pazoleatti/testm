@@ -894,7 +894,7 @@ xmlbuilder.Файл(
                     /** МесАвПлат1КвСлед. Столбец «Ежемесячные авансовые платежи на I квартал следующего налогового периода». */
                     def mesAvPlat1CvSled = emptyNull
 
-                    if (dataRowsHelperAdvance != null) {
+                    if (dataRowsHelperAdvance != null && !dataRowsHelperAdvance.getAllCached().isEmpty()) {
                         dataRowsHelperAdvance.getAllCached().each { row ->
                             if (row.getAlias() == null) {
                                 obRasch = refBookService.getNumberValue(26, row.calcFlag, 'CODE')
@@ -931,6 +931,24 @@ xmlbuilder.Файл(
                                         МесАвПлат1КвСлед : mesAvPlat1CvSled)
                             }
                         }
+                    } else {
+                        РаспрНалСубРФ(
+                                ТипНП : typeNP,
+                                ОбРасч : obRasch,
+                                НаимОП : naimOP,
+                                КППОП : kppop,
+                                ОбязУплНалОП : obazUplNalOP,
+                                НалБазаОрг : nalBazaIsch,
+                                НалБазаБезЛиквОП : empty,
+                                ДоляНалБаз : dolaNalBaz,
+                                НалБазаДоля : nalBazaDola,
+                                СтавНалСубРФ : stavNalSubRF,
+                                СумНал : sumNal,
+                                НалНачислСубРФ : nalNachislSubRF,
+                                НалВыплВнеРФ : nalViplVneRF,
+                                СумНалП : sumNalP,
+                                МесАвПлат : mesAvPlat,
+                                МесАвПлат1КвСлед : mesAvPlat1CvSled)
                     }
                     // Приложение № 5 к Листу 02 - конец
                 }
