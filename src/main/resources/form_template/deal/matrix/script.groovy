@@ -843,7 +843,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     if (type.id == 381 || type.id == 385) {
         row.okeiCode = srcRow.okeiCode
     } else {
-        def String val41 = null;
+        def String val41 = null
         switch (type.id) {
             case 376:
             case 377:
@@ -987,26 +987,22 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             row.dealDoneDate = srcRow.transactionDeliveryDate
             break
     }
-    */
 
     // Графа 47
     row.dealMemberNum = row.otherNum
-
-    // Графа 48
-    // row.organInfo = из 50 // Справочное // TODO Перенести поcле 50 и заполнить
 
     // Графа 49
     switch (type.id) {
         case 376:
         case 377:
-            // row.countryCode3 = srcRow.country // Справочное
+            row.countryCode3 = srcRow.country
             break
         case 375:
         case 379:
         case 380:
         case 381:
         case 382:
-            // row.countryCode3 = srcRow.countryCode // Справочное
+            row.countryCode3 = srcRow.countryCode
             break
         case 383:
         case 389:
@@ -1014,25 +1010,25 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 391:
         case 392:
         case 394:
-            // row.countryCode3 = srcRow.countryCode // Справочное
+            row.countryCode3 = srcRow.countryCode
             break
         case 393:
-            // row.countryCode3 = srcRow.countryCode1 // Справочное
+            row.countryCode3 = srcRow.countryCode1
             break
         case 384:
-            // row.countryCode3 = srcRow.contraCountryCode // Справочное
+            row.countryCode3 = srcRow.contraCountryCode
             break
         case 385:
-            // row.countryCode3 = srcRow.country // Справочное
+            row.countryCode3 = srcRow.country
             break
         case 386:
-            // row.countryCode3 = srcRow.countryCode // Справочное
+            row.countryCode3 = srcRow.countryCode
             break
         case 388:
-            // row.countryCode3 = srcRow.countryName // Справочное
+            row.countryCode3 = srcRow.countryName
             break
         case 387:
-            // row.countryCode3 = srcRow.countryName // Справочное
+            row.countryCode3 = srcRow.countryName
             break
     }
 
@@ -1068,22 +1064,48 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             row.organName = srcRow.fullName
             break
     }
+    */
+    // Графа 3
+    // TODO Вопрос по атрибуту
+    // def val2 = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
+    row.f121 = recYesId
 
-    // TODO заполнить далее графа_3 row.f121 =
-    // TODO заполнить далее графа_5
-    // TODO заполнить далее графа_7
-    // TODO заполнить далее графа_8
-    // TODO заполнить далее графа_9
+    // Графа 5
+    // TODO Вопрос по атрибуту
+    row.f123 = recYesId
+
+    // Графа 7
+    // TODO Вопрос по атрибуту
+    row.f131 = recYesId
+
+    // Графа 8
+    // TODO Вопрос по атрибуту
+    row.f132 = recYesId
+
+    // Графа 9
+    // TODO Вопрос по атрибуту
+    row.f133 = recYesId
+
+    // Графа 10
+
     // TODO заполнить далее графа_10
     // Графа 11
     if (row.dealDoneDate != null || row.organName != null) {
         Calendar compareCalendar11 = Calendar.getInstance()
         compareCalendar11.set(2014, 1, 1)
 
-        //        refBookFactory.getDataProvider(9L).
-        //
-        //        if (row.dealDoneDate.before(compareCalendar11.getTime())) {
-        //        }
+        def val11 = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
+
+        // TODO Вопрос по атрибуту
+        //if(row.dealDoneDate.before(compareCalendar11.getTime()) || (val11 != null && val11.???.numVal == 1)) {
+        //  row.f135 = recNoId
+        //}
+    }
+
+    // Графа 48
+    if (row.organName != null) {
+        def val48 = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
+        row.organInfo = val48.ORGANIZATION.stringValue;
     }
 
     // Графа 51
