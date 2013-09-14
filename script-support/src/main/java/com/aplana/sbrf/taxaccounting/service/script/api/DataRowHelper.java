@@ -130,6 +130,11 @@ public interface DataRowHelper {
     List<DataRow<Cell>> getAllCached();
 
     /**
+     * Сброс кэша
+     */
+    void dropCache();
+
+    /**
      * Возвращает индекс строки, имеющий заданный алиас.
      *
      * @param rowAlias
