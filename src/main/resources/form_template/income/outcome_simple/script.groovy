@@ -271,17 +271,19 @@ def consolidationBank() {
     // очистить форму
     data.getAllCached().each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
+            if (row.getCell(alias).isEditable() || row.getAlias() in ['R107', 'R212']) {
+                row.getCell(alias).setValue(0)
+            }
+        }
+        ['logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference'].each { alias ->
             row.getCell(alias).setValue(null)
         }
     }
-
-    def needCalc = false
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())){
         def child = formDataService.find(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
-            needCalc = true
             DataRowHelper childData = getData(child)
             for (DataRow<Cell> row : childData.allCached) {
                 if (row.getAlias() == null) {
@@ -295,9 +297,6 @@ def consolidationBank() {
                 }
             }
         }
-    }
-    if (needCalc) {
-        checkAndCalc()
     }
     data.save(data.allCached)
     data.commit()
@@ -318,9 +317,6 @@ void consolidationSummary() {
             row.getCell(alias).setValue(null)
         }
     }
-
-    // справочник 27 "Классификатор расходов Сбербанка России для целей налогового учёта"
-    def refDataProvider = refBookFactory.getDataProvider(27)
 
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
