@@ -74,6 +74,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
         checkNSI()
+        logicalChecks()
         break
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
         checkRequiredField()
@@ -228,7 +229,7 @@ void logicalChecks() {
     // показ ошибок
     errors.each{ e ->
         if (e.lines.size() > 1){
-            logger.error("\"Форма содержит несколько записей для ТС ("+getRefBookValue(3, e.okato, "OKATO")+", "+e.identNumber+", "+e.regNumber+"). Строки: "+e.lines.join(', '))
+            logger.warn("\"Форма содержит несколько записей для ТС ("+getRefBookValue(3, e.okato, "OKATO")+", "+e.identNumber+", "+e.regNumber+"). Строки: "+e.lines.join(', '))
         }
     }
 
