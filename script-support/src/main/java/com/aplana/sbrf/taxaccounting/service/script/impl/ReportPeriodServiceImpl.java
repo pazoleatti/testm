@@ -96,7 +96,10 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
          TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
          // календарь
          Calendar cal = Calendar.getInstance();
-         cal.set(Calendar.MONTH, 0);
+        cal.set(Calendar.YEAR, reportPeriod.getYear());
+        cal.set(Calendar.MONTH, 0);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+
         /**
          * Начало всегда совпадает
          *  1. Для налога на прибыль (т.к. периоды вложены в друг дгруга)
@@ -144,7 +147,9 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
         TaxPeriod taxPeriod = taxPeriodDao.get(reportPeriod .getTaxPeriod().getId());
         // календарь
         Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, reportPeriod.getYear());
         cal.set(Calendar.MONTH, 0);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
 
         // для налога на прибыль, периоды вложены в друг дгруга
         if (taxPeriod.getTaxType() == TaxType.INCOME){

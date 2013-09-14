@@ -327,11 +327,11 @@
 		</variable>
 		<variable name="Срок" class="java.lang.String">
 			<variableExpression><![CDATA[$F{Срок} == null ?
-"-------------------------"
+"--.--.-------------------"
 :
 ($F{Срок}+"-------------------------").substring(0,25)]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{Срок} == null ?
-"-------------------------"
+"--.--.-------------------"
 :
 ($F{Срок}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
