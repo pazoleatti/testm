@@ -193,17 +193,10 @@ void logicCheck() {
         def cost = row.cost
         def transactionDate = row.transactionDate
 
-        // В одной строке не должны быть одновременно заполнены графы 12 и 13
-        if (consumptionSum != null && price != null) {
-            def msg1 = row.getCell('consumptionSum').column.name
-            def msg2 = row.getCell('cost').column.name
-            logger.warn("«$msg1» и «$msg2» в строке $rowNum не могут быть одновременно заполнены!")
-        }
-
-        // В одной строке если не заполнена графа 12, то должна быть заполнена графа 13 и наоборот
+        // В одной строке если не заполнена графа 11, то должна быть заполнена графа 12 и наоборот
         if (consumptionSum == null && price == null) {
             def msg1 = row.getCell('consumptionSum').column.name
-            def msg2 = row.getCell('cost').column.name
+            def msg2 = row.getCell('price').column.name
             logger.warn("Одна из граф «$msg1» и «$msg2» в строке $rowNum должно быть заполнена!")
         }
 
@@ -389,7 +382,7 @@ void addAllStatic() {
                 nextRow = dataRows.get(i + 1)
             }
 
-            if (row.getAlias() == null && nextRow == null || isDiffRow(row, newRow, getGroupColumns())) {
+            if (row.getAlias() == null && nextRow == null || isDiffRow(row, nextRow, getGroupColumns())) {
                 def itogRow = calcItog(i, dataRows)
                 dataRowHelper.insert(itogRow, ++i+1)
             }
