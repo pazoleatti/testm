@@ -852,9 +852,7 @@ def consolidation(){
                      * в общий список, и проверим остальные поля
                      */
                     def contains = sourses202.find{ el ->
-                        el.codeOKATO.equals(sRow.codeOKATO)
-                        el.identNumber.equals(sRow.identNumber)
-                        el.regNumber.equals(sRow.regNumber)
+                        el.codeOKATO.equals(sRow.codeOKATO) && el.identNumber.equals(sRow.identNumber) && el.regNumber.equals(sRow.regNumber)
                     }
                     if (contains != null){
                         DataRow<Cell> row = contains
@@ -1039,40 +1037,41 @@ def consolidation(){
 
         }
 
-        /**
-         * Расставим соответствия для формы с 202
-         */
-        int cnt = 0
-        sourses202.each{ v ->
-            cnt++
-            // признак подстаноки текущей строки в сводную
-            boolean use = false
-            // пробежимся по форме расставим данные для текущей 202 строки
-            dataRows.each{ row ->
-                // поиск
-                if (v.codeOKATO.equals(row.okato)
+    }
+
+    /**
+     * Расставим соответствия для формы с 202
+     */
+    int cnt = 0
+    sourses202.each{ v ->
+        cnt++
+        // признак подстаноки текущей строки в сводную
+        boolean use = false
+        // пробежимся по форме расставим данные для текущей 202 строки
+        dataRows.each{ row ->
+            // поиск
+            if (v.codeOKATO.equals(row.okato)
                     && v.identNumber.equals(row.vi)
                     && v.regNumber.equals(row.regNumber)){
 
-                    use = true
-                    row.taxBenefitCode = v.taxBenefitCode
-                    row.benefitStartDate = v.benefitStartDate
-                    row.benefitEndDate = v.benefitEndDate
-                }
+                use = true
+                row.taxBenefitCode = v.taxBenefitCode
+                row.benefitStartDate = v.benefitStartDate
+                row.benefitEndDate = v.benefitEndDate
+            }
+        }
+
+        // если значения этой строки 202 формы не подставлялись в сводную то ругаемся
+        if (!use){
+            def ref = refBookFactory.getDataProvider(30)
+            def records = ref.getRecords(new Date(), null, "ID = "+formData.departmentId, null)
+
+            String name
+            if (records.size() == 1){
+                name = records.get(0).NAME;
             }
 
-            // если значения этой строки 202 формы не подставлялись в сводную то ругаемся
-            if (!use){
-                def ref = refBookFactory.getDataProvider(30)
-                def records = ref.getRecords(new Date(), null, "ID = "+formData.departmentId, null)
-
-                String name
-                if (records.size() == 1){
-                    name = records.get(0).NAME;
-                }
-
-                logger.warn("Для строки "+cnt+" "+name+" \"Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог\"  не найдены соответствующие ТС  в  формах \"Сведения о транспортных средствах, по которым уплачивается транспортный налог\"")
-            }
+            logger.warn("Для строки "+cnt+" "+name+" \"Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог\"  не найдены соответствующие ТС  в  формах \"Сведения о транспортных средствах, по которым уплачивается транспортный налог\"")
         }
     }
     dataRowHelper.save(dataRows)
