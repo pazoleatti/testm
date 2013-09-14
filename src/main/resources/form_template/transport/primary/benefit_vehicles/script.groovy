@@ -73,6 +73,8 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+        checkNSI()
+        break
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
         checkRequiredField()
         logicalChecks()
@@ -336,7 +338,7 @@ boolean checkOkato(codeOKATO){
  * атрибут «Код региона» справочника «Параметры налоговых льгот» соответствует значению «графы 2» («Код по ОКАТО»).
  */
 boolean checkBenefit(taxBenefitCode, okato){
-	if (taxBenefitCode != null && getRefBookValue(6, taxBenefitCode, "CODE") in [20210, 20220, 20230]){
+    if (taxBenefitCode != null && getRefBookValue(6, taxBenefitCode, "CODE").stringValue in ['20210', '20220', '20230']){
         def refTaxBenefitParameters = refBookFactory.getDataProvider(7)
         def region = getRegionByOkatoOrg(okato)
         query = "TAX_BENEFIT_ID ="+taxBenefitCode+" AND DICT_REGION_ID = "+region.record_id
