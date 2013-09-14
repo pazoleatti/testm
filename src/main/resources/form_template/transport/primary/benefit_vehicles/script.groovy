@@ -228,7 +228,7 @@ void logicalChecks() {
     // показ ошибок
     errors.each{ e ->
         if (e.lines.size() > 1){
-            logger.error("\"Форма содержит несколько записей для ТС ("+e.okato+", "+e.identNumber+", "+e.regNumber+"). Строки: "+e.lines.join(', '))
+            logger.error("\"Форма содержит несколько записей для ТС ("+getRefBookValue(3, e.okato, "OKATO")+", "+e.identNumber+", "+e.regNumber+"). Строки: "+e.lines.join(', '))
         }
     }
 
