@@ -121,6 +121,9 @@ void checkCreation() {
  */
 def logicalCheck() {
     def data = getData(formData)
+    def dateStart = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def dateEnd = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def reportDate = getReportDate().time
     for (row in getRows(data)) {
         if (row.getAlias() == null) {
 
@@ -138,13 +141,13 @@ def logicalCheck() {
                 return false
             }
             // 2. Проверка даты первой части РЕПО
-            if (row.part1REPODate != null && reportDate.time.before((Date) row.part1REPODate)) {
+            if (row.part1REPODate != null && reportDate.before((Date) row.part1REPODate)) {
                 logger.error(errorMsg + "неверно указана дата первой части сделки!")
                 return false
             }
             // 3. Проверка даты второй части РЕПО
             if (row.part2REPODate != null
-                    && (reportPeriodService.getStartDate(formData.reportPeriodId).time.after((Date) row.part2REPODate) || reportPeriodService.getEndDate(formData.reportPeriodId).time.before((Date) row.part2REPODate)
+                    && (dateStart.after((Date) row.part2REPODate) || dateEnd.before((Date) row.part2REPODate)
             )) {
                 logger.error(errorMsg + "неверно указана дата второй части сделки!")
                 return false
@@ -759,6 +762,7 @@ def addData(def xml) {
     def data = getData(formData)
     data.clear()
     def index
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
 
     for (def row : xml.exemplar.table.detail.record) {
         index = 0
@@ -773,7 +777,11 @@ def addData(def xml) {
         index++
 
         // графа 3 - справочник 15, атрибут 64
-        newRow.currencyCode = getRecordId(15, 'CODE', row.field[index].text(), date, cache)
+        tmp = null
+        if (row.field[index].text() != null && row.field[index].text().trim() != '') {
+            tmp = getRecordId(15, 'CODE', row.field[index].text(), date, cache)
+        }
+        newRow.currencyCode = tmp
         index++
 
         // графа 4
@@ -790,11 +798,11 @@ def addData(def xml) {
         index++
 
         // графа 5
-        newRow.part1REPODate = getDate(row.field[index].@value.text())
+        newRow.part1REPODate = getDate(row.field[index].@value.text(), format)
         index++
 
         // графа 6
-        newRow.part2REPODate = getDate(row.field[index].@value.text())
+        newRow.part2REPODate = getDate(row.field[index].@value.text(), format)
         index++
 
         // графа 9
@@ -870,8 +878,6 @@ def getNumber(def value) {
     if ("".equals(tmp)) {
         return null
     }
-    // поменять запятую на точку и убрать пробелы
-    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
     return new BigDecimal(tmp)
 }
 
@@ -909,10 +915,12 @@ def getNewRow() {
  * @param cache кеш
  * @return
  */
-def getRecordId(def ref_id, String code, String value, Date date, def cache) {
-    String filter = code + " like '" + value.replaceAll(' ', '') + "%'"
+def getRecordId(def ref_id, String code, def value, Date date, def cache) {
+    String filter = code + " = '" + value + "'"
     if (cache[ref_id]!=null) {
-        if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
+        if (cache[ref_id][filter] != null) {
+            return cache[ref_id][filter]
+        }
     } else {
         cache[ref_id] = [:]
     }
@@ -923,17 +931,16 @@ def getRecordId(def ref_id, String code, String value, Date date, def cache) {
         return cache[ref_id][filter]
     }
     logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
-    return null;
+    return null
 }
 
 /**
  * Получить дату по строковому представлению (формата дд.ММ.гггг)
  */
-def getDate(def value) {
+def getDate(def value, def format) {
     if (value == null || value == '') {
         return null
     }
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     return format.parse(value)
 }
 
