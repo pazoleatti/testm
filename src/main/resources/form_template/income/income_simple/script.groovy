@@ -62,8 +62,6 @@ switch (formDataEvent) {
         DataRowHelper form = getData(formData)
         if (form != null) {
             consolidation(form)
-            logicalCheck()
-            calcForm()
         }
         break
 // проверить
@@ -372,9 +370,14 @@ def consolidation(DataRowHelper form) {
 }
 
 def consolidationBank(DataRowHelper form) {
-// очистить форму
+    // очистить форму
     form.getAllCached().each { row ->
-        ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted', 'logicalCheck', 'accountingRecords'].each { alias ->
+        ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted'].each { alias ->
+            if (row.getCell(alias).isEditable() || row.getAlias() in ['R53', 'R156']) {
+                row.getCell(alias).setValue(0)
+            }
+        }
+        ['logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableD', 'opuSumTotal', 'difference'].each { alias ->
             row.getCell(alias).setValue(null)
         }
     }
