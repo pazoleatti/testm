@@ -508,7 +508,7 @@ def fillForm() {
          */
         if (row.taxBase != null && row.coef362 != null && row.taxRate != null) {
             def taxRate = getRefBookValue(41, row.taxRate, "VALUE")
-            row.calculatedTaxSum = (row.taxBase * row.coef362 * taxRate).setScale(0, BigDecimal.ROUND_HALF_UP)
+            row.calculatedTaxSum = (row.taxBase * row.coef362 * taxRate.numberValue).setScale(0, BigDecimal.ROUND_HALF_UP)
         } else {
             row.calculatedTaxSum = null
 
@@ -553,7 +553,6 @@ def fillForm() {
          */
         if (row.taxBenefitCode != null) {
             def taxBenefitCode = getRefBookValue(6, row.taxBenefitCode, 'CODE').stringValue
-
             // получение параметров региона
             if (taxBenefitCode != '20210' && taxBenefitCode != '30200') {
                 if (row.taxBenefitCode){
@@ -574,14 +573,17 @@ def fillForm() {
             }
 
 
-            if (taxBenefitCode == '20210' || taxBenefitCode == '30200') {
-                row.benefitSum = (row.taxBase * row.coefKl * row.taxRate).setScale(0, BigDecimal.ROUND_HALF_UP)
-            } else if (taxBenefitCode == '20220') {
-                row.benefitSum = round(row.taxBase * row.taxRate * row.coefKl * reducingPerc / 100, 0)
-            } else if (taxBenefitCode == '20230') {
-                row.benefitSum = round(row.coefKl * row.taxRate * (row.taxRate - loweringRates), 0)
-            } else {
-                row.benefitSum = 0
+            if (row.taxRate != null){
+                def taxRate = getRefBookValue(41, row.taxRate, "VALUE").numberValue
+                if (taxBenefitCode == '20210' || taxBenefitCode == '30200') {
+                    row.benefitSum = (row.taxBase * row.coefKl * taxRate).setScale(0, BigDecimal.ROUND_HALF_UP)
+                } else if (taxBenefitCode == '20220') {
+                    row.benefitSum = round(row.taxBase * taxRate * row.coefKl * reducingPerc / 100, 0)
+                } else if (taxBenefitCode == '20230') {
+                    row.benefitSum = round(row.coefKl * taxRate * (taxRate - loweringRates), 0)
+                } else {
+                    row.benefitSum = 0
+                }
             }
         }
 
@@ -858,8 +860,8 @@ def consolidation(){
                         DataRow<Cell> row = contains
                         // если поля совпадают то ругаемся и убираем текущую совпавшую с коллекции
                         if (row.taxBenefitCode == sRow.taxBenefitCode &&
-                            row.benefitStartDate.equal(sRow.benefitStartDate) &&
-                            row.benefitEndDate.equal(sRow.benefitEndDate)){
+                            row.benefitStartDate.equals(sRow.benefitStartDate) &&
+                            row.benefitEndDate.equals(sRow.benefitEndDate)){
 
                             logger.warn("Обнаружены несколько разных строк для Код Окато="+sRow.codeOKATO+",Идентификационный номер = "+sRow.identNumber+", Регистрационный знак="+sRow.regNumber+". Строки : "+sRow.getIndex()+", "+row.getIndex())
                             sourses202.remove(sRow)
@@ -1074,4 +1076,5 @@ def consolidation(){
         }
     }
     dataRowHelper.save(dataRows)
+    dataRowHelper.dropCache()
 }
