@@ -226,6 +226,9 @@ def logicalCheck() {
     def data = getData(formData)
     def totalQuarterRow = null
     def totalRow = null
+    reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
+
     for (def row : getRows(data)) {
         // Обязательность заполнения поля графы (с 1 по 6); фатальная; Поле ”Наименование поля” не заполнено!
         if (!isTotalRow(row)) {
@@ -234,8 +237,6 @@ def logicalCheck() {
                 return false
             }
 
-            reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
-            reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
             // Проверка даты совершения операции и границ отчетного периода; фатальная; Дата совершения операции вне границ отчетного периода!
             if (!isTotalRow(row) && row.date != null && !(
             (reportPeriodStartDate.getTime().equals(row.date) || row.date.after(reportPeriodStartDate.getTime())) &&
@@ -560,6 +561,7 @@ def addData(def xml) {
 
     def data = getData(formData)
     data.clear()
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
 
     for (def row : xml.exemplar.table.detail.record) {
         index = 0
@@ -570,11 +572,15 @@ def addData(def xml) {
         index++
 
         // графа 2
-        newRow.date = getDate(row.field[index].@value.text())
+        newRow.date = getDate(row.field[index].@value.text(), format)
         index++
 
         // графа 3 - справочник 60 "Части сделок"
-        newRow.part = getRecords(60, 'CODE', row.field[index].@value.text(), date, cache)
+        tmp = null
+        if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
+            tmp = getRecordId(60, 'CODE', row.field[index].@value.text(), date, cache)
+        }
+        newRow.part = tmp
         index++
 
         // графа 4
@@ -632,19 +638,16 @@ def getNumber(def value) {
     if ("".equals(tmp)) {
         return null
     }
-    // поменять запятую на точку и убрать пробелы
-    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
     return new BigDecimal(tmp)
 }
 
 /**
  * Получить дату по строковому представлению (формата дд.ММ.гггг)
  */
-def getDate(def value) {
+def getDate(def value, def format) {
     if (isEmpty(value)) {
         return null
     }
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     return format.parse(value)
 }
 
@@ -716,8 +719,8 @@ void insert(def data, def row) {
  * @param cache кеш
  * @return
  */
-def getRecords(def ref_id, String code, String value, Date date, def cache) {
-    String filter = code + "= '"+ value+"'"
+def getRecordId(def ref_id, String code, def value, Date date, def cache) {
+    String filter = code + " = '" + value + "'"
     if (cache[ref_id]!=null) {
         if (cache[ref_id][filter] != null) {
             return cache[ref_id][filter]

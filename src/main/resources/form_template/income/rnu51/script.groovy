@@ -849,11 +849,11 @@ void importData() {
 def addData(def xml) {
     def tmp
     def index
-    def refDataProvider61 = refBookFactory.getDataProvider(61)
-    def refDataProvider62 = refBookFactory.getDataProvider(62)
-
     def data = getData(formData)
     data.clear()
+    def cache = [:]
+    def date = new Date()
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
 
     for (def row : xml.exemplar.table.detail.record) {
         index = 0
@@ -867,7 +867,7 @@ def addData(def xml) {
         // графа 2 - справочник 61 "Коды сделок"
         tmp = null
         if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
-            tmp = getRecordId(refDataProvider61, 'CODE', getNumber(row.field[index].@value.text()))
+            tmp = getRecordId(61, 'CODE', getNumber(row.field[index].@value.text()), new Date(), cache)
         }
         newRow.tradeNumber = tmp
         index++
@@ -875,7 +875,7 @@ def addData(def xml) {
         // графа 3 - справочник 62 "Признаки ценных бумаг"
         tmp = null
         if (row.field[index].text() != null && row.field[index].text().trim() != '') {
-            tmp = getRecordId(refDataProvider62, 'CODE', row.field[index].text())
+            tmp = getRecordId(62, 'CODE', row.field[index].text(), date, cache)
         }
         newRow.singSecurirty = tmp
         index++
@@ -885,11 +885,11 @@ def addData(def xml) {
         index++
 
         // графа 5
-        newRow.acquisitionDate = getDate(row.field[index].@value.text())
+        newRow.acquisitionDate = getDate(row.field[index].@value.text(), format)
         index++
 
         // графа 6
-        newRow.saleDate = getDate(row.field[index].@value.text())
+        newRow.saleDate = getDate(row.field[index].@value.text(), format)
         index++
 
         // графа 7
@@ -1033,8 +1033,6 @@ def getNumber(def value) {
     if ("".equals(tmp)) {
         return null
     }
-    // поменять запятую на точку и убрать пробелы
-    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
     return new BigDecimal(tmp)
 }
 
@@ -1065,28 +1063,12 @@ def getNewRow() {
 }
 
 /**
- * Получить идентификатор записи из справочника.
- *
- * @param provider справочник
- * @param searchByAlias алиас атрибута справочника по которому ищется запись
- * @param value значение по которому ищется запись
- */
-def getRecordId(def provider, def searchByAlias, def value) {
-    def records = provider.getRecords(new Date(), null, searchByAlias + " = '" + value + "'", null);
-    if (records != null && !records.getRecords().isEmpty()) {
-        return records.getRecords().get(0).get('record_id').getNumberValue()
-    }
-    return null
-}
-
-/**
  * Получить дату по строковому представлению (формата дд.ММ.гггг)
  */
-def getDate(def value) {
+def getDate(def value, def format) {
     if (value == null || value == '') {
         return null
     }
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     return format.parse(value)
 }
 
@@ -1172,4 +1154,33 @@ def getSum(def data, def columnAlias) {
         return 0
     }
     return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
+}
+
+/**
+ * Получить id справочника.
+ *
+ * @param ref_id идентификатор справончика
+ * @param code атрибут справочника
+ * @param value значение для поиска
+ * @param date дата актуальности
+ * @param cache кеш
+ * @return
+ */
+def getRecordId(def ref_id, String code, def value, Date date, def cache) {
+    String filter = code + " = '" + value + "'"
+    if (cache[ref_id]!=null) {
+        if (cache[ref_id][filter] != null) {
+            return cache[ref_id][filter]
+        }
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    if (records.size() == 1){
+        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        return cache[ref_id][filter]
+    }
+    logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
+    return null
 }
