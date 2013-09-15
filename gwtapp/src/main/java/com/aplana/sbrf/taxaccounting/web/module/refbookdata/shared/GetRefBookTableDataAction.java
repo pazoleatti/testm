@@ -8,16 +8,16 @@ import java.util.Date;
 
 public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTableDataResult> implements ActionName {
 
-	long refbookId;
+	long refBookId;
 	PagingParams pagingParams;
 	Date relevanceDate;
 
-	public long getRefbookId() {
-		return refbookId;
+	public long getRefBookId() {
+		return refBookId;
 	}
 
-	public void setRefbookId(long refbookId) {
-		this.refbookId = refbookId;
+	public void setRefBookId(long refBookId) {
+		this.refBookId = refBookId;
 	}
 
 	public PagingParams getPagingParams() {

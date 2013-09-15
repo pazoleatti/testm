@@ -12,14 +12,14 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  */
 public class GetRefBookAttributesAction extends UnsecuredActionImpl<GetRefBookAttributesResult> implements ActionName {
 
-	long refbookId;
+	long refBookId;
 
-	public long getRefbookId() {
-		return refbookId;
+	public long getRefBookId() {
+		return refBookId;
 	}
 
-	public void setRefbookId(long refbookId) {
-		this.refbookId = refbookId;
+	public void setRefBookId(long refBookId) {
+		this.refBookId = refBookId;
 	}
 
 	@Override

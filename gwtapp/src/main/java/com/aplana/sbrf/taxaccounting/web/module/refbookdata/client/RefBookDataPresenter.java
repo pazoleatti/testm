@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -101,10 +99,11 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void onDeleteRowClicked() {
 		DeleteRefBookRowAction action = new DeleteRefBookRowAction();
-		action.setRefbookId(refBookDataId);
+		action.setRefBookId(refBookDataId);
 		List<Long> rowsId = new ArrayList<Long>();
 		rowsId.add(getView().getSelectedRow().getRefBookRowId());
 		action.setRecordsId(rowsId);
+		action.setRelevanceDate(getView().getRelevanceDate());
 		dispatcher.execute(action,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<DeleteRefBookRowResult>() {
@@ -131,7 +130,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		super.prepareFromRequest(request);
 		GetRefBookAttributesAction action = new GetRefBookAttributesAction();
 		refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
-		action.setRefbookId(refBookDataId);
+		action.setRefBookId(refBookDataId);
 		dispatcher.execute(action,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<GetRefBookAttributesResult>() {
@@ -147,7 +146,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 						}, this));
 
 		GetNameAction nameAction = new GetNameAction();
-		nameAction.setRefbookId(refBookDataId);
+		nameAction.setRefBookId(refBookDataId);
 		dispatcher.execute(nameAction,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<GetNameResult>() {
@@ -171,7 +170,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 			if (refBookDataId == null) return;
 			final Range range = display.getVisibleRange();
 			GetRefBookTableDataAction action = new GetRefBookTableDataAction();
-			action.setRefbookId(refBookDataId);
+			action.setRefBookId(refBookDataId);
 			action.setPagingParams(new PagingParams(range.getStart() + 1, range.getLength()));
 			action.setRelevanceDate(getView().getRelevanceDate());
 			dispatcher.execute(action,
