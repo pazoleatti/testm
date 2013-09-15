@@ -48,8 +48,8 @@
 
                                     <g:MenuItem><img src="resources/img/question_mark.png" title="Руководство пользователя"/>
                                         <g:MenuBar vertical="true">
-                                            <g:MenuItem><a href="resources/Руководство_пользователя_УН.pdf" target="_blank" title="Руководство пользователя" style="color:#000000; text-decoration:none;">Учет налогов</a></g:MenuItem>
-                                            <g:MenuItem><a href="resources/Руководство_пользователя_УКС.pdf" target="_blank" style="color:#000000; text-decoration:none;">Учет КС</a></g:MenuItem>
+                                            <g:MenuItem><a href="resources/help_un.pdf" target="_blank" title="Руководство пользователя" style="color:#000000; text-decoration:none;">Учет налогов</a></g:MenuItem>
+                                            <g:MenuItem><a href="resources/help_uks.pdf" target="_blank" style="color:#000000; text-decoration:none;">Учет КС</a></g:MenuItem>
                                         </g:MenuBar>
                                     </g:MenuItem>
                                 </g:MenuBar>
