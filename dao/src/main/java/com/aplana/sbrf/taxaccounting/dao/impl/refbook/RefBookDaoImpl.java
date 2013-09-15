@@ -127,10 +127,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         String sql = getRefBookSql(refBookId, version, sortAttribute, filter, pagingParams);
         RefBook refBook = get(refBookId);
         List<Map<String, RefBookValue>> records = getJdbcTemplate().query(sql, new RefBookValueMapper(refBook));
-        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-        result.setRecords(records);
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         sql = "SELECT count(*) FROM (" + getRefBookSql(refBookId, version, sortAttribute, filter, null) + ")";
-        result.setTotalRecordCount(getJdbcTemplate().queryForInt(sql));
+        result.setTotalCount(getJdbcTemplate().queryForInt(sql));
         return result;
     }
 
@@ -138,7 +137,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
         String sql = getRefBookRecordSql(refBookId, recordId);
         RefBook refBook = get(refBookId);
-        return getJdbcTemplate().queryForObject(sql, new RefBookValueMapper(refBook));
+		try {
+        	return getJdbcTemplate().queryForObject(sql, new RefBookValueMapper(refBook));
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException(String.format("В справочнике \"%s\"(id = %d) не найдена строка с id = %d", refBook.getName(), refBookId, recordId));
+		}
     }
 
     private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");

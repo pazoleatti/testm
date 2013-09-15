@@ -36,26 +36,19 @@ public class RefBookHelperImpl implements RefBookHelper {
 			for (Map.Entry<String, Object> entry : dataRow.entrySet()) {
 				Cell cell = ((DataRow.MapEntry<Cell>) entry).getCell();
 				Object value = cell.getValue();
-				if ((cell.getColumn() instanceof RefBookColumn)
-						&& value != null) {
+				if ((cell.getColumn() instanceof RefBookColumn) && value != null) {
 					RefBookColumn column = (RefBookColumn) cell.getColumn();
-					Pair<RefBookDataProvider, RefBookAttribute> pair = providers
-							.get(column.getRefBookAttributeId());
+					Long refAttributeId = column.getRefBookAttributeId();
+					Pair<RefBookDataProvider, RefBookAttribute> pair = providers.get(refAttributeId);
 					if (pair == null) {
-						RefBook refBook = refBookFactory.getByAttribute(column
-								.getRefBookAttributeId());
-						RefBookAttribute attribute = refBook
-								.getAttribute(column.getRefBookAttributeId());
-						RefBookDataProvider provider = refBookFactory
-								.getDataProvider(refBook.getId());
-						pair = new Pair<RefBookDataProvider, RefBookAttribute>(
-								provider, attribute);
-						providers.put(column.getRefBookAttributeId(), pair);
+						RefBook refBook = refBookFactory.getByAttribute(refAttributeId);
+						RefBookAttribute attribute = refBook.getAttribute(refAttributeId);
+						RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
+						pair = new Pair<RefBookDataProvider, RefBookAttribute>(provider, attribute);
+						providers.put(refAttributeId, pair);
 					}
-					Map<String, RefBookValue> record = pair.getFirst()
-							.getRecordData((Long) value);
-					RefBookValue refBookValue = record.get(pair.getSecond()
-							.getAlias());
+					Map<String, RefBookValue> record = pair.getFirst().getRecordData((Long) value);
+					RefBookValue refBookValue = record.get(pair.getSecond().getAlias());
 					cell.setRefBookDereference(String.valueOf(refBookValue));
 				}
 			}
