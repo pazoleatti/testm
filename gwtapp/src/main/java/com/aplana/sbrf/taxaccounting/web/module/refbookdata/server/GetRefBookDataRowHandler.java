@@ -97,7 +97,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 				rows.add(tableRow);
 
 			}
-			result.setTotalCount(refBookPage.getTotalRecordCount());
+			result.setTotalCount(refBookPage.getTotalCount());
 
 			result.setDataRows(rows);
 		}

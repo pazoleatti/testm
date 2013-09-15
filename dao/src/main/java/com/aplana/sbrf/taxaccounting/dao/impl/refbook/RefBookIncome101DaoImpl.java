@@ -84,10 +84,8 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
 
         List<Map<String, RefBookValue>> records = getNamedParameterJdbcTemplate().query(sql.toString(), params,
                 new RefBookValueMapper(refBook));
-        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-        result.addAll(records);
-
-        result.setTotalRecordCount(getNamedParameterJdbcTemplate().queryForInt("select count(*) from (" + sql.toString() + ")", params));
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+        result.setTotalCount(getNamedParameterJdbcTemplate().queryForInt("select count(*) from (" + sql.toString() + ")", params));
         return result;
     }
 

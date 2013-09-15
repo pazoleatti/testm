@@ -105,7 +105,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 				new AbstractCallback<GetRefBookValuesResult>() {
 					@Override
 					public void onSuccess(GetRefBookValuesResult result) {
-						getView().setRowData(offset, result.getPage(), result.getPage().getTotalRecordCount());
+						getView().setRowData(offset, result.getPage(), result.getPage().getTotalCount());
 					}
 				}, this));
 		

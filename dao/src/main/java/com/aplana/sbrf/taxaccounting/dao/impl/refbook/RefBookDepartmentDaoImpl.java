@@ -62,9 +62,8 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         } else {
             records = getNamedParameterJdbcTemplate().query(sql.toString(), new HashMap<String, Object>(), new RefBookValueMapper(refBook));
         }
-        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-        result.setRecords(records);
-        result.setTotalRecordCount(getJdbcTemplate().queryForInt("SELECT count(*) FROM DEPARTMENT"));
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+        result.setTotalCount(getJdbcTemplate().queryForInt("SELECT count(*) FROM DEPARTMENT"));
         return result;
     }
 

@@ -153,11 +153,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 				},
 				new FormDataSearchResultItemMapper()
 		);
-		int count = getCount(filter);
-		PagingResult<FormDataSearchResultItem> result = new PagingResult<FormDataSearchResultItem>();
-		result.setRecords(records);
-		result.setTotalRecordCount(count);
-		return result;
+		return new PagingResult<FormDataSearchResultItem>(records, getCount(filter));
 	}
 
 	@Override

@@ -221,11 +221,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 				},
 				new DeclarationDataSearchResultItemMapper()
 		);
-		int count = getCount(declarationFilter);
-		PagingResult<DeclarationDataSearchResultItem> result = new PagingResult<DeclarationDataSearchResultItem>();
-		result.setRecords(records);
-		result.setTotalRecordCount(count);
-		return result;
+		return new PagingResult<DeclarationDataSearchResultItem>(records, getCount(declarationFilter));
 	}
 
 	@Override

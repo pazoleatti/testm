@@ -48,7 +48,7 @@ public class AuditDaoTest {
         assertEquals(1, logSystem.getFormKind().getId());
         assertEquals("the best note", logSystem.getNote());
         assertEquals(1, logSystem.getUserDepartment().getId());
-        assertEquals(1, records.getTotalRecordCount());
+        assertEquals(1, records.getTotalCount());
     }
 
     @Test
@@ -94,6 +94,6 @@ public class AuditDaoTest {
         assertEquals(2, logSystemSearchResultItem.getFormKind().getId());
         assertEquals("the best note", logSystemSearchResultItem.getNote());
         assertEquals(1, logSystemSearchResultItem.getUserDepartment().getId());
-        assertEquals(2, records.getTotalRecordCount());
+        assertEquals(2, records.getTotalCount());
     }
 }
