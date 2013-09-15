@@ -158,6 +158,7 @@ def calcForm() {
 def logicalCheck() {
     refBookIncome102 = refBookFactory.getDataProvider(52L)
     refBookIncome101 = refBookFactory.getDataProvider(50L)
+    def dateEnd = reportPeriodService.getEndDate(formData.reportPeriodId).time
     getRows(data).each {DataRow<Cell> row ->
 
         /*
@@ -241,10 +242,9 @@ def logicalCheck() {
          * Выбираются данные отчета за период, для которого сформирована текущая форма
          * Значение поля «Кода ОПУ» Отчета о прибылях и убытках совпадает со значением «графы 10» текущей строки текущей формы.
          */
-
         if (!rowsNotCalc.contains(row.getAlias()) && !(row.getAlias() in ['R118', 'R119', 'R141', 'R142'])) {
             row.opuSumTotal = 0
-            PagingResult<Map<String, RefBookValue>> income102Records = refBookIncome102.getRecords(reportPeriodService.getEndDate(formData.reportPeriodId).time, null, 'OPU_CODE = \'' + row.accountingRecords.toString() + '\'', null).getRecords()
+            PagingResult<Map<String, RefBookValue>> income102Records = refBookIncome102.getRecords(dateEnd, null, 'OPU_CODE = \'' + row.accountingRecords.toString() + '\'', null).getRecords()
             for (income102 in income102Records) {
                 row.opuSumTotal += income102.get("TOTAL_SUM").getNumberValue()
             }
@@ -261,7 +261,7 @@ def logicalCheck() {
          */
         if (row.getAlias() in ['R118', 'R119', 'R141', 'R142']) {
             row.opuSumTotal = 0
-            for (income101 in refBookIncome101.getRecords(reportPeriodService.getEndDate(formData.reportPeriodId).time, null, 'ACCOUNT = \'' + row.accountingRecords.toString() + '\'', null).getRecords()) {
+            for (income101 in refBookIncome101.getRecords(dateEnd, null, 'ACCOUNT = \'' + row.accountingRecords.toString() + '\'', null).getRecords()) {
                 row.opuSumTotal += income101.get("DEBET_RATE").getNumberValue()
             }
         }
