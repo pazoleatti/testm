@@ -12,6 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -38,6 +40,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 @Repository
 @Transactional
 public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
+
+	private static final Log logger = LogFactory.getLog(RefBookDaoImpl.class);
 
     @Override
     public RefBook get(Long refBookId) {
@@ -429,6 +433,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public void updateRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records) {
+		if (refBookId == null || version == null || records == null) {
+			throw new IllegalArgumentException("refBookId: " + refBookId + "; version: " + version + "; records: " + records);
+		}
         try {
             //TODO: возможно стоит добавить проверку, что запись еще не удалена (Marat Fayzullin 2013-07-26)
             // нет данных - нет работы
@@ -506,9 +513,16 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public Long checkRecordUnique(Long refBookId, Date version, Long rowId) {
+		if (refBookId == null || version == null || rowId == null) {
+			throw new IllegalArgumentException("refBookId: " + refBookId + "; version: " + version + "; rowId: " + rowId);
+		}
         try {
+			if (logger.isDebugEnabled()) {
+				logger.trace(String.format("refBookId: %d; version: %s; rowId: %s", refBookId, version.toString(), rowId));
+			}
             return getJdbcTemplate().queryForLong(CHECK_REF_BOOK_RECORD_UNIQUE_SQL,
-                    new Object[]{refBookId, version, rowId});
+                    new Object[]{refBookId, version, rowId},
+					new int[]{Types.BIGINT, Types.DATE, Types.BIGINT});
         } catch (EmptyResultDataAccessException ex) {
             return null;
         }
@@ -521,6 +535,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public void deleteRecords(Long refBookId, Date version, List<Long> recordIds) {
         //TODO: возможно стоит добавить проверку, что запись еще не удалена (Marat Fayzullin 2013-07-26)
+		if (refBookId == null || version == null || recordIds == null) {
+			throw new IllegalArgumentException("refBookId: " + refBookId + "; version: " + version + "; recordIds: " + recordIds);
+		}
         // нет данных - нет работы
         if (recordIds.size() == 0) {
             return;
