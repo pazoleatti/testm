@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Результат запроса на получение данных с разбивкой на страницы
@@ -29,6 +30,17 @@ public class PagingResult<T> extends ArrayList<T>{
 		this(c);
 		this.totalCount = totalCount;
 	}
+
+    /**
+     * @return список записей, попавших в запрошенный диапазон значений
+     */
+    public List<T> getRecords() {
+        return this;
+    }
+    public void setRecords(List<T> records) {
+        clear();
+        addAll(records);
+    }
 
 	/**
 	 * @return общее количество записей (на всех страницах)
