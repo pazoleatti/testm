@@ -31,7 +31,6 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
-        println("AFTER_MOVE_APPROVED_TO_ACCEPTED")
         accepted()
         break
 }
