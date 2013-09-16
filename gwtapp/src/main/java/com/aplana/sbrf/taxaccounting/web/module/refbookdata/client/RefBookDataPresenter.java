@@ -109,6 +109,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 						new AbstractCallback<DeleteRefBookRowResult>() {
 							@Override
 							public void onSuccess(DeleteRefBookRowResult result) {
+								editFormPresenter.show(null);
+								editFormPresenter.setEnabled(false);
 								getView().updateTable();
 							}
 						}, this));

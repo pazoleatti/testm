@@ -562,6 +562,7 @@ def addData(def xml) {
     def data = getData(formData)
     data.clear()
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    def newRows = []
 
     for (def row : xml.exemplar.table.detail.record) {
         index = 0
@@ -594,8 +595,9 @@ def addData(def xml) {
         // графа 6
         newRow.costs = getNumber(row.field[index].@value.text())
 
-        insert(data, newRow)
+        newRows.add(newRow)
     }
+    data.insert(newRows, 1)
 
     // итоговая строка
     if (xml.exemplar.table.total.record.field.size() > 0) {
