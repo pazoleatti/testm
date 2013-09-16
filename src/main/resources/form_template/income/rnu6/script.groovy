@@ -575,12 +575,11 @@ DataRow itogoKNY(DataRowHelper form, int i) {
 
     for (j = i; j >= 0; j--) {
         row = form.getAllCached().get(j)
-        if (row.getAlias() == null && !kny.equals(getKNY(row.kny as Long))) {
-            break
-        }
-        for (column in columns) {
-            if (row.getCell(column).value != null) {
-                newRow.getCell(column).value += row.getCell(column).value
+        if (row.getAlias() == null && kny.equals(getKNY(row.kny as Long))) {
+            for (column in columns) {
+                if (row.getCell(column).value != null) {
+                    newRow.getCell(column).value += row.getCell(column).value
+                }
             }
         }
     }
