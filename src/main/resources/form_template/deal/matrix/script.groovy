@@ -125,15 +125,14 @@ void addRow(DataRow<Cell> row, DataRow<Cell> currentRow) {
     def size = dataRows.size()
     def index = currentRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
 
-    // TODO пересмотреть редактируемость (пока все редактируемо)
-    for (column in formData.getFormColumns()) {
-        if (column.alias.equals('dealNum1') || column.alias.equals('dealNum2') || column.alias.equals('dealNum3')
-                || column.alias.equals('groupName')) {
-            continue
-        }
-        row.getCell(column.alias).editable = true
-        row.getCell(column.alias).setStyleAlias('Редактируемая')
-    }
+//    for (column in formData.getFormColumns()) {
+//        if (column.alias.equals('dealNum1') || column.alias.equals('dealNum2') || column.alias.equals('dealNum3')
+//                || column.alias.equals('groupName')) {
+//            continue
+//        }
+//        row.getCell(column.alias).editable = true
+//        row.getCell(column.alias).setStyleAlias('Редактируемая')
+//    }
     dataRowHelper.insert(row, index)
 }
 
@@ -323,7 +322,6 @@ void consolidation() {
  * @param type
  */
 DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
-    println(">>> buildRow type = "+type.id+" "+type.name+" srcRow = "+srcRow)
     // Общие значения
 
     // "Да"
@@ -331,8 +329,8 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     // "Нет"
     def Long recNoId = null
 
-    def valYes = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 0", null)
-    def valNo = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 1", null)
+    def valYes = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 1", null)
+    def valNo = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 0", null)
     if (valYes != null && valYes.size() == 1) {
         recYesId = valYes.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
     }
@@ -1089,16 +1087,16 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         def val = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
         row.f121 = val.OFFSHORE.numberValue == 1 ? recNoId : recYesId
 
-        // Графа 5 (логига, обратная графе 3)
+        // Графа 5 (логика, обратная графе 3)
         row.f123 = row.f121 == recYesId ? recNoId : recYesId
 
-        // Графа 7 (та же логига, что у графы 3)
+        // Графа 7 (та же логика, что у графы 3)
         row.f131 = row.f121
 
-        // Графа 8 (та же логига, что у графы 3, но вместо "Да" не заполняется)
+        // Графа 8 (та же логика, что у графы 3, но вместо "Да" не заполняется)
         row.f132 = row.f121 == recNoId ? recNoId : null
 
-        // Графа 9 (та же логига, что у графы 3)
+        // Графа 9 (та же логика, что у графы 3)
         row.f133 = row.f121
 
         // Графа 10
