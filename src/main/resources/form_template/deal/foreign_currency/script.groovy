@@ -24,7 +24,6 @@ switch (formDataEvent) {
         sort()
         calc()
         addAllStatic()
-        calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
@@ -60,7 +59,6 @@ switch (formDataEvent) {
             sort()
             calc()
             addAllStatic()
-            calc()
             logicCheck()
         }
         break

@@ -48,8 +48,8 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         deleteAllStatic()
-        calc()
         sort()
+        calc()
         addAllStatic()
         logicCheck()
         break
