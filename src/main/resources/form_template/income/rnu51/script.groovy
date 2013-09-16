@@ -481,7 +481,7 @@ BigDecimal calc18(DataRow row) {
     if ((code == 2 || code == 5) && (row.priceInFactPerc < row.marketPriceInPerc1 && row.priceInFactRub < row.marketPriceInRub1)) {
         result = row.marketPriceInRub1
     }
-    if (result != null) result = roundTo2(result, 3)
+    if (result != null) result = roundTo2(result, 2)
     return result
 }
 
@@ -492,7 +492,7 @@ BigDecimal calc18(DataRow row) {
  */
 BigDecimal calc20(DataRow row) {
     BigDecimal result = (row.costOfAcquisition ?: 0) + (row.acquisitionPriceTax ?: 0) + (row.expensesOnSale ?: 0)
-    return roundTo2(result, 3)
+    return roundTo2(result, 2)
 }
 
 /**
@@ -502,7 +502,7 @@ BigDecimal calc20(DataRow row) {
  */
 BigDecimal calc21(DataRow row) {
     BigDecimal result = (row.salePriceTax ?: 0) - (row.expensesTotal ?: 0)
-    return roundTo2(result, 3)
+    return roundTo2(result, 2)
 }
 
 /**
@@ -520,7 +520,7 @@ BigDecimal calc22(DataRow row) {
     } else {
         result = (row.salePriceTax ?: 0) - (row.priceInFactRub ?: 0)
     }
-    return roundTo2(result, 3)
+    return roundTo2(result, 2)
 }
 
 void calc() {
@@ -854,6 +854,7 @@ def addData(def xml) {
     def cache = [:]
     def date = new Date()
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    def newRows = []
 
     for (def row : xml.exemplar.table.detail.record) {
         index = 0
@@ -955,8 +956,9 @@ def addData(def xml) {
         // графа 22
         newRow.excessSalePriceTax = getNumber(row.field[index].@value.text())
 
-        insert(data, newRow)
+        newRows.add(newRow)
     }
+    data.insert(newRows, 1)
 
     // итоговая строка
     if (xml.exemplar.table.total.record.size() > 1) {
@@ -1026,11 +1028,8 @@ def addData(def xml) {
  * @param value строка
  */
 def getNumber(def value) {
-    if (value == null) {
-        return null
-    }
     def tmp = value.trim()
-    if ("".equals(tmp)) {
+    if (''.equals(tmp)) {
         return null
     }
     return new BigDecimal(tmp)
@@ -1128,7 +1127,7 @@ def hasError() {
  * Получить итоговую строку с суммами.
  */
 def getCalcTotalRow() {
-    def totalColumns = sumColumns = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInRub',
+    def totalColumns = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInRub',
             'acquisitionPriceTax', 'redemptionValue', 'priceInFactRub', 'marketPriceInRub1', 'salePriceTax',
             'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
     def totalRow = formData.createDataRow()
@@ -1138,22 +1137,20 @@ def getCalcTotalRow() {
     totalRow.fix = "Итого за текущий отчетный (налоговый) период"
     setTotalStyle(totalRow)
     def data = getData(formData)
+    def tmp
     totalColumns.each { alias ->
-        totalRow.getCell(alias).setValue(getSum(data, alias))
+        totalRow.getCell(alias).setValue(0)
+    }
+    for (def row : getRows(data)) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        totalColumns.each { alias ->
+            tmp = totalRow.getCell(alias).getValue() + (row.getCell(alias).getValue() ?: 0)
+            totalRow.getCell(alias).setValue(tmp)
+        }
     }
     return totalRow
-}
-
-/**
- * Получить сумму столбца.
- */
-def getSum(def data, def columnAlias) {
-    def from = 0
-    def to = getRows(data).size() - 1
-    if (from > to) {
-        return 0
-    }
-    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
 }
 
 /**
@@ -1183,4 +1180,11 @@ def getRecordId(def ref_id, String code, def value, Date date, def cache) {
     }
     logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
     return null
+}
+
+/**
+ * Проверка пустое ли значение.
+ */
+def isEmpty(def value) {
+    return value == null || value == '' || value == 0
 }

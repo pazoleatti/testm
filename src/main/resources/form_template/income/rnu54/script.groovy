@@ -867,6 +867,7 @@ def addData(def xml) {
     def data = getData(formData)
     data.clear()
     def cache = [:]
+    def newRows = []
 
     for (def row : xml.exemplar.table.detail.record) {
         index = 0
@@ -928,8 +929,9 @@ def addData(def xml) {
         // графа 13
         newRow.outcomeTax = getNumber(row.field[index].@value.text())
 
-        insert(data, newRow)
+        newRows.add(newRow)
     }
+    data.insert(newRows, 1)
 
     // итоговая строка
     if (xml.exemplar.table.total.record.field.size() > 0) {

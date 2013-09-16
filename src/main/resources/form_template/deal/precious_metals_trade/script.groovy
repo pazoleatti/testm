@@ -36,16 +36,17 @@ switch (formDataEvent) {
         break
 // После принятия из Утверждено
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
-        acceptance()
+        logicCheck()
         break
 // После принятия из Подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
-        acceptance()
+        logicCheck()
         break
 // Консолидация
     case FormDataEvent.COMPOSE:
         consolidation()
         deleteAllStatic()
+        sort()
         calc()
         addAllStatic()
         logicCheck()
@@ -54,6 +55,7 @@ switch (formDataEvent) {
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             deleteAllStatic()
+            sort()
             calc()
             addAllStatic()
             logicCheck()
