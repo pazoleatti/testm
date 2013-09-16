@@ -303,6 +303,7 @@ public class FormDataPresenter extends
 
 
 	private void goMove(final WorkflowMove wfMove){
+		LogCleanEvent.fire(this);
 		GoMoveAction action = new GoMoveAction();
 		action.setFormDataId(formData.getId());
 		action.setMove(wfMove);
@@ -310,6 +311,7 @@ public class FormDataPresenter extends
 				.defaultCallback(new AbstractCallback<GoMoveResult>() {
 					@Override
 					public void onSuccess(GoMoveResult result) {
+						LogAddEvent.fire(FormDataPresenter.this, result.getLogEntries());
 						revealFormData(true);
 					}
 				}, this));
