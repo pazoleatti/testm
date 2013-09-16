@@ -125,6 +125,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	public void onRelevanceDateChanged() {
 		getView().updateTable();
 		editFormPresenter.setRelevanceDate(getView().getRelevanceDate());
+		editFormPresenter.show(null);
+		editFormPresenter.setEnabled(false);
 	}
 
 	@Override
