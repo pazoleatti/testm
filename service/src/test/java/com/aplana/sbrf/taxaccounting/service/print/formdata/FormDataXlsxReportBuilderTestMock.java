@@ -83,13 +83,13 @@ public class FormDataXlsxReportBuilderTestMock {
 
         //set width
         colNum.setWidth(10);
-        colNum1.setWidth(10);
+        colNum1.setWidth(0);
         colNum2.setWidth(10);
         colNum3.setWidth(10);
         colNum4.setWidth(10);
         colNum5.setWidth(10);
         colNum6.setWidth(10);
-        colNum7.setWidth(10);
+        colNum7.setWidth(0);
         colNum8.setWidth(10);
         colStr9.setWidth(10);
         colStr10.setWidth(10);
@@ -121,20 +121,25 @@ public class FormDataXlsxReportBuilderTestMock {
 		FormTemplate formTemplate;
 		Department department;
 		ReportPeriod reportPeriod;
+        TaxPeriod taxPeriod = new TaxPeriod();
 		FormDataPerformer formDataperformer = new FormDataPerformer();
 		List<FormDataSigner> formDataSigners = new ArrayList<FormDataSigner>();
 		FormDataSigner formDataSigner1 = new FormDataSigner();
 		FormDataSigner formDataSigner2 = new FormDataSigner();
-		
+
+        taxPeriod.setStartDate(new Date());
 		formData = new FormData();
 		formTemplate = new FormTemplate();
         formTemplate.setId(328);
 		reportPeriod = new ReportPeriod();
 		reportPeriod.setName("1 квартал");
+        reportPeriod.setTaxPeriod(taxPeriod);
         formTemplate.getStyles().addAll(formStyles);
 		formTemplate.setNumberedColumns(true);
 		formTemplate.setCode("Таблица 1\\2\\3 | Приложение 1 | Приложение 2");
         formTemplate.getColumns().addAll(columns);
+        formTemplate.setFullName("Печатная форма");
+        formTemplate.setCode("33");
         formData.initFormTemplateParams(formTemplate);
 
         BufferedReader reader = new BufferedReader(

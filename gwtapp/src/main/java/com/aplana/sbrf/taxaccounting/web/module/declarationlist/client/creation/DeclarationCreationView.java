@@ -1,12 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
@@ -31,14 +29,14 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 	public interface Binder extends UiBinder<PopupPanel, DeclarationCreationView> {
 	}
 
-	private DeclarationDataFilter filter;
-	private DeclarationDataFilterAvailableValues filterValues;
-
 	@UiField
 	PeriodPicker periodPicker;
 
 	@UiField
 	DepartmentPicker departmentPicker;
+	
+	@UiField(provided = true)
+	ListBoxWithTooltip<Integer> declarationTypeBox;
 
 	@UiField
 	Button continueButton;
@@ -46,20 +44,27 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 	@UiField
 	Button cancelButton;
 
-	@UiField(provided = true)
-	ListBoxWithTooltip<DeclarationType> declarationType;
+
+	
+	final private Map<Integer, DeclarationType> declarationTypesMap = new LinkedHashMap<Integer, DeclarationType>();
 
 	@Inject
 	public DeclarationCreationView(Binder uiBinder, EventBus eventBus) {
 		super(eventBus);
 
-		declarationType = new ListBoxWithTooltip<DeclarationType>(new AbstractRenderer<DeclarationType>() {
+		declarationTypeBox = new ListBoxWithTooltip<Integer>(new AbstractRenderer<Integer>() {
+
 			@Override
-			public String render(DeclarationType object) {
+			public String render(Integer object) {
 				if (object == null) {
 					return "";
 				}
-				return object.getName();
+				DeclarationType declarationType = declarationTypesMap.get(object);
+				if (declarationType!=null){
+					return declarationType.getName();
+				} else {
+					return String.valueOf(object);
+				}
 			}
 		});
 		
@@ -67,72 +72,25 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 		
 	}
 
-	@Override
-	public void setDeclarationFilter(DeclarationDataFilter filter) {
-		this.filter = filter;
-		if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()){
-			periodPicker.setValue(Arrays.asList(filter.getReportPeriodIds().iterator().next()));
-		} else {
-			periodPicker.setValue(null);
-		}
-		
-	}
 
 	@Override
-	public void setDeclarationFilterValues(DeclarationDataFilterAvailableValues filterValues) {
-		this.filterValues = filterValues;
-		setDeclarationType();
-	}
-
-	private void setDeclarationType() {
-		declarationType.setValue(null);
-		declarationType.setAcceptableValues(filterValues.getDeclarationTypes());
-
-		if (filter.getDeclarationTypeId() != null) {
-			for (DeclarationType availableType : filterValues.getDeclarationTypes()) {
-				if (availableType.getId() == filter.getDeclarationTypeId()) {
-					declarationType.setValue(availableType);
-					return;
-				}
-			}
+	public void setAcceptableDeclarationTypes(List<DeclarationType> declarationTypes) {
+		declarationTypesMap.clear();
+		for (DeclarationType declarationType : declarationTypes) {
+			declarationTypesMap.put(declarationType.getId(), declarationType);
 		}
+		declarationTypeBox.setValue(null);
+		declarationTypeBox.setAcceptableValues(declarationTypesMap.keySet());
 	}
 	
 	@Override
-	public void setDepartments(List<Department> departments, Set<Integer> departmentsIds) {
+	public void setAcceptableDepartments(List<Department> departments, Set<Integer> departmentsIds) {
 		departmentPicker.setAvalibleValues(departments, departmentsIds);
-		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
-			Integer departmentId = filter.getDepartmentIds().iterator().next();
-			for (Department department : departments) {
-				if (department.getId() == departmentId) {
-					departmentPicker.setValue(Arrays.asList(departmentId));
-					return;
-				}
-			}
-		}
 	}
 
 	@Override
-	public void setSelectedReportPeriod(Integer reportPeriodId){
-		periodPicker.setValue(Arrays.asList(reportPeriodId));
-	}
-
-	@Override
-	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
+	public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods) {
 		periodPicker.setPeriods(reportPeriods);
-	}
-
-	@Override
-	public DeclarationDataFilter updateAndGetDeclarationFilter() {
-		filter.setReportPeriodIds(periodPicker.getValue());
-		if (departmentPicker.getValue() != null && departmentPicker.getValue().iterator().hasNext() ) {
-			filter.setDepartmentIds(departmentPicker.getValue().isEmpty() ? new ArrayList<Integer>() :
-					Arrays.asList(departmentPicker.
-							getValue().iterator().next()));
-		}
-        filter.setDeclarationTypeId(declarationType.getValue()!= null?declarationType.getValue().getId() :
-                null);
-		return filter;
 	}
 
     @UiHandler("continueButton")
@@ -143,5 +101,41 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
 		hide();
+	}
+
+
+	@Override
+	public void setSelectedDeclarationType(Integer id) {
+		declarationTypeBox.setValue(id);
+	}
+
+
+	@Override
+	public void setSelectedReportPeriod(List<Integer> periodIds) {
+		periodPicker.setValue(periodIds);
+	}
+
+
+	@Override
+	public void setSelectedDepartment(List<Integer> departmentIds) {
+		departmentPicker.setValue(departmentIds);
+	}
+
+
+	@Override
+	public Integer getSelectedDeclarationType() {
+		return declarationTypeBox.getValue();
+	}
+
+
+	@Override
+	public List<Integer> getSelectedReportPeriod() {
+		return periodPicker.getValue();
+	}
+
+
+	@Override
+	public List<Integer> getSelectedDepartment() {
+		return departmentPicker.getValue();
 	}
 }

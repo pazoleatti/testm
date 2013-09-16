@@ -18,7 +18,7 @@
     </ui:style>
 
 	<g:DialogBox height="100%" width="250px" glassEnabled="true" text="Создание налоговой формы">
-        <g:VerticalPanel height="100%" width="250px">
+        <g:VerticalPanel height="100%" width="100%">
             <g:FlowPanel addStyleNames="{style.content}">
 
                 <g:FlowPanel height="60px">
