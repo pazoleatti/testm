@@ -33,7 +33,7 @@
 
                 <g:FlowPanel height="60px">
                     <g:Label text="Вид декларации" />
-                    <style:ListBoxWithTooltip width="205px" ui:field="declarationType" showTooltip="true"/>
+                    <style:ListBoxWithTooltip width="205px" ui:field="declarationTypeBox" showTooltip="true"/>
                 </g:FlowPanel>
             </g:FlowPanel>
 

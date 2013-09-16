@@ -121,20 +121,25 @@ public class FormDataXlsxReportBuilderTestMock {
 		FormTemplate formTemplate;
 		Department department;
 		ReportPeriod reportPeriod;
+        TaxPeriod taxPeriod = new TaxPeriod();
 		FormDataPerformer formDataperformer = new FormDataPerformer();
 		List<FormDataSigner> formDataSigners = new ArrayList<FormDataSigner>();
 		FormDataSigner formDataSigner1 = new FormDataSigner();
 		FormDataSigner formDataSigner2 = new FormDataSigner();
-		
+
+        taxPeriod.setStartDate(new Date());
 		formData = new FormData();
 		formTemplate = new FormTemplate();
         formTemplate.setId(328);
 		reportPeriod = new ReportPeriod();
 		reportPeriod.setName("1 квартал");
+        reportPeriod.setTaxPeriod(taxPeriod);
         formTemplate.getStyles().addAll(formStyles);
 		formTemplate.setNumberedColumns(true);
 		formTemplate.setCode("Таблица 1\\2\\3 | Приложение 1 | Приложение 2");
         formTemplate.getColumns().addAll(columns);
+        formTemplate.setFullName("Печатная форма");
+        formTemplate.setCode("33");
         formData.initFormTemplateParams(formTemplate);
 
         BufferedReader reader = new BufferedReader(

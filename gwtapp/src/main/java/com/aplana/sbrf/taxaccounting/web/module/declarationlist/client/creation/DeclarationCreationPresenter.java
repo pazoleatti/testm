@@ -18,6 +18,7 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -29,12 +30,17 @@ import java.util.Set;
 public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCreationPresenter.MyView> implements DeclarationCreationUiHandlers {
 
 	public interface MyView extends PopupView, HasUiHandlers<DeclarationCreationUiHandlers> {
-		void setDeclarationFilter(DeclarationDataFilter filter);
-		void setDeclarationFilterValues(DeclarationDataFilterAvailableValues filterValues);
-		void setReportPeriods(List<ReportPeriod> reportPeriods);
-		void setDepartments(List<Department> departments, Set<Integer> departmentsIds);
-		void setSelectedReportPeriod(Integer reportPeriodId);
-		DeclarationDataFilter updateAndGetDeclarationFilter();
+		void setAcceptableDeclarationTypes(List<DeclarationType> declarationType);
+		void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
+		void setAcceptableDepartments(List<Department> departments, Set<Integer> departmentsIds);
+		
+		void setSelectedDeclarationType(Integer id);
+		void setSelectedReportPeriod(List<Integer> periodIds);
+		void setSelectedDepartment(List<Integer> departmentIds);
+		
+		Integer getSelectedDeclarationType();
+		List<Integer> getSelectedReportPeriod();
+		List<Integer> getSelectedDepartment();
 	}
 
 	private DispatchAsync dispatcher;
@@ -51,28 +57,41 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 
 	@Override
 	protected void onHide() {
+		clearValues();
 		getView().hide();
 	}
 	
 	public void setDeclarationFilter(DeclarationDataFilter filter) {
-		getView().setDeclarationFilter(filter);
+		
+		if(filter.getDeclarationTypeId() != null){
+			getView().setSelectedDeclarationType(filter.getDeclarationTypeId());
+		}
+		if(filter.getDepartmentIds()!= null && filter.getDepartmentIds().size() == 1){
+			getView().setSelectedDepartment(Arrays.asList(filter.getDepartmentIds().get(0)));
+		}
+		if (filter.getReportPeriodIds()!=null && filter.getReportPeriodIds().size() == 1){
+			getView().setSelectedReportPeriod(Arrays.asList(filter.getReportPeriodIds().get(0)));
+		}
 	}
 
-	public void setFilterValues(DeclarationDataFilterAvailableValues filterValues) {
-		getView().setDeclarationFilterValues(filterValues);
+	public void setDeclarationTypes(DeclarationDataFilterAvailableValues filterValues) {
+		getView().setAcceptableDeclarationTypes(filterValues.getDeclarationTypes());
 	}
 
 	public void setDepartments(List<Department> departments, Set<Integer> departmentsIds) {
-		getView().setDepartments(departments, departmentsIds);
+		getView().setAcceptableDepartments(departments, departmentsIds);
 	}
 	
 	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
-		getView().setReportPeriods(reportPeriods);
+		getView().setAcceptableReportPeriods(reportPeriods);
 	}
 
 	@Override
 	public void onContinue() {
-		final DeclarationDataFilter filter = getView().updateAndGetDeclarationFilter();
+		final DeclarationDataFilter filter = new DeclarationDataFilter();
+		filter.setDeclarationTypeId(getView().getSelectedDeclarationType());
+		filter.setDepartmentIds(getView().getSelectedDepartment());
+		filter.setReportPeriodIds(getView().getSelectedReportPeriod());
 		if(isFilterDataCorrect(filter)){
 			LogCleanEvent.fire(this);
 			LogShowEvent.fire(this, false);
@@ -140,4 +159,11 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		}
 		return true;
 	}
+	
+	private void clearValues(){
+		getView().setSelectedDeclarationType(null);
+		getView().setSelectedReportPeriod(null);
+		getView().setSelectedDepartment(null);
+	}
+	
 }
