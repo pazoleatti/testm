@@ -10,12 +10,12 @@ import java.util.Date;
  */
 public class ColumnContext {
 	public static enum Mode {
-		EDIT_MODE,
+		SUPER_EDIT_MODE,
 		READONLY_MODE,
-		DEFAULT_MODE
+		NORMAL_EDIT_MODE
 	}
 
-	Mode mode = Mode.DEFAULT_MODE;
+	Mode mode = Mode.NORMAL_EDIT_MODE;
 	Column column;
 	Date startDate;
 	Date endDate;

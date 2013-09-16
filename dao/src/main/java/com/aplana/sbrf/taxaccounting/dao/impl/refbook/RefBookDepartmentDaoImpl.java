@@ -35,27 +35,27 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         Filter.getFilterQuery(filter, new DepartmentFilterTreeListener(refBook, sb));
         StringBuilder sql = new StringBuilder("SELECT ");
         sql.append("id ").append(RefBook.RECORD_ID_ALIAS);
-        for(RefBookAttribute attribute: refBook.getAttributes()){
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
             sql.append(", ");
             sql.append(attribute.getAlias());
         }
         sql.append(" FROM (SELECT ");
-        if (isSupportOver() && sortAttribute != null){
+        if (isSupportOver() && sortAttribute != null) {
             sql.append("row_number() over (order by '" + sortAttribute.getAlias() + "') as row_number_over");
         } else {
             sql.append("rownum row_number_over");
         }
         sql.append(", d.* FROM DEPARTMENT d");
-        if (sb.length() > 0){
+        if (sb.length() > 0) {
             sql.append(" WHERE\n ");
             sql.append(sb.toString());
             sql.append("\n");
         }
         sql.append(")");
+        Map<String, Integer> params = new HashMap<String, Integer>();
         List<Map<String, RefBookValue>> records;
         if (pagingParams != null) {
             sql.append(" WHERE row_number_over BETWEEN :offset AND :count");
-            Map<String, Integer> params = new HashMap<String, Integer>();
             params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
             params.put("offset", pagingParams.getStartIndex());
             records = getNamedParameterJdbcTemplate().query(sql.toString(), params, new RefBookValueMapper(refBook));
@@ -63,7 +63,17 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
             records = getNamedParameterJdbcTemplate().query(sql.toString(), new HashMap<String, Object>(), new RefBookValueMapper(refBook));
         }
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-        result.setTotalCount(getJdbcTemplate().queryForInt("SELECT count(*) FROM DEPARTMENT"));
+        if (isSupportOver()) {
+            if (params.size() > 0) {
+                result.setTotalCount(getNamedParameterJdbcTemplate().queryForInt("SELECT count(*) FROM (" + sql.toString() + ")", params));
+            } else {
+                result.setTotalCount(getJdbcTemplate().queryForInt("SELECT count(*) FROM (" + sql.toString() + ")"));
+            }
+        } else {
+            // Бд тестовая тут магия
+            result.setTotalCount(getJdbcTemplate().queryForInt("SELECT count(*) FROM DEPARTMENT"));
+        }
+
         return result;
     }
 
@@ -72,7 +82,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         RefBook refBook = refBookDao.get(refBookId);
         StringBuilder sql = new StringBuilder("SELECT id ");
         sql.append(RefBook.RECORD_ID_ALIAS);
-        for(RefBookAttribute attribute: refBook.getAttributes()){
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
             sql.append(", ");
             sql.append(attribute.getAlias());
         }

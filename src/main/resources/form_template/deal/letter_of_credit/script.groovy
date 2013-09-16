@@ -55,11 +55,13 @@ switch (formDataEvent) {
 // импорт из xls
     case FormDataEvent.IMPORT :
         importData()
-        deleteAllStatic()
-        sort()
-        calc()
-        addAllStatic()
-        logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            deleteAllStatic()
+            sort()
+            calc()
+            addAllStatic()
+            logicCheck()
+        }
         break
 }
 
@@ -146,12 +148,12 @@ void logicCheck() {
     def dTo = taxPeriod.getEndDate()
 
     def dataRows = dataRowHelper.getAllCached()
-
+    def rowNum = 0
     for (row in dataRows) {
+        rowNum++
         if (row.getAlias() != null) {
             continue
         }
-        def rowNum = row.getIndex()
         def dealDateCell = row.getCell('dealDate')
         def docDateCell = row.getCell('docDate')
         [
@@ -494,7 +496,6 @@ void importData() {
             return
         }
         addData(xml)
-//        logicCheck()
     } catch(Exception e) {
         logger.error(""+e.message)
     }
@@ -683,7 +684,7 @@ def getRecordId(def ref_id, String alias, String value, Date date, def cache, in
     def refDataProvider = refBookFactory.getDataProvider(ref_id)
     def records = refDataProvider.getRecords(date, null, filter, null)
     if (records.size() == 1){
-        cache[ref_id][filter] = (records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue)
+        cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
     }
     throw new Exception("Строка ${indexRow+3} столбец ${indexCell+1} содержит значение, отсутствующее в справочнике!")

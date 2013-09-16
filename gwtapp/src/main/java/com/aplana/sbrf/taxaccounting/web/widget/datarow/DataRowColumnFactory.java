@@ -13,19 +13,21 @@ import com.google.gwt.user.cellview.client.Column;
 import java.util.Date;
 
 public class DataRowColumnFactory {
-	private Boolean isReadOnly = false;
-	private Boolean isEditOnly = false;
+	private boolean readOnly;
+	private boolean superEditMode;
 	private Date startDate;
 	private Date endDate;
 
 	public Column<DataRow<Cell>, ?> createTableColumn(com.aplana.sbrf.taxaccounting.model.Column col, AbstractCellTable<DataRow<Cell>> cellTable) {
 		ColumnContext columnContext = new ColumnContext();
-		if (isEditOnly && !isReadOnly) {
-			columnContext.setMode(ColumnContext.Mode.EDIT_MODE);
-		} else if (isReadOnly && !isEditOnly) {
+		if (readOnly) {
 			columnContext.setMode(ColumnContext.Mode.READONLY_MODE);
 		} else {
-			columnContext.setMode(ColumnContext.Mode.DEFAULT_MODE);
+			if (superEditMode){
+				columnContext.setMode(ColumnContext.Mode.SUPER_EDIT_MODE);
+			} else {
+				columnContext.setMode(ColumnContext.Mode.NORMAL_EDIT_MODE);
+			}
 		}
 		columnContext.setDateRange(startDate, endDate);
 		Column<DataRow<Cell>, ?> uiColumn = null;
@@ -51,16 +53,23 @@ public class DataRowColumnFactory {
 		return uiColumn;
 	}
 
-	public Boolean isReadOnly() {
-		return isReadOnly;
+
+	/**
+	 * Устанавливает флаг недоступности редактирования
+	 * 
+	 * @param readOnly
+	 */
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
-	public void setReadOnly(Boolean readOnly) {
-		this.isReadOnly = readOnly;
-	}
-
-	public void setEditOnly(Boolean editOnly) {
-		this.isEditOnly = editOnly;
+	/**
+	 * Устанавливает флаг доступности суперредактирования всех ячеек в режиме редактирования
+	 * 
+	 * @param editOnly
+	 */
+	public void setSuperEditMode(boolean editOnly) {
+		this.superEditMode = editOnly;
 	}
 
 	public void setDateRange(Date startDate, Date endDate) {

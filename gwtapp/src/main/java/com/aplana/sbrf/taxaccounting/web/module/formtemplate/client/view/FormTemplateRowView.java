@@ -75,7 +75,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	public FormTemplateRowView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
 
-		factory.setEditOnly(true);
+		factory.setSuperEditMode(true);
 		styleCellPopup = new StyleCellPopup(this);
 
 		selectionModel = new NoSelectionModel<DataRow>();
@@ -231,7 +231,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		StringColumn aliasColumn = new StringColumn();
 		ColumnContext columnContext = new ColumnContext();
 		columnContext.setColumn(aliasColumn);
-		columnContext.setMode(ColumnContext.Mode.EDIT_MODE);
+		columnContext.setMode(ColumnContext.Mode.SUPER_EDIT_MODE);
 		EditTextColumn editTextAliasColumn = new EditTextColumn(aliasColumn, columnContext) {
 			@Override
 			public String getValue(DataRow aliasRow) {
