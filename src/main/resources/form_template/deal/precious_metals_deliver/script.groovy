@@ -444,7 +444,12 @@ def getValuesByGroupColumn(DataRow row) {
 }
 
 def getRefBookValue(int id, def cell, def alias) {
-    def map = refBookService.getRecordData(id, cell)
+    def map
+    try {
+        map = refBookService.getRecordData(id, cell)
+    } catch (Exception e) {
+        map = null
+    }
     return map == null ? 'null' : map.get(alias).stringValue
 }
 
@@ -836,7 +841,7 @@ def addData(def xml) {
         indexCell++
 
         // столбец 15
-        newRow.countryCode2 = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.countryCode2 = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // столбец 16
@@ -844,7 +849,7 @@ def addData(def xml) {
         if (code.length() == 1){    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
-        newRow.region1 = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell)
+        newRow.region1 = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell, false)
         indexCell++
 
         // столбец 17
@@ -856,7 +861,7 @@ def addData(def xml) {
         indexCell++
 
         // столбец 19
-        newRow.countryCode3 = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.countryCode3 = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // столбец 20
@@ -864,7 +869,7 @@ def addData(def xml) {
         if (code.length() == 1){    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
-        newRow.region2 = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell)
+        newRow.region2 = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell, false)
         indexCell++
 
         // столбец 21
@@ -935,7 +940,7 @@ def getNumber(def value, int indexRow, int indexCell) {
  * @param value
  */
 def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory=true) {
-    String filter = alias + "= '" + value + "'"
+    String filter = alias + " = '" + value + "'"
     if (value=='') filter = "$alias is null"
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
