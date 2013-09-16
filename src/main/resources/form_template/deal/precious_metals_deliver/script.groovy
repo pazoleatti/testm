@@ -444,7 +444,12 @@ def getValuesByGroupColumn(DataRow row) {
 }
 
 def getRefBookValue(int id, def cell, def alias) {
-    def map = refBookService.getRecordData(id, cell)
+    def map
+    try {
+        map = refBookService.getRecordData(id, cell)
+    } catch (Exception e) {
+        map = null
+    }
     return map == null ? 'null' : map.get(alias).stringValue
 }
 
