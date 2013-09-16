@@ -3,6 +3,7 @@ package form_template.deal.nondeliverable
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 
 import java.text.SimpleDateFormat
 
@@ -52,12 +53,14 @@ switch (formDataEvent) {
 // Импорт
     case FormDataEvent.IMPORT:
         importData()
-        deleteAllStatic()
-        sort()
-        calc()
-        addAllStatic()
-        calc()
-        logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            deleteAllStatic()
+            sort()
+            calc()
+            addAllStatic()
+            calc()
+            logicCheck()
+        }
         break
 }
 
@@ -151,13 +154,12 @@ void logicCheck() {
     def dTo = taxPeriod.getEndDate()
 
     def dataRows = dataRowHelper.getAllCached();
-
+    def rowNum = 0
     for (row in dataRows) {
+        rowNum++
         if (row.getAlias() != null) {
             continue
         }
-
-        def rowNum = row.getIndex()
 
         if (row.getAlias() != null) {
             continue
@@ -787,7 +789,7 @@ def getRecordId(def ref_id, String code, String value, Date date, def cache) {
     if (value == null || value.equals("")) {
         filter = code + " is null"
     } else {
-        filter = code + "= '" + value + "'"
+        filter = code + " = '" + value + "'"
     }
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
@@ -795,11 +797,12 @@ def getRecordId(def ref_id, String code, String value, Date date, def cache) {
         cache[ref_id] = [:]
     }
     def refDataProvider = refBookFactory.getDataProvider(ref_id)
-    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    def records = refDataProvider.getRecords(date, null, filter, null)
     if (records.size() == 1) {
-        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
     }
+
 }
 
 /**
