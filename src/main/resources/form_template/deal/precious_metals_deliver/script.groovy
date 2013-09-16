@@ -444,7 +444,12 @@ def getValuesByGroupColumn(DataRow row) {
 }
 
 def getRefBookValue(int id, def cell, def alias) {
-    def map = refBookService.getRecordData(id, cell)
+    def map
+    try {
+        map = refBookService.getRecordData(id, cell)
+    } catch (Exception e) {
+        map = null
+    }
     return map == null ? 'null' : map.get(alias).stringValue
 }
 
@@ -948,7 +953,7 @@ def getRecordId(def ref_id, String alias, String value, Date date, def cache, in
         cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
     } else if (mandatory || value!='') {
-        throw new Exception("Строка ${indexRow - (getHeaderRowCount() - 1)} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!($filter)")
+        throw new Exception("Строка ${indexRow - (getHeaderRowCount() - 1)} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
     return null
 }

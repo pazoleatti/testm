@@ -725,7 +725,7 @@ def getNumber(def value, int indexRow, int indexCell) {
  * @param value
  */
 def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell) {
-    String filter = alias + "= '" + value + "'"
+    String filter = alias + " like '" + value + "%'"
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
     } else {
