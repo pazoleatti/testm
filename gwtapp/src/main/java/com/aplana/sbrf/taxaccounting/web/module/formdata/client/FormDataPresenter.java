@@ -94,10 +94,10 @@ public class FormDataPresenter extends
 					.wrongStateCallback(new AbstractCallback<GetRowsDataResult>() {
 						@Override
 						public void onSuccess(GetRowsDataResult result) {
-							if(result==null || result.getDataRows().getTotalRecordCount() == 0)
+							if(result==null || result.getDataRows().getTotalCount() == 0)
 								getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
 							else {
-								getView().setRowsData(start, (int) result.getDataRows().getTotalRecordCount(), result.getDataRows());
+								getView().setRowsData(start, (int) result.getDataRows().getTotalCount(), result.getDataRows());
 								if (result.getDataRows().size() > PAGE_SIZE) {
 									getView().assignDataProvider(result.getDataRows().size());
 								}

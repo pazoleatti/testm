@@ -8,17 +8,17 @@ import java.util.Map;
 
 public class SaveRefBookRowAction extends UnsecuredActionImpl<SaveRefBookRowResult> implements ActionName {
 
-	Long refbookId;
+	Long refBookId;
 	Long recordId;
 	Map<String, RefBookValueSerializable> valueToSave;
 	Date relevanceDate;
 
-	public Long getRefbookId() {
-		return refbookId;
+	public Long getRefBookId() {
+		return refBookId;
 	}
 
-	public void setRefbookId(Long refbookId) {
-		this.refbookId = refbookId;
+	public void setRefBookId(Long refBookId) {
+		this.refBookId = refBookId;
 	}
 
 	public Long getRecordId() {

@@ -26,8 +26,8 @@ public class GetProjectVersionHandler extends
 	public GetProjectVersionResult execute(GetProjectVersion action,
 			ExecutionContext executionContext) throws ActionException {
 		
-		String version = manifestProperties.getProperty("Implementation-Version", "unknown");
-		String revision = manifestProperties.getProperty("X-Git", "unknown");
+		String version = manifestProperties.getProperty("Implementation-Version", "?");
+		String revision = manifestProperties.getProperty("X-Git", "?");
 
 		
 		GetProjectVersionResult result = new GetProjectVersionResult();

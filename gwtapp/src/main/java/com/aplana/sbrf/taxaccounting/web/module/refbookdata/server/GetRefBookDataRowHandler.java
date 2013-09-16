@@ -33,10 +33,10 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 	@Override
 	public GetRefBookTableDataResult execute(GetRefBookTableDataAction action, ExecutionContext executionContext) throws ActionException {
 
-		RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefbookId());
+		RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
 
 		GetRefBookTableDataResult result = new GetRefBookTableDataResult();
-		RefBook refBook = refBookFactory.get(action.getRefbookId());
+		RefBook refBook = refBookFactory.get(action.getRefBookId());
 		result.setTableHeaders(refBook.getAttributes());
 		result.setDesc(refBook.getName());
 		if (action.getPagingParams() != null) {//TODO перенести в отдельный хэндлер
@@ -97,7 +97,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 				rows.add(tableRow);
 
 			}
-			result.setTotalCount(refBookPage.getTotalRecordCount());
+			result.setTotalCount(refBookPage.getTotalCount());
 
 			result.setDataRows(rows);
 		}

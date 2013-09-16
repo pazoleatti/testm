@@ -73,6 +73,9 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+        checkNSI()
+        logicalChecks()
+        break
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
         checkRequiredField()
         logicalChecks()
@@ -226,7 +229,7 @@ void logicalChecks() {
     // показ ошибок
     errors.each{ e ->
         if (e.lines.size() > 1){
-            logger.error("\"Форма содержит несколько записей для ТС ("+e.okato+", "+e.identNumber+", "+e.regNumber+"). Строки: "+e.lines.join(', '))
+            logger.warn("\"Форма содержит несколько записей для ТС ("+getRefBookValue(3, e.okato, "OKATO")+", "+e.identNumber+", "+e.regNumber+"). Строки: "+e.lines.join(', '))
         }
     }
 
@@ -336,7 +339,7 @@ boolean checkOkato(codeOKATO){
  * атрибут «Код региона» справочника «Параметры налоговых льгот» соответствует значению «графы 2» («Код по ОКАТО»).
  */
 boolean checkBenefit(taxBenefitCode, okato){
-	if (taxBenefitCode != null && getRefBookValue(6, taxBenefitCode, "CODE") in [20210, 20220, 20230]){
+    if (taxBenefitCode != null && getRefBookValue(6, taxBenefitCode, "CODE").stringValue in ['20210', '20220', '20230']){
         def refTaxBenefitParameters = refBookFactory.getDataProvider(7)
         def region = getRegionByOkatoOrg(okato)
         query = "TAX_BENEFIT_ID ="+taxBenefitCode+" AND DICT_REGION_ID = "+region.record_id

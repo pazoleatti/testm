@@ -7,7 +7,7 @@
 	<artifactId>taxaccounting</artifactId>
 
 	<description>АС "Учёт налогов" - Родительский модуль</description>
-	<version>0.2.2-SNAPSHOT</version>
+	<version>0.3</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -26,7 +26,7 @@
 	</modules>
 
 	<properties>
-		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
+		<maven.build.timestamp.format>yyyy.MM.dd-HH:mm</maven.build.timestamp.format>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<gwt.version>2.5.1</gwt.version>
 		<gwtp.version>1.0</gwtp.version>
@@ -379,7 +379,7 @@
 								<X-Git-Commits-Count>${git.commitsCount}</X-Git-Commits-Count>
 								<X-Git-Revision>${git.revision}</X-Git-Revision>
 								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
-								<X-Git>${git.buildnumber}.${maven.build.timestamp}</X-Git>
+								<X-Git>${git.buildnumber}(${maven.build.timestamp})</X-Git>
 							</manifestEntries>
 						</archive>
 					</configuration>

@@ -181,6 +181,14 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
                 + rowAlias);
     }
 
+    /**
+     * Сброс кэша
+     */
+    @Override
+    public void dropCache(){
+        dataRows = null;
+    }
+
     @Override
     public void clear(){
         dataRows = new ArrayList<DataRow<Cell>>();

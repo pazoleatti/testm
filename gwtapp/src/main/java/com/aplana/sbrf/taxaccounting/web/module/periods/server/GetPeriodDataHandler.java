@@ -46,8 +46,8 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 			@Override
 			public int compare(DepartmentReportPeriod o1,
 					DepartmentReportPeriod o2) {
-			    return Integer.compare(o1.getReportPeriod().getOrder(), o2.getReportPeriod().getOrder());
-			}
+                return o1.getReportPeriod().getOrder() - o2.getReportPeriod().getOrder();
+            }
 		});
 		Map<Integer, List<TableRow>> per = new TreeMap<Integer, List<TableRow>>();
 		for (DepartmentReportPeriod period : reportPeriods) {

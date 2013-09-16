@@ -3,6 +3,7 @@ package form_template.deal.nondeliverable
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 
 import java.text.SimpleDateFormat
 
@@ -43,18 +44,23 @@ switch (formDataEvent) {
 // Консолидация
     case FormDataEvent.COMPOSE:
         consolidation()
+        deleteAllStatic()
+        sort()
         calc()
+        addAllStatic()
         logicCheck()
         break
 // Импорт
     case FormDataEvent.IMPORT:
         importData()
-        deleteAllStatic()
-        sort()
-        calc()
-        addAllStatic()
-        calc()
-        logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            deleteAllStatic()
+            sort()
+            calc()
+            addAllStatic()
+            calc()
+            logicCheck()
+        }
         break
 }
 
@@ -148,13 +154,12 @@ void logicCheck() {
     def dTo = taxPeriod.getEndDate()
 
     def dataRows = dataRowHelper.getAllCached();
-
+    def rowNum = 0
     for (row in dataRows) {
+        rowNum++
         if (row.getAlias() != null) {
             continue
         }
-
-        def rowNum = row.getIndex()
 
         if (row.getAlias() != null) {
             continue
@@ -190,17 +195,10 @@ void logicCheck() {
         def cost = row.cost
         def transactionDate = row.transactionDate
 
-        // В одной строке не должны быть одновременно заполнены графы 12 и 13
-        if (consumptionSum != null && price != null) {
-            def msg1 = row.getCell('consumptionSum').column.name
-            def msg2 = row.getCell('cost').column.name
-            logger.warn("«$msg1» и «$msg2» в строке $rowNum не могут быть одновременно заполнены!")
-        }
-
-        // В одной строке если не заполнена графа 12, то должна быть заполнена графа 13 и наоборот
+        // В одной строке если не заполнена графа 11, то должна быть заполнена графа 12 и наоборот
         if (consumptionSum == null && price == null) {
             def msg1 = row.getCell('consumptionSum').column.name
-            def msg2 = row.getCell('cost').column.name
+            def msg2 = row.getCell('price').column.name
             logger.warn("Одна из граф «$msg1» и «$msg2» в строке $rowNum должно быть заполнена!")
         }
 
@@ -280,6 +278,8 @@ void logicCheck() {
     def testItogRows = testRows.findAll { it -> it.getAlias() != null }
     def itogRows = dataRows.findAll { it -> it.getAlias() != null }
 
+    Date date = new Date()
+    def cache = [:]
 
     if (testItogRows.size() > itogRows.size()) {            //если удалили итоговые строки
 
@@ -289,7 +289,7 @@ void logicCheck() {
             if (row.getAlias() == null) {
                 if (nextRow == null ||
                         nextRow.getAlias() == null && isDiffRow(row, nextRow, getGroupColumns())) {
-                    logger.error("Отсутствует итоговое значение по группе ${row.innKio}")
+                    logger.error("Отсутствует итоговое значение по группе «${getValuesByGroupColumn(row, date, cache)}»")
                 }
             }
         }
@@ -306,28 +306,31 @@ void logicCheck() {
     } else {
         def costName = getAtributes().cost[2]
         def priceName = getAtributes().price[2]
-        Date date = new Date()
-        def cache = [:]
+
         for (int i = 0; i < testItogRows.size(); i++) {
             def testItogRow = testItogRows[i]
             def realItogRow = itogRows[i]
             int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
             def index = realItogRow.getIndex()
             if (testItogRow.price != realItogRow.price) {
-                logger.error("Неверное итоговое значение по группе '${getValuesByGroupColumn(dataRows[itg], date, cache)}' в графе '${priceName}' в строке ${index}")
+                logger.error("Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg], date, cache)}» в графе «${priceName}» в строке ${index}")
             }
             if (testItogRow.cost != realItogRow.cost) {
-                logger.error("Неверное итоговое значение по группе '${getValuesByGroupColumn(dataRows[itg], date, cache)}' в графе '${costName}' в строке ${index}")
+                logger.error("Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg], date, cache)}» в графе «${costName}» в строке ${index}")
             }
         }
     }
 }
 
-// ['name', 'innKio', 'contractNum', 'contractDate', 'transactionType']
+/*
+     Возвращает строку со значениями полей строки по которым идет группировка
+     ['name', 'innKio', 'contractNum', 'contractDate', 'transactionType']
+ */
 def getValuesByGroupColumn(DataRow row, Date date, def cache) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    builder.append(refBookService.getRecordData(9, row.name).NAME.stringValue).append(sep)
+    def map = refBookService.getRecordData(9, row.name)
+    builder.append(map == null ? 'null' : map.NAME.stringValue).append(sep)
     builder.append(row.innKio).append(sep)
     builder.append(row.contractNum).append(sep)
     builder.append(row.contractDate).append(sep)
@@ -369,6 +372,10 @@ void addAllStatic() {
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.getAllCached()
 
+        if (dataRows.size()<1){
+            return
+        }
+
         for (int i = 0; i < dataRows.size(); i++) {
             def row = dataRows.get(i)
             def nextRow = null
@@ -377,7 +384,7 @@ void addAllStatic() {
                 nextRow = dataRows.get(i + 1)
             }
 
-            if (row.getAlias() == null && nextRow == null || isDiffRow(row, newRow, getGroupColumns())) {
+            if (row.getAlias() == null && nextRow == null || isDiffRow(row, nextRow, getGroupColumns())) {
                 def itogRow = calcItog(i, dataRows)
                 dataRowHelper.insert(itogRow, ++i+1)
             }
@@ -465,7 +472,7 @@ void sort() {
     def dataRows = dataRowHelper.getAllCached()
 
     dataRows.sort({ DataRow a, DataRow b ->
-        sortRow(['name', 'innKio', 'contractNum', 'contractDate', 'transactionType'], a, b)
+        sortRow(getGroupColumns(), a, b)
     })
 
     dataRowHelper.save(dataRows);
@@ -782,7 +789,7 @@ def getRecordId(def ref_id, String code, String value, Date date, def cache) {
     if (value == null || value.equals("")) {
         filter = code + " is null"
     } else {
-        filter = code + "= '" + value + "'"
+        filter = code + " = '" + value + "'"
     }
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
@@ -790,11 +797,12 @@ def getRecordId(def ref_id, String code, String value, Date date, def cache) {
         cache[ref_id] = [:]
     }
     def refDataProvider = refBookFactory.getDataProvider(ref_id)
-    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    def records = refDataProvider.getRecords(date, null, filter, null)
     if (records.size() == 1) {
-        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
     }
+
 }
 
 /**

@@ -35,17 +35,17 @@ public class RefBookIncome102DaoTest {
         // Без фильтра
         PagingResult<Map<String, RefBookValue>> records = dao.getRecords(1, null, null, null);
         Assert.assertEquals(records.size(), 4);
-        Assert.assertEquals(records.getTotalRecordCount(), 4);
+        Assert.assertEquals(records.getTotalCount(), 4);
 
         // REPORT_PERIOD_ID = 1
         records = dao.getRecords(1, null, "REPORT_PERIOD_ID = 1", null);
         Assert.assertEquals(records.size(), 4);
-        Assert.assertEquals(records.getTotalRecordCount(), 4);
+        Assert.assertEquals(records.getTotalCount(), 4);
 
         // REPORT_PERIOD_ID = 1 AND DEPARTMENT_ID = 2
         records = dao.getRecords(1, null, "REPORT_PERIOD_ID = 1 AND DEPARTMENT_ID = 2", null);
         Assert.assertEquals(records.size(), 1);
-        Assert.assertEquals(records.getTotalRecordCount(), 1);
+        Assert.assertEquals(records.getTotalCount(), 1);
     }
 
     @Test

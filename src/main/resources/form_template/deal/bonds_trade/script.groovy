@@ -47,8 +47,10 @@ switch (formDataEvent) {
 // импорт из xls
     case FormDataEvent.IMPORT :
         importData()
-        calc()
-        logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+            logicCheck()
+        }
         break
 }
 
@@ -107,13 +109,12 @@ void logicCheck() {
 
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
-
+    def rowNum = 0
     for (row in dataRowHelper.getAllCached()) {
+        rowNum++
         if (row.getAlias() != null) {
             continue;
         }
-
-        def rowNum = row.getIndex()
 
         [
                 'rowNum', // № п/п
@@ -186,7 +187,7 @@ void logicCheck() {
             res = (transactionSumRub / bondCount).setScale(0, RoundingMode.HALF_UP)
         }
 
-        if (transactionSumRub != null || bondCount == null || priceOne != res) {
+        if (transactionSumRub == null || bondCount == null || priceOne != res) {
             def msg1 = row.getCell('priceOne').column.name
             def msg2 = row.getCell('transactionSumRub').column.name
             def msg3 = row.getCell('bondCount').column.name
@@ -374,25 +375,11 @@ def addData(def xml) {
         indexCell++
 
         // графа 3
-        def val1 = refBookFactory.getDataProvider(9L).getRecords(
-                new Date(),
-                null,
-                "NAME = '"+row.cell[indexCell].text()+"'",
-                null)
-        if (val1 != null && val1.size() == 1) {
-            newRow.contraName = val1.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        }
+        newRow.contraName = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
         indexCell++
 
         // графа 4
-        def val2 = refBookFactory.getDataProvider(14L).getRecords(
-                new Date(),
-                null,
-                "MODE = '"+row.cell[indexCell].text()+"'",
-                null)
-        if (val2 != null && val2.size() == 1) {
-            newRow.transactionMode = val2.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        }
+        newRow.transactionMode = getRecordId(14, 'MODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
         indexCell++
 
         // графа 5
@@ -409,14 +396,7 @@ def addData(def xml) {
         indexCell++
 
         // графа 9
-        def val3 = refBookFactory.getDataProvider(15L).getRecords(
-                new Date(),
-                null,
-                "CODE = '"+row.cell[indexCell].text()+"'",
-                null)
-        if (val3 != null && val3.size() == 1) {
-            newRow.currency = val3.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        }
+        newRow.currency = getRecordId(15, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
         indexCell++
 
         // графа 10
@@ -451,14 +431,7 @@ def addData(def xml) {
         indexCell++
 
         // графа 18
-        def val4 = refBookFactory.getDataProvider(16L).getRecords(
-                new Date(),
-                null,
-                "CODE = '"+row.cell[indexCell].text()+"'",
-                null)
-        if (val4 != null && val4.size() == 1) {
-            newRow.transactionType = val4.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        }
+        newRow.transactionType = getRecordId(16, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
 
         data.insert(newRow, indexRow - 3)
     }
@@ -583,5 +556,33 @@ def getDate(def value, int indexRow, int indexCell) {
         return format.parse(value)
     } catch (Exception e) {
         throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит недопустимый тип данных!")
+    }
+}
+
+
+/**
+ * Получить record_id элемента справочника.
+ *
+ * @param value
+ */
+def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
+    String filter;
+    if (value == null || value.equals("")) {
+        filter = code + " is null"
+    } else {
+        filter = code + "= '" + value + "'"
+    }
+    if (cache[ref_id] != null) {
+        if (cache[ref_id][filter] != null) return cache[ref_id][filter]
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null)
+    if (records.size() == 1) {
+        cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        return cache[ref_id][filter]
+    } else {
+        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
 }

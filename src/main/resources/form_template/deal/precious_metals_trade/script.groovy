@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 
 import java.text.SimpleDateFormat
 
@@ -44,16 +45,66 @@ switch (formDataEvent) {
 // Консолидация
     case FormDataEvent.COMPOSE:
         consolidation()
-        calc()
-        logicCheck()
-        break
-    case FormDataEvent.IMPORT:
-        importData()
         deleteAllStatic()
         calc()
         addAllStatic()
         logicCheck()
         break
+    case FormDataEvent.IMPORT:
+        importData()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            deleteAllStatic()
+            calc()
+            addAllStatic()
+            logicCheck()
+        }
+        break
+}
+
+def getAtributes() {
+    [
+            rowNum:             ['rowNum',              'гр. 1', '№ п/п'],
+            fullName:           ['fullName',            'гр. 2.1', 'Полное наименование с указанием ОПФ'],
+            interdependence:    ['interdependence',     'гр. 2.2', 'Признак взаимозависимости'],
+            inn:                ['inn',                 'гр. 3', 'ИНН/ КИО'],
+            countryName:        ['countryName',         'гр. 4.1', 'Наименование страны регистрации'],
+            countryCode:        ['countryCode',         'гр. 4.2', 'Код страны регистрации по классификатору ОКСМ'],
+            docNumber:          ['docNumber',           'гр. 5', 'Номер договора'],
+            docDate:            ['docDate',             'гр. 6', 'Дата договора'],
+            dealNumber:         ['dealNumber',          'гр. 7', 'Номер сделки'],
+            dealDate:           ['dealDate',            'гр. 8', 'Дата заключения сделки'],
+            dealFocus:          ['dealFocus',           'гр. 9', 'Направленность сделки'],
+            deliverySign:       ['deliverySign',        'гр. 10', 'Признак физической поставки драгоценного металла'],
+            metalName:          ['metalName',           'гр. 11', 'Наименование драгоценного металла'],
+            foreignDeal:        ['foreignDeal',         'гр. 12', 'Внешнеторговая сделка'],
+            countryCodeNumeric: ['countryCodeNumeric',  'гр. 13.1', 'Место отправки - Код страны по классификатору ОКСМ (цифровой)'],
+            regionCode:         ['regionCode',          'гр. 13.2', 'Место отправки - Регион (код)'],
+            city:               ['city',                'гр. 13.3', 'Место отправки - Город'],
+            locality:           ['locality',            'гр. 13.4', 'Место отправки - Населенный пункт (село, поселок и т.д.)'],
+            countryCodeNumeric2:['countryCodeNumeric2', 'гр. 14.1', 'Место совершения сделки - Код страны по классификатору ОКСМ (цифровой)'],
+            region2:            ['region2',             'гр. 14.2', 'Место совершения сделки - Регион (код)'],
+            city2:              ['city2',               'гр. 14.3', 'Место совершения сделки - Город'],
+            locality2:          ['locality2',           'гр. 14.4', 'Место совершения сделки - Населенный пункт (село, поселок и т.д.)'],
+            deliveryCode:       ['deliveryCode',        'гр. 15', 'Код условия поставки'],
+            count:              ['count',               'гр. 16', 'Количество'],
+            incomeSum:          ['incomeSum',           'гр. 17', 'Сумма доходов Банка по данным бухгалтерского учета, руб.'],
+            outcomeSum:         ['outcomeSum',          'гр. 18', 'Сумма расходов Банка по данным бухгалтерского учета, руб.'],
+            price:              ['price',               'гр. 19', 'Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.'],
+            total:              ['total',               'гр. 20', 'Итого стоимость без учета НДС, акцизов и пошлины, руб.'],
+            dealDoneDate:       ['dealDoneDate',        'гр. 21', 'Дата совершения сделки']
+    ]
+}
+
+// гр. 2.1, гр. 3, гр. 5, гр. 6, гр. 9, гр. 10, гр. 11, гр. 12, гр. 15
+def getGroupColumns(){
+    ['fullName', 'inn', 'docNumber', 'docDate', 'dealFocus',
+            'deliverySign', 'metalName', 'foreignDeal', 'deliveryCode']
+}
+
+def getEditColumns(){
+    ['fullName', 'interdependence', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealFocus', 'deliverySign', 'metalName',
+            'foreignDeal', 'countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2',
+            'locality2', 'deliveryCode', 'incomeSum', 'outcomeSum', 'dealDoneDate']
 }
 
 void deleteRow() {
@@ -67,9 +118,7 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = 0
-    ['fullName', 'interdependence', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealFocus', 'deliverySign', 'metalName',
-            'foreignDeal', 'countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2',
-            'locality2', 'deliveryCode', 'incomeSum', 'outcomeSum', 'dealDoneDate'].each {
+    getEditColumns().each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
@@ -114,12 +163,14 @@ void logicCheck() {
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
 
-    def index = 1;
-    for (row in dataRowHelper.getAllCached()) {
+    def dataRows = dataRowHelper.getAllCached()
+
+    def rowNum = 0;
+    for (row in dataRows) {
+        rowNum++
         if (row.getAlias() != null) {
             continue
         }
-        def rowNum = index++
         def docDateCell = row.getCell('docDate')
         def dealDateCell = row.getCell('dealDate')
         [
@@ -233,6 +284,66 @@ void logicCheck() {
         checkNSI(row, "deliverySign", "Признаки физической поставки", 18)
         checkNSI(row, "deliveryCode", "Коды условий поставки", 63)
         checkNSI(row, "dealFocus", "Направленности сделок", 20)
+    }
+
+    //Проверки подитоговых сумм
+    def testRows = dataRows.findAll{it -> it.getAlias() == null}
+    //добавляем итоговые строки для проверки
+    for (int i = 0; i < testRows.size(); i++) {
+        def testRow = testRows.get(i)
+        def nextRow = null
+
+        if (i < testRows.size() - 1) {
+            nextRow = testRows.get(i + 1)
+        }
+
+        if (testRow.getAlias() == null && nextRow == null || isDiffRow(testRow, nextRow, getGroupColumns())) {
+            def itogRow = calcItog(i, testRows)
+            testRows.add(++i, itogRow)
+        }
+    }
+
+    def testItogRows = testRows.findAll { it -> it.getAlias() != null }
+    def itogRows = dataRows.findAll { it -> it.getAlias() != null }
+
+    if (testItogRows.size() > itogRows.size()) {            //если удалили итоговые строки
+
+        for (int i = 0; i < dataRows.size(); i++) {
+            def row = dataRows[i]
+            def nextRow = dataRows[i + 1]
+            if (row.getAlias() == null) {
+                if (nextRow == null ||
+                        nextRow.getAlias() == null && isDiffRow(row, nextRow, getGroupColumns())) {
+                    logger.error("Отсутствует итоговое значение по группе «${getValuesByGroupColumn(row)}»")
+                }
+            }
+        }
+
+    } else if (testItogRows.size() < itogRows.size()) {     //если удалили все обычные строки, значит где то 2 подряд подитог.строки
+
+        for (int i = 0; i < dataRows.size(); i++) {
+            if (dataRows[i].getAlias() != null) {
+                if(i - 1 < -1 || dataRows[i - 1].getAlias() != null){
+                    logger.error("Лишняя итоговая строка " + dataRows[i].getIndex())
+                }
+            }
+        }
+    } else {
+        def price = getAtributes().price[2]
+        def total = getAtributes().total[2]
+
+        for (int i = 0; i < testItogRows.size(); i++) {
+            def testItogRow = testItogRows[i]
+            def realItogRow = itogRows[i]
+            int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
+            def rn = realItogRow.getIndex()
+            if (testItogRow.price != realItogRow.price) {
+                logger.error("Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе «${price}» в строке ${rn}")
+            }
+            if (testItogRow.total != realItogRow.total) {
+                logger.error("Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе «${total}» в строке ${rn}")
+            }
+        }
     }
 }
 
@@ -349,8 +460,7 @@ void sort() {
     def dataRows = dataRowHelper.getAllCached()
     dataRows.sort({ DataRow a, DataRow b ->
         // гр. 2.1, гр. 3, гр. 5, гр. 6, гр. 9, гр. 10, гр. 11, гр. 12, гр. 15
-        sortRow(['fullName', 'inn', 'docNumber', 'docDate', 'dealFocus',
-                'deliverySign', 'metalName', 'foreignDeal', 'deliveryCode'], a, b)
+        sortRow(getGroupColumns(), a, b)
     })
     dataRowHelper.save(dataRows);
 }
@@ -372,9 +482,7 @@ int sortRow(List<String> params, DataRow a, DataRow b) {
  * @param i
  * @return
  */
-def calcItog(int i) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+def calcItog(int i, def dataRows) {
     def newRow = formData.createDataRow()
 
     newRow.getCell('itog').colSpan = 26
@@ -417,22 +525,55 @@ void addAllStatic() {
             }
 
             if (row.getAlias() == null)
-                if (nextRow == null
-                        || row.fullName != nextRow.fullName
-                        || row.inn != nextRow.inn
-                        || row.docNumber != nextRow.docNumber
-                        || row.docDate != nextRow.docDate
-                        || row.dealFocus != nextRow.dealFocus
-                        || row.deliverySign != nextRow.deliverySign
-                        || row.metalName != nextRow.metalName
-                        || row.foreignDeal != nextRow.foreignDeal
-                        || row.deliveryCode != nextRow.deliveryCode) {
-
-                    def itogRow = calcItog(i)
+                if (nextRow == null || isDiffRow(row, nextRow, getGroupColumns())) {
+                    def itogRow = calcItog(i, dataRows)
                     dataRowHelper.insert(itogRow, ++i + 1)
                 }
         }
     }
+}
+
+/*
+    Возвращает строку со значениями полей строки по которым идет группировка
+    ['fullName', 'inn', 'docNumber', 'docDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal', 'deliveryCode']
+ */
+def getValuesByGroupColumn(DataRow row) {
+    def sep = ", "
+    StringBuilder builder = new StringBuilder()
+    builder.append(getRefBookValue(9, row.fullName, 'NAME')).append(sep)
+    builder.append(row.inn).append(sep)
+    builder.append(row.docNumber).append(sep)
+    builder.append(row.docDate).append(sep)
+    builder.append(getRefBookValue(20, row.dealFocus, 'DIRECTION')).append(sep)
+    builder.append(getRefBookValue(18, row.deliverySign, 'SIGN')).append(sep)
+    builder.append(getRefBookValue(17, row.metalName, 'INNER_CODE')).append(sep)
+    builder.append(getRefBookValue(38, row.foreignDeal, 'VALUE')).append(sep)
+    builder.append(getRefBookValue(63, row.deliveryCode, 'STRCODE'))
+    builder.toString()
+}
+
+def getRefBookValue(int id, def cell, def alias) {
+    def map
+    try {
+        map = refBookService.getRecordData(id, cell)
+    } catch (Exception e) {
+        map = null
+    }
+    return map == null ? 'null' : map.get(alias).stringValue
+}
+
+/**
+ * проверяет разные ли строки по значениям полей группировки
+ * @param a первая  строка
+ * @param b вторая строка
+ * @return true - разные, false = одинаковые
+ */
+boolean isDiffRow(DataRow row, DataRow nextRow, def groupColumns) {
+    def rez = false
+    groupColumns.each { def n ->
+        rez = rez || (row.get(n) != nextRow.get(n))
+    }
+    return rez
 }
 
 /**
@@ -617,9 +758,7 @@ def addData(def xml, int headRowCount) {
         }
 
         def newRow = formData.createDataRow()
-        ['fullName', 'interdependence', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealFocus', 'deliverySign', 'metalName',
-                'foreignDeal', 'countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2',
-                'locality2', 'deliveryCode', 'incomeSum', 'outcomeSum', 'dealDoneDate'].each {
+        getEditColumns().each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
@@ -681,7 +820,7 @@ def addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 13.1
-        newRow.countryCodeNumeric = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.countryCodeNumeric = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // графа 13.2
@@ -689,7 +828,7 @@ def addData(def xml, int headRowCount) {
         if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
-        newRow.regionCode = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell)
+        newRow.regionCode = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell, false)
         indexCell++
 
         // графа 13.3
@@ -701,7 +840,7 @@ def addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 14.1
-        newRow.countryCodeNumeric2 = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.countryCodeNumeric2 = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // графа 14.2
@@ -709,7 +848,7 @@ def addData(def xml, int headRowCount) {
         if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
-        newRow.region2 = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell)
+        newRow.region2 = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell, false)
         indexCell++
 
         // графа 14.3
@@ -721,7 +860,7 @@ def addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 15
-        newRow.deliveryCode = getRecordId(63, 'STRCODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.deliveryCode = getRecordId(63, 'STRCODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // графа 16
@@ -778,21 +917,23 @@ def getNumber(def value, int indexRow, int indexCell) {
  *
  * @param value
  */
-def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
-    String filter = code + "= '" + value + "'"
+def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory=true) {
+    String filter = alias + "= '" + value + "'"
+    if (value=='') filter = "$alias is null"
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
     } else {
         cache[ref_id] = [:]
     }
     def refDataProvider = refBookFactory.getDataProvider(ref_id)
-    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    def records = refDataProvider.getRecords(date, null, filter, null)
     if (records.size() == 1) {
-        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
-    } else {
+    } else if (mandatory || value!='') {
         throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
+    return null
 }
 
 /**

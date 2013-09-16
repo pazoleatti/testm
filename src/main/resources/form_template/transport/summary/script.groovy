@@ -395,22 +395,6 @@ def fillForm() {
     data.getAllCached().each { row ->
         // получение региона по ОКАТО
         def region = getRegionByOkatoOrg(row.okato)
-        // получение параметров региона
-        if (row.taxBenefitCode){
-            // датапровайдер для справочника "Параметры налоговых льгот"
-            def  refDataProvideTaxBenefit = refBookFactory.getDataProvider(7)
-            // запрос по выборке данных из справочника
-            def query = "TAX_BENEFIT_ID = "+row.taxBenefitCode+" and DICT_REGION_ID = "+region.record_id
-            def records = refDataProvideTaxBenefit.getRecords(new Date(), null, query, null).getRecords()
-
-            if (records.size() == 0){
-                logger.error("Ошибка при получении параметров налоговых льгот. Строка: "+row.getIndex())
-                return;
-            } else{
-                reducingPerc = records.get(0).percent
-                loweringRates = records.get(0).rate
-            }
-        }
 
         /*
          * Графа 1 (№ пп) - Установка номера строки
@@ -523,7 +507,8 @@ def fillForm() {
          * Скрипт для вычисления значения столбца "сумма исчисления налога".
          */
         if (row.taxBase != null && row.coef362 != null && row.taxRate != null) {
-            row.calculatedTaxSum = (row.taxBase * row.coef362 * row.taxRate).setScale(0, BigDecimal.ROUND_HALF_UP)
+            def taxRate = getRefBookValue(41, row.taxRate, "VALUE")
+            row.calculatedTaxSum = (row.taxBase * row.coef362 * taxRate.numberValue).setScale(0, BigDecimal.ROUND_HALF_UP)
         } else {
             row.calculatedTaxSum = null
 
@@ -568,14 +553,37 @@ def fillForm() {
          */
         if (row.taxBenefitCode != null) {
             def taxBenefitCode = getRefBookValue(6, row.taxBenefitCode, 'CODE').stringValue
-            if (taxBenefitCode == '20210' || taxBenefitCode == '30200') {
-                row.benefitSum = (row.taxBase * row.coefKl * row.taxRate).setScale(0, BigDecimal.ROUND_HALF_UP)
-            } else if (taxBenefitCode == '20220') {
-                row.benefitSum = round(row.taxBase * row.taxRate * row.coefKl * reducingPerc / 100, 0)
-            } else if (taxBenefitCode == '20230') {
-                row.benefitSum = round(row.coefKl * row.taxRate * (row.taxRate - loweringRates), 0)
-            } else {
-                row.benefitSum = 0
+            // получение параметров региона
+            if (taxBenefitCode != '20210' && taxBenefitCode != '30200') {
+                if (row.taxBenefitCode){
+                    // датапровайдер для справочника "Параметры налоговых льгот"
+                    def  refDataProvideTaxBenefit = refBookFactory.getDataProvider(7)
+                    // запрос по выборке данных из справочника
+                    def query = "TAX_BENEFIT_ID = "+row.taxBenefitCode+" and DICT_REGION_ID = "+region.record_id
+                    def records = refDataProvideTaxBenefit.getRecords(new Date(), null, query, null).getRecords()
+
+                    if (records.size() == 0){
+                        logger.error("Ошибка при получении параметров налоговых льгот. Строка: "+row.getIndex())
+                        return;
+                    } else{
+                        reducingPerc = records.get(0).percent
+                        loweringRates = records.get(0).rate
+                    }
+                }
+            }
+
+
+            if (row.taxRate != null){
+                def taxRate = getRefBookValue(41, row.taxRate, "VALUE").numberValue
+                if (taxBenefitCode == '20210' || taxBenefitCode == '30200') {
+                    row.benefitSum = (row.taxBase * row.coefKl * taxRate).setScale(0, BigDecimal.ROUND_HALF_UP)
+                } else if (taxBenefitCode == '20220') {
+                    row.benefitSum = round(row.taxBase * taxRate * row.coefKl * reducingPerc / 100, 0)
+                } else if (taxBenefitCode == '20230') {
+                    row.benefitSum = round(row.coefKl * taxRate * (taxRate - loweringRates), 0)
+                } else {
+                    row.benefitSum = 0
+                }
             }
         }
 
@@ -829,7 +837,7 @@ def consolidation(){
     // очистить форму
     def dataRowHelper = getData(formData)
     List dataRows = new ArrayList<DataRow<Cell>>()
-    Map<String, DataRow<Cell>> sourses202 = new HashMap()
+    List<DataRow<Cell>> sourses202 = new ArrayList()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
@@ -839,25 +847,25 @@ def consolidation(){
             // формы типа 202 собираем, проверяем на пересечение, для дальнейшего использования
             if (source.formType.id == 202){
                 sourceDataRows.each{ sRow ->
-                    //КОД ОКАТО, Идентификационный номер, Регистрационный знак
-                    String key = getConsolidationLinkKey(sRow.codeOKATO, sRow.identNumber, sRow.regNumber)
-
-                    /**
+                     /**
                      * Если нашлись две строки с одинаковыми данными то ее не добавляем
                      * в общий список, и проверим остальные поля
                      */
-                    if (sourses202.containsValue(key)){
-                        DataRow<Cell> row = sourses202.get(key)
+                    def contains = sourses202.find{ el ->
+                        el.codeOKATO.equals(sRow.codeOKATO) && el.identNumber.equals(sRow.identNumber) && el.regNumber.equals(sRow.regNumber)
+                    }
+                    if (contains != null){
+                        DataRow<Cell> row = contains
                         // если поля совпадают то ругаемся и убираем текущую совпавшую с коллекции
                         if (row.taxBenefitCode == sRow.taxBenefitCode &&
-                            row.benefitStartDate.equal(sRow.benefitStartDate) &&
-                            row.benefitEndDate.equal(sRow.benefitEndDate)){
+                            row.benefitStartDate.equals(sRow.benefitStartDate) &&
+                            row.benefitEndDate.equals(sRow.benefitEndDate)){
 
                             logger.warn("Обнаружены несколько разных строк для Код Окато="+sRow.codeOKATO+",Идентификационный номер = "+sRow.identNumber+", Регистрационный знак="+sRow.regNumber+". Строки : "+sRow.getIndex()+", "+row.getIndex())
-                            sourses202.remove(key)
+                            sourses202.remove(sRow)
                         }
                     } else{
-                        sourses202.put(key, sRow)
+                        sourses202.add(sRow)
                     }
                 }
             } else{
@@ -1029,41 +1037,43 @@ def consolidation(){
 
         }
 
-        /**
-         * Расставим соответствия для формы с 202
-         */
+    }
+
+    /**
+     * Расставим соответствия для формы с 202
+     */
+    int cnt = 0
+    sourses202.each{ v ->
+        cnt++
+        // признак подстаноки текущей строки в сводную
+        boolean use = false
+        // пробежимся по форме расставим данные для текущей 202 строки
         dataRows.each{ row ->
-            String key = getConsolidationLinkKey(row.okato, row.vi, row.regNumber)
-            if (sourses202.containsKey(key)){
-                DataRow<Cell> row202 = sourses202.get(key)
-                // 16=графа 5 (год налоговой льготы),графа 17=графа6, графа 18=графа 7.
-                row.taxBenefitCode = row202.taxBenefitCode
-                row.benefitStartDate = row202.benefitStartDate
-                row.benefitEndDate = row202.benefitEndDate
-            } else{
-                def ref = refBookFactory.getDataProvider(30)
-                def records = ref.getRecords(new Date(), null, "ID = "+formData.departmentId, null)
+            // поиск
+            if (v.codeOKATO.equals(row.okato)
+                    && v.identNumber.equals(row.vi)
+                    && v.regNumber.equals(row.regNumber)){
 
-                String name
-                if (records.size() == 1){
-                    name = records.get(0).NAME;
-                }
-
-
-                logger.warn("Для строки "+row.getIndex()+" "+name+" \"Сведения о транспортных средствах, по которым уплачивается транспортный налог\" не найдены соответствующие строки в  формах \"Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог\" .")
+                use = true
+                row.taxBenefitCode = v.taxBenefitCode
+                row.benefitStartDate = v.benefitStartDate
+                row.benefitEndDate = v.benefitEndDate
             }
+        }
+
+        // если значения этой строки 202 формы не подставлялись в сводную то ругаемся
+        if (!use){
+            def ref = refBookFactory.getDataProvider(30)
+            def records = ref.getRecords(new Date(), null, "ID = "+formData.departmentId, null)
+
+            String name
+            if (records.size() == 1){
+                name = records.get(0).NAME;
+            }
+
+            logger.warn("Для строки "+cnt+" "+name+" \"Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог\"  не найдены соответствующие ТС  в  формах \"Сведения о транспортных средствах, по которым уплачивается транспортный налог\"")
         }
     }
     dataRowHelper.save(dataRows)
-}
-
-/**
- *
- * @param okato
- * @param identNumber
- * @param regNumber
- * @return
- */
-String getConsolidationLinkKey(def okato, def identNumber, def regNumber){
-    return "key"+okato+"-"+identNumber+"-"+regNumber
+    dataRowHelper.dropCache()
 }

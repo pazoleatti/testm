@@ -864,9 +864,9 @@ def addData(def xml) {
     def tmp
     def index
     def date = new Date()
-    def refDataProvider = refBookFactory.getDataProvider(15)
     def data = getData(formData)
     data.clear()
+    def cache = [:]
 
     for (def row : xml.exemplar.table.detail.record) {
         index = 0
@@ -882,12 +882,8 @@ def addData(def xml) {
 
         // графа 3 - справочник 15 "Общероссийский классификатор валют"
         tmp = null
-        if (row.field[index].text() != null &&
-                row.field[index].text().trim() != '') {
-            def records = refDataProvider.getRecords(date, null, "CODE = '" + row.field[index].text() + "'", null);
-            if (records != null && !records.getRecords().isEmpty()) {
-                tmp = records.getRecords().get(0).get('record_id').getNumberValue()
-            }
+        if (row.field[index].text() != null && row.field[index].text().trim() != '') {
+            tmp = getRecordId(15, 'CODE', row.field[index].text(), date, cache)
         }
         newRow.currencyCode = tmp
         index++
@@ -981,8 +977,6 @@ def getNumber(def value) {
     if ("".equals(tmp)) {
         return null
     }
-    // поменять запятую на точку и убрать пробелы
-    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
     return new BigDecimal(tmp)
 }
 
@@ -1036,4 +1030,33 @@ def getCalcTotalRow() {
         totalRow.getCell(alias).setValue(getSum(alias))
     }
     return totalRow
+}
+
+/**
+ * Получить id справочника.
+ *
+ * @param ref_id идентификатор справончика
+ * @param code атрибут справочника
+ * @param value значение для поиска
+ * @param date дата актуальности
+ * @param cache кеш
+ * @return
+ */
+def getRecordId(def ref_id, String code, def value, Date date, def cache) {
+    String filter = code + " = '" + value + "'"
+    if (cache[ref_id]!=null) {
+        if (cache[ref_id][filter] != null) {
+            return cache[ref_id][filter]
+        }
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    if (records.size() == 1){
+        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        return cache[ref_id][filter]
+    }
+    logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
+    return null
 }

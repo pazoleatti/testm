@@ -94,11 +94,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     new AuditRowMapper());
         }
 
-		PagingResult<LogSystemSearchResultItem> result = new PagingResult<LogSystemSearchResultItem>();
-		result.setRecords(records);
-		result.setTotalRecordCount(getCount(filter));
-
-		return result;
+		return new PagingResult<LogSystemSearchResultItem>(records, getCount(filter));
 	}
 
 	@Override

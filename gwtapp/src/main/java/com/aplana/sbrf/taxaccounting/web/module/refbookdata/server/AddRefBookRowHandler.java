@@ -29,7 +29,7 @@ public class AddRefBookRowHandler extends AbstractActionHandler<AddRefBookRowAct
 	@Override
 	public AddRefBookRowResult execute(AddRefBookRowAction action, ExecutionContext executionContext) throws ActionException {
 		RefBookDataProvider refBookDataProvider = refBookFactory
-				.getDataProvider(action.getRefbookId());
+				.getDataProvider(action.getRefBookId());
 
 
 		List<Map<String, RefBookValue>> valuesToSaveList = new ArrayList<Map<String, RefBookValue>>();
@@ -42,7 +42,7 @@ public class AddRefBookRowHandler extends AbstractActionHandler<AddRefBookRowAct
 			valuesToSaveList.add(valueToSave);
 		}
 
-		refBookDataProvider.insertRecords(new Date(), valuesToSaveList);
+		refBookDataProvider.insertRecords(action.getRelevanceDate(), valuesToSaveList);
 
 		return new AddRefBookRowResult();
 	}

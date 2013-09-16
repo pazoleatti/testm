@@ -126,7 +126,7 @@ public class FormDataSearchDaoTest {
 			pageParams.setCount(requestedCount);
 			res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.ID, true, pageParams);
 			assertEquals(requestedCount, res.size());
-			assertEquals(TOTAL_RECORDS_COUNT, res.getTotalRecordCount());
+			assertEquals(TOTAL_RECORDS_COUNT, res.getTotalCount());
 		}
 
 	}

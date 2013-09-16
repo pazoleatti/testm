@@ -48,7 +48,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	public void init(final Long refbookId) {
 
 		GetRefBookAttributesAction action = new GetRefBookAttributesAction();
-		action.setRefbookId(refbookId);
+		action.setRefBookId(refbookId);
 		dispatchAsync.execute(action,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<GetRefBookAttributesResult>() {
@@ -58,6 +58,14 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 								currentRefBookId = refbookId;
 							}
 						}, this));
+	}
+
+	// TODO: отрефакторить, чтобы дата была общая с com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataView.getRelevanceDate() (Marat Fayzullin 2013-09-15)
+	public Date getRelevanceDate() {
+		if (relevanceDate == null) {
+			relevanceDate = new Date();
+		}
+		return relevanceDate;
 	}
 
 	public void setRelevanceDate(Date relevanceDate) {
@@ -103,10 +111,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		getView().setSaveButtonEnabled(false);
 		if (currentRecordId == null) {
 			AddRefBookRowAction action = new AddRefBookRowAction();
-			action.setRefbookId(currentRefBookId);
+			action.setRefBookId(currentRefBookId);
 			List<Map<String, RefBookValueSerializable>> valuesToAdd = new ArrayList<Map<String, RefBookValueSerializable>>();
 			valuesToAdd.add(getView().getFieldsValues());
 			action.setRecords(valuesToAdd);
+			action.setRelevanceDate(getRelevanceDate());
 			dispatchAsync.execute(action,
 					CallbackUtils.defaultCallback(
 							new AbstractCallback<AddRefBookRowResult>() {
@@ -119,10 +128,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 							}, this));
 		} else {
 			SaveRefBookRowAction action = new SaveRefBookRowAction();
-			action.setRefbookId(currentRefBookId);
+			action.setRefBookId(currentRefBookId);
 			action.setRecordId(currentRecordId);
 			action.setValueToSave(getView().getFieldsValues());
-			action.setRelevanceDate(relevanceDate);
+			action.setRelevanceDate(getRelevanceDate());
 			dispatchAsync.execute(action,
 					CallbackUtils.defaultCallback(
 							new AbstractCallback<SaveRefBookRowResult>() {

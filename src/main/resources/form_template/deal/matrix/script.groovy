@@ -1079,27 +1079,36 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             row.organName = srcRow.fullName
             break
     }
+    if (row.organName != null) {
+        // Графа 3
+        /**
+         * Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
+         * «Организации – участники контролируемых сделок» атрибут «Резидент оффшорной зоны» = 1,
+         * то заполняется значением «0». В ином случае заполняется значением «1».
+         */
+        def val = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
+        row.f121 = val.OFFSHORE.numberValue == 1 ? recNoId : recYesId
 
-    // Графа 3
-    // TODO Вопрос по атрибуту
-    // def val2 = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
-    row.f121 = recYesId
+        // Графа 5 (логига, обратная графе 3)
+        row.f123 = row.f121 == recYesId ? recNoId : recYesId
 
-    // Графа 5 (логига, обратная графе 3)
-    row.f123 = row.f121 == recYesId ? recNoId : recYesId
+        // Графа 7 (та же логига, что у графы 3)
+        row.f131 = row.f121
 
-    // Графа 7 (та же логига, что у графы 3)
-    row.f131 = row.f121
+        // Графа 8 (та же логига, что у графы 3, но вместо "Да" не заполняется)
+        row.f132 = row.f121 == recNoId ? recNoId : null
 
-    // Графа 8 (та же логига, что у графы 3, но вместо "Да" не заполняется)
-    row.f132 = row.f121 == recNoId ? recNoId : null
+        // Графа 9 (та же логига, что у графы 3)
+        row.f133 = row.f121
 
-    // Графа 9 (та же логига, что у графы 3)
-    row.f133 = row.f121
-
-    // Графа 10
-    // TODO Вопрос по атрибуту
-    row.f134 = recYesId
+        // Графа 10
+        /**
+         * Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
+         * «Организации – участники контролируемых сделок» атрибут «Освобождена от налога на прибыль либо является резидентом Сколково» = 1,
+         * то заполняется значением «1».    В ином случае не Не заполняется.
+         */
+        row.f134 = val.SKOLKOVO.numberValue == 1 ? recYesId : null
+    }
 
     // Графа 11
     if (row.dealDoneDate != null || row.organName != null) {

@@ -23,7 +23,7 @@ public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetName
 
 	@Override
 	public GetNameResult execute(GetNameAction action, ExecutionContext executionContext) throws ActionException {
-		String name = refBookFactory.get(action.getRefbookId()).getName();
+		String name = refBookFactory.get(action.getRefBookId()).getName();
 		GetNameResult result = new GetNameResult();
 		result.setName(name);
 		return result;

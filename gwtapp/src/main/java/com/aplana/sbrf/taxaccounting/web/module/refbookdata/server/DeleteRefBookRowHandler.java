@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP')")
 public class DeleteRefBookRowHandler extends AbstractActionHandler<DeleteRefBookRowAction, DeleteRefBookRowResult> {
@@ -27,9 +25,9 @@ public class DeleteRefBookRowHandler extends AbstractActionHandler<DeleteRefBook
 	@Override
 	public DeleteRefBookRowResult execute(DeleteRefBookRowAction action, ExecutionContext executionContext) throws ActionException {
 		RefBookDataProvider refBookDataProvider = refBookFactory
-				.getDataProvider(action.getRefbookId());
+				.getDataProvider(action.getRefBookId());
 
-		refBookDataProvider.deleteRecords(new Date(), action.getRecordsId());
+		refBookDataProvider.deleteRecords(action.getRelevanceDate(), action.getRecordsId());
 		return new DeleteRefBookRowResult();
 	}
 
