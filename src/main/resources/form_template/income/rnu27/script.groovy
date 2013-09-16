@@ -1028,6 +1028,7 @@ def addData(def xml) {
     def cache = [:]
     def data = getData(formData)
     data.clear()
+    def newRows = []
 
     for (def row : xml.row) {
         def newRow = getNewRow()
@@ -1100,8 +1101,9 @@ def addData(def xml) {
         // графа 17
         newRow.recovery = getNumber(row.cell[indexCell].text())
 
-        insert(data, newRow)
+        newRows.add(newRow)
     }
+    data.insert(newRows, 1)
 
     if (xml.rowTotal.size() == 1) {
         def row = xml.rowTotal[0]
