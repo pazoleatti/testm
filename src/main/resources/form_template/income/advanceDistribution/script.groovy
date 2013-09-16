@@ -829,7 +829,7 @@ def getTaxBase() {
             rnu7Field10Sum = rnu7Field10Sum ?: 0
 
             // 6
-            BigDecimal rnu7Field12Accepted = (BigDecimal)(row.getCell('rnu7Field10Sum').hasValueOwner() ? row.getCell('rnu7Field10Sum').getValueOwner().value : row.getCell('rnu7Field10Sum').value)
+            BigDecimal rnu7Field12Accepted = (BigDecimal)(row.getCell('rnu7Field12Accepted').hasValueOwner() ? row.getCell('rnu7Field12Accepted').getValueOwner().value : row.getCell('rnu7Field12Accepted').value)
             rnu7Field12Accepted = rnu7Field12Accepted ?: 0
 
             //k24
