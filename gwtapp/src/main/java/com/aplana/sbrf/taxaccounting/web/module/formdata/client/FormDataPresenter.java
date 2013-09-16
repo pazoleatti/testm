@@ -303,6 +303,7 @@ public class FormDataPresenter extends
 
 
 	private void goMove(final WorkflowMove wfMove){
+		LogCleanEvent.fire(this);
 		GoMoveAction action = new GoMoveAction();
 		action.setFormDataId(formData.getId());
 		action.setMove(wfMove);
@@ -310,6 +311,7 @@ public class FormDataPresenter extends
 				.defaultCallback(new AbstractCallback<GoMoveResult>() {
 					@Override
 					public void onSuccess(GoMoveResult result) {
+						LogAddEvent.fire(FormDataPresenter.this, result.getLogEntries());
 						revealFormData(true);
 					}
 				}, this));
@@ -371,9 +373,10 @@ public class FormDataPresenter extends
 		                                result.getTaxPeriodStartDate(), result.getTaxPeriodEndDate());
                                 // Если период для ввода остатков, то делаем все ячейки редактируемыми
                                 
-                                if (!readOnlyMode && result.isBalancePeriod()) {
-                                    forceEditMode = true;
-                                }
+
+                                // В периоде ввода остатков форма должна быть в режиме супер редактирования
+                                // Он должен включаться в фабрике колонок если readOnly = false;
+                                forceEditMode = result.isBalancePeriod();
                                 
                                 getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
                                         + String.valueOf(result.getFormData().getFormType().getTaxType()));

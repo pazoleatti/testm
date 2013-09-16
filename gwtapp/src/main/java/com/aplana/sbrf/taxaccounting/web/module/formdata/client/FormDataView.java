@@ -177,7 +177,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		formDataTable.setColumnWidth(indexColumn, "3em");
 
 		factory.setReadOnly(readOnly);
-		factory.setEditOnly(forceEditMode);
+		factory.setSuperEditMode(forceEditMode);
+		
 		boolean hideCheckedColumnsCheckbox = true;
 		for (Column col : columnsData) {
 			if (col.isChecking()) {
