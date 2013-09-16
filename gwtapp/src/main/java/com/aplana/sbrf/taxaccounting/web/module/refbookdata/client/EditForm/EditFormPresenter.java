@@ -39,6 +39,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException;
 		void setSaveButtonEnabled(boolean enabled);
 		void setCancelButtonEnabled(boolean enabled);
+		void setEnabled(boolean enabled);
 	}
 
 	@Inject
@@ -60,6 +61,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 							public void onSuccess(GetRefBookAttributesResult result) {
 								getView().createInputFields(result.getAttributes());
 								currentRefBookId = refbookId;
+								setEnabled(false);
 							}
 						}, this));
 	}
@@ -93,6 +95,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		if (refBookRecordId == null) {
 			currentRecordId = null;
 			getView().fillInputFields(null);
+			setEnabled(true);
 			return;
 		}
 		GetRefBookRecordAction action = new GetRefBookRecordAction();
@@ -105,6 +108,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 							public void onSuccess(GetRefBookRecordResult result) {
 								getView().fillInputFields(result.getRecord());
 								currentRecordId = refBookRecordId;
+								setEnabled(true);
 							}
 						}, this));
 	}
@@ -112,8 +116,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	@Override
 	public void onSaveClicked() {
 		try {
-			getView().setCancelButtonEnabled(false);
-			getView().setSaveButtonEnabled(false);
 			if (currentRecordId == null) {
 				AddRefBookRowAction action = new AddRefBookRowAction();
 				action.setRefBookId(currentRefBookId);
@@ -128,6 +130,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 									public void onSuccess(AddRefBookRowResult result) {
 										isFormModified = false;
 										getView().fillInputFields(null);
+										setEnabled(false);
 										UpdateForm.fire(EditFormPresenter.this, true);
 									}
 							}, this));
@@ -143,6 +146,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 										@Override
 										public void onSuccess(SaveRefBookRowResult result) {
 											isFormModified = false;
+											getView().fillInputFields(null);
+											setEnabled(false);
 											UpdateForm.fire(EditFormPresenter.this, true);
 										}
 								}, this));
@@ -159,15 +164,15 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	@Override
 	public void onCancelClicked() {
 		isFormModified = false;
-		getView().setCancelButtonEnabled(false);
-		getView().setSaveButtonEnabled(false);
 		showRecord(currentRecordId);
 	}
 
 	@Override
 	public void valueChanged() {
-		getView().setCancelButtonEnabled(true);
-		getView().setSaveButtonEnabled(true);
 		isFormModified = true;
+	}
+
+	public void setEnabled(boolean enabled) {
+		getView().setEnabled(enabled);
 	}
 }

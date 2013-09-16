@@ -180,6 +180,17 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		cancel.setEnabled(enabled);
 	}
 
+	@Override
+	public void setEnabled(boolean enabled) {
+		for (HasValue entry : widgets.values()) {
+			if (entry instanceof HasEnabled) {
+				((HasEnabled) entry).setEnabled(enabled);
+			}
+		}
+		save.setEnabled(enabled);
+		cancel.setEnabled(enabled);
+	}
+
 	@UiHandler("save")
 	void saveButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
