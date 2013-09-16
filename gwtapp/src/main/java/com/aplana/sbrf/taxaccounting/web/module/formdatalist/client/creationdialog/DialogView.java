@@ -78,7 +78,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	}
 
 	@Override
-	public void setAvalibleDepartments(List<Department> list, Set<Integer> availableValues){
+	public void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues){
 		departmentPicker.setAvalibleValues(list, availableValues);
 	}
 
@@ -94,12 +94,12 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	}
 
 	@Override
-	public void setKindList(List<FormDataKind> list) {
+	public void setAcceptableFormKindList(List<FormDataKind> list) {
 		formKind.setAcceptableValues(list);
 	}
 
 	@Override
-	public void setFormTypeList(List<FormType> list) {
+	public void setAcceptableFormTypeList(List<FormType> list) {
 		formType.setAcceptableValues(list);
 	}
 
@@ -134,7 +134,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	}
 
     @Override
-	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
+	public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods) {
 		reportPeriodPicker.setPeriods(reportPeriods);
 	}
 

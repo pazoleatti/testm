@@ -173,7 +173,7 @@ void logicCheck() {
         checkNSI(row, "dealPriceSign", YES_NO, 38)
 
         //Проверка наличия элемента справочника "Коды наименования сделки" (графа 13)
-        checkNSI(row, "similarDealGroup", "Коды наименования сделки", 67)
+        checkNSI(row, "dealNameCode", "Коды наименования сделки", 67)
 
         // 3. Проверка наличия элемента справочника «Коды сторон сделки» (графа 14)
         checkNSI(row, "taxpayerSideCode", "Коды стороны сделки", 65)

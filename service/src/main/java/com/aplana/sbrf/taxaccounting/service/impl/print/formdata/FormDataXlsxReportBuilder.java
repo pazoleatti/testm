@@ -220,7 +220,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
         sb.delete(0, sb.length());
 
         //Fill report name
-        createCellByRange(XlsxReportMetadata.RANGE_REPORT_NAME, null, 0);
+        createCellByRange(XlsxReportMetadata.RANGE_REPORT_NAME, formTemplate.getFullName(), 0);
 
         //Fill code
         StringTokenizer sToK = new StringTokenizer(formTemplate.getCode(), XlsxReportMetadata.REPORT_DELIMITER);//This needed because we can have not only one delimiter
@@ -232,7 +232,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 
         //Fill period
         if(data.getFormType().getTaxType() == TaxType.TRANSPORT || data.getFormType().getTaxType() == TaxType.INCOME)
-            sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName()));
+            sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName(), String.valueOf(reportPeriod.getYear())));
         createCellByRange(XlsxReportMetadata.RANGE_REPORT_PERIOD, sb.toString(), 0);
     }
 

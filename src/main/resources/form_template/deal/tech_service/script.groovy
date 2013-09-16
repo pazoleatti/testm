@@ -83,7 +83,6 @@ void addRow() {
             'city',
             'settlement',
             'count',
-            'price',
             'transactionDate'
     ].each {
         row.getCell(it).editable = true
