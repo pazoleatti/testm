@@ -195,6 +195,8 @@ public class FormDataServiceImpl implements FormDataService {
             throw new ServiceLoggerException(
                     "Есть критические ошибки при выполнения скрипта",
                     logger.getEntries());
+        }  else {
+            logger.info("Данные загружены");
         }
         
         logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
