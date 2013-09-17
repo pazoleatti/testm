@@ -83,6 +83,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			hasValue.addValueChangeHandler(new ValueChangeHandler() {
 				@Override
 				public void onValueChange(ValueChangeEvent event) {
+					if (event.getSource() instanceof UIObject) {
+						((UIObject) event.getSource()).setTitle(event.getValue().toString());
+					}
 					if (getUiHandlers() != null) {
 						getUiHandlers().valueChanged();
 					}
@@ -101,6 +104,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		if (record == null) {
 			for (HasValue w : widgets.values()) {
 				w.setValue(null);
+				if (w.getValue() instanceof Widget) {
+					((Widget) w.getValue()).setTitle("");
+				}
 			}
 		} else {
 			for (Map.Entry<RefBookAttribute, HasValue> w : widgets.entrySet()) {
@@ -120,6 +126,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					}
                 } else {
 					w.getValue().setValue(recordValue.getValue());
+				}
+				if (w.getValue() instanceof Widget) {
+					((Widget) w.getValue()).setTitle(w.getValue().getValue().toString());
 				}
 			}
 		}

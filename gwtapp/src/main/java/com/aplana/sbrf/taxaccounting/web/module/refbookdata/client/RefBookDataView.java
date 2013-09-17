@@ -108,6 +108,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	public void updateTable() {
 		Range range = new Range(pager.getPageStart(), pager.getPageSize());
 		refbookDataTable.setVisibleRangeAndClearData(range, true);
+		selectionModel.clear();
 	}
 
 	@Override
@@ -153,6 +154,9 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
 	@UiHandler("deleteRow")
 	void deleteRowButtonClicked(ClickEvent event) {
+		if (selectionModel.getSelectedObject() == null) {
+			return;
+		}
 		boolean confirm = Window.confirm("Удалить выбранную запись справочника?");
 		if (confirm) {
 			if (getUiHandlers() != null) {

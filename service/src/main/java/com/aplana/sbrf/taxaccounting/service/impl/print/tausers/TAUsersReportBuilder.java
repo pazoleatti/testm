@@ -22,7 +22,7 @@ public class TAUsersReportBuilder extends AbstractXlsxReportBuilder {
 
     private List<TAUserFull> taUserList;
 
-    private int rowNumber = 5;
+    private int rowNumber = 3;
     private int cellNumber = 0;
 
     private static final String FIRST_COLUMN = "Логин";
@@ -87,12 +87,11 @@ public class TAUsersReportBuilder extends AbstractXlsxReportBuilder {
         font.setBoldweight(Font.BOLDWEIGHT_BOLD);
         cs.setFont(font);
 
-        Row row = sheet.createRow(rowNumber);
-        Cell cell = row.createCell(cellNumber++);
+        Row row = sheet.createRow(0);
+        Cell cell = row.createCell(3);
         cell.setCellValue("Пользователи АС Учет налогов");
         cell.setCellStyle(cs);
 
-        cellNumber = 0;
         rowNumber = sheet.getLastRowNum() + 2;
     }
 

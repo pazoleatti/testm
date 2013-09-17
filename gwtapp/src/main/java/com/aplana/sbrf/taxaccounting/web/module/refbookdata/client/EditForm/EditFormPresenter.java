@@ -61,6 +61,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 							public void onSuccess(GetRefBookAttributesResult result) {
 								getView().createInputFields(result.getAttributes());
 								currentRefBookId = refbookId;
+								isFormModified = false;
 								setEnabled(false);
 							}
 						}, this));
