@@ -250,15 +250,26 @@ void logicCheck() {
         // Проверка количества
         if (row.count != 1) {
             def msg = row.getCell('count').column.name
-            logger.warn("В графе «$msg» в строке $rowNum может  быть указано только значение «1»!")
+            logger.warn("В графе «$msg» в строке $rowNum может быть указано только значение «1»!")
         }
         // Проверка внешнеторговой сделки
         def msg14 = row.getCell('foreignDeal').column.name
-        def sign = refBookService.getNumberValue(38, row.foreignDeal, 'CODE')
-        if (row.countryCodeNumeric == row.countryCodeNumeric2 && sign != 0) {
-            logger.warn("«$msg14» в строке $rowNum должен быть «Нет»!")
-        } else if (row.countryCodeNumeric != row.countryCodeNumeric2 && sign != 1) {
-            logger.warn("«$msg14» в строке $rowNum должен быть «Да»!")
+        def signCode = refBookService.getNumberValue(38, row.foreignDeal, 'CODE')
+
+        if (row.countryCodeNumeric == row.countryCodeNumeric2 && signCode != 0) {
+            def String valNo = "Нет"
+            def valNoRec = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 0", null)
+            if (valNoRec != null && valNoRec.size() == 1) {
+                valNo = valNoRec.get(0).VALUE.stringValue
+            }
+            logger.warn("Строка $rowNum: $msg14 должно иметь значение «$valNo»!")
+        } else if (row.countryCodeNumeric != row.countryCodeNumeric2 && signCode != 1) {
+            def String valYes = "Да"
+            def valYesRec = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 1", null)
+            if (valYesRec != null && valYesRec.size() == 1) {
+                valYes = valYesRec.get(0).VALUE.stringValue
+            }
+            logger.warn("Строка $rowNum: $msg14 должно иметь значение «$valYes»!")
         }
         // Корректность даты совершения сделки
         def dealDoneDateCell = row.getCell('dealDoneDate')
