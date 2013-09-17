@@ -34,8 +34,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.xml.sax.SAXException;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;

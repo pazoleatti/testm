@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
@@ -83,23 +83,23 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public void saveForm(Long departmentId, int typeId, int formId) {
-        departmentFormTypeDao.createDepartmentFormType(departmentId.intValue(), typeId, formId);
+    public void saveDFT(Long departmentId, int typeId, int formId) {
+        departmentFormTypeDao.save(departmentId.intValue(), typeId, formId);
     }
 
     @Override
-    public void deleteForm(Long id) {
-        departmentFormTypeDao.deleteDepartmentFormType(id);
+    public void deleteDFT(Long id) {
+        departmentFormTypeDao.delete(id);
     }
 
     @Override
-    public void saveDeclaration(Long departmentId, int declarationId) {
-        departmentFormTypeDao.createDepartmentDeclType(departmentId.intValue(), declarationId);
+    public void saveDDT(Long departmentId, int declarationId) {
+        departmentDeclarationTypeDao.save(departmentId.intValue(), declarationId);
     }
 
     @Override
-    public void deleteDeclaration(Long id) {
-        departmentFormTypeDao.deleteDepartmentDeclType(id);
+    public void deleteDDT(Long id) {
+    	departmentDeclarationTypeDao.delete(id);
     }
 
 	@Override

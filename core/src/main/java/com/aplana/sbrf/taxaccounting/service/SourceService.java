@@ -134,14 +134,14 @@ public interface SourceService {
      * @param typeId       id типа налоговой формы
      * @param formId       id вида налоговой формы
      */
-    void saveForm(Long departmentId, int typeId, int formId);
+    void saveDFT(Long departmentId, int typeId, int formId);
 
     /**
      * Удаляет налоговые формы, назначенные подразделению
      *
      * @param id id на удаление
      */
-    void deleteForm(Long id);
+    void deleteDFT(Long id);
 
     /**
      * Добавляет декларации, назначенные подразделению
@@ -149,14 +149,14 @@ public interface SourceService {
      * @param departmentId  id подразделения
      * @param declarationId id вида декларации
      */
-    void saveDeclaration(Long departmentId, int declarationId);
+    void saveDDT(Long departmentId, int declarationId);
 
     /**
      * Удаляет декларации, назначенные подразделению
      *
      * @param id id на удаление
      */
-    void deleteDeclaration(Long id);
+    void deleteDDT(Long id);
     
 	/**
 	 * Получить вид налоговой формы по идентификатору

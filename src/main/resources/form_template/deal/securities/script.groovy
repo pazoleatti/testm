@@ -132,7 +132,7 @@ void logicCheck() {
             def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
-                logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
+                logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
             }
         }
         // Проверка доходов и расходов
@@ -141,23 +141,23 @@ void logicCheck() {
         def msgIn = incomeSumCell.column.name
         def msgOut = outcomeSumCell.column.name
         if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            logger.warn("«$msgIn» и «$msgOut» в строке $rowNum не могут быть одновременно заполнены!")
+            logger.warn("Строка $rowNum: «$msgIn» и «$msgOut» не могут быть одновременно заполнены!")
         }
         if (incomeSumCell.value == null && outcomeSumCell.value == null) {
-            logger.warn("Одна из граф «$msgIn» и «$msgOut» в строке $rowNum должна быть заполнена!")
+            logger.warn("Строка $rowNum: Одна из граф «$msgIn» и «$msgOut» должна быть заполнена!")
         }
         // Проверка выбранной единицы измерения
         def okei =  row.okeiCode!= null ? refBookService.getRecordData(12, row.okeiCode).CODE.stringValue : null
         if (okei != '796' && okei != '744') {
             def msg = okeiCodeCell.column.name
-            logger.warn("В графе «$msg» строки $rowNum могут быть указаны только следующие элементы: шт., процент!")
+            logger.warn("Строка $rowNum: В графе «$msg» могут быть указаны только следующие элементы: шт., процент!")
         }
 
         //  Корректность даты договора
         def dt = docDateCell.value
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = docDateCell.column.name
-            logger.warn("«$msg» в строке $rowNum не может быть вне налогового периода!")
+            logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
         }
 
         // Проверка цены
@@ -169,18 +169,18 @@ void logicCheck() {
             def msg1 = priceCell.column.name
             def msg2 = sumCell.column.name
             def msg3 = countCell.column.name
-            logger.warn("«$msg1» в строке $rowNum не равно отношению «$msg2» и «$msg3»!")
+            logger.warn("Строка $rowNum: «$msg1» не равно отношению «$msg2» и «$msg3»!")
         } else if (okei == '744' && priceCell.value != sumCell.value) {
             def msg1 = priceCell.column.name
             def msg2 = sumCell.column.name
-            logger.warn("«$msg1» в строке $rowNum не равно «$msg2»!")
+            logger.warn("Строка $rowNum: «$msg1» не равно «$msg2»!")
         }
         // Корректность даты совершения сделки
         def dealDateCell = row.getCell('dealDate')
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
         //Проверки соответствия НСИ
         checkNSI(row, "fullNamePerson", "Организации-участники контролируемых сделок", 9)
@@ -198,7 +198,7 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
         def msg2 = cell.column.name
         def rowNum = row.getIndex()
-        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
+        logger.warn("Строка $rowNum: В справочнике «$msg» не найден элемент «$msg2»!")
     }
 }
 

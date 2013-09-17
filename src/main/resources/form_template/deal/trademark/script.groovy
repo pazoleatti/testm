@@ -114,7 +114,7 @@ void logicCheck() {
             def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
-                logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
+                logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
             }
         }
 
@@ -122,7 +122,7 @@ void logicCheck() {
         def dt = docDateCell.value
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = docDateCell.column.name
-            logger.warn("«$msg» в строке $rowNum не может быть вне налогового периода!")
+            logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
         }
 
         // Проверка доходов
@@ -132,18 +132,18 @@ void logicCheck() {
         def msgSum = sumCell.column.name
         if (priceCell.value != sumCell.value) {
             def msg = priceCell.column.name
-            logger.warn("«$msg» в строке $rowNum не может отличаться от «$msgSum»!")
+            logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
         }
         if (costCell.value != sumCell.value) {
             def msg = costCell.column.name
-            logger.warn("«$msg» в строке $rowNum не может отличаться от «$msgSum»!")
+            logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
         }
         // Корректность даты совершения сделки
         def dealDateCell = row.getCell('dealDate')
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
         //Проверки соответствия НСИ
         checkNSI(row, "fullNamePerson", "Организации-участники контролируемых сделок",9)
@@ -159,7 +159,7 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
         def msg2 = cell.column.name
         def rowNum = row.getIndex()
-        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
+        logger.warn("Строка $rowNum: В справочнике «$msg» не найден элемент «$msg2»!")
     }
 }
 

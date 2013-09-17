@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao;
+package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
@@ -125,22 +125,13 @@ public interface DepartmentFormTypeDao {
     List<FormTypeKind> getDeclarationAssigned(Long departmentId, char taxType);
 
     /**
-     * Добавляет налоговые формы, назначенные подразделению
+     * Добавляет назначенные НФ
      */
-    void createDepartmentFormType(int departmentId, int typeId, int formId);
+    void save(int departmentId, int typeId, int formId);
 
     /**
-     * Удаляет налоговые формы, назначенные подразделению
+     * Удаляет назначение НФ
      */
-    void deleteDepartmentFormType(Long id);
+    void delete(Long id);
 
-    /**
-     * Добавляет декларации, назначенные подразделению
-     */
-    void createDepartmentDeclType(int departmentId, int declarationId);
-
-    /**
-     * Удаляет декларации, назначенные подразделению
-     */
-    void deleteDepartmentDeclType(Long id);
 }
