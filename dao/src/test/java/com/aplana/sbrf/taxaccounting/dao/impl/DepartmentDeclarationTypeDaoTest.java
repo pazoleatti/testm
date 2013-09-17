@@ -51,29 +51,4 @@ public class DepartmentDeclarationTypeDaoTest {
 		assertTrue(departmentIds.contains(1));
 	}
 
-	@Test
-	public void testSave() {
-		List<DepartmentDeclarationType> links = departmentDeclarationTypeDao.getDepartmentDeclarationTypes(1);
-		// changing
-		DepartmentDeclarationType link = links.get(0);
-		link.setDeclarationTypeId(3);
-		//adding
-		DepartmentDeclarationType newLink = new DepartmentDeclarationType();
-		newLink.setDeclarationTypeId(4);
-		newLink.setDepartmentId(1);
-
-		links.add(newLink);
-
-		departmentDeclarationTypeDao.save(1, links);
-
-		link = departmentDeclarationTypeDao.getDepartmentDeclarationTypes(1).get(1);
-		newLink = departmentDeclarationTypeDao.getDepartmentDeclarationTypes(1).get(0);
-
-		assertEquals(3, link.getDeclarationTypeId());
-		assertEquals(1, link.getDepartmentId());
-
-		assertEquals(4, newLink.getDeclarationTypeId());
-		assertEquals(1, newLink.getDepartmentId());
-	}
-
 }

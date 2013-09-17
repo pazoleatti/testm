@@ -43,18 +43,6 @@ public interface DepartmentDeclarationTypeService {
 	 */
 	@Deprecated
 	Set<Integer> getDepartmentIdsByTaxType(TaxType taxType);
-	/**
-	 * Обновляет/добавляет список назначенных подразделению деклараций (с учётом вида и типа)
-	 * @param departmentId
-	 *            идентификатор подразделения формируемой налоговой формы
-	 *            назначения
-	 * @param departmentDeclarationTypes
-	 *            новые данные для обновления/добавления
-	 */
-	@Deprecated
-	void save(int departmentId, List<DepartmentDeclarationType> departmentDeclarationTypes);
-	
-
 	
 	/**
 	 * Получить список всех видов деклараций по типу налога

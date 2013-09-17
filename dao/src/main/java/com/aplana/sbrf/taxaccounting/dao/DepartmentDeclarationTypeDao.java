@@ -45,13 +45,4 @@ public interface DepartmentDeclarationTypeDao {
 	 */
 	List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType);
 
-	/**
-	 * Обновляет/добавляет список назначенных подразделению деклараций (с учётом вида и типа)
-	 * @param departmentId
-	 *            идентификатор подразделения формируемой налоговой формы
-	 *            назначения
-	 * @param departmentDeclarationTypes
-	 *            новые данные для обновления/добавления
-	 */
-	void save(int departmentId, List<DepartmentDeclarationType> departmentDeclarationTypes);
 }

@@ -42,12 +42,6 @@ public class DepartmentDeclarationTypeServiceImpl implements DepartmentDeclarati
 
 
 	@Override
-	public void save(int departmentId, List<DepartmentDeclarationType> departmentDeclarationTypes) {
-		departmentDeclarationTypeDao.save(departmentId, departmentDeclarationTypes);
-	}
-
-
-	@Override
 	public List<DeclarationType> listAllByTaxType(TaxType taxType) {
 		return declarationTypeDao.listAllByTaxType(taxType);
 	}
