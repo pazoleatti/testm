@@ -181,7 +181,7 @@ void logicCheck() {
             def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
-                logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
+                logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
             }
         }
         // Проверка доходов и расходов
@@ -190,29 +190,29 @@ void logicCheck() {
         def msgIn = incomeSumCell.column.name
         def msgOut = outcomeSumCell.column.name
         if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            logger.warn("«$msgIn» и «$msgOut» в строке $rowNum не могут быть одновременно заполнены!")
+            logger.warn("Строка $rowNum: «$msgIn» и «$msgOut» не могут быть одновременно заполнены!")
         }
         if (incomeSumCell.value == null && outcomeSumCell.value == null) {
-            logger.warn("Одна из граф «$msgIn» и «$msgOut» в строке $rowNum должна быть заполнена!")
+            logger.warn("Строка $rowNum: Одна из граф «$msgIn» и «$msgOut» должна быть заполнена!")
         }
         //  Корректность даты договора
         def dt = docDateCell.value
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = docDateCell.column.name
-            logger.warn("«$msg» в строке $rowNum не может быть вне налогового периода!")
+            logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
         }
         // Корректность даты заключения сделки
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
         // Корректность даты совершения сделки
         def dealDoneDateCell = row.getCell('dealDoneDate')
         if (dealDoneDateCell.value < dealDateCell.value) {
             def msg1 = dealDoneDateCell.column.name
             def msg2 = dealDateCell.column.name
-            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
         //Проверки соответствия НСИ
         checkNSI(row, "fullName", "Организации-участники контролируемых сделок",9)
@@ -242,9 +242,6 @@ void logicCheck() {
     def testItogRows = testRows.findAll { it -> it.getAlias() != null }
     def itogRows = dataRows.findAll { it -> it.getAlias() != null }
 
-    Date date = new Date()
-    def cache = [:]
-
     if (testItogRows.size() > itogRows.size()) {            //если удалили итоговые строки
 
         for (int i = 0; i < dataRows.size(); i++) {
@@ -253,7 +250,7 @@ void logicCheck() {
             if (row.getAlias() == null) {
                 if (nextRow == null ||
                         nextRow.getAlias() == null && isDiffRow(row, nextRow, getGroupColumns())) {
-                    logger.error("Отсутствует итоговое значение по группе «${getValuesByGroupColumn(row, date, cache)}»")
+                    logger.error("Группа «${getValuesByGroupColumn(row)}» не имеет строки подитога!")
                 }
             }
         }
@@ -263,7 +260,7 @@ void logicCheck() {
         for (int i = 0; i < dataRows.size(); i++) {
             if (dataRows[i].getAlias() != null) {
                 if(i - 1 < -1 || dataRows[i - 1].getAlias() != null){
-                    logger.error("Лишняя итоговая строка " + dataRows[i].getIndex())
+                    logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
                 }
             }
         }
@@ -275,12 +272,12 @@ void logicCheck() {
             def testItogRow = testItogRows[i]
             def realItogRow = itogRows[i]
             int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
-            def rn = realItogRow.getIndex()
+            def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
             if (testItogRow.price != realItogRow.price) {
-                logger.error("Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg], date, cache)}» в графе «${priceName}» в строке ${rn}")
+                logger.error(mes + " «${priceName}»")
             }
             if (testItogRow.total != realItogRow.total) {
-                logger.error("Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg], date, cache)}» в графе «${totalName}» в строке ${rn}")
+                logger.error(mes + " «${totalName}»")
             }
         }
     }
@@ -294,7 +291,7 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
         def msg2 = cell.column.name
         def rowNum = row.getIndex()
-        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
+        logger.warn("Строка $rowNum: В справочнике «$msg» не найден элемент «$msg2»!")
     }
 }
 
@@ -302,7 +299,7 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     Возвращает строку со значениями полей строки по которым идет группировка
     ['fullName', 'inn', 'docNumber', 'docDate', 'dealType']
  */
-def getValuesByGroupColumn(DataRow row, Date date, def cache) {
+def getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
     def map = refBookService.getRecordData(9, row.fullName)

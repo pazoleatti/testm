@@ -47,12 +47,12 @@ public class SaveHandler extends AbstractActionHandler<SaveAction, GetTableDataR
                         return result;
                     }
                 }
-                departmentFormTypeService.saveForm(departmentId, typeId, formId);
+                departmentFormTypeService.saveDFT(departmentId, typeId, formId);
             } else {
                 // Удаление
                 for (Long id : ids) {
                     try {
-                        departmentFormTypeService.deleteForm(id);
+                        departmentFormTypeService.deleteDFT(id);
                     } catch (DataIntegrityViolationException exception) {
                         // есть зависимые связи
                         result.setErrorOnSave("Невозможно снять назначение налоговой формы, т. к. определены источники данных / назначение является источником данных");
@@ -73,12 +73,12 @@ public class SaveHandler extends AbstractActionHandler<SaveAction, GetTableDataR
                         return result;
                     }
                 }
-                departmentFormTypeService.saveDeclaration(departmentId, formId);
+                departmentFormTypeService.saveDDT(departmentId, formId);
             } else {
                 // Удаление
                 for (Long id : ids){
                     try {
-                        departmentFormTypeService.deleteDeclaration(id);
+                        departmentFormTypeService.deleteDDT(id);
                     } catch (DataIntegrityViolationException exception) {
                         // есть зависимые связи
                         result.setErrorOnSave("Невозможно снять назначение декларации, т. к. определены источники данных / назначение является источником данных");
