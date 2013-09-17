@@ -1,11 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared;
 
 
+import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.util.Set;
 
-public class SaveAction extends UnsecuredActionImpl<GetTableDataResult> {
+public class SaveAction extends UnsecuredActionImpl<GetTableDataResult> implements ActionName{
 
     public SaveAction() {
     }
@@ -64,4 +65,20 @@ public class SaveAction extends UnsecuredActionImpl<GetTableDataResult> {
     public void setIds(Set<Long> ids) {
         this.ids = ids;
     }
+
+	@Override
+	public String getName() {
+		StringBuilder sb = new StringBuilder();
+		if (ids == null){
+			sb.append("Добавление назначений ");
+		} else {
+			sb.append("Удаление назначений ");
+		}
+		if (isForm){
+			sb.append("налоговых форм");
+		} else {
+			sb.append("деклараций");
+		}
+		return sb.toString();
+	}
 }

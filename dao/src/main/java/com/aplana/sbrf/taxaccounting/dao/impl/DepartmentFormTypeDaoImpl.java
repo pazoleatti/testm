@@ -274,12 +274,16 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     @Override
     @Transactional(readOnly = false)
     public void delete(Long id) {
-        getJdbcTemplate().update(
-                "delete from department_form_type where id = ?",
-                new Object[]{
-                        id
-                }
-        );
+    	try{
+	        getJdbcTemplate().update(
+	                "delete from department_form_type where id = ?",
+	                new Object[]{
+	                        id
+	                }
+	        );
+    	} catch (DataIntegrityViolationException e){
+    		throw new DaoException("Назначение является источником или приемником данных", e);
+    	}
     }
 
     @Override
