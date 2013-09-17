@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
@@ -141,7 +142,7 @@ public interface SourceService {
      *
      * @param id id на удаление
      */
-    void deleteDFT(Long id);
+    void deleteDFT(Collection<Long> ids);
 
     /**
      * Добавляет декларации, назначенные подразделению
@@ -156,7 +157,7 @@ public interface SourceService {
      *
      * @param id id на удаление
      */
-    void deleteDDT(Long id);
+    void deleteDDT(Collection<Long> ids);
     
 	/**
 	 * Получить вид налоговой формы по идентификатору

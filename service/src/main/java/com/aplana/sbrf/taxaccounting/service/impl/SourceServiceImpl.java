@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -88,8 +89,10 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public void deleteDFT(Long id) {
-        departmentFormTypeDao.delete(id);
+    public void deleteDFT(Collection<Long> ids) {
+    	for (Long id : ids) {
+    		departmentFormTypeDao.delete(id);
+    	}
     }
 
     @Override
@@ -98,8 +101,10 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public void deleteDDT(Long id) {
-    	departmentDeclarationTypeDao.delete(id);
+    public void deleteDDT(Collection<Long> ids) {
+    	for (Long id : ids) {
+    		departmentDeclarationTypeDao.delete(id);
+		}
     }
 
 	@Override

@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Set;
 
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -32,7 +32,7 @@ public class DepartmentDeclarationTypeDaoImplTest {
 		departmentDeclarationTypeDao.save(5, 4);
 	}
 	
-	@Test(expected = DaoException.class)
+	@Test(expected = DaoException.class) 
 	public void saveError(){
 		departmentDeclarationTypeDao.save(5, 4);
 		departmentDeclarationTypeDao.save(5, 4);
@@ -51,7 +51,7 @@ public class DepartmentDeclarationTypeDaoImplTest {
 		ddt = departmentDeclarationTypeDao.getDestinations(1, 1, FormDataKind.PRIMARY);
 		assertEquals(2, ddt.size());
 		ddt = departmentDeclarationTypeDao.getDestinations(1, 2, FormDataKind.CONSOLIDATED);
-		assertEquals(3, ddt.size());
+		assertEquals(2, ddt.size());
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class DepartmentDeclarationTypeDaoImplTest {
 		assertTrue(departmentIds.contains(1));
 		assertTrue(departmentIds.contains(2));
 		departmentIds = departmentDeclarationTypeDao.getDepartmentIdsByTaxType(TaxType.fromCode('I'));
-		assertEquals(2, departmentIds.size());
+		assertEquals(1, departmentIds.size());
 		assertTrue(departmentIds.contains(1));
 	}
 

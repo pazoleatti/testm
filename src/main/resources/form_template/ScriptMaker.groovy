@@ -45,7 +45,7 @@ def outFile = new File("out.sql")
 // Вывод sql-скрипта в файл
 outFile.withWriter { out ->
     out.println('DECLARE')
-    def Set<Integer> idSet = new HashSet<Integer>()
+    def Map<Integer, Integer> scriptMap = new HashMap<Integer, Integer>()
     map.each {
         def scriptFile = new File(scriptLocation + it.value + "\\script.groovy")
         // Пропускаем несуществующие файлы
@@ -53,12 +53,36 @@ outFile.withWriter { out ->
             println("Skip bad script address: " + scriptFile.absolutePath)
             return
         }
-        idSet.add(it.key)
-        out.println(String.format("SCRIPT_%d CLOB := '%s';", it.key, scriptFile.text.replaceAll("'", "''")))
+
+        // Текст скрипта
+        String text = scriptFile.text.replaceAll("'", "''")
+
+        // Деление на части
+        int seek = 0
+        int step = 4000  // Символов
+        int counter = 1
+        while (seek < text.length()) {
+            String subClob = text.length() > seek + step ? text.substring(seek, seek + step) : text.substring(seek, text.length())
+            out.println(String.format("SCRIPT_%d_%d CLOB := '%s';", it.key, counter, subClob))
+            seek += step
+            counter++
+        }
+        scriptMap.put(it.key, counter - 1)
     }
+
     out.println('BEGIN')
-    idSet.each {
-        out.println("   UPDATE FORM_TEMPLATE SET SCRIPT = SCRIPT_$it WHERE ID = $it;")
+
+    scriptMap.keySet().each {
+
+        StringBuilder sb = new StringBuilder();
+        def count = scriptMap.get(it)
+        for (int i = 1; i <= count; i++) {
+            sb.append("SCRIPT_${it}_${i}")
+            if (i != count) {
+                sb.append(" || ")
+            }
+        }
+        out.println("   UPDATE FORM_TEMPLATE SET SCRIPT = ${sb.toString()} WHERE ID = $it;")
     }
     out.print('END;')
 }

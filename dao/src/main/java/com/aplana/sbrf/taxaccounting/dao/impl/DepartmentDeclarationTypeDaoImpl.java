@@ -107,9 +107,13 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 	@Override
     @Transactional(readOnly = false)
 	public void delete(Long id) {
-        getJdbcTemplate().update(
-                "delete from department_declaration_type where id = ?",
-                new Object[]{id}
-        );
+		try{
+	        getJdbcTemplate().update(
+	                "delete from department_declaration_type where id = ?",
+	                new Object[]{id}
+	        );
+		} catch (DataIntegrityViolationException e){
+			throw new DaoException("Назначение является приемником данных для форм", e);
+		}
 	}
 }

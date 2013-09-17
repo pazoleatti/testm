@@ -113,6 +113,13 @@ public class NumericColumn extends Column implements Serializable {
 						|| valueToCheck.contains(" ")) {
 					return false;
 				}
+				if (valueToCheck.equals("-")) {
+					return true;
+				}
+				if (valueToCheck.startsWith("-")) {
+					valueToCheck = valueToCheck.substring(1);
+				}
+
 				if (valueToCheck.isEmpty()) {
 					return true;
 				} else if ((precision == 0) && valueToCheck.contains(".")) {
@@ -125,8 +132,7 @@ public class NumericColumn extends Column implements Serializable {
 						? valueToCheck.substring(0,valueToCheck.indexOf('.'))
 						: valueToCheck).length() > maxLength - precision) {
 					return false;
-				} else if (valueToCheck.equals("-")) {
-					return true;
+
 				} else {
 					try {
 						Double.parseDouble(valueToCheck);

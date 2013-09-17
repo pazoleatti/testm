@@ -1,23 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.SaveAction;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Set;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class SaveHandler extends AbstractActionHandler<SaveAction, GetTableDataResult> {
+public class SaveHandler extends AbstractActionHandler<SaveAction, GetTableDataResult>{
 
     public SaveHandler() {
         super(SaveAction.class);
@@ -36,54 +34,22 @@ public class SaveHandler extends AbstractActionHandler<SaveAction, GetTableDataR
 
         if (action.isForm()) {// "Налоговые формы"
             if (ids == null) {
-                int formId = action.getFormId();
-                int typeId = action.getTypeId();
                 // Сохранение
-                List<FormTypeKind> list = departmentFormTypeService.getFormAssigned(departmentId, taxType);
-                for (FormTypeKind model : list) {
-                    if (model.getFormTypeId().intValue() == formId && model.getKind().getId() == typeId) {
-                        // дубль не сохраняем
-                        result.setErrorOnSave("Налоговая форма указанного типа и вида уже назначена подразделению");
-                        return result;
-                    }
-                }
-                departmentFormTypeService.saveDFT(departmentId, typeId, formId);
+                departmentFormTypeService.saveDFT(departmentId, action.getTypeId(), action.getFormId());
             } else {
                 // Удаление
-                for (Long id : ids) {
-                    try {
-                        departmentFormTypeService.deleteDFT(id);
-                    } catch (DataIntegrityViolationException exception) {
-                        // есть зависимые связи
-                        result.setErrorOnSave("Невозможно снять назначение налоговой формы, т. к. определены источники данных / назначение является источником данных");
-                    }
-                }
+                departmentFormTypeService.deleteDFT(ids);
             }
             // актуальный список
             result.setTableData(departmentFormTypeService.getFormAssigned(departmentId, taxType));
 
         } else {// "Декларации"
             if (ids == null) {
-                int formId = action.getFormId();
                 // Сохранение
-                List<FormTypeKind> list = departmentFormTypeService.getDeclarationAssigned(departmentId, taxType);
-                for (FormTypeKind model : list) {
-                    if (model.getFormTypeId().intValue() == formId) {
-                        result.setErrorOnSave("Декларация указанного вида уже назначена подразделению");
-                        return result;
-                    }
-                }
-                departmentFormTypeService.saveDDT(departmentId, formId);
+                departmentFormTypeService.saveDDT(departmentId, action.getFormId());
             } else {
                 // Удаление
-                for (Long id : ids){
-                    try {
-                        departmentFormTypeService.deleteDDT(id);
-                    } catch (DataIntegrityViolationException exception) {
-                        // есть зависимые связи
-                        result.setErrorOnSave("Невозможно снять назначение декларации, т. к. определены источники данных / назначение является источником данных");
-                    }
-                }
+                departmentFormTypeService.deleteDDT(ids);
             }
             // актуальный список
             result.setTableData(departmentFormTypeService.getDeclarationAssigned(departmentId, taxType));
