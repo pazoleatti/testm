@@ -82,7 +82,6 @@ void addRow() {
             'region',
             'city',
             'settlement',
-            'price',
             'count',
             'transactionDate'
     ].each {
@@ -142,25 +141,28 @@ void logicCheck() {
         def transactionDate = row.transactionDate
         def contractDate = row.contractDate
 
+        //Наименования колонок
+        def contractDateName = row.getCell('contractDate').column.name
+        def transactionDateName = row.getCell('transactionDate').column.name
+        def priceName = row.getCell('price').column.name
+        def bankSumName = row.getCell('bankSum').column.name
+        def countName = row.getCell('count').column.name
+        def costName = row.getCell('cost').column.name
+
+        //Проверка стоимости
         if (price == null || count != null && cost != price * count) {
-            def msg1 = row.getCell('cost').column.name
-            def msg2 = row.getCell('price').column.name
-            def msg3 = row.getCell('count').column.name
-            logger.warn("«$msg1» не равна произведению «$msg2» и «$msg3» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$costName» не равна произведению «$countName» и «$priceName»!")
         }
 
         // Корректность даты договора
         def dt = contractDate
         if (dt != null && (dt < dFrom || dt > dTo)) {
-            def msg = row.getCell('contractDate').column.name
-            logger.warn("«$msg» в строке $rowNum не может быть вне налогового периода!")
+            logger.warn("Строка $rowNum: «$contractDateName» не может быть вне налогового периода!")
         }
 
         // Корректность даты совершения сделки
         if (transactionDate < contractDate) {
-            def msg1 = row.getCell('transactionDate').column.name
-            def msg2 = row.getCell('contractDate').column.name
-            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$transactionDateName» не может быть меньше «$contractDateName»!")
         }
 
         // Проверка цены сделки
@@ -172,42 +174,35 @@ void logicCheck() {
             }
 
             if (bankSum == null || count == null || price != res) {
-                def msg1 = row.getCell('price').column.name
-                def msg2 = row.getCell('bankSum').column.name
-                def msg3 = row.getCell('count').column.name
-                logger.warn("«$msg1» не равно отношению «$msg2» и «$msg3» в строке $rowNum!")
+                logger.warn("Строка $rowNum: «$priceName» не равно отношению «$bankSumName» и «$countName»!")
             }
         } else {
             if (price != bankSum) {
-                def msg1 = row.getCell('price').column.name
-                def msg2 = row.getCell('bankSum').column.name
-                logger.warn("«$msg1» не равно «$msg2» в строке $rowNum!")
+                logger.warn("Строка $rowNum: «$priceName» не равно «$bankSumName»!")
             }
         }
 
         // Проверка расходов
         if (cost != bankSum) {
-            def msg1 = row.getCell('cost').column.name
-            def msg2 = row.getCell('bankSum').column.name
-            logger.warn("«$msg1» не равно «$msg2» в строке $rowNum!")
+            logger.warn("«$costName» не равно «$bankSumName» в строке $rowNum!")
         }
 
         // Проверка заполнения региона
         def country = refBookService.getStringValue(10, row.country,'CODE')
         if (country != null) {
-            def msg1 = row.getCell('region').column.name
-            def msg2 = row.getCell('country').column.name
+            def regionName = row.getCell('region').column.name
+            def countryName = row.getCell('country').column.name
             if (country == '643' && row.region == null) {
-                logger.warn("«$msg1» в строке $rowNum должен быть заполнен, т.к. в «$msg2» указан код 643!")
+                logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
             } else if (country != '643' && row.region != null) {
-                logger.warn("«$msg1» в строке $rowNum не должен быть заполнен, т.к. в «$msg2» указан код, отличный от 643!")
+                logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
             }
         }
         // Проверка населенного пункта
         if (row.city != null && row.city.toString().isEmpty() && row.settlement != null && row.settlement.toString().isEmpty()) {
-            def msg1 = row.getCell('city').column.name
-            def msg2 = row.getCell('settlement').column.name
-            logger.warn("Если указан «$msg1» в строке $rowNum, не должен быть указан «$msg2» в строке $rowNum!")
+            def cityName = row.getCell('city').column.name
+            def settleName = row.getCell('settlement').column.name
+            logger.warn("Строка $rowNum: Если указан «$settleName», то не должен быть указан «$cityName»!")
         }
 
         // Проверки соответствия НСИ
@@ -226,7 +221,7 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
         def msg2 = cell.column.name
         def rowNum = row.getIndex()
-        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
+        logger.warn("Строка $rowNum: В справочнике «$msg» не найден элемент «$msg2»!")
     }
 }
 
