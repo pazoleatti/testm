@@ -31,6 +31,8 @@ public abstract class AbstractXlsxReportBuilder {
      */
     protected static String fileName;
 
+    //Порядок формирования заголовка и шапки таблицы в такой последовательности не случайно,
+    //а по причине наличия нулевых столбцов в налоговых отчетах, чтобы потом некоторые значения случайно не пропали.
     public final String createReport() throws IOException {
         createTableHeaders();
         createDataForTable();
