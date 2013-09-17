@@ -15,7 +15,7 @@ insert into declaration_type (id, tax_type, name) values (4, 'V', 'testName4');
 insert into department_declaration_type (id, department_id, declaration_type_id) values (1, 1, 1);
 insert into department_declaration_type (id, department_id, declaration_type_id) values (2, 1, 2);
 insert into department_declaration_type (id, department_id, declaration_type_id) values (3, 2, 1);
-insert into department_declaration_type (id, department_id, declaration_type_id) values (4, 2, 1);
+insert into department_declaration_type (id, department_id, declaration_type_id) values (4, 2, 2);
 
 -- FORM_TYPE
 insert into form_type (id, name, tax_type) values (1, 'FormType - Transport', 'T');

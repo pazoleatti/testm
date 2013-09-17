@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Set;
 
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +32,7 @@ public class DepartmentDeclarationTypeDaoImplTest {
 		departmentDeclarationTypeDao.save(5, 4);
 	}
 	
-	//@Test(expected = DaoException.class) 
-	// TODO: Вернуть ошибку когда Марат закоммитит констрейнт (SBRFACCTAX-4444)
-	@Test
+	@Test(expected = DaoException.class)
 	public void saveError(){
 		departmentDeclarationTypeDao.save(5, 4);
 		departmentDeclarationTypeDao.save(5, 4);
@@ -62,7 +61,7 @@ public class DepartmentDeclarationTypeDaoImplTest {
 		assertTrue(departmentIds.contains(1));
 		assertTrue(departmentIds.contains(2));
 		departmentIds = departmentDeclarationTypeDao.getDepartmentIdsByTaxType(TaxType.fromCode('I'));
-		assertEquals(1, departmentIds.size());
+		assertEquals(2, departmentIds.size());
 		assertTrue(departmentIds.contains(1));
 	}
 
