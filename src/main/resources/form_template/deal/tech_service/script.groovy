@@ -82,7 +82,6 @@ void addRow() {
             'region',
             'city',
             'settlement',
-            'price',
             'count',
             'transactionDate'
     ].each {
