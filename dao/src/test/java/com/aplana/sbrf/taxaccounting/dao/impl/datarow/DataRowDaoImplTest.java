@@ -116,10 +116,9 @@ public class DataRowDaoImplTest {
 	
 	private void checkIndexCorrect(List<DataRow<Cell>> dataRows, DataRowRange range) {
 		int from = range.getOffset();
-		int to = Math.max(dataRows.size(), from + range.getLimit() - 1);
+		int to =  range.getOffset() + dataRows.size();
 		for (int i = from; i < to; i++) {
-			Assert.assertEquals(Integer.valueOf(i), dataRows.get(i - 1).getIndex());	
-			System.out.println(dataRows.get(i - 1).getIndex());
+			Assert.assertEquals(Integer.valueOf(i), dataRows.get(i - from).getIndex());	
 		}
 	}
 
