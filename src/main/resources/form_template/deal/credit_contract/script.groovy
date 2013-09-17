@@ -70,10 +70,16 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
-    ['name', 'contractNum', 'contractDate', 'okeiCode', 'price', 'transactionDate'].each {
+    ['name', 'contractNum', 'contractDate', 'price', 'transactionDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
+
+    // Элемент с кодом «796» подставляется по-умолчанию
+    def refDataProvider = refBookFactory.getDataProvider(12);
+    def res = refDataProvider.getRecords(new Date(), null, "CODE = 796", null);
+    row.okeiCode = res.getRecords().get(0).record_id.numberValue
+
     dataRowHelper.insert(row, index)
 }
 
@@ -127,7 +133,7 @@ void logicCheck() {
         def price = row.price
 
         // Проверка выбранной единицы измерения
-        if (refBookService.getStringValue(12, row.okeiCode, 'CODE')!= '796'){
+        if (refBookService.getStringValue(12, row.okeiCode, 'CODE') != '796'){
             logger.warn('В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт.!')
         }
 
@@ -191,12 +197,6 @@ void calc() {
         row.count = 1
         // Итого стоимость без учета НДС, акцизов и пошлин, руб.
         row.totalCost = row.price
-
-        // Элемент с кодом «796» подставляется по умолчанию
-        def refDataProvider =  refBookFactory.getDataProvider(12);
-        def res = refDataProvider.getRecords(new Date(), null, "CODE = 796", null);
-        row.okeiCode = res.getRecords().get(0).record_id.numberValue
-
         // Расчет полей зависимых от справочников
         if (row.name != null) {
             def map2 = refBookService.getRecordData(9, row.name)
