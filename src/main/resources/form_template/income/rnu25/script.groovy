@@ -559,7 +559,6 @@ def logicalCheck() {
             // 18. Проверка итогового значений по всей форме
             for (def alias : totalColumns) {
                 if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
-                    logger.info('===== alias = ' + alias + ' = '  + totalSums[alias] + ', ' + totalRow.getCell(alias).getValue()) // TODO (Ramil Timerbaev)
                     logger.error('Итоговые значения рассчитаны неверно!')
                     return false
                 }

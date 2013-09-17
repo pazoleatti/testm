@@ -141,6 +141,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
+    @Transactional(timeout = 900) // 15 min // TODO Вынести в глобальные настройки
     public void migrationFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName) {
         loadFormData(logger, userInfo, formDataId, inputStream, fileName, FormDataEvent.MIGRATION);
     }
@@ -195,6 +196,8 @@ public class FormDataServiceImpl implements FormDataService {
             throw new ServiceLoggerException(
                     "Есть критические ошибки при выполнения скрипта",
                     logger.getEntries());
+        }  else {
+            logger.info("Данные загружены");
         }
         
         logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);

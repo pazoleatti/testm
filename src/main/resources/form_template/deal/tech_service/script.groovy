@@ -209,7 +209,7 @@ void logicCheck() {
             logger.warn("Если указан «$msg1» в строке $rowNum, не должен быть указан «$msg2» в строке $rowNum!")
         }
 
-        //Проверки соответствия НСИ
+        // Проверки соответствия НСИ
         checkNSI(row, "jurName", "Организации-участники контролируемых сделок", 9)
         checkNSI(row, "countryCode", "ОКСМ", 10)
         checkNSI(row, "country", "ОКСМ", 10)

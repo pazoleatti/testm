@@ -28,7 +28,6 @@ switch (formDataEvent) {
  * Удаление уведомления
  */
 void delete() {
-    // TODO реализовать удаление
 }
 
 /**
@@ -128,12 +127,12 @@ void generateXML() {
                 mapYesNo.put(recNoId, '0')
 
                 for (row in dataRowHelper.getAllCached()) {
-                    println("" + row)
                     СвКонтрСд(
                             НомПорСд: row.dealNum1
                     ) {
+                        def String interdependenceSing  = row.interdependenceSing != null ? '' + refBookService.getRecordData(69, row.interdependenceSing).CODE.numberValue : null
                         ОснКонтрСд(
-                                ВзЗавис: '0'
+                                ВзЗавис: interdependenceSing
                         ) {
                             'Осн105.14'(
                                     Осн121: mapYesNo.get(row.f121),
@@ -157,27 +156,8 @@ void generateXML() {
                                 КодНаимСд: dealNameCode,
                                 КодСторСд: taxpayerSideCode,
                                 ПрОпрЦен: mapYesNo.get(row.dealPriceSign),
-                                //КомПрОпрЦен: 'string', // не заполняется
-                                КодОпрЦен: dealPriceCode,
-                                /*КомКодОпрЦен: 'string', // не заполняется
-                                 КодМетЦен: '03',
-                                 КомКодМетЦен: 'string',
-                                 КолУчСд: '100',
-                                 КомКолУчСд: 'string'
-                                 */
-                        ) {
-                            /*КодИстИнф(   // не заполняется
-                                    Ист251: '0',
-                                    Ист252: '1',
-                                    Ист253: '1',
-                                    Ист254: '0',
-                                    Ист255: '1',
-                                    Ист256: '1',
-                                    Ист257: '1',
-                                    Ист258: '1',
-                                    Ист259: '0'
-                            )  */
-                        }
+                                КодОпрЦен: dealPriceCode
+                        )
                         ДохРасхСд(
                                 СумДохСд: row.income,
                                 СумДохСдРег: row.incomeIncludingRegulation,
@@ -250,52 +230,6 @@ void generateXML() {
                                 КодНПРег: taxpayerCode,
                                 АдрИнТекст: address
                         )
-                        /*СвФЛУчаст(   // не заполняется
-                                НомПорСд: '',
-                                КодВД: ''
-                        ) {
-                            ФИО(
-                                    Фамилия: '',
-                                    Имя: '',
-                                    Отчество: ''
-                            )
-                            ИННФЛ(
-                            ) {
-                                // stringstring
-                            }
-                            СвФЛ(
-                                    ДатаРожд: '',
-                                    МестоРожд: '',
-                                    НалГражд: '',
-                                    ОКСМ: ''
-                            ) {
-                                УдЛичнФЛ(
-                                        КодВидДок: '',
-                                        СерНомДок: '',
-                                        ДатаДок: '',
-                                        ВыдДок: ''
-                                )
-                                СвАдрРФ(
-                                        ПрАдр: ''
-                                ) {
-                                    АдрРФ(
-                                            Индекс: '',
-                                            КодРегион: '',
-                                            Район: '',
-                                            Город: '',
-                                            НаселПункт: '',
-                                            Улица: '',
-                                            Дом: '',
-                                            Корпус: '',
-                                            Кварт: ''
-                                    )
-                                }
-                                АдрИн(
-                                        ОКСМ: '',
-                                        АдрИнТекст: ''
-                                )
-                            }
-                        } */
                     }
                 }
             }

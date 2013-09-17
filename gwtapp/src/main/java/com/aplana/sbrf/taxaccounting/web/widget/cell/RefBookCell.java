@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPick
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidget;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -82,20 +83,20 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	public void onBrowserEvent(final Context context, final Element parent, final Long nvalue,
 			final NativeEvent nevent, final ValueUpdater<Long> valueUpdater) {
 		
-		@SuppressWarnings("unchecked")
+
 		AbstractCell editableCell = ((DataRow<?>) context.getKey()).getCell(column.getAlias());
 		if (!DataRowEditableCellUtils.editMode(columnContext, editableCell)) {
 			return;
 		}
 			
-		
-		if (CLICK.equals(nevent.getType())) {
+	    String eventType = nevent.getType();
+	    if ((BrowserEvents.KEYDOWN.equals(eventType) && nevent.getKeyCode() == KeyCodes.KEY_ENTER)
+	    		|| (CLICK.equals(eventType))) {
 			
 			// При нажатии на ячейку инициализируем справочник, если он ещё не инициализирован
 			if (!refBookPikerAlredyInit) {
 				refBookPiker.setAcceptableValues(column.getRefBookAttributeId(), column.getFilter(), columnContext.getStartDate(),
 						columnContext.getEndDate());
-
 				refBookPikerAlredyInit = true;
 			}
 			// Устанавливаем старое значение
