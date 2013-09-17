@@ -118,13 +118,13 @@ void logicCheck() {
             def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
-                logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
+                logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
             }
         }
         // Проверка на заполнение атрибута «Запись справочника»
         if (row.editSign != null && row.refBookRecord == null && refBookService.getRecordData(38, row.editSign).CODE.numberValue == 1) {
             def msg = row.getCell('refBookRecord').column.name
-            logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
+            logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
         }
         // Проверка уникальности полей в рамках справочника «Организации – участники контролируемых сделок»
         if (row.editSign == null || refBookService.getRecordData(38, row.editSign).CODE.numberValue == 0) {
@@ -135,7 +135,7 @@ void logicCheck() {
                 def res = refDataProvider.getRecords(new Date(), null, "REG_NUM = '$val'", null);
                 if (res.getRecords().size() > 0) {
                     def msg = row.getCell("regNum").column.name
-                    logger.warn("«$msg» в строке $rowNum уже существует в справочнике «Организации – участники контролируемых сделок»!")
+                    logger.warn("Строка $rowNum: «$msg» уже существует в справочнике «Организации – участники контролируемых сделок»!")
                 }
             }
             // Код налогоплательщика
@@ -144,7 +144,7 @@ void logicCheck() {
                 def res = refDataProvider.getRecords(new Date(), null, "TAXPAYER_CODE = '$val'", null);
                 if (res.getRecords().size() > 0) {
                     def msg = row.getCell("taxpayerCode").column.name
-                    logger.warn("«$msg» в строке $rowNum уже существует в справочнике «Организации – участники контролируемых сделок»!")
+                    logger.warn("Строка $rowNum: «$msg» уже существует в справочнике «Организации – участники контролируемых сделок»!")
                 }
             }
             // ИНН
@@ -153,7 +153,7 @@ void logicCheck() {
                 def res = refDataProvider.getRecords(new Date(), null, "INN_KIO = $val", null);
                 if (res.getRecords().size() > 0) {
                     def msg = row.getCell("inn").column.name
-                    logger.warn("«$msg» в строке $rowNum уже существует в справочнике «Организации – участники контролируемых сделок»!")
+                    logger.warn("Строка $rowNum: «$msg» уже существует в справочнике «Организации – участники контролируемых сделок»!")
                 }
             }
             // КПП
@@ -162,14 +162,14 @@ void logicCheck() {
                 def res = refDataProvider.getRecords(new Date(), null, "KPP = $val", null);
                 if (res.getRecords().size() > 0) {
                     def msg = row.getCell("kpp").column.name
-                    logger.warn("«$msg» в строке $rowNum уже существует в справочнике «Организации – участники контролируемых сделок»!")
+                    logger.warn("Строка $rowNum: «$msg» уже существует в справочнике «Организации – участники контролируемых сделок»!")
                 }
             }
         }
         // Проверка существования записи
         if (row.refBookRecord != null && refBookService.getRecordData(9, row.refBookRecord) == null) {
             def msg = row.getCell('refBookRecord').column.name
-            logger.warn("В справочнике «Организации – участники контролируемых сделок» не найден элемент $msg, указанный в строке $rowNum!")
+            logger.warn("Строка $rowNum: В справочнике «Организации – участники контролируемых сделок» не найден элемент $msg!")
         }
 
         // Проверка уникальности ссылки на элемент справочника
