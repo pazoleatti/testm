@@ -20,7 +20,7 @@ public abstract class AbstractXlsxReportBuilder {
 
     protected Sheet sheet;
 
-    protected static final int cellWidthMin = 20;
+    protected static final int cellWidthMin = 30;
     protected static final int cellWidthMax = 100;
 
 
