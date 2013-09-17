@@ -37,8 +37,6 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 	private int cellNumber = 0;
 	private boolean isShowChecked;
 
-	private static String dateFormater = "dd.MM.yyyy";
-
 	private CellStyleBuilder cellStyleBuilder;
     private static final String TEMPLATE = ClassUtils
 			.classPackageAsResourcePath(FormDataXlsxReportBuilder.class)
@@ -127,7 +125,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                 case DATE:
                     style.setAlignment(CellStyle.ALIGN_CENTER);
                     if(Formats.getById(((DateColumn)currColumn).getFormatId()).getFormat().equals("")){
-                        style.setDataFormat(dataFormat.getFormat(dateFormater));
+                        style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.toPattern()));
                     } else{
                         style.setDataFormat(dataFormat.getFormat(Formats.getById(((DateColumn)currColumn).getFormatId()).getFormat()));
                     }
@@ -188,10 +186,10 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 
     protected void fillHeader(){
         //Fill subdivision
-        createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION, department.getName(), 0);
+        createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION, department.getName(), 0, 0);
 
         //Fill subdivision signature
-        createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION_SIGN, null, 0);
+        createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION_SIGN, null, 0, 0);
 
         //Fill date
         StringBuilder sb = new StringBuilder();
@@ -216,24 +214,23 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
         }
         sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.format(printDate),
                 new String(arr), XlsxReportMetadata.sdf_y.format(printDate)));
-        createCellByRange(XlsxReportMetadata.RANGE_DATE_CREATE, sb.toString(), 0);
+        createCellByRange(XlsxReportMetadata.RANGE_DATE_CREATE, sb.toString(), 0, 0);
         sb.delete(0, sb.length());
 
         //Fill report name
-        createCellByRange(XlsxReportMetadata.RANGE_REPORT_NAME, formTemplate.getFullName(), 0);
+        createCellByRange(XlsxReportMetadata.RANGE_REPORT_NAME, formTemplate.getFullName(), 0, formTemplate.getColumns().size()/2 - 1);
 
         //Fill code
         StringTokenizer sToK = new StringTokenizer(formTemplate.getCode(), XlsxReportMetadata.REPORT_DELIMITER);//This needed because we can have not only one delimiter
         int j = 0;
         while(sToK.hasMoreTokens()){
-            createCellByRange(XlsxReportMetadata.RANGE_REPORT_CODE, sToK.nextToken(), j);
+            createCellByRange(XlsxReportMetadata.RANGE_REPORT_CODE, sToK.nextToken(), j, 0);
             j++;
         }
 
         //Fill period
-        if(data.getFormType().getTaxType() == TaxType.TRANSPORT || data.getFormType().getTaxType() == TaxType.INCOME)
-            sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName(), String.valueOf(reportPeriod.getYear())));
-        createCellByRange(XlsxReportMetadata.RANGE_REPORT_PERIOD, sb.toString(), 0);
+        sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName(), String.valueOf(reportPeriod.getYear())));
+        createCellByRange(XlsxReportMetadata.RANGE_REPORT_PERIOD, sb.toString(), 0, formTemplate.getColumns().size()/2 - 1);
     }
 
 	protected void createTableHeaders(){
@@ -308,6 +305,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                     else
                         cell.setCellValue("");
 					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DATE, i , j));
+                    fillWidth(cell.getColumnIndex(),date != null?XlsxReportMetadata.sdf.format(date).length():0);
 				}
 				else if(column instanceof NumericColumn){
 					BigDecimal bd = (BigDecimal)obj;
@@ -356,13 +354,14 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		c = r.getCell(ar.getFirstCell().getCol());
 		CellStyle cs = c.getCellStyle();
 
+        int cellSignPosition = formTemplate.getColumns().size() / 2;
 		for (int i = 0;i < data.getSigners().size(); i++) {
 			Row rs = sheet.createRow(rowNumber);
 			Cell crsP = createNotHiddenCell(XlsxReportMetadata.CELL_POS, rs);
 			crsP.setCellValue(data.getSigners().get(i).getPosition());
-            Cell crsS = createNotHiddenCell(XlsxReportMetadata.CELL_SIGN, rs);
+            Cell crsS = createNotHiddenCell(cellSignPosition, rs);
 			crsS.setCellValue("_______");
-			Cell crsFio = createNotHiddenCell(XlsxReportMetadata.CELL_FIO, rs);
+			Cell crsFio = createNotHiddenCell(cellSignPosition + 2, rs);
 			crsFio.setCellValue("(" + data.getSigners().get(i).getName() + ")");
 			crsP.setCellStyle(cs);
 			crsS.setCellStyle(cs);
@@ -457,8 +456,9 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                 row.createCell(columnIndex);
     }
 
-    private void createCellByRange(String rangeName, String cellValue, int shiftRows){
-        logger.debug(workBook.getName(rangeName).getRefersToFormula());
+    private void createCellByRange(String rangeName, String cellValue, int shiftRows, int shiftColumns){
+        if (logger.isDebugEnabled())
+            logger.debug(workBook.getName(rangeName).getRefersToFormula());
         StringBuilder sb = new StringBuilder();
         AreaReference ar = new AreaReference(workBook.getName(rangeName).getRefersToFormula());
         Row r = sheet.getRow(ar.getFirstCell().getRow() + shiftRows) != null ? sheet.getRow(ar.getFirstCell().getRow() + shiftRows)
@@ -469,7 +469,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
             sb.append(r.getCell(ar.getFirstCell().getCol()).getStringCellValue());
             r.getCell(ar.getFirstCell().getCol()).setCellValue("");//чтобы при печати не залипала перенесенная запись
         }
-        Cell c = createNotHiddenCell(ar.getFirstCell().getCol(), r);
+        Cell c = createNotHiddenCell(ar.getFirstCell().getCol() + shiftColumns, r);
         sb.append(cellValue != null?cellValue:"");
         c.setCellValue(String.valueOf(sb));
         c.setCellStyle(r.getCell(ar.getFirstCell().getCol()).getCellStyle());
