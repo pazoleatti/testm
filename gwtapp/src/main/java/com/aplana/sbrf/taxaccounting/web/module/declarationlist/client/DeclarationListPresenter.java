@@ -76,11 +76,11 @@ public class DeclarationListPresenter extends
 
 	@Override
 	public void onCreateClicked() {
-		creationPresenter.setDeclarationFilter(filterPresenter.getFilterData());
 		creationPresenter.setDepartments(filterPresenter.getDepartments(), filterPresenter.getFilterValues().getDepartmentIds());
 		creationPresenter.setReportPeriods(filterPresenter.getReportPeriods());
+		creationPresenter.setDeclarationTypes(filterPresenter.getFilterValues());
 		
-		creationPresenter.setFilterValues(filterPresenter.getFilterValues());
+		creationPresenter.setDeclarationFilter(filterPresenter.getFilterData());
 		
 		addToPopupSlot(creationPresenter);
 	}

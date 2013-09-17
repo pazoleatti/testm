@@ -20,7 +20,7 @@ public abstract class AbstractXlsxReportBuilder {
 
     protected Sheet sheet;
 
-    protected static final int cellWidthMin = 20;
+    protected static final int cellWidthMin = 30;
     protected static final int cellWidthMax = 100;
 
 
@@ -31,17 +31,19 @@ public abstract class AbstractXlsxReportBuilder {
      */
     protected static String fileName;
 
+    //Порядок формирования заголовка и шапки таблицы в такой последовательности не случайно,
+    //а по причине наличия нулевых столбцов в налоговых отчетах, чтобы потом некоторые значения случайно не пропали.
     public final String createReport() throws IOException {
-        fillHeader();
         createTableHeaders();
         createDataForTable();
         cellAlignment();
+        fillHeader();
         fillFooter();
         setPrintSetup();
         return flush();
     }
 
-    private void cellAlignment() {
+    protected void cellAlignment() {
         for (Map.Entry<Integer, Integer> width : widthCellsMap.entrySet()) {
             //logger.debug("----n" + width.getKey() + ":" + width.getValue());
             sheet.setColumnWidth(width.getKey(), width.getValue() *256);

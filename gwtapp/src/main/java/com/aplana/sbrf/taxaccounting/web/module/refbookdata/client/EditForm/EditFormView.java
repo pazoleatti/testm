@@ -1,21 +1,20 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm;
 
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -84,6 +83,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			hasValue.addValueChangeHandler(new ValueChangeHandler() {
 				@Override
 				public void onValueChange(ValueChangeEvent event) {
+					if (event.getSource() instanceof UIObject) {
+						((UIObject) event.getSource()).setTitle(event.getValue().toString());
+					}
 					if (getUiHandlers() != null) {
 						getUiHandlers().valueChanged();
 					}
@@ -102,6 +104,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		if (record == null) {
 			for (HasValue w : widgets.values()) {
 				w.setValue(null);
+				if (w.getValue() instanceof Widget) {
+					((Widget) w.getValue()).setTitle("");
+				}
 			}
 		} else {
 			for (Map.Entry<RefBookAttribute, HasValue> w : widgets.entrySet()) {
@@ -114,48 +119,62 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				} else if(w.getValue() instanceof HasText) {
                     ((Widget)w.getValue()).setTitle(((HasText)w.getValue()).getText());
 					if (w.getKey().getAttributeType() == RefBookAttributeType.NUMBER) {
-						w.getValue().setValue(((BigDecimal)recordValue.getValue()).toPlainString());
+						w.getValue().setValue(((BigDecimal) recordValue.getValue()) == null ? ""
+								: ((BigDecimal) recordValue.getValue()).toPlainString());
 					} else {
 						w.getValue().setValue(recordValue.getValue());
 					}
                 } else {
 					w.getValue().setValue(recordValue.getValue());
 				}
+				if (w.getValue() instanceof Widget) {
+					((Widget) w.getValue()).setTitle(w.getValue().getValue().toString());
+				}
 			}
 		}
 	}
 
 	@Override
-	public Map<String, RefBookValueSerializable> getFieldsValues() {
+	public Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException {
 		Map<String, RefBookValueSerializable> fieldsValues = new HashMap<String, RefBookValueSerializable>();
 		for (Map.Entry<RefBookAttribute, HasValue> field : widgets.entrySet()) {
 			RefBookValueSerializable value = new RefBookValueSerializable();
-			switch (field.getKey().getAttributeType()) {
-				case NUMBER:
-					Number number = field.getValue().getValue() == null ? null : new BigDecimal((String)field.getValue().getValue());
-					value.setAttributeType(RefBookAttributeType.NUMBER);
-					value.setNumberValue(number);
-					break;
-				case STRING:
-					String string = field.getValue().getValue() == null ? null : (String)field.getValue().getValue();
-					value.setAttributeType(RefBookAttributeType.STRING);
-					value.setStringValue(string);
-					break;
-				case DATE:
-					Date date = field.getValue().getValue() == null ? null : (Date)field.getValue().getValue();
-					value.setAttributeType(RefBookAttributeType.DATE);
-					value.setDateValue(date);
-					break;
-				case REFERENCE:
-					Long longValue = field.getValue().getValue() == null ? null : (Long)field.getValue().getValue();
-					value.setAttributeType(RefBookAttributeType.REFERENCE);
-					value.setReferenceValue(longValue);
-					break;
-				default:
-					//TODO
-					break;
+			try {
+				switch (field.getKey().getAttributeType()) {
+					case NUMBER:
+						Number number = field.getValue().getValue() == null ? null : new BigDecimal((String)field.getValue().getValue());
+						value.setAttributeType(RefBookAttributeType.NUMBER);
+						value.setNumberValue(number);
+						break;
+					case STRING:
+						String string = field.getValue().getValue() == null ? null : (String)field.getValue().getValue();
+						value.setAttributeType(RefBookAttributeType.STRING);
+						value.setStringValue(string);
+						break;
+					case DATE:
+						Date date = field.getValue().getValue() == null ? null : (Date)field.getValue().getValue();
+						value.setAttributeType(RefBookAttributeType.DATE);
+						value.setDateValue(date);
+						break;
+					case REFERENCE:
+						Long longValue = field.getValue().getValue() == null ? null : (Long)field.getValue().getValue();
+						value.setAttributeType(RefBookAttributeType.REFERENCE);
+						value.setReferenceValue(longValue);
+						break;
+					default:
+						//TODO
+						break;
+				}
+				fieldsValues.put(field.getKey().getAlias(), value);
+			} catch (NumberFormatException nfe) {
+				BadValueException badValueException = new BadValueException();
+				badValueException.setFieldName(field.getKey().getName());
+				throw badValueException;
+			} catch (ClassCastException cce) {
+				BadValueException badValueException = new BadValueException();
+				badValueException.setFieldName(field.getKey().getName());
+				throw badValueException;
 			}
-			fieldsValues.put(field.getKey().getAlias(), value);
 		}
 		return fieldsValues;
 	}
@@ -167,6 +186,17 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
 	@Override
 	public void setCancelButtonEnabled(boolean enabled) {
+		cancel.setEnabled(enabled);
+	}
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		for (HasValue entry : widgets.values()) {
+			if (entry instanceof HasEnabled) {
+				((HasEnabled) entry).setEnabled(enabled);
+			}
+		}
+		save.setEnabled(enabled);
 		cancel.setEnabled(enabled);
 	}
 

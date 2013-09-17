@@ -109,6 +109,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 						new AbstractCallback<DeleteRefBookRowResult>() {
 							@Override
 							public void onSuccess(DeleteRefBookRowResult result) {
+								editFormPresenter.show(null);
+								editFormPresenter.setEnabled(false);
 								getView().updateTable();
 							}
 						}, this));
@@ -116,13 +118,17 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	@Override
 	public void onSelectionChanged() {
-		editFormPresenter.show(getView().getSelectedRow().getRefBookRowId());
+		if (getView().getSelectedRow() != null) {
+			editFormPresenter.show(getView().getSelectedRow().getRefBookRowId());
+		}
 	}
 
 	@Override
 	public void onRelevanceDateChanged() {
 		getView().updateTable();
 		editFormPresenter.setRelevanceDate(getView().getRelevanceDate());
+		editFormPresenter.show(null);
+		editFormPresenter.setEnabled(false);
 	}
 
 	@Override

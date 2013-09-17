@@ -1,9 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm;
 
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasValue;
@@ -32,9 +36,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
 		Map<RefBookAttribute, HasValue> createInputFields(List<RefBookAttribute> attributes);
 		void fillInputFields(Map<String, RefBookValueSerializable> record);
-		Map<String, RefBookValueSerializable> getFieldsValues();
+		Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException;
 		void setSaveButtonEnabled(boolean enabled);
 		void setCancelButtonEnabled(boolean enabled);
+		void setEnabled(boolean enabled);
 	}
 
 	@Inject
@@ -56,6 +61,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 							public void onSuccess(GetRefBookAttributesResult result) {
 								getView().createInputFields(result.getAttributes());
 								currentRefBookId = refbookId;
+								isFormModified = false;
+								setEnabled(false);
 							}
 						}, this));
 	}
@@ -89,6 +96,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		if (refBookRecordId == null) {
 			currentRecordId = null;
 			getView().fillInputFields(null);
+			setEnabled(true);
 			return;
 		}
 		GetRefBookRecordAction action = new GetRefBookRecordAction();
@@ -101,61 +109,71 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 							public void onSuccess(GetRefBookRecordResult result) {
 								getView().fillInputFields(result.getRecord());
 								currentRecordId = refBookRecordId;
+								setEnabled(true);
 							}
 						}, this));
 	}
 
 	@Override
 	public void onSaveClicked() {
-		getView().setCancelButtonEnabled(false);
-		getView().setSaveButtonEnabled(false);
-		if (currentRecordId == null) {
-			AddRefBookRowAction action = new AddRefBookRowAction();
-			action.setRefBookId(currentRefBookId);
-			List<Map<String, RefBookValueSerializable>> valuesToAdd = new ArrayList<Map<String, RefBookValueSerializable>>();
-			valuesToAdd.add(getView().getFieldsValues());
-			action.setRecords(valuesToAdd);
-			action.setRelevanceDate(getRelevanceDate());
-			dispatchAsync.execute(action,
-					CallbackUtils.defaultCallback(
-							new AbstractCallback<AddRefBookRowResult>() {
-								@Override
-								public void onSuccess(AddRefBookRowResult result) {
-									isFormModified = false;
-									getView().fillInputFields(null);
-									UpdateForm.fire(EditFormPresenter.this, true);
-								}
+		try {
+			if (currentRecordId == null) {
+				AddRefBookRowAction action = new AddRefBookRowAction();
+				action.setRefBookId(currentRefBookId);
+				List<Map<String, RefBookValueSerializable>> valuesToAdd = new ArrayList<Map<String, RefBookValueSerializable>>();
+				valuesToAdd.add(getView().getFieldsValues());
+				action.setRecords(valuesToAdd);
+				action.setRelevanceDate(getRelevanceDate());
+				dispatchAsync.execute(action,
+						CallbackUtils.defaultCallback(
+								new AbstractCallback<AddRefBookRowResult>() {
+									@Override
+									public void onSuccess(AddRefBookRowResult result) {
+										isFormModified = false;
+										getView().fillInputFields(null);
+										setEnabled(false);
+										UpdateForm.fire(EditFormPresenter.this, true);
+									}
 							}, this));
-		} else {
-			SaveRefBookRowAction action = new SaveRefBookRowAction();
-			action.setRefBookId(currentRefBookId);
-			action.setRecordId(currentRecordId);
-			action.setValueToSave(getView().getFieldsValues());
-			action.setRelevanceDate(getRelevanceDate());
-			dispatchAsync.execute(action,
-					CallbackUtils.defaultCallback(
-							new AbstractCallback<SaveRefBookRowResult>() {
-								@Override
-								public void onSuccess(SaveRefBookRowResult result) {
-									isFormModified = false;
-									UpdateForm.fire(EditFormPresenter.this, true);
-								}
-							}, this));
+			} else {
+					SaveRefBookRowAction action = new SaveRefBookRowAction();
+					action.setRefBookId(currentRefBookId);
+					action.setRecordId(currentRecordId);
+					action.setValueToSave(getView().getFieldsValues());
+					action.setRelevanceDate(getRelevanceDate());
+					dispatchAsync.execute(action,
+							CallbackUtils.defaultCallback(
+									new AbstractCallback<SaveRefBookRowResult>() {
+										@Override
+										public void onSuccess(SaveRefBookRowResult result) {
+											isFormModified = false;
+											getView().fillInputFields(null);
+											setEnabled(false);
+											UpdateForm.fire(EditFormPresenter.this, true);
+										}
+								}, this));
+
+			}
+		} catch (BadValueException bve) {
+			isFormModified = false;
+			List<LogEntry> logEntries = new ArrayList<LogEntry>();
+			logEntries.add(new LogEntry(LogLevel.ERROR, "Некорректный тип значения в поле \" " + bve.getFieldName()  + "\""));
+			LogAddEvent.fire(EditFormPresenter.this, logEntries);
 		}
 	}
 
 	@Override
 	public void onCancelClicked() {
 		isFormModified = false;
-		getView().setCancelButtonEnabled(false);
-		getView().setSaveButtonEnabled(false);
 		showRecord(currentRecordId);
 	}
 
 	@Override
 	public void valueChanged() {
-		getView().setCancelButtonEnabled(true);
-		getView().setSaveButtonEnabled(true);
 		isFormModified = true;
+	}
+
+	public void setEnabled(boolean enabled) {
+		getView().setEnabled(enabled);
 	}
 }

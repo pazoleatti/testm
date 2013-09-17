@@ -559,7 +559,6 @@ def logicalCheck() {
             // 18. Проверка итогового значений по всей форме
             for (def alias : totalColumns) {
                 if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
-                    logger.info('===== alias = ' + alias + ' = '  + totalSums[alias] + ', ' + totalRow.getCell(alias).getValue()) // TODO (Ramil Timerbaev)
                     logger.error('Итоговые значения рассчитаны неверно!')
                     return false
                 }
@@ -968,6 +967,7 @@ def addData(def xml) {
     def cache = [:]
     def data = getData(formData)
     data.clear()
+    def newRows = []
 
    def indexRow = 0
     for (def row : xml.row) {
@@ -1027,8 +1027,9 @@ def addData(def xml) {
         // графа 13
         newRow.reserveRecovery = getNumber(row.cell[indexCell].text())
 
-        insert(data, newRow)
+        newRows.add(newRow)
     }
+    data.insert(newRows, 1)
 
     // итоговая строка
     if (xml.rowTotal.size() == 1) {

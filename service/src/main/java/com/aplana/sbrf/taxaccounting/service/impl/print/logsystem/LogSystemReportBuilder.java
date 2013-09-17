@@ -22,7 +22,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
         fileName = "Журнал_аудита_";
     }
 
-    private int rowNumber = 0;
+    private int rowNumber = 3;
     private int cellNumber = 0;
 
     private static final String DATE_DATA_FORMAT = "dd.MM.yyyy HH:mm";
@@ -118,23 +118,23 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
         cs.setFont(font);
         cs.setAlignment(CellStyle.ALIGN_CENTER);
 
-        Row row = sheet.createRow(rowNumber++);
+        Row row = sheet.createRow(0);
         Cell cell = row.createCell(cellNumber++);
         CellRangeAddress regionTitle = new CellRangeAddress(
-                rowNumber - 1,
-                rowNumber - 1,
+                0,
+                0,
                 0,
                 9);
         cell.setCellValue("Журнал аудита");
         cell.setCellStyle(cs);
         cellNumber = 0;
-        Row reportRow = sheet.createRow(rowNumber);
+        Row reportRow = sheet.createRow(1);
         Cell reportDate = reportRow.createCell(cellNumber);
         reportDate.setCellValue(new SimpleDateFormat(DATE_FORMAT).format(new Date()));
         reportDate.setCellStyle(cs);
         CellRangeAddress regionDate = new CellRangeAddress(
-                rowNumber,
-                rowNumber,
+                1,
+                1,
                 0,
                 9);
         sheet.addMergedRegion(regionTitle);
