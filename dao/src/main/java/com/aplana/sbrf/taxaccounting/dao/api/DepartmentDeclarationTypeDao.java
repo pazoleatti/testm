@@ -1,10 +1,9 @@
-package com.aplana.sbrf.taxaccounting.dao;
+package com.aplana.sbrf.taxaccounting.dao.api;
 
 import java.util.List;
 import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
@@ -44,5 +43,15 @@ public interface DepartmentDeclarationTypeDao {
 	 * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
 	 */
 	List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType);
+	
+    /**
+     * Добавляет назначения декларации
+     */
+    void save(int departmentId, int declarationTypeId);
+    
+    /**
+     * Удаляет назначение декларации
+     */
+    void delete(Long id);
 
 }

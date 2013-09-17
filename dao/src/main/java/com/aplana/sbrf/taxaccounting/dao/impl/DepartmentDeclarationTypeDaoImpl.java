@@ -1,21 +1,19 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -90,5 +88,28 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 				},
 				DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER
 		);
+	}
+
+	@Override
+	@Transactional(readOnly = false)
+	public void save(int departmentId, int declarationTypeId) {
+		try {
+	        getJdbcTemplate().update(
+	                "insert into department_declaration_type (id, department_id, declaration_type_id) " +
+	                        " values (SEQ_DEPT_DECLARATION_TYPE.nextval, ?, ?)",
+	                new Object[]{ departmentId, declarationTypeId});
+		} catch (DataIntegrityViolationException e) {
+    		throw new DaoException("Декларация указанного типа уже назначена подразделению", e);
+    	}
+		
+	}
+
+	@Override
+    @Transactional(readOnly = false)
+	public void delete(Long id) {
+        getJdbcTemplate().update(
+                "delete from department_declaration_type where id = ?",
+                new Object[]{id}
+        );
 	}
 }

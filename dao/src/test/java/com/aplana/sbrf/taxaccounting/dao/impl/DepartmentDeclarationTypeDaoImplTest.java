@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+import java.util.Set;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,18 +13,31 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({ "DepartmentDeclarationTypeDaoTest.xml" })
+@ContextConfiguration({ "DepartmentDeclarationTypeDaoImplTest.xml" })
 @Transactional
-public class DepartmentDeclarationTypeDaoTest {
+public class DepartmentDeclarationTypeDaoImplTest {
+	
 	@Autowired
 	DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
+	
+	@Test
+	public void saveSucsess(){
+		departmentDeclarationTypeDao.save(5, 4);
+	}
+	
+	//@Test(expected = DaoException.class) 
+	// TODO: Вернуть ошибку когда Марат закоммитит констрейнт (SBRFACCTAX-4444)
+	@Test
+	public void saveError(){
+		departmentDeclarationTypeDao.save(5, 4);
+		departmentDeclarationTypeDao.save(5, 4);
+	}
 
 	@Test
 	public void testGetDepartmentDeclarationTypes() {
