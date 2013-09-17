@@ -106,9 +106,8 @@ def getGroupColumns(){
 def getEditColumns(){
     ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode',
             'unitCountryCode', 'signPhis', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
-            'city2', 'settlement2', 'conditionCode', 'count', 'incomeSum', 'consumptionSum', 'transactionDate']
+            'city2', 'settlement2', 'conditionCode', 'incomeSum', 'consumptionSum', 'transactionDate']
 }
-
 
 /**
  * Проверка при создании формы.
@@ -150,6 +149,7 @@ void addRow() {
             }
         }
     }
+    row.count = 1
     dataRowHelper.insert(row, index+1)
 }
 
@@ -481,6 +481,9 @@ void calc() {
             row.totalNds = consumptionSum
         }
 
+        // Код ОКП
+        row.okpCode = row.innerCode
+
         // Расчет полей зависимых от справочников
         if (row.name != null) {
             def map = refBookService.getRecordData(9, row.name)
@@ -492,7 +495,11 @@ void calc() {
             row.country = null
             row.countryCode1 = null
         }
-        if (row.signPhis == 1) {
+
+        // Признак физической поставки
+        def boolean deliveryPhis = refBookService.getNumberValue(18, row.signPhis, 'CODE') == 1
+
+        if (deliveryPhis) {
             row.countryCode2 = null
             row.region1 = null
             row.city1 = null
@@ -502,10 +509,17 @@ void calc() {
             row.city2 = null
             row.settlement2 = null
         }
+
         if (row.countryCode2 == row.countryCode3) {
-            row.signTransaction = Long.valueOf(182632)
+            def valNo = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 0", null)
+            if (valNo != null && valNo.size() == 1) {
+                row.signTransaction = valNo.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+            }
         } else {
-            row.signTransaction = Long.valueOf(182633)
+            def valYes = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 1", null)
+            if (valYes != null && valYes.size() == 1) {
+                row.signTransaction = valYes.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+            }
         }
     }
     dataRowHelper.update(dataRows);

@@ -397,7 +397,11 @@ void calc() {
             row.countryCode = null
             row.countryName = null
         }
-        if (row.deliverySign == 1) {
+
+        // Признак физической поставки
+        def boolean deliveryPhis = refBookService.getNumberValue(18, row.deliverySign, 'CODE') == 1
+
+        if (deliveryPhis) {
             row.countryCodeNumeric = null
             row.regionCode = null
             row.city = null
@@ -407,10 +411,17 @@ void calc() {
             row.city2 = null
             row.locality2 = null
         }
-        if (row.countryCodeNumeric == row.countryCodeNumeric2) {
-            row.foreignDeal = Long.valueOf(182632)
+
+        if (row.countryCodeNumeric == row.countryCodeNumeric2 || deliveryPhis) {
+            def valNo = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 0", null)
+            if (valNo != null && valNo.size() == 1) {
+                row.foreignDeal = valNo.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+            }
         } else {
-            row.foreignDeal = Long.valueOf(182633)
+            def valYes = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 1", null)
+            if (valYes != null && valYes.size() == 1) {
+                row.foreignDeal = valYes.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+            }
         }
     }
 
@@ -778,15 +789,15 @@ def addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 3
-//        newRow.inn =
+        // newRow.inn
         indexCell++
 
         // графа 4.1
-//        newRow.countryName =
+        // newRow.countryName
         indexCell++
 
         // графа 4.2
-//        newRow.countryCode =
+        // newRow.countryCode
         indexCell++
 
         // графа 5
@@ -952,7 +963,6 @@ def getDate(def value, int indexRow, int indexCell) {
         throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
-
 
 /**
  * Получить признак физической поставки драгоценного металла
