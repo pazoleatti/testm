@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -31,9 +32,7 @@ public class DepartmentDeclarationTypeDaoImplTest {
 		departmentDeclarationTypeDao.save(5, 4);
 	}
 	
-	//@Test(expected = DaoException.class) 
-	// TODO: Вернуть ошибку когда Марат закоммитит констрейнт (SBRFACCTAX-4444)
-	@Test
+	@Test(expected = DaoException.class) 
 	public void saveError(){
 		departmentDeclarationTypeDao.save(5, 4);
 		departmentDeclarationTypeDao.save(5, 4);
@@ -52,7 +51,7 @@ public class DepartmentDeclarationTypeDaoImplTest {
 		ddt = departmentDeclarationTypeDao.getDestinations(1, 1, FormDataKind.PRIMARY);
 		assertEquals(2, ddt.size());
 		ddt = departmentDeclarationTypeDao.getDestinations(1, 2, FormDataKind.CONSOLIDATED);
-		assertEquals(3, ddt.size());
+		assertEquals(2, ddt.size());
 	}
 
 	@Test
