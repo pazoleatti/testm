@@ -402,6 +402,7 @@ create table department_declaration_type (
 alter table department_declaration_type add constraint dept_decl_type_pk primary key (id);
 alter table department_declaration_type add constraint dept_decl_type_fk_dept foreign key (department_id) references department (id);
 alter table department_declaration_type add constraint dept_decl_type_fk_decl_type foreign key (declaration_type_id) references declaration_type (id);
+alter table department_declaration_type add constraint dept_decl_type_uniq_decl unique (department_id, declaration_type_id);
 
 comment on table department_declaration_type is 'Сведения о декларациях, с которыми можно работать в подразделении';
 comment on column department_declaration_type.id is 'Идентификатор (первичный ключ)';
