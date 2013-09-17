@@ -34,9 +34,12 @@ public class PagingResult<T> extends ArrayList<T>{
     /**
      * @return список записей, попавших в запрошенный диапазон значений
      */
+	@Deprecated
     public List<T> getRecords() {
         return this;
     }
+
+	@Deprecated
     public void setRecords(List<T> records) {
         clear();
         addAll(records);
