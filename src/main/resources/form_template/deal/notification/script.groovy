@@ -1,9 +1,6 @@
 package form_template.deal.notification
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.FormType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 
 import groovy.xml.MarkupBuilder
@@ -17,17 +14,8 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         generateXML()
         break
-    case FormDataEvent.DELETE:
-        delete()
-        break
     default:
         return
-}
-
-/**
- * Удаление уведомления
- */
-void delete() {
 }
 
 /**

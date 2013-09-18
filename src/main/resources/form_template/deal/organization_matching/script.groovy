@@ -12,7 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
  *
  * @author Stanislav Yasinskiy
  */
-
+// TODO заменить 38 на номер нового справочника
 switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
@@ -38,15 +38,24 @@ switch (formDataEvent) {
 void accepted() {
     def List<Map<String, RefBookValue>> updateList = new ArrayList<Map<String, RefBookValue>>()
     def List<Map<String, RefBookValue>> insertList = new ArrayList<Map<String, RefBookValue>>()
+    def List<Long> deleteList = new ArrayList<Long>()
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
     for (row in dataRows) {
-        if (row.refBookRecord != null) {
-            // изменение существующей записи
-            updateList.add(getRecord(row))
-        } else {
-            // добавление новой записи
-            insertList.add(getRecord(row))
+        def Number operationCode = row.editSign != null ? refBookService.getRecordData(38, row.editSign).CODE.numberValue : 0
+        switch (operationCode) {
+            case 0:
+                // добавление новой записи
+                insertList.add(getRecord(row))
+                break
+            case 1:
+                // изменение существующей записи
+                updateList.add(getRecord(row))
+                break
+            case 2:
+                // удаление существующей записи
+                deleteList.add(row.refBookRecord)
+                break
         }
     }
 
@@ -55,6 +64,8 @@ void accepted() {
         refDataProvider.updateRecords(new Date(), updateList)
     if (insertList.size() > 0)
         refDataProvider.insertRecords(new Date(), insertList)
+    if (deleteList.size() > 0)
+        deleteRecords(9, new Date(), deleteList)
 }
 
 Map<String, RefBookValue> getRecord(DataRow<Cell> row) {
@@ -83,7 +94,7 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
+    def index = currentDataRow != null ? (currentDataRow.getIndex() + 1) : (size == 0 ? 1 : (size + 1))
     ['name', 'country', 'regNum', 'taxpayerCode', 'address', 'inn', 'kpp', 'code', 'editSign', 'refBookRecord'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
@@ -114,15 +125,27 @@ void logicCheck() {
             continue
         }
         def rowNum = row.getIndex()
-        ['rowNum', 'name', 'country', 'address', 'inn', 'code'].each {
-            def rowCell = row.getCell(it)
-            if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
-                def msg = rowCell.column.name
-                logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
+        // Проверка заполненности полей в строках НЕ на удаление
+        if (row.editSign == null || refBookService.getRecordData(38, row.editSign).CODE.numberValue != 2) {
+            ['rowNum', 'name', 'country', 'address', 'inn', 'code', 'editSign'].each {
+                def rowCell = row.getCell(it)
+                if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
+                    def msg = rowCell.column.name
+                    logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
+                }
+            }
+        } else{
+            // Проверка заполненности полей в строках на удаление
+            ['rowNum', 'editSign', 'refBookRecord'].each {
+                def rowCell = row.getCell(it)
+                if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
+                    def msg = rowCell.column.name
+                    logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
+                }
             }
         }
         // Проверка на заполнение атрибута «Запись справочника»
-        if (row.editSign != null && row.refBookRecord == null && refBookService.getRecordData(38, row.editSign).CODE.numberValue == 1) {
+        if (row.editSign != null && row.refBookRecord == null && refBookService.getRecordData(38, row.editSign).CODE.numberValue != 0) {
             def msg = row.getCell('refBookRecord').column.name
             logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
         }
@@ -171,11 +194,12 @@ void logicCheck() {
             def msg = row.getCell('refBookRecord').column.name
             logger.warn("Строка $rowNum: В справочнике «Организации – участники контролируемых сделок» не найден элемент $msg!")
         }
-
         // Проверка уникальности ссылки на элемент справочника
-        isHaveDuplicates = row.refBookRecord != null && dataRows.find { it.refBookRecord == row.refBookRecord && it != row } != null
+        if (row.refBookRecord != null && dataRows.find { it.refBookRecord == row.refBookRecord && it.getIndex() != row.getIndex() } != null)
+            isHaveDuplicates = true
     }
-    if (isHaveDuplicates) logger.error("Одна запись справочника не может быть отредактирована более одного раза в одной и той же форме!")
+    if (isHaveDuplicates)
+        logger.error("Одна запись справочника не может быть отредактирована более одного раза в одной и той же форме!")
 }
 
 /**
@@ -188,11 +212,12 @@ void calc() {
         if (row.getAlias() != null) {
             continue
         }
+        // Порядковый номер строки
+        row.rowNum = row.getIndex()
+        // Чистим ссылку на запись, если не меняем и не удаляем
         if (row.refBookRecord != null && (row.editSign == null || refBookService.getRecordData(38, row.editSign).CODE.numberValue == 0)) {
             row.refBookRecord = null
         }
-        // Порядковый номер строки
-        row.rowNum = row.getIndex()
     }
     dataRowHelper.update(dataRows);
 }

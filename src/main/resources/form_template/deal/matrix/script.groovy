@@ -1079,11 +1079,10 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     }
     if (row.organName != null) {
         // Графа 3
-        /**
-         * Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
-         * «Организации – участники контролируемых сделок» атрибут «Резидент оффшорной зоны» = 1,
-         * то заполняется значением «0». В ином случае заполняется значением «1».
-         */
+
+         // Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
+         // «Организации – участники контролируемых сделок» атрибут «Резидент оффшорной зоны» = 1,
+         // то заполняется значением «0». В ином случае заполняется значением «1».
         def val = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
         row.f121 = val.OFFSHORE.numberValue == 1 ? recNoId : recYesId
 
@@ -1100,11 +1099,9 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         row.f133 = row.f121
 
         // Графа 10
-        /**
-         * Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
-         * «Организации – участники контролируемых сделок» атрибут «Освобождена от налога на прибыль либо является резидентом Сколково» = 1,
-         * то заполняется значением «1».    В ином случае не Не заполняется.
-         */
+        // Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
+        // «Организации – участники контролируемых сделок» атрибут «Освобождена от налога на прибыль либо является резидентом Сколково» = 1,
+        // то заполняется значением «1».    В ином случае не Не заполняется.
         row.f134 = val.SKOLKOVO.numberValue == 1 ? recYesId : null
     }
 
@@ -1115,10 +1112,9 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
         def val11 = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
 
-        // TODO Вопрос по атрибуту
-        //if(row.dealDoneDate.before(compareCalendar11.getTime()) || (val11 != null && val11.???.numVal == 1)) {
-        //  row.f135 = recNoId
-        //}
+        if(row.dealDoneDate.before(compareCalendar11.getTime()) || (val11 != null && val11.OFFSHORE.referenceValue == recYesId)) {
+          row.f135 = recNoId
+        }
     }
 
     if (row.organName != null) {
