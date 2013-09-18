@@ -230,11 +230,10 @@ public class DeclarationDataPresenter
 		CheckDeclarationDataAction checkAction = new CheckDeclarationDataAction();
 		checkAction.setDeclarationId(declarationId);
 		dispatcher.execute(checkAction, CallbackUtils
-				.defaultCallbackNoModalError(new AbstractCallback<CheckDeclarationDataResult>() {
+				.defaultCallback(new AbstractCallback<CheckDeclarationDataResult>() {
 					@Override
 					public void onSuccess(CheckDeclarationDataResult result) {
 						MessageEvent.fire(DeclarationDataPresenter.this, "Ошибок не обнаружено");
-						LogAddEvent.fire(DeclarationDataPresenter.this, result.getLogEntries());
 					}
 				}, this));
 	}

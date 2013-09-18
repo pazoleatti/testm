@@ -192,7 +192,6 @@ void generateXML() {
                                 ) {
                                     def String countryCode1 = row.countryCode1 != null ? '' + refBookService.getRecordData(10, row.countryCode1).CODE.stringValue : '000'
                                     def String region1 = row.region1 != null ? '' + refBookService.getRecordData(4, row.region1).CODE.stringValue : null
-                                    println("countryCode1 = " + countryCode1)
                                     МестОтпрТов(
                                             [ОКСМ: countryCode1] +
                                                     (region1 != null ? [КодРегион: region1] : [:]) +
@@ -201,7 +200,6 @@ void generateXML() {
                                     )
                                     def String countryCode2 = row.countryCode2 != null ? '' + refBookService.getRecordData(10, row.countryCode2).CODE.stringValue : '000'
                                     def String region2 = row.region2 != null ? '' + refBookService.getRecordData(4, row.region2).CODE.stringValue : null
-                                    println("countryCode2 = " + countryCode2)
                                     МестСовСд(
                                             [ОКСМ: countryCode2] +
                                                     [КодРегион: region2] +

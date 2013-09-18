@@ -134,16 +134,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	public void check(Logger logger, long id, TAUserInfo userInfo) {
-        if (isDeclarationValid(id, logger, true)) {
-            declarationDataScriptingService.executeScript(userInfo, declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
-            // Проверяем ошибки при пересчете
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException(
-                        "Найдены ошибки при выполнении проверки декларации",
-                        logger.getEntries());
-            } else {
-                logger.info("Проверка завершена, ошибок не обнаружено");
-            }
+        validateDeclaration(id, logger, true);
+        declarationDataScriptingService.executeScript(userInfo, declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
+        // Проверяем ошибки при пересчете
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Найдены ошибки при выполнении проверки декларации",
+                    logger.getEntries());
+        } else {
+            logger.info("Проверка завершена, ошибок не обнаружено");
         }
 	}
 
@@ -176,19 +175,18 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		if (accepted) {
             DeclarationData declarationData  = declarationDataDao.get(id);
 
-            if (isDeclarationValid(id, logger, true)) {
-                declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
+            validateDeclaration(id, logger, true);
+            declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
-                declarationData.setAccepted(true);
+            declarationData.setAccepted(true);
 
-                Map<String, Object> exchangeParams = new HashMap<String, Object>();
-                declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
+            Map<String, Object> exchangeParams = new HashMap<String, Object>();
+            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
 
-                Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId();
-                logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
-                auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED , userInfo, declarationData.getDepartmentId(),
-                        declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
-            }
+            Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId();
+            logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
+            auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED , userInfo, declarationData.getDepartmentId(),
+                    declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
 		} else {
 			declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
 
@@ -259,7 +257,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		String xml = XML_HEADER.concat(writer.toString());
         declarationDataDao.setXmlData(declarationData.getId(), xml);
 
-        isDeclarationValid(declarationData.getId(), logger, false);
+        validateDeclaration(declarationData.getId(), logger, false);
         // Заполнение отчета и экспорт в формате PDF и XLSX
         JasperPrint jasperPrint = fillReport(xml,
                 declarationTemplateDao.getJasper(declarationData.getDeclarationTemplateId()));
@@ -272,9 +270,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * @param declarationDataId идентификатор данных декларации
      * @param logger логгер лог панели
      * @param isErrorFatal признак того, что операция не может быть продолжена с невалидным xml
-     * @return
      */
-    private boolean isDeclarationValid(Long declarationDataId, final Logger logger, final boolean isErrorFatal) {
+    private void validateDeclaration(Long declarationDataId, final Logger logger, final boolean isErrorFatal) {
         DeclarationData declarationData  = declarationDataDao.get(declarationDataId);
         String xml = declarationDataDao.getXmlData(declarationData.getId());
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
@@ -319,16 +316,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     }
                 });
                 validator.validate(new StreamSource(xmlStream));
-
-                if (logger.containsLevel(LogLevel.ERROR)) {
-                    throw new ServiceLoggerException(VALIDATION_ERR_MSG, logger.getEntries());
-                }
             } catch (Exception e) {
                 logger.error(e);
+                throw new ServiceException(VALIDATION_ERR_MSG, logger.getEntries());
+            }
+
+            if (logger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException(VALIDATION_ERR_MSG, logger.getEntries());
             }
         }
-        return true;
     }
 
 	private static JasperPrint fillReport(String xml, byte[] jasperTemplate) {
