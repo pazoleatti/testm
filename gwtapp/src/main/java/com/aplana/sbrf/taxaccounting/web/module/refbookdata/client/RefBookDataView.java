@@ -127,7 +127,22 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		}
 	}
 
-    @Override
+	@Override
+	public void setSelected(Long recordId) {
+		selectionModel.clear();
+		int i = 0;
+		for (RefBookDataRow row : refbookDataTable.getVisibleItems()) {
+
+			if (row.getRefBookRowId() == recordId) {
+				selectionModel.setSelected(row, true);
+				refbookDataTable.setKeyboardSelectedRow(i, true);
+				return;
+			}
+			i++;
+		}
+	}
+
+	@Override
     public void resetRefBookElements() {
         int i;
         while ((i = refbookDataTable.getColumnCount()) != 0) {
