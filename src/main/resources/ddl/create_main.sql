@@ -258,7 +258,7 @@ alter table form_column add constraint form_column_chk_max_length
 check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 1000) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 27) or ((type ='D' or type ='R') and max_length is null));
 alter table form_column add constraint form_column_chk_checking check (checking in (0, 1));
 alter table form_column add constraint form_column_chk_attribute_id check ((type = 'R' and attribute_id is not null and precision >=0 and precision < 9) or (type <> 'R' and attribute_id is null));
-
+alter table form_column add constraint form_column_chk_width check (not width is null);
 alter table form_column add constraint form_column_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
 
 comment on table form_column is 'Описания столбцов налоговых форм';
