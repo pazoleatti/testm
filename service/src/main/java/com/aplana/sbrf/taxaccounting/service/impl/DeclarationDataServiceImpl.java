@@ -91,6 +91,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public static final String ATTR_FILE_ID = "ИдФайл";
 	public static final String ATTR_DOC_DATE = "ДатаДок";
 	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+    private static final String VALIDATION_ERR_MSG = "Декларация / Уведомление не может быть создана, т.к. шаблон некорректен. Обратитесь к настройщику шаблонов";
 
 	@Override
 	@Transactional(readOnly = false)
@@ -133,7 +134,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	public void check(Logger logger, long id, TAUserInfo userInfo) {
-        if (isDeclarationValid(id, logger)) {
+        if (isDeclarationValid(id, logger, true)) {
             declarationDataScriptingService.executeScript(userInfo, declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
             // Проверяем ошибки при пересчете
             if (logger.containsLevel(LogLevel.ERROR)) {
@@ -175,7 +176,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		if (accepted) {
             DeclarationData declarationData  = declarationDataDao.get(id);
 
-            if (isDeclarationValid(id, logger)) {
+            if (isDeclarationValid(id, logger, true)) {
                 declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
                 declarationData.setAccepted(true);
@@ -258,19 +259,22 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		String xml = XML_HEADER.concat(writer.toString());
         declarationDataDao.setXmlData(declarationData.getId(), xml);
 
-        if (isDeclarationValid(declarationData.getId(), logger)) {
-            // Заполнение отчета и экспорт в формате PDF и XLSX
-            JasperPrint jasperPrint = fillReport(xml,
-                    declarationTemplateDao.getJasper(declarationData
-                            .getDeclarationTemplateId()));
-            declarationDataDao.setPdfData(declarationData.getId(),
-                    exportPDF(jasperPrint));
-            declarationDataDao.setXlsxData(declarationData.getId(),
-                    exportXLSX(jasperPrint));
-        }
+        isDeclarationValid(declarationData.getId(), logger, false);
+        // Заполнение отчета и экспорт в формате PDF и XLSX
+        JasperPrint jasperPrint = fillReport(xml,
+                declarationTemplateDao.getJasper(declarationData.getDeclarationTemplateId()));
+        declarationDataDao.setPdfData(declarationData.getId(), exportPDF(jasperPrint));
+        declarationDataDao.setXlsxData(declarationData.getId(), exportXLSX(jasperPrint));
 	}
 
-    private boolean isDeclarationValid(Long declarationDataId, Logger logger) {
+    /**
+     * Проверка валидности xml декларации
+     * @param declarationDataId идентификатор данных декларации
+     * @param logger логгер лог панели
+     * @param isErrorFatal признак того, что операция не может быть продолжена с невалидным xml
+     * @return
+     */
+    private boolean isDeclarationValid(Long declarationDataId, final Logger logger, final boolean isErrorFatal) {
         DeclarationData declarationData  = declarationDataDao.get(declarationDataId);
         String xml = declarationDataDao.getXmlData(declarationData.getId());
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
@@ -288,29 +292,40 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 validator.setErrorHandler(new ErrorHandler() {
                     @Override
                     public void warning(SAXParseException e) throws SAXException {
-                        wrapException(e);
+                        logger.info(getMessage(e));
                     }
 
                     @Override
                     public void error(SAXParseException e) throws SAXException {
-                        wrapException(e);
+                        if (isErrorFatal){
+                            logger.error(getMessage(e));
+                        } else {
+                            logger.warn(getMessage(e));
+                        }
                     }
 
                     @Override
                     public void fatalError(SAXParseException e) throws SAXException {
-                        wrapException(e);
+                        if (isErrorFatal){
+                            logger.error(getMessage(e));
+                        } else {
+                            logger.warn(getMessage(e));
+                        }
                     }
 
-                    private void wrapException(SAXParseException e) throws SAXException {
-                        throw new SAXException(e.getLocalizedMessage()+" Строка: "+e.getLineNumber()+"; Столбец: "+e.getColumnNumber());
+                    private String getMessage(SAXParseException e) throws SAXException {
+                        return String.format(e.getLocalizedMessage() + " Строка: %s; Столбец: %s",
+                                e.getLineNumber(), e.getColumnNumber());
                     }
                 });
                 validator.validate(new StreamSource(xmlStream));
+
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    throw new ServiceLoggerException(VALIDATION_ERR_MSG, logger.getEntries());
+                }
             } catch (Exception e) {
                 logger.error(e);
-                throw new ServiceLoggerException(
-                        "Декларация / Уведомление не может быть создана, т.к. шаблон некорректен. Обратитесь к настройщику шаблонов",
-                        logger.getEntries());
+                throw new ServiceLoggerException(VALIDATION_ERR_MSG, logger.getEntries());
             }
         }
         return true;
@@ -396,13 +411,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			throw new ServiceException("Невозможно получить дату обновления декларации", e);
 		}
 	}
-	
-	
+
+
 	@Override
 	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
 		return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
 	}
 
-	
-	
+
+
 }
