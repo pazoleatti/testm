@@ -33,9 +33,11 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 	@Override
 	public CreateDeclarationResult execute(CreateDeclaration command, ExecutionContext executionContext) throws ActionException {
 		CreateDeclarationResult result = new CreateDeclarationResult();
-		result.setDeclarationId(declarationDataService.create(new Logger(), declarationTemplateService
+        Logger logger = new Logger();
+		result.setDeclarationId(declarationDataService.create(logger, declarationTemplateService
 				.getActiveDeclarationTemplateId(command.getDeclarationTypeId()), command.getDepartmentId(),
 				securityService.currentUserInfo(), command.getReportPeriodId()));
+        result.setLogEntries(logger.getEntries());
 		return result;
 	}
 
