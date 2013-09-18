@@ -2,8 +2,6 @@ package form_template.income.rnu8
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -11,13 +9,10 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 /**
- * Скрипт для РНУ-8 (rnu8.groovy).
+ * Скрипт для РНУ-8.
  * Форма "(РНУ-8) Простой регистр налогового учёта «Требования»".
  *
  * @version 59
- *
- * TODO:
- *      - нет условии в проверках соответствия НСИ
  *
  * @author rtimerbaev
  */
@@ -45,10 +40,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        allCheck()
-        break
-// после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
         allCheck()
         break
 // обобщить
@@ -57,7 +49,7 @@ switch (formDataEvent) {
         calc()
         if (allCheck()) {
             // для сохранения изменений приемников
-            getData(formData).commit()
+            data.commit()
         }
         break
 }
@@ -81,7 +73,7 @@ def hasError() {
 }
 
 /**
- * Вставка строки в случае если форма генирует динамически строки итого (на основе данных введённых пользователем)
+ * Вставка строки в случае если форма генерирует динамически строки итого (на основе данных введённых пользователем)
  */
 void addNewRow() {
     def data = data
@@ -126,7 +118,9 @@ def DataRow getNewRow() {
  * Удалить строку.
  */
 def deleteRow() {
-    data.delete(currentDataRow)
+    if (!isTotal(currentDataRow)) {
+        data.delete(currentDataRow)
+    }
 }
 
 /**
@@ -267,7 +261,7 @@ def logicalCheck() {
 
             // 2. Проверка на уникальность поля «№ пп» (графа 1)
             if (numberList.contains(row.number)) {
-                logger.error('Нарушена уникальность номера по порядку!')
+                logger.error("Нарушена уникальность номера по порядку ${row.number}!")
                 return false
             }else{
                 numberList.add(row.number)
@@ -359,33 +353,18 @@ def getRowIndexString(def DataRow row){
 }
 
 /**
- * Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята".
- */
-void checkOnPrepareOrAcceptance(def value) {
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() { department ->
-        if (department.formTypeId == formData.getFormType().getId()) {
-            def form = formDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-            // если форма существует и статус "принята"
-            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
-                logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
-            }
-        }
-    }
-}
-
-/**
  * Консолидация.
  */
 void consolidation() {
+    def data = data
     // удалить все строки и собрать из источников их строки
-    getRows(data).clear()
+    data.clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
+                getRows(getData(source)).each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
                         data.insert(row,getRows(data).size()+1)
                     }
@@ -393,23 +372,23 @@ void consolidation() {
             }
         }
     }
-    logger.info('Формирование консолидированной формы прошло успешно.')
-}
-
-/**
- * Проверки при переходе "Отменить принятие".
- */
-void checkOnCancelAcceptance() {
-    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
-            formData.getFormType().getId(), formData.getKind());
-    DepartmentFormType department = departments.getAt(0);
-    if (department != null) {
-        FormData form = formDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-
-        if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
-            logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
+    def ignoredRows = []
+    for(def row : getRows(data)){
+        if (!ignoredRows.contains(row)) {
+            for(def rowB : getRows(data)){
+                if(row!=rowB && row.balance==rowB.balance && !ignoredRows.contains(rowB)){
+                    row.income+=rowB.income
+                    row.outcome+=rowB.outcome
+                    ignoredRows.add(rowB)
+                }
+            }
         }
     }
+    data.save(getRows(data))
+    ignoredRows.each{
+        data.delete(it)
+    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**

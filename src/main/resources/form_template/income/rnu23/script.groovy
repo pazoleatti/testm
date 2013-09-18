@@ -10,6 +10,10 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  *
  * @version 59
  *
+ * TODO:
+ *      - неясности в консолидацией. Пока убрал расчеты и проверки после консолидации.
+ *      - поправить загрузку
+ *
  * @author rtimerbaev
  */
 
@@ -39,10 +43,11 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE : // обобщить
         consolidation()
-        calc() && logicalCheck() && checkNSI()
+        // calc() && logicalCheck() && checkNSI()
         break
     case FormDataEvent.IMPORT :
         importData()
+        // TODO (Ramil Timerbaev)
         if (!hasError() && calc() && logicalCheck() && checkNSI()) {
             logger.info('Закончена загрузка файла ' + UploadFileName)
         }
@@ -402,19 +407,45 @@ void consolidation() {
     // удалить все строки и собрать из источников их строки
     data.clear()
 
+    def newRows = []
+    def sumColumns = getTotalColumns()
+    def isFind
+    def tmp
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceData = getData(source)
-                getRows(sourceData).each { row->
-                    if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
+                // строки источника
+                getRows(sourceData).each { sRow ->
+                    if (sRow.getAlias() == null || sRow.getAlias() == '') {
+                        isFind = false
+
+                        // строки приемника - искать совпадения, если совпадения есть, то суммировать графы 13..20
+                        for (def dRow : newRows) {
+                            if (sRow.contract == dRow.contract && sRow.contractDate == dRow.contractDate &&
+                                    sRow.dateOfTransaction == dRow.dateOfTransaction) {
+                                isFind = true
+                                sumColumns.each { alias ->
+                                    tmp = (dRow.getCell(alias).getValue() ?: 0) + (sRow.getCell(alias).getValue() ?: 0)
+                                    dRow.getCell(alias).setValue(tmp)
+                                }
+                                break
+                            }
+                        }
+                        // если совпадений нет, то просто добавить строку
+                        if (!isFind) {
+                            newRows.add(sRow)
+                        }
                     }
                 }
             }
         }
     }
+    if (!newRows.isEmpty()) {
+        data.insert(newRows, 1)
+    }
+    save(data)
     data.commit()
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
@@ -549,7 +580,7 @@ def getSum(def form, def columnAlias) {
         return 0
     }
     def to = 0
-    def from = form.dataRows.size() - 2
+    def from = getRows(form).size() - 2
     if (to > from) {
         return 0
     }
