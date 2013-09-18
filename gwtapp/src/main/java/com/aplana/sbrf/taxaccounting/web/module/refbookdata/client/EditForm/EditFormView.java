@@ -104,8 +104,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		if (record == null) {
 			for (HasValue w : widgets.values()) {
 				w.setValue(null);
-				if (w.getValue() instanceof Widget) {
-					((Widget) w.getValue()).setTitle("");
+				if (w instanceof UIObject) {
+					((UIObject) w).setTitle(null);
 				}
 			}
 		} else {
