@@ -232,6 +232,7 @@ void calc() {
     def DataRow totalRow = formData.createDataRow()
     totalRow.setAlias('total')
     totalRow.contractNumber = 'Итого'
+    totalRow.getCell('contractNumber').colSpan = 11
     setTotalStyle(totalRow)
 
     // графы для которых надо вычислять итого (графа 13..20)
@@ -642,14 +643,9 @@ def boolean checkRequiredColumns(def DataRow row, def List columns) {
         }
     }
     if (!colNames.isEmpty()) {
-        def index = row.rowNumber
+        def errorBegin = getRowIndexString(row)
         def errorMsg = colNames.join(', ')
-        if (index != null) {
-            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-        } else {
-            index = getIndex(row) + 1
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
-        }
+        logger.error(errorBegin+ "не заполнены колонки : $errorMsg.")
         return false
     }
     return true

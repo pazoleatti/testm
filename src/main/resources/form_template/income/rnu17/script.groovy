@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 /**
@@ -18,39 +19,35 @@ switch (formDataEvent) {
         checkCreation()
         break
     case FormDataEvent.CHECK :
-        logicalCheck(true)
-        checkNSI()
+        allCheck()
         break
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck(false)
-        checkNSI()
+        allCheck()
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
         break
     case FormDataEvent.DELETE_ROW :
-        deleteRow(currentDataRow)
+        deleteRow()
         break
-    // проверка при "подготовить"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :
-        break
-    // проверка при "принять"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
-        break
-    // проверка при "вернуть из принята в подготовлена"
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
-        break
-    // после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
+        allCheck()
         break
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        logicalCheck(false)
-        checkNSI()
-        data.commit()
+        if (allCheck()) {
+            // для сохранения изменений приемников
+            data.commit()
+        }
         break
 }
 
@@ -80,16 +77,34 @@ void checkCreation() {
     }
 }
 
-def logicalCheck(def useLog) {
+def allCheck() {
+    return !hasError() && logicalCheck() && checkNSI()
+}
+
+/**
+ * Имеются ли фатальные ошибки.
+ */
+def hasError() {
+    return logger.containsLevel(LogLevel.ERROR)
+}
+
+def logicalCheck() {
     def data = data
     def requiredColumns = ['rowNumber','knu','incomeType','sum']
     def hasTotal = false
     def totalSum = 0
+    def rowNumbers = []
     for (def DataRow row : getRows(data)){
         if (!isTotal(row)){
             //проверяем обязательные поля
-            if (!checkRequiredColumns(row, requiredColumns, useLog)){
+            if (!checkRequiredColumns(row, requiredColumns)){
                 return false
+            }
+            if(rowNumbers.contains(row.rowNumber)){
+                logger.error("Нарушена уникальность номера по порядку ${row.rowNumber}!")
+                return false
+            }else{
+                rowNumbers.add(row.rowNumber)
             }
             //сразу считаем сумму для проверки итогов
             totalSum+=row.sum
@@ -129,7 +144,7 @@ void calc() {
     for (def DataRow row : getRows(data)){
         if (!isTotal(row)){
             //проверяем обязательные поля
-            if (!checkRequiredColumns(row, requiredColumns, true)){
+            if (!checkRequiredColumns(row, requiredColumns)){
                 return
             }
         }
@@ -142,24 +157,25 @@ void calc() {
         }
     }
     delRow.each {
-        deleteRow(it)
+        data.delete(it)
     }
     if (getRows(data).isEmpty()) {
         return
     }
-    getRows(data).sort { it.knu }
-    data.save(getRows(data))
-    recalculateNumbers()
+    getRows(data).sort { getKnu(it.knu) }
+    // проставление номеров строк и расчет суммы
     def totalSum = 0
-    getRows(data).each { row->
+    getRows(data).eachWithIndex { row, index->
+        row.rowNumber = index+1
         totalSum += row.sum?:0
     }
+    data.save(getRows(data))
 
     // добавить строки "итого"
     def DataRow totalRow = formData.createDataRow()
     totalRow.setAlias('total')
     totalRow.fix = 'Итого'
-    totalRow.getCell('fix').colSpan = 2
+    totalRow.getCell('fix').colSpan = 3
     totalRow.sum = totalSum
     setTotalStyle(totalRow)
     data.insert(totalRow,getRows(data).size()+1)
@@ -188,7 +204,6 @@ void addNewRow() {
         }
     }
     data.insert(newRow,index+1)
-    recalculateNumbers()
 }
 
 /**
@@ -203,28 +218,17 @@ def DataRow getNewRow() {
     return row
 }
 
-void deleteRow(def row) {
-    data.delete(row)
-    recalculateNumbers()
-}
-
-void recalculateNumbers(){
-    def data = data
-    // проставление номеров строк
-    def i = 1;
-    getRows(data).each{ row->
-        if (!isTotal(row)) {
-            row.rowNumber = i++
-        }
+void deleteRow() {
+    if (!isTotal(currentDataRow)) {
+        data.delete(currentDataRow)
     }
-    data.save(getRows(data))
 }
 
 void consolidation() {
     def data = data
     // удалить все строки и собрать из источников их строки
-    getRows(data).clear()
-
+    data.clear()
+    //TODO не определен вид консолидации
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
@@ -274,10 +278,9 @@ def isTotal(def row) {
  *
  * @param row строка
  * @param columns список обязательных графов
- * @param useLog нужно ли записывать сообщения в лог
  * @return true - все хорошо, false - есть незаполненные поля
  */
-def checkRequiredColumns(def DataRow row, ArrayList<String> columns, def useLog) {
+def checkRequiredColumns(def DataRow row, ArrayList<String> columns) {
     def colNames = []
     columns.each {
         if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
@@ -286,17 +289,9 @@ def checkRequiredColumns(def DataRow row, ArrayList<String> columns, def useLog)
         }
     }
     if (!colNames.isEmpty()) {
-        if (!useLog) {
-            return false
-        }
-        def index = row.rowNumber
+        def errorBegin = getRowIndexString(row)
         def errorMsg = colNames.join(', ')
-        if (index != null) {
-            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-        } else {
-            index = getRows(data).indexOf(row) + 1
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
-        }
+        logger.error(errorBegin+ "не заполнены колонки : $errorMsg.")
         return false
     }
     return true
@@ -327,4 +322,17 @@ def getIncomeType(def id) {
     return refBookService.getStringValue(28, id, 'TYPE_INCOME')
 }
 
-
+/**
+ * Начало предупреждений/ошибок
+ * @param row
+ * @return
+ */
+def String getRowIndexString(def DataRow row){
+    def index = row.rowNumber
+    if (index != null) {
+        return "В строке \"№ пп\" равной $index "
+    } else {
+        index = getIndex(row) + 1
+        return "В строке $index "
+    }
+}
