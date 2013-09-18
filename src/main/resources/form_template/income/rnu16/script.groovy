@@ -1,3 +1,9 @@
+package form_template.income.rnu16
+
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+
 /**
  *  Скрипт для РНУ-16
  *  Форма "(РНУ-16) Регистр налогового учёта доходов по поставочным сделкам с ПФИ, не признаваемыми ФИСС, в соответствии с учётной политикой для целей налогообложения ОАО «Сбербанк России»"
@@ -10,13 +16,11 @@ switch (formDataEvent) {
         checkCreation()
         break
     case FormDataEvent.CHECK :
-        logicalCheck()
-        checkNSI()
+        allCheck()
         break
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck()
-        checkNSI()
+        allCheck()
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
@@ -24,25 +28,22 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW :
         deleteRow()
         break
-    // проверка при "подготовить"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :
-        break
-    // проверка при "принять"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
-        break
-    // проверка при "вернуть из принята в подготовлена"
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
-        break
-    // после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        allCheck()
         break
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        logicalCheck()
-        checkNSI()
-        getData(formData).commit()
+        if (allCheck()) {
+            // для сохранения изменений приемников
+            data.commit()
+        }
         break
 }
 
@@ -72,6 +73,17 @@ void checkCreation() {
     }
 }
 
+def allCheck() {
+    return !hasError() && logicalCheck() && checkNSI()
+}
+
+/**
+ * Имеются ли фатальные ошибки.
+ */
+def hasError() {
+    return logger.containsLevel(LogLevel.ERROR)
+}
+
 /**
  * Добавить новую строку.
  */
@@ -90,6 +102,7 @@ def addNewRow() {
     data.insert(newRow, i + 1)
 
     // проставление номеров строк
+    //TODO возможно убрать http://jira.aplana.com/browse/SBRFACCTAX-4270
     i = 1;
     getRows(data).each{ row->
         if (!isTotal(row)) {
@@ -390,8 +403,8 @@ void consolidation() {
     def data = getData(formData)
 
     // удалить все строки и собрать из источников их строки
-    getRows(data).clear()
-
+    data.clear()
+    // TODO не определен вид консолидации
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
@@ -405,6 +418,5 @@ void consolidation() {
             }
         }
     }
-    data.commit()
     logger.info('Формирование консолидированной формы прошло успешно.')
 }

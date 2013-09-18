@@ -232,6 +232,7 @@ void calc() {
     def DataRow totalRow = formData.createDataRow()
     totalRow.setAlias('total')
     totalRow.contractNumber = 'Итого'
+    totalRow.getCell('contractNumber').colSpan = 11
     setTotalStyle(totalRow)
 
     // графы для которых надо вычислять итого (графа 13..20)
@@ -564,12 +565,13 @@ def isTotal(def row) {
  * @param date2 дата окончания
  */
 def getColumn13or15or19(def DataRow row, def Date date1, def Date date2) {
+    def rowBegin = getRowIndexString(row)
     if (date1 == null || date2 == null) {
         return 0
     }
     def division = row.basisForCalc * (date2 - date1 + 1)
     if (division == 0) {
-        logger.error('Деление на ноль. Возможно неправильно выбраны даты.')
+        logger.error(rowBegin + 'деление на ноль. Возможно неправильно выбраны даты.')
         return 0
     }
     return roundTo2((row.base * row.interestRate) / (division))
@@ -642,14 +644,9 @@ def boolean checkRequiredColumns(def DataRow row, def List columns) {
         }
     }
     if (!colNames.isEmpty()) {
-        def index = row.rowNumber
+        def errorBegin = getRowIndexString(row)
         def errorMsg = colNames.join(', ')
-        if (index != null) {
-            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-        } else {
-            index = getIndex(row) + 1
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
-        }
+        logger.error(errorBegin+ "не заполнены колонки : $errorMsg.")
         return false
     }
     return true
