@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.*;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -256,6 +257,22 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 				formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
 			}
 		}
+		//TODO КОСТЫЛИ! По возможности убрать.
+		float tableWidth = 0;
+		for (int i=0; i<formDataTable.getColumnCount(); i++) {
+			String width = formDataTable.getColumnWidth(formDataTable.getColumn(i));
+			if (width == null) {
+				continue;
+			}
+			for (Style.Unit unit : Style.Unit.values()) {
+				if (width.contains(unit.getType())) {
+					width = width.replace(unit.getType(), "");
+					break;
+				}
+			}
+			tableWidth += Float.parseFloat(width);
+		}
+		formDataTable.setTableWidth(tableWidth, Style.Unit.EM);
 	}
 
 	public void refresh() {
