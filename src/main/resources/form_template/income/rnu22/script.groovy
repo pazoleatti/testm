@@ -565,12 +565,13 @@ def isTotal(def row) {
  * @param date2 дата окончания
  */
 def getColumn13or15or19(def DataRow row, def Date date1, def Date date2) {
+    def rowBegin = getRowIndexString(row)
     if (date1 == null || date2 == null) {
         return 0
     }
     def division = row.basisForCalc * (date2 - date1 + 1)
     if (division == 0) {
-        logger.error('Деление на ноль. Возможно неправильно выбраны даты.')
+        logger.error(rowBegin + 'деление на ноль. Возможно неправильно выбраны даты.')
         return 0
     }
     return roundTo2((row.base * row.interestRate) / (division))

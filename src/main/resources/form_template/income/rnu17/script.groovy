@@ -126,12 +126,13 @@ def checkNSI() {
     def data = data
     getRows(data).each{ row ->
         if (!isTotal(row)) {
+            def rowBegin = getRowIndexString(row)
             if (row.knu!=null && getKnu(row.knu)==null){
-                logger.error("Неверно заполнена графа \"Код налогового учета\"")
+                logger.error(rowBegin + "неверно заполнена графа \"Код налогового учета\"")
                 return false
             }
             if (row.incomeType!=null && getIncomeType(row.incomeType)==null){
-                logger.error("Неверно заполнена графа \"Вид (наименование) дохода\"")
+                logger.error(rowBegin + "неверно заполнена графа \"Вид (наименование) дохода\"")
                 return false
             }
         }
