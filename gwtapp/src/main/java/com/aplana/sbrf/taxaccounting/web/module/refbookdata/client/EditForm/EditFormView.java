@@ -106,6 +106,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				w.setValue(null);
 				if (w instanceof UIObject) {
 					((UIObject) w).setTitle(null);
+					if (w instanceof RefBookPickerPopupWidget) {
+						((RefBookPickerPopupWidget)w).setDereferenceValue("");
+					}
 				}
 			}
 		} else {
