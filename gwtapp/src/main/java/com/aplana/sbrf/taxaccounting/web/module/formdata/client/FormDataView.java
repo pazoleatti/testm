@@ -17,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -157,7 +158,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void setColumnsData(List<Column> columnsData, boolean readOnly, boolean forceEditMode) {
-
 		// Clean columns
 		while (formDataTable.getColumnCount() > 0) {
 			formDataTable.removeColumn(0);
@@ -174,7 +174,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		
 		indexColumn.setCellStyleNames("order");
 		formDataTable.addColumn(indexColumn, "№");
-		formDataTable.setColumnWidth(indexColumn, "3em");
+		formDataTable.setColumnWidth(indexColumn, 3, Style.Unit.EM);
 
 		factory.setReadOnly(readOnly);
 		factory.setSuperEditMode(forceEditMode);
@@ -198,11 +198,27 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 					}
 				});
 				if (col.getWidth() >= 0) {
-					formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
+					formDataTable.setColumnWidth(tableCol, col.getWidth(), Style.Unit.EM);
 				}
 			}
 		}
 		showCheckedColumns.setVisible(!hideCheckedColumnsCheckbox);
+		//TODO КОСТЫЛИ! По возможности убрать.
+		float tableWidth = 0;
+		for (int i=0; i<formDataTable.getColumnCount(); i++) {
+			String width = formDataTable.getColumnWidth(formDataTable.getColumn(i));
+			if (width == null) {
+				continue;
+			}
+			for (Style.Unit unit : Style.Unit.values()) {
+				if (width.contains(unit.getType())) {
+					width = width.replace(unit.getType(), "");
+					break;
+				}
+			}
+			tableWidth += Float.parseFloat(width);
+		}
+		formDataTable.setTableWidth(tableWidth, Style.Unit.EM);
 
 	}
 
