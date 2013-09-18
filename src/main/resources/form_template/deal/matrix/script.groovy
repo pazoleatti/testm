@@ -417,8 +417,8 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             val13 = '017'
             break
     }
-    if (val13 != null && type.id != 375) {
-        def values13 = refBookFactory.getDataProvider(67L).getRecords(new Date(), null, "NAME = '$val13'", null)
+    if (val13 != null) {
+        def values13 = refBookFactory.getDataProvider(67L).getRecords(new Date(), null, "CODE = '$val13'", null)
         if (values13 != null && values13.size() == 1) {
             row.dealNameCode = values13.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         }
