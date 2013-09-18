@@ -1,17 +1,19 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 
 import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
+import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.cellview.client.AbstractPager;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -32,7 +34,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     GenericDataGrid<LogSystemSearchResultItem> auditTable;
 
     @UiField
-    AbstractPager pager;
+    FlexiblePager pager;
 
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
 
@@ -157,6 +159,20 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         auditTable.addColumn(userLoginColumn, userLoginColumnHeader);
         auditTable.addColumn(userRolesColumn, userRolesColumnHeader);
         auditTable.addColumn(userIpColumn, userIpColumnHeader);
+	    auditTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSystemSearchResultItem>() {
+		    @Override
+		    public void onCellPreview(CellPreviewEvent<LogSystemSearchResultItem> event) {
+			    if ("mouseover".equals(event.getNativeEvent().getType())) {
+				    long index = (event.getIndex() - (pager.getPage() * auditTable.getPageSize()));
+				    TableCellElement cellElement = auditTable.getRowElement((int) index).getCells().getItem(event.getColumn());
+				    if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
+					    cellElement.removeAttribute("title");
+				    } else {
+					    cellElement.setTitle(cellElement.getInnerText());
+				    }
+			    }
+		    }
+	    });
 
         pager.setDisplay(auditTable);
     }
