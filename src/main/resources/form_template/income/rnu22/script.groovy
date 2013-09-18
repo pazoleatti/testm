@@ -701,9 +701,7 @@ BigDecimal roundTo2(BigDecimal value) {
  */
 def getColumnName(def DataRow row, def alias) {
     if (row != null && alias != null) {
-        def column = row.getCell(alias).getColumn()
-        def name = column.getGroupName() +' '+ column.getName()
-        return name.trim().replace('%', '%%')
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
     }
     return ''
 }
