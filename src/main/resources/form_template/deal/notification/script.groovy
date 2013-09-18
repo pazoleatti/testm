@@ -147,8 +147,9 @@ void generateXML() {
                                         Осн135: mapYesNo.get(row.f135)
                                 )
                             }
-                            def String dealNameCode = row.dealNameCode != null ? '' + refBookService.getRecordData(67, row.dealNameCode).CODE.numberValue : '---'
-                            def String taxpayerSideCode = row.taxpayerSideCode != null ? '' + refBookService.getRecordData(65, row.taxpayerSideCode).CODE.numberValue : ''
+                            // TODO всегда доложен быть заполнен в бд (в xsd req и не пускает null)
+                            def String dealNameCode = row.dealNameCode != null ? refBookService.getRecordData(67, row.dealNameCode).CODE.stringValue : '---'
+                            def String taxpayerSideCode = row.taxpayerSideCode != null ? refBookService.getRecordData(65, row.taxpayerSideCode).CODE.stringValue : ''
                             while (taxpayerSideCode.length() < 3)
                                 taxpayerSideCode = '0' + taxpayerSideCode
                             def String dealPriceCode = row.taxpayerSideCode != null ? '' + refBookService.getRecordData(66, row.dealPriceCode).CODE.numberValue : null
@@ -173,7 +174,7 @@ void generateXML() {
                                 def String dealSubjectCode2 = row.dealSubjectCode2 != null ? '' + refBookService.getRecordData(68, row.dealSubjectCode2).CODE.numberValue : null
                                 def String dealSubjectCode3 = row.dealSubjectCode3 != null ? '' + refBookService.getRecordData(34, row.dealSubjectCode3).CODE.stringValue : null
                                 def String countryCode = row.countryCode != null ? '' + refBookService.getRecordData(10, row.countryCode).CODE.numberValue : null
-                                def String deliveryCode = row.deliveryCode != null ? '' + refBookService.getRecordData(63, row.deliveryCode).CODE.numberValue : null
+                                def String deliveryCode = row.deliveryCode != null ? refBookService.getRecordData(63, row.deliveryCode).STRCODE.stringValue : null
                                 def String okeiCode = row.okeiCode != null ? '' + refBookService.getRecordData(12, row.okeiCode).CODE.stringValue : null
                                 ПерПредСд(
                                         [НаимПредСд: row.dealSubjectName] +

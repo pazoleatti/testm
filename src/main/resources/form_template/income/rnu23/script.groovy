@@ -1,5 +1,6 @@
 package form_template.income.rnu23
 
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException
@@ -142,7 +143,7 @@ def calc() {
 
     // РНУ-22 предыдущего периода
     def formDataOld = getFormDataOld()
-    def totalRowOld = getRowByAlias(formDataOld, 'total')
+    def totalRowOld = getRowByAlias(getData(formDataOld), 'total')
 
     /*
      * Расчеты.
@@ -158,6 +159,21 @@ def calc() {
     getRows(data).removeAll(deleteRows)
     if (getRows(data).isEmpty()) {
         return true
+    }
+
+    // отсортировать/группировать
+    getRows(data).sort {
+        // графа 2  - contract
+        // графа 3  - contractDate
+        // графа 5  - dateOfTransaction
+        def a, def b ->
+            if (a.dateOfTransaction == b.dateOfTransaction && a.contractDate == b.contractDate) {
+                return a.contract <=> b.contract
+            }
+            if (a.dateOfTransaction == b.dateOfTransaction) {
+                return a.contractDate <=> b.contractDate
+            }
+            return a.dateOfTransaction <=> b.dateOfTransaction
     }
 
     // графа 1, 13..20
@@ -358,7 +374,7 @@ def logicalCheck() {
     }
 
     if (hasTotal) {
-        def totalRow = getRowByAlias(formData, 'total')
+        def totalRow = getRowByAlias(data, 'total')
 
         // 6. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода (графа 16, 14, 18)
         if (totalRow.incomeRuble + totalRow.preChargeRuble < totalRow.accountingRuble) {
@@ -446,7 +462,6 @@ void consolidation() {
         data.insert(newRows, 1)
     }
     save(data)
-    data.commit()
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
@@ -688,7 +703,7 @@ def getNewRow() {
 }
 
 /**
- * Получить строку по алиасу.
+ * Получить список строк формы.
  *
  * @param data данные нф (helper)
  */
@@ -735,20 +750,6 @@ def getData(def formData) {
         return formDataService.getDataRowHelper(formData)
     }
     return null
-}
-
-/**
- * Проверить наличие итоговой строки.
- *
- * @param data данные нф (helper)
- */
-def hasTotal(def data) {
-    for (def row: getRows(data)) {
-        if (row.getAlias() == 'total') {
-            return true
-        }
-    }
-    return false
 }
 
 /**
@@ -933,41 +934,19 @@ def getRecordId(def ref_id, String code, def value, Date date, def cache) {
 /**
  * Получить строку по алиасу.
  *
- * @param form нф
+ * @param data данные нф
  * @param alias алиас
  */
-def getRowByAlias(def form, def alias) {
-    if (alias == null || alias == '') {
+def getRowByAlias(def data, def alias) {
+    if (alias == null || alias == '' || data == null) {
         return null
     }
-    def data = getData(form)
-    if (data != null) {
-        for (def row : getRows(data)) {
-            if (alias.equals(row.getAlias())) {
-                return row
-            }
+    for (def row : getRows(data)) {
+        if (alias.equals(row.getAlias())) {
+            return row
         }
     }
     return null
-}
-
-/**
- * Проверить существование строки по алиасу.
- *
- * @param list строки нф
- * @param rowAlias алиас
- * @return <b>true</b> - строка с указанным алиасом есть, иначе <b>false</b>
- */
-def checkAlias(def list, def rowAlias) {
-    if (rowAlias == null || rowAlias == "" || list == null || list.isEmpty()) {
-        return false
-    }
-    for (def row : list) {
-        if (row.getAlias() == rowAlias) {
-            return true
-        }
-    }
-    return false
 }
 
 /**
