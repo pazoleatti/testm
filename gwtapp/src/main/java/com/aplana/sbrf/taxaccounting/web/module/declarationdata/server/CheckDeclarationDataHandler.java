@@ -29,10 +29,8 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
 
     @Override
     public CheckDeclarationDataResult execute(CheckDeclarationDataAction action, ExecutionContext context) {
-		Logger logger = new Logger();
 		CheckDeclarationDataResult result = new CheckDeclarationDataResult();
-		declarationDataService.check(logger, action.getDeclarationId(), securityService.currentUserInfo());
-		result.setLogEntries(logger.getEntries());
+		declarationDataService.check(new Logger(), action.getDeclarationId(), securityService.currentUserInfo());
 	    return result;
     }
 
