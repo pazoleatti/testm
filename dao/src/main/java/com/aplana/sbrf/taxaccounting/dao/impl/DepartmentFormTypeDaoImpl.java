@@ -1,21 +1,31 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 @Repository
 @Transactional(readOnly = true)
 public class DepartmentFormTypeDaoImpl extends AbstractDao implements DepartmentFormTypeDao {
+	
+	public static final String DUBLICATE_ERROR = "Налоговая форма указанного типа и вида уже назначена подразделению";
+	
     private static final RowMapper<DepartmentFormType> DFT_MAPPER = new RowMapper<DepartmentFormType>() {
         @Override
         public DepartmentFormType mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -263,49 +273,31 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     @Transactional(readOnly = false)
-    public void deleteDepartmentFormType(Long id) {
-        getJdbcTemplate().update(
-                "delete from department_form_type where id = ?",
-                new Object[]{
-                        id
-                }
-        );
+    public void delete(Long id) {
+    	try{
+	        getJdbcTemplate().update(
+	                "delete from department_form_type where id = ?",
+	                new Object[]{
+	                        id
+	                }
+	        );
+    	} catch (DataIntegrityViolationException e){
+    		throw new DaoException("Назначение является источником или приемником данных", e);
+    	}
     }
 
     @Override
     @Transactional(readOnly = false)
-    public void createDepartmentFormType(Long departmentId, int typeId, int formId) {
-        getJdbcTemplate().update(
-                "insert into department_form_type (department_id, form_type_id, id, kind) " +
-                        " values (?, ?, seq_department_form_type.nextval, ?)",
-                new Object[]{
-                        departmentId,
-                        formId,
-                        typeId
-                });
+    public void save(int departmentId, int formKindId, int formTypeId) {
+    	try {
+	        getJdbcTemplate().update(
+	                "insert into department_form_type (department_id, form_type_id, id, kind) " +
+	                        " values (?, ?, seq_department_form_type.nextval, ?)",
+	                new Object[]{ departmentId, formTypeId, formKindId });
+    	} catch (DataIntegrityViolationException e){
+    		throw new DaoException("Налоговая форма указанного типа и вида уже назначена подразделению", e);
+    	} 
     }
 
-    @Override
-    @Transactional(readOnly = false)
-    public void deleteDepartmentDeclType(Long id) {
-        getJdbcTemplate().update(
-                "delete from department_declaration_type where id = ?",
-                new Object[]{
-                        id
-                }
-        );
-    }
-
-    @Override
-    @Transactional(readOnly = false)
-    public void createDepartmentDeclType(Long departmentId, int formId) {
-        getJdbcTemplate().update(
-                "insert into department_declaration_type (id, department_id, declaration_type_id) " +
-                        " values (SEQ_DEPT_DECLARATION_TYPE.nextval, ?, ?)",
-                new Object[]{
-                        departmentId,
-                        formId
-                });
-    }
 
 }

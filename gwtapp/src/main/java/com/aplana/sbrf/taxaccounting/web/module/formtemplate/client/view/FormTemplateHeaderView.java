@@ -174,7 +174,7 @@ public class FormTemplateHeaderView extends ViewWithUiHandlers<FormTemplateHeade
 			column.setAlias(col.getAlias());
 			ColumnContext columnContext = new ColumnContext();
 			columnContext.setColumn(column);
-			columnContext.setMode(ColumnContext.Mode.EDIT_MODE);
+			columnContext.setMode(ColumnContext.Mode.SUPER_EDIT_MODE);
 			DataRowColumn editTextAliasColumn = new EditTextColumn(column, columnContext) {
 				@Override
 				public String getValue(DataRow aliasRow) {

@@ -160,10 +160,7 @@ public class GetRefBookValuesHandler extends
 			items.add(item);
 		}
 
-		PagingResult<RefBookItem> result = new PagingResult<RefBookItem>();
-		result.setRecords(items);
-		result.setTotalRecordCount(refBookPage.getTotalRecordCount());
-		return result;
+		return new PagingResult<RefBookItem>(items, refBookPage.getTotalCount());
 	}
 
 }

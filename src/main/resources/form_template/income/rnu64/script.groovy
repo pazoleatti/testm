@@ -101,6 +101,22 @@ switch (formDataEvent) {
     // загрузка xml
     case FormDataEvent.IMPORT :
         importData()
+        if (!hasError()) {
+            calc()
+            !hasError() && logicalCheck() && checkNSI()
+            if (!hasError()) {
+                logger.info('Закончена загрузка файла ' + UploadFileName)
+            }
+        }
+        break
+    case FormDataEvent.MIGRATION :
+        importData()
+        if (!hasError()) {
+            def total = getCalcTotalRow()
+            def data = getData(formData)
+            insert(data, total)
+            logger.info('Закончена загрузка файла ' + UploadFileName)
+        }
         break
 }
 
@@ -210,6 +226,9 @@ def logicalCheck() {
     def data = getData(formData)
     def totalQuarterRow = null
     def totalRow = null
+    reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
+
     for (def row : getRows(data)) {
         // Обязательность заполнения поля графы (с 1 по 6); фатальная; Поле ”Наименование поля” не заполнено!
         if (!isTotalRow(row)) {
@@ -218,32 +237,30 @@ def logicalCheck() {
                 return false
             }
 
-            reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
-            reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
             // Проверка даты совершения операции и границ отчетного периода; фатальная; Дата совершения операции вне границ отчетного периода!
             if (!isTotalRow(row) && row.date != null && !(
             (reportPeriodStartDate.getTime().equals(row.date) || row.date.after(reportPeriodStartDate.getTime())) &&
                     (reportPeriodEndDate.getTime().equals(row.date) || row.date.before(reportPeriodEndDate.getTime()))
             )) {
-                logger.error("В строке \"№ пп\" равной " + row.number + " дата совершения операции вне границ отчетного периода!")
+                logger.error("В строке " + row.number + " дата совершения операции вне границ отчетного периода!")
                 return false
             }
 
             getRows(data).each { rowItem ->
                 if (!isTotalRow(row) && row.number == rowItem.number && !row.equals(rowItem)) {
-                    logger.error("В строке \"№ пп\" равной " + row.number + " нарушена уникальность номера по порядку!")
+                    logger.error("В строке " + row.number + " нарушена уникальность номера по порядку!")
                     return false
                 }
             }
 
             // Проверка на нулевые значения; фатальная; Все суммы по операции нулевые!
             if (row.costs == 0) {
-                logger.error("В строке \"№ пп\" равной " + row.number + " все суммы по операции нулевые!")
+                logger.error("В строке " + row.number + " все суммы по операции нулевые!")
                 return false
             }
             // Проверка актуальности поля «Часть сделки»; не фатальная;
             if (row.part != null && getPart(row.part) == null) {
-                logger.warn("В строке \"№ пп\" равной " + row.number + " поле ”Часть сделки” указано неверно!")
+                logger.warn("В строке " + row.number + " поле ”Часть сделки” указано неверно!")
             }
         } else if (isMainTotalRow(row)) {
             totalRow = row
@@ -290,7 +307,7 @@ def checkRequiredColumns(def row, def columns) {
     if (!colNames.isEmpty()) {
         def index = getRows(data).indexOf(row) + 1
         def errorMsg = colNames.join(', ')
-        logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+        logger.error("В строке $index не заполнены колонки : $errorMsg.")
         return false
     }
     return true
@@ -429,7 +446,7 @@ void sort() {
 void consolidation() {
     def data = getData(formData)
     // удалить все строки и собрать из источников их строки
-    getRows(data).clear()
+    data.clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
@@ -530,10 +547,6 @@ void importData() {
     } catch(Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
-
-    if (!hasError()) {
-        logger.info('Закончена загрузка файла ' + fileName)
-    }
 }
 
 /**
@@ -548,6 +561,8 @@ def addData(def xml) {
 
     def data = getData(formData)
     data.clear()
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    def newRows = []
 
     for (def row : xml.exemplar.table.detail.record) {
         index = 0
@@ -558,11 +573,15 @@ def addData(def xml) {
         index++
 
         // графа 2
-        newRow.date = getDate(row.field[index].@value.text())
+        newRow.date = getDate(row.field[index].@value.text(), format)
         index++
 
         // графа 3 - справочник 60 "Части сделок"
-        newRow.part = getRecords(60, 'CODE', row.field[index].@value.text(), date, cache)
+        tmp = null
+        if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
+            tmp = getRecordId(60, 'CODE', row.field[index].@value.text(), date, cache)
+        }
+        newRow.part = tmp
         index++
 
         // графа 4
@@ -576,8 +595,9 @@ def addData(def xml) {
         // графа 6
         newRow.costs = getNumber(row.field[index].@value.text())
 
-        insert(data, newRow)
+        newRows.add(newRow)
     }
+    data.insert(newRows, 1)
 
     // итоговая строка
     if (xml.exemplar.table.total.record.field.size() > 0) {
@@ -620,19 +640,16 @@ def getNumber(def value) {
     if ("".equals(tmp)) {
         return null
     }
-    // поменять запятую на точку и убрать пробелы
-    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
     return new BigDecimal(tmp)
 }
 
 /**
  * Получить дату по строковому представлению (формата дд.ММ.гггг)
  */
-def getDate(def value) {
+def getDate(def value, def format) {
     if (isEmpty(value)) {
         return null
     }
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     return format.parse(value)
 }
 
@@ -660,25 +677,20 @@ void calc() {
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    calc()
-    if (!hasError() && logicalCheck()) {
-        def data = getData(formData)
-        def totalColumns = [6 : 'costs']
+    def totalColumns = [6 : 'costs']
 
-        def totalCalc = null
-        for (def row : getRows(data)) {
-            if (isMainTotalRow(row)) {
-                totalCalc = row
-                break
+    def totalCalc = getCalcTotalRow()
+    def errorColums = []
+    if (totalCalc != null) {
+        totalColumns.each { index, columnAlias ->
+            if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
+                errorColums.add(index)
             }
         }
-        if (totalCalc != null) {
-            totalColumns.each { index, columnAlias ->
-                if (totalCalc[columnAlias] != totalRow[columnAlias]) {
-                    logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
-                }
-            }
-        }
+    }
+    if (!errorColums.isEmpty()) {
+        def columns = errorColums.join(', ')
+        logger.error("Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
 }
 
@@ -709,8 +721,8 @@ void insert(def data, def row) {
  * @param cache кеш
  * @return
  */
-def getRecords(def ref_id, String code, String value, Date date, def cache) {
-    String filter = code + "= '"+ value+"'"
+def getRecordId(def ref_id, String code, def value, Date date, def cache) {
+    String filter = code + " = '" + value + "'"
     if (cache[ref_id]!=null) {
         if (cache[ref_id][filter] != null) {
             return cache[ref_id][filter]
@@ -724,6 +736,33 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
-    logger.error("Не удалось определить элемент справочника!")
+    logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
     return null
+}
+
+
+/**
+ * Получить итоговую строку с суммами.
+ */
+def getCalcTotalRow() {
+    def totalRow = formData.createDataRow()
+    totalRow.getCell("fix").setColSpan(4)
+    totalRow.fix = "Итоги"
+    totalRow.setAlias("total")
+    setTotalStyle(totalRow)
+    totalRow.costs = getSum('costs')
+    return totalRow
+}
+
+/**
+ * Получить сумму столбца.
+ */
+def getSum(def columnAlias) {
+    def data = getData(formData)
+    def from = 0
+    def to = getRows(data).size() - 1
+    if (from > to) {
+        return 0
+    }
+    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
 }

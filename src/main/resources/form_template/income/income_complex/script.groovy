@@ -119,16 +119,23 @@ def consolidationBank(DataRowHelper formTarget) {
     // очистить форму
     formTarget.getAllCached().each { row ->
         ['incomeBuhSumAccepted', 'incomeBuhSumPrevTaxPeriod', 'incomeTaxSumS'].each { alias ->
+            if (row.getCell(alias).isEditable()) {
+                row.getCell(alias).setValue(0)
+            }
+        }
+        // графа 11, 13..16
+        ['logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableD', 'opuSumTotal', 'difference'].each { alias ->
             row.getCell(alias).setValue(null)
         }
+        if (row.getAlias() in ['R30', 'R85']) {
+            row.incomeTaxSumS = 0
+        }
     }
-    def needCalc = false
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
-            needCalc = true
             for (DataRow<Cell> row : formDataService.getDataRowHelper(child).allCached) {
                 if (row.getAlias() == null) {
                     continue
@@ -141,9 +148,6 @@ def consolidationBank(DataRowHelper formTarget) {
                 }
             }
         }
-    }
-    if (needCalc) {
-        checkAndCalc()
     }
     formTarget.save(formTarget.allCached)
     formTarget.commit()
@@ -276,7 +280,7 @@ def getIncome101Data(def dataRow) {
 
     // Справочник 50 - "Оборотная ведомость (Форма 0409101-СБ)"
     def refDataProvider = refBookFactory.getDataProvider(50)
-    def records = refDataProvider.getRecords(new Date(), null,  "ACCOUNT = '" + account + "' AND REPORT_PERIOD_ID = " + reportPeriodId, null)
+    def records = refDataProvider.getRecords(reportPeriodService.getEndDate(formData.reportPeriodId).time, null,  "ACCOUNT = '" + account + "'", null)
     return records.getRecords()
 }
 

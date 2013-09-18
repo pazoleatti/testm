@@ -275,18 +275,24 @@ void consolidation() {
     }
     // очистить форму
     dataRowsHelper.getAllCached().each { row ->
-        ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each { it ->
-            row.getCell(it).setValue(null)
+        ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each { alias ->
+            if (row.getCell(alias).isEditable()) {
+                row.getCell(alias).setValue(0)
+            }
+        }
+        // графа 11, 13..16
+        ['logicalCheck', 'opuSumByEnclosure3', 'opuSumByTableP', 'opuSumTotal', 'difference'].each { alias ->
+            row.getCell(alias).setValue(null)
+        }
+        if (row.getAlias() in ['R67', 'R93']) {
+            row.consumptionTaxSumS = 0
         }
     }
-
-    def needCalc = false
 
     // получить консолидированные формы из источников
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
-            needCalc = true
             for (def row : formDataService.getDataRowHelper(child).getAllCached()) {
                 if (row.getAlias() == null) {
                     continue
@@ -299,9 +305,6 @@ void consolidation() {
                 }
             }
         }
-    }
-    if (needCalc) {
-        checkAndCalc()
     }
     logger.info('Формирование сводной формы уровня Банка прошло успешно.')
     dataRowsHelper.save(dataRowsHelper.allCached)

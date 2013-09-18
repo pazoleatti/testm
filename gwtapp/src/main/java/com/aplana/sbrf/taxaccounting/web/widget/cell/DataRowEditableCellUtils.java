@@ -25,7 +25,7 @@ public class DataRowEditableCellUtils {
 			editableCell = true;
 		}
 		if ((columnContext.getMode() == ColumnContext.Mode.READONLY_MODE)
-				|| (columnContext.getMode() == ColumnContext.Mode.DEFAULT_MODE && !editableCell)) {
+				|| (columnContext.getMode() == ColumnContext.Mode.NORMAL_EDIT_MODE && !editableCell)) {
 			return false;
 		} else {
 			return true;

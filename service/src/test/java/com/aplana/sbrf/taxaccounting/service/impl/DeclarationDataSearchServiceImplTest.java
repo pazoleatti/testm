@@ -1,10 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 
 import static com.aplana.sbrf.taxaccounting.test.DeclarationTypeMockUtils.mockDeclarationType;
 import static com.aplana.sbrf.taxaccounting.test.DepartmentDeclarationTypeMockUtils.mockDepartmentDeclarationType;
@@ -12,6 +13,7 @@ import static com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils.mockDepartm
 import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Matchers;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -59,10 +62,8 @@ public class DeclarationDataSearchServiceImplTest {
 
 		DepartmentDao departmentDao = mock(DepartmentDao.class);
 		// В подразделении 1 есть только декларация INCOME_DECLARATION_TYPE_ID_1
-		List<DepartmentDeclarationType> incomeDdts = new ArrayList<DepartmentDeclarationType>(1);
-		incomeDdts.add(mockDepartmentDeclarationType(1, INCOME_DECLARATION_TYPE_ID_1));
+
 		Department department1 = mockDepartment(1, null, DepartmentType.TERBANK);
-		when(department1.getDepartmentDeclarationTypes()).thenReturn(incomeDdts);
 		when(departmentDao.getDepartment(1)).thenReturn(department1);
 		ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
 		
@@ -76,6 +77,12 @@ public class DeclarationDataSearchServiceImplTest {
 		incomeDeclarationTypes.add(incomeDeclarationType2);
 		when(declarationTypeDao.listAllByTaxType(TaxType.INCOME)).thenReturn(incomeDeclarationTypes);
 		ReflectionTestUtils.setField(service, "declarationTypeDao", declarationTypeDao);
+		
+		SourceService sourceService = mock(SourceService.class);
+		List<DepartmentDeclarationType> incomeDdts = new ArrayList<DepartmentDeclarationType>(1);
+		incomeDdts.add(mockDepartmentDeclarationType(1, INCOME_DECLARATION_TYPE_ID_1));
+		when(sourceService.getDDTByDepartment(Matchers.eq(1), Matchers.any(TaxType.class))).thenReturn(incomeDdts);
+		ReflectionTestUtils.setField(service, "sourceService", sourceService);
 	}
 
 	// TODO: сделать тесты для остальных методов!

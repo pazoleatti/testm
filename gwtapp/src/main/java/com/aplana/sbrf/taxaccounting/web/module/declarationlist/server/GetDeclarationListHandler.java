@@ -31,7 +31,7 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
 		PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(action.getDeclarationFilter());
 		GetDeclarationListResult result = new GetDeclarationListResult();
 		result.setRecords(page);
-		result.setTotalCountOfRecords(page.getTotalRecordCount());
+		result.setTotalCountOfRecords(page.getTotalCount());
 		return result;
 	}
 

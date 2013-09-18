@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
@@ -82,7 +84,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 	 */
 	@Override
 	public void compose(FormData sformData, int departmentId, int formTypeId, FormDataKind kind) {
-		TaxType taxType = formTypeDao.getType(formTypeId).getTaxType();
+		TaxType taxType = formTypeDao.get(formTypeId).getTaxType();
 
 		// Find form data.
 		FormData dformData = formDataDao.find(formTypeId, kind, departmentId, sformData.getReportPeriodId());
@@ -102,6 +104,13 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 			
 			// Execute composition scripts
 			formDataScriptingService.executeScript(scriptComponentContext.getUserInfo(), dformData, FormDataEvent.COMPOSE, scriptComponentContext.getLogger(), null);
+
+            if (scriptComponentContext.getLogger().containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException(
+                        "Произошли ошибки при консолидации данных в приемнике: " +
+                                dformData.getKind().getName()+" \"" + dformData.getFormType().getName() + "\".",
+                        scriptComponentContext.getLogger().getEntries());
+            }
 			
 			formDataDao.save(dformData);
 			// Коммитим строки после отработки скрипта. http://jira.aplana.com/browse/SBRFACCTAX-3637

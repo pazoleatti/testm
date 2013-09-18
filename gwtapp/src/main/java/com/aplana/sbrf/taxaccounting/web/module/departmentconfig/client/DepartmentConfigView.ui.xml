@@ -2,7 +2,8 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:d='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker'
              xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client'
-             xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
+             xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
+             xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
 
     <ui:style>
         .titleLabel {
@@ -40,7 +41,9 @@
                     </g:HorizontalPanel>
                     <g:HorizontalPanel spacing="5" height="35px">
                         <g:Label styleName="{style.boldLabel}" text="Период:"/>
-                        <g:SimplePanel ui:field="reportPeriodPanel" width="200px"/>
+                        <g:FlowPanel>
+                            <rep:PeriodPickerPopupWidget ui:field="periodPickerPopup"/>
+                        </g:FlowPanel>
                     </g:HorizontalPanel>
                 </g:HorizontalPanel>
             </g:VerticalPanel>

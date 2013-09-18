@@ -4,18 +4,24 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> implements RefBookDataPresenter.MyView {
@@ -28,9 +34,11 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	@UiField
 	FlexiblePager pager;
 	@UiField
-	VerticalPanel contentPanel;
+	Panel contentPanel;
 	@UiField
 	Label titleDesc;
+	@UiField
+	DateBox relevanceDate;
 
 	SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
 
@@ -38,6 +46,16 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	public RefBookDataView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
 
+		relevanceDate.setFormat(new DateBox.DefaultFormat(DateTimeFormat.getFormat("dd.MM.yyyy")));
+		relevanceDate.setValue(new Date());
+		relevanceDate.addValueChangeHandler(new ValueChangeHandler<Date>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Date> event) {
+				if (getUiHandlers() != null) {
+					getUiHandlers().onRelevanceDateChanged();
+				}
+			}
+		});
 		refbookDataTable.setSelectionModel(selectionModel);
 		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
@@ -71,6 +89,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 				}
 			};
 			refbookDataTable.addColumn(column, header.getName());
+			refbookDataTable.setColumnWidth(column, header.getWidth(), Style.Unit.EM);
 		}
 	}
 
@@ -89,6 +108,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	public void updateTable() {
 		Range range = new Range(pager.getPageStart(), pager.getPageSize());
 		refbookDataTable.setVisibleRangeAndClearData(range, true);
+		selectionModel.clear();
 	}
 
 	@Override
@@ -107,7 +127,22 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		}
 	}
 
-    @Override
+	@Override
+	public void setSelected(Long recordId) {
+		selectionModel.clear();
+		int i = 0;
+		for (RefBookDataRow row : refbookDataTable.getVisibleItems()) {
+
+			if (row.getRefBookRowId() == recordId) {
+				selectionModel.setSelected(row, true);
+				refbookDataTable.setKeyboardSelectedRow(i, true);
+				return;
+			}
+			i++;
+		}
+	}
+
+	@Override
     public void resetRefBookElements() {
         int i;
         while ((i = refbookDataTable.getColumnCount()) != 0) {
@@ -120,6 +155,11 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		return selectionModel.getSelectedObject();
 	}
 
+	@Override
+	public Date getRelevanceDate() {
+		return relevanceDate.getValue();
+	}
+
 	@UiHandler("addRow")
 	void addRowButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
@@ -129,6 +169,9 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
 	@UiHandler("deleteRow")
 	void deleteRowButtonClicked(ClickEvent event) {
+		if (selectionModel.getSelectedObject() == null) {
+			return;
+		}
 		boolean confirm = Window.confirm("Удалить выбранную запись справочника?");
 		if (confirm) {
 			if (getUiHandlers() != null) {

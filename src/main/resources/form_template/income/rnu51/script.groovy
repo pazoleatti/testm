@@ -64,6 +64,28 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT :
         importData()
+        if (!hasError()) {
+            deleteAllStatic()
+            sort()
+            calc()
+            addAllStatic()
+            if (!hasError()) {
+                logicalCheck()
+                checkNSI()
+                if (!hasError()) {
+                    logger.info('Закончена загрузка файла ' + UploadFileName)
+                }
+            }
+        }
+        break
+    case FormDataEvent.MIGRATION :
+        importData()
+        if (!hasError()) {
+            def total = getCalcTotalRow()
+            def data = getData(formData)
+            insert(data, total)
+            logger.info('Закончена загрузка файла ' + UploadFileName)
+        }
         break
 }
 
@@ -101,7 +123,7 @@ void logicalCheck() {
     def data = getData(formData).getAllCached()
 
     // Проверока наличия итоговой строки
-    if (!checkAlias(data, 'itogo')) {
+    if (!data.isEmpty() && !checkAlias(data, 'itogo')) {
         logger.error('Итоговые значения не рассчитаны')
         return
     }
@@ -118,26 +140,35 @@ void logicalCheck() {
                 return
             }
 
+            def index = row.rowNumber
+            def errorMsg
+            if (index!=null && index!='') {
+                errorMsg = "В строке \"№ пп\" равной $index "
+            } else {
+                index = row.getIndex()
+                errorMsg = "В строке $index "
+            }
+
             // 1.Проверка цены приобретения для целей налогообложения (графа 12)
             if (row.acquisitionPrice > row.marketPriceInRub && row.acquisitionPriceTax != row.marketPriceInRub) {
-                logger.error("Неверно определена цена приобретения для целей налогообложения")
+                logger.error(errorMsg + "неверно определена цена приобретения для целей налогообложения")
                 return
             }
 
             if (row.acquisitionPrice <= row.marketPriceInRub && row.acquisitionPriceTax != row.acquisitionPrice) {
-                logger.error("Неверно определена цена приобретения для целей налогообложения")
+                logger.error(errorMsg + "неверно определена цена приобретения для целей налогообложения")
                 return
             }
 
             // 2.Проверка рыночной цены в процентах при погашении (графа 16)
             if (row.redemptionValue != null && row.redemptionValue > 0 && !(row.marketPriceInPerc1 == 100)) {
-                logger.error("Неверно указана рыночная цена в процентах при погашении!")
+                logger.error(errorMsg + "Неверно указана рыночная цена в процентах при погашении!")
                 return
             }
 
             // 3.Проверка рыночной цены в рублях при погашении (графа 17)
             if (row.redemptionValue != null && row.redemptionValue > 0 && !(row.marketPriceInRub1 == row.redemptionValue)) {
-                logger.error("Неверно указана рыночная цена в рублях при погашении!")
+                logger.error(errorMsg + "неверно указана рыночная цена в рублях при погашении!")
                 return
             }
 
@@ -149,7 +180,7 @@ void logicalCheck() {
             if ((code == 1 || code == 2 || code == 5) && row.priceInFactPerc > row.marketPriceInPerc1
                     && row.priceInFactRub > row.marketPriceInRub1 && row.salePriceTax != row.priceInFactRub
             ) {
-                logger.error('Неверно определена цена реализации для целей налогообложения по сделкам на ОРЦБ!')
+                logger.error(errorMsg + "неверно определена цена реализации для целей налогообложения по сделкам на ОРЦБ!")
                 return
             }
 
@@ -160,7 +191,7 @@ void logicalCheck() {
              * Неверно определена цена реализации для целей налогообложения при погашении!
              */
             if (code == 4 && row.salePriceTax != row.redemptionValue) {
-                logger.error('Неверно определена цена реализации для целей налогообложения при погашении!')
+                logger.error(errorMsg + "неверно определена цена реализации для целей налогообложения при погашении!")
                 return
             }
 
@@ -172,7 +203,7 @@ void logicalCheck() {
              */
             if ((code == 2 || code == 5) && row.tradeNumber < row.marketPriceInPerc1
                     && row.priceInFactRub < row.marketPriceInRub1 && row.salePriceTax != row.marketPriceInRub1) {
-                logger.error('Неверно определена цена реализации для целей налогообложения по переговорным сделкам на ОРЦБ и сделкам, связанным с открытием-закрытием короткой позиции!')
+                logger.error(errorMsg + "неверно определена цена реализации для целей налогообложения по переговорным сделкам на ОРЦБ и сделкам, связанным с открытием-закрытием короткой позиции!")
                 return
             }
 
@@ -183,7 +214,7 @@ void logicalCheck() {
              * Неверно определены расходы!
              */
             if (row.expensesTotal != (row.costOfAcquisition ?: 0) + (row.acquisitionPriceTax ?: 0) + (row.expensesOnSale ?: 0)) {
-                logger.error('Неверно определены расходы!')
+                logger.error(errorMsg + "неверно определены расходы!")
                 return
             }
 
@@ -194,7 +225,7 @@ void logicalCheck() {
              * Неверно определен финансовый результат реализации (выбытия)!
              */
             if (row.profit != (row.salePriceTax ?: 0) - (row.expensesTotal ?: 0)) {
-                logger.error('Неверно определен финансовый результат реализации (выбытия)!')
+                logger.error(errorMsg + "неверно определен финансовый результат реализации (выбытия)!")
                 return
             }
 
@@ -210,7 +241,7 @@ void logicalCheck() {
                     || (code == 4 && row.excessSalePriceTax != 0)
                     || row.excessSalePriceTax < 0
             ) {
-                logger.error('Неверно определено превышение цены реализации для целей налогообложения над фактической ценой реализации!')
+                logger.error(errorMsg + "неверно определено превышение цены реализации для целей налогообложения над фактической ценой реализации!")
                 return
             }
 
@@ -231,7 +262,7 @@ void logicalCheck() {
             value.put('excessSalePriceTax', calc22(row))
             for (String check in checks) {
                 if (row.getCell(check).value != value.get(check)) {
-                    logger.error("Неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '%%') + "!")
+                    logger.error(errorMsg + "неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '%%') + "!")
                     return
                 }
             }
@@ -418,7 +449,6 @@ BigDecimal calc16(DataRow row) {
     return result
 }
 
-// TODO (Ramil Timerbaev)
 /**
  * Если «графа 13» > 0, то «графа 17» = «графа 13»
  * @param row
@@ -451,7 +481,7 @@ BigDecimal calc18(DataRow row) {
     if ((code == 2 || code == 5) && (row.priceInFactPerc < row.marketPriceInPerc1 && row.priceInFactRub < row.marketPriceInRub1)) {
         result = row.marketPriceInRub1
     }
-    if (result != null) result = roundTo2(result, 3)
+    if (result != null) result = roundTo2(result, 2)
     return result
 }
 
@@ -462,7 +492,7 @@ BigDecimal calc18(DataRow row) {
  */
 BigDecimal calc20(DataRow row) {
     BigDecimal result = (row.costOfAcquisition ?: 0) + (row.acquisitionPriceTax ?: 0) + (row.expensesOnSale ?: 0)
-    return roundTo2(result, 3)
+    return roundTo2(result, 2)
 }
 
 /**
@@ -472,7 +502,7 @@ BigDecimal calc20(DataRow row) {
  */
 BigDecimal calc21(DataRow row) {
     BigDecimal result = (row.salePriceTax ?: 0) - (row.expensesTotal ?: 0)
-    return roundTo2(result, 3)
+    return roundTo2(result, 2)
 }
 
 /**
@@ -490,7 +520,7 @@ BigDecimal calc22(DataRow row) {
     } else {
         result = (row.salePriceTax ?: 0) - (row.priceInFactRub ?: 0)
     }
-    return roundTo2(result, 3)
+    return roundTo2(result, 2)
 }
 
 void calc() {
@@ -563,11 +593,15 @@ void sort() {
 }
 
 void addAllStatic() {
+    def data = getData(formData)
+    if (getRows(data).isEmpty()) {
+        return
+    }
     def itogoKvartal = getItogoKvartal()
     def prevItogoKvartal = getPrevItogoKvartal()
-    getData(formData).insert(itogoKvartal, getData(formData).getAllCached().size() + 1)
+    data.insert(itogoKvartal, data.getAllCached().size() + 1)
 
-    getData(formData).insert(getItogo(itogoKvartal, prevItogoKvartal), getData(formData).getAllCached().size() + 1)
+    data.insert(getItogo(itogoKvartal, prevItogoKvartal), data.getAllCached().size() + 1)
 }
 
 void allCheck() {
@@ -589,12 +623,21 @@ void checkCreation() {
 
 void checkNSI() {
     getRows(getData(formData)).each{ DataRow row ->
+
+        def index = row.rowNumber
+        def errorMsg
+        if (index!=null && index!='') {
+            errorMsg = "В строке \"№ пп\" равной $index "
+        } else {
+            index = row.getIndex()
+            errorMsg = "В строке $index "
+        }
         if (row.getAlias()==null) {
             if (row.tradeNumber!=null && getCode(row.tradeNumber)==null){
-                logger.warn('Код сделки в справочнике отсутствует!');
+                logger.warn(errorMsg + "код сделки в справочнике отсутствует!");
             }
             if (row.singSecurirty!=null && getSign(row.singSecurirty)==null){
-                logger.warn('Признак ценной бумаги в справочнике отсутствует!');
+                logger.warn(errorMsg + "признак ценной бумаги в справочнике отсутствует!");
             }
         }
     }
@@ -796,9 +839,6 @@ void importData() {
     } catch(Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
     }
-    if (!hasError()) {
-        logger.info('Закончена загрузка файла ' + fileName)
-    }
 }
 
 /**
@@ -809,13 +849,13 @@ void importData() {
 def addData(def xml) {
     def tmp
     def index
-    def refDataProvider61 = refBookFactory.getDataProvider(61)
-    def refDataProvider62 = refBookFactory.getDataProvider(62)
-
     def data = getData(formData)
     data.clear()
+    def cache = [:]
+    def date = new Date()
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    def newRows = []
 
-    // TODO (Ramil Timerbaev) Проверка корректности данных
     for (def row : xml.exemplar.table.detail.record) {
         index = 0
 
@@ -828,7 +868,7 @@ def addData(def xml) {
         // графа 2 - справочник 61 "Коды сделок"
         tmp = null
         if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
-            tmp = getRecordId(refDataProvider61, 'CODE', getNumber(row.field[index].@value.text()))
+            tmp = getRecordId(61, 'CODE', getNumber(row.field[index].@value.text()), new Date(), cache)
         }
         newRow.tradeNumber = tmp
         index++
@@ -836,7 +876,7 @@ def addData(def xml) {
         // графа 3 - справочник 62 "Признаки ценных бумаг"
         tmp = null
         if (row.field[index].text() != null && row.field[index].text().trim() != '') {
-            tmp = getRecordId(refDataProvider62, 'CODE', row.field[index].text())
+            tmp = getRecordId(62, 'CODE', row.field[index].text(), date, cache)
         }
         newRow.singSecurirty = tmp
         index++
@@ -846,11 +886,11 @@ def addData(def xml) {
         index++
 
         // графа 5
-        newRow.acquisitionDate = getDate(row.field[index].@value.text())
+        newRow.acquisitionDate = getDate(row.field[index].@value.text(), format)
         index++
 
         // графа 6
-        newRow.saleDate = getDate(row.field[index].@value.text())
+        newRow.saleDate = getDate(row.field[index].@value.text(), format)
         index++
 
         // графа 7
@@ -916,8 +956,9 @@ def addData(def xml) {
         // графа 22
         newRow.excessSalePriceTax = getNumber(row.field[index].@value.text())
 
-        insert(data, newRow)
+        newRows.add(newRow)
     }
+    data.insert(newRows, 1)
 
     // итоговая строка
     if (xml.exemplar.table.total.record.size() > 1) {
@@ -987,15 +1028,10 @@ def addData(def xml) {
  * @param value строка
  */
 def getNumber(def value) {
-    if (value == null) {
-        return null
-    }
     def tmp = value.trim()
-    if ("".equals(tmp)) {
+    if (''.equals(tmp)) {
         return null
     }
-    // поменять запятую на точку и убрать пробелы
-    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
     return new BigDecimal(tmp)
 }
 
@@ -1026,28 +1062,12 @@ def getNewRow() {
 }
 
 /**
- * Получить идентификатор записи из справочника.
- *
- * @param provider справочник
- * @param searchByAlias алиас атрибута справочника по которому ищется запись
- * @param value значение по которому ищется запись
- */
-def getRecordId(def provider, def searchByAlias, def value) {
-    def records = provider.getRecords(new Date(), null, searchByAlias + " = '" + value + "'", null);
-    if (records != null && !records.getRecords().isEmpty()) {
-        return records.getRecords().get(0).get('record_id').getNumberValue()
-    }
-    return null
-}
-
-/**
  * Получить дату по строковому представлению (формата дд.ММ.гггг)
  */
-def getDate(def value) {
+def getDate(def value, def format) {
     if (value == null || value == '') {
         return null
     }
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     return format.parse(value)
 }
 
@@ -1076,33 +1096,23 @@ def checkAlias(def list, def rowAlias) {
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    deleteAllStatic()
-    sort()
-    calc()
-    addAllStatic()
-    allCheck()
-    if (!hasError()) {
-        def data = getData(formData)
-        // графы 7-9, 11-13, 15, 17-22
-        def totalColumns = [7: 'amountBonds', 8 : 'acquisitionPrice', 9 : 'costOfAcquisition',
-                11 : 'marketPriceInRub', 12 : 'acquisitionPriceTax', 13 : 'redemptionValue',
-                15 : 'priceInFactRub', 17 : 'marketPriceInRub1', 18 : 'salePriceTax', 19 : 'expensesOnSale',
-                20 : 'expensesTotal', 21 : 'profit', 22 : 'excessSalePriceTax']
-        def totalCalc = null
-        for (def row : getRows(data)) {
-            if (row.getAlias() == 'itogo') {
-                totalCalc = row
-                break
+    // графы 7-9, 11-13, 15, 17-22
+    def totalColumns = [7: 'amountBonds', 8 : 'acquisitionPrice', 9 : 'costOfAcquisition',
+            11 : 'marketPriceInRub', 12 : 'acquisitionPriceTax', 13 : 'redemptionValue',
+            15 : 'priceInFactRub', 17 : 'marketPriceInRub1', 18 : 'salePriceTax', 19 : 'expensesOnSale',
+            20 : 'expensesTotal', 21 : 'profit', 22 : 'excessSalePriceTax']
+    def totalCalc = getCalcTotalRow()
+    def errorColums = []
+    if (totalCalc != null) {
+        totalColumns.each { index, columnAlias ->
+            if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
+                errorColums.add(index)
             }
         }
-        if (totalCalc != null) {
-            totalColumns.each { index, columnAlias ->
-                if (totalCalc[columnAlias] != totalRow[columnAlias]) {
-                    logger.info('===== ' + totalCalc[columnAlias] + ' - ' + totalRow[columnAlias]) // TODO (Ramil Timerbaev)
-                    logger.error("Итоговая сумма в графе $index в транспортном файле некорректна")
-                }
-            }
-        }
+    }
+    if (!errorColums.isEmpty()) {
+        def columns = errorColums.join(', ')
+        logger.error("Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
 }
 
@@ -1111,4 +1121,70 @@ void checkTotalRow(def totalRow) {
  */
 def hasError() {
     return logger.containsLevel(LogLevel.ERROR)
+}
+
+/**
+ * Получить итоговую строку с суммами.
+ */
+def getCalcTotalRow() {
+    def totalColumns = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInRub',
+            'acquisitionPriceTax', 'redemptionValue', 'priceInFactRub', 'marketPriceInRub1', 'salePriceTax',
+            'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
+    def totalRow = formData.createDataRow()
+
+    totalRow.setAlias('itogo')
+    totalRow.getCell('fix').colSpan = 7
+    totalRow.fix = "Итого за текущий отчетный (налоговый) период"
+    setTotalStyle(totalRow)
+    def data = getData(formData)
+    def tmp
+    totalColumns.each { alias ->
+        totalRow.getCell(alias).setValue(0)
+    }
+    for (def row : getRows(data)) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        totalColumns.each { alias ->
+            tmp = totalRow.getCell(alias).getValue() + (row.getCell(alias).getValue() ?: 0)
+            totalRow.getCell(alias).setValue(tmp)
+        }
+    }
+    return totalRow
+}
+
+/**
+ * Получить id справочника.
+ *
+ * @param ref_id идентификатор справончика
+ * @param code атрибут справочника
+ * @param value значение для поиска
+ * @param date дата актуальности
+ * @param cache кеш
+ * @return
+ */
+def getRecordId(def ref_id, String code, def value, Date date, def cache) {
+    String filter = code + " = '" + value + "'"
+    if (cache[ref_id]!=null) {
+        if (cache[ref_id][filter] != null) {
+            return cache[ref_id][filter]
+        }
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    if (records.size() == 1){
+        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        return cache[ref_id][filter]
+    }
+    logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
+    return null
+}
+
+/**
+ * Проверка пустое ли значение.
+ */
+def isEmpty(def value) {
+    return value == null || value == '' || value == 0
 }

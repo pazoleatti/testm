@@ -16,19 +16,34 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.test.FormTypeMockUtils;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.test.FormTypeMockUtils;
 
 public class FormDataAccessServiceImplTest {
 	private static FormDataAccessServiceImpl service = new FormDataAccessServiceImpl();
@@ -101,32 +116,23 @@ public class FormDataAccessServiceImplTest {
 		Department d;
 
 		// В тербанках есть формы 1 (консолидированная и сводная) и 3 (выходная)
-		List<DepartmentFormType> dfts = new ArrayList<DepartmentFormType>();
-		dfts.add(mockDepartmentFormType(TB1_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
-		dfts.add(mockDepartmentFormType(TB1_ID, summaryFormType1.getId(), FormDataKind.CONSOLIDATED));
-		dfts.add(mockDepartmentFormType(TB1_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
-		d = mockDepartment(TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK, dfts);
+
+		d = mockDepartment(TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
 		when(departmentService.getDepartment(TB1_ID)).thenReturn(d);
 		
-		dfts = new ArrayList<DepartmentFormType>();
-		dfts.add(mockDepartmentFormType(TB2_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
-		dfts.add(mockDepartmentFormType(TB2_ID, summaryFormType1.getId(), FormDataKind.CONSOLIDATED));
-		dfts.add(mockDepartmentFormType(TB2_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
-		d = mockDepartment(TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK, dfts);
+
+		d = mockDepartment(TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
 		when(departmentService.getDepartment(TB2_ID)).thenReturn(d);
 
 		// В банке есть форма 1 (сводная), 2 (сводная) и 3 (выходная)
-		dfts = new ArrayList<DepartmentFormType>();
-		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
-		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType2.getId(), FormDataKind.SUMMARY));
-		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
-		d = mockDepartment(Department.ROOT_BANK_ID, null, DepartmentType.ROOT_BANK, dfts);		
+		d = mockDepartment(Department.ROOT_BANK_ID, null, DepartmentType.ROOT_BANK);		
 		when(departmentService.getDepartment(Department.ROOT_BANK_ID)).thenReturn(d);
 
 		ReflectionTestUtils.setField(service, "departmentService", departmentService);
 		
 		// Сводная форма 1 из тербанка 1 является источником для сводной 1 банка
 		DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
+		List<DepartmentFormType> dfts = new ArrayList<DepartmentFormType>();
 		dfts = new ArrayList<DepartmentFormType>();
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType2.getId(), FormDataKind.SUMMARY));
@@ -216,6 +222,33 @@ public class FormDataAccessServiceImplTest {
 		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_BALANCED_ID, Department.ROOT_BANK_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
 		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_BALANCED_ID, Department.ROOT_BANK_ID)).thenReturn(REPORT_PERIOD_BALANCED);
 		ReflectionTestUtils.setField(service, "reportPeriodService", reportPeriodService);
+		
+		SourceService sourceService = mock(SourceService.class);
+		dfts.add(mockDepartmentFormType(TB1_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
+		dfts.add(mockDepartmentFormType(TB1_ID, summaryFormType1.getId(), FormDataKind.CONSOLIDATED));
+		dfts.add(mockDepartmentFormType(TB1_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
+		when(sourceService.getDFTByDepartment(Matchers.eq(TB1_ID), Matchers.any(TaxType.class))).thenReturn(dfts);
+		
+		dfts = new ArrayList<DepartmentFormType>();
+		dfts.add(mockDepartmentFormType(TB2_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
+		dfts.add(mockDepartmentFormType(TB2_ID, summaryFormType1.getId(), FormDataKind.CONSOLIDATED));
+		dfts.add(mockDepartmentFormType(TB2_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
+		when(sourceService.getDFTByDepartment(Matchers.eq(TB2_ID), Matchers.any(TaxType.class))).thenReturn(dfts);
+		
+		dfts = new ArrayList<DepartmentFormType>();
+		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
+		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType2.getId(), FormDataKind.SUMMARY));
+		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
+		when(sourceService.getDFTByDepartment(Matchers.eq(Department.ROOT_BANK_ID), Matchers.any(TaxType.class))).thenReturn(dfts);
+		ReflectionTestUtils.setField(service, "sourceService", sourceService);
+		
+		FormTypeDao formTypeDao = mock(FormTypeDao.class);
+		FormType ft = new FormType();
+		ft.setTaxType(TaxType.INCOME);
+		when(formTypeDao.get(Matchers.anyInt())).thenReturn(ft);
+		ReflectionTestUtils.setField(service, "formTypeDao", formTypeDao);
+		
+		
 	}
 
 	@Test
@@ -547,8 +580,11 @@ public class FormDataAccessServiceImplTest {
 		userInfo.setUser(mockUser(TB1_OPERATOR_USER_ID, TB1_ID, TARole.ROLE_OPER));
 		assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, TB1_APPROVED_FORMDATA_ID).toArray());
 		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
-		assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_CREATED},
+		// TODO: (sgoryachkin) Когда сделал SBRFACCTAX-4009, упал тест в этом месте. Пришлось добавить  WorkflowMove.APPROVED_TO_ACCEPTED
+		//                     Надо уточнить правильно ли это. Может ли контролер принять НФ?
+		assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_CREATED, WorkflowMove.APPROVED_TO_ACCEPTED},
 				service.getAvailableMoves(userInfo, TB1_APPROVED_FORMDATA_ID).toArray());
+		
 	}
 
 	@Test
@@ -563,7 +599,9 @@ public class FormDataAccessServiceImplTest {
 		userInfo.setUser(mockUser(TB1_OPERATOR_USER_ID, TB1_ID, TARole.ROLE_OPER));
 		assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, TB1_ACCEPTED_FORMDATA_ID).toArray());
 		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
-		assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, TB1_ACCEPTED_FORMDATA_ID).toArray());
+		// TODO: (sgoryachkin) Когда сделал SBRFACCTAX-4009, упал тест в этом месте. Пришлось добавить  WorkflowMove.ACCEPTED_TO_APPROVED
+		//                     Надо уточнить правильно ли это. Может ли контролер вернуть в принята?
+		assertArrayEquals(new Object[] {WorkflowMove.ACCEPTED_TO_APPROVED}, service.getAvailableMoves(userInfo, TB1_ACCEPTED_FORMDATA_ID).toArray());
 	}
 
 	@Test

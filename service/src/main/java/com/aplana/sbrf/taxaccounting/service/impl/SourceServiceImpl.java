@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -83,33 +84,37 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public void saveForm(Long departmentId, int typeId, int formId) {
-        departmentFormTypeDao.createDepartmentFormType(departmentId, typeId, formId);
+    public void saveDFT(Long departmentId, int typeId, int formId) {
+        departmentFormTypeDao.save(departmentId.intValue(), typeId, formId);
     }
 
     @Override
-    public void deleteForm(Long id) {
-        departmentFormTypeDao.deleteDepartmentFormType(id);
+    public void deleteDFT(Collection<Long> ids) {
+    	for (Long id : ids) {
+    		departmentFormTypeDao.delete(id);
+    	}
     }
 
     @Override
-    public void saveDeclaration(Long departmentId, int declarationId) {
-        departmentFormTypeDao.createDepartmentDeclType(departmentId, declarationId);
+    public void saveDDT(Long departmentId, int declarationId) {
+        departmentDeclarationTypeDao.save(departmentId.intValue(), declarationId);
     }
 
     @Override
-    public void deleteDeclaration(Long id) {
-        departmentFormTypeDao.deleteDepartmentDeclType(id);
+    public void deleteDDT(Collection<Long> ids) {
+    	for (Long id : ids) {
+    		departmentDeclarationTypeDao.delete(id);
+		}
     }
 
 	@Override
 	public FormType getFormType(int formTypeId) {
-		return formTypeDao.getType(formTypeId);
+		return formTypeDao.get(formTypeId);
 	}
 
 	@Override
 	public List<FormType> listAllByTaxType(TaxType taxType) {
-		return formTypeDao.listAllByTaxType(taxType);
+		return formTypeDao.getByTaxType(taxType);
 	}
 
 	@Override

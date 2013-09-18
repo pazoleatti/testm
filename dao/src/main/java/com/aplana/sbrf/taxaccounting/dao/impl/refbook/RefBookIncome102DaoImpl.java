@@ -46,47 +46,46 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter,
                                                               RefBookAttribute sortAttribute) {
-        RefBook refBook = refBookDao.get(REF_BOOK_ID);
+		RefBook refBook = refBookDao.get(REF_BOOK_ID);
 
-        StringBuilder sql = new StringBuilder("select * from income_102 ");
+		String sortColumn = sortAttribute == null ? "id" : sortAttribute.getAlias();
 
-        Map<String, Integer> params = new HashMap<String, Integer>();
+		StringBuilder sql = new StringBuilder("select ");
+		// Сортировка
+		if (isSupportOver()) {
+			sql.append("* from ( select row_number() over (order by '").append(sortColumn).append("') as row_number_over, ");
+		}
+		sql.append("id, report_period_id, department_id, opu_code, total_sum, item_name ");
+		sql.append("from income_102 ");
 
-        sql.append("WHERE report_period_id = :reportPeriodId ");
-        params.put("reportPeriodId", reportPeriodId);
+		Map<String, Integer> params = new HashMap<String, Integer>();
+		sql.append("WHERE report_period_id = :reportPeriodId ");
+		params.put("reportPeriodId", reportPeriodId);
 
-        // Фильтрация
-        StringBuffer sb = new StringBuffer();
-        Filter.getFilterQuery(filter, new BookerStatementsFilterTreeListener(refBook, sb));
+		// Фильтрация
+		StringBuffer sb = new StringBuffer();
+		Filter.getFilterQuery(filter, new BookerStatementsFilterTreeListener(refBook, sb));
 
-        if (sb.length() > 0) {
-            sql.append("AND ");
-            sql.append(sb.toString());
-            sql.append(" ");
-        }
+		if (sb.length() > 0) {
+			sql.append("AND ");
+			sql.append(sb.toString());
+		}
 
-        if (pagingParams != null) {
-            if (sb.length() == 0) {
-                sql.append("where ");
-            }
-            // Тестовая база не поддерживает такой синтаксис
-            sql.append("AND row_number_over between :offset and :count ");
-            params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
-            params.put("offset", pagingParams.getStartIndex());
-        }
+		if (isSupportOver()) {
+			sql.append(')');
+			if (pagingParams != null) {
+				// Тестовая база не поддерживает такой синтаксис
+				sql.append(" WHERE row_number_over between :from and :to ");
+				params.put("from", pagingParams.getStartIndex());
+				params.put("to", pagingParams.getStartIndex() + pagingParams.getCount());
+			}
+		}
 
-        // Сортировка
-        if (isSupportOver() && sortAttribute != null) {
-            sql.append("row_number() over (order by '").append(sortAttribute.getAlias()).append("') as row_number_over");
-        }
-
-        List<Map<String, RefBookValue>> records = getNamedParameterJdbcTemplate().query(sql.toString(), params,
-                new RefBookValueMapper(refBook));
-        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-        result.addAll(records);
-
-        result.setTotalRecordCount(getNamedParameterJdbcTemplate().queryForInt("select count(*) from (" + sql.toString() + ")", params));
-        return result;
+		List<Map<String, RefBookValue>> records = getNamedParameterJdbcTemplate().query(sql.toString(), params,
+				new RefBookValueMapper(refBook));
+		PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+		result.setTotalCount(getNamedParameterJdbcTemplate().queryForInt("select count(*) from (" + sql.toString() + ")", params));
+		return result;
     }
 
     @Override

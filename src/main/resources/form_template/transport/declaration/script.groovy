@@ -8,6 +8,8 @@
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+
 // Форма настроек обособленного подразделения: значение атрибута 11
 
 /*
@@ -75,7 +77,6 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
         builder.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId, declarationData.getReportPeriodId()), ВерсПрог: departmentParamTransport.APP_VERSION, ВерсФорм:departmentParamTransport.FORMAT_VERSION) {
             Документ(
                     КНД:"1152004",
-                    // TODO обсудить всплывающее окно, вынести в конф. Трансп декл
                     ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"), //new Date().format("dd.MM.yyyy"),
                     Период: 34,
                     ОтчетГод: reportPeriodService.get(declarationData.reportPeriodId).taxPeriod.startDate.format('yyyy'),
@@ -96,7 +97,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                             КПП: (departmentParamTransport.KPP)){
 
 
-                        if (departmentParamTransport.REORG_FORM_CODE){
+                        if (!departmentParamTransport.REORG_FORM_CODE.toString().equals("")){
                             СвРеоргЮЛ(
                                     ФормРеорг:departmentParamTransport.REORG_FORM_CODE.CODE,
                                     ИННЮЛ: (formReorg in [1, 2, 3, 5, 6] ? departmentParamTransport.REORG_INN: 0),
@@ -198,18 +199,18 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                             ){
 
                                 row.rowData.each{ tRow ->
-                                    def taxBenefitCode = tRow.taxBenefitCode ? tRow.taxBenefitCode:null
+                                    def taxBenefitCode = tRow.taxBenefitCode ? getRefBookValue(6, tRow.taxBenefitCode, "CODE").stringValue:null
                                     // TODO есть поля которые могут не заполняться, в нашем случае опираться какой логики?
                                     РасчНалТС(
                                             [
-                                                    КодВидТС: tRow.tsTypeCode,
+                                                    КодВидТС: getRefBookValue(42, tRow.tsTypeCode, "CODE"),
                                                     ИдНомТС: tRow.vi, //
                                                     МаркаТС: tRow.model, //
                                                     РегЗнакТС: tRow.regNumber,
                                                     НалБаза: tRow.taxBase,
                                                     ОКЕИНалБаза: getRefBookValue(12, tRow.taxBaseOkeiUnit, "CODE"),
                                             ]
-                                                    + (tRow.ecoClass ? [ЭкологКл: tRow.ecoClass]:[])+ //
+                                                    + (tRow.ecoClass ? [ЭкологКл: getRefBookValue(40, tRow.ecoClass, "CODE")]:[])+ //
                                                     [
                                                             ВыпускТС: tRow.years, //
                                                             ВладенТС: tRow.ownMonths,
@@ -224,55 +225,41 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                                     (tRow.coefKl ? [КоэфКл: tRow.coefKl]:[]),
                                     ){
 
-                                        /* 	2.2. Получить в справочнике «Параметры налоговых льгот» запись,
-                                        *	соответствующую значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
-                                        */
-                                        def param = null;
-                                        if (tRow.taxBenefitCode != null){
-                                            // получения региона по кода ОКАТО по справочнику Регионов
-                                            def tOkato = getRefBookValue(3, tRow.okato, "OKATO")
-                                            def region = getRegionByOkatoOrg(tOkato);
-
-                                            def refBookProvider = refBookFactory.getDataProvider(7)
-
-                                            def query = "DICT_REGION_ID LIKE '"+region.record_id+"' AND TAX_BENEFIT_ID LIKE '"+tRow.taxBenefitCode+"'"
-                                            def params = refBookProvider.getRecords(new Date(), null, query, null).getRecords()
-
-                                            if (params.size() == 1)
-                                                param = params.get(0)
-                                            else{
-                                                logger.error("Ошибка при получении данных из справочника «Параметры налоговых льгот» Query: "+query)
-                                            }
-                                        }
-
                                         // генерация КодОсвНал
-                                        if ((taxBenefitCode != 20220 && taxBenefitCode != 20230 && taxBenefitCode != null)){
+                                        if ((!(taxBenefitCode.equals("20220")) && !(taxBenefitCode.equals("20230")) && taxBenefitCode != null)){
+                                            def l = taxBenefitCode;
+                                            def x = "";
+                                            if (l.equals("30200")){
+                                                x = 30200
+                                            } else{
+                                                def param = getParam(tRow.taxBenefitCode, tRow.okato);
 
-                                            def l = tRow.taxBenefitCode;
-                                            if (param != null) {
-                                                def x = l == 30200 ? "" : ((param.SECTION.toString().size() < 4 ? "0"*(4 - param.SECTION.toString().size()) : param.SECTION.toString())
-                                                        + (param.ITEM.toString().size() < 4 ? "0"*(4 - param.ITEM.toString().size()) : param.ITEM.toString())
-                                                        + (param.SUBITEM.toString().size() < 4 ? "0"*(4 - param.SUBITEM.toString().size()) : param.SUBITEM.toString()))
+                                                if (param != null) {
+                                                    x = ((param.SECTION.toString().size() < 4 ? "0"*(4 - param.SECTION.toString().size()) : param.SECTION.toString())
+                                                            + (param.ITEM.toString().size() < 4 ? "0"*(4 - param.ITEM.toString().size()) : param.ITEM.toString())
+                                                            + (param.SUBITEM.toString().size() < 4 ? "0"*(4 - param.SUBITEM.toString().size()) : param.SUBITEM.toString()))
 
 
-                                                def kodOsnNal = (l != "" ? l.toString():"0000") +"/"+ x
+                                                    def kodOsnNal = (l != "" ? l.toString():"0000") +"/"+ x
 
-                                                ЛьготОсвНал(
-                                                        КодОсвНал: kodOsnNal,
-                                                        СумОсвНал: tRow.benefitSum
-                                                )
+                                                    ЛьготОсвНал(
+                                                            КодОсвНал: kodOsnNal,
+                                                            СумОсвНал: tRow.benefitSum
+                                                    )
+                                                }
                                             }
                                         }
 
                                         // вычисление ЛьготУменСум
                                         // не заполняется если Код налоговой льготы = 30200, 20200, 20210 или 20230
-                                        if (taxBenefitCode != 30200
-                                                && taxBenefitCode != 20200
-                                                && taxBenefitCode != 20210
-                                                && taxBenefitCode != 20230
+                                        if (!(taxBenefitCode.equals("30200"))
+                                                && !(taxBenefitCode.equals("20200"))
+                                                && !(taxBenefitCode.equals("20210"))
+                                                && !(taxBenefitCode.equals("20230"))
                                                 && taxBenefitCode != null){
 
                                             // вычисление КодУменСум
+                                            def param = getParam(tRow.taxBenefitCode, tRow.okato);
                                             def valL = tRow.taxBenefitCode;
                                             if (param != null) {
                                                 def valX = ((param.SECTION.toString().size() < 4 ? ("0"*(4 - param.SECTION.toString().size())) : param.SECTION.toString())
@@ -288,14 +275,15 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
 
                                         // ЛьготСнижСтав
                                         // не заполняется если Код налоговой льготы = 30200, 20200, 20210 или 20220
-                                        if (taxBenefitCode != 30200
-                                                && taxBenefitCode != 20200
-                                                && taxBenefitCode != 20210
-                                                && taxBenefitCode != 20220
+                                        if (!(taxBenefitCode.equals("30200"))
+                                                && !(taxBenefitCode.equals("20200"))
+                                                && !(taxBenefitCode.equals("20210"))
+                                                && !(taxBenefitCode.equals("20220"))
                                                 && taxBenefitCode != null){
 
                                             // вычисление КодУменСум
                                             def valL = tRow.taxBenefitCode;
+                                            def param = getParam(tRow.taxBenefitCode, tRow.okato);
                                             if (param != null) {
                                                 def valX = ((param.SECTION.toString().size() < 4 ? "0"*(4 - param.SECTION.toString().size()) : param.SECTION.toString())
                                                         + (param.ITEM.toString().size() < 4 ? "0"*(4 - param.ITEM.toString().size()) : param.ITEM.toString())
@@ -421,8 +409,16 @@ def getRefBookValue(refBookID, recordId, alias){
 def checkTransportParams(departmentParamTransport){
     def errors = []
     departmentParamTransport.each{ key, value ->
-        if (!(key in ['PHONE', 'REORG_FORM_CODE', 'REORG_KPP', 'REORG_INN', 'SIGNATORY_LASTNAME', 'APPROVE_DOC_NAME', 'APPROVE_ORG_NAME']) && (value.toString().equals(""))){
-            errors.add(key)
+        if (!(key in ['PHONE', 'REORG_FORM_CODE', 'REORG_KPP', 'REORG_INN', 'SIGNATORY_LASTNAME', 'APPROVE_DOC_NAME', 'APPROVE_ORG_NAME'])){
+            if (
+                    (value instanceof List && value.size() == 0) ||
+                    (value instanceof RefBookValue && value.equals(new RefBookAttribute())) ||
+                    (value instanceof Number && value.equals(0)) ||
+                    (value instanceof String && value.equals("")) ||
+                    (value instanceof Date && value.equals(null))
+            ){
+                errors.add(key)
+            }
         }
     }
 
@@ -437,4 +433,29 @@ def checkTransportParams(departmentParamTransport){
     }
 
     return true;
+}
+
+
+/*
+* 2.2. Получить в справочнике «Параметры налоговых льгот» запись,
+* соответствующую значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
+*/
+def getParam(taxBenefitCode, okato){
+    if (taxBenefitCode != null){
+        // получения региона по кода ОКАТО по справочнику Регионов
+        def tOkato = getRefBookValue(3, okato, "OKATO")
+        def region = getRegionByOkatoOrg(tOkato);
+
+        def refBookProvider = refBookFactory.getDataProvider(7)
+
+        def query = "DICT_REGION_ID LIKE '"+region.record_id+"' AND TAX_BENEFIT_ID LIKE '"+taxBenefitCode+"'"
+        def params = refBookProvider.getRecords(new Date(), null, query, null).getRecords()
+
+        if (params.size() == 1)
+            param = params.get(0)
+        else{
+            logger.error("Ошибка при получении данных из справочника «Параметры налоговых льгот»"+taxBenefitCode)
+        }
+    }
+
 }

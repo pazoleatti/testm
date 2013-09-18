@@ -334,16 +334,32 @@ def checkNSI(){
     def data = getData(formData)
     getRows(data).each{row->
         if (!isTotalRow(row)) {
+            def index = row.rowNumber
+            def errorMsg
+            boolean npp
+            if (index != null) {
+                npp = true
+                errorMsg = "В строке \"№ пп\" равной $index "
+            } else {
+                npp = false
+                index = getRows(getData(formData)).indexOf(row) + 1
+                errorMsg = "В строке $index "
+            }
+
             if (row.code!=null && getKnu(row.code)==null){
-                logger.warn('Код налогового учета в справочнике отсутствует!')
+                logger.warn(errorMsg + 'код налогового учета в справочнике отсутствует!')
             }
             if (row.balance!=null && getBalance(row.balance)==null){
-                logger.warn('Код налогового учета в справочнике отсутствует!')
+                logger.warn(errorMsg + 'код налогового учета в справочнике отсутствует!')
             }
             def start = reportPeriodService.getStartDate(formData.reportPeriodId)
             def end = reportPeriodService.getEndDate(formData.reportPeriodId)
             if (row.code!=null && isKnuDate(row.code,start.getTime()) && isKnuDate(row.code,end.getTime())){
-                logger.error('Операция в РНУ не учитывается!')
+                if (npp) {
+                    logger.error("Операция в строке \"№ пп\" равной $index в РНУ не учитывается!")
+                } else {
+                    logger.error("Операция в строке $index в РНУ не учитывается!")
+                }
             }
         }
     }

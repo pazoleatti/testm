@@ -99,12 +99,20 @@ public interface DataRowHelper {
 
 	/**
 	 * Сохранение строк НФ
+	 * 
+	 * @deprecated Не должен вызываться из скриптов
+	 * 
 	 */
+	@Deprecated
 	void commit();
 
 	/**
 	 * Отмена изменений сток НФ
+	 * 
+	 * @deprecated Не должен вызываться из скриптов
+	 * 
 	 */
+	@Deprecated
 	void rollback();
 
     /**
@@ -120,6 +128,11 @@ public interface DataRowHelper {
      * Используется ленивая загрузка + кэш
      */
     List<DataRow<Cell>> getAllCached();
+
+    /**
+     * Сброс кэша
+     */
+    void dropCache();
 
     /**
      * Возвращает индекс строки, имеющий заданный алиас.

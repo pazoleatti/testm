@@ -34,21 +34,21 @@ public class RefBookDepartmentDaoTest {
         RefBookValue departmentBankid = new RefBookValue(RefBookAttributeType.NUMBER, 1L);
         RefBookValue departmentTB1Name = new RefBookValue(RefBookAttributeType.STRING, "Териториальный Банк №1");
         PagingResult<Map<String, RefBookValue>> data = refBookDepartmentDao.getRecords(DEPARTMENT_REF_BOOK_ID, new PagingParams(), null, null);
-        assertTrue(data.getTotalRecordCount() == DEPARTMENTS_TOTAL_RECORDS);
+        assertTrue(data.getTotalCount() == DEPARTMENTS_TOTAL_RECORDS);
         assertTrue(data.size() == DEPARTMENTS_COUNT);
         assertTrue(data.get(0).get(RefBook.RECORD_ID_ALIAS).equals(departmentBankid));
         assertTrue(data.get(1).get("name").equals(departmentTB1Name));
 
         // Получим пустой результат (уйдем за пределы пагинации)
         data = refBookDepartmentDao.getRecords(DEPARTMENT_REF_BOOK_ID, new PagingParams(999999, 10), null, null);
-        assertTrue(data.getTotalRecordCount() == DEPARTMENTS_TOTAL_RECORDS);
+        assertTrue(data.getTotalCount() == DEPARTMENTS_TOTAL_RECORDS);
         assertTrue(data.size() == 0);
 
         // Получим записи из бд с сортировкой (метод сейчаз падает из за отсутвия сортировки
 //        RefBookAttribute sortAttribute = new RefBookAttribute();
 //        sortAttribute.setAlias("sbrf_code");
 //        data = refBookDepartmentDao.getRecords(DEPARTMENT_REF_BOOK_ID, new PagingParams(), sortAttribute);
-//        assertTrue(data.getTotalRecordCount() == DEPARTMENTS_TOTAL_RECORDS);
+//        assertTrue(data.getTotalCount() == DEPARTMENTS_TOTAL_RECORDS);
 //        assertTrue(data.size() == DEPARTMENTS_COUNT);
 //        assertTrue(data.get(1).get(RefBook.RECORD_ID_ALIAS).equals(departmentBankid));
 //        assertTrue(data.get(0).get("name").equals(departmentTB1Name));

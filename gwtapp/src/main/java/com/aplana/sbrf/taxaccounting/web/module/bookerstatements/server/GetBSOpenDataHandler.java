@@ -1,8 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpenDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpenDataResult;
@@ -34,6 +35,9 @@ public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAct
     @Autowired
     SourceService departmentFormTypService;
 
+    @Autowired
+    private PeriodService periodService;
+
     public GetBSOpenDataHandler() {
         super(GetBSOpenDataAction.class);
     }
@@ -44,6 +48,8 @@ public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAct
 
         // Текущий пользователь
         TAUser currUser = securityService.currentUserInfo().getUser();
+
+        result.setReportPeriods(periodService.getAllPeriodsByTaxType(TaxType.INCOME, false));
 
         // Признак контролера
         if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {

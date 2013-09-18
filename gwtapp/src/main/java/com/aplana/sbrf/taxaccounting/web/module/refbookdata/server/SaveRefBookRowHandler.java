@@ -31,7 +31,7 @@ public class SaveRefBookRowHandler extends AbstractActionHandler<SaveRefBookRowA
 	@Override
 	public SaveRefBookRowResult execute(SaveRefBookRowAction action, ExecutionContext executionContext) throws ActionException {
 		RefBookDataProvider refBookDataProvider = refBookFactory
-				.getDataProvider(action.getRefbookId());
+				.getDataProvider(action.getRefBookId());
 		Map<String, RefBookValue> valueToSave = new HashMap<String, RefBookValue>();
 
 		for(Map.Entry<String, RefBookValueSerializable> v : action.getValueToSave().entrySet()) {
@@ -44,7 +44,7 @@ public class SaveRefBookRowHandler extends AbstractActionHandler<SaveRefBookRowA
 		valuesToSaveList.add(valueToSave);
 
 
-		refBookDataProvider.updateRecords(new Date(), valuesToSaveList);
+		refBookDataProvider.updateRecords(action.getRelevanceDate(), valuesToSaveList);
 		return new SaveRefBookRowResult();
 	}
 

@@ -271,17 +271,19 @@ def consolidationBank() {
     // очистить форму
     data.getAllCached().each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
+            if (row.getCell(alias).isEditable() || row.getAlias() in ['R107', 'R212']) {
+                row.getCell(alias).setValue(0)
+            }
+        }
+        ['logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference'].each { alias ->
             row.getCell(alias).setValue(null)
         }
     }
-
-    def needCalc = false
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())){
         def child = formDataService.find(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
-            needCalc = true
             DataRowHelper childData = getData(child)
             for (DataRow<Cell> row : childData.allCached) {
                 if (row.getAlias() == null) {
@@ -296,9 +298,6 @@ def consolidationBank() {
             }
         }
     }
-    if (needCalc) {
-        checkAndCalc()
-    }
     data.save(data.allCached)
     data.commit()
     logger.info('Формирование сводной формы уровня Банка прошло успешно.')
@@ -307,7 +306,7 @@ def consolidationBank() {
 /**
  * Консолидация данных из рну-7 и рну-5 в сводные расходы простые уровня ОП.
  */
-def consolidationSummary() {
+void consolidationSummary() {
     def data = getData(formData)
     if (data == null) {
         return
@@ -318,9 +317,6 @@ def consolidationSummary() {
             row.getCell(alias).setValue(null)
         }
     }
-
-    // справочник 27 "Классификатор расходов Сбербанка России для целей налогового учёта"
-    def refDataProvider = refBookFactory.getDataProvider(27)
 
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
@@ -358,18 +354,20 @@ def consolidationSummary() {
         }
     }
 
+    def cache = [:]
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
+            def date = new Date()
             switch (child.formType.id) {
-            // рну 7
+                // рну 7
                 case 311:
                     ([3, 12] + (15..35) + (38..49) + (51..54) + (56..58) + (62..78) + (91..95) + (98..101) +
                             (103..106) + (181..183) + (190..194) + [199, 204, 205] + (207..211)).each {
                         def alias = 'R' + it
                         def row = getRowByAlias(data, alias)
-                        def recordId = getRecordId(refDataProvider, row.consumptionTypeId)
+                        def recordId = getRecords(27, 'CODE', row.consumptionTypeId, date, cache)
 
                         // сумма графы 10 рну-7
                         def sum10 = 0
@@ -378,9 +376,9 @@ def consolidationSummary() {
                         // сумма графы 10 рну-7 для графы 7
                         def sum = 0
                         if (recordId != null) {
-                            sum10 = getSumForColumn5or6or8(child, recordId, row.consumptionAccountNumber, 'code', 'balance', 'taxAccountingRuble')
-                            sum12 = getSumForColumn5or6or8(child, recordId, row.consumptionAccountNumber, 'code', 'balance', 'ruble')
-                            sum = getSumForColumn7(child, recordId, row.consumptionAccountNumber)
+                            sum10 = getSumForColumn5or6or8(child, recordId, 'code', 'balance', 'taxAccountingRuble')
+                            sum12 = getSumForColumn5or6or8(child, recordId, 'code', 'balance', 'ruble')
+                            sum = getSumForColumn7(child, recordId)
                         }
 
                         // графа 5
@@ -392,17 +390,17 @@ def consolidationSummary() {
                     }
                     break
 
-            // рну 5
+                // рну 5
                 case 317:
                     ((2..106) + (109..211)).each {
                         def alias = 'R' + it
                         def row = getRowByAlias(data, alias)
-                        def recordId = getRecordId(refDataProvider, row.consumptionTypeId)
+                        def recordId = getRecords(27, 'CODE', row.consumptionTypeId, date, cache)
 
                         // сумма графы 5 рну-5
                         def sum5 = 0
                         if (recordId != null) {
-                            sum5 = getSumForColumn5or6or8(child, recordId, row.consumptionAccountNumber, 'code', 'number', 'sum')
+                            sum5 = getSumForColumn5or6or8(child, recordId, 'code', 'number', 'sum')
                         }
 
                         // графа 8
@@ -699,24 +697,18 @@ def getValue(def record, def alias) {
  *
  * @param form нф источника (рну-7 или рну-5)
  * @param value1 значение приемника для первого условия (id справочника)
- * @param value2 значение приемника для второго условия
  * @param alias1 алиас графы для первого условия
  * @param alias2 алиас графы для второго условия
  * @param resultAlias алиас графы суммирования
  */
-def getSumForColumn5or6or8(def form, def value1, def value2, def alias1, def alias2, def resultAlias) {
+def getSumForColumn5or6or8(def form, def value1, def alias1, def alias2, def resultAlias) {
     def sum = 0
     def data = getData(form)
     if (data == null) {
         return sum
     }
-    def tmpValueA = value2.replace('.', '')
-    def tmpValueB
     getRows(data).each { row ->
-        tmpValueB = (row.getCell(alias2).getValue() ?
-            refBookService.getStringValue(27, row.getCell(alias2).getValue(), 'NUMBER') : null)
-
-        if (value1 == row.getCell(alias1).getValue() && tmpValueA == tmpValueB) {
+        if (value1 == row.getCell(alias1).getValue() && value1 == row.getCell(alias2).getValue()) {
             sum += (row.getCell(resultAlias).getValue() ?: 0)
         }
     }
@@ -728,9 +720,8 @@ def getSumForColumn5or6or8(def form, def value1, def value2, def alias1, def ali
  *
  * @param form нф источника (рну-7 или рну-5)
  * @param value1 значение приемника для первого условия (id справочника)
- * @param value2 значение приемника для второго условия
  */
-def getSumForColumn7(def form, def value1, def value2) {
+def getSumForColumn7(def form, def value1) {
     def sum = 0
     def data = getData(form)
     if (data == null) {
@@ -738,13 +729,9 @@ def getSumForColumn7(def form, def value1, def value2) {
     }
     SimpleDateFormat formatY = new SimpleDateFormat('yyyy')
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    def tmpValueA = value2.replace('.', '')
-    def tmpValueB
     getRows(data).each { row ->
         if (row.getAlias()==null) {
-            def String balance = getBalanceValue(row.balance)
-            tmpValueB = (row.balance!=null && balance!=null ? balance.replace('.', '') : null)
-            if (value1 == row.code && tmpValueA == tmpValueB && row.ruble != null && row.ruble != 0) {
+            if (value1 == row.code && value1 == row.balance && row.ruble != null && row.ruble != 0) {
                 // получить (дату - 3 года)
                 def Date dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(row.docDate)) - 3))
                 // получить налоговые и отчетные периоды за найденый промежуток времени [(дата - 3года)..дата]
@@ -776,7 +763,31 @@ def getSumForColumn7(def form, def value1, def value2) {
     return sum
 }
 
-def getBalanceValue(def value) {
-    return refBookService.getStringValue(27, value, 'NUMBER')
+/**
+ * Получить id справочника.
+ *
+ * @param ref_id идентификатор справончика
+ * @param code атрибут справочника
+ * @param value значение для поиска
+ * @param date дата актуальности
+ * @param cache кеш
+ * @return
+ */
+def getRecords(def ref_id, String code, String value, Date date, def cache) {
+    String filter = code + "= '"+ value.replaceAll(' ', '')+"'"
+    if (cache[ref_id]!=null) {
+        if (cache[ref_id][filter] != null) {
+            return cache[ref_id][filter]
+        }
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null)
+    if (records.size() == 1){
+        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        return cache[ref_id][filter]
+    }
+    logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
+    return null
 }
-

@@ -3,6 +3,7 @@ package form_template.deal.auctions_property
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 
 import java.text.SimpleDateFormat
 
@@ -45,15 +46,16 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT :
         importData()
-        calc()
-        logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+            logicCheck()
+        }
         break
 }
 
 void deleteRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.delete(currentDataRow)
-    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 void addRow() {
@@ -61,7 +63,7 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
     ['fullNamePerson', 'sum', 'docNumber', 'docDate', 'count', 'date'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
@@ -84,11 +86,17 @@ void checkCreation() {
  */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+    def dFrom = taxPeriod.getStartDate()
+    def dTo = taxPeriod.getEndDate()
+    def rowNum = 0
+
     for (row in dataRowHelper.getAllCached()) {
+        rowNum++
         if (row.getAlias() != null) {
             continue
         }
-        def rowNum = row.getIndex()
         def docDateCell = row.getCell('docDate')
         [
                 'rowNumber',     // № п/п
@@ -106,22 +114,14 @@ void logicCheck() {
             def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
-                logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
+                logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
             }
         }
         //  Корректность даты договора
-        def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-        def dFrom = taxPeriod.getStartDate()
-        def dTo = taxPeriod.getEndDate()
         def dt = docDateCell.value
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = docDateCell.column.name
-            if (dt > dTo) {
-                logger.warn("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
-            }
-            if (dt < dFrom) {
-                logger.warn("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
-            }
+            logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
         }
         // Проверка доходов
         def sumCell = row.getCell('sum')
@@ -130,18 +130,18 @@ void logicCheck() {
         def msgSum = sumCell.column.name
         if (priceCell.value != sumCell.value) {
             def msg = priceCell.column.name
-            logger.warn("«$msg» в строке $rowNum не может отличаться от «$msgSum»!")
+            logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
         }
         if (costCell.value != sumCell.value) {
             def msg = costCell.column.name
-            logger.warn("«$msg» в строке $rowNum не может отличаться от «$msgSum»!")
+            logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
         }
         // Корректность даты совершения сделки
         def dealDateCell = row.getCell('date')
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
         //Проверки соответствия НСИ
         checkNSI(row, "fullNamePerson", "Организации-участники контролируемых сделок",9)
@@ -157,7 +157,7 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
         def msg2 = cell.column.name
         def rowNum = row.getIndex()
-        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
+        logger.warn("Строка $rowNum: В справочнике «$msg» не найден элемент «$msg2»!")
     }
 }
 
@@ -383,9 +383,9 @@ def getRecordId(def ref_id, String code, String value, Date date, def cache, int
         cache[ref_id] = [:]
     }
     def refDataProvider = refBookFactory.getDataProvider(ref_id)
-    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    def records = refDataProvider.getRecords(date, null, filter, null)
     if (records.size() == 1){
-        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
     }
     throw new Exception("Строка ${indexRow+14} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")

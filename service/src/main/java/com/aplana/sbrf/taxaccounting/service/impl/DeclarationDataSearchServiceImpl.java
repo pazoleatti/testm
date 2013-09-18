@@ -2,10 +2,12 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.util.DeclarationTypeAlphanumericComparator;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,10 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 
 	@Autowired
 	private DepartmentDao departmentDao;
+	
+	@Autowired
+	private SourceService sourceService;
+	
 
 	@Override
 	public PagingResult<DeclarationDataSearchResultItem> search(DeclarationDataFilter declarationFilter) {
@@ -45,9 +51,8 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 			result.setDepartmentIds(departmentDeclarationTypeDao.getDepartmentIdsByTaxType(taxType));
 		} else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
 			int userDepartmentId = userInfo.getUser().getDepartmentId();
-			// Контролёр видит виды деклараций, привязанные к его подразделению
-			Department userDepartment = departmentDao.getDepartment(userDepartmentId);			
-			List<DepartmentDeclarationType> ddts = userDepartment.getDepartmentDeclarationTypes();
+			// Контролёр видит виды деклараций, привязанные к его подразделению		
+			List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(userDepartmentId, taxType);
 			Map<Integer, DeclarationType> dtMap = new HashMap<Integer, DeclarationType>();
 			for (DepartmentDeclarationType ddt: ddts) {
 				int declarationTypeId = ddt.getDeclarationTypeId();

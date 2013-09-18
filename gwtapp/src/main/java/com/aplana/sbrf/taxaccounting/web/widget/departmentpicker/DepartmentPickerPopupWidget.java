@@ -17,8 +17,9 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasEnabled;
+import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -32,13 +33,16 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 	private DepartmentPicker departmentPiker;
 
 	@UiField
-	TextBox selected;
+	HasText selected;
 
 	@UiField
 	Button selectButton;
 	
 	@UiField
 	Button clearButton;
+	
+	@UiField
+	Panel panel;
 
 	@Override
 	public boolean isEnabled() {
@@ -76,15 +80,11 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 		});
 	}
 
-	public void setWidth(int width) {
-		selected.setWidth(new String(width + "px"));
-		popup.setPixelSize(width, 370);
-	}
 
 	@UiHandler("selectButton")
 	void onSelectButtonClicked(ClickEvent event){
-		popup.setPopupPosition(selected.getAbsoluteLeft(),
-				selected.getAbsoluteTop() + selected.getOffsetHeight());
+		popup.setPopupPosition(panel.getAbsoluteLeft(),
+				panel.getAbsoluteTop() + panel.getOffsetHeight());
 		popup.show();
 	}
 	

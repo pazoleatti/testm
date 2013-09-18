@@ -111,8 +111,14 @@ public class DataRowDaoImplTest {
 	}
 
 	private void checkIndexCorrect(List<DataRow<Cell>> dataRows) {
-		for (int i = 0; i < dataRows.size(); i++) {
-			Assert.assertEquals(Integer.valueOf(i + 1), dataRows.get(i).getIndex());	
+		checkIndexCorrect(dataRows, new DataRowRange(1, dataRows.size()));
+	}
+	
+	private void checkIndexCorrect(List<DataRow<Cell>> dataRows, DataRowRange range) {
+		int from = range.getOffset();
+		int to =  range.getOffset() + dataRows.size();
+		for (int i = from; i < to; i++) {
+			Assert.assertEquals(Integer.valueOf(i), dataRows.get(i - from).getIndex());	
 		}
 	}
 
@@ -640,6 +646,7 @@ public class DataRowDaoImplTest {
 		Assert.assertArrayEquals(new int[] { 2, 3, 4 },
 				dataRowsToStringColumnValues(dataRowDao
 						.getRows(fd, null, range)));
+		checkIndexCorrect(dataRowDao.getRows(fd, null, range), range);
 	}
 
 	@Test
@@ -649,6 +656,7 @@ public class DataRowDaoImplTest {
 		Assert.assertArrayEquals(new int[] { 1, 2 },
 				dataRowsToStringColumnValues(dataRowDao
 						.getRows(fd, null, range)));
+		checkIndexCorrect(dataRowDao.getRows(fd, null, range), range);
 	}
 
 	@Test
@@ -658,6 +666,7 @@ public class DataRowDaoImplTest {
 		Assert.assertArrayEquals(new int[] { 5 },
 				dataRowsToStringColumnValues(dataRowDao
 						.getRows(fd, null, range)));
+		checkIndexCorrect(dataRowDao.getRows(fd, null, range), range);
 	}
 
 	@Test
@@ -852,7 +861,7 @@ public class DataRowDaoImplTest {
 	@Test
 	public void repackORDSuccessCenter() {
 		FormData fd = formDataDao.get(1);
-        int sizeBefore = dataRowDao.getSize(fd,null);
+        //int sizeBefore = dataRowDao.getSize(fd,null);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
 		for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {

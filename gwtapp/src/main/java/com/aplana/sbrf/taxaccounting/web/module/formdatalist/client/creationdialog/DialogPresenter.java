@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.creationdialog;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,21 +42,25 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 
 	private final PlaceManager placeManager;
 	private final DispatchAsync dispatchAsync;
+	
 	private final Map<Integer, FormType> formTypeMap = new HashMap<Integer, FormType>();
-	private final Map<Integer, Department> departmentMap = new HashMap<Integer, Department>();
 
 	public interface MyView extends PopupView, HasUiHandlers<DialogUiHandlers> {
-		void clearInput();
 		
-		void setAvalibleDepartments(List<Department> list, Set<Integer> availableValues);
-		void setKindList(List<FormDataKind> list);
-		void setFormTypeList(List<FormType> list);
-		FormDataFilter getFilterData();
+		void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues);
+		void setAcceptableFormKindList(List<FormDataKind> list);
+		void setAcceptableFormTypeList(List<FormType> list);
+		void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
+		
+		
 		void setFormTypeValue(FormType value);
 		void setFormKindValue(FormDataKind value);
 		void setDepartmentValue(List<Integer> value);
 		void setReportPeriodValue(List<Integer> value);
-		void setReportPeriods(List<ReportPeriod> reportPeriods);
+		
+		FormDataFilter getFilterData();
+		void clearInput();
+		
 	}
 
 	@Inject
@@ -87,6 +92,7 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 						@Override
 						public void onSuccess(final CreateFormDataResult createResult) {
 							getView().hide();
+							getView().clearInput();
 							placeManager.revealPlace(new Builder().nameToken(FormDataPresenter.NAME_TOKEN).with(FormDataPresenter.READ_ONLY, "false").with(FormDataPresenter.FORM_DATA_ID, String.valueOf(createResult.getFormDataId())).build());
 						}
 					}, DialogPresenter.this)
@@ -104,11 +110,10 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 					@Override
 					public void onSuccess(GetFilterDataResult result) {
 						FormDataFilterAvailableValues filterValues = result.getFilterValues();
-						getView().setAvalibleDepartments(result.getDepartments(), filterValues.getDepartmentIds());
-						getView().setKindList(fillFilterList(filterValues.getKinds()));
-						getView().setFormTypeList(fillFilterList(filterValues.getFormTypes()));
-						getView().setReportPeriods(result.getReportPeriods());
-						fillDepartmentsMap(result.getDepartments());
+						getView().setAcceptableDepartments(result.getDepartments(), filterValues.getDepartmentIds());
+						getView().setAcceptableFormKindList(whithEmptyList(filterValues.getKinds()));
+						getView().setAcceptableFormTypeList(whithEmptyList(filterValues.getFormTypes()));
+						getView().setAcceptableReportPeriods(result.getReportPeriods());
 						fillFormTypeMap(filterValues.getFormTypes());
 					}
 				}, this));
@@ -121,18 +126,15 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 		if(formDataFilter.getFormDataKind() != null){
 			getView().setFormKindValue(formDataFilter.getFormDataKind());
 		}
-		if(formDataFilter.getDepartmentId().size() == 1){
-			List<Integer> value = new ArrayList<Integer>();
-			Integer departmentId = formDataFilter.getDepartmentId().iterator().next();
-			//String departmentName = departmentMap.get(departmentId).getName();
-			value.add(departmentId);
-			getView().setDepartmentValue(value);
+		if(formDataFilter.getDepartmentId()!= null && formDataFilter.getDepartmentId().size() == 1){
+			getView().setDepartmentValue(Arrays.asList(formDataFilter.getDepartmentId().get(0)));
 		}
-
-		getView().setReportPeriodValue(formDataFilter.getReportPeriodIds());
+		if (formDataFilter.getReportPeriodIds()!=null && formDataFilter.getReportPeriodIds().size() == 1){
+			getView().setReportPeriodValue(Arrays.asList(formDataFilter.getReportPeriodIds().get(0)));
+		}
 	}
 
-	private <T> List<T> fillFilterList(List<T> source){
+	private <T> List<T> whithEmptyList(List<T> source){
 		List<T> kind = new ArrayList<T>();
 		kind.add(null);
 		kind.addAll(source);
@@ -143,13 +145,6 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 		formTypeMap.clear();
 		for(FormType formType : source){
 			formTypeMap.put(formType.getId(), formType);
-		}
-	}
-
-	private void fillDepartmentsMap(List<Department> source){
-		departmentMap.clear();
-		for(Department department : source){
-			departmentMap.put(department.getId(), department);
 		}
 	}
 

@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -16,28 +16,44 @@ import java.util.List;
 public class PagingResult<T> extends ArrayList<T>{
 	private static final long serialVersionUID = 4359122077734311449L;
 	
-	int totalRecordCount;
-	
-	/**
-	 * @return список записей, попавших в запрошенный диапазон значений
-	 */
-	@Deprecated
-	public List<T> getRecords() {
-		return this;
+	private int totalCount;
+
+	public PagingResult() {
+		super();
 	}
-	@Deprecated
-	public void setRecords(List<T> records) {
-		clear();
-		addAll(records);
+
+	public PagingResult(Collection<? extends T> c) {
+		super(c);
 	}
+
+	public PagingResult(Collection<? extends T> c, int totalCount) {
+		this(c);
+		this.totalCount = totalCount;
+	}
+
+    /**
+     * @return список записей, попавших в запрошенный диапазон значений
+     */
+	@Deprecated
+    public List<T> getRecords() {
+        return this;
+    }
+
+	@Deprecated
+    public void setRecords(List<T> records) {
+        clear();
+        addAll(records);
+    }
+
 	/**
 	 * @return общее количество записей (на всех страницах)
 	 */
-	public int getTotalRecordCount() {
-		return totalRecordCount;
+	public int getTotalCount() {
+		return totalCount;
 	}
-	public void setTotalRecordCount(int totalRecordCount) {
-		this.totalRecordCount = totalRecordCount;
+
+	public void setTotalCount(int totalCount) {
+		this.totalCount = totalCount;
 	}
 
 }

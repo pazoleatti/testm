@@ -70,7 +70,7 @@ public class AuditServiceImpl implements AuditService {
 	public LogSystemFilterAvailableValues getFilterAvailableValues() {
 		LogSystemFilterAvailableValues values = new LogSystemFilterAvailableValues();
 		values.setDepartments(departmentService.listDepartments());
-		values.setFormTypes(formTypeDao.listFormTypes());
+		values.setFormTypes(formTypeDao.getAll());
 		values.setDeclarationTypes(declarationTypeDao.listAll());
 		values.setUsers(userService.listAllUsers());
 		return values;

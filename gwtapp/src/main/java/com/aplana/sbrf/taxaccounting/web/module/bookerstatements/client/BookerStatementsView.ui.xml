@@ -2,7 +2,8 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:d='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
-             xmlns:c='urn:import:com.google.gwt.user.cellview.client'>
+             xmlns:c='urn:import:com.google.gwt.user.cellview.client'
+             xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
     <ui:style>
         .titleLabel {
             font-size: 26px;
@@ -29,7 +30,9 @@
                         <d:DepartmentPickerPopupWidget width="200px" ui:field="departmentPicker" multiselection="false" header="Выберите подразделение"/>
                     </g:cell>
                     <g:cell width="220px">
-                        <g:SimplePanel ui:field="reportPeriodPanel" width="200px"/>
+                        <g:FlowPanel>
+                            <rep:PeriodPickerPopupWidget ui:field="periodPickerPopup"/>
+                        </g:FlowPanel>
                     </g:cell>
                     <g:cell width="220px">
                         <g:ListBox ui:field="bookerReportType" width="200px"/>

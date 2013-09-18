@@ -2,24 +2,24 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'
 	xmlns:p="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
 
-	<g:FlowPanel>
-		<g:HorizontalPanel width="100%">
+	<g:FlowPanel width="200px">
+		<g:HorizontalPanel verticalAlignment="middle"
+			width="100%" ui:field="panel">
 			<g:cell width="100%">
 				<g:TextBox enabled="false" ui:field="text" width="100%" />
 			</g:cell>
 			<g:cell>
-				<g:Button text="..." ui:field="selectButton" />
+				<g:Button text="..." ui:field="selectButton" width="25px" />
 			</g:cell>
 			<g:cell>
-				<g:Button text="X" ui:field="clearButton" />
+				<g:Button text="X" ui:field="clearButton" width="25px" />
 			</g:cell>
 		</g:HorizontalPanel>
 		<g:FlowPanel visible="false">
-			<g:PopupPanel ui:field="popupPanel" autoHideEnabled="true"
-				modal="true" width="300px" height="350px">
-				<g:VerticalPanel width="100%">
-					<g:cell>
-						<p:PeriodPickerWidget ui:field="periodPicker" />
+			<g:PopupPanel ui:field="popupPanel" autoHideEnabled="true" modal="true" width="300px" height="300px">
+				<g:VerticalPanel height="100%" width="100%">
+					<g:cell height="100%" width="100%">
+						<p:PeriodPickerWidget ui:field="periodPicker" height="100%" width="100%"/>
 					</g:cell>
 					<g:cell>
 						<g:Button ui:field="okButton" text="ОК" />

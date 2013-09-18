@@ -4,19 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 
 @Service
 public class FormDataAccessServiceImpl implements FormDataAccessService {
@@ -47,6 +49,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	private DepartmentFormTypeDao departmentFormTypeDao;
 	@Autowired
 	private PeriodService reportPeriodService;
+	@Autowired
+	private SourceService sourceService;
+	@Autowired
+	private FormTypeDao formTypeDao;
 
 	@Override
 	public boolean canRead(TAUserInfo userInfo, long formDataId) {
@@ -232,6 +238,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              ---------------|-------------------------------------------------|
              | Подготовлена |   -    |     +      |      +      |      +      |
              ---------------|-------------------------------------------------|
+             | Утверждена   |   -    |     -      |      +      |      +      |
+             ---------------|-------------------------------------------------|
              | Принята      |   -    |     -      |      -      |      -      |
              ---------------|--------------------------------------------------
              *Контролер ТУ - Контролер текущего уровня
@@ -243,6 +251,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				case PREPARED:
 					return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
 							formDataAccess.isControllerOfUNP();
+                case APPROVED:
+                    return formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
 				case ACCEPTED:
 					return false; //Нельзя редактировать НФ в состоянии "Принята"
 			}
@@ -361,10 +371,12 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			logger.warn(String.format(REPORT_PERIOD_IS_CLOSED, reportPeriod.getId()));
 			return false;
 		}
+		
+		FormType formType = formTypeDao.get(formTypeId);
 
 		// Проверяем, что в подразделении вообще можно работать с формами такого вида и типа
 		boolean found = false;
-		for (DepartmentFormType dft: formDataDepartment.getDepartmentFormTypes()) {
+		for (DepartmentFormType dft: sourceService.getDFTByDepartment(formDataDepartment.getId(), formType.getTaxType())) {
 			if (dft.getFormTypeId() == formTypeId && dft.getKind() == kind) {
 				found = true;
 				break;

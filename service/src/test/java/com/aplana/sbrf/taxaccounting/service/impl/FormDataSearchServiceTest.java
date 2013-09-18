@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
@@ -37,7 +37,7 @@ public class FormDataSearchServiceTest {
 		sourceService = new SourceServiceImpl();
 
 		FormTypeDao formTypeDao = mock(FormTypeDao.class);
-		when(formTypeDao.listAllByTaxType(TaxType.TRANSPORT)).thenReturn(FORM_TYPES_BY_TAX_TYPE);
+		when(formTypeDao.getByTaxType(TaxType.TRANSPORT)).thenReturn(FORM_TYPES_BY_TAX_TYPE);
 		ReflectionTestUtils.setField(service, "formTypeDao", formTypeDao);
 		
 		DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);

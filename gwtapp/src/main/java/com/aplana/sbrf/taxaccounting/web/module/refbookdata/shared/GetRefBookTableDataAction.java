@@ -4,17 +4,20 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
+import java.util.Date;
+
 public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTableDataResult> implements ActionName {
 
-	long refbookId;
+	long refBookId;
 	PagingParams pagingParams;
+	Date relevanceDate;
 
-	public long getRefbookId() {
-		return refbookId;
+	public long getRefBookId() {
+		return refBookId;
 	}
 
-	public void setRefbookId(long refbookId) {
-		this.refbookId = refbookId;
+	public void setRefBookId(long refBookId) {
+		this.refBookId = refBookId;
 	}
 
 	public PagingParams getPagingParams() {
@@ -23,6 +26,14 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
 
 	public void setPagingParams(PagingParams pagingParams) {
 		this.pagingParams = pagingParams;
+	}
+
+	public Date getRelevanceDate() {
+		return relevanceDate;
+	}
+
+	public void setRelevanceDate(Date relevanceDate) {
+		this.relevanceDate = relevanceDate;
 	}
 
 	@Override

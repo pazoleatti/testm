@@ -107,16 +107,17 @@ public class RefBookIncome102 implements RefBookDataProvider {
         ReportPeriod reportPeriodResult = null;
         Long resultTime;
         for (ReportPeriod reportPeriod : reportPeriods) {
-            startCal.setTime(taxPeriod.getStartDate());
+            startCal.clear();
+            startCal.set(Calendar.YEAR, reportPeriod.getYear());
             startCal.set(Calendar.MONTH, startCal.get(Calendar.MONTH) + reportPeriod.getMonths());
             resultTime = startCal.getTime().getTime() - version.getTime();
-            if (resultTime > 0 && ((reportPeriodResult == null) || (time > resultTime))) {
+            if (resultTime >= 0 && ((reportPeriodResult == null) || (time > resultTime))) {
                 time = resultTime;
                 reportPeriodResult = reportPeriod;
             }
         }
         if (reportPeriodResult == null) {
-            throw new IllegalArgumentException("Invalid version repord period not found");
+            throw new IllegalArgumentException("Invalid version report period not found");
         }
         return reportPeriodResult;
     }

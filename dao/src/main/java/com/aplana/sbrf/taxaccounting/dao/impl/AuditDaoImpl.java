@@ -94,11 +94,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     new AuditRowMapper());
         }
 
-		PagingResult<LogSystemSearchResultItem> result = new PagingResult<LogSystemSearchResultItem>();
-		result.setRecords(records);
-		result.setTotalRecordCount(getCount(filter));
-
-		return result;
+		return new PagingResult<LogSystemSearchResultItem>(records, getCount(filter));
 	}
 
 	@Override
@@ -188,7 +184,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             if(rs.getInt("declaration_type_id") != 0)
 			    log.setDeclarationType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
             if(rs.getInt("form_type_id") != 0)
-			    log.setFormType(formTypeDao.getType(rs.getInt("form_type_id")));
+			    log.setFormType(formTypeDao.get(rs.getInt("form_type_id")));
 			if (rs.getInt("form_kind_id") != 0) {
 				log.setFormKind(FormDataKind.fromId(rs.getInt("form_kind_id")));
 			}

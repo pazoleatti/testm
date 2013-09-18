@@ -28,8 +28,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataResul
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateDataRowsAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RollbackDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RollbackDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UploadDataRowsAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
@@ -75,6 +73,9 @@ public class FormDataPresenter extends
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
 		GetFormData action = new GetFormData();
+		if ( formData!=null ){
+			action.setOldFormDataId(formData.getId());
+		}
 		action.setFormDataId(Long.parseLong(request.getParameter(FORM_DATA_ID, null)));
 		action.setReadOnly(Boolean.parseBoolean(request.getParameter(READ_ONLY, "true")));
         executeAction(action);
@@ -93,10 +94,10 @@ public class FormDataPresenter extends
 					.wrongStateCallback(new AbstractCallback<GetRowsDataResult>() {
 						@Override
 						public void onSuccess(GetRowsDataResult result) {
-							if(result==null || result.getDataRows().getTotalRecordCount() == 0)
+							if(result==null || result.getDataRows().getTotalCount() == 0)
 								getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
 							else {
-								getView().setRowsData(start, (int) result.getDataRows().getTotalRecordCount(), result.getDataRows());
+								getView().setRowsData(start, (int) result.getDataRows().getTotalCount(), result.getDataRows());
 								if (result.getDataRows().size() > PAGE_SIZE) {
 									getView().assignDataProvider(result.getDataRows().size());
 								}
@@ -177,22 +178,8 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onCancelClicked() {
-			RollbackDataAction action = new RollbackDataAction();
-			action.setFormDataId(formData.getId());
-			dispatcher.execute(action, CallbackUtils
-					.defaultCallback(new AbstractCallback<RollbackDataResult>() {
-						@Override
-						public void onSuccess(RollbackDataResult result) {
-							revealFormData(true);
-						}
-						
-						public void onFailure(Throwable caught) {
-							modifiedRows.clear();
-							getView().updateData();
-						}
-						
-				}, this));
-		}
+		revealFormData(true);
+	}
 
 
 	
@@ -316,6 +303,7 @@ public class FormDataPresenter extends
 
 
 	private void goMove(final WorkflowMove wfMove){
+		LogCleanEvent.fire(this);
 		GoMoveAction action = new GoMoveAction();
 		action.setFormDataId(formData.getId());
 		action.setMove(wfMove);
@@ -323,6 +311,7 @@ public class FormDataPresenter extends
 				.defaultCallback(new AbstractCallback<GoMoveResult>() {
 					@Override
 					public void onSuccess(GoMoveResult result) {
+						LogAddEvent.fire(FormDataPresenter.this, result.getLogEntries());
 						revealFormData(true);
 					}
 				}, this));
@@ -338,11 +327,19 @@ public class FormDataPresenter extends
 
                                 LogAddEvent.fire(FormDataPresenter.this,
                                         result.getLogEntries());
+                               
                                 
                     			// Очищаем возможные изменения на форме перед открытием.
                     			modifiedRows.clear();
                     			
-                                formData = result.getFormData();
+                    			formData = result.getFormData();
+                    			
+                    			// Регистрируем хендлер на закрытие
+                    			if (closeFormDataHandlerRegistration !=null ){
+                    				closeFormDataHandlerRegistration.removeHandler();
+                    			}
+                    			
+                                
                                 formDataAccessParams = result
                                         .getFormDataAccessParams();
                                 fixedRows = result.isFixedRows();
@@ -376,9 +373,10 @@ public class FormDataPresenter extends
 		                                result.getTaxPeriodStartDate(), result.getTaxPeriodEndDate());
                                 // Если период для ввода остатков, то делаем все ячейки редактируемыми
                                 
-                                if (!readOnlyMode && result.isBalancePeriod()) {
-                                    forceEditMode = true;
-                                }
+
+                                // В периоде ввода остатков форма должна быть в режиме супер редактирования
+                                // Он должен включаться в фабрике колонок если readOnly = false;
+                                forceEditMode = result.isBalancePeriod();
                                 
                                 getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
                                         + String.valueOf(result.getFormData().getFormType().getTaxType()));

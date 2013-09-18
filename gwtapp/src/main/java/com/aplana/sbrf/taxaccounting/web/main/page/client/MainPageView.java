@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPagePresenter.MyView;
-import com.aplana.sbrf.taxaccounting.web.module.about.client.AboutNameTokens;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -12,7 +11,6 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 
@@ -47,14 +45,10 @@ public class MainPageView extends ViewImpl implements MyView {
 	@UiField
 	Panel projectVersion;
 
-	@UiField
-	Anchor aboutLink;
-
 	@Inject
 	public MainPageView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
 		splitPanel.setWidgetHidden(logAreaPanel, true);
-		aboutLink.setHref("#" + AboutNameTokens.ABOUT_PAGE);
 	}
 
 	@Override

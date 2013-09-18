@@ -22,22 +22,22 @@ public class FormTypeDaoTest {
 	
 	@Test
 	public void testGet() {
-		FormType t = formTypeDao.getType(Constants.TRANSPORT_FORM_TYPE_ID);
+		FormType t = formTypeDao.get(Constants.TRANSPORT_FORM_TYPE_ID);
 		Assert.assertEquals("FormType - Transport", t.getName());
 		Assert.assertEquals(Constants.TRANSPORT_FORM_TYPE_ID, t.getId());
 		Assert.assertEquals(TaxType.TRANSPORT, t.getTaxType());
 		
-		t = formTypeDao.getType(Constants.INCOME_FORM_TYPE_ID);
+		t = formTypeDao.get(Constants.INCOME_FORM_TYPE_ID);
 		Assert.assertEquals("FormType - Income", t.getName());
 		Assert.assertEquals(Constants.INCOME_FORM_TYPE_ID, t.getId());
 		Assert.assertEquals(TaxType.INCOME, t.getTaxType());
 
-        t = formTypeDao.getType(Constants.VAT_FORM_TYPE_ID);
+        t = formTypeDao.get(Constants.VAT_FORM_TYPE_ID);
 		Assert.assertEquals("FormType - VAT", t.getName());
 		Assert.assertEquals(Constants.VAT_FORM_TYPE_ID, t.getId());
 		Assert.assertEquals(TaxType.VAT, t.getTaxType());
 
-        t = formTypeDao.getType(Constants.PROPERTY_FORM_TYPE_ID);
+        t = formTypeDao.get(Constants.PROPERTY_FORM_TYPE_ID);
 		Assert.assertEquals("FormType - Property", t.getName());
 		Assert.assertEquals(Constants.PROPERTY_FORM_TYPE_ID, t.getId());
 		Assert.assertEquals(TaxType.PROPERTY, t.getTaxType());
@@ -45,6 +45,6 @@ public class FormTypeDaoTest {
 	
 	@Test(expected=DaoException.class)
 	public void testWrongIdGet() {
-		formTypeDao.getType(-1000);
+		formTypeDao.get(-1000);
 	}
 }

@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
+import java.util.List;
+import java.util.Set;
+
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
@@ -7,8 +10,13 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetOpenDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetOpenDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTaxFormTypesAction;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTaxFormTypesResult;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.SaveAction;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -21,9 +29,6 @@ import com.gwtplatform.mvp.client.proxy.ManualRevealCallback;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * Презентер для формы "Назначение форм и деклараций"
@@ -155,9 +160,6 @@ public class TaxFormNominationPresenter
                 .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
-                        if (result.getErrorOnSave() != null) {
-                            MessageEvent.fire(TaxFormNominationPresenter.this, result.getErrorOnSave());
-                        }
                         if (result.getTableData() != null)
                             getView().setTableData(result.getTableData());
                     }

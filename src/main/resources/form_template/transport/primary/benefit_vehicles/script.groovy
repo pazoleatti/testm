@@ -73,6 +73,9 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+        checkNSI()
+        logicalChecks()
+        break
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
         checkRequiredField()
         logicalChecks()
@@ -175,12 +178,61 @@ void deleteRow() {
  */
 void logicalChecks() {
     for (def row : getDataRows()) {
-
         // Поверка на соответствие дат использования льготы
         if (!(row.benefitEndDate > row.benefitStartDate)) {
             logger.error("Строка $row.rowNumber : Неверно указаны Даты начала и Дата окончания использования льготы! !")
         }
     }
+
+    /**
+     * Во вторую форму по транспорту (202) добавить лог. проверку того,
+     * что форма не содержит записей с разными льготами для одинаковых ТС
+     * (ТС с одинаковым кодом ОКАТО, Идентификационным номером, рег. номером).
+     */
+
+    // Ошибки которые возникли
+    def errors = [];
+
+    for (def row : getDataRows()){
+        // текущий вариант проверки
+        def variant = [
+            okato : row.codeOKATO,
+            identNumber : row.identNumber,
+            regNumber: row.regNumber,
+            lines: []
+        ]
+        variant.lines.add(row.getIndex())
+
+
+        // проверка с остальными строками
+        for (def r : getDataRows()) {
+
+            if (!r.getIndex().equals(row.getIndex())){
+                if (r.codeOKATO.equals(row.codeOKATO)
+                    && r.identNumber.equals(row.identNumber)
+                    && r.regNumber.equals(row.regNumber)){
+                    variant.lines.add(r.getIndex())
+                }
+            }
+        }
+
+        def contains = errors.findAll{ el ->
+            el.codeOKATO.equals(row.codeOKATO)
+            el.identNumber.equals(row.identNumber)
+            el.regNumber.equals(row.regNumber)
+        }
+        if (contains.size() == 0){
+            errors.add(variant)
+        }
+    }
+
+    // показ ошибок
+    errors.each{ e ->
+        if (e.lines.size() > 1){
+            logger.warn("\"Форма содержит несколько записей для ТС ("+getRefBookValue(3, e.okato, "OKATO")+", "+e.identNumber+", "+e.regNumber+"). Строки: "+e.lines.join(', '))
+        }
+    }
+
 }
 
 /**
@@ -287,7 +339,7 @@ boolean checkOkato(codeOKATO){
  * атрибут «Код региона» справочника «Параметры налоговых льгот» соответствует значению «графы 2» («Код по ОКАТО»).
  */
 boolean checkBenefit(taxBenefitCode, okato){
-	if (taxBenefitCode != null && getRefBookValue(6, taxBenefitCode, "CODE") in [20210, 20220, 20230]){
+    if (taxBenefitCode != null && getRefBookValue(6, taxBenefitCode, "CODE").stringValue in ['20210', '20220', '20230']){
         def refTaxBenefitParameters = refBookFactory.getDataProvider(7)
         def region = getRegionByOkatoOrg(okato)
         query = "TAX_BENEFIT_ID ="+taxBenefitCode+" AND DICT_REGION_ID = "+region.record_id
