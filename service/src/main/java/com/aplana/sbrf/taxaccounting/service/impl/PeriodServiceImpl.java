@@ -228,12 +228,10 @@ public class PeriodServiceImpl implements PeriodService{
 
 	private void closePeriodWithLog(int reportPeriodId, long departmentId, List<LogEntry> logs) {
 		DepartmentReportPeriod period = departmentReportPeriodDao.get(reportPeriodId, departmentId);
-		if ((period == null) || period.isActive()) {
+		if (period != null && period.isActive()) {
 			departmentReportPeriodDao.updateActive(reportPeriodId, departmentId, false);
 			ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(period.getReportPeriod().getTaxPeriod().getStartDate());
-			int year = calendar.get(Calendar.YEAR);
+			int year = period.getReportPeriod().getYear();
 			logs.add(new LogEntry(LogLevel.INFO, "Период" + " \"" + reportPeriod.getName() + "\" " +
 					"за " + year + " год " +
 					"закрыт для подразделения \"" +
@@ -254,9 +252,7 @@ public class PeriodServiceImpl implements PeriodService{
 			return;
 		}
 		if (logs != null) {
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(departmentReportPeriod.getReportPeriod().getTaxPeriod().getStartDate());
-			int year = calendar.get(Calendar.YEAR);
+			int year = departmentReportPeriod.getReportPeriod().getYear();
 			logs.add(new LogEntry(LogLevel.INFO,"Создан период" + " \"" + departmentReportPeriod.getReportPeriod().getName() + "\" " +
 					" за " + year + " год "
 					+ "для подразделения \" " +
