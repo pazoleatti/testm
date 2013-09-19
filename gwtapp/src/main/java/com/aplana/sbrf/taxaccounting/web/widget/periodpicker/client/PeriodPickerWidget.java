@@ -1,10 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.google.gwt.core.client.GWT;
@@ -81,8 +77,13 @@ public class PeriodPickerWidget extends Composite implements PeriodPicker{
 		return addHandler(handler, ValueChangeEvent.getType());
 	}
 
+    @Override
+    public void setPeriods(List<ReportPeriod> periods) {
+        setPeriods(periods, false);
+    }
+
 	@Override
-	public void setPeriods(List<ReportPeriod> periods) {
+	public void setPeriods(List<ReportPeriod> periods, boolean setLastPeriodSelected) {
 		tree.clear();
 		
 		Map<Integer, YearTreeItem> periodYearsMap = new LinkedHashMap<Integer, YearTreeItem>();
@@ -103,16 +104,29 @@ public class PeriodPickerWidget extends Composite implements PeriodPicker{
 				
 			});
 			periodYearsMap.get(reportPeriod.getYear()).addItem(reportPeriodItem);
-		}
+        }
 		
 		for (YearTreeItem taxPeriodTreeItem : periodYearsMap.values()) {
 			tree.addItem(taxPeriodTreeItem);
 		}
-		
+
+        if (setLastPeriodSelected && periods != null && !periods.isEmpty()) {
+            setLastPeriodSelected();
+        }
 	}
-	
-	
-	private Collection<ReportPeriodTreeItem> getPeriodItem(){
+
+    private void setLastPeriodSelected() {
+        for (int i = tree.getItemCount() - 1; i >= 0; i--) {
+            TreeItem taxItem = tree.getItem(i);
+            for (int j = taxItem.getChildCount() - 1; j >= 0; j++) {
+                ReportPeriodTreeItem periodItem = (ReportPeriodTreeItem) taxItem.getChild(j);
+                setValue(Arrays.asList(periodItem.getId()));
+                return;
+            }
+        }
+    }
+
+    private Collection<ReportPeriodTreeItem> getPeriodItem(){
 		Collection<ReportPeriodTreeItem> result = new ArrayList<ReportPeriodTreeItem>();
 		for (int i = 0; i < tree.getItemCount(); i++) {
 			TreeItem taxItem = tree.getItem(i);
