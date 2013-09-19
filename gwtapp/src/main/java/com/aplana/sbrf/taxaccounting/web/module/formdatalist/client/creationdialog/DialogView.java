@@ -108,7 +108,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 		FormDataFilter formDataFilter = new FormDataFilter();
 		formDataFilter.setFormDataKind(formKind.getValue());
 		formDataFilter.setFormTypeId(formType.getValue() != null ? formType.getValue().getId() : null);
-		formDataFilter.setDepartmentId(new ArrayList<Integer>(departmentPicker.getValue()));
+        formDataFilter.setDepartmentId(departmentPicker.getValue());
 		formDataFilter.setReportPeriodIds(reportPeriodPicker.getValue());
 		return formDataFilter;
 	}
