@@ -57,10 +57,14 @@ public enum Color {
 	 *  Синий
 	 */
 	DARK_BLUE(11, 0, 0, 255, "#0000FF Синий"),
-	/**
-	 * Зеленый
-	 */
-	GREEN(12, 0, 255, 0, "#00FF00 Зеленый");
+    /**
+     * Зеленый
+     */
+    GREEN(12, 0, 255, 0, "#00FF00 Зеленый"),
+    /**
+     * Темно-зеленый
+     */
+    DARK_GREEN(13, 0, 108, 0, "#006C00 Темно-зеленый");
 
 	private Color(int id, int red, int green, int blue, String title) {
 		this.id = id;
