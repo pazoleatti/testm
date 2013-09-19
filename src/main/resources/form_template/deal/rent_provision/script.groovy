@@ -55,6 +55,11 @@ switch (formDataEvent) {
         break
 }
 
+def getEditColumns() {
+    ['jurName', 'incomeBankSum', 'contractNum', 'contractDate', 'country',
+            'region', 'city', 'settlement', 'count', 'transactionDate']
+}
+
 /**
  * Проверка при создании формы.
  */
@@ -72,18 +77,10 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
-    [
-            'jurName',
-            'incomeBankSum',
-            'contractNum',
-            'contractDate',
-            'country',
-            'region',
-            'city',
-            'settlement',
-            'count',
-            'transactionDate'
-    ].each {
+    row.keySet().each{
+        row.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+    getEditColumns().each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
@@ -107,12 +104,15 @@ void logicCheck() {
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
 
+    int index = 1
+
     for (row in dataRowHelper.getAllCached()) {
         if (row.getAlias() != null) {
             continue
         }
 
-        def rowNum = row.getIndex()
+        def rowNum = index++
+
         [
                 'rowNum', // № п/п
                 'jurName', // Полное наименование юридического лица с указанием ОПФ
@@ -129,7 +129,7 @@ void logicCheck() {
         ].each {
             if (row.getCell(it).value == null || row.getCell(it).value.toString().isEmpty()) {
                 msg = row.getCell(it).column.name
-                logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
+                logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
             }
         }
 
@@ -140,39 +140,44 @@ void logicCheck() {
         def transactionDate = row.transactionDate
         def contractDate = row.contractDate
 
+        //Наименования колонок
+        def contractDateName = row.getCell('contractDate').column.name
+        def transactionDateName = row.getCell('transactionDate').column.name
+        def priceName = row.getCell('price').column.name
+        def incomeBankSumName = row.getCell('incomeBankSum').column.name
+        def countName = row.getCell('count').column.name
+        def costName = row.getCell('cost').column.name
+
         // Корректность даты договора
         def dt = contractDate
         if (dt != null && (dt < dFrom || dt > dTo)) {
-            def msg = row.getCell('contractDate').column.name
-            logger.warn("«$msg» в строке $rowNum не может быть вне налогового периода!")
+            logger.warn("Строка $rowNum: «$contractDateName» не может быть вне налогового периода!")
         }
 
         // Проверка цены
         def res = null
 
-        if (incomeBankSum != null && count != null) {
+        if (incomeBankSum != null && count != null && count != 0) {
             res = (incomeBankSum / count).setScale(0, RoundingMode.HALF_UP)
         }
 
         if (incomeBankSum == null || count == null || price != res) {
-            def msg1 = row.getCell('price').column.name
-            def msg2 = row.getCell('incomeBankSum').column.name
-            def msg3 = row.getCell('count').column.name
-            logger.warn("«$msg1» не равно отношению «$msg2» и «$msg3» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$priceName» не равно отношению «$incomeBankSumName» и «$countName»!")
         }
 
         // Проверка доходности
         if (cost != incomeBankSum) {
-            def msg1 = row.getCell('cost').column.name
-            def msg2 = row.getCell('incomeBankSum').column.name
-            logger.warn("«$msg1» не равно «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$costName» не может отличаться от «$incomeBankSumName»!")
         }
 
         // Корректность даты совершения сделки
         if (transactionDate < contractDate) {
-            def msg1 = row.getCell('transactionDate').column.name
-            def msg2 = row.getCell('contractDate').column.name
-            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$transactionDateName» не может быть меньше «$contractDateName»!")
+        }
+
+        // Проверка стоимости
+        if (price == null || count != null && cost != price * count) {
+            logger.warn("Строка $rowNum: «$costName» не равна произведению «$countName» и «$priceName»!")
         }
 
         //Проверки соответствия НСИ
@@ -191,7 +196,7 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
         def msg2 = cell.column.name
         def rowNum = row.getIndex()
-        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
+        logger.warn("Строка $rowNum: В справочнике «$msg» не найден элемент «$msg2»!")
     }
 }
 
@@ -271,8 +276,8 @@ void importData() {
         return
     }
 
-    if (!fileName.contains('.xls')) {
-        logger.error('Формат файла должен быть *.xls')
+    if (!fileName.endsWith('.xls')) {
+        logger.error('Выбранный файл не соответствует формату xls!')
         return
     }
 
@@ -327,18 +332,7 @@ def addData(def xml) {
         }
 
         def newRow = formData.createDataRow()
-        [
-                'jurName', // Полное наименование юридического лица с указанием ОПФ
-                'incomeBankSum', // Сумма доходов Банка, руб.
-                'contractNum', // Номер договора
-                'contractDate', // Дата договора
-                'country', // Адрес местонахождения объекта недвижимости (Страна)
-                'region', // регион
-                'city', // город
-                'settlement', // населённый пункт
-                'count', //кол-во
-                'transactionDate' // Дата совершения сделки
-        ].each {
+        getEditColumns().each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }

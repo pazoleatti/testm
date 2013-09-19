@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.SourceService;

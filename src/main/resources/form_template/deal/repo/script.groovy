@@ -70,6 +70,9 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
+    row.keySet().each{
+        row.getCell(it).setStyleAlias('Автозаполняемая')
+    }
     ['jurName', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'dealsMode',
             'date1', 'date2', 'percentIncomeSum', 'percentConsumptionSum', 'priceFirstCurrency', 'currencyCode',
             'courseCB', 'priceFirstRub', 'transactionDate'].each {
@@ -124,7 +127,7 @@ void logicCheck() {
         ].each {
             if (row.getCell(it).value == null || row.getCell(it).value.toString().isEmpty()) {
                 def msg = row.getCell(it).column.name
-                logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
+                logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
             }
         }
 
@@ -138,26 +141,26 @@ void logicCheck() {
         if (percentIncomeSum == null && percentConsumptionSum == null) {
             def msg1 = row.getCell('percentIncomeSum').column.name
             def msg2 = row.getCell('percentConsumptionSum').column.name
-            logger.warn("Должна быть заполнена графа «$msg1» или графа «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: Должна быть заполнена графа «$msg1» или графа «$msg2»!")
         }
         if (percentIncomeSum != null && percentConsumptionSum != null) {
             def msg1 = row.getCell('percentIncomeSum').column.name
             def msg2 = row.getCell('percentConsumptionSum').column.name
-            logger.warn("Графа  «$msg1» и графа «$msg2» в строке $rowNum не могут быть заполнены одновременно!")
+            logger.warn("Строка $rowNum: Графа «$msg1» и графа «$msg2» не могут быть заполнены одновременно!")
         }
 
         // Корректность даты договора
         def dt = contractDate
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = row.getCell('contractDate').column.name
-            logger.warn("«$msg» в строке $rowNum не может быть вне налогового периода!")
+            logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
         }
 
         // Корректность даты (заключения) сделки
         if (transactionDeliveryDate < contractDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('contractDate').column.name
-            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 
         // Корректность даты исполнения 1–ой части сделки
@@ -166,11 +169,11 @@ void logicCheck() {
             def msg = row.getCell('date1').column.name
 
             if (dt1 > dTo) {
-                logger.warn("«$msg» не может быть больше даты окончания отчётного периода в строке $rowNum!")
+                logger.warn("Строка $rowNum: «$msg» не может быть больше даты окончания отчётного периода!")
             }
 
             if (dt1 < dFrom) {
-                logger.warn("«$msg» не может быть меньше даты начала отчётного периода в строке $rowNum!")
+                logger.warn("Строка $rowNum: «$msg» не может быть меньше даты начала отчётного периода!")
             }
         }
 
@@ -178,7 +181,7 @@ void logicCheck() {
         if (transactionDate< transactionDeliveryDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('transactionDeliveryDate').column.name
-            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 
         //Проверки соответствия НСИ
@@ -198,7 +201,7 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
         def msg2 = cell.column.name
         def rowNum = row.getIndex()
-        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
+        logger.warn("Строка $rowNum: В справочнике «$msg» не найден элемент «$msg2»!")
     }
 }
 
@@ -266,8 +269,8 @@ void importData() {
         return
     }
 
-    if (!fileName.contains('.xls')) {
-        logger.error('Формат файла должен быть *.xls')
+    if (!fileName.endsWith('.xls')) {
+        logger.error('Выбранный файл не соответствует формату xls!')
         return
     }
 

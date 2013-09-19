@@ -25,10 +25,14 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        addRow()
+        // В ручном режиме строки добавлять нельзя
+        logger.warn("Добавление строк запрещено!")
+        // addRow()
         break
     case FormDataEvent.DELETE_ROW:
-        deleteRow()
+        // В ручном режиме строки удалять нельзя
+        logger.warn("Удаление строк запрещено!")
+        // deleteRow()
         break
 // После принятия из Утверждено
     case FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED:
@@ -158,7 +162,6 @@ void logicCheck() {
         // [13/09/13] Евгений Ломоносов: пока нет, Матрица сейчас должна формироваться только автоматически,
         // поэтому нет смысл проверять обязательные поля
 
-
         // 2. Проверка наличия элемента справочника «Да/Нет» (графы 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15)
         checkNSI(row, "f121", YES_NO, 38)
         checkNSI(row, "f122", YES_NO, 38)
@@ -246,7 +249,7 @@ void sort() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
     dataRows.sort { it.organName }
-    dataRowHelper.save(dataRows);
+    dataRowHelper.save(dataRows)
 }
 /**
  * Проставляет статические строки
@@ -272,7 +275,7 @@ void addAllStatic() {
                 if (row.organName != null)
                     newRow.groupName = refBookService.getRecordData(9, row.organName).NAME.stringValue
                 newRow.setAlias('grp#'.concat(i.toString()))
-                dataRowHelper.insert(newRow, ++i +1 - index)
+                dataRowHelper.insert(newRow, ++i + 1 - index)
                 index = 1
             } else {
                 index++
@@ -417,8 +420,8 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             val13 = '017'
             break
     }
-    if (val13 != null && type.id != 375) {
-        def values13 = refBookFactory.getDataProvider(67L).getRecords(new Date(), null, "NAME = '$val13'", null)
+    if (val13 != null) {
+        def values13 = refBookFactory.getDataProvider(67L).getRecords(new Date(), null, "CODE = '$val13'", null)
         if (values13 != null && values13.size() == 1) {
             row.dealNameCode = values13.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         }
@@ -880,7 +883,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
                 val41 = '796'
                 break
         }
-        if (val41 != null ) {
+        if (val41 != null) {
             def values41 = refBookFactory.getDataProvider(12L).getRecords(new Date(), null, "CODE = '$val41'", null)
             if (values41 != null && values41.size() == 1) {
                 row.okeiCode = values41.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
@@ -1079,11 +1082,10 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     }
     if (row.organName != null) {
         // Графа 3
-        /**
-         * Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
-         * «Организации – участники контролируемых сделок» атрибут «Резидент оффшорной зоны» = 1,
-         * то заполняется значением «0». В ином случае заполняется значением «1».
-         */
+
+        // Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
+        // «Организации – участники контролируемых сделок» атрибут «Резидент оффшорной зоны» = 1,
+        // то заполняется значением «0». В ином случае заполняется значением «1».
         def val = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
         row.f121 = val.OFFSHORE.numberValue == 1 ? recNoId : recYesId
 
@@ -1100,11 +1102,9 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         row.f133 = row.f121
 
         // Графа 10
-        /**
-         * Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
-         * «Организации – участники контролируемых сделок» атрибут «Освобождена от налога на прибыль либо является резидентом Сколково» = 1,
-         * то заполняется значением «1».    В ином случае не Не заполняется.
-         */
+        // Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
+        // «Организации – участники контролируемых сделок» атрибут «Освобождена от налога на прибыль либо является резидентом Сколково» = 1,
+        // то заполняется значением «1».    В ином случае не Не заполняется.
         row.f134 = val.SKOLKOVO.numberValue == 1 ? recYesId : null
     }
 
@@ -1115,32 +1115,31 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
         def val11 = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
 
-        // TODO Вопрос по атрибуту
-        //if(row.dealDoneDate.before(compareCalendar11.getTime()) || (val11 != null && val11.???.numVal == 1)) {
-        //  row.f135 = recNoId
-        //}
+        if (row.dealDoneDate.before(compareCalendar11.getTime()) || (val11 != null && val11.OFFSHORE.referenceValue == recYesId)) {
+            row.f135 = recNoId
+        }
     }
 
     if (row.organName != null) {
         def organ = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
 
         // Графа 48
-        row.organInfo = organ.ORGANIZATION.stringValue;
+        row.organInfo = organ.ORGANIZATION.stringValue
 
         // Графа 51
-         row.organINN = organ.INN_KIO.numberValue;
+        row.organINN = organ.INN_KIO.numberValue
 
         // Графа 52
-         row.organKPP = organ.KPP.numberValue;
+        row.organKPP = organ.KPP.numberValue
 
         // Графа 53
-         row.organRegNum = organ.REG_NUM.stringValue;
+        row.organRegNum = organ.REG_NUM.stringValue
 
         // Графа 54
-         row.taxpayerCode = organ.TAXPAYER_CODE.stringValue;
+        row.taxpayerCode = organ.TAXPAYER_CODE.stringValue
 
         // Графа 55
-         row.address =  organ.ADDRESS.stringValue;
+        row.address = organ.ADDRESS.stringValue
     }
 
     return row

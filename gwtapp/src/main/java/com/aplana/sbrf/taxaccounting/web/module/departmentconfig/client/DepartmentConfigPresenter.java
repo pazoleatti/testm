@@ -130,6 +130,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     @Override
     public void reloadDepartmentParams(Integer departmentId, TaxType taxType, Integer reportPeriodId) {
         if (departmentId == null || taxType == null || reportPeriodId == null) {
+            getView().clear();
             return;
         }
 
@@ -180,6 +181,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                     // Выбирается подразделение пользователя
                                     getView().setDepartment(userDepartment);
                                 }
+                                // Список отчетных периодов
                                 getView().setReportPeriods(result.getReportPeriods());
                             }
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));

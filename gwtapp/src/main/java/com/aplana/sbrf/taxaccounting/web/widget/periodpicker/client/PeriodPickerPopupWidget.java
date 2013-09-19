@@ -62,14 +62,22 @@ public class PeriodPickerPopupWidget extends Composite implements
 		initWidget(binder.createAndBindUi(this));
 	}
 
-	@Override
-	public void setPeriods(List<ReportPeriod> periods) {
-		dereferenceValue = new HashMap<Integer, String>();
-		for (ReportPeriod reportPeriod : periods) {
-			dereferenceValue.put(reportPeriod.getId(), reportPeriod.getName());
-		}
-		periodPicker.setPeriods(periods);
-	}
+    @Override
+    public void setPeriods(List<ReportPeriod> periods) {
+        setPeriods(periods, false);
+    }
+
+    @Override
+    public void setPeriods(List<ReportPeriod> periods, boolean setLastPeriodSelected) {
+        dereferenceValue = new HashMap<Integer, String>();
+        for (ReportPeriod reportPeriod : periods) {
+            dereferenceValue.put(reportPeriod.getId(), reportPeriod.getName());
+        }
+        periodPicker.setPeriods(periods, setLastPeriodSelected);
+        if (setLastPeriodSelected) {
+            setValue(periodPicker.getValue(), true);
+        }
+    }
 
 	@Override
 	public void setAcceptableValues(Collection<List<Integer>> values) {

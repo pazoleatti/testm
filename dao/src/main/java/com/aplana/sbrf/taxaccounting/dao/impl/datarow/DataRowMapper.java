@@ -123,7 +123,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		}
 		DataRow<Cell> dataRow = new DataRow<Cell>(rs.getString("A"), cells);
 		dataRow.setId(rs.getLong("ID"));
-		dataRow.setIndex(rowNum + 1);
+		dataRow.setIndex(rs.getInt("IDX"));
 		return dataRow;
 	}
 }

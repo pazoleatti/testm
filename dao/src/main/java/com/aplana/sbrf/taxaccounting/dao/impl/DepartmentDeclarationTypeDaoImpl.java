@@ -1,21 +1,19 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -78,89 +76,6 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 		return departmentIds;
 	}
 
-	@Override
-	@Transactional(readOnly = false)
-	public void save(int departmentId, List<DepartmentDeclarationType> departmentDeclarationTypes) {
-		final List<DepartmentDeclarationType> newLinks= new LinkedList<DepartmentDeclarationType>();
-		final List<DepartmentDeclarationType> oldLinks = new LinkedList<DepartmentDeclarationType>();
-		final Set<Integer> removedLinks = new HashSet<Integer>(getJdbcTemplate().queryForList(
-				"select id from department_declaration_type where department_id = ?",
-				new Object[]{departmentId},
-				new int[]{Types.NUMERIC},
-				Integer.class
-		));
-		for (DepartmentDeclarationType link : departmentDeclarationTypes) {
-			if (link.getId() == 0) {
-				newLinks.add(link);
-			} else {
-				oldLinks.add(link);
-				removedLinks.remove(link.getId());
-			}
-		}
-
-		if(!removedLinks.isEmpty()){
-			getJdbcTemplate().batchUpdate(
-					"delete from department_declaration_type where id = ?",
-					new BatchPreparedStatementSetter() {
-
-						@Override
-						public void setValues(PreparedStatement ps, int index) throws SQLException {
-							ps.setInt(1, iterator.next());
-						}
-
-						@Override
-						public int getBatchSize() {
-							return removedLinks.size();
-						}
-
-						private Iterator<Integer> iterator = removedLinks.iterator();
-					}
-			);
-		}
-
-		// create new
-		if (!newLinks.isEmpty()) {
-			getJdbcTemplate().batchUpdate(
-					"insert into department_declaration_type (department_id, declaration_type_id, id) " +
-							"values (?, ?, seq_dept_declaration_type.nextval)",
-					new BatchPreparedStatementSetter() {
-						@Override
-						public void setValues(PreparedStatement ps, int index) throws SQLException {
-							DepartmentDeclarationType link = newLinks.get(index);
-							ps.setInt(1, link.getDepartmentId());
-							ps.setInt(2, link.getDeclarationTypeId());
-						}
-
-						@Override
-						public int getBatchSize() {
-							return newLinks.size();
-						}
-					}
-			);
-		}
-		// update old
-		if (!oldLinks.isEmpty()) {
-			getJdbcTemplate().batchUpdate(
-					"update department_declaration_type set department_id = ?, declaration_type_id = ? " +
-							"where id = ?",
-					new BatchPreparedStatementSetter() {
-						@Override
-						public void setValues(PreparedStatement ps, int index) throws SQLException {
-							DepartmentDeclarationType links = oldLinks.get(index);
-							ps.setInt(1, links.getDepartmentId());
-							ps.setInt(2, links.getDeclarationTypeId());
-							ps.setLong(3, links.getId());
-						}
-
-						@Override
-						public int getBatchSize() {
-							return oldLinks.size();
-						}
-					}
-			);
-		}
-	}
-
 	private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_declaration_type ddt where department_id = ?" +
 			" and exists (select 1 from declaration_type dt where dt.id = ddt.declaration_type_id and dt.tax_type = ?)";
 	@Override
@@ -173,5 +88,32 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 				},
 				DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER
 		);
+	}
+
+	@Override
+	@Transactional(readOnly = false)
+	public void save(int departmentId, int declarationTypeId) {
+		try {
+	        getJdbcTemplate().update(
+	                "insert into department_declaration_type (id, department_id, declaration_type_id) " +
+	                        " values (SEQ_DEPT_DECLARATION_TYPE.nextval, ?, ?)",
+	                new Object[]{ departmentId, declarationTypeId});
+		} catch (DataIntegrityViolationException e) {
+    		throw new DaoException("Декларация указанного типа уже назначена подразделению", e);
+    	}
+		
+	}
+
+	@Override
+    @Transactional(readOnly = false)
+	public void delete(Long id) {
+		try{
+	        getJdbcTemplate().update(
+	                "delete from department_declaration_type where id = ?",
+	                new Object[]{id}
+	        );
+		} catch (DataIntegrityViolationException e){
+			throw new DaoException("Назначение является приемником данных для форм", e);
+		}
 	}
 }

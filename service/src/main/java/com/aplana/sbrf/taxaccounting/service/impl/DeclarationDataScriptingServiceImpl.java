@@ -108,7 +108,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
-					"Есть критические ошибки при выполнения скрипта",
+					"Есть критические ошибки при выполнении скрипта",
 					logger.getEntries());
 		}
 	}

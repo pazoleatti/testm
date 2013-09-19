@@ -70,6 +70,9 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
+    row.keySet().each{
+        row.getCell(it).setStyleAlias('Автозаполняемая')
+    }
     ['jurName', 'serviceName', 'bankIncomeSum', 'contractNum', 'contractDate', 'transactionDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
@@ -117,7 +120,7 @@ void logicCheck() {
         ].each {
             if (row.getCell(it).value == null || row.getCell(it).value.toString().isEmpty()) {
                 def msg = row.getCell(it).column.name
-                logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
+                logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
             }
         }
 
@@ -131,28 +134,28 @@ void logicCheck() {
         def dt = contractDate
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = row.getCell('contractDate').column.name
-            logger.warn("«$msg» в строке $rowNum не может быть вне налогового периода!")
+            logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
         }
 
         // Проверка доходности
         if (bankIncomeSum != price) {
             def msg1 = row.getCell('bankIncomeSum').column.name
             def msg2 = row.getCell('price').column.name
-            logger.warn("«$msg1» не равно «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
         }
 
         // Проверка доходности
         if (bankIncomeSum != cost) {
             def msg1 = row.getCell('bankIncomeSum').column.name
             def msg2 = row.getCell('cost').column.name
-            logger.warn("«$msg1» не равно «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
         }
 
         // Корректность даты сделки
         if (transactionDate < contractDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('contractDate').column.name
-            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 
         //Проверки соответствия НСИ
@@ -171,7 +174,7 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
         def msg2 = cell.column.name
         def rowNum = row.getIndex()
-        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
+        logger.warn("Строка $rowNum: В справочнике «$msg» не найден элемент «$msg2»!")
     }
 }
 
@@ -245,8 +248,8 @@ void importData() {
         return
     }
 
-    if (!fileName.contains('.xls')) {
-        logger.error('Формат файла должен быть *.xls')
+    if (!fileName.endsWith('.xls')) {
+        logger.error('Выбранный файл не соответствует формату xls!')
         return
     }
 

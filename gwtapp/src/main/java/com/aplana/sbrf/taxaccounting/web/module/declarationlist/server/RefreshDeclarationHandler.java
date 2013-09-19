@@ -40,6 +40,7 @@ public class RefreshDeclarationHandler extends AbstractActionHandler<RefreshDecl
 		} else {
 			result.setSuccess(true);
 		}
+        result.setLogEntries(logger.getEntries());
 		return result;
 	}
 

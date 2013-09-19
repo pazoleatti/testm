@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
@@ -31,7 +32,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	private Long currentRecordId;
 	private boolean isFormModified = false;
 	private Date relevanceDate;
-	private static final String DIALOG_MESSAGE = "Сохранить изменения в справочнике?";
+	private static final String DIALOG_MESSAGE = "Строка была изменена. Все не сохраненные данные будут потеряны.";
 
 	public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
 		Map<RefBookAttribute, HasValue> createInputFields(List<RefBookAttribute> attributes);
@@ -80,16 +81,20 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	}
 
 	public void show(final Long refBookRecordId) {
-
+		if ((currentRecordId == refBookRecordId) && (refBookRecordId != null)) {
+			return;
+		}
 		if (isFormModified) {
 			boolean confirmed = Window.confirm(DIALOG_MESSAGE);
 			if (confirmed) {
-				onSaveClicked();
+				isFormModified = false;
+				showRecord(refBookRecordId);
 			} else {
-				onCancelClicked();
+				RollbackTableRowSelection.fire(this, currentRecordId);
 			}
+		} else {
+			showRecord(refBookRecordId);
 		}
-		showRecord(refBookRecordId);
 	}
 
 	private void showRecord(final Long refBookRecordId) {

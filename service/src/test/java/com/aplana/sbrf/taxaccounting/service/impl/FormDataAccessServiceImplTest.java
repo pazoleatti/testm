@@ -21,9 +21,9 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.Department;

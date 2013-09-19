@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.history.client;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
+import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -11,6 +12,7 @@ import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewImpl;
@@ -109,6 +111,20 @@ public class HistoryView extends PopupViewImpl implements
 		logsTable.addColumn(rolesColumn, "Роли пользователя");
 		logsTable.addColumn(departmentColumn, "Подразделение пользователя");
 		logsTable.addColumn(noteColumn, "Текст события");
+		logsTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LogBusiness>() {
+			@Override
+			public void onCellPreview(CellPreviewEvent<LogBusiness> event) {
+				if ("mouseover".equals(event.getNativeEvent().getType())) {
+					long index = event.getIndex();
+					TableCellElement cellElement = logsTable.getRowElement((int) index).getCells().getItem(event.getColumn());
+					if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
+						cellElement.removeAttribute("title");
+					} else {
+						cellElement.setTitle(cellElement.getInnerText());
+					}
+				}
+			}
+		});
 	}
 
 	@UiHandler("hideButton")

@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.EditTextColumn;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -186,6 +187,23 @@ public class FormTemplateHeaderView extends ViewWithUiHandlers<FormTemplateHeade
 			}
 			formDataTable.addColumn(editTextAliasColumn);
 		}
+
+		//TODO КОСТЫЛИ! По возможности убрать.
+		float tableWidth = 0;
+		for (int i=0; i<formDataTable.getColumnCount(); i++) {
+			String width = formDataTable.getColumnWidth(formDataTable.getColumn(i));
+			if (width == null) {
+				continue;
+			}
+			for (Style.Unit unit : Style.Unit.values()) {
+				if (width.contains(unit.getType())) {
+					width = width.replace(unit.getType(), "");
+					break;
+				}
+			}
+			tableWidth += Float.parseFloat(width);
+		}
+		formDataTable.setTableWidth(tableWidth, Style.Unit.EM);
 
 	}
 

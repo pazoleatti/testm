@@ -92,7 +92,7 @@ create table form_style (
 
 alter table form_style add constraint form_style_pk primary key (id);
 alter table form_style add constraint form_style_fk_form_template_id foreign key (form_template_id) references form_template (id);
-alter table form_style add constraint form_style_chk_font_color check (font_color in (0,1,2,3,4,5,6,7,8,9,10,11,12));
+alter table form_style add constraint form_style_chk_font_color check (font_color in (0,1,2,3,4,5,6,7,8,9,10,11,12,13));
 alter table form_style add constraint form_style_chk_back_color check (back_color in (0,1,2,3,4,5,6,7,8,9,10,11,12));
 alter table form_style add constraint form_style_chk_italic check (italic in (0,1));
 alter table form_style add constraint form_style_chk_bold check (bold in (0,1));
@@ -258,7 +258,7 @@ alter table form_column add constraint form_column_chk_max_length
 check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 1000) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 27) or ((type ='D' or type ='R') and max_length is null));
 alter table form_column add constraint form_column_chk_checking check (checking in (0, 1));
 alter table form_column add constraint form_column_chk_attribute_id check ((type = 'R' and attribute_id is not null and precision >=0 and precision < 9) or (type <> 'R' and attribute_id is null));
-
+alter table form_column add constraint form_column_chk_width check (not width is null);
 alter table form_column add constraint form_column_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
 
 comment on table form_column is 'Описания столбцов налоговых форм';
@@ -402,6 +402,7 @@ create table department_declaration_type (
 alter table department_declaration_type add constraint dept_decl_type_pk primary key (id);
 alter table department_declaration_type add constraint dept_decl_type_fk_dept foreign key (department_id) references department (id);
 alter table department_declaration_type add constraint dept_decl_type_fk_decl_type foreign key (declaration_type_id) references declaration_type (id);
+alter table department_declaration_type add constraint dept_decl_type_uniq_decl unique (department_id, declaration_type_id);
 
 comment on table department_declaration_type is 'Сведения о декларациях, с которыми можно работать в подразделении';
 comment on column department_declaration_type.id is 'Идентификатор (первичный ключ)';

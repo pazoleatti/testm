@@ -149,10 +149,13 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         periodPickerPopup.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<Integer>> event) {
-                if (event.getValue().size() == 1) {
+                if (event.getValue() !=null && event.getValue().size() == 1) {
                     onReportPeriodsSelected(event.getValue().get(0));
-                    editButton.setVisible(isReportPeriodActive);
+                } else {
+                    onReportPeriodsSelected(null);
+                    isReportPeriodActive = false;
                 }
+                editButton.setVisible(isReportPeriodActive);
             }
         });
         // Подразделение
@@ -160,12 +163,11 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
             @Override
             public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+                Integer selDepartmentId = null;
 
-                if (event == null || event.getValue().isEmpty()) {
-                    return;
+                if (event != null && !event.getValue().isEmpty()) {
+                    selDepartmentId = event.getValue().iterator().next();
                 }
-
-                Integer selDepartmentId = event.getValue().iterator().next();
 
                 boolean checkPass = checkUnsaved(new CheckUnsavedHandler() {
                     @Override
@@ -187,15 +189,14 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
                 DepartmentConfigView.this.currentDepartmentId = selDepartmentId;
 
-                currentReportPeriodId = null;
-
                 // Очистка формы
                 clear();
 
                 updateVisibility();
+
+                reloadDepartmentParams();
             }
         });
-
 
         // Вид налога
         taxType.addChangeHandler(new ChangeHandler() {
@@ -221,14 +222,15 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
                 // Очистка формы
                 clear();
+
+                // Сброс выбранного отчетного периода
                 currentReportPeriodId = null;
+                periodPickerPopup.setValue(null);
+
                 updateVisibility();
 
                 // Обновление дерева подразделений
                 reloadDepartments();
-
-                // Обновление налоговых периодов
-                // reloadReportPeriods();
             }
         });
     }
@@ -395,7 +397,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     }
 
     public void onReportPeriodsSelected(Integer reportPeriodId) {
-
         // Проверка совпадения выбранного подразделения с текущим
         if (this.currentReportPeriodId != null && reportPeriodId != null && this.currentReportPeriodId.equals(reportPeriodId)) {
             return;
@@ -438,7 +439,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @Override
     public void setReportPeriods(List<ReportPeriod> reportPeriods) {
-        periodPickerPopup.setPeriods(reportPeriods);
+        periodPickerPopup.setPeriods(reportPeriods, true);
     }
 
     @Override

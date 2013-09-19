@@ -70,10 +70,19 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
-    ['name', 'contractNum', 'contractDate', 'okeiCode', 'price', 'transactionDate'].each {
+    row.keySet().each{
+        row.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+    ['name', 'contractNum', 'contractDate', 'price', 'transactionDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
+
+    // Элемент с кодом «796» подставляется по-умолчанию
+    def refDataProvider = refBookFactory.getDataProvider(12);
+    def res = refDataProvider.getRecords(new Date(), null, "CODE = 796", null);
+    row.okeiCode = res.getRecords().get(0).record_id.numberValue
+
     dataRowHelper.insert(row, index)
 }
 
@@ -117,7 +126,7 @@ void logicCheck() {
         ].each {
             if (row.getCell(it).value == null || row.getCell(it).value.toString().isEmpty()) {
                 def msg = row.getCell(it).column.name
-                logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
+                logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
             }
         }
 
@@ -127,35 +136,35 @@ void logicCheck() {
         def price = row.price
 
         // Проверка выбранной единицы измерения
-        if (refBookService.getStringValue(12, row.okeiCode, 'CODE')!= '796'){
-            logger.warn('В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт.!')
+        if (refBookService.getStringValue(12, row.okeiCode, 'CODE') != '796'){
+            logger.warn("Строка $rowNum: В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт.!")
         }
 
         // Проверка количества
         if (row.count != 1) {
             def msg = row.getCell('transactionDate').column.name
-            logger.warn("В графе «$msg» может быть указано только значение «1» в строке $rowNum!")
+            logger.warn("Строка $rowNum: В графе «$msg» может быть указано только значение «1»!")
         }
 
         // Корректность даты договора
         def dt = contractDate
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = row.getCell('contractDate').column.name
-            logger.warn("«$msg» в строке $rowNum не может быть вне налогового периода!")
+            logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
         }
 
         // Корректность даты совершения сделки
         if (transactionDate < contractDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('contractDate').column.name
-            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 
         // Проверка заполнения стоимости сделки
         if (totalCost != price) {
             def msg1 = row.getCell('totalCost').column.name
             def msg2 = row.getCell('price').column.name
-            logger.warn("«$msg1» не может отличаться от «$msg2» в строке $rowNum!")
+            logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
         }
 
         //Проверки соответствия НСИ
@@ -173,7 +182,7 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
         def msg2 = cell.column.name
         def rowNum = row.getIndex()
-        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
+        logger.warn("Строка $rowNum: В справочнике «$msg» не найден элемент «$msg2»!")
     }
 }
 
@@ -191,12 +200,6 @@ void calc() {
         row.count = 1
         // Итого стоимость без учета НДС, акцизов и пошлин, руб.
         row.totalCost = row.price
-
-        // Элемент с кодом «796» подставляется по умолчанию
-        def refDataProvider =  refBookFactory.getDataProvider(12);
-        def res = refDataProvider.getRecords(new Date(), null, "CODE = 796", null);
-        row.okeiCode = res.getRecords().get(0).record_id.numberValue
-
         // Расчет полей зависимых от справочников
         if (row.name != null) {
             def map2 = refBookService.getRecordData(9, row.name)
@@ -251,8 +254,8 @@ void importData() {
         return
     }
 
-    if (!fileName.contains('.xls')) {
-        logger.error('Формат файла должен быть *.xls')
+    if (!fileName.endsWith('.xls')) {
+        logger.error('Выбранный файл не соответствует формату xls!')
         return
     }
 

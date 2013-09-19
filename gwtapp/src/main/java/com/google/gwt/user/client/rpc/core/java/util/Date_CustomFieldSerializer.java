@@ -1,15 +1,3 @@
-/*
- * Copyright 2006 Google Inc.
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.google.gwt.user.client.rpc.core.java.util;
 
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
@@ -22,13 +10,31 @@ import java.util.Date;
 /**
  * Custom field serializer for {@link java.util.Date}.
  */
+//TODO Убрать трейсы
 public final class Date_CustomFieldSerializer extends
 		CustomFieldSerializer<Date> {
 
 	/**
-	 * @param streamReader a SerializationStreamReader instance
-	 * @param instance the instance to be deserialized
+	 * Сброс/восстановление UTC
+	 * 
+	 * @param date
+	 * @param plus
+	 *            true - преобразовать дату в UTC0 false - преобразовать дату из
+	 *            UTC0 в текущую
+	 * 
+	 * @return
 	 */
+	private static long offsetUTC(Date date, boolean plus) {
+		System.out.println(plus);
+		System.out.println(date);
+		@SuppressWarnings("deprecation")
+		long offset = date.getTimezoneOffset() * 60000;
+		System.out.println(offset);
+		long result = date.getTime() + (plus ? offset : -offset);
+		System.out.println(new Date(result));
+		return result;
+	}
+
 	public static void deserialize(SerializationStreamReader streamReader,
 			Date instance) {
 		// No fields
@@ -36,26 +42,16 @@ public final class Date_CustomFieldSerializer extends
 
 	public static Date instantiate(SerializationStreamReader streamReader)
 			throws SerializationException {
-		String[] arr = streamReader.readString().split("\\.");
-		Integer[] intArr = new Integer[arr.length];
-		for (int i = 0; i < arr.length; i++) {
-			intArr[i] = Integer.valueOf(arr[i]);
-		}
-		@SuppressWarnings("deprecation")
-		Date d = new Date(intArr[0], intArr[1], intArr[2], intArr[3], intArr[4], intArr[5]);
-		return d;
+		System.out.println("instantiate");
+		long time = streamReader.readLong();
+		Date date = new Date(offsetUTC(new Date(time), false));
+		return date;
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void serialize(SerializationStreamWriter streamWriter,
 			Date instance) throws SerializationException {
-		String date = instance.getYear() + "." +
-				instance.getMonth() + '.' +
-				instance.getDate() + '.' +
-				instance.getHours() + '.' +
-				instance.getMinutes() + '.' +
-				instance.getSeconds();
-		streamWriter.writeString(date);
+		System.out.println("serialize");
+		streamWriter.writeLong(offsetUTC(instance, true));
 	}
 
 	@Override
