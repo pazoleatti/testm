@@ -62,6 +62,7 @@ switch (formDataEvent) {
         DataRowHelper form = getData(formData)
         if (form != null) {
             consolidation(form)
+            calcForm()
         }
         break
 // проверить
@@ -349,15 +350,6 @@ def getColumnName(def row, def alias) {
         return row.getCell(alias).getColumn().getName().replace('%', '%%')
     }
     return ''
-}
-
-/**
- * Функция возвращает тип ячейки вычисляемая она или нет
- * @param cell
- * @return
- */
-def isCalcField(Cell cell) {
-    return cell.getStyleAlias() == "Контрольные суммы"
 }
 
 /**
