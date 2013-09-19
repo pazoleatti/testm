@@ -1,6 +1,5 @@
 package form_template.income.rnu23
 
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException
@@ -49,9 +48,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT :
         importData()
         // TODO (Ramil Timerbaev)
-        if (!hasError() && calc() && logicalCheck() && checkNSI()) {
+        // if (!hasError() && calc() && logicalCheck() && checkNSI()) {
             logger.info('Закончена загрузка файла ' + UploadFileName)
-        }
+        // }
         break
     case FormDataEvent.MIGRATION :
         importData()
@@ -162,18 +161,17 @@ def calc() {
     }
 
     // отсортировать/группировать
-    getRows(data).sort {
+    getRows(data).sort { def a, def b ->
         // графа 2  - contract
         // графа 3  - contractDate
         // графа 5  - dateOfTransaction
-        def a, def b ->
-            if (a.dateOfTransaction == b.dateOfTransaction && a.contractDate == b.contractDate) {
-                return a.contract <=> b.contract
-            }
-            if (a.dateOfTransaction == b.dateOfTransaction) {
-                return a.contractDate <=> b.contractDate
-            }
-            return a.dateOfTransaction <=> b.dateOfTransaction
+        if (a.dateOfTransaction == b.dateOfTransaction && a.contractDate == b.contractDate) {
+            return a.contract <=> b.contract
+        }
+        if (a.dateOfTransaction == b.dateOfTransaction) {
+            return a.contractDate <=> b.contractDate
+        }
+        return a.dateOfTransaction <=> b.dateOfTransaction
     }
 
     // графа 1, 13..20
@@ -766,11 +764,11 @@ def addData(def xml) {
     // def date = new Date()
     def cache = [:]
     def newRows = []
-    def indexRow = 0
+    def index = 0
 
     // TODO (Ramil Timerbaev) поправить получение строк если загружать из *.rnu или *.xml
     for (def row : xml.row) {
-        indexRow++
+        index++
 
         def newRow = getNewRow()
         def indexCell = 0

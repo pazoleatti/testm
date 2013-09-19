@@ -1,6 +1,7 @@
 package form_template.income.rnu30
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
  * Форма "(РНУ-30) Расчёт резерва по сомнительным долгам на основании результатов инвентаризации сомнительной задолженности и безнадежных долгов.".
@@ -8,7 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
  * @version 59
  *
  * TODO:
- *      - нет уcловии в проверках соответствия НСИ (потому что нету справочников)
+ *      - нет уcловии в проверках соответствия НСИ
  *
  * @author rtimerbaev
  */
@@ -127,7 +128,7 @@ def addNewRow() {
         }
         setEdit(newRow, 'B')
     }
-    data.insert(newRow, index)
+    data.insert(newRow, index ? index + 1: 0)
 }
 
 /**
@@ -158,12 +159,15 @@ def calc() {
 
     for (def row : getRows(data)) {
         if (!isFixedRow(row)) {
-            def requiredColumns = (isFirstSection(row) ? requiredColumns1 : requiredColumnsAB)
+            def requiredColumns = (isFirstSection(data, row) ? requiredColumns1 : requiredColumnsAB)
             if (!checkRequiredColumns(row, requiredColumns)) {
                 return false
             }
         }
     }
+
+    // отсортировать/группировать
+    sort()
 
     /*
      * Расчеты
@@ -174,7 +178,7 @@ def calc() {
     def index = 1
     getRows(data).each { row ->
         if (!isFixedRow(row)) {
-            isFirst = isFirstSection(row)
+            isFirst = isFirstSection(data, row)
 
             // графа 1
             row.number = index++
@@ -185,14 +189,14 @@ def calc() {
 
                 // графа 7
                 tmp = row.debt45_90DaysSum * row.debt45_90DaysNormAllocation50per / 100
-                row.debt45_90DaysReserve = round(tmp, 2)
+                row.debt45_90DaysReserve = roundValue(tmp, 2)
 
                 // графа 9
                 row.debtOver90DaysNormAllocation100per = 100
 
                 // графа 10
                 tmp = row.debtOver90DaysSum * row.debtOver90DaysNormAllocation100per / 100
-                row.debtOver90DaysReserve = round(tmp, 2)
+                row.debtOver90DaysReserve = roundValue(tmp, 2)
 
                 // графа 11
                 row.totalReserve = row.debt45_90DaysReserve + row.debtOver90DaysReserve
@@ -213,29 +217,37 @@ def calc() {
             }
         }
     }
+    save(data)
 
     // Первые строки (графа 5, 7, 8, 10..16)
-    def totalRow = formData.getDataRow('total')
-    ['debt45_90DaysSum', 'debt45_90DaysReserve', 'debtOver90DaysSum',
-            'debtOver90DaysReserve', 'totalReserve', 'reservePrev',
-            'reserveCurrent', 'calcReserve', 'reserveRecovery', 'useReserve'].each { alias ->
-        totalRow.getCell(alias).setValue(getSum(alias, totalRow))
+    def totalColumns1 = getTotalColumns1()
+    def totalRow = getRowByAlias(data, 'total')
+//    totalColumns1.each { alias ->
+//        totalRow.getCell(alias).setValue(0)
+//    }
+    totalColumns1.each { alias ->
+        totalRow.getCell(alias).setValue(getSum(data, alias, totalRow))
     }
 
-    def aRow = formData.getDataRow('A')
-    def totalARow = formData.getDataRow('totalA')
+    def aRow =getRowByAlias(data, 'A')
+    def totalARow = getRowByAlias(data, 'totalA')
 
-    def bRow = formData.getDataRow('B')
-    def totalBRow = formData.getDataRow('totalB')
+    def bRow = getRowByAlias(data, 'B')
+    def totalBRow = getRowByAlias(data, 'totalB')
 
-    //  раздел А и Б (графа 12, 13, 16)
-    ['reservePrev', 'reserveCurrent', 'useReserve'].each { alias ->
-        totalARow.getCell(alias).setValue(getSum(alias, aRow, totalARow))
-        totalBRow.getCell(alias).setValue(getSum(alias, bRow, totalBRow))
+    // раздел А и Б (графа 12, 13, 16)
+    def totalColumnsAB = getTotalColumnsAB()
+//    totalColumnsAB.each { alias ->
+//        totalARow.getCell(alias).setValue(0)
+//        totalBRow.getCell(alias).setValue(0)
+//    }
+    totalColumnsAB.each { alias ->
+        totalARow.getCell(alias).setValue(getSum(data, alias, aRow, totalARow))
+        totalBRow.getCell(alias).setValue(getSum(data, alias, bRow, totalBRow))
     }
 
     // Всего (графа 5, 7, 8, 10..16)
-    def totalAllRow = formData.getDataRow('totalAll')
+    def totalAllRow = getRowByAlias(data, 'totalAll')
     ['debt45_90DaysSum', 'debt45_90DaysReserve', 'debtOver90DaysSum',
             'debtOver90DaysReserve', 'totalReserve', 'reservePrev',
             'reserveCurrent', 'calcReserve', 'reserveRecovery', 'useReserve'].each { alias ->
@@ -244,6 +256,9 @@ def calc() {
                 getValue(totalBRow.getCell(alias).getValue())
         totalAllRow.getCell(alias).setValue(tmp)
     }
+    save(data)
+
+    return true
 }
 
 /**
@@ -261,7 +276,7 @@ def logicalCheck() {
             'totalReserve', 'reservePrev', 'reserveCurrent', 'calcReserve',
             'reserveRecovery', 'useReserve']
 
-    //  для раздера А и Б - графы 1, 2, 4, 12, 16
+    // для раздера А и Б - графы 1, 2, 4, 12, 16
     requiredColumnsAB = ['number', 'debtor', 'nameBalanceAccount', 'reservePrev', 'useReserve']
 
     def tmp
@@ -271,7 +286,7 @@ def logicalCheck() {
             continue
         }
 
-        isFirst = isFirstSection(row)
+        isFirst = isFirstSection(data, row)
 
         // 1. Обязательность заполнения полей
         def requiredColumns = (isFirst ? requiredColumns1 :  requiredColumnsAB)
@@ -283,13 +298,13 @@ def logicalCheck() {
         if (isFirst) {
             // 2. Арифметическая проверка графы 7
             tmp = row.debt45_90DaysSum * row.debt45_90DaysNormAllocation50per / 100
-            if (row.debt45_90DaysReserve != round(tmp, 2)) {
+            if (row.debt45_90DaysReserve != roundValue(tmp, 2)) {
                 logger.warn('Неверно рассчитана графа «Задолженность от 45 до 90 дней. Расчётный резерв»!')
             }
 
             // 3. Арифметическая проверка графы 10
             tmp = row.debtOver90DaysSum * row.debtOver90DaysNormAllocation100per / 100
-            if (row.debtOver90DaysReserve != round(tmp, 2)) {
+            if (row.debtOver90DaysReserve != roundValue(tmp, 2)) {
                 logger.warn('Неверно рассчитана графа «Задолженность более 90 дней. Расчётный резерв»!')
             }
 
@@ -299,7 +314,6 @@ def logicalCheck() {
             }
 
             // 5. Арифметическая проверка графы 13
-            // TODO (Ramil Timerbaev) уточнить: 13 графу считать только для первых строк или для всех?
             tmp = row.reservePrev + row.calcReserve - row.reserveRecovery - row.useReserve
             if (row.reserveCurrent != tmp) {
                 logger.warn('Неверно рассчитана графа «Резерв на отчётную дату. Текущую»!')
@@ -328,6 +342,12 @@ def logicalCheck() {
             if (row.debtOver90DaysNormAllocation100per != 100) {
                 logger.warn('Неверно рассчитана графа «Задолженность более 90 дней. Норматив отчислений 100%»!')
             }
+        } else {
+            // 5. Арифметическая проверка графы 13
+            tmp = row.reservePrev - row.useReserve
+            if (row.reserveCurrent != tmp) {
+                logger.warn('Неверно рассчитана графа «Резерв на отчётную дату. Текущую»!')
+            }
         }
 
         // 13. Проверка на уникальность поля "№ пп" (графа 1)
@@ -335,45 +355,41 @@ def logicalCheck() {
             logger.error('Нарушена уникальность номера по порядку!')
             return false
         }
-        i += 1
+        i++
     }
 
     def columns
-    def cell
 
-    // 10. Проверка итоговых значений по строкам, не входящим в состав раздело А и Б (графа 5, 7, 8, 10..16)
-    def totalRow = formData.getDataRow('total')
+    // 10. Проверка итоговых значений по строкам, не входящим в состав раздел А и Б (графа 5, 7, 8, 10..16)
+    def totalRow = getRowByAlias(data, 'total')
     columns = ['debt45_90DaysSum', 'debt45_90DaysReserve', 'debtOver90DaysSum',
             'debtOver90DaysReserve', 'totalReserve', 'reservePrev',
             'reserveCurrent', 'calcReserve', 'reserveRecovery', 'useReserve']
     for (def alias : columns) {
-        cell = totalRow.getCell(alias)
-        if (cell.getValue() != getSum(alias, totalRow)) {
-            def name = cell.getColumn().getName()
+        if (totalRow.getCell(alias).getValue() != getSum(data, alias, totalRow)) {
+            def name = getColumnName(totalRow, alias)
             logger.error("Итоговые значения для \"$name\" рассчитаны неверно!")
             return false
         }
     }
 
     // 11 + 12. Проверка итоговых значений по строкам из раздела А и B
-    def aRow = formData.getDataRow('A')
-    def totalARow = formData.getDataRow('totalA')
+    def aRow = getRowByAlias(data, 'A')
+    def totalARow = getRowByAlias(data, 'totalA')
 
-    def bRow = formData.getDataRow('B')
-    def totalBRow = formData.getDataRow('totalB')
+    def bRow = getRowByAlias(data, 'B')
+    def totalBRow = getRowByAlias(data, 'totalB')
 
     //  раздел А и Б (графа 12, 13, 16)
     columns = ['reservePrev', 'reserveCurrent', 'useReserve']
     for (def alias : columns) {
-        cell = totalARow.getCell(alias)
-        if (cell.getValue() != getSum(alias, aRow, totalARow)) {
-            def name = cell.getColumn().getName()
+        if (totalARow.getCell(alias).getValue() != getSum(data, alias, aRow, totalARow)) {
+            def name = getColumnName(totalARow, alias)
             logger.error("Итоговые значения для \"$name\" раздела А рассчитаны неверно!")
             return false
         }
-        cell = totalBRow.getCell(alias)
-        if (cell.getValue() != getSum(alias, bRow, totalBRow)) {
-            def name = cell.getColumn().getName()
+        if (totalBRow.getCell(alias).getValue() != getSum(data, alias, bRow, totalBRow)) {
+            def name = getColumnName(totalBRow, alias)
             logger.error("Итоговые значения для \"$name\" раздела Б рассчитаны неверно!")
             return false
         }
@@ -419,17 +435,20 @@ void consolidation() {
     }
     getRows(data).removeAll(deleteRows)
 
+    def sourceData
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                copyRows(source, formData, null, 'total')
-                copyRows(source, formData, 'A', 'totalA')
-                copyRows(source, formData, 'B', 'totalB')
+                sourceData = getData(source)
+                copyRows(sourceData, data, null, 'total')
+                copyRows(sourceData, data, 'A', 'totalA')
+                copyRows(sourceData, data, 'B', 'totalB')
             }
         }
     }
+    save(data)
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
@@ -530,21 +549,21 @@ def isEmpty(def value) {
 }
 
 /**
- * Получить номер строки в таблице.
+ * Получить номер строки в таблице (1..n).
  *
  * @param row строка
  */
 def getIndex(def row) {
-    row.getIndex()
+    row.getIndex() - 1
 }
 
 /**
- * Получить номер строки в таблице по псевдонимиу.
+ * Получить номер строки в таблице по псевдонимиу (0..n).
  */
-def getIndex(def form, String rowAlias) {
-    def row = getRowByAlias(getData(form), rowAlias)
+def getIndexByAlias(def data, String rowAlias) {
+    def row = getRowByAlias(data, rowAlias)
     if (row != null) {
-        return (getRows(getData(form))).indexOf(row)
+        return getIndex(row)
     }
     return -1
 }
@@ -552,25 +571,25 @@ def getIndex(def form, String rowAlias) {
 /**
  * Получить сумму столбца.
  */
-def getSum(def columnAlias, def rowStart, def rowEnd) {
+def getSum(def data, def columnAlias, def rowStart, def rowEnd) {
     def from = getIndex(rowStart) + 1
     def to = getIndex(rowEnd) - 1
     if (from > to) {
         return 0
     }
-    return summ(formData, new ColumnRange(columnAlias, from, to))
+    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
 }
 
 /**
  * Получить сумму столбца.
  */
-def getSum(def columnAlias, def rowEnd) {
+def getSum(def data, def columnAlias, def rowEnd) {
     def from = 0
     def to = getIndex(rowEnd) - 1
     if (from > to) {
         return 0
     }
-    return summ(formData, new ColumnRange(columnAlias, from, to))
+    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
 }
 
 /**
@@ -585,8 +604,8 @@ def isFirstSection(def data, def row) {
  */
 def isSection(def data, def row, def section) {
     return row != null &&
-            getIndex(row) > getIndex(getRowByAlias(data, section)) &&
-            getIndex(row) < getIndex(getRowByAlias(data, 'total' + section))
+            getIndex(row) > getIndexByAlias(data, section) &&
+            getIndex(row) < getIndexByAlias(data, 'total' + section)
 }
 
 /**
@@ -733,24 +752,26 @@ def getData(def formData) {
 /**
  * Копировать заданный диапозон строк из источника в приемник.
  *
- * @param sourceForm форма источник
- * @param destinationForm форма приемник
+ * @param sourceData даныне источника
+ * @param destinationData данные приемника
  * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно),
  *      если = null, то копировать с 0 строки
  * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно),
  *      в приемник строки вставляются перед строкой с этим псевдонимом
  */
-void copyRows(def sourceForm, def destinationForm, def fromAlias, def toAlias) {
-    def from = (fromAlias != null ? getIndex(sourceForm, fromAlias) + 1 : 0)
-    def to = getIndex(sourceForm, toAlias)
+void copyRows(def sourceData, def destinationData, def fromAlias, def toAlias) {
+    def from = (fromAlias != null ? getIndexByAlias(sourceData, fromAlias) + 1 : 0)
+    def to = getIndexByAlias(sourceData, toAlias)
     if (from > to) {
         return
     }
-    def dataSource = getData(sourceForm)
-    getRows(dataSource).subList(from, to).each { row ->
-        def dataDestination = getData(destinationForm)
-        getRows(dataDestination).add(getIndex(destinationForm, toAlias), row)
+    def copyRows = getRows(sourceData).subList(from, to)
+    getRows(destinationData).addAll(getIndexByAlias(destinationData, toAlias), copyRows)
+    // поправить индексы, потому что они после вставки не пересчитываются
+    getRows(destinationData).eachWithIndex { row, i ->
+        row.setIndex(i + 1)
     }
+    save(destinationData)
 }
 
 /**
@@ -767,93 +788,79 @@ def addData(def xml) {
     // def date = new Date()
     def cache = [:]
     def newRows = []
-    def indexRow = 0
+    def index = 0
 
     // TODO (Ramil Timerbaev) поправить получение строк если загружать из *.rnu или *.xml
     for (def row : xml.row) {
-        indexRow++
+        index++
 
-        def newRow = getNewRow()
+        def newRow = formData.createDataRow()
+        setEdit(newRow, null) // TODO (Ramil Timerbaev) задать раздел
         def indexCell = 0
 
+        // графа 0 - forLabel - для вывода надписей
         // графа 1
         newRow.number = getNumber(row.cell[indexCell].text())
         index++
 
         // графа 2
-        newRow.contract = getNumber(row.cell[indexCell].text())
+        newRow.debtor = row.cell[indexCell].text()
         index++
 
         // графа 3
-        newRow.contractDate = getNumber(row.cell[indexCell].text())
+        newRow.provision = row.cell[indexCell].text()
         index++
 
         // графа 4
-        newRow.amountOfTheGuarantee = getNumber(row.cell[indexCell].text())
+        newRow.nameBalanceAccount = row.cell[indexCell].text()
         index++
 
         // графа 5
-        newRow.dateOfTransaction = getNumber(row.cell[indexCell].text())
+        newRow.debt45_90DaysSum = getNumber(row.cell[indexCell].text())
         index++
 
         // графа 6
-        newRow.rateOfTheBankOfRussia = getNumber(row.cell[indexCell].text())
+        newRow.debt45_90DaysNormAllocation50per = getNumber(row.cell[indexCell].text())
         index++
 
         // графа 7
-        newRow.interestRate = getNumber(row.cell[indexCell].text())
+        newRow.debt45_90DaysReserve = getNumber(row.cell[indexCell].text())
         index++
 
         // графа 8
-        newRow.baseForCalculation = getNumber(row.cell[indexCell].text())
+        newRow.debtOver90DaysSum = getNumber(row.cell[indexCell].text())
         index++
 
         // графа 9
-        newRow.accrualAccountingStartDate = getNumber(row.cell[indexCell].text())
+        newRow.debtOver90DaysNormAllocation100per = getNumber(row.cell[indexCell].text())
         index++
 
         // графа 10
-        newRow.accrualAccountingEndDate = getNumber(row.cell[indexCell].text())
+        newRow.debtOver90DaysReserve = getNumber(row.cell[indexCell].text())
         index++
 
         // графа 11
-        newRow.preAccrualsStartDate = getNumber(row.cell[indexCell].text())
+        newRow.totalReserve = getNumber(row.cell[indexCell].text())
         index++
 
         // графа 12
-        newRow.preAccrualsEndDate = getNumber(row.cell[indexCell].text())
+        newRow.reservePrev = getNumber(row.cell[indexCell].text())
         index++
 
         // графа 13
-        newRow.incomeCurrency = getNumber(row.cell[indexCell].text())
+        newRow.reserveCurrent = getNumber(row.cell[indexCell].text())
         index++
 
         // графа 14
-        newRow.incomeRuble = getNumber(row.cell[indexCell].text())
+        newRow.calcReserve = getNumber(row.cell[indexCell].text())
         index++
 
         // графа 15
-        newRow.accountingCurrency = getNumber(row.cell[indexCell].text())
+        newRow.reserveRecovery = getNumber(row.cell[indexCell].text())
         index++
 
         // графа 16
-        newRow.accountingRuble = getNumber(row.cell[indexCell].text())
-        index++
-
-        // графа 17
-        newRow.preChargeCurrency = getNumber(row.cell[indexCell].text())
-        index++
-
-        // графа 18
-        newRow.preChargeRuble = getNumber(row.cell[indexCell].text())
-        index++
-
-        // графа 19
-        newRow.taxPeriodCurrency = getNumber(row.cell[indexCell].text())
-        index++
-
-        // графа 20
-        newRow.taxPeriodRuble = getNumber(row.cell[indexCell].text())
+        newRow.useReserve = getNumber(row.cell[indexCell].text())
         index++
 
         newRows.add(newRow)
@@ -862,27 +869,13 @@ def addData(def xml) {
 
     // итоговая строка
     if (xml.rowTotal.size() > 0) {
-        def row = xml.rowTotal[0]
+        //def row = xml.rowTotal[0]
         def total = formData.createDataRow()
-        def index = 12
+        //index = 12
 
         // TODO (Ramil Timerbaev) поправить/уточнить
-        // графа 13
-        total.incomeCurrency = getNumber(row.cell[index++].text())
-        // графа 14
-        total.incomeRuble = getNumber(row.cell[index++].text())
-        // графа 15
-        total.accountingCurrency = getNumber(row.cell[index++].text())
-        // графа 16
-        total.accountingRuble = getNumber(row.cell[index++].text())
-        // графа 17
-        total.preChargeCurrency = getNumber(row.cell[index++].text())
-        // графа 18
-        total.preChargeRuble = getNumber(row.cell[index++].text())
-        // графа 19
-        total.taxPeriodCurrency = getNumber(row.cell[index++].text())
-        // графа 20
-        total.taxPeriodRuble = getNumber(row.cell[index++].text())
+        // графа
+        // total. = getNumber(row.cell[index++].text())
 
         return total
     } else {
@@ -1024,11 +1017,57 @@ def getCalcTotalRow() {
 }
 
 /**
- * Получить список графов для которых надо вычислять итого (графа 13..20).
+ * Получить список графов для которых надо вычислять итого (первые строки: графа 5, 7, 8, 10..16).
  */
-def getTotalColumns() {
-    return ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble',
-            'preChargeCurrency', 'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble']
+def getTotalColumns1() {
+    return ['debt45_90DaysSum', 'debt45_90DaysReserve', 'debtOver90DaysSum',
+            'debtOver90DaysReserve', 'totalReserve', 'reservePrev',
+            'reserveCurrent', 'calcReserve', 'reserveRecovery', 'useReserve']
+}
+
+/**
+ * Получить список графов для которых надо вычислять итого (раздел А и Б: графа 12, 13, 16).
+ */
+def getTotalColumnsAB() {
+    return ['reservePrev', 'reserveCurrent', 'useReserve']
+}
+
+/**
+ * Отсортировать / группировать строки
+ */
+void sort() {
+    def data = getData(formData)
+    def rows = getRows(data)
+    def sortRows = []
+    def from
+    def to
+
+    // первые строки
+    from = 0
+    to = getIndexByAlias(data, 'total') - 1
+    sortRows.add(rows[from..to])
+
+    // раздел А
+    from = getIndexByAlias(data, 'A') + 1
+    to = getIndexByAlias(data, 'totalA') - 1
+    sortRows.add(rows[from..to])
+
+    // раздела Б
+    from = getIndexByAlias(data, 'B') + 1
+    to = getIndexByAlias(data, 'totalB') - 1
+    sortRows.add(rows[from..to])
+
+    sortRows.each {
+        it.sort {
+            // графа 2  - debtor
+            // графа 3  - provision
+            def a, def b ->
+                if (a.provision == b.provision) {
+                    return a.debtor <=> b.debtor
+                }
+                return a.provision <=> b.provision
+        }
+    }
 }
 
 // TODO (Ramil Timerbaev)

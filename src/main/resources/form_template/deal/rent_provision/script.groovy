@@ -104,12 +104,15 @@ void logicCheck() {
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
 
+    int index = 1
+
     for (row in dataRowHelper.getAllCached()) {
         if (row.getAlias() != null) {
             continue
         }
 
-        def rowNum = row.getIndex()
+        def rowNum = index++
+
         [
                 'rowNum', // № п/п
                 'jurName', // Полное наименование юридического лица с указанием ОПФ
@@ -154,7 +157,7 @@ void logicCheck() {
         // Проверка цены
         def res = null
 
-        if (incomeBankSum != null && count != null) {
+        if (incomeBankSum != null && count != null && count != 0) {
             res = (incomeBankSum / count).setScale(0, RoundingMode.HALF_UP)
         }
 

@@ -602,12 +602,7 @@ def getValuesByGroupColumn(DataRow row) {
 }
 
 def getRefBookValue(int id, def cell, def alias) {
-    def map
-    try {
-        map = refBookService.getRecordData(id, cell)
-    } catch (Exception e) {
-        map = null
-    }
+    def map = cell != null ? refBookService.getRecordData(id, cell) : null
     return map == null ? 'null' : map.get(alias).stringValue
 }
 

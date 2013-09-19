@@ -469,12 +469,7 @@ def getValuesByGroupColumn(DataRow row) {
 }
 
 def getRefBookValue(int id, def cell, def alias) {
-    def map
-    try {
-        map = refBookService.getRecordData(id, cell)
-    } catch (Exception e) {
-        map = null
-    }
+    def map = cell != null ? refBookService.getRecordData(id, cell) : null
     return map == null ? 'null' : map.get(alias).stringValue
 }
 
@@ -494,17 +489,19 @@ void calc() {
         row.rowNum = index++
         // Графы 27 и 28 из 25 и 26
         incomeSum = row.incomeSum
-        consumptionSum = row.incomeSum
+        consumptionSum = row.consumptionSum
 
-        if (incomeSum != null) {
+        if (incomeSum != null && consumptionSum == null) {
             row.priceOne = incomeSum
-            row.totalNds = incomeSum
+        } else if (incomeSum == null && consumptionSum != null) {
+            row.priceOne = consumptionSum
+        } else if (incomeSum != null && consumptionSum != null) {
+            row.priceOne = Math.abs(incomeSum - consumptionSum)
+        } else {
+            row.priceOne = null
         }
 
-        if (consumptionSum != null) {
-            row.priceOne = consumptionSum
-            row.totalNds = consumptionSum
-        }
+        row.totalNds = row.priceOne
 
         // Код ОКП
         row.okpCode = row.innerCode
@@ -783,7 +780,7 @@ def checkHeaderRow(def xml, def headRowCount, def cellNumber, def arrayHeaders){
         //убираем перевод строки, множественное использование пробелов
         value = value.replaceAll('\\n', '').replaceAll('\\r','').replaceAll(' {2,}', ' ').trim()
         if (value != arrayHeaders[i]){
-            println("row index '"+ i +"' row value '" + value + "' cellNumber '" + cellNumber + "' value '" + arrayHeaders[i] + "'")
+            //println("row index '"+ i +"' row value '" + value + "' cellNumber '" + cellNumber + "' value '" + arrayHeaders[i] + "'")
             return false
         }
     }
@@ -947,7 +944,7 @@ def addData(def xml) {
         newRow.transactionDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
 
         data.insert(newRow, indexRow - headShift)
-        println(indexRow - headShift)
+        // println(indexRow - headShift)
     }
 }
 
