@@ -12,6 +12,8 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
@@ -31,46 +33,46 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
         fileName = "Налоговый_отчет_";
     }
 
-	private static final Log logger = LogFactory.getLog(FormDataXlsxReportBuilder.class);
+    private static final Log logger = LogFactory.getLog(FormDataXlsxReportBuilder.class);
 
-	private int rowNumber = 9;
-	private int cellNumber = 0;
-	private boolean isShowChecked;
+    private int rowNumber = 9;
+    private int cellNumber = 0;
+    private boolean isShowChecked;
 
-	private CellStyleBuilder cellStyleBuilder;
+    private CellStyleBuilder cellStyleBuilder;
     private static final String TEMPLATE = ClassUtils
-			.classPackageAsResourcePath(FormDataXlsxReportBuilder.class)
-			+ "/acctax.xlsx";
+            .classPackageAsResourcePath(FormDataXlsxReportBuilder.class)
+            + "/acctax.xlsx";
 
-	private enum CellType{
-		DATE,
-		STRING,
-		BIGDECIMAL,
-		EMPTY ,
-		DEFAULT
-	}
+    private enum CellType{
+        DATE,
+        STRING,
+        BIGDECIMAL,
+        EMPTY ,
+        DEFAULT
+    }
 
-	private final class CellStyleBuilder{
-		public CellStyle cellStyle;
+    private final class CellStyleBuilder{
+        public CellStyle cellStyle;
 
-		private CellStyleBuilder(){
-			cellStyle = workBook.createCellStyle();
-			cellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.index);
-			cellStyle.setFillBackgroundColor(IndexedColors.GREY_25_PERCENT.index);
-			cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
-			cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-			cellStyle.setWrapText(true);
-			cellStyle.setBorderBottom(CellStyle.BORDER_THICK);
-			cellStyle.setBorderTop(CellStyle.BORDER_THICK);
-			cellStyle.setBorderRight(CellStyle.BORDER_THICK);
-			cellStyle.setBorderLeft(CellStyle.BORDER_THICK);
-		}
+        private CellStyleBuilder(){
+            cellStyle = workBook.createCellStyle();
+            cellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.index);
+            cellStyle.setFillBackgroundColor(IndexedColors.GREY_25_PERCENT.index);
+            cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+            cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+            cellStyle.setWrapText(true);
+            cellStyle.setBorderBottom(CellStyle.BORDER_THICK);
+            cellStyle.setBorderTop(CellStyle.BORDER_THICK);
+            cellStyle.setBorderRight(CellStyle.BORDER_THICK);
+            cellStyle.setBorderLeft(CellStyle.BORDER_THICK);
+        }
 
 
-		public CellStyle createCellStyle(CellType value, int columnNumber, int rowNumber){
-			DataFormat dataFormat = workBook.createDataFormat();
+        public CellStyle createCellStyle(CellType value, int columnNumber, int rowNumber){
+            DataFormat dataFormat = workBook.createDataFormat();
             Column currColumn = formTemplate.getColumns().get(columnNumber);
-			CellStyle style = workBook.createCellStyle();
+            CellStyle style = workBook.createCellStyle();
             style.setBorderRight(CellStyle.BORDER_THIN);
             style.setBorderLeft(CellStyle.BORDER_THIN);
             style.setBorderBottom(CellStyle.BORDER_THIN);
@@ -147,44 +149,45 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                     break;
             }
 
-			return style;
-		}
-	}
+            return style;
+        }
+    }
 
-	private FormData data;
-	private List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows;
-	private FormTemplate formTemplate;
-	private Department department;
-	private ReportPeriod reportPeriod;
-	private Date acceptanceDate;
-	private Date creationDate;
+    private FormData data;
+    private List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows;
+    private FormTemplate formTemplate;
+    private Department department;
+    private ReportPeriod reportPeriod;
+    private Date acceptanceDate;
+    private Date creationDate;
 
-	public FormDataXlsxReportBuilder() throws IOException {
+    public FormDataXlsxReportBuilder() throws IOException {
         InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
-		try {
-			workBook = WorkbookFactory.create(templeteInputStream);
-		} catch (InvalidFormatException e) {
-			logger.error(e.getMessage(), e);
-			throw new IOException("Wrong file format. Template must be in format of 2007 Excel!!!");
-		}
-		sheet = workBook.getSheetAt(0);
-		cellStyleBuilder = new CellStyleBuilder();
+        try {
+            workBook = WorkbookFactory.create(templeteInputStream);
+        } catch (InvalidFormatException e) {
+            logger.error(e.getMessage(), e);
+            throw new IOException("Wrong file format. Template must be in format of 2007 Excel!!!");
+        }
+        sheet = workBook.getSheetAt(0);
+        cellStyleBuilder = new CellStyleBuilder();
 
-	}
+    }
 
-	public FormDataXlsxReportBuilder(FormDataReport data, boolean isShowChecked, List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows) throws IOException {
-		this();
-		this.data = data.getData();
+    public FormDataXlsxReportBuilder(FormDataReport data, boolean isShowChecked, List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows) throws IOException {
+        this();
+        this.data = data.getData();
         this.dataRows = dataRows;
-		formTemplate = data.getFormTemplate();
-		this.isShowChecked = isShowChecked;
-		department = data.getDepartment();
-		reportPeriod = data.getReportPeriod();
-		acceptanceDate = data.getAcceptanceDate();
-		creationDate = data.getCreationDate();
-	}
+        formTemplate = data.getFormTemplate();
+        this.isShowChecked = isShowChecked;
+        department = data.getDepartment();
+        reportPeriod = data.getReportPeriod();
+        acceptanceDate = data.getAcceptanceDate();
+        creationDate = data.getCreationDate();
+    }
 
     protected void fillHeader(){
+
         //Fill subdivision
         createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION, department.getName(), 0, 0);
 
@@ -223,8 +226,9 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
         //Fill code
         StringTokenizer sToK = new StringTokenizer(formTemplate.getCode(), XlsxReportMetadata.REPORT_DELIMITER);//This needed because we can have not only one delimiter
         int j = 0;
+        Row row = sheet.getRow(0);
         while(sToK.hasMoreTokens()){
-            createCellByRange(XlsxReportMetadata.RANGE_REPORT_CODE, sToK.nextToken(), j, 0);
+            createCellByRange(XlsxReportMetadata.RANGE_REPORT_CODE, sToK.nextToken(), j, formTemplate.getColumns().size() - row.getLastCellNum());
             j++;
         }
 
@@ -233,7 +237,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
         createCellByRange(XlsxReportMetadata.RANGE_REPORT_PERIOD, sb.toString(), 0, formTemplate.getColumns().size()/2 - 1);
     }
 
-	protected void createTableHeaders(){
+    protected void createTableHeaders(){
         AreaReference ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_POSITION).getRefersToFormula());
         Row r = sheet.getRow(ar.getFirstCell().getRow());
         if (rowNumber + formTemplate.getHeaders().size() >= r.getRowNum()){
@@ -266,16 +270,16 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
             rowNumber++;
             cellNumber = 0;
         }
-	}
+    }
 
-	protected void createDataForTable(){
+    protected void createDataForTable(){
         rowNumber = (rowNumber > sheet.getLastRowNum()?sheet.getLastRowNum():rowNumber);//if we have empty strings
         sheet.shiftRows(rowNumber, sheet.getLastRowNum(), dataRows.size() + 2);
-		for (int j = 0; j < dataRows.size(); j++) {
+        for (int j = 0; j < dataRows.size(); j++) {
             DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow = dataRows.get(j);
-			Row row = sheet.createRow(rowNumber++);
+            Row row = sheet.createRow(rowNumber++);
 
-			for (int i = 0; i < formTemplate.getColumns().size(); i++) {
+            for (int i = 0; i < formTemplate.getColumns().size(); i++) {
                 Column column = formTemplate.getColumns().get(i);
                 if (column.isChecking() && !isShowChecked){
                     continue;
@@ -289,31 +293,31 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                         i = i + dataRow.getCell(column.getAlias()).getColSpan() - 1;
                     continue;
                 }
-				Object obj = dataRow.get(column.getAlias());
-				Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, false);
-				if(column instanceof StringColumn){
-					String str = (String)obj;
-					CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, i , j);
-					cell.setCellStyle(cellStyle);
-					cell.setCellValue(str);
-					fillWidth(cell.getColumnIndex(),str != null?str.length():0);
-				}
-				else if(column instanceof DateColumn){
-					Date date = (Date)obj;
+                Object obj = dataRow.get(column.getAlias());
+                Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, false);
+                if(column instanceof StringColumn){
+                    String str = (String)obj;
+                    CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, i , j);
+                    cell.setCellStyle(cellStyle);
+                    cell.setCellValue(str);
+                    fillWidth(cell.getColumnIndex(),str != null?str.length():0);
+                }
+                else if(column instanceof DateColumn){
+                    Date date = (Date)obj;
                     if (date!=null)
                         cell.setCellValue(date);
                     else
                         cell.setCellValue("");
-					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DATE, i , j));
+                    cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DATE, i , j));
                     fillWidth(cell.getColumnIndex(),date != null?XlsxReportMetadata.sdf.format(date).length():0);
-				}
-				else if(column instanceof NumericColumn){
-					BigDecimal bd = (BigDecimal)obj;
-					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.BIGDECIMAL, i , j));
+                }
+                else if(column instanceof NumericColumn){
+                    BigDecimal bd = (BigDecimal)obj;
+                    cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.BIGDECIMAL, i , j));
 
-					cell.setCellValue(bd!=null ? String.valueOf(bd) : "");
-					fillWidth(cell.getColumnIndex(),String.valueOf(bd!=null?bd.doubleValue():"").length());
-				}else if(column instanceof RefBookColumn){
+                    cell.setCellValue(bd!=null ? String.valueOf(bd) : "");
+                    fillWidth(cell.getColumnIndex(),String.valueOf(bd!=null?bd.doubleValue():"").length());
+                }else if(column instanceof RefBookColumn){
                     CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, i , j);
                     cell.setCellStyle(cellStyle);
                     cell.setCellValue(dataRow.getCell(column.getAlias()).getRefBookDereference());
@@ -321,17 +325,17 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                             dataRow.getCell(column.getAlias()).getRefBookDereference() :
                             "").length());
                 }
-				else if(obj == null){
-					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.EMPTY, i , j));
-					cell.setCellValue("");
-				}
+                else if(obj == null){
+                    cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.EMPTY, i , j));
+                    cell.setCellValue("");
+                }
                 if (dataRow.getCell(column.getAlias()).getColSpan() > 1)
                     i = i + dataRow.getCell(column.getAlias()).getColSpan() - 1;
-			}
+            }
 
-		}
+        }
 
-	}
+    }
 
     @Override
     protected void cellAlignment() {
@@ -342,46 +346,46 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
         super.cellAlignment();
     }
 
-	protected void fillFooter(){
-		AreaReference ar;
-		Row r;
-		Cell c;
+    protected void fillFooter(){
+        AreaReference ar;
+        Row r;
+        Cell c;
 
-		//Fill position and FIO
-		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_POSITION).getRefersToFormula());
-		r = sheet.getRow(ar.getFirstCell().getRow());
-		rowNumber = r.getRowNum();
-		c = r.getCell(ar.getFirstCell().getCol());
-		CellStyle cs = c.getCellStyle();
+        //Fill position and FIO
+        ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_POSITION).getRefersToFormula());
+        r = sheet.getRow(ar.getFirstCell().getRow());
+        rowNumber = r.getRowNum();
+        c = r.getCell(ar.getFirstCell().getCol());
+        CellStyle cs = c.getCellStyle();
 
         int cellSignPosition = formTemplate.getColumns().size() / 2;
-		for (int i = 0;i < data.getSigners().size(); i++) {
-			Row rs = sheet.createRow(rowNumber);
-			Cell crsP = createNotHiddenCell(XlsxReportMetadata.CELL_POS, rs);
-			crsP.setCellValue(data.getSigners().get(i).getPosition());
+        for (int i = 0;i < data.getSigners().size(); i++) {
+            Row rs = sheet.createRow(rowNumber);
+            Cell crsP = createNotHiddenCell(XlsxReportMetadata.CELL_POS, rs);
+            crsP.setCellValue(data.getSigners().get(i).getPosition());
             Cell crsS = createNotHiddenCell(cellSignPosition, rs);
-			crsS.setCellValue("_______");
-			Cell crsFio = createNotHiddenCell(cellSignPosition + 2, rs);
-			crsFio.setCellValue("(" + data.getSigners().get(i).getName() + ")");
-			crsP.setCellStyle(cs);
-			crsS.setCellStyle(cs);
-			crsFio.setCellStyle(cs);
+            crsS.setCellValue("_______");
+            Cell crsFio = createNotHiddenCell(cellSignPosition + 2, rs);
+            crsFio.setCellValue("(" + data.getSigners().get(i).getName() + ")");
+            crsP.setCellStyle(cs);
+            crsS.setCellStyle(cs);
+            crsFio.setCellStyle(cs);
 			/*sheet.shiftRows(rowNumber, sheet.getLastRowNum(), 1);*/
             rowNumber++;
-		}
+        }
 
-		//Fill performer
-		if(data.getPerformer()!=null){
-			r = sheet.createRow(rowNumber);
-			c = createNotHiddenCell(0, r);
+        //Fill performer
+        if(data.getPerformer()!=null){
+            r = sheet.createRow(rowNumber);
+            c = createNotHiddenCell(0, r);
             c.setCellValue("Исполнитель:");
             c = createNotHiddenCell(1, r);
-			c.setCellValue((data.getPerformer().getName()!=null?data.getPerformer().getName():"") + "/" +
+            c.setCellValue((data.getPerformer().getName()!=null?data.getPerformer().getName():"") + "/" +
                     (data.getPerformer().getPhone()!=null?data.getPerformer().getPhone():""));
             sheet.shiftRows(sheet.getLastRowNum(), sheet.getLastRowNum(), 1);
-		}
+        }
 
-	}
+    }
 
     @Override
     protected void setPrintSetup() {
@@ -405,10 +409,10 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
     /*
     * Merge rows with data. Depend on fields from com.aplana.sbrf.taxaccounting.model.Cell rowSpan and colSpan.
     */
-	private Cell mergedDataCells(AbstractCell cell,Row currRow, boolean isHeader){
+    private Cell mergedDataCells(AbstractCell cell,Row currRow, boolean isHeader){
         int currColumn = currRow.getLastCellNum()!=-1?currRow.getLastCellNum():0;
-		Cell currCell = currRow.createCell(currColumn);
-		if(cell != null && (cell.getColSpan() > 1 || cell.getRowSpan() > 1)){
+        Cell currCell = currRow.createCell(currColumn);
+        if(cell != null && (cell.getColSpan() > 1 || cell.getRowSpan() > 1)){
             if(currColumn + cell.getColSpan() > formTemplate.getColumns().size()){
                 tableBorders(currColumn, formTemplate.getColumns().size(), currRow.getRowNum(), currRow.getRowNum() + cell.getRowSpan() - 1, isHeader);
             }else if(currColumn + cell.getColSpan() > formTemplate.getColumns().size() - 1){
@@ -417,9 +421,9 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
             else{
                 tableBorders(currColumn, currColumn + cell.getColSpan() - 1, currRow.getRowNum(), currRow.getRowNum() + cell.getRowSpan() - 1, isHeader);
             }
-		}
-		return currCell;
-	}
+        }
+        return currCell;
+    }
 
     /*
     * Create new merge region, or if we haven't intersections
@@ -459,20 +463,28 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
     private void createCellByRange(String rangeName, String cellValue, int shiftRows, int shiftColumns){
         if (logger.isDebugEnabled())
             logger.debug(workBook.getName(rangeName).getRefersToFormula());
-        StringBuilder sb = new StringBuilder();
+        XSSFRichTextString richTextString = new XSSFRichTextString();
         AreaReference ar = new AreaReference(workBook.getName(rangeName).getRefersToFormula());
         Row r = sheet.getRow(ar.getFirstCell().getRow() + shiftRows) != null ? sheet.getRow(ar.getFirstCell().getRow() + shiftRows)
                 : sheet.createRow(ar.getFirstCell().getRow() + shiftRows);
         if (r.getCell(ar.getFirstCell().getCol()) != null &&
                 r.getCell(ar.getFirstCell().getCol()).getStringCellValue()!= null &&
                 !r.getCell(ar.getFirstCell().getCol()).getStringCellValue().isEmpty()){
-            sb.append(r.getCell(ar.getFirstCell().getCol()).getStringCellValue());
+            richTextString = (XSSFRichTextString) r.getCell(ar.getFirstCell().getCol()).getRichStringCellValue();
             r.getCell(ar.getFirstCell().getCol()).setCellValue("");//чтобы при печати не залипала перенесенная запись
         }
         Cell c = createNotHiddenCell(ar.getFirstCell().getCol() + shiftColumns, r);
-        sb.append(cellValue != null?cellValue:"");
-        c.setCellValue(String.valueOf(sb));
-        c.setCellStyle(r.getCell(ar.getFirstCell().getCol()).getCellStyle());
+        if (richTextString.numFormattingRuns() > 1){
+            int richTextStart = richTextString.length() - 1;
+            XSSFFont richTextIndex = richTextString.getFontAtIndex(richTextStart);
+            richTextString.append(cellValue != null?cellValue:"");
+            richTextString.applyFont(richTextStart,
+                    richTextString.length(), richTextIndex);
+        } else
+            richTextString.append(cellValue != null?cellValue:"");
+
+        /*c.setCellStyle(r.getCell(ar.getFirstCell().getCol()).getCellStyle());*/
+        c.setCellValue(richTextString);
     }
 
 
