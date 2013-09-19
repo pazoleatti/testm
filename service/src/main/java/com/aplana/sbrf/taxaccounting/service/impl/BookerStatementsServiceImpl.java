@@ -55,6 +55,10 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     private static final long MAX_FILE_ROW = 10000L;
 
     private static final String BAD_FILE_MSG = "Формат файла не соответствуют ожидаемому формату. Файл не может быть загружен.";
+    private static final String IO_WORKBOOK_EXCEPTION = "Не могу прочитать загруженный Excel фаил";
+    private static final String REPORT_PERIOD_CLOSED = "Указан закрытый период. Файл не может быть загружен.";
+    private static final String REPORT_PERIOD_INVALID = "Отчетный период не указан";
+    private static final String FILE_NULL = "Не указан фаил";
 
     @Autowired
     PeriodService reportPeriodService;
@@ -63,10 +67,20 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     RefBookFactory rbFactory;
 
     @Override
-    public void importXML(InputStream stream, Integer periodId, int typeId, int departmentId) throws IOException, ServiceException {
+    public void importXML(String realFileName, InputStream stream, Integer periodId, int typeId, int departmentId) {
+
+        if (stream == null) {
+            throw new ServiceException(FILE_NULL);
+        }
+        if (periodId == null) {
+            throw new ServiceException(REPORT_PERIOD_INVALID);
+        }
+        if (realFileName == null || !getFileExtention(realFileName).equals("xls")) {
+            throw  new ServiceException(BAD_FILE_MSG);
+        }
         // Проверка того, что пользователем указан открытый отчетный период
         if (!reportPeriodService.isActivePeriod(periodId, departmentId)) {
-            throw new ServiceException("Указан закрытый период. Файл не может быть загружен.");
+            throw new ServiceException(REPORT_PERIOD_CLOSED);
         }
 
         if (typeId == 0) {
@@ -115,9 +129,20 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         }
     }
 
-    private List<Income101> importIncome101(InputStream stream) throws IOException, ServiceException {
+    // Проверка расширения Булата Кинзибулатова из com.aplana.sbrf.taxaccounting.web.mvc.BookerStatementsController.getFileExtention()
+    private static String getFileExtention(String filename) {
+        int dotPos = filename.lastIndexOf(".") + 1;
+        return filename.substring(dotPos);
+    }
+
+    private List<Income101> importIncome101(InputStream stream) {
         List<Income101> list = new ArrayList<Income101>();
-        HSSFWorkbook wb = new HSSFWorkbook(stream);
+        HSSFWorkbook wb = null;
+        try {
+            wb = new HSSFWorkbook(stream);
+        } catch (IOException e) {
+            throw new ServiceException(IO_WORKBOOK_EXCEPTION);
+        }
         Sheet sheet = wb.getSheetAt(0);
         Iterator<Row> it = sheet.iterator();
         boolean endOfFile = false;
@@ -225,7 +250,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         return list;
     }
 
-    private List<Income102> importIncome102(InputStream stream) throws IOException, ServiceException {
+    private List<Income102> importIncome102(InputStream stream) {
         // строки со следующими кодами игнорируем
         Set<String> excludeCode = new HashSet<String>();
         excludeCode.add("");
@@ -233,7 +258,12 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         excludeCode.add("20000");
         // выходной лист с моделями для записи в бд
         List<Income102> list = new ArrayList<Income102>();
-        HSSFWorkbook wb = new HSSFWorkbook(stream);
+        HSSFWorkbook wb = null;
+        try {
+            wb = new HSSFWorkbook(stream);
+        } catch (IOException e) {
+            throw new ServiceException(IO_WORKBOOK_EXCEPTION);
+        }
         Sheet sheet = wb.getSheetAt(0);
         Iterator<Row> it = sheet.iterator();
         boolean endOfFile = false;
