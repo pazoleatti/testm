@@ -1,19 +1,31 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.*;
-import com.google.gwt.cell.client.*;
-import com.google.gwt.safehtml.shared.*;
-import com.google.gwt.uibinder.client.*;
-import com.google.gwt.user.cellview.client.*;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.*;
-import com.google.inject.*;
-import com.gwtplatform.mvp.client.*;
+import java.util.List;
 
-import java.util.*;
+import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.cellview.client.AbstractPager;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.cellview.client.Header;
+import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.AbstractDataProvider;
+import com.google.inject.Inject;
+import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 public class FormDataListView extends
 		ViewWithUiHandlers<FormDataListUiHandlers> implements
@@ -39,7 +51,7 @@ public class FormDataListView extends
 	Panel filterContentPanel;
 
 	@UiField
-	CellTable<FormDataSearchResultItem> formDataTable;
+	DataGrid<FormDataSearchResultItem> formDataTable;
 	
 	@UiField
 	AbstractPager pager;
@@ -127,11 +139,20 @@ public class FormDataListView extends
 				return object;
 			}
 		};
+		
+		
 
 		formDataTable.addColumn(formKindColumn, getHeader(FORM_DATA_KIND_TITLE));
 		formDataTable.addColumn(linkColumn, getHeader(FORM_DATA_TYPE_TITLE));
+		formDataTable.setColumnWidth(linkColumn, 40, Style.Unit.EM);
+		
 		formDataTable.addColumn(departmentColumn, getHeader(DEPARTMENT_TITLE));
+		
         formDataTable.addColumn(periodYearColumn, getHeader(PERIOD_YEAR_TITLE));
+        formDataTable.setColumnWidth(periodYearColumn, 5, Style.Unit.EM);
+        periodYearColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        
+        
 		formDataTable.addColumn(reportPeriodColumn, getHeader(REPORT_PERIOD_TITLE));
 		formDataTable.addColumn(periodMonthColumn, getHeader(PERIOD_MONTH_TITLE));
 		formDataTable.addColumn(stateColumn, getHeader(FORM_DATA_STATE_TITLE));

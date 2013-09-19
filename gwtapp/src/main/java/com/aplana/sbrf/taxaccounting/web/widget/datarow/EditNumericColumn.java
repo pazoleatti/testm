@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.cell.ValidatedInputCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.user.cellview.client.AbstractCellTable;
 
 /** 
  * @author Vitalii Samolovskikh 
