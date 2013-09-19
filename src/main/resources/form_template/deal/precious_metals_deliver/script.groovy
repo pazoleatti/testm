@@ -783,7 +783,7 @@ def checkHeaderRow(def xml, def headRowCount, def cellNumber, def arrayHeaders){
         //убираем перевод строки, множественное использование пробелов
         value = value.replaceAll('\\n', '').replaceAll('\\r','').replaceAll(' {2,}', ' ').trim()
         if (value != arrayHeaders[i]){
-            println("row index '"+ i +"' row value '" + value + "' cellNumber '" + cellNumber + "' value '" + arrayHeaders[i] + "'")
+            //println("row index '"+ i +"' row value '" + value + "' cellNumber '" + cellNumber + "' value '" + arrayHeaders[i] + "'")
             return false
         }
     }
@@ -947,7 +947,7 @@ def addData(def xml) {
         newRow.transactionDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
 
         data.insert(newRow, indexRow - headShift)
-        println(indexRow - headShift)
+        // println(indexRow - headShift)
     }
 }
 
