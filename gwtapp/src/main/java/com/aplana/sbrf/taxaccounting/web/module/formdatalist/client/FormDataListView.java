@@ -7,13 +7,13 @@ import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
+import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.cellview.client.AbstractPager;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.Header;
@@ -23,13 +23,17 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.AbstractDataProvider;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 public class FormDataListView extends
 		ViewWithUiHandlers<FormDataListUiHandlers> implements
 		FormDataListPresenter.MyView {
+	
+	private static final int PAGE_SIZE = 20;
 
 	public static final String FORM_DATA_KIND_TITLE = "Тип налоговой формы";
 	public static final String FORM_DATA_TYPE_TITLE = "Вид налоговой формы";
@@ -54,10 +58,20 @@ public class FormDataListView extends
 	DataGrid<FormDataSearchResultItem> formDataTable;
 	
 	@UiField
-	AbstractPager pager;
+	FlexiblePager pager;
 
 	@UiField
 	Label titleDesc;
+	
+	private AsyncDataProvider<FormDataSearchResultItem> dataProvider = new  AsyncDataProvider<FormDataSearchResultItem>() {
+		@Override
+		protected void onRangeChanged(HasData<FormDataSearchResultItem> display) {
+			if (getUiHandlers() != null){
+				Range range = display.getVisibleRange();
+				getUiHandlers().onRangeChange(range.getStart(), range.getLength());	
+			}
+		}
+	};
 
 	@Inject
 	public FormDataListView(final MyBinder binder) {
@@ -159,6 +173,8 @@ public class FormDataListView extends
 		formDataTable.addColumn(returnColumn, getHeader(FORM_DATA_RETURN_TITLE));
 
 		pager.setDisplay(formDataTable);
+		formDataTable.setPageSize(PAGE_SIZE);
+		dataProvider.addDataDisplay(formDataTable);
 
 	}
 
@@ -175,15 +191,9 @@ public class FormDataListView extends
 	}
 
 	@Override
-	public void setFormDataList(int start, long totalCount, List<FormDataSearchResultItem> records) {
+	public void setTableData(int start, long totalCount, List<FormDataSearchResultItem> records) {
 		formDataTable.setRowCount((int) totalCount);
 		formDataTable.setRowData(start, records);
-	}
-
-	@Override
-	public void assignDataProvider(int pageSize, AbstractDataProvider<FormDataSearchResultItem> data) {
-		formDataTable.setPageSize(pageSize);
-		data.addDataDisplay(formDataTable);
 	}
 
 	@Override
@@ -243,5 +253,19 @@ public class FormDataListView extends
 
 	private void setAscSorting(boolean ascSorting){
 		this.isAscSorting = ascSorting;
+	}
+
+	@Override
+	public void updateData() {
+		formDataTable.setVisibleRangeAndClearData(formDataTable.getVisibleRange(), true);
+	}
+
+	@Override
+	public void updateData(int pageNumber) {
+		if (pager.getPage() == pageNumber){
+			updateData();
+		} else {
+			pager.setPage(pageNumber);
+		}
 	}
 }
