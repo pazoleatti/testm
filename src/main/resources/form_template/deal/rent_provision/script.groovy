@@ -76,8 +76,8 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
-    row.keySet().each{
+    def index = currentDataRow != null ? (currentDataRow.getIndex() + 1) : (size == 0 ? 1 : (size + 1))
+    row.keySet().each {
         row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
@@ -181,11 +181,32 @@ void logicCheck() {
             logger.warn("Строка $rowNum: «$costName» не равна произведению «$countName» и «$priceName»!")
         }
 
+        // Проверка заполненности одного из атрибутов
+        if (row.city != null && row.city.toString().isEmpty() && row.settlement != null && row.settlement.toString().isEmpty()) {
+            def cityName = row.getCell('city').column.name
+            def settleName = row.getCell('settlement').column.name
+            logger.warn("Строка $rowNum: Если заполнена графа «$cityName», то графа «$settleName» не должна быть заполнена!")
+        }
+
+        // Проверка заполнения региона
+        if (row.country != null) {
+            def country = refBookService.getStringValue(10, row.country, 'CODE')
+            if (country != null) {
+                def regionName = row.getCell('region').column.name
+                def countryName = row.getCell('country').column.name
+                if (country == '643' && row.region == null) {
+                    logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
+                } else if (country != '643' && row.region != null) {
+                    logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
+                }
+            }
+        }
+
         //Проверки соответствия НСИ
-        checkNSI(row, "jurName", "Организации-участники контролируемых сделок",9)
-        checkNSI(row, "countryCode", "ОКСМ",10)
-        checkNSI(row, "country", "ОКСМ",10)
-        checkNSI(row, "region", "Коды субъектов Российской Федерации",4)
+        checkNSI(row, "jurName", "Организации-участники контролируемых сделок", 9)
+        checkNSI(row, "countryCode", "ОКСМ", 10)
+        checkNSI(row, "country", "ОКСМ", 10)
+        checkNSI(row, "region", "Коды субъектов Российской Федерации", 4)
     }
 }
 
@@ -218,7 +239,7 @@ void calc() {
         incomeBankSum = row.incomeBankSum
         count = row.count
         // Расчет поля "Цена"
-        if (count != null && count != 0) {
+        if (incomeBankSum != null && count != null && count != 0) {
             row.price = incomeBankSum / count
         }
         // Расчет поля "Стоимость"
@@ -295,15 +316,15 @@ void importData() {
     }
 
     // добавить данные в форму
-    try{
+    try {
         if (!checkTableHead(xml, 3)) {
             logger.error('Заголовок таблицы не соответствует требуемой структуре!')
             return
         }
         addData(xml)
 //        logicCheck()
-    } catch(Exception e) {
-        logger.error(""+e.message)
+    } catch (Exception e) {
+        logger.error("" + e.message)
     }
 }
 
@@ -328,7 +349,7 @@ def addData(def xml) {
             continue
         }
 
-        if ((row.cell.find{it.text()!=""}.toString())=="") {
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
 
@@ -345,7 +366,6 @@ def addData(def xml) {
         // графа 2
         newRow.jurName = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
         indexCell++
-
 
         // графа 3
         indexCell++
@@ -398,7 +418,6 @@ def addData(def xml) {
     }
 }
 
-
 /**
  * Проверить шапку таблицы.
  *
@@ -412,7 +431,7 @@ def checkTableHead(def xml, def headRowCount) {
         return false
     }
     def result = (
-            xml.row[0].cell[0] == 'Полное наименование юридического лица с указанием ОПФ' &&
+    xml.row[0].cell[0] == 'Полное наименование юридического лица с указанием ОПФ' &&
             xml.row[2].cell[0] == 'гр. 2' &&
 
             xml.row[0].cell[1] == 'ИНН/ КИО' &&
@@ -476,7 +495,7 @@ def getNumber(def value, int indexRow, int indexCell) {
     try {
         return new BigDecimal(tmp)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
 
@@ -491,7 +510,7 @@ def getDate(def value, int indexRow, int indexCell) {
     try {
         return format.parse(value)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
 
@@ -500,9 +519,9 @@ def getDate(def value, int indexRow, int indexCell) {
  *
  * @param value
  */
-def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory=true) {
+def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory = true) {
     String filter = alias + "= '" + value + "'"
-    if (value=='') filter = "$alias is null"
+    if (value == '') filter = "$alias is null"
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
     } else {
@@ -513,7 +532,7 @@ def getRecordId(def ref_id, String alias, String value, Date date, def cache, in
     if (records.size() == 1) {
         cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
-    } else if (mandatory || value!='') {
+    } else if (mandatory || value != '') {
         throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
     return null

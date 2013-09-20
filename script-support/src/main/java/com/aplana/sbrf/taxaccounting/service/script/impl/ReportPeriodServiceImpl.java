@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 
@@ -92,11 +93,12 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
      * @return
      */
     public Calendar getStartDate(int reportPeriodId){
-    	 ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-         TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
-         // календарь
-         Calendar cal = Calendar.getInstance();
+    	ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+        TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
+        // календарь
+        Calendar cal = new GregorianCalendar();
         cal.clear();
+        cal.set(Calendar.DATE, 1);
         cal.set(Calendar.YEAR, reportPeriod.getYear());
 
         /**
@@ -145,7 +147,7 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
         ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
         TaxPeriod taxPeriod = taxPeriodDao.get(reportPeriod .getTaxPeriod().getId());
         // календарь
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = new GregorianCalendar();
         cal.clear();
         cal.set(Calendar.YEAR, reportPeriod.getYear());
 
@@ -169,9 +171,10 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
                 months += cReportPeriod.getMonths();
             }
             // Calendar.MONTH = 0 это январь
-            cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + months -1);
+            cal.set(Calendar.MONTH, months - 1);
         }
 
+        cal.set(Calendar.DATE, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
         return cal;
     }
 
