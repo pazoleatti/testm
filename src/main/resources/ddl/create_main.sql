@@ -850,8 +850,8 @@ comment on column department_report_period.is_active is 'Признак акти
 comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
 comment on column department_report_period.report_date is 'Срок подачи отчётности';
 
-alter table department_report_period add constraint dep_rep_per_fk_department_id foreign key (department_id) references DEPARTMENT (id);
-alter table department_report_period add constraint dep_rep_per_fk_rep_period_id foreign key (report_period_id) references REPORT_PERIOD (id);
+alter table department_report_period add constraint dep_rep_per_fk_department_id foreign key (department_id) references DEPARTMENT (id) on delete cascade;
+alter table department_report_period add constraint dep_rep_per_fk_rep_period_id foreign key (report_period_id) references REPORT_PERIOD (id) on delete cascade;
 
 
 CREATE TABLE task_context
