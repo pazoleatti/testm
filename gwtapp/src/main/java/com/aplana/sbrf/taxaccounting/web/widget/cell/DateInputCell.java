@@ -34,7 +34,7 @@ public class DateInputCell extends
 		@Template("<input type=\"text\" value=\"{0}\" tabindex=\"-1\"></input>")
 		SafeHtml input(String value);
 
-		@Template("<img imageTypeCalendar=\"calendar\" align=\"right\" src=\"resources/img/calendar-16.png\"/>")
+		@Template("<img imageTypeCalendar=\"calendar\" align=\"right\" src=\"resources/img/calendar-16.gif\"/>")
 		SafeHtml calendarIcon();
 	}
 
