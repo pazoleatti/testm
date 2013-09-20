@@ -483,10 +483,11 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
             richTextString.append(cellValue != null?cellValue:"");
             richTextString.applyFont(richTextStart,
                     richTextString.length(), richTextIndex);
-        } else
+        } else {
             richTextString.append(cellValue != null?cellValue:"");
+            c.setCellStyle(r.getCell(ar.getFirstCell().getCol()).getCellStyle());
+        }
 
-        /*c.setCellStyle(r.getCell(ar.getFirstCell().getCol()).getCellStyle());*/
         c.setCellValue(richTextString);
     }
 

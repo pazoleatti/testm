@@ -99,18 +99,26 @@ public class FormDataXlsxReportBuilderTestMock {
 
         //set width
         colNum.setWidth(10);
-        colNum1.setWidth(10);
+        colNum1.setWidth(0);
         colNum2.setWidth(10);
         colNum3.setWidth(10);
         colNum4.setWidth(10);
         colNum5.setWidth(10);
         colNum6.setWidth(10);
-        colNum7.setWidth(10);
+        colNum7.setWidth(0);
         colNum8.setWidth(10);
         colStr9.setWidth(10);
         colStr10.setWidth(10);
         colStr11.setWidth(10);
         colDate12.setWidth(10);
+        colDate13.setWidth(10);
+        colDate14.setWidth(10);
+        colDate15.setWidth(10);
+        colDate16.setWidth(10);
+        colDate17.setWidth(10);
+        colDate18.setWidth(10);
+        colDate19.setWidth(10);
+
 		
 		columns.add(colNum);
 		columns.add(colNum1);
@@ -182,7 +190,7 @@ public class FormDataXlsxReportBuilderTestMock {
             builder.append(s);
         dataRows.addAll(
                 xmlSerializationUtils.deserialize(builder.toString(), formTemplate.getColumns(), formTemplate.getStyles(), Cell.class)
-        );
+        );*/
 		
 		department = new Department();
         department.setId(1);
