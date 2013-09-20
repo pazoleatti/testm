@@ -178,7 +178,7 @@ void calc() {
 
         def currency = getCurrency(row.currencyCode)
         // графа 11
-        row.rateBR = roundTo2(calculateColumn11(row, reportPeriodService.getEndDate(formData.reportPeriodId)))
+        row.rateBR = roundTo2(calc11(row, reportPeriodService.getEndDate(formData.reportPeriodId)))
 
         // графа 12
         if (row.outcome == 0) {
@@ -332,7 +332,7 @@ def logicalCheck() {
             }
 
             // графа 11
-            def col11 = roundTo2(calculateColumn11(row, lastDayReportPeriod))
+            def col11 = roundTo2(calc11(row, lastDayReportPeriod))
             if (col11!=null && col11!=row.rateBR) {
                 name = getColumnName(row, 'rateBR')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
@@ -431,7 +431,7 @@ def checkNSI() {
             }
 
             // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
-            def col11 = roundTo2(calculateColumn11(row, lastDayReportPeriod))
+            def col11 = roundTo2(calc11(row, lastDayReportPeriod))
             if (col11!=null && col11!=row.rateBR) {
                 logger.error(errorMsg + 'неверно указана ставка Банка России!')
                 return false
