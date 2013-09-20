@@ -137,7 +137,6 @@ void logicCheck() {
             }
         }
 
-        // Проверка стоимости
         def cost = row.cost
         def price = row.price
         def count = row.count
@@ -192,21 +191,24 @@ void logicCheck() {
         }
 
         // Проверка заполнения региона
-        def country = refBookService.getStringValue(10, row.country, 'CODE')
-        if (country != null) {
-            def regionName = row.getCell('region').column.name
-            def countryName = row.getCell('country').column.name
-            if (country == '643' && row.region == null) {
-                logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
-            } else if (country != '643' && row.region != null) {
-                logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
+        if (row.country != null) {
+            def country = refBookService.getStringValue(10, row.country, 'CODE')
+            if (country != null) {
+                def regionName = row.getCell('region').column.name
+                def countryName = row.getCell('country').column.name
+                if (country == '643' && row.region == null) {
+                    logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
+                } else if (country != '643' && row.region != null) {
+                    logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
+                }
             }
         }
-        // Проверка населенного пункта
+
+        // Проверка заполненности одного из атрибутов
         if (row.city != null && row.city.toString().isEmpty() && row.settlement != null && row.settlement.toString().isEmpty()) {
             def cityName = row.getCell('city').column.name
             def settleName = row.getCell('settlement').column.name
-            logger.warn("Строка $rowNum: Если указан «$settleName», то не должен быть указан «$cityName»!")
+            logger.warn("Строка $rowNum: Если заполнена графа «$settleName», то графа «$cityName» не должна быть заполнена!")
         }
 
         // Проверки соответствия НСИ
@@ -242,11 +244,6 @@ void calc() {
         }
         // Порядковый номер строки
         row.rowNum = index++
-
-        // Расчет поля "Населенный пункт"
-        if (row.city != null && !row.city.toString().isEmpty()) {
-            row.settlement = row.city
-        }
 
         count = row.count
         bankSum = row.bankSum
