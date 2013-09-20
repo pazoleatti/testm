@@ -72,6 +72,10 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex()  : size
+    row.keySet().each{
+        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
+        row.getCell(it).setStyleAlias('Автозаполняемая')
+    }
     [
             'transactionDeliveryDate',
             'contraName',
@@ -239,7 +243,7 @@ void calc() {
         // Расчет полей зависимых от справочников
         if (row.contraName != null) {
             def map = refBookService.getRecordData(9, row.contraName)
-            row.innKio = map.INN_KIO.numberValue
+            row.innKio = map.INN_KIO.stringValue
             row.contraCountry = map.COUNTRY.referenceValue
             row.contraCountryCode = map.COUNTRY.referenceValue
         } else {
@@ -291,8 +295,8 @@ void importData() {
         return
     }
 
-    if (!fileName.contains('.xls')) {
-        logger.error('Формат файла должен быть *.xls')
+    if (!fileName.endsWith('.xls')) {
+        logger.error('Выбранный файл не соответствует формату xls!')
         return
     }
 

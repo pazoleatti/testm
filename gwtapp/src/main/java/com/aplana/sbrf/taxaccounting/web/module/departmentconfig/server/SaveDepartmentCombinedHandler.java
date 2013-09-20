@@ -97,18 +97,15 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             paramsMap.put(DepartmentParamAliases.APP_VERSION.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getAppVersion()));
             paramsMap.put(DepartmentParamAliases.FORMAT_VERSION.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getFormatVersion()));
 
-            // УКС и налог на прибыль
-            if (depCombined.getTaxType() == TaxType.INCOME || depCombined.getTaxType() == TaxType.DEAL) {
+            // Налог на прибыль
+            if (depCombined.getTaxType() == TaxType.INCOME) {
                 paramsMap.put(DepartmentParamAliases.SUM_TAX.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getSumTax()));
                 paramsMap.put(DepartmentParamAliases.SUM_DIVIDENDS.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getSumDividends()));
-
-                // Налог на прибыль
-                if (depCombined.getTaxType() == TaxType.INCOME) {
-                    paramsMap.put(DepartmentParamAliases.OBLIGATION.name(), new RefBookValue(RefBookAttributeType.REFERENCE, depCombined.getObligation()));
-                    paramsMap.put(DepartmentParamAliases.TAX_RATE.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getTaxRate()));
-                    paramsMap.put(DepartmentParamAliases.TYPE.name(), new RefBookValue(RefBookAttributeType.REFERENCE, depCombined.getType()));
-                }
+                paramsMap.put(DepartmentParamAliases.OBLIGATION.name(), new RefBookValue(RefBookAttributeType.REFERENCE, depCombined.getObligation()));
+                paramsMap.put(DepartmentParamAliases.TAX_RATE.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getTaxRate()));
+                paramsMap.put(DepartmentParamAliases.TYPE.name(), new RefBookValue(RefBookAttributeType.REFERENCE, depCombined.getType()));
             }
+
             provider.updateRecords(calendarFrom.getTime(), Arrays.asList(paramsMap));
         }
 

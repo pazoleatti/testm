@@ -72,7 +72,11 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex()  : size
+    def index = currentDataRow != null ? currentDataRow.getIndex() : size
+    row.keySet().each {
+        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
+        row.getCell(it).setStyleAlias('Автозаполняемая')
+    }
     [
             'jurName',
             'bankSum',
@@ -88,7 +92,7 @@ void addRow() {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.insert(row, index+1)
+    dataRowHelper.insert(row, index + 1)
 }
 
 void deleteRow() {
@@ -169,7 +173,7 @@ void logicCheck() {
         if (count != null) {
             def res = null
 
-            if (bankSum != null && count != null) {
+            if (bankSum != null && count != null && count != 0) {
                 res = (bankSum / count).setScale(0, RoundingMode.HALF_UP)
             }
 
@@ -188,7 +192,7 @@ void logicCheck() {
         }
 
         // Проверка заполнения региона
-        def country = refBookService.getStringValue(10, row.country,'CODE')
+        def country = refBookService.getStringValue(10, row.country, 'CODE')
         if (country != null) {
             def regionName = row.getCell('region').column.name
             def countryName = row.getCell('country').column.name
@@ -247,14 +251,17 @@ void calc() {
         count = row.count
         bankSum = row.bankSum
         // Расчет поля "Цена"
-        row.price = count == null ? bankSum : bankSum / count
+        if (bankSum != null)
+            row.price = count == null || count == 0 ? bankSum : bankSum / count
+        else
+            row.price = null
         // Расчет поля "Стоимость"
         row.cost = bankSum
 
         // Расчет полей зависимых от справочников
         if (row.jurName != null) {
             def map = refBookService.getRecordData(9, row.jurName)
-            row.innKio = map.INN_KIO.numberValue
+            row.innKio = map.INN_KIO.stringValue
             row.countryCode = map.COUNTRY.referenceValue
         } else {
             row.innKio = null
@@ -303,8 +310,8 @@ void importData() {
         return
     }
 
-    if (!fileName.contains('.xls')) {
-        logger.error('Формат файла должен быть *.xls')
+    if (!fileName.endsWith('.xls')) {
+        logger.error('Выбранный файл не соответствует формату xls!')
         return
     }
 
@@ -321,15 +328,15 @@ void importData() {
     }
 
     // добавить данные в форму
-    try{
+    try {
         if (!checkTableHead(xml, 2)) {
             logger.error('Заголовок таблицы не соответствует требуемой структуре!')
             return
         }
         addData(xml)
 //        logicCheck()
-    } catch(Exception e) {
-        logger.error(""+e.message)
+    } catch (Exception e) {
+        logger.error("" + e.message)
     }
 }
 
@@ -354,7 +361,7 @@ def addData(def xml) {
             continue
         }
 
-        if ((row.cell.find{it.text()!=""}.toString())=="") {
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
 
@@ -381,7 +388,7 @@ def addData(def xml) {
         newRow.rowNum = indexRow - 2
 
         // графа 2
-        newRow.jurName = getRecordId(9, 'NAME',  row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.jurName = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
         indexCell++
 
         // графа 3
@@ -403,11 +410,11 @@ def addData(def xml) {
         indexCell++
 
         // графа 8
-        newRow.country = getRecordId(10, 'CODE_3',  row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.country = getRecordId(10, 'CODE_3', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
         indexCell++
 
         // графа 9
-        newRow.region = getRecordId(4, 'CODE',  row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.region = getRecordId(4, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
         indexCell++
 
         // графа 10
@@ -449,7 +456,7 @@ def checkTableHead(def xml, def headRowCount) {
         return false
     }
     def result = (
-            xml.row[0].cell[0] == 'Полное наименование юридического лица с указанием ОПФ' &&
+    xml.row[0].cell[0] == 'Полное наименование юридического лица с указанием ОПФ' &&
             xml.row[2].cell[0] == 'гр. 2' &&
 
             xml.row[0].cell[1] == 'ИНН/ КИО' &&
@@ -512,7 +519,7 @@ def getNumber(def value, int indexRow, int indexCell) {
     try {
         return new BigDecimal(tmp)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
 
@@ -527,10 +534,9 @@ def getDate(def value, int indexRow, int indexCell) {
     try {
         return format.parse(value)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
-
 
 /**
  * Получить record_id элемента справочника.
@@ -538,18 +544,18 @@ def getDate(def value, int indexRow, int indexCell) {
  * @param value
  */
 def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell) {
-    String filter = alias + "= '"+ value+"'"
-    if (value=='') filter = "$alias is null"
-    if (cache[ref_id]!=null) {
-        if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
+    String filter = alias + "= '" + value + "'"
+    if (value == '') filter = "$alias is null"
+    if (cache[ref_id] != null) {
+        if (cache[ref_id][filter] != null) return cache[ref_id][filter]
     } else {
         cache[ref_id] = [:]
     }
     def refDataProvider = refBookFactory.getDataProvider(ref_id)
     def records = refDataProvider.getRecords(date, null, filter, null)
-    if (records.size() == 1){
+    if (records.size() == 1) {
         cache[ref_id][filter] = (records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue)
         return cache[ref_id][filter]
     }
-    throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+    throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
 }

@@ -23,7 +23,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.creationdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
-import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -50,9 +49,11 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 	 */
 	public interface MyView extends View, HasUiHandlers<FormDataListUiHandlers> {
 		
-		void setFormDataList(int start, long totalCount, List<FormDataSearchResultItem> records);
-
-		void assignDataProvider(int pageSize, AbstractDataProvider<FormDataSearchResultItem> data);
+		void setTableData(int start, long totalCount, List<FormDataSearchResultItem> records);
+		
+		void updateData();
+		
+		void updateData(int pageNumber);
 
 		FormDataSearchOrdering getSearchOrdering();
 

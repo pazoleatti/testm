@@ -81,7 +81,11 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
+    def index = currentDataRow != null ? (currentDataRow.getIndex() + 1) : (size == 0 ? 1 : (size + 1))
+    row.keySet().each {
+        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
+        row.getCell(it).setStyleAlias('Автозаполняемая')
+    }
     ['fullNamePerson', 'dealSign', 'incomeSum', 'outcomeSum', 'docNumber', 'docDate', 'okeiCode', 'count', 'dealDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
@@ -147,7 +151,7 @@ void logicCheck() {
             logger.warn("Строка $rowNum: Одна из граф «$msgIn» и «$msgOut» должна быть заполнена!")
         }
         // Проверка выбранной единицы измерения
-        def okei =  row.okeiCode!= null ? refBookService.getRecordData(12, row.okeiCode).CODE.stringValue : null
+        def okei = row.okeiCode != null ? refBookService.getRecordData(12, row.okeiCode).CODE.stringValue : null
         if (okei != '796' && okei != '744') {
             def msg = okeiCodeCell.column.name
             logger.warn("Строка $rowNum: В графе «$msg» могут быть указаны только следующие элементы: шт., процент!")
@@ -162,18 +166,20 @@ void logicCheck() {
 
         // Проверка цены
         def sumCell = row.incomeSum != null ? row.getCell('incomeSum') : row.getCell('outcomeSum')
-        def countCell = row.getCell('count')
-        def priceCell = row.getCell('price')
-        if (okei == '796' && countCell.value != null && countCell.value != 0
-                && priceCell.value != (sumCell.value / countCell.value).setScale(2, RoundingMode.HALF_UP)) {
-            def msg1 = priceCell.column.name
-            def msg2 = sumCell.column.name
-            def msg3 = countCell.column.name
-            logger.warn("Строка $rowNum: «$msg1» не равно отношению «$msg2» и «$msg3»!")
-        } else if (okei == '744' && priceCell.value != sumCell.value) {
-            def msg1 = priceCell.column.name
-            def msg2 = sumCell.column.name
-            logger.warn("Строка $rowNum: «$msg1» не равно «$msg2»!")
+        if (sumCell.value != null) {
+            def countCell = row.getCell('count')
+            def priceCell = row.getCell('price')
+            if (okei == '796' && countCell.value != null && countCell.value != 0
+                    && priceCell.value != (sumCell.value / countCell.value).setScale(2, RoundingMode.HALF_UP)) {
+                def msg1 = priceCell.column.name
+                def msg2 = sumCell.column.name
+                def msg3 = countCell.column.name
+                logger.warn("Строка $rowNum: «$msg1» не равно отношению «$msg2» и «$msg3»!")
+            } else if (okei == '744' && priceCell.value != sumCell.value) {
+                def msg1 = priceCell.column.name
+                def msg2 = sumCell.column.name
+                logger.warn("Строка $rowNum: «$msg1» не равно «$msg2»!")
+            }
         }
         // Корректность даты совершения сделки
         def dealDateCell = row.getCell('dealDate')
@@ -215,11 +221,15 @@ void calc() {
         }
         // Расчет поля "Цена"
         def priceValue = row.incomeSum != null ? row.incomeSum : row.outcomeSum
-        def okei =  row.okeiCode!= null ? refBookService.getStringValue(12, row.okeiCode, 'CODE') : null
-        if (okei == '744') {
-            row.price = priceValue
-        } else if (okei == '796' && row.count != 0 && row.count != null) {
-            row.price = priceValue / row.count
+        if (priceValue != null) {
+            def okei = row.okeiCode != null ? refBookService.getStringValue(12, row.okeiCode, 'CODE') : null
+            if (okei == '744') {
+                row.price = priceValue
+            } else if (okei == '796' && row.count != 0 && row.count != null) {
+                row.price = priceValue / row.count
+            } else {
+                row.price = null
+            }
         } else {
             row.price = null
         }
@@ -229,7 +239,7 @@ void calc() {
         // Расчет полей зависимых от справочников
         if (row.fullNamePerson != null) {
             def map = refBookService.getRecordData(9, row.fullNamePerson)
-            row.inn = map.INN_KIO.numberValue
+            row.inn = map.INN_KIO.stringValue
             row.countryCode = map.COUNTRY.referenceValue
         } else {
             row.inn = null
@@ -276,8 +286,8 @@ void importData() {
         return
     }
 
-    if (!fileName.contains('.xls')) {
-        logger.error('Формат файла должен быть *.xls')
+    if (!fileName.endsWith('.xls')) {
+        logger.error('Выбранный файл не соответствует формату xls!')
         return
     }
 
@@ -379,7 +389,7 @@ def addData(def xml) {
             continue
         }
 
-        if ((row.cell.find {it.text() != ""}.toString()) == "") {
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
 

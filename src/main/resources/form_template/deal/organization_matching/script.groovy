@@ -12,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
  *
  * @author Stanislav Yasinskiy
  */
-// TODO заменить 38 на номер нового справочника
 switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
@@ -42,7 +41,7 @@ void accepted() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
     for (row in dataRows) {
-        def Number operationCode = row.editSign != null ? refBookService.getRecordData(38, row.editSign).CODE.numberValue : 0
+        def Number operationCode = row.editSign != null ? refBookService.getRecordData(80, row.editSign).CODE.numberValue : 0
         switch (operationCode) {
             case 0:
                 // добавление новой записи
@@ -65,7 +64,7 @@ void accepted() {
     if (insertList.size() > 0)
         refDataProvider.insertRecords(new Date(), insertList)
     if (deleteList.size() > 0)
-        deleteRecords(9, new Date(), deleteList)
+        refDataProvider.deleteRecords(new Date(), deleteList)
 }
 
 Map<String, RefBookValue> getRecord(DataRow<Cell> row) {
@@ -73,7 +72,7 @@ Map<String, RefBookValue> getRecord(DataRow<Cell> row) {
     map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, row.name))
     map.put("ORGANIZATION", new RefBookValue(RefBookAttributeType.NUMBER, row.code))
     map.put("KPP", new RefBookValue(RefBookAttributeType.NUMBER, row.kpp))
-    map.put("INN_KIO", new RefBookValue(RefBookAttributeType.NUMBER, row.inn))
+    map.put("INN_KIO", new RefBookValue(RefBookAttributeType.STRING, row.inn))
     map.put("ADDRESS", new RefBookValue(RefBookAttributeType.STRING, row.address))
     map.put("TAXPAYER_CODE", new RefBookValue(RefBookAttributeType.STRING, row.taxpayerCode))
     map.put("REG_NUM", new RefBookValue(RefBookAttributeType.STRING, row.regNum))
@@ -95,22 +94,14 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? (currentDataRow.getIndex() + 1) : (size == 0 ? 1 : (size + 1))
+    row.keySet().each {
+        row.getCell(it).setStyleAlias('Автозаполняемая')
+    }
     ['name', 'country', 'regNum', 'taxpayerCode', 'address', 'inn', 'kpp', 'code', 'editSign', 'refBookRecord'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
     dataRowHelper.insert(row, index)
-}
-
-/**
- * Проверяет уникальность в отчётном периоде и вид
- * (не был ли ранее сформирован отчет, параметры которого совпадают с параметрами, указанными пользователем )
- */
-void checkUniq() {
-    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
-    if (findForm != null) {
-        logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
-    }
 }
 
 /**
@@ -126,7 +117,7 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
         // Проверка заполненности полей в строках НЕ на удаление
-        if (row.editSign == null || refBookService.getRecordData(38, row.editSign).CODE.numberValue != 2) {
+        if (row.editSign == null || refBookService.getRecordData(80, row.editSign).CODE.numberValue != 2) {
             ['rowNum', 'name', 'country', 'address', 'inn', 'code', 'editSign'].each {
                 def rowCell = row.getCell(it)
                 if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
@@ -134,9 +125,9 @@ void logicCheck() {
                     logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
                 }
             }
-        } else{
+        } else {
             // Проверка заполненности полей в строках на удаление
-            ['rowNum', 'editSign', 'refBookRecord'].each {
+            ['rowNum', 'editSign'].each {
                 def rowCell = row.getCell(it)
                 if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                     def msg = rowCell.column.name
@@ -145,12 +136,12 @@ void logicCheck() {
             }
         }
         // Проверка на заполнение атрибута «Запись справочника»
-        if (row.editSign != null && row.refBookRecord == null && refBookService.getRecordData(38, row.editSign).CODE.numberValue != 0) {
+        if (row.editSign != null && row.refBookRecord == null && refBookService.getRecordData(80, row.editSign).CODE.numberValue != 0) {
             def msg = row.getCell('refBookRecord').column.name
             logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
         }
         // Проверка уникальности полей в рамках справочника «Организации – участники контролируемых сделок»
-        if (row.editSign == null || refBookService.getRecordData(38, row.editSign).CODE.numberValue == 0) {
+        if (row.editSign == null || refBookService.getRecordData(80, row.editSign).CODE.numberValue == 0) {
             def refDataProvider = refBookFactory.getDataProvider(9)
             // Рег. номер организации
             def val = row.regNum
@@ -173,10 +164,14 @@ void logicCheck() {
             // ИНН
             val = row.inn
             if (val != null) {
-                def res = refDataProvider.getRecords(new Date(), null, "INN_KIO = $val", null);
-                if (res.getRecords().size() > 0) {
-                    def msg = row.getCell("inn").column.name
-                    logger.warn("Строка $rowNum: «$msg» уже существует в справочнике «Организации – участники контролируемых сделок»!")
+                def msg = row.getCell("inn").column.name
+                if (!val.matches('[0-9]*')) {
+                    logger.error("Строка $rowNum: «$msg» содержит недопустимые символы!")
+                } else {
+                    def res = refDataProvider.getRecords(new Date(), null, "INN_KIO = $val", null);
+                    if (res.getRecords().size() > 0) {
+                        logger.warn("Строка $rowNum: «$msg» уже существует в справочнике «Организации – участники контролируемых сделок»!")
+                    }
                 }
             }
             // КПП
@@ -198,6 +193,7 @@ void logicCheck() {
         if (row.refBookRecord != null && dataRows.find { it.refBookRecord == row.refBookRecord && it.getIndex() != row.getIndex() } != null)
             isHaveDuplicates = true
     }
+
     if (isHaveDuplicates)
         logger.error("Одна запись справочника не может быть отредактирована более одного раза в одной и той же форме!")
 }
@@ -215,7 +211,7 @@ void calc() {
         // Порядковый номер строки
         row.rowNum = row.getIndex()
         // Чистим ссылку на запись, если не меняем и не удаляем
-        if (row.refBookRecord != null && (row.editSign == null || refBookService.getRecordData(38, row.editSign).CODE.numberValue == 0)) {
+        if (row.refBookRecord != null && (row.editSign == null || refBookService.getRecordData(80, row.editSign).CODE.numberValue == 0)) {
             row.refBookRecord = null
         }
     }

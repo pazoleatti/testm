@@ -10,7 +10,7 @@
     </ui:style>
 
     <g:DialogBox glassEnabled="true" animationEnabled="true"
-                 text="Информация по налоговой форме/декларации">
+                 text="Информация по форме/декларации">
         <g:FlowPanel>
             <style:GenericDataGrid ui:field="logsTable" height="250px" width="1000px" />
             <style:Bar styleName="{style.marginTop}">

@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
@@ -111,12 +112,12 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 											.defaultCallback(new AbstractCallback<RefreshDeclarationResult>() {
 												@Override
 												public void onSuccess(RefreshDeclarationResult result) {
-													onHide();
-													placeManager
-															.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
-																	.with(DeclarationDataTokens.declarationId,
-																			String.valueOf(checkResult.getDeclarationDataId())).build());
-															
+                                                    onHide();
+                                                    placeManager
+                                                            .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
+                                                                    .with(DeclarationDataTokens.declarationId,
+                                                                            String.valueOf(checkResult.getDeclarationDataId())).build());
+                                                    LogAddEvent.fire(DeclarationCreationPresenter.this, result.getLogEntries());
 												}
 											}, DeclarationCreationPresenter.this));
 								}
@@ -131,10 +132,11 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 										.defaultCallback(new AbstractCallback<CreateDeclarationResult>() {
 											@Override
 											public void onSuccess(CreateDeclarationResult result) {
-												onHide();
-												placeManager
-														.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
-																.with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId())).build());
+                                                onHide();
+                                                placeManager
+                                                        .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
+                                                                .with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId())).build());
+                                                LogAddEvent.fire(DeclarationCreationPresenter.this, result.getLogEntries());
 											}
 										}, DeclarationCreationPresenter.this));
 							}

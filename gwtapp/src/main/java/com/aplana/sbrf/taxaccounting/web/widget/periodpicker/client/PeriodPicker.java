@@ -8,6 +8,8 @@ import com.google.gwt.user.client.ui.HasConstrainedValue;
 public interface PeriodPicker extends HasConstrainedValue<List<Integer>>{
 	
 	void setPeriods(List<ReportPeriod> periods);
+
+    void setPeriods(List<ReportPeriod> periods, boolean setLastPeriodSelected);
 	
 	void setTaxType(String taxType);
 	

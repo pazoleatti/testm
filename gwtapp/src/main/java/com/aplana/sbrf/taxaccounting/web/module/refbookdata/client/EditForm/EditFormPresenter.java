@@ -81,7 +81,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	}
 
 	public void show(final Long refBookRecordId) {
-		if (currentRecordId == refBookRecordId) {
+		if ((currentRecordId == refBookRecordId) && (refBookRecordId != null)) {
 			return;
 		}
 		if (isFormModified) {

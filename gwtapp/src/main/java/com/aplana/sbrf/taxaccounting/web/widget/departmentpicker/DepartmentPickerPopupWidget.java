@@ -90,7 +90,7 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 	
 	@UiHandler("clearButton")
 	void onClearButtonClicked(ClickEvent event){
-		this.setValue(null);
+		this.setValue(null, true);
 	}
 
 

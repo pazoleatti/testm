@@ -35,6 +35,7 @@ switch (formDataEvent) {
 // обобщить
     case FormDataEvent.COMPOSE:
         isBank() ? consolidationBank() : consolidationSummary()
+        calculationBasicSum()
         break
 // проверить
     case FormDataEvent.CHECK:
@@ -85,16 +86,6 @@ switch (formDataEvent) {
  * Проверить и расчитать.
  */
 void checkAndCalc() {
-    calculationBasicSum()
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        calculationControlGraphs()
-    }
-}
-
-/**
- * Вычисление сумм.
- */
-void calculationBasicSum() {
     def data = getData(formData)
     if (data == null) {
         return
@@ -110,6 +101,17 @@ void calculationBasicSum() {
         }
     }
 
+    calculationBasicSum()
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        calculationControlGraphs()
+    }
+}
+
+/**
+ * Вычисление сумм.
+ */
+void calculationBasicSum() {
+    def data = getData(formData)
     /*
      * Расчет сумм
      */
@@ -121,8 +123,24 @@ void calculationBasicSum() {
         row50001.getCell(alias).setValue(getSum(alias, 'R2', 'R106'))
         row50002.getCell(alias).setValue(getSum(alias, 'R109', 'R211'))
     }
-
-    calculationControlGraphs()
+    ['R213', 'R214', 'R215', 'R216', 'R217'].each{ alias ->
+        def row = getRowByAlias(data,alias)
+        if (!isBank()) {
+            //при консолидации из первичных
+            row.rnu5Field5Accepted = 0
+        } else {
+            //Строки 213-217 расчет 8-й графы (при консолидации из сводных)
+            def formDataRNU14 = getFormDataRNU14()
+            if (formDataRNU14 != null) {
+                for (def rowRNU14 : getData(formDataRNU14).getAllCached()) {
+                    if (row.consumptionTypeId == rowRNU14.knu) {
+                        row.rnu5Field5Accepted = rowRNU14.overApprovedNprms
+                    }
+                }
+            }
+        }
+    }
+    save(data)
 }
 
 /**
@@ -143,20 +161,8 @@ void calculationControlGraphs() {
     def formDataComplex = getFormDataComplex()
     def income102NotFound = []
     for (def row : getRows(data)) {
-        // исключить итоговые строки
-        if (row.getAlias() in ['R107', 'R212', 'R1', 'R108']) {
-            continue
-        }
-        //Строки 213-217 расчет 8-й графы
-        if (row.getAlias() in ['R213', 'R214', 'R215', 'R216', 'R217']) {
-            def formDataRNU14 = getFormDataRNU14()
-            if (formDataRNU14 != null) {
-                for (def rowRNU14 : getData(formDataRNU14).getAllCached()) {
-                    if (row.consumptionTypeId == rowRNU14.knu) {
-                        row.rnu5Field5Accepted = rowRNU14.overApprovedNprms
-                    }
-                }
-            }
+        // исключить итоговые строки и пять конечных
+        if (row.getAlias() in ['R107', 'R212', 'R1', 'R108', 'R213', 'R214', 'R215', 'R216', 'R217']) {
             continue
         }
         if (!isEmpty(row.rnu7Field10Sum) && !isEmpty(row.rnu7Field12Accepted) &&
@@ -200,6 +206,7 @@ void calculationControlGraphs() {
         def rows = income102NotFound.join(', ')
         logger.warn("Не найдены соответствующие данные в отчете о прибылях и убытках для строк: $rows")
     }
+    save(data)
 }
 
 /**

@@ -77,6 +77,10 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
+    row.keySet().each{
+        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
+        row.getCell(it).setStyleAlias('Автозаполняемая')
+    }
     getEditColumns().each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
@@ -101,12 +105,15 @@ void logicCheck() {
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
 
+    int index = 1
+
     for (row in dataRowHelper.getAllCached()) {
         if (row.getAlias() != null) {
             continue
         }
 
-        def rowNum = row.getIndex()
+        def rowNum = index++
+
         [
                 'rowNum', // № п/п
                 'jurName', // Полное наименование юридического лица с указанием ОПФ
@@ -151,7 +158,7 @@ void logicCheck() {
         // Проверка цены
         def res = null
 
-        if (incomeBankSum != null && count != null) {
+        if (incomeBankSum != null && count != null && count != 0) {
             res = (incomeBankSum / count).setScale(0, RoundingMode.HALF_UP)
         }
 
@@ -211,7 +218,7 @@ void calc() {
         incomeBankSum = row.incomeBankSum
         count = row.count
         // Расчет поля "Цена"
-        if (count != null && count != 0) {
+        if (incomeBankSum!= null && count != null && count != 0) {
             row.price = incomeBankSum / count
         }
         // Расчет поля "Стоимость"
@@ -220,7 +227,7 @@ void calc() {
         // Расчет полей зависимых от справочников
         if (row.jurName != null) {
             def map = refBookService.getRecordData(9, row.jurName)
-            row.innKio = map.INN_KIO.numberValue
+            row.innKio = map.INN_KIO.stringValue
             row.countryCode = map.COUNTRY.referenceValue
         } else {
             row.innKio = null
@@ -270,8 +277,8 @@ void importData() {
         return
     }
 
-    if (!fileName.contains('.xls')) {
-        logger.error('Формат файла должен быть *.xls')
+    if (!fileName.endsWith('.xls')) {
+        logger.error('Выбранный файл не соответствует формату xls!')
         return
     }
 

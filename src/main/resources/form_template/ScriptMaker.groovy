@@ -55,7 +55,7 @@ outFile.withWriter { out ->
         }
 
         // Текст скрипта
-        String text = scriptFile.text.replaceAll("'", "''")
+        String text = scriptFile.text
 
         // Деление на части
         int seek = 0
@@ -63,7 +63,7 @@ outFile.withWriter { out ->
         int counter = 1
         while (seek < text.length()) {
             String subClob = text.length() > seek + step ? text.substring(seek, seek + step) : text.substring(seek, text.length())
-            out.println(String.format("SCRIPT_%d_%d CLOB := '%s';", it.key, counter, subClob))
+            out.println(String.format("SCRIPT_%d_%d CLOB := '%s';", it.key, counter, subClob.replaceAll("'", "''")))
             seek += step
             counter++
         }
