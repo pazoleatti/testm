@@ -208,7 +208,7 @@ public class GetFormDataHandler extends
 
 	private static String getFormedDate(Date dateToForm) {
 		// Преобразуем Date в строку вида "dd.mm.yyyy hh:mm"
-		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
 		formatter.format(dateToForm);
 		return (formatter.format(dateToForm));
 	}
