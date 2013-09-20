@@ -127,14 +127,14 @@ void addRow(DataRow<Cell> row, DataRow<Cell> currentRow) {
 
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = currentRow != null ? currentRow.getIndex() : size
 
     // TODO Временное разрешение редактировать все до 23.09.2013
-    for (column in formData.getFormColumns()) {
-        row.getCell(column.alias).editable = true
-        row.getCell(column.alias).setStyleAlias('Редактируемая')
+    row.keySet().each{
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.insert(row, index)
+    dataRowHelper.insert(row, index+1)
 }
 
 void deleteRow() {
@@ -1106,7 +1106,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     }
 
     // Графа 11
-    if (row.dealDoneDate != null || row.organName != null) {
+    if (row.dealDoneDate != null && row.organName != null) {
         Calendar compareCalendar11 = Calendar.getInstance()
         compareCalendar11.set(2014, 1, 1)
 

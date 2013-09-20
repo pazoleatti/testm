@@ -106,6 +106,8 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                 }
 
                 provider.updateRecords(new Date(), records);
+            } else {
+                // TODO что делать если в файле нет строк для записи в бд?
             }
         } else {
             RefBookDataProvider provider = rbFactory.getDataProvider(INCOME_102);
@@ -125,6 +127,8 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                 }
 
                 provider.updateRecords(new Date(), records);
+            } else {
+                // TODO что делать если в файле нет строк для записи в бд?
             }
         }
     }
@@ -146,6 +150,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         Sheet sheet = wb.getSheetAt(0);
         Iterator<Row> it = sheet.iterator();
         boolean endOfFile = false;
+        boolean hasHeader = false;
         long rowCounter = 1L;
         while (it.hasNext() && !endOfFile) {
             if (rowCounter++ > MAX_FILE_ROW) {
@@ -171,6 +176,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             }
             // проверка ячеек в строке 12
             if (row.getRowNum() == 11) {
+                hasHeader = true;
                 while (cells.hasNext()) {
                     Cell cell = cells.next();
                     int colNum = cell.getColumnIndex();
@@ -246,6 +252,9 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     list.add(model);
                 }
             }
+        }
+        if(!hasHeader){
+            throw new ServiceException(BAD_FILE_MSG);
         }
         return list;
     }
