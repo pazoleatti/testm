@@ -12,6 +12,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -50,24 +51,27 @@ public class ReportPeriodServiceTest {
 		ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
 		
 		// подготовим модели reportPeriod
+		ReportPeriod reportPeriod1 = getReportPeriod(1, taxPeriod1, 1, 1);
+		// подготовим модели reportPeriod
 		ReportPeriod reportPeriod2 = getReportPeriod(2, taxPeriod1, 2, 2);
 		// подготовим модель reportPeriod для 1 отчетного периода в 2 налоговом периоде
         ReportPeriod reportPeriod5 = getReportPeriod(5, taxPeriod2, 2, 1);
         // отчетный период для 1 налогового периода по транспотру
-        ReportPeriod reportPeriod1 = getReportPeriod(4, taxPeriod1, 4, 4);
+        ReportPeriod reportPeriod4 = getReportPeriod(4, taxPeriod1, 4, 4);
 
 		// перехват вызова функции получения отчетного периода по налоговому и возвращение нашего reportPeriod
+		when(reportPeriodDao.get(1)).thenReturn(reportPeriod1);
 		when(reportPeriodDao.get(2)).thenReturn(reportPeriod2);
         when(reportPeriodDao.get(5)).thenReturn(reportPeriod5);
         when(reportPeriodDao.get(8)).thenReturn(getReportPeriod(8, taxPeriod3, 2, 2));
-        when(reportPeriodDao.get(4)).thenReturn(reportPeriod1);
+        when(reportPeriodDao.get(4)).thenReturn(reportPeriod4);
 
 		// подготовка списка отчетных периодов для 1 налогового периода 
 		List<ReportPeriod> reportPeriodListBy1Period= new ArrayList<ReportPeriod>();
-		reportPeriodListBy1Period.add(getReportPeriod(4, taxPeriod1, 4, 4));
+		reportPeriodListBy1Period.add(reportPeriod4);
         reportPeriodListBy1Period.add(getReportPeriod(3, taxPeriod1, 3, 3));
-        reportPeriodListBy1Period.add(getReportPeriod(2, taxPeriod1, 2, 2));
-        reportPeriodListBy1Period.add(getReportPeriod(1, taxPeriod1, 1, 1));
+        reportPeriodListBy1Period.add(reportPeriod2);
+        reportPeriodListBy1Period.add(reportPeriod1);
         // подготовка списка отчетных периодов для 2 налогового периода
         List<ReportPeriod> reportPeriodListBy2Period= new ArrayList<ReportPeriod>();
         reportPeriodListBy2Period.add(getReportPeriod(6, taxPeriod2, 2, 2));
@@ -136,23 +140,32 @@ public class ReportPeriodServiceTest {
 
     @Test
     public void getStartDate(){
-        Calendar cl = Calendar.getInstance();
+        Calendar cl = new GregorianCalendar();
+        cl.clear();
         cl.set(2012, 1, 1);
 
-        assertEquals(service.getStartDate(2).get(Calendar.MONTH), cl.get(Calendar.MONTH));
+        assertEquals(service.getStartDate(2), cl);
     }
 
     @Test
     public void getEndDate(){
-        Calendar cl = Calendar.getInstance();
-        cl.set(2012, 2, 1);
+        Calendar c2 = new GregorianCalendar();
+        c2.clear();
+        c2.set(2012, 2, 31);
 
-        assertEquals(service.getEndDate(2).get(Calendar.MONTH), cl.get(Calendar.MONTH));
+        assertEquals(service.getEndDate(2), c2);
+
+        Calendar cl = new GregorianCalendar();
+        cl.clear();
+        cl.set(2012, 0, 31);
+
+        assertEquals(service.getEndDate(1), cl);
     }
 
     @Test
     public void getStartDateIncome(){
         Calendar cl = Calendar.getInstance();
+        cl.clear();
         cl.set(2012, 1, 1);
 
         assertEquals("Wait ", service.getStartDate(8).get(Calendar.MONTH), cl.get(Calendar.MONTH));
@@ -161,6 +174,7 @@ public class ReportPeriodServiceTest {
     @Test
     public void getEndDateIncome(){
         Calendar cl = Calendar.getInstance();
+        cl.clear();
         cl.set(2012, 2, 1);
 
         assertEquals(service.getEndDate(8).get(Calendar.MONTH), cl.get(Calendar.MONTH));
