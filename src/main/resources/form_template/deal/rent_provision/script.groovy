@@ -218,7 +218,7 @@ void calc() {
         incomeBankSum = row.incomeBankSum
         count = row.count
         // Расчет поля "Цена"
-        if (count != null && count != 0) {
+        if (incomeBankSum!= null && count != null && count != 0) {
             row.price = incomeBankSum / count
         }
         // Расчет поля "Стоимость"
