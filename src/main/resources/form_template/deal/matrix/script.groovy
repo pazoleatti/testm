@@ -129,14 +129,11 @@ void addRow(DataRow<Cell> row, DataRow<Cell> currentRow) {
     def size = dataRows.size()
     def index = currentRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
 
-//    for (column in formData.getFormColumns()) {
-//        if (column.alias.equals('dealNum1') || column.alias.equals('dealNum2') || column.alias.equals('dealNum3')
-//                || column.alias.equals('groupName')) {
-//            continue
-//        }
-//        row.getCell(column.alias).editable = true
-//        row.getCell(column.alias).setStyleAlias('Редактируемая')
-//    }
+    // TODO Временное разрешение редактировать все до 23.09.2013
+    for (column in formData.getFormColumns()) {
+        row.getCell(column.alias).editable = true
+        row.getCell(column.alias).setStyleAlias('Редактируемая')
+    }
     dataRowHelper.insert(row, index)
 }
 
