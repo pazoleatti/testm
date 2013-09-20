@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="total">
+        <cell alias="zeroStartColumn" colSpan="3" rowSpan="1" stringValue="Итог"/>
         <cell alias="number" colSpan="1" numericValue="1" rowSpan="1"/>
         <cell alias="securitiesType" colSpan="3" rowSpan="1" stringValue="Процентный (купонный) доход по облигациям"/>
         <cell alias="ofz" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>

@@ -182,6 +182,42 @@ void calc() {
         return
     }
 
+    getRows(data).sort(new Comparator<DataRow>(){
+
+        @Override
+        int compare(DataRow rowA, DataRow rowB) {
+            def k5 = 0
+            if (rowA.transactionDate!=null && rowB.transactionDate!=null) {
+                k5 = (rowA.transactionDate).compareTo(rowB.transactionDate)
+            }
+            if (k5!=0){
+                return k5
+            }else{
+                def k3 = 0
+                if (rowA.contractData!=null && rowB.contractData!=null) {
+                    k3 = (rowA.contractData).compareTo(rowB.contractData)
+                }
+                if(k3!=0){
+                    return k3
+                }else{
+                    def k2 = 0
+                    if (rowA.contractNumber!=null && rowB.contractNumber!=null) {
+                        k2 = (rowA.contractNumber).compareTo(rowB.contractNumber)
+                    }
+                    return k2
+                }
+            }
+        }
+
+        @Override
+        boolean equals(Object obj) {
+            if(obj == null || !(obj instanceof DataRow)) {
+                return false;
+            }
+            return isEqualRows(this,obj)
+        }
+    })
+
     // графа 1, 13..20
     getRows(data).eachWithIndex { DataRow row, index ->
         // графа 1

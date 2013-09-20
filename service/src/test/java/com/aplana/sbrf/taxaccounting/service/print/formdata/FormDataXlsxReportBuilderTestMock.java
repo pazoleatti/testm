@@ -111,14 +111,7 @@ public class FormDataXlsxReportBuilderTestMock {
         colStr10.setWidth(10);
         colStr11.setWidth(10);
         colDate12.setWidth(10);
-        colDate13.setWidth(10);
-        colDate14.setWidth(10);
-        colDate15.setWidth(10);
-        colDate16.setWidth(10);
-        colDate17.setWidth(10);
-        colDate18.setWidth(10);
-        colDate19.setWidth(10);
-
+		
 		columns.add(colNum);
 		columns.add(colNum1);
 		columns.add(colNum2);
@@ -140,6 +133,13 @@ public class FormDataXlsxReportBuilderTestMock {
         columns.add(colDate18);
         columns.add(colDate19);
 
+        List<FormStyle> formStyles = new ArrayList<FormStyle>();
+		FormStyle formStyle1 = new FormStyle();
+        formStyle1.setAlias("Редактируемая");
+        formStyle1.setBackColor(Color.LIGHT_BLUE);
+        formStyle1.setFontColor(Color.LIGHT_BROWN);
+        formStyles.add(formStyle1);
+
 		FormData formData;
 		FormTemplate formTemplate;
 		Department department;
@@ -154,10 +154,10 @@ public class FormDataXlsxReportBuilderTestMock {
 		formData = new FormData();
 		formTemplate = new FormTemplate();
         formTemplate.setId(328);
-		reportPeriod = new ReportPeriod();
-		reportPeriod.setName("1 квартал");
+        reportPeriod = new ReportPeriod();
+        reportPeriod.setName("1 квартал");
         reportPeriod.setTaxPeriod(taxPeriod);
-        /*formTemplate.getStyles().addAll(formStyles);*/
+        formTemplate.getStyles().addAll(formStyles);
 		formTemplate.setNumberedColumns(true);
 		formTemplate.setCode("Таблица 1\\2\\3 | Приложение 1 | Приложение 2");
         formTemplate.getColumns().addAll(columns);
@@ -182,7 +182,7 @@ public class FormDataXlsxReportBuilderTestMock {
             builder.append(s);
         dataRows.addAll(
                 xmlSerializationUtils.deserialize(builder.toString(), formTemplate.getColumns(), formTemplate.getStyles(), Cell.class)
-        );*/
+        );
 		
 		department = new Department();
         department.setId(1);

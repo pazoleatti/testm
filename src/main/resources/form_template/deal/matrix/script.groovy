@@ -26,13 +26,13 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW:
         // В ручном режиме строки добавлять нельзя
-        logger.warn("Добавление строк запрещено!")
-        // addRow()
+        // logger.warn("Добавление строк запрещено!") // TODO Временное разрешение редактировать все до 23.09.2013
+        addRow() // TODO Временное разрешение редактировать все до 23.09.2013
         break
     case FormDataEvent.DELETE_ROW:
         // В ручном режиме строки удалять нельзя
-        logger.warn("Удаление строк запрещено!")
-        // deleteRow()
+        // logger.warn("Удаление строк запрещено!") // TODO Временное разрешение редактировать все до 23.09.2013
+        deleteRow() // TODO Временное разрешение редактировать все до 23.09.2013
         break
 // После принятия из Утверждено
     case FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED:
@@ -127,17 +127,14 @@ void addRow(DataRow<Cell> row, DataRow<Cell> currentRow) {
 
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    def index = currentRow != null ? currentRow.getIndex() : size
 
-//    for (column in formData.getFormColumns()) {
-//        if (column.alias.equals('dealNum1') || column.alias.equals('dealNum2') || column.alias.equals('dealNum3')
-//                || column.alias.equals('groupName')) {
-//            continue
-//        }
-//        row.getCell(column.alias).editable = true
-//        row.getCell(column.alias).setStyleAlias('Редактируемая')
-//    }
-    dataRowHelper.insert(row, index)
+    // TODO Временное разрешение редактировать все до 23.09.2013
+    row.keySet().each{
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
+    }
+    dataRowHelper.insert(row, index+1)
 }
 
 void deleteRow() {
@@ -1109,7 +1106,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     }
 
     // Графа 11
-    if (row.dealDoneDate != null || row.organName != null) {
+    if (row.dealDoneDate != null && row.organName != null) {
         Calendar compareCalendar11 = Calendar.getInstance()
         compareCalendar11.set(2014, 1, 1)
 
@@ -1127,7 +1124,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         row.organInfo = organ.ORGANIZATION.stringValue
 
         // Графа 51
-        row.organINN = organ.INN_KIO.numberValue
+        row.organINN = organ.INN_KIO.stringValue
 
         // Графа 52
         row.organKPP = organ.KPP.numberValue

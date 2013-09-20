@@ -106,6 +106,7 @@ void addRow() {
     def size = dataRows.size()
     def index = 0
     row.keySet().each{
+        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     getEditColumns().each {
@@ -313,14 +314,14 @@ boolean isDiffRow(DataRow row, DataRow nextRow, def groupColumns) {
 def getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    def map = refBookService.getRecordData(9, row.fullName)
+    def map = row.fullName != null ? refBookService.getRecordData(9, row.fullName) : null
     builder.append(map == null ? 'null' : map.NAME.stringValue).append(sep)
     builder.append(row.inn).append(sep)
     builder.append(row.docNum).append(sep)
     builder.append(row.docDate).append(sep)
-    map = refBookService.getRecordData(15, row.currencyCode)
+    map = row.currencyCode != null ? refBookService.getRecordData(15, row.currencyCode) : null
     builder.append(map == null ? 'null' : map.CODE_2.stringValue).append(sep)
-    map = refBookService.getRecordData(10, row.countryDealCode)
+    map = row.countryDealCode != null ? refBookService.getRecordData(10, row.countryDealCode) : null
     builder.append(map == null ? 'null' : map.CODE_2.stringValue)
     builder.toString()
 }
@@ -358,7 +359,7 @@ void calc() {
         // Расчет полей зависимых от справочников
         if (row.fullName != null) {
             def map = refBookService.getRecordData(9, row.fullName)
-            row.inn = map.INN_KIO.numberValue
+            row.inn = map.INN_KIO.stringValue
             row.countryCode = map.COUNTRY.referenceValue
             row.countryName = map.COUNTRY.referenceValue
         } else {
@@ -440,10 +441,6 @@ void addAllStatic() {
     if (!logger.containsLevel(LogLevel.ERROR)) {
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.getAllCached()
-
-        if (dataRows.size()<1){
-            return
-        }
 
         for (int i = 0; i < dataRows.size(); i++) {
             def row = dataRows.get(i)

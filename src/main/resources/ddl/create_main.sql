@@ -497,7 +497,7 @@ comment on column form_data.state is 'Код состояния';
 comment on column form_data.kind is 'Тип налоговой формы (1 - Первичная, 2 - Консолидированная, 3 - Сводная, 4 - Форма УНП, 5 - Выходная)';
 comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
 comment on column form_data.return_sign is 'Флаг возврата (0 - обычный режим; 1 - форма возвращена из вышестоящего статуса)';
-comment on column form_data.period_order is 'Указывает на очередность налоговой формы в рамках отчетного периода. Необходимо для, например, месячных форм в рамках квартального отчетного периода';
+comment on column form_data.period_order is 'Указывает на очередность налоговой формы в рамках налогового периода. Необходимо для, например, месячных форм в рамках квартального отчетного периода';
 
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -762,7 +762,7 @@ alter table log_business add constraint log_business_fk_declaration_id foreign k
 alter table log_business add constraint log_business_fk_form_data_id foreign key (form_data_id) references form_data (id) on delete cascade;
 
 alter table log_business add constraint log_business_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 101, 102,
-  103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303));
+  103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401));
 alter table log_business add constraint log_business_chk_frm_dcl_ev check (form_data_id is not null or declaration_data_id is not null);
 alter table log_business add constraint log_business_fk_usr_departm_id foreign key (user_department_id) references department (id);
 
@@ -797,7 +797,7 @@ create table log_system (
 );
 alter table log_system add constraint log_system_chk_form_kind_id check (form_kind_id in (1, 2, 3, 4, 5));
 alter table log_system add constraint log_system_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 101, 102,
-  103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 501, 502));
+  103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401, 501, 502));
 
 alter table log_system add constraint log_system_chk_dcl_form check (event_id in (501, 502) or
   declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
@@ -850,8 +850,8 @@ comment on column department_report_period.is_active is 'Признак акти
 comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
 comment on column department_report_period.report_date is 'Срок подачи отчётности';
 
-alter table department_report_period add constraint dep_rep_per_fk_department_id foreign key (department_id) references DEPARTMENT (id);
-alter table department_report_period add constraint dep_rep_per_fk_rep_period_id foreign key (report_period_id) references REPORT_PERIOD (id);
+alter table department_report_period add constraint dep_rep_per_fk_department_id foreign key (department_id) references DEPARTMENT (id) on delete cascade;
+alter table department_report_period add constraint dep_rep_per_fk_rep_period_id foreign key (report_period_id) references REPORT_PERIOD (id) on delete cascade;
 
 
 CREATE TABLE task_context

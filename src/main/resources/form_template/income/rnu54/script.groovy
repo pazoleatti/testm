@@ -49,19 +49,12 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        if (!hasError() && logicalCheck() && checkNSI()) {
-            // для сохранения изменений приемников
-            getData(formData).commit()
-        }
+        !hasError() && logicalCheck() && checkNSI()
         break
     case FormDataEvent.IMPORT :
         importData()
         if (!hasError()) {
             calc()
-            !hasError() && logicalCheck() && checkNSI()
-            if (!hasError()) {
-                logger.info('Закончена загрузка файла ' + UploadFileName)
-            }
         }
         break
     case FormDataEvent.MIGRATION :
@@ -70,7 +63,6 @@ switch (formDataEvent) {
             def total = getCalcTotalRow()
             def data = getData(formData)
             insert(data, total)
-            logger.info('Закончена загрузка файла ' + UploadFileName)
         }
         break
 }
@@ -121,7 +113,9 @@ def addNewRow() {
  * Удалить строку.
  */
 def deleteRow() {
-    getData(formData).delete(currentDataRow)
+    if (currentDataRow != null && currentDataRow.getAlias() == null) {
+        getData(formData).delete(currentDataRow)
+    }
 }
 
 /**
@@ -147,11 +141,17 @@ void calc() {
         data.delete(row)
     }
 
+    // отсортировать/группировать - при импорте не сортировать
+    if (formDataEvent != FormDataEvent.IMPORT) {
+        sort(data)
+    }
+
     /** Отчетная дата. */
     def reportDate = getReportDate()
 
     /** Дата нужная при подсчете графы 12. */
-    def someDate = getDate('01.11.2009')
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    def someDate = getDate('01.11.2009', format)
 
     /** Количество дней в году. */
     def daysInYear = getCountDaysInYaer(new Date())
@@ -164,20 +164,22 @@ void calc() {
 
     getRows(data).each { row ->
 
-        def currency = getCurrency(row.currencyCode)
-        course = getCourse(row.currencyCode,reportDate)
+        // графа 9, 10 - при импорте не рассчитывать эти графы
+        if (formDataEvent != FormDataEvent.IMPORT) {
+            def currency = getCurrency(row.currencyCode)
+            course = getCourse(row.currencyCode,reportDate)
 
-        // графа 9, 10
-        a = calcAForColumn9or10(row, reportDate, course)
-        b = 0
-        c = 0
-        if (a < 0) {
-            c = roundTo2(abs(a))
-        } else if (a > 0) {
-            b = roundTo2(a)
+            a = calcAForColumn9or10(row, reportDate, course)
+            b = 0
+            c = 0
+            if (a < 0) {
+                c = roundTo2(abs(a))
+            } else if (a > 0) {
+                b = roundTo2(a)
+            }
+            row.income = b
+            row.outcome = c
         }
-        row.income = b
-        row.outcome = c
 
         // графа 11
         row.rateBR = roundTo2(calc11Value(row, reportDate))
@@ -238,13 +240,14 @@ def logicalCheck() {
         def reportDate = getReportDate()
 
         /** Дата нужная при подсчете графы 12. */
-        def someDate = getDate('01.11.2009')
+        SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+        def someDate = getDate('01.11.2009', format)
 
         /** Количество дней в году. */
         def daysInYear = getCountDaysInYaer(new Date())
 
         /** Курс ЦБ РФ на отчётную дату. */
-        def course = 1
+        def course
 
         def hasTotalRow = false
         def hasError
@@ -440,6 +443,7 @@ void consolidation() {
     }
     // удалить все строки и собрать из источников их строки
     data.clear()
+    def newRows = []
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
@@ -447,11 +451,15 @@ void consolidation() {
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 getRows(getData(source)).each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        insert(data, row)
+                        newRows.add(row)
                     }
                 }
             }
         }
+    }
+    if (!newRows.isEmpty()) {
+        data.insert(newRows, 1)
+        sort(data)
     }
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
@@ -558,12 +566,15 @@ def inPeriod(def date, def from, to) {
 /**
  * Получить дату по строковому представлению (формата дд.ММ.гггг)
  */
-def getDate(def value) {
+def getDate(def value, format) {
     if (isEmpty(value)) {
         return null
     }
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    return format.parse(value)
+    try {
+        return format.parse(value)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в дату. " + e.message)
+    }
 }
 
 /**
@@ -864,6 +875,7 @@ def addData(def xml) {
     def tmp
     def index
     def date = new Date()
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def data = getData(formData)
     data.clear()
     def cache = [:]
@@ -903,11 +915,11 @@ def addData(def xml) {
         index++
 
         // графа 7
-        newRow.part1REPODate = getDate(row.field[index].@value.text())
+        newRow.part1REPODate = getDate(row.field[index].@value.text(), format)
         index++
 
         // графа 8
-        newRow.part2REPODate = getDate(row.field[index].@value.text())
+        newRow.part2REPODate = getDate(row.field[index].@value.text(), format)
         index++
 
         // графа 9
@@ -972,14 +984,15 @@ def addData(def xml) {
  * @param value строка
  */
 def getNumber(def value) {
-    if (value == null) {
-        return null
-    }
     def tmp = value.trim()
     if ("".equals(tmp)) {
         return null
     }
-    return new BigDecimal(tmp)
+    try {
+        return new BigDecimal(tmp)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в число. " + e.message)
+    }
 }
 
 /**
@@ -1061,4 +1074,20 @@ def getRecordId(def ref_id, String code, def value, Date date, def cache) {
     }
     logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
     return null
+}
+
+/**
+ * Отсорировать данные (по графе 7, 1).
+ *
+ * @param data данные нф (хелпер)
+ */
+void sort(def data) {
+    getRows(data).sort { def a, def b ->
+        // графа 1  - tadeNumber
+        // графа 7  - part1REPODate
+        if (a.part1REPODate == b.part1REPODate) {
+            return a.tadeNumber <=> b.tadeNumber
+        }
+        return a.part1REPODate <=> b.part1REPODate
+    }
 }

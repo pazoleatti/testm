@@ -137,6 +137,7 @@ void addRow() {
     def size = dataRows.size()
     def index = 0
     row.keySet().each{
+        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     getEditColumns().each {
@@ -353,6 +354,34 @@ void logicCheck() {
             logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2» сделки!")
         }
 
+        // Проверка заполнения региона отправки
+        if (row.countryCode2 != null) {
+            def country = refBookService.getStringValue(10, row.countryCode2, 'CODE')
+            if (country != null) {
+                def regionName = row.getCell('region1').column.name
+                def countryName = row.getCell('countryCode2').column.name
+                if (country == '643' && row.region1 == null) {
+                    logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
+                } else if (country != '643' && row.region1 != null) {
+                    logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
+                }
+            }
+        }
+
+        // Проверка заполнения региона доставки
+        if (row.countryCode3 != null) {
+            def country = refBookService.getStringValue(10, row.countryCode3, 'CODE')
+            if (country != null) {
+                def regionName = row.getCell('region2').column.name
+                def countryName = row.getCell('countryCode3').column.name
+                if (country == '643' && row.region2 == null) {
+                    logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
+                } else if (country != '643' && row.region2 != null) {
+                    logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
+                }
+            }
+        }
+
         // Проверки соответствия НСИ
         checkNSI(row, "name", "Организации-участники контролируемых сделок", 9)
         checkNSI(row, "countryCode1", "ОКСМ", 10)
@@ -469,12 +498,7 @@ def getValuesByGroupColumn(DataRow row) {
 }
 
 def getRefBookValue(int id, def cell, def alias) {
-    def map
-    try {
-        map = refBookService.getRecordData(id, cell)
-    } catch (Exception e) {
-        map = null
-    }
+    def map = cell != null ? refBookService.getRecordData(id, cell) : null
     return map == null ? 'null' : map.get(alias).stringValue
 }
 
@@ -494,17 +518,19 @@ void calc() {
         row.rowNum = index++
         // Графы 27 и 28 из 25 и 26
         incomeSum = row.incomeSum
-        consumptionSum = row.incomeSum
+        consumptionSum = row.consumptionSum
 
-        if (incomeSum != null) {
+        if (incomeSum != null && consumptionSum == null) {
             row.priceOne = incomeSum
-            row.totalNds = incomeSum
+        } else if (incomeSum == null && consumptionSum != null) {
+            row.priceOne = consumptionSum
+        } else if (incomeSum != null && consumptionSum != null) {
+            row.priceOne = Math.abs(incomeSum - consumptionSum)
+        } else {
+            row.priceOne = null
         }
 
-        if (consumptionSum != null) {
-            row.priceOne = consumptionSum
-            row.totalNds = consumptionSum
-        }
+        row.totalNds = row.priceOne
 
         // Код ОКП
         row.okpCode = row.innerCode
@@ -512,7 +538,7 @@ void calc() {
         // Расчет полей зависимых от справочников
         if (row.name != null) {
             def map = refBookService.getRecordData(9, row.name)
-            row.innKio = map.INN_KIO.numberValue
+            row.innKio = map.INN_KIO.stringValue
             row.country = map.COUNTRY.referenceValue
             row.countryCode1 = map.COUNTRY.referenceValue
         } else {
@@ -783,7 +809,7 @@ def checkHeaderRow(def xml, def headRowCount, def cellNumber, def arrayHeaders){
         //убираем перевод строки, множественное использование пробелов
         value = value.replaceAll('\\n', '').replaceAll('\\r','').replaceAll(' {2,}', ' ').trim()
         if (value != arrayHeaders[i]){
-            println("row index '"+ i +"' row value '" + value + "' cellNumber '" + cellNumber + "' value '" + arrayHeaders[i] + "'")
+            //println("row index '"+ i +"' row value '" + value + "' cellNumber '" + cellNumber + "' value '" + arrayHeaders[i] + "'")
             return false
         }
     }
@@ -832,11 +858,9 @@ def addData(def xml) {
         indexCell++
 
         // столбец 3
-        newRow.innKio = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 
         // столбец 4
-        newRow.country = getRecordId(10, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
         indexCell++
 
         // столбец 5
@@ -947,7 +971,7 @@ def addData(def xml) {
         newRow.transactionDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
 
         data.insert(newRow, indexRow - headShift)
-        println(indexRow - headShift)
+        // println(indexRow - headShift)
     }
 }
 

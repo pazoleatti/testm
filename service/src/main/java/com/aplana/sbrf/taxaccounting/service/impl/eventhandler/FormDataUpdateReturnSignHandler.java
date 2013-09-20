@@ -48,7 +48,7 @@ public class FormDataUpdateReturnSignHandler implements EventHandler {
 								.equals(event)) {
 					formDataDao.updateReturnSign(formData.getId(), true);
 				} else {
-					formDataDao.updateReturnSign(formData.getId(), true);
+					formDataDao.updateReturnSign(formData.getId(), false);
 				}
 			}
 		}
