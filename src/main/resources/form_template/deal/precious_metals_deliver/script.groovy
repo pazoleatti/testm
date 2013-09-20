@@ -830,11 +830,9 @@ def addData(def xml) {
         indexCell++
 
         // столбец 3
-        newRow.innKio = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 
         // столбец 4
-        newRow.country = getRecordId(10, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
         indexCell++
 
         // столбец 5

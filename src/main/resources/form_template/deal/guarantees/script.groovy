@@ -610,7 +610,6 @@ def addData(def xml) {
         indexCell++
 
         // графа 3
-        //newRow.inn = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 
         // графа 4
