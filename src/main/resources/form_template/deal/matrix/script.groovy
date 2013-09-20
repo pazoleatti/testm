@@ -1127,7 +1127,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         row.organInfo = organ.ORGANIZATION.stringValue
 
         // Графа 51
-        row.organINN = organ.INN_KIO.numberValue
+        row.organINN = organ.INN_KIO.stringValue
 
         // Графа 52
         row.organKPP = organ.KPP.numberValue

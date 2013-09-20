@@ -443,7 +443,7 @@ void calc() {
         // Расчет полей зависимых от справочников
         if (row.name != null) {
             def map = refBookService.getRecordData(9, row.name)
-            row.innKio = map.INN_KIO.numberValue
+            row.innKio = map.INN_KIO.stringValue
             row.country = map.COUNTRY.referenceValue
             row.countryCode = map.COUNTRY.referenceValue
         } else {
