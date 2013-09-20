@@ -26,13 +26,13 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW:
         // В ручном режиме строки добавлять нельзя
-        logger.warn("Добавление строк запрещено!")
-        // addRow()
+        // logger.warn("Добавление строк запрещено!") // TODO Временное разрешение редактировать все до 23.09.2013
+        addRow() // TODO Временное разрешение редактировать все до 23.09.2013
         break
     case FormDataEvent.DELETE_ROW:
         // В ручном режиме строки удалять нельзя
-        logger.warn("Удаление строк запрещено!")
-        // deleteRow()
+        // logger.warn("Удаление строк запрещено!") // TODO Временное разрешение редактировать все до 23.09.2013
+        deleteRow() // TODO Временное разрешение редактировать все до 23.09.2013
         break
 // После принятия из Утверждено
     case FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED:

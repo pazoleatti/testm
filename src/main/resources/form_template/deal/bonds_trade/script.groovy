@@ -73,6 +73,7 @@ void addRow() {
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex()  : size
     row.keySet().each{
+        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     [
