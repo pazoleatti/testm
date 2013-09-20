@@ -1,3 +1,13 @@
+package form_template.income.rnu53
+
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+
+import java.text.SimpleDateFormat
+
 /**
  * Форма "(РНУ-53) Регистр налогового учёта открытых сделок РЕПО с обязательством продажи по 2-й части".
  *
@@ -5,14 +15,6 @@
  *
  * @author lhaziev
  */
-
-
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
-
-import java.text.SimpleDateFormat
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
@@ -46,19 +48,12 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        if (!hasError() && logicalCheck() && checkNSI()) {
-            // для сохранения изменений приемников
-            getData(formData).commit()
-        }
+        !hasError() && logicalCheck() && checkNSI()
         break
     case FormDataEvent.IMPORT :
         importData()
         if (!hasError()) {
             calc()
-            !hasError() && logicalCheck() && checkNSI()
-            if (!hasError()) {
-                logger.info('Закончена загрузка файла ' + UploadFileName)
-            }
         }
         break
     case FormDataEvent.MIGRATION :
@@ -67,7 +62,6 @@ switch (formDataEvent) {
             def total = getCalcTotalRow()
             def data = getData(formData)
             insert(data, total)
-            logger.info('Закончена загрузка файла ' + UploadFileName)
         }
         break
 }
@@ -118,8 +112,10 @@ def addNewRow() {
  * Удалить строку.
  */
 def deleteRow() {
-    def data = getData(formData)
-    data.delete(currentDataRow)
+    if (currentDataRow != null && currentDataRow.getAlias() == null) {
+        def data = getData(formData)
+        data.delete(currentDataRow)
+    }
 }
 
 /**
@@ -139,11 +135,17 @@ void calc() {
         data.delete(row)
     }
 
+    // отсортировать/группировать
+    if (formDataEvent != FormDataEvent.IMPORT) {
+        sort(data)
+    }
+
     /** Отчетная дата. */
     def reportDate = getReportDate()
 
     /** Дата нужная при подсчете графы 12. */
-    def someDate = getDate('01.11.2009')
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    def someDate = getDate('01.11.2009', format)
 
     /** Количество дней в году. */
     def daysInYear = getCountDaysInYear(new Date())
@@ -156,23 +158,25 @@ void calc() {
 
     getRows(data).eachWithIndex { row, i ->
 
-        course = getCourse(row.currencyCode, reportDate)
+        // графа 9, 10 - при импорте не рассчитывать эти графы
+        if (formDataEvent != FormDataEvent.IMPORT) {
+            course = getCourse(row.currencyCode, reportDate)
 
-        // графа 9, 10
-        a = calcAForColumn9or10(row, reportDate, course)
-        b = 0
-        c = 0
-        if (a!=null && a > 0) {
-            c = roundTo2(a)
-        } else if (a!=null && a < 0) {
-            b = roundTo2(-a)
+            a = calcAForColumn9or10(row, reportDate, course)
+            b = 0
+            c = 0
+            if (a!=null && a > 0) {
+                c = roundTo2(a)
+            } else if (a!=null && a < 0) {
+                b = roundTo2(-a)
+            }
+            row.income = c
+            row.outcome = b
         }
-        row.income = c
-        row.outcome = b
 
         def currency = getCurrency(row.currencyCode)
         // графа 11
-        row.rateBR = roundTo2(calculateColumn11(row, reportDate))
+        row.rateBR = roundTo2(calc11(row, reportDate))
 
         // графа 12
         if (row.outcome == 0) {
@@ -230,7 +234,8 @@ def logicalCheck() {
         def reportDate = getReportDate()
 
         /** Дата нужная при подсчете графы 12. */
-        def someDate = getDate('01.11.2009')
+        SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+        def someDate = getDate('01.11.2009', format)
 
         /** Количество дней в году. */
         def daysInYear = getCountDaysInYear(new Date())
@@ -323,7 +328,7 @@ def logicalCheck() {
             }
 
             // графа 11
-            def col11 = roundTo2(calculateColumn11(row, reportDate))
+            def col11 = roundTo2(calc11(row, reportDate))
             if (col11!=null && col11!=row.rateBR) {
                 name = getColumnName(row, 'rateBR')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
@@ -422,7 +427,7 @@ def checkNSI() {
             }
 
             // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
-            def col11 = roundTo2(calculateColumn11(row, reportDate))
+            def col11 = roundTo2(calc11(row, reportDate))
             if (col11!=null && col11!=row.rateBR) {
                 logger.error(errorMsg + 'неверно указана ставка Банка России!')
                 return false
@@ -439,6 +444,7 @@ void consolidation() {
     def data = getData(formData)
     // удалить все строки и собрать из источников их строки
     data.clear()
+    def newRows = []
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
@@ -446,12 +452,18 @@ void consolidation() {
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 getRows(getData(source)).each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        data.insert(row,getRows(data).size()+1)
+                        newRows.add(row)
                     }
                 }
             }
         }
     }
+    if (!newRows.isEmpty()) {
+        data.insert(newRows, 1)
+        sort(data)
+    }
+    def total = getCalcTotalRow()
+    insert(data, total)
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
@@ -560,12 +572,15 @@ def inPeriod(def date, def from, to) {
 /**
  * Получить дату по строковому представлению (формата дд.ММ.гггг)
  */
-def getDate(def value) {
+def getDate(def value, def format) {
     if (isEmpty(value)) {
         return null
     }
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    return format.parse(value)
+    try {
+        return format.parse(value)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в дату. " + e.message)
+    }
 }
 
 /**
@@ -717,7 +732,7 @@ def calcAForColumn9or10(def row, def reportDate, def course) {
  * @param row
  * @param rateDate
  */
-def calculateColumn11(DataRow row, def rateDate){
+def calc11(DataRow row, def rateDate){
     def currency = getCurrency(row.currencyCode)
     def rate = getRate(rateDate)
     // Если «графа 10» = 0, то « графа 11» не заполняется; && Если «графа 3» не заполнена, то « графа 11» не заполняется
@@ -833,7 +848,6 @@ def getCourse(def currency, def date) {
     }
 }
 
-
 /**
  * Заполнить форму данными.
  *
@@ -841,6 +855,7 @@ def getCourse(def currency, def date) {
  */
 def addData(def xml) {
     def date = new Date()
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def cache = [:]
     def data = getData(formData)
     data.clear()
@@ -876,11 +891,11 @@ def addData(def xml) {
         index++
 
         // графа 7
-        newRow.part1REPODate = getDate(row.field[index].@value.text())
+        newRow.part1REPODate = getDate(row.field[index].@value.text(), format)
         index++
 
         // графа 8
-        newRow.part2REPODate = getDate(row.field[index].@value.text())
+        newRow.part2REPODate = getDate(row.field[index].@value.text(), format)
         index++
 
         // графа 9
@@ -944,16 +959,15 @@ def addData(def xml) {
  * @param value строка
  */
 def getNumber(def value) {
-    if (value == null) {
-        return null
-    }
     def tmp = value.trim()
     if ("".equals(tmp)) {
         return null
     }
-    // поменять запятую на точку и убрать пробелы
-    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
-    return new BigDecimal(tmp)
+    try {
+        return new BigDecimal(tmp)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в число. " + e.message)
+    }
 }
 
 /**
@@ -989,7 +1003,6 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    def data = getData(formData)
     def totalColumns = [5 : 'acquisitionPrice', 6 : 'salePrice', 9 : 'income', 10 : 'outcome', 12 : 'outcome269st', 13 : 'outcomeTax']
 
     def totalCalc = getCalcTotalRow()
@@ -1037,4 +1050,39 @@ def getCalcTotalRow() {
         totalRow.getCell(alias).setValue(getSum(alias))
     }
     return totalRow
+}
+
+/**
+ * Проверить существования строки по алиасу.
+ *
+ * @param list строки нф
+ * @param rowAlias алиас
+ * @return <b>true</b> - строка с указанным алиасом есть, иначе <b>false</b>
+ */
+def checkAlias(def list, def rowAlias) {
+    if (rowAlias == null || rowAlias == "" || list == null || list.isEmpty()) {
+        return false
+    }
+    for (def row : list) {
+        if (row.getAlias() == rowAlias) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Отсорировать данные (по графе 7, 1).
+ *
+ * @param data данные нф (хелпер)
+ */
+void sort(def data) {
+    getRows(data).sort { def a, def b ->
+        // графа 1  - tadeNumber
+        // графа 7  - part1REPODate
+        if (a.part1REPODate == b.part1REPODate) {
+            return a.tadeNumber <=> b.tadeNumber
+        }
+        return a.part1REPODate <=> b.part1REPODate
+    }
 }
