@@ -1,52 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="">
-        <cell alias="number" colSpan="1" rowSpan="2" value="№ пп"/>
-        <cell alias="securitiesType" colSpan="1" rowSpan="2" value="Вид ценных бумаг"/>
-        <cell alias="ofz" colSpan="4" rowSpan="1" value="Ставка налога на прибыль 15%"/>
-        <cell alias="municipalBonds" colSpan="1" rowSpan="1" value="Ставка налога на прибыль 15%"/>
-        <cell alias="governmentBonds" colSpan="1" rowSpan="1" value="Ставка налога на прибыль 15%"/>
-        <cell alias="mortgageBonds" colSpan="1" rowSpan="1" value="Ставка налога на прибыль 15%"/>
-        <cell alias="municipalBondsBefore" colSpan="2" rowSpan="1" value="Ставка налога на прибыль 9%"/>
-        <cell alias="rtgageBondsBefore" colSpan="1" rowSpan="1" value="Ставка налога на прибыль 9%"/>
-        <cell alias="ovgvz" colSpan="1" rowSpan="1" value="Ставка налога на прибыль 0%"/>
-        <cell alias="eurobondsRF" colSpan="3" rowSpan="1" value="Ставка налога на прибыль 20%"/>
-        <cell alias="itherEurobonds" colSpan="1" rowSpan="1" value="Ставка налога на прибыль 20%"/>
-        <cell alias="corporateBonds" colSpan="1" rowSpan="1" value="Ставка налога на прибыль 20%"/>
-        <cell alias="dateInfo" colSpan="1" rowSpan="1" value="Дата"/>
+        <cell alias="number" colSpan="1" rowSpan="3" value="№ пп"/>
+        <cell alias="contract" colSpan="1" rowSpan="3" value="Номер договора"/>
+        <cell alias="contractDate" colSpan="1" rowSpan="3" value="Дата договора"/>
+        <cell alias="amountOfTheGuarantee" colSpan="1" rowSpan="3" value="Сумма гарантии"/>
+        <cell alias="dateOfTransaction" colSpan="1" rowSpan="3" value="Дата совершения операции"/>
+        <cell alias="rateOfTheBankOfRussia" colSpan="1" rowSpan="3" value="Курс Банка России"/>
+        <cell alias="interestRate" colSpan="1" rowSpan="3" value="Процентная ставка"/>
+        <cell alias="baseForCalculation" colSpan="1" rowSpan="3" value="База для расчёта (дни)"/>
+        <cell alias="accrualAccountingStartDate" colSpan="4" rowSpan="1" value="Расчётный период"/>
+        <cell alias="accrualAccountingEndDate" colSpan="1" rowSpan="1"
+              value="Расчётный период. Начисление/факт. Дата окончания"/>
+        <cell alias="preAccrualsStartDate" colSpan="1" rowSpan="1" value="Расчётный период. Доначисление. Дата начала"/>
+        <cell alias="preAccrualsEndDate" colSpan="1" rowSpan="1"
+              value="Расчётный период. Доначисление. Дата окончания"/>
+        <cell alias="incomeCurrency" colSpan="2" rowSpan="1" value="Сумма в налоговом учёте"/>
+        <cell alias="incomeRuble" colSpan="1" rowSpan="1" value="Сумма в налоговом учёте. Рубли "/>
+        <cell alias="accountingCurrency" colSpan="2" rowSpan="1" value="Сумма в бухгалтерском учёте"/>
+        <cell alias="accountingRuble" colSpan="1" rowSpan="1" value="Сумма в бухгалтерском учёте. Рубли"/>
+        <cell alias="preChargeCurrency" colSpan="4" rowSpan="1" value="Сумма доначисления"/>
+        <cell alias="preChargeRuble" colSpan="1" rowSpan="1" value="Сумма доначисления. Предыдущий период. Рубли"/>
+        <cell alias="taxPeriodCurrency" colSpan="1" rowSpan="1" value="Сумма доначисления. Отчётный период. Валюта"/>
+        <cell alias="taxPeriodRuble" colSpan="1" rowSpan="1" value="Сумма доначисления. Отчётный период. Рубли"/>
     </row>
     <row alias="">
         <cell alias="number" colSpan="1" rowSpan="1" value="№ пп"/>
-        <cell alias="securitiesType" colSpan="1" rowSpan="1" value="Вид ценных бумаг"/>
-        <cell alias="ofz" colSpan="1" rowSpan="1" value="ОФЗ"/>
-        <cell alias="municipalBonds" colSpan="1" rowSpan="1"
-              value="Субфедеральные и муниципальные облигации, за исключением муниципальных облигаций, выпущенных до 1 января 2007 года на срок не менее 3 лет"/>
-        <cell alias="governmentBonds" colSpan="1" rowSpan="1" value="Государственные облигации Республики Беларусь"/>
-        <cell alias="mortgageBonds" colSpan="1" rowSpan="1"
-              value="Ипотечные облигации, выпущенные после 1 января 2007 года"/>
-        <cell alias="municipalBondsBefore" colSpan="1" rowSpan="1"
-              value="Муниципальные облигации, выпущенные до 1 января 2007 года на срок не менее 3 лет"/>
-        <cell alias="rtgageBondsBefore" colSpan="1" rowSpan="1"
-              value="Ипотечные облигации, выпущенные до 1 января 2007 года"/>
-        <cell alias="ovgvz" colSpan="1" rowSpan="1" value="ОВГВЗ"/>
-        <cell alias="eurobondsRF" colSpan="1" rowSpan="1" value="Еврооблигации РФ"/>
-        <cell alias="itherEurobonds" colSpan="1" rowSpan="1" value="Прочие еврооблигации"/>
-        <cell alias="corporateBonds" colSpan="1" rowSpan="1" value="Корпоративные облигации"/>
-        <cell alias="dateInfo" colSpan="1" rowSpan="1" value="Дата"/>
+        <cell alias="contract" colSpan="1" rowSpan="1" value="Номер договора"/>
+        <cell alias="contractDate" colSpan="1" rowSpan="1" value="Дата договора"/>
+        <cell alias="amountOfTheGuarantee" colSpan="1" rowSpan="1" value="Сумма гарантии"/>
+        <cell alias="dateOfTransaction" colSpan="1" rowSpan="1" value="Дата совершения операции"/>
+        <cell alias="rateOfTheBankOfRussia" colSpan="1" rowSpan="1" value="Курс Банка России"/>
+        <cell alias="interestRate" colSpan="1" rowSpan="1" value="Процентная ставка"/>
+        <cell alias="baseForCalculation" colSpan="1" rowSpan="1" value="База для расчёта (дни)"/>
+        <cell alias="accrualAccountingStartDate" colSpan="2" rowSpan="1" value="начисление/факт"/>
+        <cell alias="accrualAccountingEndDate" colSpan="1" rowSpan="1"
+              value="Расчётный период. Начисление/факт. Дата окончания"/>
+        <cell alias="preAccrualsStartDate" colSpan="2" rowSpan="1" value="доначисление"/>
+        <cell alias="preAccrualsEndDate" colSpan="1" rowSpan="1"
+              value="Расчётный период. Доначисление. Дата окончания"/>
+        <cell alias="incomeCurrency" colSpan="1" rowSpan="2" value="валюта"/>
+        <cell alias="incomeRuble" colSpan="1" rowSpan="2" value="рубли "/>
+        <cell alias="accountingCurrency" colSpan="1" rowSpan="2" value="валюта"/>
+        <cell alias="accountingRuble" colSpan="1" rowSpan="2" value="рубли"/>
+        <cell alias="preChargeCurrency" colSpan="2" rowSpan="1" value="предыдущий период"/>
+        <cell alias="preChargeRuble" colSpan="1" rowSpan="1" value="Сумма доначисления. Предыдущий период. Рубли"/>
+        <cell alias="taxPeriodCurrency" colSpan="2" rowSpan="1" value="отчётный период"/>
+        <cell alias="taxPeriodRuble" colSpan="1" rowSpan="1" value="Сумма доначисления. Отчётный период. Рубли"/>
+    </row>
+    <row alias="">
+        <cell alias="number" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="contract" colSpan="1" rowSpan="1" value="Номер договора"/>
+        <cell alias="contractDate" colSpan="1" rowSpan="1" value="Дата договора"/>
+        <cell alias="amountOfTheGuarantee" colSpan="1" rowSpan="1" value="Сумма гарантии"/>
+        <cell alias="dateOfTransaction" colSpan="1" rowSpan="1" value="Дата совершения операции"/>
+        <cell alias="rateOfTheBankOfRussia" colSpan="1" rowSpan="1" value="Курс Банка России"/>
+        <cell alias="interestRate" colSpan="1" rowSpan="1" value="Процентная ставка"/>
+        <cell alias="baseForCalculation" colSpan="1" rowSpan="1" value="База для расчёта (дни)"/>
+        <cell alias="accrualAccountingStartDate" colSpan="1" rowSpan="1" value="дата начала"/>
+        <cell alias="accrualAccountingEndDate" colSpan="1" rowSpan="1" value="дата окончания"/>
+        <cell alias="preAccrualsStartDate" colSpan="1" rowSpan="1" value="дата начала"/>
+        <cell alias="preAccrualsEndDate" colSpan="1" rowSpan="1" value="дата окончания"/>
+        <cell alias="incomeCurrency" colSpan="1" rowSpan="1" value="Сумма в налоговом учёте. Валюта"/>
+        <cell alias="incomeRuble" colSpan="1" rowSpan="1" value="Сумма в налоговом учёте. Рубли "/>
+        <cell alias="accountingCurrency" colSpan="1" rowSpan="1" value="Сумма в бухгалтерском учёте. Валюта"/>
+        <cell alias="accountingRuble" colSpan="1" rowSpan="1" value="Сумма в бухгалтерском учёте. Рубли"/>
+        <cell alias="preChargeCurrency" colSpan="1" rowSpan="1" value="валюта"/>
+        <cell alias="preChargeRuble" colSpan="1" rowSpan="1" value="рубли"/>
+        <cell alias="taxPeriodCurrency" colSpan="1" rowSpan="1" value="валюта"/>
+        <cell alias="taxPeriodRuble" colSpan="1" rowSpan="1" value="рубли"/>
     </row>
     <row alias="">
         <cell alias="number" colSpan="1" rowSpan="1" value="1"/>
-        <cell alias="securitiesType" colSpan="1" rowSpan="1" value="2"/>
-        <cell alias="ofz" colSpan="1" rowSpan="1" value="3"/>
-        <cell alias="municipalBonds" colSpan="1" rowSpan="1" value="4"/>
-        <cell alias="governmentBonds" colSpan="1" rowSpan="1" value="5"/>
-        <cell alias="mortgageBonds" colSpan="1" rowSpan="1" value="6"/>
-        <cell alias="municipalBondsBefore" colSpan="1" rowSpan="1" value="7"/>
-        <cell alias="rtgageBondsBefore" colSpan="1" rowSpan="1" value="8"/>
-        <cell alias="ovgvz" colSpan="1" rowSpan="1" value="9"/>
-        <cell alias="eurobondsRF" colSpan="1" rowSpan="1" value="10"/>
-        <cell alias="itherEurobonds" colSpan="1" rowSpan="1" value="11"/>
-        <cell alias="corporateBonds" colSpan="1" rowSpan="1" value="12"/>
-        <cell alias="dateInfo" colSpan="1" rowSpan="1" value="Дата"/>
+        <cell alias="contract" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="contractDate" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="amountOfTheGuarantee" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="dateOfTransaction" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="rateOfTheBankOfRussia" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="interestRate" colSpan="1" rowSpan="1" value="7"/>
+        <cell alias="baseForCalculation" colSpan="1" rowSpan="1" value="8"/>
+        <cell alias="accrualAccountingStartDate" colSpan="1" rowSpan="1" value="9"/>
+        <cell alias="accrualAccountingEndDate" colSpan="1" rowSpan="1" value="10"/>
+        <cell alias="preAccrualsStartDate" colSpan="1" rowSpan="1" value="11"/>
+        <cell alias="preAccrualsEndDate" colSpan="1" rowSpan="1" value="12"/>
+        <cell alias="incomeCurrency" colSpan="1" rowSpan="1" value="13"/>
+        <cell alias="incomeRuble" colSpan="1" rowSpan="1" value="14"/>
+        <cell alias="accountingCurrency" colSpan="1" rowSpan="1" value="15"/>
+        <cell alias="accountingRuble" colSpan="1" rowSpan="1" value="16"/>
+        <cell alias="preChargeCurrency" colSpan="1" rowSpan="1" value="17"/>
+        <cell alias="preChargeRuble" colSpan="1" rowSpan="1" value="18"/>
+        <cell alias="taxPeriodCurrency" colSpan="1" rowSpan="1" value="19"/>
+        <cell alias="taxPeriodRuble" colSpan="1" rowSpan="1" value="20"/>
     </row>
 </rows>

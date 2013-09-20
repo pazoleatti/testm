@@ -234,6 +234,9 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
     }
 
 	protected void createTableHeaders(){
+        //Поскольку имеется шаблон с выставленными алиасами, то чтобы не записать данные в ячейку с алиасом
+        //делаем проверку на то, что сумма начала записи таблицы и кол-ва строк не превышает номер строки с алиасом
+        //и если превышает,то сдвигаем
         AreaReference ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_POSITION).getRefersToFormula());
         Row r = sheet.getRow(ar.getFirstCell().getRow());
         if (rowNumber + formTemplate.getHeaders().size() >= r.getRowNum()){
@@ -255,6 +258,9 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                     continue;
                 }
                 HeaderCell headerCell = headerCellDataRow.getCell(formTemplate.getColumns().get(i).getAlias());
+                System.out.println("alias: " + formTemplate.getColumns().get(i).getAlias() +
+                        " headerCell.getValue(): " + headerCell.getValue() + " cellNumber: " + cellNumber +
+                        " headerCell.getColSpan(): " + headerCell.getColSpan() + " headerCell.getRowSpan(): " + headerCell.getRowSpan());
                 Cell workBookcell = mergedDataCells(headerCellDataRow.getCell(formTemplate.getColumns().get(i).getAlias()), row, true);
                 workBookcell.setCellStyle(cellStyleBuilder.cellStyle);
                 workBookcell.setCellValue(String.valueOf(headerCell.getValue()));
@@ -408,6 +414,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 	private Cell mergedDataCells(AbstractCell cell,Row currRow, boolean isHeader){
         int currColumn = currRow.getLastCellNum()!=-1?currRow.getLastCellNum():0;
 		Cell currCell = currRow.createCell(currColumn);
+
 		if(cell != null && (cell.getColSpan() > 1 || cell.getRowSpan() > 1)){
             if(currColumn + cell.getColSpan() > formTemplate.getColumns().size()){
                 tableBorders(currColumn, formTemplate.getColumns().size(), currRow.getRowNum(), currRow.getRowNum() + cell.getRowSpan() - 1, isHeader);
@@ -427,7 +434,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
     private void tableBorders(int startCell,int endCell, int startRow, int endRow, boolean isHeader){
         for (int i = 0; i < sheet.getNumMergedRegions(); i++){
             CellRangeAddress cellRangeAddressTemp = sheet.getMergedRegion(i);
-            if (cellRangeAddressTemp.isInRange(startRow, startCell) || cellRangeAddressTemp.isInRange(endCell, endRow))
+            if (cellRangeAddressTemp.isInRange(startRow, startCell) && cellRangeAddressTemp.isInRange(endCell, endRow))
                 return;
         }
         CellRangeAddress region = new CellRangeAddress(

@@ -47,24 +47,40 @@ public class FormDataXlsxReportBuilderTestMock {
 		Column colStr9 = new StringColumn();
 		Column colStr10 = new NumericColumn();
 		Column colStr11 = new NumericColumn();
-        Column colDate12 = new DateColumn();
-		
+        Column colDate12 = new StringColumn();
+        Column colDate13 = new StringColumn();
+        Column colDate14 = new StringColumn();
+        Column colDate15 = new StringColumn();
+        Column colDate16 = new StringColumn();
+        Column colDate17 = new StringColumn();
+        Column colDate18 = new StringColumn();
+        Column colDate19 = new StringColumn();
+
+
 		//setting alias
 		colNum.setAlias("number");
-		colNum1.setAlias("securitiesType");
-		colNum2.setAlias("ofz");
-		colNum3.setAlias("municipalBonds");
-		colNum4.setAlias("governmentBonds");
-		colNum5.setAlias("mortgageBonds");
-		colNum6.setAlias("municipalBondsBefore");
-		colNum7.setAlias("rtgageBondsBefore");
-		colNum8.setAlias("ovgvz");
-		
-		colStr9.setAlias("eurobondsRF");
-		colStr10.setAlias("itherEurobonds");
-		colStr11.setAlias("corporateBonds");
-        colDate12.setAlias("dateInfo");
-		
+		colNum1.setAlias("contract");
+		colNum2.setAlias("contractDate");
+		colNum3.setAlias("amountOfTheGuarantee");
+		colNum4.setAlias("dateOfTransaction");
+		colNum5.setAlias("rateOfTheBankOfRussia");
+		colNum6.setAlias("interestRate");
+		colNum7.setAlias("baseForCalculation");
+		colNum8.setAlias("accrualAccountingStartDate");
+
+		colStr9.setAlias("accrualAccountingEndDate");
+		colStr10.setAlias("preAccrualsStartDate");
+		colStr11.setAlias("preAccrualsEndDate");
+        colDate12.setAlias("incomeCurrency");
+        colDate13.setAlias("incomeRuble");
+        colDate14.setAlias("accountingCurrency");
+        colDate15.setAlias("accountingRuble");
+        colDate16.setAlias("preChargeCurrency");
+        colDate17.setAlias("preChargeRuble");
+        colDate18.setAlias("taxPeriodCurrency");
+        colDate19.setAlias("taxPeriodRuble");
+
+
 		//setting check
 		colNum.setChecking(false);
 		colNum1.setChecking(false);
@@ -75,7 +91,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		colNum6.setChecking(false);
 		colNum7.setChecking(false);
 		colNum8.setChecking(false);
-		
+
 		colStr9.setChecking(true);
 		colStr10.setChecking(true);
 		colStr11.setChecking(true);
@@ -83,19 +99,26 @@ public class FormDataXlsxReportBuilderTestMock {
 
         //set width
         colNum.setWidth(10);
-        colNum1.setWidth(0);
+        colNum1.setWidth(10);
         colNum2.setWidth(10);
         colNum3.setWidth(10);
         colNum4.setWidth(10);
         colNum5.setWidth(10);
         colNum6.setWidth(10);
-        colNum7.setWidth(0);
+        colNum7.setWidth(10);
         colNum8.setWidth(10);
         colStr9.setWidth(10);
         colStr10.setWidth(10);
         colStr11.setWidth(10);
         colDate12.setWidth(10);
-		
+        colDate13.setWidth(10);
+        colDate14.setWidth(10);
+        colDate15.setWidth(10);
+        colDate16.setWidth(10);
+        colDate17.setWidth(10);
+        colDate18.setWidth(10);
+        colDate19.setWidth(10);
+
 		columns.add(colNum);
 		columns.add(colNum1);
 		columns.add(colNum2);
@@ -109,13 +132,13 @@ public class FormDataXlsxReportBuilderTestMock {
 		columns.add(colStr10);
 		columns.add(colStr11);
         columns.add(colDate12);
-
-        List<FormStyle> formStyles = new ArrayList<FormStyle>();
-		FormStyle formStyle1 = new FormStyle();
-        formStyle1.setAlias("Редактируемая");
-        formStyle1.setBackColor(Color.LIGHT_BLUE);
-        formStyle1.setFontColor(Color.LIGHT_BROWN);
-        formStyles.add(formStyle1);
+        columns.add(colDate13);
+        columns.add(colDate14);
+        columns.add(colDate15);
+        columns.add(colDate16);
+        columns.add(colDate17);
+        columns.add(colDate18);
+        columns.add(colDate19);
 
 		FormData formData;
 		FormTemplate formTemplate;
@@ -134,7 +157,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		reportPeriod = new ReportPeriod();
 		reportPeriod.setName("1 квартал");
         reportPeriod.setTaxPeriod(taxPeriod);
-        formTemplate.getStyles().addAll(formStyles);
+        /*formTemplate.getStyles().addAll(formStyles);*/
 		formTemplate.setNumberedColumns(true);
 		formTemplate.setCode("Таблица 1\\2\\3 | Приложение 1 | Приложение 2");
         formTemplate.getColumns().addAll(columns);
@@ -152,14 +175,14 @@ public class FormDataXlsxReportBuilderTestMock {
                 xmlSerializationUtils.deserialize(builder.toString(), formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class);
         formTemplate.getHeaders().addAll(headerCells);
 
-        builder = new StringBuilder();
+        /*builder = new StringBuilder();
         reader = new BufferedReader(
                 new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream(DATAROWS_TEMPLATE)));
         while ((s = reader.readLine())!=null)
             builder.append(s);
         dataRows.addAll(
                 xmlSerializationUtils.deserialize(builder.toString(), formTemplate.getColumns(), formTemplate.getStyles(), Cell.class)
-        );
+        );*/
 		
 		department = new Department();
         department.setId(1);
