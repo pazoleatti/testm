@@ -178,6 +178,12 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
         return cal;
     }
 
+    public Calendar getReportDate(int reportPeriodId) {
+        Calendar cal = getEndDate(reportPeriodId);
+        cal.set(Calendar.DATE, cal.get(Calendar.DATE) + 1);
+        return cal;
+    }
+
     @Override
     public boolean isActivePeriod(int reportPeriodId, long departmentId) {
         return reportPeriodService.isActivePeriod(reportPeriodId, departmentId);  //To change body of implemented methods use File | Settings | File Templates.

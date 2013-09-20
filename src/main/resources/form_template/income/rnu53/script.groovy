@@ -141,7 +141,9 @@ void calc() {
     }
 
     /** Отчетная дата. */
-    def reportDate = getReportDate()
+    Calendar reportDate = reportPeriodService.getReportDate(formData.reportPeriodId)
+    /** Последний день отчетного периода */
+    Calendar lastDayReportPeriod = reportPeriodService.getEndDate(formData.reportPeriodId)
 
     /** Дата нужная при подсчете графы 12. */
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
@@ -150,7 +152,7 @@ void calc() {
     /** Количество дней в году. */
     def daysInYear = getCountDaysInYear(new Date())
 
-    /** Курс ЦБ РФ на отчётную дату. */
+    /** Курс ЦБ РФ на Последний день отчетного периода. */
     def course = 1
 
     def tmp = 0
@@ -176,23 +178,23 @@ void calc() {
 
         def currency = getCurrency(row.currencyCode)
         // графа 11
-        row.rateBR = roundTo2(calc11(row, reportDate))
+        row.rateBR = roundTo2(calculateColumn11(row, reportPeriodService.getEndDate(formData.reportPeriodId)))
 
         // графа 12
         if (row.outcome == 0) {
             tmp = 0
         } else if (row.outcome > 0 && currency == '810') {
-            if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
+            if (inPeriod(lastDayReportPeriod, '01.09.2008', '31.12.2009')) {
                 tmp = calc12Value(row, 1.5, reportDate, daysInYear)
-            } else if (inPeriod(reportDate, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
+            } else if (inPeriod(lastDayReportPeriod, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
                 tmp = calc12Value(row, 2, reportDate, daysInYear)
-            } else if (inPeriod(reportDate, '01.01.2010', '31.12.2012')) {
+            } else if (inPeriod(lastDayReportPeriod, '01.01.2010', '31.12.2012')) {
                 tmp = calc12Value(row, 1.8, reportDate, daysInYear)
             } else {
                 tmp = calc12Value(row, 1.1, reportDate, daysInYear)
             }
         } else if (row.outcome > 0 && currency != '810') {
-            if (inPeriod(reportDate, '01.01.20011', '31.12.2012')) {
+            if (inPeriod(lastDayReportPeriod, '01.01.20011', '31.12.2012')) {
                 tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
             } else {
                 tmp = calc12Value(row, 1, reportDate, daysInYear) * course
@@ -231,7 +233,9 @@ def logicalCheck() {
         def requiredColumns = ['outcome269st', 'outcomeTax']
 
         /** Отчетная дата. */
-        def reportDate = getReportDate()
+        Calendar reportDate = reportPeriodService.getReportDate(formData.reportPeriodId)
+        /** Последний день отчетного периода */
+        Calendar lastDayReportPeriod = reportPeriodService.getEndDate(formData.reportPeriodId)
 
         /** Дата нужная при подсчете графы 12. */
         SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
@@ -268,7 +272,7 @@ def logicalCheck() {
             }
 
             if (row.currencyCode!=null) {
-                course = getCourse(row.currencyCode,reportDate)
+                course = getCourse(row.currencyCode,lastDayReportPeriod)
             }
 
             // 2. Проверка даты первой части РЕПО (графа 7)
@@ -311,10 +315,10 @@ def logicalCheck() {
             a = calcAForColumn9or10(row, reportDate, course)
             b = 0
             c = 0
-            if (a!=null && a < 0) {
-                c = roundTo2(-a)
-            } else if (a!=null && a > 0) {
-                b = roundTo2(a)
+            if (a!=null && a > 0) {
+                c = roundTo2(a)
+            } else if (a!=null && a < 0) {
+                b = roundTo2(-a)
             }
             // графа 9
             if (row.income != b) {
@@ -328,7 +332,7 @@ def logicalCheck() {
             }
 
             // графа 11
-            def col11 = roundTo2(calc11(row, reportDate))
+            def col11 = roundTo2(calculateColumn11(row, lastDayReportPeriod))
             if (col11!=null && col11!=row.rateBR) {
                 name = getColumnName(row, 'rateBR')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
@@ -339,17 +343,17 @@ def logicalCheck() {
             if (row.outcome == 0) {
                 tmp = 0
             } else if (row.outcome > 0 && currency == '810') {
-                if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
+                if (inPeriod(lastDayReportPeriod, '01.09.2008', '31.12.2009')) {
                     tmp = calc12Value(row, 1.5, reportDate, daysInYear)
-                } else if (inPeriod(reportDate, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
+                } else if (inPeriod(lastDayReportPeriod, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
                     tmp = calc12Value(row, 2, reportDate, daysInYear)
-                } else if (inPeriod(reportDate, '01.01.2010', '31.12.2012')) {
+                } else if (inPeriod(lastDayReportPeriod, '01.01.2010', '31.12.2012')) {
                     tmp = calc12Value(row, 1.8, reportDate, daysInYear)
                 } else {
                     tmp = calc12Value(row, 1.1, reportDate, daysInYear)
                 }
             } else if (row.outcome > 0 && currency != '810') {
-                if (inPeriod(reportDate, '01.01.20011', '31.12.2012')) {
+                if (inPeriod(lastDayReportPeriod, '01.01.20011', '31.12.2012')) {
                     tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
                 } else {
                     tmp = calc12Value(row, 1, reportDate, daysInYear) * course
@@ -404,8 +408,8 @@ def logicalCheck() {
 def checkNSI() {
     def data = getData(formData)
     if (!getRows(data).isEmpty()) {
-        /** Отчетная дата. */
-        def reportDate = getReportDate()
+        /** Последний день отчетного периода */
+        Calendar lastDayReportPeriod = reportPeriodService.getEndDate(formData.reportPeriodId)
 
         for (def row : getRows(data)) {
             if (isTotal(row)) {
@@ -427,7 +431,7 @@ def checkNSI() {
             }
 
             // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
-            def col11 = roundTo2(calc11(row, reportDate))
+            def col11 = roundTo2(calculateColumn11(row, lastDayReportPeriod))
             if (col11!=null && col11!=row.rateBR) {
                 logger.error(errorMsg + 'неверно указана ставка Банка России!')
                 return false
