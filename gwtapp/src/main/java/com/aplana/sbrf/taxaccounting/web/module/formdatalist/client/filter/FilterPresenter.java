@@ -96,7 +96,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 
 	public void updateSavedFilterData(FormDataFilter formDataFilter){
 		savedFilterData.put(this.taxType, formDataFilter);
-		List<Integer> selectedDepartments = new ArrayList<Integer>(getView().getSelectedDepartments());
+		List<Integer> selectedDepartments = getView().getSelectedDepartments();
 		savedDepartmentsMap.put(this.taxType, selectedDepartments);
 	}
 

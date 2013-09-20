@@ -1,3 +1,5 @@
+package form_template.income.income_complex
+
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -70,6 +72,9 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         DataRowHelper form = formDataService.getDataRowHelper(formData)
         consolidationBank(form)
+        if (isTerBank()) {
+            calcTotal()
+        }
         break
 // утвердить
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :

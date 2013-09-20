@@ -469,12 +469,7 @@ def getValuesByGroupColumn(DataRow row) {
 }
 
 def getRefBookValue(int id, def cell, def alias) {
-    def map
-    try {
-        map = refBookService.getRecordData(id, cell)
-    } catch (Exception e) {
-        map = null
-    }
+    def map = cell != null ? refBookService.getRecordData(id, cell) : null
     return map == null ? 'null' : map.get(alias).stringValue
 }
 
@@ -494,17 +489,19 @@ void calc() {
         row.rowNum = index++
         // Графы 27 и 28 из 25 и 26
         incomeSum = row.incomeSum
-        consumptionSum = row.incomeSum
+        consumptionSum = row.consumptionSum
 
-        if (incomeSum != null) {
+        if (incomeSum != null && consumptionSum == null) {
             row.priceOne = incomeSum
-            row.totalNds = incomeSum
+        } else if (incomeSum == null && consumptionSum != null) {
+            row.priceOne = consumptionSum
+        } else if (incomeSum != null && consumptionSum != null) {
+            row.priceOne = Math.abs(incomeSum - consumptionSum)
+        } else {
+            row.priceOne = null
         }
 
-        if (consumptionSum != null) {
-            row.priceOne = consumptionSum
-            row.totalNds = consumptionSum
-        }
+        row.totalNds = row.priceOne
 
         // Код ОКП
         row.okpCode = row.innerCode
