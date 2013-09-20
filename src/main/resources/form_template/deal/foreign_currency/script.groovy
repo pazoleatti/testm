@@ -106,6 +106,7 @@ void addRow() {
     def size = dataRows.size()
     def index = 0
     row.keySet().each{
+        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     getEditColumns().each {
@@ -358,7 +359,7 @@ void calc() {
         // Расчет полей зависимых от справочников
         if (row.fullName != null) {
             def map = refBookService.getRecordData(9, row.fullName)
-            row.inn = map.INN_KIO.numberValue
+            row.inn = map.INN_KIO.stringValue
             row.countryCode = map.COUNTRY.referenceValue
             row.countryName = map.COUNTRY.referenceValue
         } else {
