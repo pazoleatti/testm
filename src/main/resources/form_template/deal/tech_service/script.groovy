@@ -251,7 +251,7 @@ void calc() {
         count = row.count
         bankSum = row.bankSum
         // Расчет поля "Цена"
-        row.price = count == null ? bankSum : bankSum / count
+        row.price = count == null || count == 0 ? bankSum : bankSum / count
         // Расчет поля "Стоимость"
         row.cost = bankSum
 
