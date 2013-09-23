@@ -52,6 +52,14 @@ public interface ReportPeriodService {
     Calendar getEndDate(int reportPeriodId);
 
     /**
+     * Возвращает "отчетную дату" если требуется в чтз
+     * Отчетная дата = дата конца периода + 1 день
+     * @param reportPeriodId
+     * @return
+     */
+    Calendar getReportDate(int reportPeriodId);
+
+    /**
      * Проверяем, открыт ли период для департамента или нет
      *
      * @param reportPeriodId

@@ -240,7 +240,7 @@ void generateXML() {
                             if (row.organName != null) {
                                 def map = refBookService.getRecordData(9, row.organName)
                                 organName = map.NAME.stringValue
-                                organINN = '' + map.INN_KIO.numberValue
+                                organINN = '' + map.INN_KIO.stringValue
                                 organKPP = '' + map.KPP.numberValue
                                 organRegNum = map.REG_NUM.stringValue
                                 taxpayerCode = map.TAXPAYER_CODE.stringValue

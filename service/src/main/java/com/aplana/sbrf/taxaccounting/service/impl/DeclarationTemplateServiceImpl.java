@@ -59,20 +59,19 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
 	@Override
 	public void setJrxml(int declarationTemplateId, String jrxml) {
-		ByteArrayOutputStream  xlsReport = new ByteArrayOutputStream();
-		JasperDesign jasperDesign = null;
+		ByteArrayOutputStream  compiledReport = new ByteArrayOutputStream();
 		try {
-			jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(jrxml.getBytes("UTF-8")));
-			JasperCompileManager.compileReportToStream(jasperDesign, xlsReport);
+			JasperDesign jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(jrxml.getBytes("UTF-8")));
+			JasperCompileManager.compileReportToStream(jasperDesign, compiledReport);
 		} catch (JRException e) {
 			logger.error(e.getMessage(), e);
-			throw new ServiceException("Некорректный файл шаблона");
+			throw new ServiceException("Произошли ошибки во время формирования отчета");
 		} catch (UnsupportedEncodingException e2) {
 			logger.error(e2.getMessage(), e2);
-			throw new ServiceException("Некорректный файл шаблона");
+			throw new ServiceException("Шаблон отчета имеет неправильную кодировку");
 		}
 
-		declarationTemplateDao.setJrxmlAndJasper(declarationTemplateId, jrxml, xlsReport.toByteArray());
+		declarationTemplateDao.setJrxmlAndJasper(declarationTemplateId, jrxml, compiledReport.toByteArray());
 	}
 
 	@Override

@@ -53,18 +53,13 @@ public class BookerStatementsServiceImplTest {
         ReflectionTestUtils.setField(service, "rbFactory", refBookFactory);
     }
 
-    /**
-     * FIXME Пустой фаил в текущей реализации должен импортироваться успешно, возможно в будущем http://jira.aplana.com/browse/SBRFACCTAX-4483 поведение измениться
-     */
-    @Test
+    @Test(expected = ServiceException.class)
     public void importEmptyXml() {
         service.importXML("test.xls", getEmptyStream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_ID);
         service.importXML("test.xls", getEmptyStream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_102, DEPARTMENT_ID);
     }
 
-    /**
-     * FIXME метод должен выкидывать Исключения (но почему то не выкидывает) http://jira.aplana.com/browse/SBRFACCTAX-4485
-     */
+    @Test(expected = ServiceException.class)
     public void importInvalidXml() {
         service.importXML("test.xls", getInvalidStream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_ID);
         service.importXML("test.xls", getInvalidStream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_102, DEPARTMENT_ID);

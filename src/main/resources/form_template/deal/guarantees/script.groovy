@@ -104,6 +104,7 @@ void addRow() {
     def size = dataRows.size()
     def index = 0
     row.keySet().each{
+        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     getEditColumns().each {
@@ -331,7 +332,7 @@ void calc() {
         // Расчет полей зависимых от справочников
         if (row.fullName != null) {
             def map = refBookService.getRecordData(9, row.fullName)
-            row.inn = map.INN_KIO.numberValue
+            row.inn = map.INN_KIO.stringValue
             row.countryName = map.COUNTRY.referenceValue
         } else {
             row.inn = null
@@ -346,8 +347,7 @@ void calc() {
  */
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    dataRows.clear()
+    dataRowHelper.clear()
 
     int index = 1;
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
@@ -609,7 +609,6 @@ def addData(def xml) {
         indexCell++
 
         // графа 3
-        //newRow.inn = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 
         // графа 4

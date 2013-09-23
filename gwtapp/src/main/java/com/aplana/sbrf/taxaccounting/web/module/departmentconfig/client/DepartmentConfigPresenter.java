@@ -52,10 +52,16 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         void setDepartment(Department department);
 
         /**
-         * Установка доступных налоговых периодов
+         * Установка доступных отчетных периодов
          * @param reportPeriods
          */
         void setReportPeriods(List<ReportPeriod> reportPeriods);
+
+        /**
+         * Установка выбранного отчетного периода
+         * @param reportPeriodId
+         */
+        void setReportPeriod(Integer reportPeriodId);
 
         /**
          * Установка параметров подразделения
@@ -183,6 +189,11 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                 }
                                 // Список отчетных периодов
                                 getView().setReportPeriods(result.getReportPeriods());
+
+                                // По-умолчанию последний
+                                if (result.getReportPeriods() != null && !result.getReportPeriods().isEmpty()) {
+                                    getView().setReportPeriod(result.getReportPeriods().get(result.getReportPeriods().size()-1).getId());
+                                }
                             }
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
     }
@@ -211,6 +222,4 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                             }
                         }, this).addCallback(new ManualRevealCallback<GetUserDepartmentAction>(this)));
     }
-
-    // TODO Unlock. Реализовать механизм блокировок.
 }
