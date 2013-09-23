@@ -270,15 +270,19 @@ void logicCheck() {
             def testItogRow = testItogRows[i]
             def realItogRow = itogRows[i]
             int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
-            def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
-            if (testItogRow.price != realItogRow.price) {
-                logger.error(mes + " «${priceName}»")
-            }
-            if (testItogRow.total != realItogRow.total) {
-                logger.error(mes + " «${totalName}»")
-            }
-            if (testItogRow.sum != realItogRow.sum) {
-                logger.error(mes + " «${sumName}»")
+            if (dataRows[itg].getAlias() != null) {
+                logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
+            } else {
+                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
+                if (testItogRow.price != realItogRow.price) {
+                    logger.error(mes + " «${priceName}»")
+                }
+                if (testItogRow.total != realItogRow.total) {
+                    logger.error(mes + " «${totalName}»")
+                }
+                if (testItogRow.sum != realItogRow.sum) {
+                    logger.error(mes + " «${sumName}»")
+                }
             }
         }
     }
