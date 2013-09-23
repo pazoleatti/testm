@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.service.print.formdata;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsxReportBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +22,7 @@ public class FormDataXlsxReportBuilderTestMock {
 	private List<Column> columns = new ArrayList<Column>();
 	private FormDataReport data = new FormDataReport();
     private List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+    private RefBookValue refBookValue = new RefBookValue(RefBookAttributeType.STRING, "34");
 
     private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
     private final String HEADERROWSS_TEMPLATE = ClassUtils
@@ -225,7 +228,7 @@ public class FormDataXlsxReportBuilderTestMock {
 
 	@Test
 	public void testReport() throws IOException{
-		FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,true, dataRows);
+		FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,true, dataRows, refBookValue);
         builder.createReport();
 	}
 }
