@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
@@ -80,14 +81,15 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	}
 
 	@Override
-	public void setTableColumns(final List<RefBookAttribute> headers) {
-		for (final RefBookAttribute header : headers) {
+	public void setTableColumns(final List<RefBookColumn> columns) {
+		for (final RefBookColumn header : columns) {
 			TextColumn<RefBookDataRow> column = new TextColumn<RefBookDataRow>() {
 				@Override
 				public String getValue(RefBookDataRow object) {
 					return object.getValues().get(header.getAlias());
 				}
 			};
+			column.setHorizontalAlignment(convertAlignment(header.getAlignment()));
 			refbookDataTable.addColumn(column, header.getName());
 			refbookDataTable.setColumnWidth(column, header.getWidth(), Style.Unit.EM);
 		}
@@ -177,6 +179,19 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 			if (getUiHandlers() != null) {
 				getUiHandlers().onDeleteRowClicked();
 			}
+		}
+	}
+
+	private HasHorizontalAlignment.HorizontalAlignmentConstant convertAlignment(HorizontalAlignment alignment) {
+		switch (alignment) {
+			case ALIGN_LEFT:
+				return HasHorizontalAlignment.ALIGN_LEFT;
+			case ALIGN_CENTER:
+				return HasHorizontalAlignment.ALIGN_CENTER;
+			case ALIGN_RIGHT:
+				return HasHorizontalAlignment.ALIGN_RIGHT;
+			default:
+				return HasHorizontalAlignment.ALIGN_LEFT;
 		}
 	}
 }

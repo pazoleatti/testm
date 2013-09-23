@@ -24,153 +24,119 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
         this.refBook = refBook;
     }
 
-    /**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) {
         if (ctx.link_type() != null){
-            appendToQuery(ctx.link_type().getText());
+            query.append(" ").append(ctx.link_type().getText()).append(" ");
         }
     }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
+
 	@Override public void exitNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) { }
 
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void enterOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx) {
-        appendToQuery(ctx.getText());
+    @Override
+    public void enterStrtype(@NotNull FilterTreeParser.StrtypeContext ctx) {
+        if (ctx.ALIAS() != null){
+            query.append(buildAliasStr(ctx.getText()));
+        } else {
+            appendToQuery(ctx.getText());
+        }
     }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
+
+    @Override
+    public void exitStrtype(@NotNull FilterTreeParser.StrtypeContext ctx) { }
+
+    @Override
+    public void enterFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
+        query.append(ctx.functype().getText()).append("(");
+    }
+
+    @Override
+    public void exitFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
+        query.append(")");
+    }
+
+	@Override public void enterOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx) {
+        query.append(" ").append(ctx.getText()).append(" ");
+    }
+
 	@Override public void exitOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx) { }
 
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterQuery(@NotNull FilterTreeParser.QueryContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
+
 	@Override public void exitQuery(@NotNull FilterTreeParser.QueryContext ctx) { }
 
     @Override
-    public void enterStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void enterStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {}
 
     @Override
-    public void exitStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void exitStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) { }
 
-    /**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx) {
         if (ctx.link_type() != null){
             appendToQuery(ctx.link_type().getText());
         }
         query.append("(");
     }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
+
 	@Override public void exitWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx) {
         query.append(")");
     }
 
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void enterOperand(@NotNull FilterTreeParser.OperandContext ctx) {
-        if (ctx.ALIAS() != null){
-            appendToQuery("a");
-            query.append(ctx.getText());
-            query.append(".");
-            query.append(refBook.getAttribute(ctx.getText()).getAttributeType().toString());
-            query.append("_value");
-        } else {
-            appendToQuery(ctx.getText());
-        }
-    }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitOperand(@NotNull FilterTreeParser.OperandContext ctx) { }
+    @Override
+    public void enterOperand(@NotNull FilterTreeParser.OperandContext ctx) { }
 
     @Override
-    public void enterIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void exitOperand(@NotNull FilterTreeParser.OperandContext ctx) { }
+
+    @Override
+    public void enterFunctype(@NotNull FilterTreeParser.FunctypeContext ctx) { }
+
+    @Override
+    public void exitFunctype(@NotNull FilterTreeParser.FunctypeContext ctx) { }
+
+    @Override
+    public void enterIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) { }
 
     @Override
     public void exitIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
         query.append(" is null");
     }
 
-    /**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterLink_type(@NotNull FilterTreeParser.Link_typeContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
+
 	@Override public void exitLink_type(@NotNull FilterTreeParser.Link_typeContext ctx) { }
 
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void enterEveryRule(@NotNull ParserRuleContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitEveryRule(@NotNull ParserRuleContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void visitTerminal(@NotNull TerminalNode node) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
+    @Override
+    public void enterSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx) {
+        if (ctx.ALIAS() != null){
+            query.append(buildAliasStr(ctx.getText()));
+        } else {
+            query.append(ctx.getText());
+        }
+    }
+
+    @Override
+    public void exitSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx) {}
+
+	@Override public void enterEveryRule(@NotNull ParserRuleContext ctx) {}
+
+	@Override public void exitEveryRule(@NotNull ParserRuleContext ctx) {}
+
+	@Override public void visitTerminal(@NotNull TerminalNode node) {}
+
 	@Override public void visitErrorNode(@NotNull ErrorNode node) { }
 
     private void appendToQuery(String queryPart){
         query.append(" ").append(queryPart);
+    }
+
+    private String buildAliasStr(String alias){
+        StringBuffer sb = new StringBuffer();
+        sb.append("a");
+        sb.append(alias);
+        sb.append(".");
+        sb.append(refBook.getAttribute(alias).getAttributeType().toString());
+        sb.append("_value");
+
+        return sb.toString();
     }
 }

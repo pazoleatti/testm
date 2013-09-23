@@ -1,11 +1,7 @@
-// Generated from FilterTree.g4 by ANTLR 4.1
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.filter.FilterTreeListener;
-import org.antlr.v4.runtime.Parser;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATN;
 import org.antlr.v4.runtime.atn.ATNSimulator;
 import org.antlr.v4.runtime.atn.ParserATNSimulator;
@@ -22,19 +18,21 @@ public class FilterTreeParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__1=1, T__0=2, LINK_TYPE_OR=3, LINK_TYPE_AND=4, EQUAL=5, NOTEQUAL=6, 
-		MORE=7, LESS=8, LIKE=9, IS_NULL=10, NUMBER=11, ALIAS=12, FLOAT=13, STRING=14, 
-		SPACE=15;
+		T__1=1, T__0=2, LINK_TYPE_OR=3, LINK_TYPE_AND=4, LOWER=5, LENGTH=6, EQUAL=7, 
+		NOTEQUAL=8, MORE=9, LESS=10, LIKE=11, IS_NULL=12, NUMBER=13, ALIAS=14, 
+		FLOAT=15, STRING=16, SPACE=17;
 	public static final String[] tokenNames = {
-		"<INVALID>", "')'", "'('", "LINK_TYPE_OR", "LINK_TYPE_AND", "'='", "'!='", 
-		"'>'", "'<'", "LIKE", "IS_NULL", "NUMBER", "ALIAS", "FLOAT", "STRING", 
-		"' '"
+		"<INVALID>", "')'", "'('", "LINK_TYPE_OR", "LINK_TYPE_AND", "'LOWER'", 
+		"'LENGTH'", "'='", "'!='", "'>'", "'<'", "LIKE", "IS_NULL", "NUMBER", 
+		"ALIAS", "FLOAT", "STRING", "' '"
 	};
 	public static final int
 		RULE_query = 0, RULE_condition = 1, RULE_link_type = 2, RULE_expr = 3, 
-		RULE_operand = 4, RULE_operand_type = 5;
+		RULE_operand = 4, RULE_simpleoperand = 5, RULE_funcwrap = 6, RULE_functype = 7, 
+		RULE_strtype = 8, RULE_operand_type = 9;
 	public static final String[] ruleNames = {
-		"query", "condition", "link_type", "expr", "operand", "operand_type"
+		"query", "condition", "link_type", "expr", "operand", "simpleoperand", 
+		"funcwrap", "functype", "strtype", "operand_type"
 	};
 
 	@Override
@@ -70,7 +68,7 @@ public class FilterTreeParser extends Parser {
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).exitQuery(this);
+			if ( listener instanceof FilterTreeListener) ((FilterTreeListener)listener).exitQuery(this);
 		}
 	}
 
@@ -81,19 +79,19 @@ public class FilterTreeParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(13); 
+			setState(21); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			do {
 				{
 				{
-				setState(12); condition();
+				setState(20); condition();
 				}
 				}
-				setState(15); 
+				setState(23); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 2) | (1L << LINK_TYPE_OR) | (1L << LINK_TYPE_AND) | (1L << NUMBER) | (1L << ALIAS) | (1L << STRING))) != 0) );
+			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 2) | (1L << LINK_TYPE_OR) | (1L << LINK_TYPE_AND) | (1L << LOWER) | (1L << LENGTH) | (1L << NUMBER) | (1L << ALIAS) | (1L << STRING))) != 0) );
 			}
 		}
 		catch (RecognitionException re) {
@@ -161,21 +159,21 @@ public class FilterTreeParser extends Parser {
 		enterRule(_localctx, 2, RULE_condition);
 		int _la;
 		try {
-			setState(32);
+			setState(40);
 			switch ( getInterpreter().adaptivePredict(_input,4,_ctx) ) {
 			case 1:
 				_localctx = new NobraketsContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(18);
+				setState(26);
 				_la = _input.LA(1);
 				if (_la==LINK_TYPE_OR || _la==LINK_TYPE_AND) {
 					{
-					setState(17); link_type();
+					setState(25); link_type();
 					}
 				}
 
-				setState(20); expr();
+				setState(28); expr();
 				}
 				break;
 
@@ -183,29 +181,29 @@ public class FilterTreeParser extends Parser {
 				_localctx = new WithbraketsContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(22);
+				setState(30);
 				_la = _input.LA(1);
 				if (_la==LINK_TYPE_OR || _la==LINK_TYPE_AND) {
 					{
-					setState(21); link_type();
+					setState(29); link_type();
 					}
 				}
 
-				setState(24); match(2);
-				setState(26); 
+				setState(32); match(2);
+				setState(34); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				do {
 					{
 					{
-					setState(25); condition();
+					setState(33); condition();
 					}
 					}
-					setState(28); 
+					setState(36); 
 					_errHandler.sync(this);
 					_la = _input.LA(1);
-				} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 2) | (1L << LINK_TYPE_OR) | (1L << LINK_TYPE_AND) | (1L << NUMBER) | (1L << ALIAS) | (1L << STRING))) != 0) );
-				setState(30); match(1);
+				} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 2) | (1L << LINK_TYPE_OR) | (1L << LINK_TYPE_AND) | (1L << LOWER) | (1L << LENGTH) | (1L << NUMBER) | (1L << ALIAS) | (1L << STRING))) != 0) );
+				setState(38); match(1);
 				}
 				break;
 			}
@@ -234,7 +232,7 @@ public class FilterTreeParser extends Parser {
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof FilterTreeListener) ((FilterTreeListener)listener).exitLink_type(this);
+			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).exitLink_type(this);
 		}
 	}
 
@@ -245,7 +243,7 @@ public class FilterTreeParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(34);
+			setState(42);
 			_la = _input.LA(1);
 			if ( !(_la==LINK_TYPE_OR || _la==LINK_TYPE_AND) ) {
 			_errHandler.recoverInline(this);
@@ -297,8 +295,8 @@ public class FilterTreeParser extends Parser {
 	}
 	public static class IsNullExprContext extends ExprContext {
 		public TerminalNode IS_NULL() { return getToken(FilterTreeParser.IS_NULL, 0); }
-		public OperandContext operand() {
-			return getRuleContext(OperandContext.class,0);
+		public SimpleoperandContext simpleoperand() {
+			return getRuleContext(SimpleoperandContext.class,0);
 		}
 		public IsNullExprContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
@@ -315,15 +313,15 @@ public class FilterTreeParser extends Parser {
 		ExprContext _localctx = new ExprContext(_ctx, getState());
 		enterRule(_localctx, 6, RULE_expr);
 		try {
-			setState(43);
+			setState(51);
 			switch ( getInterpreter().adaptivePredict(_input,5,_ctx) ) {
 			case 1:
 				_localctx = new StandartExprContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(36); operand();
-				setState(37); operand_type();
-				setState(38); operand();
+				setState(44); operand();
+				setState(45); operand_type();
+				setState(46); operand();
 				}
 				break;
 
@@ -331,8 +329,8 @@ public class FilterTreeParser extends Parser {
 				_localctx = new IsNullExprContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(40); operand();
-				setState(41); match(IS_NULL);
+				setState(48); simpleoperand();
+				setState(49); match(IS_NULL);
 				}
 				break;
 			}
@@ -349,9 +347,12 @@ public class FilterTreeParser extends Parser {
 	}
 
 	public static class OperandContext extends ParserRuleContext {
-		public TerminalNode NUMBER() { return getToken(FilterTreeParser.NUMBER, 0); }
-		public TerminalNode ALIAS() { return getToken(FilterTreeParser.ALIAS, 0); }
-		public TerminalNode STRING() { return getToken(FilterTreeParser.STRING, 0); }
+		public SimpleoperandContext simpleoperand() {
+			return getRuleContext(SimpleoperandContext.class,0);
+		}
+		public FuncwrapContext funcwrap() {
+			return getRuleContext(FuncwrapContext.class,0);
+		}
 		public OperandContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -369,13 +370,197 @@ public class FilterTreeParser extends Parser {
 	public final OperandContext operand() throws RecognitionException {
 		OperandContext _localctx = new OperandContext(_ctx, getState());
 		enterRule(_localctx, 8, RULE_operand);
+		try {
+			setState(55);
+			switch (_input.LA(1)) {
+			case LOWER:
+			case LENGTH:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(53); funcwrap();
+				}
+				break;
+			case NUMBER:
+			case ALIAS:
+			case STRING:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(54); simpleoperand();
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class SimpleoperandContext extends ParserRuleContext {
+		public TerminalNode NUMBER() { return getToken(FilterTreeParser.NUMBER, 0); }
+		public TerminalNode ALIAS() { return getToken(FilterTreeParser.ALIAS, 0); }
+		public TerminalNode STRING() { return getToken(FilterTreeParser.STRING, 0); }
+		public SimpleoperandContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_simpleoperand; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).enterSimpleoperand(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).exitSimpleoperand(this);
+		}
+	}
+
+	public final SimpleoperandContext simpleoperand() throws RecognitionException {
+		SimpleoperandContext _localctx = new SimpleoperandContext(_ctx, getState());
+		enterRule(_localctx, 10, RULE_simpleoperand);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(45);
+			setState(57);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << NUMBER) | (1L << ALIAS) | (1L << STRING))) != 0)) ) {
+			_errHandler.recoverInline(this);
+			}
+			consume();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class FuncwrapContext extends ParserRuleContext {
+		public FunctypeContext functype() {
+			return getRuleContext(FunctypeContext.class,0);
+		}
+		public StrtypeContext strtype() {
+			return getRuleContext(StrtypeContext.class,0);
+		}
+		public FuncwrapContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_funcwrap; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).enterFuncwrap(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).exitFuncwrap(this);
+		}
+	}
+
+	public final FuncwrapContext funcwrap() throws RecognitionException {
+		FuncwrapContext _localctx = new FuncwrapContext(_ctx, getState());
+		enterRule(_localctx, 12, RULE_funcwrap);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(59); functype();
+			setState(60); match(2);
+			setState(61); strtype();
+			setState(62); match(1);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class FunctypeContext extends ParserRuleContext {
+		public TerminalNode LOWER() { return getToken(FilterTreeParser.LOWER, 0); }
+		public TerminalNode LENGTH() { return getToken(FilterTreeParser.LENGTH, 0); }
+		public FunctypeContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_functype; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).enterFunctype(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).exitFunctype(this);
+		}
+	}
+
+	public final FunctypeContext functype() throws RecognitionException {
+		FunctypeContext _localctx = new FunctypeContext(_ctx, getState());
+		enterRule(_localctx, 14, RULE_functype);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(64);
+			_la = _input.LA(1);
+			if ( !(_la==LOWER || _la==LENGTH) ) {
+			_errHandler.recoverInline(this);
+			}
+			consume();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class StrtypeContext extends ParserRuleContext {
+		public TerminalNode ALIAS() { return getToken(FilterTreeParser.ALIAS, 0); }
+		public TerminalNode STRING() { return getToken(FilterTreeParser.STRING, 0); }
+		public StrtypeContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_strtype; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).enterStrtype(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).exitStrtype(this);
+		}
+	}
+
+	public final StrtypeContext strtype() throws RecognitionException {
+		StrtypeContext _localctx = new StrtypeContext(_ctx, getState());
+		enterRule(_localctx, 16, RULE_strtype);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(66);
+			_la = _input.LA(1);
+			if ( !(_la==ALIAS || _la==STRING) ) {
 			_errHandler.recoverInline(this);
 			}
 			consume();
@@ -414,12 +599,12 @@ public class FilterTreeParser extends Parser {
 
 	public final Operand_typeContext operand_type() throws RecognitionException {
 		Operand_typeContext _localctx = new Operand_typeContext(_ctx, getState());
-		enterRule(_localctx, 10, RULE_operand_type);
+		enterRule(_localctx, 18, RULE_operand_type);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(47);
+			setState(68);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << EQUAL) | (1L << NOTEQUAL) | (1L << MORE) | (1L << LESS) | (1L << LIKE))) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -439,20 +624,25 @@ public class FilterTreeParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\3\21\64\4\2\t\2\4\3"+
-		"\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\3\2\6\2\20\n\2\r\2\16\2\21\3\3\5"+
-		"\3\25\n\3\3\3\3\3\5\3\31\n\3\3\3\3\3\6\3\35\n\3\r\3\16\3\36\3\3\3\3\5"+
-		"\3#\n\3\3\4\3\4\3\5\3\5\3\5\3\5\3\5\3\5\3\5\5\5.\n\5\3\6\3\6\3\7\3\7\3"+
-		"\7\2\b\2\4\6\b\n\f\2\5\3\2\5\6\4\2\r\16\20\20\3\2\7\13\63\2\17\3\2\2\2"+
-		"\4\"\3\2\2\2\6$\3\2\2\2\b-\3\2\2\2\n/\3\2\2\2\f\61\3\2\2\2\16\20\5\4\3"+
-		"\2\17\16\3\2\2\2\20\21\3\2\2\2\21\17\3\2\2\2\21\22\3\2\2\2\22\3\3\2\2"+
-		"\2\23\25\5\6\4\2\24\23\3\2\2\2\24\25\3\2\2\2\25\26\3\2\2\2\26#\5\b\5\2"+
-		"\27\31\5\6\4\2\30\27\3\2\2\2\30\31\3\2\2\2\31\32\3\2\2\2\32\34\7\4\2\2"+
-		"\33\35\5\4\3\2\34\33\3\2\2\2\35\36\3\2\2\2\36\34\3\2\2\2\36\37\3\2\2\2"+
-		"\37 \3\2\2\2 !\7\3\2\2!#\3\2\2\2\"\24\3\2\2\2\"\30\3\2\2\2#\5\3\2\2\2"+
-		"$%\t\2\2\2%\7\3\2\2\2&\'\5\n\6\2\'(\5\f\7\2()\5\n\6\2).\3\2\2\2*+\5\n"+
-		"\6\2+,\7\f\2\2,.\3\2\2\2-&\3\2\2\2-*\3\2\2\2.\t\3\2\2\2/\60\t\3\2\2\60"+
-		"\13\3\2\2\2\61\62\t\4\2\2\62\r\3\2\2\2\b\21\24\30\36\"-";
+		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\3\23I\4\2\t\2\4\3\t"+
+		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\3"+
+		"\2\6\2\30\n\2\r\2\16\2\31\3\3\5\3\35\n\3\3\3\3\3\5\3!\n\3\3\3\3\3\6\3"+
+		"%\n\3\r\3\16\3&\3\3\3\3\5\3+\n\3\3\4\3\4\3\5\3\5\3\5\3\5\3\5\3\5\3\5\5"+
+		"\5\66\n\5\3\6\3\6\5\6:\n\6\3\7\3\7\3\b\3\b\3\b\3\b\3\b\3\t\3\t\3\n\3\n"+
+		"\3\13\3\13\3\13\2\f\2\4\6\b\n\f\16\20\22\24\2\7\3\2\5\6\4\2\17\20\22\22"+
+		"\3\2\7\b\4\2\20\20\22\22\3\2\t\rE\2\27\3\2\2\2\4*\3\2\2\2\6,\3\2\2\2\b"+
+		"\65\3\2\2\2\n9\3\2\2\2\f;\3\2\2\2\16=\3\2\2\2\20B\3\2\2\2\22D\3\2\2\2"+
+		"\24F\3\2\2\2\26\30\5\4\3\2\27\26\3\2\2\2\30\31\3\2\2\2\31\27\3\2\2\2\31"+
+		"\32\3\2\2\2\32\3\3\2\2\2\33\35\5\6\4\2\34\33\3\2\2\2\34\35\3\2\2\2\35"+
+		"\36\3\2\2\2\36+\5\b\5\2\37!\5\6\4\2 \37\3\2\2\2 !\3\2\2\2!\"\3\2\2\2\""+
+		"$\7\4\2\2#%\5\4\3\2$#\3\2\2\2%&\3\2\2\2&$\3\2\2\2&\'\3\2\2\2\'(\3\2\2"+
+		"\2()\7\3\2\2)+\3\2\2\2*\34\3\2\2\2* \3\2\2\2+\5\3\2\2\2,-\t\2\2\2-\7\3"+
+		"\2\2\2./\5\n\6\2/\60\5\24\13\2\60\61\5\n\6\2\61\66\3\2\2\2\62\63\5\f\7"+
+		"\2\63\64\7\16\2\2\64\66\3\2\2\2\65.\3\2\2\2\65\62\3\2\2\2\66\t\3\2\2\2"+
+		"\67:\5\16\b\28:\5\f\7\29\67\3\2\2\298\3\2\2\2:\13\3\2\2\2;<\t\3\2\2<\r"+
+		"\3\2\2\2=>\5\20\t\2>?\7\4\2\2?@\5\22\n\2@A\7\3\2\2A\17\3\2\2\2BC\t\4\2"+
+		"\2C\21\3\2\2\2DE\t\5\2\2E\23\3\2\2\2FG\t\6\2\2G\25\3\2\2\2\t\31\34 &*"+
+		"\659";
 	public static final ATN _ATN =
 		ATNSimulator.deserialize(_serializedATN.toCharArray());
 	static {
