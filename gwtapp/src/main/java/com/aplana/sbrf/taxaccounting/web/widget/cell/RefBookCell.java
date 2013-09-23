@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPick
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidget;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -20,6 +21,8 @@ import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
@@ -36,6 +39,11 @@ import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
  *
  */
 public class RefBookCell extends AbstractEditableCell<Long, String> {
+
+	interface Template extends SafeHtmlTemplates {
+		@Template("<img align=\"right\" src=\"resources/img/reference-16.gif\"/>")
+		SafeHtml referenceIcon();
+	}
 	
 	protected static final SafeHtmlRenderer<String> renderer = SimpleSafeHtmlRenderer.getInstance();
 
@@ -48,12 +56,14 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 
 	private ColumnContext columnContext;
 	private RefBookColumn column;
-
+	private static Template template;
 	public RefBookCell(ColumnContext columnContext) {
 		super(CLICK, KEYDOWN);
 		this.columnContext = columnContext;
 		this.column = (RefBookColumn) columnContext.getColumn();
-
+		if (template == null) {
+			template = GWT.create(Template.class);
+		}
 		// Create popup panel
 		this.panel = new PopupPanel(true, true) {
 			@Override
@@ -161,5 +171,6 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			rendValue = "";
 		}
 		sb.append(renderer.render(rendValue));
+		sb.append(template.referenceIcon());
 	}
 }

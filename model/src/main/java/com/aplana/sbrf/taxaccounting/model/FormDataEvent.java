@@ -51,6 +51,8 @@ public enum FormDataEvent implements Serializable {
 	DELETE_ROW(303, "Удалить строку"),
 	AFTER_LOAD(302, "Загрузка"),	/* Вызывается после того как форма была получена из БД. */
 
+	IMPORT_TRANSPORT_FILE(401, "Загрузка ТФ"),
+
     LOGIN(501, "Вход пользователя в Систему"),
     LOGOUT(502, "Выход пользователя из Системы");
 

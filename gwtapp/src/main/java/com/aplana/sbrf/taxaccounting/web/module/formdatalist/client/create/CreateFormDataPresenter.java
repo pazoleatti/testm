@@ -1,10 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
@@ -42,8 +38,6 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 
 	private final PlaceManager placeManager;
 	private final DispatchAsync dispatchAsync;
-	
-	private final Map<Integer, FormType> formTypeMap = new HashMap<Integer, FormType>();
 
 	public interface MyView extends PopupView, HasUiHandlers<CreateFormDataUiHandlers> {
 		
@@ -53,7 +47,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 		void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
 		
 		
-		void setFormTypeValue(FormType value);
+		void setFormTypeValue(Integer value);
 		void setFormKindValue(FormDataKind value);
 		void setDepartmentValue(List<Integer> value);
 		void setReportPeriodValue(List<Integer> value);
@@ -111,10 +105,9 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 					public void onSuccess(GetFilterDataResult result) {
 						FormDataFilterAvailableValues filterValues = result.getFilterValues();
 						getView().setAcceptableDepartments(result.getDepartments(), filterValues.getDepartmentIds());
-						getView().setAcceptableFormKindList(whithEmptyList(filterValues.getKinds()));
-						getView().setAcceptableFormTypeList(whithEmptyList(filterValues.getFormTypes()));
+						getView().setAcceptableFormKindList(filterValues.getKinds());
+						getView().setAcceptableFormTypeList(filterValues.getFormTypes());
 						getView().setAcceptableReportPeriods(result.getReportPeriods());
-						fillFormTypeMap(filterValues.getFormTypes());
 						setSelectedFilterValues(filter);
 						slotForMe.addToPopupSlot(CreateFormDataPresenter.this);
 					}
@@ -123,30 +116,16 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 
 	private void setSelectedFilterValues(FormDataFilter formDataFilter){
 		if(formDataFilter.getFormTypeId() != null){
-			getView().setFormTypeValue(formTypeMap.get(formDataFilter.getFormTypeId()));
+			getView().setFormTypeValue(formDataFilter.getFormTypeId());
 		}
 		if(formDataFilter.getFormDataKind() != null){
 			getView().setFormKindValue(formDataFilter.getFormDataKind());
 		}
 		if(formDataFilter.getDepartmentIds()!= null && formDataFilter.getDepartmentIds().size() == 1){
-			getView().setDepartmentValue(Arrays.asList(formDataFilter.getDepartmentIds().get(0)));
+			getView().setDepartmentValue(formDataFilter.getDepartmentIds());
 		}
 		if (formDataFilter.getReportPeriodIds()!=null && formDataFilter.getReportPeriodIds().size() == 1){
-			getView().setReportPeriodValue(Arrays.asList(formDataFilter.getReportPeriodIds().get(0)));
-		}
-	}
-
-	private <T> List<T> whithEmptyList(List<T> source){
-		List<T> kind = new ArrayList<T>();
-		kind.add(null);
-		kind.addAll(source);
-		return kind;
-	}
-
-	private void fillFormTypeMap(List<FormType> source){
-		formTypeMap.clear();
-		for(FormType formType : source){
-			formTypeMap.put(formType.getId(), formType);
+			getView().setReportPeriodValue(formDataFilter.getReportPeriodIds());
 		}
 	}
 

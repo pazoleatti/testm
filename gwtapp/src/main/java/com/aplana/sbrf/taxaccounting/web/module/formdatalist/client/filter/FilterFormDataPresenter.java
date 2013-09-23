@@ -2,9 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
@@ -44,7 +42,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 
 		void setReturnStateList(List<Boolean> list);
 
-		void setFormTypesMap(Map<Integer, String> formTypesMap);
+		void setFormTypesMap(List<FormType> formTypes);
 
 		void setDepartments(List<Department> list, Set<Integer> availableValues);
 
@@ -78,8 +76,8 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 					public void onSuccess(GetFilterDataResult result) {
 						FormDataFilterAvailableValues filterValues = result.getFilterValues();
 						getView().setDepartments(result.getDepartments(), filterValues.getDepartmentIds());
-						getView().setKindList(fillFormKindList(filterValues.getKinds()));
-						getView().setFormTypesMap(fillFormTypesMap(filterValues.getFormTypes()));
+						getView().setKindList(filterValues.getKinds());
+						getView().setFormTypesMap(filterValues.getFormTypes());
 						getView().setReportPeriods(result.getReportPeriods());
 						getView().setFormStateList(fillFormStateList());
 						getView().setReturnStateList(Arrays.asList(new Boolean[]{null, Boolean.TRUE, Boolean.FALSE}));
@@ -110,22 +108,6 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 	@Override
 	public void onApplyClicked() {
 		FormDataListApplyEvent.fire(this);
-	}
-
-	private Map<Integer, String> fillFormTypesMap(List<FormType> source){
-		Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
-		formTypesMap.put(null, "");
-		for(FormType formType : source){
-			formTypesMap.put(formType.getId(), formType.getName());
-		}
-		return formTypesMap;
-	}
-
-	private List<FormDataKind> fillFormKindList(List<FormDataKind> source){
-		List<FormDataKind> kind = new ArrayList<FormDataKind>();
-		kind.add(null);
-		kind.addAll(source);
-		return kind;
 	}
 
 	private List<WorkflowState> fillFormStateList(){

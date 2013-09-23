@@ -38,7 +38,7 @@
 
                 <g:FlowPanel height="60px">
                     <g:Label text="Вид налоговой формы"/>
-                    <style:ListBoxWithTooltip width="205px" ui:field="formType" showTooltip="true"/>
+                    <style:ListBoxWithTooltip width="205px" ui:field="formTypeId" showTooltip="true"/>
                 </g:FlowPanel>
 
             </g:FlowPanel>

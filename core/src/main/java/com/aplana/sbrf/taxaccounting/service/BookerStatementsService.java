@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -15,11 +12,11 @@ public interface BookerStatementsService {
     /**
      * Загрузка бух отчетности из хмл
      *
-     * @param stream       файл для загрузки
+     * @param realFileName Имя файла что импортируем (валидируем расширение должно быть xml)
+     * @param stream       Steam на загруженный фаил
      * @param periodID     id периода
      * @param typeID       0 - Оборотная ведомость по счетам бухгалтерского учёта кредитной организации (Ф-101);
-     * @param departmentId Подразделение
-     * @throws IOException, ServiceException
+     * @param departmentId Подразделение    @throws IOException, ServiceException
      */
-    void importXML(InputStream stream, Integer periodID, int typeID, int departmentId) throws IOException, ServiceException;
+    void importXML(String realFileName, InputStream stream, Integer periodID, int typeID, int departmentId);
 }

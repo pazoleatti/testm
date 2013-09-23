@@ -1,32 +1,23 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryMessageCell;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellList;
-import com.google.gwt.user.cellview.client.DataGrid;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
 
 import java.util.*;
 
@@ -36,15 +27,17 @@ import java.util.*;
  * @author Dmitriy Levykin
  */
 public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiHandlers>
-        implements BookerStatementsPresenter.MyView {
+        implements BookerStatementsPresenter.MyView, FileUploadHandler {
+
+    @Override
+    public void onFileUploadSuccess(String uuid) {
+        getUiHandlers().ImportData(uuid);
+    }
 
     interface Binder extends UiBinder<Widget, BookerStatementsView> {
     }
 
     List<LogEntry> logs = new ArrayList<LogEntry>();
-
-    // Признак УНП
-    private boolean isUnp = false;
 
     // Выбранное подразделение
     private Integer currentDepartmentId;
@@ -54,23 +47,12 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     PeriodPickerPopup periodPickerPopup;
 
     @UiField
-    DataGrid<DataRow<Cell>> formDataTable;
-
-    @UiField
     DepartmentPickerPopupWidget departmentPicker;
 
     @UiField
     ListBox bookerReportType;
-    @UiField
-    FormPanel uploadFormPanel;
-    @UiField
-    FileUpload uploader;
-    @UiField
-    SubmitButton uploadButton;
-    @UiField
-    Widget logPanel;
     @UiField(provided = true)
-    CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryMessageCell());
+    FileUploadWidget fileUploader = new FileUploadWidget(this, "upload/uploadController/xls/");
     @UiField
     DockLayoutPanel dockPanel;
 
@@ -79,8 +61,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     public BookerStatementsView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
         initListeners();
-        setAction();
-        dockPanel.setWidgetHidden(logPanel, (logs == null || logs.isEmpty()));
     }
 
     private void initListeners() {
@@ -103,65 +83,8 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
                 BookerStatementsView.this.currentDepartmentId = selDepartmentId;
 
-                setAction();
             }
         });
-
-        periodPickerPopup.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<List<Integer>> event) {
-                setAction();
-            }
-        });
-
-        ChangeHandler actionHandler = new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                setAction();
-            }
-        };
-        bookerReportType.addChangeHandler(actionHandler);
-        uploader.addChangeHandler(actionHandler);
-
-        uploadFormPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
-            @Override
-            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                String error = event.getResults();
-                if (!error.toLowerCase().contains("error")) {
-                    logs.add(new LogEntry(LogLevel.INFO, "Файл успешно загружен"));
-                } else {
-                    logs.add(new LogEntry(LogLevel.ERROR, error.substring(6)));
-                }
-                setLogMessages(logs);
-                LockInteractionEvent.fire((BookerStatementsPresenter) getUiHandlers(), false);
-            }
-        });
-
-        uploadButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                LockInteractionEvent.fire((BookerStatementsPresenter) getUiHandlers(), true);
-            }
-        });
-    }
-
-    private void setAction() {
-        boolean isReady = periodPickerPopup.getValue() != null && bookerReportType.getSelectedIndex() != -1 && uploader.getFilename() != null
-                && !uploader.getFilename().isEmpty() && currentDepartmentId != null;
-        uploadButton.setEnabled(isReady);
-        if (isReady && periodPickerPopup.getValue().size() == 1) {
-            uploadFormPanel.setAction(GWT.getHostPageBaseURL() + "upload/bookerstatements/"
-                    + currentDepartmentId
-                    + "/"
-                    + periodPickerPopup.getValue().get(0)
-                    + "/"
-                    + bookerReportType.getSelectedIndex());
-        }
-    }
-
-    @Override
-    public void setUnpFlag(boolean isUnp) {
-        this.isUnp = isUnp;
     }
 
     @Override
@@ -196,16 +119,29 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
         }
     }
 
-    private void setLogMessages(List<LogEntry> entries) {
-        dockPanel.setWidgetHidden(logPanel, (entries == null || entries.isEmpty()));
-        if (entries != null && !entries.isEmpty()) {
-            logPanel.setVisible(true);
-            loggerList.setVisible(true);
-            loggerList.setRowData(entries);
-        } else {
-            loggerList.setRowCount(0);
-            loggerList.setRowData(new ArrayList<LogEntry>(0));
+    @Override
+    public Integer getDepartmentId() {
+        Integer result = null;
+        if (departmentPicker.getValue() != null && departmentPicker.getValue().size() == 1) {
+            result = departmentPicker.getValue().get(0);
         }
-        loggerList.redraw();
+        return result;
+    }
+
+    @Override
+    public Integer getReportPeriodId() {
+        Integer result = null;
+        if (periodPickerPopup.getValue() != null && periodPickerPopup.getValue().size() == 1) {
+            result = periodPickerPopup.getValue().get(0);
+        }
+        return result;
+    }
+
+    @Override
+    public Integer getType() {
+        Integer result = null;
+        if (bookerReportType.getSelectedIndex() != -1)
+            result = bookerReportType.getSelectedIndex();
+        return result;
     }
 }

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -7,6 +8,7 @@ import java.util.Set;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
@@ -53,7 +55,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 	@UiField
 	DepartmentPicker departmentPicker;
 
-	private Map<Integer, String> formTypesMap;
+	private Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
 
     @Inject
     public FilterFormDataView(final MyBinder binder, final MyDriver driver) {
@@ -125,6 +127,9 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 
     @Override
     public void setKindList(List<FormDataKind> list) {
+		/** .setValue(null) see
+		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
+    	formDataKind.setValue(null);
 		formDataKind.setAcceptableValues(list);
     }
 
@@ -145,8 +150,12 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 	}
 
 	@Override
-	public void setFormTypesMap(Map<Integer, String> formTypesMap){
-		this.formTypesMap = formTypesMap;
+	public void setFormTypesMap(List<FormType> formTypes){
+		formTypesMap.clear();
+		for (FormType formType : formTypes) {
+			formTypesMap.put(formType.getId(), formType.getName());
+		}
+		
 		/** .setValue(null) see
 		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
 		formTypeId.setValue(null);

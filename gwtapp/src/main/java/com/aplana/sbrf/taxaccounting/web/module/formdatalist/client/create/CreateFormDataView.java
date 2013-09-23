@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
@@ -38,14 +40,15 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 	ValueListBox<FormDataKind> formKind;
 
 	@UiField(provided = true)
-	ListBoxWithTooltip<FormType> formType;
+	ListBoxWithTooltip<Integer> formTypeId;
 
 	@UiField
 	Button continueButton;
 
 	@UiField
 	Button cancelButton;	
-
+	
+	private Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
 
 	@Inject
 	public CreateFormDataView(Binder uiBinder, EventBus eventBus) {
@@ -61,13 +64,13 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 			}
 		});
 
-		formType = new ListBoxWithTooltip<FormType>(new AbstractRenderer<FormType>() {
+		formTypeId = new ListBoxWithTooltip<Integer>(new AbstractRenderer<Integer>() {
 			@Override
-			public String render(FormType object) {
+			public String render(Integer object) {
 				if (object == null) {
 					return "";
 				}
-				return object.getName();
+				return formTypesMap.get(object);
 			}
 		});
 		
@@ -92,27 +95,34 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
 	@Override
 	public void setAcceptableFormKindList(List<FormDataKind> list) {
+		formKind.setValue(null);
 		formKind.setAcceptableValues(list);
 	}
 
 	@Override
-	public void setAcceptableFormTypeList(List<FormType> list) {
-		formType.setAcceptableValues(list);
+	public void setAcceptableFormTypeList(List<FormType> formTypes) {
+		formTypesMap.clear();
+		for (FormType formType : formTypes) {
+			formTypesMap.put(formType.getId(), formType.getName());
+		}
+		
+		formTypeId.setValue(null);
+		formTypeId.setAcceptableValues(formTypesMap.keySet());
 	}
 
 	@Override
 	public FormDataFilter getFilterData(){
 		FormDataFilter formDataFilter = new FormDataFilter();
 		formDataFilter.setFormDataKind(formKind.getValue());
-		formDataFilter.setFormTypeId(formType.getValue() != null ? formType.getValue().getId() : null);
+		formDataFilter.setFormTypeId(formTypeId.getValue());
         formDataFilter.setDepartmentIds(departmentPicker.getValue());
 		formDataFilter.setReportPeriodIds(reportPeriodPicker.getValue());
 		return formDataFilter;
 	}
 
 	@Override
-	public void setFormTypeValue(FormType value){
-		formType.setValue(value);
+	public void setFormTypeValue(Integer value){
+		formTypeId.setValue(value);
 	}
 
 	@Override
@@ -140,7 +150,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 		reportPeriodPicker.setValue(null);
 		departmentPicker.setValue(null);
 		formKind.setValue(null);
-		formType.setValue(null);
+		formTypeId.setValue(null);
 	}
 
 }
