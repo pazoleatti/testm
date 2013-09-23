@@ -83,11 +83,11 @@ def getAtributes(){
     ]
 }
 
-def getGroupColumns(){
+def getGroupColumns() {
     ['fullName', 'inn', 'docNumber', 'docDate']
 }
 
-def getEditColumns(){
+def getEditColumns() {
     ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'dealDoneDate']
 }
 
@@ -103,7 +103,7 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = 0
-    row.keySet().each{
+    row.keySet().each {
         row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
@@ -111,25 +111,25 @@ void addRow() {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    if (currentDataRow!=null){
+    if (currentDataRow != null) {
         index = currentDataRow.getIndex()
         def pointRow = currentDataRow
-        while(pointRow.getAlias()!=null && index>0){
+        while (pointRow.getAlias() != null && index > 0) {
             pointRow = dataRows.get(--index)
         }
-        if(index!=currentDataRow.getIndex() && dataRows.get(index).getAlias()==null){
+        if (index != currentDataRow.getIndex() && dataRows.get(index).getAlias() == null) {
             index++
         }
-    }else if (size>0) {
-        for(int i = size-1;i>=0;i--){
+    } else if (size > 0) {
+        for (int i = size - 1; i >= 0; i--) {
             def pointRow = dataRows.get(i)
-            if(pointRow.getAlias()==null){
-                index = dataRows.indexOf(pointRow)+1
+            if (pointRow.getAlias() == null) {
+                index = dataRows.indexOf(pointRow) + 1
                 break
             }
         }
     }
-    dataRowHelper.insert(row, index+1)
+    dataRowHelper.insert(row, index + 1)
 }
 /**
  * Проверяет уникальность в отчётном периоде и вид
@@ -153,12 +153,13 @@ void logicCheck() {
     def dTo = taxPeriod.getEndDate()
 
     def dataRows = dataRowHelper.getAllCached()
-    def rowNum = 0
+    int index = 1
     for (row in dataRows) {
-        rowNum++
         if (row.getAlias() != null) {
             continue
         }
+        def rowNum = index++
+
         def docDateCell = row.getCell('docDate')
         def dealDateCell = row.getCell('dealDate')
         [
@@ -180,46 +181,47 @@ void logicCheck() {
                 def msg = rowCell.column.name
                 logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
             }
-            //  Корректность даты договора
-            def dt = docDateCell.value
-            if (dt != null && (dt < dFrom || dt > dTo)) {
-                def msg = docDateCell.column.name
-                logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
-            }
-            // Корректность даты заключения сделки
-            if (docDateCell.value > dealDateCell.value) {
-                def msg1 = dealDateCell.column.name
-                def msg2 = docDateCell.column.name
-                logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
-            }
-            // Проверка доходности
-            def sumCell = row.getCell('sum')
-            def priceCell = row.getCell('price')
-            def totalCell = row.getCell('total')
-            def msgSum = sumCell.column.name
-            if (priceCell.value != sumCell.value) {
-                def msg = priceCell.column.name
-                logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
-            }
-            if (totalCell.value != sumCell.value) {
-                def msg = totalCell.column.name
-                logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
-            }
-            // Корректность даты совершения сделки
-            def dealDoneDateCell = row.getCell('dealDoneDate')
-            if (dealDoneDateCell.value < dealDateCell.value) {
-                def msg1 = dealDoneDateCell.column.name
-                def msg2 = dealDateCell.column.name
-                logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
-            }
+
+        }
+        //  Корректность даты договора
+        def dt = docDateCell.value
+        if (dt != null && (dt < dFrom || dt > dTo)) {
+            def msg = docDateCell.column.name
+            logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
+        }
+        // Корректность даты заключения сделки
+        if (docDateCell.value > dealDateCell.value) {
+            def msg1 = dealDateCell.column.name
+            def msg2 = docDateCell.column.name
+            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+        }
+        // Проверка доходности
+        def sumCell = row.getCell('sum')
+        def priceCell = row.getCell('price')
+        def totalCell = row.getCell('total')
+        def msgSum = sumCell.column.name
+        if (priceCell.value != sumCell.value) {
+            def msg = priceCell.column.name
+            logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
+        }
+        if (totalCell.value != sumCell.value) {
+            def msg = totalCell.column.name
+            logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
+        }
+        // Корректность даты совершения сделки
+        def dealDoneDateCell = row.getCell('dealDoneDate')
+        if (dealDoneDateCell.value < dealDateCell.value) {
+            def msg1 = dealDoneDateCell.column.name
+            def msg2 = dealDateCell.column.name
+            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
         //Проверки соответствия НСИ
-        checkNSI(row, "fullName", "Организации-участники контролируемых сделок",9)
-        checkNSI(row, "countryName", "ОКСМ",10)
+        checkNSI(row, "fullName", "Организации-участники контролируемых сделок", 9)
+        checkNSI(row, "countryName", "ОКСМ", 10)
     }
 
     //Проверки подитоговых сумм
-    def testRows = dataRows.findAll{it -> it.getAlias() == null}
+    def testRows = dataRows.findAll { it -> it.getAlias() == null }
     //добавляем итоговые строки для проверки
     for (int i = 0; i < testRows.size(); i++) {
         def testRow = testRows.get(i)
@@ -256,7 +258,7 @@ void logicCheck() {
 
         for (int i = 0; i < dataRows.size(); i++) {
             if (dataRows[i].getAlias() != null) {
-                if(i - 1 < -1 || dataRows[i - 1].getAlias() != null){
+                if (i - 1 < -1 || dataRows[i - 1].getAlias() != null) {
                     logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
                 }
             }
@@ -270,15 +272,19 @@ void logicCheck() {
             def testItogRow = testItogRows[i]
             def realItogRow = itogRows[i]
             int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
-            def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
-            if (testItogRow.price != realItogRow.price) {
-                logger.error(mes + " «${priceName}»")
-            }
-            if (testItogRow.total != realItogRow.total) {
-                logger.error(mes + " «${totalName}»")
-            }
-            if (testItogRow.sum != realItogRow.sum) {
-                logger.error(mes + " «${sumName}»")
+            if (dataRows[itg].getAlias() != null) {
+                logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
+            } else {
+                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
+                if (testItogRow.price != realItogRow.price) {
+                    logger.error(mes + " «${priceName}»")
+                }
+                if (testItogRow.total != realItogRow.total) {
+                    logger.error(mes + " «${totalName}»")
+                }
+                if (testItogRow.sum != realItogRow.sum) {
+                    logger.error(mes + " «${sumName}»")
+                }
             }
         }
     }
@@ -300,10 +306,11 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     Возвращает строку со значениями полей строки по которым идет группировка
     ['fullName', 'inn', 'docNumber', 'docDate']
  */
+
 def getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    def map = refBookService.getRecordData(9, row.fullName)
+    def map = row.fullName !=null ? refBookService.getRecordData(9, row.fullName) : null
     builder.append(map == null ? 'null' : map.NAME.stringValue).append(sep)
     builder.append(row.inn).append(sep)
     builder.append(row.docNumber).append(sep)
@@ -440,7 +447,7 @@ void addAllStatic() {
             if (row.getAlias() == null)
                 if (nextRow == null || isDiffRow(row, nextRow, getGroupColumns())) {
                     def itogRow = calcItog(i, dataRows)
-                    dataRowHelper.insert(itogRow, ++i+1)
+                    dataRowHelper.insert(itogRow, ++i + 1)
                 }
         }
     }
@@ -471,7 +478,6 @@ int sortRow(List<String> params, DataRow a, DataRow b) {
     }
     return 0
 }
-
 
 /**
  * Получение импортируемых данных.
@@ -530,7 +536,7 @@ def checkTableHead(def xml, def headRowCount) {
         return false
     }
     def result = (
-            xml.row[0].cell[0] == 'Полное наименование с указанием ОПФ' &&
+    xml.row[0].cell[0] == 'Полное наименование с указанием ОПФ' &&
             xml.row[1].cell[0] == '' &&
             xml.row[2].cell[0] == 'гр. 2' &&
             xml.row[0].cell[1] == 'ИНН/ КИО' &&
@@ -590,7 +596,7 @@ def addData(def xml) {
             continue
         }
 
-        if ((row.cell.find {it.text() != ""}.toString()) == "") {
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
 

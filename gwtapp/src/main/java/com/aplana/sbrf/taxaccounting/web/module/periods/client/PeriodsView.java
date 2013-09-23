@@ -27,7 +27,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
 	interface Binder extends UiBinder<Widget, PeriodsView> { }
 
-	private static final String[] COLUMN_NAMES = {"Период", "Состояние"};
+	private static final String[] COLUMN_NAMES = {"Период", "Состояние", "Ввод остатков"};
 
 	@UiField
 	Label title;
@@ -77,11 +77,25 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 				}
 			}
 		};
+        TextColumn<TableRow> periodBalanceColumn = new TextColumn<TableRow>() {
+            @Override
+            public String getValue(TableRow object) {
+                if (object.isBalance() == null) {
+                    return "";
+                }
+                if (object.isBalance()) {
+                    return "Да";
+                } else {
+                    return "Нет";
+                }
+            }
+        };
 
 
 
 		periodsTable.addColumn(periodNameColumn, COLUMN_NAMES[0]);
 		periodsTable.addColumn(periodConditionColumn, COLUMN_NAMES[1]);
+        periodsTable.addColumn(periodBalanceColumn, COLUMN_NAMES[2]);
 
 		periodsTable.setSelectionModel(selectionModel);
 

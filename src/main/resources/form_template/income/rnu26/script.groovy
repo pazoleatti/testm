@@ -58,11 +58,9 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
+        // TODO (Ramil Timerbaev) уточнить нужен ли пересчет при консолидации? и если не нужен то надо ли проверять наличие итоговой строки?
         calc()
-        if (!hasError() && logicalCheck() && checkNSI()) {
-            // для сохранения изменений приемников
-            getData(formData).commit()
-        }
+        !hasError() && logicalCheck() && checkNSI()
         break
     case FormDataEvent.IMPORT :
         if (!isBalancePeriod && !checkPrevPeriod()) {
@@ -72,10 +70,6 @@ switch (formDataEvent) {
         importData()
         if (!hasError()) {
             calc()
-            !hasError() && logicalCheck() && checkNSI()
-            if (!hasError()) {
-                logger.info('Закончена загрузка файла ' + UploadFileName)
-            }
         }
         break
     case FormDataEvent.MIGRATION :
@@ -88,7 +82,6 @@ switch (formDataEvent) {
             def total = getCalcTotalRow()
             def data = getData(formData)
             insert(data, total)
-            logger.info('Закончена загрузка файла ' + UploadFileName)
         }
         break
 }
@@ -210,26 +203,32 @@ void calc() {
     }
 
     // отсортировать/группировать
-    getRows(data).sort { it.issuer }
+    if (formDataEvent != FormDataEvent.IMPORT) {
+        sort(data)
+    }
 
     def tmp
     getRows(data).eachWithIndex { row, index ->
-        // графа 1
-        row.rowNumber = index + 1
+        if (formDataEvent != FormDataEvent.IMPORT) {
+            // графа 1
+            row.rowNumber = index + 1
+        }
 
         // графа 8
         row.reserveCalcValuePrev = getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)
 
-        // графа 12 курс валют
-        row.rubCourse = getCourse(row.currency,reportDate)
+        if (formDataEvent != FormDataEvent.IMPORT) {
+            // графа 12 курс валют
+            row.rubCourse = getCourse(row.currency,reportDate)
 
-        // графа 13
-        if (row.marketQuotation != null && row.rubCourse != null) {
-            row.marketQuotationInRub = round(row.marketQuotation * row.rubCourse, 2)
+            // графа 13
+            if (row.marketQuotation != null && row.rubCourse != null) {
+                row.marketQuotationInRub = roundValue(row.marketQuotation * row.rubCourse, 2)
+            }
         }
 
         // графа 14
-        tmp = (row.marketQuotationInRub == null ? 0 : round(row.lotSizeCurrent * row.marketQuotationInRub, 2))
+        tmp = (row.marketQuotationInRub == null ? 0 : roundValue(row.lotSizeCurrent * row.marketQuotationInRub, 2))
         row.costOnMarketQuotation = tmp
 
         // графа 15
@@ -319,18 +318,17 @@ def logicalCheck() {
         }
     }
 
-    // Проверока наличия итоговой строки
-    if (!checkAlias(getRows(data), 'total')) {
-        logger.error('Итоговые значения не рассчитаны')
-        return false
-    }
+//    // Проверока наличия итоговой строки
+//    if (!checkAlias(getRows(data), 'total')) {
+//        logger.error('Итоговые значения не рассчитаны')
+//        return false
+//    }
 
     // данные предыдущего отчетного периода
     def formDataOld = getFormDataOld()
     def dataOld = getData(formDataOld)
 
     if (formDataOld != null && !getRows(dataOld).isEmpty()) {
-        def i = 1
 
         // суммы строки общих итогов
         def totalSums = [:]
@@ -452,13 +450,13 @@ def logicalCheck() {
 
             // графа 13
             if (row.marketQuotation != null && row.rubCourse != null &&
-                    row.marketQuotationInRub != round(row.marketQuotation * row.rubCourse, 2)) {
+                    row.marketQuotationInRub != roundValue(row.marketQuotation * row.rubCourse, 2)) {
                 name = getColumnName(row, 'marketQuotationInRub')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
 
             // графа 14
-            tmp = (row.marketQuotationInRub == null ? 0 : round(row.lotSizeCurrent * row.marketQuotationInRub, 2))
+            tmp = (row.marketQuotationInRub == null ? 0 : roundValue(row.lotSizeCurrent * row.marketQuotationInRub, 2))
             if (row.costOnMarketQuotation != tmp) {
                 name = getColumnName(row, 'costOnMarketQuotation')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
@@ -593,6 +591,7 @@ void consolidation() {
     def data = getData(formData)
     // удалить все строки и собрать из источников их строки
     data.clear()
+    def newRows = []
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
@@ -600,11 +599,15 @@ void consolidation() {
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 getRows(getData(source)).each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        data.insert(row,getRows(data).size()+1)
+                        newRows.add(row)
                     }
                 }
             }
         }
+    }
+    if (!newRows.isEmpty()) {
+        data.insert(newRows, 1)
+        // sort(data)
     }
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
@@ -689,11 +692,10 @@ def isFixedRow(def row) {
 /**
  * Получить сумму столбца.
  */
-def getSum(def columnAlias) {
-    def data = getData(formData)
-    def from = 0
+def getSum(def data, def columnAlias) {
     def rows = getRows(data)
-    def to = (rows.get(rows.size()-1)!=null && rows.get(rows.size()-1).getAlias()!=null)?rows.size() - 2:rows.size() - 1
+    def from = 0
+    def to = rows.size() - 1
     if (from > to) {
         return 0
     }
@@ -840,7 +842,7 @@ def getPrevPeriodValue(def needColumnName, def searchColumnName, def searchValue
     if (formDataOld != null && !getRows(dataOld).isEmpty()) {
         for (def row : getRows(dataOld)) {
             if (row.getCell(searchColumnName).getValue() == searchValue) {
-                return round(row.getCell(needColumnName).getValue(), 2)
+                return roundValue(row.getCell(needColumnName).getValue(), 2)
             }
         }
     }
@@ -871,30 +873,6 @@ def checkPrevPeriod() {
         return true
     }
     return false
-}
-
-/**
- * Получить значение за предыдущий отчетный период для графы 6
- *
- * @param row строка текущего периода
- * @return возвращает найденое значение, иначе возвратит 0
- */
-def getValueForColumn6(def row) {
-    def formDataOld = getFormDataOld()
-    def dataOld = getData(formDataOld)
-    def value = 0
-    def count = 0
-    if (formDataOld != null && !getRows(dataOld).isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
-        for (def rowOld : getRows(dataOld)) {
-            if (rowOld.tradeNumber == row.tradeNumber) {
-                value = (getSign(rowOld.signSecurity) == '+' && getSign(row.reserveCalcValuePrev) == '-' ? rowOld.lotSizePrev : 0)
-                count += 1
-            }
-        }
-    }
-    // если count не равно 1, то или нет формы за предыдущий период,
-    // или нет соответствующей записи в предыдущем периода или записей несколько
-    return (count == 1 ? value : 0)
 }
 
 /**
@@ -1037,16 +1015,15 @@ def addData(def xml) {
  * @param value строка
  */
 def getNumber(def value) {
-    if (value == null) {
-        return null
-    }
     def tmp = value.trim()
     if ("".equals(tmp)) {
         return null
     }
-    // поменять запятую на точку и убрать пробелы
-    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
-    return new BigDecimal(tmp)
+    try {
+        return new BigDecimal(tmp)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в число. " + e.message)
+    }
 }
 
 /**
@@ -1158,7 +1135,6 @@ def getRowNumber(def alias, def data) {
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    def data = getData(formData)
     def totalColumns = [6 : 'lotSizePrev', 7 : 'lotSizeCurrent', 8: 'reserveCalcValuePrev', 9 : 'cost', 14 : 'costOnMarketQuotation',
             15 : 'reserveCalcValue', 16 : 'reserveCreation', 17: 'reserveRecovery']
     def totalCalc = getCalcTotalRow()
@@ -1214,8 +1190,41 @@ def getCalcTotalRow() {
     totalRow.setAlias('total')
     totalRow.issuer = 'Общий итог'
     setTotalStyle(totalRow)
+    def data = getData(formData)
     totalColumns.each { alias ->
-        totalRow.getCell(alias).setValue(getSum(alias))
+        totalRow.getCell(alias).setValue(getSum(data, alias))
     }
     return totalRow
+}
+
+/**
+ * Отсорировать данные (по графе 2, 4).
+ *
+ * @param data данные нф (хелпер)
+ */
+void sort(def data) {
+    // отсортировать/группировать
+    getRows(data).sort { def a, def b ->
+        // графа 2  - issuer
+        // графа 4  - tradeNumber
+        if (a.issuer == b.issuer) {
+            return a.tradeNumber <=> b.tradeNumber
+        }
+        return a.issuer <=> b.issuer
+    }
+}
+
+/**
+ * Округляет число до требуемой точности.
+ *
+ * @param value округляемое число
+ * @param precision точность округления, знаки после запятой
+ * @return округленное число
+ */
+def roundValue(def value, def precision) {
+    if (value != null) {
+        return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
+    } else {
+        return null
+    }
 }

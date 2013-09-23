@@ -269,15 +269,19 @@ void logicCheck() {
             def testItogRow = testItogRows[i]
             def realItogRow = itogRows[i]
             int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
-            def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
-            if (testItogRow.price != realItogRow.price) {
-                logger.error(mes + " «${priceName}»")
-            }
-            if (testItogRow.total != realItogRow.total) {
-                logger.error(mes + " «${totalName}»")
-            }
-            if (testItogRow.sum != realItogRow.sum) {
-                logger.error(mes + " «${sumName}»")
+            if (dataRows[itg].getAlias() != null) {
+                logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
+            } else {
+                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
+                if (testItogRow.price != realItogRow.price) {
+                    logger.error(mes + " «${priceName}»")
+                }
+                if (testItogRow.total != realItogRow.total) {
+                    logger.error(mes + " «${totalName}»")
+                }
+                if (testItogRow.sum != realItogRow.sum) {
+                    logger.error(mes + " «${sumName}»")
+                }
             }
         }
     }
@@ -302,7 +306,7 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
 def getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    def map = refBookService.getRecordData(9, row.fullName)
+    def map = row.fullName != null ? refBookService.getRecordData(9, row.fullName) : null
     builder.append(map == null ? 'null' : map.NAME.stringValue).append(sep)
     builder.append(row.inn).append(sep)
     builder.append(row.docNumber).append(sep)
