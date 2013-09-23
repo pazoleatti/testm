@@ -325,7 +325,7 @@ void logicCheck() {
 def getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    def map = refBookService.getRecordData(9, row.name)
+    def map = row.name !=null ? refBookService.getRecordData(9, row.name) : null
     builder.append(map == null ? 'null' : map.NAME.stringValue).append(sep)
     builder.append(row.innKio).append(sep)
     builder.append(row.contractNum).append(sep)
