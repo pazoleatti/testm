@@ -45,24 +45,11 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        if (!hasError() && logicalCheck()) {
-            // для сохранения изменений приемников
-            getData(formData).commit()
-        }
+        !hasError() && logicalCheck()
         break
     case FormDataEvent.IMPORT :
-        importData()
-        if (!hasError()) {
-            calc()
-            !hasError() && logicalCheck()
-            if (!hasError()) {
-                logger.info('Закончена загрузка файла ' + UploadFileName)
-            }
-        }
-        break
     case FormDataEvent.MIGRATION :
         importData()
-        logger.info('Закончена загрузка файла ' + UploadFileName)
         break
 }
 
@@ -538,16 +525,15 @@ def addData(def xml) {
  * @param value строка
  */
 def getNumber(def value) {
-    if (value == null) {
-        return null
-    }
     def tmp = value.trim()
     if ("".equals(tmp)) {
         return null
     }
-    // поменять запятую на точку и убрать пробелы
-    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
-    return new BigDecimal(tmp)
+    try {
+        return new BigDecimal(tmp)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в число. " + e.message)
+    }
 }
 
 /**

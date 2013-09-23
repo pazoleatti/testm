@@ -31,8 +31,15 @@ public abstract class AbstractXlsxReportBuilder {
      */
     protected static String fileName;
 
-    //Порядок формирования заголовка и шапки таблицы в такой последовательности не случайно,
-    //а по причине наличия нулевых столбцов в налоговых отчетах, чтобы потом некоторые значения случайно не пропали.
+    //
+
+    /**
+     * Формирование отчета. Условно разбит на шесть частей.
+     * Порядок формирования заголовка и шапки таблицы в такой последовательности не случайно,
+     * а по причине наличия нулевых столбцов в налоговых отчетах, чтобы потом некоторые значения не пропали.
+     * @return
+     * @throws IOException
+     */
     public final String createReport() throws IOException {
         createTableHeaders();
         createDataForTable();
@@ -50,19 +57,32 @@ public abstract class AbstractXlsxReportBuilder {
         }
     }
 
+    /**
+     * Создание шапки таблицы.
+     */
     protected abstract void createTableHeaders();
 
+    /**
+     * Заполнение шапк отчета.
+     */
     protected abstract void fillHeader();
 
+    /**
+     * Заполнение таблицы данными.
+     */
     protected abstract void createDataForTable();
 
+    /**
+     * Заполнение подвала отчета.
+     */
     protected abstract void fillFooter();
 
     /**
-     * Выставляем область печати. Она может маштабироваться самим Excel, в зависимости от ширины области печати.
+     * Выставление области печати для отчета.
+     * Она может маштабироваться самим Excel, в зависимости от ширины области печати.
      */
     protected void setPrintSetup(){
-
+        //Nothing
     }
 
     private String flush() throws IOException {

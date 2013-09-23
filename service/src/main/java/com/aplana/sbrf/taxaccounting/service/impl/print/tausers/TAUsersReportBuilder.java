@@ -145,8 +145,8 @@ public class TAUsersReportBuilder extends AbstractXlsxReportBuilder {
                 if(j < user.getUser().getRoles().size() - 1){
                     row = sheet.createRow(sheet.getLastRowNum() + 1);
                     cell = row.createCell(cellNumber);
+                    cell.setCellStyle(cs);
                 }
-
             }
 
             cellNumber = 0;

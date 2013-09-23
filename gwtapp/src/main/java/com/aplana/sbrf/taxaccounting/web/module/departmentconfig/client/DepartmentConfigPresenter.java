@@ -52,10 +52,16 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         void setDepartment(Department department);
 
         /**
-         * Установка доступных налоговых периодов
+         * Установка доступных отчетных периодов
          * @param reportPeriods
          */
         void setReportPeriods(List<ReportPeriod> reportPeriods);
+
+        /**
+         * Установка выбранного отчетного периода
+         * @param reportPeriodId
+         */
+        void setReportPeriod(Integer reportPeriodId);
 
         /**
          * Установка параметров подразделения
@@ -130,6 +136,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     @Override
     public void reloadDepartmentParams(Integer departmentId, TaxType taxType, Integer reportPeriodId) {
         if (departmentId == null || taxType == null || reportPeriodId == null) {
+            getView().clear();
             return;
         }
 
@@ -180,7 +187,13 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                     // Выбирается подразделение пользователя
                                     getView().setDepartment(userDepartment);
                                 }
+                                // Список отчетных периодов
                                 getView().setReportPeriods(result.getReportPeriods());
+
+                                // По-умолчанию последний
+                                if (result.getReportPeriods() != null && !result.getReportPeriods().isEmpty()) {
+                                    getView().setReportPeriod(result.getReportPeriods().get(result.getReportPeriods().size()-1).getId());
+                                }
                             }
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
     }
@@ -209,6 +222,4 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                             }
                         }, this).addCallback(new ManualRevealCallback<GetUserDepartmentAction>(this)));
     }
-
-    // TODO Unlock. Реализовать механизм блокировок.
 }

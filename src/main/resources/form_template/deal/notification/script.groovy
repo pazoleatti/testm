@@ -2,28 +2,36 @@ package form_template.deal.notification
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 import groovy.xml.MarkupBuilder
 
 /**
  * Уведомление. Генератор XML.
+ * http://conf.aplana.com/pages/viewpage.action?pageId=9594552
+ * http://conf.aplana.com/pages/viewpage.action?pageId=10388852
  *
  * @author Dmitriy Levykin
  */
+
+// TODO в DeclarationDataServiceImpl в check и setAccepted метод validateDeclaration вызывается до скрипта, а по аналитике д.б. после проверки подразделений (checkDeparmentParams)
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
+        checkDeparmentParams(LogLevel.WARNING)
         generateXML()
+        break
+    case FormDataEvent.CHECK:
+        checkDeparmentParams(LogLevel.ERROR)
+        break
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
+        checkDeparmentParams(LogLevel.ERROR)
         break
     default:
         return
 }
 
-/**
- * Запуск генерации XML
- */
-void generateXML() {
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
-
+void checkDeparmentParams(LogLevel logLevel) {
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
@@ -34,6 +42,31 @@ void generateXML() {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
     }
 
+    // Проверки подразделения
+    def List<String> errorList = getErrorDepartment(departmentParam)
+    for (String error : errorList) {
+        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s", error))
+    }
+    errorList = getErrorVersion(departmentParam)
+    for (String error : errorList) {
+        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений для %s", error, departmentParam.NAME.stringValue))
+    }
+
+}
+
+/**
+ * Запуск генерации XML
+ */
+void generateXML() {
+
+    def departmentId = declarationData.departmentId
+
+    // Параметры подразделения
+    def refDataProvider = refBookFactory.getDataProvider(37)
+    def departmentParam = refDataProvider.getRecords(new Date(), null, "DEPARTMENT_ID = '$departmentId'", null).get(0)
+
+    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
+
     def builder = new MarkupBuilder(xml)
 
     // Тип декларации - Уведомление
@@ -42,10 +75,8 @@ void generateXML() {
     def String KND = '1110025'
     builder.Файл(
             ИдФайл: declarationService.generateXmlFileId(notificationType, departmentId, declarationData.reportPeriodId),
-            // TODO заменить на departmentParam.APP_VERSION.stringValue (в базе пока null, не проходит валидацию)
-            ВерсПрог: 'test',
-            // TODO заменить на departmentParam.FORMAT_VERSION.stringValue (в базе пока null, не проходит валидацию)
-            ВерсФорм: '5.01') {
+            ВерсПрог: departmentParam.APP_VERSION.stringValue,
+            ВерсФорм: departmentParam.FORMAT_VERSION.stringValue) {
         Документ(
                 // Код формы отчетности по КНД
                 КНД: KND,
@@ -59,14 +90,11 @@ void generateXML() {
                 // TODO сделать на следующей версии
                 НомКорр: '0',
                 // Код места, по которому представляется документ
-                // TODO заменить на departmentParam.TAX_PLACE_TYPE_CODE.stringValue (в базе пока null, не проходит валидацию)
-                ПоМесту: '111'
+                ПоМесту: departmentParam.TAX_PLACE_TYPE_CODE.stringValue
         ) {
             СвНП(
-                    // TODO заменить на departmentParam.OKATO.stringValue (в базе пока null, не проходит валидацию)
-                    ОКАТО: '12345678901',
-                    // TODO заменить на departmentParam.OKVED_CODE.stringValue (в базе пока null, не проходит валидацию)
-                    ОКВЭД: '01.12.1',
+                    ОКАТО: departmentParam.OKATO.stringValue,
+                    ОКВЭД: departmentParam.OKVED_CODE.stringValue,
                     Тлф: departmentParam.PHONE.stringValue
             ) {
                 НПЮЛ(
@@ -89,10 +117,8 @@ void generateXML() {
             Подписант(
                     ПрПодп: prPodp
             ) {
-                // TODO заменить на departmentParam.SIGNATORY_SURNAME.stringValue (в базе пока null, не проходит валидацию)
-                def String surname = 'Фамилия'
-                // TODO заменить на departmentParam.SIGNATORY_FIRSTNAME.stringValue (в базе пока null, не проходит валидацию)
-                def String firstname = 'Имя'
+                def String surname = departmentParam.SIGNATORY_SURNAME.stringValue
+                def String firstname = departmentParam.SIGNATORY_FIRSTNAME.stringValue
                 def String lastname = departmentParam.SIGNATORY_LASTNAME.stringValue
                 ФИО(
                         [Фамилия: surname] +
@@ -147,8 +173,8 @@ void generateXML() {
                                         Осн135: mapYesNo.get(row.f135)
                                 )
                             }
-                            def String dealNameCode = row.dealNameCode != null ? '' + refBookService.getRecordData(67, row.dealNameCode).CODE.numberValue : '---'
-                            def String taxpayerSideCode = row.taxpayerSideCode != null ? '' + refBookService.getRecordData(65, row.taxpayerSideCode).CODE.numberValue : ''
+                            def String dealNameCode = row.dealNameCode != null ? refBookService.getRecordData(67, row.dealNameCode).CODE.stringValue : null
+                            def String taxpayerSideCode = row.taxpayerSideCode != null ? refBookService.getRecordData(65, row.taxpayerSideCode).CODE.stringValue : ''
                             while (taxpayerSideCode.length() < 3)
                                 taxpayerSideCode = '0' + taxpayerSideCode
                             def String dealPriceCode = row.taxpayerSideCode != null ? '' + refBookService.getRecordData(66, row.dealPriceCode).CODE.numberValue : null
@@ -173,7 +199,7 @@ void generateXML() {
                                 def String dealSubjectCode2 = row.dealSubjectCode2 != null ? '' + refBookService.getRecordData(68, row.dealSubjectCode2).CODE.numberValue : null
                                 def String dealSubjectCode3 = row.dealSubjectCode3 != null ? '' + refBookService.getRecordData(34, row.dealSubjectCode3).CODE.stringValue : null
                                 def String countryCode = row.countryCode != null ? '' + refBookService.getRecordData(10, row.countryCode).CODE.numberValue : null
-                                def String deliveryCode = row.deliveryCode != null ? '' + refBookService.getRecordData(63, row.deliveryCode).CODE.numberValue : null
+                                def String deliveryCode = row.deliveryCode != null ? refBookService.getRecordData(63, row.deliveryCode).STRCODE.stringValue : null
                                 def String okeiCode = row.okeiCode != null ? '' + refBookService.getRecordData(12, row.okeiCode).CODE.stringValue : null
                                 ПерПредСд(
                                         [НаимПредСд: row.dealSubjectName] +
@@ -208,14 +234,13 @@ void generateXML() {
                                     )
                                 }
                             }
-                            // TODO в БД д.б. заполнена у всех, пока ставлю '1'
-                            def String organInfo = row.organInfo != null ? '' + refBookService.getRecordData(4, row.organInfo).VALUE.numberValue : '1'
+                            def String organInfo = row.organInfo != null ? '' + refBookService.getRecordData(4, row.organInfo).VALUE.numberValue : null
                             def String countryCode3 = row.countryCode3 != null ? '' + refBookService.getRecordData(10, row.countryCode3).CODE.stringValue : null
                             def String organName, organINN, organKPP, organRegNum, taxpayerCode, address
                             if (row.organName != null) {
                                 def map = refBookService.getRecordData(9, row.organName)
                                 organName = map.NAME.stringValue
-                                organINN = '' + map.INN_KIO.numberValue
+                                organINN = '' + map.INN_KIO.stringValue
                                 organKPP = '' + map.KPP.numberValue
                                 organRegNum = map.REG_NUM.stringValue
                                 taxpayerCode = map.TAXPAYER_CODE.stringValue
@@ -239,3 +264,61 @@ void generateXML() {
         }
     }
 }
+
+List<String> getErrorDepartment(record) {
+    List<String> errorList = new ArrayList<String>()
+    if (record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
+        errorList.add("«Наименование подразделения»")
+    }
+    if (record.OKATO.referenceValue == null) {
+        errorList.add("«Код по ОКАТО»")
+    }
+    if (record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
+        errorList.add("«ИНН»")
+    }
+    if (record.KPP.stringValue == null || record.KPP.stringValue.isEmpty()) {
+        errorList.add("«КПП»")
+    }
+    if (record.TAX_ORGAN_CODE.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
+        errorList.add("«Код налогового органа»")
+    }
+    if (record.OKVED_CODE.referenceValue == null) {
+        errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
+    }
+    if (record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
+        errorList.add("«ИНН реорганизованного обособленного подразделения»")
+    }
+    if (record.REORG_KPP.stringValue == null || record.REORG_KPP.stringValue.isEmpty()) {
+        errorList.add("«КПП реорганизованного обособленного подразделения»")
+    }
+    if (record.SIGNATORY_ID.referenceValue == null) {
+        errorList.add("«Признак лица подписавшего документ»")
+    }
+    if (record.SIGNATORY_SURNAME.stringValue == null || record.SIGNATORY_SURNAME.stringValue.isEmpty()) {
+        errorList.add("«Фамилия подписанта»")
+    }
+    if (record.SIGNATORY_FIRSTNAME.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
+        errorList.add("«Имя подписанта»")
+    }
+    if (record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
+        errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
+    }
+    if (record.TAX_PLACE_TYPE_CODE.referenceValue == null) {
+        errorList.add("«Код места, по которому представляется документ»")
+    }
+
+    errorList
+}
+
+List<String> getErrorVersion(record) {
+    List<String> errorList = new ArrayList<String>()
+    if (record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.01')) {
+        errorList.add("«Версия формата»")
+    }
+    if (record.APP_VERSION.stringValue == null || !record.APP_VERSION.stringValue.equals('XLR_FNP_TAXCOM_5_01')) {
+        errorList.add("«Версия программы, с помощью которой сформирован файл»")
+    }
+
+    errorList
+}
+

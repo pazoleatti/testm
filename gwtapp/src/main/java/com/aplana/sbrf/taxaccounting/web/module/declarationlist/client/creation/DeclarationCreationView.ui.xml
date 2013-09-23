@@ -28,7 +28,7 @@
                 
                 <g:FlowPanel height="60px">
                     <g:Label text="Отчетный период" />
-                     <rep:PeriodPickerPopupWidget ui:field="periodPicker"/>
+                     <rep:PeriodPickerPopupWidget ui:field="periodPicker" multiselect="false"/>
                 </g:FlowPanel>
 
                 <g:FlowPanel height="60px">

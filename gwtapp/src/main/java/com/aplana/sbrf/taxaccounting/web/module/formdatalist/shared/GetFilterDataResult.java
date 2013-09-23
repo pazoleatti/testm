@@ -11,6 +11,7 @@ public class GetFilterDataResult implements Result {
     private List<Department> departments;
 	private List<ReportPeriod> reportPeriods;
 	private FormDataFilterAvailableValues filterValues;
+	private FormDataFilter defaultFilter;
 
     public GetFilterDataResult(){
 
@@ -38,5 +39,13 @@ public class GetFilterDataResult implements Result {
 
 	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
 		this.reportPeriods = reportPeriods;
+	}
+
+	public FormDataFilter getDefaultFilter() {
+		return defaultFilter;
+	}
+
+	public void setDefaultFilter(FormDataFilter defaultFilter) {
+		this.defaultFilter = defaultFilter;
 	}
 }

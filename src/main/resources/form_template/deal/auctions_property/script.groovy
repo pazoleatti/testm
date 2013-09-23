@@ -64,6 +64,10 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
+    row.keySet().each{
+        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
+        row.getCell(it).setStyleAlias('Автозаполняемая')
+    }
     ['fullNamePerson', 'sum', 'docNumber', 'docDate', 'count', 'date'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
@@ -180,7 +184,7 @@ void calc() {
         // Расчет полей зависимых от справочников
         if (row.fullNamePerson != null) {
             def map = refBookService.getRecordData(9, row.fullNamePerson)
-            row.inn = map.INN_KIO.numberValue
+            row.inn = map.INN_KIO.stringValue
             row.countryCode = map.COUNTRY.referenceValue
         } else {
             row.inn = null
@@ -195,8 +199,7 @@ void calc() {
  */
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    dataRows.clear()
+    dataRowHelper.clear()
 
     int index = 1;
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {

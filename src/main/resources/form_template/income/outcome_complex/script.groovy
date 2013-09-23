@@ -1,3 +1,10 @@
+package form_template.income.outcome_complex
+
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+
 /**
  * Форма "Сводная форма начисленных расходов (расходы сложные)".
  *
@@ -19,6 +26,9 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
+        if (!isBank()) {
+            calcTotal()
+        }
         break
     // проверить
     case FormDataEvent.CHECK :
@@ -75,30 +85,6 @@ switch (formDataEvent) {
  * Проверить и расчитать.
  */
 void checkAndCalc() {
-    calculation()
-}
-
-/**
- * Расчет.
- */
-void calculation() {
-    def needExit = true
-    if ((formDataEvent == FormDataEvent.COMPOSE && isBank()) || formDataEvent != FormDataEvent.COMPOSE) {
-        needExit = false
-    }
-    if (needExit) {
-        return
-    }
-
-//    formData.dataRows.each { row ->
-//        ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each {
-//            def cell = row.getCell(it)
-//            if (cell.isEditable()) {
-//                cell.setValue(1)
-//            }
-//        }
-//    }
-
     /*
      * Проверка объязательных полей
      */
@@ -108,10 +94,23 @@ void calculation() {
             return
         }
     }
+    calcTotal()
+    calculationControlGraphs()
+    dataRowsHelper.save(dataRowsHelper.getAllCached())
+}
 
-    /*
-     * Расчет сумм
-     */
+/**
+ * Расчет итоговых строк.
+ */
+void calcTotal() {
+//    formData.dataRows.each { row ->
+//        ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each {
+//            def cell = row.getCell(it)
+//            if (cell.isEditable()) {
+//                cell.setValue(1)
+//            }
+//        }
+//    }
     def totalRow1 = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R67')
     def totalRow2 = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R93')
 
@@ -121,22 +120,12 @@ void calculation() {
         totalRow2.getCell(alias).setValue(getSum(alias, 'R69', 'R92'))
     }
 
-    calculationControlGraphs()
-    dataRowsHelper.save(dataRowsHelper.getAllCached())
 }
 
 /**
  * Расчет (контрольные графы).
  */
 void calculationControlGraphs() {
-    def needExit = true
-    if ((formDataEvent == FormDataEvent.COMPOSE && isBank()) || formDataEvent != FormDataEvent.COMPOSE) {
-        needExit = false
-    }
-    if (needExit) {
-        return
-    }
-
     def message = 'ТРЕБУЕТСЯ ОБЪЯСНЕНИЕ'
     def tmp
     def value
@@ -234,7 +223,7 @@ void checkCreation() {
  * @since 21.03.2013 11:00
  */
 void checkDeclarationBankOnAcceptance() {
-    if (isTerBank()) {
+    if (!isBank()) {
         return
     }
     departmentFormTypeService.getDeclarationDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY).each { department ->
@@ -252,7 +241,7 @@ void checkDeclarationBankOnAcceptance() {
  * @since 21.03.2013 11:00
  */
 void checkDeclarationBankOnCancelAcceptance() {
-    if (isTerBank()) {
+    if (!isBank()) {
         return
     }
     departmentFormTypeService.getDeclarationDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY).each { department ->
@@ -270,7 +259,7 @@ void checkDeclarationBankOnCancelAcceptance() {
  * @since 22.02.2013 15:30
  */
 void consolidation() {
-    if (isTerBank()) {
+    if (!isBank()) {
         return
     }
     // очистить форму
@@ -327,19 +316,6 @@ def isBank() {
         }
     }
     return isBank
-}
-
-/**
- * Проверка на террбанк.
- */
-def isTerBank() {
-    boolean isTerBank = false
-    departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
-        if (it.departmentId != formData.departmentId) {
-            isTerBank = true
-        }
-    }
-    return isTerBank
 }
 
 double summ(String columnName, String fromRowA, String toRowA) {

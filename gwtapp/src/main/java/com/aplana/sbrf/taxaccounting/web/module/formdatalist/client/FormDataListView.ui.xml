@@ -1,7 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
 	xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager">
 
 	<ui:style>
@@ -9,46 +8,45 @@
 			margin-right: auto;
 			margin-left: auto;
 		}
-
-        .titleText{
-            font-size: 26px;
-        }
-
-        .titleDesc{
-            font-size: 16px;
-        }
-
-        .titlePanel{
-            padding-left: 10px
-        }
+		
+		.titleText {
+			font-size: 26px;
+		}
+		
+		.titleDesc {
+			font-size: 16px;
+		}
+		
+		.titlePanel {
+			padding-left: 10px
+		}
 	</ui:style>
 
 	<g:DockLayoutPanel unit='PX' height="100%" width="100%">
 
 		<g:north size="100">
-            <g:HorizontalPanel>
-                <g:cell width="335px">
-                    <g:VerticalPanel width="310px" addStyleNames="{style.titlePanel}">
-                        <g:cell height="45px">
-                            <g:Label styleName="{style.titleText}">Список налоговых форм</g:Label>
-                        </g:cell>
-                        <g:Label ui:field="titleDesc" styleName="{style.titleDesc}"/>
-                    </g:VerticalPanel>
-                </g:cell>
-                <g:FlowPanel width="100%" ui:field="filterContentPanel" />
-            </g:HorizontalPanel>
+			<g:HorizontalPanel>
+				<g:cell width="335px">
+					<g:VerticalPanel width="310px" addStyleNames="{style.titlePanel}">
+						<g:cell height="45px">
+							<g:Label styleName="{style.titleText}">Список налоговых форм</g:Label>
+						</g:cell>
+						<g:Label ui:field="titleDesc" styleName="{style.titleDesc}" />
+					</g:VerticalPanel>
+				</g:cell>
+				<g:FlowPanel width="100%" ui:field="filterContentPanel" />
+			</g:HorizontalPanel>
 		</g:north>
 
 		<g:center>
-			<g:ScrollPanel>
-				<g:VerticalPanel width="100%">
-					<style:GenericCellTable ui:field="formDataTable" width="100%" />
-					<pager:FlexiblePager ui:field="pager" location="CENTER"
-						showFastForwardButton="false" fastForwardRows="0"
-						showLastPageButton="true" styleName="{style.pager}" />
-				</g:VerticalPanel>
-			</g:ScrollPanel>
+			<style:GenericDataGrid ui:field="formDataTable"	height="100%"/>
 		</g:center>
+
+		<g:south size="30">
+			<pager:FlexiblePager ui:field="pager" location="CENTER"
+				showFastForwardButton="false" fastForwardRows="0"
+				showLastPageButton="true" styleName="{style.pager}" />
+		</g:south>
 
 	</g:DockLayoutPanel>
 

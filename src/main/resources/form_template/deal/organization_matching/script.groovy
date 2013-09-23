@@ -72,7 +72,7 @@ Map<String, RefBookValue> getRecord(DataRow<Cell> row) {
     map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, row.name))
     map.put("ORGANIZATION", new RefBookValue(RefBookAttributeType.NUMBER, row.code))
     map.put("KPP", new RefBookValue(RefBookAttributeType.NUMBER, row.kpp))
-    map.put("INN_KIO", new RefBookValue(RefBookAttributeType.NUMBER, row.inn))
+    map.put("INN_KIO", new RefBookValue(RefBookAttributeType.STRING, row.inn))
     map.put("ADDRESS", new RefBookValue(RefBookAttributeType.STRING, row.address))
     map.put("TAXPAYER_CODE", new RefBookValue(RefBookAttributeType.STRING, row.taxpayerCode))
     map.put("REG_NUM", new RefBookValue(RefBookAttributeType.STRING, row.regNum))
@@ -94,22 +94,14 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? (currentDataRow.getIndex() + 1) : (size == 0 ? 1 : (size + 1))
+    row.keySet().each {
+        row.getCell(it).setStyleAlias('Автозаполняемая')
+    }
     ['name', 'country', 'regNum', 'taxpayerCode', 'address', 'inn', 'kpp', 'code', 'editSign', 'refBookRecord'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
     dataRowHelper.insert(row, index)
-}
-
-/**
- * Проверяет уникальность в отчётном периоде и вид
- * (не был ли ранее сформирован отчет, параметры которого совпадают с параметрами, указанными пользователем )
- */
-void checkUniq() {
-    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
-    if (findForm != null) {
-        logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
-    }
 }
 
 /**
@@ -133,7 +125,7 @@ void logicCheck() {
                     logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
                 }
             }
-        } else{
+        } else {
             // Проверка заполненности полей в строках на удаление
             ['rowNum', 'editSign'].each {
                 def rowCell = row.getCell(it)
@@ -172,10 +164,14 @@ void logicCheck() {
             // ИНН
             val = row.inn
             if (val != null) {
-                def res = refDataProvider.getRecords(new Date(), null, "INN_KIO = $val", null);
-                if (res.getRecords().size() > 0) {
-                    def msg = row.getCell("inn").column.name
-                    logger.warn("Строка $rowNum: «$msg» уже существует в справочнике «Организации – участники контролируемых сделок»!")
+                def msg = row.getCell("inn").column.name
+                if (!val.matches('[0-9]*')) {
+                    logger.error("Строка $rowNum: «$msg» содержит недопустимые символы!")
+                } else {
+                    def res = refDataProvider.getRecords(new Date(), null, "INN_KIO = $val", null);
+                    if (res.getRecords().size() > 0) {
+                        logger.warn("Строка $rowNum: «$msg» уже существует в справочнике «Организации – участники контролируемых сделок»!")
+                    }
                 }
             }
             // КПП
@@ -197,6 +193,7 @@ void logicCheck() {
         if (row.refBookRecord != null && dataRows.find { it.refBookRecord == row.refBookRecord && it.getIndex() != row.getIndex() } != null)
             isHaveDuplicates = true
     }
+
     if (isHaveDuplicates)
         logger.error("Одна запись справочника не может быть отредактирована более одного раза в одной и той же форме!")
 }

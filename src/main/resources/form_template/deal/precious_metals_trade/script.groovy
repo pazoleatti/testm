@@ -128,6 +128,10 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = 0
+    row.keySet().each{
+        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
+        row.getCell(it).setStyleAlias('Автозаполняемая')
+    }
     getEditColumns().each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
@@ -311,6 +315,35 @@ void logicCheck() {
             def msg2 = price.column.name
             logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
         }
+
+        // Проверка заполнения региона отправки
+        if (row.countryCodeNumeric != null) {
+            def country = refBookService.getStringValue(10, row.countryCodeNumeric, 'CODE')
+            if (country != null) {
+                def regionName = row.getCell('regionCode').column.name
+                def countryName = row.getCell('countryCodeNumeric').column.name
+                if (country == '643' && row.regionCode == null) {
+                    logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
+                } else if (country != '643' && row.regionCode != null) {
+                    logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
+                }
+            }
+        }
+
+        // Проверка заполнения региона доставки
+        if (row.countryCodeNumeric2 != null) {
+            def country = refBookService.getStringValue(10, row.countryCodeNumeric2, 'CODE')
+            if (country != null) {
+                def regionName = row.getCell('region2').column.name
+                def countryName = row.getCell('countryCodeNumeric2').column.name
+                if (country == '643' && row.region2 == null) {
+                    logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
+                } else if (country != '643' && row.region2 != null) {
+                    logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
+                }
+            }
+        }
+
         //Проверки соответствия НСИ
         checkNSI(row, "fullName", "Организации-участники контролируемых сделок", 9)
         checkNSI(row, "countryCode", "ОКСМ", 10)
@@ -371,12 +404,16 @@ void logicCheck() {
             def testItogRow = testItogRows[i]
             def realItogRow = itogRows[i]
             int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
-            def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
-            if (testItogRow.price != realItogRow.price) {
-                logger.error(mes + " «${getAtributes().price[2]}»")
-            }
-            if (testItogRow.total != realItogRow.total) {
-                logger.error(mes + " «${getAtributes().total[2]}»")
+            if (dataRows[itg].getAlias() != null) {
+                logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
+            } else {
+                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
+                if (testItogRow.price != realItogRow.price) {
+                    logger.error(mes + " «${getAtributes().price[2]}»")
+                }
+                if (testItogRow.total != realItogRow.total) {
+                    logger.error(mes + " «${getAtributes().total[2]}»")
+                }
             }
         }
     }
@@ -422,7 +459,7 @@ void calc() {
         // Расчет полей зависимых от справочников
         if (row.fullName != null) {
             def map = refBookService.getRecordData(9, row.fullName)
-            row.inn = map.INN_KIO.numberValue
+            row.inn = map.INN_KIO.stringValue
             row.countryCode = map.COUNTRY.referenceValue
             row.countryName = map.COUNTRY.referenceValue
         } else {
@@ -466,8 +503,7 @@ void calc() {
  */
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    dataRows.clear()
+    dataRowHelper.clear()
 
     int index = 1;
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
@@ -599,12 +635,7 @@ def getValuesByGroupColumn(DataRow row) {
 }
 
 def getRefBookValue(int id, def cell, def alias) {
-    def map
-    try {
-        map = refBookService.getRecordData(id, cell)
-    } catch (Exception e) {
-        map = null
-    }
+    def map = cell != null ? refBookService.getRecordData(id, cell) : null
     return map == null ? 'null' : map.get(alias).stringValue
 }
 

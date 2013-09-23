@@ -10,5 +10,4 @@ public interface PeriodPicker extends HasConstrainedValue<List<Integer>>{
 	void setPeriods(List<ReportPeriod> periods);
 	
 	void setTaxType(String taxType);
-	
 }

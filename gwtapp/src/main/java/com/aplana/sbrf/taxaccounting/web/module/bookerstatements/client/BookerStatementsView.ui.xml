@@ -1,15 +1,16 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:d='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker'
-             xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
-             xmlns:c='urn:import:com.google.gwt.user.cellview.client'
-             xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
+             xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
+             xmlns:fileuplod="urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload">
     <ui:style>
         .titleLabel {
             font-size: 26px;
             margin: 10px;
         }
     </ui:style>
+    <!--<ui:with field="bookerStatements"-->
+    <!--type="com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.BookerStatementsView"/>-->
     <g:DockLayoutPanel ui:field="dockPanel">
         <g:north size="110">
             <g:VerticalPanel>
@@ -19,50 +20,32 @@
                         <g:Label text="Подразделение"/>
                     </g:cell>
                     <g:cell width="220px">
-                        <g:Label text="Период" />
+                        <g:Label text="Период"/>
                     </g:cell>
                     <g:cell width="220px">
-                        <g:Label text="Вид бухгалтерской отчётности" />
+                        <g:Label text="Вид бухгалтерской отчётности"/>
                     </g:cell>
                 </g:HorizontalPanel>
                 <g:HorizontalPanel verticalAlignment="MIDDLE">
                     <g:cell width="220px">
-                        <d:DepartmentPickerPopupWidget width="200px" ui:field="departmentPicker" multiselection="false" header="Выберите подразделение"/>
+                        <d:DepartmentPickerPopupWidget width="200px" ui:field="departmentPicker" multiselection="false"
+                                                       header="Выберите подразделение"/>
                     </g:cell>
                     <g:cell width="220px">
                         <g:FlowPanel>
-                            <rep:PeriodPickerPopupWidget ui:field="periodPickerPopup"/>
+                            <rep:PeriodPickerPopupWidget ui:field="periodPickerPopup" multiselect="false"/>
                         </g:FlowPanel>
                     </g:cell>
                     <g:cell width="220px">
                         <g:ListBox ui:field="bookerReportType" width="200px"/>
                     </g:cell>
                     <g:cell>
-                        <g:FormPanel ui:field="uploadFormPanel" encoding="multipart/form-data" method="post">
-                            <g:HorizontalPanel ui:field="uploadPanel">
-                                <g:FileUpload ui:field="uploader" title="Файл xls" name="uploader"/>
-                                <g:SubmitButton ui:field="uploadButton" text="Загрузить"/>
-                            </g:HorizontalPanel>
-                        </g:FormPanel>
+                        <fileuplod:FileUploadWidget ui:field="fileUploader"/>
+                        <!--Инициализируем параметры внутри View uploadHandler actionUrl смотри объевление (магия Дмитрия Л.)-->
                     </g:cell>
                 </g:HorizontalPanel>
             </g:VerticalPanel>
         </g:north>
-        <g:center>
-            <g:DockLayoutPanel>
-                <g:center>
-                    <g:ResizeLayoutPanel>
-                        <style:GenericDataGrid height="100%" ui:field="formDataTable"/>
-                    </g:ResizeLayoutPanel>
-                </g:center>
-            </g:DockLayoutPanel>
-        </g:center>
-
-        <g:south size="80">
-            <g:ScrollPanel width="100%" ui:field="logPanel">
-                <c:CellList ui:field="loggerList" />
-            </g:ScrollPanel>
-        </g:south>
 
     </g:DockLayoutPanel>
 </ui:UiBinder>

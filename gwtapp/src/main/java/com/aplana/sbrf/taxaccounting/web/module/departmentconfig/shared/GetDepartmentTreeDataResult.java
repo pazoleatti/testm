@@ -18,6 +18,7 @@ public class GetDepartmentTreeDataResult implements Result {
     // Список id подразделений, доступных пользователю
     private Set<Integer> availableDepartments;
 
+    // Список отчетных периодов
     private List<ReportPeriod> reportPeriods;
 
     public List<Department> getDepartments() {

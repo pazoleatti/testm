@@ -499,14 +499,9 @@ def checkRequiredColumns(def row, def columns) {
         }
     }
     if (!colNames.isEmpty()) {
-        def index = row.number
+        def errorBegin = getRowIndexString(row)
         def errorMsg = colNames.join(', ')
-        if (index != null) {
-            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-        } else {
-            index = getIndex(row) + 1
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
-        }
+        logger.error(errorBegin+ "не заполнены колонки : $errorMsg.")
         return false
     }
     return true

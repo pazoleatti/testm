@@ -50,7 +50,7 @@ switch (formDataEvent) {
         addAllStatic()
         logicCheck()
         break
-    case FormDataEvent.IMPORT :
+    case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             deleteAllStatic()
@@ -84,11 +84,11 @@ def getAtributes(){
     ]
 }
 
-def getGroupColumns(){
+def getGroupColumns() {
     ['fullName', 'inn', 'docNumber', 'docDate', 'dealType']
 }
 
-def getEditColumns(){
+def getEditColumns() {
     ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealType',
             'currencyCode', 'countryDealCode', 'incomeSum', 'outcomeSum', 'dealDoneDate']
 }
@@ -105,29 +105,33 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = 0
+    row.keySet().each {
+        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
+        row.getCell(it).setStyleAlias('Автозаполняемая')
+    }
     getEditColumns().each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    if (currentDataRow!=null){
+    if (currentDataRow != null) {
         index = currentDataRow.getIndex()
         def pointRow = currentDataRow
-        while(pointRow.getAlias()!=null && index>0){
+        while (pointRow.getAlias() != null && index > 0) {
             pointRow = dataRows.get(--index)
         }
-        if(index!=currentDataRow.getIndex() && dataRows.get(index).getAlias()==null){
+        if (index != currentDataRow.getIndex() && dataRows.get(index).getAlias() == null) {
             index++
         }
-    }else if (size>0) {
-        for(int i = size-1;i>=0;i--){
+    } else if (size > 0) {
+        for (int i = size - 1; i >= 0; i--) {
             def pointRow = dataRows.get(i)
-            if(pointRow.getAlias()==null){
-                index = dataRows.indexOf(pointRow)+1
+            if (pointRow.getAlias() == null) {
+                index = dataRows.indexOf(pointRow) + 1
                 break
             }
         }
     }
-    dataRowHelper.insert(row, index+1)
+    dataRowHelper.insert(row, index + 1)
 }
 
 /**
@@ -184,14 +188,11 @@ void logicCheck() {
                 logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
             }
         }
-        // Проверка доходов и расходов
+        // Проверка заполнения расходов/доходов.
         def incomeSumCell = row.getCell('incomeSum')
         def outcomeSumCell = row.getCell('outcomeSum')
         def msgIn = incomeSumCell.column.name
         def msgOut = outcomeSumCell.column.name
-        if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            logger.warn("Строка $rowNum: «$msgIn» и «$msgOut» не могут быть одновременно заполнены!")
-        }
         if (incomeSumCell.value == null && outcomeSumCell.value == null) {
             logger.warn("Строка $rowNum: Одна из граф «$msgIn» и «$msgOut» должна быть заполнена!")
         }
@@ -214,16 +215,36 @@ void logicCheck() {
             def msg2 = dealDateCell.column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
+
+        // Проверка доходов/расходов и стоимости
+        def msgPrice = row.getCell('price').column.name
+        if (incomeSumCell.value != null && outcomeSumCell.value != null) {
+            if (row.price.abs() != (incomeSumCell.value - outcomeSumCell.value).abs())
+                logger.warn("Строка $rowNum: Графа «$msgPrice» должна быть равна разнице графы «$msgIn» и «$msgOut» по модулю!")
+        } else if (incomeSumCell.value != null) {
+            if (row.price != incomeSumCell.value)
+                logger.warn("Строка $rowNum: Графа «$msgPrice» должна быть равна «$msgIn»!")
+        } else if (outcomeSumCell.value != null) {
+            if (row.price != outcomeSumCell.value)
+                logger.warn("Строка $rowNum: Графа «$msgPrice» должна быть равна «$msgOut»!")
+        }
+
+        // Проверка заполнения стоимости сделки
+        if (row.total != row.price) {
+            def msg1 = row.getCell('total').column.name
+            logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msgPrice» сделки!")
+        }
+
         //Проверки соответствия НСИ
-        checkNSI(row, "fullName", "Организации-участники контролируемых сделок",9)
-        checkNSI(row, "countryName", "ОКСМ",10)
-        checkNSI(row, "countryCode", "ОКСМ",10)
-        checkNSI(row, "countryDealCode", "ОКСМ",10)
-        checkNSI(row, "currencyCode", "Единый справочник валют",15)
+        checkNSI(row, "fullName", "Организации-участники контролируемых сделок", 9)
+        checkNSI(row, "countryName", "ОКСМ", 10)
+        checkNSI(row, "countryCode", "ОКСМ", 10)
+        checkNSI(row, "countryDealCode", "ОКСМ", 10)
+        checkNSI(row, "currencyCode", "Единый справочник валют", 15)
     }
 
     //Проверки подитоговых сумм
-    def testRows = dataRows.findAll{it -> it.getAlias() == null}
+    def testRows = dataRows.findAll { it -> it.getAlias() == null }
     //добавляем итоговые строки для проверки
     for (int i = 0; i < testRows.size(); i++) {
         def testRow = testRows.get(i)
@@ -259,7 +280,7 @@ void logicCheck() {
 
         for (int i = 0; i < dataRows.size(); i++) {
             if (dataRows[i].getAlias() != null) {
-                if(i - 1 < -1 || dataRows[i - 1].getAlias() != null){
+                if (i - 1 < -1 || dataRows[i - 1].getAlias() != null) {
                     logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
                 }
             }
@@ -272,12 +293,16 @@ void logicCheck() {
             def testItogRow = testItogRows[i]
             def realItogRow = itogRows[i]
             int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
-            def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
-            if (testItogRow.price != realItogRow.price) {
-                logger.error(mes + " «${priceName}»")
-            }
-            if (testItogRow.total != realItogRow.total) {
-                logger.error(mes + " «${totalName}»")
+            if (dataRows[itg].getAlias() != null) {
+                logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
+            } else {
+                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
+                if (testItogRow.price != realItogRow.price) {
+                    logger.error(mes + " «${priceName}»")
+                }
+                if (testItogRow.total != realItogRow.total) {
+                    logger.error(mes + " «${totalName}»")
+                }
             }
         }
     }
@@ -299,10 +324,11 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     Возвращает строку со значениями полей строки по которым идет группировка
     ['fullName', 'inn', 'docNumber', 'docDate', 'dealType']
  */
+
 def getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    def map = refBookService.getRecordData(9, row.fullName)
+    def map = row.fullName !=null ? refBookService.getRecordData(9, row.fullName) : null
     builder.append(map == null ? 'null' : map.NAME.stringValue).append(sep)
     builder.append(row.inn).append(sep)
     builder.append(row.docNumber).append(sep)
@@ -325,14 +351,18 @@ void calc() {
         // Порядковый номер строки
         row.rowNumber = index++
         // Расчет поля "Цена"
-        row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
+        if (row.incomeSum != null && row.outcomeSum != null) {
+            row.price = (row.incomeSum - row.outcomeSum).abs()
+        } else {
+            row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
+        }
         // Расчет поля "Итого"
         row.total = row.price
 
         // Расчет полей зависимых от справочников
         if (row.fullName != null) {
             def map = refBookService.getRecordData(9, row.fullName)
-            row.inn = map.INN_KIO.numberValue
+            row.inn = map.INN_KIO.stringValue
             row.countryName = map.COUNTRY.referenceValue
             row.countryCode = map.COUNTRY.referenceValue
         } else {
@@ -420,8 +450,7 @@ int sortRow(List<String> params, DataRow a, DataRow b) {
  */
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    dataRows.clear()
+    dataRowHelper.clear()
 
     int index = 1;
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
@@ -461,7 +490,7 @@ void addAllStatic() {
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.getAllCached()
 
-        if (dataRows.size()<1){
+        if (dataRows.size() < 1) {
             return
         }
 
@@ -475,12 +504,11 @@ void addAllStatic() {
             if (row.getAlias() == null)
                 if (nextRow == null || isDiffRow(row, nextRow, getGroupColumns())) {
                     def itogRow = calcItog(i, dataRows)
-                    dataRowHelper.insert(itogRow, ++i+1)
-            }
+                    dataRowHelper.insert(itogRow, ++i + 1)
+                }
         }
     }
 }
-
 
 /**
  * Получение импортируемых данных.
@@ -515,14 +543,14 @@ void importData() {
     }
 
     // добавить данные в форму
-    try{
+    try {
         if (!checkTableHead(xml, 4)) {
             logger.error('Заголовок таблицы не соответствует требуемой структуре!')
             return
         }
-        addData(xml,3)
-    } catch(Exception e) {
-        logger.error(""+e.message)
+        addData(xml, 3)
+    } catch (Exception e) {
+        logger.error("" + e.message)
     }
 }
 
@@ -547,7 +575,7 @@ def addData(def xml, int headRowCount) {
             continue
         }
 
-        if ((row.cell.find{it.text()!=""}.toString())=="") {
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
 
@@ -629,7 +657,6 @@ def addData(def xml, int headRowCount) {
     }
 }
 
-
 /**
  * Проверить шапку таблицы.
  *
@@ -643,53 +670,53 @@ def checkTableHead(def xml, int headRowCount) {
         return false
     }
     def result = (xml.row[0].cell[0] == 'Полное наименование с указанием ОПФ' &&
-            xml.row[2].cell[0] ==  '2' &&
-            xml.row[3].cell[0] ==  'гр. 2' &&
+            xml.row[2].cell[0] == '2' &&
+            xml.row[3].cell[0] == 'гр. 2' &&
             xml.row[0].cell[1] == 'ИНН/ КИО' &&
-            xml.row[2].cell[1] ==  '3' &&
-            xml.row[3].cell[1] ==  'гр. 3' &&
+            xml.row[2].cell[1] == '3' &&
+            xml.row[3].cell[1] == 'гр. 3' &&
             xml.row[0].cell[2] == 'Наименование страны регистрации' &&
-            xml.row[2].cell[2] ==  '4' &&
-            xml.row[3].cell[2] ==  'гр. 4.1'&&
+            xml.row[2].cell[2] == '4' &&
+            xml.row[3].cell[2] == 'гр. 4.1' &&
             xml.row[0].cell[3] == 'Код страны регистрации по классификатору ОКСМ' &&
-            xml.row[2].cell[3] ==  '5' &&
-            xml.row[3].cell[3] ==  'гр. 4.2' &&
+            xml.row[2].cell[3] == '5' &&
+            xml.row[3].cell[3] == 'гр. 4.2' &&
             xml.row[0].cell[4] == 'Номер договора' &&
-            xml.row[2].cell[4] ==  '6' &&
-            xml.row[3].cell[4] ==  'гр. 5' &&
+            xml.row[2].cell[4] == '6' &&
+            xml.row[3].cell[4] == 'гр. 5' &&
             xml.row[0].cell[5] == 'Дата договора' &&
-            xml.row[2].cell[5] ==  '7' &&
-            xml.row[3].cell[5] ==  'гр. 6' &&
+            xml.row[2].cell[5] == '7' &&
+            xml.row[3].cell[5] == 'гр. 6' &&
             xml.row[0].cell[6] == 'Номер сделки' &&
-            xml.row[2].cell[6] ==  '8' &&
-            xml.row[3].cell[6] ==  'гр. 7' &&
+            xml.row[2].cell[6] == '8' &&
+            xml.row[3].cell[6] == 'гр. 7' &&
             xml.row[0].cell[7] == 'Дата заключения сделки' &&
-            xml.row[2].cell[7] ==  '9' &&
-            xml.row[3].cell[7] ==  'гр. 8' &&
+            xml.row[2].cell[7] == '9' &&
+            xml.row[3].cell[7] == 'гр. 8' &&
             xml.row[0].cell[8] == 'Вид срочной сделки' &&
-            xml.row[2].cell[8] ==  '10' &&
-            xml.row[3].cell[8] ==  'гр. 9' &&
+            xml.row[2].cell[8] == '10' &&
+            xml.row[3].cell[8] == 'гр. 9' &&
             xml.row[0].cell[9] == 'Код валюты по сделке' &&
-            xml.row[2].cell[9] ==  '11' &&
-            xml.row[3].cell[9] ==  'гр. 10' &&
-            xml.row[0].cell[11]== 'Код страны происхождения предмета сделки по классификатору ОКСМ' &&
-            xml.row[2].cell[11] ==  '12' &&
-            xml.row[3].cell[11] ==  'гр. 11' &&
+            xml.row[2].cell[9] == '11' &&
+            xml.row[3].cell[9] == 'гр. 10' &&
+            xml.row[0].cell[11] == 'Код страны происхождения предмета сделки по классификатору ОКСМ' &&
+            xml.row[2].cell[11] == '12' &&
+            xml.row[3].cell[11] == 'гр. 11' &&
             xml.row[0].cell[12] == 'Сумма доходов Банка по данным бухгалтерского учета, руб.' &&
-            xml.row[2].cell[12] ==  '13' &&
-            xml.row[3].cell[12] ==  'гр. 12' &&
+            xml.row[2].cell[12] == '13' &&
+            xml.row[3].cell[12] == 'гр. 12' &&
             xml.row[0].cell[13] == 'Сумма расходов Банка по данным бухгалтерского учета, руб.' &&
-            xml.row[2].cell[13] ==  '14' &&
-            xml.row[3].cell[13] ==  'гр. 13' &&
+            xml.row[2].cell[13] == '14' &&
+            xml.row[3].cell[13] == 'гр. 13' &&
             xml.row[0].cell[14] == 'Цена (тариф) за единицу измерения, руб.' &&
-            xml.row[2].cell[14] ==  '15' &&
-            xml.row[3].cell[14] ==  'гр. 14' &&
+            xml.row[2].cell[14] == '15' &&
+            xml.row[3].cell[14] == 'гр. 14' &&
             xml.row[0].cell[15] == 'Итого стоимость, руб.' &&
-            xml.row[2].cell[15] ==  '16' &&
-            xml.row[3].cell[15] ==  'гр. 15' &&
+            xml.row[2].cell[15] == '16' &&
+            xml.row[3].cell[15] == 'гр. 15' &&
             xml.row[0].cell[16] == 'Дата совершения сделки' &&
-            xml.row[2].cell[16] ==  '17' &&
-            xml.row[3].cell[16] ==  'гр. 16')
+            xml.row[2].cell[16] == '17' &&
+            xml.row[3].cell[16] == 'гр. 16')
     return result
 }
 
@@ -711,7 +738,7 @@ def getNumber(def value, int indexRow, int indexCell) {
     try {
         return new BigDecimal(tmp)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
 
@@ -721,22 +748,21 @@ def getNumber(def value, int indexRow, int indexCell) {
  * @param value
  */
 def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
-    String filter = code + "= '"+ value+"'"
-    if (value=='') filter = "$code is null"
-    if (cache[ref_id]!=null) {
-        if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
+    String filter = code + "= '" + value + "'"
+    if (value == '') filter = "$code is null"
+    if (cache[ref_id] != null) {
+        if (cache[ref_id][filter] != null) return cache[ref_id][filter]
     } else {
         cache[ref_id] = [:]
     }
     def refDataProvider = refBookFactory.getDataProvider(ref_id)
     def records = refDataProvider.getRecords(date, null, filter, null)
-    if (records.size() == 1){
+    if (records.size() == 1) {
         cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
     }
-    throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!($filter)")
+    throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!($filter)")
 }
-
 
 /**
  * Получить дату по строковому представлению (формата дд.ММ.гггг)
@@ -749,6 +775,6 @@ def getDate(def value, int indexRow, int indexCell) {
     try {
         return format.parse(value)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
