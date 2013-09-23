@@ -10,15 +10,16 @@ import com.google.gwt.event.shared.HasHandlers;
  * @author sgoryachkin
  *
  */
-public class FilterReadyEvent extends
-		GwtEvent<FilterReadyEvent.MyHandler> {
+public class FilterFormDataReadyEvent extends GwtEvent<FilterFormDataReadyEvent.MyHandler> {
 	
 	public static interface MyHandler extends EventHandler {
 		/**
 		 * @param event
 		 */
-		void onFilterReady(FilterReadyEvent event);
+		void onFilterReady(FilterFormDataReadyEvent event);
 	}
+	
+	private boolean success; 
 
 	private static final Type<MyHandler> TYPE = new Type<MyHandler>();
 
@@ -26,11 +27,13 @@ public class FilterReadyEvent extends
 		return TYPE;
 	}
 
-	public static void fire(HasHandlers source) {
-		source.fireEvent(new FilterReadyEvent());
+	public static void fire(HasHandlers source, boolean success) {
+		FilterFormDataReadyEvent event = new FilterFormDataReadyEvent();
+		event.setSuccess(success);
+		source.fireEvent(event);
 	}
 	
-	public FilterReadyEvent() {
+	public FilterFormDataReadyEvent() {
 	}
 
 	@Override
@@ -41,6 +44,14 @@ public class FilterReadyEvent extends
 	@Override
 	public Type<MyHandler> getAssociatedType() {
 		return getType();
+	}
+
+	public boolean isSuccess() {
+		return success;
+	}
+
+	public void setSuccess(boolean success) {
+		this.success = success;
 	}
 
 }

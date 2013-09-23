@@ -227,8 +227,9 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
         StringTokenizer sToK = new StringTokenizer(formTemplate.getCode(), XlsxReportMetadata.REPORT_DELIMITER);//This needed because we can have not only one delimiter
         int j = 0;
         Row row = sheet.getRow(0);
+        int shiftCode = formTemplate.getColumns().size() - row.getLastCellNum();
         while(sToK.hasMoreTokens()){
-            createCellByRange(XlsxReportMetadata.RANGE_REPORT_CODE, sToK.nextToken(), j, formTemplate.getColumns().size() - row.getLastCellNum());
+            createCellByRange(XlsxReportMetadata.RANGE_REPORT_CODE, sToK.nextToken(), j, shiftCode);
             j++;
         }
 
@@ -485,9 +486,9 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                     richTextString.length(), richTextIndex);
         } else {
             richTextString.append(cellValue != null?cellValue:"");
-            c.setCellStyle(r.getCell(ar.getFirstCell().getCol()).getCellStyle());
+            c.setCellStyle(r.getCell(ar.getFirstCell().getCol())!=null?r.getCell(ar.getFirstCell().getCol()).getCellStyle()
+                : r.createCell(ar.getFirstCell().getCol()).getCellStyle());
         }
-
         c.setCellValue(richTextString);
     }
 

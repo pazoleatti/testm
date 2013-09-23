@@ -1,17 +1,19 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.creationdialog.DialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.events.FormDataListApplyEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.events.FormDataListCreateEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterReadyEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create.CreateFormDataPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterFormDataPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterFormDataReadyEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FormDataListApplyEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FormDataListCreateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataListResult;
 import com.google.inject.Inject;
@@ -19,7 +21,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
@@ -27,9 +28,10 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 public class FormDataListPresenter extends
 		FormDataListPresenterBase<FormDataListPresenter.MyProxy> implements
-		FormDataListUiHandlers, FilterReadyEvent.MyHandler, FormDataListCreateEvent.FormDataCreateHandler,
+		FormDataListUiHandlers, FilterFormDataReadyEvent.MyHandler, FormDataListCreateEvent.FormDataCreateHandler,
 		FormDataListApplyEvent.FormDataApplyHandler {
-
+	
+	
 	/**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListPresenter}
 	 * 's proxy.
@@ -38,75 +40,79 @@ public class FormDataListPresenter extends
 	@NameToken(FormDataListNameTokens.FORM_DATA_LIST)
 	public interface MyProxy extends ProxyPlace<FormDataListPresenter>, Place {
 	}
+	
+	/**
+	 * Текущий тип налога
+	 */
+	private TaxType taxType;
+
+	/**
+	 * Текущее состояние фильтров для всех типов налогов.
+	 * Обновляться из фильтра при FormDataListApplyEvent.
+	 * Сетится в фильтр при открытии формы.  
+	 * Используется при заполнении начальных значений фильтра поиска
+	 */
+	private Map<TaxType, FormDataFilter> filterStates = new HashMap<TaxType, FormDataFilter>();
+
+	
+
 
 	@Inject
 	public FormDataListPresenter(EventBus eventBus, MyView view, MyProxy proxy,
 			PlaceManager placeManager, DispatchAsync dispatcher,
-			FilterPresenter filterPresenter, DialogPresenter dialogPresenter) {
+			FilterFormDataPresenter filterPresenter, CreateFormDataPresenter dialogPresenter) {
 		super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, dialogPresenter);
 		getView().setUiHandlers(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.gwtplatform.mvp.client.Presenter#prepareFromRequest(com.gwtplatform
-	 * .mvp.client.proxy.PlaceRequest)
-	 */
+	@Override
+	protected void onBind() {
+		addRegisteredHandler(FilterFormDataReadyEvent.getType(), this);
+		addRegisteredHandler(FormDataListCreateEvent.getType(), this);
+		addRegisteredHandler(FormDataListApplyEvent.getType(), this);
+		super.onBind();
+	}
+	
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
-		try {
-			LogCleanEvent.fire(this);
-			LogShowEvent.fire(this, false);
-			super.prepareFromRequest(request);
-			TaxType taxType = TaxType.valueOf(request.getParameter("nType", ""));
-			filterPresenter.initFilter(taxType);
-		} catch (Exception e) {
-			ErrorEvent.fire(this, "Не удалось открыть список форм", e);
-		}
+		LogCleanEvent.fire(this);
+		LogShowEvent.fire(this, false);
+		TaxType taxType = TaxType.valueOf(request.getParameter("nType", ""));
+		filterPresenter.initFilter(taxType, filterStates.get(taxType));
+		super.prepareFromRequest(request);
 	}
 
 	@Override
-	@ProxyEvent
-	public void onFormDataCreateButtonClicked(FormDataListCreateEvent event) {
-		dialogPresenter.setSelectedFilterValues(filterPresenter.getFilterData());
-		addToPopupSlot(dialogPresenter);
+	public void onClickCreate(FormDataListCreateEvent event) {
+		// При создании формы берем не последний примененный фильтр, а фильтр который сейчас выставлен в форме фильтрации
+		// Если это поведение не устаривает то нужно получить фильтр из состояни формы getFilterState
+		dialogPresenter.initAndShowDialog(filterPresenter.getFilterData(), this);
+		
 	}
 
 	@Override
-	@ProxyEvent
-	public void onFormDataApplyButtonClicked(FormDataListApplyEvent event) {
-		FormDataFilter filterFormData = filterPresenter.getFilterData();
-		getView().updateTitle(filterFormData.getTaxType().getName());
-		filterPresenter.updateSavedFilterData(filterFormData);
+	public void onClickFind(FormDataListApplyEvent event) {
+		FormDataFilter filter = filterPresenter.getFilterData();
+		saveFilterSatet(filter.getTaxType(), filter);
 		getView().updateData(0);
 	}
 
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.
-	 * FilterReadyEvent
-	 * .MyHandler#onFilterReady(com.aplana.sbrf.taxaccounting.web
-	 * .module.formdatalist.client.filter.FilterReadyEvent)
-	 */
-	@ProxyEvent
 	@Override
-	public void onFilterReady(FilterReadyEvent event) {
+	public void onFilterReady(FilterFormDataReadyEvent event) {
 		if (event.getSource() == filterPresenter) {
-			dialogPresenter.initDialog(filterPresenter.getFilterData().getTaxType());
-			getView().updateData(0);
-
-			//TitleUpdateEvent.fire(this, "Список налоговых форм", filterFormData.getTaxType().getName());
-			// Вручную вызывается onReveal. Вызываем его всегда,
-			// даже когда
-			// презентер в состоянии visible, т.к. нам необходима
-			// его разблокировка.
-			// Почему GWTP вызывает блокировку даже если страница
-			// уже видна - непонятно.
-			getProxy().manualReveal(FormDataListPresenter.this);
+			if (event.isSuccess()){
+				FormDataFilter filter = filterPresenter.getFilterData();
+				getView().updateTitle(filter.getTaxType().getName());
+				this.taxType = filter.getTaxType();
+				saveFilterSatet(filter.getTaxType(), filter);
+				getView().updateData(0);
+				
+				// Презентор фильтра успешно проинициализировался - делаем ревал
+				getProxy().manualReveal(FormDataListPresenter.this);
+			} else {
+				// Отменяем отображение формы
+				getProxy().manualRevealFailed();
+			}
 		}
 	}
 
@@ -114,10 +120,35 @@ public class FormDataListPresenter extends
 	public void onSortingChanged(){
 		getView().updateData();
 	}
+	
+	
+	private void saveFilterSatet(TaxType taxType, FormDataFilter filter){
+		// Это ворк эраунд.
+		// Нужно клонировать состояние т.к. в FilterFormDataPresenter 
+		// может менять значения в этом объекте, что нужно не всегда.
+		// Здесь должны быть добавлены все поля для которых мы хотим сохранять состояние
+		// при переходах между формами
+		FormDataFilter cloneFilter = new FormDataFilter();
+		cloneFilter.setTaxType(filter.getTaxType());
+		cloneFilter.setFormTypeId(filter.getFormTypeId());
+		cloneFilter.setFormDataKind(filter.getFormDataKind());
+		cloneFilter.setReportPeriodIds(filter.getReportPeriodIds());
+		cloneFilter.setDepartmentIds(filter.getDepartmentIds());
+		cloneFilter.setFormState(filter.getFormState());
+		cloneFilter.setReturnState(filter.getReturnState());
+		// Если мы захотим чтобы для каждого налога запоминались другие параметры поиска (сортировка...),
+		// то вместо создания нового мы должны будем получать фильтр из мапки и обновлять.
+		
+		filterStates.put(taxType, cloneFilter);
+	}
+	
+	private FormDataFilter getFilterState(TaxType taxType){
+		return filterStates.get(taxType);
+	}
 
 	@Override
 	public void onRangeChange(final int start, int length) {
-		FormDataFilter filter = filterPresenter.getFilterData();
+		FormDataFilter filter = getFilterState(taxType);
 		filter.setCountOfRecords(length);
 		filter.setStartIndex(start);
 		filter.setAscSorting(getView().isAscSorting());
@@ -132,5 +163,6 @@ public class FormDataListPresenter extends
 					}
 				}, FormDataListPresenter.this));
 	}
+	
 
 }

@@ -170,7 +170,6 @@ public class FormDataXlsxReportBuilderTestMock {
 		formTemplate.setCode("Таблица 1\\2\\3 | Приложение 1 | Приложение 2");
         formTemplate.getColumns().addAll(columns);
         formTemplate.setFullName("Печатная форма");
-        formTemplate.setCode("33");
         formData.initFormTemplateParams(formTemplate);
 
         BufferedReader reader = new BufferedReader(

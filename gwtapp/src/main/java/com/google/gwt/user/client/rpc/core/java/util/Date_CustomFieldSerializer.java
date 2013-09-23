@@ -44,14 +44,14 @@ public final class Date_CustomFieldSerializer extends
 			throws SerializationException {
 		System.out.println("instantiate");
 		long time = streamReader.readLong();
-		Date date = new Date(offsetUTC(new Date(time), false));
+		Date date = new Date(offsetUTC(new Date(time), true));
 		return date;
 	}
 
 	public static void serialize(SerializationStreamWriter streamWriter,
 			Date instance) throws SerializationException {
 		System.out.println("serialize");
-		streamWriter.writeLong(offsetUTC(instance, true));
+		streamWriter.writeLong(offsetUTC(instance, false));
 	}
 
 	@Override
