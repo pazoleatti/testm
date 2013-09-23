@@ -1,6 +1,5 @@
-package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.creationdialog;
+package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -15,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -25,9 +23,9 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
-public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implements DialogPresenter.MyView {
+public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUiHandlers> implements CreateFormDataPresenter.MyView {
 
-	public interface Binder extends UiBinder<PopupPanel, DialogView> {
+	public interface Binder extends UiBinder<PopupPanel, CreateFormDataView> {
 	}
 
 	@UiField
@@ -50,8 +48,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
 
 	@Inject
-	@UiConstructor
-	public DialogView(Binder uiBinder, EventBus eventBus) {
+	public CreateFormDataView(Binder uiBinder, EventBus eventBus) {
 		super(eventBus);
 
 		formKind = new ValueListBox<FormDataKind>(new AbstractRenderer<FormDataKind>() {
@@ -108,7 +105,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 		FormDataFilter formDataFilter = new FormDataFilter();
 		formDataFilter.setFormDataKind(formKind.getValue());
 		formDataFilter.setFormTypeId(formType.getValue() != null ? formType.getValue().getId() : null);
-        formDataFilter.setDepartmentId(departmentPicker.getValue());
+        formDataFilter.setDepartmentIds(departmentPicker.getValue());
 		formDataFilter.setReportPeriodIds(reportPeriodPicker.getValue());
 		return formDataFilter;
 	}

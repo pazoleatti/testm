@@ -1,11 +1,11 @@
-package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.events;
+package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
 import com.google.gwt.event.shared.*;
 
 public class FormDataListCreateEvent extends GwtEvent<FormDataListCreateEvent.FormDataCreateHandler> {
 
 	public static interface FormDataCreateHandler extends EventHandler {
-		void onFormDataCreateButtonClicked(FormDataListCreateEvent event);
+		void onClickCreate(FormDataListCreateEvent event);
 	}
 
 	private static final Type<FormDataCreateHandler> TYPE = new Type<FormDataCreateHandler>();
@@ -23,7 +23,7 @@ public class FormDataListCreateEvent extends GwtEvent<FormDataListCreateEvent.Fo
 
 	@Override
 	protected void dispatch(FormDataCreateHandler handler) {
-		handler.onFormDataCreateButtonClicked(this);
+		handler.onClickCreate(this);
 	}
 
 	@Override

@@ -1,6 +1,9 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" 
+	xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+	xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+	xmlns:per="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
 
 	<g:VerticalPanel>
 		<g:cell height="50px">
@@ -8,7 +11,7 @@
 				<g:cell width="250px">
 					<g:FlowPanel>
 						<g:Label width="200px" text="Подразделение" />
-						<g:SimplePanel ui:field="departmentSelectionTreePanel" width="200px" />
+						<dep:DepartmentPickerPopupWidget width="200px" ui:field="departmentPicker" multiselection="true" header="Выберите подразделение"/>
 					</g:FlowPanel>
 				</g:cell>
 				<g:cell width="250px">
@@ -43,7 +46,7 @@
 				<g:cell width="250px" verticalAlignment="bottom">
 					<g:FlowPanel>
 						<g:Label width="200px" text="Отчетный период" />
-						<g:SimplePanel ui:field="reportPeriodPanel" width="200px" />
+						<per:PeriodPickerPopupWidget ui:field="reportPeriodIds" width="200px"/>
 					</g:FlowPanel>
 				</g:cell>
 				<g:cell verticalAlignment="bottom">

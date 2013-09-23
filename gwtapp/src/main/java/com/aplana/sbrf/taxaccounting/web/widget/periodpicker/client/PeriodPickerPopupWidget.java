@@ -8,6 +8,8 @@ import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.IsEditor;
+import com.google.gwt.editor.client.adapters.TakesValueEditor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -24,7 +26,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 
 public class PeriodPickerPopupWidget extends Composite implements
-		PeriodPickerPopup {
+		PeriodPickerPopup, IsEditor<TakesValueEditor<List<Integer>>>  {
 	
 	interface Binder extends UiBinder<Widget, PeriodPickerPopupWidget> {
 	}
@@ -50,6 +52,9 @@ public class PeriodPickerPopupWidget extends Composite implements
 	 
 	
 	private List<Integer> value;
+	
+	private TakesValueEditor<List<Integer>> editor;
+	
 	private Map<Integer, String> dereferenceValue;
 	
 	public PeriodPickerPopupWidget(){
@@ -169,6 +174,14 @@ public class PeriodPickerPopupWidget extends Composite implements
 			text.append(name + "; ");
 		}
 		return text.toString();
+	}
+
+	@Override
+	public TakesValueEditor<List<Integer>> asEditor() {
+	    if (editor == null) {
+	        editor = TakesValueEditor.of(this);
+	    }
+	    return editor;
 	}
 
 }

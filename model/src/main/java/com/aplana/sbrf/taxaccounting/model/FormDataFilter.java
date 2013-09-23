@@ -12,7 +12,7 @@ public class FormDataFilter implements Serializable{
 
 	private List<Integer> reportPeriodIds;
 
-	private List<Integer> departmentId;
+	private List<Integer> departmentIds;
 
 	/*Пример: Сведения о транспортных средствах, Расчет суммы налога, DEMO*/
 	private Integer formTypeId;
@@ -37,20 +37,13 @@ public class FormDataFilter implements Serializable{
 
 	private Boolean returnState;
 
-	public List<Integer> getReportPeriodIds() {
-		return reportPeriodIds;
+
+	public List<Integer> getDepartmentIds() {
+		return departmentIds;
 	}
 
-	public void setReportPeriodIds(List<Integer> reportPeriodIds) {
-		this.reportPeriodIds = reportPeriodIds;
-	}
-
-	public List<Integer> getDepartmentId() {
-		return departmentId;
-	}
-
-	public void setDepartmentId(List<Integer> departmentId) {
-		this.departmentId = departmentId;
+	public void setDepartmentIds(List<Integer> departmentIds) {
+		this.departmentIds = departmentIds;
 	}
 
 	public Integer getFormTypeId() {
@@ -124,4 +117,13 @@ public class FormDataFilter implements Serializable{
 	public void setReturnState(Boolean returnState) {
 		this.returnState = returnState;
 	}
+
+	public List<Integer> getReportPeriodIds() {
+		return reportPeriodIds;
+	}
+
+	public void setReportPeriodIds(List<Integer> reportPeriodIds) {
+		this.reportPeriodIds = reportPeriodIds;
+	}
+	
 }
