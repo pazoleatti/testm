@@ -1,7 +1,6 @@
 package form_template.income.rnu60
 
 import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.Column
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
@@ -54,29 +53,19 @@ switch (formDataEvent) {
         sort()
         calc()
         addAllStatic()
-        if (allCheck()) {
-            // для сохранения изменений приемников
-            getData(formData).commit()
-        }
+        allCheck()
         break
     case FormDataEvent.IMPORT :
         importData()
         if (!hasError()) {
-            deleteAllStatic()
-            sort()
-            calc()
+            calcAfterImport()
             addAllStatic()
-            !hasError() && allCheck()
-            if (!hasError()) {
-                logger.info('Закончена загрузка файла ' + UploadFileName)
-            }
         }
         break
     case FormDataEvent.MIGRATION :
         importData()
         if (!hasError()) {
             addAllStatic()
-            logger.info('Закончена загрузка файла ' + UploadFileName)
         }
 }
 
@@ -537,6 +526,21 @@ void calc() {
 }
 
 /**
+ * Табл. 207 Алгоритмы заполнения полей формы «Регистр налогового учёта закрытых сделок РЕПО с обязательством покупки по 2-й части»
+ */
+void calcAfterImport() {
+    def data = getData(formData)
+    for (DataRow row in getRows(data)) {
+        if (row.getAlias() == null) {
+            row.rateBR = calc11(row,row.part2REPODate)
+            row.outcome269st = calc12(row)
+            row.outcomeTax = calc13(row)
+        }
+    }
+    data.save(getRows(data));
+}
+
+/**
  * Количество дней в году за который делаем
  * @return
  */
@@ -624,6 +628,7 @@ void consolidation() {
     def data = getData(formData)
     // удалить все строки и собрать из источников их строки
     data.clear()
+    def newRows = []
 
     departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
@@ -631,11 +636,15 @@ void consolidation() {
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 getRows(getData(source)).each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        data.insert(row,getRows(data).size()+1)
+                        newRows.add(row)
                     }
                 }
             }
         }
+    }
+    if (!newRows.isEmpty()) {
+        data.insert(newRows, 1)
+        sort()
     }
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
@@ -836,27 +845,21 @@ def addData(def xml) {
 
         // графа 4
         totalRow.nominalPrice = getNumber(row.field[3].@value.text())
-        index++
 
         // графа 7
         totalRow.salePrice = getNumber(row.field[4].@value.text())
-        index++
 
         // графа 8
         totalRow.acquisitionPrice = getNumber(row.field[5].@value.text())
-        index++
 
         // графа 9
         totalRow.income = getNumber(row.field[8].@value.text())
-        index++
 
         // графа 10
         totalRow.outcome = getNumber(row.field[9].@value.text())
-        index++
 
         // графа 12
         totalRow.outcome269st = getNumber(row.field[11].@value.text())
-        index++
 
         // графа 13
         totalRow.outcomeTax = getNumber(row.field[12].@value.text())
@@ -873,14 +876,15 @@ def addData(def xml) {
  * @param value строка
  */
 def getNumber(def value) {
-    if (value == null) {
-        return null
-    }
     def tmp = value.trim()
     if ("".equals(tmp)) {
         return null
     }
-    return new BigDecimal(tmp)
+    try {
+        return new BigDecimal(tmp)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в число. " + e.message)
+    }
 }
 
 /**
@@ -943,7 +947,11 @@ def getDate(def value, def format) {
     if (value == null || value == '') {
         return null
     }
-    return format.parse(value)
+    try {
+        return format.parse(value)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в дату. " + e.message)
+    }
 }
 
 /**
