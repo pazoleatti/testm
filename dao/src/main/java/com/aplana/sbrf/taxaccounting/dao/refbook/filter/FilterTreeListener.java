@@ -1,4 +1,3 @@
-// Generated from FilterTree.g4 by ANTLR 4.1
 package com.aplana.sbrf.taxaccounting.dao.refbook.filter;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.FilterTreeParser;
@@ -20,6 +19,28 @@ public interface FilterTreeListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link FilterTreeParser#strtype}.
+	 * @param ctx the parse tree
+	 */
+	void enterStrtype(@NotNull FilterTreeParser.StrtypeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FilterTreeParser#strtype}.
+	 * @param ctx the parse tree
+	 */
+	void exitStrtype(@NotNull FilterTreeParser.StrtypeContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link FilterTreeParser#funcwrap}.
+	 * @param ctx the parse tree
+	 */
+	void enterFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FilterTreeParser#funcwrap}.
+	 * @param ctx the parse tree
+	 */
+	void exitFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link FilterTreeParser#operand_type}.
@@ -77,6 +98,17 @@ public interface FilterTreeListener extends ParseTreeListener {
 	void exitOperand(@NotNull FilterTreeParser.OperandContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link FilterTreeParser#functype}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunctype(@NotNull FilterTreeParser.FunctypeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FilterTreeParser#functype}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunctype(@NotNull FilterTreeParser.FunctypeContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link FilterTreeParser#isNullExpr}.
 	 * @param ctx the parse tree
 	 */
@@ -97,4 +129,15 @@ public interface FilterTreeListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitLink_type(@NotNull FilterTreeParser.Link_typeContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link FilterTreeParser#simpleoperand}.
+	 * @param ctx the parse tree
+	 */
+	void enterSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FilterTreeParser#simpleoperand}.
+	 * @param ctx the parse tree
+	 */
+	void exitSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx);
 }

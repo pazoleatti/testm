@@ -194,9 +194,9 @@ void logicCheck() {
         def transactionDate = row.transactionDate
 
         // В одной строке если не заполнена графа 11, то должна быть заполнена графа 12 и наоборот
-        if (consumptionSum == null && price == null) {
+        if (consumptionSum == null && incomeSum == null) {
             def msg1 = row.getCell('consumptionSum').column.name
-            def msg2 = row.getCell('price').column.name
+            def msg2 = row.getCell('incomeSum').column.name
             logger.warn("Строка $rowNum: Одна из граф «$msg1» и «$msg2» должна быть заполнена!")
         }
 
@@ -303,12 +303,16 @@ void logicCheck() {
             def testItogRow = testItogRows[i]
             def realItogRow = itogRows[i]
             int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
-            def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
-            if (testItogRow.price != realItogRow.price) {
-                logger.error(mes + " «${getAtributes().price[2]}»")
-            }
-            if (testItogRow.cost != realItogRow.cost) {
-                logger.error(mes + " «${getAtributes().cost[2]}»")
+            if (dataRows[itg].getAlias() != null) {
+                logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
+            } else {
+                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
+                if (testItogRow.price != realItogRow.price) {
+                    logger.error(mes + " «${getAtributes().price[2]}»")
+                }
+                if (testItogRow.cost != realItogRow.cost) {
+                    logger.error(mes + " «${getAtributes().cost[2]}»")
+                }
             }
         }
     }
@@ -321,7 +325,7 @@ void logicCheck() {
 def getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    def map = refBookService.getRecordData(9, row.name)
+    def map = row.name !=null ? refBookService.getRecordData(9, row.name) : null
     builder.append(map == null ? 'null' : map.NAME.stringValue).append(sep)
     builder.append(row.innKio).append(sep)
     builder.append(row.contractNum).append(sep)

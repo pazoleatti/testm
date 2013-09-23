@@ -141,9 +141,9 @@ void calc() {
     }
 
     /** Отчетная дата. */
-    Calendar reportDate = reportPeriodService.getReportDate(formData.reportPeriodId)
+    def reportDate = reportPeriodService.getReportDate(formData.reportPeriodId).time
     /** Последний день отчетного периода */
-    Calendar lastDayReportPeriod = reportPeriodService.getEndDate(formData.reportPeriodId)
+    def lastDayReportPeriod = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
     /** Дата нужная при подсчете графы 12. */
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
@@ -233,9 +233,9 @@ def logicalCheck() {
         def requiredColumns = ['outcome269st', 'outcomeTax']
 
         /** Отчетная дата. */
-        Calendar reportDate = reportPeriodService.getReportDate(formData.reportPeriodId)
+        def reportDate = reportPeriodService.getReportDate(formData.reportPeriodId).time
         /** Последний день отчетного периода */
-        Calendar lastDayReportPeriod = reportPeriodService.getEndDate(formData.reportPeriodId)
+        def lastDayReportPeriod = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
         /** Дата нужная при подсчете графы 12. */
         SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
@@ -409,7 +409,7 @@ def checkNSI() {
     def data = getData(formData)
     if (!getRows(data).isEmpty()) {
         /** Последний день отчетного периода */
-        Calendar lastDayReportPeriod = reportPeriodService.getEndDate(formData.reportPeriodId)
+        def lastDayReportPeriod = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
         for (def row : getRows(data)) {
             if (isTotal(row)) {

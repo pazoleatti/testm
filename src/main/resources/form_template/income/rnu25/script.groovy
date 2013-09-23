@@ -59,11 +59,9 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
+        // TODO (Ramil Timerbaev) уточнить нужен ли пересчет при консолидации? и если не нужен то надо ли проверять наличие итоговой строки?
         calc()
-        if (!hasError() && logicalCheck() && checkNSI()) {
-            // для сохранения изменении приемников
-            getData(formData).commit()
-        }
+        !hasError() && logicalCheck() && checkNSI()
         break
     case FormDataEvent.IMPORT :
         if (!isBalancePeriod && !checkPrevPeriod()) {
@@ -73,10 +71,6 @@ switch (formDataEvent) {
         importData()
         if (!hasError()) {
             calc()
-            !hasError() && logicalCheck() && checkNSI()
-            if (!hasError()) {
-                logger.info('Закончена загрузка файла ' + UploadFileName)
-            }
         }
         break
     case FormDataEvent.MIGRATION :
@@ -89,7 +83,6 @@ switch (formDataEvent) {
             def total = getCalcTotalRow()
             def data = getData(formData)
             insert(data, total)
-            logger.info('Закончена загрузка файла ' + UploadFileName)
         }
         break
 }
@@ -206,15 +199,19 @@ void calc() {
     }
 
     // отсортировать/группировать
-    getRows(data).sort { it.regNumber }
+    if (formDataEvent != FormDataEvent.IMPORT) {
+        sort(data)
+    }
 
     def tmp
     def formDataOld = getFormDataOld()
     def dataOld = getData(formDataOld)
 
     getRows(data).eachWithIndex { row, index ->
-        // графа 1
-        row.rowNumber = index + 1
+        if (formDataEvent != FormDataEvent.IMPORT) {
+            // графа 1
+            row.rowNumber = index + 1
+        }
 
         // графа 6
         row.reserve = getValueForColumn6(dataOld, row)
@@ -311,11 +308,11 @@ def logicalCheck() {
         }
     }
 
-    // Проверока наличия итоговой строки
-    if (!checkAlias(getRows(data), 'total')) {
-        logger.error('Итоговые значения не рассчитаны')
-        return false
-    }
+//    // Проверока наличия итоговой строки
+//    if (!checkAlias(getRows(data), 'total')) {
+//        logger.error('Итоговые значения не рассчитаны')
+//        return false
+//    }
 
     def formDataOld = getFormDataOld()
     def dataOld = getData(formDataOld)
@@ -595,6 +592,7 @@ void consolidation() {
 
     // удалить все строки и собрать из источников их строки
     data.clear()
+    def newRows = []
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
@@ -603,13 +601,18 @@ void consolidation() {
                 def sourceData = getData(source)
                 getRows(sourceData).each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        insert(data, row)
+                        newRows.add(row)
                     }
                 }
             }
         }
     }
-    data.commit()
+    if (!newRows.isEmpty()) {
+        data.insert(newRows, 1)
+        sort(data)
+    }
+    def total = getCalcTotalRow()
+    insert(data, total)
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
@@ -694,12 +697,13 @@ def isFixedRow(def row) {
  * Получить сумму столбца.
  */
 def getSum(def data, def columnAlias) {
+    def rows = getRows(data)
     def from = 0
-    def to = getRows(data).size() - 1
+    def to = rows.size() - 1
     if (from > to) {
         return 0
     }
-    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
+    return summ(formData, rows, new ColumnRange(columnAlias, from, to))
 }
 
 /**
@@ -1069,16 +1073,15 @@ def addData(def xml) {
  * @param value строка
  */
 def getNumber(def value) {
-    if (value == null) {
-        return null
-    }
     def tmp = value.trim()
     if ("".equals(tmp)) {
         return null
     }
-    // поменять запятую на точку и убрать пробелы
-    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
-    return new BigDecimal(tmp)
+    try {
+        return new BigDecimal(tmp)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в число. " + e.message)
+    }
 }
 
 /**
@@ -1228,4 +1231,21 @@ def getCalcTotalRow() {
         totalRow.getCell(alias).setValue(getSum(data, alias))
     }
     return totalRow
+}
+
+/**
+ * Отсорировать данные (по графе 2, 3).
+ *
+ * @param data данные нф (хелпер)
+ */
+void sort(def data) {
+    // отсортировать/группировать
+    getRows(data).sort { def a, def b ->
+        // графа 2  - regNumber
+        // графа 3  - tradeNumber
+        if (a.regNumber == b.regNumber) {
+            return a.tradeNumber <=> b.tradeNumber
+        }
+        return a.regNumber <=> b.regNumber
+    }
 }

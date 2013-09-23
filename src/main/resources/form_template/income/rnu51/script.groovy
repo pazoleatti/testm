@@ -59,24 +59,9 @@ switch (formDataEvent) {
         calc()
         addAllStatic()
         allCheck()
-        // для сохранения изменений приемников
-        getData(formData).commit()
         break
     case FormDataEvent.IMPORT :
         importData()
-        if (!hasError()) {
-            deleteAllStatic()
-            sort()
-            calc()
-            addAllStatic()
-            if (!hasError()) {
-                logicalCheck()
-                checkNSI()
-                if (!hasError()) {
-                    logger.info('Закончена загрузка файла ' + UploadFileName)
-                }
-            }
-        }
         break
     case FormDataEvent.MIGRATION :
         importData()
@@ -84,7 +69,6 @@ switch (formDataEvent) {
             def total = getCalcTotalRow()
             def data = getData(formData)
             insert(data, total)
-            logger.info('Закончена загрузка файла ' + UploadFileName)
         }
         break
 }
@@ -727,6 +711,7 @@ void consolidation() {
     def data = getData(formData)
     // удалить все строки и собрать из источников их строки
     data.clear()
+    def newRows = []
 
     departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
@@ -734,11 +719,14 @@ void consolidation() {
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 getData(source).getAllCached().each { DataRow row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        data.insert(row, getRows(data).size()+1)
+                        newRows.add(row)
                     }
                 }
             }
         }
+    }
+    if (!newRows.isEmpty()) {
+        data.insert(newRows, 1)
     }
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
@@ -967,51 +955,39 @@ def addData(def xml) {
 
         // графа 7
         total.amountBonds = getNumber(row.field[6].@value.text())
-        index++
 
         // графа 8
         total.acquisitionPrice = getNumber(row.field[7].@value.text())
-        index++
 
         // графа 9
         total.costOfAcquisition = getNumber(row.field[8].@value.text())
-        index++
 
         // графа 11
         total.marketPriceInRub = getNumber(row.field[10].@value.text())
-        index++
 
         // графа 12
         total.acquisitionPriceTax = getNumber(row.field[11].@value.text())
-        index++
 
         // графа 13
         total.redemptionValue = getNumber(row.field[12].@value.text())
-        index++
 
         // графа 15
         total.priceInFactRub = getNumber(row.field[14].@value.text())
-        index++
 
         // графа 17
         total.marketPriceInRub1 = getNumber(row.field[16].@value.text())
-        index++
 
         // графа 18
         total.salePriceTax = getNumber(row.field[17].@value.text())
-        index++
 
         // графа 19
         total.expensesOnSale = getNumber(row.field[18].@value.text())
-        index++
 
         // графа 20
         total.expensesTotal = getNumber(row.field[19].@value.text())
-        index++
 
         // графа 21
         total.profit = getNumber(row.field[20].@value.text())
-        index++
 
         // графа 22
         total.excessSalePriceTax = getNumber(row.field[21].@value.text())
@@ -1032,7 +1008,11 @@ def getNumber(def value) {
     if (''.equals(tmp)) {
         return null
     }
-    return new BigDecimal(tmp)
+    try {
+        return new BigDecimal(tmp)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в число. " + e.message)
+    }
 }
 
 /**
@@ -1068,7 +1048,11 @@ def getDate(def value, def format) {
     if (value == null || value == '') {
         return null
     }
-    return format.parse(value)
+    try {
+        return format.parse(value)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в дату. " + e.message)
+    }
 }
 
 /**
