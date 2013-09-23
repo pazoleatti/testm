@@ -77,10 +77,7 @@ switch (formDataEvent) {
         sort()
         calc()
         addAllStatic()
-        if (!hasError() && logicalCheck() && checkNSI()) {
-            // для сохранения изменений приемников
-            getData(formData).commit()
-        }
+        !hasError() && logicalCheck() && checkNSI()
         break
     case FormDataEvent.IMPORT :
         def formPrev = getFormPrev()
@@ -91,14 +88,8 @@ switch (formDataEvent) {
         }
         importData()
         if (!hasError()) {
-            deleteAllStatic()
-            sort()
-            calc()
+            calcAfterImport()
             addAllStatic()
-            !hasError() && logicalCheck() && checkNSI()
-            if (!hasError()) {
-                logger.info('Закончена загрузка файла ' + UploadFileName)
-            }
         }
         break
     case FormDataEvent.MIGRATION :
@@ -113,7 +104,6 @@ switch (formDataEvent) {
             def total = getCalcTotalRow()
             def data = getData(formData)
             insert(data, total)
-            logger.info('Закончена загрузка файла ' + UploadFileName)
         }
         break
 }
@@ -154,11 +144,11 @@ def logicalCheck() {
         return
     }
 
-    // Проверока наличия итоговой строки
-    if (!checkAlias(getRows(data), 'itogo')) {
-        logger.error('Итоговые значения не рассчитаны')
-        return false
-    }
+//    // Проверока наличия итоговой строки
+//    if (!checkAlias(getRows(data), 'itogo')) {
+//        logger.error('Итоговые значения не рассчитаны')
+//        return false
+//    }
 
     def formPrev = getFormPrev()
     def dataPrev = getData(formPrev)
@@ -731,6 +721,32 @@ void calc() {
 }
 
 /**
+ * Расчеты. Алгоритмы заполнения полей формы после импорта.
+ */
+void calcAfterImport() {
+    def data = getData(formData)
+    for (row in data.getAllCached()) {
+        // Проверим чтобы человек рукамми ввёл всё что необходимо
+        def requiredColumns = ['issuer', 'regNumber', 'tradeNumber', 'currency']
+        if(!checkRequiredColumns(row,requiredColumns)){
+            return
+        }
+    }
+    if (!hasError()) {
+        def formPrev = getFormPrev()
+        BigDecimal i = 0
+        for (DataRow row in data.getAllCached()) {
+            row.reserveCalcValuePrev = calc8(row, formPrev)
+            row.costOnMarketQuotation = calc14(row)
+            row.reserveCalcValue = calc15(row)
+            row.reserveCreation = calc16(row)
+            row.recovery = calc17(row)
+        }
+        data.save(data.getAllCached());
+    }
+}
+
+/**
  * Расчет графы 8
  */
 BigDecimal calc8(DataRow row, def formPrev) {
@@ -980,6 +996,7 @@ void consolidation() {
     def data = getData(formData)
     // удалить все строки и собрать из источников их строки
     data.clear()
+    def newRows = []
 
     departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
@@ -988,10 +1005,15 @@ void consolidation() {
                 getData(source).getAllCached().each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
                         data.insert(row,data.getAllCached().size()+1)
+                        newRows.add(row)
                     }
                 }
             }
         }
+    }
+    if (!newRows.isEmpty()) {
+        data.insert(newRows, 1)
+        // sort(data)
     }
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
@@ -1145,16 +1167,15 @@ def addData(def xml) {
  * @param value строка
  */
 def getNumber(def value) {
-    if (value == null) {
-        return null
-    }
     def tmp = value.trim()
     if ("".equals(tmp)) {
         return null
     }
-    // поменять запятую на точку и убрать пробелы
-    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
-    return new BigDecimal(tmp)
+    try {
+        return new BigDecimal(tmp)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в число. " + e.message)
+    }
 }
 
 /**
@@ -1299,7 +1320,6 @@ def isFixedRow(def row) {
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    def data = getData(formData)
     def totalColumns = [6:'prev', 7:'current', 8: 'reserveCalcValuePrev', 9:'cost', 14:'costOnMarketQuotation', 15:'reserveCalcValue',
             16 : 'reserveCreation', 17 : 'recovery']
     def totalCalc

@@ -217,12 +217,14 @@ void calc() {
         // графа 8
         row.reserveCalcValuePrev = getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)
 
-        // графа 12 курс валют
-        row.rubCourse = getCourse(row.currency,reportDate)
+        if (formDataEvent != FormDataEvent.IMPORT) {
+            // графа 12 курс валют
+            row.rubCourse = getCourse(row.currency,reportDate)
 
-        // графа 13
-        if (row.marketQuotation != null && row.rubCourse != null) {
-            row.marketQuotationInRub = roundValue(row.marketQuotation * row.rubCourse, 2)
+            // графа 13
+            if (row.marketQuotation != null && row.rubCourse != null) {
+                row.marketQuotationInRub = roundValue(row.marketQuotation * row.rubCourse, 2)
+            }
         }
 
         // графа 14
@@ -605,10 +607,8 @@ void consolidation() {
     }
     if (!newRows.isEmpty()) {
         data.insert(newRows, 1)
-        sort(data)
+        // sort(data)
     }
-    def total = getCalcTotalRow()
-    insert(data, total)
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
