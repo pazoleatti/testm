@@ -310,7 +310,7 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
 def getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    def map = refBookService.getRecordData(9, row.fullName)
+    def map = row.fullName !=null ? refBookService.getRecordData(9, row.fullName) : null
     builder.append(map == null ? 'null' : map.NAME.stringValue).append(sep)
     builder.append(row.inn).append(sep)
     builder.append(row.docNumber).append(sep)
