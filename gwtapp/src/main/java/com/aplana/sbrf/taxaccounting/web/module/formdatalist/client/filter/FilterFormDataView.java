@@ -135,11 +135,13 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 
 	@Override
 	public void setFormStateList(List<WorkflowState> list){
+		formState.setValue(null);
 		formState.setAcceptableValues(list);
 	}
 
 	@Override
 	public void setReturnStateList(List<Boolean> list) {
+		returnState.setValue(null);
 		returnState.setAcceptableValues(list);
 	}
 

@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -79,8 +78,8 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 						getView().setKindList(filterValues.getKinds());
 						getView().setFormTypesMap(filterValues.getFormTypes());
 						getView().setReportPeriods(result.getReportPeriods());
-						getView().setFormStateList(fillFormStateList());
-						getView().setReturnStateList(Arrays.asList(new Boolean[]{null, Boolean.TRUE, Boolean.FALSE}));
+						getView().setFormStateList(Arrays.asList(WorkflowState.values()));
+						getView().setReturnStateList(Arrays.asList(new Boolean[]{ Boolean.TRUE, Boolean.FALSE }));
 						// Если при инициализации фильтра клиент устанавливает фильтр, то берем его.
 						// Иначе устанавливаем фильтр по умолчанию.
 						if (filter != null){
@@ -108,13 +107,6 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 	@Override
 	public void onApplyClicked() {
 		FormDataListApplyEvent.fire(this);
-	}
-
-	private List<WorkflowState> fillFormStateList(){
-		List<WorkflowState> formState = new ArrayList<WorkflowState>();
-		formState.add(null);
-		formState.addAll(Arrays.asList(WorkflowState.values()));
-		return formState;
 	}
 
 }

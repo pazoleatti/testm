@@ -46,14 +46,8 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 		void setAcceptableFormTypeList(List<FormType> list);
 		void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
 		
-		
-		void setFormTypeValue(Integer value);
-		void setFormKindValue(FormDataKind value);
-		void setDepartmentValue(List<Integer> value);
-		void setReportPeriodValue(List<Integer> value);
-		
 		FormDataFilter getFilterData();
-		void clearInput();
+		void setFilterData(FormDataFilter filter);
 		
 	}
 
@@ -86,7 +80,6 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 						@Override
 						public void onSuccess(final CreateFormDataResult createResult) {
 							getView().hide();
-							getView().clearInput();
 							placeManager.revealPlace(new Builder().nameToken(FormDataPresenter.NAME_TOKEN).with(FormDataPresenter.READ_ONLY, "false").with(FormDataPresenter.FORM_DATA_ID, String.valueOf(createResult.getFormDataId())).build());
 						}
 					}, CreateFormDataPresenter.this)
@@ -108,6 +101,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 						getView().setAcceptableFormKindList(filterValues.getKinds());
 						getView().setAcceptableFormTypeList(filterValues.getFormTypes());
 						getView().setAcceptableReportPeriods(result.getReportPeriods());
+						
 						setSelectedFilterValues(filter);
 						slotForMe.addToPopupSlot(CreateFormDataPresenter.this);
 					}
@@ -115,18 +109,20 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 	}
 
 	private void setSelectedFilterValues(FormDataFilter formDataFilter){
+		FormDataFilter filter = new FormDataFilter();
 		if(formDataFilter.getFormTypeId() != null){
-			getView().setFormTypeValue(formDataFilter.getFormTypeId());
+			 filter.setFormTypeId(formDataFilter.getFormTypeId());
 		}
 		if(formDataFilter.getFormDataKind() != null){
-			getView().setFormKindValue(formDataFilter.getFormDataKind());
+			filter.setFormDataKind(formDataFilter.getFormDataKind());
 		}
 		if(formDataFilter.getDepartmentIds()!= null && formDataFilter.getDepartmentIds().size() == 1){
-			getView().setDepartmentValue(formDataFilter.getDepartmentIds());
+			filter.setDepartmentIds(formDataFilter.getDepartmentIds());
 		}
 		if (formDataFilter.getReportPeriodIds()!=null && formDataFilter.getReportPeriodIds().size() == 1){
-			getView().setReportPeriodValue(formDataFilter.getReportPeriodIds());
+			filter.setReportPeriodIds(formDataFilter.getReportPeriodIds());
 		}
+		getView().setFilterData(filter);
 	}
 
 	private boolean isFilterDataCorrect(FormDataFilter filter){

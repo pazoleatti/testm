@@ -28,12 +28,12 @@
 
                 <g:FlowPanel height="60px">
                     <g:Label text="Отчетный период"/>
-                    <rep:PeriodPickerPopupWidget ui:field="reportPeriodPicker"/>
+                    <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="false"/>
                 </g:FlowPanel>
 
                 <g:FlowPanel height="60px">
                     <g:Label text="Тип налоговой формы"/>
-                    <g:ValueListBox width="205px" ui:field="formKind" />
+                    <g:ValueListBox width="205px" ui:field="formDataKind" />
                 </g:FlowPanel>
 
                 <g:FlowPanel height="60px">

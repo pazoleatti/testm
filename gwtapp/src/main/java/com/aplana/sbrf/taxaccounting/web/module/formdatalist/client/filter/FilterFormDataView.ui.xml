@@ -46,7 +46,7 @@
 				<g:cell width="250px" verticalAlignment="bottom">
 					<g:FlowPanel>
 						<g:Label width="200px" text="Отчетный период" />
-						<per:PeriodPickerPopupWidget ui:field="reportPeriodIds" width="200px"/>
+						<per:PeriodPickerPopupWidget  multiselect="true" ui:field="reportPeriodIds" width="200px"/>
 					</g:FlowPanel>
 				</g:cell>
 				<g:cell verticalAlignment="bottom">

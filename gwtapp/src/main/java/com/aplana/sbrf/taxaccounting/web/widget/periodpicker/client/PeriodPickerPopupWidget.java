@@ -15,6 +15,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -62,6 +63,7 @@ public class PeriodPickerPopupWidget extends Composite implements
 		initWidget(binder.createAndBindUi(this));
 	}
 	
+	@UiConstructor
 	public PeriodPickerPopupWidget(boolean multiselect){
 		periodPicker = new PeriodPickerWidget(multiselect);
 		initWidget(binder.createAndBindUi(this));
