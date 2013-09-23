@@ -439,7 +439,14 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @Override
     public void setReportPeriods(List<ReportPeriod> reportPeriods) {
-        periodPickerPopup.setPeriods(reportPeriods, true);
+        periodPickerPopup.setPeriods(reportPeriods);
+    }
+
+    @Override
+    public void setReportPeriod(Integer reportPeriodId) {
+        if (reportPeriodId != null) {
+            periodPickerPopup.setValue(Arrays.asList(reportPeriodId), true);
+        }
     }
 
     @Override
