@@ -33,7 +33,7 @@
                     </g:cell>
                     <g:cell width="220px">
                         <g:FlowPanel>
-                            <rep:PeriodPickerPopupWidget ui:field="periodPickerPopup"/>
+                            <rep:PeriodPickerPopupWidget ui:field="periodPickerPopup" multiselect="false"/>
                         </g:FlowPanel>
                     </g:cell>
                     <g:cell width="220px">

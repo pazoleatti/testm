@@ -42,7 +42,7 @@
                     <g:HorizontalPanel spacing="5" height="35px">
                         <g:Label styleName="{style.boldLabel}" text="Период:"/>
                         <g:FlowPanel>
-                            <rep:PeriodPickerPopupWidget ui:field="periodPickerPopup"/>
+                            <rep:PeriodPickerPopupWidget ui:field="periodPickerPopup" multiselect="false"/>
                         </g:FlowPanel>
                     </g:HorizontalPanel>
                 </g:HorizontalPanel>
