@@ -95,12 +95,13 @@ public class DeclarationDataAccessServiceImpl implements
 			return;
 		}
 
-		// Обычный контролёр может просматривать декларации только в своём
-		// обособленном подразделении
+
+		// Обычный контролёр может просматривать декларации либо только в своём
+		// обособленном подразделении, либо все декларации если он находится в головном подразделении
+        // http://jira.aplana.com/browse/SBRFACCTAX-4474
 		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-				&& userInfo.getUser().getDepartmentId() == declarationDepartment.getId()
-				&& !DepartmentType.ROOT_BANK.equals(declarationDepartment
-						.getType())) {
+				&& (userInfo.getUser().getDepartmentId() == declarationDepartment.getId()
+				|| Department.ROOT_BANK_ID ==userInfo.getUser().getDepartmentId())) {
 			return;
 		}
 		throw new AccessDeniedException("Нет прав на доступ к декларации");

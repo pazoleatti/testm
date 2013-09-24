@@ -205,8 +205,8 @@ public class DeclarationDataAccessServiceImplTest {
 		
 		// Контролёр может читать только в своём обособленном подразделении и в любом статусе
 		userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-		assertFalse(canGet(userInfo, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canGet(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+        assertTrue(canGet(userInfo, DECLARATION_CREATED_BANK_ID));
+        assertTrue(canGet(userInfo, DECLARATION_ACCEPTED_BANK_ID));
 		userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
 		assertTrue(canGet(userInfo, DECLARATION_CREATED_TB1_ID));
 		assertTrue(canGet(userInfo, DECLARATION_ACCEPTED_TB1_ID));
@@ -239,8 +239,8 @@ public class DeclarationDataAccessServiceImplTest {
 		
 		// Контролёр может обновлять только непринятые декларации в своём обособленном подразделении
 		userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-		assertFalse(canRefresh(userInfo, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canRefresh(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+        assertTrue(canRefresh(userInfo, DECLARATION_CREATED_BANK_ID));
+        assertFalse(canRefresh(userInfo, DECLARATION_ACCEPTED_BANK_ID));
 		userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
 		assertTrue(canRefresh(userInfo, DECLARATION_CREATED_TB1_ID));
 		assertFalse(canRefresh(userInfo, DECLARATION_ACCEPTED_TB1_ID));
@@ -271,15 +271,25 @@ public class DeclarationDataAccessServiceImplTest {
 		assertTrue(canAccept(userInfo, DECLARATION_CREATED_TB2_ID));
 		assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 
-		// Контролёр может принимать непринятые декларации только в своём обособленном подразделении
+		// Контролёр банка может принимать непринятые декларации только в своём обособленном подразделении
 		userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-		assertFalse(canAccept(userInfo, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+        assertTrue(canAccept(userInfo, DECLARATION_CREATED_BANK_ID));
+        assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_BANK_ID));
 		userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
 		assertTrue(canAccept(userInfo, DECLARATION_CREATED_TB1_ID));
 		assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_TB1_ID));
 		assertFalse(canAccept(userInfo, DECLARATION_CREATED_TB2_ID));
 		assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_TB2_ID));
+
+        // Контролёр подразделения может принимать непринятые декларации только в своём обособленном подразделении
+        userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
+        assertFalse(canAccept(userInfo, DECLARATION_CREATED_BANK_ID));
+        assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+        userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
+        assertTrue(canAccept(userInfo, DECLARATION_CREATED_TB1_ID));
+        assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+        assertFalse(canAccept(userInfo, DECLARATION_CREATED_TB2_ID));
+        assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может принимать никаких деклараций
 		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPER));
@@ -308,7 +318,7 @@ public class DeclarationDataAccessServiceImplTest {
 		// Контролёр может отменять принятые декларации только в своём обособленном подразделении
 		userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
 		assertFalse(canReject(userInfo, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canReject(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+        assertTrue(canReject(userInfo, DECLARATION_ACCEPTED_BANK_ID));
 		userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
 		assertFalse(canReject(userInfo, DECLARATION_CREATED_TB1_ID));
 		assertTrue(canReject(userInfo, DECLARATION_ACCEPTED_TB1_ID));
@@ -342,7 +352,7 @@ public class DeclarationDataAccessServiceImplTest {
 		// Контролёр может скачивать файл в формате законодателя у принятых деклараций только в своём обособленном подразделении
 		userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
 		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canGetXml(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+        assertTrue(canGetXml(userInfo, DECLARATION_ACCEPTED_BANK_ID));
 		userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
 		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_TB1_ID));
 		assertTrue(canGetXml(userInfo, DECLARATION_ACCEPTED_TB1_ID));
@@ -375,7 +385,7 @@ public class DeclarationDataAccessServiceImplTest {
 
 		// Контролёр может удалять непринятые декларации только в своём обособленном подразделении
 		userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-		assertFalse(canDelete(userInfo, DECLARATION_CREATED_BANK_ID));
+        assertTrue(canDelete(userInfo, DECLARATION_CREATED_BANK_ID));
 		assertFalse(canDelete(userInfo, DECLARATION_ACCEPTED_BANK_ID));
 		userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
 		assertTrue(canDelete(userInfo, DECLARATION_CREATED_TB1_ID));
@@ -408,7 +418,7 @@ public class DeclarationDataAccessServiceImplTest {
 		
 		// Контролёр может создавать декларации в своём обособленном подразделении, если они там разрешены
 		userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, Department.ROOT_BANK_ID, 1));
+        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, Department.ROOT_BANK_ID, 1));
 		userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
 		assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB1_ID, 1));
 		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB1_ID, 1));
