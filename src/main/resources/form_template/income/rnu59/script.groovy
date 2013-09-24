@@ -206,7 +206,7 @@ def fillForm(){
 
     def data = getData(formData)
 
-    // Проверка объязательных полей. Cписок проверяемых столбцов (графа 1..8)
+    // Проверка обязательных полей. Cписок проверяемых столбцов (графа 1..8)
     def requiredColumns = ['tradeNumber', 'securityName', 'currencyCode', 'nominalPrice', 'part1REPODate', 'part2REPODate', 'acquisitionPrice', 'salePrice']
     for (def row : getRows(data)) {
         if (!isTotalRow(row) && !checkRequiredColumns(row, requiredColumns)) {
@@ -296,7 +296,7 @@ void checkCreation() {
 def logicalCheck(){
     def data = getData(formData)
 
-    // Проверка объязательных полей. Cписок проверяемых столбцов (графа 1..13)
+    // Проверка обязательных полей. Cписок проверяемых столбцов (графа 1..13)
     def requiredColumns = ['tradeNumber', 'securityName', 'currencyCode', 'nominalPrice', 'part1REPODate', 'part2REPODate', 'acquisitionPrice', 'salePrice', 'income', 'outcome', 'rateBR', 'outcome269st', 'outcomeTax']
     for (def row : getRows(data)) {
         if (!isTotalRow(row) && !checkRequiredColumns(row, requiredColumns)) {

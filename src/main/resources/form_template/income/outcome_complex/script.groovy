@@ -86,7 +86,7 @@ switch (formDataEvent) {
  */
 void checkAndCalc() {
     /*
-     * Проверка объязательных полей
+     * Проверка обязательных полей
      */
     def requiredColumns = ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS']
     for (def row : dataRowsHelper.getAllCached()) {
