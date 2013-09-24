@@ -26,29 +26,6 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  * 6    baseDate        Дата
  * 7    summ            Сумма восстановленной амортизационной премии
  *
- *                  *****   РНУ 46  *****
- * 1    rowNumber               № пп
- * 2    invNumber               Инв. номер
- * 3    name                    Наименование объекта
- * 4    cost                    Первоначальная стоимость
- * 5    amortGroup              Амортизационная группа
- * 6    usefulLife              Срок полезного использования, (мес.)
- * 7    monthsUsed              Количество месяцев эксплуатации предыдущими собственниками (арендодателями,
- *                              ссудодателями)
- * 8    usefulLifeWithUsed      Срок полезного использования с учётом срока эксплуатации предыдущими собственниками
- *                              (арендодателями, ссудодателями) либо установленный самостоятельно, (мес.)
- * 9    specCoef                Специальный коэффициент
- * 10   cost10perMonth          За месяц
- * 11   cost10perTaxPeriod      с начала налогового периода
- * 12   cost10perExploitation   с даты ввода в эксплуатацию
- * 13   amortNorm               Норма амортизации (% в мес.)
- * 14   amortMonth              за месяц
- * 15   amortTaxPeriod          с начала налогового периода
- * 16   amortExploitation       с даты ввода в эксплуатацию
- * 17   exploitationStart       Дата ввода в эксплуатацию
- * 18   usefullLifeEnd          Дата истечения срока полезного использования
- * 19   rentEnd                 Дата истечения срока договора аренды / договора безвозмездного пользования
- *
  *                  *****   РНУ 49  *****
  * 1    rowNumber   № пп
  * 2    firstRecordNumber       Номер первой записи
@@ -75,12 +52,26 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  * 23   propertyType            Тип имущества
  */
 switch (formDataEvent) {
+    case FormDataEvent.CREATE:
+        checkCreation()
+        break
     case FormDataEvent.CHECK :
+        def rnu49FormData = getRnu49FormData()
+        if (rnu49FormData==null) {
+            logger.error("Отсутствуют данные РНУ-49!")
+            return
+        }
         logicalCheckWithTotalDataRowCheck()
         break
     case FormDataEvent.CALCULATE :
+        def rnu49FormData = getRnu49FormData()
+        if (rnu49FormData==null) {
+            logger.error("Отсутствуют данные РНУ-49!")
+            return
+        }
         if (logicalCheckWithoutTotalDataRowCheck()) {
             calc()
+            !hasError() && logicalCheckWithTotalDataRowCheck()
         }
         break
     case FormDataEvent.ADD_ROW :
@@ -91,6 +82,26 @@ switch (formDataEvent) {
         deleteRow()
         recalculateNumbers()
         break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        logicalCheck()
+        break
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = formDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
+    }
 }
 
 /**
@@ -179,7 +190,7 @@ def getRnu49Row(def rnu49FormData, def dataRow) {
     def indexRow = (startToSearchIndex..endToSearchIndex).find { index ->
         rnu49Rows[index].invNumber == dataRow.inventoryNumber
     }
-    return rnu49Rows[indexRow]
+    return indexRow?rnu49Rows[indexRow]:[:]
 }
 
 def getRnu49AIndex(){
@@ -237,11 +248,26 @@ boolean logicalCheckWithoutTotalDataRowCheck() {
  * проверяем все данные формы на обязательное и корректное заполнение
  */
 boolean logicalCheckWithTotalDataRowCheck() {
-    if (checkColsFilledByAliases(getAllRequiredColsAliases())) {
-        return (checkCalculatedCells() && checkTotalResults())
+    if (checkColsFilledByAliases(getAllRequiredColsAliases()) ) {
+        return (checkInventoryNumber() && checkCalculatedCells() && checkTotalResults())
     }
 
     return false
+}
+
+/**
+ * проверяем заполнения столбцов по алиасам этих столбцов
+ */
+boolean checkColsFilledByAliases(List colsAliases) {
+    boolean isValid = true
+    def dataRows = getRows(formDataService.getDataRowHelper(formData))
+    dataRows.each { dataRow ->
+        if (! isFixedRow(dataRow)) {       //итоговые строки не проверяем
+            isValid &= checkRequiredColumns(dataRow, colsAliases)
+        }
+    }
+
+    return isValid
 }
 
 /**
@@ -249,6 +275,23 @@ boolean logicalCheckWithTotalDataRowCheck() {
  */
 def getAllRequiredColsAliases() {
     return ['operationDate', 'name', 'inventoryNumber', 'baseNumber', 'baseDate', 'summ']
+}
+
+/**
+ * проверяем актуальность Инвентарного номера
+ */
+boolean checkInventoryNumber() {
+    def dataRows = getRows(formDataService.getDataRowHelper(formData))
+    for(def row: dataRows) {
+        def find = dataRows.find{it->
+            (row!=it && row.inventoryNumber==it.inventoryNumber)
+        }
+        if (find!=null) {
+            logger.error("Инвентарный номер не уникальный!")
+            return false
+        }
+    }
+    return true
 }
 
 /**
@@ -269,21 +312,6 @@ boolean checkTotalResults() {
                     logger.error("Строка $fieldNumber: Неверно рассчитана графа «$msg»!")
                 }
             }
-        }
-    }
-
-    return isValid
-}
-
-/**
- * проверяем заполнения столбцов по алиасам этих столбцов
- */
-boolean checkColsFilledByAliases(List colsAliases) {
-    boolean isValid = true
-    def dataRows = getRows(formDataService.getDataRowHelper(formData))
-    dataRows.each { dataRow ->
-        if (! isFixedRow(dataRow)) {       //итоговые строки не проверяем
-            isValid &= checkRequiredColumns(dataRow, colsAliases)
         }
     }
 
@@ -329,7 +357,7 @@ def getNewRow() {
 
     getEditableColsAliases().each {
         newRow.getCell(it).editable = true
-//        newRow.getCell(it).setStyleAlias('Редактируемая')
+        newRow.getCell(it).setStyleAlias('Редактируемая')
     }
     return newRow
 }
@@ -480,4 +508,11 @@ def getColumnName(def row, def alias) {
         return row.getCell(alias).getColumn().getName().replace('%', '%%')
     }
     return ''
+}
+
+/**
+ * Имеются ли фатальные ошибки.
+ */
+def hasError() {
+    return logger.containsLevel(LogLevel.ERROR)
 }
