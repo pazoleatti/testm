@@ -100,7 +100,6 @@ def getAtributes() {
 /*
 Возвращает графу вида "гр. хх"
  */
-
 def getGrafNum(def alias) {
     def atr = getAtributes().find { it -> it.getValue()[0] == alias }
     atr.getValue()[1]
@@ -215,8 +214,8 @@ void logicCheck() {
                 logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
             }
         }
-
-        //  Корректность даты договора
+              
+        // Корректность даты договора
         def dt = docDateCell.value
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = docDateCell.column.name
@@ -301,23 +300,35 @@ void logicCheck() {
 
         // Проверка внешнеторговой сделки
         def msg14 = row.getCell('foreignDeal').column.name
-        def signCode = refBookService.getNumberValue(38, row.foreignDeal, 'CODE')
 
-        if (row.countryCodeNumeric == row.countryCodeNumeric2 && signCode != 0) {
-            def String valNo = "Нет"
-            def valNoRec = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 0", null)
-            if (valNoRec != null && valNoRec.size() == 1) {
-                valNo = valNoRec.get(0).VALUE.stringValue
+        def boolean deliveryPhis = refBookService.getNumberValue(18, row.deliverySign, 'CODE') == 1
+
+        // "Да"
+        def Long recYesId = null
+        // "Нет"
+        def Long recNoId = null
+        def valYes = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 1", null)
+        def valNo = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 0", null)
+        if (valYes != null && valYes.size() == 1)
+            recYesId = valYes.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        if (valNo != null && valNo.size() == 1)
+            recNoId = valNo.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+
+        if (row.countryCodeNumeric == row.regionCode) {
+            if (row.foreignDeal != recNoId) {
+                logger.warn("Строка $rowNum: $msg14 должно иметь значение «${valNo.get(0).VALUE.stringValue}»!")
             }
-            logger.warn("Строка $rowNum: $msg14 должно иметь значение «$valNo»!")
-        } else if (row.countryCodeNumeric != row.countryCodeNumeric2 && signCode != 1) {
-            def String valYes = "Да"
-            def valYesRec = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 1", null)
-            if (valYesRec != null && valYesRec.size() == 1) {
-                valYes = valYesRec.get(0).VALUE.stringValue
-            }
-            logger.warn("Строка $rowNum: $msg14 должно иметь значение «$valYes»!")
         }
+        else if (deliveryPhis) {
+            if (row.foreignDeal != recNoId) {
+                logger.warn("Строка $rowNum: $msg14 должно иметь значение «${valNo.get(0).VALUE.stringValue}»!")
+            }
+        } else {
+            if (row.foreignDeal != recYesId) {
+                logger.warn("Строка $rowNum: $msg14 должно иметь значение «${valYes.get(0).VALUE.stringValue}»!")
+            }
+        }
+
 
         // Корректность даты совершения сделки
         def dealDoneDateCell = row.getCell('dealDoneDate')
@@ -601,7 +612,6 @@ def calcItog(int i, def dataRows) {
     for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
         row = dataRows.get(j)
 
-        // TODO в ТЗ пропал список итоговых колонок. Уточнить
         def price = row.price
         def total = row.total
 
