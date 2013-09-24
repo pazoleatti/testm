@@ -377,8 +377,8 @@ def checkTableHead(def xml, def headRowCount) {
  *
  * @param value
  */
-def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
-    String filter = code + "= '"+ value+"'"
+def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell) {
+    String filter = "LOWER($alias) = LOWER('$value')"
     if (cache[ref_id]!=null) {
         if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
     } else {

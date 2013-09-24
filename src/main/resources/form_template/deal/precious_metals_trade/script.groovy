@@ -1048,7 +1048,7 @@ def getNumber(def value, int indexRow, int indexCell) {
  * @param value
  */
 def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory = true) {
-    String filter = alias + "= '" + value + "'"
+    String filter = "LOWER($alias) = LOWER('$value')"
     if (value == '') filter = "$alias is null"
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
