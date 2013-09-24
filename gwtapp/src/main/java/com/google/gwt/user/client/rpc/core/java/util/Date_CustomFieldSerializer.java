@@ -1,14 +1,14 @@
 package com.google.gwt.user.client.rpc.core.java.util;
 
+import java.util.Date;
+
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 
-import java.util.Date;
-
 /**
- * Custom field serializer for {@link java.util.Date}.
+ * Этот класс реализует сериализацию {@link java.util.Date} со сдвигом временных зон.
  */
 public final class Date_CustomFieldSerializer extends
 		CustomFieldSerializer<Date> {
@@ -18,14 +18,16 @@ public final class Date_CustomFieldSerializer extends
 	 * 
 	 * @param date
 	 * @param plus
-	 *            true - преобразовать дату в UTC0 false - преобразовать дату из
-	 *            UTC0 в текущую
 	 * 
 	 * @return
 	 */
 	private static long offsetUTC(long time, boolean plus) {
+		// * 
+		// Получение текущего сдвига. Нужно будет придумать другой способ,
+		// без вызова deprecated методов
 		Date getOffsetDate = new Date();
 		long offset = getOffsetDate.getTimezoneOffset() * 60000;
+		// *
 		long result = time + (plus ? offset : -offset);
 		return result;
 	}

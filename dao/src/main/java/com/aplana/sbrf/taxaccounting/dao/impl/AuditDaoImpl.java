@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -174,7 +175,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		public LogSystemSearchResultItem mapRow(ResultSet rs, int index) throws SQLException {
 			LogSystemSearchResultItem log = new LogSystemSearchResultItem();
 			log.setId(rs.getLong("id"));
-			log.setLogDate(rs.getTimestamp("log_date"));
+			log.setLogDate(new Date(rs.getTimestamp("log_date").getTime()));
 			log.setIp(rs.getString("ip"));
 			log.setEvent(FormDataEvent.getByCode(rs.getInt("event_id")));
 			log.setUser(userDao.getUser(rs.getInt("user_id")));
