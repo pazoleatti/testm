@@ -295,7 +295,7 @@ def checkRequiredColumns(def row, def columns) {
     def cell
     columns.each {
         cell = row.getCell(it)
-        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+        if (cell.getValue() == null || row.getCell(it).getValue() == '') {
             def name = getColumnName(row, it)
             colNames.add('"' + name + '"')
         }
