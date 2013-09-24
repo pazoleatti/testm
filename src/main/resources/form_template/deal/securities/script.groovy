@@ -488,7 +488,7 @@ def getRecordId(def ref_id, String alias, String value, Date date, def cache, in
     if (value == null || value.equals("")) {
         filter = alias + " is null"
     } else {
-        filter = alias + "= '" + value + "'"
+        filter = "LOWER($alias) = LOWER('$value')"
     }
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]

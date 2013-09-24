@@ -41,4 +41,17 @@ public interface ImportService {
      * @return xml в виде текста
      */
     String getData(InputStream inputStream, String fileName, String charset, String startStr, String endStr) throws IOException;
+
+    /**
+     * Получить из потока данных только нужные данные в виде xml.
+     *
+     * @param inputStream данные
+     * @param fileName имя файла
+     * @param charset кодировка
+     * @param startStr начало таблицы (например, шапка первой колонки)
+     * @param endStr конец табцицы (например, надпись "итого" или значения после таблицы "руководитель, фио")
+     * @param columnsCount количество колонок в таблице
+     * @return xml в виде текста
+     */
+    String getData(InputStream inputStream, String fileName, String charset, String startStr, String endStr, Integer columnsCount) throws IOException;
 }

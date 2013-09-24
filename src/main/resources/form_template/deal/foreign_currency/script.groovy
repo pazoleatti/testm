@@ -335,7 +335,7 @@ String getValuesByGroupColumn(DataRow row) {
     map = row.currencyCode != null ? refBookService.getRecordData(15, row.currencyCode) : null
     if (map != null)
         builder.append(map.CODE_2.stringValue).append(sep)
-    map = row.countryDealCode != null ? refBookService.getRecordData(15, row.countryDealCode) : null
+    map = row.countryDealCode != null ? refBookService.getRecordData(10, row.countryDealCode) : null
     if (map != null)
         builder.append(map.CODE_2.stringValue).append(sep)
 
@@ -738,7 +738,7 @@ def getNumber(def value, int indexRow, int indexCell) {
  * @param value
  */
 def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell) {
-    String filter = alias + " like '" + value + "%'"
+    String filter = "LOWER($alias) like LOWER('$value%')"
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
     } else {

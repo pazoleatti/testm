@@ -72,7 +72,7 @@ switch (formDataEvent) {
 void calc() {
     def data = getData(formData)
     /*
-     * Проверка объязательных полей.
+     * Проверка обязательных полей.
      */
     // список проверяемых столбцов (графа 3..12)
     def requiredColumns = ['ofz', 'municipalBonds', 'governmentBonds',

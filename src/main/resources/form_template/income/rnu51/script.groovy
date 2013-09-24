@@ -509,7 +509,17 @@ BigDecimal calc22(DataRow row) {
 
 void calc() {
     def data = getData(formData)
-    for (DataRow row in getData(formData).getAllCached()) {
+    def rows = getRows(data)
+    def columns = ['rowNumber', 'tradeNumber', 'singSecurirty', 'issue', 'acquisitionDate', 'saleDate', 'amountBonds',
+            'acquisitionPrice', 'costOfAcquisition', 'marketPriceInPerc', 'marketPriceInRub',
+            'redemptionValue', 'priceInFactPerc', 'priceInFactRub', 'expensesOnSale']
+
+    for (def DataRow row in rows) {
+        if (row.getAlias() == null && !checkRequiredColumns(row, columns)) {
+            return
+        }
+    }
+    for (def DataRow row in rows) {
         if (row.getAlias() == null) {
             row.rowNumber = calc1(row)
             row.acquisitionPriceTax = calc12(row)
@@ -521,7 +531,7 @@ void calc() {
             row.excessSalePriceTax = calc22(row)
         }
     }
-    data.save(data.getAllCached());
+    data.save(rows);
 }
 
 /**
@@ -589,8 +599,7 @@ void addAllStatic() {
 }
 
 void allCheck() {
-    logicalCheck()
-    checkNSI()
+    !hasError() && logicalCheck() && checkNSI()
 }
 
 /**
@@ -640,7 +649,7 @@ def checkRequiredColumns(def row, def columns) {
     def cell
     columns.each {
         cell = row.getCell(it)
-        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+        if (cell.getValue() == null || row.getCell(it).getValue() == '') {
             def name = getColumnName(row, it)
             colNames.add('"' + name + '"')
         }
