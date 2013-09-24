@@ -65,7 +65,6 @@ void addRow() {
     def size = dataRows.size()
     def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
     row.keySet().each{
-        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     ['fullNamePerson', 'sum', 'docNumber', 'docDate', 'count', 'date'].each {
@@ -378,8 +377,8 @@ def checkTableHead(def xml, def headRowCount) {
  *
  * @param value
  */
-def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
-    String filter = code + "= '"+ value+"'"
+def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell) {
+    String filter = "LOWER($alias) = LOWER('$value')"
     if (cache[ref_id]!=null) {
         if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
     } else {

@@ -35,7 +35,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	private static final String DIALOG_MESSAGE = "Строка была изменена. Все не сохраненные данные будут потеряны.";
 
 	public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
-		Map<RefBookAttribute, HasValue> createInputFields(List<RefBookAttribute> attributes);
+		Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes);
 		void fillInputFields(Map<String, RefBookValueSerializable> record);
 		Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException;
 		void setSaveButtonEnabled(boolean enabled);
@@ -60,7 +60,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 						new AbstractCallback<GetRefBookAttributesResult>() {
 							@Override
 							public void onSuccess(GetRefBookAttributesResult result) {
-								getView().createInputFields(result.getAttributes());
+								getView().createInputFields(result.getColumns());
 								currentRefBookId = refbookId;
 								isFormModified = false;
 								setEnabled(false);

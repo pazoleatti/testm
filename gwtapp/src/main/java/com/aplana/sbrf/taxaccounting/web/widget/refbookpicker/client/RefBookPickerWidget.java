@@ -240,8 +240,8 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 	}
 
 	@Override
-	public void setVersions(List<Date> versions) {
-		version.setValue(versions.iterator().next());
+	public void setVersions(List<Date> versions, Date defaultValue) {
+		version.setValue(defaultValue);
 		version.setAcceptableValues(versions);	
 	}
 

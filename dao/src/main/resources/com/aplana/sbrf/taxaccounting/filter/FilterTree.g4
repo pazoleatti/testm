@@ -11,17 +11,31 @@ link_type : LINK_TYPE_OR
 LINK_TYPE_OR : ('o'|'O')('r'|'R');
 LINK_TYPE_AND : ('a'|'A')('n'|'N')('d'|'D') ;
 
-expr : operand operand_type operand;
+expr	: operand operand_type operand #standartExpr
+	| simpleoperand IS_NULL #isNullExpr;
 
-operand :NUMBER
+operand : funcwrap 
+	| simpleoperand;
+
+simpleoperand : NUMBER
 	| ALIAS
 	| STRING;
+	
+funcwrap : functype '(' strtype ')';
+
+functype: LENGTH | LOWER;
+
+LOWER :  'LOWER';
+LENGTH 	: 'LENGTH';
+
+strtype: ALIAS | STRING;
 
 operand_type :	EQUAL
 	| NOTEQUAL
 	| MORE
 	| LESS
 	| LIKE;
+	
 
 EQUAL 	: '=';
 NOTEQUAL : '!=';
@@ -32,9 +46,9 @@ LIKE	: ('L'|'l') ('I'|'i') ('K'|'k') ('E'|'e');
 
 fragment DIGIT : '0'..'9' ;
 
+IS_NULL : ('I'|'i')('S'|'s') ' '+ ('N'|'n')('U'|'u')('L'|'l')('L'|'l');
 NUMBER : DIGIT+ | FLOAT ;
-ALIAS :	('a'..'z'|'A'..'Z'|'_')+  ('a'..'z'|'A'..'Z'|DIGIT|'_')* ;
-
+ALIAS :	('a'..'z'|'A'..'Z'|'_')+  ('a'..'z'|'A'..'Z'|DIGIT|'_')*;
 
 FLOAT	: DIGIT+ '.' DIGIT+;
 

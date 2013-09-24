@@ -12,6 +12,14 @@
  * @author rtimerbaev
  */
 
+
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType
+import com.aplana.sbrf.taxaccounting.model.FormData
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
+
 import java.text.SimpleDateFormat
 
 switch (formDataEvent) {
@@ -83,36 +91,40 @@ switch (formDataEvent) {
  */
 def addNewRow() {
     def newRow = formData.createDataRow()
-    formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
-
+    def data = data
+    def size = getRows(data).size()
+    def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
     // графа 2..7, 9, 17..19
     ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed',
             'specCoef', 'exploitationStart', 'usefullLifeEnd', 'rentEnd'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+    data.insert(newRow, index)
 }
 
 /**
  * Удалить строку.
  */
 def deleteRow() {
-    formData.dataRows.remove(currentDataRow)
+    data.delete(currentDataRow)
 }
 
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
+    def data = data
+    def rows = getRows(data)
     /*
-     * Проверка объязательных полей.
+     * Проверка обязательных полей.
      */
 
     // список проверяемых столбцов (графа 2..7, 9, 17..19)
     def requiredColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed',
             'specCoef', 'exploitationStart', 'usefullLifeEnd', 'rentEnd']
 
-    for (def row : formData.dataRows) {
+    for (def row : rows) {
         if (!checkRequiredColumns(row, requiredColumns, true)) {
             return
         }
@@ -124,9 +136,12 @@ void calc() {
 
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def lastDay2001 = format.parse('31.12.2001')
+    // последнее число предыдущего месяца
+    def endDate = reportPeriodService.getEndDate(formData.reportPeriodId)
+    def lastDayPrevMonth = (endDate ? endDate.getTime() : null)
 
     def tmp
-    formData.dataRows.eachWithIndex { row, index ->
+    rows.eachWithIndex { row, index ->
         // графа 1
         row.rowNumber = index + 1
 
@@ -137,7 +152,7 @@ void calc() {
         } else {
             tmp = 0 // TODO (Ramil Timerbaev) не описано в чтз
         }
-        row.usefulLifeWithUsed = round(tmp, 0)
+        row.usefulLifeWithUsed = roundTo(tmp, 0)
 
         // графа 10
         tmp = 0
@@ -146,7 +161,7 @@ void calc() {
         } else if (row.amortGroup in ('3'..'7')) {
             tmp = row.cost * 0.3
         }
-        row.cost10perMonth = round(tmp, 2)
+        row.cost10perMonth = roundTo(tmp, 2)
 
         // графа 12
         // TODO (Ramil Timerbaev) getFromOld() = 12 графа предыдущего месяца
@@ -157,17 +172,17 @@ void calc() {
         if (row.usefulLifeWithUsed != 0) {
             tmp = (1 / row.usefulLifeWithUsed) * 100
         }
-        row.amortNorm = round(tmp, 0)
+        row.amortNorm = roundTo(tmp, 0)
 
         // графа 14
         // TODO (Ramil Timerbaev) требуется пояснение относительно этой формулы
         if (row.usefullLifeEnd > lastDay2001) {
             // row.amortMonth = (row.cost (на начало месяца) - row.cost10perExploitation - row.amortExploitation (на начало месяца)) / (row.usefullLifeEnd - последнее число предыдущего месяца)
-            tmp = (row.cost - row.cost10perExploitation - row.amortExploitation) / (row.usefullLifeEnd - lastDayPrevMonth)
+            tmp = (row.cost?:0 - row.cost10perExploitation?:0 - row.amortExploitation?:0) / (row.usefullLifeEnd - lastDayPrevMonth)
         } else {
             tmp = row.cost / 84
         }
-        row.amortMonth = round(tmp, 2)
+        row.amortMonth = roundTo(tmp, 2)
 
         // графа 11, 15, 16
         if (isFirstMonth()) {
@@ -185,6 +200,7 @@ void calc() {
             row.amortExploitation = getFromOld() + row.amortMonth
         }
     }
+    data.save(getRows(data))
 }
 
 /**
@@ -211,6 +227,7 @@ def checkNSI() {
  * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
 def logicalCheck(def useLog) {
+    def data = data
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def lastDay2001 = format.parse('31.12.2001')
 
@@ -226,7 +243,7 @@ def logicalCheck(def useLog) {
     def lastDayPrevMonth = (tmp ? tmp.getTime() : null)
 
     def hasError
-    for (def row : formData.dataRows) {
+    for (def row : getRows(data)) {
         // 1. Обязательность заполнения поля (графа 1..18)
         if (!checkRequiredColumns(row, columns, useLog)) {
             return
@@ -275,7 +292,7 @@ def logicalCheck(def useLog) {
         } else {
             tmp = 0 // TODO (Ramil Timerbaev) не описано в чтз
         }
-        if (row.usefulLifeWithUsed != round(tmp, 0)) {
+        if (row.usefulLifeWithUsed != roundTo(tmp, 0)) {
             logger.warn('Неверное значение графы «Срок полезного использования с учётом срока эксплуатации предыдущими собственниками (арендодателями, ссудодателями) либо установленный самостоятельно, (мес.)»!')
         }
 
@@ -286,7 +303,7 @@ def logicalCheck(def useLog) {
         } else if (row.amortGroup in ('3'..'7')) {
             tmp = row.cost * 0.3
         }
-        if (row.cost10perMonth != round(tmp, 2)) {
+        if (row.cost10perMonth != roundTo(tmp, 2)) {
             logger.warn('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.За месяц»!')
         }
 
@@ -314,7 +331,7 @@ def logicalCheck(def useLog) {
         } else if (row.usefulLifeWithUsed == 0) {
             tmp = 0 // TODO (Ramil Timerbaev) уточнить
         }
-        if (row.amortNorm != round(tmp, 0)) {
+        if (row.amortNorm != roundTo(tmp, 0)) {
             logger.warn('Неверное значение графы «Норма амортизации (процентов в мес.)»!')
         }
 
@@ -327,7 +344,7 @@ def logicalCheck(def useLog) {
             tmp = row.cost / 84
         }
         // TODO (Ramil Timerbaev) убрать && false
-        if (row.amortMonth != round(tmp, 2) && false) {
+        if (row.amortMonth != roundTo(tmp, 2) && false) {
             logger.warn('Неверно рассчитана графа «Сумма начисленной амортизации.за месяц»!')
         }
 
@@ -365,7 +382,7 @@ void checkOnPrepareOrAcceptance(def value) {
     departmentFormTypeService.getFormDestinations(formDataDepartment.id,
             formData.getFormType().getId(), formData.getKind()).each() { department ->
         if (department.formTypeId == formData.getFormType().getId()) {
-            def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+            def form = formDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
             // если форма существует и статус "принята"
             if (form != null && form.getState() == WorkflowState.ACCEPTED) {
                 logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
@@ -378,15 +395,16 @@ void checkOnPrepareOrAcceptance(def value) {
  * Консолидация.
  */
 void consolidation() {
+    def data = data
     // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    data.clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
-                    formData.dataRows.add(row)
+                getRows(getData(source)).each { row->
+                    data.insert(row, getRows(data).size()+1)
                 }
             }
         }
@@ -402,7 +420,7 @@ void checkOnCancelAcceptance() {
             formData.getFormType().getId(), formData.getKind());
     DepartmentFormType department = departments.getAt(0);
     if (department != null) {
-        FormData form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+        FormData form = formDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
 
         if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
             logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
@@ -436,7 +454,7 @@ void checkCreation() {
         return
     }
 
-    def findForm = FormDataService.find(formData.formType.id,
+    def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
@@ -460,7 +478,7 @@ def getFromOld() {
     // РНУ-25 за предыдущий отчетный период
     def formDataOld = null
     if (reportPeriodOld != null) {
-        formDataOld = FormDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
+        formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
     }
     */
     return 0
@@ -483,7 +501,7 @@ def isFirstMonth() {
  * Получить номер строки в таблице.
  */
 def getIndex(def row) {
-    formData.dataRows.indexOf(row)
+    getRows(data).indexOf(row)+1
 }
 
 /**
@@ -518,4 +536,43 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         return false
     }
     return true
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def DataRowHelper getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
+
+def DataRowHelper getData(){
+    return getData(formData)
+}
+
+/**
+ * Получить строки формы.
+ *
+ * @param formData форма
+ */
+def List<DataRow<Cell>> getRows(def DataRowHelper data) {
+    return data.getAllCached()
+}
+
+/**
+ * Хелпер для округления чисел
+ * @param value
+ * @param newScale
+ * @return
+ */
+BigDecimal roundTo(BigDecimal value, int round) {
+    if (value != null) {
+        return value.setScale(round, BigDecimal.ROUND_HALF_UP)
+    } else {
+        return value
+    }
 }

@@ -9,7 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import java.text.SimpleDateFormat
 
 /**
- * 386 - Предоставление инструментов торгового финансирования и непокрытых аккредитивов
+ * 386 - Предоставление инструментов торгового финансирования и непокрытых аккредитивов (11)
  * (похож на guarantees "Предоставление гарантий")
  *
  * @author Stanislav Yasinskiy
@@ -53,7 +53,7 @@ switch (formDataEvent) {
         logicCheck()
         break
 // импорт из xls
-    case FormDataEvent.IMPORT :
+    case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             deleteAllStatic()
@@ -82,11 +82,11 @@ def getAtributes(){
     ]
 }
 
-def getGroupColumns(){
+def getGroupColumns() {
     ['fullName', 'inn', 'docNumber', 'docDate']
 }
 
-def getEditColumns(){
+def getEditColumns() {
     ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'dealDoneDate']
 }
 
@@ -102,33 +102,32 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = 0
-    row.keySet().each{
-        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
+    row.keySet().each {
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     getEditColumns().each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    if (currentDataRow!=null){
+    if (currentDataRow != null) {
         index = currentDataRow.getIndex()
         def pointRow = currentDataRow
-        while(pointRow.getAlias()!=null && index>0){
+        while (pointRow.getAlias() != null && index > 0) {
             pointRow = dataRows.get(--index)
         }
-        if(index!=currentDataRow.getIndex() && dataRows.get(index).getAlias()==null){
+        if (index != currentDataRow.getIndex() && dataRows.get(index).getAlias() == null) {
             index++
         }
-    }else if (size>0) {
-        for(int i = size-1;i>=0;i--){
+    } else if (size > 0) {
+        for (int i = size - 1; i >= 0; i--) {
             def pointRow = dataRows.get(i)
-            if(pointRow.getAlias()==null){
-                index = dataRows.indexOf(pointRow)+1
+            if (pointRow.getAlias() == null) {
+                index = dataRows.indexOf(pointRow) + 1
                 break
             }
         }
     }
-    dataRowHelper.insert(row, index+1)
+    dataRowHelper.insert(row, index + 1)
 }
 /**
  * Проверяет уникальность в отчётном периоде и вид
@@ -218,7 +217,7 @@ void logicCheck() {
     }
 
     //Проверки подитоговых сумм
-    def testRows = dataRows.findAll{it -> it.getAlias() == null}
+    def testRows = dataRows.findAll { it -> it.getAlias() == null }
     //добавляем итоговые строки для проверки
     for (int i = 0; i < testRows.size(); i++) {
         def testRow = testRows.get(i)
@@ -246,7 +245,10 @@ void logicCheck() {
             if (row.getAlias() == null) {
                 if (nextRow == null ||
                         nextRow.getAlias() == null && isDiffRow(row, nextRow, getGroupColumns())) {
-                    logger.error("Группа «${getValuesByGroupColumn(row)}» не имеет строки подитога!")
+                    def String groupCols = getValuesByGroupColumn(row)
+                    if (groupCols != null) {
+                        logger.error("Группа «$groupCols» не имеет строки подитога!")
+                    }
                 }
             }
         }
@@ -255,7 +257,7 @@ void logicCheck() {
 
         for (int i = 0; i < dataRows.size(); i++) {
             if (dataRows[i].getAlias() != null) {
-                if(i - 1 < -1 || dataRows[i - 1].getAlias() != null){
+                if (i - 1 < -1 || dataRows[i - 1].getAlias() != null) {
                     logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
                 }
             }
@@ -272,15 +274,18 @@ void logicCheck() {
             if (dataRows[itg].getAlias() != null) {
                 logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
             } else {
-                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
-                if (testItogRow.price != realItogRow.price) {
-                    logger.error(mes + " «${priceName}»")
-                }
-                if (testItogRow.total != realItogRow.total) {
-                    logger.error(mes + " «${totalName}»")
-                }
-                if (testItogRow.sum != realItogRow.sum) {
-                    logger.error(mes + " «${sumName}»")
+                def String groupCols = getValuesByGroupColumn(dataRows[itg])
+                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «$groupCols» в графе"
+                if (groupCols != null) {
+                    if (testItogRow.price != realItogRow.price) {
+                        logger.error(mes + " «${priceName}»")
+                    }
+                    if (testItogRow.total != realItogRow.total) {
+                        logger.error(mes + " «${totalName}»")
+                    }
+                    if (testItogRow.sum != realItogRow.sum) {
+                        logger.error(mes + " «${sumName}»")
+                    }
                 }
             }
         }
@@ -299,19 +304,27 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     }
 }
 
-/*
-    Возвращает строку со значениями полей строки по которым идет группировка
-    ['fullName', 'inn', 'docNumber', 'docDate']
+/**
+ * Возвращает строку со значениями полей строки по которым идет группировка
+ * ['fullName', 'inn', 'docNumber', 'docDate']
  */
-def getValuesByGroupColumn(DataRow row) {
+String getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    def map = refBookService.getRecordData(9, row.fullName)
-    builder.append(map == null ? 'null' : map.NAME.stringValue).append(sep)
-    builder.append(row.inn).append(sep)
-    builder.append(row.docNumber).append(sep)
-    builder.append(row.docDate)
-    builder.toString()
+    def map = row.fullName != null ? refBookService.getRecordData(9, row.fullName) : null
+    if (map != null)
+        builder.append(map.NAME.stringValue).append(sep)
+    if (row.inn != null)
+        builder.append(row.inn).append(sep)
+    if (row.docNumber != null)
+        builder.append(row.docNumber).append(sep)
+    if (row.docDate != null)
+        builder.append(row.docDate).append(sep)
+
+    def String retVal = builder.toString()
+    if (retVal.length() < 2)
+        return null
+    retVal.substring(0, retVal.length() - 2)
 }
 
 /**
@@ -427,7 +440,7 @@ void addAllStatic() {
             if (row.getAlias() == null)
                 if (nextRow == null || isDiffRow(row, nextRow, getGroupColumns())) {
                     def itogRow = calcItog(i, dataRows)
-                    dataRowHelper.insert(itogRow, ++i+1)
+                    dataRowHelper.insert(itogRow, ++i + 1)
                 }
         }
     }
@@ -496,14 +509,14 @@ void importData() {
     }
 
     // добавить данные в форму
-    try{
+    try {
         if (!checkTableHead(xml, 3)) {
             logger.error('Заголовок таблицы не соответствует требуемой структуре!')
             return
         }
         addData(xml)
-    } catch(Exception e) {
-        logger.error(""+e.message)
+    } catch (Exception e) {
+        logger.error("" + e.message)
     }
 }
 
@@ -528,7 +541,7 @@ def addData(def xml) {
             continue
         }
 
-        if ((row.cell.find{it.text()!=""}.toString())=="") {
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
 
@@ -543,7 +556,7 @@ def addData(def xml) {
         newRow.rowNumber = indexRow - 2
 
         // графа 2
-        newRow.fullName = getRecordId(9, 'NAME',  row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.fullName = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
         indexCell++
 
         // графа 3
@@ -586,7 +599,6 @@ def addData(def xml) {
     }
 }
 
-
 /**
  * Проверить шапку таблицы.
  *
@@ -601,7 +613,7 @@ def checkTableHead(def xml, def headRowCount) {
     }
 
     def result = (
-            xml.row[0].cell[0] == 'Полное наименование с указанием ОПФ' &&
+    xml.row[0].cell[0] == 'Полное наименование с указанием ОПФ' &&
             xml.row[2].cell[0] == 'гр. 2' &&
 
             xml.row[0].cell[1] == 'ИНН/ КИО' &&
@@ -654,7 +666,7 @@ def getNumber(def value, int indexRow, int indexCell) {
     try {
         return new BigDecimal(tmp)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow+3} столбец ${indexCell+1} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 1} содержит недопустимый тип данных!")
     }
 }
 
@@ -669,10 +681,9 @@ def getDate(def value, int indexRow, int indexCell) {
     try {
         return format.parse(value)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow+3} столбец ${indexCell+1} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 1} содержит недопустимый тип данных!")
     }
 }
-
 
 /**
  * Получить record_id элемента справочника.
@@ -680,18 +691,18 @@ def getDate(def value, int indexRow, int indexCell) {
  * @param value
  */
 def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell) {
-    String filter = alias + "= '"+ value+"'"
-    if (value=='') filter = "$alias is null"
-    if (cache[ref_id]!=null) {
-        if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
+    String filter = "LOWER($alias) = LOWER('$value')"
+    if (value == '') filter = "$alias is null"
+    if (cache[ref_id] != null) {
+        if (cache[ref_id][filter] != null) return cache[ref_id][filter]
     } else {
         cache[ref_id] = [:]
     }
     def refDataProvider = refBookFactory.getDataProvider(ref_id)
     def records = refDataProvider.getRecords(date, null, filter, null)
-    if (records.size() == 1){
+    if (records.size() == 1) {
         cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
     }
-    throw new Exception("Строка ${indexRow+3} столбец ${indexCell+1} содержит значение, отсутствующее в справочнике!")
+    throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 1} содержит значение, отсутствующее в справочнике!")
 }

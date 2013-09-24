@@ -1,3 +1,10 @@
+package form_template.income.rnu59
+
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+
+import java.text.SimpleDateFormat
+
 /**
  * РНУ-59
  * @author auldanov
@@ -18,11 +25,6 @@
  * 12. Расходы по сделке РЕПО, рассчитанные с учётом ст. 269 НК РФ (руб.коп.) - outcome269st
  * 13. Расходы по сделке РЕПО, учитываемые для целей налогообложения (руб.коп.) - outcomeTax
  */
-
-
-import com.aplana.sbrf.taxaccounting.model.DataRow
-
-import java.text.SimpleDateFormat
 
 // дата начала отчетного периода
 Calendar getPeriodStartDate(){
@@ -96,19 +98,12 @@ switch (formDataEvent){
     case FormDataEvent.COMPOSE :
         consolidation()
         fillForm()
-        if (!hasError() && logicalCheck() && checkNSI()) {
-            // для сохранения изменений приемников
-            getData(formData).commit()
-        }
+        !hasError() && logicalCheck() && checkNSI()
         break
     case FormDataEvent.IMPORT :
         importData()
         if (!hasError()) {
             fillForm()
-            !hasError() && logicalCheck() && checkNSI()
-            if (!hasError()) {
-                logger.info('Закончена загрузка файла ' + UploadFileName)
-            }
         }
         break
     case FormDataEvent.MIGRATION :
@@ -117,7 +112,6 @@ switch (formDataEvent){
             def total = getCalcTotalRow()
             def data = getData(formData)
             insert(data, total)
-            logger.info('Закончена загрузка файла ' + UploadFileName)
         }
         break
 }
@@ -212,7 +206,7 @@ def fillForm(){
 
     def data = getData(formData)
 
-    // Проверка объязательных полей. Cписок проверяемых столбцов (графа 1..8)
+    // Проверка обязательных полей. Cписок проверяемых столбцов (графа 1..8)
     def requiredColumns = ['tradeNumber', 'securityName', 'currencyCode', 'nominalPrice', 'part1REPODate', 'part2REPODate', 'acquisitionPrice', 'salePrice']
     for (def row : getRows(data)) {
         if (!isTotalRow(row) && !checkRequiredColumns(row, requiredColumns)) {
@@ -228,37 +222,42 @@ def fillForm(){
         }
     }
 
+    if (formDataEvent != FormDataEvent.IMPORT) {
+        sort(data)
+    }
+
     data.getAllCached().each{ DataRow row ->
         /**
          * Табл. 199 Алгоритмы заполнения полей формы «Регистр налогового учёта закрытых сделок РЕПО с обязательством продажи по 2-й части»
          */
-
-        // графа 9, 10
-        // A=«графа8» - «графа7»
-        BigDecimal a = (row.salePrice?:0) - (row.acquisitionPrice?:0)
-        // B=ОКРУГЛ(A;2),
-        BigDecimal b = roundTo2(a)
-        // C= ОКРУГЛ(ABS(A);2),
-        BigDecimal c = roundTo2(a.abs())
-        /**
-         *    Если  .A>0, то
-         «графа 9» = B
-         «графа 10» = 0
-         Иначе Если  A<0
-         «графа 9» = 0
-         «графа 10» = С
-         Иначе
-         «графа 9»= «графа 10» = 0
-         */
-        if (a.compareTo(0) > 0){
-            row.income = b
-            row.outcome = 0
-        } else if (a.compareTo(0) < 0){
-            row.income = 0
-            row.outcome = c
-        }   else{
-            row.income = 0
-            row.outcome = 0
+        if (formDataEvent != FormDataEvent.IMPORT) {
+            // графа 9, 10
+            // A=«графа8» - «графа7»
+            BigDecimal a = (row.salePrice?:0) - (row.acquisitionPrice?:0)
+            // B=ОКРУГЛ(A;2),
+            BigDecimal b = roundTo2(a)
+            // C= ОКРУГЛ(ABS(A);2),
+            BigDecimal c = roundTo2(a.abs())
+            /**
+             *    Если  .A>0, то
+             «графа 9» = B
+             «графа 10» = 0
+             Иначе Если  A<0
+             «графа 9» = 0
+             «графа 10» = С
+             Иначе
+             «графа 9»= «графа 10» = 0
+             */
+            if (a.compareTo(0) > 0){
+                row.income = b
+                row.outcome = 0
+            } else if (a.compareTo(0) < 0){
+                row.income = 0
+                row.outcome = c
+            }   else{
+                row.income = 0
+                row.outcome = 0
+            }
         }
 
         // Графа 11
@@ -297,7 +296,7 @@ void checkCreation() {
 def logicalCheck(){
     def data = getData(formData)
 
-    // Проверка объязательных полей. Cписок проверяемых столбцов (графа 1..13)
+    // Проверка обязательных полей. Cписок проверяемых столбцов (графа 1..13)
     def requiredColumns = ['tradeNumber', 'securityName', 'currencyCode', 'nominalPrice', 'part1REPODate', 'part2REPODate', 'acquisitionPrice', 'salePrice', 'income', 'outcome', 'rateBR', 'outcome269st', 'outcomeTax']
     for (def row : getRows(data)) {
         if (!isTotalRow(row) && !checkRequiredColumns(row, requiredColumns)) {
@@ -541,7 +540,9 @@ def calculateColumn13(DataRow row){
  */
 void consolidation() {
     // удалить все строки и собрать из источников их строки
-    getData(formData).clear()
+    def data = getData(formData)
+    data.clear()
+    def newRows = []
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
@@ -549,11 +550,15 @@ void consolidation() {
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 getData(source).getAllCached().each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        data.insert(row, getRows(data).size+1);
+                        newRows.add(row)
                     }
                 }
             }
         }
+    }
+    if (!newRows.isEmpty()) {
+        data.insert(newRows, 1)
+        sort(data)
     }
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
@@ -815,14 +820,15 @@ def addData(def xml) {
  * @param value строка
  */
 def getNumber(def value) {
-    if (value == null) {
-        return null
-    }
     def tmp = value.trim()
     if ("".equals(tmp)) {
         return null
     }
-    return new BigDecimal(tmp)
+    try {
+        return new BigDecimal(tmp)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в число. " + e.message)
+    }
 }
 
 /**
@@ -832,7 +838,11 @@ def getDate(def value, def format) {
     if (isEmpty(value)) {
         return null
     }
-    return format.parse(value)
+    try {
+        return format.parse(value)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в дату. " + e.message)
+    }
 }
 
 /**
@@ -992,4 +1002,20 @@ def getRecordId(def ref_id, String code, def value, Date date, def cache) {
     }
     logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
     return null
+}
+
+/**
+ * Отсорировать данные (по графе 5, 1).
+ *
+ * @param data данные нф (хелпер)
+ */
+void sort(def data) {
+    getRows(data).sort { def a, def b ->
+        // графа 1 - tradeNumber - Номер сделки первая часть / вторая часть
+        // графа 5 - part1REPODate - Дата первой части РЕПО
+        if (a.part1REPODate == b.part1REPODate) {
+            return a.tradeNumber <=> b.tradeNumber
+        }
+        return a.part1REPODate <=> b.part1REPODate
+    }
 }

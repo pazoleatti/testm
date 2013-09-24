@@ -51,7 +51,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	private final TableDataProvider dataProvider = new TableDataProvider();
 
 	public interface MyView extends View, HasUiHandlers<RefBookDataUiHandlers> {
-		void setTableColumns(List<RefBookAttribute> headers);
+		void setTableColumns(final List<RefBookColumn> columns);
 		void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows);
 		void setSelected(Long recordId);
 		void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data);
@@ -148,9 +148,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 							@Override
 							public void onSuccess(GetRefBookAttributesResult result) {
                                 getView().resetRefBookElements();
-								getView().setTableColumns(result.getAttributes());
+								getView().setTableColumns(result.getColumns());
 								getView().setRange(new Range(0, PAGE_SIZE));
-//								getView().setRefBookNameDesc(result.getDesc());
 								editFormPresenter.init(refBookDataId);
                                 getProxy().manualReveal(RefBookDataPresenter.this);
 							}

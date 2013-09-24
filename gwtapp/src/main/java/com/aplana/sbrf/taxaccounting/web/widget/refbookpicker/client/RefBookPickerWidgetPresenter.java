@@ -47,7 +47,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 				RefBookPickerWidgetPresenter.this.refBookAttrId = refBookAttrId;
 				getView().setHeaders(result.getHeaders());
 				if (!result.getVersions().isEmpty()){
-					getView().setVersions(result.getVersions());
+					getView().setVersions(result.getVersions(), result.getDefaultValue());
 				}
 				RefBookPickerWidgetPresenter.this.filter = filter;
 				getView().refreshDataAndGoToFirstPage();
@@ -65,7 +65,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 	}
 
 	interface MyView extends View, HasValue<Long>, HasUiHandlers<RefBookPickerWidgetUiHandlers>{
-		void setVersions(List<Date> versions);
+		void setVersions(List<Date> versions, Date defaultValue);
 		void setHeaders(List<String> headers);
 		
 		void setVersion(Date version);

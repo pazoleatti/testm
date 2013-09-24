@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import java.text.SimpleDateFormat
 
 /**
- * 388 - Предоставление гарантий
+ * 388 - Предоставление гарантий (13)
  *
  * (похож на letter_of_credit "Предоставление инструментов торгового финансирования и непокрытых аккредитивов")
  * (похож на  interbank_credits "Предоставление межбанковских кредитов")
@@ -104,7 +104,6 @@ void addRow() {
     def size = dataRows.size()
     def index = 0
     row.keySet().each {
-        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     getEditColumns().each {
@@ -249,7 +248,10 @@ void logicCheck() {
             if (row.getAlias() == null) {
                 if (nextRow == null ||
                         nextRow.getAlias() == null && isDiffRow(row, nextRow, getGroupColumns())) {
-                    logger.error("Группа «${getValuesByGroupColumn(row)}» не имеет строки подитога!")
+                    def String groupCols = getValuesByGroupColumn(row)
+                    if (groupCols != null) {
+                        logger.error("Группа «$groupCols» не имеет строки подитога!")
+                    }
                 }
             }
         }
@@ -275,15 +277,18 @@ void logicCheck() {
             if (dataRows[itg].getAlias() != null) {
                 logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
             } else {
-                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
-                if (testItogRow.price != realItogRow.price) {
-                    logger.error(mes + " «${priceName}»")
-                }
-                if (testItogRow.total != realItogRow.total) {
-                    logger.error(mes + " «${totalName}»")
-                }
-                if (testItogRow.sum != realItogRow.sum) {
-                    logger.error(mes + " «${sumName}»")
+                def String groupCols = getValuesByGroupColumn(dataRows[itg])
+                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «$groupCols» в графе"
+                if (groupCols != null) {
+                    if (testItogRow.price != realItogRow.price) {
+                        logger.error(mes + " «${priceName}»")
+                    }
+                    if (testItogRow.total != realItogRow.total) {
+                        logger.error(mes + " «${totalName}»")
+                    }
+                    if (testItogRow.sum != realItogRow.sum) {
+                        logger.error(mes + " «${sumName}»")
+                    }
                 }
             }
         }
@@ -302,20 +307,27 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     }
 }
 
-/*
-    Возвращает строку со значениями полей строки по которым идет группировка
-    ['fullName', 'inn', 'docNumber', 'docDate']
+/**
+ * Возвращает строку со значениями полей строки по которым идет группировка
+ * ['fullName', 'inn', 'docNumber', 'docDate']
  */
-
-def getValuesByGroupColumn(DataRow row) {
+String getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    def map = refBookService.getRecordData(9, row.fullName)
-    builder.append(map == null ? 'null' : map.NAME.stringValue).append(sep)
-    builder.append(row.inn).append(sep)
-    builder.append(row.docNumber).append(sep)
-    builder.append(row.docDate)
-    builder.toString()
+    def map = row.fullName != null ? refBookService.getRecordData(9, row.fullName) : null
+    if (map != null)
+        builder.append(map.NAME.stringValue).append(sep)
+    if (row.inn != null)
+        builder.append(row.inn).append(sep)
+    if (row.docNumber != null)
+        builder.append(row.docNumber).append(sep)
+    if (row.docDate != null)
+        builder.append(row.docDate).append(sep)
+
+    def String retVal = builder.toString()
+    if (retVal.length() < 2)
+        return null
+    retVal.substring(0, retVal.length() - 2)
 }
 
 /**
@@ -686,13 +698,13 @@ def getNumber(def value, int indexRow, int indexCell) {
  *
  * @param value
  */
-def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
+def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell) {
 
     String filter;
     if (value == null || value.equals("")) {
-        filter = code + " is null"
+        filter = alias + " is null"
     } else {
-        filter = code + " = '" + value + "'"
+        filter = "LOWER($alias) = LOWER('$value')"
     }
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]

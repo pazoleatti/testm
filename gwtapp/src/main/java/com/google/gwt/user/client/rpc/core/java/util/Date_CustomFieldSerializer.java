@@ -1,16 +1,15 @@
 package com.google.gwt.user.client.rpc.core.java.util;
 
+import java.util.Date;
+
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 
-import java.util.Date;
-
 /**
- * Custom field serializer for {@link java.util.Date}.
+ * Этот класс реализует сериализацию {@link java.util.Date} со сдвигом временных зон.
  */
-//TODO Убрать трейсы
 public final class Date_CustomFieldSerializer extends
 		CustomFieldSerializer<Date> {
 
@@ -19,19 +18,17 @@ public final class Date_CustomFieldSerializer extends
 	 * 
 	 * @param date
 	 * @param plus
-	 *            true - преобразовать дату в UTC0 false - преобразовать дату из
-	 *            UTC0 в текущую
 	 * 
 	 * @return
 	 */
-	private static long offsetUTC(Date date, boolean plus) {
-		System.out.println(plus);
-		System.out.println(date);
-		@SuppressWarnings("deprecation")
-		long offset = date.getTimezoneOffset() * 60000;
-		System.out.println(offset);
-		long result = date.getTime() + (plus ? offset : -offset);
-		System.out.println(new Date(result));
+	private static long offsetUTC(long time, boolean plus) {
+		// * 
+		// Получение текущего сдвига. Нужно будет придумать другой способ,
+		// без вызова deprecated методов
+		Date getOffsetDate = new Date();
+		long offset = getOffsetDate.getTimezoneOffset() * 60000;
+		// *
+		long result = time + (plus ? offset : -offset);
 		return result;
 	}
 
@@ -42,16 +39,14 @@ public final class Date_CustomFieldSerializer extends
 
 	public static Date instantiate(SerializationStreamReader streamReader)
 			throws SerializationException {
-		System.out.println("instantiate");
 		long time = streamReader.readLong();
-		Date date = new Date(offsetUTC(new Date(time), true));
+		Date date = new Date(offsetUTC(time, true));
 		return date;
 	}
 
 	public static void serialize(SerializationStreamWriter streamWriter,
 			Date instance) throws SerializationException {
-		System.out.println("serialize");
-		streamWriter.writeLong(offsetUTC(instance, false));
+		streamWriter.writeLong(offsetUTC(instance.getTime(), false));
 	}
 
 	@Override

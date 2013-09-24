@@ -60,7 +60,16 @@ public class RefBookHelperImpl implements RefBookHelper {
 	public Map<String, String> singleRecordDereference(RefBook refBook,
 			RefBookDataProvider provider, List<RefBookAttribute> attributes,
 			Map<String, RefBookValue> record) {
-		Map<String, String> result = new HashMap<String, String>();
+
+        //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
+        Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
+            }
+        }
+
+        Map<String, String> result = new HashMap<String, String>();
 		for (RefBookAttribute refBookAttribute : attributes) {
 			RefBookAttributeType type = record.get(refBookAttribute.getAlias())
 					.getAttributeType();
@@ -75,12 +84,9 @@ public class RefBookHelperImpl implements RefBookHelper {
 								refBookAttribute.getRefBookAttributeId());
 						result.put(alias, String.valueOf(val));
 					} else {
-						// TODO: Необходимо разименовать значение ссылки
-						// (http://jira.aplana.com/browse/SBRFACCTAX-3220)
-						result.put(
-								alias,
-								"Не разыменовано: "
-										+ String.valueOf(longRefValue));
+                        RefBookValue val = refProviders.get(refBookAttribute.getAlias()).getValue(longRefValue,
+                                refBookAttribute.getRefBookAttributeId());
+                        result.put(alias, String.valueOf(val));
 					}
 				}
 			} else {

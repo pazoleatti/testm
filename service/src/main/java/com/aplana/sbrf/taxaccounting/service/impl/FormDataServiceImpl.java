@@ -367,7 +367,7 @@ public class FormDataServiceImpl implements FormDataService {
 					"Найдены ошибки при выполнении проверки формы", logger.getEntries());
 		} else {
 			// Ошибка для отката транзакции
-			logger.info("Проверка завершена, ошибок не обнаружено");
+			logger.info("Проверка завершена, фатальных ошибок не обнаружено");
 			throw new ServiceLoggerException(
 					"Ошибок не обнаружено", logger.getEntries());
 		}

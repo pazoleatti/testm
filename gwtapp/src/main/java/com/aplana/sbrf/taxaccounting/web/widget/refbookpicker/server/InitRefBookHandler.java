@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.server;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -55,7 +53,11 @@ public class InitRefBookHandler extends
 		} else {
 			versions.add(new Date());
 		}
+
+        Date defaultValue = Collections.max(versions);
+
 		result.setVersions(versions);
+        result.setDefaultValue(defaultValue);
 		
 		return result;
 	}

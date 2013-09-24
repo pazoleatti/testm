@@ -24,10 +24,7 @@ switch (formDataEvent){
         break
 // Инициирование Пользователем создания формы
     case FormDataEvent.CREATE:
-        //1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при создании формы.
-        //2.	Логические проверки значений налоговой.
-        //logicalCheck()
-        //3.	Проверки соответствия НСИ.
+        checkCreation()
         break
 // Инициирование Пользователем перехода «Подготовить»
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:
@@ -298,7 +295,7 @@ def checkRequiredColumns(def row, def columns) {
     def cell
     columns.each {
         cell = row.getCell(it)
-        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+        if (cell.getValue() == null || row.getCell(it).getValue() == '') {
             def name = getColumnName(row, it)
             colNames.add('"' + name + '"')
         }
@@ -523,5 +520,26 @@ void setTotalStyle(def row) {
     ['rowNumber', 'fix', 'balance', 'code', 'name', 'sum'].each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
         row.getCell(it).setEditable(false)
+    }
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    // отчётный период
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+
+    //проверка периода ввода остатков
+    if (reportPeriod != null && reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
+        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
+        return
+    }
+
+    def findForm = formDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
 }

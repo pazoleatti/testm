@@ -11,6 +11,7 @@ public class TableRow implements Serializable {
 	private String periodName;
 	private Boolean periodCondition;
 	private boolean isSubHeader;
+    private Boolean balance;
 
 	public int getId() {
 		return id;
@@ -67,4 +68,12 @@ public class TableRow implements Serializable {
 	public void setSubHeader(boolean subHeader) {
 		isSubHeader = subHeader;
 	}
+
+    public Boolean isBalance() {
+        return balance;
+    }
+
+    public void setBalance(Boolean balance) {
+        this.balance = balance;
+    }
 }

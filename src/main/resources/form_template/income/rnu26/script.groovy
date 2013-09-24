@@ -170,7 +170,7 @@ def deleteRow() {
 void calc() {
     def data = getData(formData)
     /*
-     * Проверка объязательных полей.
+     * Проверка обязательных полей.
      */
     for (def row : getRows(data)) {
         if (!isFixedRow(row)) {

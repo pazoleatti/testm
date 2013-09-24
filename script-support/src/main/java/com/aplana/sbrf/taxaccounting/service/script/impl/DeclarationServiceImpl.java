@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -21,14 +22,6 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataCollection;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
@@ -43,9 +36,16 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
 	private static final String DATE_FORMAT = "yyyyMMdd";
 
-    private static final Long DEPARTMENT_PARAM_REF_BOOK_ID = 31L;
-	
-	private ScriptComponentContext context;
+    // Тип налога -> ID справочника с параметрами подразделения
+    private static final Map<TaxType, Long> TAX_TYPE_TO_REF_BOOK_MAP = new HashMap<TaxType, Long>() {
+        {
+            put(TaxType.INCOME, 33L);
+            put(TaxType.TRANSPORT, 31L);
+            put(TaxType.DEAL, 37L);
+        }
+    };
+
+    private ScriptComponentContext context;
 
 	@Autowired
 	DeclarationDataDao declarationDataDao;
@@ -83,9 +83,12 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 	public String generateXmlFileId(int declarationTypeId, int departmentId, int reportPeriodId) {
 
         DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-        String declarationPrefix = declarationTypeDao.get(declarationTypeId).getTaxType().getDeclarationPrefix();
+
+        TaxType declarationTaxType = declarationTypeDao.get(declarationTypeId).getTaxType();
+        String declarationPrefix = declarationTaxType.getDeclarationPrefix();
 		StringBuilder stringBuilder = new StringBuilder(declarationPrefix);
-		RefBookDataProvider tmp = factory.getDataProvider(DEPARTMENT_PARAM_REF_BOOK_ID);
+
+		RefBookDataProvider tmp = factory.getDataProvider(TAX_TYPE_TO_REF_BOOK_MAP.get(declarationTaxType));
         Date startDate = periodService.getStartDate(reportPeriodId).getTime();
         List<Map<String, RefBookValue>> departmentParams = tmp.getRecords(startDate, null, String.format("DEPARTMENT_ID = %d", departmentId), null);
         Map<String, RefBookValue> departmentParam = departmentParams.get(0);

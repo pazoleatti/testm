@@ -141,6 +141,27 @@ public class DepartmentReportPeriodDaoImplTest {
 		assertEquals(true, departmentReportPeriod.isActive());
 		assertEquals(true, departmentReportPeriod.isBalance());
 		assertEquals(9, departmentReportPeriod.getReportPeriod().getOrder());
+	
+	}
+	
+	@Test
+	public void saveAndGetSuccessFalseBalanceActiveTest() {
+
+		DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+		departmentReportPeriod.setDepartmentId(1l);
+		departmentReportPeriod.setActive(false);
+		departmentReportPeriod.setBalance(false);
+		departmentReportPeriod.setReportPeriod(reportPeriod1);
+
+		departmentReportPeriodDao.save(departmentReportPeriod);
+		departmentReportPeriod = departmentReportPeriodDao.get(
+				reportPeriod1.getId(), 1l);
+
+		assertEquals(Long.valueOf(1l), departmentReportPeriod.getDepartmentId());
+		assertEquals(false, departmentReportPeriod.isActive());
+		assertEquals(false, departmentReportPeriod.isBalance());
+		assertEquals(9, departmentReportPeriod.getReportPeriod().getOrder());
+	
 	}
 
 	@Test

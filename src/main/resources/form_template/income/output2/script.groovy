@@ -166,7 +166,8 @@ void importData() {
         return
     }
 
-    def xmlString = importService.getData(is, fileName, 'windows-1251', '№ стр.', null)
+    def columnsCount = 22
+    def xmlString = importService.getData(is, fileName, 'windows-1251', '№ стр.', null, columnsCount)
     if (xmlString == null) {
         logger.error('Отсутствие значении после обработки потока данных')
         return
@@ -193,9 +194,6 @@ void importData() {
     } catch(Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        logger.info('Данные загружены')
-    }
 }
 
 /**
@@ -205,9 +203,6 @@ void importData() {
  * @param headRowCount количество строк в шапке
  */
 void addData(def xml, headRowCount) {
-    if (xml == null) {
-        return
-    }
     def data = getData()
 
     // количество графов в таблице
@@ -330,7 +325,11 @@ def getNumber(def value) {
     }
     // поменять запятую на точку и убрать пробелы
     tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
-    return new BigDecimal(tmp)
+    try {
+        return new BigDecimal(tmp)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в число. " + e.message)
+    }
 }
 
 /**
@@ -410,4 +409,3 @@ def getValue(def record, def alias) {
 def getRows(def data) {
     return data.getAllCached();
 }
-

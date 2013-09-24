@@ -1,3 +1,9 @@
+package form_template.income.rnu44
+
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+
 /**
  * Скрипт для РНУ-44 (rnu44.groovy).
  * (РНУ-44) Регистр налогового учёта доходов, в виде восстановленной амортизационной премии при реализации ранее,
@@ -6,8 +12,6 @@
  *
  * Версия ЧТЗ: 64
  *
- * TODO:
- *         -    не понятно, как получать данные из РНУ-46 и РНУ-49 с.м. http://jira.aplana.com/browse/SBRFACCTAX-2731
  *
  * @author vsergeev
  *
@@ -21,29 +25,6 @@
  * 5    baseNumber      Номер
  * 6    baseDate        Дата
  * 7    summ            Сумма восстановленной амортизационной премии
- *
- *                  *****   РНУ 46  *****
- * 1    rowNumber               № пп
- * 2    invNumber               Инв. номер
- * 3    name                    Наименование объекта
- * 4    cost                    Первоначальная стоимость
- * 5    amortGroup              Амортизационная группа
- * 6    usefulLife              Срок полезного использования, (мес.)
- * 7    monthsUsed              Количество месяцев эксплуатации предыдущими собственниками (арендодателями,
- *                              ссудодателями)
- * 8    usefulLifeWithUsed      Срок полезного использования с учётом срока эксплуатации предыдущими собственниками
- *                              (арендодателями, ссудодателями) либо установленный самостоятельно, (мес.)
- * 9    specCoef                Специальный коэффициент
- * 10   cost10perMonth          За месяц
- * 11   cost10perTaxPeriod      с начала налогового периода
- * 12   cost10perExploitation   с даты ввода в эксплуатацию
- * 13   amortNorm               Норма амортизации (% в мес.)
- * 14   amortMonth              за месяц
- * 15   amortTaxPeriod          с начала налогового периода
- * 16   amortExploitation       с даты ввода в эксплуатацию
- * 17   exploitationStart       Дата ввода в эксплуатацию
- * 18   usefullLifeEnd          Дата истечения срока полезного использования
- * 19   rentEnd                 Дата истечения срока договора аренды / договора безвозмездного пользования
  *
  *                  *****   РНУ 49  *****
  * 1    rowNumber   № пп
@@ -71,120 +52,145 @@
  * 23   propertyType            Тип имущества
  */
 switch (formDataEvent) {
+    case FormDataEvent.CREATE:
+        checkCreation()
+        break
     case FormDataEvent.CHECK :
+        def rnu49FormData = getRnu49FormData()
+        if (rnu49FormData==null) {
+            logger.error("Отсутствуют данные РНУ-49!")
+            return
+        }
         logicalCheckWithTotalDataRowCheck()
         break
     case FormDataEvent.CALCULATE :
+        def rnu49FormData = getRnu49FormData()
+        if (rnu49FormData==null) {
+            logger.error("Отсутствуют данные РНУ-49!")
+            return
+        }
         if (logicalCheckWithoutTotalDataRowCheck()) {
             calc()
+            !hasError() && logicalCheckWithTotalDataRowCheck()
         }
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
+        recalculateNumbers()
         break
     case FormDataEvent.DELETE_ROW :
-        deleteCurrentRow()
+        deleteRow()
+        recalculateNumbers()
+        break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        logicalCheck()
         break
 }
 
-def calc() {
-    calcValues()
-    calcTotal()
-}
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = formDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
 
-boolean checkCalculatedCells() {
-    def isValid = true
-
-    def rnu46FormData = getRnu46FormData()
-    def rnu49FormData = getRnu49FormData()
-
-    for (def dataRow : formData.getDataRows()) {
-        if ( ! isInTotalRowsAliases(dataRow.getAlias())) {      //строку итогов не проверяем
-            def rnu46Row = getRnu46Row(rnu46FormData, dataRow)
-            def rnu49Row = getRnu49Row(rnu49FormData, dataRow)
-
-            def values = getValues(rnu46Row, rnu49Row)
-
-            for (def colName : values.keySet()) {
-                if (dataRow[colName] != values[colName]) {
-                    isValid = false
-                    def fieldNumber = formData.dataRows.indexOf(dataRow) + 1
-                    logger.error("Строка $fieldNumber заполнена неверно!")
-                    break
-                }
-            }
-        }
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
-
-    return isValid
 }
 
 /**
  * заполняем ячейки, вычисляемые автоматически
  */
-def calcValues() {
-    def rnu46FormData = getRnu46FormData()
+
+def calc() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = getRows(dataRowHelper)
+
     def rnu49FormData = getRnu49FormData()
 
-    for (def dataRow : formData.getDataRows()) {
-        if ( ! isInTotalRowsAliases(dataRow.getAlias())) {      //строку итогов не заполняем
-            def rnu46Row = getRnu46Row(rnu46FormData, dataRow)
+    if (rnu49FormData!=null) {
+    for (def dataRow : dataRows) {
+        if ( ! isFixedRow(dataRow)) {      //строку итогов не заполняем
             def rnu49Row = getRnu49Row(rnu49FormData, dataRow)
 
-            def values = getValues(rnu46Row, rnu49Row)
+            def values = getValues(rnu49Row)
 
             values.keySet().each { colName ->
                 dataRow[colName] = values[colName]
             }
         }
     }
+    def totalResults = getTotalResults()
+    dataRows.each { dataRow ->
+        if (isFixedRow(dataRow)) {
+            getTotalColsAliases().each { colName ->
+                dataRow[colName] = totalResults[colName]
+            }
+        }
+    }
+    }
+    save(dataRowHelper)
 }
 
-def getRnu46FormData() {
-    //todo за какой период брать форму?  с.м. http://jira.aplana.com/browse/SBRFACCTAX-2731
+boolean checkCalculatedCells() {
+    def isValid = true
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = getRows(dataRowHelper)
+
+    def rnu49FormData = getRnu49FormData()
+
+    if (rnu49FormData!=null) {
+    for (def dataRow : dataRows) {
+        if ( !isFixedRow(dataRow)) {      //строку итогов не проверяем
+            def rnu49Row = getRnu49Row(rnu49FormData, dataRow)
+
+            def values = getValues(rnu49Row)
+
+            for (def colName : values.keySet()) {
+                if (dataRow[colName] != values[colName]) {
+                    isValid = false
+                    def fieldNumber = dataRow.getIndex()
+                    String msg = getColumnName(dataRow, colName)
+                    logger.error("Строка $fieldNumber: Неверно рассчитана графа «$msg»!")
+                }
+            }
+        }
+    }
+    }
+    return isValid
 }
 
+/**
+ * Получить данные за формы "(РНУ-49) Регистр налогового учёта «ведомость определения результатов от реализации (выбытия) имущества»"
+ */
 def getRnu49FormData() {
-    //todo за какой период брать форму?  с.м. http://jira.aplana.com/browse/SBRFACCTAX-2731
-}
-
-/**
- * получаем мапу со значениями, расчитанными для каждой конкретной строки
- */
-def getValues(def rnu46Row, def rnu49Row) {
-    def values = [:]
-
-    values.with {
-        /*2*/   operationDate = getOperationDate(rnu49Row)
-        /*5*/   baseNumber = getBaseNumber(rnu49Row)
-        /*6*/   baseDate = getBaseDate(rnu49Row)
-        /*7*/   summ = getSumm(rnu46Row)
+    def formData49 = formDataService.find(312, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+    if (formData49!=null) {
+        return getData(formData49)
     }
-
-    return values
-}
-
-/**
- * В РНУ-46 находим строку, для которой «графа 2» = «графа 4» текущей строки формы РНУ-44.
- */
-def getRnu46Row(rnu46FormData, dataRow){
-    return rnu46FormData.dataRows.find { rnu46DataRow ->
-        rnu46DataRow.invNumber == dataRow.inventoryNumber
-    }
+    return null
 }
 
 /**
  * В разделе А РНУ-49 находим строку, для которой «графа 6» = «графа 4» текущей строки формы РНУ-44.
  */
-def getRnu49Row(rnu49FormData, dataRow) {
-
+def getRnu49Row(def rnu49FormData, def dataRow) {
+    def rnu49Rows = getRows(rnu49FormData)
     //находим границы раздела "А" в РНУ-49
-    def startToSearchIndex = rnu49FormData.dataRows.indexOf(rnu49FormData.getDataRow(getRnu49AIndex()))
-    def endToSearchIndex = rnu49FormData.dataRows.indexOf(rnu49FormData.getDataRow(getRnu49TotalAIndex()))
 
-    return startToSearchIndex..endToSearchIndex.find { index ->
-        rnu49FormData.dataRows[index].invNumber = dataRow.inventoryNumber
+    def startToSearchIndex = rnu49Rows.indexOf(rnu49FormData.getDataRow(rnu49Rows, getRnu49AIndex()))
+    def endToSearchIndex = rnu49Rows.indexOf(rnu49FormData.getDataRow(rnu49Rows, getRnu49TotalAIndex()))
+
+    def indexRow = (startToSearchIndex..endToSearchIndex).find { index ->
+        rnu49Rows[index].invNumber == dataRow.inventoryNumber
     }
+    return indexRow?rnu49Rows[indexRow]:[:]
 }
 
 def getRnu49AIndex(){
@@ -193,6 +199,23 @@ def getRnu49AIndex(){
 
 def getRnu49TotalAIndex(){
     return 'totalA'
+}
+
+
+/**
+ * получаем мапу со значениями, расчитанными для каждой конкретной строки
+ */
+def getValues(def rnu49Row) {
+    def values = [:]
+
+    values.with {
+        /*2*/   operationDate = getOperationDate(rnu49Row)
+        /*5*/   baseNumber = getBaseNumber(rnu49Row)
+        /*6*/   baseDate = getBaseDate(rnu49Row)
+        /*7*/   summ = getSumm(rnu49Row)
+    }
+
+    return values
 }
 
 def getOperationDate(def rnu49Row) {
@@ -207,26 +230,8 @@ def getBaseDate(rnu49Row){
     return rnu49Row.reasonDate
 }
 
-def getSumm(rnu46Row) {
-    return rnu46Row.cost10perTaxPeriod
-}
-
-/********************************   ОБЩИЕ ФУНКЦИИ   ********************************/
-
-/**
- * false, если в строке нет символов или строка null
- * true, если в строке есть символы
- */
-boolean isBlankOrNull(value) {
-    return (value == null || value.equals(''))
-}
-
-/**
- * возвращает true, если в таблице выделен какой-нибудь столбце
- * иначе возвращает false
- */
-boolean isCurrentDataRowSelected() {
-    return (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) >= 0)
+def getSumm(rnu49Row) {
+    return rnu49Row.sum
 }
 
 /***********   ФУНКЦИИ ДЛЯ ПРОВЕРКИ ОБЯЗАТЕЛЬНЫХ ДЛЯ ЗАПОЛНЕНИЯ ДАННЫХ   ***********/
@@ -243,37 +248,11 @@ boolean logicalCheckWithoutTotalDataRowCheck() {
  * проверяем все данные формы на обязательное и корректное заполнение
  */
 boolean logicalCheckWithTotalDataRowCheck() {
-    if (checkColsFilledByAliases(getAllRequiredColsAliases())) {
-        return (checkCalculatedCells() && checkTotalResults())
+    if (checkColsFilledByAliases(getAllRequiredColsAliases()) ) {
+        return (checkInventoryNumber() && checkCalculatedCells() && checkTotalResults())
     }
 
     return false
-}
-
-/**
- * возвращает список алиасов всех обязательных для заполнения столбцов
- */
-def getAllRequiredColsAliases() {
-    return ['number', 'bill', 'purchaseDate', 'purchasePrice', 'purchaseOutcome', 'implementationDate', 'implementationPrice',
-            'implementationOutcome', 'price', 'percent', 'implementationpPriceTax', 'allIncome',
-            'implementationPriceUp', 'income']
-}
-
-/**
- * проверяем актуальность итоговых значения
- */
-boolean checkTotalResults() {
-    def totalDataRow = formData.getDataRow(getTotalDataRowAlias())
-    def controlTotalResults = getTotalResults()
-
-    for (def colName : controlTotalResults.keySet()) {
-        if (totalDataRow[colName] != controlTotalResults[colName]) {
-            logger.error('Итоговые значения рассчитаны неверно!')
-            return false
-        }
-    }
-
-    return true
 }
 
 /**
@@ -281,14 +260,56 @@ boolean checkTotalResults() {
  */
 boolean checkColsFilledByAliases(List colsAliases) {
     boolean isValid = true
-    formData.dataRows.each { dataRow ->
-        if (! isInTotalRowsAliases(dataRow.getAlias())) {       //итоговые строки не проверяем
-            for (def colAlias : colsAliases) {
-                if (isBlankOrNull(dataRow[colAlias])) {
-                    def columnIndex = formData.dataRows.indexOf(dataRow) + 1
-                    logger.error("Поле $columnIndex не заполнено!")
+    def dataRows = getRows(formDataService.getDataRowHelper(formData))
+    dataRows.each { dataRow ->
+        if (! isFixedRow(dataRow)) {       //итоговые строки не проверяем
+            isValid &= checkRequiredColumns(dataRow, colsAliases)
+        }
+    }
+
+    return isValid
+}
+
+/**
+ * возвращает список алиасов всех обязательных для заполнения столбцов
+ */
+def getAllRequiredColsAliases() {
+    return ['operationDate', 'name', 'inventoryNumber', 'baseNumber', 'baseDate', 'summ']
+}
+
+/**
+ * проверяем актуальность Инвентарного номера
+ */
+boolean checkInventoryNumber() {
+    def dataRows = getRows(formDataService.getDataRowHelper(formData))
+    for(def row: dataRows) {
+        def find = dataRows.find{it->
+            (row!=it && row.inventoryNumber==it.inventoryNumber)
+        }
+        if (find!=null) {
+            logger.error("Инвентарный номер не уникальный!")
+            return false
+        }
+    }
+    return true
+}
+
+/**
+ * проверяем актуальность итоговых значения
+ */
+boolean checkTotalResults() {
+    def isValid = true
+    def controlTotalResults = getTotalResults()
+
+    def dataRows = getRows(formDataService.getDataRowHelper(formData))
+    dataRows.each { dataRow ->
+        if (isFixedRow(dataRow)) {
+            for (def colName : controlTotalResults.keySet()) {
+                if (dataRow[colName] != controlTotalResults[colName]) {
                     isValid = false
-                    break
+                    def fieldNumber = dataRow.getIndex()
+                    String msg = getColumnName(dataRow, colName)
+                    logger.error("Строка $fieldNumber: Неверно рассчитана графа «$msg»!")
                 }
             }
         }
@@ -300,29 +321,45 @@ boolean checkColsFilledByAliases(List colsAliases) {
 /***********   ДОБАВЛЕНИЕ СТРОКИ В ТАБЛИЦУ С ФИКСИРОВАННЫМИ СТРОКАМИ ИТОГОВ   ***********/
 
 /**
- * добавляет строку в таблицу с фиксированными строками итогов. строка добавляется перед выделенной
- * строкой (если такая есть). если выделенной строки нет, то строка добавляется в конец таблицы перед
- * последней итоговой строкой
+ * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = formData.createDataRow()
+    def data = getData(formData)
 
-    makeCellsEditable(newRow)
-
-    int index = getNewRowIndex()
-
-    formData.dataRows.add(index, newRow)
-
-    return newRow
+    def index = 0
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def row = currentDataRow
+        while(row.getAlias()!=null && index>0){
+            row = getRows(data).get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
+            index++
+        }
+    }else if (getRows(data).size()>0) {
+        for(int i = getRows(data).size()-1;i>=0;i--){
+            def row = getRows(data).get(i)
+            if(!isFixedRow(row)){
+                index = getRows(data).indexOf(row)+1
+                break
+            }
+        }
+    }
+    data.insert(newRow,index+1)
 }
 
+
 /**
- * делает ячейки, алиасы которых есть в списке редактируемых, редактируемыми
+ * Получить новую стролу с заданными стилями.
  */
-def makeCellsEditable(def row) {
+def getNewRow() {
+    def newRow = formData.createDataRow()
+
     getEditableColsAliases().each {
-        row.getCell(it).editable = true
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+    return newRow
 }
 
 /**
@@ -333,70 +370,10 @@ def getEditableColsAliases() {
 }
 
 /**
- * возвращает индекс для добавляемого столбца
- * (находит строку, удовлетворяющую условиям addNewRow(). на ее место будет произведена вставка новой строки)
+ * Проверка является ли строка итоговой.
  */
-int getNewRowIndex() {
-    def index
-
-    def isTotalRow = false
-    if (isCurrentDataRowSelected()) {
-        index = formData.dataRows.indexOf(currentDataRow)
-        if ( ! isBlankOrNull(currentDataRow.getAlias())) {
-            isTotalRow = true
-        }
-    } else {
-        index = formData.dataRows.size() - 1
-    }
-
-    index = goToTopAndGetMaxIndexOfRowWithoutAlias(index)
-
-    if (isTotalRow && index != null) {
-        index += 1
-    } else if (index == null) {
-        index = 0
-    }
-
-    return index
-}
-
-/**
- * идем вверх по таблице, начиная со строки с индексом startIndex (включительно). находим первую неитоговую
- * строку (алиас которой не помечен как итоговый в getTotalRowsAliases()).
- *
- * возвращает индекс этой строки.
- */
-def goToTopAndGetMaxIndexOfRowWithoutAlias(def startIndex) {
-    for (int i = startIndex; i >= 0; i--) {
-        if (getTotalRowsAliases().find{ totalRowAlias ->
-            totalRowAlias == formData.dataRows[i].getAlias()
-        } == null) {
-            return i
-        }
-    }
-
-    return null
-}
-
-/***********   ОБЩИЕ ФУНКЦИИ ДЛЯ ИТОГОВЫХ СТРОК   ***********/
-
-/**
- * заполняем строку с итоговыми значениям
- */
-def calcTotal() {
-    def totalResults = getTotalResults()
-    def totalRow = formData.getDataRow(getTotalDataRowAlias())
-    getTotalColsAliases().each { colName ->
-        totalRow[colName] = totalResults[colName]
-    }
-}
-
-/**
- * false, если алиас строки не входит в список алиасов итоговых строк
- * true, если алиас строки входит в алиас итоговых строк
- */
-boolean isInTotalRowsAliases(def alias){
-    return (totalRowsAliases.find {totalAlias -> alias == totalAlias} != null)
+def isFixedRow(def row) {
+    return row != null && row.getAlias() != null && row.getAlias().contains('total')
 }
 
 /**
@@ -406,22 +383,14 @@ def getTotalRowsAliases() {
     return ['total']
 }
 
-def getTotalRowAlias() {
-    return 'total'
-}
-
 /***********   УДАЛЕНИЕ СТРОКИ ИЗ ТАБЛИЦЫ С ФИКСИРОВАННЫМИ СТРОКАМИ ИТОГОВ   ***********/
 
 /**
- * удаляет выделенную строку, если она не является итоговой
- * если выделенная строки является итоговой, то она не удаляется и выводится сообщение о критичесокй ошибке
+ * Удалить строку.
  */
-def deleteCurrentRow() {
-    if (isCurrentDataRowSelected() &&
-            totalRowsAliases.find { totalRowAlias ->
-                totalRowAlias == currentDataRow.getAlias()
-            } == null) {
-        formData.dataRows.remove(currentDataRow)
+def deleteRow() {
+    if (!isFixedRow(currentDataRow)) {
+        getData(formData).delete(currentDataRow)
     } else {
         logger.error ('Невозможно удалить фиксированную строку!')
     }
@@ -434,17 +403,19 @@ def deleteCurrentRow() {
  * возвращаем мапу вида алиас_столбца -> итоговое_значение
  */
 def getTotalResults() {
-    def result = [:]
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    def totalRow = [:]
     for (def colAlias : getTotalColsAliases()) {
-        result.put(colAlias, formData.dataRows.sum {row ->
-            if (! isInTotalRowsAliases(row.getAlias())) {    //строка не входит в итоговые
+        totalRow.put(colAlias, dataRows.sum {row ->
+            if (! isFixedRow(row)) {    //строка не входит в итоговые
                 row[colAlias]
             } else {
                 0
             }
         })
     }
-    return result
+    return totalRow
 }
 
 /**
@@ -452,258 +423,96 @@ def getTotalResults() {
  */
 def getTotalColsAliases() {
     return ['summ']
-}/**
- * ������ ��� ���-44 (rnu44.groovy).
- * (���-44) ������� ���������� ����� �������, � ���� ��������������� ��������������� ������ ��� ���������� �����,
- * ��� �� ��������� 5 ��� � ���� ����� � ������������ ��������������� ����� � ���������� ��������� ��� �������� �������
- * �������� � ������������ ����� 01.01.2013
- *
- * ������ ���: 64
- *
- * TODO:
- *
- * @author vsergeev
- *
- * �����:
- *
- *                  *****   ��� 44  *****
- * 1    number          � ��
- * 2    operationDate   ���� ��������
- * 3    name            �������� ��������
- * 4    inventoryNumber ����������� �����
- * 5    baseNumber      �����
- * 6    baseDate        ����
- * 7    summ            ����� ��������������� ��������������� ������
- *
- *                  *****   ��� 46  *****
- * 1    rowNumber               � ��
- * 2    invNumber               ���. �����
- * 3    name                    ������������ �������
- * 4    cost                    �������������� ���������
- * 5    amortGroup              ��������������� ������
- * 6    usefulLife              ���� ��������� �������������, (���.)
- * 7    monthsUsed              ���������� ������� ������������ ����������� �������������� (��������������,
- *                              �������������)
- * 8    usefulLifeWithUsed      ���� ��������� ������������� � ������ ����� ������������ ����������� ��������������
- *                              (��������������, �������������) ���� ������������� ��������������, (���.)
- * 9    specCoef                ����������� �����������
- * 10   cost10perMonth          �� �����
- * 11   cost10perTaxPeriod      � ������ ���������� �������
- * 12   cost10perExploitation   � ���� ����� � ������������
- * 13   amortNorm               ����� ����������� (% � ���.)
- * 14   amortMonth              �� �����
- * 15   amortTaxPeriod          � ������ ���������� �������
- * 16   amortExploitation       � ���� ����� � ������������
- * 17   exploitationStart       ���� ����� � ������������
- * 18   usefullLifeEnd          ���� ��������� ����� ��������� �������������
- * 19   rentEnd                 ���� ��������� ����� �������� ������ / �������� �������������� �����������
- *
- *                  *****   ��� 49  *****
- * 1    rowNumber   � ��
- * 2    firstRecordNumber       ����� ������ ������
- * 3    operationDate           ���� ��������
- * 4    reasonNumber            �����
- * 5    reasonDate              ����
- * 6    invNumber               ����������� �����
- * 7     name                   ������������
- * 8    price                   ���� ������������
- * 9    amort                   ���������� ��������� ����������� (�������� �� �������)
- * 10   expensesOnSale          ������� ��� ����������
- * 11   sum                     ����� ����������� ������� �� ����������
- * 12   sumInFact               ����� ���������� ����������� �������� �������
- * 13   costProperty            ��������� ���������� � ���������, ���������� ��� ���������� �������� �������
- * 14   marketPrice             �������� ����
- * 15   sumIncProfit            ����� � ���������� ������� (���������� ������)
- * 16   profit                  ������� �� ����������
- * 17   loss                    ������ �� ����������
- * 18   usefullLifeEnd          ���� ��������� ����� ��������� �������������
- * 19   monthsLoss              ���������� ������� ��������� ������� �� �������
- * 20   expensesSum             ����� ��������, ������������ �� ������ �����
- * 21   saledPropertyCode       ���� ���� �������������� (���������) ���������
- * 22   saleCode                ���� ���� ���������� (�������)
- * 23   propertyType            ��� ���������
- */
-switch (formDataEvent) {
-    case FormDataEvent.CHECK :
-        logicalCheck()
-        break
-    case FormDataEvent.CALCULATE :
-        if (logicalCheck(false)) {
-            calc()
-        }
-        break
-    case FormDataEvent.ADD_ROW :
-        addNewRow()
-        break
-    case FormDataEvent.DELETE_ROW :
-        deleteCurrentRow()
-        break
-}
-
-def getTotalRowIndex() {
-    return formData.getDataRowIndex(getTotalRowAlias())
-}
-
-/********************************   ����� �������   ********************************/
-
-/**
- * false, ���� � ������ ��� �������� ��� ������ null
- * true, ���� � ������ ���� �������
- */
-boolean isBlankOrNull(value) {
-    return (value == null || value.equals(''))
 }
 
 /**
- * ���������� true, ���� � ������� ������� �����-������ �������
- * ����� ���������� false
+ * Получить данные формы.
+ *
+ * @param formData форма
  */
-boolean isCurrentDataRowSelected() {
-    return (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) >= 0)
-}
-
-/***********   ���������� ������ � ������� � �������������� �������� ������   ***********/
-
-/**
- * ��������� ������ � ������� � �������������� �������� ������. ������ ����������� ����� ����������
- * ������� (���� ����� ����). ���� ���������� ������ ���, �� ������ ����������� � ����� ������� �����
- * ��������� �������� �������
- */
-def addNewRow() {
-    def newRow = formData.createDataRow()
-
-    makeCellsEditable(newRow)
-
-    int index = getNewRowIndex()
-
-    formData.dataRows.add(index, newRow)
-
-    return newRow
-}
-
-/**
- * ������ ������, ������ ������� ���� � ������ �������������, ��������������
- */
-def makeCellsEditable(def row) {
-    getEditableColsAliases().each {
-        row.getCell(it).editable = true
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
     }
-}
-
-/**
- * ���������� ������ ������� ��������, ��������� ��� �������������� �������������
- */
-def getEditableColsAliases() {
-    return ['name', 'inventoryNumber']
-}
-
-/**
- * ���������� ������ ��� ������������ �������
- * (������� ������, ��������������� �������� addNewRow(). �� �� ����� ����� ����������� ������� ����� ������)
- */
-int getNewRowIndex() {
-    def index
-
-    def isTotalRow = false
-    if (isCurrentDataRowSelected()) {
-        index = formData.dataRows.indexOf(currentDataRow)
-        if ( ! isBlankOrNull(currentDataRow.getAlias())) {
-            isTotalRow = true
-        }
-    } else {
-        index = formData.dataRows.size() - 1
-    }
-
-    index = goToTopAndGetMaxIndexOfRowWithoutAlias(index)
-
-    if (isTotalRow && index != null) {
-        index += 1
-    } else if (index == null) {
-        index = 0
-    }
-
-    return index
-}
-
-/**
- * ���� ����� �� �������, ������� �� ������ � �������� startIndex (������������). ������� ������ ����������
- * ������ (����� ������� �� ������� ��� �������� � getTotalRowsAliases()).
- *
- * ���������� ������ ���� ������.
- */
-def goToTopAndGetMaxIndexOfRowWithoutAlias(def startIndex) {
-    for (int i = startIndex; i >= 0; i--) {
-        if (getTotalRowsAliases().find{ totalRowAlias ->
-            totalRowAlias == formData.dataRows[i].getAlias()
-        } == null) {
-            return i
-        }
-    }
-
     return null
 }
 
-/***********   ����� ������� ��� �������� �����   ***********/
-
 /**
- * false, ���� ����� ������ �� ������ � ������ ������� �������� �����
- * true, ���� ����� ������ ������ � ����� �������� �����
+ * Получить строку по алиасу.
+ *
+ * @param data данные нф (helper)
  */
-boolean isInTotalRowsAliases(def alias){
-    return (totalRowsAliases.find {totalAlias -> alias == totalAlias} != null)
+def getRows(def data) {
+    return data.getAllCached();
 }
 
 /**
- * ���������� ������ ������� ��� �������� �����
+ * Сохранить измененные значения нф.
+ *
+ * @param data данные нф (helper)
  */
-def getTotalRowsAliases() {
-    return ['total']
+void save(def data) {
+    data.save(getRows(data))
 }
 
-def getTotalRowAlias() {
-    return 'total'
-}
-
-/***********   �������� ������ �� ������� � �������������� �������� ������   ***********/
-
-/**
- * ������� ���������� ������, ���� ��� �� �������� ��������
- * ���� ���������� ������ �������� ��������, �� ��� �� ��������� � ��������� ��������� � ����������� ������
- */
-def deleteCurrentRow() {
-    if (isCurrentDataRowSelected() &&
-            totalRowsAliases.find { totalRowAlias ->
-                totalRowAlias == currentDataRow.getAlias()
-            } == null) {
-        formData.dataRows.remove(currentDataRow)
-    } else {
-        logger.error ('���������� ������� ������������� ������!')
+def recalculateNumbers(){
+    def index = 1
+    def data = getData(formData)
+    getRows(data).each{row->
+        if (!isFixedRow(row)) {
+            row.number = index++
+        }
     }
+    data.save(getRows(data))
 }
 
-/***********   ����� ������� ��� ��������, �� ������� ���������� �����   ***********/
-
 /**
- * ������� ��� ���� �����, ����� ��������, ����� �� ��������, �� ������� �������� �����
- * ���������� ���� ���� �����_������� -> ��������_��������
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ * @return true - все хорошо, false - есть незаполненные поля
  */
-def getTotalResults() {
-    def result = [:]
-    for (def colAlias : getTotalColsAliases()) {
-        result.put(colAlias, formData.dataRows.sum {row ->
-            if (! isInTotalRowsAliases(row.getAlias())) {    //������ �� ������ � ��������
-                row[colAlias]
-            } else {
-                0
-            }
-        })
+def checkRequiredColumns(def row, def columns) {
+    def colNames = []
+
+    columns.each {
+        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+            def name = getColumnName(row, it)
+            colNames.add('"' + name + '"')
+        }
     }
-    return result
+    if (!colNames.isEmpty()) {
+        def index = row.number
+        def errorMsg = colNames.join(', ')
+        if (index != null) {
+            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            def data = getData(formData)
+            index = getRows(data).indexOf(row) + 1
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        }
+        return false
+    }
+    return true
 }
 
 /**
- * ���������� ������ ������� ��� �������, �� ������� ���������� �����
+ * Получить название графы по псевдониму.
+ *
+ * @param row строка
+ * @param alias псевдоним графы
  */
-def getTotalColsAliases() {
-    return ['summ']
+def getColumnName(def row, def alias) {
+    if (row != null && alias != null) {
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
+    }
+    return ''
+}
+
+/**
+ * Имеются ли фатальные ошибки.
+ */
+def hasError() {
+    return logger.containsLevel(LogLevel.ERROR)
 }

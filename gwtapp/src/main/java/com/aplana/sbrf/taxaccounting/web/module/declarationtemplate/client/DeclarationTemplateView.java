@@ -111,7 +111,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
     @Override
     public void onFileUploadSuccess(String uuid) {
-        System.out.println("xsd uuid: "+uuid);
         getUiHandlers().setXsdId(uuid);
     }
 

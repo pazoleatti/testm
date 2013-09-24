@@ -1,10 +1,14 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-    <g:FormPanel ui:field="uploadFormDataXls" encoding="multipart/form-data" method="post">
-        <g:HorizontalPanel ui:field="uploadPanel">
-            <g:FileUpload ui:field="uploader" title="Файл xls" name="uploader"/>
-            <g:Button ui:field="uploadButton" text="Загрузить"/>
+    <g:FormPanel ui:field="uploadFormDataXls" encoding="multipart/form-data" method="post" height="150px">
+        <g:HorizontalPanel ui:field="uploadPanel" height="100%">
+        	<g:cell height="100%">
+            	<g:FileUpload ui:field="uploader" title="Файл: " name="uploader"/>
+            </g:cell>
+            <g:cell>
+           		<g:Button ui:field="uploadButton" text="Загрузить"/>
+            </g:cell>
         </g:HorizontalPanel>
     </g:FormPanel>
 </ui:UiBinder>

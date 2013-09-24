@@ -14,6 +14,8 @@ public class InitRefBookResult implements Result {
 	private List<Date> versions;
 
 	private List<String> headers;
+
+    private Date defaultValue;
 	
 	public List<Date> getVersions() {
 		return versions;
@@ -40,4 +42,11 @@ public class InitRefBookResult implements Result {
 	}
 
 
+    public Date getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(Date defaultValue) {
+        this.defaultValue = defaultValue;
+    }
 }

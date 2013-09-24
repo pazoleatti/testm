@@ -117,7 +117,7 @@ def deleteRow() {
  */
 void calc() {
     /*
-     * Проверка объязательных полей.
+     * Проверка обязательных полей.
      */
 
     def data = getData(formData)

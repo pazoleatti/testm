@@ -1,9 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm;
 
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
@@ -28,7 +27,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
 	interface Binder extends UiBinder<Widget, EditFormView> { }
 
-	Map<RefBookAttribute, HasValue> widgets;
+	Map<RefBookColumn, HasValue> widgets;
 
 	@UiField
 	VerticalPanel editPanel;
@@ -44,21 +43,21 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	}
 
 	@Override
-	public Map<RefBookAttribute, HasValue> createInputFields(List<RefBookAttribute> attributes) {
+	public Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes) {
 		editPanel.clear();
 		if (widgets != null) widgets.clear();
-		Map<RefBookAttribute, HasValue> widgets = new HashMap<RefBookAttribute, HasValue>();
-		for (RefBookAttribute attr : attributes) {
+		Map<RefBookColumn, HasValue> widgets = new HashMap<RefBookColumn, HasValue>();
+		for (RefBookColumn col : attributes) {
 			HorizontalPanel oneField = new HorizontalPanel();
 			oneField.setWidth("100%");
-			Label label = new Label(attr.getName());
+			Label label = new Label(col.getName());
             label.setWordWrap(true);
 			HorizontalPanel panel = new HorizontalPanel();
 			panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 			panel.setWidth("100%");
 			oneField.add(label);
 			Widget widget;
-			switch (attr.getAttributeType()) {
+			switch (col.getAttributeType()) {
 				case NUMBER:
 					widget = new TextBox();
 					break;
@@ -70,7 +69,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					break;
 				case REFERENCE:
 					RefBookPickerPopupWidget refbookWidget = new RefBookPickerPopupWidget();
-					refbookWidget.setAttributeId(attr.getRefBookAttributeId());
+					refbookWidget.setAttributeId(col.getRefBookAttributeId());
 					widget = refbookWidget;
 					break;
 				default:
@@ -93,7 +92,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			});
 			oneField.add(panel);
 			editPanel.add(oneField);
-			widgets.put(attr, (HasValue)widget);
+			widgets.put(col, (HasValue)widget);
 		}
 		this.widgets = widgets;
 		return widgets;
@@ -112,7 +111,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				}
 			}
 		} else {
-			for (Map.Entry<RefBookAttribute, HasValue> w : widgets.entrySet()) {
+			for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
 				RefBookValueSerializable recordValue = record.get(w.getKey().getAlias());
 				if (w.getValue() instanceof RefBookPickerPopupWidget) {
 					RefBookPickerPopupWidget rbw = (RefBookPickerPopupWidget) w.getValue();
@@ -131,7 +130,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					w.getValue().setValue(recordValue.getValue());
 				}
 				if (w.getValue() instanceof Widget) {
-					((Widget) w.getValue()).setTitle(w.getValue().getValue().toString());
+					((Widget) w.getValue()).setTitle(w.getValue().getValue() == null ? ""
+							: w.getValue().getValue().toString());
 				}
 			}
 		}
@@ -140,7 +140,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	@Override
 	public Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException {
 		Map<String, RefBookValueSerializable> fieldsValues = new HashMap<String, RefBookValueSerializable>();
-		for (Map.Entry<RefBookAttribute, HasValue> field : widgets.entrySet()) {
+		for (Map.Entry<RefBookColumn, HasValue> field : widgets.entrySet()) {
 			RefBookValueSerializable value = new RefBookValueSerializable();
 			try {
 				switch (field.getKey().getAttributeType()) {

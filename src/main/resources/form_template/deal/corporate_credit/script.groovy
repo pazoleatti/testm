@@ -68,7 +68,6 @@ void addRow() {
     def size = dataRows.size()
     def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
     row.keySet().each{
-        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     ['fullNamePerson', 'sum', 'docNumber', 'docDate', 'dealDate'].each {
@@ -411,12 +410,12 @@ def getNumber(def value, int indexRow, int indexCell) {
  *
  * @param value
  */
-def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
+def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell) {
     String filter;
     if (value == null || value.equals("")) {
-        filter = code + " is null"
+        filter = alias + " is null"
     } else {
-        filter = code + "= '" + value + "'"
+        filter = "LOWER($alias) = LOWER('$value')"
     }
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
