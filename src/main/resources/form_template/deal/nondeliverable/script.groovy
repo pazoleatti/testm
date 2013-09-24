@@ -82,6 +82,7 @@ def getAtributes(){
     ]
 }
 
+// TODO в ТЗ вместо  contractNum указано transactionNum. Уточняется
 def getGroupColumns(){
     ['name', 'innKio', 'contractNum', 'contractDate', 'transactionType']
 }
