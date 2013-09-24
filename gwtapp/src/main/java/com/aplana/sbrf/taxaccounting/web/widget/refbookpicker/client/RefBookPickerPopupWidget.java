@@ -10,11 +10,8 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.*;
 
 /**
  * Версионный справочник с выбором значения из выпадающего списка с пагинацией
@@ -61,8 +58,24 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
     @UiHandler("selectButton")
     void onSelectButtonClicked(ClickEvent event){
         refBookPiker.setAcceptableValues(this.attributeId, this.filter, this.date1, this.date2);
-        popupPanel.setPopupPosition(text.getAbsoluteLeft(), text.getAbsoluteTop() + text.getOffsetHeight());
-        popupPanel.show();
+	    popupPanel.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+		    public void setPosition(int offsetWidth, int offsetHeight) {
+			    int windowHeight = Window.getClientHeight();
+			    int windowWidth = Window.getClientWidth();
+
+			    int exceedOffsetX = text.getAbsoluteLeft();
+			    int exceedOffsetY = text.getAbsoluteTop()+text.getOffsetHeight();
+			    // Сдвигаем попап, если он не помещается в окно
+			    if ((text.getAbsoluteLeft() + popupPanel.getOffsetWidth()) > windowWidth) {
+				    exceedOffsetX -= popupPanel.getOffsetWidth();
+			    }
+
+			    if ((text.getAbsoluteTop() + popupPanel.getOffsetHeight()) > windowHeight) {
+				    exceedOffsetY -= popupPanel.getOffsetHeight() + text.getOffsetHeight();
+			    }
+			    popupPanel.setPopupPosition(exceedOffsetX, exceedOffsetY);
+		    }
+	    });
     }
 
     @Override
