@@ -215,18 +215,21 @@ void logicCheck() {
                 logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
             }
         }
+
         //  Корректность даты договора
         def dt = docDateCell.value
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = docDateCell.column.name
             logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
         }
+
         // Корректность даты заключения сделки
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
+
         // Зависимости от признака физической поставки
         if (getDeliverySign(row.deliverySign) == 1) {
             def isHaveNotEmptyField = false
@@ -251,6 +254,7 @@ void logicCheck() {
                 logger.warn("Строка $rowNum: В графе «$msg1» указан «ОМС», графы ${builder.toString()} заполняться не должны!")
             }
         }
+
         // Проверка заполнения населенного пункта
         localityCell = row.getCell('locality');
         def locGrafNum = getGrafNum('locality')
@@ -266,22 +270,35 @@ void logicCheck() {
         if (localityCell.value != null && !localityCell.value.toString().isEmpty() && cityCell.value != null && !cityCell.value.toString().isEmpty()) {
             logger.warn("Строка $rowNum: Если указан «${localityCell.column.name}»($locGrafNum), не должен быть указан  «${cityCell.column.name}»($cityGrafNum)!")
         }
+
         // Проверка доходов и расходов
         def incomeSumCell = row.getCell('incomeSum')
         def outcomeSumCell = row.getCell('outcomeSum')
         def msgIn = incomeSumCell.column.name
         def msgOut = outcomeSumCell.column.name
-        if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            logger.warn("Строка $rowNum: Поля «$msgIn» и «$msgOut» не могут быть одновременно заполнены!")
-        }
         if (incomeSumCell.value == null && outcomeSumCell.value == null) {
             logger.warn("Строка $rowNum: Одна из граф «$msgIn» и «$msgOut» должна быть заполнена!")
         }
+
+        // Проверка доходов/расходов и стоимости
+        def msgPrice = row.getCell('price').column.name
+        if (incomeSumCell.value != null && outcomeSumCell.value != null) {
+            if (row.price.abs() != (incomeSumCell.value - outcomeSumCell.value).abs())
+                logger.warn("Строка $rowNum: Графа «$msgPrice» должна быть равна разнице графы «$msgIn» и «$msgOut» по модулю!")
+        } else if (incomeSumCell.value != null) {
+            if (row.price != incomeSumCell.value)
+                logger.warn("Строка $rowNum: Графа «$msgPrice» должна быть равна «$msgIn»!")
+        } else if (outcomeSumCell.value != null) {
+            if (row.price != outcomeSumCell.value)
+                logger.warn("Строка $rowNum: Графа «$msgPrice» должна быть равна «$msgOut»!")
+        }
+
         // Проверка количества
         if (row.count != 1) {
             def msg = row.getCell('count').column.name
             logger.warn("Строка $rowNum: В графе «$msg» может быть указано только значение «1»!")
         }
+
         // Проверка внешнеторговой сделки
         def msg14 = row.getCell('foreignDeal').column.name
         def signCode = refBookService.getNumberValue(38, row.foreignDeal, 'CODE')
@@ -301,6 +318,7 @@ void logicCheck() {
             }
             logger.warn("Строка $rowNum: $msg14 должно иметь значение «$valYes»!")
         }
+
         // Корректность даты совершения сделки
         def dealDoneDateCell = row.getCell('dealDoneDate')
         if (dealDoneDateCell.value < dealDateCell.value) {
@@ -308,6 +326,7 @@ void logicCheck() {
             def msg2 = dealDateCell.column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
+
         // Проверка заполнения стоимости сделки
         def total = row.getCell('total')
         def price = row.getCell('price')
@@ -453,9 +472,7 @@ void calc() {
         row.rowNum = index++
         // Расчет поля "Цена"
         if (row.incomeSum != null && row.outcomeSum != null) {
-            row.price = row.incomeSum - row.outcomeSum
-            if (row.price < 0)
-                row.price = -row.price
+            row.price = (row.incomeSum - row.outcomeSum).abs()
         } else
             row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
         // Расчет поля "Итого"
@@ -584,6 +601,7 @@ def calcItog(int i, def dataRows) {
     for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
         row = dataRows.get(j)
 
+        // TODO в ТЗ пропал список итоговых колонок. Уточнить
         def price = row.price
         def total = row.total
 
@@ -647,11 +665,11 @@ String getValuesByGroupColumn(DataRow row) {
     metalName = getRefBookValue(17, row.metalName, 'INNER_CODE')
     if (metalName != null)
         builder.append(metalName).append(sep)
-    foreignDeal = getRefBookValue(38, row.foreignDeal, 'INNER_CODE')
+    foreignDeal = getRefBookValue(38, row.foreignDeal, 'VALUE')
     if (foreignDeal != null)
         builder.append(foreignDeal).append(sep)
     deliveryCode = getRefBookValue(63, row.deliveryCode, 'STRCODE')
-    if (foreignDeal != null)
+    if (deliveryCode != null)
         builder.append(deliveryCode).append(sep)
 
     def String retVal = builder.toString()
