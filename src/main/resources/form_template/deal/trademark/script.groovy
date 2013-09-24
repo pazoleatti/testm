@@ -65,7 +65,6 @@ void addRow() {
     def size = dataRows.size()
     def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
     row.keySet().each{
-        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     ['fullNamePerson', 'sum', 'docNumber', 'docDate', 'dealDate'].each {
