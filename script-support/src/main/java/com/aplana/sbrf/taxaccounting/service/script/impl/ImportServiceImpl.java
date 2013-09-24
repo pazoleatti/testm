@@ -52,7 +52,7 @@ public class ImportServiceImpl implements ImportService {
         String format = getFileExtension(fileName.trim());
 
         if (XLS.equals(format)) {
-            return getXMLStringFromXLS(inputStream, null, null);
+            return getXMLStringFromXLS(inputStream, null, null, null);
         } else if (XML.equals(format)) {
             return getXMLStringFromXML(inputStream, charset);
         } else if (RNU.equals(format) || (format != null && format.matches("r[\\d]{2}"))) {
@@ -62,12 +62,18 @@ public class ImportServiceImpl implements ImportService {
     }
 
     @Override
+    public String getData(InputStream inputStream, String fileName, String charset, String startStr, String endStr) throws IOException {
+        return getData(inputStream, fileName, charset, startStr, endStr, null);
+    }
+
+    @Override
     public String getData(InputStream inputStream, String fileName) throws IOException {
         return getData(inputStream, fileName, DEFAULT_CHARSET);
     }
 
     @Override
-    public String getData(InputStream inputStream, String fileName, String charset, String startStr, String endStr) throws IOException {
+    public String getData(InputStream inputStream, String fileName, String charset, String startStr,
+                          String endStr, Integer columnsCount) throws IOException {
         if (inputStream == null) {
             throw new NullPointerException("inputStream cannot be null");
         }
@@ -89,7 +95,7 @@ public class ImportServiceImpl implements ImportService {
         String format = getFileExtension(fileName.trim());
 
         if (XLS.equals(format)) {
-            return getXMLStringFromXLS(inputStream, startStr, endStr);
+            return getXMLStringFromXLS(inputStream, startStr, endStr, columnsCount);
         } else if (XML.equals(format)) {
             return getXMLStringFromXML(inputStream, charset);
         } else if (RNU.equals(format) || (format != null && format.matches("r[\\d]{2}"))) {
@@ -144,23 +150,24 @@ public class ImportServiceImpl implements ImportService {
         if (rowCells == null) {
             return;
         }
-        sb.append(TAB).append("<" + rowName + ">").append(ENTER);
+        sb.append(TAB).append("<").append(rowName).append(">").append(ENTER);
         for (String cell : rowCells) {
             sb.append(TAB).append(TAB).append("<cell>");
             sb.append(cell);
             sb.append("</cell>").append(ENTER);
         }
-        sb.append(TAB).append("</" + rowName + ">").append(ENTER);
+        sb.append(TAB).append("</").append(rowName).append(">").append(ENTER);
     }
 
     /**
      * Получить текстовый xml из XLS файла.
      *
+     * @param inputStream данные из файла
      * @param startStr начало таблицы (шапка первой колонки)
      * @param endStr конец табцицы (надпись "итого" или значения после таблицы)
-     * @param inputStream данные из файла
+     * @param columnsCount количество колонок в таблице
      */
-    private String getXMLStringFromXLS(InputStream inputStream, String startStr, String endStr) throws IOException {
+    private String getXMLStringFromXLS(InputStream inputStream, String startStr, String endStr, Integer columnsCount) throws IOException {
         HSSFWorkbook workbook;
         workbook = new HSSFWorkbook(inputStream);
         HSSFSheet sheet = workbook.getSheetAt(0);
@@ -195,7 +202,7 @@ public class ImportServiceImpl implements ImportService {
             }
 
             // получить значения ячеек строки
-            rowStr = getRowString(row, firstP.getX());
+            rowStr = getRowString(row, firstP.getX(), columnsCount);
             sb.append(rowStr);
         }
         sb.append("</data>");
@@ -255,8 +262,9 @@ public class ImportServiceImpl implements ImportService {
      *
      * @param row строка из таблицы
      * @param colP номер ячейки с которой брать данные
+     * @param columnsCount количество столбцов в таблице
      */
-    private String getRowString(HSSFRow row, Integer colP) {
+    private String getRowString(HSSFRow row, Integer colP, Integer columnsCount) {
         if (row == null) {
             return "<row/>";
         }
@@ -271,6 +279,9 @@ public class ImportServiceImpl implements ImportService {
             cellValue = getCellValue((HSSFCell)iterator.next());
             if (colP != null && indexCol + row.getFirstCellNum() < colP.shortValue()) {
                 continue;
+            }
+            if (columnsCount != null && indexCol > columnsCount) {
+                break;
             }
             sb.append(TAB).append(TAB).append("<cell>");
             sb.append(cellValue != null ? cellValue : "");
