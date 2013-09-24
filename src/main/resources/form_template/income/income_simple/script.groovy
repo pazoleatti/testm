@@ -163,7 +163,7 @@ def logicalCheck() {
     getRows(data).each {DataRow<Cell> row ->
 
         /*
-         * Проверка объязательных полей
+         * Проверка обязательных полей
          */
         def requiredColumns = ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted']
         if (!checkRequiredColumns(row, requiredColumns)) {

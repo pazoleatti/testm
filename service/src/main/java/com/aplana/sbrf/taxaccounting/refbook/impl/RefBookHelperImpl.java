@@ -60,7 +60,6 @@ public class RefBookHelperImpl implements RefBookHelper {
 	public Map<String, String> singleRecordDereference(RefBook refBook,
 			RefBookDataProvider provider, List<RefBookAttribute> attributes,
 			Map<String, RefBookValue> record) {
-        System.out.println("singleRecordDereference started!");
 
         //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
         Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();

@@ -103,7 +103,7 @@ boolean calc() {
     def data = getData(formData)
 
     /*
-	 * Проверка объязательных полей.
+	 * Проверка обязательных полей.
 	 */
     // список проверяемых столбцов (графа 2..7)
     def requiredColumns = ['inventoryNumber', 'name', 'buyDate',

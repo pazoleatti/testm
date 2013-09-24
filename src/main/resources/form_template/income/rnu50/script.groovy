@@ -1,9 +1,20 @@
+package form_template.income.rnu50
+
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
+
 /**
  * Скрипт для РНУ-50 (rnu50.groovy).
  * Форма "(РНУ-50) Регистр налогового учёта «ведомость понесённых убытков от реализации амортизируемого имущества»".
  *
  * @version 59
- *
+ * TODO
+ * - не указан вид консолидации
  * @author rtimerbaev
  */
 
@@ -12,11 +23,11 @@ switch (formDataEvent) {
         checkCreation()
         break
     case FormDataEvent.CHECK :
-        logicalCheck(true)
+        allCheck()
         break
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck(false)
+        allCheck()
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
@@ -24,27 +35,23 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW :
         deleteRow()
         break
-// проверка при "подготовить"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :
-        checkOnPrepareOrAcceptance('Подготовка')
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
+        allCheck()
         break
-// проверка при "принять"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
-        checkOnPrepareOrAcceptance('Принятие')
-        break
-// проверка при "вернуть из принята в подготовлена"
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
-        checkOnCancelAcceptance()
-        break
-// после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
-        acceptance()
-        break
-// обобщить
+    // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        logicalCheck(false)
+        if (allCheck()) {
+            // для сохранения изменений приемников
+            data.commit()
+        }
         break
 }
 
@@ -54,39 +61,74 @@ switch (formDataEvent) {
 // графа 4  - lossReportPeriod
 // графа 5  - lossTaxPeriod
 
+def allCheck() {
+    return !hasError() && logicalCheck()
+}
+
+/**
+ * Имеются ли фатальные ошибки.
+ */
+def hasError() {
+    return logger.containsLevel(LogLevel.ERROR)
+}
+
 /**
  * Добавить новую строку.
  */
 def addNewRow() {
+    def data = data
+    def rows = getRows(data)
     def newRow = formData.createDataRow()
-    formData.dataRows.add(newRow)
-
     // графа 2..5
     ['rnu49rowNumber', 'invNumber', 'lossReportPeriod', 'lossTaxPeriod'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+    def index = 0
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def row = currentDataRow
+        while(row.getAlias()!=null && index>0){
+            row = rows.get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && rows.get(index).getAlias()==null){
+            index++
+        }
+    }else if (rows.size()>0) {
+        for(int i = rows.size()-1;i>=0;i--){
+            def row = rows.get(i)
+            if(row.getAlias()==null){
+                index = rows.indexOf(row)+1
+                break
+            }
+        }
+    }
+    data.insert(newRow,index+1)
 }
 
 /**
  * Удалить строку.
  */
 def deleteRow() {
-    formData.dataRows.remove(currentDataRow)
+    if (currentDataRow != null && currentDataRow.getAlias() == null) {
+        data.delete(currentDataRow)
+    }
 }
 
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
+    def data = data
+    def rows = getRows(data)
     /*
-     * Проверка объязательных полей.
+     * Проверка обязательных полей.
      */
     // список проверяемых столбцов (графа 2..5)
     def requiredColumns = ['rnu49rowNumber', 'invNumber', 'lossReportPeriod', 'lossTaxPeriod']
 
-    for (def row : formData.dataRows) {
-        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
+    for (def row : rows) {
+        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns)) {
             return
         }
     }
@@ -97,30 +139,30 @@ void calc() {
 
     // удалить строку "итого"
     def delRow = []
-    formData.dataRows.each { row ->
+    rows.each { row ->
         if (isTotal(row)) {
             delRow += row
         }
     }
     delRow.each { row ->
-        formData.dataRows.remove(getIndex(row))
+        data.delete(row)
     }
-    if (formData.dataRows.isEmpty()) {
+    if (rows.isEmpty()) {
         return
     }
 
-    formData.dataRows.eachWithIndex { row, i ->
+    rows.eachWithIndex { row, i ->
         // графа 1
         row.rowNumber = i + 1
     }
 
-    def totalRow = formData.createDataRow()
-    formData.dataRows.add(totalRow)
+    def DataRow totalRow = formData.createDataRow()
     totalRow.setAlias('total')
     totalRow.rnu49rowNumber = 'Итого'
     totalRow.lossReportPeriod = getSum('lossReportPeriod')
     totalRow.lossTaxPeriod = getSum('lossTaxPeriod')
     setTotalStyle(totalRow)
+    data.insert(totalRow,rows.size()+1)
 }
 
 /**
@@ -128,21 +170,27 @@ void calc() {
  *
  * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-def logicalCheck(def useLog) {
-    if (!formData.dataRows.isEmpty()) {
+def logicalCheck() {
+    def data = data
+    def rows = getRows(data)
+    if (!rows.isEmpty()) {
         // список проверяемых столбцов (графа 1..5)
         def requiredColumns = ['rowNumber', 'rnu49rowNumber', 'invNumber',
                 'lossReportPeriod', 'lossTaxPeriod']
 
         def hasTotalRow = false
-        for (def row : formData.dataRows) {
+
+        // суммы строки общих итогов
+        def totalSums = [:]
+        def totalSumColumns = ['lossReportPeriod', 'lossTaxPeriod']
+        for (def row : rows) {
             if (isTotal(row)) {
                 hasTotalRow = true
                 continue
             }
 
             // 1. Обязательность заполнения полей (графа 1..5)
-            if (!checkRequiredColumns(row, requiredColumns, useLog)) {
+            if (!checkRequiredColumns(row, requiredColumns)) {
                 return false
             }
 
@@ -157,54 +205,49 @@ def logicalCheck(def useLog) {
                 logger.error('Неправильно указан номер записи в РНУ-49 (формат: ГГ-НННННН, см. №852-р в актуальной редакции)!')
                 return false
             }
+
+            // 4. Проверка итогового значених по всей форме - подсчет сумм для общих итогов
+            totalSumColumns.each { alias ->
+                if (totalSums[alias] == null) {
+                    totalSums[alias] = 0
+                }
+                totalSums[alias] += row.getCell(alias).getValue()
+            }
         }
 
 
         // 4. Проверка итоговых значений формы	Заполняется автоматически.
         if (hasTotalRow) {
-            def totalRow = formData.getDataRow('total')
-            def totalSumColumns = ['lossReportPeriod', 'lossTaxPeriod']
+            def totalRow = data.getDataRow(rows, 'total')
             for (def alias : totalSumColumns) {
-                if (totalRow.getCell(alias).getValue() != getSum(alias)) {
+                if (totalRow.getCell(alias).getValue() != totalSums[alias]) {
                     logger.error('Итоговые значения формы рассчитаны неверно!')
                     return false
                 }
             }
+        } else {
+            logger.error('Итоговая строка не рассчитана!')
+            return false
         }
     }
     return true
 }
 
 /**
- * Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята".
- */
-void checkOnPrepareOrAcceptance(def value) {
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() { department ->
-        if (department.formTypeId == formData.getFormType().getId()) {
-            def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-            // если форма существует и статус "принята"
-            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
-                logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
-            }
-        }
-    }
-}
-
-/**
  * Консолидация.
  */
 void consolidation() {
+    def data = data
     // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    data.clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
+                getRows(getData(source)).each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
+                        data.insert(row, getRows(data).size()+1)
                     }
                 }
             }
@@ -214,26 +257,10 @@ void consolidation() {
 }
 
 /**
- * Проверки при переходе "Отменить принятие".
- */
-void checkOnCancelAcceptance() {
-    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
-            formData.getFormType().getId(), formData.getKind());
-    DepartmentFormType department = departments.getAt(0);
-    if (department != null) {
-        FormData form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-
-        if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
-            logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
-        }
-    }
-}
-
-/**
  * Принять.
  */
 void acceptance() {
-    if (!logicalCheck(true)) {
+    if (!logicalCheck()) {
         return
     }
     departmentFormTypeService.getFormDestinations(formDataDepartment.id,
@@ -255,7 +282,7 @@ void checkCreation() {
         return
     }
 
-    def findForm = FormDataService.find(formData.formType.id,
+    def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
@@ -278,12 +305,13 @@ def isTotal(def row) {
  * Получить сумму столбца.
  */
 def getSum(def columnAlias) {
+    def data = data
     def from = 0
-    def to = formData.dataRows.size() - 2
+    def to = getRows(data).size()-1
     if (from > to) {
         return 0
     }
-    return summ(formData, new ColumnRange(columnAlias, from, to))
+    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
 }
 
 /**
@@ -297,7 +325,7 @@ def isEmpty(def value) {
  * Получить номер строки в таблице.
  */
 def getIndex(def row) {
-    formData.dataRows.indexOf(row)
+    getRows(data).indexOf(row)
 }
 
 /**
@@ -317,28 +345,62 @@ void setTotalStyle(def row) {
  * @param useLog нужно ли записывать сообщения в лог
  * @return true - все хорошо, false - есть незаполненные поля
  */
-def checkRequiredColumns(def row, def columns, def useLog) {
+def checkRequiredColumns(DataRow row, Object columns) {
     def colNames = []
 
-    columns.each {
-        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-            def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+    columns.each { String col ->
+        if (row.getCell(col).getValue() == null || ''.equals(row.getCell(col).getValue())) {
+            def name = row.getCell(col).getColumn().getName().replace('%', '%%')
             colNames.add('"' + name + '"')
         }
     }
     if (!colNames.isEmpty()) {
-        if (!useLog) {
-            return false
-        }
-        def index = getIndex(row) + 1
+        def errorBegin = getRowIndexString(row)
         def errorMsg = colNames.join(', ')
-        if (index != null) {
-            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-        } else {
-            index = getIndex(row) + 1
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
-        }
+        logger.error(errorBegin+ "не заполнены колонки : $errorMsg.")
         return false
     }
     return true
 }
+
+/**
+ * Начало предупреждений/ошибок
+ * @param row
+ * @return
+ */
+def String getRowIndexString(def DataRow row){
+    def index = row.rowNumber
+    if (index != null) {
+        return "В строке \"№ пп\" равной $index "
+    } else {
+        index = getIndex(row) + 1
+        return "В строке $index "
+    }
+
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def DataRowHelper getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
+
+def DataRowHelper getData(){
+    return getData(formData)
+}
+
+/**
+ * Получить строки формы.
+ *
+ * @param formData форма
+ */
+def List<DataRow<Cell>> getRows(def DataRowHelper data) {
+    return data.getAllCached()
+}
+

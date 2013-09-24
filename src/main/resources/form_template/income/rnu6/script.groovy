@@ -171,7 +171,10 @@ DataRowHelper getDataRowsHelper() {
 }
 
 void logicCheckBefore(DataRowHelper form) {
-    columns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'taxAccountingCurrency', 'accountingCurrency']
+    columns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
+    if (formDataEvent == FormDataEvent.CALCULATE) {
+        columns -= ['taxAccountingRuble', 'ruble']
+    }
     for (row in form.allCached) {
         if (row.getAlias() == null) {
             if(!checkRequiredColumns(row,columns)){
@@ -468,7 +471,7 @@ def checkRequiredColumns(def row, def columns) {
     def cell
     columns.each {
         cell = row.getCell(it)
-        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+        if (cell.getValue() == null || row.getCell(it).getValue() == '') {
             def name = getColumnName(row, it)
             colNames.add('"' + name + '"')
         }
