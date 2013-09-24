@@ -601,7 +601,6 @@ def calcItog(int i, def dataRows) {
     for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
         row = dataRows.get(j)
 
-        // TODO в ТЗ пропал список итоговых колонок. Уточнить
         def price = row.price
         def total = row.total
 
