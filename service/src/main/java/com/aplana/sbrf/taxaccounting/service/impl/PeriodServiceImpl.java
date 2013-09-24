@@ -35,8 +35,6 @@ public class PeriodServiceImpl implements PeriodService{
 	
 	public static final Long PERIOD$CODE$REFBOOK = 8L;
 
-	public static final int UNP_ID = 1;
-
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
 
@@ -158,8 +156,8 @@ public class PeriodServiceImpl implements PeriodService{
 
 		if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT) || (taxType == TaxType.DEAL)) {
 			if ((user.getUser().hasRole("ROLE_CONTROL_UNP") || (user.getUser().hasRole("ROLE_CONTROL")))
-					&& (user.getUser().getDepartmentId() == UNP_ID)
-					&& (departmentId == UNP_ID)) {
+					&& (user.getUser().getDepartmentId() == Department.ROOT_BANK_ID)
+					&& (departmentId == Department.ROOT_BANK_ID)) {
 				for(Department dep : departmentService.listAll()) {
 					DepartmentReportPeriod depRP = new DepartmentReportPeriod();
 					depRP.setReportPeriod(newReportPeriod);
