@@ -138,7 +138,6 @@ void addRow() {
     def size = dataRows.size()
     def index = 0
     row.keySet().each {
-        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     getEditColumns().each {
