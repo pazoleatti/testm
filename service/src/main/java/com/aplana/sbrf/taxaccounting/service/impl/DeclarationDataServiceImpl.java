@@ -373,7 +373,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 					Boolean.FALSE);
 			exporter.setParameter(
 					JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS,
-					Boolean.TRUE);
+					Boolean.FALSE);
+            exporter.setParameter(
+                    JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_COLUMNS,
+                    Boolean.FALSE);
 
 			exporter.exportReport();
 			return data.toByteArray();
