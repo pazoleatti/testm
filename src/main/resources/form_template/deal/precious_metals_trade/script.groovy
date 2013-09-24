@@ -9,7 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import java.text.SimpleDateFormat
 
 /**
- * 394 - Купля-продажа драгоценных металлов
+ * 394 - Купля-продажа драгоценных металлов (19)
  *
  * @author Stanislav Yasinskiy
  */
@@ -100,18 +100,19 @@ def getAtributes() {
 /*
 Возвращает графу вида "гр. хх"
  */
+
 def getGrafNum(def alias) {
     def atr = getAtributes().find { it -> it.getValue()[0] == alias }
     atr.getValue()[1]
 }
 
 // гр. 2.1, гр. 3, гр. 5, гр. 6, гр. 9, гр. 10, гр. 11, гр. 12, гр. 15
-def getGroupColumns(){
+def getGroupColumns() {
     ['fullName', 'inn', 'docNumber', 'docDate', 'dealFocus',
             'deliverySign', 'metalName', 'foreignDeal', 'deliveryCode']
 }
 
-def getEditColumns(){
+def getEditColumns() {
     ['fullName', 'interdependence', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealFocus', 'deliverySign', 'metalName',
             'foreignDeal', 'countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2',
             'locality2', 'deliveryCode', 'incomeSum', 'outcomeSum', 'dealDoneDate']
@@ -128,7 +129,7 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = 0
-    row.keySet().each{
+    row.keySet().each {
         row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
@@ -358,7 +359,7 @@ void logicCheck() {
     }
 
     //Проверки подитоговых сумм
-    def testRows = dataRows.findAll{it -> it.getAlias() == null}
+    def testRows = dataRows.findAll { it -> it.getAlias() == null }
     //добавляем итоговые строки для проверки
     for (int i = 0; i < testRows.size(); i++) {
         def testRow = testRows.get(i)
@@ -385,7 +386,10 @@ void logicCheck() {
             if (row.getAlias() == null) {
                 if (nextRow == null ||
                         nextRow.getAlias() == null && isDiffRow(row, nextRow, getGroupColumns())) {
-                    logger.error("Группа «${getValuesByGroupColumn(row)}» не имеет строки подитога!»")
+                    def String groupCols = getValuesByGroupColumn(row)
+                    if (groupCols != null) {
+                        logger.error("Группа «$groupCols» не имеет строки подитога!")
+                    }
                 }
             }
         }
@@ -394,7 +398,7 @@ void logicCheck() {
 
         for (int i = 0; i < dataRows.size(); i++) {
             if (dataRows[i].getAlias() != null) {
-                if(i - 1 < -1 || dataRows[i - 1].getAlias() != null){
+                if (i - 1 < -1 || dataRows[i - 1].getAlias() != null) {
                     logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
                 }
             }
@@ -407,12 +411,15 @@ void logicCheck() {
             if (dataRows[itg].getAlias() != null) {
                 logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
             } else {
-                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
-                if (testItogRow.price != realItogRow.price) {
-                    logger.error(mes + " «${getAtributes().price[2]}»")
-                }
-                if (testItogRow.total != realItogRow.total) {
-                    logger.error(mes + " «${getAtributes().total[2]}»")
+                def String groupCols = getValuesByGroupColumn(dataRows[itg])
+                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «$groupCols» в графе"
+                if (groupCols != null) {
+                    if (testItogRow.price != realItogRow.price) {
+                        logger.error(mes + " «${getAtributes().price[2]}»")
+                    }
+                    if (testItogRow.total != realItogRow.total) {
+                        logger.error(mes + " «${getAtributes().total[2]}»")
+                    }
                 }
             }
         }
@@ -615,28 +622,47 @@ void addAllStatic() {
     }
 }
 
-/*
-    Возвращает строку со значениями полей строки по которым идет группировка
-    ['fullName', 'inn', 'docNumber', 'docDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal', 'deliveryCode']
+/**
+ *  Возвращает строку со значениями полей строки по которым идет группировка
+ *  ['fullName', 'inn', 'docNumber', 'docDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal', 'deliveryCode']
  */
-def getValuesByGroupColumn(DataRow row) {
+String getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    builder.append(getRefBookValue(9, row.fullName, 'NAME')).append(sep)
-    builder.append(row.inn).append(sep)
-    builder.append(row.docNumber).append(sep)
-    builder.append(row.docDate).append(sep)
-    builder.append(getRefBookValue(20, row.dealFocus, 'DIRECTION')).append(sep)
-    builder.append(getRefBookValue(18, row.deliverySign, 'SIGN')).append(sep)
-    builder.append(getRefBookValue(17, row.metalName, 'INNER_CODE')).append(sep)
-    builder.append(getRefBookValue(38, row.foreignDeal, 'VALUE')).append(sep)
-    builder.append(getRefBookValue(63, row.deliveryCode, 'STRCODE'))
-    builder.toString()
+    def map = row.fullName != null ? refBookService.getRecordData(9, row.fullName) : null
+    if (map != null)
+        builder.append(map.NAME.stringValue).append(sep)
+    if (row.inn != null)
+        builder.append(row.inn).append(sep)
+    if (row.docNumber != null)
+        builder.append(row.docNumber).append(sep)
+    if (row.docDate != null)
+        builder.append(row.docDate).append(sep)
+    dealFocus = getRefBookValue(20, row.dealFocus, 'DIRECTION')
+    if (dealFocus != null)
+        builder.append(dealFocus).append(sep)
+    deliverySign = getRefBookValue(18, row.deliverySign, 'SIGN')
+    if (deliverySign != null)
+        builder.append(deliverySign).append(sep)
+    metalName = getRefBookValue(17, row.metalName, 'INNER_CODE')
+    if (metalName != null)
+        builder.append(metalName).append(sep)
+    foreignDeal = getRefBookValue(38, row.foreignDeal, 'INNER_CODE')
+    if (foreignDeal != null)
+        builder.append(foreignDeal).append(sep)
+    deliveryCode = getRefBookValue(63, row.deliveryCode, 'STRCODE')
+    if (foreignDeal != null)
+        builder.append(deliveryCode).append(sep)
+
+    def String retVal = builder.toString()
+    if (retVal.length() < 2)
+        return null
+    retVal.substring(0, retVal.length() - 2)
 }
 
 def getRefBookValue(int id, def cell, def alias) {
     def map = cell != null ? refBookService.getRecordData(id, cell) : null
-    return map == null ? 'null' : map.get(alias).stringValue
+    return map == null ? null : map.get(alias).stringValue
 }
 
 /**
@@ -994,9 +1020,9 @@ def getNumber(def value, int indexRow, int indexCell) {
  *
  * @param value
  */
-def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory=true) {
+def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory = true) {
     String filter = alias + "= '" + value + "'"
-    if (value=='') filter = "$alias is null"
+    if (value == '') filter = "$alias is null"
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
     } else {
@@ -1007,7 +1033,7 @@ def getRecordId(def ref_id, String alias, String value, Date date, def cache, in
     if (records.size() == 1) {
         cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
-    } else if (mandatory || value!='') {
+    } else if (mandatory || value != '') {
         throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
     return null
@@ -1032,5 +1058,5 @@ def getDate(def value, int indexRow, int indexCell) {
  * Получить признак физической поставки драгоценного металла
  */
 def getDeliverySign(def deliverySign) {
-    return  refBookService.getNumberValue(18,deliverySign,'CODE')
+    return refBookService.getNumberValue(18, deliverySign, 'CODE')
 }
