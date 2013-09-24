@@ -8,7 +8,7 @@ import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 
 /**
- * Custom field serializer for {@link java.sql.Date}.
+ * Этот класс реализует сериализацию {@link java.sql.Date} со сдвигом временных зон.
  */
 public final class Date_CustomFieldSerializer extends
 		CustomFieldSerializer<Date> {

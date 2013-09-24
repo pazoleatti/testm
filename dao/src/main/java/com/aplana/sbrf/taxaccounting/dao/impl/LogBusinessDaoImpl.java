@@ -29,7 +29,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 		public LogBusiness mapRow(ResultSet rs, int index) throws SQLException {
 			LogBusiness log = new LogBusiness();
 			log.setId(rs.getLong("id"));
-			log.setLogDate(rs.getTimestamp("log_date"));
+			log.setLogDate(new Date(rs.getTimestamp("log_date").getTime()));
 			log.setEventId(rs.getInt("event_id"));
 			log.setUserId(rs.getInt("user_id"));
 			log.setRoles(rs.getString("roles"));
