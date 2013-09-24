@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import java.text.SimpleDateFormat
 
 /**
- * 391 - Поставочные срочные сделки, базисным активом которых является иностранная валюта
+ * 391 - Поставочные срочные сделки, базисным активом которых является иностранная валюта (16)
  *
  * @author Stanislav Yasinskiy
  */
@@ -262,20 +262,20 @@ void logicCheck() {
 
     def testItogRows = testRows.findAll { it -> it.getAlias() != null }
     def itogRows = dataRows.findAll { it -> it.getAlias() != null }
-
     if (testItogRows.size() > itogRows.size()) {            //если удалили итоговые строки
-
         for (int i = 0; i < dataRows.size(); i++) {
             def row = dataRows[i]
             def nextRow = dataRows[i + 1]
             if (row.getAlias() == null) {
                 if (nextRow == null ||
                         nextRow.getAlias() == null && isDiffRow(row, nextRow, getGroupColumns())) {
-                    logger.error("Группа «${getValuesByGroupColumn(row)}» не имеет строки подитога!")
+                    def String groupCols = getValuesByGroupColumn(row)
+                    if (groupCols != null) {
+                        logger.error("Группа «$groupCols» не имеет строки подитога!")
+                    }
                 }
             }
         }
-
     } else if (testItogRows.size() < itogRows.size()) {     //если удалили все обычные строки, значит где то 2 подряд подитог.строки
 
         for (int i = 0; i < dataRows.size(); i++) {
@@ -296,12 +296,15 @@ void logicCheck() {
             if (dataRows[itg].getAlias() != null) {
                 logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
             } else {
-                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
-                if (testItogRow.price != realItogRow.price) {
-                    logger.error(mes + " «${priceName}»")
-                }
-                if (testItogRow.total != realItogRow.total) {
-                    logger.error(mes + " «${totalName}»")
+                def String groupCols = getValuesByGroupColumn(dataRows[itg])
+                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «$groupCols» в графе"
+                if (groupCols != null) {
+                    if (testItogRow.price != realItogRow.price) {
+                        logger.error(mes + " «${priceName}»")
+                    }
+                    if (testItogRow.total != realItogRow.total) {
+                        logger.error(mes + " «${totalName}»")
+                    }
                 }
             }
         }
@@ -320,21 +323,29 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     }
 }
 
-/*
-    Возвращает строку со значениями полей строки по которым идет группировка
-    ['fullName', 'inn', 'docNumber', 'docDate', 'dealType']
+/**
+ * Возвращает строку со значениями полей строки по которым идет группировка
+ * ['fullName', 'inn', 'docNumber', 'docDate', 'dealType']
  */
-
-def getValuesByGroupColumn(DataRow row) {
+String getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    def map = row.fullName !=null ? refBookService.getRecordData(9, row.fullName) : null
-    builder.append(map == null ? 'null' : map.NAME.stringValue).append(sep)
-    builder.append(row.inn).append(sep)
-    builder.append(row.docNumber).append(sep)
-    builder.append(row.docDate).append(sep)
-    builder.append(row.dealType)
-    builder.toString()
+    def map = row.fullName != null ? refBookService.getRecordData(9, row.fullName) : null
+    if (map != null)
+        builder.append(map.NAME.stringValue).append(sep)
+    if (row.inn != null)
+        builder.append(row.inn).append(sep)
+    if (row.docNumber != null)
+        builder.append(row.docNumber).append(sep)
+    if (row.docDate != null)
+        builder.append(row.docDate).append(sep)
+    if (row.dealType != null)
+        builder.append(row.dealType).append(sep)
+
+    def String retVal = builder.toString()
+    if (retVal.length() < 2)
+        return null
+    retVal.substring(0, retVal.length() - 2)
 }
 
 /**
