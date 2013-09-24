@@ -114,7 +114,7 @@ def deleteRow() {
  */
 void calc() {
     /*
-     * Проверка объязательных полей.
+     * Проверка обязательных полей.
      */
 
     // список проверяемых столбцов (графа 2..7)
@@ -190,8 +190,8 @@ def logicalCheck(def useLog) {
             continue
         }
 
-        // TODO (Ramil Timerbaev) в чтз нет проверки объязательных полей
-        // . Проверка объязательных полей (графа 2..7)
+        // TODO (Ramil Timerbaev) в чтз нет проверки обязательных полей
+        // . Проверка обязательных полей (графа 2..7)
         if (!isFixedRow(row) && !checkRequiredColumns(row, requiredColumns, useLog)) {
             return false
         }

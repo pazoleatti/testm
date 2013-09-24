@@ -793,12 +793,12 @@ def getNumber(def value) {
  *
  * @param value
  */
-def getRecordId(def ref_id, String code, String value, Date date, def cache) {
+def getRecordId(def ref_id, String alias, String value, Date date, def cache) {
     String filter;
     if (value == null || value.equals("")) {
-        filter = code + " is null"
+        filter = alias + " is null"
     } else {
-        filter = code + " = '" + value + "'"
+        filter = "LOWER($alias) = LOWER('$value')"
     }
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]

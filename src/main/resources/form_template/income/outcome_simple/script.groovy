@@ -92,7 +92,7 @@ void checkAndCalc() {
     }
 
     /*
-     * Проверка объязательных полей
+     * Проверка обязательных полей
      */
     def requiredColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']
     for (def row : getRows(data)) {
