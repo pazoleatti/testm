@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
@@ -51,6 +53,12 @@ public class PrintingServiceImpl implements PrintingService {
 
     @Autowired
     RefBookHelper refBookHelper;
+
+    @Autowired
+    RefBookFactory refBookFactory;
+
+    private static long REF_BOOK_ID = 8L;
+    private static String REF_BOOK_VALUE_NAME = "CODE";
 	
 	@Override
 	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean isShowChecked) {
@@ -69,8 +77,11 @@ public class PrintingServiceImpl implements PrintingService {
 			data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
             List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null, null);
             refBookHelper.dataRowsDereference(dataRows, formTemplate.getColumns());
+
+            RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
+                    getRecordData((long) reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
 			try {
-				FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,isShowChecked, dataRows);
+				FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,isShowChecked, dataRows, refBookValue);
 				return builder.createReport();
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);

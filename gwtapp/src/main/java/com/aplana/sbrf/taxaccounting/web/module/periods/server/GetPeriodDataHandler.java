@@ -64,6 +64,7 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 				row.setDepartmentId(action.getDepartmentId());
 				row.setReportPeriodId(period.getReportPeriod().getId());
 				row.setSubHeader(false);
+                row.setBalance(period.isBalance());
 				per.get(periodYear).add(row);
 			}
 		}

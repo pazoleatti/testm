@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl.print.formdata;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractXlsxReportBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -154,6 +155,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 	}
 
 	private FormData data;
+    private RefBookValue refBookValue;
 	private List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows;
 	private FormTemplate formTemplate;
 	private Department department;
@@ -174,7 +176,8 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 
 	}
 
-	public FormDataXlsxReportBuilder(FormDataReport data, boolean isShowChecked, List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows) throws IOException {
+	public FormDataXlsxReportBuilder(FormDataReport data, boolean isShowChecked, List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows, RefBookValue refBookValue)
+            throws IOException {
 		this();
 		this.data = data.getData();
         this.dataRows = dataRows;
@@ -184,6 +187,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		reportPeriod = data.getReportPeriod();
 		acceptanceDate = data.getAcceptanceDate();
 		creationDate = data.getCreationDate();
+        this.refBookValue = refBookValue;
 	}
 
     protected void fillHeader(){
@@ -227,13 +231,17 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
         StringTokenizer sToK = new StringTokenizer(formTemplate.getCode(), XlsxReportMetadata.REPORT_DELIMITER);//This needed because we can have not only one delimiter
         int j = 0;
         Row row = sheet.getRow(0);
+        int shiftCode = formTemplate.getColumns().size() - row.getLastCellNum();
         while(sToK.hasMoreTokens()){
-            createCellByRange(XlsxReportMetadata.RANGE_REPORT_CODE, sToK.nextToken(), j, formTemplate.getColumns().size() - row.getLastCellNum());
+            createCellByRange(XlsxReportMetadata.RANGE_REPORT_CODE, sToK.nextToken(), j, shiftCode);
             j++;
         }
 
         //Fill period
-        sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName(), String.valueOf(reportPeriod.getYear())));
+        if (!refBookValue.getStringValue().equals("34"))
+            sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName(), String.valueOf(reportPeriod.getYear())));
+        else
+            sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, "", String.valueOf(reportPeriod.getYear())));
         createCellByRange(XlsxReportMetadata.RANGE_REPORT_PERIOD, sb.toString(), 0, formTemplate.getColumns().size()/2 - 1);
     }
 
@@ -298,12 +306,12 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                 }
 				Object obj = dataRow.get(column.getAlias());
 				Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, false);
+                fillWidth(cell.getColumnIndex(),column.getWidth());
 				if(column instanceof StringColumn){
 					String str = (String)obj;
 					CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, i , j);
 					cell.setCellStyle(cellStyle);
 					cell.setCellValue(str);
-					fillWidth(cell.getColumnIndex(),str != null?str.length():0);
 				}
 				else if(column instanceof DateColumn){
 					Date date = (Date)obj;
@@ -312,21 +320,16 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                     else
                         cell.setCellValue("");
 					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DATE, i , j));
-                    fillWidth(cell.getColumnIndex(),date != null?XlsxReportMetadata.sdf.format(date).length():0);
 				}
 				else if(column instanceof NumericColumn){
 					BigDecimal bd = (BigDecimal)obj;
 					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.BIGDECIMAL, i , j));
 
 					cell.setCellValue(bd!=null ? String.valueOf(bd) : "");
-					fillWidth(cell.getColumnIndex(),String.valueOf(bd!=null?bd.doubleValue():"").length());
 				}else if(column instanceof RefBookColumn){
                     CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, i , j);
                     cell.setCellStyle(cellStyle);
                     cell.setCellValue(dataRow.getCell(column.getAlias()).getRefBookDereference());
-                    fillWidth(cell.getColumnIndex(), String.valueOf(dataRow.getCell(column.getAlias()) != null ?
-                            dataRow.getCell(column.getAlias()).getRefBookDereference() :
-                            "").length());
                 }
                 else if(obj == null){
                     cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.EMPTY, i , j));
@@ -485,9 +488,9 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                     richTextString.length(), richTextIndex);
         } else {
             richTextString.append(cellValue != null?cellValue:"");
-            c.setCellStyle(r.getCell(ar.getFirstCell().getCol()).getCellStyle());
+            c.setCellStyle(r.getCell(ar.getFirstCell().getCol())!=null?r.getCell(ar.getFirstCell().getCol()).getCellStyle()
+                : r.createCell(ar.getFirstCell().getCol()).getCellStyle());
         }
-
         c.setCellValue(richTextString);
     }
 

@@ -33,7 +33,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	public PagingResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
 		FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
 
-		formDataDaoFilter.setDepartmentIds(formDataFilter.getDepartmentId());
+		formDataDaoFilter.setDepartmentIds(formDataFilter.getDepartmentIds());
 		formDataDaoFilter.setReportPeriodIds(formDataFilter.getReportPeriodIds());
 
 		if(formDataFilter.getFormDataKind() == null){

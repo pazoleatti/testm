@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import java.text.SimpleDateFormat
 
 /**
- * 393 - Поставочные срочные сделки с драгоценными металлами
+ * 393 - Поставочные срочные сделки с драгоценными металлами (18)
  *
  * @author Dmitriy Levykin
  */
@@ -99,6 +99,7 @@ def getAtributes() {
 /*
 Возвращает графу вида "гр. хх"
  */
+
 def getGrafNum(def alias) {
     def atr = getAtributes().find { it -> it.getValue()[0] == alias }
     atr.getValue()[1]
@@ -106,13 +107,13 @@ def getGrafNum(def alias) {
 
 // гр. 2, гр. 3, гр. 6, гр. 7, гр. 10, гр. 11, гр. 12, гр. 13, гр. 14, гр. 15, гр. 16, гр. 17, гр. 18, гр. 19,
 // гр. 20, гр. 21, гр. 22, гр. 23, гр. 24.
-def getGroupColumns(){
+def getGroupColumns() {
     ['name', 'innKio', 'contractNum', 'contractDate', 'innerCode', 'okpCode', 'unitCountryCode', 'signPhis',
             'signTransaction', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
             'city2', 'settlement2', 'conditionCode', 'count']
 }
 
-def getEditColumns(){
+def getEditColumns() {
     ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode',
             'unitCountryCode', 'signPhis', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
             'city2', 'settlement2', 'conditionCode', 'incomeSum', 'consumptionSum', 'transactionDate']
@@ -136,34 +137,33 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = 0
-    row.keySet().each{
-        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
+    row.keySet().each {
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     getEditColumns().each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    if (currentDataRow!=null){
+    if (currentDataRow != null) {
         index = currentDataRow.getIndex()
         def pointRow = currentDataRow
-        while(pointRow.getAlias()!=null && index>0){
+        while (pointRow.getAlias() != null && index > 0) {
             pointRow = dataRows.get(--index)
         }
-        if(index!=currentDataRow.getIndex() && dataRows.get(index).getAlias()==null){
+        if (index != currentDataRow.getIndex() && dataRows.get(index).getAlias() == null) {
             index++
         }
-    }else if (size>0) {
-        for(int i = size-1;i>=0;i--){
+    } else if (size > 0) {
+        for (int i = size - 1; i >= 0; i--) {
             def pointRow = dataRows.get(i)
-            if(pointRow.getAlias()==null){
-                index = dataRows.indexOf(pointRow)+1
+            if (pointRow.getAlias() == null) {
+                index = dataRows.indexOf(pointRow) + 1
                 break
             }
         }
     }
     row.count = 1
-    dataRowHelper.insert(row, index+1)
+    dataRowHelper.insert(row, index + 1)
 }
 
 void deleteRow() {
@@ -237,7 +237,7 @@ void logicCheck() {
         def signPhis = row.signPhis
         if (signPhis != null && refBookService.getNumberValue(18, signPhis, 'CODE') == 1) {
             def isHaveNotEmptyField = false
-            def checkField = ['countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2', 'city2','settlement2', 'conditionCode']
+            def checkField = ['countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2', 'city2', 'settlement2', 'conditionCode']
             for (it in checkField) {
                 isHaveNotEmptyField = row.getCell(it).value != null && !row.getCell(it).value.toString().isEmpty()
                 if (isHaveNotEmptyField)
@@ -396,7 +396,7 @@ void logicCheck() {
     }
 
     //Проверки подитоговых сумм
-    def testRows = dataRows.findAll{it -> it.getAlias() == null}
+    def testRows = dataRows.findAll { it -> it.getAlias() == null }
     //добавляем итоговые строки для проверки
     for (int i = 0; i < testRows.size(); i++) {
         def testRow = testRows.get(i)
@@ -423,7 +423,10 @@ void logicCheck() {
             if (row.getAlias() == null) {
                 if (nextRow == null ||
                         nextRow.getAlias() == null && isDiffRow(row, nextRow, getGroupColumns())) {
-                    logger.error("Группа «${getValuesByGroupColumn(row)}» не имеет строки подитога!»")
+                    def String groupCols = getValuesByGroupColumn(row)
+                    if (groupCols != null) {
+                        logger.error("Группа «$groupCols» не имеет строки подитога!")
+                    }
                 }
             }
         }
@@ -432,7 +435,7 @@ void logicCheck() {
 
         for (int i = 0; i < dataRows.size(); i++) {
             if (dataRows[i].getAlias() != null) {
-                if(i - 1 < -1 || dataRows[i - 1].getAlias() != null){
+                if (i - 1 < -1 || dataRows[i - 1].getAlias() != null) {
                     logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
                 }
             }
@@ -442,12 +445,19 @@ void logicCheck() {
             def testItogRow = testItogRows[i]
             def realItogRow = itogRows[i]
             int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
-            def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
-            if (testItogRow.priceOne != realItogRow.priceOne) {
-                logger.error(mes + " «${getAtributes().priceOne[2]}»")
-            }
-            if (testItogRow.totalNds != realItogRow.totalNds) {
-                logger.error(mes + " «${getAtributes().totalNds[2]}»")
+            if (dataRows[itg].getAlias() != null) {
+                logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
+            } else {
+                def String groupCols = getValuesByGroupColumn(dataRows[itg])
+                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «$groupCols» в графе"
+                if (groupCols != null) {
+                    if (testItogRow.priceOne != realItogRow.priceOne) {
+                        logger.error(mes + " «${getAtributes().priceOne[2]}»")
+                    }
+                    if (testItogRow.totalNds != realItogRow.totalNds) {
+                        logger.error(mes + " «${getAtributes().totalNds[2]}»")
+                    }
+                }
             }
         }
     }
@@ -467,39 +477,75 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     }
 }
 
-/*
-    Возвращает строку со значениями полей строки по которым идет группировка
-   ['name', 'innKio', 'contractNum', 'contractDate', 'innerCode', 'okpCode', 'unitCountryCode', 'signPhis',
-            'signTransaction', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
-            'city2', 'settlement2', 'conditionCode', 'count']
+/**
+ * Возвращает строку со значениями полей строки по которым идет группировка
+ * ['name', 'innKio', 'contractNum', 'contractDate', 'innerCode', 'okpCode', 'unitCountryCode', 'signPhis',
+ *          'signTransaction', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
+ *          'city2', 'settlement2', 'conditionCode', 'count']
  */
-def getValuesByGroupColumn(DataRow row) {
+
+String getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    builder.append(getRefBookValue(9, row.name, 'NAME')).append(sep)
-    builder.append(row.innKio).append(sep)
-    builder.append(row.contractNum).append(sep)
-    builder.append(getRefBookValue(17, row.innerCode, 'INNER_CODE')).append(sep)
-    builder.append(getRefBookValue(17, row.okpCode, 'OKP_CODE')).append(sep)
-    builder.append(getRefBookValue(10, row.unitCountryCode, 'CODE')).append(sep)
-    builder.append(getRefBookValue(18, row.signPhis, 'SIGN')).append(sep)
-    builder.append(getRefBookValue(38, row.signTransaction, 'VALUE')).append(sep)
-    builder.append(getRefBookValue(10, row.countryCode2, 'CODE')).append(sep)
-    builder.append(getRefBookValue(4, row.region1, 'CODE')).append(sep)
-    builder.append(row.city1).append(sep)
-    builder.append(row.settlement1).append(sep)
-    builder.append(getRefBookValue(10, row.countryCode3, 'CODE')).append(sep)
-    builder.append(getRefBookValue(4, row.region2, 'CODE')).append(sep)
-    builder.append(row.city2).append(sep)
-    builder.append(row.settlement2).append(sep)
-    builder.append(getRefBookValue(63, row.conditionCode, 'STRCODE')).append(sep)
-    builder.append(row.count)
-    builder.toString()
+    def map = row.name != null ? refBookService.getRecordData(9, row.name) : null
+    if (map != null)
+        builder.append(map.NAME.stringValue).append(sep)
+    if (row.innKio != null)
+        builder.append(row.innKio).append(sep)
+    if (row.contractNum != null)
+        builder.append(row.contractNum).append(sep)
+    if (row.contractDate != null)
+        builder.append(row.contractDate).append(sep)
+    innerCode = getRefBookValue(17, row.innerCode, 'INNER_CODE')
+    if (innerCode != null)
+        builder.append(innerCode).append(sep)
+    okpCode = getRefBookValue(17, row.okpCode, 'OKP_CODE')
+    if (okpCode != null)
+        builder.append(okpCode).append(sep)
+    unitCountryCode = getRefBookValue(10, row.unitCountryCode, 'CODE')
+    if (unitCountryCode != null)
+        builder.append(unitCountryCode).append(sep)
+    signPhis = getRefBookValue(18, row.signPhis, 'SIGN')
+    if (signPhis != null)
+        builder.append(signPhis).append(sep)
+    signTransaction = getRefBookValue(38, row.signTransaction, 'VALUE')
+    if (signTransaction != null)
+        builder.append(signTransaction).append(sep)
+    countryCode2 = getRefBookValue(10, row.countryCode2, 'CODE')
+    if (countryCode2 != null)
+        builder.append(countryCode2).append(sep)
+    region1 = getRefBookValue(4, row.region1, 'CODE')
+    if (region1 != null)
+        builder.append(region1).append(sep)
+    if (row.city1 != null)
+        builder.append(row.city1).append(sep)
+    if (row.settlement1 != null)
+        builder.append(row.settlement1).append(sep)
+    countryCode3 = getRefBookValue(10, row.countryCode3, 'CODE')
+    if (countryCode3 != null)
+        builder.append(countryCode3).append(sep)
+    region2 = getRefBookValue(4, row.region2, 'CODE')
+    if (region2 != null)
+        builder.append(region2).append(sep)
+    if (row.city2 != null)
+        builder.append(row.city2).append(sep)
+    if (row.settlement2 != null)
+        builder.append(row.settlement2).append(sep)
+    conditionCode = getRefBookValue(63, row.conditionCode, 'STRCODE')
+    if (conditionCode != null)
+        builder.append(conditionCode).append(sep)
+    if (row.count != null)
+        builder.append(row.count).append(sep)
+
+    def String retVal = builder.toString()
+    if (retVal.length() < 2)
+        return null
+    retVal.substring(0, retVal.length() - 2)
 }
 
 def getRefBookValue(int id, def cell, def alias) {
     def map = cell != null ? refBookService.getRecordData(id, cell) : null
-    return map == null ? 'null' : map.get(alias).stringValue
+    return map == null ? null : map.get(alias).stringValue
 }
 
 /**
@@ -707,7 +753,7 @@ void consolidation() {
     }
 }
 
-def getHeaderRowCount(){
+def getHeaderRowCount() {
     return 4
 }
 
@@ -743,7 +789,6 @@ void importData() {
         return
     }
 
-
     // добавить данные в форму
     try {
         if (!checkTableHead(xml)) {
@@ -770,7 +815,7 @@ def checkTableHead(def xml) {
         return false
     }
     def result = (
-            checkHeaderRow(xml, rc, 0, ['Полное наименование с указанием ОПФ', '', '2', 'гр. 2']) &&
+    checkHeaderRow(xml, rc, 0, ['Полное наименование с указанием ОПФ', '', '2', 'гр. 2']) &&
             checkHeaderRow(xml, rc, 1, ['ИНН/ КИО', '', '3', 'гр. 3']) &&
             checkHeaderRow(xml, rc, 2, ['Наименование страны регистрации', '', '4', 'гр. 4.1']) &&
             checkHeaderRow(xml, rc, 3, ['Код страны регистрации по классификатору ОКСМ', '', '5', 'гр. 4.2']) &&
@@ -802,12 +847,12 @@ def checkTableHead(def xml) {
     return result
 }
 
-def checkHeaderRow(def xml, def headRowCount, def cellNumber, def arrayHeaders){
-    for (int i = 0; i < headRowCount; i++){
+def checkHeaderRow(def xml, def headRowCount, def cellNumber, def arrayHeaders) {
+    for (int i = 0; i < headRowCount; i++) {
         String value = xml.row[i].cell[cellNumber]
         //убираем перевод строки, множественное использование пробелов
-        value = value.replaceAll('\\n', '').replaceAll('\\r','').replaceAll(' {2,}', ' ').trim()
-        if (value != arrayHeaders[i]){
+        value = value.replaceAll('\\n', '').replaceAll('\\r', '').replaceAll(' {2,}', ' ').trim()
+        if (value != arrayHeaders[i]) {
             //println("row index '"+ i +"' row value '" + value + "' cellNumber '" + cellNumber + "' value '" + arrayHeaders[i] + "'")
             return false
         }
@@ -836,7 +881,7 @@ def addData(def xml) {
             continue
         }
 
-        if ((row.cell.find {it.text() != ""}.toString()) == "") {
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
 
@@ -908,7 +953,7 @@ def addData(def xml) {
 
         // столбец 16
         String code = row.cell[indexCell].text()
-        if (code.length() == 1){    //для кодов 1, 2, 3...9
+        if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
         newRow.region1 = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell, false)
@@ -928,7 +973,7 @@ def addData(def xml) {
 
         // столбец 20
         code = row.cell[indexCell].text()
-        if (code.length() == 1){    //для кодов 1, 2, 3...9
+        if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
         newRow.region2 = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell, false)
@@ -1001,9 +1046,9 @@ def getNumber(def value, int indexRow, int indexCell) {
  *
  * @param value
  */
-def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory=true) {
+def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory = true) {
     String filter = alias + " = '" + value + "'"
-    if (value=='') filter = "$alias is null"
+    if (value == '') filter = "$alias is null"
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
     } else {
@@ -1014,7 +1059,7 @@ def getRecordId(def ref_id, String alias, String value, Date date, def cache, in
     if (records.size() == 1) {
         cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
-    } else if (mandatory || value!='') {
+    } else if (mandatory || value != '') {
         throw new Exception("Строка ${indexRow - (getHeaderRowCount() - 1)} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
     return null

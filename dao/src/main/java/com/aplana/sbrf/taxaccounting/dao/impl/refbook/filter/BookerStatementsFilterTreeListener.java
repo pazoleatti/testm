@@ -22,44 +22,51 @@ public class BookerStatementsFilterTreeListener implements FilterTreeListener {
     @Override
     public void enterNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) {
         if (ctx.link_type() != null){
-            query.append(" ").append(ctx.link_type().getText());
+            query.append(" ").append(ctx.link_type().getText()).append(" ");
         }
     }
 
     @Override
-    public void exitNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void exitNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) {}
+
+    @Override
+    public void enterStrtype(@NotNull FilterTreeParser.StrtypeContext ctx) {
+        query.append(ctx.getText());
+    }
+
+    @Override
+    public void exitStrtype(@NotNull FilterTreeParser.StrtypeContext ctx) {}
+
+    @Override
+    public void enterFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
+        query.append(ctx.functype().getText()).append("(");
+    }
+
+    @Override
+    public void exitFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
+        query.append(")");
     }
 
     @Override
     public void enterOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        query.append(" ").append(ctx.getText()).append(" ");
     }
 
     @Override
     public void exitOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx) {
-        query.append(" ").append(ctx.getText());
     }
 
     @Override
-    public void enterQuery(@NotNull FilterTreeParser.QueryContext ctx) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void enterQuery(@NotNull FilterTreeParser.QueryContext ctx) {}
 
     @Override
-    public void exitQuery(@NotNull FilterTreeParser.QueryContext ctx) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void exitQuery(@NotNull FilterTreeParser.QueryContext ctx) {}
 
     @Override
-    public void enterStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void enterStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {}
 
     @Override
-    public void exitStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void exitStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {}
 
     @Override
     public void enterWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx) {
@@ -75,19 +82,19 @@ public class BookerStatementsFilterTreeListener implements FilterTreeListener {
     }
 
     @Override
-    public void enterOperand(@NotNull FilterTreeParser.OperandContext ctx) {
-        query.append(" ").append(ctx.getText());
-    }
+    public void enterOperand(@NotNull FilterTreeParser.OperandContext ctx) {}
 
     @Override
-    public void exitOperand(@NotNull FilterTreeParser.OperandContext ctx) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void exitOperand(@NotNull FilterTreeParser.OperandContext ctx) {}
 
     @Override
-    public void enterIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void enterFunctype(@NotNull FilterTreeParser.FunctypeContext ctx) {}
+
+    @Override
+    public void exitFunctype(@NotNull FilterTreeParser.FunctypeContext ctx) {}
+
+    @Override
+    public void enterIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {}
 
     @Override
     public void exitIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
@@ -95,32 +102,28 @@ public class BookerStatementsFilterTreeListener implements FilterTreeListener {
     }
 
     @Override
-    public void enterLink_type(@NotNull FilterTreeParser.Link_typeContext ctx) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void enterLink_type(@NotNull FilterTreeParser.Link_typeContext ctx) {}
+
+    @Override
+    public void exitLink_type(@NotNull FilterTreeParser.Link_typeContext ctx) {}
+
+    @Override
+    public void enterSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx) {
+        query.append(ctx.getText());
     }
 
     @Override
-    public void exitLink_type(@NotNull FilterTreeParser.Link_typeContext ctx) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void exitSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx) {}
 
     @Override
-    public void visitTerminal(@NotNull TerminalNode terminalNode) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void visitTerminal(@NotNull TerminalNode terminalNode) {}
 
     @Override
-    public void visitErrorNode(@NotNull ErrorNode errorNode) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void visitErrorNode(@NotNull ErrorNode errorNode) {}
 
     @Override
-    public void enterEveryRule(@NotNull ParserRuleContext parserRuleContext) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void enterEveryRule(@NotNull ParserRuleContext parserRuleContext) {}
 
     @Override
-    public void exitEveryRule(@NotNull ParserRuleContext parserRuleContext) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void exitEveryRule(@NotNull ParserRuleContext parserRuleContext) {}
 }

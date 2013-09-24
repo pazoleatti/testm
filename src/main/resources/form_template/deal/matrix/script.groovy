@@ -26,13 +26,11 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW:
         // В ручном режиме строки добавлять нельзя
-        // logger.warn("Добавление строк запрещено!") // TODO Временное разрешение редактировать все до 23.09.2013
-        addRow() // TODO Временное разрешение редактировать все до 23.09.2013
+        logger.warn("Добавление строк запрещено!")
         break
     case FormDataEvent.DELETE_ROW:
         // В ручном режиме строки удалять нельзя
-        // logger.warn("Удаление строк запрещено!") // TODO Временное разрешение редактировать все до 23.09.2013
-        deleteRow() // TODO Временное разрешение редактировать все до 23.09.2013
+        logger.warn("Удаление строк запрещено!")
         break
 // После принятия из Утверждено
     case FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED:
@@ -129,11 +127,6 @@ void addRow(DataRow<Cell> row, DataRow<Cell> currentRow) {
     def size = dataRows.size()
     def index = currentRow != null ? currentRow.getIndex() : size
 
-    // TODO Временное разрешение редактировать все до 23.09.2013
-    row.keySet().each{
-        row.getCell(it).editable = true
-        row.getCell(it).setStyleAlias('Редактируемая')
-    }
     dataRowHelper.insert(row, index+1)
 }
 

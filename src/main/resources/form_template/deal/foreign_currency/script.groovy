@@ -9,7 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import java.text.SimpleDateFormat
 
 /**
- * 390 - Купля-продажа иностранной валюты
+ * 390 - Купля-продажа иностранной валюты (15)
  * (похож на nondeliverable " Беспоставочные срочные сделки")
  *
  * @author Stanislav Yasinskiy
@@ -85,11 +85,11 @@ def getAtributes(){
     ]
 }
 
-def getGroupColumns(){
+def getGroupColumns() {
     ['fullName', 'inn', 'docNum', 'docDate', 'currencyCode', 'countryDealCode']
 }
 
-def getEditColumns(){
+def getEditColumns() {
     ['fullName', 'docNum', 'docDate', 'dealNumber', 'dealDate', 'currencyCode',
             'countryDealCode', 'incomeSum', 'outcomeSum', 'dealDoneDate']
 }
@@ -105,33 +105,32 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = 0
-    row.keySet().each{
-        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
+    row.keySet().each {
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     getEditColumns().each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    if (currentDataRow!=null){
+    if (currentDataRow != null) {
         index = currentDataRow.getIndex()
         def pointRow = currentDataRow
-        while(pointRow.getAlias()!=null && index>0){
+        while (pointRow.getAlias() != null && index > 0) {
             pointRow = dataRows.get(--index)
         }
-        if(index!=currentDataRow.getIndex() && dataRows.get(index).getAlias()==null){
+        if (index != currentDataRow.getIndex() && dataRows.get(index).getAlias() == null) {
             index++
         }
-    }else if (size>0) {
-        for(int i = size-1;i>=0;i--){
+    } else if (size > 0) {
+        for (int i = size - 1; i >= 0; i--) {
             def pointRow = dataRows.get(i)
-            if(pointRow.getAlias()==null){
-                index = dataRows.indexOf(pointRow)+1
+            if (pointRow.getAlias() == null) {
+                index = dataRows.indexOf(pointRow) + 1
                 break
             }
         }
     }
-    dataRowHelper.insert(row, index+1)
+    dataRowHelper.insert(row, index + 1)
 }
 
 /**
@@ -232,7 +231,7 @@ void logicCheck() {
     }
 
     //Проверки подитоговых сумм
-    def testRows = dataRows.findAll{it -> it.getAlias() == null}
+    def testRows = dataRows.findAll { it -> it.getAlias() == null }
     //добавляем итоговые строки для проверки
     for (int i = 0; i < testRows.size(); i++) {
         def testRow = testRows.get(i)
@@ -259,7 +258,10 @@ void logicCheck() {
             if (row.getAlias() == null) {
                 if (nextRow == null ||
                         nextRow.getAlias() == null && isDiffRow(row, nextRow, getGroupColumns())) {
-                    logger.error("Группа «${getValuesByGroupColumn(row)}» не имеет строки подитога!")
+                    def String groupCols = getValuesByGroupColumn(row)
+                    if (groupCols != null) {
+                        logger.error("Группа «$groupCols» не имеет строки подитога!")
+                    }
                 }
             }
         }
@@ -268,7 +270,7 @@ void logicCheck() {
 
         for (int i = 0; i < dataRows.size(); i++) {
             if (dataRows[i].getAlias() != null) {
-                if(i - 1 < -1 || dataRows[i - 1].getAlias() != null){
+                if (i - 1 < -1 || dataRows[i - 1].getAlias() != null) {
                     logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
                 }
             }
@@ -281,12 +283,19 @@ void logicCheck() {
             def testItogRow = testItogRows[i]
             def realItogRow = itogRows[i]
             int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
-            def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
-            if (testItogRow.price != realItogRow.price) {
-                logger.error(mes + " «${priceName}»")
-            }
-            if (testItogRow.total != realItogRow.total) {
-                logger.error(mes + " «${totalName}»")
+            if (dataRows[itg].getAlias() != null) {
+                logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
+            } else {
+                def String groupCols = getValuesByGroupColumn(dataRows[itg])
+                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «$groupCols» в графе"
+                if (groupCols != null) {
+                    if (testItogRow.price != realItogRow.price) {
+                        logger.error(mes + " «${priceName}»")
+                    }
+                    if (testItogRow.total != realItogRow.total) {
+                        logger.error(mes + " «${totalName}»")
+                    }
+                }
             }
         }
     }
@@ -307,23 +316,33 @@ boolean isDiffRow(DataRow row, DataRow nextRow, def groupColumns) {
     return rez
 }
 
-/*
-    Возвращает строку со значениями полей строки по которым идет группировка
-    ['fullName', 'inn', 'docNum', 'docDate', 'currencyCode', 'countryDealCode']
+/**
+ * Возвращает строку со значениями полей строки по которым идет группировка
+ * ['fullName', 'inn', 'docNum', 'docDate', 'currencyCode', 'countryDealCode']
  */
-def getValuesByGroupColumn(DataRow row) {
+String getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
     def map = row.fullName != null ? refBookService.getRecordData(9, row.fullName) : null
-    builder.append(map == null ? 'null' : map.NAME.stringValue).append(sep)
-    builder.append(row.inn).append(sep)
-    builder.append(row.docNum).append(sep)
-    builder.append(row.docDate).append(sep)
+    if (map != null)
+        builder.append(map.NAME.stringValue).append(sep)
+    if (row.inn != null)
+        builder.append(row.inn).append(sep)
+    if (row.docNum != null)
+        builder.append(row.docNum).append(sep)
+    if (row.docDate != null)
+        builder.append(row.docDate).append(sep)
     map = row.currencyCode != null ? refBookService.getRecordData(15, row.currencyCode) : null
-    builder.append(map == null ? 'null' : map.CODE_2.stringValue).append(sep)
-    map = row.countryDealCode != null ? refBookService.getRecordData(10, row.countryDealCode) : null
-    builder.append(map == null ? 'null' : map.CODE_2.stringValue)
-    builder.toString()
+    if (map != null)
+        builder.append(map.CODE_2.stringValue).append(sep)
+    map = row.countryDealCode != null ? refBookService.getRecordData(15, row.countryDealCode) : null
+    if (map != null)
+        builder.append(map.CODE_2.stringValue).append(sep)
+
+    def String retVal = builder.toString()
+    if (retVal.length() < 2)
+        return null
+    retVal.substring(0, retVal.length() - 2)
 }
 
 /**
@@ -451,7 +470,7 @@ void addAllStatic() {
 
             if (row.getAlias() == null && nextRow == null || isDiffRow(row, nextRow, getGroupColumns())) {
                 def itogRow = calcItog(i, dataRows)
-                dataRowHelper.insert(itogRow, ++i+1)
+                dataRowHelper.insert(itogRow, ++i + 1)
             }
         }
     }

@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
@@ -49,6 +50,10 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
 
 	    res.setFilterValues(filterValues);
 	    res.setReportPeriods(periodService.getAllPeriodsByTaxType(action.getTaxType(), true));
+	    
+	    FormDataFilter filter = new FormDataFilter();
+	    filter.setTaxType(action.getTaxType());
+	    res.setDefaultFilter(filter);
 
         return res;
     }

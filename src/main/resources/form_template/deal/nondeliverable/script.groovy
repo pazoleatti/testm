@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import java.text.SimpleDateFormat
 
 /**
- * 392 - Беспоставочные срочные сделки
+ * 392 - Беспоставочные срочные сделки (17)
  *
  * @author Dmitriy Levykin
  */
@@ -110,7 +110,6 @@ void addRow() {
     def size = dataRows.size()
     def index = 0
     row.keySet().each{
-        row.getCell(it).editable = true // TODO Временное разрешение редактировать все до 23.09.2013
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     getEditColumns().each {
@@ -194,9 +193,9 @@ void logicCheck() {
         def transactionDate = row.transactionDate
 
         // В одной строке если не заполнена графа 11, то должна быть заполнена графа 12 и наоборот
-        if (consumptionSum == null && price == null) {
+        if (consumptionSum == null && incomeSum == null) {
             def msg1 = row.getCell('consumptionSum').column.name
-            def msg2 = row.getCell('price').column.name
+            def msg2 = row.getCell('incomeSum').column.name
             logger.warn("Строка $rowNum: Одна из граф «$msg1» и «$msg2» должна быть заполнена!")
         }
 
@@ -284,7 +283,10 @@ void logicCheck() {
             if (row.getAlias() == null) {
                 if (nextRow == null ||
                         nextRow.getAlias() == null && isDiffRow(row, nextRow, getGroupColumns())) {
-                    logger.error("Группа «${getValuesByGroupColumn(row)}» не имеет строки подитога!")
+                    def String groupCols = getValuesByGroupColumn(row)
+                    if (groupCols != null) {
+                        logger.error("Группа «$groupCols» не имеет строки подитога!")
+                    }
                 }
             }
         }
@@ -303,31 +305,47 @@ void logicCheck() {
             def testItogRow = testItogRows[i]
             def realItogRow = itogRows[i]
             int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
-            def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «${getValuesByGroupColumn(dataRows[itg])}» в графе"
-            if (testItogRow.price != realItogRow.price) {
-                logger.error(mes + " «${getAtributes().price[2]}»")
-            }
-            if (testItogRow.cost != realItogRow.cost) {
-                logger.error(mes + " «${getAtributes().cost[2]}»")
+            if (dataRows[itg].getAlias() != null) {
+                logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
+            } else {
+                def String groupCols = getValuesByGroupColumn(dataRows[itg])
+                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «$groupCols» в графе"
+                if (groupCols != null) {
+                if (testItogRow.price != realItogRow.price) {
+                    logger.error(mes + " «${getAtributes().price[2]}»")
+                }
+                if (testItogRow.cost != realItogRow.cost) {
+                    logger.error(mes + " «${getAtributes().cost[2]}»")
+                }
+                }
             }
         }
     }
 }
 
-/*
-     Возвращает строку со значениями полей строки по которым идет группировка
-     ['name', 'innKio', 'contractNum', 'contractDate', 'transactionType']
+/**
+ * Возвращает строку со значениями полей строки по которым идет группировка
+ * ['name', 'innKio', 'contractNum', 'contractDate', 'transactionType']
  */
-def getValuesByGroupColumn(DataRow row) {
+String getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    def map = refBookService.getRecordData(9, row.name)
-    builder.append(map == null ? 'null' : map.NAME.stringValue).append(sep)
-    builder.append(row.innKio).append(sep)
-    builder.append(row.contractNum).append(sep)
-    builder.append(row.contractDate).append(sep)
-    builder.append(row.transactionType)
-    builder.toString()
+    def map = row.name != null ? refBookService.getRecordData(9, row.name) : null
+    if (map != null)
+        builder.append(map.NAME.stringValue).append(sep)
+    if (row.innKio != null)
+        builder.append(row.innKio).append(sep)
+    if (row.contractNum != null)
+        builder.append(row.contractNum).append(sep)
+    if (row.contractDate != null)
+        builder.append(row.contractDate).append(sep)
+    if (row.transactionType != null)
+        builder.append(row.transactionType).append(sep)
+
+    def String retVal = builder.toString()
+    if (retVal.length() < 2)
+        return null
+    retVal.substring(0, retVal.length() - 2)
 }
 
 /**
