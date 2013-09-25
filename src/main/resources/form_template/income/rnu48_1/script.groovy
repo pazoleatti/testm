@@ -1,3 +1,12 @@
+package form_template.income.rnu48_1
+
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
+
 /**
  * Скрипт для РНУ-48-1 (rnu48_1.groovy).
  * Форма "3.1	(РНУ-48.1) Регистр налогового учёта «ведомость ввода в эксплуатацию инвентаря и принадлежностей
@@ -17,13 +26,15 @@
  * amount           -   Сумма, включаемая в состав материальных расходов
  */
 switch (formDataEvent) {
+    case FormDataEvent.CREATE :
+        checkCreation()
+        break
     case FormDataEvent.CHECK :
-        logicalCheckWithTotalDataRowCheck()
+        allCheck()
         break
     case FormDataEvent.CALCULATE :
-        if (logicalCheckWithoutTotalDataRowCheck()) {
-            calc()
-        }
+        calc()
+        allCheck()
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
@@ -31,92 +42,119 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW :
         deleteCurrentRow()
         break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
+        allCheck()
+        break
+    // обобщить
+    case FormDataEvent.COMPOSE :
+        consolidation()
+        calc()
+        if (allCheck()) {
+            // для сохранения изменений приемников
+            data.commit()
+        }
+        break
+}
+
+def allCheck() {
+    return !hasError() && logicalCheck()
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    // отчётный период
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+
+    //проверка периода ввода остатков
+    if (reportPeriod != null && reportPeriodService.isBalancePeriod(reportPeriod.id, formData.departmentId)) {
+        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
+        return
+    }
+
+    def findForm = formDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
+    }
+}
+
+/**
+ * Имеются ли фатальные ошибки.
+ */
+def hasError() {
+    return logger.containsLevel(LogLevel.ERROR)
 }
 
 /**
  * Расчеты
  */
 void calc() {
+    def data = data
+    def requiredColumns = getEditableColsAliases()
+    // Обязательность заполнения полей граф (с 2 по 4)
+    i = 1
+    for (def row : getRows(data)) {
+        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns)) {
+            return
+        } else if (!isTotal(row)){
+            row.number = i++
+        }
+    }
+
     //расчитываем новые итоговые значения
     def totalResults = getTotalResultsForCols()
-    def totalRow = formData.getDataRow(getTotalDataRowAlias())
+    def totalRow = data.getDataRow(getRows(data),getTotalDataRowAlias())
     getTotalColsAliases().each { colName ->
         totalRow[colName] = totalResults[colName]
     }
+    data.save(getRows(data))
 }
 
 /**
- * проверяем все строки, включая итоговые
+ * Общие проверки
  */
-boolean logicalCheckWithTotalDataRowCheck(){
-    if (logicalCheckWithoutTotalDataRowCheck()) {
-        checkTotalDataRowValid()
-    }
-}
-
-/**
- * проверяем все строки, за исключением итоговых
- */
-boolean logicalCheckWithoutTotalDataRowCheck(){
-    def formIsValid = true
+boolean logicalCheck(){
+    def data = data
+    def rows = getRows(data)
+    def requiredColumns = getRequiredColsAliases()
     //  проверка, что в таблице есть хотя бы одна строка
-    if (formData.dataRows.isEmpty()) {
+    if (rows.isEmpty()) {
         logger.error ('В таблице отсутствуют заполненные строки!')
         return false
     }
 
     // 1.  Обязательность заполнения поля графы (с 1 по 4)
-    if (! requiredColsFilled()) {
-        logger.error('Не заполнены обязательные значения!')
-        return false
+    for (def row : rows) {
+        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns)) {
+            return false
+        }
     }
 
     def reportPeriodRange = getReportPeriodRange()
 
     //построчно проверяем данные формы
-    for (def row : formData.dataRows) {
-        if ( ! isInTotalRowsAliases(row.getAlias())) {
+    for (def row : rows) {
+        if ( ! isTotal(row)) {
             // 2.  Проверка даты ввода в эксплуатацию и границ отчетного периода
             // Дата начала отчётного периода ≤ графа 3 ≤ дата окончания отчётного периода
             if (! reportPeriodRange.containsWithinBounds(row.usefulDate)){
-                formIsValid = false
-                logger.error('Дата ввода в эксплуатацию вне границ отчетного периода!')
+                def rowStart = getRowIndexString(row)
+                logger.error("${rowStart}дата ввода в эксплуатацию вне границ отчетного периода!")
+                return false
             }
         }
     }
 
-    return formIsValid
-}
-
-/**
- * Проверяет
- * 1.  Обязательность заполнения поля графы (с 1 по 4)
- * @return {@value true} если все обязательные поля заполнены, иначе {@value false}
- */
-boolean requiredColsFilled() {
-    def formIsValid = true
-
-    for (def row : formData.dataRows) {
-        if ( ! isInTotalRowsAliases(row.getAlias())) {      //строку ИТОГО не проверяем
-            def fieldNumber = formData.dataRows.indexOf(row) + 1
-            for (def col : getEditableColsAliases()) {
-                final def value = row.get(col)
-                if (isBlankOrNull(value)) {
-                    formIsValid = false
-                    logger.error("Строка $fieldNumber не заполнена!")
-                    break
-                }
-            }
-        }
-    }
-    return formIsValid
-}
-
-/**
- * проверяем, что итоговые значения рассчитаны верно
- */
-boolean checkTotalDataRowValid() {
-    def totalDataRow = formData.getDataRow(getTotalDataRowAlias())
+    def totalDataRow = data.getDataRow(getRows(data),getTotalDataRowAlias())
     if (totalDataRow == null) {
         logger.error('Строка Итого не найдена')
         return false
@@ -128,8 +166,78 @@ boolean checkTotalDataRowValid() {
             return false
         }
     }
-
     return true
+}
+
+/**
+ * Консолидация.
+ */
+void consolidation() {
+    def data = data
+    // удалить все строки и собрать из источников их строки
+    data.clear()
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                getRows(getData(source)).each { row->
+                    if (row.getAlias() == null || row.getAlias() == '') {
+                        data.insert(row, getRows(data).size()+1)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ * @param useLog нужно ли записывать сообщения в лог
+ * @return true - все хорошо, false - есть незаполненные поля
+ */
+def checkRequiredColumns(DataRow row, Object columns) {
+    def colNames = []
+
+    columns.each { String col ->
+        if (row.getCell(col).getValue() == null || ''.equals(row.getCell(col).getValue())) {
+            def name = row.getCell(col).getColumn().getName().replace('%', '%%')
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        def errorBegin = getRowIndexString(row)
+        def errorMsg = colNames.join(', ')
+        logger.error("${errorBegin}не заполнены колонки : $errorMsg.")
+        return false
+    }
+    return true
+}
+
+/**
+ * Начало предупреждений/ошибок
+ * @param row
+ * @return
+ */
+def String getRowIndexString(def DataRow row){
+    def index = row.number
+    if (index != null) {
+        return "В строке \"№ пп\" равной $index "
+    } else {
+        index = getIndex(row) + 1
+        return "В строке $index "
+    }
+}
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    getRows(data).indexOf(row)
 }
 
 def getTotalDataRowAlias() {
@@ -139,14 +247,6 @@ def getTotalDataRowAlias() {
 /********************************   ОБЩИЕ ФУНКЦИИ   ********************************/
 
 /**
- * false, если в строке нет символов или строка null
- * true, если в строке есть символы
- */
-boolean isBlankOrNull(value) {
-    return (value == null || value.equals(''))
-}
-
-/**
  * возвращает список алиасов столбцов, доступных для редактирования
  */
 def getEditableColsAliases() {
@@ -154,21 +254,19 @@ def getEditableColsAliases() {
 }
 
 /**
- * возвращает true, если в таблице выделен какой-нибудь столбце
- * иначе возвращает false
+ * возвращает список алиасов обязательных столбцов
  */
-boolean isCurrentDataRowSelected() {
-    return (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) >= 0)
+def getRequiredColsAliases() {
+    return ['number', 'inventoryNumber', 'usefulDate', 'amount']
 }
 
 /***********   ОБЩИЕ ФУНКЦИИ ДЛЯ ИТОГОВЫХ СТРОК   ***********/
 
 /**
- * false, если алиас строки не входит в список алиасов итоговых строк
- * true, если алиас строки входит в алиас итоговых строк
+ * Проверка является ли строка итоговой.
  */
-boolean isInTotalRowsAliases(def alias){
-    return (totalRowsAliases.find {totalAlias -> alias == totalAlias} != null)
+def isTotal(def row) {
+    return row != null && row.getAlias() != null && (row.getAlias() in totalRowsAliases)
 }
 
 /**
@@ -192,10 +290,12 @@ def getTotalColsAliases() {
  * возвращаем мапу вида алиас_столбца -> итоговое_значение
  */
 def getTotalResultsForCols() {
+    def data = data
+    def rows = getRows(data)
     def result = [:]
     for (def colAlias : getTotalColsAliases()) {
-        result.put(colAlias, formData.dataRows.sum {row ->
-            if (! isInTotalRowsAliases(row.getAlias())) {    //строка не входит в итоговые
+        result.put(colAlias, rows.sum {row ->
+            if (! isTotal(row)) {    //строка не входит в итоговые
                 row[colAlias]
             } else {
                 0
@@ -206,86 +306,43 @@ def getTotalResultsForCols() {
 }
 
 /***********   ДОБАВЛЕНИЕ СТРОКИ В ТАБЛИЦУ С ФИКСИРОВАННЫМИ СТРОКАМИ ИТОГОВ   ***********/
-
-/**
- * добавляет строку в таблицу с фиксированными строками итогов. строка добавляется перед выделенной
- * строкой (если такая есть). если выделенной строки нет, то строка добавляется в конец таблицы перед
- * последней итоговой строкой
- */
 def addNewRow() {
+    def data = data
+    def rows = getRows(data)
     def newRow = formData.createDataRow()
 
     getEditableColsAliases().each{ value ->
         newRow.getCell(value).editable = true
+        newRow.getCell(value).setStyleAlias('Редактируемая')
     }
-
-    int index = getNewRowIndex()
-
-    formData.dataRows.add(index, newRow)
-
-    return newRow
-}
-
-/**
- * возвращает индекс для добавляемого столбца
- * (находит строку, удовлетворяющую условиям addNewRow(). на ее место будет произведена вставка новой строки)
- */
-int getNewRowIndex() {
-    def index
-
-    def isTotalRow = false
-    if (isCurrentDataRowSelected()) {
-        index = formData.dataRows.indexOf(currentDataRow)
-        if ( ! isBlankOrNull(currentDataRow.getAlias())) {
-            isTotalRow = true
+    def index = 0
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def row = currentDataRow
+        while(row.getAlias()!=null && index>0){
+            row = rows.get(--index)
         }
-    } else {
-        index = formData.dataRows.size() - 1
-    }
-
-    index = goToTopAndGetMaxIndexOfRowWithoutAlias(index)
-
-    if (isTotalRow && index != null) {
-        index += 1
-    } else if (index == null) {
-        index = 0
-    }
-
-    return index
-}
-
-/**
- * идем вверх по таблице, начиная со строки с индексом startIndex (включительно). находим первую неитоговую
- * строку (алиас которой не помечен как итоговый в getTotalRowsAliases()).
- *
- * возвращает индекс этой строки.
- */
-def goToTopAndGetMaxIndexOfRowWithoutAlias(def startIndex) {
-    for (int i = startIndex; i >= 0; i--) {
-        if (getTotalRowsAliases().find{ totalRowAlias ->
-            totalRowAlias == formData.dataRows[i].getAlias()
-        } == null) {
-            return i
+        if(index!=currentDataRow.getIndex() && rows.get(index).getAlias()==null){
+            index++
+        }
+    }else if (rows.size()>0) {
+        for(int i = rows.size()-1;i>=0;i--){
+            def row = rows.get(i)
+            if(row.getAlias()==null){
+                index = rows.indexOf(row)+1
+                break
+            }
         }
     }
-
-    return null
+    data.insert(newRow,index+1)
 }
 
-/***********   УДАЛЕНИЕ СТРОКИ ИЗ ТАБЛИЦЫ С ФИКСИРОВАННЫМИ СТРОКАМИ ИТОГОВ   ***********/
-
 /**
- * удаляет выделенную строку, если она не является итоговой
- * если выделенная строки является итоговой, то она не удаляется и выводится сообщение о критичесокй ошибке
+ * Удалить строку.
  */
 def deleteCurrentRow() {
-    if (isCurrentDataRowSelected() &&
-            totalRowsAliases.find { totalRowAlias ->
-                totalRowAlias == currentDataRow.getAlias()
-            } == null) {
-        formData.dataRows.remove(currentDataRow)
-    } else {
-        logger.error ('Невозможно удалить фиксированную строку!')
+    if (currentDataRow != null && currentDataRow.getAlias() == null) {
+        data.delete(currentDataRow)
     }
 }
 
@@ -300,3 +357,29 @@ def getReportPeriodRange() {
 
     return periodStartsDate..periodEndsDate
 }
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def DataRowHelper getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
+
+def DataRowHelper getData(){
+    return getData(formData)
+}
+
+/**
+ * Получить строки формы.
+ *
+ * @param formData форма
+ */
+def List<DataRow<Cell>> getRows(def DataRowHelper data) {
+    return data.getAllCached()
+}
+

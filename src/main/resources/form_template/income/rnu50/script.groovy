@@ -219,6 +219,7 @@ def logicalCheck() {
                 hasTotalRow = true
                 continue
             }
+            def rowStart = getRowIndexString(row)
             // 1. Обязательность заполнения полей (графа 1..5)
             if (!checkRequiredColumns(row, requiredColumns)) {
                 return false
@@ -226,13 +227,13 @@ def logicalCheck() {
 
             // 2. Проверка на нулевые значения
             if (isEmpty(row.lossReportPeriod) && isEmpty(row.lossTaxPeriod)) {
-                logger.error('Все суммы по операции нулевые!')
+                logger.error(rowStart + 'все суммы по операции нулевые!')
                 return false
             }
 
             // 3. Проверка формата номера записи в РНУ-49 (графа 2)
             if (!row.rnu49rowNumber.matches('\\w{2}-\\w{6}')) {
-                logger.error('Неправильно указан номер записи в РНУ-49 (формат: ГГ-НННННН, см. №852-р в актуальной редакции)!')
+                logger.error(rowStart + 'неправильно указан номер записи в РНУ-49 (формат: ГГ-НННННН, см. №852-р в актуальной редакции)!')
                 return false
             }
 
