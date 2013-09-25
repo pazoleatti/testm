@@ -153,7 +153,8 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 
         // для налога на прибыль, периоды вложены в друг дгруга
         if (taxPeriod.getTaxType() == TaxType.INCOME){
-            cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + reportPeriod.getMonths());
+            // Calendar.MONTH = 0 это январь
+            cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + reportPeriod.getMonths() - 1);
         }
         else{
             // получим отчетные периоды для данного налогового периода
