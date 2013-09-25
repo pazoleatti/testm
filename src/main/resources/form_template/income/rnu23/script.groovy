@@ -3,6 +3,7 @@ package form_template.income.rnu23
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
@@ -11,8 +12,9 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  * @version 59
  *
  * TODO:
- *      - неясности в консолидацией. Пока убрал расчеты и проверки после консолидации.
- *      - поправить загрузку
+ *      - неясности с консолидацией. Пока убрал расчеты и проверки после консолидации http://jira.aplana.com/browse/SBRFACCTAX-4455.
+ *      - поправить загрузку (возможно загрузка не нужна)
+ *      - проверки нси: курс валют http://jira.aplana.com/browse/SBRFACCTAX-4446
  *
  * @author rtimerbaev
  */
@@ -48,9 +50,7 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT :
         importData()
         // TODO (Ramil Timerbaev)
-        // if (!hasError() && calc() && logicalCheck() && checkNSI()) {
-            logger.info('Закончена загрузка файла ' + UploadFileName)
-        // }
+        // !hasError() && calc() && logicalCheck() && checkNSI()
         break
     case FormDataEvent.MIGRATION :
         importData()
@@ -58,7 +58,6 @@ switch (formDataEvent) {
             def total = getCalcTotalRow()
             def data = getData(formData)
             insert(data, total)
-            logger.info('Закончена загрузка файла ' + UploadFileName)
         }
         break
 }
@@ -104,7 +103,7 @@ def addNewRow() {
         for (int i = getRows(data).size()-1; i >= 0; i--) {
             def row = getRows(data).get(i)
             if (!isFixedRow(row)) {
-                index = getIndex(data, row) + 1
+                index = getIndex(row) + 1
                 break
             }
         }
@@ -251,11 +250,17 @@ def logicalCheck() {
     // признак наличия итоговых строк
     def hasTotal = false
 
+    def index
+    def errorMsg
+
     for (def row : getRows(data)) {
         if (isTotal(row)) {
             hasTotal = true
             continue
         }
+
+        index = getIndex(row) + 1
+        errorMsg = "В строке $index "
 
         // 1. Проверка даты совершения операции и границ отчётного периода (графа 5, 10, 12)
         if (a != null && b != null &&
@@ -263,7 +268,7 @@ def logicalCheck() {
                         (row.accrualAccountingEndDate != null && (row.accrualAccountingEndDate < a || b < row.accrualAccountingEndDate)) ||
                         (row.preAccrualsEndDate != null && (row.preAccrualsEndDate < a || b < row.preAccrualsEndDate)))
         ) {
-            logger.error('Дата совершения операции вне границ отчётного периода!')
+            logger.error(errorMsg + 'дата совершения операции вне границ отчётного периода!')
             return false
         }
 
@@ -277,24 +282,24 @@ def logicalCheck() {
             }
         }
         if (hasNull) {
-            logger.error('Все суммы по операции нулевые!')
+            logger.error(errorMsg + 'все суммы по операции нулевые!')
             return false
         }
 
         // 3. Проверка на сумму гарантии (графа 4)
         if (row.amountOfTheGuarantee != null && row.amountOfTheGuarantee == 0) {
-            logger.warn('Суммы гарантии равны нулю!')
+            logger.warn(errorMsg + 'суммы гарантии равны нулю!')
         }
 
         // 4. Проверка задания расчётного периода (графа 9, 10, 11, 12)
         if (row.accrualAccountingStartDate > row.accrualAccountingEndDate ||
                 row.preAccrualsStartDate > row.preAccrualsEndDate) {
-            logger.warn('Неправильно задан расчётный период!')
+            logger.warn(errorMsg + 'неправильно задан расчётный период!')
         }
 
         // 5. Проверка на корректность даты договора (графа 3)
         if (row.contractDate > b) {
-            logger.error('Дата договора неверная!')
+            logger.error(errorMsg + 'дата договора неверная!')
             return false
         }
 
@@ -306,13 +311,13 @@ def logicalCheck() {
         def checkColumn11and12 = (row.accrualAccountingStartDate != null || row.accrualAccountingEndDate != null) &&
                 row.preAccrualsStartDate != null && row.preAccrualsEndDate != null
         if (checkColumn9and10 || checkColumn11and12) {
-            logger.error('Поля в графе 9, 10, 11, 12 заполены неверно!')
+            logger.error(errorMsg + 'поля в графе 9, 10, 11, 12 заполены неверно!')
             return  false
         }
 
         // 9. Проверка на уникальность поля «№ пп» (графа 1)
         if (i != row.number) {
-            logger.error('Нарушена уникальность номера по порядку!')
+            logger.error(errorMsg + 'нарушена уникальность номера по порядку!')
             return  false
         }
         i++
@@ -320,46 +325,46 @@ def logicalCheck() {
         // 10. Арифметическая проверка графы 13
         tmp = getColumn13or15(row)
         if (row.incomeCurrency != tmp) {
-            logger.warn('Неверно рассчитана графа «Сумма начисленного дохода. Валюта»!')
+            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма начисленного дохода. Валюта»!')
         }
 
         // 11. Арифметическая проверка графы 14
         if (row.incomeRuble != roundValue(row.incomeCurrency * row.rateOfTheBankOfRussia, 2)) {
-            logger.warn('Неверно рассчитана графа «Сумма начисленного дохода. Рубли»!')
+            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма начисленного дохода. Рубли»!')
         }
 
         // 12. Арифметическая проверка графы 15
         tmp = getColumn13or15(row)
         if (row.accountingCurrency != tmp) {
-            logger.warn('Неверно рассчитана графа «Сумма дохода, отражённая в бухгалтерском учёте. Валюта»!')
+            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма дохода, отражённая в бухгалтерском учёте. Валюта»!')
         }
 
         // 13. Арифметическая проверка графы 16
         if (row.accountingRuble != roundValue(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)) {
-            logger.warn('Неверно рассчитана графа «Сумма дохода, отражённая в бухгалтерском учёте. Рубли»!')
+            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма дохода, отражённая в бухгалтерском учёте. Рубли»!')
         }
 
         // 14. Арифметическая проверка графы 17
         tmp = getSum(formDataOld, 'taxPeriodCurrency')
         if (row.preChargeCurrency != tmp) {
-            logger.warn('Неверно рассчитана графа «Сумма доначисления. Предыдущий период. Валюта»!')
+            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма доначисления. Предыдущий период. Валюта»!')
         }
 
         // 15. Арифметическая проверка графы 18
         tmp = getSum(formDataOld, 'taxPeriodRuble')
         if (row.preChargeRuble != tmp) {
-            logger.warn('Неверно рассчитана графа «Сумма доначисления. Предыдущий период. Рубли»!')
+            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма доначисления. Предыдущий период. Рубли»!')
         }
 
         // 16. Арифметическая проверка графы 19
         tmp = getColumn13or15or19(row, row.preAccrualsStartDate, row.preAccrualsEndDate)
         if (row.taxPeriodCurrency != tmp) {
-            logger.warn('Неверно рассчитана графа «Сумма доначисления. Отчётный период. Валюта»!')
+            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма доначисления. Отчётный период. Валюта»!')
         }
 
         // 17. Арифметическая проверка графы 20
         if (row.taxPeriodRuble != roundValue(row.taxPeriodCurrency * row.rateOfTheBankOfRussia, 2)) {
-            logger.warn('Неверно рассчитана графа «Сумма доначисления. Отчётный период. Рубли»!')
+            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма доначисления. Отчётный период. Рубли»!')
         }
 
         // 18. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
@@ -397,6 +402,7 @@ def logicalCheck() {
  * Проверки соответствия НСИ.
  */
 def checkNSI() {
+    // TODO (Ramil Timerbaev) курсы валют
 //    def data = getData(formData)
 //    def tmp
 //    for (def row : getRows(data)) {
@@ -630,13 +636,12 @@ void setTotalStyle(def row) {
 }
 
 /**
- * Получить номер строки в таблице.
+ * Получить номер строки в таблице (1..n).
  *
- * @param data данные нф
  * @param row строка
  */
-def getIndex(def data, def row) {
-    getRows(data).indexOf(row)
+def getIndex(def row) {
+    row.getIndex() - 1
 }
 
 /**
@@ -661,8 +666,7 @@ def checkRequiredColumns(def row, def columns) {
         if (index != null) {
             logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
         } else {
-            def data = getData(formData)
-            index = getIndex(data, row) + 1
+            index = getIndex(row) + 1
             logger.error("В строке $index не заполнены колонки : $errorMsg.")
         }
         return false
@@ -861,7 +865,7 @@ def addData(def xml) {
     if (xml.rowTotal.size() > 0) {
         def row = xml.rowTotal[0]
         def total = formData.createDataRow()
-        def index = 12
+        index = 12
 
         // TODO (Ramil Timerbaev) поправить/уточнить
         // графа 13
@@ -897,7 +901,11 @@ def getNumber(def value) {
     if ("".equals(tmp)) {
         return null
     }
-    return new BigDecimal(tmp)
+    try {
+        return new BigDecimal(tmp)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в число. " + e.message)
+    }
 }
 
 /**

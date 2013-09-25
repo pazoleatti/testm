@@ -1,6 +1,7 @@
 package form_template.income.rnu30
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
@@ -281,6 +282,8 @@ def logicalCheck() {
 
     def tmp
     def isFirst
+    def index
+    def errorMsg
     for (def row : getRows(data)) {
         if (isFixedRow(row)) {
             continue
@@ -290,69 +293,71 @@ def logicalCheck() {
 
         // 1. Обязательность заполнения полей
         def requiredColumns = (isFirst ? requiredColumns1 :  requiredColumnsAB)
-
         if (!checkRequiredColumns(row, requiredColumns)) {
             return false
         }
+
+        index = getIndex(row) + 1
+        errorMsg = "В строке $index "
 
         if (isFirst) {
             // 2. Арифметическая проверка графы 7
             tmp = row.debt45_90DaysSum * row.debt45_90DaysNormAllocation50per / 100
             if (row.debt45_90DaysReserve != roundValue(tmp, 2)) {
-                logger.warn('Неверно рассчитана графа «Задолженность от 45 до 90 дней. Расчётный резерв»!')
+                logger.warn(errorMsg + ' неверно рассчитана графа «Задолженность от 45 до 90 дней. Расчётный резерв»!')
             }
 
             // 3. Арифметическая проверка графы 10
             tmp = row.debtOver90DaysSum * row.debtOver90DaysNormAllocation100per / 100
             if (row.debtOver90DaysReserve != roundValue(tmp, 2)) {
-                logger.warn('Неверно рассчитана графа «Задолженность более 90 дней. Расчётный резерв»!')
+                logger.warn(errorMsg + 'неверно рассчитана графа «Задолженность более 90 дней. Расчётный резерв»!')
             }
 
             // 4. Арифметическая проверка графы 11
             if (row.totalReserve != row.debt45_90DaysReserve + row.debtOver90DaysReserve) {
-                logger.warn('Наверное значение графы «Итого расчётный резерв»')
+                logger.warn(errorMsg + 'наверное значение графы «Итого расчётный резерв»')
             }
 
             // 5. Арифметическая проверка графы 13
             tmp = row.reservePrev + row.calcReserve - row.reserveRecovery - row.useReserve
             if (row.reserveCurrent != tmp) {
-                logger.warn('Неверно рассчитана графа «Резерв на отчётную дату. Текущую»!')
+                logger.warn(errorMsg + 'неверно рассчитана графа «Резерв на отчётную дату. Текущую»!')
             }
 
             // 6. Арифметическая проверка графы 14
             tmp = (row.totalReserve + row.useReserve > row.reservePrev ?
                 row.totalReserve + row.useReserve - row.reservePrev : 0)
             if (row.calcReserve != tmp) {
-                logger.warn('Неверно рассчитана графа «Изменение фактического резерва. Доначисление резерва с отнесением на расходы код 22670»!')
+                logger.warn(errorMsg + 'неверно рассчитана графа «Изменение фактического резерва. Доначисление резерва с отнесением на расходы код 22670»!')
             }
 
             // 7. Арифметическая проверка графы 15
             tmp = (row.totalReserve + row.useReserve < row.reservePrev ?
                 row.reservePrev - (row.totalReserve + row.useReserve) : 0)
             if (row.reserveRecovery != tmp) {
-                logger.warn('Неверно рассчитана графа «Изменение фактического резерва. Восстановление резерва на доходах код 13091»!')
+                logger.warn(errorMsg + 'неверно рассчитана графа «Изменение фактического резерва. Восстановление резерва на доходах код 13091»!')
             }
 
             // 8. Арифметическая проверка графы 6
             if (row.debt45_90DaysNormAllocation50per != 50) {
-                logger.warn('Неверно рассчитана графа «Задолженность от 45 до 90 дней. Норматив отчислений 50%»!')
+                logger.warn(errorMsg + 'неверно рассчитана графа «Задолженность от 45 до 90 дней. Норматив отчислений 50%»!')
             }
 
             // 9. Арифметическая проверка графы 9
             if (row.debtOver90DaysNormAllocation100per != 100) {
-                logger.warn('Неверно рассчитана графа «Задолженность более 90 дней. Норматив отчислений 100%»!')
+                logger.warn(errorMsg + 'неверно рассчитана графа «Задолженность более 90 дней. Норматив отчислений 100%»!')
             }
         } else {
             // 5. Арифметическая проверка графы 13
             tmp = row.reservePrev - row.useReserve
             if (row.reserveCurrent != tmp) {
-                logger.warn('Неверно рассчитана графа «Резерв на отчётную дату. Текущую»!')
+                logger.warn(errorMsg + 'неверно рассчитана графа «Резерв на отчётную дату. Текущую»!')
             }
         }
 
         // 13. Проверка на уникальность поля "№ пп" (графа 1)
         if (i != row.number) {
-            logger.error('Нарушена уникальность номера по порядку!')
+            logger.error(errorMsg + 'нарушена уникальность номера по порядку!')
             return false
         }
         i++
@@ -402,19 +407,24 @@ def logicalCheck() {
  */
 def checkNSI() {
     def data = getData(formData)
+    def index
+    def errorMsg
     for (def row : getRows(data)) {
         if (isTotal(row)) {
             continue
         }
 
+        index = getIndex(row) + 1
+        errorMsg = "В строке $index "
+
         // 1. Проверка актуальности поля «Обеспечение» (графа 3)
         if (false) {
-            logger.warn('Обеспечение в справочнике отсутствует!')
+            logger.warn(errorMsg + 'обеспечение в справочнике отсутствует!')
         }
 
         // 2. Проверка счёта бухгалтерского учёта для данного РНУ (графа 4)
         if (false) {
-            logger.error('Операция в РНУ не учитывается!')
+            logger.error(errorMsg + 'операция в РНУ не учитывается!')
             return false
         }
     }
@@ -685,21 +695,6 @@ def getColumnName(def row, def alias) {
 }
 
 /**
- * Получить новую стролу с заданными стилями.
- */
-def getNewRow() {
-    def newRow = formData.createDataRow()
-
-    // TODO (Ramil Timerbaev)
-    // графа
-    ['', ''].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
-    return newRow
-}
-
-/**
  * Получить список строк формы.
  *
  * @param data данные нф (helper)
@@ -893,7 +888,11 @@ def getNumber(def value) {
     if ("".equals(tmp)) {
         return null
     }
-    return new BigDecimal(tmp)
+    try {
+        return new BigDecimal(tmp)
+    } catch (Exception e) {
+        throw new Exception("Значение \"$value\" не может быть преобразовано в число. " + e.message)
+    }
 }
 
 /**
