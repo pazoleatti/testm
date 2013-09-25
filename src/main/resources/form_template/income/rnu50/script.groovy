@@ -2,6 +2,7 @@ package form_template.income.rnu50
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -30,10 +31,10 @@ switch (formDataEvent) {
         allCheck()
         break
     case FormDataEvent.ADD_ROW :
-        addNewRow()
+        //addNewRow()
         break
     case FormDataEvent.DELETE_ROW :
-        deleteRow()
+        //deleteRow()
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
@@ -120,41 +121,61 @@ def deleteRow() {
  */
 void calc() {
     def data = data
-    def rows = getRows(data)
-    /*
-     * Проверка обязательных полей.
-     */
-    // список проверяемых столбцов (графа 2..5)
-    def requiredColumns = ['rnu49rowNumber', 'invNumber', 'lossReportPeriod', 'lossTaxPeriod']
-
-    for (def row : rows) {
-        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns)) {
-            return
-        }
-    }
 
     /*
      * Расчеты
      */
+    // удалить все строки
+    data.clear()
 
-    // удалить строку "итого"
-    def delRow = []
-    rows.each { row ->
-        if (isTotal(row)) {
-            delRow += row
+    def data49 = getData(formData49)
+
+    def DataRow newRow = null
+    for (def row49 in getRows(data49)){
+        if (!isTotal(row49) && row49.usefullLifeEnd!=null &&
+            row49.monthsLoss!=null &&
+            row49.expensesSum!=null){
+            newRow = formData.createDataRow()
+            // 3 графа
+            newRow.invNumber = row49.invNumber
+            // 2 графа
+            newRow.rnu49rowNumber = row49.firstRecordNumber
+            def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).getTime()
+            def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).getTime()
+            def date = row49.operationDate
+            if (date>=startDate && date<=endDate) {
+                // 4 графа
+                if(row49.usefullLifeEnd > row49.operationDate){
+                    newRow.lossReportPeriod = row49.expensesSum * (endDate[Calendar.MONTH] - date[Calendar.MONTH])
+                }else{
+                    newRow.lossReportPeriod = row49.expensesSum
+                }
+            }
+            date = row49.usefullLifeEnd// 18 графа РНУ-49
+            // 5 графа
+            if (date < startDate){
+                newRow.lossTaxPeriod = row49.expensesSum * 3
+            } else if (date>=startDate && date<=endDate){
+                newRow.lossTaxPeriod = row49.expensesSum * (endDate[Calendar.MONTH] - row49.usefullLifeEnd[Calendar.MONTH])
+            }
+            data.insert(newRow, getRows(data).size()+1)
         }
     }
-    delRow.each { row ->
-        data.delete(row)
-    }
-    if (rows.isEmpty()) {
+
+    if (getRows(data).isEmpty()) {
         return
     }
 
-    rows.eachWithIndex { row, i ->
+    def sortColumns = ['rnu49rowNumber', 'invNumber']
+    getRows(data).sort({ DataRow a, DataRow b ->
+        sortRow(sortColumns, a, b)
+    })
+
+    getRows(data).eachWithIndex { row, i ->
         // графа 1
         row.rowNumber = i + 1
     }
+    data.save(getRows(data))
 
     def DataRow totalRow = formData.createDataRow()
     totalRow.setAlias('total')
@@ -162,13 +183,23 @@ void calc() {
     totalRow.lossReportPeriod = getSum('lossReportPeriod')
     totalRow.lossTaxPeriod = getSum('lossTaxPeriod')
     setTotalStyle(totalRow)
-    data.insert(totalRow,rows.size()+1)
+    data.insert(totalRow,getRows(data).size()+1)
+}
+
+int sortRow(List<String> params, DataRow a, DataRow b) {
+    for (String param : params) {
+        def aD = a.getCell(param).value
+        def bD = b.getCell(param).value
+
+        if (aD != bD) {
+            return aD <=> bD
+        }
+    }
+    return 0
 }
 
 /**
  * Логические проверки.
- *
- * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
 def logicalCheck() {
     def data = data
@@ -188,7 +219,6 @@ def logicalCheck() {
                 hasTotalRow = true
                 continue
             }
-
             // 1. Обязательность заполнения полей (графа 1..5)
             if (!checkRequiredColumns(row, requiredColumns)) {
                 return false
@@ -206,7 +236,13 @@ def logicalCheck() {
                 return false
             }
 
-            // 4. Проверка итогового значених по всей форме - подсчет сумм для общих итогов
+            // 4. Проверки существования необходимых экземпляров форм
+            if (formData49 == null){
+                logger.error('Отсутствуют данные РНУ-49!')
+                return false
+            }
+
+            // 5. Проверка итогового значених по всей форме - подсчет сумм для общих итогов
             totalSumColumns.each { alias ->
                 if (totalSums[alias] == null) {
                     totalSums[alias] = 0
@@ -216,7 +252,7 @@ def logicalCheck() {
         }
 
 
-        // 4. Проверка итоговых значений формы	Заполняется автоматически.
+        // 5. Проверка итоговых значений формы	Заполняется автоматически.
         if (hasTotalRow) {
             def totalRow = data.getDataRow(rows, 'total')
             for (def alias : totalSumColumns) {
@@ -298,7 +334,7 @@ void checkCreation() {
  * Проверка является ли строка итоговой.
  */
 def isTotal(def row) {
-    return row != null && row.getAlias() != null && row.getAlias().contains('total')
+    return row != null && row.getAlias() != null
 }
 
 /**
@@ -402,5 +438,9 @@ def DataRowHelper getData(){
  */
 def List<DataRow<Cell>> getRows(def DataRowHelper data) {
     return data.getAllCached()
+}
+
+def FormData getFormData49(){
+    return formDataService.find(312, formData.kind, formDataDepartment.id, formData.reportPeriodId)
 }
 
