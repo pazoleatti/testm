@@ -65,7 +65,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void showOriginalVersionButton(boolean show);
 
-		void showSaveCancelBar(boolean show);
+		void showSaveCancelPanel(boolean show);
 
 		void showRecalculateButton(boolean show);
 
@@ -169,7 +169,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		readOnlyMode = true;
 		
 		MyView view = getView();
-		view.showSaveCancelBar(false);
+		view.showSaveCancelPanel(false);
 		view.showRemoveRowButton(false);
 		view.showRecalculateButton(false);
 		view.showAddRowButton(false);
@@ -188,7 +188,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		readOnlyMode = true;
 		
 		MyView view = getView();
-		view.showSaveCancelBar(false);
+		view.showSaveCancelPanel(false);
 		view.showRemoveRowButton(false);
 		view.showRecalculateButton(false);
 		view.showAddRowButton(false);
@@ -214,7 +214,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 			view.showOriginalVersionButton(false);
 		}
 
-		view.showSaveCancelBar(true);
+		view.showSaveCancelPanel(true);
 		view.showRecalculateButton(true);
 		view.showAddRowButton(!fixedRows);
 		view.showRemoveRowButton(!fixedRows);
