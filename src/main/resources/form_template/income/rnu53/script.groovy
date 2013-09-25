@@ -122,23 +122,14 @@ def deleteRow() {
 
 void checkBeforeCalc(DataRowHelper form) {
     for (row in form.allCached) {
-        // Магия с индексом Айдара Кадрыгулова, я к ней отношения не имею
-        BigDecimal index = row.tadeNumber
-        def errorMsg
-        if (index!=null && index!='') {
-            errorMsg = "В строке \"Номер сделки\" равной $index "
-        } else {
-            index = row.getIndex()
-            errorMsg = "В строке $index "
-        }
         // 2. Проверка даты первой части РЕПО (графа 7)
         if (!(row.part1REPODate < reportDate)) {
-            logger.error(errorMsg + 'неверно указана дата первой части сделки в строке '+ (form.allCached.indexOf(row)+1)+'!')
+            logger.error('Неверно указана дата первой части сделки в строке '+ (form.allCached.indexOf(row)+1)+'!')
             return
         }
         // 3. Проверка даты второй части РЕПО (графа 8)
         if (!(row.part2REPODate >= reportDate)) {
-            logger.error(errorMsg + 'неверно указана дата второй части сделки в строке '+ (form.allCached.indexOf(row)+1)+'!')
+            logger.error('Неверно указана дата второй части сделки в строке '+ (form.allCached.indexOf(row)+1)+'!')
             return
         }
     }
