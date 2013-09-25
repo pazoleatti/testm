@@ -42,6 +42,7 @@ public class DeclarationServiceTest {
     private static DeclarationService service = new DeclarationServiceImpl();
     private static DeclarationType declarationType = new DeclarationType();
     private static DeclarationData declarationData = new DeclarationData();
+    private static final Calendar currentCalendar = Calendar.getInstance();
 
     @BeforeClass
     public static void tearUp() {
@@ -104,10 +105,10 @@ public class DeclarationServiceTest {
 
         RefBookDataProvider dataProvider = mock(RefBookDataProvider.class);
         PeriodService reportPeriodService = mock(PeriodService.class);
-        when(reportPeriodService.getStartDate(48)).thenReturn(Calendar.getInstance());
+        when(reportPeriodService.getStartDate(48)).thenReturn(currentCalendar);
         PagingResult<Map<String, RefBookValue>> list = new PagingResult<Map<String, RefBookValue>>();
         list.add(departmentParam);
-        when(dataProvider.getRecords(new Date(), null, String.format("DEPARTMENT_ID = %d", 2), null)).thenReturn(list);
+        when(dataProvider.getRecords(currentCalendar.getTime(), null, String.format("DEPARTMENT_ID = %d", 2), null)).thenReturn(list);
 
         RefBookFactory factory = mock(RefBookFactory.class);
         when(factory.getDataProvider(31L)).thenReturn(dataProvider);
