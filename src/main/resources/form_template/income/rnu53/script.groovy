@@ -287,9 +287,6 @@ def logicalCheck() {
                 hasTotalRow = true
                 continue
             }
-
-            dataRowHelper.allCached.indexOf(row)
-
             def index = row.tadeNumber
             def errorMsg
             if (index!=null && index!='') {
