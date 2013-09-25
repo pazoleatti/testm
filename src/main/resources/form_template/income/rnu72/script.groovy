@@ -112,14 +112,14 @@ def calc() {
      */
 
     // удалить строку "итого"
-    def delRow = []
+    def deleteRows = []
     for (def row : getRows(data)) {
         if (isTotal(row)) {
-            delRow += row
+            deleteRows.add(row)
         }
     }
-    delRow.each { row ->
-        data.delete(row)
+    if (!deleteRows.isEmpty()) {
+        getRows(data).removeAll(deleteRows)
     }
     if (getRows(data).isEmpty()) {
         return true
@@ -138,7 +138,6 @@ def calc() {
         row.loss = (tmp < 0 ? abs(tmp) : 0)
 
         // графа 9
-        tmp = row.income - (row.cost279 - row.costReserve)
         row.profit = (tmp >= 0 ? tmp : 0)
     }
     save(data)
@@ -194,6 +193,7 @@ def logicalCheck() {
         }
 
         // 3. Проверка на нулевые значения
+        // TODO (Ramil Timerbaev) в аналитике: Не (графа 5 → графа 9 = 0). Неясности со стрелкой (это перечисление графов или импликация), пока оставить, но сказали что уточнят
         // Не (графа 5 > графа 9 = 0)
         hasError = true
         ['income', 'cost279', 'costReserve', 'loss', 'profit'].each {
@@ -213,7 +213,6 @@ def logicalCheck() {
         }
 
         // 5. Арифметическая проверка графы 9
-        tmp = row.income - (row.cost279 - row.costReserve)
         if (row.profit != (tmp >= 0 ? tmp : 0)) {
             logger.warn(errorMsg + 'неверное рассчитана графа «Прибыль (руб.)»!')
         }

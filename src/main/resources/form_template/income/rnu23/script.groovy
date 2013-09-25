@@ -154,24 +154,15 @@ def calc() {
             deleteRows.add(row)
         }
     }
-    getRows(data).removeAll(deleteRows)
+    if (!deleteRows.isEmpty()) {
+        getRows(data).removeAll(deleteRows)
+    }
     if (getRows(data).isEmpty()) {
         return true
     }
 
     // отсортировать/группировать
-    getRows(data).sort { def a, def b ->
-        // графа 2  - contract
-        // графа 3  - contractDate
-        // графа 5  - dateOfTransaction
-        if (a.dateOfTransaction == b.dateOfTransaction && a.contractDate == b.contractDate) {
-            return a.contract <=> b.contract
-        }
-        if (a.dateOfTransaction == b.dateOfTransaction) {
-            return a.contractDate <=> b.contractDate
-        }
-        return a.dateOfTransaction <=> b.dateOfTransaction
-    }
+    sort(data)
 
     // графа 1, 13..20
     getRows(data).eachWithIndex { row, i ->
@@ -1041,4 +1032,24 @@ def isFixedRow(def row) {
 def getTotalColumns() {
     return ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble',
             'preChargeCurrency', 'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble']
+}
+
+/**
+ * Отсорировать данные (по графе 3, 4, 2).
+ *
+ * @param data данные нф (хелпер)
+ */
+void sort(def data) {
+    getRows(data).sort { def a, def b ->
+        // графа 2  - contract
+        // графа 3  - contractDate
+        // графа 5  - dateOfTransaction
+        if (a.dateOfTransaction == b.dateOfTransaction && a.contractDate == b.contractDate) {
+            return a.contract <=> b.contract
+        }
+        if (a.dateOfTransaction == b.dateOfTransaction) {
+            return a.contractDate <=> b.contractDate
+        }
+        return a.dateOfTransaction <=> b.dateOfTransaction
+    }
 }
