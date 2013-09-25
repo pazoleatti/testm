@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import java.text.SimpleDateFormat
 
 /**
- * 379 - Предоставление права пользования товарным знаком
+ * 379 - Предоставление права пользования товарным знаком (4)
  *
  * похож на  software_development (Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий)
  * похож на corporate_credit (Предоставление корпоративного кредита)
@@ -301,11 +301,17 @@ def addData(def xml) {
         indexCell++
 
         // графа 3
-//        newRow.inn =
+        def map = refBookService.getRecordData(9, newRow.fullNamePerson)
+        def String text = row.cell[indexCell].text()
+        if ((text != null && !text.equals(map.INN_KIO.stringValue)) || (text == null && map.INN_KIO.stringValue != null))
+            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 4
-//        newRow.countryCode =
+        text = row.cell[indexCell].text()
+        map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
+        if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
+            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 5

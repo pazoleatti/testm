@@ -334,11 +334,11 @@
 			<variableExpression><![CDATA[$F{ОКВЭД}==null?
 "--------"
 :
-($F{ОКВЭД}+"------").substring(0,8)]]></variableExpression>
+($F{ОКВЭД}+"--------").substring(0,8)]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{ОКВЭД}==null?
 "--------"
 :
-($F{ОКВЭД}+"------").substring(0,8)]]></initialValueExpression>
+($F{ОКВЭД}+"--------").substring(0,8)]]></initialValueExpression>
 		</variable>
 		<variable name="NomerUchSd" class="java.lang.String">
 			<variableExpression><![CDATA[$F{НомУчСд}==null?
