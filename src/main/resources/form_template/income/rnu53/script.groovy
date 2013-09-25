@@ -133,12 +133,12 @@ void checkBeforeCalc(DataRowHelper form) {
         }
         // 2. Проверка даты первой части РЕПО (графа 7)
         if (!(row.part1REPODate < reportDate)) {
-            logger.error(errorMsg + 'неверно указана дата первой части сделки в строке '+ (getRows(data).indexOf(row)+1)+'!')
+            logger.error(errorMsg + 'неверно указана дата первой части сделки в строке '+ (form.allCached.indexOf(row)+1)+'!')
             return
         }
         // 3. Проверка даты второй части РЕПО (графа 8)
         if (!(row.part2REPODate >= reportDate)) {
-            logger.error(errorMsg + 'неверно указана дата второй части сделки в строке '+ (getRows(data).indexOf(row)+1)+'!')
+            logger.error(errorMsg + 'неверно указана дата второй части сделки в строке '+ (form.allCached.indexOf(row)+1)+'!')
             return
         }
     }
