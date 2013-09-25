@@ -718,7 +718,7 @@ def getGraph9(def DataRow row49, def DataRow row46, def DataRow row45){
     // указывается 0
     // Если «Графа 21» = 4, то заполняется вручную
     if(row46!=null && row49.saledPropertyCode == 1){
-        return row46.cost10perExploitation + row46.amortExploitation
+        return (row46.cost10perExploitation?:0) + (row46.amortExploitation?:0)
     }
 
     if(row45!=null && row49.saledPropertyCode == 2){

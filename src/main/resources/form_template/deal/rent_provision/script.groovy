@@ -10,7 +10,7 @@ import java.math.RoundingMode
 import java.text.SimpleDateFormat
 
 /**
- * 376 - Предоставление нежилых помещений в аренду
+ * 376 - Предоставление нежилых помещений в аренду (1)
  *
  * @author Dmitriy Levykin
  */
@@ -366,9 +366,17 @@ def addData(def xml) {
         indexCell++
 
         // графа 3
+        def map = refBookService.getRecordData(9, newRow.jurName)
+        def String text = row.cell[indexCell].text()
+        if ((text != null && !text.equals(map.INN_KIO.stringValue)) || (text == null && map.INN_KIO.stringValue != null))
+            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 4
+        text = row.cell[indexCell].text()
+        map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
+        if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
+            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 5

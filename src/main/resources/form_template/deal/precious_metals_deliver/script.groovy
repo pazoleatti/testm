@@ -901,14 +901,24 @@ def addData(def xml) {
         newRow.name = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
         indexCell++
 
-        // столбец 3
+        // графа 3
+        def map = refBookService.getRecordData(9, newRow.fullName)
+        def String text = row.cell[indexCell].text()
+        if ((text != null && !text.equals(map.INN_KIO.stringValue)) || (text == null && map.INN_KIO.stringValue != null))
+            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
-        // столбец 4
+        // графа 4.1
+        text = row.cell[indexCell].text()
+        map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
+        if ((text != null && !text.equals(map.NAME.stringValue)) || (text == null && map.NAME.stringValue != null))
+            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
-        // столбец 5
-        newRow.countryCode1 = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        // графа 4.2
+        text = row.cell[indexCell].text()
+        if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
+            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // столбец 6
@@ -916,6 +926,7 @@ def addData(def xml) {
         indexCell++
 
         // столбец 7
+
         newRow.contractDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 

@@ -183,7 +183,7 @@ public class ReportPeriodServiceTest {
     public void getEndDateIncome(){
         Calendar cl = Calendar.getInstance();
         cl.clear();
-        cl.set(2012, 2, 1);
+        cl.set(2012, 1, 1);
 
         assertEquals(service.getEndDate(8).get(Calendar.MONTH), cl.get(Calendar.MONTH));
     }

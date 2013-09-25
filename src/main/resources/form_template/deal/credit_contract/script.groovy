@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import java.text.SimpleDateFormat
 
 /**
- * 385 - Уступка прав требования по кредитным договорам
+ * 385 - Уступка прав требования по кредитным договорам (10)
  *
  * @author Dmitriy Levykin
  */
@@ -321,12 +321,19 @@ def addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 3
-//        newRow.innKio =
+        def map = refBookService.getRecordData(9, newRow.name)
+        def String text = row.cell[indexCell].text()
+        if ((text != null && !text.equals(map.INN_KIO.stringValue)) || (text == null && map.INN_KIO.stringValue != null))
+            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 4
-//        newRow.country =
+        text = row.cell[indexCell].text()
+        map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
+        if ((text != null && !text.equals(map.NAME.stringValue)) || (text == null && map.NAME.stringValue != null))
+            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
+
         indexCell++
 
         // графа 5

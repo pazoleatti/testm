@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import java.text.SimpleDateFormat
 
 /**
- * 382 - Оказание банковских услуг
+ * 382 - Оказание банковских услуг (7)
  *
  * @author Dmitriy Levykin
  */
@@ -315,15 +315,23 @@ def addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 3
-//        newRow.innKio =
+        def map = refBookService.getRecordData(9, newRow.jurName)
+        def String text = row.cell[indexCell].text()
+        if ((text != null && !text.equals(map.INN_KIO.stringValue)) || (text == null && map.INN_KIO.stringValue != null))
+            throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 4
-//        newRow.country =
+        text = row.cell[indexCell].text()
+        map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
+        if ((text != null && !text.equals(map.FULLNAME.stringValue)) || (text == null && map.FULLNAME.stringValue != null))
+            throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 5
-        //newRow.countryCode = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        text = row.cell[indexCell].text()
+        if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
+            throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 6

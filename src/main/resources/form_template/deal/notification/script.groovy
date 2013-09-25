@@ -152,6 +152,9 @@ void generateXML() {
                     mapYesNo.put(null, '0')
 
                     for (row in dataRowHelper.getAllCached()) {
+                        if(row.getAlias() != null){
+                            continue
+                        }
                         СвКонтрСд(
                                 НомПорСд: row.dealNum1
                         ) {

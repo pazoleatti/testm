@@ -4,7 +4,9 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 import java.text.SimpleDateFormat
 
@@ -118,11 +120,35 @@ def deleteRow() {
     }
 }
 
+void checkBeforeCalc(DataRowHelper form) {
+    for (row in form.allCached) {
+        // Магия с индексом Айдара Кадрыгулова, я к ней отношения не имею
+        BigDecimal index = row.tadeNumber
+        def errorMsg
+        if (index!=null && index!='') {
+            errorMsg = "В строке \"Номер сделки\" равной $index "
+        } else {
+            index = row.getIndex()
+            errorMsg = "В строке $index "
+        }
+        // 2. Проверка даты первой части РЕПО (графа 7)
+        if (!(row.part1REPODate < reportDate)) {
+            logger.error(errorMsg + 'неверно указана дата первой части сделки в строке '+ (form.allCached.indexOf(row)+1)+'!')
+            return
+        }
+        // 3. Проверка даты второй части РЕПО (графа 8)
+        if (!(row.part2REPODate >= reportDate)) {
+            logger.error(errorMsg + 'неверно указана дата второй части сделки в строке '+ (form.allCached.indexOf(row)+1)+'!')
+            return
+        }
+    }
+}
+
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
-    def data = getData(formData)
+    DataRowHelper data = getData(formData)
 
     // удалить строку "итого"
     def delRow = []
@@ -144,6 +170,11 @@ void calc() {
     def reportDate = reportPeriodService.getReportDate(formData.reportPeriodId).time
     /** Последний день отчетного периода */
     def lastDayReportPeriod = reportPeriodService.getEndDate(formData.reportPeriodId).time
+
+    checkBeforeCalc(data)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return  // Расчитывать не можем
+    }
 
     /** Дата нужная при подсчете графы 12. */
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
@@ -178,7 +209,7 @@ void calc() {
 
         def currency = getCurrency(row.currencyCode)
         // графа 11
-        row.rateBR = roundTo2(calc11(row, reportPeriodService.getEndDate(formData.reportPeriodId)))
+        row.rateBR = roundTo2(calc11(row, lastDayReportPeriod))
 
         // графа 12
         if (row.outcome == 0) {
@@ -256,7 +287,6 @@ def logicalCheck() {
                 hasTotalRow = true
                 continue
             }
-
             def index = row.tadeNumber
             def errorMsg
             if (index!=null && index!='') {
@@ -276,12 +306,12 @@ def logicalCheck() {
             }
 
             // 2. Проверка даты первой части РЕПО (графа 7)
-            if (row.part1REPODate > reportDate) {
+            if (!(row.part1REPODate < reportDate)) {
                 logger.error(errorMsg + 'неверно указана дата первой части сделки в строке '+ (getRows(data).indexOf(row)+1)+'!')
                 return false
             }
             // 3. Проверка даты второй части РЕПО (графа 8)
-            if (row.part2REPODate <= reportDate) {
+            if (!(row.part2REPODate >= reportDate)) {
                 logger.error(errorMsg + 'неверно указана дата второй части сделки в строке '+ (getRows(data).indexOf(row)+1)+'!')
                 return false
             }
