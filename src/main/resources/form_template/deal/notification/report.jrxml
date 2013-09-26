@@ -1021,7 +1021,7 @@ $F{ОКАТО}]]></variableExpression>
             <staticText>
                 <reportElement uuid="4c87f76b-7b7b-47ea-942e-de212bdbd9ab" x="0" y="67" width="593" height="22">
                     <property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.1"/>
-                    <property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1.241f"/>
+                    <property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1.15f"/>
                 </reportElement>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
                     <font fontName="Arial" size="12" isBold="true" pdfFontName="Arialbd.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
