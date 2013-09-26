@@ -1,0 +1,26 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:style>
+        .dataLayout {
+            margin: 5px;
+        }
+    </ui:style>
+    <g:DialogBox height="100%" glassEnabled="true" text="Введите атрибуты уведомления">
+        <g:DockPanel addStyleNames="{style.dataLayout}">
+            <g:Dock direction="NORTH" size="40px">
+                <g:HorizontalPanel spacing="5" horizontalAlignment="ALIGN_RIGHT" width="100%">
+                    <g:Label>Количество листов копии документа:</g:Label>
+                    <g:IntegerBox ui:field="pagesCountBox" width="50px"/>
+                </g:HorizontalPanel>
+            </g:Dock>
+            <g:Dock direction="SOUTH" size="35px">
+                <g:HorizontalPanel horizontalAlignment="ALIGN_RIGHT" width="100%">
+                    <g:HorizontalPanel spacing="5">
+                        <g:Button text="Продолжить" ui:field="okButton"/>
+                        <g:Button text="Отмена" ui:field="cancelButton"/>
+                    </g:HorizontalPanel>
+                </g:HorizontalPanel>
+            </g:Dock>
+        </g:DockPanel>
+    </g:DialogBox>
+</ui:UiBinder>

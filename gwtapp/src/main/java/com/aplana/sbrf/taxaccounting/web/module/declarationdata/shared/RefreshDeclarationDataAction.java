@@ -7,6 +7,7 @@ import java.util.Date;
 public class RefreshDeclarationDataAction extends UnsecuredActionImpl<RefreshDeclarationDataResult> {
 	private long declarationId;
 	private Date docDate;
+    private Integer pagesCount;
 
 	public long getDeclarationId() {
 		return declarationId;
@@ -23,4 +24,12 @@ public class RefreshDeclarationDataAction extends UnsecuredActionImpl<RefreshDec
 	public void setDocDate(Date docDate) {
 		this.docDate = docDate;
 	}
+
+    public Integer getPagesCount() {
+        return pagesCount;
+    }
+
+    public void setPagesCount(Integer pagesCount) {
+        this.pagesCount = pagesCount;
+    }
 }
