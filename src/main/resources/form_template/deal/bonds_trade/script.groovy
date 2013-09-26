@@ -385,12 +385,23 @@ def addData(def xml) {
         indexCell++
 
         // графа 5
+        def map = refBookService.getRecordData(9, newRow.contraName)
+        def String text = row.cell[indexCell].text()
+        if ((text != null && !text.equals(map.INN_KIO.stringValue)) || (text == null && map.INN_KIO.stringValue != null))
+            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
-        // графа 6
+        // графа 6.1
+        text = row.cell[indexCell].text()
+        map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
+        if ((text != null && !text.equals(map.NAME.stringValue)) || (text == null && map.NAME.stringValue != null))
+            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
-        // графа 7
+        // графа 6.2
+        text = row.cell[indexCell].text()
+        if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
+            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 8
