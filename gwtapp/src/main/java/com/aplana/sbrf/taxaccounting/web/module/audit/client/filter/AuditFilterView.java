@@ -1,18 +1,19 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.AuditFormType;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
-import com.google.gwt.uibinder.client.*;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiConstructor;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ValueListBox;
@@ -28,10 +29,10 @@ import java.util.*;
  * Date: 2013
  */
 public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
-        implements AuditFilterPresenter.MyView, ReportPeriodSelectHandler {
+        implements AuditFilterPresenter.MyView {
 
     @UiField
-    ReportPeriodPicker currentReportPeriod;
+    PeriodPicker periodPicker;
 
     interface Binder extends UiBinder<Widget, AuditFilterView> { }
 
@@ -110,22 +111,15 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     }
 
     @Override
-    public void updateTaxPeriodPicker(List<TaxPeriod> taxPeriods) {
-        currentReportPeriod.setTaxPeriods(taxPeriods == null ? new ArrayList<TaxPeriod>() : taxPeriods);
-    }
-
-    @Override
     public void updateReportPeriodPicker(List<ReportPeriod> reportPeriods) {
-        currentReportPeriod.setReportPeriods(reportPeriods);
+        periodPicker.setPeriods(reportPeriods);
     }
 
     @Override
     public LogSystemFilter getFilterData() {
         LogSystemFilter lsf = new LogSystemFilter();
         // Отчетные периоды
-        if(currentReportPeriod != null){
-            lsf.setReportPeriodIds(new ArrayList<Integer>(currentReportPeriod.getSelectedReportPeriods().keySet()));
-        }
+        lsf.setReportPeriodIds(periodPicker.getValue());
         // Подразделение
         if (!selectedValues.isEmpty()) {
             lsf.setDepartmentId(selectedValues.get(0));
@@ -192,17 +186,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @Override
     public void setFormTypeHandler(ValueChangeHandler<AuditFormType> handler) {
         auditFormType.addValueChangeHandler(handler);
-    }
-
-    @Override
-    public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
-        if(getUiHandlers()!=null) {
-            getUiHandlers().onTaxPeriodSelected(taxPeriod);
-        }
-    }
-
-    @Override
-    public void onReportPeriodsSelected(Map<Integer, ReportPeriod> selectedReportPeriods) {
     }
 
     @Inject
@@ -295,10 +278,5 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiHandler("printButton")
     void onPrintButtonClicked(ClickEvent event){
         getUiHandlers().onPrintButtonClicked();
-    }
-
-    @UiFactory
-    AuditFilterView getView(){
-        return this;
     }
 }

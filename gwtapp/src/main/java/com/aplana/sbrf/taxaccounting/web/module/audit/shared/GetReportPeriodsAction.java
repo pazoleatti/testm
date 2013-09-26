@@ -7,7 +7,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 /**
  * User: avanteev
  */
-public class GetTaxPeriodAction extends UnsecuredActionImpl<GetTaxPeriodResult> implements ActionName {
+public class GetReportPeriodsAction extends UnsecuredActionImpl<GetReportPeriodsResult> implements ActionName {
 
     private TaxType taxType;
 
