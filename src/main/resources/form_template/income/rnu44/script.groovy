@@ -88,7 +88,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        logicalCheck()
+        logicalCheckWithTotalDataRowCheck()
         break
 }
 
