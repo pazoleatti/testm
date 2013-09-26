@@ -310,7 +310,7 @@ def checkTableHead(def xml, def headRowCount) {
  * @param xml данные
  */
 def addData(def xml, int headRowCount) {
-    Date date = new Date()
+    Date date = reportPeriodService.get(formData.reportPeriodId).taxPeriod.getEndDate()
 
     def cache = [:]
     def data = formDataService.getDataRowHelper(formData)

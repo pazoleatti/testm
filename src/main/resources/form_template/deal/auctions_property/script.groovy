@@ -259,7 +259,7 @@ void importData() {
  * @param xml данные
  */
 def addData(def xml) {
-    Date date = new Date()
+    Date date =  reportPeriodService.get(formData.reportPeriodId).taxPeriod.getEndDate()
 
     def cache = [:]
     def data = formDataService.getDataRowHelper(formData)
