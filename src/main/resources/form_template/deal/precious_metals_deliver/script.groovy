@@ -902,7 +902,7 @@ def addData(def xml) {
         indexCell++
 
         // графа 3
-        def map = refBookService.getRecordData(9, newRow.fullName)
+        def map = refBookService.getRecordData(9, newRow.name)
         def String text = row.cell[indexCell].text()
         if ((text != null && !text.equals(map.INN_KIO.stringValue)) || (text == null && map.INN_KIO.stringValue != null))
             throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
