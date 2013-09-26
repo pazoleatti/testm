@@ -302,7 +302,7 @@ void importData() {
  * @param xml данные
  */
 def addData(def xml, int headRowCount) {
-    Date date = new Date()
+    Date date = reportPeriodService.get(formData.reportPeriodId).taxPeriod.getEndDate()
 
     def cache = [:]
     def dataRowHelper = formDataService.getDataRowHelper(formData)
