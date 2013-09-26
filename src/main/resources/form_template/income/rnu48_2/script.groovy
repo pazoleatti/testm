@@ -3,6 +3,7 @@ package form_template.income.rnu48_2
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 /**
@@ -41,6 +42,14 @@ switch (formDataEvent) {
         break
     case FormDataEvent.DELETE_ROW :
         //deleteRow()
+        break
+    case FormDataEvent.COMPOSE :
+        consolidation()
+        calc()
+        if (logicalCheckWithTotalDataRowCheck()) {
+            // для сохранения изменений приемников
+            data.commit()
+        }
         break
 }
 
@@ -91,6 +100,30 @@ boolean totalRowCheck() {
     }
 
     return isValid
+}
+
+/**
+ * Консолидация.
+ */
+void consolidation() {
+    def data = data
+    // сбросить строки
+    for (def row : getRows(data)){
+        row.summ = 0
+    }
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                getRows(getData(source)).each { row->
+                    def curRow = data.getDataRow(getRows(data),row.getAlias())
+                    curRow.summ += row.summ
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**
