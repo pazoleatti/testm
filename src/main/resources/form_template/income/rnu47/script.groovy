@@ -1,3 +1,5 @@
+package form_template.income.rnu47
+
 /**
  * Скрипт для РНУ-47 (rnu47.groovy).
  * Форма "(РНУ-47) Регистр налогового учёта «ведомость начисленной амортизации по основным средствам,
@@ -7,9 +9,8 @@
  * Вопросы аналитикам по ЧТЗ: http://jira.aplana.com/browse/SBRFACCTAX-2383
  *
  * TODO:
- *      -   убрать тестовое заполнение таблицы после отладки
- *      -   не понятно, откуда брать данные помесячно (вопрос аналитикам)
- *      -   после того, как аналитики ответят на вопросы и код будет дописан - все провреить!
+ *      -   не доделаны проверки 2, 3
+ *      -   нет консолидации
  *
  * @author vsergeev
  *
@@ -81,26 +82,30 @@ void calc(){
 
     // расчет для первых 11 строк
     def row1_11 = calcRows1_11()
-    // расчет для строк 12-13
-    def totalValues = getTotalValues()
 
     dataRows.eachWithIndex{row, index->
         if (index<11) {
             row1_11[index].each{k,v->
                 row[k] = v
             }
-        } else if (index==12 || index==13) {
-            row.cost10perMonth = totalValues[index].cost10perMonth
-            row.cost10perTaxPeriod = totalValues[index].cost10perTaxPeriod
         }
     }
+    // расчет для строк 12-13
+    def totalValues = getTotalValues()
+    dataRows.eachWithIndex{row, index->
+        if (index==11 || index==12) {
+            row.sumCurrentPeriodTotal = totalValues[index].sumCurrentPeriodTotal
+            row.sumTaxPeriodTotal = totalValues[index].sumTaxPeriodTotal
+        }
+    }
+
     save(dataRowHelper)
 }
 
 /**
  * расчет строк 1-11
  */
-void calcRows1_11(){
+def calcRows1_11(){
     def rnu46FormData = getRnu46FormData()
     def rnu46Rows = getRows(rnu46FormData)
     def groupList = 0..10
@@ -108,6 +113,7 @@ void calcRows1_11(){
     groupList.each{group ->
         value[group] = calc3_6(rnu46Rows, group)
     }
+    return value
 }
 
 /**
@@ -118,16 +124,16 @@ def getTotalValues(){
     def dataRows = getRows(dataRowHelper)
     def group12 = ['R1', 'R2', 'R8', 'R9', 'R10']
     def group13 = ['R3', 'R4', 'R5', 'R6', 'R7']
-    def value = [:]
+    def value = [11: [:], 12: [:]]
 
     // расчет для строк 12-13
     dataRows.eachWithIndex{row, index->
         if (group12.contains(row.getAlias())) {
-            value[12].sumCurrentPeriodTotal = (value[12].sumCurrentPeriodTotal?:new BigDecimal(0))+row.sumCurrentPeriodTotal
-            value[12].sumTaxPeriodTotal = (value[12].sumCurrentPeriodTotal?:new BigDecimal(0))+row.sumCurrentPeriodTotal
+            value[11].sumCurrentPeriodTotal = (value[11].sumCurrentPeriodTotal?:new BigDecimal(0))+row.sumCurrentPeriodTotal?:new BigDecimal(0)
+            value[11].sumTaxPeriodTotal = (value[11].sumCurrentPeriodTotal?:new BigDecimal(0))+(row.sumCurrentPeriodTotal?:new BigDecimal(0))
         } else if (group13.contains(row.getAlias())) {
-            value[13].sumCurrentPeriodTotal = (value[13].sumCurrentPeriodTotal?:new BigDecimal(0))+row.sumCurrentPeriodTotal
-            value[13].sumTaxPeriodTotal = (value[13].sumTaxPeriodTotal?:new BigDecimal(0))+row.sumTaxPeriodTotal
+            value[12].sumCurrentPeriodTotal = (value[12].sumCurrentPeriodTotal?:new BigDecimal(0))+row.sumCurrentPeriodTotal?:new BigDecimal(0)
+            value[12].sumTaxPeriodTotal = (value[12].sumTaxPeriodTotal?:new BigDecimal(0))+row.sumTaxPeriodTotal?:new BigDecimal(0)
         }
     }
     return value
@@ -144,10 +150,10 @@ def calc3_6(def rows, def group) {
                 ]
     rows.each{row ->
         if (refBookService.getNumberValue(71,row.amortGroup,'GROUP')==group) {
-            value.sumCurrentPeriodTotal += row.cost10perMonth
-            value.sumTaxPeriodTotal += row.cost10perTaxPeriod
-            value.amortPeriod += row.amortMonth
-            value.amortTaxPeriod += row.amortTaxPeriod
+            value.sumCurrentPeriodTotal += row.cost10perMonth?:0
+            value.sumTaxPeriodTotal += row.cost10perTaxPeriod?:0
+            value.amortPeriod += row.amortMonth?:0
+            value.amortTaxPeriod += row.amortTaxPeriod?:0
         }
     }
     return value
@@ -175,9 +181,9 @@ boolean totalRowCheck() {
 
     def totalValues = getTotalValues()
     dataRows.eachWithIndex{row, index->
-        if ( (index==12 || index==13) &&
-             (row.cost10perMonth==totalValues[index].cost10perMonth &&
-              row.cost10perTaxPeriod==totalValues[index].cost10perTaxPeriod) ) isValid = false
+        if ( (index==11 || index==12) &&
+             !(row.sumCurrentPeriodTotal==totalValues[index].sumCurrentPeriodTotal &&
+              row.sumTaxPeriodTotal==totalValues[index].sumTaxPeriodTotal) ) isValid = false
     }
     if (! isValid) {
         logger.error('Итоговые значения рассчитаны неверно!')
@@ -192,27 +198,33 @@ boolean totalRowCheck() {
  */
 boolean groupRowsCheck() {
     boolean isValid = true
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = getRows(dataRowHelper)
+
     def groupRowsAliases = ['R0', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10']
     def formDataOld = getFormDataOld()
+    def dataOld = getData(formDataOld)
 
-    for (def rowName : groupRowsAliases) {
-        def row = formData.get(rowName)
+    for (def row : dataRows) {
+        if (!groupRowsAliases.contains(row.getAlias())) {
+            continue
+        }
         //2.		Проверка суммы расходов в виде капитальных вложений с начала года
 
         //2.1	графа 4 ? графа 3;
         final invalidCapitalForm = 'Неверная сумма расходов в виде капитальных вложений с начала года!'
-        if (! row.sumTaxPeriodTotal >= row.sumCurrentPeriodTotal) {
+        if (! (row.sumTaxPeriodTotal >= row.sumCurrentPeriodTotal)) {
             isValid = false
             logger.error(invalidCapitalForm)
         } else
-        //2.2	графа 4 = графа 3 + графа  за предыдущий месяц;
+        //2.2	графа 4 = графа 3 + графа 4 за предыдущий месяц;
         // (если текущий отчетный период – январь, то слагаемое «по графе 4 за предыдущий месяц» в формуле считается равным «0.00»)
-        if (! row.sumTaxPeriodTotal.equals(row.sumCurrentPeriodTotal + getSumTaxPeriodTotalFromPreviousMonth())) {
+        if (! (row.sumTaxPeriodTotal == (row.sumCurrentPeriodTotal + getSumTaxPeriodTotalFromPreviousMonth(dataOld, row.getAlias())))) {
             isValid = false
             logger.error(invalidCapitalForm)
         } else
         //2.3	графа 4 = ?графа 3 за все месяцы текущего года, начиная с января и включая текущий отчетный период.
-        if (! row.sumTaxPeriodTotal.equals(getSumCurrentQuarterTotalForAllPeriods())) {
+        if (! (row.sumTaxPeriodTotal == getSumCurrentQuarterTotalForAllPeriods()) )  {
             isValid = false
             logger.error(invalidCapitalForm)
         }
@@ -220,18 +232,18 @@ boolean groupRowsCheck() {
         //3.    Проверка суммы начисленной амортизации с начала года
         final invalidAmortSumms = 'Неверная сумма начисленной амортизации с начала года!'
         //3.1.	графа 6 ? графа 5
-        if (! row.amortTaxPeriod >= row.amortPeriod) {
+        if (! (row.amortTaxPeriod >= row.amortPeriod)) {
             isValid = false
             logger.error(invalidAmortSumms)
         } else
         //3.2   графа 6 = графа 5 + графа 6 за предыдущий месяц;
         //  (если текущий отчетный период – январь, то слагаемое «по графе 6 за предыдущий месяц» в формуле считается равным «0.00»)
-        if (! row.amortTaxPeriod.equals(row.amortPeriod + getAmortTaxPeriodFromPreviousMonth())) {
+        if (! (row.amortTaxPeriod == (row.amortPeriod + getAmortTaxPeriodFromPreviousMonth(dataOld, row.getAlias()))) ) {
             isValid = false;
             logger.error(invalidAmortSumms)
-        } else
+        }
         //3.3   графа 6 = ?графа 5 за все месяцы текущего года, начиная с января и включая текущий отчетный период.
-        if (! row.amortTaxPeriod.equals(getAmortQuarterForAllPeriods())) {
+        if (! (row.amortTaxPeriod == getAmortQuarterForAllPeriods()) ) {
             isValid = false
             logger.error(invalidAmortSumms)
         }
@@ -241,24 +253,26 @@ boolean groupRowsCheck() {
 }
 
 /**
- * Получить данные за предыдущий отчетный период
+ * Получить данные за предыдущий месяц
+ *
  */
 def getFormDataOld() {
     // предыдущий отчётный период
     def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
 
-    // РНУ-47 за предыдущие отчетные периоды
+    // РНУ-47 за предыдущий отчетный период
     def formDataOld = null
     if (reportPeriodOld != null) {
         formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
     }
 
-    return formDataOld
+    return null //TODO (Lenar Khaziev) нужно брать за предыдущий месяц(если текущий отчетный период – январь, то слагаемое «по графе 4 за предыдущий месяц» в формуле считается равным «0.00»)
 }
+
 
 /**
  * Проверяет
- * 1.  Обязательность заполнения поля графы (с 1 по 8) только для редактируемых ячеек
+ * 1.  Обязательность заполнения полей графы (с 3 по 6)
  * @return {@value true} если все обязательные поля заполнены, иначе {@value false}
  */
 boolean requiredColsFilled() {
@@ -281,11 +295,26 @@ boolean requiredColsFilled() {
 }
 
 /**
- * возвращает значение графы 5 за предыдущий месяц
+ * возвращает значение графы 4 за предыдущий месяц
  * @return
  */
-def getSumTaxPeriodTotalFromPreviousMonth() {
-    return new BigDecimal(0)    //todo (vsergeev)  не понятно, откуда брать данные : http://jira.aplana.com/browse/SBRFACCTAX-2383
+def getSumTaxPeriodTotalFromPreviousMonth(def dataRows, def alias) {
+    for(def row: dataRows) {
+        if (row.getAlias()==alias) return row.sumTaxPeriodTotal
+    }
+    return 0
+}
+
+
+/**
+ * возвращает значение графы 6 за предыдущий месяц
+ * @return
+ */
+def getAmortTaxPeriodFromPreviousMonth(def dataRows, def alias) {
+    for(def row: dataRows) {
+        if (row.getAlias()==alias) return row.amortTaxPeriod
+    }
+    return 0
 }
 
 /**
@@ -293,9 +322,16 @@ def getSumTaxPeriodTotalFromPreviousMonth() {
  * @return
  */
 def getSumCurrentQuarterTotalForAllPeriods() {
-    return new BigDecimal(0)    //todo (vsergeev)  не понятно, откуда брать данные : http://jira.aplana.com/browse/SBRFACCTAX-2383
+    return new BigDecimal(0)    //TODO (Lenar Khaziev) еще не понятно как реализовать
 }
 
+/**
+ * возвращает значение графы 3 за все месяцы текущего года, включая текущий отчетный период
+ * @return
+ */
+def getAmortQuarterForAllPeriods() {
+    return new BigDecimal(0)    //TODO (Lenar Khaziev) еще не понятно как реализовать
+}
 boolean isBlankOrNull(value) {
     value == null || value.equals('')
 }
