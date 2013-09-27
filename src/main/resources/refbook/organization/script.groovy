@@ -3,143 +3,106 @@ package refbook.organization
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-
-import javax.xml.namespace.QName
-import javax.xml.stream.XMLInputFactory
-import java.text.SimpleDateFormat
-
 /**
- * скрипт справочника Организации-участники контролируемых сделок
+ * Cкрипт справочника «Организации - участники контролируемых сделок»
  *
  * @author Stanislav Yasinskiy
  */
 switch (formDataEvent) {
     case FormDataEvent.IMPORT:
-        importFromXML()
+        importFromXLS()
         break
 }
 
-// TODO доделать под xml
-void importFromXML() {
-    def final Long refBookID = 9L
-    def dataProvider = refBookFactory.getDataProvider(refBookID)
-    def RefBook refBook = refBookFactory.get(refBookID)
-    def SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd")
-    def reader = null
-    def Date version = null  //дата актуальности
-    def Map<String, RefBookValue> recordsMap = new HashMap<String, RefBookValue>() // аттрибут и его значение
-    def List<Map<String, RefBookValue>> recordsList = new ArrayList<Map<String, RefBookValue>>() // данные для записи в бд
-    def Map<String, Model> mapper = new HashMap<String, Model>() // соответствие имён аттрибутов в бд и xml
-    def final INSERT_SIZE = 100 // размер одной порции данных // 10000 Превышает таймаут
+void importFromXLS() {
+    println("importFromXLS")
 
-    mapper.put("TODO1", getModel(refBook, 'NAME'))
-    mapper.put("TODO2", getModel(refBook, 'SKOLKOVO'))
-    mapper.put("TODO3", getModel(refBook, 'DOP_INFO'))
-    mapper.put("TODO4", getModel(refBook, 'OFFSHORE'))
-    mapper.put("TODO5", getModel(refBook, 'ORGANIZATION'))
-    mapper.put("TODO6", getModel(refBook, 'INN_KIO'))
-    mapper.put("TODO7", getModel(refBook, 'ADDRESS'))
-    mapper.put("TODO8", getModel(refBook, 'TAXPAYER_CODE'))
-    mapper.put("TODO9", getModel(refBook, 'REG_NUM'))
-    mapper.put("TODO0", getModel(refBook, 'COUNTRY'))
+    if (inputStream == null) {
+        logger.error('Поток данных пуст')
+        return
+    }
 
-    // Признак обновления записей
-    def isUpdateMode = false;
+    def xmlString = importService.getData(inputStream, ".xls", 'windows-1251', 'Наименование организации', null)
+    if (xmlString == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
+        return
+    }
+
+    // println(xmlString)
+
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
+        return
+    }
 
     try {
-        def XMLInputFactory factory = XMLInputFactory.newInstance()
-        factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
-        factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
-        reader = factory.createXMLStreamReader(inputStream)
-
-        while (reader.hasNext()) {
-            if (reader.startElement) {
-
-                // Версия справочника
-                if (reader.getName().equals(QName.valueOf("rollout"))) {
-                    version = sdf.parse(reader.getAttributeValue(null, "dateSet"))
-
-                    List<Date> versionList = dataProvider.getVersions(version, version)
-                    isUpdateMode = versionList.contains(version)
-
-                    // Если версии не совпадают, прежние записи отмечаются как удаленные
-                    if (!isUpdateMode) {
-                        dataProvider.deleteAllRecords(version)
-                    }
-                }
-
-                // Список значений для вставки в бд
-                if (reader.getName().equals(QName.valueOf("field"))) {
-                    def name = reader.getAttributeValue(null, "name")
-                    def value = reader.getAttributeValue(null, "value")
-                    def map = mapper.get(name)
-                    if (map != null) {
-                        def RefBookValue refBookValue = null
-                        if (map.type.equals(RefBookAttributeType.STRING)) {
-                            refBookValue = new RefBookValue(map.type, value)
-                        } else if (map.type.equals(RefBookAttributeType.NUMBER) || map.type.equals(RefBookAttributeType.REFERENCE)) {
-                            refBookValue = new RefBookValue(map.type, value.toLong())
-                        } else if (map.type.equals(RefBookAttributeType.DATE)) {
-                            refBookValue = new RefBookValue(map.type, sdf.parse(value))
-                        }
-                        recordsMap.put(map.name, refBookValue)
-                    }
-                }
-            }
-
-            // Запись в лист
-            if (reader.endElement && reader.getName().equals(QName.valueOf("record"))) {
-                // recordsMap.put("ID", new RefBookValue(RefBookAttributeType.NUMBER, counter++))
-                recordsList.add(recordsMap)
-                recordsMap = new HashMap<String, RefBookValue>()
-                if (recordsList.size() >= INSERT_SIZE) {
-                    writeRecords(dataProvider, isUpdateMode, version, recordsList)
-                    recordsList.clear()
-                }
-            }
-
-            reader.next()
+        if (!checkTableHead(xml)) {
+            logger.error('Заголовок таблицы не соответствует требуемой структуре!')
+            return
         }
-    } finally {
-        reader?.close()
+        addData(xml)
+    } catch (Exception e) {
+        logger.error(e.message)
     }
 
-    writeRecords(dataProvider, isUpdateMode, version, recordsList)
+    // def final Long refBookID = 9L
+//    def dataProvider = refBookFactory.getDataProvider(refBookID)
+//    def RefBook refBook = refBookFactory.get(refBookID)
+//    def SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd")
 
-    if (isUpdateMode) {
-        refBookOkatoDao.clearParentId(version)
-    }
-
-    refBookOkatoDao.updateParentId(version)
 }
 
-// Добавление или обновление порции записей
-private void writeRecords(def dataProvider, boolean isUpdateMode, Date version,
-                          List<Map<String, RefBookValue>> recordsList) {
-    if (!isUpdateMode) {
-        // Добавление новых записей
-        dataProvider.insertRecords(version, recordsList)
-    } else {
-        // Обновление атрибутов
-        List<Map<String, RefBookValue>> notFoundList = refBookOkatoDao.updateValueNames(version, recordsList)
-        // Добавление новых записей
-        if (!notFoundList.isEmpty()) {
-            dataProvider.insertRecords(version, notFoundList)
+// Проверить шапку таблицы
+def checkTableHead(def xml) {
+    def colCount = 11
+    if (xml.row[0].cell.size() < colCount) {
+        return false
+    }
+    def cells = xml.row[0].cell
+    return cells[0] == 'Наименование организации' &&
+            cells[1] == 'Страна регистрации' &&
+            cells[2] == 'Регистрационный номер организации в стране ее регистрации (инкорпорации)' &&
+            cells[3] == 'Код налогоплательщика в стране регистрации (инкорпорации) или его аналог ' &&
+            cells[4] == 'Адрес организации' &&
+            cells[5] == 'ИНН / КИО' &&
+            cells[6] == 'КПП' &&
+            cells[7] == 'Сведения об организации' &&
+            cells[8] == 'Резидент оффшорной зоны' &&
+            cells[9] == 'Дополнительная информация' &&
+            cells[10] == 'Освобождена от налога на прибыль либо является резидентом Сколково'
+}
+
+/**
+ * Импорт данных
+ */
+def addData(def xml) {
+
+    def List<Map<String, RefBookValue>> insertList = new LinkedList<Map<String, RefBookValue>>()
+
+    for (def row : xml.row) {
+        // Шапка
+        if (row == xml.row[0]) {
+            continue
         }
+
+        def Map recordsMap = new HashMap<String, RefBookValue>()
+
+//        recordsMap.put("NAME", new RefBookValue(RefBookAttributeType.STRING, row.cell[0].text()))
+//        recordsMap.put("COUNTRY", new RefBookValue(RefBookAttributeType.REFERENCE,))
+//        recordsMap.put("REG_NUM", new RefBookValue(RefBookAttributeType.STRING,))
+//        recordsMap.put("TAXPAYER_CODE", new RefBookValue(RefBookAttributeType.STRING,))
+//        recordsMap.put("ADDRESS", new RefBookValue(RefBookAttributeType.STRING,))
+//        recordsMap.put("INN_KIO", new RefBookValue(RefBookAttributeType.STRING,))
+//        recordsMap.put("KPP", new RefBookValue(RefBookAttributeType.NUMBER,))
+//        recordsMap.put("ORGANIZATION", new RefBookValue(RefBookAttributeType.NUMBER,))
+//        recordsMap.put("OFFSHORE", new RefBookValue(RefBookAttributeType.REFERENCE,))
+//        recordsMap.put("DOP_INFO", new RefBookValue(RefBookAttributeType.STRING,))
+//        recordsMap.put("SKOLKOVO", new RefBookValue(RefBookAttributeType.REFERENCE,))
+
+        insertList.add(recordsMap)
     }
-}
 
-class Model {
-    RefBookAttributeType type
-    String name
+   //  dataProvider.updateRecords(new Date(), insertList)
 
-    Model(RefBookAttributeType type, String name) {
-        this.type = type
-        this.name = name
-    }
-}
-
-Model getModel(RefBook refBook, String name) {
-    new Model(refBook.getAttribute(name).attributeType, name)
 }
