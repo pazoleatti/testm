@@ -9,6 +9,7 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -313,7 +314,7 @@ public class ImportServiceImpl implements ImportService {
                 }
             } else {
                 // число
-                value = Double.toString(cell.getNumericCellValue());
+                value = BigDecimal.valueOf(cell.getNumericCellValue()).toPlainString();
                 if (value != null) {
                     // поменять запятую на точку и убрать пробелы
                     value = value.replaceAll(",", ".").replaceAll("[^\\d.,-]+", "");
