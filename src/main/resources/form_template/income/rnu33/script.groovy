@@ -11,7 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  * @version 68
  *
  * TODO:
- *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
+ *      - проверки нси 2: неясности со справочником "Признаки ценных бумаг"
  *		- проверка 6 не сделана, потому что про предыдущие месяцы пока не прояснилось
  *		- доделать получение нф за предыдущий месяц в методе getFormDataOld() после того как будет готово: http://jira.aplana.com/browse/SBRFACCTAX-4515
  *	    - заполнение графы 15 не доописано
@@ -153,7 +153,6 @@ def calc() {
     // отсортировать/группировать
     sort(data)
 
-    def tmp
     getRows(data).eachWithIndex { row, index ->
         // графа 1
         row.rowNumber = index + 1
@@ -358,6 +357,8 @@ def checkNSI() {
     def data = getData(formData)
     def index
     def errorMsg
+    def date = new Date()
+    def cache = [:]
     for (def row : getRows(data)) {
         if (row.getAlias() != null) {
             continue
@@ -366,13 +367,16 @@ def checkNSI() {
         errorMsg = "В строке $index "
 
         // 1. Проверка актуальности поля «Код сделки» (графа 2)
-        if (false) {
-            logger.warn(errorMsg + '')
+        // справочника 61 «Коды сделок»
+        // атрибут 611 "Код сделки" - CODE
+        if (row.code != null && null == getRecordId(61, 'CODE', row.code, date, cache)) {
+            logger.warn(errorMsg + 'код сделки в справочнике отсутствует!')
         }
 
         // 2. Проверка актуальности поля «Признак ценной бумаги» (графа 3)
+        // TODO (Ramil Timerbaev) неясности со справочником "Признаки ценных бумаг"
         if (false) {
-            logger.warn(errorMsg + '')
+            logger.warn(errorMsg + 'Признак ценной бумаги не найден в справочнике!')
         }
     }
     return true
@@ -462,7 +466,7 @@ void setTotalStyle(def row) {
 }
 
 /**
- * Получить номер строки в таблице (1..n).
+ * Получить номер строки в таблице (0..n).
  *
  * @param row строка
  */
@@ -746,6 +750,12 @@ def log(def msg) {
     // System.out.println('===== ' + msg)
 }
 
+/**
+ * Проверка деления на ноль.
+ *
+ * @param division делитель
+ * @param index номер строки
+ */
 void checkDivision(def division, def index) {
     if (division == 0) {
         throw new ServiceLoggerException("Деление на ноль в строке $index.", logger.getEntries())
@@ -792,4 +802,33 @@ def getCalcAllTotal() {
         newRow.getCell(alias).setValue(tmp)
     }
     return newRow
+}
+
+/**
+ * Получить id справочника.
+ *
+ * @param ref_id идентификатор справончика
+ * @param code атрибут справочника
+ * @param value значение для поиска
+ * @param date дата актуальности
+ * @param cache кеш
+ * @return
+ */
+def getRecordId(def ref_id, String code, def value, Date date, def cache) {
+    String filter = code + " = '" + value + "'"
+    if (cache[ref_id]!=null) {
+        if (cache[ref_id][filter] != null) {
+            return cache[ref_id][filter]
+        }
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    if (records.size() == 1) {
+        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        return cache[ref_id][filter]
+    }
+    // logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
+    return null
 }
