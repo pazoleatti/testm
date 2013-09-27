@@ -4,7 +4,7 @@
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
              xmlns:n="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
-             xmlns:reportperiodpicker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker">
+             xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
 
     <ui:style>
 
@@ -20,7 +20,6 @@
         }
     </ui:style>
 
-    <ui:with field="reportPeriodDataProvider" type="com.aplana.sbrf.taxaccounting.web.module.audit.client.filter.AuditFilterView"/>
     <g:HorizontalPanel spacing="3">
         <g:cell width="25%">
             <g:VerticalPanel width="200px" addStyleNames="{style.titlePanel}">
@@ -75,7 +74,7 @@
                             <g:Label width="200px" text="Период" />
                         </g:cell>
                         <g:cell height="25px">
-                            <reportperiodpicker:ReportPeriodPicker ui:field="currentReportPeriod" reportPeriodDataProvider="{reportPeriodDataProvider.getView}" isMultiselect="true"/>
+                            <rep:PeriodPickerPopupWidget ui:field="periodPicker" multiselect="true"/>
                         </g:cell>
                     </g:VerticalPanel>
                 </g:cell>

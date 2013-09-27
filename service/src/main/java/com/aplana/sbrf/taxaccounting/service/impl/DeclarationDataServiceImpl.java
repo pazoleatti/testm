@@ -64,6 +64,7 @@ import org.xml.sax.SAXParseException;
 public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
+    private static final String PAGES_COUNT_PARAM = "pagesCount";
 
 	@Autowired
 	private DeclarationDataDao declarationDataDao;
@@ -96,7 +97,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Override
 	@Transactional(readOnly = false)
 	public long create(Logger logger, int declarationTemplateId,
-			int departmentId, TAUserInfo userInfo, int reportPeriodId) {
+			int departmentId, TAUserInfo userInfo, int reportPeriodId, Integer pagesCount) {
 		declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentId, reportPeriodId, FormDataEvent.CREATE);
 
 		DeclarationData newDeclaration = new DeclarationData();
@@ -106,7 +107,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		newDeclaration.setDeclarationTemplateId(declarationTemplateId);
 		long id = declarationDataDao.saveNew(newDeclaration);
 
-		setDeclarationBlobs(logger, newDeclaration, new Date(), userInfo);
+		setDeclarationBlobs(logger, newDeclaration, new Date(), pagesCount, userInfo);
 		logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration.getDepartmentId(),
 				newDeclaration.getReportPeriodId(),
@@ -120,10 +121,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Override
 	@Transactional(readOnly = false)
 	public void reCreate(Logger logger, long id, TAUserInfo userInfo,
-			Date docDate) {
+			Date docDate, Integer pagesCount) {
 		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
 			DeclarationData declarationData = declarationDataDao.get(id);
-			setDeclarationBlobs(logger, declarationData, docDate, userInfo);
+			setDeclarationBlobs(logger, declarationData, docDate, pagesCount, userInfo);
 			logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
 			auditService.add(FormDataEvent.SAVE , userInfo, declarationData.getDepartmentId(),
 					declarationData.getReportPeriodId(),
@@ -245,12 +246,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
 	private void setDeclarationBlobs(Logger logger,
-			DeclarationData declarationData, Date docDate, TAUserInfo userInfo) {
+			DeclarationData declarationData, Date docDate, Integer pagesCount, TAUserInfo userInfo) {
 
 		Map<String, Object> exchangeParams = new HashMap<String, Object>();
 		exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
 		StringWriter writer = new StringWriter();
 		exchangeParams.put(DeclarationDataScriptParams.XML, writer);
+        exchangeParams.put(PAGES_COUNT_PARAM, pagesCount);
 
 		declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CREATE, logger, exchangeParams);
 

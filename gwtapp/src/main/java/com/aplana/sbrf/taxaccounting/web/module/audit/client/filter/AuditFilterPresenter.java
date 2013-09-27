@@ -2,12 +2,9 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSearchEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.*;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.inject.Inject;
@@ -32,19 +29,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         super(eventBus, view);
         this.dispatchAsync = dispatchAsync;
         getView().setUiHandlers(this);
-    }
-
-    @Override
-    public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
-        GetReportPeriods action = new GetReportPeriods();
-        action.setTaxPeriod(taxPeriod);
-        dispatchAsync.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
-                    @Override
-                    public void onSuccess(GetReportPeriodsResult result) {
-                        getView().updateReportPeriodPicker(result.getReportPeriods());
-                    }
-                }, this));
     }
 
     @Override
@@ -85,7 +69,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         void setUserLogins(Map<Integer, String> userLoginsMap);
         void setValueListBoxHandler(ValueChangeHandler<TaxType> handler);
         void setFormTypeHandler(ValueChangeHandler<AuditFormType> handler);
-        void updateTaxPeriodPicker(List<TaxPeriod> taxPeriods);
         void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
         LogSystemFilter getFilterData();
         void getBlobFromServer(String uuid);
@@ -161,15 +144,15 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
             public void onValueChange(ValueChangeEvent<TaxType> event) {
                 final TaxType taxType = event.getValue();
                 if(taxType == null) {
-                    getView().updateTaxPeriodPicker(null);
+                    getView().updateReportPeriodPicker(new ArrayList<ReportPeriod>());
                     return;
                 }
-                GetTaxPeriodAction action = new GetTaxPeriodAction();
+                GetReportPeriodsAction action = new GetReportPeriodsAction();
                 action.setTaxType(taxType);
-                dispatchAsync.execute(action, new AbstractCallback<GetTaxPeriodResult>() {
+                dispatchAsync.execute(action, new AbstractCallback<GetReportPeriodsResult>() {
                     @Override
-                    public void onSuccess(GetTaxPeriodResult result) {
-                        getView().updateTaxPeriodPicker(result.getTaxPeriods());
+                    public void onSuccess(GetReportPeriodsResult result) {
+                        getView().updateReportPeriodPicker(result.getReportPeriods());
                     }
                 });
 

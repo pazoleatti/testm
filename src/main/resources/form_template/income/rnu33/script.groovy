@@ -2,6 +2,7 @@ package form_template.income.rnu33
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
@@ -11,13 +12,11 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *		- проверка 5 не сделана, потому что про предыдущие месяцы пока не прояснилось
- *		- неясность с алгоритмом заполнения строки «Итого за текущий месяц»
- *              (после каких строк считать или по каким значениям группировать строки).
- *              Временно сгруппировал по графе 4 "Выпуск"
- *		- по какому полю группировать?
+ *		- проверка 6 не сделана, потому что про предыдущие месяцы пока не прояснилось
+ *		- доделать получение нф за предыдущий месяц в методе getFormDataOld() после того как будет готово: http://jira.aplana.com/browse/SBRFACCTAX-4515
  *	    - заполнение графы 15 не доописано
  *	    - нет проверок заполнения полей перед логической проверкой
+ *	    - алгоритмы заполнения графы 16, 17, 18 не указано что присваивать если ни одно из условий не срабатывает http://jira.aplana.com/browse/SBRFACCTAX-4569
  *
  * @author rtimerbaev
  */
@@ -77,9 +76,27 @@ switch (formDataEvent) {
  */
 def addNewRow() {
     def data = getData(formData)
-    def newRow = getNewRow()
-    // TODO (Ramil Timerbaev)
-    insert(data, newRow)
+
+    def index = 0
+    if (currentDataRow != null) {
+        index = currentDataRow.getIndex()
+        def row = currentDataRow
+        while (row.getAlias() != null && index > 0) {
+            row = getRows(data).get(--index)
+        }
+        if (index != currentDataRow.getIndex() && getRows(data).get(index).getAlias() == null) {
+            index++
+        }
+    } else if (getRows(data).size() > 0) {
+        for (int i = getRows(data).size()-1; i >= 0; i--) {
+            def row = getRows(data).get(i)
+            if (!isFixedRow(row)) {
+                index = getIndex(row) + 1
+                break
+            }
+        }
+    }
+    data.insert(getNewRow(),index + 1)
 }
 
 /**
@@ -141,98 +158,47 @@ def calc() {
         // графа 1
         row.rowNumber = index + 1
 
-        // TODO (Ramil Timerbaev) графа 10 в чтз непонятно
         // графа 10
-        row.marketPriceOnDateAcquisitionInPerc = row.marketPriceOnDateAcquisitionInRub / row.parPaper
+        row.marketPriceOnDateAcquisitionInPerc = column10(row)
 
         // графа 12
-        row.taxPrice = (row.purchaseCost > row.marketPriceOnDateAcquisitionInRub ?
-            row.marketPriceOnDateAcquisitionInRub : row.purchaseCost)
+        row.taxPrice = column12(row)
 
-        // TODO (Ramil Timerbaev) графа 15, 16, 17
+        // TODO (Ramil Timerbaev) графа 15 сказали пока оставить
+
+        // графа 16
+        row.marketPricePercent = column16(row)
+
+        // графа 17
+        row.marketPriceRuble = column17(row)
 
         // графа 18
-        if (row.code == 1 ||
-                ((row.code == 2 || row.code == 5) && row.exercisePrice > row.marketPricePercent && row.exerciseRuble > row.marketPriceRuble) ||
-                ((row.code == 2 || row.code == 5) && row.marketPricePercent == 0 && row.marketPriceRuble == 0)) {
-            tmp = row.exerciseRuble
-        } else if (row.code == 4) {
-            tmp = row.redemptionVal
-        } else if ((row.code == 2 || row.code == 5) && row.exercisePrice < row.marketPricePercent && row.exerciseRuble < row.marketPriceRuble) {
-            tmp = row.marketPriceRuble
-        } else {
-            // TODO (Ramil Timerbaev) иначе что?
-            tmp = 0
-        }
-        row.exercisePriceRetirement = tmp
+        row.exercisePriceRetirement = column18(row)
 
         // графа 20
-        row.allCost = row.purchaseCost + row.costs + row.costsRetirement
+        row.allCost = column20(row)
 
         // графа 24
-        row.tenureSkvitovannymiBonds = row.implementationDate - row.purchaseDate
+        row.tenureSkvitovannymiBonds = column24(row)
 
         // графа 25
-        def column22 = (row.parPaper - row.averageWeightedPricePaper) * row.tenureSkvitovannymiBonds * row.bondsCount / row.issueDays
-        row.interestEarned = roundValue(column22, 0)
+        row.interestEarned = column25(row)
 
-        // графа 23
-        row.profitLoss = row.exercisePriceRetirement - row.allCost - abs(row.interestEarned)
+        // графа 26
+        row.profitLoss = column26(row)
 
         // графа 27
-        row.excessOfTheSellingPrice = (row.code != 4 ? row.exercisePriceRetirement - row.exerciseRuble : 0)
+        row.excessOfTheSellingPrice = column27(row)
     }
     save(data)
 
-    // графы для которых надо вычислять итого и итого по эмитенту (графа 7..9, 13, 15, 17..20, 25..27)
-    def totalColumns = getTotalColumns()
-
-    // TODO (Ramil Timerbaev) разобраться как считать
-    // добавить строку "Итого за текущий отчётный (налоговый) период"
+    // посчитать "Итого за текущий месяц"
     def totalRow = getCalcTotalRow()
     insert(data, totalRow)
 
-    // посчитать "Итого за текущий месяц"
-    def totalRows = [:]
-    def sums = [:]
-    tmp = null
-    totalColumns.each {
-        sums[it] = 0
-    }
-    getRows(data).eachWithIndex { row, i ->
-        if (!isTotal(row)) {
-            if (tmp == null) {
-                tmp = row.issue // TODO (Ramil Timerbaev) уточнить по какому полю группировать
-            }
-            // если код расходы поменялся то создать новую строку "Итого за текущий месяц"
-            if (tmp != row.issue) { // TODO (Ramil Timerbaev) уточнить по какому полю группировать
-                totalRows.put(i, getNewRow(tmp, totalColumns, sums))
-                totalColumns.each {
-                    sums[it] = 0
-                }
-            }
-            // если строка последняя то сделать для ее кода расхода новую строку "Итого за текущий месяц"
-            if (i == getRows(data).size() - 2) {
-                totalColumns.each {
-                    sums[it] += row.getCell(it).getValue()
-                }
-                totalRows.put(i + 1, getNewRow(row.issue, totalColumns, sums))
-                totalColumns.each {
-                    sums[it] = 0
-                }
-            }
-            totalColumns.each {
-                sums[it] += row.getCell(it).getValue()
-            }
-            tmp = row.issue // TODO (Ramil Timerbaev) уточнить по какому полю группировать
-        }
-    }
-    // добавить "Итого за текущий месяц" в таблицу
-    def i = 0
-    totalRows.each { index, row ->
-        data.insert(row, index + i)
-        i++
-    }
+    // добавить строку "Итого за текущий отчётный (налоговый) период"
+    def totalAll = getCalcAllTotal()
+    insert(data, totalAll)
     return true
 }
 
@@ -248,38 +214,37 @@ def logicalCheck() {
     // 6. Проверка наличия данных предыдущих месяцев
     // Наличие экземпляров отчетов за предыдущие месяцы с начала текущего отчётного (налогового) периода
     // TODO (Ramil Timerbaev) про предыдущие месяцы пока не прояснилось
-    for (def row : getRows(data)) {
-        if (false) {
-            // TODO (Ramil Timerbaev) поправить сообщение
-            index = getIndex(row) + 1
-            errorMsg = "В строке $index "
-            logger.error(errorMsg + 'экземпляр за период(ы) <Дата начала отчетного периода1> - <Дата окончания отчетного периода1>, <Дата начала отчетного периода N> - <Дата окончания отчетного периода N> не существует (отсутствуют первичные данные для расчёта)')
-            return false
-        }
+    def formDataOld = getFormDataOld()
+    if (false && formDataOld == null) {
+        // TODO (Ramil Timerbaev) поправить сообщение
+        logger.error('Экземпляр за период(ы) <Дата начала отчетного периода1> - <Дата окончания отчетного периода1>, <Дата начала отчетного периода N> - <Дата окончания отчетного периода N> не существует (отсутствуют первичные данные для расчёта)')
+        return false
     }
 
-    // список проверяемых столбцов (графа 2..17, 19, 21..23)
-    def requiredColumns = ['code', 'valuablePaper', 'issue', 'purchaseDate', 'implementationDate',
-            'bondsCount', 'purchaseCost', 'costs', 'marketPriceOnDateAcquisitionInPerc',
-            'marketPriceOnDateAcquisitionInRub', 'redemptionVal', 'exercisePrice',
-            'exerciseRuble', 'marketPricePercent', 'marketPriceRuble', 'costsRetirement',
-            'parPaper', 'averageWeightedPricePaper', 'issueDays']
-    // суммы строки общих итогов
-    def totalSums = [:]
-    // графы для которых надо вычислять итого и итого по эмитенту (графа 7..9, 13, 15, 17..20, 25..27)
-    def totalColumns = getTotalColumns()
-    // признак наличия итоговых строк
-    def hasTotal = false
-    // список групп кодов классификации для которых надо будет посчитать суммы
-    def totalGroupsName = []
-    def tmp
+    // список проверяемых столбцов (графа 1..27)
+    def requiredColumns = ['rowNumber', 'code', 'valuablePaper', 'issue', 'purchaseDate',
+            'implementationDate', 'bondsCount', 'purchaseCost', 'costs',
+            'marketPriceOnDateAcquisitionInPerc', 'marketPriceOnDateAcquisitionInRub', 'taxPrice',
+            'redemptionVal', 'exercisePrice', 'exerciseRuble',
+            'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement',
+            'costsRetirement', 'allCost', 'parPaper', 'averageWeightedPricePaper',
+            'issueDays', 'tenureSkvitovannymiBonds', 'interestEarned',
+            'profitLoss', 'excessOfTheSellingPrice']
+
+    // алиасы графов для арифметической проверки (графы 10, 12, 16, 17, 18, 20, 24, 25, 26, 27)
+    def arithmeticCheckAlias = ['marketPriceOnDateAcquisitionInPerc', 'taxPrice', 'marketPricePercent',
+            'marketPriceRuble', 'exercisePriceRetirement', 'allCost', 'tenureSkvitovannymiBonds',
+            'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
+    // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
+    def needValue = [:]
+    def colNames = []
+
     for (def row : getRows(data)) {
         if (isTotal(row)) {
-            hasTotal = true
             continue
         }
 
-        // TODO (Ramil Timerbaev) нет проверок заполнения полей перед логической проверкой
+        // TODO (Ramil Timerbaev) в чтз нет проверок заполнения полей перед логической проверкой
         // . Обязательность заполнения полей (графа 2..17, 19, 21..23)
         if (!checkRequiredColumns(row, requiredColumns)) {
             return false
@@ -318,67 +283,31 @@ def logicalCheck() {
             return false
         }
 
-        // 7. Арифметическая проверка графы 18
-        if (row.code == 1 ||
-                (row.code in [2, 5] && row.exercisePrice > row.marketPricePercent && row.exerciseRuble > row.marketPriceRuble) ||
-                (row.code in [2, 5] && row.marketPricePercent == 0 && row.marketPriceRuble)) {
-            tmp = row.exerciseRuble
-        } else if (row.code == 4) {
-            tmp = row.redemptionVal
-        } else if (row.code in [2, 5] &&
-                row.exercisePrice < row.marketPricePercent &&
-                row.exerciseRuble < row.marketPriceRuble) {
-            tmp = row.marketPriceRuble
-        }
-        if (row.exercisePriceRetirement != tmp) {
-            logger.warn(errorMsg + 'неверное значение поля «Цена реализации (выбытия) для целей налогообложения (руб.коп.)»!')
-        }
+        // 7. Арифметическая проверка графы 10, 12, 16, 17, 18, 20, 24, 25, 26, 27
+        needValue['marketPriceOnDateAcquisitionInPerc'] = column10(row)
+        needValue['taxPrice'] = column12(row)
+        needValue['marketPricePercent'] = column16(row)
+        needValue['marketPriceRuble'] = column17(row)
+        needValue['exercisePriceRetirement'] = column18(row)
+        needValue['allCost'] = column20(row)
+        needValue['tenureSkvitovannymiBonds'] = column24(row)
+        needValue['interestEarned'] = column25(row)
+        needValue['profitLoss'] = column26(row)
+        needValue['excessOfTheSellingPrice'] = column27(row)
 
-        // TODO (Ramil Timerbaev)
-        // 7. Арифметическая проверка графы 20
-        tmp = row.purchaseCost + row.costs + row.costsRetirement
-        if (row.allCost != tmp) {
-            logger.warn(errorMsg + 'неверное значение поля «Всего расходы (руб.коп.)»!')
-        }
-
-        // 8. Арифметическая проверка графы 24
-        if (row.tenureSkvitovannymiBonds != row.implementationDate - row.purchaseDate) {
-            logger.warn(errorMsg + 'неверное значение поля «Показатели для расчёта процентного дохода за время владения сквитованными облигациями.Срок владения сквитованными облигациями (дни)»!')
-        }
-
-        // 9. Арифметическая проверка графы 25
-        tmp = roundValue((row.parPaper - row.averageWeightedPricePaper) * row.tenureSkvitovannymiBonds * row.bondsCount / row.issueDays, 2)
-        if (row.interestEarned != tmp) {
-            logger.warn(errorMsg + 'неверное значение поля «Процентный доход, полученный за время владения сквитованными облигациями (руб.коп.)»!')
-        }
-
-        // 10. Арифметическая проверка графы 27
-        tmp = row.exercisePriceRetirement - row.allCost - abs(row.interestEarned)
-        if (row.profitLoss != tmp) {
-            logger.warn(errorMsg + 'неверное значение поля «Прибыль (+), убыток (-) от реализации (погашения) за вычетом процентного дохода (руб.коп.)»!')
-        }
-
-        // 11. Арифметическая проверка графы 24
-        tmp = row.exercisePriceRetirement - row.exerciseRuble
-        if ((row.code != 4 && row.excessOfTheSellingPrice != tmp) ||
-                (row.code == 4 && row.excessOfTheSellingPrice != 0)) {
-            logger.warn(errorMsg + 'неверное значение поля «Превышение цены реализации для целей налогообложения над ценой реализации (руб.коп.)»!')
-        }
-
-        // 12. Проверка итоговых значений за текущий месяц
-        if (!totalGroupsName.contains(row.issue)) {
-            totalGroupsName.add(row.issue)
-        }
-
-        // 13. Проверка итоговых значений за текущий отчётный (налоговый) период - подсчет сумм для общих итогов
-        totalColumns.each { alias ->
-            if (totalSums[alias] == null) {
-                totalSums[alias] = 0
+        arithmeticCheckAlias.each { alias ->
+            if (needValue[alias] != row.getCell(alias).getValue()) {
+                def name = getColumnName(row, alias)
+                colNames.add('"' + name + '"')
             }
-            totalSums[alias] += (row.getCell(alias).getValue() ?: 0)
+        }
+        if (!colNames.isEmpty()) {
+            def msg = colNames.join(', ')
+            logger.error(errorMsg + "неверно рассчитана графы: $msg.")
+            return false
         }
 
-        // 14. Проверка на уникальность поля «№ пп» (графа 1)
+        // 10. Проверка на уникальность поля «№ пп» (графа 1)
         if (i != row.rowNumber) {
             logger.error(errorMsg + 'нарушена уникальность номера по порядку!')
             return false
@@ -386,26 +315,37 @@ def logicalCheck() {
         i += 1
     }
 
-    if (hasTotal) {
-        def totalRow = getRowByAlias(data, 'total')
+    // графы для которых надо вычислять итого и итого по эмитенту (графа 7..9, 13, 15, 17..20, 25..27)
+    def totalColumns = getTotalColumns()
 
-        // 12. Проверка итоговых значений за текущий месяц
-        for (def codeName : totalGroupsName) {
-            def row = getRowByAlias(data, 'total' + codeName)
-            for (def alias : totalColumns) {
-                if (calcSumByCode(codeName, alias) != row.getCell(alias).getValue()) {
-                    logger.error('Итоговые значения за текущий месяц рассчитаны неверно!')
-                    return false
-                }
-            }
+    // 8. Проверка итоговых значений за текущий месяц
+    def totalRow = getRowByAlias(data, 'total')
+    if (totalRow == null) {
+        logger.error('Не рассчитаны итоговые значения за тукущий месяц.')
+        return false
+    }
+    def totalRowTmp = getCalcTotalRow()
+    for (def alias : totalColumns) {
+        if (totalRow.getCell(alias).getValue() != totalRowTmp.getCell(alias).getValue()) {
+            def name = getColumnName(totalRow, alias)
+            logger.error("В графе \"$name\" итоговые значения за текущий месяц рассчитаны неверно!")
+            return false
         }
+    }
 
-        // 13. Проверка итоговых значений за текущий отчётный (налоговый) период
-        for (def alias : totalColumns) {
-            if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
-                logger.error('Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!')
-                return false
-            }
+    // 9. Проверка итоговых значений за текущий отчётный (налоговый) период - подсчет сумм для общих итогов
+    def totalRowAll = getRowByAlias(data, 'totalAll')
+    if (totalRowAll == null) {
+        logger.error('Не рассчитаны итоговые значения за тукущий отчётный (налоговый) период.')
+        return false
+    }
+    def totalRowAllTmp = getCalcAllTotal()
+
+    for (def alias : totalColumns) {
+        if (totalRowAll.getCell(alias).getValue() != totalRowAllTmp.getCell(alias).getValue()) {
+            def name = getColumnName(totalRow, alias)
+            logger.error("В графе \"$name\" итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!")
+            return false
         }
     }
     return true
@@ -419,6 +359,9 @@ def checkNSI() {
     def index
     def errorMsg
     for (def row : getRows(data)) {
+        if (row.getAlias() != null) {
+            continue
+        }
         index = getIndex(row) + 1
         errorMsg = "В строке $index "
 
@@ -503,21 +446,6 @@ def getSum(def columnAlias) {
 }
 
 /**
- * Получить новую строку.
- */
-def getNewRow(def alias, def totalColumns, def sums) {
-    def newRow = formData.createDataRow()
-    newRow.setAlias('total' + alias)
-    newRow.valuablePaper = 'Итого за текущий месяц'
-    newRow.getCell('valuablePaper').setColSpan(4)
-    setTotalStyle(newRow)
-    totalColumns.each {
-        newRow.getCell(it).setValue(sums[it])
-    }
-    return newRow
-}
-
-/**
  * Устаносить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
@@ -531,23 +459,6 @@ void setTotalStyle(def row) {
             'profitLoss', 'excessOfTheSellingPrice'].each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
     }
-}
-
-/**
- * Посчитать сумму указанного графа для строк с общим значением
- *
- * @param value значение общее для всех строк суммирования
- * @param alias название графа
- */
-def calcSumByCode(def value, def alias) {
-    def sum = 0
-    def data = getData(formData)
-    getRows(data).each { row ->
-        if (!isTotal(row) && row.issue == value) {
-            sum += (row.getCell(alias).getValue() ?: 0)
-        }
-    }
-    return sum
 }
 
 /**
@@ -730,6 +641,7 @@ def getCalcTotalRow() {
     totalRow.setAlias('total')
     totalRow.getCell('valuablePaper').setColSpan(4)
     totalRow.getCell('valuablePaper').setValue('Итого за текущий отчётный (налоговый) период')
+    setTotalStyle(totalRow)
 
     def totalColumns = getTotalColumns()
     def data = getData(formData)
@@ -767,4 +679,117 @@ def getRowByAlias(def data, def alias) {
         }
     }
     return null
+}
+
+def column10(def row) {
+    // TODO (Ramil Timerbaev) графа 10 в чтз непонятно
+    checkDivision(row.parPaper, row.getIndex())
+    return row.marketPriceOnDateAcquisitionInRub / row.parPaper
+}
+
+def column12(def row) {
+    return (row.purchaseCost > row.marketPriceOnDateAcquisitionInRub ? row.marketPriceOnDateAcquisitionInRub : row.purchaseCost)
+}
+
+def column16(def row) {
+    // TODO (Ramil Timerbaev) иначе null или 0?
+    return (row.redemptionVal > 0 ? 100 : null)
+}
+
+def column17(def row) {
+    // TODO (Ramil Timerbaev) иначе null или 0?
+    return (row.redemptionVal > 0 ? row.redemptionVal : null)
+}
+
+def column18(def row) {
+    def tmp
+    if (row.code == 1 ||
+            (row.code in [2, 5] && row.marketPriceOnDateAcquisitionInRub > row.redemptionVal && row.taxPrice > row.exercisePrice) ||
+            (row.code in [2, 5] && row.marketPricePercent == 0 && row.marketPriceRuble == 0)) {
+        tmp = row.exerciseRuble
+    } else if (row.code == 4) {
+        tmp = row.redemptionVal
+    } else if (row.code in [2, 5] && row.exercisePrice < row.marketPricePercent && row.exerciseRuble < row.marketPriceRuble) {
+        tmp = row.marketPriceRuble
+    } else {
+        // TODO (Ramil Timerbaev) иначе что?
+        tmp = 0
+    }
+    return tmp
+}
+
+def column20(def row) {
+    return row.taxPrice + row.costs + row.costsRetirement
+}
+
+def column24(def row) {
+    return row.implementationDate - row.purchaseDate
+}
+
+def column25(def row) {
+    checkDivision(row.issueDays, row.getIndex())
+    def tmp = (row.parPaper - row.averageWeightedPricePaper) * row.tenureSkvitovannymiBonds * row.bondsCount / row.issueDays
+    return roundValue(tmp, 0)
+}
+
+def column26(def row) {
+    return row.exercisePriceRetirement - row.allCost - abs(row.interestEarned)
+}
+
+def column27(def row) {
+    return (row.code != 4 ? row.exercisePriceRetirement - row.exerciseRuble : 0)
+}
+
+// TODO (Ramil Timerbaev) для отладки, потом убрать
+def log(def msg) {
+    logger.info('===== ' + msg)
+    // System.out.println('===== ' + msg)
+}
+
+void checkDivision(def division, def index) {
+    if (division == 0) {
+        throw new ServiceLoggerException("Деление на ноль в строке $index.", logger.getEntries())
+    }
+}
+
+/**
+ * Получить нф за предыдущий месяц
+ */
+def getFormDataOld() {
+    // TODO (Ramil Timerbaev) сделать получение нф за предыдущий месяц
+    // предыдущий отчётный период
+    def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+
+    def formDataOld = null
+    if (reportPeriodOld != null) {
+        formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
+    }
+
+    return formDataOld
+}
+
+def getCalcAllTotal() {
+    // новая строка
+    def newRow = formData.createDataRow()
+    newRow.setAlias('totalAll')
+    newRow.valuablePaper = 'Итого за текущий месяц'
+    newRow.getCell('valuablePaper').setColSpan(4)
+    setTotalStyle(newRow)
+    def totalColumns = getTotalColumns()
+
+    // получить итоги за текущий месяц
+    def data = getData(formData)
+    def currentTotal = getRowByAlias(data, 'total')
+
+    // получить итоги за предыдущие месяцы текущего налогового периода
+    def dataOld = getData(getFormDataOld())
+    def allTotal = getRowByAlias(dataOld, 'totalAll')
+
+    // сложить текущие суммы и за предыдущие месяцы
+    def tmp
+    totalColumns.each { alias ->
+        tmp = currentTotal.getCell(alias).getValue() + (allTotal != null ? allTotal.getCell(alias).getValue() : 0)
+        newRow.getCell(alias).setValue(tmp)
+    }
+    return newRow
 }

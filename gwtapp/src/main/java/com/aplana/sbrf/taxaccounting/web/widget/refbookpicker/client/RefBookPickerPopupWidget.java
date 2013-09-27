@@ -38,7 +38,7 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
     TextBox text;
 
     @UiField
-    Button selectButton;
+    Image selectButton;
 
     public RefBookPickerPopupWidget() {
         initWidget(binder.createAndBindUi(this));

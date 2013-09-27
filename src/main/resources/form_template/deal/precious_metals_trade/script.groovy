@@ -113,7 +113,7 @@ def getGroupColumns() {
 
 def getEditColumns() {
     ['fullName', 'interdependence', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealFocus', 'deliverySign', 'metalName',
-            'foreignDeal', 'countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2',
+            'countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2',
             'locality2', 'deliveryCode', 'incomeSum', 'outcomeSum', 'dealDoneDate']
 }
 
@@ -868,7 +868,7 @@ def checkTableHead(def xml, def headRowCount) {
  * @param xml данные
  */
 def addData(def xml, int headRowCount) {
-    Date date = new Date()
+    Date date = reportPeriodService.get(formData.reportPeriodId).taxPeriod.getEndDate()
 
     def cache = [:]
     def data = formDataService.getDataRowHelper(formData)

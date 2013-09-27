@@ -61,7 +61,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         sql.append("left join REPORT_PERIOD rp on ls.report_period_id=rp.\"ID\" ");
         sql.append("left join TAX_PERIOD tp on rp.tax_period_id=tp.\"ID\" ");
 
-		appendSelectWhereClause(sql, filter);
+		appendSelectWhereClause(sql, filter, "ls.");
 
 		sql.append(" order by ls.id desc,");
 		sql.append(" tp.start_date desc,");
@@ -127,7 +127,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		);
 	}
 
-	private void appendSelectWhereClause(StringBuilder sql, LogSystemFilter filter) {
+	private void appendSelectWhereClause(StringBuilder sql, LogSystemFilter filter, String prefix) {
 		sql.append(" WHERE log_date BETWEEN TO_DATE('").append
 				(formatter.format(filter.getFromSearchDate()))
 				.append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append
@@ -139,34 +139,37 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		}
 
 		if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
-            sql.append(" AND report_period_id = ").append(filter.getReportPeriodIds().get(0));
+            if (filter.getReportPeriodIds().size() != 0)
+                sql.append(String.format(" AND (%sreport_period_id = ", prefix)).append(filter.getReportPeriodIds().get(0));
 			for (int i = 1; i < filter.getReportPeriodIds().size(); i++) {
-				sql.append(" OR report_period_id = ").append(filter.getReportPeriodIds().get(i));
+				sql.append(String.format(" OR %sreport_period_id = ", prefix)).append(filter.getReportPeriodIds().get(i));
+                if (i == filter.getReportPeriodIds().size() - 1)
+                    sql.append(")");
 			}
 		}
 
 		if (filter.getFormKind() != null && filter.getFormKind().getId() != 0) {
-			sql.append(" AND form_kind_id = ").append(filter.getFormKind().getId());
+			sql.append(String.format(" AND %sform_kind_id = ", prefix)).append(filter.getFormKind().getId());
 		}
 
 		if (filter.getFormTypeId() != null) {
-			sql.append(" AND form_type_id = ").append(filter.getFormTypeId());
+			sql.append(String.format(" AND %sform_type_id = ", prefix)).append(filter.getFormTypeId());
 		}
 
 		if (filter.getDeclarationTypeId() != null) {
-			sql.append(" AND declaration_type_id = ").append(filter.getDeclarationTypeId());
+			sql.append(String.format(" AND %sdeclaration_type_id = ", prefix)).append(filter.getDeclarationTypeId());
 		}
 
         if (filter.getAuditFormTypeId() != null) {
             if (filter.getAuditFormTypeId().equals(AuditFormType.FORM_TYPE_TAX.getId())) {
-                sql.append(" AND form_type_id is not null ");
+                sql.append(String.format(" AND %sform_type_id is not null ", prefix));
             } else if (filter.getAuditFormTypeId().equals(AuditFormType.FORM_TYPE_DECLARATION.getId())) {
-                sql.append(" AND declaration_type_id is not null ");
+                sql.append(String.format(" AND %sdeclaration_type_id is not null ", prefix));
             }
         }
 
 		if (filter.getDepartmentId() != null) {
-            sql.append(" AND department_id = ").append(filter.getDepartmentId());
+            sql.append(String.format(" AND %sdepartment_id = ", prefix)).append(filter.getDepartmentId());
 		}
 	}
 
@@ -197,7 +200,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
 	private int getCount(LogSystemFilter filter) {
 		StringBuilder sql = new StringBuilder("select count(*) from log_system");
-		appendSelectWhereClause(sql, filter);
+		appendSelectWhereClause(sql, filter, "");
 		return getJdbcTemplate().queryForInt(sql.toString());
 	}
 }

@@ -30,7 +30,6 @@ public class ImportServiceImpl implements ImportService {
      */
     private final char QUOTE = '\'';
 
-    private static HSSFDataFormatter formatter = new HSSFDataFormatter();
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
@@ -314,7 +313,7 @@ public class ImportServiceImpl implements ImportService {
                 }
             } else {
                 // число
-                value = formatter.formatCellValue(cell);
+                value = Double.toString(cell.getNumericCellValue());
                 if (value != null) {
                     // поменять запятую на точку и убрать пробелы
                     value = value.replaceAll(",", ".").replaceAll("[^\\d.,-]+", "");
