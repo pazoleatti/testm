@@ -1,13 +1,18 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
+    <ui:style>
+        .mg5{
+            margin-left: 5px;
+        }
+    </ui:style>
     <g:FormPanel ui:field="uploadFormDataXls" encoding="multipart/form-data" method="post">
-        <g:HorizontalPanel ui:field="uploadPanel" height="100%" width="350px">
+        <g:HorizontalPanel ui:field="uploadPanel" height="100%" >
         	<g:cell height="100%">
-            	<g:FileUpload ui:field="uploader" title="Файл: " name="uploader"/>
+            	<g:FileUpload ui:field="uploader" title="Файл: " name="uploader" width="215px"/>
             </g:cell>
             <g:cell>
-           		<g:Button ui:field="uploadButton" text="Загрузить"/>
+           		<g:Button ui:field="uploadButton" text="Загрузить" addStyleNames="{style.mg5}"/>
             </g:cell>
         </g:HorizontalPanel>
     </g:FormPanel>

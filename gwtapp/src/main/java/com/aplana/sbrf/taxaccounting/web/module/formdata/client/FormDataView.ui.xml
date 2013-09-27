@@ -125,7 +125,7 @@
                             <style:LinkButton text="Ручной ввод" ui:field="manualInputAnchor" img="resources/img/pencil-16.png"
                                  title="Перейти в режим редактирования"/>
                         </g:SimplePanel>
-                        <g:HorizontalPanel height="100%" spacing="5">
+                        <g:HorizontalPanel height="100%" spacing="5" verticalAlignment="middle">
                             <g:HorizontalPanel ui:field="saveCancelPanel" height="100%" spacing="5">
                                 <g:Button ui:field="saveButton" text="Сохранить"/>
                                 <g:Button ui:field="cancelButton" text="Отмена"/>
