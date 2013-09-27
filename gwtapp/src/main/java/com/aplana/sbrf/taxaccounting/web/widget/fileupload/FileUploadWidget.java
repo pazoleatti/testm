@@ -20,6 +20,8 @@ import com.google.gwt.user.client.ui.*;
 
 /**
  * User: avanteev
+ * Виджет для загрузки файлов.
+ * Поле TextBox используется для имитации выбора файла, редиректит к <input type-"file" />.
  */
 public class FileUploadWidget extends Composite implements HasHandlers, HasValue<String>{
 
@@ -34,6 +36,8 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
 
     private String value;
     private static String actionUrl = "upload/uploadController/pattern/";
+    private static String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
+    private static String uploadPatternIE = "C:.+fakepath?."; //паттерн для IE
 
     @Override
     public String getValue() {
@@ -71,8 +75,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
                 if (!event.getResults().toLowerCase().contains("error") && event.getResults().toLowerCase().contains("uuid")) {
-                    String pattern = "(<pre.*>)(.+?)(</pre>)";
-                    String uuid = event.getResults().replaceAll(pattern, "$2");
+                    String uuid = event.getResults().replaceAll(jsonPattern, "$2");
                     JSONValue jsonValue = JSONParser.parseLenient(uuid);
                     setValue(jsonValue.isObject().get("uuid").toString().replaceAll("\"", "").trim(), true);
                 } else {
@@ -92,7 +95,8 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         uploader.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                textBox.setValue(uploader.getFilename());
+                //В IE в случае скрытия поля <input type='file'/> к имени файла дополнительно добавляется fakepath
+                textBox.setValue(uploader.getFilename().replaceAll(uploadPatternIE, ""));
             }
         });
     }
