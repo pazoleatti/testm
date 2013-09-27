@@ -14,8 +14,6 @@ public class CreateDeclaration extends UnsecuredActionImpl<CreateDeclarationResu
 
 	private Integer departmentId;
 
-    private Integer pagesCount;
-
 	public Integer getDeclarationTypeId() {
 		return declarationTypeId;
 	}
@@ -40,15 +38,7 @@ public class CreateDeclaration extends UnsecuredActionImpl<CreateDeclarationResu
 		this.departmentId = departmentId;
 	}
 
-    public Integer getPagesCount() {
-        return pagesCount;
-    }
-
-    public void setPagesCount(Integer pagesCount) {
-        this.pagesCount = pagesCount;
-    }
-
-    @Override
+	@Override
 	public String getName() {
 		return "Создание декларации";
 	}
