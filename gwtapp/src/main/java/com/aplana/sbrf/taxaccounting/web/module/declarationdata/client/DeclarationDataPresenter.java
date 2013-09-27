@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import java.util.Date;
+
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -9,12 +10,12 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
-import com.aplana.sbrf.taxaccounting.web.widget.declarationparamsdialog.client.ConfirmHandler;
-import com.aplana.sbrf.taxaccounting.web.widget.declarationparamsdialog.client.DeclarationParamsDialog;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.google.gwt.core.client.GWT;
@@ -31,8 +32,6 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
-
-import java.util.Date;
 
 public class DeclarationDataPresenter
 		extends
@@ -77,7 +76,7 @@ public class DeclarationDataPresenter
 	private final DialogPresenter dialogPresenter;
 	private final HistoryPresenter historyPresenter;
 	private long declarationId;
-	private TaxType taxType;
+	private String taxName;
 
 	@Inject
 	public DeclarationDataPresenter(final EventBus eventBus, final MyView view,
@@ -114,7 +113,7 @@ public class DeclarationDataPresenter
 							public void onSuccess(
 									GetDeclarationDataResult result) {
 								declarationId = id;
-                                taxType = result.getTaxType();
+								taxName = result.getTaxType().name();
 								getView().setType("Декларация");
 								getView().setReportPeriod(
 										result.getReportPeriodYear() + ", " + result.getReportPeriod());
@@ -151,43 +150,27 @@ public class DeclarationDataPresenter
 		return true;
 	}
 
-    @Override
-    public void refreshDeclaration(final Date docDate) {
-        // TODO Levykin: Временное решение! Ввод параметров пока только для МУКС. Потом оставить только else-ветку.
-        if (taxType == null || taxType != TaxType.DEAL) {
-            refreshDeclarationPerform(docDate, null);
-        } else {
-            DeclarationParamsDialog dpdv = new DeclarationParamsDialog();
-            dpdv.setConfirmHandler(new ConfirmHandler() {
-                @Override
-                public void onConfirm(Integer pagesCount) {
-                    refreshDeclarationPerform(docDate, pagesCount);
-                }
-            });
-            addToPopupSlot(dpdv.getPresenter());
-        }
-    }
-
-    private void refreshDeclarationPerform(Date docDate, Integer pagesCount) {
-        LogCleanEvent.fire(this);
-        RefreshDeclarationDataAction action = new RefreshDeclarationDataAction();
-        action.setDeclarationId(declarationId);
-        action.setDocDate(docDate);
-        action.setPagesCount(pagesCount);
-        dispatcher.execute(
-                action,
-                CallbackUtils
-                        .defaultCallback(new AbstractCallback<RefreshDeclarationDataResult>() {
-                            @Override
-                            public void onSuccess(
-                                    RefreshDeclarationDataResult result) {
-                                MessageEvent.fire(
-                                        DeclarationDataPresenter.this,
-                                        "Декларация обновлена");
-                                revealPlaceRequest();
-                            }
-                        }, DeclarationDataPresenter.this));
-    }
+	@Override
+	public void refreshDeclaration(Date docDate) {
+		LogCleanEvent.fire(this);
+		RefreshDeclarationDataAction action = new RefreshDeclarationDataAction();
+		action.setDeclarationId(declarationId);
+		action.setDocDate(docDate);
+		dispatcher
+				.execute(
+						action,
+						CallbackUtils
+								.defaultCallback(new AbstractCallback<RefreshDeclarationDataResult>() {
+									@Override
+									public void onSuccess(
+											RefreshDeclarationDataResult result) {
+										MessageEvent.fire(
+												DeclarationDataPresenter.this,
+												"Декларация обновлена");
+										revealPlaceRequest();
+									}
+								}, DeclarationDataPresenter.this));
+	}
 
 	@Override
 	public void accept(boolean accepted) {
@@ -235,7 +218,7 @@ public class DeclarationDataPresenter
 													.revealPlace(new PlaceRequest(
 															DeclarationListNameTokens.DECLARATION_LIST)
 															.with("nType",
-                                                                    taxType.getName()));
+																	taxName));
 										}
 									}, DeclarationDataPresenter.this));
 		}

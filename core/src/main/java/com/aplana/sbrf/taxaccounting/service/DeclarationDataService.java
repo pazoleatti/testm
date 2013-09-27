@@ -19,12 +19,11 @@ public interface DeclarationDataService {
 	 * @param departmentId идентификатор подразделения, в котором создаваётся декларация
 	 * @param userInfo информация о пользователе, выполняющего действие
 	 * @param reportPeriodId идентификатор отчетного периода
-     * @param pagesCount количество страниц
 	 * @return идентификатор созданной декларации
 	 * @throws AccessDeniedException - если у пользователя нет прав на создание декларации с заданными параметрами
 	 * 	ServiceException - если при создании декларации произошла ошибка (например декларация с такими параметрами уже существует)
 	 */
-	long create(Logger logger, int declarationTemplateId, int departmentId, TAUserInfo userInfo, int reportPeriodId, Integer pagesCount);
+	long create(Logger logger, int declarationTemplateId, int departmentId, TAUserInfo userInfo, int reportPeriodId);
 	
 	/**
 	 * Обновить декларацию (сформировать декларацию заново на основе данных, которые есть в БД)
@@ -32,9 +31,8 @@ public interface DeclarationDataService {
 	 * @param declarationDataId - идентификатор декларации
 	 * @param docDate - дата обновления декларации
 	 * @param userInfo - информация о пользователе, выполняющего операцию
-     * @param pagesCount количество страниц
 	 */
-	void reCreate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate, Integer pagesCount);
+	void reCreate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate);
 	
 	/**
 	 * Получить декларацию

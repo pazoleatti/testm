@@ -5,8 +5,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class RefreshDeclaration extends UnsecuredActionImpl<RefreshDeclarationResult> implements ActionName {
 
-	private long declarationDataId;
-    private Integer pagesCount;
+	long declarationDataId;
 
 	public long getDeclarationDataId() {
 		return declarationDataId;
@@ -16,15 +15,7 @@ public class RefreshDeclaration extends UnsecuredActionImpl<RefreshDeclarationRe
 		this.declarationDataId = declarationDataId;
 	}
 
-    public Integer getPagesCount() {
-        return pagesCount;
-    }
-
-    public void setPagesCount(Integer pagesCount) {
-        this.pagesCount = pagesCount;
-    }
-
-    @Override
+	@Override
 	public String getName() {
 		return "Переформирования декларации";
 	}

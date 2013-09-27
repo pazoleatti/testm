@@ -32,8 +32,8 @@ public class RefreshDeclarationHandler extends AbstractActionHandler<RefreshDecl
 
 	@Override
 	public RefreshDeclarationResult execute(RefreshDeclaration command, ExecutionContext executionContext) throws ActionException {
-		Logger logger = new Logger();
-		declarationDataService.reCreate(logger, command.getDeclarationDataId(), securityService.currentUserInfo(), new Date(), command.getPagesCount());
+		Logger  logger = new Logger();
+		declarationDataService.reCreate(logger, command.getDeclarationDataId(), securityService.currentUserInfo(), new Date());
 		RefreshDeclarationResult result = new RefreshDeclarationResult();
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			result.setSuccess(false);

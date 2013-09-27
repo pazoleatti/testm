@@ -72,7 +72,7 @@ public class DeclarationDataServiceImplTest {
 			TAUserInfo userInfo = new TAUserInfo();
 			userInfo.setIp("192.168.72.16");
 			userInfo.setUser(mockUser(10,  Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-			service.reCreate(logger, 1l, userInfo, new Date(), null);
+			service.reCreate(logger, 1l, userInfo, new Date());
 		} catch (ServiceException e) {
 			
 		}
@@ -88,7 +88,7 @@ public class DeclarationDataServiceImplTest {
 		TAUserInfo userInfo = new TAUserInfo();
 		userInfo.setIp("192.168.72.16");
 		userInfo.setUser(mockUser(10,  2, TARole.ROLE_CONTROL));
-		service.reCreate(logger, 2l, userInfo, new Date(), null);
+		service.reCreate(logger, 2l, userInfo, new Date());
 	}
 
     @Test
