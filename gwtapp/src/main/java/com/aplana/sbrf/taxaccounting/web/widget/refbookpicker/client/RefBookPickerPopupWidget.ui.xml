@@ -2,12 +2,20 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
-    <g:HorizontalPanel width="200px">
+    <ui:style>
+        .selectButton {
+            border-color: #009900;
+            border-style: solid;
+            border-width: 1px;
+            vertical-align: middle;
+        }
+    </ui:style>
+    <g:HorizontalPanel width="200px" verticalAlignment="middle">
         <g:cell width="100%">
             <g:TextBox enabled="false" ui:field="text" width="100%"/>
         </g:cell>
-        <g:cell>
-        	<g:Button text="..." ui:field="selectButton" width="25px"/>
+        <g:cell verticalAlignment="middle" horizontalAlignment="center">
+        	<g:Image ui:field="selectButton" styleName="{style.selectButton}" url="resources/img/reference-16.gif"/>
         </g:cell>
     </g:HorizontalPanel>
     

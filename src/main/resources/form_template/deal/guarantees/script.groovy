@@ -593,7 +593,7 @@ def checkTableHead(def xml, def headRowCount) {
  * @param xml данные
  */
 def addData(def xml) {
-    Date date = new Date()
+    Date date = reportPeriodService.get(formData.reportPeriodId).taxPeriod.getEndDate()
 
     def cache = [:]
     def data = formDataService.getDataRowHelper(formData)
@@ -635,6 +635,11 @@ def addData(def xml) {
 
         // графа 4
         text = row.cell[indexCell].text()
+        if (text.length() == 1) {    //для кодов 4, 8 и тд
+            text = "00".concat(text)
+        } else if (text.length() == 2) {    //для кодов 10, 12, 16, 20 и тд
+            text = "0".concat(text)
+        }
         map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
         if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
             throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")

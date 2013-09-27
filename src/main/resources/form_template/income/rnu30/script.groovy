@@ -559,7 +559,7 @@ def isEmpty(def value) {
 }
 
 /**
- * Получить номер строки в таблице (1..n).
+ * Получить номер строки в таблице (0..n).
  *
  * @param row строка
  */
@@ -572,10 +572,7 @@ def getIndex(def row) {
  */
 def getIndexByAlias(def data, String rowAlias) {
     def row = getRowByAlias(data, rowAlias)
-    if (row != null) {
-        return getIndex(row)
-    }
-    return -1
+    return (row != null ? getIndex(row) : -1)
 }
 
 /**

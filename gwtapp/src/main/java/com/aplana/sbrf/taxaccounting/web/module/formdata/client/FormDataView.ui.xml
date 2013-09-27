@@ -130,8 +130,9 @@
                             <g:Button ui:field="cancelButton" text="Отмена" />
                             <fileuplod:FileUploadWidget ui:field="fileUploader"/>
                         </g:HorizontalPanel>
-                        <g:CheckBox ui:field="showCheckedColumns" value="true" addStyleNames="{style.showCheckedColumns}"
-                                text="Показывать контрольные поля"/>
+                        <g:CheckBox ui:field="showCheckedColumns" value="true"
+                                    addStyleNames="{style.showCheckedColumns}"
+                                    text="Показывать контрольные поля"/>
                     </g:HorizontalPanel>
                 </g:FlowPanel>
             </g:HorizontalPanel>
