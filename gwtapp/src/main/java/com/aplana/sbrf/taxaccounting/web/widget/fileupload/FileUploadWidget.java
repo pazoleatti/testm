@@ -1,8 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.widget.fileupload;
 
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
@@ -10,14 +16,12 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FileUpload;
-import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.*;
 
 /**
  * User: avanteev
  */
-public class FileUploadWidget extends Composite implements HasHandlers{
+public class FileUploadWidget extends Composite implements HasHandlers, HasValue<String>{
 
     @UiField
     FileUpload uploader;
@@ -25,13 +29,42 @@ public class FileUploadWidget extends Composite implements HasHandlers{
     @UiField
     FormPanel uploadFormDataXls;
 
+    @UiField
+    TextBox textBox;
+
+    private String value;
+    private static String actionUrl = "upload/uploadController/pattern/";
+
+    @Override
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    @Override
+    public void setValue(String value, boolean fireEvents) {
+        this.value = value;
+        if (fireEvents){
+            ValueChangeEvent.fire(this, this.value);
+        }
+    }
+
+    @Override
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
+        return addHandler(handler, ValueChangeEvent.getType());
+    }
+
     interface Binder extends UiBinder<FormPanel, FileUploadWidget>{
     }
 
     private static Binder uiBinder = GWT.create(Binder.class);
 
     @UiConstructor
-    public FileUploadWidget(final FileUploadHandler uploadHandler, String actionUrl) {
+    public FileUploadWidget() {
         initWidget(uiBinder.createAndBindUi(this));
         uploadFormDataXls.setAction(actionUrl);
         uploadFormDataXls.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
@@ -41,11 +74,25 @@ public class FileUploadWidget extends Composite implements HasHandlers{
                     String pattern = "(<pre.*>)(.+?)(</pre>)";
                     String uuid = event.getResults().replaceAll(pattern, "$2");
                     JSONValue jsonValue = JSONParser.parseLenient(uuid);
-                    uploadHandler.onFileUploadSuccess(jsonValue.isObject().get("uuid").toString().replaceAll("\"","").trim());
+                    setValue(jsonValue.isObject().get("uuid").toString().replaceAll("\"", "").trim(), true);
                 } else {
-                    executeEvent(event.getResults().replaceFirst("error ", ""));
+                    setValue("");
                 }
                 uploadFormDataXls.reset();
+            }
+        });
+        uploader.getElement().setId("uploaderWidget");
+        textBox.getElement().setId("fakeInput");
+        textBox.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                uploader.getElement().<InputElement>cast().click();
+            }
+        });
+        uploader.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                textBox.setValue(uploader.getFilename());
             }
         });
     }
@@ -55,7 +102,4 @@ public class FileUploadWidget extends Composite implements HasHandlers{
         uploadFormDataXls.submit();
     }
 
-    private void executeEvent(String msg){
-        MessageEvent.fire(this, "Не удалось импортировать данные для формы. Ошибка: " + msg);
-    }
 }

@@ -1,16 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.SignService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
-import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -31,20 +30,14 @@ import java.util.List;
 public class UploadController {
 
     @Autowired
-    private FormDataService formDataService;
-
-    @Autowired
-    private SecurityService securityService;
-
-    @Autowired
     BlobDataService blobDataService;
 
     @Autowired
     private SignService signService;
 
-    @RequestMapping(value = "/xls", method = RequestMethod.POST)
+    @RequestMapping(value = "/pattern", method = RequestMethod.POST)
     public void processUploadXls(HttpServletRequest request, HttpServletResponse response)
-            throws FileUploadException, IOException, JSONException {
+            throws FileUploadException, IOException {
 
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
@@ -61,18 +54,6 @@ public class UploadController {
                 FormDataKind.fromId(jo.getInt(JSON_ATTR4)), jo.getInt(JSON_ATTR5), fileItem.getInputStream(), fileItem.getName());
         IOUtils.closeQuietly(fileItem.getInputStream());*/
         String uuid = blobDataService.createTemporary(fileItem.getInputStream(), fileItem.getName());
-        response.getWriter().printf("{uuid : \"%s\"}", uuid);
-    }
-
-    @RequestMapping(value = "/xsd", method = RequestMethod.POST)
-    public void processUploadXsd(HttpServletRequest request, HttpServletResponse response)
-            throws FileUploadException, IOException {
-
-        FileItemFactory factory = new DiskFileItemFactory();
-        ServletFileUpload upload = new ServletFileUpload(factory);
-        List<FileItem> items = upload.parseRequest(request);
-        FileItem fileItem = items.get(0);
-        String uuid = blobDataService.create(fileItem.getInputStream(), fileItem.getName());
         response.getWriter().printf("{uuid : \"%s\"}", uuid);
     }
 
