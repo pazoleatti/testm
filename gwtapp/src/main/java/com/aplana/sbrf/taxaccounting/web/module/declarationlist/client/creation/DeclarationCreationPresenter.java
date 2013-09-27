@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.declarationparamsdialog.client.ConfirmHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.declarationparamsdialog.client.DeclarationParamsDialog;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -89,62 +91,80 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 
 	@Override
 	public void onContinue() {
-		final DeclarationDataFilter filter = new DeclarationDataFilter();
-		filter.setDeclarationTypeId(getView().getSelectedDeclarationType());
-		filter.setDepartmentIds(getView().getSelectedDepartment());
-		filter.setReportPeriodIds(getView().getSelectedReportPeriod());
-		if(isFilterDataCorrect(filter)){
-			LogCleanEvent.fire(this);
-			LogShowEvent.fire(this, false);
-			CheckExistenceDeclaration checkCommand = new CheckExistenceDeclaration();
-			checkCommand.setDeclarationTypeId(filter.getDeclarationTypeId());
-			checkCommand.setDepartmentId(filter.getDepartmentIds().iterator().next());
-			checkCommand.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
-			dispatcher.execute(checkCommand, CallbackUtils
-					.defaultCallback(new AbstractCallback<CheckExistenceDeclarationResult>() {
-						@Override
-						public void onSuccess(final CheckExistenceDeclarationResult checkResult) {
-							if (checkResult.getStatus() == CheckExistenceDeclarationResult.DeclarationStatus.EXIST_CREATED) {
-								if (Window.confirm("Декларация с указанными параметрами уже существует. Переформировать?")) {
-									RefreshDeclaration refreshDeclarationCommand = new RefreshDeclaration();
-									refreshDeclarationCommand.setDeclarationDataId(checkResult.getDeclarationDataId());
-									dispatcher.execute(refreshDeclarationCommand, CallbackUtils
-											.defaultCallback(new AbstractCallback<RefreshDeclarationResult>() {
-												@Override
-												public void onSuccess(RefreshDeclarationResult result) {
+        // TODO Levykin: Временное решение! Ввод параметров пока только для МУКС. Потом оставить только else-ветку.
+        Integer declarationType = getView().getSelectedDeclarationType();
+        if (declarationType == null || declarationType != 6) {
+            onContinuePerform(null);
+        } else {
+            DeclarationParamsDialog dpdv = new DeclarationParamsDialog();
+            dpdv.setConfirmHandler(new ConfirmHandler() {
+                @Override
+                public void onConfirm(Integer pagesCount) {
+                    onContinuePerform(pagesCount);
+                }
+            });
+            addToPopupSlot(dpdv.getPresenter());
+        }
+	}
+
+    private void onContinuePerform(final Integer pagesCount) {
+        final DeclarationDataFilter filter = new DeclarationDataFilter();
+        filter.setDeclarationTypeId(getView().getSelectedDeclarationType());
+        filter.setDepartmentIds(getView().getSelectedDepartment());
+        filter.setReportPeriodIds(getView().getSelectedReportPeriod());
+        if(isFilterDataCorrect(filter)){
+            LogCleanEvent.fire(this);
+            LogShowEvent.fire(this, false);
+            CheckExistenceDeclaration checkCommand = new CheckExistenceDeclaration();
+            checkCommand.setDeclarationTypeId(filter.getDeclarationTypeId());
+            checkCommand.setDepartmentId(filter.getDepartmentIds().iterator().next());
+            checkCommand.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
+            dispatcher.execute(checkCommand, CallbackUtils
+                    .defaultCallback(new AbstractCallback<CheckExistenceDeclarationResult>() {
+                        @Override
+                        public void onSuccess(final CheckExistenceDeclarationResult checkResult) {
+                            if (checkResult.getStatus() == CheckExistenceDeclarationResult.DeclarationStatus.EXIST_CREATED) {
+                                if (Window.confirm("Декларация с указанными параметрами уже существует. Переформировать?")) {
+                                    RefreshDeclaration refreshDeclarationCommand = new RefreshDeclaration();
+                                    refreshDeclarationCommand.setDeclarationDataId(checkResult.getDeclarationDataId());
+                                    refreshDeclarationCommand.setPagesCount(pagesCount);
+                                    dispatcher.execute(refreshDeclarationCommand, CallbackUtils
+                                            .defaultCallback(new AbstractCallback<RefreshDeclarationResult>() {
+                                                @Override
+                                                public void onSuccess(RefreshDeclarationResult result) {
                                                     onHide();
                                                     placeManager
                                                             .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
                                                                     .with(DeclarationDataTokens.declarationId,
                                                                             String.valueOf(checkResult.getDeclarationDataId())).build());
                                                     LogAddEvent.fire(DeclarationCreationPresenter.this, result.getLogEntries());
-												}
-											}, DeclarationCreationPresenter.this));
-								}
-							} else if (checkResult.getStatus() == CheckExistenceDeclarationResult.DeclarationStatus.EXIST_ACCEPTED) {
-								MessageEvent.fire(DeclarationCreationPresenter.this, "Переформирование невозможно, так как декларация уже принята.");
-							} else {
-								CreateDeclaration command = new CreateDeclaration();
-								command.setDeclarationTypeId(filter.getDeclarationTypeId());
-								command.setDepartmentId(filter.getDepartmentIds().iterator().next());
-								command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
-								dispatcher.execute(command, CallbackUtils
-										.defaultCallback(new AbstractCallback<CreateDeclarationResult>() {
-											@Override
-											public void onSuccess(CreateDeclarationResult result) {
+                                                }
+                                            }, DeclarationCreationPresenter.this));
+                                }
+                            } else if (checkResult.getStatus() == CheckExistenceDeclarationResult.DeclarationStatus.EXIST_ACCEPTED) {
+                                MessageEvent.fire(DeclarationCreationPresenter.this, "Переформирование невозможно, так как декларация уже принята.");
+                            } else {
+                                CreateDeclaration command = new CreateDeclaration();
+                                command.setDeclarationTypeId(filter.getDeclarationTypeId());
+                                command.setDepartmentId(filter.getDepartmentIds().iterator().next());
+                                command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
+                                command.setPagesCount(pagesCount);
+                                dispatcher.execute(command, CallbackUtils
+                                        .defaultCallback(new AbstractCallback<CreateDeclarationResult>() {
+                                            @Override
+                                            public void onSuccess(CreateDeclarationResult result) {
                                                 onHide();
                                                 placeManager
                                                         .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
                                                                 .with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId())).build());
                                                 LogAddEvent.fire(DeclarationCreationPresenter.this, result.getLogEntries());
-											}
-										}, DeclarationCreationPresenter.this));
-							}
-						}
-					}, DeclarationCreationPresenter.this));
-		}
-	}
-
+                                            }
+                                        }, DeclarationCreationPresenter.this));
+                            }
+                        }
+                    }, DeclarationCreationPresenter.this));
+        }
+    }
 
 	private boolean isFilterDataCorrect(DeclarationDataFilter filter){
 		if(filter.getDeclarationTypeId() == null){
