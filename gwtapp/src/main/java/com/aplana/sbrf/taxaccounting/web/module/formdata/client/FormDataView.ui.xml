@@ -125,13 +125,19 @@
                             <style:LinkButton text="Ручной ввод" ui:field="manualInputAnchor" img="resources/img/pencil-16.png"
                                  title="Перейти в режим редактирования"/>
                         </g:SimplePanel>
-                        <g:HorizontalPanel ui:field="saveCancelPanel" height="100%" spacing="5">
-                            <g:Button ui:field="saveButton" text="Сохранить" />
-                            <g:Button ui:field="cancelButton" text="Отмена" />
-                            <fileuplod:FileUploadWidget ui:field="fileUploader" uploadHandler="{formDataProvider.getView}" actionUrl="upload/uploadController/xls/"/>
+                        <g:HorizontalPanel height="100%" spacing="5">
+                            <g:HorizontalPanel ui:field="saveCancelPanel" height="100%" spacing="5">
+                                <g:Button ui:field="saveButton" text="Сохранить"/>
+                                <g:Button ui:field="cancelButton" text="Отмена"/>
+                                <fileuplod:FileUploadWidget ui:field="fileUploader"
+                                                            uploadHandler="{formDataProvider.getView}"
+                                                            actionUrl="upload/uploadController/xls/"/>
+                            </g:HorizontalPanel>
+                            <g:CheckBox ui:field="showCheckedColumns" value="true"
+                                        addStyleNames="{style.showCheckedColumns}"
+                                        text="Показывать контрольные поля"/>
                         </g:HorizontalPanel>
-                        <g:CheckBox ui:field="showCheckedColumns" value="true" addStyleNames="{style.showCheckedColumns}"
-                                text="Показывать контрольные поля"/>
+
                     </g:HorizontalPanel>
                 </g:FlowPanel>
             </g:HorizontalPanel>
