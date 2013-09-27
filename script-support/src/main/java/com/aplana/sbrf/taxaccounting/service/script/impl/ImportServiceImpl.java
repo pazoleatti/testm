@@ -9,6 +9,7 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -313,7 +314,14 @@ public class ImportServiceImpl implements ImportService {
                 }
             } else {
                 // число
-                value = Double.toString(cell.getNumericCellValue());
+                BigDecimal tmp1 = BigDecimal.valueOf(cell.getNumericCellValue()).setScale(0, BigDecimal.ROUND_DOWN);
+                BigDecimal tmp2 = BigDecimal.valueOf(cell.getNumericCellValue()).setScale(0, BigDecimal.ROUND_UP);
+                // если число без дроби, то отбросить часть числа "*.0", иначе не надо отбрасывать дробные значения
+                if (tmp1.equals(tmp2)) {
+                    value = tmp1.toPlainString();
+                } else {
+                    value = BigDecimal.valueOf(cell.getNumericCellValue()).toPlainString();
+                }
                 if (value != null) {
                     // поменять запятую на точку и убрать пробелы
                     value = value.replaceAll(",", ".").replaceAll("[^\\d.,-]+", "");
