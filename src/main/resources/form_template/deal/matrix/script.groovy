@@ -1114,7 +1114,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         def organ = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
 
         // Графа 48
-        row.organInfo = organ.ORGANIZATION.stringValue
+        row.organInfo = organ.ORGANIZATION.numberValue
 
         // Графа 51
         row.organINN = organ.INN_KIO.stringValue
