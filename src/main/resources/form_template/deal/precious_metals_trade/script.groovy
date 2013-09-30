@@ -539,17 +539,20 @@ void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.clear()
 
-    int index = 1;
+    def rows = new LinkedList<DataRow<Cell>>()
+
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
             formDataService.getDataRowHelper(source).getAllCached().each { row ->
                 if (row.getAlias() == null) {
-                    dataRowHelper.insert(row, index++)
+                    rows.add(row)
                 }
             }
         }
     }
+
+    dataRowHelper.insert(rows, 1)
 }
 
 /**
@@ -875,6 +878,9 @@ def addData(def xml, int headRowCount) {
     data.clear()
 
     def indexRow = -1
+
+    def rows = new LinkedList<DataRow<Cell>>()
+
     for (def row : xml.row) {
         indexRow++
 
@@ -1024,8 +1030,9 @@ def addData(def xml, int headRowCount) {
         // графа 21
         newRow.dealDoneDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
 
-        data.insert(newRow, indexRow - headRowCount)
+        rows.add(newRow)
     }
+    data.insert(rows, 1)
 }
 
 /**
