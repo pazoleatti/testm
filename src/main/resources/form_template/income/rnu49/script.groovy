@@ -183,11 +183,17 @@ void calc() {
             }
             row.sumIncProfit = roundTo(tmp, 2)
 
-            // графа 16
-            row.profit = row.sum?:0 - (row.price?:0 - row.amort?:0) - row.expensesOnSale?:0 + row.sumIncProfit?:0
+            tmp = row.sum?:0 - (row.price?:0 - row.amort?:0) - row.expensesOnSale?:0 + row.sumIncProfit?:0
 
-            // графа 17
-            row.loss = row.profit
+            if (tmp>0) {
+                // графа 16
+                row.profit = tmp
+                row.loss = 0
+            } else {
+                // графа 17
+                row.loss = abs(row.profit)
+                row.profit = 0
+            }
 
             // графа 18
             row.usefullLifeEnd = getGraph18(row, row46)
