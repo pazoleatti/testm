@@ -923,20 +923,20 @@ def addData(def xml, int headRowCount) {
         def map = getRefBookValue(9, newRow.fullName)
         def String text = row.cell[xmlIndexCell].text()
         if ((text != null && !text.equals(map.INN_KIO.stringValue)) || (text == null && map.INN_KIO.stringValue != null))
-            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            throw new Exception("Строка ${xmlIndexRow+3}, столбец ${xmlIndexCell+2} содержит значение, отсутствующее в справочнике!")
         xmlIndexCell++
 
         // графа 4.1
         text = row.cell[xmlIndexCell].text()
         map = getRefBookValue(10, map.COUNTRY.referenceValue)
         if ((text != null && !text.equals(map.NAME.stringValue)) || (text == null && map.NAME.stringValue != null))
-            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            throw new Exception("Строка ${xmlIndexRow+3}, столбец ${xmlIndexCell+2} содержит значение, отсутствующее в справочнике!")
         xmlIndexCell++
 
         // графа 4.2
         text = row.cell[xmlIndexCell].text()
         if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
-            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            throw new Exception("Строка ${xmlIndexRow+3}, столбец ${xmlIndexCell+2} содержит значение, отсутствующее в справочнике!")
         xmlIndexCell++
 
         // графа 5
@@ -1066,7 +1066,7 @@ def getNumber(def value, int indexRow, String cellName) {
 }
 
 /**
- * Получение Id записи с использованием кеширования
+ * Получение Id записи с использованием кэширования
  *
  * @param value
  */
@@ -1106,11 +1106,7 @@ def getDate(def value, int indexRow, String cellName) {
     }
 }
 
-/**
- * Получение провайдера с использованием кеширования
- * @param providerId
- * @return
- */
+// Получение провайдера с использованием кэширования
 def getProvider(def long providerId) {
     if (!providerCache.containsKey(providerId)) {
         providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
@@ -1118,12 +1114,7 @@ def getProvider(def long providerId) {
     return providerCache.get(providerId)
 }
 
-/**
- * Разыменование с использованием кеширования
- * @param refBookId
- * @param recordId
- * @return
- */
+// Разыменование с использованием кэширования
 def getRefBookValue(def long refBookId, def long recordId) {
     if (!refBookCache.containsKey(recordId)) {
         refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
