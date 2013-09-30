@@ -128,17 +128,18 @@ boolean checkCalculatedCells() {
 }
 
 def calc() {
-    calcValues()
-    calcTotal()
+    def data = data
+    calcValues(data)
+    calcTotal(data)
+    data.save(getRows(data))
 }
 
 /**
  * заполняем ячейки, вычисляемые автоматически
  */
-def calcValues() {
+def calcValues(def data) {
     def rnu55FormData = getRnu55FormData()
     def rnu56FormData = getRnu56FormData()
-    def data = data
 
     for (def dataRow : getRows(data)) {
         if ( ! isInTotalRowsAliases(dataRow.getAlias())) {      //строку итогов не заполняем
@@ -152,6 +153,7 @@ def calcValues() {
             }
         }
     }
+    getRows(data).sort{ it.bill }
 }
 
 /**
@@ -532,8 +534,7 @@ def deleteCurrentRow() {
 /**
  * заполняем строку с итоговыми значениям
  */
-def calcTotal() {
-    def data = data
+def calcTotal(def data) {
     def totalResults = getTotalResults()
     def totalRow = data.getDataRow(getRows(data),getTotalDataRowAlias())
     getTotalColsAliases().each { colName ->

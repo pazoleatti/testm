@@ -14,8 +14,6 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
  * Форма "(РНУ-50) Регистр налогового учёта «ведомость понесённых убытков от реализации амортизируемого имущества»".
  *
  * @version 59
- * TODO
- * - не указан вид консолидации
  * @author rtimerbaev
  */
 
