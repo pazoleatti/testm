@@ -100,12 +100,22 @@ def hasError() {
 void calc() {
     def data = data
     def requiredColumns = getEditableColsAliases()
+
     // Обязательность заполнения полей граф (с 2 по 4)
-    i = 1
     for (def row : getRows(data)) {
         if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns)) {
             return
-        } else if (!isTotal(row)){
+        }
+    }
+
+    def sortColumns = ['usefulDate', 'inventoryNumber']
+    getRows(data).sort({ DataRow a, DataRow b ->
+        sortRow(sortColumns, a, b)
+    })
+
+    i = 1
+    for (def row : getRows(data)) {
+        if (!isTotal(row)){
             row.number = i++
         }
     }
@@ -117,6 +127,18 @@ void calc() {
         totalRow[colName] = totalResults[colName]
     }
     data.save(getRows(data))
+}
+
+int sortRow(List<String> params, DataRow a, DataRow b) {
+    for (String param : params) {
+        def aD = a.getCell(param).value
+        def bD = b.getCell(param).value
+
+        if (!isTotal(a) && !isTotal(b) && aD != bD) {
+            return aD <=> bD
+        }
+    }
+    return 0
 }
 
 /**
