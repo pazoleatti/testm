@@ -149,7 +149,7 @@ void generateXML() {
                     Map<Long, String> mapYesNo = new HashMap<Long, String>()
                     mapYesNo.put(recYesId, '1')
                     mapYesNo.put(recNoId, '0')
-                    mapYesNo.put(null, '0')
+                    mapYesNo.put(null, '-')
 
                     for (row in dataRowHelper.getAllCached()) {
                         if(row.getAlias() != null){

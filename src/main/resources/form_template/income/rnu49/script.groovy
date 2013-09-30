@@ -19,7 +19,7 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *      - уникальность инвентарного номера
- * TODO заменить значение поля saledPropertyCode и второе на значение из справочника
+ * TODO заменить значение поля saledPropertyCode и saleCode на значение из справочника
  *
  * @author rtimerbaev
  */
@@ -205,7 +205,7 @@ void calc() {
             row.expensesSum = getGraph20(row)
         }
     }
-
+    sort()
     // подразделы
     ['A', 'B', 'V', 'G', 'D', 'E'].each { section ->
         firstRow = data.getDataRow(rows,section)
@@ -217,6 +217,56 @@ void calc() {
         }
     }
     data.save(getRows(data))
+}
+
+/**
+ * Отсортировать / группировать строки
+ */
+void sort() {
+    def data = data
+    def rows = getRows(data)
+    def sortRows = []
+    def from
+    def to
+
+    ['A', 'B', 'V', 'G', 'D', 'E'].each { section ->
+        from = getIndexByAlias(data, section) + 1
+        to = getIndexByAlias(data, 'total'+section) - 1
+        if (from<=to) {
+            sortRows.add(rows[from..to])
+        }
+
+    }
+
+    sortRows.each {
+        it.sort { it.operationDate }
+    }
+}
+
+/**
+ * Получить номер строки в таблице по псевдонимиу (0..n).
+ */
+def getIndexByAlias(def data, String rowAlias) {
+    def row = getRowByAlias(data,rowAlias)
+    return (row != null ? getIndex(row) : -1)
+}
+
+/**
+ * Получить строку по алиасу.
+ *
+ * @param data данные нф
+ * @param alias алиас
+ */
+def getRowByAlias(def data, def alias) {
+    if (alias == null || alias == '' || data == null) {
+        return null
+    }
+    for (def row : getRows(data)) {
+        if (alias.equals(row.getAlias())) {
+            return row
+        }
+    }
+    return null
 }
 
 /**
@@ -445,7 +495,6 @@ void checkOnPrepareOrAcceptance(def value) {
  * Консолидация.
  */
 void consolidation() {
-    //TODO какой вид консолидации? скорее всего дублирующий, но ведь и так инв номера не должны повторяться
     def data = data
     // удалить нефиксированные строки
     def deleteRows = []

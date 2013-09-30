@@ -210,24 +210,9 @@ boolean calc() {
     setTotalStyle(totalRow)
     insert(data, totalRow)
     return true
-
-// TODO (Aydar Kadyrgulov) убрать
-// графа 1	- rowNumber
-// графа 2	- inventoryNumber
-// графа 3	- name
-// графа 4	- buyDate
-// графа 5	- usefulLife
-// графа 6	- expirationDate
-// графа 7	- startCost
-// графа 8	- depreciationRate
-// графа 9	- amortizationMonth
-// графа 10	- amortizationSinceYear
-// графа 11	- amortizationSinceUsed
-    return true
 }
 
 def logicalCheck() {
-// TODO (Aydar Kadyrgulov)
     def data = getData(formData)
 
     // 1. Проверка на заполнение полей 1..11
