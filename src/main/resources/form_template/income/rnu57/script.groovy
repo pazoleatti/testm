@@ -1,3 +1,10 @@
+package form_template.income.rnu57
+
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
+
 /**
  * Скрипт для РНУ-57 (rnu57.groovy).
  * (РНУ-57) Регистр налогового учёта финансового результата от реализации (погашения) векселей сторонних эмитентов
@@ -63,10 +70,10 @@
  */
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
-        logicalCheckWithTotalDataRowCheck()
+        checkAll()
         break
     case FormDataEvent.CALCULATE :
-        if (logicalCheckWithoutTotalDataRowCheck()) {
+        if (logicalCheckPreCalc()) {
             calc()
         }
         break
@@ -79,12 +86,14 @@ switch (formDataEvent) {
 }
 
 boolean checkCalculatedCells() {
+    def data = data
+    def rows = getRows(data)
     def isValid = true
 
     def rnu55FormData = getRnu55FormData()
     def rnu56FormData = getRnu56FormData()
 
-    for (def dataRow : formData.getDataRows()) {
+    for (def dataRow : rows) {
         if ( ! isInTotalRowsAliases(dataRow.getAlias())) {      //строку итогов не проверяем
             def rnu55Row = getRnu55Row(rnu55FormData, dataRow)
             def rnu56Row = getRnu56Row(rnu56FormData, dataRow)
@@ -94,14 +103,14 @@ boolean checkCalculatedCells() {
             for (def colName : values.keySet()) {
                 if (dataRow[colName] != values[colName]) {
                     isValid = false
-                    def fieldNumber = formData.dataRows.indexOf(dataRow) + 1
-                    logger.error("Строка $fieldNumber заполнена неверно!")
+                    def columnName = dataRow.getCell(colName).getColumn().getName().replace('%', '%%')
+                    def rowStart = getRowIndexString(dataRow)
+                    logger.error("${rowStart}поле $columnName заполнено неверно!")
                     break
                 }
             }
         }
     }
-
     return isValid
 }
 
@@ -116,8 +125,9 @@ def calc() {
 def calcValues() {
     def rnu55FormData = getRnu55FormData()
     def rnu56FormData = getRnu56FormData()
+    def data = data
 
-    for (def dataRow : formData.getDataRows()) {
+    for (def dataRow : getRows(data)) {
         if ( ! isInTotalRowsAliases(dataRow.getAlias())) {      //строку итогов не заполняем
             def rnu55Row = getRnu55Row(rnu55FormData, dataRow)
             def rnu56Row = getRnu56Row(rnu56FormData, dataRow)
@@ -142,33 +152,42 @@ def getValues(def dataRow, def rnu55Row, def rnu56Row, def rnu56FormData) {
         purchaseOutcome = getPurchaseOutcome(dataRow, rnu55Row, rnu56Row)
         percentInRuble = getPercentInRuble(dataRow, rnu55Row, rnu56Row)
         percent = getPercent(dataRow, rnu55Row, rnu56Row, rnu56FormData)
-        implementationpPriceTax = getImplementationpPriceTax(dataRow, rnu55Row, rnu56Row)
-        allIncome = getAllIncome(dataRow, rnu55Row, rnu56Row)
-        implementationPriceUp = getImplementationPriceUp(dataRow, rnu55Row, rnu56Row)
-        income = getIncome(dataRow, rnu55Row, rnu56Row)
+        implementationpPriceTax = getImplementationPriceTax(dataRow, rnu55Row, rnu56Row)
+        allIncome = getAllIncome(dataRow)
+        implementationPriceUp = getImplementationPriceUp(dataRow)
+        income = getIncome(dataRow)
     }
 
     return values
 }
 
 def getRnu55FormData() {
-    //todo тут будем получать formData из РНУ 55. какую форму получать - в вопросах аналитикам
+    return formDataService.find(348, formData.kind, formDataDepartment.id, formData.reportPeriodId)
 }
 
 def getRnu56FormData() {
-    //todo тут будем получать formData из РНУ 56. какую форму получать - в вопросах аналитикам
+    return formDataService.find(349, formData.kind, formDataDepartment.id, formData.reportPeriodId)
 }
 
 def getRnu55Row(def rnu55formData, def dataRow) {
-    //todo тут будем получать строку из РНУ-55, с которой будем сравнивать значения текущей строки
+    def data55 = getData(rnu55formData)
+    for(def row55 : getRows(data55)){
+        if(dataRow.bill == row55.bill){
+            return row55
+        }
+    }
 }
 
 def getRnu56Row(def rnu56formData, def dataRow) {
-    //todo тут будем получать строку из РНУ-56, с которой будем сравнивать значения текущей строки
+    def data56 = getData(rnu56formData)
+    for(def row56 : getRows(data56)){
+        if(dataRow.bill == row56.bill){
+            return row56
+        }
+    }
 }
 
 def getPurchasePrice(def dataRow, def rnu55DataRow, def rnu56DataRow) {
-    //todo тут спорный вопрос о порядке следования условий, см. в вопросах аналитикам, уточнить!
     if (isHasTheSameBills(dataRow, rnu55DataRow)) {
         return calcPurchasePrice(rnu55DataRow)
     }
@@ -181,12 +200,12 @@ def calcPurchasePrice(def dataRow) {
     dataRow.nominal * getCourseForCurrencyByDate(dataRow.currency, dataRow.buyDate)
 }
 
-def getPurchaseOutcome(def dataRow, def rnu55dataRow, def rnu56DataRow) {
-    if (isHasTheSameBills(dataRow, rnu55dataRow)) {
-        return null     //todo косяк в аналитике, см. http://jira.aplana.com/browse/SBRFACCTAX-2698
+def getPurchaseOutcome(def dataRow, def rnu55DataRow, def rnu56DataRow) {
+    if (isHasTheSameBills(dataRow, rnu55DataRow)) {
+        return rnu55DataRow.sumIncomeinRuble
     }
     if (isHasTheSameBills(dataRow, rnu56DataRow)) {
-        return null     //todo косяк в аналитике, см. http://jira.aplana.com/browse/SBRFACCTAX-2698
+        return rnu56DataRow.sumIncomeinRuble
     }
 }
 
@@ -196,16 +215,15 @@ def getPercentInRuble(def dataRow, def rnu55DataRow, def rnu56DataRow) {
             return 0
         }
 
-        if (rnu56DataRow.maturity > dataRow.implementationDate) {   //todo разобраться с условиями. см. http://jira.aplana.com/browse/SBRFACCTAX-2704
+        if (rnu56DataRow.maturity > dataRow.implementationDate) {
             def N = rnu56DataRow.nominal
             def K = rnu56DataRow.price
-            def T = getT(dataRow, rnu56DataRow)
-            // TODO протестировать TimeCategory.minus и возможно использовать другое решение
-            //def D = TimeCategory.minus(dataRow.implementationDate, rnu56DataRow.buyDate)
+            def T = rnu56DataRow.maturity - rnu56DataRow.buyDate
+            def D = dataRow.implementationDate - rnu56DataRow.buyDate
 
             //в ЧТЗ, похоже, два условия: для рублей и для нерублей. условия отличаются только домножением на курс валют,
             // но для рубля курс всегда берется равным единице, так что условия можно объединить
-            return (N - K) / T * D + K * getCourseForCurrencyByDate(rnu56DataRow.currency, dataRow.implementationDate)
+            return ((N - K) / T * D + K) * getCourseForCurrencyByDate(rnu56DataRow.currency, dataRow.implementationDate)
 
         }
     }
@@ -214,16 +232,13 @@ def getPercentInRuble(def dataRow, def rnu55DataRow, def rnu56DataRow) {
     }
 }
 
-def getT(def dataRow, def rnu56DataRow) {
-    //todo не до конца понятно, как расчитывать. см. http://jira.aplana.com/browse/SBRFACCTAX-2704
-}
-
 def getPercent(def dataRow, def rnu55DataRow, def rnu56DataRow, def rnu56FormData) {
+    def data56 = getData(rnu56FormData)
     if (isHasTheSameBills(dataRow, rnu56DataRow)) {
         return rnu56DataRow.discountInRub
     }
     if (rnu56DataRow.bill == null) {
-        def rnu56TotalDataRow = rnu56FormData.getDataRow(getTotalDataRowAlias())     //todo после реализации РНУ-56 убедиться, что у строики итогов именно такой алиас
+        def rnu56TotalDataRow = data56.getDataRow(getRows(data56),getTotalDataRowAlias())
         return rnu56TotalDataRow.sumIncomeinRuble
     }
     if (isHasTheSameBills(dataRow, rnu55DataRow)) {
@@ -231,8 +246,7 @@ def getPercent(def dataRow, def rnu55DataRow, def rnu56DataRow, def rnu56FormDat
     }
 }
 
-def getImplementationpPriceTax(def dataRow, def rnu55DataRow, def rnu56DataRow) {
-    //todo тут спорный вопрос о порядке следования условий, см. в вопросах аналитикам, уточнить!
+def getImplementationPriceTax(Object dataRow, Object rnu55DataRow, Object rnu56DataRow) {
     final def tmpValue = 0.8 * dataRow.price
     if (isHasTheSameBills(dataRow, rnu55DataRow)) {
         if (dataRow.implementationPrice >= tmpValue) {
@@ -250,30 +264,46 @@ def getImplementationpPriceTax(def dataRow, def rnu55DataRow, def rnu56DataRow) 
     }
 }
 
-def getAllIncome(def dataRow, def rnu55dataRow, def rnu56DataRow) {
+def getAllIncome(def dataRow) {
     return dataRow.purchasePrice + dataRow.purchaseOutcome + dataRow.implementationOutcome
 }
 
-def getImplementationPriceUp(def dataRow, def rnu55DataRow, def rnu56DataRow) {
-    def tmpValue = dataRow.implementationpPriceTax + dataRow.percent - dataRow.implementationPrice
-    if (tmpValue < 0) {
-        return 0
+def getImplementationPriceUp(def dataRow) {
+    def tmpOne = dataRow.implementationpPriceTax - dataRow.implementationPrice
+    def tmpTwo = dataRow.implementationpPriceTax + dataRow.percent - dataRow.implementationPrice
+    if (dataRow.percent == 0){
+        return tmpOne
     }
-    if (isHasTheSameBills(dataRow, rnu55DataRow)) {
-        return dataRow.implementationpPriceTax - dataRow.implementationPrice
-    }
-    if (isHasTheSameBills(dataRow, rnu56DataRow)) {
-        return dataRow.implementationpPriceTax - dataRow.implementationPrice + dataRow.percent
+    if (dataRow.percent > 0){
+        if(tmpOne<0 || tmpTwo<0){
+            return 0
+        } else {
+            return tmpTwo
+        }
     }
 }
 
-def getIncome(def dataRow, def rnu55DataRow, def rnu56DataRow) {
+def getIncome(def dataRow) {
     return dataRow.implementationpPriceTax - dataRow.allIncome
 }
 
 def getCourseForCurrencyByDate(def currency, def date) {
-    //todo тут будем получать курс валюты по дате, когда сделают соответствующий справочник
-    //если валюта = 810 (рубли), то возвращать курс 1.0. почему-то в ЧТЗ это отмечено отдельно. наверное, рублей в справочнике не будет
+    if (currency!=null && !isRubleCurrency(currency)) {
+        def refCourseDataProvider = refBookFactory.getDataProvider(22)
+        def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
+        return res.getRecords().get(0).RATE.getNumberValue()
+    } else if (isRubleCurrency(currency)){
+        return 1;
+    } else {
+        return null
+    }
+}
+
+/**
+ * Проверка валюты на рубли
+ */
+def isRubleCurrency(def currencyCode) {
+    return  refBookService.getStringValue(15,currencyCode,'CODE')=='810'
 }
 
 /**
@@ -296,33 +326,63 @@ boolean isBlankOrNull(value) {
     return (value == null || value.equals(''))
 }
 
-/**
- * возвращает true, если в таблице выделен какой-нибудь столбце
- * иначе возвращает false
- */
-boolean isCurrentDataRowSelected() {
-    return (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) >= 0)
-}
-
 /***********   ФУНКЦИИ ДЛЯ ПРОВЕРКИ ОБЯЗАТЕЛЬНЫХ ДЛЯ ЗАПОЛНЕНИЯ ДАННЫХ   ***********/
+
+boolean logicalCheckPreCalc(){
+    return checkRequiredColumns() && logicalChecks(false)
+}
 
 /**
  * перед расчетами проверяем заполнение только ячеек, доступных для ввода. т.к.
  * они нам нужны для расчетов, а рассчитываемые - не нужны
  */
-boolean logicalCheckWithoutTotalDataRowCheck() {
+boolean checkRequiredColumns() {
     return checkColsFilledByAliases(getEditableColsAliases())
 }
 
 /**
  * проверяем все данные формы на обязательное и корректное заполнение
  */
-boolean logicalCheckWithTotalDataRowCheck() {
+boolean checkAll() {
     if (checkColsFilledByAliases(getAllRequiredColsAliases())) {
-        return (checkCalculatedCells() && checkTotalResults())
+        return (logicalChecks(true) && checkCalculatedCells() && checkTotalResults())
     }
 
     return false
+}
+
+boolean logicalChecks(boolean checkNumbers){
+    def numbers = []
+    for (def row : getRows(data)){
+        def rowStart = getRowIndexString(row)
+        def dateEnd = reportPeriodService.getEndDate(formData.reportPeriodId).getTime()
+        def dateStart = reportPeriodService.getStartDate(formData.reportPeriodId).getTime()
+        if (row.purchaseDate.compareTo(dateEnd)>0){
+            logger.error("${rowStart}дата приобретения вне границ отчетного периода!")
+            return false
+        }
+        if (row.purchaseDate.compareTo(dateStart)<0 || row.purchaseDate.compareTo(dateEnd)>0){
+            logger.error("${rowStart}дата реализации (погашения) вне границ отчетного периода!")
+            return false
+        }
+        if (checkNumbers) {
+            if (row.number in numbers){
+                logger.error("Нарушена уникальность номера по порядку ${row.number}!")
+                return false
+            }else {
+                numbers += row.number
+            }
+        }
+        if (rnu55FormData == null){
+            logger.error("Отсутствуют данные в РНУ-55!")
+            return false
+        }
+        if (rnu56FormData == null){
+            logger.error("Отсутствуют данные в РНУ-56!")
+            return false
+        }
+    }
+    return true
 }
 
 /**
@@ -338,7 +398,8 @@ def getAllRequiredColsAliases() {
  * проверяем актуальность итоговых значения
  */
 boolean checkTotalResults() {
-    def totalDataRow = formData.getDataRow(getTotalDataRowAlias())
+    def data = data
+    def totalDataRow = data.getDataRow(getRows(data),getTotalDataRowAlias())
     def controlTotalResults = getTotalResults()
 
     for (def colName : controlTotalResults.keySet()) {
@@ -355,21 +416,39 @@ boolean checkTotalResults() {
  * проверяем заполнения столбцов по алиасам этих столбцов
  */
 boolean checkColsFilledByAliases(List colsAliases) {
-    boolean isValid = true
-    formData.dataRows.each { dataRow ->
-        if (! isInTotalRowsAliases(dataRow.getAlias())) {       //итоговые строки не проверяем
-            for (def colAlias : colsAliases) {
-                if (isBlankOrNull(dataRow[colAlias])) {
-                    def columnIndex = formData.dataRows.indexOf(dataRow) + 1
-                    logger.error("Поле $columnIndex не заполнено!")
-                    isValid = false
-                    break
-                }
-            }
+    def data = data
+    def rows = getRows(data)
+    for (def dataRow in rows){
+        if (!isInTotalRowsAliases(dataRow.getAlias()) && !checkRequiredColumns(dataRow,colsAliases)) {
+            return false
         }
     }
+    return true
+}
 
-    return isValid
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ * @return true - все хорошо, false - есть незаполненные поля
+ */
+def checkRequiredColumns(DataRow row, Object columns) {
+    def colNames = []
+
+    columns.each { String col ->
+        if (row.getCell(col).getValue() == null || ''.equals(row.getCell(col).getValue())) {
+            def name = row.getCell(col).getColumn().getName().replace('%', '%%')
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        def errorBegin = getRowIndexString(row)
+        def errorMsg = colNames.join(', ')
+        logger.error(errorBegin+ "не заполнены колонки : $errorMsg.")
+        return false
+    }
+    return true
 }
 
 /***********   ДОБАВЛЕНИЕ СТРОКИ В ТАБЛИЦУ С ФИКСИРОВАННЫМИ СТРОКАМИ ИТОГОВ   ***********/
@@ -380,15 +459,31 @@ boolean checkColsFilledByAliases(List colsAliases) {
  * последней итоговой строкой
  */
 def addNewRow() {
-    def newRow = formData.createDataRow()
+    def data = data
+    def DataRow newRow = formData.createDataRow()
 
     makeCellsEditable(newRow)
 
-    int index = getNewRowIndex()
-
-    formData.dataRows.add(index, newRow)
-
-    return newRow
+    def index = 0
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def row = currentDataRow
+        while(row.getAlias()!=null && index>0){
+            row = getRows(data).get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
+            index++
+        }
+    }else if (getRows(data).size()>0) {
+        for(int i = getRows(data).size()-1;i>=0;i--){
+            def row = getRows(data).get(i)
+            if(row.getAlias()==null){
+                index = getRows(data).indexOf(row)+1
+                break
+            }
+        }
+    }
+    data.insert(newRow,index+1)
 }
 
 /**
@@ -397,6 +492,7 @@ def addNewRow() {
 def makeCellsEditable(def row) {
     getEditableColsAliases().each {
         row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
     }
 }
 
@@ -407,66 +503,14 @@ def getEditableColsAliases() {
     return ['bill', 'purchaseDate', 'implementationDate', 'implementationPrice', 'implementationOutcome']
 }
 
-/**
- * возвращает индекс для добавляемого столбца
- * (находит строку, удовлетворяющую условиям addNewRow(). на ее место будет произведена вставка новой строки)
- */
-int getNewRowIndex() {
-    def index
-
-    def isTotalRow = false
-    if (isCurrentDataRowSelected()) {
-        index = formData.dataRows.indexOf(currentDataRow)
-        if ( ! isBlankOrNull(currentDataRow.getAlias())) {
-            isTotalRow = true
-        }
-    } else {
-        index = formData.dataRows.size() - 1
-    }
-
-    index = goToTopAndGetMaxIndexOfRowWithoutAlias(index)
-
-    if (isTotalRow && index != null) {
-        index += 1
-    } else if (index == null) {
-        index = 0
-    }
-
-    return index
-}
-
-/**
- * идем вверх по таблице, начиная со строки с индексом startIndex (включительно). находим первую неитоговую
- * строку (алиас которой не помечен как итоговый в getTotalRowsAliases()).
- *
- * возвращает индекс этой строки.
- */
-def goToTopAndGetMaxIndexOfRowWithoutAlias(def startIndex) {
-    for (int i = startIndex; i >= 0; i--) {
-        if (getTotalRowsAliases().find{ totalRowAlias ->
-            totalRowAlias == formData.dataRows[i].getAlias()
-        } == null) {
-            return i
-        }
-    }
-
-    return null
-}
-
 /***********   УДАЛЕНИЕ СТРОКИ ИЗ ТАБЛИЦЫ С ФИКСИРОВАННЫМИ СТРОКАМИ ИТОГОВ   ***********/
 
 /**
  * удаляет выделенную строку, если она не является итоговой
- * если выделенная строки является итоговой, то она не удаляется и выводится сообщение о критичесокй ошибке
  */
 def deleteCurrentRow() {
-    if (isCurrentDataRowSelected() &&
-            totalRowsAliases.find { totalRowAlias ->
-                totalRowAlias == currentDataRow.getAlias()
-            } == null) {
-        formData.dataRows.remove(currentDataRow)
-    } else {
-        logger.error ('Невозможно удалить фиксированную строку!')
+    if (currentDataRow != null && currentDataRow.getAlias() == null) {
+        data.delete(currentDataRow)
     }
 }
 
@@ -476,8 +520,9 @@ def deleteCurrentRow() {
  * заполняем строку с итоговыми значениям
  */
 def calcTotal() {
+    def data = data
     def totalResults = getTotalResults()
-    def totalRow = formData.getDataRow(getTotalDataRowAlias())
+    def totalRow = data.getDataRow(getRows(data),getTotalDataRowAlias())
     getTotalColsAliases().each { colName ->
         totalRow[colName] = totalResults[colName]
     }
@@ -509,9 +554,10 @@ def getTotalDataRowAlias() {
  * возвращаем мапу вида алиас_столбца -> итоговое_значение
  */
 def getTotalResults() {
+    def data = data
     def result = [:]
     for (def colAlias : getTotalColsAliases()) {
-        result.put(colAlias, formData.dataRows.sum {row ->
+        result.put(colAlias, getRows(data).sum {row ->
             if (! isInTotalRowsAliases(row.getAlias())) {    //строка не входит в итоговые
                 row[colAlias]
             } else {
@@ -526,6 +572,48 @@ def getTotalResults() {
  * возвращает список алиасов для стобцов, по которым подводятся итоги
  */
 def getTotalColsAliases() {
-    return ['purchasePrice', 'purchaseOutcome', 'implementationPrice', 'implementationOutcome', 'price', 'percent',
+    return ['purchaseOutcome',  'implementationOutcome', 'percent',
             'implementationpPriceTax', 'allIncome', 'implementationPriceUp', 'income']
 }
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def DataRowHelper getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
+
+def DataRowHelper getData(){
+    return getData(formData)
+}
+
+/**
+ * Получить строки формы.
+ *
+ * @param formData форма
+ */
+def List<DataRow<Cell>> getRows(def DataRowHelper data) {
+    return data.getAllCached()
+}
+
+/**
+ * Начало предупреждений/ошибок
+ * @param row
+ * @return
+ */
+def String getRowIndexString(def DataRow row){
+    def index = row.number
+    if (index != null) {
+        return "В строке \"№ пп\" равной $index "
+    } else {
+        index = getRows(data).indexOf(row) + 1
+        return "В строке $index "
+    }
+
+}
+

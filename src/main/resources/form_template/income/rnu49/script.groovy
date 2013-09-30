@@ -93,9 +93,8 @@ def addNewRow() {
     def newRow = formData.createDataRow()
     // графа 2..14, 18, 19, 21..22
     ['firstRecordNumber', 'operationDate', 'reasonNumber', 'reasonDate',
-            'invNumber', 'name', 'price', 'amort', 'expensesOnSale',
-            'sum', 'sumInFact', 'costProperty', 'marketPrice', 'usefullLifeEnd',
-            'monthsLoss', 'saledPropertyCode', 'saleCode'].each {
+            'invNumber', 'name', 'price', 'amort', 'expensesOnSale', 'sum',
+            'sumInFact', 'costProperty', 'marketPrice', 'saledPropertyCode', 'saleCode'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).styleAlias = 'Редактируемая'
     }
@@ -145,11 +144,10 @@ void calc() {
      * Проверка обязательных полей.
      */
 
-    // Список проверяемых столбцов (графа 2..14, 18, 19, 21, 22)
+    // Список проверяемых столбцов (графа 2..14, 21, 22)
     def requiredColumns = ['firstRecordNumber', 'operationDate', 'reasonNumber', 'reasonDate',
             'invNumber', 'name', 'price', 'amort', 'expensesOnSale',
-            'sum', 'sumInFact', 'costProperty', 'marketPrice', 'usefullLifeEnd',
-            'monthsLoss', 'saledPropertyCode', 'saleCode']
+            'sum', 'sumInFact', 'costProperty', 'marketPrice', 'saledPropertyCode', 'saleCode']
 
     for (def row : rows) {
         if (!isFixedRow(row) && !checkRequiredColumns(row, requiredColumns)) {
@@ -733,9 +731,9 @@ def getGraph9(def DataRow row49, def DataRow row46, def DataRow row45){
 }
 
 def getGraph18(def DataRow row49, def DataRow row46){
-    // Если «Графа 11» > 0 и «Графа 21» = 1 и «Графа 22» = 1, то указывается значение графы 18 РНУ-46, где графа 6 РНУ-49 = графа 2 РНУ-46
+    // Если «Графа 17» > 0 и «Графа 21» = 1 и «Графа 22» = 1, то указывается значение графы 18 РНУ-46, где графа 6 РНУ-49 = графа 2 РНУ-46
     // Иначе, не заполняется
-    if(row46!=null && row49.sum>0 && row49.saledPropertyCode == 1 && row49.saleCode == 1){
+    if(row46!=null && row49.loss>0 && row49.saledPropertyCode == 1 && row49.saleCode == 1){
         return row46.usefullLifeEnd
     }
     return null
@@ -745,7 +743,7 @@ def getGraph19(def DataRow row49){
     // Если «Графа 17» > 0, то «Графа 19» = «Графа 18» – «Графа 3»
     // Если «Графа 18» = «Графа 3», то «Графа 19» = 1
     // Иначе не заполняется
-    if (row49.sum > 0 && row49.usefullLifeEnd!=null && row49.operationDate!=null){
+    if (row49.loss > 0 && row49.usefullLifeEnd!=null && row49.operationDate!=null){
         tmp = row49.usefullLifeEnd[Calendar.MONTH] - row49.operationDate[Calendar.MONTH]
         return (tmp == 0) ? 1 : tmp
     }

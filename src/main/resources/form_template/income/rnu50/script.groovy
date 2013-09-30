@@ -78,7 +78,6 @@ def hasError() {
  */
 def addNewRow() {
     def data = data
-    def rows = getRows(data)
     def newRow = formData.createDataRow()
     // графа 2..5
     ['rnu49rowNumber', 'invNumber', 'lossReportPeriod', 'lossTaxPeriod'].each {
@@ -90,16 +89,16 @@ def addNewRow() {
         index = currentDataRow.getIndex()
         def row = currentDataRow
         while(row.getAlias()!=null && index>0){
-            row = rows.get(--index)
+            row = getRows(data).get(--index)
         }
-        if(index!=currentDataRow.getIndex() && rows.get(index).getAlias()==null){
+        if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
             index++
         }
-    }else if (rows.size()>0) {
-        for(int i = rows.size()-1;i>=0;i--){
-            def row = rows.get(i)
+    }else if (getRows(data).size()>0) {
+        for(int i = getRows(data).size()-1;i>=0;i--){
+            def row = getRows(data).get(i)
             if(row.getAlias()==null){
-                index = rows.indexOf(row)+1
+                index = getRows(data).indexOf(row)+1
                 break
             }
         }
@@ -128,7 +127,11 @@ void calc() {
     // удалить все строки
     data.clear()
 
-    def data49 = getData(formData49)
+    def formData49 = formData49
+    if (formData49 == null){
+        return
+    }
+    def DataRowHelper data49 = getData(formData49)
 
     def DataRow newRow = null
     for (def row49 in getRows(data49)){
@@ -202,6 +205,12 @@ int sortRow(List<String> params, DataRow a, DataRow b) {
  * Логические проверки.
  */
 def logicalCheck() {
+    // 4. Проверки существования необходимых экземпляров форм
+    if (formData49 == null){
+        logger.error('Отсутствуют данные РНУ-49!')
+        return false
+    }
+
     def data = data
     def rows = getRows(data)
     if (!rows.isEmpty()) {
@@ -234,12 +243,6 @@ def logicalCheck() {
             // 3. Проверка формата номера записи в РНУ-49 (графа 2)
             if (!row.rnu49rowNumber.matches('\\w{2}-\\w{6}')) {
                 logger.error(rowStart + 'неправильно указан номер записи в РНУ-49 (формат: ГГ-НННННН, см. №852-р в актуальной редакции)!')
-                return false
-            }
-
-            // 4. Проверки существования необходимых экземпляров форм
-            if (formData49 == null){
-                logger.error('Отсутствуют данные РНУ-49!')
                 return false
             }
 
@@ -379,7 +382,6 @@ void setTotalStyle(def row) {
  *
  * @param row строка
  * @param columns список обязательных графов
- * @param useLog нужно ли записывать сообщения в лог
  * @return true - все хорошо, false - есть незаполненные поля
  */
 def checkRequiredColumns(DataRow row, Object columns) {
