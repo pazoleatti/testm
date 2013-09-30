@@ -23,17 +23,17 @@ insert into report_period (id, name, months, tax_period_id, ord, dict_tax_period
 insert into report_period (id, name, months, tax_period_id, ord, dict_tax_period_id) values (3, '3 - период', 3, 1, 3, 23);
 
 insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (1,  4, 1, 1, 2, 1, 0);
-insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (2,  3, 2, 2, 3, 2, 0);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (2,  3, 2, 2, 3, 2, 1);
 insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (3,  2, 3, 3, 2, 3, 0);
 insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (4,  1, 1, 4, 3, 1, 0);
-insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (5,  4, 2, 1, 2, 2, 0);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (5,  4, 2, 1, 2, 2, 1);
 insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (6,  3, 3, 2, 3, 3, 0);
 insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (7,  2, 1, 3, 2, 1, 0);
-insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (8,  1, 2, 4, 3, 2, 0);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (8,  1, 2, 4, 3, 2, 1);
 insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (9,  4, 3, 1, 2, 3, 0);
 insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (10, 3, 1, 2, 3, 1, 0);
 insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (11, 2, 2, 3, 2, 2, 0);
-insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (12, 1, 3, 4, 3, 3, 0);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (12, 1, 3, 4, 3, 3, 1);
 insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (13, 4, 1, 1, 2, 1, 0);
 insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (14, 3, 2, 2, 3, 2, 0);
 insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (15, 2, 3, 3, 2, 3, 0);
