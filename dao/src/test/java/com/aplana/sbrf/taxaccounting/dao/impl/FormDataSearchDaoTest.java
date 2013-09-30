@@ -173,6 +173,17 @@ public class FormDataSearchDaoTest {
 		assertIdsEquals(new long[] {1, 5, 9, 13, 17}, res);
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.STATE, false, pageParams);
 		assertIdsEquals(new long[] {16, 12, 8, 4, 15}, res);
+
+		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.YEAR, true, pageParams);
+		assertIdsEquals(new long[] {1, 2, 3, 4, 5}, res);
+		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.YEAR, false, pageParams);
+		assertIdsEquals(new long[] {18, 17, 16, 15, 14}, res);
+
+		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.RETURN, true, pageParams);
+		assertIdsEquals(new long[] {1, 3, 4, 6, 7}, res);
+		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.RETURN, false, pageParams);
+		assertIdsEquals(new long[] {12, 8, 5, 2, 18}, res);
+
 	}
 	
 	@Test

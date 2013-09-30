@@ -117,15 +117,12 @@ void checkCreation() {
 }
 
 void addRow() {
-    addRow(formData.createDataRow(), currentDataRow)
-}
 
-void addRow(DataRow<Cell> row, DataRow<Cell> currentRow) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-
+    def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentRow != null ? currentRow.getIndex() : size
+    def index = currentDataRow != null ? currentDataRow.getIndex() : size
 
     dataRowHelper.insert(row, index+1)
 }
@@ -296,17 +293,22 @@ void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.clear()
 
+    def rows = new LinkedList<DataRow<Cell>>()
+
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.getFormType().getTaxType() == TaxType.DEAL) {
             formDataService.getDataRowHelper(source).getAllCached().each { srcRow ->
                 if (srcRow.getAlias() == null) {
                     def row = buildRow(srcRow, source.getFormType())
-                    addRow(row, null)
+                    rows.add(row)
+                    //addRow(row, null)
                 }
             }
         }
     }
+
+    dataRowHelper.insert(rows, 1)
 }
 
 /**
@@ -1114,7 +1116,8 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         def organ = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
 
         // Графа 48
-        row.organInfo = organ.ORGANIZATION.numberValue
+        row.organInfo = organ.ORGANIZATION.referenceValue
+
 
         // Графа 51
         row.organINN = organ.INN_KIO.stringValue
