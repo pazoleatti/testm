@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import java.util.ArrayList;
-
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Formats;
@@ -15,24 +13,12 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CheckFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DataRowResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteRowAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateDataRowsAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UploadDataRowsAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
@@ -44,6 +30,8 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+
+import java.util.ArrayList;
 
 public class FormDataPresenter extends
         FormDataPresenterBase<FormDataPresenter.MyProxy> implements
@@ -97,7 +85,7 @@ public class FormDataPresenter extends
 							if(result==null || result.getDataRows().getTotalCount() == 0)
 								getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
 							else {
-								getView().setRowsData(start, (int) result.getDataRows().getTotalCount(), result.getDataRows());
+								getView().setRowsData(start, result.getDataRows().getTotalCount(), result.getDataRows());
 								if (result.getDataRows().size() > PAGE_SIZE) {
 									getView().assignDataProvider(result.getDataRows().size());
 								}
@@ -113,14 +101,6 @@ public class FormDataPresenter extends
 		modifiedRows.add(dataRow);
 
 	}
-
-    @Override
-    public void onUploadDataRow(String uuid) {
-        UploadDataRowsAction action = new UploadDataRowsAction();
-        action.setUuid(uuid);
-        action.setFormData(formData);
-        dispatcher.execute(action, createDataRowResultCallback(true));
-    }
 
     @Override
 	public void onSelectRow() {
@@ -412,6 +392,23 @@ public class FormDataPresenter extends
             builder.append(", ").append(Formats.getRussianMonthNameWithTier(retFormDataResult.getFormData().getPeriodOrder()));
         }
         return builder.toString();
+    }
+
+    @Override
+    protected void onBind() {
+        super.onBind();
+        final ValueChangeHandler<String> fileUploadValueChangeHandler = new ValueChangeHandler<String>() {
+
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                String uuid = event.getValue();
+                UploadDataRowsAction action = new UploadDataRowsAction();
+                action.setUuid(uuid);
+                action.setFormData(formData);
+                dispatcher.execute(action, createDataRowResultCallback(true));
+            }
+        };
+        getView().addFileUploadValueChangeHandler(fileUploadValueChangeHandler);
     }
 
 }

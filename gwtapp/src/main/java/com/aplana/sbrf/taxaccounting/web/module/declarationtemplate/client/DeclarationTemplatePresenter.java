@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
@@ -27,6 +29,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
 	public interface MyView extends View, HasUiHandlers<DeclarationTemplateUiHandlers> {
 		void setDeclarationTemplate(DeclarationTemplate declaration);
+        void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler);
 	}
 
 	private final DispatchAsync dispatcher;
@@ -155,8 +158,14 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
     @Override
-    public void setXsdId(String xsdId) {
-        declarationTemplate.setXsdId(xsdId);
+    protected void onBind() {
+        super.onBind();
+        ValueChangeHandler<String> declarationValueChangeHandler = new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                declarationTemplate.setXsdId(event.getValue());
+            }
+        };
+        getView().addDeclarationValueHandler(declarationValueChangeHandler);
     }
-
 }
