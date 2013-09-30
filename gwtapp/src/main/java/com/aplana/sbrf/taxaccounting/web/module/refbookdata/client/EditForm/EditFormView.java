@@ -145,7 +145,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			try {
 				switch (field.getKey().getAttributeType()) {
 					case NUMBER:
-						Number number = field.getValue().getValue() == null ? null : new BigDecimal((String)field.getValue().getValue());
+						Number number = field.getValue().getValue() == null || field.getValue().getValue().toString().trim().isEmpty() ? null : new BigDecimal((String)field.getValue().getValue());
 						value.setAttributeType(RefBookAttributeType.NUMBER);
 						value.setNumberValue(number);
 						break;

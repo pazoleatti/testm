@@ -42,6 +42,4 @@ public interface FormDataUiHandlers extends UiHandlers{
 	void onRangeChange(final int start, int length);
 
 	void onCellModified(DataRow<Cell> dataRow);
-
-    void onUploadDataRow(String uuid);
 }

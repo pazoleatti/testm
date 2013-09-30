@@ -70,7 +70,7 @@ void accepted() {
 Map<String, RefBookValue> getRecord(DataRow<Cell> row) {
     def Map<String, RefBookValue> map = new HashMap<String, RefBookValue>()
     map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, row.name))
-    map.put("ORGANIZATION", new RefBookValue(RefBookAttributeType.NUMBER, row.code))
+    map.put("ORGANIZATION", new RefBookValue(RefBookAttributeType.REFERENCE, row.code))
     map.put("KPP", new RefBookValue(RefBookAttributeType.NUMBER, row.kpp))
     map.put("INN_KIO", new RefBookValue(RefBookAttributeType.STRING, row.inn))
     map.put("ADDRESS", new RefBookValue(RefBookAttributeType.STRING, row.address))

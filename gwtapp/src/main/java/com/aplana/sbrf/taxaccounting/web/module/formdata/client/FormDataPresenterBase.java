@@ -1,20 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
-
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -26,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataList
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.web.bindery.event.shared.EventBus;
@@ -36,6 +23,12 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 
 public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		Presenter<FormDataPresenterBase.MyView, Proxy_>{
@@ -96,22 +89,14 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		void updateData();
 		
 		void updateData(int pageNumber);
+
+        void addFileUploadValueChangeHandler(ValueChangeHandler<String> changeHandler);
 	}
 
 	public static final String NAME_TOKEN = "!formData";
 
 	public static final String FORM_DATA_ID = "formDataId";
 	public static final String READ_ONLY = "readOnly";
-
-	public static final String DEPARTMENT_ID = "departmentId";
-
-	public static final String FORM_DATA_KIND_ID = "formDataKindId";
-
-	public static final String FORM_DATA_TYPE_ID = "formDataTypeId";
-
-	public static final String FORM_DATA_RPERIOD_ID = "formDataRPeriodId";
-
-	public static final String WORK_FLOW_ID = "goWorkFlowId";
 
 	protected HandlerRegistration closeFormDataHandlerRegistration;
 

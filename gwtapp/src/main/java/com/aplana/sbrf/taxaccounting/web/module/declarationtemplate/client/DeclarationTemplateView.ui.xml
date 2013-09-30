@@ -12,8 +12,6 @@
 	</ui:style>
 
 
-    <ui:with field="declarationTemplateProvider" type="com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateView"/>
-
 	<g:DockLayoutPanel unit='PX' height="100%" width="100%"
 		ui:field="dockPanel">
 		<g:north size="40">
@@ -67,7 +65,7 @@
 
                         <g:HorizontalPanel height="30px">
                             <g:Label width="150px">Загрузить файл xsd</g:Label>
-                            <fileuplod:FileUploadWidget uploadHandler="{declarationTemplateProvider.getView}" actionUrl="upload/uploadController/xsd/"/>
+                            <fileuplod:FileUploadWidget ui:field="fileUploader"/>
                         </g:HorizontalPanel>
 
 
