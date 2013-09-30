@@ -117,6 +117,12 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		case STATE:
 			column = "fd.state";
 			break;
+		case YEAR:
+			column = "tp.start_date";
+			break;
+		case RETURN:
+			column = "fd.return_sign";
+			break;
 		}
 		
 		if (column != null) {
