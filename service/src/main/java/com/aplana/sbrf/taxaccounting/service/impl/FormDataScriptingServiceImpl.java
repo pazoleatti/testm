@@ -65,7 +65,8 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 			}
 		}
 		b.putAll(scriptComponents);
-		
+        // Поддержка аннотации @Field для глобальных переменных в скриптах
+        b.put(groovy.transform.Field.class.getSimpleName(), groovy.transform.Field.class);
 		b.put("formDataEvent", event);
 		b.put("logger", logger);
 		b.put("formData", formData);
