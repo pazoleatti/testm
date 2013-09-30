@@ -100,7 +100,7 @@ def addData(def xml) {
         recordsMap.put("ADDRESS",       new RefBookValue(RefBookAttributeType.STRING,       row.cell[indexCell++].text()))
         recordsMap.put("INN_KIO",       new RefBookValue(RefBookAttributeType.STRING,       row.cell[indexCell++].text()))
         recordsMap.put("KPP",           new RefBookValue(RefBookAttributeType.NUMBER,       getNumber(row.cell[indexCell++].text())))
-        recordsMap.put("ORGANIZATION",  new RefBookValue(RefBookAttributeType.NUMBER,       getNumber(row.cell[indexCell++].text())))
+        recordsMap.put("ORGANIZATION",  new RefBookValue(RefBookAttributeType.REFERENCE,    getRecordId(70, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell++)))
         recordsMap.put("OFFSHORE",      new RefBookValue(RefBookAttributeType.REFERENCE,    getRecordId(38, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell++)))
         recordsMap.put("DOP_INFO",      new RefBookValue(RefBookAttributeType.STRING,       row.cell[indexCell++].text()))
         recordsMap.put("SKOLKOVO",      new RefBookValue(RefBookAttributeType.REFERENCE,    getRecordId(38, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)))
