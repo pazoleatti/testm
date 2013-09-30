@@ -9,7 +9,10 @@
     <g:FormPanel ui:field="uploadFormDataXls" encoding="multipart/form-data" method="post">
         <g:HorizontalPanel ui:field="uploadPanel" height="100%" >
         	<g:cell height="100%">
-            	<g:FileUpload ui:field="uploader" title="Файл: " name="uploader" width="215px"/>
+            	<g:FileUpload ui:field="uploader" name="uploader" visible="false"/>
+            </g:cell>
+            <g:cell>
+                <g:TextBox ui:field="textBox" />
             </g:cell>
             <g:cell>
            		<g:Button ui:field="uploadButton" text="Загрузить" addStyleNames="{style.mg5}"/>

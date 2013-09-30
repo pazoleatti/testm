@@ -2,9 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
 import com.google.gwt.editor.client.Editor;
@@ -27,17 +25,10 @@ import java.util.*;
  * @author Dmitriy Levykin
  */
 public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiHandlers>
-        implements BookerStatementsPresenter.MyView, FileUploadHandler {
-
-    @Override
-    public void onFileUploadSuccess(String uuid) {
-        getUiHandlers().ImportData(uuid);
-    }
+        implements BookerStatementsPresenter.MyView {
 
     interface Binder extends UiBinder<Widget, BookerStatementsView> {
     }
-
-    List<LogEntry> logs = new ArrayList<LogEntry>();
 
     // Выбранное подразделение
     private Integer currentDepartmentId;
@@ -51,8 +42,10 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
     @UiField
     ListBox bookerReportType;
-    @UiField(provided = true)
-    FileUploadWidget fileUploader = new FileUploadWidget(this, "upload/uploadController/xls/");
+
+    @UiField
+    FileUploadWidget fileUploader;
+
     @UiField
     DockLayoutPanel dockPanel;
 
@@ -143,5 +136,10 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
         if (bookerReportType.getSelectedIndex() != -1)
             result = bookerReportType.getSelectedIndex();
         return result;
+    }
+
+    @Override
+    public void addAccImportValueChangeHandler(ValueChangeHandler<String> valueChangeHandler) {
+        fileUploader.addValueChangeHandler(valueChangeHandler);
     }
 }

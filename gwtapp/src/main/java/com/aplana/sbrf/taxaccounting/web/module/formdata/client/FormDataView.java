@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
-import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
@@ -17,6 +16,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
@@ -31,16 +31,9 @@ import java.util.Date;
 import java.util.List;
 
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
-		implements FormDataPresenterBase.MyView,FileUploadHandler {
+		implements FormDataPresenterBase.MyView {
 
 	private NoSelectionModel<DataRow<Cell>> selectionModel;
-
-    @Override
-    public void onFileUploadSuccess(String uuid) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onUploadDataRow(uuid);
-        }
-    }
 
     interface Binder extends UiBinder<Widget, FormDataView> {
 	}
@@ -478,5 +471,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			pager.setPage(pageNumber);
 		}
 	}
+
+    @Override
+    public void addFileUploadValueChangeHandler(ValueChangeHandler<String> changeHandler) {
+        fileUploader.addValueChangeHandler(changeHandler);
+    }
 
 }

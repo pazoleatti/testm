@@ -55,10 +55,11 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     private static final long MAX_FILE_ROW = 10000L;
 
     private static final String BAD_FILE_MSG = "Формат файла не соответствуют ожидаемому формату. Файл не может быть загружен.";
-    private static final String IO_WORKBOOK_EXCEPTION = "Не могу прочитать загруженный Excel фаил";
+    private static final String NO_DATA_FILE_MSG = "Файл не содержит данных. Файл не может быть загружен.";
+    private static final String IO_WORKBOOK_EXCEPTION = "Не могу прочитать загруженный Excel фаил.";
     private static final String REPORT_PERIOD_CLOSED = "Указан закрытый период. Файл не может быть загружен.";
-    private static final String REPORT_PERIOD_INVALID = "Отчетный период не указан";
-    private static final String FILE_NULL = "Не указан фаил";
+    private static final String REPORT_PERIOD_INVALID = "Отчетный период не указан.";
+    private static final String FILE_NULL = "Не указан фаил.";
 
     @Autowired
     PeriodService reportPeriodService;
@@ -76,7 +77,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             throw new ServiceException(REPORT_PERIOD_INVALID);
         }
         if (realFileName == null || !getFileExtention(realFileName).equals("xls")) {
-            throw  new ServiceException(BAD_FILE_MSG);
+            throw  new ServiceException(NO_DATA_FILE_MSG);
         }
         // Проверка того, что пользователем указан открытый отчетный период
         if (!reportPeriodService.isActivePeriod(periodId, departmentId)) {
@@ -107,7 +108,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
 
                 provider.updateRecords(new Date(), records);
             } else {
-                // TODO что делать если в файле нет строк для записи в бд?
+                throw  new ServiceException(NO_DATA_FILE_MSG);
             }
         } else {
             RefBookDataProvider provider = rbFactory.getDataProvider(INCOME_102);
@@ -128,7 +129,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
 
                 provider.updateRecords(new Date(), records);
             } else {
-                // TODO что делать если в файле нет строк для записи в бд?
+                throw  new ServiceException(NO_DATA_FILE_MSG);
             }
         }
     }

@@ -10,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpe
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpenDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.ImportAction;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.ImportResult;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -91,6 +93,8 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
          * @return null в случае если ничего не выбранно
          */
         Integer getType();
+
+        void addAccImportValueChangeHandler(ValueChangeHandler<String> valueChangeHandler);
     }
 
     @Inject
@@ -148,5 +152,28 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                                 getView().setReportPeriods(result.getReportPeriods());
                             }
                         }, this).addCallback(new ManualRevealCallback<GetBSOpenDataAction>(this)));
+    }
+
+    @Override
+    protected void onBind() {
+        super.onBind();
+        ValueChangeHandler<String> accImportValueChangeHandler = new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                ImportAction importAction = new ImportAction();
+                importAction.setUuid(event.getValue());
+                importAction.setDepartmentId(getView().getDepartmentId());
+                importAction.setReportPeriodId(getView().getReportPeriodId());
+                importAction.setTypeId(getView().getType());
+                dispatcher.execute(importAction, CallbackUtils.defaultCallback(
+                        new AbstractCallback<ImportResult>() {
+                            @Override
+                            public void onSuccess(ImportResult importResult) {
+                                MessageEvent.fire(BookerStatementsPresenter.this, "Загрузка бух отчетности выполнена успешно");
+                            }
+                        }, BookerStatementsPresenter.this));
+            }
+        };
+        getView().addAccImportValueChangeHandler(accImportValueChangeHandler);
     }
 }
