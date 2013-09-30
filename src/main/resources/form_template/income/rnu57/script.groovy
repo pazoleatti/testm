@@ -3,6 +3,7 @@ package form_template.income.rnu57
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 /**
@@ -10,12 +11,6 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
  * (РНУ-57) Регистр налогового учёта финансового результата от реализации (погашения) векселей сторонних эмитентов
  *
  * Версия ЧТЗ: 64
- *
- * Вопросы аналитикам: http://jira.aplana.com/browse/SBRFACCTAX-2662
- *
- * TODO:
- *      дописать получение данных из РНУ-55 и РНУ-56
- *      добавить справочники кодов валют
  *
  * @author vsergeev
  *
@@ -82,6 +77,24 @@ switch (formDataEvent) {
         break
     case FormDataEvent.DELETE_ROW :
         deleteCurrentRow()
+        break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
+        checkAll()
+        break
+// обобщить
+    case FormDataEvent.COMPOSE :
+        consolidation()
+        calc()
+        if (checkAll()) {
+            // для сохранения изменений приемников
+            data.commit()
+        }
         break
 }
 
@@ -574,6 +587,29 @@ def getTotalResults() {
 def getTotalColsAliases() {
     return ['purchaseOutcome',  'implementationOutcome', 'percent',
             'implementationpPriceTax', 'allIncome', 'implementationPriceUp', 'income']
+}
+
+/**
+ * Консолидация.
+ */
+void consolidation() {
+    def data = data
+    // удалить все строки и собрать из источников их строки
+    data.clear()
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                getRows(getData(source)).each { row->
+                    if (row.getAlias() == null || row.getAlias() == '') {
+                        data.insert(row, getRows(data).size()+1)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**
