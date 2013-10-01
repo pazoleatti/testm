@@ -1,25 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
@@ -28,10 +8,26 @@ import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
@@ -128,12 +124,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
                                                               String filter, RefBookAttribute sortAttribute) {
-        String sql = getRefBookSql(refBookId, version, sortAttribute, filter, pagingParams);
+        PreparedStatementData ps = getRefBookSql(refBookId, version, sortAttribute, filter, pagingParams);
         RefBook refBook = get(refBookId);
-        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(sql, new RefBookValueMapper(refBook));
+        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-        sql = "SELECT count(*) FROM (" + getRefBookSql(refBookId, version, sortAttribute, filter, null) + ")";
-        result.setTotalCount(getJdbcTemplate().queryForInt(sql));
+        // Получение количества данных в справкочнике
+        PreparedStatementData psForCount = getRefBookSql(refBookId, version, sortAttribute, filter, null);
+        psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
+        result.setTotalCount(getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray()));
         return result;
     }
 
@@ -169,17 +167,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      * @param pagingParams
      * @return
      */
-    private String getRefBookSql(Long refBookId, Date version, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams) {
+    private PreparedStatementData getRefBookSql(Long refBookId, Date version, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams) {
+        // модель которая будет возвращаться как результат
+        PreparedStatementData ps = new PreparedStatementData();
 
         RefBook refBook = get(refBookId);
-
-        /**
-         * создаем StringBuffer для передачи в FilterTreeListener, псле обхода дерева
-         * stringBuffer будет содержать строку с xml
-         */
-        StringBuffer stringBuffer = new StringBuffer();
-        Filter.getFilterQuery(filter, new UniversalFilterTreeListener(refBook, stringBuffer));
-
         List<RefBookAttribute> attributes = refBook.getAttributes();
 
         if (sortAttribute != null && !attributes.contains(sortAttribute)) {
@@ -190,43 +182,41 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         StringBuilder fromSql = new StringBuilder("\nfrom\n");
         fromSql.append("  ref_book_record r join t on (r.version = t.version and r.record_id = t.record_id)\n");
 
-        StringBuilder sql = new StringBuilder();
-        sql.append(String.format(WITH_STATEMENT, refBookId, sdf.format(version)));
-        sql.append("SELECT * FROM ");
-        sql.append("(select\n");
-        sql.append("  r.id as \"");
-        sql.append(RefBook.RECORD_ID_ALIAS);
-        sql.append("\",\n");
+        ps.appendQuery(String.format(WITH_STATEMENT, refBookId, sdf.format(version)));
+        ps.appendQuery("SELECT * FROM ");
+        ps.appendQuery("(select\n");
+        ps.appendQuery("  r.id as \"");
+        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+        ps.appendQuery("\",\n");
         if (isSupportOver() && sortAttribute != null) {
             // эту часть кода нельзя покрыть юнит тестами с использованием hsql потому что она не поддерживает row_number()
-            sql.append("row_number()");
+            ps.appendQuery("row_number()");
             // Надо делать сортировку
-            sql.append(" over (order by ");
-            sql.append("a");
-            sql.append(sortAttribute.getAlias());
-            sql.append(".");
-            sql.append(sortAttribute.getAttributeType().toString());
-            sql.append("_value");
-            sql.append(")");
-            sql.append(" as row_number_over,\n");
+            ps.appendQuery(" over (order by ");
+            ps.appendQuery("a");
+            ps.appendQuery(sortAttribute.getAlias());
+            ps.appendQuery(".");
+            ps.appendQuery(sortAttribute.getAttributeType().toString());
+            ps.appendQuery("_value");
+            ps.appendQuery(")");
+            ps.appendQuery(" as row_number_over,\n");
         } else {
             // База тестовая и не поддерживает row_number() значит сортировка работать не будет
-            sql.append("rownum row_number_over,\n");
+            ps.appendQuery("rownum row_number_over,\n");
         }
         for (int i = 0; i < attributes.size(); i++) {
             RefBookAttribute attribute = attributes.get(i);
             String alias = attribute.getAlias();
-            sql.append("  a");
-            sql.append(alias);
-            sql.append(".");
-            sql.append(attribute.getAttributeType().toString());
-            sql.append("_value as \"");
-            sql.append(alias);
-            sql.append("\"");
+            ps.appendQuery("  a");
+            ps.appendQuery(alias);
+            ps.appendQuery(".");
+            ps.appendQuery(attribute.getAttributeType().toString());
+            ps.appendQuery("_value as \"");
+            ps.appendQuery(alias);
+            ps.appendQuery("\"");
             if (i < attributes.size() - 1) {
-                sql.append(",\n");
+                ps.appendQuery(",\n");
             }
-
             fromSql.append("  left join ref_book_value a");
             fromSql.append(alias);
             fromSql.append(" on a");
@@ -237,23 +227,29 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             fromSql.append(attribute.getId());
             fromSql.append("\n");
         }
-        sql.append(fromSql);
-        sql.append("where\n  r.ref_book_id = ");
-        sql.append(refBookId);
-        sql.append(" and\n  status <> -1\n");
+        ps.appendQuery(fromSql.toString());
+        ps.appendQuery("where\n  r.ref_book_id = ");
+        ps.appendQuery("?");
+        ps.addParam(refBookId);
+        ps.appendQuery(" and\n  status <> -1\n");
 
-        if (stringBuffer.length() > 0) {
-            sql.append(" and\n ");
-            sql.append(stringBuffer.toString());
-            sql.append("\n");
+        PreparedStatementData filterPS = new PreparedStatementData();
+        Filter.getFilterQuery(filter, new UniversalFilterTreeListener(refBook, filterPS));
+        if (filterPS.getQuery().length() > 0) {
+            ps.appendQuery(" and\n ");
+            ps.appendQuery(filterPS.getQuery().toString());
+            ps.appendQuery("\n");
+            ps.addParam(filterPS.getParams());
         }
-        sql.append(")");
+        ps.appendQuery(")");
 
         if (pagingParams != null) {
-            sql.append(" where row_number_over between " + pagingParams.getStartIndex() + " and " + String.valueOf(pagingParams.getStartIndex() + pagingParams.getCount()));
+            ps.appendQuery(" where row_number_over between ? and ?");
+            ps.addParam(pagingParams.getStartIndex());
+            ps.addParam(String.valueOf(pagingParams.getStartIndex() + pagingParams.getCount()));
         }
 
-        return sql.toString();
+        return ps;
     }
 
     /**

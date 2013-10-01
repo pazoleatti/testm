@@ -52,9 +52,7 @@ ALIAS :	('a'..'z'|'A'..'Z'|'_')+  ('a'..'z'|'A'..'Z'|DIGIT|'_')*;
 
 FLOAT	: DIGIT+ '.' DIGIT+;
 
-STRING
-    :  '\'' ( ESC_SEQ | ~('\\'|'\'') )* '\''
-    ;
+STRING :  '\'' .* '\'';
 
 fragment
 HEX_DIGIT : ('0'..'9'|'a'..'f'|'A'..'F') ;
