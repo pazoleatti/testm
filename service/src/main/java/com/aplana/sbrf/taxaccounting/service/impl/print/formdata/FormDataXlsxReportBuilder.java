@@ -31,11 +31,6 @@ import java.util.StringTokenizer;
  */
 public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 
-    static {
-        setFileName("Налоговый_отчет_");
-        setPostfix(".xslm");
-    }
-
     private final Log logger = LogFactory.getLog(getClass());
 
     private int rowNumber = 9;
@@ -166,6 +161,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 	private Date creationDate;
 
     public FormDataXlsxReportBuilder() throws IOException {
+        super("Налоговый_отчет_", ".xlsm");
         InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
         try {
             workBook = WorkbookFactory.create(templeteInputStream);
