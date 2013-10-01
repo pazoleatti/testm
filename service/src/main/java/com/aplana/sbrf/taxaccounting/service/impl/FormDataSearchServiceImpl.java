@@ -108,11 +108,6 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 				kinds.remove(FormDataKind.ADDITIONAL);
 				kinds.remove(FormDataKind.UNP);
 			}
-            // TODO Временное решение, пункт 21 http://conf.aplana.com/pages/viewpage.action?pageId=8790172
-            if (taxType == TaxType.DEAL) {
-                kinds.remove(FormDataKind.CONSOLIDATED);
-                kinds.remove(FormDataKind.SUMMARY);
-            }
             result.setKinds(kinds);
 			
 			// все виды налоговых форм по заданному виду налога
@@ -147,12 +142,6 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			kinds.add(dft.getKind());
 			departmentIds.add(dft.getDepartmentId());
 		}
-
-        // TODO Временное решение, пункт 21 http://conf.aplana.com/pages/viewpage.action?pageId=8790172
-        if (taxType == TaxType.DEAL) {
-            kinds.remove(FormDataKind.CONSOLIDATED);
-            kinds.remove(FormDataKind.SUMMARY);
-        }
 
 		// Подразделение пользователя должно быть доступно
 		// Этот викс пришлось сделать для Ведения периодов.
