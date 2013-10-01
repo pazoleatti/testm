@@ -241,7 +241,7 @@ void generateXML() {
                                     )
                                 }
                             }
-                            def String organInfo = row.organInfo != null ? '' + getRefBookValue(4, row.organInfo).VALUE.numberValue : null
+                            def String organInfo = row.organInfo != null ? '' + getRefBookValue(70, row.organInfo).VALUE.numberValue : null
                             def String countryCode3 = row.countryCode3 != null ? '' + getRefBookValue(10, row.countryCode3).CODE.stringValue : null
                             def String organName, organINN, organKPP, organRegNum, taxpayerCode, address
                             if (row.organName != null) {
