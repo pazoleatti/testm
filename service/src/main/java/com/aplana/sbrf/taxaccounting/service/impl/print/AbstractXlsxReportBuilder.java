@@ -29,7 +29,8 @@ public abstract class AbstractXlsxReportBuilder {
     /*
      * Нужно создать в классе наследнике блок static, для определения в нем имени файла
      */
-    protected static String fileName;
+    private static String fileName;
+    private static String postfix;
 
     //
 
@@ -85,8 +86,8 @@ public abstract class AbstractXlsxReportBuilder {
         //Nothing
     }
 
-    private String flush() throws IOException {
-        File file = File.createTempFile(fileName, ".xlsx");
+    protected String flush() throws IOException {
+        File file = File.createTempFile(fileName, postfix);
         OutputStream out = new FileOutputStream(file);
         workBook.write(out);
 
@@ -116,5 +117,13 @@ public abstract class AbstractXlsxReportBuilder {
         else
             widthCellsMap.put(cellNumber, cellWidthMin);
 
+    }
+
+    public static void setFileName(String fileName) {
+        AbstractXlsxReportBuilder.fileName = fileName;
+    }
+
+    public static void setPostfix(String postfix) {
+        AbstractXlsxReportBuilder.postfix = postfix;
     }
 }
