@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import groovy.transform.Field
 
 /**
  * 400 - Матрица
@@ -26,10 +27,12 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW:
         // В ручном режиме строки добавлять нельзя
+        // addRow
         logger.warn("Добавление строк запрещено!")
         break
     case FormDataEvent.DELETE_ROW:
         // В ручном режиме строки удалять нельзя
+        //deleteRow()
         logger.warn("Удаление строк запрещено!")
         break
 // После принятия из Утверждено
@@ -47,6 +50,16 @@ switch (formDataEvent) {
         logicCheck()
         break
 }
+
+// Кэш провайдеров
+@Field
+def providerCache = [:]
+// Кэш id записей справочника
+@Field
+def recordCache = [:]
+// Кэш значений справочника
+@Field
+def refBookCache = [:]
 
 // 1.	dealNum1	п. 010 "Порядковый номер сделки по уведомлению"
 // 2.	interdependenceSing	п. 100
@@ -117,7 +130,6 @@ void checkCreation() {
 }
 
 void addRow() {
-
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
@@ -200,7 +212,7 @@ void logicCheck() {
  */
 void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     def cell = row.getCell(alias)
-    if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
+    if (cell.value != null && getRefBookValue(id, cell.value) == null) {
         def msg2 = cell.column.name
         def rowNum = row.getIndex()
         logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
@@ -260,7 +272,7 @@ void addAllStatic() {
                 def newRow = formData.createDataRow()
                 newRow.getCell('groupName').colSpan = 56
                 if (row.organName != null)
-                    newRow.groupName = refBookService.getRecordData(9, row.organName).NAME.stringValue
+                    newRow.groupName = getRefBookValue(9, row.organName).NAME.stringValue
                 newRow.setAlias('grp#'.concat(i.toString()))
                 dataRowHelper.insert(newRow, ++i + 1 - index)
                 index = 1
@@ -302,7 +314,6 @@ void consolidation() {
                 if (srcRow.getAlias() == null) {
                     def row = buildRow(srcRow, source.getFormType())
                     rows.add(row)
-                    //addRow(row, null)
                 }
             }
         }
@@ -318,28 +329,17 @@ void consolidation() {
  */
 DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     // Общие значения
+    def Date date = new Date()
 
     // "Да"
-    def Long recYesId = null
+    def Long recYesId = getRecordId(38, 'CODE', '1', date)
     // "Нет"
-    def Long recNoId = null
-
-    def valYes = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 1", null)
-    def valNo = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 0", null)
-    if (valYes != null && valYes.size() == 1) {
-        recYesId = valYes.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-    }
-    if (valNo != null && valNo.size() == 1) {
-        recNoId = valNo.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-    }
+    def Long recNoId = getRecordId(38, 'CODE', '0', date)
 
     def DataRow<Cell> row = formData.createDataRow()
 
     // Графа 2
-    def val2 = refBookFactory.getDataProvider(69L).getRecords(new Date(), null, "CODE = 1", null)
-    if (val2 != null && val2.size() == 1) {
-        row.interdependenceSing = val2.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-    }
+    row.interdependenceSing = getRecordId(69, 'CODE', '1', date)
 
     // Графа 3
     // row.f121, заполняется после графы 50
@@ -413,10 +413,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
     if (val13 != null) {
-        def values13 = refBookFactory.getDataProvider(67L).getRecords(new Date(), null, "CODE = '$val13'", null)
-        if (values13 != null && values13.size() == 1) {
-            row.dealNameCode = values13.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        }
+        row.dealNameCode = getRecordId(67, 'CODE', val13, date)
     }
 
     // Графа 14
@@ -452,7 +449,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
         case 384:
             if (srcRow.transactionType != null) {
-                def val14Rec = refBookFactory.getDataProvider(16L).getRecordData(srcRow.transactionType)
+                def val14Rec = getRefBookValue(16, srcRow.transactionType)
                 if (val14Rec.CODE != null) {
                     if (val14Rec.CODE.equals('S')) {
                         val14 = '027'
@@ -484,10 +481,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
     if (val14 != null) {
-        def values14 = refBookFactory.getDataProvider(65L).getRecords(new Date(), null, "CODE = '$val14'", null)
-        if (values14 != null && values14.size() == 1) {
-            row.taxpayerSideCode = values14.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        }
+        row.taxpayerSideCode = getRecordId(65, 'CODE', val14, date)
     }
 
     // Графа 15
@@ -502,17 +496,15 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
         case 384:
             if (srcRow.transactionMode != null) {
-                def val16Rec = refBookFactory.getDataProvider(14L).getRecordData(srcRow.transactionMode)
+                def val16Rec = getRefBookValue(14, srcRow.transactionMode)
                 if (val16Rec.ID != null && val16Rec.ID == 1) {
                     val16 = 2
                 }
             }
             break
     }
-    def values16 = refBookFactory.getDataProvider(66L).getRecords(new Date(), null, "CODE = $val16", null)
-    if (values16 != null && values16.size() == 1) {
-        row.dealPriceCode = values16.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-    }
+
+    row.dealPriceCode = getRecordId(66, 'CODE', val16, date)
 
     // Графа 17
     row.dealMemberCount = 2
@@ -600,10 +592,8 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             val23 = 1
             break
     }
-    def values23 = refBookFactory.getDataProvider(64L).getRecords(new Date(), null, "CODE = $val23", null)
-    if (values23 != null && values23.size() == 1) {
-        row.dealType = values23.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-    }
+
+    row.dealType = getRecordId(64, 'CODE', val23, date)
 
     // Графа 24
     switch (type.id) {
@@ -702,10 +692,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     }
 
     if (val27 != null) {
-        def values27 = refBookFactory.getDataProvider(34L).getRecords(new Date(), null, "CODE = '$val27'", null)
-        if (values27 != null && values27.size() == 1) {
-            row.dealSubjectCode3 = values27.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        }
+        row.dealSubjectCode3 = getRecordId(34, 'CODE', val27, date)
     }
 
     // Графа 28
@@ -786,7 +773,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
     // Графа 32, Графа 33, Графа 34, Графа 35
     if (type.id == 393 || type.id == 394) {
-        def values32 = refBookFactory.getDataProvider(18L).getRecordData(srcRow.signPhis)
+        def values32 = getRefBookValue(18, srcRow.signPhis)
         if (values32 != null && values32.SIGN.stringValue.equals("Физическая поставка")) {
             if (type.id == 393) {
                 row.countryCode1 = srcRow.countryCode2
@@ -826,14 +813,8 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             row.locality2 = srcRow.locality2
             break
         default:
-            def values36 = refBookFactory.getDataProvider(10L).getRecords(new Date(), null, "CODE = '643'", null)
-            if (values36 != null && values36.size() == 1) {
-                row.countryCode2 = values36.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-            }
-            def values37 = refBookFactory.getDataProvider(4L).getRecords(new Date(), null, "CODE = '77'", null)
-            if (values37 != null && values37.size() == 1) {
-                row.region2 = values37.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-            }
+            row.countryCode2 = getRecordId(10, 'CODE', '643', date)
+            row.region2 = getRecordId(4, 'CODE', '77', date)
             row.city2 = 'Москва'
             row.locality2 = row.city2
             break
@@ -876,10 +857,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
                 break
         }
         if (val41 != null) {
-            def values41 = refBookFactory.getDataProvider(12L).getRecords(new Date(), null, "CODE = '$val41'", null)
-            if (values41 != null && values41.size() == 1) {
-                row.okeiCode = values41.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-            }
+            row.okeiCode = getRecordId(12, 'CODE', val41, date)
         }
     }
 
@@ -1078,7 +1056,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         // Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
         // «Организации – участники контролируемых сделок» атрибут «Резидент оффшорной зоны» = 1,
         // то заполняется значением «0». В ином случае заполняется значением «1».
-        def val = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
+        def val = getRefBookValue(9, row.organName)
         row.f121 = val.OFFSHORE.numberValue == 1 ? recNoId : recYesId
 
         // Графа 5 (логика, обратная графе 3)
@@ -1105,7 +1083,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         Calendar compareCalendar11 = Calendar.getInstance()
         compareCalendar11.set(2014, 1, 1)
 
-        def val11 = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
+        def val11 = getRefBookValue(9, row.organName)
 
         if (row.dealDoneDate.before(compareCalendar11.getTime()) || (val11 != null && val11.OFFSHORE.referenceValue == recYesId)) {
             row.f135 = recNoId
@@ -1113,7 +1091,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     }
 
     if (row.organName != null) {
-        def organ = refBookFactory.getDataProvider(9L).getRecordData(row.organName)
+        def organ = getRefBookValue(9, row.organName)
 
         // Графа 48
         row.organInfo = organ.ORGANIZATION.referenceValue
@@ -1136,4 +1114,48 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     }
 
     return row
+}
+
+// Получение Id записи с использованием кэширования
+def getRecordId(def ref_id, String alias, String value, Date date) {
+    String filter = "LOWER($alias) = LOWER('$value')"
+    if (value == '') filter = "$alias is null"
+    if (recordCache[ref_id] != null) {
+        if (recordCache[ref_id][filter] != null) {
+            return recordCache[ref_id][filter]
+        }
+    } else {
+        recordCache[ref_id] = [:]
+    }
+    def records = getProvider(ref_id).getRecords(date, null, filter, null)
+    if (records.size() == 1) {
+        recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        return recordCache[ref_id][filter]
+    }
+    return null
+}
+
+/**
+ * Получение провайдера с использованием кэширования
+ * @param providerId
+ * @return
+ */
+def getProvider(def long providerId) {
+    if (!providerCache.containsKey(providerId)) {
+        providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
+    }
+    return providerCache.get(providerId)
+}
+
+/**
+ * Разыменование с использованием кэширования
+ * @param refBookId
+ * @param recordId
+ * @return
+ */
+def getRefBookValue(def long refBookId, def long recordId) {
+    if (!refBookCache.containsKey(recordId)) {
+        refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
+    }
+    return refBookCache.get(recordId)
 }
