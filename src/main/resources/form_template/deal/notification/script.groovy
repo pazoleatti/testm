@@ -39,10 +39,12 @@ def providerCache = [:]
 def refBookCache = [:]
 
 void checkDeparmentParams(LogLevel logLevel) {
+    def date = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
+
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    def departmentParam = getProvider(37).getRecords(new Date(), null, "DEPARTMENT_ID = '$departmentId'", null).get(0)
+    def departmentParam = getProvider(37).getRecords(date, null, "DEPARTMENT_ID = '$departmentId'", null).get(0)
 
     if (departmentParam == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
@@ -63,11 +65,12 @@ void checkDeparmentParams(LogLevel logLevel) {
  * Запуск генерации XML
  */
 void generateXML() {
+    def date = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
 
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    def departmentParam = getProvider(37).getRecords(new Date(), null, "DEPARTMENT_ID = '$departmentId'", null).get(0)
+    def departmentParam = getProvider(37).getRecords(date, null, "DEPARTMENT_ID = '$departmentId'", null).get(0)
 
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
 
@@ -353,4 +356,3 @@ def getRefBookValue(def long refBookId, def long recordId) {
     }
     return refBookCache.get(recordId)
 }
-
