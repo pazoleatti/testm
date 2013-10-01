@@ -470,10 +470,8 @@ def checkRequiredColumns(def row, def columns) {
 
     def cell
     columns.each {
-        logger.info("getColumnName(row, it) = ${getColumnName(row, it)}")
         cell = row.getCell(it)
         if (cell.getValue() == null || cell.getValue() == '') {
-            logger.info("getColumnName(row, it) = ${getColumnName(row, it)}")
             def name = getColumnName(row, it)
             colNames.add('"' + name + '"')
         }
