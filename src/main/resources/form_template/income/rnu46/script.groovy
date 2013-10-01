@@ -95,7 +95,7 @@ def addNewRow() {
     def size = getRows(data).size()
     def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
     // графа 2..7, 9, 17..19
-    ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed',
+    ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed', 'usefulLifeWithUsed',
             'specCoef', 'exploitationStart', 'usefullLifeEnd', 'rentEnd'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -125,8 +125,14 @@ void calc() {
             'specCoef', 'exploitationStart', 'usefullLifeEnd', 'rentEnd']
 
     for (def row : rows) {
+        if (row.monthsUsed >= getTermAttribute(row.usefulLife)) {
+            requiredColumns.add('usefulLifeWithUsed')
+        }
         if (!checkRequiredColumns(row, requiredColumns, true)) {
             return
+        }
+        if (requiredColumns.contains('usefulLifeWithUsed')) {
+            requiredColumns.remove('usefulLifeWithUsed')
         }
     }
 
@@ -136,9 +142,18 @@ void calc() {
 
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def lastDay2001 = format.parse('31.12.2001')
+    def check17 = format.parse('01.01.2006')
     // последнее число предыдущего месяца
     def endDate = reportPeriodService.getEndDate(formData.reportPeriodId)
     def lastDayPrevMonth = (endDate ? endDate.getTime() : null)
+
+    /** Дата начала отчетного периода. */
+    def tmpDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+    def rpStartDate = (tmpDate ? tmpDate.getTime() : null)
+
+    /** Дата окончания отчетного периода. */
+    tmpDate = reportPeriodService.getEndDate(formData.reportPeriodId)
+    def rpEndDate = (tmpDate ? tmpDate.getTime() : null)
 
     def tmp
     rows.eachWithIndex { row, index ->
@@ -147,28 +162,44 @@ void calc() {
 
         // графа 8
         // TODO (Ramil Timerbaev) спросить у аналитика
-        if (row.specCoef > 0) {
-            tmp = (row.usefulLife - row.monthsUsed) / row.specCoef
-        } else {
-            tmp = 0 // TODO (Ramil Timerbaev) не описано в чтз
+        if (row.monthsUsed < getTermAttribute(row.usefulLife)) {
+            if (row.specCoef > 0) {
+                row.usefulLifeWithUsed = roundTo(((getTermAttribute(row.usefulLife) - row.monthsUsed) / row.specCoef), 0)
+            } else {
+                row.usefulLifeWithUsed = roundTo((getTermAttribute(row.usefulLife) - row.monthsUsed), 0)
+            }
         }
-        row.usefulLifeWithUsed = roundTo(tmp, 0)
+        logger.info('графа 8 = ' + row.usefulLifeWithUsed)
 
         // графа 10
         tmp = 0
         if (row.amortGroup in ['1', '2', '8', '9', '10']) {
-            tmp = row.cost * 0.1
+            tmp = row.cost * 10
         } else if (row.amortGroup in ('3'..'7')) {
-            tmp = row.cost * 0.3
+            tmp = row.cost * 30
+        } else if (row.exploitationStart < check17) {
+            tmp = 0
         }
         row.cost10perMonth = roundTo(tmp, 2)
 
+        // графа 11
+        // TODO (Ramil Timerbaev) getFromOld() = «Графа 11» РНУ-46 за предыдущий месяц
+/*        boolean isJanuary = false // TODO (Aydar Kadyrgulov) сделать проверку "Если форма создается за январь". пока можем проверить только отчетный период
+        if (isJanuary) {
+            row.cost10perTaxPeriod = row.cost10perMonth
+        } else {
+            row.cost10perTaxPeriod = row.cost10perMonth + getFromOld()
+        }*/
+
         // графа 12
-        // TODO (Ramil Timerbaev) getFromOld() = 12 графа предыдущего месяца
-        row.cost10perExploitation = getFromOld() + row.cost10perMonth
+        // TODO (Aydar Kadyrgulov) getFromOld() = «Графа 12» (РНУ-46 за предыдущий месяц)
+        if (rpStartDate < row.exploitationStart && row.exploitationStart < rpEndDate) {
+            row.cost10perExploitation = row.cost10perMonth
+        } else {
+            row.cost10perExploitation =  row.cost10perMonth + getFromOld()
+        }
 
         // графа 13
-        tmp = 0
         if (row.usefulLifeWithUsed != 0) {
             tmp = (1 / row.usefulLifeWithUsed) * 100
         }
@@ -199,6 +230,27 @@ void calc() {
             // TODO (Ramil Timerbaev) getFromOld() = 16 графа предыдущего месяца
             row.amortExploitation = getFromOld() + row.amortMonth
         }
+
+// графа 1  - rowNumber
+// графа 2  - invNumber
+// графа 3  - name
+// графа 4  - cost
+// графа 5  - amortGroup
+// графа 6  - usefulLife
+// графа 7  - monthsUsed
+// графа 8  - usefulLifeWithUsed
+// графа 9  - specCoef
+// графа 10 - cost10perMonth
+// графа 11 - cost10perTaxPeriod
+// графа 12 - cost10perExploitation
+// графа 13 - amortNorm
+// графа 14 - amortMonth
+// графа 15 - amortTaxPeriod
+// графа 16 - amortExploitation
+// графа 17 - exploitationStart
+// графа 18 - usefullLifeEnd
+// графа 19 - rentEnd
+
     }
     data.save(getRows(data))
 }
@@ -242,20 +294,44 @@ def logicalCheck(def useLog) {
     def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
     def lastDayPrevMonth = (tmp ? tmp.getTime() : null)
 
-    def hasError
+    /** Дата начала отчетного периода. */
+    def tmpDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+    def rpStartDate = (tmpDate ? tmpDate.getTime() : null)
+
+    /** Дата окончания отчетного периода. */
+    tmpDate = reportPeriodService.getEndDate(formData.reportPeriodId)
+    def rpEndDate = (tmpDate ? tmpDate.getTime() : null)
+
+
+    // 4. Проверки существования необходимых экземпляров форм
+    if(getFromOld() == null) {
+        logger.error('Отсутствуют данные за прошлые отчетные периоды!')
+        return false
+    }
+
     for (def row : getRows(data)) {
         // 1. Обязательность заполнения поля (графа 1..18)
         if (!checkRequiredColumns(row, columns, useLog)) {
             return
         }
 
-        // 2. Проверка на уникальность поля «инвентарный номер» (графа 2)
-        // TODO (Ramil Timerbaev) Как должна производиться эта проверка?
-        if (false) {
-            logger.warn('Инвентарный номер не уникальный!')
+        for (def rowB : getRows(data)) {
+            // 2. Проверка на уникальность поля «№ пп»
+            if(!row.equals(rowB) && row.rowNumber ==rowB.rowNumber){
+                logger.error("В строке $row.rowNumber нарушена уникальность номера по порядку!")
+                return false
+            }
+            // 3. Проверка на уникальность поля «инвентарный номер»
+            if(!row.equals(rowB) && row.inventoryNumber ==rowB.inventoryNumber){
+                logger.error("В строке $row.rowNumber нарушена уникальность инвентарного номера!")
+                return false
+            }
         }
+    }
 
-        // 3. Проверка на нулевые значения (графа 9, 10, 11, 13, 14, 15)
+    for (def row : getRows(data)) {
+
+         // 5. Проверка на нулевые значения (графа 9, 10, 11, 13, 14, 15)
         if (row.specCoef == 0 &&
                 row.cost10perMonth == 0 &&
                 row.cost10perTaxPeriod == 0 &&
@@ -266,29 +342,37 @@ def logicalCheck(def useLog) {
             return false
         }
 
-        // 4. Проверка суммы расходов в виде капитальных вложений с начала года (графа 10, 9, 10 (за прошлый месяц), 9 (за предыдущие месяцы текущего года))
-        if (row.cost10perMonth >= row.specCoef &&
-                // TODO (Ramil Timerbaev) getFromOld() = 10 графа предыдущего месяца
-                row.cost10perMonth == row.specCoef + getFromOld() &&
-                // TODO (Ramil Timerbaev) getFromOld() = сумма графы 9 всех предыдущих месяцев
-                row.cost10perMonth == getFromOld()) {
+        // 6. Проверка суммы расходов в виде капитальных вложений с начала года
+        if (row.cost10perTaxPeriod >= row.cost10perMonth &&
+                // TODO (Ramil Timerbaev) getFromOld() = 11 графа предыдущего месяца
+                row.cost10perTaxPeriod == row.cost10perTaxPeriod + getFromOld() &&
+                // TODO (Ramil Timerbaev) getFromOld() = сумма графы 10 всех предыдущих месяцев (текущего года)
+                row.cost10perTaxPeriod == getFromOld()
+
+                // TODO (Aydar Kadyrgulov) удалить && false
+                && false
+        ) {
             logger.error('Неверная сумма расходов в виде капитальных вложений с начала года!')
             return false
         }
 
-        // 5. Проверка суммы начисленной амортизации с начала года (графа 14, 13, 14 (за прошлый месяц), 13 (за предыдущие месяцы текущего года))
-        if (row.amortMonth < row.amortNorm ||
-                // TODO (Ramil Timerbaev) getFromOld() = 14 графа предыдущего месяца
-                row.amortMonth != row.amortNorm + getFromOld() ||
-                // TODO (Ramil Timerbaev) getFromOld() = сумма графы 13 всех предыдущих месяцев
-                row.amortMonth != getFromOld()) {
+        // 7. Проверка суммы начисленной амортизации с начала года
+        if (row.amortTaxPeriod < row.amortMonth ||
+                // TODO (Ramil Timerbaev) getFromOld() = 15 графа предыдущего месяца
+                row.amortTaxPeriod != row.cost10perTaxPeriod + getFromOld() ||
+                // TODO (Ramil Timerbaev) getFromOld() = сумма графы 14 всех предыдущих месяцев текущего года
+                row.amortTaxPeriod != getFromOld()) {
             logger.error('Неверная сумма начисленной амортизации с начала года!')
             return false
         }
 
-        // 6. Арифметическая проверка графы 8
+        // 8. Арифметические проверки расчета неитоговых графы
+        // Графы 8, 10-16, 18 всех строк формы содержат значения, рассчитанные согласно алгоритмам расчета граф 8, 10-16, 18 из раздела 6.3.4.1
+
+        // Арифметическая проверка графы 8
+        // TODO (Aydar Kadyrgulov)
         if (row.specCoef < 0) {
-            tmp = (row.usefulLife - row.monthsUsed) / row.specCoef
+            tmp = (getTermAttribute(row.usefulLife) - row.monthsUsed) / row.specCoef
         } else {
             tmp = 0 // TODO (Ramil Timerbaev) не описано в чтз
         }
@@ -296,7 +380,7 @@ def logicalCheck(def useLog) {
             logger.warn('Неверное значение графы «Срок полезного использования с учётом срока эксплуатации предыдущими собственниками (арендодателями, ссудодателями) либо установленный самостоятельно, (мес.)»!')
         }
 
-        // 7. Арифметическая проверка графы 10
+        // Арифметическая проверка графы 10
         tmp = 0
         if (row.amortGroup in ['1', '2', '8', '9', '10']) {
             tmp = row.cost * 0.1
@@ -304,10 +388,11 @@ def logicalCheck(def useLog) {
             tmp = row.cost * 0.3
         }
         if (row.cost10perMonth != roundTo(tmp, 2)) {
-            logger.warn('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.За месяц»!')
+            logger.error('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.За месяц»!')
+            return false
         }
 
-        // 8. Арифметическая проверка графы 11
+        // Арифметическая проверка графы 11
         if (isFirstMonth()) {
             tmp = row.cost10perMonth
 
@@ -316,16 +401,25 @@ def logicalCheck(def useLog) {
             tmp = getFromOld() + row.cost10perMonth
         }
         if (row.cost10perTaxPeriod != tmp) {
-            logger.warn('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.с начала налогового периода»!')
+            logger.error('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.с начала налогового периода»!')
+            return false
         }
 
-        // 9. Арифметическая проверка графы 12
-        // TODO (Ramil Timerbaev) getFromOld() = 12 графа предыдущего месяца
-        if (row.cost10perExploitation != getFromOld() + row.cost10perMonth) {
-            logger.warn('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.с даты ввода в эксплуатацию»!')
+        // Арифметическая проверка графы 12
+        if (row.exploitationStart > rpStartDate && row.exploitationStart < rpEndDate) {
+            if (row.cost10perExploitation != row.cost10perMonth) {
+                logger.error("В строке $row.rowNumber неверно рассчитана графа «10% (30%) от первоначальной стоимости, включаемые в расходы. С даты ввода в эксплуатацию»")
+                return false
+            }
+        } else {
+            // TODO (Ramil Timerbaev) getFromOld() = 12 графа предыдущего месяца
+            if (row.cost10perExploitation != row.cost10perMonth + getFromOld()) {
+                logger.error("В строке $row.rowNumber неверно рассчитана графа «10% (30%) от первоначальной стоимости, включаемые в расходы. С даты ввода в эксплуатацию»")
+                return false
+            }
         }
 
-        // 10. Арифметическая проверка графы 13
+        // Арифметическая проверка графы 13
         if (row.usefulLifeWithUsed != 0) {
             tmp = (1 / row.usefulLifeWithUsed) * 100
         } else if (row.usefulLifeWithUsed == 0) {
@@ -335,7 +429,7 @@ def logicalCheck(def useLog) {
             logger.warn('Неверное значение графы «Норма амортизации (процентов в мес.)»!')
         }
 
-        // 11. Арифметическая проверка графы 14
+        // Арифметическая проверка графы 14
         // TODO (Ramil Timerbaev) требуется пояснение относительно этой формулы
         if (row.usefullLifeEnd > lastDay2001) {
             // row.amortMonth = (row.cost (на начало месяца) - row.cost10perExploitation - row.amortExploitation (на начало месяца)) / (row.usefullLifeEnd - последнее число предыдущего месяца)
@@ -471,6 +565,7 @@ void checkCreation() {
  */
 def getFromOld() {
     // TODO (Ramil Timerbaev)
+    // пока блокируется http://jira.aplana.com/browse/SBRFACCTAX-4515
     /*
     // предыдущий отчётный период
     def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
@@ -575,4 +670,13 @@ BigDecimal roundTo(BigDecimal value, int round) {
     } else {
         return value
     }
+}
+
+/**
+ * Получить атрибут 645 - "Срок полезного использования (месяцев)" справочник 71 - "Амортизационные группы".
+ *
+ * @param id идентификатор записи справочника
+ */
+def getTermAttribute(def id) {
+    return refBookService.getNumberValue(71, id, 'TERM')
 }
