@@ -413,7 +413,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
     if (val13 != null) {
-        row.dealNameCode = getRecordId(67, 'CODE', val13, date)
+        row.dealNameCode = getRecordId(67, 'CODE', "$val13", date)
     }
 
     // Графа 14
@@ -481,7 +481,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
     if (val14 != null) {
-        row.taxpayerSideCode = getRecordId(65, 'CODE', val14, date)
+        row.taxpayerSideCode = getRecordId(65, 'CODE', "$val14", date)
     }
 
     // Графа 15
@@ -504,7 +504,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
 
-    row.dealPriceCode = getRecordId(66, 'CODE', val16, date)
+    row.dealPriceCode = getRecordId(66, 'CODE', "$val16", date)
 
     // Графа 17
     row.dealMemberCount = 2
@@ -593,7 +593,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
 
-    row.dealType = getRecordId(64, 'CODE', val23, date)
+    row.dealType = getRecordId(64, 'CODE', "$val23", date)
 
     // Графа 24
     switch (type.id) {
@@ -692,7 +692,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     }
 
     if (val27 != null) {
-        row.dealSubjectCode3 = getRecordId(34, 'CODE', val27, date)
+        row.dealSubjectCode3 = getRecordId(34, 'CODE', "$val27", date)
     }
 
     // Графа 28
@@ -857,7 +857,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
                 break
         }
         if (val41 != null) {
-            row.okeiCode = getRecordId(12, 'CODE', val41, date)
+            row.okeiCode = getRecordId(12, 'CODE', "$val41", date)
         }
     }
 
