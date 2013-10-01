@@ -773,7 +773,9 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
     // Графа 32, Графа 33, Графа 34, Графа 35
     if (type.id == 393 || type.id == 394) {
-        def values32 = getRefBookValue(18, srcRow.signPhis)
+        sign32 = type.id == 393 ? srcRow.signPhis : srcRow.deliverySign
+		if(sign32!=null){
+        def values32 =  getRefBookValue(18, sign32)
         if (values32 != null && values32.SIGN.stringValue.equals("Физическая поставка")) {
             if (type.id == 393) {
                 row.countryCode1 = srcRow.countryCode2
@@ -789,6 +791,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
                 row.locality1 = srcRow.locality
             }
         }
+		}
     }
 
     // Графа 36, Графа 37, Графа 38, Графа 39

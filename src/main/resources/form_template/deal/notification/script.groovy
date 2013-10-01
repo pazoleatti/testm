@@ -199,7 +199,7 @@ void generateXML() {
                             ДохРасхСд(
                                     [СумДохСд: row.income != null ? row.income : 0] +
                                             (row.incomeIncludingRegulation != null ? [СумДохСдРег: row.incomeIncludingRegulation] : [:]) +
-                                            [СумРасхСд: row.outcome != null ? row.outcome : 0] +
+                                            [СумРасхСд: row.outcome != null ? row.outcome : '-'] +
                                             (row.outcomeIncludingRegulation != null ? [СумРасхСдРег: row.outcomeIncludingRegulation] : [:])
                             )
                             def String dealType = row.dealType != null ? '' + getRefBookValue(64, row.dealType).CODE.numberValue : null
@@ -250,7 +250,7 @@ void generateXML() {
                             if (row.organName != null) {
                                 def map = getRefBookValue(9, row.organName)
                                 organName = map.NAME.stringValue
-                                organINN = '' + map.INN_KIO.stringValue
+                                organINN = map.INN_KIO.stringValue
                                 organKPP = '' + map.KPP.numberValue
                                 organRegNum = map.REG_NUM.stringValue
                                 taxpayerCode = map.TAXPAYER_CODE.stringValue
