@@ -2,6 +2,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.filter.FilterTreeListener;
+import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -14,19 +15,21 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  * of the available methods.
  */
 public class UniversalFilterTreeListener implements FilterTreeListener {
-    // объект для создания строки запроса
-    private StringBuffer query;
+    // модель для preparedStatement
+    PreparedStatementData ps;
     // справочник
     private RefBook refBook;
 
-    public UniversalFilterTreeListener(RefBook refBook, StringBuffer stringBuffer){
-        this.query = stringBuffer;
+    public UniversalFilterTreeListener(RefBook refBook, PreparedStatementData preparedStatementData){
+        ps = preparedStatementData;
         this.refBook = refBook;
     }
 
 	@Override public void enterNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) {
         if (ctx.link_type() != null){
-            query.append(" ").append(ctx.link_type().getText()).append(" ");
+            ps.appendQuery(" ");
+            ps.appendQuery(ctx.link_type().getText());
+            ps.appendQuery(" ");
         }
     }
 
@@ -35,8 +38,11 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
     @Override
     public void enterStrtype(@NotNull FilterTreeParser.StrtypeContext ctx) {
         if (ctx.ALIAS() != null){
-            query.append(buildAliasStr(ctx.getText()));
-        } else {
+            ps.appendQuery(buildAliasStr(ctx.getText()));
+        } else if(ctx.STRING() != null){
+            ps.appendQuery("?");
+            ps.addParam(ctx.getText());
+        } else  {
             appendToQuery(ctx.getText());
         }
     }
@@ -46,23 +52,27 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void enterFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
-        query.append(ctx.functype().getText()).append("(");
+        ps.appendQuery(ctx.functype().getText());
+        ps.appendQuery("(");
     }
 
     @Override
     public void exitFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
-        query.append(")");
+        ps.appendQuery(")");
     }
 
 	@Override public void enterOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx) {
-        query.append(" ").append(ctx.getText()).append(" ");
+        ps.appendQuery(" ");
+        ps.appendQuery(ctx.getText());
+        ps.appendQuery(" ");
     }
 
 	@Override public void exitOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx) { }
 
 	@Override public void enterQuery(@NotNull FilterTreeParser.QueryContext ctx) { }
 
-	@Override public void exitQuery(@NotNull FilterTreeParser.QueryContext ctx) { }
+	@Override
+    public void exitQuery(@NotNull FilterTreeParser.QueryContext ctx) { }
 
     @Override
     public void enterStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {}
@@ -74,11 +84,11 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
         if (ctx.link_type() != null){
             appendToQuery(ctx.link_type().getText());
         }
-        query.append("(");
+        ps.appendQuery("(");
     }
 
 	@Override public void exitWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx) {
-        query.append(")");
+        ps.appendQuery(")");
     }
 
     @Override
@@ -98,7 +108,7 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void exitIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
-        query.append(" is null");
+        ps.appendQuery(" is null");
     }
 
 	@Override public void enterLink_type(@NotNull FilterTreeParser.Link_typeContext ctx) { }
@@ -108,9 +118,12 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
     @Override
     public void enterSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx) {
         if (ctx.ALIAS() != null){
-            query.append(buildAliasStr(ctx.getText()));
+            ps.appendQuery(buildAliasStr(ctx.getText()));
+        } else if(ctx.STRING() != null){
+            ps.appendQuery("?");
+            ps.addParam(ctx.getText().substring(1, ctx.getText().length() - 1));
         } else {
-            query.append(ctx.getText());
+            ps.appendQuery(ctx.getText());
         }
     }
 
@@ -126,7 +139,8 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 	@Override public void visitErrorNode(@NotNull ErrorNode node) { }
 
     private void appendToQuery(String queryPart){
-        query.append(" ").append(queryPart);
+        ps.appendQuery(" ");
+        ps.appendQuery(queryPart);
     }
 
     private String buildAliasStr(String alias){
