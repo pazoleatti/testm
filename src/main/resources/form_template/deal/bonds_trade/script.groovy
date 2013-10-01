@@ -312,7 +312,7 @@ void importData() {
 
     // добавить данные в форму
     try{
-        if (!checkTableHead(xml, 3)) {
+        if (!checkTableHead(xml, 2)) {
             logger.error('Заголовок таблицы не соответствует требуемой структуре!')
             return
         }
@@ -340,7 +340,7 @@ def addData(def xml) {
         indexRow++
 
         // пропустить шапку таблицы
-        if (indexRow <= 3) {
+        if (indexRow <= 2) {
             continue
         }
 
@@ -446,7 +446,7 @@ def addData(def xml) {
         // графа 18
         newRow.transactionType = getRecordId(16, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
 
-        data.insert(newRow, indexRow - 3)
+        data.insert(newRow, indexRow - 2)
     }
 }
 
@@ -466,72 +466,55 @@ def checkTableHead(def xml, def headRowCount) {
     def result = (
             xml.row[0].cell[0] == 'Сокращенная форма\nДанные для расчета сумм доходов по сделкам' &&
             xml.row[1].cell[0] == 'Дата сделки (поставки)' &&
-            xml.row[2].cell[0] == '2' &&
-            xml.row[3].cell[0] == 'гр. 2' &&
+            xml.row[2].cell[0] == 'гр. 2' &&
 
             xml.row[1].cell[1] == 'Наименование контрагента и ОПФ' &&
-            xml.row[2].cell[1] == '3' &&
-            xml.row[3].cell[1] == 'гр. 3' &&
+            xml.row[2].cell[1] == 'гр. 3' &&
 
             xml.row[1].cell[2] == 'Режим переговорных сделок' &&
-            xml.row[2].cell[2] == '4' &&
-            xml.row[3].cell[2] == 'гр. 4' &&
+            xml.row[2].cell[2] == 'гр. 4' &&
 
             xml.row[1].cell[3] == 'ИНН/ КИО контрагента' &&
-            xml.row[2].cell[3] == '5' &&
-            xml.row[3].cell[3] == 'гр. 5' &&
+            xml.row[2].cell[3] == 'гр. 5' &&
 
             xml.row[1].cell[4] == 'Страна местонахождения  контрагента' &&
-            xml.row[2].cell[4] == '6' &&
-            xml.row[3].cell[4] == 'гр. 6.1' &&
+            xml.row[2].cell[4] == 'гр. 6.1' &&
 
             xml.row[1].cell[5] == 'Код страны местонахождения  контрагента' &&
-            xml.row[2].cell[5] == '7' &&
-            xml.row[3].cell[5] == 'гр. 6.2' &&
+            xml.row[2].cell[5] == 'гр. 6.2' &&
 
             xml.row[1].cell[6] == 'Сумма сделки (с учетом НКД), в валюте расчетов' &&
-            xml.row[2].cell[6] == '8' &&
-            xml.row[3].cell[6] == 'гр. 7.1' &&
+            xml.row[2].cell[6] == 'гр. 7.1' &&
 
             xml.row[1].cell[7] == 'Валюта расчетов по сделке' &&
-            xml.row[2].cell[7] == '9' &&
-            xml.row[3].cell[7] == 'гр. 7.2' &&
+            xml.row[2].cell[7] == 'гр. 7.2' &&
 
             xml.row[1].cell[8] == 'Курс ЦБ РФ' &&
-            xml.row[2].cell[8] == '10' &&
-            xml.row[3].cell[8] == 'гр. 7.3' &&
+            xml.row[2].cell[8] == 'гр. 7.3' &&
 
             xml.row[1].cell[9] == 'Сумма сделки (с учетом НКД), руб.' &&
-            xml.row[2].cell[9] == '11' &&
-            xml.row[3].cell[9] == 'гр. 7.4' &&
+            xml.row[2].cell[9] == 'гр. 7.4' &&
 
             xml.row[0].cell[10] == 'Номер договора' &&
-            xml.row[2].cell[10] == '12' &&
-            xml.row[3].cell[10] == 'гр. 8' &&
+            xml.row[2].cell[10] == 'гр. 8' &&
 
             xml.row[0].cell[11] == 'Дата договора' &&
-            xml.row[2].cell[11] == '13' &&
-            xml.row[3].cell[11] == 'гр. 9' &&
+            xml.row[2].cell[11] == 'гр. 9' &&
 
             xml.row[0].cell[12] == 'Дата (заключения) сделки' &&
-            xml.row[2].cell[12] == '14' &&
-            xml.row[3].cell[12] == 'гр. 10' &&
+            xml.row[2].cell[12] == 'гр. 10' &&
 
             xml.row[0].cell[13] == 'Регистрационный код ценной бумаги' &&
-            xml.row[2].cell[13] == '15' &&
-            xml.row[3].cell[13] == 'гр. 11' &&
+            xml.row[2].cell[13] == 'гр. 11' &&
 
             xml.row[0].cell[14] == 'Количество бумаг по сделке, шт.' &&
-            xml.row[2].cell[14] == '16' &&
-            xml.row[3].cell[14] == 'гр. 12' &&
+            xml.row[2].cell[14] == 'гр. 12' &&
 
             xml.row[0].cell[15] == 'Цена за 1 шт., руб. ' &&
-            xml.row[2].cell[15] == '17' &&
-            xml.row[3].cell[15] == 'гр. 13' &&
+            xml.row[2].cell[15] == 'гр. 13' &&
 
             xml.row[0].cell[16] == 'Тип сделки' &&
-            xml.row[2].cell[16] == '18' &&
-            xml.row[3].cell[16] == 'гр. 14')
+            xml.row[2].cell[16] == 'гр. 14')
     return result
 }
 
@@ -553,7 +536,7 @@ def getNumber(def value, int indexRow, int indexCell) {
     try {
         return new BigDecimal(tmp)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит недопустимый тип данных!")
     }
 }
 
@@ -568,7 +551,7 @@ def getDate(def value, int indexRow, int indexCell) {
     try {
         return format.parse(value)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит недопустимый тип данных!")
     }
 }
 
@@ -596,6 +579,6 @@ def getRecordId(def ref_id, String alias, String value, Date date, def cache, in
         cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
     } else {
-        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
+        throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
 }

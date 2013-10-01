@@ -28,5 +28,13 @@ public enum FormDataSearchOrdering {
 	/**
 	 * По наименованию отчётного периода
 	 */
-	REPORT_PERIOD_NAME
+	REPORT_PERIOD_NAME,
+	/**
+	 * По году
+	 */
+	YEAR,
+	/**
+	 * По признаку возврата
+	 */
+	RETURN
 }

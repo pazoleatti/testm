@@ -240,6 +240,10 @@ public class FormDataListView extends
 			this.sortByColumn = FormDataSearchOrdering.KIND;
 		} else if (FORM_DATA_TYPE_TITLE.equals(sortByColumn)){
 			this.sortByColumn = FormDataSearchOrdering.FORM_TYPE_NAME;
+		} else if (PERIOD_YEAR_TITLE.equals(sortByColumn)) {
+			this.sortByColumn = FormDataSearchOrdering.YEAR;
+		} else if (FORM_DATA_RETURN_TITLE.equals(sortByColumn)) {
+			this.sortByColumn = FormDataSearchOrdering.RETURN;
 		} else if (DEPARTMENT_TITLE.equals(sortByColumn)){
 			this.sortByColumn = FormDataSearchOrdering.DEPARTMENT_NAME;
 		} else if (REPORT_PERIOD_TITLE.equals(sortByColumn)){
