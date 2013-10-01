@@ -222,11 +222,11 @@ $F{ОКАТО}]]></initialValueExpression>
 			<variableExpression><![CDATA[$F{НалБаза} == null ?
 "-----------------"
 :
-($F{НалБаза}+"-----------------").substring(0,17)]]></variableExpression>
+("-----------------".substring(0,17-$F{НалБаза}.length())+$F{НалБаза})]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{НалБаза} == null ?
 "-----------------"
 :
-($F{НалБаза}+"-----------------").substring(0,17)]]></initialValueExpression>
+("-----------------".substring(0,17-$F{НалБаза}.length())+$F{НалБаза})]]></initialValueExpression>
 		</variable>
 		<variable name="OKEI" class="java.lang.String">
 			<variableExpression><![CDATA[$F{ОКЕИНалБаза} == null ?
@@ -272,11 +272,11 @@ $F{ОКАТО}]]></initialValueExpression>
 			<variableExpression><![CDATA[$F{НалСтавка} == null?
 "---------"
 :
-($F{НалСтавка}+"---------").substring(0,9)]]></variableExpression>
+("---------".substring(0,9-$F{НалСтавка}.length())+$F{НалСтавка})]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{НалСтавка} == null?
 "---------"
 :
-($F{НалСтавка}+"---------").substring(0,9)]]></initialValueExpression>
+("---------".substring(0,9-$F{НалСтавка}.length())+$F{НалСтавка})]]></initialValueExpression>
 		</variable>
 		<variable name="LMonth" class="java.lang.String">
 			<variableExpression><![CDATA[$F{ЛьготМесТС} == null ?
