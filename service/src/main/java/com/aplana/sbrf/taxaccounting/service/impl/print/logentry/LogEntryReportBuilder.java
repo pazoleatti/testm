@@ -13,7 +13,8 @@ import java.util.List;
 public class LogEntryReportBuilder extends AbstractXlsxReportBuilder {
 
     static {
-        fileName = "Список_ошибок_";
+        setFileName("Список_ошибок_");
+        setPostfix(".xlsx");
     }
 	
 	private static final String FIRST_COLUMN = "№ п/п";
