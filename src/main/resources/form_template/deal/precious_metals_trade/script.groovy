@@ -1058,7 +1058,7 @@ def getRecordId(def ref_id, String alias, String value, Date date, int rowIndex,
         recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return recordCache[ref_id][filter]
     } else if (mandatory || value != '') {
-        throw new Exception("Строка ${rowIndex}, графа «$cellName» содержит значение, отсутствующее в справочнике!")
+        throw new Exception("Строка ${rowIndex + 2}, графа «$cellName» содержит значение, отсутствующее в справочнике!")
     }
     return null
 }
