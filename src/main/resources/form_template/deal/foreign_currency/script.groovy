@@ -540,11 +540,11 @@ void importData() {
 
     // добавить данные в форму
     try {
-        if (!checkTableHead(xml, 4)) {
+        if (!checkTableHead(xml, 3)) {
             logger.error('Заголовок таблицы не соответствует требуемой структуре!')
             return
         }
-        addData(xml, 3)
+        addData(xml, 2)
     } catch (Exception e) {
         logger.error("" + e.message)
     }
@@ -565,50 +565,35 @@ def checkTableHead(def xml, def headRowCount) {
     }
     def result = (
     xml.row[0].cell[0] == 'Полное наименование с указанием ОПФ' &&
-            xml.row[2].cell[0] == '2' &&
-            xml.row[3].cell[0] == 'гр. 2' &&
+            xml.row[2].cell[0] == 'гр. 2' &&
             xml.row[0].cell[1] == 'ИНН/ КИО' &&
-            xml.row[2].cell[1] == '3' &&
-            xml.row[3].cell[1] == 'гр. 3' &&
+            xml.row[2].cell[1] == 'гр. 3' &&
             xml.row[0].cell[2] == 'Наименование страны регистрации' &&
-            xml.row[2].cell[2] == '4' &&
-            xml.row[3].cell[2] == 'гр. 4.1' &&
+            xml.row[2].cell[2] == 'гр. 4.1' &&
             xml.row[0].cell[3] == 'Код страны регистрации по классификатору ОКСМ' &&
-            xml.row[2].cell[3] == '5' &&
-            xml.row[3].cell[3] == 'гр. 4.2' &&
+            xml.row[2].cell[3] == 'гр. 4.2' &&
             xml.row[0].cell[4] == 'Номер договора' &&
-            xml.row[2].cell[4] == '6' &&
-            xml.row[3].cell[4] == 'гр. 5' &&
+            xml.row[2].cell[4] == 'гр. 5' &&
             xml.row[0].cell[5] == 'Дата договора' &&
-            xml.row[2].cell[5] == '7' &&
-            xml.row[3].cell[5] == 'гр. 6' &&
+            xml.row[2].cell[5] == 'гр. 6' &&
             xml.row[0].cell[6] == 'Номер сделки' &&
-            xml.row[2].cell[6] == '8' &&
-            xml.row[3].cell[6] == 'гр. 7' &&
+            xml.row[2].cell[6] == 'гр. 7' &&
             xml.row[0].cell[7] == 'Дата  заключения сделки' &&
-            xml.row[2].cell[7] == '9' &&
-            xml.row[3].cell[7] == 'гр. 8' &&
+            xml.row[2].cell[7] == 'гр. 8' &&
             xml.row[0].cell[8] == 'Код валюты по сделке' &&
-            xml.row[2].cell[8] == '10' &&
-            xml.row[3].cell[8] == 'гр. 9' &&
+            xml.row[2].cell[8] == 'гр. 9' &&
             xml.row[0].cell[10] == 'Код страны происхождения предмета сделки по классификатору ОКСМ' &&
-            xml.row[2].cell[10] == '11' &&
-            xml.row[3].cell[10] == 'гр. 10' &&
+            xml.row[2].cell[10] == 'гр. 10' &&
             xml.row[0].cell[12] == 'Сумма доходов Банка по данным бухгалтерского учета, руб.' &&
-            xml.row[2].cell[12] == '12' &&
-            xml.row[3].cell[12] == 'гр. 11' &&
+            xml.row[2].cell[12] == 'гр. 11' &&
             xml.row[0].cell[13] == 'Сумма расходов Банка по данным бухгалтерского учета, руб.' &&
-            xml.row[2].cell[13] == '13' &&
-            xml.row[3].cell[13] == 'гр. 12' &&
+            xml.row[2].cell[13] == 'гр. 12' &&
             xml.row[0].cell[14] == 'Цена (тариф) за единицу измерения, руб.' &&
-            xml.row[2].cell[14] == '14' &&
-            xml.row[3].cell[14] == 'гр. 13' &&
+            xml.row[2].cell[14] == 'гр. 13' &&
             xml.row[0].cell[15] == 'Итого стоимость, руб.' &&
-            xml.row[2].cell[15] == '15' &&
-            xml.row[3].cell[15] == 'гр. 14' &&
+            xml.row[2].cell[15] == 'гр. 14' &&
             xml.row[0].cell[16] == 'Дата совершения сделки' &&
-            xml.row[2].cell[16] == '16' &&
-            xml.row[3].cell[16] == 'гр. 15')
+            xml.row[2].cell[16] == 'гр. 15')
 
     return result
 }

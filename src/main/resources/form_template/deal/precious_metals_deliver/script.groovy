@@ -754,7 +754,7 @@ void consolidation() {
 }
 
 def getHeaderRowCount() {
-    return 4
+    return 3
 }
 
 /**
@@ -815,34 +815,34 @@ def checkTableHead(def xml) {
         return false
     }
     def result = (
-    checkHeaderRow(xml, rc, 0, ['Полное наименование с указанием ОПФ', '', '2', 'гр. 2']) &&
-            checkHeaderRow(xml, rc, 1, ['ИНН/ КИО', '', '3', 'гр. 3']) &&
-            checkHeaderRow(xml, rc, 2, ['Наименование страны регистрации', '', '4', 'гр. 4.1']) &&
-            checkHeaderRow(xml, rc, 3, ['Код страны регистрации по классификатору ОКСМ', '', '5', 'гр. 4.2']) &&
-            checkHeaderRow(xml, rc, 4, ['Номер договора', '', '6', 'гр. 5']) &&
-            checkHeaderRow(xml, rc, 5, ['Дата договора', '', '7', 'гр. 6']) &&
-            checkHeaderRow(xml, rc, 6, ['Номер сделки', '', '8', 'гр. 7']) &&
-            checkHeaderRow(xml, rc, 7, ['Дата заключения сделки', '', '9', 'гр. 8']) &&
-            checkHeaderRow(xml, rc, 8, ['Характеристика базисного актива', 'Внутренний код', '10', 'гр. 9.1']) &&
-            checkHeaderRow(xml, rc, 9, ['', 'Код по ОКП', '11', 'гр. 9.2']) &&
-            checkHeaderRow(xml, rc, 10, ['', 'Код страны происхождения предмета сделки', '12', 'гр. 9.3']) &&
-            checkHeaderRow(xml, rc, 11, ['Признак физической поставки драгоценного металла', '', '13', 'гр. 10']) &&
-            checkHeaderRow(xml, rc, 12, ['Признак внешнеторговой сделки', '', '14', 'гр. 11']) &&
-            checkHeaderRow(xml, rc, 13, ['Место отправки (погрузки) драгоценного металла в соответствии с товаросопроводительными документами', 'Код страны по классификатору ОКСМ', '15', 'гр. 12.1']) &&
-            checkHeaderRow(xml, rc, 14, ['', 'Регион (код)', '16', 'гр. 12.2']) &&
-            checkHeaderRow(xml, rc, 15, ['', 'Город', '17', 'гр. 12.3']) &&
-            checkHeaderRow(xml, rc, 16, ['', 'Населенный пункт', '18', 'гр. 12.4']) &&
-            checkHeaderRow(xml, rc, 17, ['Место совершения сделки (адрес места доставки (разгрузки) драгоценного металла)', 'Код страны по классификатору ОКСМ', '19', 'гр. 13.1']) &&
-            checkHeaderRow(xml, rc, 18, ['', 'Регион (код)', '20', 'гр. 13.2']) &&
-            checkHeaderRow(xml, rc, 19, ['', 'Город', '21', 'гр. 13.3']) &&
-            checkHeaderRow(xml, rc, 20, ['', 'Населенный пункт', '22', 'гр. 13.4']) &&
-            checkHeaderRow(xml, rc, 21, ['Код условия поставки', '', '23', 'гр. 14']) &&
-            checkHeaderRow(xml, rc, 22, ['Количество', '', '24', 'гр. 15']) &&
-            checkHeaderRow(xml, rc, 23, ['Сумма доходов Банка по данным бухгалтерского учета, руб.', '', '25', 'гр. 16']) &&
-            checkHeaderRow(xml, rc, 24, ['Сумма расходов Банка по данным бухгалтерского учета, руб.', '', '26', 'гр. 17']) &&
-            checkHeaderRow(xml, rc, 25, ['Цена (тариф) за единицу измерения без учета НДС, руб.', '', '27', 'гр. 18']) &&
-            checkHeaderRow(xml, rc, 26, ['Итого стоимость без учета НДС, руб.', '', '28', 'гр. 19']) &&
-            checkHeaderRow(xml, rc, 27, ['Дата совершения сделки', '', '29', 'гр. 20'])
+    checkHeaderRow(xml, rc, 0, ['Полное наименование с указанием ОПФ', '', 'гр. 2']) &&
+            checkHeaderRow(xml, rc, 1, ['ИНН/ КИО', '', 'гр. 3']) &&
+            checkHeaderRow(xml, rc, 2, ['Наименование страны регистрации', '', 'гр. 4.1']) &&
+            checkHeaderRow(xml, rc, 3, ['Код страны регистрации по классификатору ОКСМ', '', 'гр. 4.2']) &&
+            checkHeaderRow(xml, rc, 4, ['Номер договора', '', 'гр. 5']) &&
+            checkHeaderRow(xml, rc, 5, ['Дата договора', '', 'гр. 6']) &&
+            checkHeaderRow(xml, rc, 6, ['Номер сделки', '', 'гр. 7']) &&
+            checkHeaderRow(xml, rc, 7, ['Дата заключения сделки', '', 'гр. 8']) &&
+            checkHeaderRow(xml, rc, 8, ['Характеристика базисного актива', 'Внутренний код', 'гр. 9.1']) &&
+            checkHeaderRow(xml, rc, 9, ['', 'Код по ОКП', 'гр. 9.2']) &&
+            checkHeaderRow(xml, rc, 10, ['', 'Код страны происхождения предмета сделки', 'гр. 9.3']) &&
+            checkHeaderRow(xml, rc, 11, ['Признак физической поставки драгоценного металла', '', 'гр. 10']) &&
+            checkHeaderRow(xml, rc, 12, ['Признак внешнеторговой сделки', '', 'гр. 11']) &&
+            checkHeaderRow(xml, rc, 13, ['Место отправки (погрузки) драгоценного металла в соответствии с товаросопроводительными документами', 'Код страны по классификатору ОКСМ', 'гр. 12.1']) &&
+            checkHeaderRow(xml, rc, 14, ['', 'Регион (код)', 'гр. 12.2']) &&
+            checkHeaderRow(xml, rc, 15, ['', 'Город', 'гр. 12.3']) &&
+            checkHeaderRow(xml, rc, 16, ['', 'Населенный пункт', 'гр. 12.4']) &&
+            checkHeaderRow(xml, rc, 17, ['Место совершения сделки (адрес места доставки (разгрузки) драгоценного металла)', 'Код страны по классификатору ОКСМ', 'гр. 13.1']) &&
+            checkHeaderRow(xml, rc, 18, ['', 'Регион (код)', 'гр. 13.2']) &&
+            checkHeaderRow(xml, rc, 19, ['', 'Город', 'гр. 13.3']) &&
+            checkHeaderRow(xml, rc, 20, ['', 'Населенный пункт', 'гр. 13.4']) &&
+            checkHeaderRow(xml, rc, 21, ['Код условия поставки', '', 'гр. 14']) &&
+            checkHeaderRow(xml, rc, 22, ['Количество', '', 'гр. 15']) &&
+            checkHeaderRow(xml, rc, 23, ['Сумма доходов Банка по данным бухгалтерского учета, руб.', '', 'гр. 16']) &&
+            checkHeaderRow(xml, rc, 24, ['Сумма расходов Банка по данным бухгалтерского учета, руб.', '', 'гр. 17']) &&
+            checkHeaderRow(xml, rc, 25, ['Цена (тариф) за единицу измерения без учета НДС, руб.', '', 'гр. 18']) &&
+            checkHeaderRow(xml, rc, 26, ['Итого стоимость без учета НДС, руб.', '', 'гр. 19']) &&
+            checkHeaderRow(xml, rc, 27, ['Дата совершения сделки', '', 'гр. 20'])
     )
     return result
 }
@@ -905,20 +905,20 @@ def addData(def xml) {
         def map = refBookService.getRecordData(9, newRow.name)
         def String text = row.cell[indexCell].text()
         if ((text != null && !text.equals(map.INN_KIO.stringValue)) || (text == null && map.INN_KIO.stringValue != null))
-            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 4.1
         text = row.cell[indexCell].text()
         map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
         if ((text != null && !text.equals(map.NAME.stringValue)) || (text == null && map.NAME.stringValue != null))
-            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 4.2
         text = row.cell[indexCell].text()
         if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
-            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // столбец 6

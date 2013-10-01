@@ -282,7 +282,7 @@ void importData() {
 
     // добавить данные в форму
     try{
-        if (!checkTableHead(xml, 3)) {
+        if (!checkTableHead(xml, 2)) {
             logger.error('Заголовок таблицы не соответствует требуемой структуре!')
             return
         }
@@ -310,7 +310,7 @@ def addData(def xml) {
         indexRow++
 
         // пропустить шапку таблицы
-        if (indexRow <= 3) {
+        if (indexRow <= 2) {
             continue
         }
 
@@ -334,7 +334,7 @@ def addData(def xml) {
 
         def indexCell = 0
         // графа 1
-        newRow.rowNumber = indexRow - 3
+        newRow.rowNumber = indexRow - 2
 
         // графа 2
         newRow.fullName = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
@@ -344,20 +344,20 @@ def addData(def xml) {
         def map = refBookService.getRecordData(9, newRow.fullName)
         def String text = row.cell[indexCell].text()
         if ((text != null && !text.equals(map.INN_KIO.stringValue)) || (text == null && map.INN_KIO.stringValue != null))
-            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 4
         text = row.cell[indexCell].text()
         map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
         if ((text != null && !text.equals(map.NAME.stringValue)) || (text == null && map.NAME.stringValue != null))
-            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 5
         text = row.cell[indexCell].text()
         if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
-            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 6
@@ -396,7 +396,7 @@ def addData(def xml) {
         // графа 14
         newRow.dealDoneDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
 
-        data.insert(newRow, indexRow - 3)
+        data.insert(newRow, indexRow - 2)
     }
 }
 
@@ -415,36 +415,28 @@ def checkTableHead(def xml, def headRowCount) {
     }
     def result = (
         xml.row[0].cell[0] == 'Полное наименование юридического лица с указанием ОПФ' &&
-        xml.row[2].cell[0] == '2' &&
-        xml.row[3].cell[0] == 'гр. 2' &&
+        xml.row[2].cell[0] == 'гр. 2' &&
 
         xml.row[0].cell[1] == 'ИНН/ КИО' &&
-        xml.row[2].cell[1] == '3' &&
-        xml.row[3].cell[1] == 'гр. 3' &&
+        xml.row[2].cell[1] == 'гр. 3' &&
 
         xml.row[0].cell[2] == 'Наименование страны регистрации' &&
-        xml.row[2].cell[2] == '4' &&
-        xml.row[3].cell[2] == 'гр. 4.1' &&
+        xml.row[2].cell[2] == 'гр. 4.1' &&
 
         xml.row[0].cell[3] == 'Код страны регистрации по классификатору ОКСМ' &&
-        xml.row[2].cell[3] == '5' &&
-        xml.row[3].cell[3] == 'гр. 4.2' &&
+        xml.row[2].cell[3] == 'гр. 4.2' &&
 
         xml.row[0].cell[4] == 'Номер договора' &&
-        xml.row[2].cell[4] == '6' &&
-        xml.row[3].cell[4] == 'гр. 5' &&
+        xml.row[2].cell[4] == 'гр. 5' &&
 
         xml.row[0].cell[5] == 'Дата договора' &&
-        xml.row[2].cell[5] == '7' &&
-        xml.row[3].cell[5] == 'гр. 6' &&
+        xml.row[2].cell[5] == 'гр. 6' &&
 
         xml.row[0].cell[6] == 'Номер сделки' &&
-        xml.row[2].cell[6] == '8' &&
-        xml.row[3].cell[6] == 'гр. 7' &&
+        xml.row[2].cell[6] == 'гр. 7' &&
 
         xml.row[0].cell[7] == 'Дата заключения сделки' &&
-        xml.row[2].cell[7] == '9' &&
-        xml.row[3].cell[7] == 'гр. 8' &&
+        xml.row[2].cell[7] == 'гр. 8' &&
 
         xml.row[0].cell[8] == 'Количество' &&
         xml.row[2].cell[8] == '10' &&
@@ -486,7 +478,7 @@ def getNumber(def value, int indexRow, int indexCell) {
     try {
         return new BigDecimal(tmp)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит недопустимый тип данных!")
     }
 }
 
@@ -508,7 +500,7 @@ def getRecordId(def ref_id, String alias, String value, Date date, def cache, in
         cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
     }
-    throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+    throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
 }
 
 /**
@@ -522,6 +514,6 @@ def getDate(def value, int indexRow, int indexCell) {
     try {
         return format.parse(value)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит недопустимый тип данных!")
     }
 }
