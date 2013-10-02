@@ -217,14 +217,14 @@ void generateXML() {
                                                 [ОКВЭД: dealSubjectCode3] +
                                                 [НомУчСд: row.otherNum] +
                                                 [НомДог: row.contractNum] +
-                                                [ДатаДог: row.contractDate.format("dd.MM.yyyy")] +
+                                                (row.contractDate!= null ? [ДатаДог: row.contractDate.format("dd.MM.yyyy")]: [:]) +
                                                 (countryCode != null ? [ОКСМ: countryCode] : [:]) +
                                                 (deliveryCode != null ? [КодУсловПост: deliveryCode] : [:]) +
                                                 [ОКЕИ: okeiCode] +
                                                 [Количество: row.count] +
                                                 [ЦенаЕдин: row.price] +
                                                 [СтоимИтог: row.total] +
-                                                [ДатаСовСд: row.dealDoneDate.format("dd.MM.yyyy")]
+                                                (row.dealDoneDate!=null ? [ДатаСовСд: row.dealDoneDate.format("dd.MM.yyyy")] : [:])
                                 ) {
                                     def String countryCode1 = row.countryCode1 != null ? '' + getRefBookValue(10, row.countryCode1).CODE.stringValue : '000'
                                     def String region1 = row.region1 != null ? '' + getRefBookValue(4, row.region1).CODE.stringValue : null
