@@ -11,10 +11,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.util.List;
 
 public class LogEntryReportBuilder extends AbstractXlsxReportBuilder {
-
-    static {
-        fileName = "Список_ошибок_";
-    }
 	
 	private static final String FIRST_COLUMN = "№ п/п";
 	private static final String SECOND_COLUMN = "Тип сообщения";
@@ -27,7 +23,8 @@ public class LogEntryReportBuilder extends AbstractXlsxReportBuilder {
 
 	
 	public LogEntryReportBuilder(List<LogEntry> list){
-		this.list = list;
+        super("Список_ошибок_", ".xlsx");
+        this.list = list;
 		this.workBook = new XSSFWorkbook();
 		this.sheet = workBook.createSheet("Учет налогов");
         this.sheet.setColumnWidth(2, cellWidthMin * 256 * 4);

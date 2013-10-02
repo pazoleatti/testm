@@ -29,9 +29,13 @@ public abstract class AbstractXlsxReportBuilder {
     /*
      * Нужно создать в классе наследнике блок static, для определения в нем имени файла
      */
-    protected static String fileName;
+    private String fileName;
+    private String postfix;
 
-    //
+    protected AbstractXlsxReportBuilder(String fileName, String postfix) {
+        this.fileName = fileName;
+        this.postfix = postfix;
+    }
 
     /**
      * Формирование отчета. Условно разбит на шесть частей.
@@ -85,8 +89,8 @@ public abstract class AbstractXlsxReportBuilder {
         //Nothing
     }
 
-    private String flush() throws IOException {
-        File file = File.createTempFile(fileName, ".xlsx");
+    protected String flush() throws IOException {
+        File file = File.createTempFile(fileName, postfix);
         OutputStream out = new FileOutputStream(file);
         workBook.write(out);
 
