@@ -161,7 +161,6 @@ void generateXML() {
                     Map<Long, String> mapYesNo = new HashMap<Long, String>()
                     mapYesNo.put(recYesId, '1')
                     mapYesNo.put(recNoId, '0')
-                    mapYesNo.put(null, '-')
 
                     for (row in dataRowHelper.getAllCached()) {
                         if(row.getAlias() != null){
@@ -204,7 +203,7 @@ void generateXML() {
                             ДохРасхСд(
                                     [СумДохСд: row.income != null ? row.income : 0] +
                                             (row.incomeIncludingRegulation != null ? [СумДохСдРег: row.incomeIncludingRegulation] : [:]) +
-                                            [СумРасхСд: row.outcome != null ? row.outcome : '-'] +
+                                            [СумРасхСд: row.outcome] +
                                             (row.outcomeIncludingRegulation != null ? [СумРасхСдРег: row.outcomeIncludingRegulation] : [:])
                             )
                             def String dealType = row.dealType != null ? '' + getRefBookValue(64, row.dealType).CODE.numberValue : null
