@@ -293,6 +293,20 @@ void logicCheck() {
 }
 
 /**
+ * проверяет разные ли строки по значениям полей группировки
+ * @param a первая  строка
+ * @param b вторая строка
+ * @return true - разные, false = одинаковые
+ */
+boolean isDiffRow(DataRow row, DataRow nextRow, def groupColumns) {
+    def rez = false
+    groupColumns.each { def n ->
+        rez = rez || (row.get(n) != nextRow.get(n))
+    }
+    return rez
+}
+
+/**
  * Проверка соответствия НСИ
  */
 void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
@@ -569,8 +583,10 @@ def addData(def xml) {
         // графа 4
         text = row.cell[indexCell].text()
         map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
-        if ((text != null && !text.equals(map.FULLNAME.stringValue)) || (text == null && map.FULLNAME.stringValue != null))
-            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if ((text != null && !text.equals(map.FULLNAME.stringValue)) || (text == null && map.FULLNAME.stringValue != null)) {
+            if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
+                throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        }
         indexCell++
 
         // графа 5
@@ -673,7 +689,7 @@ def getNumber(def value, int indexRow, int indexCell) {
     try {
         return new BigDecimal(tmp)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 1} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
 
@@ -688,7 +704,7 @@ def getDate(def value, int indexRow, int indexCell) {
     try {
         return format.parse(value)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 1} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
 
@@ -711,5 +727,5 @@ def getRecordId(def ref_id, String alias, String value, Date date, def cache, in
         cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
     }
-    throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 1} содержит значение, отсутствующее в справочнике!")
+    throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
 }

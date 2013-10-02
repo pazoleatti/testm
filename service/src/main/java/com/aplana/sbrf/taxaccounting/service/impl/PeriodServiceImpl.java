@@ -288,7 +288,7 @@ public class PeriodServiceImpl implements PeriodService{
             int months = 0;
             for (ReportPeriod cReportPeriod: reportPeriodList){
                 // если достигли текущего то выходим из цикла
-                if (cReportPeriod.getId() == reportPeriod.getId()){
+                if (cReportPeriod.getId().equals(reportPeriod.getId())){
                     break;
                 }
                 // смещение в месяцах

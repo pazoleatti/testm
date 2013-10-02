@@ -17,7 +17,8 @@ import java.util.List;
 public class TAUsersReportBuilder extends AbstractXlsxReportBuilder {
 
     static {
-        fileName = "Список_пользователей_";
+        setFileName("Список_пользователей_");
+        setPostfix(".xlsx");
     }
 
     private List<TAUserFull> taUserList;
