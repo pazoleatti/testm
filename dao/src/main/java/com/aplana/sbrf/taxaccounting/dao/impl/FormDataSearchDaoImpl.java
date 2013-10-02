@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.FormDataSearchResultItemMappe
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,8 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
 @Repository("formDataSearchDao")
 @Transactional(readOnly = true)
 public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearchDao {
+
+	private static final Log logger = LogFactory.getLog(FormDataSearchDaoImpl.class);
 
 	private void appendFromAndWhereClause(StringBuilder sql, FormDataDaoFilter filter) {
 		sql.append(" FROM form_data fd, form_type ft, department dp, report_period rp, tax_period tp")
@@ -89,8 +93,12 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		StringBuilder sql = new StringBuilder();
 		appendSelectClause(sql);
 		appendFromAndWhereClause(sql, dataFilter);
-		
-		sql.append(" order by fd.id");
+
+		if (logger.isTraceEnabled()) {
+			logger.trace(sql);
+		}
+
+		sql.append(" order by fd.id desc");
 		return getJdbcTemplate().query(sql.toString(), new FormDataSearchResultItemMapper());
 	}
 	
