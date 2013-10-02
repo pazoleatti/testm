@@ -80,6 +80,11 @@ void generateXML() {
     def notificationType = 6
     // Код формы отчетности по КНД
     def String KND = '1110025'
+
+    def okato = departmentParam.OKATO.referenceValue !=null ?  getRefBookValue(3, departmentParam.OKATO.referenceValue).OKATO.stringValue : null
+    def okvedCode = departmentParam.OKVED_CODE.referenceValue !=null ?  getRefBookValue(34, departmentParam.OKVED_CODE.referenceValue).CODE.stringValue : null
+    def taxPlaceTypeCode = departmentParam.TAX_PLACE_TYPE_CODE.referenceValue !=null ?  getRefBookValue(2, departmentParam.TAX_PLACE_TYPE_CODE.referenceValue).CODE.stringValue : null
+
     builder.Файл(
             ИдФайл: declarationService.generateXmlFileId(notificationType, departmentId, declarationData.reportPeriodId),
             ВерсПрог: departmentParam.APP_VERSION.stringValue,
@@ -97,11 +102,11 @@ void generateXML() {
                 // TODO сделать на следующей версии
                 НомКорр: '0',
                 // Код места, по которому представляется документ
-                ПоМесту: departmentParam.TAX_PLACE_TYPE_CODE.stringValue
+                ПоМесту: taxPlaceTypeCode
         ) {
             СвНП(
-                    ОКАТО: departmentParam.OKATO.stringValue,
-                    ОКВЭД: departmentParam.OKVED_CODE.stringValue,
+                    ОКАТО: okato,
+                    ОКВЭД: okvedCode,
                     Тлф: departmentParam.PHONE.stringValue
             ) {
                 НПЮЛ(
