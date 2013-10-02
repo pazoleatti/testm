@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -60,7 +59,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 	@Override
 	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
 		return getJdbcTemplate().query(
-				"select * from report_period where tax_period_id = ? order by ord desc",
+				"select * from report_period where tax_period_id = ? order by ord",
 				new Object[]{taxPeriodId},
 				new int[]{Types.NUMERIC},
 				new ReportPeriodMapper()
