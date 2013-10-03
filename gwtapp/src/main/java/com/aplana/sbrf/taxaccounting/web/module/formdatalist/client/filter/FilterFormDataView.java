@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FormDataElementName;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
@@ -21,6 +22,7 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -54,6 +56,30 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 
 	@UiField
 	DepartmentPicker departmentPicker;
+
+	@Ignore
+	@UiField
+	Label departmentPickerLbl;
+
+	@Ignore
+	@UiField
+	Label formDataKindLbl;
+
+	@Ignore
+	@UiField
+	Label formTypeIdLbl;
+
+	@Ignore
+	@UiField
+	Label formStateLbl;
+
+	@Ignore
+	@UiField
+	Label returnStateLbl;
+
+	@Ignore
+	@UiField
+	Label reportPeriodIdsLbl;
 
 	private Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
 
@@ -149,6 +175,37 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 	@Override
 	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
 		reportPeriodIds.setPeriods(reportPeriods);
+	}
+
+	@Override
+	public void setElementNames(Map<FormDataElementName, String> names) {
+		for (Map.Entry<FormDataElementName, String> name : names.entrySet()) {
+			if (name.getValue() == null) {
+				continue;
+			}
+			switch (name.getKey()) {
+				case DEPARTMENT:
+					departmentPickerLbl.setText(name.getValue());
+					break;
+				case FORM_KIND:
+					formDataKindLbl.setText(name.getValue());
+					break;
+				case FORM_TYPE:
+					formTypeIdLbl.setText(name.getValue());
+					break;
+				case REPORT_PERIOD:
+					reportPeriodIdsLbl.setText(name.getValue());
+					break;
+				case RETURN:
+					returnStateLbl.setText(name.getValue());
+					break;
+				case STATUS:
+					formStateLbl.setText(name.getValue());
+					break;
+				default:
+					break;
+			}
+		}
 	}
 
 	@Override

@@ -16,11 +16,6 @@ import java.util.List;
  */
 public class TAUsersReportBuilder extends AbstractXlsxReportBuilder {
 
-    static {
-        setFileName("Список_пользователей_");
-        setPostfix(".xlsx");
-    }
-
     private List<TAUserFull> taUserList;
 
     private int rowNumber = 3;
@@ -35,6 +30,7 @@ public class TAUsersReportBuilder extends AbstractXlsxReportBuilder {
 
 
     public TAUsersReportBuilder(List<TAUserFull> taUserList) {
+        super("Список_пользователей_", ".xlsx");
         this.taUserList = taUserList;
         this.workBook = new XSSFWorkbook();
         this.sheet = workBook.createSheet("Список пользователей");

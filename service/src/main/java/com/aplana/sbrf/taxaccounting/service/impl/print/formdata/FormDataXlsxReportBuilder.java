@@ -15,7 +15,6 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
@@ -31,11 +30,6 @@ import java.util.StringTokenizer;
  */
 public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 
-    static {
-        setFileName("Налоговый_отчет_");
-        setPostfix(".xslm");
-    }
-
     private final Log logger = LogFactory.getLog(getClass());
 
     private int rowNumber = 9;
@@ -46,6 +40,9 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
     private static final String TEMPLATE = ClassUtils
 			.classPackageAsResourcePath(FormDataXlsxReportBuilder.class)
 			+ "/acctax.xlsm";
+
+    private static final String REPORT_NAME = "Налоговый_отчет_";
+    private static final String REPORT_POSFIX = ".xlsm";
 
 	private enum CellType{
 		DATE,
@@ -166,6 +163,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 	private Date creationDate;
 
     public FormDataXlsxReportBuilder() throws IOException {
+        super(REPORT_NAME, REPORT_POSFIX);
         InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
         try {
             workBook = WorkbookFactory.create(templeteInputStream);
@@ -193,13 +191,6 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 	}
 
     protected void fillHeader(){
-        HeaderFooter header = ((XSSFSheet)sheet).getFirstHeader();
-        header.setCenter("RATIONAL HEADER");
-        HeaderFooter footerOdd = ((XSSFSheet)sheet).getOddFooter();
-        HeaderFooter footerEven = ((XSSFSheet)sheet).getEvenFooter();
-        footerOdd.setCenter("RATIONAL ODD FOOTER");
-        footerEven.setCenter("RATIONAL EVEN FOOTER");
-
         //Fill subdivision
         createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION, department.getName(), 0, 0);
 
