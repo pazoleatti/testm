@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.LockException;
-import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-import com.aplana.sbrf.taxaccounting.model.ObjectLock;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -14,11 +14,12 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.Date;
+import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.LockException;
+import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+import com.aplana.sbrf.taxaccounting.model.ObjectLock;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 @Repository
 @Transactional
@@ -139,24 +140,14 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 			}
 		}		
 	}
-
-    /**
-     * Возвращает дату окончания действия блокировки
-     * @param lock
-     * @return
-     */
+	
 	private Date getLockTimeoutTime(ObjectLock<?> lock) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(lock.getLockTime());
 		cal.add(Calendar.SECOND, LOCK_TIMEOUT);
 		return cal.getTime();
 	}
-
-    /**
-     * Истек ли таймаут блокировки
-     * @param lock
-     * @return true - время действия блокировки закончилось; false - иначе
-     */
+	
 	private boolean isLockTimedOut(ObjectLock<?> lock) {
 		Date currentTime = new Date();
 		return currentTime.after(getLockTimeoutTime(lock));
