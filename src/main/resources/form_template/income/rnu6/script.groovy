@@ -182,6 +182,9 @@ void logicCheckBefore(DataRowHelper form) {
             }
         }
     }
+    if (checkUniq456(form)) {
+        return
+    }
 }
 
 void NSICheck(DataRowHelper form) {
@@ -802,4 +805,78 @@ void setTotalStyle(def row) {
             'taxAccountingRuble', 'accountingCurrency', 'ruble'].each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
     }
+}
+
+def checkUniq456(def form) {
+    // 9. Проверка на уникальность записи по налоговому учету
+    // список значенией граф 4,5,6
+    boolean result = true
+    SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
+
+    List<Map<Integer, Object>> uniq456 = new ArrayList<>()
+    Map<Object, List<Integer>> notUniq = new HashMap<>()
+    for (row in form.allCached) {
+        if (!isTotal(row)) {
+            Map<Integer, Object> m = new HashMap<>();
+
+            m.put(4, row.code );
+            m.put(5, row.docNumber);
+            m.put(6, row.docDate);
+            if (notUniq.get(m) != null) {
+                List<Integer> tmpList = notUniq.get(m)
+                tmpList.add(row.number)
+                notUniq.put(m, tmpList)
+
+            } else {
+                notUniq.put(m, new ArrayList<Integer>([row.number]))
+            }
+            uniq456.add(m)
+        }
+    }
+    if (!notUniq.isEmpty()) {
+        notUniq = notUniq.sort {it.value}
+        for (def item : notUniq) {
+            if (item.value.size() > 1)
+            {
+                StringBuilder numberList = new StringBuilder()
+                item.getValue().each { rNum ->
+                    if (numberList.length() != 0) {
+                        numberList.append(', ')
+                    }
+                    numberList.append(rNum)
+                }
+                logger.error("Несколько строк $numberList содержат записи в налоговом учете для балансового счета=%s, документа № %s от %s", getNumberAttribute(item.getKey().get(4)).toString(), item.getKey().get(5).toString(), dateFormat.format(item.getKey().get(6)))
+                result = false
+            }
+        }
+    }
+    return result
+}
+
+/**
+ * Получить строку по алиасу.
+ *
+ * @param data данные нф (helper)
+ */
+def getRows(def data) {
+    return data.getAllCached();
+}
+
+/**
+ * Проверка является ли строка итоговой.
+ */
+def isTotal(def row) {
+    return row != null && row.getAlias() != null
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
 }
