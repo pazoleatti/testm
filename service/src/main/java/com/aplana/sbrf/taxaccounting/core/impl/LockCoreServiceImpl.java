@@ -44,17 +44,14 @@ public class LockCoreServiceImpl implements LockCoreService{
 	}
 
 	@Override
-	public <T extends Number> void checkUnlocked(
-			Class<? extends IdentityObject<T>> clazz, T id,
-			TAUserInfo userInfo) {
+	public <T extends Number> void checkUnlocked(Class<? extends IdentityObject<T>> clazz, T id, TAUserInfo userInfo) {
 		if (lockDao.getObjectLock(id, clazz) != null){
 			throw new ServiceException("Объект заблокирован для редактирования");
 		}
 	}
 
 	@Override
-	public <T extends Number> void checkNoLockedAnother(
-			Class<? extends IdentityObject<T>> clazz, T id, TAUserInfo userInfo) {
+	public <T extends Number> void checkNoLockedAnother(Class<? extends IdentityObject<T>> clazz, T id, TAUserInfo userInfo) {
 		ObjectLock<T> lock = lockDao.getObjectLock(id, clazz);
 		if (lock != null && lock.getUserId() != userInfo.getUser().getId()){
 			throw new ServiceException("Объект заблокирован для редактирования другим пользователем");
