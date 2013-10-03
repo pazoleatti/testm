@@ -60,4 +60,70 @@ public class FilterTreeListenerTest {
         assertTrue(result6.getParams().size() == 1);
         assertTrue(result6.getParams().get(0).equals(new String("any \\\"'key")));
     }
+
+    @Test
+    public void DepartmentFilterTreeListener(){
+        PreparedStatementData result1 = new PreparedStatementData();
+        Filter.getFilterQuery("Alias123 = 123", new DepartmentFilterTreeListener(refBook, result1));
+        assertTrue(result1.getQuery().toString().equals("Alias123 = 123"));
+
+        PreparedStatementData result2 = new PreparedStatementData();
+        Filter.getFilterQuery("Alias123 = 123 and (Alias123 > 10 or Alias123 = 15)", new DepartmentFilterTreeListener(refBook, result2));
+        assertTrue(result2.getQuery().toString().equals("Alias123 = 123 and(Alias123 > 10 or Alias123 = 15)"));
+
+        PreparedStatementData result3 = new PreparedStatementData();
+        Filter.getFilterQuery("Alias123 is null", new DepartmentFilterTreeListener(refBook, result3));
+        assertTrue(result3.getQuery().toString().equals("Alias123 is null"));
+
+        PreparedStatementData result4 = new PreparedStatementData();
+        Filter.getFilterQuery("LOWER(Alias123) like 'any key'", new DepartmentFilterTreeListener(refBook, result4));
+        assertTrue(result4.getQuery().toString().equals("LOWER(Alias123) like ?"));
+        assertTrue(result4.getParams().size() == 1);
+        assertTrue(result4.getParams().get(0).equals(new String("any key")));
+
+        PreparedStatementData result5 = new PreparedStatementData();
+        Filter.getFilterQuery("Alias123 like 'any key' and (1=1 OR 1=1)", new DepartmentFilterTreeListener(refBook, result5));
+        assertTrue(result5.getQuery().toString().equals("Alias123 like ? and(1 = 1 OR 1 = 1)"));
+        assertTrue(result5.getParams().size() == 1);
+        assertTrue(result5.getParams().get(0).equals(new String("any key")));
+
+        PreparedStatementData result6 = new PreparedStatementData();
+        Filter.getFilterQuery("Alias123 like 'any \\\"'key' and (1=1 OR 1=1)", new DepartmentFilterTreeListener(refBook, result6));
+        assertTrue(result6.getQuery().toString().equals("Alias123 like ? and(1 = 1 OR 1 = 1)"));
+        assertTrue(result6.getParams().size() == 1);
+        assertTrue(result6.getParams().get(0).equals(new String("any \\\"'key")));
+    }
+
+    @Test
+    public void BookerStatementsFilterTreeListener(){
+        PreparedStatementData result1 = new PreparedStatementData();
+        Filter.getFilterQuery("Alias123 = 123", new BookerStatementsFilterTreeListener(refBook, result1));
+        assertTrue(result1.getQuery().toString().equals("Alias123 = 123"));
+
+        PreparedStatementData result2 = new PreparedStatementData();
+        Filter.getFilterQuery("Alias123 = 123 and (Alias123 > 10 or Alias123 = 15)", new BookerStatementsFilterTreeListener(refBook, result2));
+        assertTrue(result2.getQuery().toString().equals("Alias123 = 123 and(Alias123 > 10 or Alias123 = 15)"));
+
+        PreparedStatementData result3 = new PreparedStatementData();
+        Filter.getFilterQuery("Alias123 is null", new BookerStatementsFilterTreeListener(refBook, result3));
+        assertTrue(result3.getQuery().toString().equals("Alias123 is null"));
+
+        PreparedStatementData result4 = new PreparedStatementData();
+        Filter.getFilterQuery("LOWER(Alias123) like 'any key'", new BookerStatementsFilterTreeListener(refBook, result4));
+        assertTrue(result4.getQuery().toString().equals("LOWER(Alias123) like ?"));
+        assertTrue(result4.getParams().size() == 1);
+        assertTrue(result4.getParams().get(0).equals(new String("any key")));
+
+        PreparedStatementData result5 = new PreparedStatementData();
+        Filter.getFilterQuery("Alias123 like 'any key' and (1=1 OR 1=1)", new BookerStatementsFilterTreeListener(refBook, result5));
+        assertTrue(result5.getQuery().toString().equals("Alias123 like ? and(1 = 1 OR 1 = 1)"));
+        assertTrue(result5.getParams().size() == 1);
+        assertTrue(result5.getParams().get(0).equals(new String("any key")));
+
+        PreparedStatementData result6 = new PreparedStatementData();
+        Filter.getFilterQuery("Alias123 like 'any \\\"'key' and (1=1 OR 1=1)", new BookerStatementsFilterTreeListener(refBook, result6));
+        assertTrue(result6.getQuery().toString().equals("Alias123 like ? and(1 = 1 OR 1 = 1)"));
+        assertTrue(result6.getParams().size() == 1);
+        assertTrue(result6.getParams().get(0).equals(new String("any \\\"'key")));
+    }
 }

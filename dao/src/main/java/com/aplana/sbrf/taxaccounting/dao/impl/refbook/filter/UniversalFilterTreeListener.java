@@ -41,7 +41,7 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
             ps.appendQuery(buildAliasStr(ctx.getText()));
         } else if(ctx.STRING() != null){
             ps.appendQuery("?");
-            ps.addParam(ctx.getText());
+            ps.addParam(ctx.getText().substring(1, ctx.getText().length() - 1));
         } else  {
             appendToQuery(ctx.getText());
         }
