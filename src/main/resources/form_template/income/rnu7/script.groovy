@@ -79,18 +79,27 @@ def addNewRow() {
         newRow.getCell(column).setStyleAlias('Редактируемая')
     }
 
-    def i = getRows(data).size()
-    while(i>0 && isTotalRow(getRows(data).get(i-1))){i--}
-    data.insert(newRow, i + 1)
-
-    // проставление номеров строк
-    i = 1;
-    getRows(data).each{ row->
-        if (!isTotal(row)) {
-            row.rowNumber = i++
+    def index = 0
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def row = currentDataRow
+        while(isTotalRow(row) && index>0){
+            row = getRows(data).get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && !isTotalRow(getRows(data).get(index))){
+            index++
+        }
+    }else if (getRows(data).size()>0) {
+        for(int i = getRows(data).size()-1;i>=0;i--){
+            def row = getRows(data).get(i)
+            if(!isTotalRow(row)){
+                index = getRows(data).indexOf(row)+1
+                break
+            }
         }
     }
-    save(data)
+    data.insert(newRow,index+1)
+
 }
 
 /**
@@ -351,7 +360,6 @@ def logicalCheck() {
             }
 
             // 11. Арифметические проверки расчета неитоговых строк
-            logger.info('11 ' + row.taxAccountingRuble + ' ' +row.taxAccountingCurrency + ' ' + row.rateOfTheBankOfRussia)
             if (row.taxAccountingRuble != round(row.taxAccountingCurrency * row.rateOfTheBankOfRussia, 2)) {
                 logger.error(errorMsg + 'неверно рассчитана графа "Сумма расхода в налоговом учёте - Рубли"')
                 return false
@@ -743,7 +751,7 @@ def checkRequiredColumns(def row, def columns) {
         if (index != null) {
             logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
         } else {
-            index = dataRowsHelper.allCached.indexOf(row) + 1
+            index = getRows(getData(formData)).indexOf(row) + 1
             logger.error("В строке $index не заполнены колонки : $errorMsg.")
         }
         return false

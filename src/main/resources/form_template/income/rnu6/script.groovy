@@ -50,8 +50,8 @@ switch (formDataEvent) {
         logicCheckBefore(form)
         if (!logger.containsLevel(LogLevel.ERROR)) {
             deleteAllStatic(form)
-            calc(form)
             sort(form)
+            calc(form)
             addAllStatic(form)
             logicalCheck(form)
             NSICheck(form)
@@ -60,11 +60,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW:
         addNewRow()
-        recalculateNumbers()
         break
     case FormDataEvent.DELETE_ROW:
         deleteRow()
-        recalculateNumbers()
         break
     case FormDataEvent.COMPOSE:
         def form = dataRowsHelper
@@ -729,7 +727,6 @@ void deleteAllStatic(DataRowHelper form) {
  */
 void addNewRow() {
     DataRow<Cell> newRow = formData.createDataRow()
-    int index // Здесь будет позиция вставки
 
     def form = dataRowsHelper
     [
@@ -738,32 +735,26 @@ void addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    index = 0
-    def rows = form.getAllCached()
+    def index = 0
     if (currentDataRow!=null){
         index = currentDataRow.getIndex()
-    }else if (rows.size()>0) {
-        for(int i = rows.size()-1;i>=0;i--){
-            def row = rows.get(i)
-            if(row.getAlias()==null){
-                index = rows.indexOf(row)+1
+        def row = currentDataRow
+        while(isTotal(row) && index>0){
+            row = getRows(form).get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && !isTotal(getRows(form).get(index))){
+            index++
+        }
+    }else if (getRows(form).size()>0) {
+        for(int i = getRows(form).size()-1;i>=0;i--){
+            def row = getRows(form).get(i)
+            if(!isTotal(row)){
+                index = getRows(form).indexOf(row)+1
                 break
             }
         }
     }
     form.insert(newRow,index+1)
-}
-
-def recalculateNumbers(){
-    def index = 1
-    def data = dataRowsHelper
-    def rows = data.getAllCached()
-    rows.each{row->
-        if(row.getAlias()==null){
-            row.number = index++
-        }
-    }
-    data.save(rows)
 }
 
 /**

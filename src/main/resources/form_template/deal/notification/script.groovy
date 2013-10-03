@@ -109,13 +109,14 @@ void generateXML() {
                         ИННЮЛ: departmentParam.INN.stringValue,
                         КПП: departmentParam.KPP.stringValue
                 ) {
-                    reorgFormCode = departmentParam.REORG_FORM_CODE.stringValue
-                    if (reorgFormCode != null && !reorgFormCode.equals('0')) {
-                        СвРеоргЮЛ(
-                                ФормРеорг: reorgFormCode,
-                                ИННЮЛ: departmentParam.REORG_INN.stringValue,
-                                КПП: departmentParam.REORG_KPP.stringValue)
-                    }
+                    def reorgFormCode = departmentParam.REORG_FORM_CODE.referenceValue
+                    reorgFormCode = reorgFormCode != null ? getRefBookValue(5, reorgFormCode).CODE.stringValue : null
+                    def boolean isReorg = reorgFormCode != null && !reorgFormCode.equals('0')
+                    СвРеоргЮЛ(
+                            [ФормРеорг: reorgFormCode] +
+                                    (isReorg ? [ИННЮЛ: departmentParam.REORG_INN.stringValue] : [:]) +
+                                    (isReorg ? [КПП: departmentParam.REORG_KPP.stringValue] : [:])
+                    )
                 }
             }
             def prPodp = 1
@@ -159,7 +160,7 @@ void generateXML() {
                     mapYesNo.put(null, '-')
 
                     for (row in dataRowHelper.getAllCached()) {
-                        if(row.getAlias() != null){
+                        if (row.getAlias() != null) {
                             continue
                         }
                         СвКонтрСд(
