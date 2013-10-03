@@ -12,6 +12,7 @@ public class GetDeclarationFilterDataResult implements Result {
 	private List<Department> departments;
 	private List<ReportPeriod> periods;
 	private DeclarationDataFilterAvailableValues filterValues;
+    private DeclarationDataFilter defaultDecFilterData;
 
 	public List<Department> getDepartments() {
 		return departments;
@@ -37,4 +38,11 @@ public class GetDeclarationFilterDataResult implements Result {
 		this.periods = periods;
 	}
 
+    public DeclarationDataFilter getDefaultDecFilterData() {
+        return defaultDecFilterData;
+    }
+
+    public void setDefaultDecFilterData(DeclarationDataFilter defaultDecFilterData) {
+        this.defaultDecFilterData = defaultDecFilterData;
+    }
 }

@@ -1,26 +1,43 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-	<g:HorizontalPanel>
-		<g:cell width="250px">
-			<g:FlowPanel ui:field="departmentSelectionTreePanel">
-				<g:Label width="200px" text="Подразделение" />
-			</g:FlowPanel>
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+    xmlns:per="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
 
-		</g:cell>
+    <g:VerticalPanel>
+        <g:cell>
+            <g:HorizontalPanel>
+                <g:cell width="250px">
+                    <g:FlowPanel>
+                        <g:Label width="200px" text="Подразделение" />
+                        <dep:DepartmentPickerPopupWidget width="200px" header="Выберите подразделение" multiselection="true" ui:field="departmentPicker" />
+                    </g:FlowPanel>
 
-		<g:cell width="250px">
-			<g:FlowPanel ui:field="reportPeriodPanel">
-				<g:Label width="200px" text="Отчетный период" />
-			</g:FlowPanel>
-		</g:cell>
+                </g:cell>
 
-		<g:VerticalPanel>
-			<g:Label width="200px" text="Вид декларации" />
-			<style:ListBoxWithTooltip width="200px"
-				ui:field="declarationType" showTooltip="true" />
-		</g:VerticalPanel>
-	</g:HorizontalPanel>
+                <g:cell width="250px">
+                    <g:FlowPanel>
+                        <g:Label width="200px" text="Отчетный период" />
+                        <per:PeriodPickerPopupWidget multiselect="true" width="200px" ui:field="reportPeriodIds"/>
+                    </g:FlowPanel>
+                </g:cell>
+
+                <g:VerticalPanel>
+                    <g:Label width="200px" text="Вид декларации" />
+                    <style:ListBoxWithTooltip width="200px"
+                                              ui:field="declarationTypeId" showTooltip="true" />
+                </g:VerticalPanel>
+            </g:HorizontalPanel>
+        </g:cell>
+        <g:cell height="50px" verticalAlignment="middle">
+            <style:Bar>
+                <style:LeftBar>
+                    <g:Button ui:field="create">Создать</g:Button>
+                    <g:Button ui:field="apply">Поиск</g:Button>
+                </style:LeftBar>
+            </style:Bar>
+        </g:cell>
+    </g:VerticalPanel>
 
 </ui:UiBinder> 

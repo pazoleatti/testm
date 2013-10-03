@@ -5,6 +5,7 @@ import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
 
+@Deprecated
 public class GetReportPeriodsResult implements Result {
 	private static final long serialVersionUID = -2594530589463049810L;
 	
