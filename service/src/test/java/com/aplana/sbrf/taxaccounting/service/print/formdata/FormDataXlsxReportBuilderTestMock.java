@@ -185,14 +185,14 @@ public class FormDataXlsxReportBuilderTestMock {
                 xmlSerializationUtils.deserialize(builder.toString(), formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class);
         formTemplate.getHeaders().addAll(headerCells);
 
-        /*builder = new StringBuilder();
+        builder = new StringBuilder();
         reader = new BufferedReader(
                 new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream(DATAROWS_TEMPLATE)));
         while ((s = reader.readLine())!=null)
             builder.append(s);
         dataRows.addAll(
                 xmlSerializationUtils.deserialize(builder.toString(), formTemplate.getColumns(), formTemplate.getStyles(), Cell.class)
-        );*/
+        );
 		
 		department = new Department();
         department.setId(1);

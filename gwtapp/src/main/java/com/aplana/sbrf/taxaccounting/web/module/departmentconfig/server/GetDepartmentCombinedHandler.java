@@ -138,7 +138,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             rbTextValues.put(7L, getStringValue(rbFactory.getDataProvider(3L).getValue(depCombined.getOkato(), 7L)));
         }
         if (depCombined.getOkvedCode() != null) {
-            rbTextValues.put(210L, getNumberValue(rbFactory.getDataProvider(34L).getValue(depCombined.getOkvedCode(), 210L)));
+            rbTextValues.put(210L, getStringValue(rbFactory.getDataProvider(34L).getValue(depCombined.getOkvedCode(), 210L)));
         }
         if (depCombined.getReorgFormCode() != null) {
             rbTextValues.put(13L, getStringValue(rbFactory.getDataProvider(5L).getValue(depCombined.getReorgFormCode(), 13L)));
