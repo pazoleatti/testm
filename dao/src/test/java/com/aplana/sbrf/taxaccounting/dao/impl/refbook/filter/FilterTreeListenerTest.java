@@ -59,6 +59,12 @@ public class FilterTreeListenerTest {
         assertTrue(result6.getQuery().toString().equals("aAlias123.STRING_value like ? and(1 = 1 OR 1 = 1)"));
         assertTrue(result6.getParams().size() == 1);
         assertTrue(result6.getParams().get(0).equals(new String("any \\\"'key")));
+
+        PreparedStatementData result7 = new PreparedStatementData();
+        Filter.getFilterQuery("LOWER(Alias123) = LOWER('Организация')", new UniversalFilterTreeListener(refBook, result7));
+        assertTrue(result7.getQuery().toString().equals("LOWER(aAlias123.STRING_value) = LOWER(?)"));
+        assertTrue(result7.getParams().size() == 1);
+        assertTrue(result7.getParams().get(0).equals(new String("Организация")));
     }
 
     @Test
@@ -92,6 +98,12 @@ public class FilterTreeListenerTest {
         assertTrue(result6.getQuery().toString().equals("Alias123 like ? and(1 = 1 OR 1 = 1)"));
         assertTrue(result6.getParams().size() == 1);
         assertTrue(result6.getParams().get(0).equals(new String("any \\\"'key")));
+
+        PreparedStatementData result7 = new PreparedStatementData();
+        Filter.getFilterQuery("LOWER(Alias123) = LOWER('Организация')", new DepartmentFilterTreeListener(refBook, result7));
+        assertTrue(result7.getQuery().toString().equals("LOWER(Alias123) = LOWER(?)"));
+        assertTrue(result7.getParams().size() == 1);
+        assertTrue(result7.getParams().get(0).equals(new String("Организация")));
     }
 
     @Test
@@ -125,5 +137,11 @@ public class FilterTreeListenerTest {
         assertTrue(result6.getQuery().toString().equals("Alias123 like ? and(1 = 1 OR 1 = 1)"));
         assertTrue(result6.getParams().size() == 1);
         assertTrue(result6.getParams().get(0).equals(new String("any \\\"'key")));
+
+        PreparedStatementData result7 = new PreparedStatementData();
+        Filter.getFilterQuery("LOWER(Alias123) = LOWER('Организация')", new BookerStatementsFilterTreeListener(refBook, result7));
+        assertTrue(result7.getQuery().toString().equals("LOWER(Alias123) = LOWER(?)"));
+        assertTrue(result7.getParams().size() == 1);
+        assertTrue(result7.getParams().get(0).equals(new String("Организация")));
     }
 }
