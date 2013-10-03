@@ -342,12 +342,12 @@ def logicalCheck() {
                 b = roundTo2(-a)
             }
             // графа 9
-            if (row.income != b) {
+            if (row.income != c) {
                 name = getColumnName(row, 'income')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
             // графа 10
-            if (row.outcome != c) {
+            if (row.outcome != b) {
                 name = getColumnName(row, 'outcome')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }

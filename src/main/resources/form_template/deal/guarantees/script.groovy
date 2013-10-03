@@ -100,8 +100,6 @@ void deleteRow() {
 void addRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def row = formData.createDataRow()
-    def dataRows = dataRowHelper.getAllCached()
-    def size = dataRows.size()
     def index = 0
     row.keySet().each {
         row.getCell(it).setStyleAlias('Автозаполняемая')
@@ -114,16 +112,16 @@ void addRow() {
         index = currentDataRow.getIndex()
         def pointRow = currentDataRow
         while (pointRow.getAlias() != null && index > 0) {
-            pointRow = dataRows.get(--index)
+            pointRow = dataRowHelper.getAllCached().get(--index)
         }
-        if (index != currentDataRow.getIndex() && dataRows.get(index).getAlias() == null) {
+        if (index != currentDataRow.getIndex() && dataRowHelper.getAllCached().get(index).getAlias() == null) {
             index++
         }
-    } else if (size > 0) {
-        for (int i = size - 1; i >= 0; i--) {
-            def pointRow = dataRows.get(i)
+    } else if (dataRowHelper.getAllCached().size() > 0) {
+        for (int i = dataRowHelper.getAllCached().size() - 1; i >= 0; i--) {
+            def pointRow = dataRowHelper.getAllCached().get(i)
             if (pointRow.getAlias() == null) {
-                index = dataRows.indexOf(pointRow) + 1
+                index = dataRowHelper.getAllCached().indexOf(pointRow) + 1
                 break
             }
         }
@@ -542,7 +540,7 @@ void importData() {
  * @param headRowCount количество строк в шапке
  */
 def checkTableHead(def xml, def headRowCount) {
-    def colCount = 12
+    def colCount = 11
     // проверить количество строк и колонок в шапке
     if (xml.row.size() < headRowCount || xml.row[0].cell.size() < colCount) {
         return false
@@ -557,33 +555,30 @@ def checkTableHead(def xml, def headRowCount) {
             xml.row[0].cell[2] == 'Страна регистрации' &&
             xml.row[1].cell[2] == '' &&
             (xml.row[2].cell[2] == 'гр. 4' || 'гр.4') &&
-            xml.row[0].cell[3] == '' &&
+            xml.row[0].cell[3] == 'Номер договора' &&
             xml.row[1].cell[3] == '' &&
-            xml.row[2].cell[3] == '' &&
-            xml.row[0].cell[4] == 'Номер договора' &&
+            xml.row[2].cell[3] == 'гр. 5' &&
+            xml.row[0].cell[4] == 'Дата договора' &&
             xml.row[1].cell[4] == '' &&
-            xml.row[2].cell[4] == 'гр. 5' &&
-            xml.row[0].cell[5] == 'Дата договора' &&
+            xml.row[2].cell[4] == 'гр. 6' &&
+            xml.row[0].cell[5] == 'Номер сделки' &&
             xml.row[1].cell[5] == '' &&
-            xml.row[2].cell[5] == 'гр. 6' &&
-            xml.row[0].cell[6] == 'Номер сделки' &&
+            xml.row[2].cell[5] == 'гр. 7' &&
+            xml.row[0].cell[6] == 'Дата сделки' &&
             xml.row[1].cell[6] == '' &&
-            xml.row[2].cell[6] == 'гр. 7' &&
-            xml.row[0].cell[7] == 'Дата сделки' &&
+            xml.row[2].cell[6] == 'гр. 8' &&
+            xml.row[0].cell[7] == 'Сумма доходов Банка по данным бухгалтерского учета, руб.' &&
             xml.row[1].cell[7] == '' &&
-            xml.row[2].cell[7] == 'гр. 8' &&
-            xml.row[0].cell[8] == 'Сумма доходов Банка по данным бухгалтерского учета, руб.' &&
+            xml.row[2].cell[7] == 'гр. 9' &&
+            xml.row[0].cell[8] == 'Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.' &&
             xml.row[1].cell[8] == '' &&
-            xml.row[2].cell[8] == 'гр. 9' &&
-            xml.row[0].cell[9] == 'Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.' &&
+            xml.row[2].cell[8] == 'гр. 10' &&
+            xml.row[0].cell[9] == 'Итого стоимость без учета НДС, акцизов и пошлины, руб.' &&
             xml.row[1].cell[9] == '' &&
-            xml.row[2].cell[9] == 'гр. 10' &&
-            xml.row[0].cell[10] == 'Итого стоимость без учета НДС, акцизов и пошлины, руб.' &&
+            xml.row[2].cell[9] == 'гр. 11' &&
+            xml.row[0].cell[10] == 'Дата совершения сделки' &&
             xml.row[1].cell[10] == '' &&
-            xml.row[2].cell[10] == 'гр. 11' &&
-            xml.row[0].cell[11] == 'Дата совершения сделки' &&
-            xml.row[1].cell[11] == '' &&
-            xml.row[2].cell[11] == 'гр. 12')
+            xml.row[2].cell[10] == 'гр. 12')
     return result
 }
 
@@ -643,9 +638,6 @@ def addData(def xml) {
         map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
         if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
             throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
-        indexCell++
-
-        // пустая
         indexCell++
 
         // графа 5

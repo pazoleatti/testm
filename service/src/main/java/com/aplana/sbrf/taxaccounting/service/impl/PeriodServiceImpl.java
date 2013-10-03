@@ -1,27 +1,25 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.*;
-
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
 
 /**
  * Сервис работы с периодами
@@ -281,14 +279,15 @@ public class PeriodServiceImpl implements PeriodService{
         cal.setTime(taxPeriod.getStartDate());
 
         // для налога на прибыль, периоды вложены в друг дгруга, и начало всегда совпадает
-        if (taxPeriod.getTaxType() != TaxType.INCOME){
+        // В МУКС только один период
+        if (taxPeriod.getTaxType() != TaxType.INCOME && taxPeriod.getTaxType() != TaxType.DEAL){
             // получим отчетные периоды для данного налогового периода
             List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriod().getId());
             // смещение относительно налогового периода
             int months = 0;
             for (ReportPeriod cReportPeriod: reportPeriodList){
                 // если достигли текущего то выходим из цикла
-                if (cReportPeriod.getId() == reportPeriod.getId()){
+                if (cReportPeriod.getId().equals(reportPeriod.getId())){
                     break;
                 }
                 // смещение в месяцах

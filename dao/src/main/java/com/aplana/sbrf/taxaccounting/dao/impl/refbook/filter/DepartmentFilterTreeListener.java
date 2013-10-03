@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.filter.FilterTreeListener;
+import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -12,17 +13,20 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  */
 public class DepartmentFilterTreeListener implements FilterTreeListener {
     private RefBook refBook;
-    private StringBuffer query;
+    // модель для preparedStatement
+    PreparedStatementData ps;
 
-    public DepartmentFilterTreeListener(RefBook refBook, StringBuffer query){
+    public DepartmentFilterTreeListener(RefBook refBook, PreparedStatementData preparedStatementData){
         this.refBook = refBook;
-        this.query = query;
+        this.ps = preparedStatementData;
     }
 
     @Override
     public void enterNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) {
         if (ctx.link_type() != null){
-            query.append(" ").append(ctx.link_type().getText()).append(" ");
+            ps.appendQuery(" ");
+            ps.appendQuery(ctx.link_type().getText());
+            ps.appendQuery(" ");
         }
     }
 
@@ -31,7 +35,12 @@ public class DepartmentFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void enterStrtype(@NotNull FilterTreeParser.StrtypeContext ctx) {
-        query.append(ctx.getText());
+        if(ctx.STRING() != null){
+            ps.appendQuery("?");
+            ps.addParam(ctx.getText().substring(1, ctx.getText().length() - 1));
+        } else  {
+            ps.appendQuery(ctx.getText());
+        }
     }
 
     @Override
@@ -39,17 +48,20 @@ public class DepartmentFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void enterFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
-        query.append(ctx.functype().getText()).append("(");
+        ps.appendQuery(ctx.functype().getText());
+        ps.appendQuery("(");
     }
 
     @Override
     public void exitFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
-        query.append(")");
+        ps.appendQuery(")");
     }
 
     @Override
     public void enterOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx) {
-        query.append(" ").append(ctx.getText()).append(" ");
+        ps.appendQuery(" ");
+        ps.appendQuery(ctx.getText());
+        ps.appendQuery(" ");
     }
 
     @Override
@@ -71,14 +83,15 @@ public class DepartmentFilterTreeListener implements FilterTreeListener {
     @Override
     public void enterWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx) {
         if (ctx.link_type() != null){
-            query.append(" ").append(ctx.link_type().getText());
+            ps.appendQuery(" ");
+            ps.appendQuery(ctx.link_type().getText());
         }
-        query.append("(");
+        ps.appendQuery("(");
     }
 
     @Override
     public void exitWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx) {
-        query.append(")");
+        ps.appendQuery(")");
     }
 
     @Override
@@ -98,7 +111,7 @@ public class DepartmentFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void exitIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
-        query.append(" is null");
+        ps.appendQuery(" is null");
     }
 
     @Override
@@ -109,7 +122,12 @@ public class DepartmentFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void enterSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx) {
-        query.append(ctx.getText());
+        if(ctx.STRING() != null){
+            ps.appendQuery("?");
+            ps.addParam(ctx.getText().substring(1, ctx.getText().length() - 1));
+        } else{
+            ps.appendQuery(ctx.getText());
+        }
     }
 
     @Override

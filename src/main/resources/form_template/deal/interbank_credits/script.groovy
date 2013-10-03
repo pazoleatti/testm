@@ -379,15 +379,12 @@ def addData(def xml) {
 
         // графа 10
         indexCell++
-        indexCell++
 
         // графа 11
         newRow.sum = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
-        indexCell++
 
         // графа 12
-        indexCell++
         indexCell++
 
         // графа 13
@@ -439,24 +436,19 @@ def checkTableHead(def xml, def headRowCount) {
         xml.row[2].cell[7] == 'гр. 8' &&
 
         xml.row[0].cell[8] == 'Количество' &&
-        xml.row[2].cell[8] == '10' &&
-        xml.row[3].cell[8] == 'гр. 9' &&
+        xml.row[2].cell[8] == 'гр. 9' &&
 
-        xml.row[0].cell[10] == 'Сумма доходов Банка по данным бухгалтерского учета, руб.' &&
-        xml.row[2].cell[10] == '11' &&
-        xml.row[3].cell[10] == 'гр.10' &&
+        xml.row[0].cell[9] == 'Сумма доходов Банка по данным бухгалтерского учета, руб.' &&
+        xml.row[2].cell[9] == 'гр.10' &&
 
-        xml.row[0].cell[12] == 'Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.' &&
-        xml.row[2].cell[12] == '12' &&
-        xml.row[3].cell[12] == 'гр. 11' &&
+        xml.row[0].cell[10] == 'Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.' &&
+        xml.row[2].cell[10] == 'гр. 11' &&
 
-        xml.row[0].cell[14] == 'Итого стоимость без учета НДС, акцизов и пошлины, руб.' &&
-        xml.row[2].cell[14] == '13' &&
-        xml.row[3].cell[14] == 'гр. 12' &&
+        xml.row[0].cell[11] == 'Итого стоимость без учета НДС, акцизов и пошлины, руб.' &&
+        xml.row[2].cell[11] == 'гр. 12' &&
 
-        xml.row[0].cell[15] == 'Дата совершения сделки' &&
-        xml.row[2].cell[15] == '14' &&
-        xml.row[3].cell[15] == 'гр. 13')
+        xml.row[0].cell[12] == 'Дата совершения сделки' &&
+        xml.row[2].cell[12] == 'гр. 13')
     return result
 }
 

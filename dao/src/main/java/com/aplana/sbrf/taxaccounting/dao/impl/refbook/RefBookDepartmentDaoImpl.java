@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -30,45 +31,44 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        PreparedStatementData ps = new PreparedStatementData();
         RefBook refBook = refBookDao.get(refBookId);
-        StringBuffer sb = new StringBuffer();
-        Filter.getFilterQuery(filter, new DepartmentFilterTreeListener(refBook, sb));
-        StringBuilder sql = new StringBuilder("SELECT ");
-        sql.append("id ").append(RefBook.RECORD_ID_ALIAS);
+        ps.appendQuery("SELECT ");
+        ps.appendQuery("id ");
+        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
         for (RefBookAttribute attribute : refBook.getAttributes()) {
-            sql.append(", ");
-            sql.append(attribute.getAlias());
+            ps.appendQuery(", ");
+            ps.appendQuery(attribute.getAlias());
         }
-        sql.append(" FROM (SELECT ");
+        ps.appendQuery(" FROM (SELECT ");
         if (isSupportOver() && sortAttribute != null) {
-            sql.append("row_number() over (order by '" + sortAttribute.getAlias() + "') as row_number_over");
+            ps.appendQuery("row_number() over (order by '" + sortAttribute.getAlias() + "') as row_number_over");
         } else {
-            sql.append("rownum row_number_over");
+            ps.appendQuery("rownum row_number_over");
         }
-        sql.append(", d.* FROM DEPARTMENT d");
-        if (sb.length() > 0) {
-            sql.append(" WHERE\n ");
-            sql.append(sb.toString());
-            sql.append("\n");
+        ps.appendQuery(", d.* FROM DEPARTMENT d");
+
+        PreparedStatementData filterPS = new PreparedStatementData();
+        Filter.getFilterQuery(filter, new DepartmentFilterTreeListener(refBook, filterPS));
+        if (filterPS.getQuery().length() > 0) {
+            ps.appendQuery(" WHERE\n ");
+            ps.appendQuery(filterPS.getQuery().toString());
+            ps.appendQuery("\n");
+            ps.addParam(filterPS.getParams());
         }
-        sql.append(")");
-        Map<String, Integer> params = new HashMap<String, Integer>();
+        ps.appendQuery(")");
         List<Map<String, RefBookValue>> records;
         if (pagingParams != null) {
-            sql.append(" WHERE row_number_over BETWEEN :offset AND :count");
-            params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
-            params.put("offset", pagingParams.getStartIndex());
-            records = getNamedParameterJdbcTemplate().query(sql.toString(), params, new RefBookValueMapper(refBook));
+            ps.appendQuery(" WHERE row_number_over BETWEEN ? AND ?");
+            ps.addParam(pagingParams.getStartIndex());
+            ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
+            records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
         } else {
-            records = getNamedParameterJdbcTemplate().query(sql.toString(), new HashMap<String, Object>(), new RefBookValueMapper(refBook));
+            records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
         }
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         if (isSupportOver()) {
-            if (params.size() > 0) {
-                result.setTotalCount(getNamedParameterJdbcTemplate().queryForInt("SELECT count(*) FROM (" + sql.toString() + ")", params));
-            } else {
-                result.setTotalCount(getJdbcTemplate().queryForInt("SELECT count(*) FROM (" + sql.toString() + ")"));
-            }
+            result.setTotalCount(getJdbcTemplate().queryForInt("SELECT count(*) FROM (" + ps.getQuery().toString() + ")", ps.getParams()));
         } else {
             // Бд тестовая тут магия
             result.setTotalCount(getJdbcTemplate().queryForInt("SELECT count(*) FROM DEPARTMENT"));

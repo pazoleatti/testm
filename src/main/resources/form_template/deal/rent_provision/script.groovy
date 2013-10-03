@@ -181,7 +181,7 @@ void logicCheck() {
         }
 
         // Проверка заполненности одного из атрибутов
-        if (row.city != null && row.city.toString().isEmpty() && row.settlement != null && row.settlement.toString().isEmpty()) {
+        if (row.city != null && !row.city.toString().isEmpty() && row.settlement != null && !row.settlement.toString().isEmpty()) {
             def cityName = row.getCell('city').column.name
             def settleName = row.getCell('settlement').column.name
             logger.warn("Строка $rowNum: Если заполнена графа «$cityName», то графа «$settleName» не должна быть заполнена!")

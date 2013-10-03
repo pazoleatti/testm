@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -46,46 +47,49 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter,
                                                               RefBookAttribute sortAttribute) {
+
+        PreparedStatementData ps = new PreparedStatementData();
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
 
-		String sortColumn = sortAttribute == null ? "id" : sortAttribute.getAlias();
+		ps.appendQuery("select ");
+        // Сортировка
+        if (isSupportOver()) {
+            ps.appendQuery("* from ( select row_number() over (order by '");
+            String sortColumn = sortAttribute == null ? "id" : sortAttribute.getAlias();
+            ps.appendQuery(sortColumn);
+            ps.appendQuery("') as row_number_over, ");
+        }
 
-        StringBuilder sql = new StringBuilder("select ");
-		// Сортировка
-		if (isSupportOver()) {
-			sql.append("* from ( select row_number() over (order by '").append(sortColumn).append("') as row_number_over, ");
-		}
-		sql.append("id, report_period_id, account, income_debet_remains, income_credit_remains, debet_rate, ");
-		sql.append("credit_rate, outcome_debet_remains, outcome_credit_remains, account_name, department_id ");
-		sql.append("from income_101 ");
+        ps.appendQuery("id, report_period_id, account, income_debet_remains, income_credit_remains, debet_rate, ");
+        ps.appendQuery("credit_rate, outcome_debet_remains, outcome_credit_remains, account_name, department_id ");
+        ps.appendQuery("from income_101 ");
 
-        Map<String, Integer> params = new HashMap<String, Integer>();
-        sql.append("WHERE report_period_id = :reportPeriodId ");
-        params.put("reportPeriodId", reportPeriodId);
+        ps.appendQuery("WHERE report_period_id = ?");
+        ps.addParam(reportPeriodId);
 
         // Фильтрация
-        StringBuffer sb = new StringBuffer();
-        Filter.getFilterQuery(filter, new BookerStatementsFilterTreeListener(refBook, sb));
+        PreparedStatementData filterPS = new PreparedStatementData();
+        Filter.getFilterQuery(filter, new BookerStatementsFilterTreeListener(refBook, filterPS));
 
-        if (sb.length() > 0) {
-            sql.append("AND ");
-            sql.append(sb.toString());
+        if (filterPS.getQuery().length() > 0) {
+            ps.appendQuery("AND ");
+            ps.appendQuery(filterPS.getQuery().toString());
+            ps.addParam(filterPS.getParams());
         }
 
 		if (isSupportOver()) {
-			sql.append(')');
+            ps.appendQuery(")");
 			if (pagingParams != null) {
 				// Тестовая база не поддерживает такой синтаксис
-				sql.append(" WHERE row_number_over between :from and :to ");
-				params.put("from", pagingParams.getStartIndex());
-				params.put("to", pagingParams.getStartIndex() + pagingParams.getCount());
+                ps.appendQuery(" WHERE row_number_over between ? and ?");
+				ps.addParam(pagingParams.getStartIndex());
+                ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
 			}
 		}
 
-        List<Map<String, RefBookValue>> records = getNamedParameterJdbcTemplate().query(sql.toString(), params,
-                new RefBookValueMapper(refBook));
+        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-        result.setTotalCount(getNamedParameterJdbcTemplate().queryForInt("select count(*) from (" + sql.toString() + ")", params));
+        result.setTotalCount(getJdbcTemplate().queryForInt("select count(*) from (" + ps.getQuery().toString() + ")", ps.getParams().toArray()));
         return result;
     }
 
