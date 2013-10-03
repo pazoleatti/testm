@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.aplana.taxaccounting</groupId>
 		<artifactId>taxaccounting</artifactId>
-        <version>0.3.2</version>
+        <version>0.3.5</version>
 	</parent>
 
 	<artifactId>fonts</artifactId>

@@ -18,11 +18,6 @@ import java.util.List;
  */
 public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
 
-    static {
-        setFileName("Журнал_аудита_");
-        setPostfix(".xlsx");
-    }
-
     private int rowNumber = 3;
     private int cellNumber = 0;
 
@@ -45,6 +40,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
     private final Log logger = LogFactory.getLog(getClass());
 
     public LogSystemReportBuilder(List<LogSystemSearchResultItem> items) {
+        super("Журнал_аудита_", ".xlsx");
         this.workBook = new SXSSFWorkbook(50);
         this.sheet = workBook.createSheet("Журнал аудита");
         sheet.getLastRowNum();
