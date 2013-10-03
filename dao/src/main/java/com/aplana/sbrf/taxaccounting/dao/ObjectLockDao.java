@@ -19,7 +19,7 @@ public interface ObjectLockDao {
 	 * @param id идентификатор объекта
 	 * @param clazz тип объекта
 	 * @return объект, представляющий {@link ObjectLock информацию о блокировке} или null, если объект не заблокирован. 
-	 * В случае, если объект блокировался, но время блокировки истекло, то будет возвращён пустой объект
+	 * В случае, если объект блокировался, но время блокировки истекло, всё равно будет возвращён непустой объект 
 	 */
 	<IdType extends Number> ObjectLock<IdType> getObjectLock(IdType id, Class<? extends IdentityObject<IdType>> clazz);
 
