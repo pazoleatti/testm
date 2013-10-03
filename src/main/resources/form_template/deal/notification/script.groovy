@@ -192,7 +192,7 @@ void generateXML() {
                             def String taxpayerSideCode = row.taxpayerSideCode != null ? getRefBookValue(65, row.taxpayerSideCode).CODE.stringValue : ''
                             while (taxpayerSideCode.length() < 3)
                                 taxpayerSideCode = '0' + taxpayerSideCode
-                            def String dealPriceCode = row.taxpayerSideCode != null ? '' + getRefBookValue(66, row.dealPriceCode).CODE.numberValue : null
+                            def String dealPriceCode = row.dealPriceCode != null ? '' + getRefBookValue(66, row.dealPriceCode).CODE.numberValue : null
                             КонтрСд(
                                     [ГрупОС: mapYesNo.get(row.similarDealGroup)] +
                                             [КодНаимСд: dealNameCode] +
