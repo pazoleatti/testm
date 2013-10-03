@@ -80,11 +80,6 @@ void generateXML() {
     def notificationType = 6
     // Код формы отчетности по КНД
     def String KND = '1110025'
-
-    def okato = departmentParam.OKATO.referenceValue !=null ?  getRefBookValue(3, departmentParam.OKATO.referenceValue).OKATO.stringValue : null
-    def okvedCode = departmentParam.OKVED_CODE.referenceValue !=null ?  getRefBookValue(34, departmentParam.OKVED_CODE.referenceValue).CODE.stringValue : null
-    def taxPlaceTypeCode = departmentParam.TAX_PLACE_TYPE_CODE.referenceValue !=null ?  getRefBookValue(2, departmentParam.TAX_PLACE_TYPE_CODE.referenceValue).CODE.stringValue : null
-
     builder.Файл(
             ИдФайл: declarationService.generateXmlFileId(notificationType, departmentId, declarationData.reportPeriodId),
             ВерсПрог: departmentParam.APP_VERSION.stringValue,
@@ -102,11 +97,11 @@ void generateXML() {
                 // TODO сделать на следующей версии
                 НомКорр: '0',
                 // Код места, по которому представляется документ
-                ПоМесту: taxPlaceTypeCode
+                ПоМесту: departmentParam.TAX_PLACE_TYPE_CODE.stringValue
         ) {
             СвНП(
-                    ОКАТО: okato,
-                    ОКВЭД: okvedCode,
+                    ОКАТО: departmentParam.OKATO.stringValue,
+                    ОКВЭД: departmentParam.OKVED_CODE.stringValue,
                     Тлф: departmentParam.PHONE.stringValue
             ) {
                 НПЮЛ(
@@ -161,6 +156,7 @@ void generateXML() {
                     Map<Long, String> mapYesNo = new HashMap<Long, String>()
                     mapYesNo.put(recYesId, '1')
                     mapYesNo.put(recNoId, '0')
+                    mapYesNo.put(null, '-')
 
                     for (row in dataRowHelper.getAllCached()) {
                         if(row.getAlias() != null){
@@ -203,7 +199,7 @@ void generateXML() {
                             ДохРасхСд(
                                     [СумДохСд: row.income != null ? row.income : 0] +
                                             (row.incomeIncludingRegulation != null ? [СумДохСдРег: row.incomeIncludingRegulation] : [:]) +
-                                            [СумРасхСд: row.outcome] +
+                                            [СумРасхСд: row.outcome != null ? row.outcome : '-'] +
                                             (row.outcomeIncludingRegulation != null ? [СумРасхСдРег: row.outcomeIncludingRegulation] : [:])
                             )
                             def String dealType = row.dealType != null ? '' + getRefBookValue(64, row.dealType).CODE.numberValue : null
@@ -221,14 +217,14 @@ void generateXML() {
                                                 [ОКВЭД: dealSubjectCode3] +
                                                 [НомУчСд: row.otherNum] +
                                                 [НомДог: row.contractNum] +
-                                                (row.contractDate!= null ? [ДатаДог: row.contractDate.format("dd.MM.yyyy")]: [:]) +
+                                                [ДатаДог: row.contractDate.format("dd.MM.yyyy")] +
                                                 (countryCode != null ? [ОКСМ: countryCode] : [:]) +
                                                 (deliveryCode != null ? [КодУсловПост: deliveryCode] : [:]) +
                                                 [ОКЕИ: okeiCode] +
                                                 [Количество: row.count] +
                                                 [ЦенаЕдин: row.price] +
                                                 [СтоимИтог: row.total] +
-                                                (row.dealDoneDate!=null ? [ДатаСовСд: row.dealDoneDate.format("dd.MM.yyyy")] : [:])
+                                                [ДатаСовСд: row.dealDoneDate.format("dd.MM.yyyy")]
                                 ) {
                                     def String countryCode1 = row.countryCode1 != null ? '' + getRefBookValue(10, row.countryCode1).CODE.stringValue : '000'
                                     def String region1 = row.region1 != null ? '' + getRefBookValue(4, row.region1).CODE.stringValue : null
@@ -360,3 +356,4 @@ def getRefBookValue(def long refBookId, def long recordId) {
     }
     return refBookCache.get(recordId)
 }
+

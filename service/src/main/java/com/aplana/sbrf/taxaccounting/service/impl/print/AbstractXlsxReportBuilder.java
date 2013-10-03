@@ -29,10 +29,13 @@ public abstract class AbstractXlsxReportBuilder {
     /*
      * Нужно создать в классе наследнике блок static, для определения в нем имени файла
      */
-    private static String fileName;
-    private static String postfix;
+    private String fileName;
+    private String postfix;
 
-    //
+    protected AbstractXlsxReportBuilder(String fileName, String postfix) {
+        this.fileName = fileName;
+        this.postfix = postfix;
+    }
 
     /**
      * Формирование отчета. Условно разбит на шесть частей.
@@ -117,13 +120,5 @@ public abstract class AbstractXlsxReportBuilder {
         else
             widthCellsMap.put(cellNumber, cellWidthMin);
 
-    }
-
-    public static void setFileName(String fileName) {
-        AbstractXlsxReportBuilder.fileName = fileName;
-    }
-
-    public static void setPostfix(String postfix) {
-        AbstractXlsxReportBuilder.postfix = postfix;
     }
 }
