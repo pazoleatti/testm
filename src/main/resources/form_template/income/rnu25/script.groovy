@@ -35,11 +35,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
-        recalculateNumbers()
         break
     case FormDataEvent.DELETE_ROW :
         deleteRow()
-        recalculateNumbers()
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
@@ -127,17 +125,6 @@ def addNewRow() {
         }
     }
     data.insert(newRow,index+1)
-}
-
-def recalculateNumbers(){
-    def index = 1
-    def data = getData(formData)
-    getRows(data).each{row->
-        if (!isFixedRow(row)) {
-            row.rowNumber = index++
-        }
-    }
-    data.save(getRows(data))
 }
 
 /**

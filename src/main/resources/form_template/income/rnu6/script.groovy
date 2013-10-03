@@ -50,8 +50,8 @@ switch (formDataEvent) {
         logicCheckBefore(form)
         if (!logger.containsLevel(LogLevel.ERROR)) {
             deleteAllStatic(form)
-            calc(form)
             sort(form)
+            calc(form)
             addAllStatic(form)
             logicalCheck(form)
             NSICheck(form)
@@ -60,11 +60,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW:
         addNewRow()
-        recalculateNumbers()
         break
     case FormDataEvent.DELETE_ROW:
         deleteRow()
-        recalculateNumbers()
         break
     case FormDataEvent.COMPOSE:
         def form = dataRowsHelper
@@ -171,9 +169,9 @@ DataRowHelper getDataRowsHelper() {
 }
 
 void logicCheckBefore(DataRowHelper form) {
-    columns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
+    columns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'taxAccountingCurrency', 'rateOfTheBankOfRussia', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
     if (formDataEvent == FormDataEvent.CALCULATE) {
-        columns -= ['taxAccountingRuble', 'ruble']
+        columns -= ['rateOfTheBankOfRussia', 'taxAccountingRuble', 'ruble']
     }
     for (row in form.allCached) {
         if (row.getAlias() == null) {
@@ -181,6 +179,9 @@ void logicCheckBefore(DataRowHelper form) {
                 return
             }
         }
+    }
+    if (checkUniq456(form)) {
+        return
     }
 }
 
@@ -471,7 +472,7 @@ def checkRequiredColumns(def row, def columns) {
     def cell
     columns.each {
         cell = row.getCell(it)
-        if (cell.getValue() == null || row.getCell(it).getValue() == '') {
+        if (cell.getValue() == null || cell.getValue() == '') {
             def name = getColumnName(row, it)
             colNames.add('"' + name + '"')
         }
@@ -726,7 +727,6 @@ void deleteAllStatic(DataRowHelper form) {
  */
 void addNewRow() {
     DataRow<Cell> newRow = formData.createDataRow()
-    int index // Здесь будет позиция вставки
 
     def form = dataRowsHelper
     [
@@ -735,32 +735,26 @@ void addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    index = 0
-    def rows = form.getAllCached()
+    def index = 0
     if (currentDataRow!=null){
         index = currentDataRow.getIndex()
-    }else if (rows.size()>0) {
-        for(int i = rows.size()-1;i>=0;i--){
-            def row = rows.get(i)
-            if(row.getAlias()==null){
-                index = rows.indexOf(row)+1
+        def row = currentDataRow
+        while(isTotal(row) && index>0){
+            row = getRows(form).get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && !isTotal(getRows(form).get(index))){
+            index++
+        }
+    }else if (getRows(form).size()>0) {
+        for(int i = getRows(form).size()-1;i>=0;i--){
+            def row = getRows(form).get(i)
+            if(!isTotal(row)){
+                index = getRows(form).indexOf(row)+1
                 break
             }
         }
     }
     form.insert(newRow,index+1)
-}
-
-def recalculateNumbers(){
-    def index = 1
-    def data = dataRowsHelper
-    def rows = data.getAllCached()
-    rows.each{row->
-        if(row.getAlias()==null){
-            row.number = index++
-        }
-    }
-    data.save(rows)
 }
 
 /**
@@ -802,4 +796,78 @@ void setTotalStyle(def row) {
             'taxAccountingRuble', 'accountingCurrency', 'ruble'].each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
     }
+}
+
+def checkUniq456(def form) {
+    // 9. Проверка на уникальность записи по налоговому учету
+    // список значенией граф 4,5,6
+    boolean result = true
+    SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
+
+    List<Map<Integer, Object>> uniq456 = new ArrayList<>()
+    Map<Object, List<Integer>> notUniq = new HashMap<>()
+    for (row in form.allCached) {
+        if (!isTotal(row)) {
+            Map<Integer, Object> m = new HashMap<>();
+
+            m.put(4, row.code );
+            m.put(5, row.docNumber);
+            m.put(6, row.docDate);
+            if (notUniq.get(m) != null) {
+                List<Integer> tmpList = notUniq.get(m)
+                tmpList.add(row.number)
+                notUniq.put(m, tmpList)
+
+            } else {
+                notUniq.put(m, new ArrayList<Integer>([row.number]))
+            }
+            uniq456.add(m)
+        }
+    }
+    if (!notUniq.isEmpty()) {
+        notUniq = notUniq.sort {it.value}
+        for (def item : notUniq) {
+            if (item.value.size() > 1)
+            {
+                StringBuilder numberList = new StringBuilder()
+                item.getValue().each { rNum ->
+                    if (numberList.length() != 0) {
+                        numberList.append(', ')
+                    }
+                    numberList.append(rNum)
+                }
+                logger.error("Несколько строк $numberList содержат записи в налоговом учете для балансового счета=%s, документа № %s от %s", getNumberAttribute(item.getKey().get(4)).toString(), item.getKey().get(5).toString(), dateFormat.format(item.getKey().get(6)))
+                result = false
+            }
+        }
+    }
+    return result
+}
+
+/**
+ * Получить строку по алиасу.
+ *
+ * @param data данные нф (helper)
+ */
+def getRows(def data) {
+    return data.getAllCached();
+}
+
+/**
+ * Проверка является ли строка итоговой.
+ */
+def isTotal(def row) {
+    return row != null && row.getAlias() != null
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
 }

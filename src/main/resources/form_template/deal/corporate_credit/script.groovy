@@ -274,7 +274,7 @@ void importData() {
  * @param headRowCount количество строк в шапке
  */
 def checkTableHead(def xml, def headRowCount) {
-    def colCount = 12
+    def colCount = 10
     // проверить количество строк и колонок в шапке
     if (xml.row.size() < headRowCount || xml.row[0].cell.size() < colCount) {
         return false
@@ -294,12 +294,12 @@ def checkTableHead(def xml, def headRowCount) {
             xml.row[2].cell[5] ==  'гр. 7' &&
             xml.row[0].cell[6] == 'Количество' &&
             xml.row[2].cell[6] ==  'гр. 8' &&
-            xml.row[0].cell[8] == 'Цена' &&
-            xml.row[2].cell[8] ==  'гр. 9' &&
-            xml.row[0].cell[10] == 'Стоимость' &&
-            xml.row[2].cell[10] ==  'гр. 10' &&
-            xml.row[0].cell[11] == 'Дата совершения сделки' &&
-            xml.row[2].cell[11] ==  'гр. 11')
+            xml.row[0].cell[7] == 'Цена' &&
+            xml.row[2].cell[7] ==  'гр. 9' &&
+            xml.row[0].cell[8] == 'Стоимость' &&
+            xml.row[2].cell[8] ==  'гр. 10' &&
+            xml.row[0].cell[9] == 'Дата совершения сделки' &&
+            xml.row[2].cell[9] ==  'гр. 11')
 
     return result
 }
@@ -372,11 +372,9 @@ def addData(def xml, int headRowCount) {
         // графа 8
 //        newRow.count =
         indexCell++
-        indexCell++
 
         // графа 9
 //        newRow.price =
-        indexCell++
         indexCell++
 
         // графа 10

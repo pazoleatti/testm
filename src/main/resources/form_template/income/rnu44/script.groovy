@@ -76,11 +76,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
-        recalculateNumbers()
         break
     case FormDataEvent.DELETE_ROW :
         deleteRow()
-        recalculateNumbers()
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
@@ -452,17 +450,6 @@ def getRows(def data) {
  * @param data данные нф (helper)
  */
 void save(def data) {
-    data.save(getRows(data))
-}
-
-def recalculateNumbers(){
-    def index = 1
-    def data = getData(formData)
-    getRows(data).each{row->
-        if (!isFixedRow(row)) {
-            row.number = index++
-        }
-    }
     data.save(getRows(data))
 }
 

@@ -1,14 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +10,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter;
-import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"FormDataSearchDaoTest.xml"})
@@ -96,8 +87,8 @@ public class FormDataSearchDaoTest {
 		filter.setUserDepartmentId(Department.ROOT_BANK_ID);
 		filter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT);
 		List<FormDataSearchResultItem> res = formDataSearchDao.findByFilter(filter);
-		
-		assertIdsEquals(new long[] {1, 4, 7, 10, 13, 16}, res);
+
+        assertIdsEquals(new long[] {16, 13, 10, 7, 4, 1}, res);
 	}
 	
 	@Test
@@ -106,10 +97,9 @@ public class FormDataSearchDaoTest {
 		filter.setUserDepartmentId(Department.ROOT_BANK_ID);
 		filter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT_AND_SOURCES);
 		List<FormDataSearchResultItem> res = formDataSearchDao.findByFilter(filter);
-		
-		assertIdsEquals(new long[] {1, 2, 4, 7, 8, 9, 10, 12, 13, 14, 16}, res);
+
+        assertIdsEquals(new long[] {16, 14, 13, 12, 10, 9, 8, 7, 4, 2, 1}, res);
 	}
-	
 	
 	@Test
 	public void testFindPage() {

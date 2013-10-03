@@ -557,7 +557,7 @@ void importData() {
  * @param headRowCount количество строк в шапке
  */
 def checkTableHead(def xml, def headRowCount) {
-    def colCount = 17
+    def colCount = 15
     // проверить количество строк и колонок в шапке
     if (xml.row.size() < headRowCount || xml.row[0].cell.size() < colCount) {
         return false
@@ -582,18 +582,18 @@ def checkTableHead(def xml, def headRowCount) {
             xml.row[2].cell[7] == 'гр. 8' &&
             xml.row[0].cell[8] == 'Код валюты по сделке' &&
             xml.row[2].cell[8] == 'гр. 9' &&
-            xml.row[0].cell[10] == 'Код страны происхождения предмета сделки по классификатору ОКСМ' &&
-            xml.row[2].cell[10] == 'гр. 10' &&
-            xml.row[0].cell[12] == 'Сумма доходов Банка по данным бухгалтерского учета, руб.' &&
-            xml.row[2].cell[12] == 'гр. 11' &&
-            xml.row[0].cell[13] == 'Сумма расходов Банка по данным бухгалтерского учета, руб.' &&
-            xml.row[2].cell[13] == 'гр. 12' &&
-            xml.row[0].cell[14] == 'Цена (тариф) за единицу измерения, руб.' &&
-            xml.row[2].cell[14] == 'гр. 13' &&
-            xml.row[0].cell[15] == 'Итого стоимость, руб.' &&
-            xml.row[2].cell[15] == 'гр. 14' &&
-            xml.row[0].cell[16] == 'Дата совершения сделки' &&
-            xml.row[2].cell[16] == 'гр. 15')
+            xml.row[0].cell[9] == 'Код страны происхождения предмета сделки по классификатору ОКСМ' &&
+            xml.row[2].cell[9] == 'гр. 10' &&
+            xml.row[0].cell[10] == 'Сумма доходов Банка по данным бухгалтерского учета, руб.' &&
+            xml.row[2].cell[10] == 'гр. 11' &&
+            xml.row[0].cell[11] == 'Сумма расходов Банка по данным бухгалтерского учета, руб.' &&
+            xml.row[2].cell[11] == 'гр. 12' &&
+            xml.row[0].cell[12] == 'Цена (тариф) за единицу измерения, руб.' &&
+            xml.row[2].cell[12] == 'гр. 13' &&
+            xml.row[0].cell[13] == 'Итого стоимость, руб.' &&
+            xml.row[2].cell[13] == 'гр. 14' &&
+            xml.row[0].cell[14] == 'Дата совершения сделки' &&
+            xml.row[2].cell[14] == 'гр. 15')
 
     return result
 }
@@ -676,11 +676,9 @@ def addData(def xml, int headRowCount) {
         // графа 9
         newRow.currencyCode = getRecordId(15, 'CODE_2', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
         indexCell++
-        indexCell++
 
         // графа 10
         newRow.countryDealCode = getRecordId(10, 'CODE_2', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
-        indexCell++
         indexCell++
 
         // графа 11

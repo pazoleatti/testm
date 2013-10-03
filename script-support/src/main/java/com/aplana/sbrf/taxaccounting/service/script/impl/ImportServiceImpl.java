@@ -9,6 +9,7 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.*;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -184,6 +185,8 @@ public class ImportServiceImpl implements ImportService {
         StringBuilder sb = new StringBuilder();
         sb.append("<data>").append(ENTER);
 
+        ArrayList<Integer> skipList = getSkipCol(sheet, firstP);
+
         String rowStr;
         int indexRow = -1;
         Iterator rows = sheet.rowIterator();
@@ -202,11 +205,46 @@ public class ImportServiceImpl implements ImportService {
             }
 
             // получить значения ячеек строки
-            rowStr = getRowString(row, firstP.getX(), columnsCount);
+            rowStr = getRowString(row, firstP.getX(), columnsCount, skipList);
             sb.append(rowStr);
         }
         sb.append("</data>");
         return sb.toString();
+    }
+
+    /**
+     * Получить номера столбцов которые нужно пропустить.
+     *
+     * @param sheet лист XLS
+     * @param firstP начало таблицы
+     */
+    ArrayList<Integer> getSkipCol(HSSFSheet sheet, Point firstP) {
+        ArrayList<Integer> value = new ArrayList<Integer>();
+        Iterator rows = sheet.rowIterator();
+        int indexRow = -1;
+        while (rows.hasNext()) {
+            indexRow += 1;
+            HSSFRow row = (HSSFRow) rows.next();
+
+            // брать строки с позиции начала таблицы
+            if (indexRow < (firstP.getY()+2)) {
+                continue;
+            } else if (indexRow > (firstP.getY()+2)) {
+                break;
+            }
+            Iterator<Cell> iterator = row.cellIterator();
+            int indexCol = -1;
+            String cellValue;
+            while (iterator.hasNext()) {
+                indexCol++;
+                // получить значение ячейки
+                cellValue = getCellValue((HSSFCell)iterator.next());
+                if (cellValue==null || "".equals(cellValue)) {
+                    value.add(indexCol);
+                }
+            }
+        }
+        return value;
     }
 
     /**
@@ -264,19 +302,21 @@ public class ImportServiceImpl implements ImportService {
      * @param colP номер ячейки с которой брать данные
      * @param columnsCount количество столбцов в таблице
      */
-    private String getRowString(HSSFRow row, Integer colP, Integer columnsCount) {
+    private String getRowString(HSSFRow row, Integer colP, Integer columnsCount, ArrayList<Integer> skipList) {
         if (row == null) {
             return "<row/>";
         }
         StringBuilder sb = new StringBuilder();
         sb.append(TAB).append("<row>").append(ENTER);
         String cellValue;
+
         Iterator<Cell> iterator = row.cellIterator();
         int indexCol = -1;
         while (iterator.hasNext()) {
             indexCol++;
             // получить значение ячейки
             cellValue = getCellValue((HSSFCell)iterator.next());
+            if (skipList.contains(indexCol)) continue;
             if (colP != null && indexCol + row.getFirstCellNum() < colP.shortValue()) {
                 continue;
             }
