@@ -10,32 +10,32 @@
 			<g:HorizontalPanel>
 				<g:cell width="250px">
 					<g:FlowPanel>
-						<g:Label width="200px" text="Подразделение" />
+						<g:Label width="200px" text="Подразделение" ui:field="departmentPickerLbl"/>
 						<dep:DepartmentPickerPopupWidget width="200px" ui:field="departmentPicker" multiselection="true" header="Выберите подразделение"/>
 					</g:FlowPanel>
 				</g:cell>
 				<g:cell width="250px">
 					<g:VerticalPanel>
-						<g:Label width="200px" text="Тип налоговой формы" />
+						<g:Label width="200px" text="Тип налоговой формы" ui:field="formDataKindLbl"/>
 						<g:ValueListBox width="200px" ui:field="formDataKind" />
 					</g:VerticalPanel>
 				</g:cell>
 				<g:cell width="250px">
 					<g:VerticalPanel>
-						<g:Label width="200px" text="Вид налоговой формы" />
+						<g:Label width="200px" text="Вид налоговой формы" ui:field="formTypeIdLbl"/>
 						<style:ListBoxWithTooltip width="200px"
 							ui:field="formTypeId" showTooltip="true" />
 					</g:VerticalPanel>
 				</g:cell>
 				<g:cell width="250px">
 					<g:VerticalPanel>
-						<g:Label width="200px" text="Состояние" />
+						<g:Label width="200px" text="Состояние" ui:field="formStateLbl"/>
 						<g:ValueListBox width="200px" ui:field="formState" />
 					</g:VerticalPanel>
 				</g:cell>
 				<g:cell width="250px">
 					<g:VerticalPanel>
-						<g:Label width="200px" text="Признак возврата" />
+						<g:Label width="200px" text="Признак возврата" ui:field="returnStateLbl"/>
 						<g:ValueListBox width="200px" ui:field="returnState" />
 					</g:VerticalPanel>
 				</g:cell>
@@ -45,7 +45,7 @@
 			<g:HorizontalPanel>
 				<g:cell width="250px" verticalAlignment="bottom">
 					<g:FlowPanel>
-						<g:Label width="200px" text="Отчетный период" />
+						<g:Label width="200px" text="Отчетный период" ui:field="reportPeriodIdsLbl"/>
 						<per:PeriodPickerPopupWidget  multiselect="true" ui:field="reportPeriodIds" width="200px"/>
 					</g:FlowPanel>
 				</g:cell>
