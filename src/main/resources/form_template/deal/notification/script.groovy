@@ -1,11 +1,10 @@
 package form_template.deal.notification
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
-
 /**
  * Уведомление. Генератор XML.
  * http://conf.aplana.com/pages/viewpage.action?pageId=9594552
@@ -213,7 +212,7 @@ void generateXML() {
                             ) {
                                 def String dealSubjectCode2 = row.dealSubjectCode2 != null ? '' + getRefBookValue(68, row.dealSubjectCode2).CODE.numberValue : null
                                 def String dealSubjectCode3 = row.dealSubjectCode3 != null ? '' + getRefBookValue(34, row.dealSubjectCode3).CODE.stringValue : null
-                                def String countryCode = row.countryCode != null ? '' + getRefBookValue(10, row.countryCode).CODE.numberValue : null
+                                def String countryCode = row.countryCode != null ? getRefBookValue(10, row.countryCode).CODE.numberValue : null
                                 def String deliveryCode = row.deliveryCode != null ? getRefBookValue(63, row.deliveryCode).STRCODE.stringValue : null
                                 def String okeiCode = row.okeiCode != null ? '' + getRefBookValue(12, row.okeiCode).CODE.stringValue : null
                                 ПерПредСд(
@@ -249,7 +248,7 @@ void generateXML() {
                                     )
                                 }
                             }
-                            def String organInfo = row.organInfo != null ? '' + getRefBookValue(70, row.organInfo).VALUE.numberValue : null
+                            def String organInfo = row.organInfo != null ? getRefBookValue(70, row.organInfo).CODE.numberValue : null
                             def String countryCode3 = row.countryCode3 != null ? '' + getRefBookValue(10, row.countryCode3).CODE.stringValue : null
                             def String organName, organINN, organKPP, organRegNum, taxpayerCode, address
                             if (row.organName != null) {
