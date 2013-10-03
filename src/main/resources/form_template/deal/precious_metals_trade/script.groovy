@@ -53,25 +53,13 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        println("importData begin " + System.currentTimeMillis())
         importData()
-        println("importData end " + System.currentTimeMillis())
         if (!logger.containsLevel(LogLevel.ERROR)) {
-            println("deleteAllStatic start " + System.currentTimeMillis())
             deleteAllStatic()
-            println("deleteAllStatic end " + System.currentTimeMillis())
-            println("sort start " + System.currentTimeMillis())
             sort()
-            println("sort end " + System.currentTimeMillis())
-            println("calc start " + System.currentTimeMillis())
             calc()
-            println("calc end " + System.currentTimeMillis())
-            println("addAllStatic start " + System.currentTimeMillis())
             addAllStatic()
-            println("addAllStatic end " + System.currentTimeMillis())
-            println("logicCheck start " + System.currentTimeMillis())
             logicCheck()
-            println("logicCheck end " + System.currentTimeMillis())
         }
         break
 }
@@ -761,7 +749,7 @@ void importData() {
     try {
         if (!checkTableHead(xml, 4)) {
             logger.error('Заголовок таблицы не соответствует требуемой структуре!')
-            // return TODO Вернуть
+            return
         }
         addData(xml, 3)
     } catch (Exception e) {
@@ -786,97 +774,69 @@ def checkTableHead(def xml, def headRowCount) {
     }
     def result = (
             isEquals(xml.row[0].cell[0], 'Полное наименование с указанием ОПФ') &&
-                    isEquals(xml.row[2].cell[0], '2') &&
-                    isEquals(xml.row[3].cell[0], 'гр. 2.1') &&
+                    isEquals(xml.row[2].cell[0], 'гр. 2.1') &&
                     isEquals(xml.row[0].cell[1], 'Признак взаимозависимости') &&
-                    isEquals(xml.row[2].cell[1], '3') &&
-                    isEquals(xml.row[3].cell[1], 'гр. 2.2') &&
+                    isEquals(xml.row[2].cell[1], 'гр. 2.2') &&
                     isEquals(xml.row[0].cell[2], 'ИНН/ КИО') &&
-                    isEquals(xml.row[2].cell[2], '4') &&
-                    isEquals(xml.row[3].cell[2], 'гр. 3') &&
+                    isEquals(xml.row[2].cell[2], 'гр. 3') &&
                     isEquals(xml.row[0].cell[3], 'Наименование страны регистрации') &&
-                    isEquals(xml.row[2].cell[3], '5') &&
-                    isEquals(xml.row[3].cell[3], 'гр. 4.1') &&
+                    isEquals(xml.row[2].cell[3], 'гр. 4.1') &&
                     isEquals(xml.row[0].cell[4], 'Код страны регистрации по классификатору ОКСМ') &&
-                    isEquals(xml.row[2].cell[4], '6') &&
-                    isEquals(xml.row[3].cell[4], 'гр. 4.2') &&
+                    isEquals(xml.row[2].cell[4], 'гр. 4.2') &&
                     isEquals(xml.row[0].cell[5], 'Номер договора') &&
-                    isEquals(xml.row[2].cell[5], '7') &&
-                    isEquals(xml.row[3].cell[5], 'гр. 5') &&
+                    isEquals(xml.row[2].cell[5], 'гр. 5') &&
                     isEquals(xml.row[0].cell[6], 'Дата договора') &&
-                    isEquals(xml.row[2].cell[6], '8') &&
-                    isEquals(xml.row[3].cell[6], 'гр. 6') &&
+                    isEquals(xml.row[2].cell[6], 'гр. 6') &&
                     isEquals(xml.row[0].cell[7], 'Номер сделки') &&
-                    isEquals(xml.row[2].cell[7], '9') &&
-                    isEquals(xml.row[3].cell[7], 'гр. 7') &&
+                    isEquals(xml.row[2].cell[7], 'гр. 7') &&
                     isEquals(xml.row[0].cell[8], 'Дата заключения сделки') &&
-                    isEquals(xml.row[2].cell[8], '10') &&
-                    isEquals(xml.row[3].cell[8], 'гр. 8') &&
+                    isEquals(xml.row[2].cell[8], 'гр. 8') &&
                     isEquals(xml.row[0].cell[9], 'Направленность сделки') &&
-                    isEquals(xml.row[2].cell[9], '11') &&
-                    isEquals(xml.row[3].cell[9], 'гр. 9') &&
+                    isEquals(xml.row[2].cell[9], 'гр. 9') &&
                     isEquals(xml.row[0].cell[10], 'Признак физической поставки драгоценного металла') &&
-                    isEquals(xml.row[2].cell[10], '12') &&
-                    isEquals(xml.row[3].cell[10], 'гр. 10') &&
+                    isEquals(xml.row[2].cell[10], 'гр. 10') &&
                     isEquals(xml.row[0].cell[11], 'Наименование драгоценного металла') &&
-                    isEquals(xml.row[2].cell[11], '13') &&
-                    isEquals(xml.row[3].cell[11], 'гр. 11') &&
+                    isEquals(xml.row[2].cell[11], 'гр. 11') &&
                     isEquals(xml.row[0].cell[12], 'Внешнеторговая сделка') &&
-                    isEquals(xml.row[2].cell[12], '14') &&
-                    isEquals(xml.row[3].cell[12], 'гр. 12') &&
+                    isEquals(xml.row[2].cell[12], 'гр. 12') &&
                     //isEquals(xml.row[0].cell[13], 'Место отправки (погрузки) драгоценного металла в соответствии с товаросопроводительными документами') &&
                     isEquals(xml.row[1].cell[13], '\"Код страны по классификатору ОКСМ (цифровой)\"') &&
-                    isEquals(xml.row[2].cell[13], '15') &&
-                    isEquals(xml.row[3].cell[13], 'гр. 13.1') &&
+                    isEquals(xml.row[2].cell[13], 'гр. 13.1') &&
                     isEquals(xml.row[0].cell[14], '') &&
                     isEquals(xml.row[1].cell[14], '\"Регион (код)\"') &&
-                    isEquals(xml.row[2].cell[14], '16') &&
-                    isEquals(xml.row[3].cell[14], 'гр. 13.2') &&
+                    isEquals(xml.row[2].cell[14], 'гр. 13.2') &&
                     isEquals(xml.row[0].cell[15], '') &&
                     isEquals(xml.row[1].cell[15], 'Город') &&
-                    isEquals(xml.row[2].cell[15], '17') &&
-                    isEquals(xml.row[3].cell[15], 'гр. 13.3') &&
+                    isEquals(xml.row[2].cell[15], 'гр. 13.3') &&
                     isEquals(xml.row[0].cell[16], '') &&
                     isEquals(xml.row[1].cell[16], 'Населенный пункт (село, поселок и т.д.)') &&
-                    isEquals(xml.row[2].cell[16], '18') &&
-                    isEquals(xml.row[3].cell[16], 'гр. 13.4') &&
+                    isEquals(xml.row[2].cell[16], 'гр. 13.4') &&
                     isEquals(xml.row[0].cell[17], 'Место совершения сделки (адрес места доставки (разгрузки драгоценного металла)') &&
                     isEquals(xml.row[1].cell[17], 'Код страны по классификатору ОКСМ (цифровой)') &&
-                    isEquals(xml.row[2].cell[17], '19') &&
-                    isEquals(xml.row[3].cell[17], 'гр. 14.1') &&
+                    isEquals(xml.row[2].cell[17], 'гр. 14.1') &&
                     isEquals(xml.row[0].cell[18], '') &&
                     isEquals(xml.row[1].cell[18], '\"Регион (код)\"') &&
-                    isEquals(xml.row[2].cell[18], '20') &&
-                    isEquals(xml.row[3].cell[18], 'гр. 14.2') &&
+                    isEquals(xml.row[2].cell[18], 'гр. 14.2') &&
                     isEquals(xml.row[0].cell[19], '') &&
                     isEquals(xml.row[1].cell[19], 'Город') &&
-                    isEquals(xml.row[2].cell[19], '21') &&
-                    isEquals(xml.row[3].cell[19], 'гр. 14.3') &&
+                    isEquals(xml.row[2].cell[19], 'гр. 14.3') &&
                     isEquals(xml.row[0].cell[20], '') &&
                     isEquals(xml.row[1].cell[20], 'Населенный пункт (село, поселок и т.д.)') &&
-                    isEquals(xml.row[2].cell[20], '22') &&
-                    isEquals(xml.row[3].cell[20], 'гр. 14.4') &&
+                    isEquals(xml.row[2].cell[20], 'гр. 14.4') &&
                     isEquals(xml.row[0].cell[21], 'Код условия поставки') &&
-                    isEquals(xml.row[2].cell[21], '23') &&
-                    isEquals(xml.row[3].cell[21], 'гр. 15') &&
+                    isEquals(xml.row[2].cell[21], 'гр. 15') &&
                     isEquals(xml.row[0].cell[22], 'Количество') &&
-                    isEquals(xml.row[2].cell[22], '24') &&
-                    isEquals(xml.row[3].cell[22], 'гр. 16') &&
+                    isEquals(xml.row[2].cell[22], 'гр. 16') &&
                     isEquals(xml.row[0].cell[23], 'Сумма доходов Банка по данным бухгалтерского учета, руб.') &&
-                    isEquals(xml.row[2].cell[23], '25') &&
-                    isEquals(xml.row[3].cell[23], 'гр. 17') &&
+                    isEquals(xml.row[2].cell[23], 'гр. 17') &&
                     isEquals(xml.row[0].cell[24], 'Сумма расходов Банка по данным бухгалтерского учета, руб.') &&
-                    isEquals(xml.row[2].cell[24], '26') &&
-                    isEquals(xml.row[3].cell[24], 'гр. 18') &&
+                    isEquals(xml.row[2].cell[24], 'гр. 18') &&
                     isEquals(xml.row[0].cell[25], 'Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.') &&
-                    isEquals(xml.row[2].cell[25], '27') &&
-                    isEquals(xml.row[3].cell[25], 'гр. 19') &&
+                    isEquals(xml.row[2].cell[25], 'гр. 19') &&
                     isEquals(xml.row[0].cell[26], 'Итого стоимость без учета НДС, акцизов и пошлины, руб.') &&
-                    isEquals(xml.row[2].cell[26], '28') &&
-                    isEquals(xml.row[3].cell[26], 'гр. 20') &&
+                    isEquals(xml.row[2].cell[26], 'гр. 20') &&
                     isEquals(xml.row[0].cell[27], 'Дата совершения сделки') &&
-                    isEquals(xml.row[2].cell[27], '29') &&
-                    isEquals(xml.row[3].cell[27], 'гр. 21'))
+                    isEquals(xml.row[2].cell[27], 'гр. 21'))
 
     return result
 }
@@ -904,7 +864,6 @@ def addData(def xml, int headRowCount) {
         if (xmlIndexRow <= headRowCount) {
             continue
         }
-        //println("addData row begin " + System.currentTimeMillis())
 
         rowIndex++
 
@@ -972,7 +931,6 @@ def addData(def xml, int headRowCount) {
 
         // графа 10
         newRow.deliverySign = getRecordId(18, 'SIGN', row.cell[xmlIndexCell].text(), date, xmlIndexRow, newRow.getCell('deliverySign').column.name)
-        println(">>> "+row.cell[xmlIndexCell].text()+" : "+newRow.deliverySign)
         xmlIndexCell++
 
         // графа 11
@@ -1051,11 +1009,8 @@ def addData(def xml, int headRowCount) {
         newRow.dealDoneDate = getDate(row.cell[xmlIndexCell].text(), xmlIndexRow, newRow.getCell('dealDoneDate').column.name)
 
         rows.add(newRow)
-
-        //println("addData row end " + System.currentTimeMillis())
     }
     data.insert(rows, 1)
-    println("addData row insert end " + System.currentTimeMillis())
 }
 
 /**
