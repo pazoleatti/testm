@@ -321,7 +321,8 @@ void logicCheck() {
         // "Нет"
         def recNoId = getRecordId(38, 'CODE', '0', date, rowNum-2, msg14)
 
-        if (row.countryCodeNumeric == row.regionCode) {
+
+        if (row.countryCodeNumeric == row.countryCodeNumeric2) {
             if (row.foreignDeal != recNoId) {
                 logger.warn("Строка $rowNum: $msg14 должно иметь значение «Нет»!")
             }
