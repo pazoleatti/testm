@@ -307,7 +307,7 @@ void logicCheck() {
 
         // Проверка доходов/расходов и стоимости
         def msgPrice = row.getCell('price').column.name
-        if (incomeSumCell.value != null && outcomeSumCell.value != null) {
+        if (incomeSumCell.value != null && outcomeSumCell.value != null && row.price != null) {
             if (row.price.abs() != (incomeSumCell.value - outcomeSumCell.value).abs())
                 logger.warn("Строка $rowNum: Графа «$msgPrice» должна быть равна разнице графы «$msgIn» и «$msgOut» по модулю!")
         } else if (incomeSumCell.value != null) {
@@ -328,11 +328,11 @@ void logicCheck() {
         def msg14 = row.getCell('foreignDeal').column.name
 
         // "Да"
-        def recYesId = getRecordId(38, 'CODE', '1', date, rowNum, msg14)
+        def recYesId = getRecordId(38, 'CODE', '1', date, rowNum-2, msg14)
         // "Нет"
-        def recNoId = getRecordId(38, 'CODE', '0', date, rowNum, msg14)
+        def recNoId = getRecordId(38, 'CODE', '0', date, rowNum-2, msg14)
 
-        if (row.countryCodeNumeric == row.regionCode) {
+        if (row.countryCodeNumeric == row.countryCodeNumeric2) {
             if (row.foreignDeal != recNoId) {
                 logger.warn("Строка $rowNum: «$msg14» должно иметь значение «Нет»!")
             }
@@ -539,9 +539,9 @@ void calc() {
         }
 
         if (row.countryCodeNumeric == row.countryCodeNumeric2 || deliveryPhis) {
-            row.foreignDeal = getRecordId(38, 'CODE', '0', date, index,  row.getCell('foreignDeal').column.name)
+            row.foreignDeal = getRecordId(38, 'CODE', '0', date, index-3,  row.getCell('foreignDeal').column.name)
         } else {
-            row.foreignDeal = getRecordId(38, 'CODE', '1', date, index, row.getCell('foreignDeal').column.name)
+            row.foreignDeal = getRecordId(38, 'CODE', '1', date, index-3, row.getCell('foreignDeal').column.name)
         }
     }
 
