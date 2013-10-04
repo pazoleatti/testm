@@ -316,9 +316,9 @@ void logicCheck() {
         def msg14 = row.getCell('foreignDeal').column.name
 
         // "Да"
-        def recYesId = getRecordId(38, 'CODE', '1', date, rowNum-2, msg14)
+        def recYesId = getRecordId(38, 'CODE', '1', date, rowNum-2, msg14, false)
         // "Нет"
-        def recNoId = getRecordId(38, 'CODE', '0', date, rowNum-2, msg14)
+        def recNoId = getRecordId(38, 'CODE', '0', date, rowNum-2, msg14, false)
 
         if (row.countryCodeNumeric == row.countryCodeNumeric2) {
             if (row.foreignDeal != recNoId) {
@@ -354,7 +354,7 @@ void logicCheck() {
 
         // Проверка заполнения региона отправки
         if (row.countryCodeNumeric != null) {
-            def country = getRefBookValue(10, row.countryCodeNumeric).CODE.stringValue//refBookService.getStringValue(10, row.countryCodeNumeric, 'CODE')
+            def country = getRefBookValue(10, row.countryCodeNumeric).CODE.stringValue
             if (country != null) {
                 def regionName = row.getCell('regionCode').column.name
                 def countryName = row.getCell('countryCodeNumeric').column.name
@@ -466,7 +466,7 @@ void logicCheck() {
  */
 void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     def cell = row.getCell(alias)
-    if (cell.value != null && /*refBookService.getRecordData(id, cell.value)*/getRefBookValue(id, cell.value) == null) {
+    if (cell.value != null && getRefBookValue(id, cell.value) == null) {
         def msg2 = cell.column.name
         def rowNum = row.getIndex()
         logger.warn("Строка $rowNum: В справочнике «$msg» не найден элемент «$msg2»!")
@@ -499,7 +499,7 @@ void calc() {
 
         // Расчет полей зависимых от справочников
         if (row.fullName != null) {
-            def map = getRefBookValue(9, row.fullName)//refBookService.getRecordData(9, row.fullName)
+            def map = getRefBookValue(9, row.fullName)
             row.inn = map.INN_KIO.stringValue
             row.countryCode = map.COUNTRY.referenceValue
             row.countryName = map.COUNTRY.referenceValue
@@ -512,7 +512,7 @@ void calc() {
         // Признак физической поставки
         def Boolean deliveryPhis = null
         if (row.deliverySign != null) {
-            deliveryPhis = getRefBookValue(18, row.deliverySign).CODE.numberValue == 1//refBookService.getNumberValue(18, row.deliverySign, 'CODE') == 1
+            deliveryPhis = getRefBookValue(18, row.deliverySign).CODE.numberValue == 1
         }
 
         if (deliveryPhis != null && deliveryPhis) {
@@ -527,9 +527,9 @@ void calc() {
         }
 
         if (row.countryCodeNumeric == row.countryCodeNumeric2 || deliveryPhis) {
-            row.foreignDeal = getRecordId(38, 'CODE', '0', date, index-3,  row.getCell('foreignDeal').column.name)
+            row.foreignDeal = getRecordId(38, 'CODE', '0', date, index-3,  row.getCell('foreignDeal').column.name, false)
         } else {
-            row.foreignDeal = getRecordId(38, 'CODE', '1', date, index-3, row.getCell('foreignDeal').column.name)
+            row.foreignDeal = getRecordId(38, 'CODE', '1', date, index-3, row.getCell('foreignDeal').column.name, false)
         }
     }
 
@@ -747,11 +747,11 @@ void importData() {
 
     // добавить данные в форму
     try {
-        if (!checkTableHead(xml, 4)) {
+        if (!checkTableHead(xml, 3)) {
             logger.error('Заголовок таблицы не соответствует требуемой структуре!')
             return
         }
-        addData(xml, 3)
+        addData(xml, 2)
     } catch (Exception e) {
         logger.error("" + e.message)
     }
@@ -890,23 +890,23 @@ def addData(def xml, int headRowCount) {
         xmlIndexCell++
 
         // графа 3
-        def map = getRefBookValue(9, newRow.fullName)//refBookService.getRecordData(9, newRow.fullName)
+        def map = getRefBookValue(9, newRow.fullName)
         def String text = row.cell[xmlIndexCell].text()
-//        if ((text != null && !text.equals(map.INN_KIO.stringValue)) || (text == null && map.INN_KIO.stringValue != null))
-//            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if ((text != null && !text.equals(map.INN_KIO.stringValue)) || (text == null && map.INN_KIO.stringValue != null))
+            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         xmlIndexCell++
 
         // графа 4.1
         text = row.cell[xmlIndexCell].text()
-        map = getRefBookValue(10, map.COUNTRY.referenceValue) //refBookService.getRecordData(10, map.COUNTRY.referenceValue)
-//        if ((text != null && !text.equals(map.NAME.stringValue)) || (text == null && map.NAME.stringValue != null))
-//            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        map = getRefBookValue(10, map.COUNTRY.referenceValue)
+        if ((text != null && !text.equals(map.NAME.stringValue)) || (text == null && map.NAME.stringValue != null))
+            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         xmlIndexCell++
 
         // графа 4.2
         text = row.cell[xmlIndexCell].text()
-//        if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
-//            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
+            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
         xmlIndexCell++
 
         // графа 5
@@ -1007,7 +1007,6 @@ def addData(def xml, int headRowCount) {
 
         // графа 21
         newRow.dealDoneDate = getDate(row.cell[xmlIndexCell].text(), xmlIndexRow, newRow.getCell('dealDoneDate').column.name)
-
         rows.add(newRow)
     }
     data.insert(rows, 1)
@@ -1056,7 +1055,7 @@ def getRecordId(def ref_id, String alias, String value, Date date, int rowIndex,
         recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return recordCache[ref_id][filter]
     } else if (mandatory || value != '') {
-        //throw new Exception("Строка ${rowIndex}, графа «$cellName» содержит значение, отсутствующее в справочнике!")
+        throw new Exception("Строка ${rowIndex}, графа «$cellName» содержит значение, отсутствующее в справочнике!")
     }
     return null
 }
