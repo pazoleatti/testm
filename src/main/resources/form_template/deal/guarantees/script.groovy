@@ -100,8 +100,6 @@ void deleteRow() {
 void addRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def row = formData.createDataRow()
-    def dataRows = dataRowHelper.getAllCached()
-    def size = dataRows.size()
     def index = 0
     row.keySet().each {
         row.getCell(it).setStyleAlias('Автозаполняемая')
@@ -114,16 +112,16 @@ void addRow() {
         index = currentDataRow.getIndex()
         def pointRow = currentDataRow
         while (pointRow.getAlias() != null && index > 0) {
-            pointRow = dataRows.get(--index)
+            pointRow = dataRowHelper.getAllCached().get(--index)
         }
-        if (index != currentDataRow.getIndex() && dataRows.get(index).getAlias() == null) {
+        if (index != currentDataRow.getIndex() && dataRowHelper.getAllCached().get(index).getAlias() == null) {
             index++
         }
-    } else if (size > 0) {
-        for (int i = size - 1; i >= 0; i--) {
-            def pointRow = dataRows.get(i)
+    } else if (dataRowHelper.getAllCached().size() > 0) {
+        for (int i = dataRowHelper.getAllCached().size() - 1; i >= 0; i--) {
+            def pointRow = dataRowHelper.getAllCached().get(i)
             if (pointRow.getAlias() == null) {
-                index = dataRows.indexOf(pointRow) + 1
+                index = dataRowHelper.getAllCached().indexOf(pointRow) + 1
                 break
             }
         }

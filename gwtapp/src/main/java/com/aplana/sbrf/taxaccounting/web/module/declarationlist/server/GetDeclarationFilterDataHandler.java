@@ -1,11 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
-import java.util.ArrayList;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
@@ -17,6 +12,11 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclar
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
@@ -49,6 +49,11 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 				.getDepartmentIds()).values()));
 		res.setFilterValues(declarationFilterValues);
 		res.setPeriods(periodService.getAllPeriodsByTaxType(action.getTaxType(), true));
+
+        DeclarationDataFilter dataFilter = new DeclarationDataFilter();
+        dataFilter.setTaxType(action.getTaxType());
+        res.setDefaultDecFilterData(dataFilter);
+
 		return res;
 	}
 

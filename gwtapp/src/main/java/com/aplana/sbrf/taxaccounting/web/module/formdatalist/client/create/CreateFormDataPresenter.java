@@ -3,12 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create;
 import java.util.List;
 import java.util.Set;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
@@ -90,7 +85,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 
 
 	public void initAndShowDialog(final FormDataFilter filter, final HasPopupSlot slotForMe){
-		GetFilterData action = new GetFilterData();
+		final GetFilterData action = new GetFilterData();
 		action.setTaxType(filter.getTaxType());
 		dispatchAsync.execute(action, CallbackUtils
 				.wrongStateCallback(new AbstractCallback<GetFilterDataResult>() {
@@ -98,6 +93,11 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 					public void onSuccess(GetFilterDataResult result) {
 						FormDataFilterAvailableValues filterValues = result.getFilterValues();
 						getView().setAcceptableDepartments(result.getDepartments(), filterValues.getDepartmentIds());
+						//TODO Костыли. Связано это с тем, что необходимы разные значения для создания и фильтрации.
+						if (action.getTaxType() == TaxType.DEAL) {
+							filterValues.getKinds().remove(FormDataKind.SUMMARY);
+							filterValues.getKinds().remove(FormDataKind.CONSOLIDATED);
+						}
 						getView().setAcceptableFormKindList(filterValues.getKinds());
 						getView().setAcceptableFormTypeList(filterValues.getFormTypes());
 						getView().setAcceptableReportPeriods(result.getReportPeriods());

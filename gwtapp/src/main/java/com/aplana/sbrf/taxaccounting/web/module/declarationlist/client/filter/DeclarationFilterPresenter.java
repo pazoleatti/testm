@@ -1,20 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.DetectUserRoleAction;
@@ -28,44 +14,37 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 
+import java.util.*;
+
 public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilterPresenter.MyView>
 		implements DeclarationFilterUIHandlers {
 
-	public interface MyView extends View, HasUiHandlers<DeclarationFilterUIHandlers> {
-		void setDataFilter(DeclarationDataFilter formDataFilter, TaxType taxType);
+    @Override
+    public void onApplyFilter() {
+        DeclarationFilterApplyEvent.fire(this);
+    }
+
+    @Override
+    public void onCreateClicked() {
+        DeclarationFilterCreateEvent.fire(this);
+    }
+
+    public interface MyView extends View, HasUiHandlers<DeclarationFilterUIHandlers> {
+		void setDataFilter(DeclarationDataFilter formDataFilter);
+
+        DeclarationDataFilter getFilterData();
 
 		void setDepartmentsList(List<Department> list, Set<Integer> availableDepartments);
-
-		List<Integer> getSelectedReportPeriods();
-
-		void setSelectedReportPeriods(List<Integer> reportPeriodList);
-
-		void updateReportPeriodPicker();
-
-		void updateDepartmentPicker();
-
-		List<Integer> getSelectedDepartments();
-
-		Integer getSelectedDeclarationTypeId();
 
 		void setDeclarationTypeMap(Map<Integer, String> declarationTypeMap);
 
 		void setReportPeriods(List<ReportPeriod> reportPeriods);
 
-		void setSelectedDepartments(List<Integer> values);
 	}
 
 	private final DispatchAsync dispatchAsync;
-	
-	private TaxType taxType;
-	private static Map<TaxType, DeclarationDataFilter> savedFilterData = new HashMap<TaxType, DeclarationDataFilter>();
-	private static Map<TaxType, List<Integer>> savedDepartmentsMap = new HashMap<TaxType, List<Integer>>();
-	private List<TARole> userRoles = null;
-	private List<ReportPeriod> reportPeriods;
-	private List<Department> departments;
-	private DeclarationDataFilterAvailableValues filterValues;
 
-	@Inject
+    @Inject
 	public DeclarationFilterPresenter(EventBus eventBus, MyView view,
 	                                  DispatchAsync dispatchAsync) {
 		super(eventBus, view);
@@ -75,36 +54,10 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 	}
 
 	public DeclarationDataFilter getFilterData() {
-		DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
-
-		declarationFilter.setReportPeriodIds(getView().getSelectedReportPeriods());
-		declarationFilter.setDepartmentIds(getView().getSelectedDepartments());
-		declarationFilter.setTaxType(this.taxType);
-		declarationFilter.setDeclarationTypeId(getView().getSelectedDeclarationTypeId());
-		return declarationFilter;
+		return getView().getFilterData();
 	}
 
-	public DeclarationDataFilterAvailableValues getFilterValues() {
-		return filterValues;
-	}
-
-	public List<ReportPeriod> getReportPeriods() {
-		return reportPeriods;
-	}
-
-	public List<Department> getDepartments() {
-		return departments;
-	}
-
-	public void updateSavedFilterData(DeclarationDataFilter declarationFilter){
-		savedFilterData.put(this.taxType, declarationFilter);
-		savedDepartmentsMap.put(this.taxType, getView().getSelectedDepartments());
-	}
-
-	public void initFilter(final TaxType taxType) {
-        this.taxType = taxType;
-		getView().updateReportPeriodPicker();
-		getView().updateDepartmentPicker();
+	public void initFilter(final TaxType taxType, final DeclarationDataFilter dataFilter) {
 
 		GetDeclarationFilterData action = new GetDeclarationFilterData();
         action.setTaxType(taxType);
@@ -112,24 +65,20 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 				        .defaultCallback(new AbstractCallback<GetDeclarationFilterDataResult>() {
 						@Override
 						public void onSuccess(GetDeclarationFilterDataResult result) {
-							filterValues = result.getFilterValues();
-							departments = result.getDepartments();
+                            DeclarationDataFilterAvailableValues filterValues = result.getFilterValues();
 
-							getView().setDepartmentsList(departments, filterValues.getDepartmentIds());
+							getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
 							getView().setReportPeriods(result.getPeriods());
-							reportPeriods = result.getPeriods();
 							getView().setDeclarationTypeMap(fillDeclarationTypesMap(filterValues));
 
-							getView().setDataFilter(prepareFormDataFilter(), taxType);
+                            if (dataFilter != null){
+                                getView().setDataFilter(dataFilter);
+                            } else {
+                                getView().setDataFilter(result.getDefaultDecFilterData());
+                            }
 							DeclarationFilterReadyEvent.fire(DeclarationFilterPresenter.this);
 						}
 					}, this));
-	}
-
-
-	@Override
-	public TaxType getCurrentTaxType(){
-		return this.taxType;
 	}
 
 	private Map<Integer, String> fillDeclarationTypesMap(DeclarationDataFilterAvailableValues source){
@@ -141,47 +90,13 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		return declarationTypeMap;
 	}
 
-	private DeclarationDataFilter prepareFormDataFilter(){
-		DeclarationDataFilter formDataFilter = new DeclarationDataFilter();
-
-		if(savedFilterData.get(taxType) == null){
-			if(filterValues.getDepartmentIds() != null && !filterValues.getDepartmentIds().isEmpty()
-					&& !isControlOfUnp() ){
-				Integer departmentId = filterValues.getDefaultDepartmentId();
-				//Если пользователь ни разу не выполнял фильтрацию, то ставим значения фильтра по-умолчанию
-				List<Integer> defaultDepartment = new ArrayList<Integer>(Arrays.asList(departmentId));
-				getView().setSelectedDepartments(Arrays.asList(departmentId));
-				formDataFilter.setDepartmentIds(defaultDepartment);
-			} else {
-				formDataFilter.setDepartmentIds(null);
-			}
-		} else {
-			//В противном случае - заполняем фильтр значениями, по которым делалась фильтрация в последний раз,
-			formDataFilter = savedFilterData.get(taxType);
-			getView().setSelectedDepartments(savedDepartmentsMap.get(taxType));
-		}
-		return formDataFilter;
-	}
-
-	private boolean isControlOfUnp(){
-		if(userRoles != null){
-			for(TARole taRole : userRoles){
-				if(taRole.getAlias().equals(TARole.ROLE_CONTROL_UNP)){
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	private void detectUserRoles(){
 		DetectUserRoleAction action = new DetectUserRoleAction();
 		dispatchAsync.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<DetectUserRoleResult>() {
 					@Override
 					public void onSuccess(DetectUserRoleResult result) {
-						userRoles = result.getUserRole();
-					}
+                    }
 				}, this));
 	}
 

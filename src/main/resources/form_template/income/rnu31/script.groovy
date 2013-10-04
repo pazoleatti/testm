@@ -21,8 +21,8 @@ switch (formDataEvent) {
         logicalCheck()
         break
     case FormDataEvent.CALCULATE :
-        calc()
-        !hasError() && logicalCheck()
+        //calc()
+        //!hasError() && logicalCheck()
         break
     case FormDataEvent.ADD_ROW :
         // addNewRow()
@@ -44,7 +44,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        calc()
         !hasError() && logicalCheck()
         break
     case FormDataEvent.IMPORT :
@@ -65,26 +64,6 @@ switch (formDataEvent) {
 // графа 10 - eurobondsRF
 // графа 11 - itherEurobonds
 // графа 12 - corporateBonds
-
-/**
- * Расчеты. Алгоритмы заполнения полей формы.
- */
-void calc() {
-    def data = getData(formData)
-    /*
-     * Проверка обязательных полей.
-     */
-    // список проверяемых столбцов (графа 3..12)
-    def requiredColumns = ['ofz', 'municipalBonds', 'governmentBonds',
-            'mortgageBonds', 'municipalBondsBefore', 'rtgageBondsBefore',
-            'ovgvz', 'eurobondsRF', 'itherEurobonds', 'corporateBonds']
-
-    for (def row : getRows(data)) {
-        if (!checkRequiredColumns(row, requiredColumns)) {
-            return
-        }
-    }
-}
 
 /**
  * Логические проверки.
@@ -180,7 +159,7 @@ void consolidation() {
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 sourceRow = getData(source).getDataRow(getRows(getData(source)),'total')
                 columns.each { alias ->
-                    row.getCell(alias).setValue(sourceRow.getCell(alias).getValue())
+                    row.getCell(alias).value += sourceRow.getCell(alias).getValue()
                 }
             }
         }

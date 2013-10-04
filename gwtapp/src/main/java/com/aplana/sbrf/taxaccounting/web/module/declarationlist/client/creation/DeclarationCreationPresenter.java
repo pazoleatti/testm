@@ -13,6 +13,7 @@ import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
+import com.gwtplatform.mvp.client.HasPopupSlot;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
@@ -73,18 +74,6 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		if (filter.getReportPeriodIds()!=null && filter.getReportPeriodIds().size() == 1){
 			getView().setSelectedReportPeriod(Arrays.asList(filter.getReportPeriodIds().get(0)));
 		}
-	}
-
-	public void setDeclarationTypes(DeclarationDataFilterAvailableValues filterValues) {
-		getView().setAcceptableDeclarationTypes(filterValues.getDeclarationTypes());
-	}
-
-	public void setDepartments(List<Department> departments, Set<Integer> departmentsIds) {
-		getView().setAcceptableDepartments(departments, departmentsIds);
-	}
-	
-	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
-		getView().setAcceptableReportPeriods(reportPeriods);
 	}
 
 	@Override
@@ -167,5 +156,20 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		getView().setSelectedReportPeriod(null);
 		getView().setSelectedDepartment(null);
 	}
+
+    public void initAndShowDialog(final DeclarationDataFilter dataFilter, final HasPopupSlot popupSlot){
+        GetDeclarationFilterData action = new GetDeclarationFilterData();
+        action.setTaxType(dataFilter.getTaxType());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationFilterDataResult>() {
+            @Override
+            public void onSuccess(GetDeclarationFilterDataResult result) {
+                getView().setAcceptableDepartments(result.getDepartments(), result.getFilterValues().getDepartmentIds());
+                getView().setAcceptableReportPeriods(result.getPeriods());
+                getView().setAcceptableDeclarationTypes(result.getFilterValues().getDeclarationTypes());
+                setDeclarationFilter(dataFilter);
+                popupSlot.addToPopupSlot(DeclarationCreationPresenter.this);
+            }
+        }, this) );
+    }
 	
 }
