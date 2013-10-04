@@ -29,7 +29,7 @@ public class GetFieldNamesHandler extends AbstractActionHandler<GetFieldsNames, 
 				names.put(FormDataElementName.HEADER, "Список форм");
 				names.put(FormDataElementName.FORM_KIND, "Тип формы");
 				names.put(FormDataElementName.FORM_TYPE, "Вид формы");
-				names.put(FormDataElementName.REPORT_PERIOD, "Период по требованиям");
+				names.put(FormDataElementName.REPORT_PERIOD, "Период");
 				break;
 			case INCOME:
 			case PROPERTY:
