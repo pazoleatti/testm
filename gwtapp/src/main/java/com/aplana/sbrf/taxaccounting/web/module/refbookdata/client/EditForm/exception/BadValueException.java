@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exc
 
 public class BadValueException extends Exception {
 	String fieldName;
+	String description;
 
 	public String getFieldName() {
 		return fieldName;
@@ -9,5 +10,13 @@ public class BadValueException extends Exception {
 
 	public void setFieldName(String fieldName) {
 		this.fieldName = fieldName;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }
