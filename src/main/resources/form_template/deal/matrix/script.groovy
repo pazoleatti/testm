@@ -514,23 +514,18 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 376:
             row.income = srcRow.incomeBankSum
             break
-        case 382:
-            row.income = srcRow.bankIncomeSum
-            break
         case 379:
         case 387:
             row.income = srcRow.sum
             break
-        case 377:
-        case 375:
-        case 380:
-            row.income = 0
+        case 382:
+            row.income = srcRow.bankIncomeSum
             break
         case 381:
             row.income = srcRow.cost
             break
         case 383:
-            row.income = srcRow.priceFirstRub
+            row.income = srcRow.percentIncomeSum
             break
         case 384:
             row.income = srcRow.transactionSumRub
@@ -545,16 +540,10 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
         case 390:
         case 391:
-            row.income = srcRow.total
-            break
         case 392:
-            row.income = srcRow.cost
-            break
         case 393:
-            row.income = srcRow.totalNds
-            break
         case 394:
-            row.income = srcRow.total
+            row.income = srcRow.incomeSum
             break
         default:
             row.income = 0
@@ -582,7 +571,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             row.outcome = srcRow.consumptionSum
             break
         default:
-            row.income = 0
+            row.outcome = 0
             break
     }
 
