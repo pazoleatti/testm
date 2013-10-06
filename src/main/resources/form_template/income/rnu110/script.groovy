@@ -1,27 +1,9 @@
-package form_template.income.rnu108
 /**
-* Скрипт для РНУ-108
-* Форма "(РНУ-108) Регистр налогового учёта расходов, связанных с приобретением услуг у Взаимозависимых лиц и резидентов оффшорных зон и подлежащих корректировке в связи с применением цен, не соответствующих рыночному уровню"
-*
-* @author akadyrgulov 
-*/
-
-// графа 1 - rowNumber
-// графа 2 - personName
-// графа 3 - inn
-// графа 4 - date
-// графа 5 - code
-// графа 6 - docNumber
-// графа 7 - docDate
-// графа 8 - contractNumber
-// графа 9 - contractDate
-// графа 10 - priceService
-// графа 11 - priceMarket
-// графа 12 - factSum
-// графа 13 - correctKoef
-// графа 14 - marketSum
-// графа 15 - deviatSum
-// графа 16 - code2
+ * Скрипт для РНУ-110
+ * Форма "(РНУ-110) Регистр налогового учёта доходов, возникающих в связи с применением в сделках по предоставлению имущества в аренду Взаимозависимым лицам и резидентам оффшорных зон цен, не соответствующих рыночному уровню"
+ *
+ * @author akadyrgulov
+ */
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
@@ -58,19 +40,20 @@ switch (formDataEvent) {
         break
 }
 
-/**
- * Расчеты. Алгоритмы заполнения полей формы.
- */
-boolean calc() {
 
+
+/**
+ * Расчеты
+ * @return
+ */
+def calc() {
     def data = getData(formData)
     /*
 	 * Проверка обязательных полей.
 	 */
-    // список проверяемых столбцов (графа 2..10, 12)
-    def requiredColumns = ['personName', 'inn', 'date', 'code', 'docNumber',
-            'docDate', 'contractNumber', 'contractDate', 'priceService',
-            'priceMarket', 'correctKoef']
+    // список проверяемых столбцов (графа 2..8, 10)
+    def requiredColumns = ['personName', 'date', 'code', 'baseNumber',
+            'baseDate', 'rent', 'rentMarket', 'marketRentSum']
     for (def row : getRows(data)) {
         if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns)) {
             return false
@@ -78,7 +61,7 @@ boolean calc() {
     }
 
     /**
-     * Удалим все строки c итого
+     * Удалим все строки и итого
      * для этого соберем алиасы, затем удалим все
      */
     def totalAlases = []
@@ -92,40 +75,57 @@ boolean calc() {
         data.delete(getRowByAlias(data, alias))
     }
 
+    if (getRows(data).isEmpty()) {
+        return true
+    }
     // отсортировать/группировать
     data.save(getRows(data).sort { (it.personName) })
 
-    /*
-     * Расчеты.
-     */
-
+    // рассчитываем графы 9-11
     getRows(data).eachWithIndex { row, index ->
         // графа 1
         row.rowNumber = index + 1
 
-        // графа 12
-        row.factSum = row.priceService
-
-        // графа 14
-        row.marketSum = row.priceMarket
-
-        // графа 15
-        row.deviatSum = Math.abs(row.marketSum - row.factSum)
+        // графа 9
+        // TODO (Aydar Kadyrgulov) непонятки в чтз
+        row.factRentSum = 0
+        // графа 11
+        row.addRentSum = row.marketRentSum - row.factRentSum
 
     }
 
-    data.save(getRows(data).sort { (it.personName) })
+    data.save(getRows(data).sort { it.personName })
 
-    // графа 15 для последней строки "итого"
-    def total15 = 0
+    // графа 7-11 для последней строки "итого"
+    def total7 = 0
+    def total8 = 0
+    def total9 = 0
+    def total10 = 0
+    def total11 = 0
     getRows(data).each { row ->
-        total15 += row.deviatSum
+        total7 += row.rent
+        total8 += row.rentMarket
+        total9 += row.factRentSum
+        total10 += row.marketRentSum
+        total11 += row.addRentSum
     }
 
-    /** Столбцы для которых надо вычислять итого и итого по Взаимозависимому лицу (резиденту оффшорной зоны). Графа 15. */
-    def totalColumns = ['deviatSum']
+// графа 1 - rowNumber
+// графа 2 - personName
+// графа 3 - date
+// графа 4 - code
+// графа 5 - baseNumber
+// графа 6 - baseDate
+// графа 7 - rent
+// графа 8 - rentMarket
+// графа 9 - factRentSum
+// графа 10 - marketRentSum
+// графа 11 - addRentSum
 
-    // посчитать "итого по Взаимозависимому лицу (резиденту оффшорной зоны)"
+    /** Столбцы для которых надо вычислять итого и итого по коду. Графа 10, 11, 12. */
+    def totalColumns = ['rent', 'rentMarket', 'factRentSum', 'marketRentSum', 'addRentSum']
+
+    // посчитать итого по графе 2
     def totalRows = [:]
     def tmp = null
     def sums = [:]
@@ -137,14 +137,14 @@ boolean calc() {
         if (tmp == null) {
             tmp = row.personName
         }
-        // если код расходы поменялся то создать новую строку "итого по Взаимозависимому лицу (резиденту оффшорной зоны)"
+        // если код расходы поменялся то создать новую строку "итого по "графа 2""
         if (tmp != row.personName) {
             totalRows.put(i, getNewRow(tmp, totalColumns, sums))
             totalColumns.each {
                 sums[it] = 0
             }
         }
-        // если строка последняя то сделать для ее кода расхода новую строку "итого по Взаимозависимому лицу (резиденту оффшорной зоны)"
+        // если строка последняя то сделать для ее кода расхода новую строку "итого по "Графа 2""
         if (i == getRows(data).size() - 1) {
             totalColumns.each {
                 sums[it] += row.getCell(it).getValue()
@@ -160,7 +160,7 @@ boolean calc() {
         tmp = row.personName
     }
 
-    // добавить "итого по Взаимозависимому лицу (резиденту оффшорной зоны)" в таблицу
+    // добавить "итого по "графа 2"" в таблицу
     def i = 0
     totalRows.each { index, row ->
         data.insert(row, index + i + 1)
@@ -171,16 +171,20 @@ boolean calc() {
     def totalRow = formData.createDataRow()
     totalRow.setAlias('total')
     totalRow.fix = 'Итого'
-    totalRow.getCell('fix').colSpan = 4
-    totalRow.deviatSum = total15
+    totalRow.getCell('fix').colSpan = 6
+    totalRow.rent           = total7
+    totalRow.rentMarket     = total8
+    totalRow.factRentSum    = total9
+    totalRow.marketRentSum  = total10
+    totalRow.addRentSum     = total11
     setTotalStyle(totalRow)
     insert(data, totalRow)
     return true
 }
 
 /**
- * Логические проверки.
- *
+ * Логические проверки
+ * @return
  */
 def logicalCheck() {
     def tmp
@@ -196,16 +200,16 @@ def logicalCheck() {
     if (!getRows(data).isEmpty()) {
         def i = 1
 
-        // список обязательных столбцов (все, кроме графы 13)
-        def requiredColumns = [ 'rowNumber', 'personName', 'inn', 'date', 'code',
-                'docNumber', 'docDate', 'contractNumber', 'contractDate', 'priceService',
-                'priceMarket', 'factSum', 'marketSum', 'deviatSum', 'code2']
+        // список обязательных столбцов - все
+        def requiredColumns = [ 'rowNumber', 'personName', 'date',
+                'code', 'baseNumber', 'baseDate', 'rent', 'rentMarket',
+                'factRentSum', 'marketRentSum', 'addRentSum']
 
         // суммы строки общих итогов
         def totalSums = [:]
 
         // столбцы для которых надо вычислять итого и итого по коду классификации дохода. Графа 15
-        def totalColumns = ['deviatSum']
+        def totalColumns = [ 'rent', 'rentMarket', 'factRentSum', 'marketRentSum', 'addRentSum' ]
 
         // признак наличия итоговых строк
         def hasTotal = false
@@ -238,24 +242,14 @@ def logicalCheck() {
                 return false
             }
 
-            // 4. Арифметические проверки графы 12, 14, 15
-            // графа 12
-            if (row.factSum != row.priceService) {
-                logger.error("В строке $row.rowNumber неверно рассчитана графа \"Сумма фактически начисленного расхода\"!")
-                return false
-            }
-            // графа 14
-            if (row.marketSum != row.priceMarket){
-                logger.error("В строке $row.rowNumber неверно рассчитана графа \"Сумма расхода соответствующая рыночному уровню\"!")
-                return false
-            }
-            // графа 15
-            if (row.deviatSum != Math.abs(row.marketSum - row.factSum)) {
-                logger.error("В строке $row.rowNumber неверно рассчитана графа \"Сумма отклонения (превышения) фактического расхода от рыночного уровня\"!")
+            // 4. Арифметические проверки графы 11
+            // графа 11
+            if ( row.addRentSum != row.marketRentSum - row.factRentSum) {
+                logger.error("В строке $row.rowNumber неверно рассчитана графа \"Сумма доначисления арендной платы до рыночного уровня арендной ставки\"!")
                 return false
             }
 
-            // 5. Проверка итоговых значений по кодам классификации дохода - нахождение кодов классификации расхода
+            // 5. Арифметическая проверка итоговых значений по Взаимозависимым  лицам (резидентам оффшорных зон)
             if (!totalGroupsName.contains(row.personName)) {
                 totalGroupsName.add(row.personName)
             }
@@ -297,9 +291,32 @@ def logicalCheck() {
 }
 
 /**
- * Проверки соответствия НСИ.
+ * Проверка данных из справочников
+ * @return
  */
 def checkNSI() {
+    def data = getData(formData)
+    if (!getRows(data).isEmpty()) {
+        // справочник 27 - «Классификатор доходов Сбербанка России для целей налогового учёта»
+        def refBookId = 28
+        for (def row : getRows(data)) {
+            if (isTotal(row)) {
+                continue
+            }
+            def index = row.rowNumber
+            def errorMsg
+            if (index != null) {
+                errorMsg = "В строке \"№ пп\" равной $index "
+            } else {
+                index = getIndex(row) + 1
+                errorMsg = "В строке $index "
+            }
+            // 1. Проверка графа «Код налогового учета» (графа 2)
+            if (refBookService.getRecordData(refBookId, row.code) == null) {
+                logger.warn(errorMsg + 'код налогового учёта в справочнике отсутствует!')
+            }
+        }
+        }
     return true
 }
 
@@ -310,12 +327,9 @@ def addNewRow() {
     def data = getData(formData)
     def newRow = formData.createDataRow()
 
-    // графы 2..11, 13
-    [ 'personName', 'inn', 'date',
-            'code', 'docNumber',
-            'docDate', 'contractNumber',
-            'contractDate', 'priceService',
-            'priceMarket', 'correctKoef'].each {
+    // графы 2..8
+    ['personName', 'date', 'code', 'baseNumber',
+            'baseDate', 'rent', 'rentMarket', 'marketRentSum'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
@@ -407,8 +421,8 @@ def getNewRow(def alias, def totalColumns, def sums) {
     totalColumns.each {
         newRow.getCell(it).setValue(sums[it])
     }
-    newRow.fix = 'Итого по Взаимозависимому лицу (резиденту оффшорной зоны)'
-    newRow.getCell('fix').colSpan = 4
+    newRow.fix = 'Итого по ' + alias
+    newRow.getCell('fix').colSpan = 6
     setTotalStyle(newRow)
     return newRow
 }
@@ -417,11 +431,9 @@ def getNewRow(def alias, def totalColumns, def sums) {
  * Устаносить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
-    [ 'rowNumber', 'fix', 'personName', 'inn', 'date',
-            'docDate', 'contractNumber', 'contractDate',
-            'priceMarket', 'factSum', 'correctKoef', 'priceService',
-            'marketSum', 'deviatSum', 'code2', 'code', 'docNumber',
-    ].each {
+    [ 'rowNumber', 'fix', 'personName', 'date', 'code', 'baseNumber',
+            'baseDate', 'rent', 'rentMarket', 'factRentSum',
+            'marketRentSum', 'addRentSum', ].each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
     }
 }
@@ -515,12 +527,12 @@ def getData(def formData) {
 }
 
 /**
- * Получить атрибут 130 - "Код налогового учёта" справочник 27 - "Классификатор расходов Сбербанка России для целей налогового учёта".
+ * Получить атрибут 140 - "Код налогового учёта" справочник 28 - "Классификатор доходов Сбербанка России для целей налогового учёта".
  *
  * @param id идентификатор записи справочника
  */
 def getCodeAttribute(def id) {
-    return refBookService.getStringValue(27, id, 'CODE')
+    return refBookService.getStringValue(28, id, 'CODE')
 }
 
 /**
@@ -569,3 +581,5 @@ BigDecimal roundTo(BigDecimal value, int round) {
         return value
     }
 }
+
+
