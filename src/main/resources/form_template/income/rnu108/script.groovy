@@ -569,3 +569,28 @@ BigDecimal roundTo(BigDecimal value, int round) {
         return value
     }
 }
+
+/**
+ * Консолидация.
+ */
+void consolidation() {
+    def data = getData(formData)
+
+    // удалить все строки и собрать из источников их строки
+    data.clear()
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                def sourceData = getData(source)
+                getRows(sourceData).each { row->
+                    if (row.getAlias() == null || row.getAlias() == '') {
+                        insert(data, row)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
+}

@@ -269,7 +269,12 @@ def logicalCheck() {
 
             // 5. Проверка итоговых значений по кодам классификации расхода
             for (def personName : totalGroupsName) {
-                def row = getRowByAlias(data, 'total' + personName)
+                def totalRowAlias = 'total' + personName
+                if (!checkAlias(getRows(data), totalRowAlias)) {
+                    logger.error("Итоговые значения по наименованию взаимозависимого лица (резидента оффшорной зоны) $personName не рассчитаны! Необходимо расчитать данные формы.")
+                    return false
+                }
+                def row = getRowByAlias(data, totalRowAlias)
                 for (def alias : totalColumns) {
                     if (calcSumByCode(personName, alias) != row.getCell(alias).getValue()) {
                         logger.error("Итоговые значения по наименованию взаимозависимого лица (резидента оффшорной зоны) $personName рассчитаны неверно!")
@@ -391,6 +396,25 @@ void checkCreation() {
 /*
  * Вспомогательные методы.
  */
+
+/**
+ * Проверить существования строки по алиасу.
+ *
+ * @param list строки нф
+ * @param rowAlias алиас
+ * @return <b>true</b> - строка с указанным алиасом есть, иначе <b>false</b>
+ */
+def checkAlias(def list, def rowAlias) {
+    if (rowAlias == null || rowAlias == "" || list == null || list.isEmpty()) {
+        return false
+    }
+    for (def row : list) {
+        if (row.getAlias() == rowAlias) {
+            return true
+        }
+    }
+    return false
+}
 
 /**
  * Проверка является ли строка итоговой.
@@ -582,4 +606,27 @@ BigDecimal roundTo(BigDecimal value, int round) {
     }
 }
 
+/**
+ * Консолидация.
+ */
+void consolidation() {
+    def data = getData(formData)
 
+    // удалить все строки и собрать из источников их строки
+    data.clear()
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                def sourceData = getData(source)
+                getRows(sourceData).each { row->
+                    if (row.getAlias() == null || row.getAlias() == '') {
+                        insert(data, row)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
+}

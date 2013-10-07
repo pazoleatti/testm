@@ -47,7 +47,6 @@ switch (formDataEvent) {
         calc()
         logicalCheck()
         checkNSI()
-        getData(formData).commit()
         break
 }
 
@@ -400,7 +399,12 @@ def logicalCheck() {
 
             // 12. Арифметические проверки расчета итоговых строк «Итого по КНУ»
             for (def codeName : totalGroupsName) {
-                def row = getRowByAlias(data, ('total' + codeName))
+                def totalRowAlias = 'total' + codeName
+                if (!checkAlias(getRows(data), totalRowAlias)) {
+                    logger.error("Итоговые значения по КНУ" +  getCodeAttribute(codeName) + " не рассчитаны! Необходимо расчитать данные формы.")
+                    return false
+                }
+                def row = getRowByAlias(data, totalRowAlias)
                 for (def alias : totalColumns) {
                     if (calcSumByCode(codeName, alias) != row.getCell(alias).getValue()) {
                         if (alias == 'taxAccountingRuble') logger.error("Неверное итоговое значение " + getCodeAttribute(codeName) + " для графы \"Рубли\" (Сумма расхода в налоговом учёте)!")
@@ -609,7 +613,6 @@ void consolidation() {
             }
         }
     }
-    data.commit()
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
