@@ -545,9 +545,10 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 394:
             row.income = srcRow.incomeSum
             break
-        default:
-            row.income = 0
-            break
+    }
+
+    if (row.income == null) {
+        row.income = 0
     }
 
     // Графа 20
@@ -570,9 +571,10 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 393:
             row.outcome = srcRow.consumptionSum
             break
-        default:
-            row.outcome = 0
-            break
+    }
+
+    if (row.outcome == null) {
+        row.outcome = 0
     }
 
     // Графа 23
