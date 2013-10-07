@@ -1,11 +1,16 @@
+package form_template.income.rnu38_2
+
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+
 /**
- * Скрипт для РНУ-38.2 (rnu38-2.groovy).
  * Форма "РНУ-38.2) Регистр налогового учёта начисленного процентного дохода по ОФЗ, по которым открыта короткая позиция. Отчёт 2".
  *
  * @version 59
  *
  * TODO:
- *      - сколько строк в рну?
+ *      - импорт и миграция
+ *      - уточнить пересчет и проверки после консолидации
  *
  * @author rtimerbaev
  */
@@ -18,36 +23,20 @@ switch (formDataEvent) {
         logicalCheck()
         break
     case FormDataEvent.CALCULATE :
-        calc()
+        calc() && logicalCheck()
+        break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
         logicalCheck()
         break
-    case FormDataEvent.ADD_ROW :
-        addNewRow()
-        break
-    case FormDataEvent.DELETE_ROW :
-        deleteRow()
-        break
-// проверка при "подготовить"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :
-        checkOnPrepareOrAcceptance('Подготовка')
-        break
-// проверка при "принять"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
-        checkOnPrepareOrAcceptance('Принятие')
-        break
-// проверка при "вернуть из принята в подготовлена"
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
-        checkOnCancelAcceptance()
-        break
-// после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
-        acceptance()
-        break
-// обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        calc()
-        logicalCheck()
+        // TODO (Ramil Timerbaev) уточнить
+        // calc() && logicalCheck()
         break
 }
 
@@ -57,29 +46,13 @@ switch (formDataEvent) {
 // графа 4  - totalPercIncome
 
 /**
- * Добавить новую строку.
- */
-def addNewRow() {
-    if (formData.dataRows.size == 0) {
-        formData.dataRows.add(formData.createDataRow())
-    }
-}
-
-/**
- * Удалить строку.
- */
-def deleteRow() {
-    formData.dataRows.remove(currentDataRow)
-}
-
-/**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
-void calc() {
+def calc() {
+    def data = getData(formData)
     def totalRow = getTotalRowFromRNU38_1()
     if (totalRow == null) {
-        // уточнить нужно ли убрать данные если нет данных в рну-38.1
-        formData.dataRows.each { row ->
+        for (def row : getRows(data)) {
             // графа 1
             row.amount = null
 
@@ -92,14 +65,14 @@ void calc() {
             // графа 4
             row.totalPercIncome = null
         }
-        return
+        return true
     }
 
     /*
      * Расчеты.
      */
 
-    formData.dataRows.each { row ->
+    for (def row : getRows(data)) {
         // графа 1
         row.amount = totalRow.amount
 
@@ -112,147 +85,99 @@ void calc() {
         // графа 4
         row.totalPercIncome = row.incomePrev + row.incomeShortPosition
     }
+
+    save(data)
+    return true
 }
 
 /**
  * Логические проверки.
  */
 def logicalCheck() {
+    def data = getData(formData)
+    if (getRows(data).isEmpty()) {
+        logger.error('Отсутствуют данные')
+        return false
+    }
+    def row = getRows(data).get(0)
+
+    // 1. Обязательность заполнения поля графы 1..4
+    def requiredColumns = ['amount', 'incomePrev', 'incomeShortPosition', 'totalPercIncome']
+    if (!checkRequiredColumns(row, requiredColumns)) {
+        return false
+    }
+
     def totalRow = getTotalRowFromRNU38_1()
     if (totalRow == null) {
         logger.error('Отсутствует РНУ-38.1.')
         return false
     }
-    if (formData.dataRows.isEmpty()) {
-        logger.error('Отсутствуют данные')
-        return false
-    }
-    def row = formData.dataRows.get(0)
 
-    // TODO (Ramil Timerbaev) для отладки консолидации, потом убрать
-//    ['amount', 'incomePrev', 'incomeShortPosition', 'totalPercIncome'].each {
-//        row.getCell(it).setValue(1)
-//    }
-//    return true
-
-    // 1. Обязательность заполнения поля графы 1..4
-    def colNames = []
-    // Список проверяемых столбцов (графа 1..4)
-    ['amount', 'incomePrev', 'incomeShortPosition', 'totalPercIncome'].each {
-        if (row.getCell(it).getValue() == null) {
-            colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
-        }
-    }
-    if (!colNames.isEmpty()) {
-        def errorMsg = colNames.join(', ')
-        def index = formData.dataRows.indexOf(row) + 1
-        logger.error("В строке $index не заполнены колонки : $errorMsg.")
-        return false
-    }
+    index = getIndex(row) + 1
+    errorMsg = "В строке $index "
 
     // 2. Арифметическая проверка графы 1
     if (row.amount != totalRow.amount) {
-        logger.warn('Неверно рассчитана графа «Количество (шт.)»!')
+        logger.warn(errorMsg + 'неверно рассчитана графа «Количество (шт.)»!')
     }
 
     // 3. Арифметическая проверка графы 2
     if (row.incomePrev != totalRow.incomePrev) {
-        logger.warn('Неверно рассчитана графа «Доход с даты погашения предыдущего купона (руб.коп.)»!')
+        logger.warn(errorMsg + 'неверно рассчитана графа «Доход с даты погашения предыдущего купона (руб.коп.)»!')
     }
 
     // 4. Арифметическая проверка графы 3
     if (row.incomeShortPosition != totalRow.incomeShortPosition) {
-        logger.warn('Неверно рассчитана графа «Доход с даты открытия короткой позиции, (руб.коп.)»!')
+        logger.warn(errorMsg + 'неверно рассчитана графа «Доход с даты открытия короткой позиции, (руб.коп.)»!')
     }
 
     // 5. Арифметическая проверка графы 4
-    if (row.totalPercIncome != row.incomePrev + row.incomeShortPosition) {
-        logger.warn('Неверно рассчитана графа «Всего процентный доход (руб.коп.)»!')
+    if (row.totalPercIncome != row.totalPercIncome) {
+        logger.warn(errorMsg + 'неверно рассчитана графа «Всего процентный доход (руб.коп.)»!')
     }
     return true
-}
-
-/**
- * Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята".
- */
-void checkOnPrepareOrAcceptance(def value) {
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() { department ->
-        if (department.formTypeId == formData.getFormType().getId()) {
-            def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-            // если форма существует и статус "принята"
-            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
-                logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
-            }
-        }
-    }
 }
 
 /**
  * Консолидация.
  */
 void consolidation() {
+    def data = getData(formData)
+
     // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    data.clear()
+    def newRows = []
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
-                    if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
-                    }
+                def sourceData = getData(source)
+                getRows(sourceData).each { row ->
+                    newRows.add(row)
                 }
             }
         }
     }
+    if (!newRows.isEmpty()) {
+        data.insert(newRows, 1)
+    }
     logger.info('Формирование консолидированной формы прошло успешно.')
-}
-
-/**
- * Проверки при переходе "Отменить принятие".
- */
-void checkOnCancelAcceptance() {
-    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
-            formData.getFormType().getId(), formData.getKind());
-    DepartmentFormType department = departments.getAt(0);
-    if (department != null) {
-        FormData form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-
-        if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
-            logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
-        }
-    }
-}
-
-/**
- * Принять.
- */
-void acceptance() {
-    if (!logicalCheck()) {
-        return
-    }
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() {
-        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
-    }
 }
 
 /**
  * Проверка при создании формы.
  */
 void checkCreation() {
-    // отчётный период
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
 
     //проверка периода ввода остатков
-    if (reportPeriod != null && reportPeriodService.isBalancePeriod(reportPeriod.id, formData.departmentId)) {
+    if (isBalancePeriod) {
         logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
         return
     }
 
-    def findForm = FormDataService.find(formData.formType.id,
+    def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
@@ -268,13 +193,90 @@ void checkCreation() {
  * Получить итоговую строку из нф (РНУ-38.1) Регистр налогового учёта начисленного процентного дохода по ОФЗ, по которым открыта короткая позиция. Отчёт 1.
  */
 def getTotalRowFromRNU38_1() {
-    def formDataRNU_38_1 = FormDataService.find(334, formData.kind, formDataDepartment.id, formData.reportPeriodId)
-    if (formDataRNU_38_1 != null) {
-        for (def row : formDataRNU_38_1.dataRows) {
+    def formDataRNU_38_1 = formDataService.find(334, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+    def dataRNU_38_1 = getData(formDataRNU_38_1)
+    if (dataRNU_38_1 != null) {
+        for (def row : getRows(dataRNU_38_1)) {
             if (row.getAlias() == 'total') {
                 return row
             }
         }
     }
     return null
+}
+
+/**
+ * Получить список строк формы.
+ *
+ * @param data данные нф (helper)
+ */
+def getRows(def data) {
+    return data.getAllCached();
+}
+
+/**
+ * Сохранить измененные значения нф.
+ *
+ * @param data данные нф (helper)
+ */
+void save(def data) {
+    data.save(getRows(data))
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
+
+/**
+ * Получить название графы по псевдониму.
+ *
+ * @param row строка
+ * @param alias псевдоним графы
+ */
+def getColumnName(def row, def alias) {
+    if (row != null && alias != null) {
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
+    }
+    return ''
+}
+
+/**
+ * Получить номер строки в таблице (0..n).
+ *
+ * @param row строка
+ */
+def getIndex(def row) {
+    row.getIndex() - 1
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ * @return true - все хорошо, false - есть незаполненные поля
+ */
+def checkRequiredColumns(def row, def columns) {
+    def colNames = []
+    columns.each {
+        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+            def name = getColumnName(row, it)
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        def index = getIndex(row) + 1
+        def errorMsg = colNames.join(', ')
+        logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        return false
+    }
+    return true
 }
