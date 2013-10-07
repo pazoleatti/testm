@@ -735,7 +735,7 @@ def checkOld(def row, def likeColumnName, def curColumnName, def prevColumnName,
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['rowNumber', 'regNumber', 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent',

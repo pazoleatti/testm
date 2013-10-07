@@ -5,10 +5,8 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface DeclarationListUiHandlers extends UiHandlers {
 
-	void onApplyFilter();
-
-	void onCreateClicked();
-
 	void onSortingChanged();
+
+    void onRangeChange(int start, int length);
 
 }

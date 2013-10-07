@@ -305,7 +305,7 @@ def checkRequiredColumns(def row, def columns, def useLog) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['rowNumber', 'fix', 'code', 'incomeType', 'sum'].each {
