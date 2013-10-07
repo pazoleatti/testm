@@ -643,7 +643,7 @@ def getCurrency(def currencyCode) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['tradeNumber', 'securityName', 'currencyCode', 'nominalPrice',

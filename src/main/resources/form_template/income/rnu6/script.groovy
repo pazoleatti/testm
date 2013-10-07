@@ -788,7 +788,7 @@ def getNumberAttribute(def id) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['number', 'helper', 'kny', 'date', 'code', 'docNumber', 'docDate',
