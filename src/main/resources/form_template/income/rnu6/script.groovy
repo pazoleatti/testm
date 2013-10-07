@@ -871,3 +871,11 @@ def getData(def formData) {
     }
     return null
 }
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    getRows(getData(formData)).indexOf(row)
+}
+

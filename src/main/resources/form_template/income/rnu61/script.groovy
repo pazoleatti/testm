@@ -63,7 +63,7 @@ def calc() {
     def data = getData(formData)
 
     Calendar periodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
-    def daysOfYear = (new GregorianCalendar()).isLeapYear(periodStartDate.get(Calendar.YEAR)) ? 365 : 366
+    def daysOfYear = (new GregorianCalendar()).isLeapYear(periodStartDate.get(Calendar.YEAR)) ? 366 : 365
 
     /*
 	 * Проверка обязательных полей.

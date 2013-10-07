@@ -458,7 +458,7 @@ def calculateColumn11(DataRow row, def rateDate){
  */
 int getCountDaysOfYear() {
     Calendar periodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
-    return countDaysOfYear = (new GregorianCalendar()).isLeapYear(periodStartDate.get(Calendar.YEAR)) ? 365 : 366
+    return countDaysOfYear = (new GregorianCalendar()).isLeapYear(periodStartDate.get(Calendar.YEAR)) ? 366 : 365
 }
 
 /**

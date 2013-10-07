@@ -332,7 +332,7 @@ def String getRowIndexString(def DataRow row){
     if (index != null) {
         return "В строке \"№ пп\" равной $index "
     } else {
-        index = getIndex(row) + 1
+        index = getRows(data).indexOf(row) + 1
         return "В строке $index "
     }
 }
