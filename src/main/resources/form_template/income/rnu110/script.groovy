@@ -452,7 +452,7 @@ def getNewRow(def alias, def totalColumns, def sums) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     [ 'rowNumber', 'fix', 'personName', 'date', 'code', 'baseNumber',

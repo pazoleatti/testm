@@ -788,7 +788,7 @@ def getNumberAttribute(def id) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['number', 'helper', 'kny', 'date', 'code', 'docNumber', 'docDate',
@@ -871,3 +871,11 @@ def getData(def formData) {
     }
     return null
 }
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    getRows(getData(formData)).indexOf(row)
+}
+

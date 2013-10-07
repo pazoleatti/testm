@@ -761,7 +761,7 @@ def calcSumByCode(def value, def alias) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['rowNumber', 'issuer', 'shareType', 'tradeNumber', 'currency',

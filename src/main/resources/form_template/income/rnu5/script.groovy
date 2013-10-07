@@ -419,7 +419,7 @@ def getNewTotalRow(def codeId, def sum) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['rowNumber', 'fix', 'code', 'number', 'name', 'sum'].each {
