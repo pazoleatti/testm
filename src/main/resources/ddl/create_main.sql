@@ -417,10 +417,10 @@ create table declaration_template (
   version    varchar2(20) not null,
   is_active   number(1) not null,
   create_script       clob,
-  jrxml               clob,
-  jasper              blob,
+  jrxml               VARCHAR2(36),
+  jasper              VARCHAR2(36),
   declaration_type_id number(9) not null,
-  XSD VARCHAR2(36) 
+  XSD VARCHAR2(36)
 );
 alter table declaration_template add constraint declaration_template_pk primary key (id);
 alter table declaration_template add constraint declaration_t_chk_is_active check (is_active in (0,1));

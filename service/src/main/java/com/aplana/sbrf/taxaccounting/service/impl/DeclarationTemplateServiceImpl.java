@@ -2,16 +2,19 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.ObjectLock;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +33,16 @@ import java.util.List;
 public class DeclarationTemplateServiceImpl implements DeclarationTemplateService {
 
 	private static final Log logger = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
+    private final static String ENCODING = "UTF-8";
 
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
 
 	@Autowired
 	private ObjectLockDao lockDao;
+
+    @Autowired
+    BlobDataService blobDataService;
 
 	@Override
 	public List<DeclarationTemplate> listAll() {
@@ -61,7 +68,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	public void setJrxml(int declarationTemplateId, String jrxml) {
 		ByteArrayOutputStream  compiledReport = new ByteArrayOutputStream();
 		try {
-			JasperDesign jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(jrxml.getBytes("UTF-8")));
+			JasperDesign jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(jrxml.getBytes(ENCODING)));
 			JasperCompileManager.compileReportToStream(jasperDesign, compiledReport);
 		} catch (JRException e) {
 			logger.error(e.getMessage(), e);
@@ -71,17 +78,35 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 			throw new ServiceException("Шаблон отчета имеет неправильную кодировку");
 		}
 
-		declarationTemplateDao.setJrxmlAndJasper(declarationTemplateId, jrxml, compiledReport.toByteArray());
+        DeclarationTemplate declarationTemplate = this.get(declarationTemplateId);
+
+        String jrxmBlobId = blobDataService.create(
+                new ByteArrayInputStream(jrxml.getBytes()),
+                declarationTemplate.getDeclarationType().getName() +"_jrxml");
+        String jasperBlobId = blobDataService.create(
+                new ByteArrayInputStream(compiledReport.toByteArray()),
+                declarationTemplate.getDeclarationType().getName() + "_jasper");
+
+        declarationTemplateDao.setJrxmlAndJasper(declarationTemplateId, jrxmBlobId, jasperBlobId);
 	}
 
 	@Override
 	public String getJrxml(int declarationTemplateId) {
-		return declarationTemplateDao.getJrxml(declarationTemplateId);
+        BlobData jrxmlBlobData = blobDataService.get(this.get(declarationTemplateId).getJrxmlBlobId());
+        try {
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(jrxmlBlobData.getInputStream(), writer, ENCODING);
+            return writer.toString();
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            throw new ServiceException("Не удалось получить jrxml-шаблон декларации");
+        }
 	}
 
 	@Override
-	public byte[] getJasper(int declarationTemplateId) {
-		return declarationTemplateDao.getJasper(declarationTemplateId);
+	public InputStream getJasper(int declarationTemplateId) {
+        BlobData jasperBlobData = blobDataService.get(this.get(declarationTemplateId).getJasperBlobId());
+        return jasperBlobData.getInputStream();
 	}
 
 	@Override
