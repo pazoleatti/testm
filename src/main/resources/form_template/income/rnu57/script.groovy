@@ -148,6 +148,7 @@ def calcValues(def data) {
 
             def values = getValues(dataRow, rnu55Row, rnu56Row, rnu56FormData)
 
+            //TODO проверить корректность расчетов
             values.keySet().each { colName ->
                 dataRow[colName] = values[colName]
             }

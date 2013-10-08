@@ -29,7 +29,7 @@
 				<g:cell width="335px">
 					<g:VerticalPanel width="310px" addStyleNames="{style.titlePanel}">
 						<g:cell height="45px">
-							<g:Label styleName="{style.titleText}">Список налоговых форм</g:Label>
+							<g:Label styleName="{style.titleText}" ui:field="formHeader">Список налоговых форм</g:Label>
 						</g:cell>
 						<g:Label ui:field="titleDesc" styleName="{style.titleDesc}" />
 					</g:VerticalPanel>

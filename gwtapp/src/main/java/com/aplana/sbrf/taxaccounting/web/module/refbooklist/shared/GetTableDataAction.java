@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
@@ -8,15 +9,15 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  */
 public class GetTableDataAction extends UnsecuredActionImpl<GetTableDataResult> implements ActionName {
 
-    private Type type;
+    private RefBookType refBookType;
     private String filter;
 
-    public Type getType() {
-        return type;
+    public RefBookType getType() {
+        return refBookType;
     }
 
-    public void setType(Type type) {
-        this.type = type;
+    public void setType(RefBookType refBookType) {
+        this.refBookType = refBookType;
     }
 
     @Override

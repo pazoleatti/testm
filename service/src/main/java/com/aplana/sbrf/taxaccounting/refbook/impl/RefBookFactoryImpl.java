@@ -44,8 +44,8 @@ public class RefBookFactoryImpl implements RefBookFactory {
     }
 
     @Override
-    public List<RefBook> getAll() {
-        return refBookDao.getAll();
+    public List<RefBook> getAll(boolean onlyVisible) {
+        return onlyVisible ? refBookDao.getAllVisible() : refBookDao.getAll();
     }
 
     @Override
@@ -55,20 +55,19 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
     @Override
     public RefBookDataProvider getDataProvider(Long refBookId) {
-        RefBookDataProvider refBookDataProvider;
-        if (refBookId == RefBookDepartment.REF_BOOK_ID) {
-            refBookDataProvider = applicationContext.getBean("refBookDepartment", RefBookDataProvider.class);
-        } else if (refBookId == RefBookIncome101.REF_BOOK_ID) {
-            refBookDataProvider = applicationContext.getBean("refBookIncome101", RefBookDataProvider.class);
-        } else if (refBookId == RefBookIncome102.REF_BOOK_ID) {
-            refBookDataProvider = applicationContext.getBean("refBookIncome102", RefBookDataProvider.class);
+        if (RefBookDepartment.REF_BOOK_ID.equals(refBookId)) {
+            return applicationContext.getBean("refBookDepartment", RefBookDataProvider.class);
+        } else if (RefBookIncome101.REF_BOOK_ID.equals(refBookId)) {
+			return applicationContext.getBean("refBookIncome101", RefBookDataProvider.class);
+        } else if (RefBookIncome102.REF_BOOK_ID.equals(refBookId)) {
+			return applicationContext.getBean("refBookIncome102", RefBookDataProvider.class);
         } else {
-            refBookDataProvider = applicationContext.getBean("universal", RefBookDataProvider.class);   // Исправление Марата, надо сделать получать данные отдельно для конкретных провайдеров
+			RefBookDataProvider refBookDataProvider = applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);   // Исправление Марата, надо сделать получать данные отдельно для конкретных провайдеров
             if (refBookDataProvider instanceof RefBookUniversal) {
                 ((RefBookUniversal) refBookDataProvider).setRefBookId(refBookId);
             }
+			return refBookDataProvider;
         }
-        return refBookDataProvider;
     }
 
 

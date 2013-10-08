@@ -519,7 +519,7 @@ def getBalance(def balance) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['rowNumber', 'fix', 'balance', 'code', 'name', 'sum'].each {

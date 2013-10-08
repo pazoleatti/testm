@@ -12,6 +12,8 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 	private boolean active;
 	private Integer edition;
     private String xsdId;
+    private String jrxmlBlobId;
+    private String jasperBlobId;
 
 	private String createScript;
 
@@ -105,5 +107,35 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
      */
     public void setXsdId(String xsdId) {
         this.xsdId = xsdId;
+    }
+
+    /**
+     * Получить идентификатор записи с содержимым jrxml шаблона из связанной таблицы
+     * @return идентификатор записи
+     */
+    public String getJrxmlBlobId() {
+        return jrxmlBlobId;
+    }
+
+    /**
+     * Установить идентификатор записи с содержимым jrxml шаблона из связанной таблицы
+     */
+    public void setJrxmlBlobId(String jrxmlBlobId) {
+        this.jrxmlBlobId = jrxmlBlobId;
+    }
+
+    /**
+     * Получить идентификатор записи с содержимым скомпиллированного jasper шаблона из связанной таблицы
+     * @return идентификатор записи
+     */
+    public String getJasperBlobId() {
+        return jasperBlobId;
+    }
+
+    /**
+     * Установить идентификатор записи с содержимым скомпиллированного jasper шаблона из связанной таблицы
+     */
+    public void setJasperBlobId(String jasperBlobId) {
+        this.jasperBlobId = jasperBlobId;
     }
 }

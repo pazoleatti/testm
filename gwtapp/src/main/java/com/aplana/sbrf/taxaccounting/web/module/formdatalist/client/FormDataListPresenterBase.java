@@ -60,6 +60,8 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 		boolean isAscSorting();
 
 		void updateTitle(String title);
+
+		void updateHeader(String title);
 	}
 	
 	protected final PlaceManager placeManager;
