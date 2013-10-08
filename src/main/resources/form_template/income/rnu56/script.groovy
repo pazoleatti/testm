@@ -309,6 +309,9 @@ def logicalCheck(def useLog) {
     /** Отчетная дата. */
     def reportDate = getReportDate()
 
+    // Векселя
+    def List<String> billsList = new ArrayList<String>()
+
     def totalRow = null
 
     for (def row : dataRows) {
@@ -317,7 +320,7 @@ def logicalCheck(def useLog) {
             continue
         }
 
-        // Проверка на заполнение поля
+        // 1. Проверка на заполнение поля
         if (!checkRequiredColumns(row, requiredColumns, useLog)) {
             return false
         }
@@ -328,17 +331,18 @@ def logicalCheck(def useLog) {
             return false
         }
 
-        // 3. Проверка даты реализации (погашения) и границ отчетного периода
-        if (startDate != null && row.implementationDate.before(startDate)
-                || endDate != null && row.implementationDate.after(endDate)) {
-            logger.error('Дата реализации (погашения) вне границ отчетного периода!')
-            return false
-        }
-
-        // 4. Проверка на уникальность поля «№ пп» (графа 1) (в рамках текущего года)
+        // 3. Проверка на уникальность поля «№ пп» (графа 1) (в рамках текущего года)
         if (i++ != row.number) {
             logger.error('Нарушена уникальность номера по порядку!')
             return false
+        }
+
+        // 4. Проверка на уникальность векселя
+        if (billsList.contains(row.bill)) {
+            logger.error("Повторяющееся значения в графе «Вексель»")
+            return false
+        } else {
+            billsList.add(row.bill)
         }
 
         // 5. Проверка на нулевые значения (графа 12..15)
@@ -357,13 +361,16 @@ def logicalCheck(def useLog) {
         // <Дата начала отчетного периода N> - <Дата окончания отчетного периода N>
         // не существует (отсутствуют первичные данные для расчёта)!')
 
-        // 7. Проверка корректности расчёта дисконта
+        // 7. Проверка корректности значения в «Графе 3»
+        // TODO
+
+        // 8. Проверка корректности расчёта дисконта
         if (row.sum != null && row.price != null && row.sum - row.price <= 0 && (row.discountInCurrency != 0 || row.discountInRub != 0)) {
             logger.error('Расчёт дисконта некорректен!')
             return false
         }
 
-        // 8. Проверка на неотрицательные значения
+        // 9. Проверка на неотрицательные значения
         if (row.discountInCurrency == null || row.discountInCurrency < 0) {
             logger.error("Значение графы «${row.getCell('discountInCurrency').column.name}» отрицательное!")
         }
@@ -371,7 +378,7 @@ def logicalCheck(def useLog) {
             logger.error("Значение графы «${row.getCell('discountInRub').column.name}» отрицательное!")
         }
 
-        // 9. Арифметические проверки граф 8, 9, 12-15
+        // 10. Арифметические проверки граф 8, 9, 12-15
         // Графа 8
         if (row.termDealBill != calcTermDealBill(row)) {
             logger.warn("Неверно рассчитана графа «${row.getCell('termDealBill').column.name}»!")
@@ -397,7 +404,7 @@ def logicalCheck(def useLog) {
             logger.warn('Неверно рассчитана графа «Сумма начисленного процентного дохода за отчётный период в рублях по курсу Банка России»!')
         }
 
-        // 10. Проверка итоговых значений по всей форме (графа 13, 15)
+        // 11. Проверка итоговых значений по всей форме (графа 13, 15)
         totalColumns.each { alias ->
             if (totalSums[alias] == null) {
                 totalSums[alias] = 0
@@ -413,7 +420,7 @@ def logicalCheck(def useLog) {
     }
 
     if (totalRow != null) {
-        // 16. Проверка итогового значений по всей форме (графа 13, 15)
+        // 11. Проверка итогового значений по всей форме (графа 13, 15)
         for (def alias : totalColumns) {
             if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
                 logger.error('Итоговые значения рассчитаны неверно!')
