@@ -62,31 +62,31 @@ switch (formDataEvent) {
         break
 }
 
-def getAtributes(){
+def getAtributes() {
     [
-        rowNum:                   ['rowNum', 'гр. 1',   '№ п/п'],
-        name:                     ['name', 'гр. 2',   'Полное наименование с указанием ОПФ'],
-        innKio:                   ['innKio', 'гр. 3',   'ИНН/КИО'],
-        country:                  ['country','гр. 4.1', 'Наименование страны регистрации'],
-        countryCode:              ['countryCode', 'гр. 4.2', 'Код страны по классификатору ОКСМ'],
-        contractNum:              ['contractNum','гр. 5',   'Номер договора'],
-        contractDate:             ['contractDate','гр. 6',   'Дата договора'],
-        transactionNum:           ['transactionNum','гр. 7',   'Номер сделки'],
-        transactionDeliveryDate:  ['transactionDeliveryDate','гр. 8',   'Дата заключения сделки'],
-        transactionType:          ['transactionType','гр. 9',   'Вид срочной сделки'],
-        incomeSum:                ['incomeSum','гр. 10',  'Сумма доходов Банка по данным бухгалтерского учета, руб.'],
-        consumptionSum:           ['consumptionSum','гр. 11',  'Сумма расходов Банка по данным бухгалтерского учета, руб.'],
-        price:                    ['price','гр. 12',  'Цена (тариф) за единицу измерения, руб.'],
-        cost:                     ['cost','гр. 13',  'Итого стоимость, руб.'],
-        transactionDate:          ['transactionDate','гр. 14',  'Дата совершения сделки']
+            rowNum: ['rowNum', 'гр. 1', '№ п/п'],
+            name: ['name', 'гр. 2', 'Полное наименование с указанием ОПФ'],
+            innKio: ['innKio', 'гр. 3', 'ИНН/КИО'],
+            country: ['country', 'гр. 4.1', 'Наименование страны регистрации'],
+            countryCode: ['countryCode', 'гр. 4.2', 'Код страны по классификатору ОКСМ'],
+            contractNum: ['contractNum', 'гр. 5', 'Номер договора'],
+            contractDate: ['contractDate', 'гр. 6', 'Дата договора'],
+            transactionNum: ['transactionNum', 'гр. 7', 'Номер сделки'],
+            transactionDeliveryDate: ['transactionDeliveryDate', 'гр. 8', 'Дата заключения сделки'],
+            transactionType: ['transactionType', 'гр. 9', 'Вид срочной сделки'],
+            incomeSum: ['incomeSum', 'гр. 10', 'Сумма доходов Банка по данным бухгалтерского учета, руб.'],
+            consumptionSum: ['consumptionSum', 'гр. 11', 'Сумма расходов Банка по данным бухгалтерского учета, руб.'],
+            price: ['price', 'гр. 12', 'Цена (тариф) за единицу измерения, руб.'],
+            cost: ['cost', 'гр. 13', 'Итого стоимость, руб.'],
+            transactionDate: ['transactionDate', 'гр. 14', 'Дата совершения сделки']
     ]
 }
 
-def getGroupColumns(){
+def getGroupColumns() {
     ['name', 'innKio', 'contractNum', 'contractDate', 'transactionType']
 }
 
-def getEditColumns(){
+def getEditColumns() {
     ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate',
             'transactionType', 'incomeSum', 'consumptionSum', 'transactionDate']
 }
@@ -109,32 +109,32 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = 0
-    row.keySet().each{
+    row.keySet().each {
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     getEditColumns().each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    if (currentDataRow!=null){
+    if (currentDataRow != null) {
         index = currentDataRow.getIndex()
         def pointRow = currentDataRow
-        while(pointRow.getAlias()!=null && index>0){
+        while (pointRow.getAlias() != null && index > 0) {
             pointRow = dataRows.get(--index)
         }
-        if(index!=currentDataRow.getIndex() && dataRows.get(index).getAlias()==null){
+        if (index != currentDataRow.getIndex() && dataRows.get(index).getAlias() == null) {
             index++
         }
-    }else if (size>0) {
-        for(int i = size-1;i>=0;i--){
+    } else if (size > 0) {
+        for (int i = size - 1; i >= 0; i--) {
             def pointRow = dataRows.get(i)
-            if(pointRow.getAlias()==null){
-                index = dataRows.indexOf(pointRow)+1
+            if (pointRow.getAlias() == null) {
+                index = dataRows.indexOf(pointRow) + 1
                 break
             }
         }
     }
-    dataRowHelper.insert(row, index+1)
+    dataRowHelper.insert(row, index + 1)
 }
 
 void deleteRow() {
@@ -228,7 +228,7 @@ void logicCheck() {
                 (price == null
                         || consumptionSum == null
                         || incomeSum == null
-                        || price.abs() != (consumptionSum - incomeSum).abs())) {
+                        || price != (consumptionSum - incomeSum).abs())) {
             def msg1 = row.getCell('price').column.name
             def msg2 = row.getCell('consumptionSum').column.name
             def msg3 = row.getCell('incomeSum').column.name
@@ -256,7 +256,7 @@ void logicCheck() {
     }
 
     //Проверки подитоговых сумм
-    def testRows = dataRows.findAll{it -> it.getAlias() == null}
+    def testRows = dataRows.findAll { it -> it.getAlias() == null }
     //добавляем итоговые строки для проверки
     for (int i = 0; i < testRows.size(); i++) {
         def testRow = testRows.get(i)
@@ -291,11 +291,12 @@ void logicCheck() {
             }
         }
 
-    } else if (testItogRows.size() < itogRows.size()) {     //если удалили все обычные строки, значит где то 2 подряд подитог.строки
+    } else if (testItogRows.size() < itogRows.size()) {
+        //если удалили все обычные строки, значит где то 2 подряд подитог.строки
 
         for (int i = 0; i < dataRows.size(); i++) {
             if (dataRows[i].getAlias() != null) {
-                if(i - 1 < -1 || dataRows[i - 1].getAlias() != null){
+                if (i - 1 < -1 || dataRows[i - 1].getAlias() != null) {
                     logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
                 }
             }
@@ -311,12 +312,12 @@ void logicCheck() {
                 def String groupCols = getValuesByGroupColumn(dataRows[itg])
                 def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «$groupCols» в графе"
                 if (groupCols != null) {
-                if (testItogRow.price != realItogRow.price) {
-                    logger.error(mes + " «${getAtributes().price[2]}»")
-                }
-                if (testItogRow.cost != realItogRow.cost) {
-                    logger.error(mes + " «${getAtributes().cost[2]}»")
-                }
+                    if (testItogRow.price != realItogRow.price) {
+                        logger.error(mes + " «${getAtributes().price[2]}»")
+                    }
+                    if (testItogRow.cost != realItogRow.cost) {
+                        logger.error(mes + " «${getAtributes().cost[2]}»")
+                    }
                 }
             }
         }
@@ -382,7 +383,7 @@ void addAllStatic() {
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.getAllCached()
 
-        if (dataRows.size()<1){
+        if (dataRows.size() < 1) {
             return
         }
 
@@ -396,7 +397,7 @@ void addAllStatic() {
 
             if (row.getAlias() == null && nextRow == null || isDiffRow(row, nextRow, getGroupColumns())) {
                 def itogRow = calcItog(i, dataRows)
-                dataRowHelper.insert(itogRow, ++i+1)
+                dataRowHelper.insert(itogRow, ++i + 1)
             }
         }
     }
@@ -449,14 +450,15 @@ void calc() {
         incomeSum = row.incomeSum
         consumptionSum = row.consumptionSum
 
-        if (incomeSum != null) {
+        if (incomeSum != null && consumptionSum == null) {
             row.price = incomeSum
-            row.cost = incomeSum
-        }
-
-        if (consumptionSum != null) {
+            row.cost = row.price
+        } else if (incomeSum == null && consumptionSum != null) {
             row.price = consumptionSum
-            row.cost = consumptionSum
+            row.cost = row.price
+        } else if (incomeSum != null && consumptionSum != null) {
+            row.price = (consumptionSum - incomeSum).abs()
+            row.cost = row.price
         }
 
         // Расчет полей зависимых от справочников
@@ -494,7 +496,7 @@ int sortRow(List<String> params, DataRow a, DataRow b) {
         bD = b.getCell(param).value
 
         if (aD != bD) {
-            return aD <=> bD
+            return aD<=>bD
         }
     }
     return 0
@@ -597,19 +599,19 @@ def checkTableHead(def xml, def headRowCount) {
 
     def names = (
             xml.row[0].cell[0] == 'Полное наименование с указанием ОПФ' &&
-            xml.row[0].cell[1] == 'ИНН/ КИО' &&
-            xml.row[0].cell[2] == 'Наименование страны регистрации' &&
-            xml.row[0].cell[3] == 'Код страны регистрации по классификатору ОКСМ' &&
-            xml.row[0].cell[4] == 'Номер договора' &&
-            xml.row[0].cell[5] == 'Дата договора' &&
-            xml.row[0].cell[6] == 'Номер сделки' &&
-            xml.row[0].cell[7] == 'Дата заключения сделки' &&
-            xml.row[0].cell[8] == 'Вид срочной сделки' &&
-            xml.row[0].cell[9] == 'Сумма доходов Банка по данным бухгалтерского учета, руб.' &&
-            xml.row[0].cell[10] == 'Сумма расходов Банка по данным бухгалтерского учета, руб.' &&
-            xml.row[0].cell[11] == 'Цена (тариф) за единицу измерения, руб.' &&
-            xml.row[0].cell[12] == 'Итого стоимость, руб.' &&
-            xml.row[0].cell[13] == 'Дата совершения сделки'
+                    xml.row[0].cell[1] == 'ИНН/ КИО' &&
+                    xml.row[0].cell[2] == 'Наименование страны регистрации' &&
+                    xml.row[0].cell[3] == 'Код страны регистрации по классификатору ОКСМ' &&
+                    xml.row[0].cell[4] == 'Номер договора' &&
+                    xml.row[0].cell[5] == 'Дата договора' &&
+                    xml.row[0].cell[6] == 'Номер сделки' &&
+                    xml.row[0].cell[7] == 'Дата заключения сделки' &&
+                    xml.row[0].cell[8] == 'Вид срочной сделки' &&
+                    xml.row[0].cell[9] == 'Сумма доходов Банка по данным бухгалтерского учета, руб.' &&
+                    xml.row[0].cell[10] == 'Сумма расходов Банка по данным бухгалтерского учета, руб.' &&
+                    xml.row[0].cell[11] == 'Цена (тариф) за единицу измерения, руб.' &&
+                    xml.row[0].cell[12] == 'Итого стоимость, руб.' &&
+                    xml.row[0].cell[13] == 'Дата совершения сделки'
     )
     if (!names) return false
 
@@ -625,20 +627,20 @@ def checkTableHead(def xml, def headRowCount) {
 
     // строка с нумерацией граф
     def grafRow = (
-    xml.row[2].cell[0] == 'гр. 2' &&
-    xml.row[2].cell[1] == 'гр. 3' &&
-    xml.row[2].cell[2] == 'гр. 4.1' &&
-    xml.row[2].cell[3] == 'гр. 4.2' &&
-    xml.row[2].cell[4] == 'гр. 5' &&
-    xml.row[2].cell[5] == 'гр. 6' &&
-    xml.row[2].cell[6] == 'гр. 7' &&
-    xml.row[2].cell[7] == 'гр. 8' &&
-    xml.row[2].cell[8] == 'гр. 9' &&
-    xml.row[2].cell[9] == 'гр. 10' &&
-    xml.row[2].cell[10] == 'гр. 11' &&
-    xml.row[2].cell[11] == 'гр. 12' &&
-    xml.row[2].cell[12] == 'гр. 13' &&
-    xml.row[2].cell[13] == 'гр. 14'
+            xml.row[2].cell[0] == 'гр. 2' &&
+                    xml.row[2].cell[1] == 'гр. 3' &&
+                    xml.row[2].cell[2] == 'гр. 4.1' &&
+                    xml.row[2].cell[3] == 'гр. 4.2' &&
+                    xml.row[2].cell[4] == 'гр. 5' &&
+                    xml.row[2].cell[5] == 'гр. 6' &&
+                    xml.row[2].cell[6] == 'гр. 7' &&
+                    xml.row[2].cell[7] == 'гр. 8' &&
+                    xml.row[2].cell[8] == 'гр. 9' &&
+                    xml.row[2].cell[9] == 'гр. 10' &&
+                    xml.row[2].cell[10] == 'гр. 11' &&
+                    xml.row[2].cell[11] == 'гр. 12' &&
+                    xml.row[2].cell[12] == 'гр. 13' &&
+                    xml.row[2].cell[13] == 'гр. 14'
     )
 
     return grafRow
@@ -665,7 +667,7 @@ def addData(def xml) {
             continue
         }
 
-        if ((row.cell.find {it.text() != ""}.toString()) == "") {
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
 
@@ -687,20 +689,20 @@ def addData(def xml) {
         def map = refBookService.getRecordData(9, newRow.name)
         def String text = row.cell[indexCell].text()
         if ((text != null && !text.equals(map.INN_KIO.stringValue)) || (text == null && map.INN_KIO.stringValue != null))
-            throw new Exception("Строка ${indexRow + 2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 4.1
         text = row.cell[indexCell].text()
         map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
         if ((text != null && !text.equals(map.NAME.stringValue)) || (text == null && map.NAME.stringValue != null))
-            throw new Exception("Строка ${indexRow + 2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 4.2
         text = row.cell[indexCell].text()
         if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
-            throw new Exception("Строка ${indexRow + 2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
         indexCell++
 
         // графа 5

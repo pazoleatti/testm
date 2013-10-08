@@ -9,11 +9,20 @@ import java.util.List;
  *  preparedstatement
  */
 public class PreparedStatementData {
-    // запрос
-    private StringBuilder query = new StringBuilder();
 
-    // набор параметров
-    private List<Object> params = new ArrayList<Object>();
+	// запрос
+	private StringBuilder query = new StringBuilder();
+
+	// набор параметров
+	private List<Object> params = new ArrayList<Object>();
+
+	public PreparedStatementData(){
+	}
+
+	public PreparedStatementData(String query, Object... params) {
+		this.query.append(query);
+		this.params.add(params);
+	}
 
     public void setQuery(StringBuilder query){
         this.query = query;

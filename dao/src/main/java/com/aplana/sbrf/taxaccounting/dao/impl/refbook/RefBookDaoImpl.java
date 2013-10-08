@@ -43,7 +43,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select id, name, script_id from ref_book where id = ?",
+                    "select id, name, script_id, visible from ref_book where id = ?",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -52,17 +52,24 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public List<RefBook> getAll() {
-        return getJdbcTemplate().query(
-                "select id, name, script_id from ref_book order by name",
-                new RefBookRowMapper());
-    }
+	 public List<RefBook> getAll() {
+		return getJdbcTemplate().query(
+				"select id, name, script_id, visible from ref_book order by name",
+				new RefBookRowMapper());
+	}
+
+	@Override
+	public List<RefBook> getAllVisible() {
+		return getJdbcTemplate().query(
+				"select id, name, script_id, visible from ref_book where visible = 1 order by name",
+				new RefBookRowMapper());
+	}
 
     @Override
     public RefBook getByAttribute(long attributeId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select r.id, r.name, r.script_id from ref_book r join ref_book_attribute a on a.ref_book_id = r.id where a.id = ?",
+                    "select r.id, r.name, r.script_id, r.visible from ref_book r join ref_book_attribute a on a.ref_book_id = r.id where a.id = ?",
                     new Object[]{attributeId}, new int[]{Types.NUMERIC},
                     new RefBookRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -79,6 +86,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             result.setId(rs.getLong("id"));
             result.setName(rs.getString("name"));
             result.setScriptId(rs.getString("script_id"));
+			result.setVisible(rs.getBoolean("visible"));
             result.setAttributes(getAttributes(result.getId()));
             return result;
         }

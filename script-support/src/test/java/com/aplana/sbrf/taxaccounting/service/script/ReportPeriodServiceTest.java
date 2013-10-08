@@ -12,7 +12,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -138,61 +137,5 @@ public class ReportPeriodServiceTest {
 	}
 
 
-    @Test
-    public void getStartDate(){
-        Calendar cl = new GregorianCalendar();
-        cl.clear();
-        cl.set(2012, 1, 1);
 
-        assertEquals(service.getStartDate(2), cl);
-    }
-
-    @Test
-    public void getEndDate(){
-        Calendar c2 = new GregorianCalendar();
-        c2.clear();
-        c2.set(2012, 2, 31);
-
-        assertEquals(service.getEndDate(2), c2);
-
-        Calendar cl = new GregorianCalendar();
-        cl.clear();
-        cl.set(2012, 0, 31);
-
-        assertEquals(service.getEndDate(1), cl);
-    }
-
-    @Test
-    public void getReportDate(){
-        Calendar cl = Calendar.getInstance();
-        cl.set(2012, 3, 1);
-
-        assertEquals(service.getReportDate(2).get(Calendar.MONTH), cl.get(Calendar.MONTH));
-    }
-
-    @Test
-    public void getStartDateIncome(){
-        Calendar cl = Calendar.getInstance();
-        cl.clear();
-        cl.set(2012, 1, 1);
-
-        assertEquals("Wait ", service.getStartDate(8).get(Calendar.MONTH), cl.get(Calendar.MONTH));
-    }
-
-    @Test
-    public void getEndDateIncome(){
-        Calendar cl = Calendar.getInstance();
-        cl.clear();
-        cl.set(2012, 1, 1);
-
-        assertEquals(service.getEndDate(8).get(Calendar.MONTH), cl.get(Calendar.MONTH));
-    }
-
-    @Test
-    public void getForthTransportPeriod(){
-        Calendar cl = Calendar.getInstance();
-        cl.set(2012, 1, 1);
-
-        assertEquals(service.getStartDate(4).get(Calendar.MONTH), cl.get(Calendar.MONTH));
-    }
 }

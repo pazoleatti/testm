@@ -162,7 +162,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		} catch (BadValueException bve) {
 			isFormModified = false;
 			List<LogEntry> logEntries = new ArrayList<LogEntry>();
-			logEntries.add(new LogEntry(LogLevel.ERROR, "Некорректный тип значения в поле \" " + bve.getFieldName()  + "\""));
+			logEntries.add(new LogEntry(LogLevel.ERROR, "\" " + bve.getFieldName()  + "\" - " + bve.getDescription()));
 			LogAddEvent.fire(EditFormPresenter.this, logEntries);
 		}
 	}
