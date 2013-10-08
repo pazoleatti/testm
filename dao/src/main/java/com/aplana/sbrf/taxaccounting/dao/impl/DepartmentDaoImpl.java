@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -18,7 +20,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
-import com.aplana.sbrf.taxaccounting.dao.mapper.DepartmentMapper;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 
@@ -26,9 +27,6 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 @Transactional(readOnly = true)
 public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 	private final Log logger = LogFactory.getLog(getClass());
-	
-	@Autowired 
-	private DepartmentMapper departmentMapper;
 	
 	@Autowired
 	DepartmentFormTypeDao departmentFormTypeDao;
@@ -39,19 +37,34 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 	@Override
 	@Cacheable(CacheConstants.DEPARTMENT)
 	public Department getDepartment(int id) {
+        System.out.println("getDepartment started");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Fetching department with id = " + id  + " from database");
 		}
-		Department result = departmentMapper.get(id);
-		if (result == null) {
-			throw new DaoException("Не удалось найти подразделение банка с id = " + id);
-		}
-		return result;
+        try {
+            Department result = getJdbcTemplate().queryForObject(
+                    "select * from department where id = ?",
+                    new Object[] { id },
+                    new DepartmentJdbcMapper()
+            );
+            return result;
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException("Не удалось найти подразделение банка с id = " + id);
+        }
 	}
 
 	@Override
 	public List<Department> getChildren(int parentDepartmentId){
-		return departmentMapper.getChildren(parentDepartmentId);
+        System.out.println("getChildren started");
+        try {
+            return getJdbcTemplate().query(
+                    "select * from department where parent_id = ?",
+                    new Object[] { parentDepartmentId },
+                    new DepartmentJdbcMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Department>(0);
+        }
 	}
 
 	@Override
@@ -70,7 +83,15 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     @Override
     public List<Department> listDepartments(){
-        return departmentMapper.getAll();
+        System.out.println("listDepartments started");
+        try {
+            return getJdbcTemplate().query(
+                    "select * from department",
+                    new DepartmentJdbcMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Department>(0);
+        }
     }
 	
 
@@ -116,6 +137,15 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     @Override
     public List<Department> getAllChildren(int parentDepartmentId) {
-        return departmentMapper.getAllChildren(parentDepartmentId);
+        System.out.println("getAllChildren started");
+        try {
+            return getJdbcTemplate().query(
+                    "select * from department CONNECT BY prior id = parent_id start with id = ?",
+                    new Object[] { parentDepartmentId },
+                    new DepartmentJdbcMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Department>(0);
+        }
     }
 }
