@@ -89,18 +89,26 @@ def addNewRow(){
         newRow.getCell(column).setStyleAlias('Редактируемая')
 
     }
-    def i = getRows(data).size()
-    while(i>0 && isTotalRow(getRows(data).get(i-1))){i--}
-    data.insert(newRow, i + 1)
-
-    // проставление номеров строк
-    i = 1;
-    getRows(data).each{ row->
-        if(!isTotalRow(row)){
-            row.rowNumber = i++
+    def index = 0
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def row = currentDataRow
+        while(isTotalRow(row) && index>0){
+            row = getRows(data).get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && !isTotalRow(getRows(data).get(index))){
+            index++
+        }
+    }else if (getRows(data).size()>0) {
+        for(int i = getRows(data).size()-1;i>=0;i--){
+            def row = getRows(data).get(i)
+            if(!isTotalRow(row)){
+                index = getRows(data).indexOf(row)+1
+                break
+            }
         }
     }
-    save(data)
+    data.insert(newRow,index+1)
 }
 
 /**
@@ -158,7 +166,7 @@ def fillForm(){
     data.save(getRows(data))
 
     // сортируем по кодам
-    getRows(data).sort { getKnu(it.code) }
+    data.save(getRows(data).sort { getKnu(it.code) })
     // cумма "Итого"
     def total = 0
 
@@ -195,9 +203,6 @@ def fillForm(){
         tmp = row.code
 
     }
-
-    // отсортировать/группировать
-    data.save(getRows(data).sort { getKnu(it.code) })
 
     getRows(data).eachWithIndex { row, index ->
         row.rowNumber = index + 1
@@ -514,7 +519,7 @@ def getBalance(def balance) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['rowNumber', 'fix', 'balance', 'code', 'name', 'sum'].each {

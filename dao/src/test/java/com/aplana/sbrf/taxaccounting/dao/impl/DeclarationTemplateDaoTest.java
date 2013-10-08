@@ -68,6 +68,8 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate.setCreateScript("MyScript");
 		DeclarationType declarationType = declarationTypeDao.get(1);
 		declarationTemplate.setDeclarationType(declarationType);
+        declarationTemplate.setJasperBlobId("1");
+        declarationTemplate.setJrxmlBlobId("1");
 
 		int id = declarationTemplateDao.save(declarationTemplate);
 
@@ -89,6 +91,8 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate.setActive(true);
 		declarationTemplate.setVersion("0.01");
 		declarationTemplate.setCreateScript("MyScript");
+        declarationTemplate.setJasperBlobId("1");
+        declarationTemplate.setJrxmlBlobId("1");
 		DeclarationType declarationType = declarationTypeDao.get(1);
 		declarationTemplate.setDeclarationType(declarationType);
 
@@ -115,33 +119,6 @@ public class DeclarationTemplateDaoTest {
 
 		declarationTemplateDao.save(declarationTemplate);
 
-	}
-
-	@Test
-	public void testSetJrxmlAndJasper() {
-		declarationTemplateDao.setJrxmlAndJasper(1, "Template", new byte[]{00,01,02});
-		assertEquals("Template", declarationTemplateDao.getJrxml(1));
-		assertNotNull(declarationTemplateDao.getJasper(1));
-	}
-
-	@Test(expected = DaoException.class)
-	public void testSetJrxmlAndJasperNotExisted() {
-		declarationTemplateDao.setJrxmlAndJasper(1000, "Template", new byte[]{00,01,02});
-	}
-
-	@Test
-	public void testGetJrxml() {
-		assertEquals("test-jrxml", declarationTemplateDao.getJrxml(1));
-	}
-
-	@Test(expected = DaoException.class)
-	public void testGetJrxmlNotExisted() {
-		declarationTemplateDao.getJrxml(1000);
-	}
-
-	@Test(expected = DaoException.class)
-	public void testGetJasperNotExisted() {
-		declarationTemplateDao.getJasper(1000);
 	}
 
 	@Test

@@ -613,7 +613,7 @@ def getFormDataOld() {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['number', 'contract', 'contractDate', 'amountOfTheGuarantee',

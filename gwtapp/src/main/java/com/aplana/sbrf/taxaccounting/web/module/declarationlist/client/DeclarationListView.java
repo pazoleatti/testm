@@ -1,21 +1,27 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.*;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.*;
-import com.aplana.sbrf.taxaccounting.web.widget.pager.*;
-import com.google.gwt.cell.client.*;
-import com.google.gwt.event.dom.client.*;
-import com.google.gwt.safehtml.shared.*;
-import com.google.gwt.uibinder.client.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
+import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.*;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.*;
-import com.google.inject.*;
-import com.gwtplatform.mvp.client.*;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.Range;
+import com.google.inject.Inject;
+import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.*;
+import java.util.List;
 
 public class DeclarationListView extends
 		ViewWithUiHandlers<DeclarationListUiHandlers> implements
@@ -24,6 +30,8 @@ public class DeclarationListView extends
 
 	interface MyBinder extends UiBinder<Widget, DeclarationListView> {
 	}
+
+    private static final int PAGE_SIZE = 20;
 
 	private DeclarationDataSearchOrdering sortByColumn;
 
@@ -35,11 +43,21 @@ public class DeclarationListView extends
 	@UiField
 	CellTable<DeclarationDataSearchResultItem> declarationTable;
 
-	@UiField
-	Panel tablePanel;
+    @UiField
+    FlexiblePager pager;
 
 	@UiField
 	Label titleDesc;
+
+    private final AsyncDataProvider<DeclarationDataSearchResultItem> dataProvider = new AsyncDataProvider<DeclarationDataSearchResultItem>() {
+        @Override
+        protected void onRangeChanged(HasData<DeclarationDataSearchResultItem> display) {
+            if (getUiHandlers() != null){
+                final Range range = display.getVisibleRange();
+                getUiHandlers().onRangeChange(range.getStart(), range.getLength());
+            }
+        }
+    };
 
 	@Inject
 	public DeclarationListView(final MyBinder uiBinder) {
@@ -112,9 +130,10 @@ public class DeclarationListView extends
 		declarationTable.addColumn(declarationTypeColumn, getHeader("Вид декларации"));
 		declarationTable.addColumn(stateColumn, getHeader("Состояние"));
 
-		AbstractPager pager = createFlexiblePager();
+        declarationTable.setPageSize(PAGE_SIZE);
+        dataProvider.addDataDisplay(declarationTable);
+
 		pager.setDisplay(declarationTable);
-		tablePanel.add(pager);
 	}
 	
 
@@ -130,19 +149,27 @@ public class DeclarationListView extends
 		}
 	}
 
-	@Override
-	public void setDeclarationsList(int start, long totalCount, List<DeclarationDataSearchResultItem> records) {
-		declarationTable.setRowCount((int) totalCount);
-		declarationTable.setRowData(start, records);
-	}
+    @Override
+    public void updateData(int pageNumber) {
+        if (pager.getPage() == pageNumber){
+            updateData();
+        } else {
+            pager.setPage(pageNumber);
+        }
+    }
 
-	@Override
-	public void assignDataProvider(int pageSize, AbstractDataProvider<DeclarationDataSearchResultItem> data) {
-		declarationTable.setPageSize(pageSize);
-		data.addDataDisplay(declarationTable);
-	}
+    @Override
+    public void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records) {
+        declarationTable.setRowCount((int) totalCount);
+        declarationTable.setRowData(start, records);
+    }
 
-	@Override
+    @Override
+    public void updateData() {
+        declarationTable.setVisibleRangeAndClearData(declarationTable.getVisibleRange(), true);
+    }
+
+    @Override
 	public DeclarationDataSearchOrdering getSearchOrdering(){
 		if (sortByColumn == null){
 			setSortByColumn("");
@@ -158,33 +185,6 @@ public class DeclarationListView extends
 	@Override
 	public void updateTitle(String title){
 		titleDesc.setText(title);
-	}
-
-	@UiHandler("apply")
-	void onApplyButtonClicked(ClickEvent event) {
-		if (getUiHandlers() != null) {
-			getUiHandlers().onApplyFilter();
-		}
-	}
-
-	@UiHandler("create")
-	void onCreateButtonClicked(ClickEvent event){
-		if (getUiHandlers() != null) {
-			getUiHandlers().onCreateClicked();
-		}
-	}
-
-	private static AbstractPager createFlexiblePager(){
-		final boolean showFastForwardButton = false;
-		final int fastForwardRows = 0;
-		final boolean showLastPageButton = true;
-
-		AbstractPager pager =  new FlexiblePager(FlexiblePager.TextLocation.CENTER, showFastForwardButton, fastForwardRows,
-				showLastPageButton);
-
-		pager.getElement().getStyle().setProperty("marginLeft", "auto");
-		pager.getElement().getStyle().setProperty("marginRight", "auto");
-		return pager;
 	}
 
 	private Header<String> getHeader(final String columnName){

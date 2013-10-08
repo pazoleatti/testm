@@ -43,6 +43,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			d.setEdition(rs.getInt("edition"));
 			d.setDeclarationType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
             d.setXsdId(rs.getString("XSD"));
+            d.setJrxmlBlobId(rs.getString("JRXML"));
+            d.setJasperBlobId(rs.getString("JASPER"));
 			return d;
 		}
 	}
@@ -101,7 +103,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		if (declarationTemplate.getId() == null) {
 			declarationTemplateId = generateId("seq_declaration_template", Integer.class);
 			count = getJdbcTemplate().update(
-					"insert into declaration_template (id, edition, version, is_active, create_script, declaration_type_id, xsd) values (?, ?, ?, ?, ?, ?, ?)",
+					"insert into declaration_template (id, edition, version, is_active, create_script, declaration_type_id, xsd, jrxml, jasper) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 					new Object[] {
 							declarationTemplateId,
 							1,
@@ -109,7 +111,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							declarationTemplate.isActive(),
 							declarationTemplate.getCreateScript(),
 							declarationTemplate.getDeclarationType().getId(),
-                            declarationTemplate.getXsdId()
+                            declarationTemplate.getXsdId(),
+                            declarationTemplate.getJrxmlBlobId(),
+                            declarationTemplate.getJasperBlobId()
 					},
 					new int[] {
 							Types.NUMERIC,
@@ -118,6 +122,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							Types.NUMERIC,
 							Types.VARCHAR,
 							Types.NUMERIC,
+                            Types.VARCHAR,
+                            Types.VARCHAR,
                             Types.VARCHAR
 					}
 			);
@@ -126,12 +132,12 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			declarationTemplateId = declarationTemplate.getId();
 			int storedEdition = getJdbcTemplate()
 					.queryForInt("select edition from declaration_template where id = ? for update", declarationTemplateId);
-			if (storedEdition != declarationTemplate.getEdition()) {
+            if (storedEdition != declarationTemplate.getEdition()) {
 				throw new DaoException("Сохранение описания декларации невозможно, так как её состояние в БД" +
 						" было изменено после того, как данные по ней были считаны");
 			}
 			count = getJdbcTemplate().update(
-					"update declaration_template set edition = ?, version = ?, is_active = ?, create_script = ?, declaration_type_id = ?, xsd = ? where id = ?",
+					"update declaration_template set edition = ?, version = ?, is_active = ?, create_script = ?, declaration_type_id = ?, xsd = ?, jrxml = ?, jasper = ? where id = ?",
 					new Object[] {
 							storedEdition + 1,
 							declarationTemplate.getVersion(),
@@ -139,6 +145,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							declarationTemplate.getCreateScript(),
 							declarationTemplate.getDeclarationType().getId(),
                             declarationTemplate.getXsdId(),
+                            declarationTemplate.getJrxmlBlobId(),
+                            declarationTemplate.getJasperBlobId(),
 							declarationTemplateId
 					},
 					new int[] {
@@ -147,6 +155,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							Types.NUMERIC,
 							Types.VARCHAR,
 							Types.NUMERIC,
+                            Types.VARCHAR,
+                            Types.VARCHAR,
                             Types.VARCHAR,
 							Types.NUMERIC
 					}
@@ -159,49 +169,23 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		return declarationTemplateId;
 	}
 
-	@Override
-	public void setJrxmlAndJasper(int declarationTemplateId, String jrxml, byte[] jasper) {
-		int count = getJdbcTemplate().update(
-				"update declaration_template set jrxml = ?, jasper = ? where id = ?",
-				new Object[] {
-						jrxml,
-						jasper,
-						declarationTemplateId
-				},
-				new int[] {
-						Types.VARCHAR,
-						Types.BINARY,
-						Types.NUMERIC
-				}
-		);
-		if (count == 0) {
-			throw new DaoException("Не удалось сохранить данные с id = %d, так как она не существует.", declarationTemplateId);
-		}
-	}
-
-	@Override
-	public String getJrxml(int declarationTemplateId) {
-		try {
-			return getJdbcTemplate().queryForObject(
-					"select jrxml from declaration_template where id = ?",
-					new Object[] { declarationTemplateId },
-					String.class
-			);
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Шаблон декларации с id = %d не найдена в БД", declarationTemplateId);
-		}
-	}
-
-	@Override
-	public byte[] getJasper(int declarationTemplateId) {
-		try {
-			return getJdbcTemplate().queryForObject(
-					"select jasper from declaration_template where id = ?",
-					new Object[] { declarationTemplateId },
-					byte[].class
-			);
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Шаблон декларации с id = %d не найдена в БД", declarationTemplateId);
-		}
-	}
+    @Override
+    public void setJrxmlAndJasper(int declarationTemplateId, String jrxmlBlobId, String jasperBlobId) {
+        int count = getJdbcTemplate().update(
+                "update declaration_template set jrxml = ?, jasper = ? where id = ?",
+                new Object[] {
+                        jrxmlBlobId,
+                        jasperBlobId,
+                        declarationTemplateId
+                },
+                new int[] {
+                        Types.VARCHAR,
+                        Types.VARCHAR,
+                        Types.NUMERIC
+                }
+        );
+        if (count == 0) {
+            throw new DaoException("Не удалось сохранить данные с id = %d, так как она не существует.", declarationTemplateId);
+        }
+    }
 }

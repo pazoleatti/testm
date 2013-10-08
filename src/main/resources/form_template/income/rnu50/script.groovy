@@ -46,7 +46,7 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        calc()
+        postCalc(data)
         if (allCheck()) {
             // для сохранения изменений приемников
             data.commit()
@@ -131,12 +131,11 @@ void calc() {
     }
     def DataRowHelper data49 = getData(formData49)
 
-    def DataRow newRow = null
     for (def row49 in getRows(data49)){
         if (!isTotal(row49) && row49.usefullLifeEnd!=null &&
             row49.monthsLoss!=null &&
             row49.expensesSum!=null){
-            newRow = formData.createDataRow()
+            def DataRow newRow = formData.createDataRow()
             // 3 графа
             newRow.invNumber = row49.invNumber
             // 2 графа
@@ -163,6 +162,14 @@ void calc() {
         }
     }
 
+    postCalc(data)
+}
+
+/**
+ * Сортировка, нумерование, итоги
+ * @param data
+ */
+void postCalc(def data){
     if (getRows(data).isEmpty()) {
         return
     }
@@ -367,7 +374,7 @@ def getIndex(def row) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['rowNumber', 'rnu49rowNumber', 'invNumber', 'lossReportPeriod', 'lossTaxPeriod'].each {

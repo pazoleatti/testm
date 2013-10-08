@@ -69,16 +69,26 @@ def addNewRow() {
         newRow.getCell(column).setEditable(true)
         newRow.getCell(column).setStyleAlias('Редактируемая')
     }
-    insert(data, newRow)
-
-    // проставление номеров строк
-    def i = 1;
-    getRows(data).each{ row->
-        if (!isTotal(row)) {
-            row.rowNumber = i++
+    def index = 0
+    if (currentDataRow!=null){
+        index = currentDataRow.getIndex()
+        def row = currentDataRow
+        while(isTotal(row) && index>0){
+            row = getRows(data).get(--index)
+        }
+        if(index!=currentDataRow.getIndex() && !isTotal(getRows(data).get(index))){
+            index++
+        }
+    }else if (getRows(data).size()>0) {
+        for(int i = getRows(data).size()-1;i>=0;i--){
+            def row = getRows(data).get(i)
+            if(!isTotal(row)){
+                index = getRows(data).indexOf(row)+1
+                break
+            }
         }
     }
-    save(data)
+    data.insert(newRow,index+1)
 }
 
 /**
@@ -291,7 +301,7 @@ def checkNSI() {
             if (index != null) {
                 errorMsg = "В строке \"№ пп\" равной $index "
             } else {
-                index = getIndex(row) + 1
+                index = getRows(data).indexOf(row) + 1
                 errorMsg = "В строке $index "
             }
 
@@ -409,7 +419,7 @@ def getNewTotalRow(def codeId, def sum) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['rowNumber', 'fix', 'code', 'number', 'name', 'sum'].each {

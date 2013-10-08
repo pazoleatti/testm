@@ -307,7 +307,7 @@ def isEmpty(def value) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['number', 'forLabel', 'date', 'nominal', 'price',

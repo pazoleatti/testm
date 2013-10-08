@@ -556,7 +556,7 @@ public class FormDataServiceImpl implements FormDataService {
      *
      *  http://conf.aplana.com/pages/viewpage.action?pageId=8788114
      */
-    private void compose(WorkflowMove workflowMove, FormData formData, TAUserInfo userInfo, Logger logger){
+    void compose(WorkflowMove workflowMove, FormData formData, TAUserInfo userInfo, Logger logger){
         // Проверка перехода ЖЦ. Принятие либо отмена принятия
         if (workflowMove.getToState() == WorkflowState.ACCEPTED || workflowMove.getFromState() == WorkflowState.ACCEPTED) {
             // признак периода ввода остатков
@@ -587,7 +587,7 @@ public class FormDataServiceImpl implements FormDataService {
 
                             formDataCompositionService.compose(formData, i.getDepartmentId(),
                                     i.getFormTypeId(), i.getKind());
-                        }else{
+                        } else{
                             deleteFormData(userInfo, destinationForm.getId());
                         }
                     }
