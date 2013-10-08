@@ -11,12 +11,12 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 /**
  * User: ekuvshinov
  */
-public class BookerStatementsFilterTreeListener implements FilterTreeListener {
+public class SimpleFilterTreeListener implements FilterTreeListener {
     private RefBook refBook;
     // модель для preparedStatement
     PreparedStatementData ps;
 
-    public BookerStatementsFilterTreeListener(RefBook refBook, PreparedStatementData preparedStatementData){
+    public SimpleFilterTreeListener(RefBook refBook, PreparedStatementData preparedStatementData){
         this.refBook = refBook;
         this.ps = preparedStatementData;
     }
@@ -144,4 +144,12 @@ public class BookerStatementsFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void exitEveryRule(@NotNull ParserRuleContext parserRuleContext) {}
+
+	public PreparedStatementData getPs() {
+		return ps;
+	}
+
+	public void setPs(PreparedStatementData ps) {
+		this.ps = ps;
+	}
 }

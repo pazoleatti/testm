@@ -31,6 +31,9 @@ public class RefBook implements Serializable {
     /** Скрипт справочника */
     private String scriptId;
 
+	/** Признак отображения справочника */
+	private boolean visible;
+
 	/**
 	 * Возвращает код справочника
 	 * @return код справочника
@@ -155,13 +158,30 @@ public class RefBook implements Serializable {
         this.scriptId = scriptId;
     }
 
-    @Override
+	/**
+	 * Возвращает признак видимости справочника
+	 * @return true - виден; false - скрыт
+	 */
+	public boolean isVisible() {
+		return visible;
+	}
+
+	/**
+	 * Устанавливает признак видимости справочника
+	 * @param visible true - виден; false - скрыт
+	 */
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+	}
+
+	@Override
     public String toString() {
         return "RefBook{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", attributes=" + attributes +
                 ", scriptId=" + scriptId +
+				", visible=" + visible +
                 '}';
     }
 }

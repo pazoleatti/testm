@@ -145,12 +145,28 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			try {
 				switch (field.getKey().getAttributeType()) {
 					case NUMBER:
-						Number number = field.getValue().getValue() == null || field.getValue().getValue().toString().trim().isEmpty() ? null : new BigDecimal((String)field.getValue().getValue());
+						Number number = field.getValue().getValue() == null || field.getValue().getValue().toString().trim().isEmpty()
+								? null : new BigDecimal((String)field.getValue().getValue());
+						String numberStr = Double.toString(number.doubleValue());
+						String fractionalStr = numberStr.substring(numberStr.indexOf('.')+1);
+						String intStr = Integer.toString(Math.abs(number.intValue()));
+						if ((intStr.length() > 10) || (fractionalStr.length() > 17)) {
+							BadValueException badValueException = new BadValueException();
+							badValueException.setFieldName(field.getKey().getName());
+							badValueException.setDescription("Значение не соответствует формату (27, 10)");
+							throw badValueException;
+						}
 						value.setAttributeType(RefBookAttributeType.NUMBER);
 						value.setNumberValue(number);
 						break;
 					case STRING:
 						String string = field.getValue().getValue() == null ? null : (String)field.getValue().getValue();
+						if (string.length() > 2000) {
+							BadValueException badValueException = new BadValueException();
+							badValueException.setFieldName(field.getKey().getName());
+							badValueException.setDescription("Значение более 2000 символов");
+							throw badValueException;
+						}
 						value.setAttributeType(RefBookAttributeType.STRING);
 						value.setStringValue(string);
 						break;

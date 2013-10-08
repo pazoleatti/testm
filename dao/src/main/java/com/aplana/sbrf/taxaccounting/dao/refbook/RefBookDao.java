@@ -36,6 +36,12 @@ public interface RefBookDao {
 	List<RefBook> getAll();
 
 	/**
+	 * Загружает список всех справочников
+	 * @return
+	 */
+	List<RefBook> getAllVisible();
+
+	/**
 	 * Ищет справочник по коду атрибута
 	 * @param attributeId код атрибута, входящего в справочник
 	 * @return

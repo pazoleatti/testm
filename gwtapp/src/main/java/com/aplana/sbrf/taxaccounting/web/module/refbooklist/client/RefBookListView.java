@@ -72,7 +72,7 @@ public class RefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
         TextColumn<TableModel> typeColumn = new TextColumn<TableModel>() {
             @Override
             public String getValue(TableModel object) {
-                return object.getType().getName();
+                return object.getType().toString();
             }
         };
 

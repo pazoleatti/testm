@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbooklist.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -13,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.GetTableDataR
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.LoadRefBookAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.LoadRefBookResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
-import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.Type;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -40,7 +40,7 @@ public class RefBookListPresenter extends Presenter<RefBookListPresenter.MyView,
     }
 
     private final DispatchAsync dispatcher;
-    private Type filterType;
+    private RefBookType filterRefBookType;
     private String filterText;
 
     public interface MyView extends View, HasUiHandlers<RefBookListUiHandlers> {
@@ -61,20 +61,20 @@ public class RefBookListPresenter extends Presenter<RefBookListPresenter.MyView,
     @Override
     public void prepareFromRequest(final PlaceRequest request) {
         super.prepareFromRequest(request);
-        loadData(filterType, filterText);
+        loadData(filterRefBookType, filterText);
     }
 
     @Override
     public void onFindClicked() {
         filterText = getView().getFilter();
         if (getView().isExternalFilter()) {
-            filterType = Type.EXTERNAL;
+            filterRefBookType = RefBookType.EXTERNAL;
         } else if (getView().isInternalFilter()) {
-            filterType = Type.INTERNAL;
+            filterRefBookType = RefBookType.INTERNAL;
         } else {
-            filterType = null;
+            filterRefBookType = null;
         }
-        loadData(filterType, filterText);
+        loadData(filterRefBookType, filterText);
     }
 
     @Override
@@ -90,9 +90,9 @@ public class RefBookListPresenter extends Presenter<RefBookListPresenter.MyView,
 				}, this));
     }
 
-    private void loadData(Type type, String filter) {
+    private void loadData(RefBookType refBookType, String filter) {
         GetTableDataAction action = new GetTableDataAction();
-        action.setType(type);
+        action.setType(refBookType);
         action.setFilter(filter);
         dispatcher.execute(action,
                 CallbackUtils.defaultCallback(

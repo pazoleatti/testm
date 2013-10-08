@@ -1,13 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.server;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.GetTableDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.GetTableDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
-import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.Type;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -45,12 +45,12 @@ public class GetRefBookTableDataHandler extends AbstractActionHandler<GetTableDa
         GetTableDataResult result = new GetTableDataResult();
         List<RefBook> list = new ArrayList<RefBook>();
 
-        if (Type.EXTERNAL.equals(action.getType())) {
+        if (RefBookType.EXTERNAL.equals(action.getType())) {
             // TODO внешние
-        } else if (Type.INTERNAL.equals(action.getType())) {
+        } else if (RefBookType.INTERNAL.equals(action.getType())) {
             // TODO  внутренние
         } else {
-            list = refBookFactory.getAll();
+            list = refBookFactory.getAll(true); // запросить только видимые справочники
         }
 
         List<TableModel> returnList = new ArrayList<TableModel>();
@@ -58,7 +58,7 @@ public class GetRefBookTableDataHandler extends AbstractActionHandler<GetTableDa
         for (RefBook model : list) {
             if (!isFiltered || model.getName().toLowerCase().contains(action.getFilter().toLowerCase())) {
                 // TODO внеш/внутр
-                returnList.add(new TableModel(model.getId(), model.getName(), Type.EXTERNAL));
+                returnList.add(new TableModel(model.getId(), model.getName(), RefBookType.EXTERNAL));
             }
         }
 

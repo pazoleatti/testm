@@ -79,6 +79,7 @@ public class FormDataListPresenter extends
 		LogShowEvent.fire(this, false);
 		TaxType taxType = TaxType.valueOf(request.getParameter("nType", ""));
 		filterPresenter.initFilter(taxType, filterStates.get(taxType));
+		filterPresenter.changeFilterElementNames(taxType);
 		super.prepareFromRequest(request);
 	}
 
@@ -103,6 +104,12 @@ public class FormDataListPresenter extends
 			if (event.isSuccess()){
 				FormDataFilter filter = filterPresenter.getFilterData();
 				getView().updateTitle(filter.getTaxType().getName());
+				// TODO Нужно переделать
+				if (filter.getTaxType() == TaxType.DEAL) {
+					getView().updateHeader("Список форм");
+				} else {
+					getView().updateHeader("Список налоговых форм");
+				}
 				this.taxType = filter.getTaxType();
 				saveFilterSatet(filter.getTaxType(), filter);
 				getView().updateData(0);
