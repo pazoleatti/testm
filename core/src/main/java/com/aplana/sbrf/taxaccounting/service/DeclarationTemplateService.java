@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import java.io.InputStream;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
@@ -59,9 +60,9 @@ public interface DeclarationTemplateService {
 	/**
 	 * Получить jasper-файл
 	 * @param declarationTemplateId
-	 * @return jasper-файл в виде байтового массива
+	 * @return поток jasper-файла
 	 */
-	byte[] getJasper(int declarationTemplateId);
+    InputStream getJasper(int declarationTemplateId);
 
 	/**
 	 * Снять блокировку с declarationTemplate.

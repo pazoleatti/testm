@@ -63,7 +63,7 @@ public class DeclarationTemplateImpexServiceImpl implements
 			// JasperTemplate
 			ze = new ZipEntry(REPORT_FILE);
 			zos.putNextEntry(ze);
-			zos.write(declarationTemplateDao.getJrxml(id).getBytes(ENCODING));
+			zos.write(declarationTemplateService.getJrxml(id).getBytes(ENCODING));
 			zos.closeEntry();
 
 			// content
