@@ -131,7 +131,8 @@ comment on column blob_data.data_size is 'Размер файла в байта�
 create table ref_book (
   id number(18,0) not null,
   name varchar2(200) not null,
-  script_id varchar2(36)
+  script_id varchar2(36),
+  visible number(1) default 1 not null
 );
 
 alter table ref_book add constraint ref_book_pk primary key (id);
@@ -141,6 +142,7 @@ comment on table ref_book is 'Справочник';
 comment on column ref_book.id is 'Уникальный идентификатор';
 comment on column ref_book.name is 'Название справочника';
 comment on column ref_book.script_id is 'Идентификатор связанного скрипта';
+comment on column ref_book.visible is 'Признак видимости';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
   id number(18) not null,
@@ -164,6 +166,8 @@ alter table ref_book_attribute add constraint ref_book_attr_chk_type check (type
 alter table ref_book_attribute add constraint ref_book_attr_chk_alias check (lower(alias) <> 'record_id' and lower(alias) <> 'row_number_over');
 alter table ref_book_attribute add constraint ref_book_attr_chk_precision check (precision >= 0 and precision <=10);
 alter table ref_book_attribute add constraint ref_book_attr_chk_number_type check ((type <> 2 and precision is null) or (type = 2 and not (precision is null)));
+alter table ref_book_attribute add constraint ref_book_attr_chk_ref check ((type <> 4 and reference_id is null) or (type = 4 and not (reference_id is null)));
+alter table ref_book_attribute add constraint ref_book_attr_chk_ref_attr check ((type <> 4 and attribute_id is null) or (type = 4 and not (attribute_id is null)));
 alter table ref_book_attribute add constraint ref_book_attribute_uniq_ord unique (ref_book_id, ord);
 alter table ref_book_attribute add constraint ref_book_attribute_uniq_alias unique (ref_book_id, alias);
 
@@ -525,7 +529,7 @@ create sequence seq_form_data_signer start with 10000;
 create table form_data_performer (
   form_data_id number(18) not null,
   name varchar2(200) not null,
-  phone varchar2(20)
+  phone varchar2(40)
 );
 alter table form_data_performer add constraint form_data_performer_pk primary key (form_data_id);
 alter table form_data_performer add constraint formdata_performer_fk_formdata foreign key (form_data_id) references form_data (id) on delete cascade;
@@ -799,11 +803,10 @@ create table log_system (
 );
 alter table log_system add constraint log_system_chk_form_kind_id check (form_kind_id in (1, 2, 3, 4, 5));
 alter table log_system add constraint log_system_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 101, 102,
-  103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401, 501, 502));
-
-alter table log_system add constraint log_system_chk_dcl_form check (event_id in (501, 502) or
+  103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401, 501, 502, 601));
+alter table log_system add constraint log_system_chk_dcl_form check (event_id in (501, 502, 601) or
   declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
-alter table log_system add constraint log_system_chk_rp check (event_id in (501, 502, 7) or report_period_id is not null);
+alter table log_system add constraint log_system_chk_rp check (event_id in (501, 502, 7, 601) or report_period_id is not null);
 
 alter table log_system add constraint log_system_fk_user_id foreign key (user_id) references sec_user (id);
 alter table log_system add constraint log_system_fk_department_id foreign key (department_id) references department(id);

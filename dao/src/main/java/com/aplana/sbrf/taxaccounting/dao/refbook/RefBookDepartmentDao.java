@@ -11,25 +11,25 @@ import java.util.Map;
  * User: ekuvshinov
  */
 public interface RefBookDepartmentDao {
+
+	static final Long REF_BOOK_ID = 30L;
+
     /**
      * Загружает данные справочника
      * в данном случае даты актуальности нет смотри SBRFACCTAX-3245
-     * TODO Добавить сортировку по атрибуту (пока не понятно как должно работать)
      *
-     * @param refBookId
      * @param pagingParams
      * @param sortAttribute может быть не задан (null)
      * @return
      */
-    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
+    PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
     /**
      * По коду возвращает строку справочника
      *
      *
-     * @param refBookId
      * @param recordId код строки справочника
      * @return
      */
-    Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId);
+    Map<String, RefBookValue> getRecordData(Long recordId);
 }

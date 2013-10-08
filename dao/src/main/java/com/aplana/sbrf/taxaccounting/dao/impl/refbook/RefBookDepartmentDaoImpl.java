@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.DepartmentFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
@@ -26,60 +26,23 @@ import java.util.Map;
 @Repository
 @Transactional
 public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepartmentDao {
+
+	private static final String TABLE_NAME = "DEPARTMENT";
+
     @Autowired
     private RefBookDao refBookDao;
 
+	@Autowired
+	private RefBookUtils refBookUtils;
+
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        PreparedStatementData ps = new PreparedStatementData();
-        RefBook refBook = refBookDao.get(refBookId);
-        ps.appendQuery("SELECT ");
-        ps.appendQuery("id ");
-        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
-            ps.appendQuery(", ");
-            ps.appendQuery(attribute.getAlias());
-        }
-        ps.appendQuery(" FROM (SELECT ");
-        if (isSupportOver() && sortAttribute != null) {
-            ps.appendQuery("row_number() over (order by '" + sortAttribute.getAlias() + "') as row_number_over");
-        } else {
-            ps.appendQuery("rownum row_number_over");
-        }
-        ps.appendQuery(", d.* FROM DEPARTMENT d");
-
-        PreparedStatementData filterPS = new PreparedStatementData();
-        Filter.getFilterQuery(filter, new DepartmentFilterTreeListener(refBook, filterPS));
-        if (filterPS.getQuery().length() > 0) {
-            ps.appendQuery(" WHERE\n ");
-            ps.appendQuery(filterPS.getQuery().toString());
-            ps.appendQuery("\n");
-            ps.addParam(filterPS.getParams());
-        }
-        ps.appendQuery(")");
-        List<Map<String, RefBookValue>> records;
-        if (pagingParams != null) {
-            ps.appendQuery(" WHERE row_number_over BETWEEN ? AND ?");
-            ps.addParam(pagingParams.getStartIndex());
-            ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
-            records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
-        } else {
-            records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
-        }
-        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-        if (isSupportOver()) {
-            result.setTotalCount(getJdbcTemplate().queryForInt("SELECT count(*) FROM (" + ps.getQuery().toString() + ")", ps.getParams()));
-        } else {
-            // Бд тестовая тут магия
-            result.setTotalCount(getJdbcTemplate().queryForInt("SELECT count(*) FROM DEPARTMENT"));
-        }
-
-        return result;
+    public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+		return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute);
     }
 
     @Override
-    public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
-        RefBook refBook = refBookDao.get(refBookId);
+    public Map<String, RefBookValue> getRecordData(Long recordId) {
+        RefBook refBook = refBookDao.get(REF_BOOK_ID);
         StringBuilder sql = new StringBuilder("SELECT id ");
         sql.append(RefBook.RECORD_ID_ALIAS);
         for (RefBookAttribute attribute : refBook.getAttributes()) {
@@ -89,11 +52,6 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         sql.append(" FROM department WHERE id = :id");
         Map<String, Long> params = new HashMap<String, Long>();
         params.put("id", recordId);
-        List<Map<String, RefBookValue>> records = getNamedParameterJdbcTemplate().query(sql.toString(), params, new RefBookValueMapper(refBook));
-        Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
-        if (records.size() == 1) {
-            result = records.get(0);
-        }
-        return result;
+        return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, new RefBookValueMapper(refBook));
     }
 }

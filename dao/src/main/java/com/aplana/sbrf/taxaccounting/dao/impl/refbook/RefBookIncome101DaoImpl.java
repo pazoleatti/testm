@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.BookerStatementsFilterTreeListener;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
@@ -36,7 +34,7 @@ import java.util.*;
 @Transactional
 public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncome101Dao {
 
-    private static long REF_BOOK_ID = 50L;
+	private static final String TABLE_NAME = "INCOME_101";
 
     @Autowired
     private RefBookDao refBookDao;
@@ -44,65 +42,30 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
     @Autowired
     private ReportPeriodDao reportPeriodDao;
 
+	@Autowired
+	private RefBookUtils refBookUtils;
+
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter,
-                                                              RefBookAttribute sortAttribute) {
-
-        PreparedStatementData ps = new PreparedStatementData();
-        RefBook refBook = refBookDao.get(REF_BOOK_ID);
-
-		ps.appendQuery("select ");
-        // Сортировка
-        if (isSupportOver()) {
-            ps.appendQuery("* from ( select row_number() over (order by '");
-            String sortColumn = sortAttribute == null ? "id" : sortAttribute.getAlias();
-            ps.appendQuery(sortColumn);
-            ps.appendQuery("') as row_number_over, ");
-        }
-
-        ps.appendQuery("id, report_period_id, account, income_debet_remains, income_credit_remains, debet_rate, ");
-        ps.appendQuery("credit_rate, outcome_debet_remains, outcome_credit_remains, account_name, department_id ");
-        ps.appendQuery("from income_101 ");
-
-        ps.appendQuery("WHERE report_period_id = ?");
-        ps.addParam(reportPeriodId);
-
-        // Фильтрация
-        PreparedStatementData filterPS = new PreparedStatementData();
-        Filter.getFilterQuery(filter, new BookerStatementsFilterTreeListener(refBook, filterPS));
-
-        if (filterPS.getQuery().length() > 0) {
-            ps.appendQuery("AND ");
-            ps.appendQuery(filterPS.getQuery().toString());
-            ps.addParam(filterPS.getParams());
-        }
-
-		if (isSupportOver()) {
-            ps.appendQuery(")");
-			if (pagingParams != null) {
-				// Тестовая база не поддерживает такой синтаксис
-                ps.appendQuery(" WHERE row_number_over between ? and ?");
-				ps.addParam(pagingParams.getStartIndex());
-                ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
-			}
+    public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams,
+			String filter, RefBookAttribute sortAttribute) {
+		if (filter == null || filter.isEmpty()) {
+			filter = " REPORT_PERIOD_ID = " + reportPeriodId;
+		} else {
+			filter += " AND REPORT_PERIOD_ID = " + reportPeriodId;
 		}
-
-        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
-        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-        result.setTotalCount(getJdbcTemplate().queryForInt("select count(*) from (" + ps.getQuery().toString() + ")", ps.getParams().toArray()));
-        return result;
+		return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute);
     }
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long recordId) {
-        return getJdbcTemplate().queryForObject("select * from income_101 where id = ?",
+        return getJdbcTemplate().queryForObject("select * from " + TABLE_NAME + " where id = ?",
                 new RefBookValueMapper(refBookDao.get(REF_BOOK_ID)),
                 recordId);
     }
 
     @Override
     public List<ReportPeriod> gerReportPeriods() {
-        String sql = "select distinct report_period_id from income_101";
+        String sql = "select distinct report_period_id from " + TABLE_NAME;
         return getJdbcTemplate().query(sql, new RowMapper<ReportPeriod>() {
             @Override
             public ReportPeriod mapRow(ResultSet rs, int rowNum) throws SQLException {

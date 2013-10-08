@@ -155,6 +155,11 @@ public class RefBookDaoTest {
 	}
 
 	@Test
+	public void testGetAllVisible() {
+		Assert.assertEquals(2, refBookDao.getAllVisible().size());
+	}
+
+	@Test
 	public void testGetRecordData(){
 		Map<String, RefBookValue> record = refBookDao.getRecordData(1L, 4L);
 		Assert.assertEquals(4, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
@@ -433,4 +438,5 @@ public class RefBookDaoTest {
         data = refBookDao.getRecords(rbId, delDate, new PagingParams(), null, null);
         Assert.assertTrue(data.size() == 0);
     }
+
 }

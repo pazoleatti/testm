@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
+
 import java.io.Serializable;
 
 /**
@@ -11,15 +13,15 @@ public class TableModel implements Serializable {
 
     private Long id;
     private String name;
-    private Type type;
+    private RefBookType refBookType;
 
     public TableModel() {
     }
 
-    public TableModel(Long id, String name, Type type) {
+    public TableModel(Long id, String name, RefBookType refBookType) {
         setId(id);
         setName(name);
-        setType(type);
+        setType(refBookType);
     }
 
     public String getName() {
@@ -30,12 +32,12 @@ public class TableModel implements Serializable {
         this.name = name;
     }
 
-    public Type getType() {
-        return type;
+    public RefBookType getType() {
+        return refBookType;
     }
 
-    public void setType(Type type) {
-        this.type = type;
+    public void setType(RefBookType refBookType) {
+        this.refBookType = refBookType;
     }
 
     public Long getId() {

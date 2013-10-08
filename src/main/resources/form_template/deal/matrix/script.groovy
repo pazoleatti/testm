@@ -357,7 +357,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     // row.f131, заполняется после графы 50
 
     // Графа 8
-    // row.f132, заполняется после графы 50
+    row.f132 = recNoId
 
     // Графа 9
     // row.f133, заполняется после графы 50
@@ -366,7 +366,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     // row.f134, заполняется после графы 50
 
     // Графа 11
-    // row.f135, заполняется после графы 45
+    row.f135 = recNoId
 
     // Графа 12
     row.similarDealGroup = recNoId
@@ -514,23 +514,18 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 376:
             row.income = srcRow.incomeBankSum
             break
-        case 382:
-            row.income = srcRow.bankIncomeSum
-            break
         case 379:
         case 387:
             row.income = srcRow.sum
             break
-        case 377:
-        case 375:
-        case 380:
-            row.income = 0
+        case 382:
+            row.income = srcRow.bankIncomeSum
             break
         case 381:
             row.income = srcRow.cost
             break
         case 383:
-            row.income = srcRow.priceFirstRub
+            row.income = srcRow.percentIncomeSum
             break
         case 384:
             row.income = srcRow.transactionSumRub
@@ -545,17 +540,15 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
         case 390:
         case 391:
-            row.income = srcRow.total
-            break
         case 392:
-            row.income = srcRow.cost
-            break
         case 393:
-            row.income = srcRow.totalNds
-            break
         case 394:
-            row.income = srcRow.total
+            row.income = srcRow.incomeSum
             break
+    }
+
+    if (row.income == null) {
+        row.income = 0
     }
 
     // Графа 20
@@ -578,6 +571,10 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 393:
             row.outcome = srcRow.consumptionSum
             break
+    }
+
+    if (row.outcome == null) {
+        row.outcome = 0
     }
 
     // Графа 23
@@ -1068,9 +1065,6 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         // Графа 7 (та же логика, что у графы 3)
         row.f131 = row.f121
 
-        // Графа 8 (та же логика, что у графы 3, но вместо "Да" не заполняется)
-        row.f132 = row.f121 == recNoId ? recNoId : null
-
         // Графа 9 (та же логика, что у графы 3)
         row.f133 = row.f121
 
@@ -1078,19 +1072,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         // Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
         // «Организации – участники контролируемых сделок» атрибут «Освобождена от налога на прибыль либо является резидентом Сколково» = 1,
         // то заполняется значением «1».    В ином случае не Не заполняется.
-        row.f134 = val.SKOLKOVO.numberValue == 1 ? recYesId : null
-    }
-
-    // Графа 11
-    if (row.dealDoneDate != null && row.organName != null) {
-        Calendar compareCalendar11 = Calendar.getInstance()
-        compareCalendar11.set(2014, 1, 1)
-
-        def val11 = getRefBookValue(9, row.organName)
-
-        if (row.dealDoneDate.before(compareCalendar11.getTime()) || (val11 != null && val11.OFFSHORE.referenceValue == recYesId)) {
-            row.f135 = recNoId
-        }
+        row.f134 = val.SKOLKOVO.numberValue == 1 ? recYesId : recNoId
     }
 
     if (row.organName != null) {
@@ -1098,7 +1080,6 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
         // Графа 48
         row.organInfo = organ.ORGANIZATION.referenceValue
-
 
         // Графа 51
         row.organINN = organ.INN_KIO.stringValue
