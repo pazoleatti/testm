@@ -630,7 +630,7 @@ def getSum(def form, def columnAlias) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['rowNumber', 'contractNumber', 'contractData', 'base', 'transactionDate',

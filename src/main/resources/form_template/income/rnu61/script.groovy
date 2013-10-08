@@ -63,7 +63,7 @@ def calc() {
     def data = getData(formData)
 
     Calendar periodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
-    def daysOfYear = (new GregorianCalendar()).isLeapYear(periodStartDate.get(Calendar.YEAR)) ? 365 : 366
+    def daysOfYear = (new GregorianCalendar()).isLeapYear(periodStartDate.get(Calendar.YEAR)) ? 366 : 365
 
     /*
 	 * Проверка обязательных полей.
@@ -330,7 +330,7 @@ def getNewRow(def alias, def totalColumns, def sums) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['rowNumber', 'fix', 'code', 'numberFirstRecord', 'numberFirstRecord', 'opy', 'operationDate',

@@ -635,7 +635,7 @@ def getSum(def columnAlias) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
     ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
