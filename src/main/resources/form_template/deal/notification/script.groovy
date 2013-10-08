@@ -305,9 +305,6 @@ List<String> getErrorDepartment(record) {
     if (record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«ИНН реорганизованного обособленного подразделения»")
     }
-    if (record.REORG_KPP.stringValue == null || record.REORG_KPP.stringValue.isEmpty()) {
-        errorList.add("«КПП реорганизованного обособленного подразделения»")
-    }
     if (record.SIGNATORY_ID.referenceValue == null) {
         errorList.add("«Признак лица подписавшего документ»")
     }
@@ -331,9 +328,6 @@ List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
     if (record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.01')) {
         errorList.add("«Версия формата»")
-    }
-    if (record.APP_VERSION.stringValue == null || !record.APP_VERSION.stringValue.equals('XLR_FNP_TAXCOM_5_01')) {
-        errorList.add("«Версия программы, с помощью которой сформирован файл»")
     }
 
     errorList
