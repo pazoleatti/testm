@@ -3,13 +3,6 @@
  * Форма "(РНУ-55) Регистр налогового учёта процентного дохода по процентным векселям сторонних эмитентов".
  * formTemplateId=348
  *
- * @version 59
- *
- * TODO:
- *      - нет уcловии в проверках соответствия НСИ (потому что нету справочников)
- *		- уточнить про логические проверки 5, 6, проверять на незаполнение если какие-то суммы не введены
- *		- уточнить про логическую проверку 8 (проверять с даты графы 3 до начала отчетного периода?)
- *
  * @author rtimerbaev
  */
 
@@ -17,40 +10,40 @@ import java.text.SimpleDateFormat
 import com.aplana.sbrf.taxaccounting.model.DataRow
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         checkCreation()
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         logicalCheck(true)
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         calc()
         logicalCheck(false)
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         addNewRow()
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
 // проверка при "подготовить"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:
         checkOnPrepareOrAcceptance('Подготовка')
         break
 // проверка при "принять"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
         checkOnPrepareOrAcceptance('Принятие')
         break
 // проверка при "вернуть из принята в подготовлена"
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
+    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
         checkOnCancelAcceptance()
         break
 // после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
         acceptance()
         break
 // обобщить
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         consolidation()
         calc()
         logicalCheck(false)
@@ -79,16 +72,13 @@ def getEditColumns() {
             'percentInCurrency']
 }
 
-/**
- * Добавить новую строку.
- */
 void addNewRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
-    row.keySet().each{
+    def index = currentDataRow != null ? (currentDataRow.getIndex() + 1) : (size == 0 ? 1 : (size + 1))
+    row.keySet().each {
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     getEditColumns().each {
@@ -98,30 +88,25 @@ void addNewRow() {
     dataRowHelper.insert(row, index)
 }
 
-/**
- * Удалить строку.
- */
 void deleteRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.delete(currentDataRow)
-    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 // Ресчет графы 9
-def calcPercentInCurrency(def row) {
+def calc9(def row) {
     if (row.percentInCurrency != null) {
         rate = 1
-        def curCode = getCurrencyCode(row.currency)
-        if (!curCode.equals('810')) {
+        if (!isRubleCurrency(row.currency)) {
             rate = getRate(row.implementationDate, row.currency)
         }
         return row.percentInCurrency * rate
-    } else{
+    } else {
         return null
     }
 }
 // Ресчет графы 10
-def calcSumIncomeinCurrency(def row, def startDate, def endDate, def daysInYear) {
+def calc10(def row, def startDate, def endDate, def daysInYear) {
     def tmp = 0
     if (row.percentInCurrency == null) {
         countsDays = (row.buyDate >= startDate ?
@@ -129,14 +114,14 @@ def calcSumIncomeinCurrency(def row, def startDate, def endDate, def daysInYear)
         if (countsDays != 0) {
             tmp = row.nominal * (row.percent / 100) * (countsDays / daysInYear)
         }
-    } else  {
+    } else {
         tmp = row.percentInCurrency - getCalcPrevColumn10(row.bill, 'sumIncomeinCurrency')
     }
     return round(tmp, 2)
 }
 
 // Ресчет графы 11
-def calcSumIncomeinRuble(def row, def endDate) {
+def calc11(def row, def endDate) {
     def tmp = 0
     if (row.percentInCurrency == null) {
         if (row.implementationDate != null) {
@@ -197,14 +182,13 @@ void calc() {
         row.number = ++index
 
         // графа 9
-        row.percentInRuble = calcPercentInCurrency(row)
-
+        row.percentInRuble = calc9(row)
 
         // графа 10
-        row.sumIncomeinCurrency = calcSumIncomeinCurrency( row, reportDateStart, reportDate, daysInYear)
+        row.sumIncomeinCurrency = calc10(row, reportDateStart, reportDate, daysInYear)
 
         // графа 11
-        row.sumIncomeinRuble = calcSumIncomeinRuble(row,reportDate)
+        row.sumIncomeinRuble = calc11(row, reportDate)
 
     }
     dataRowHelper.update(dataRows);
@@ -225,7 +209,7 @@ void calc() {
     }
     totalRow.percentInRuble = sumPercent
     totalRow.sumIncomeinRuble = sumIncome
-    dataRowHelper.insert(totalRow, index+1)
+    dataRowHelper.insert(totalRow, index + 1)
 
 }
 
@@ -267,6 +251,9 @@ def logicalCheck(def useLog) {
         /** Отчетная дата. */
         def reportDate = getReportDate()
 
+        // Векселя
+        def List<String> billsList = new ArrayList<String>()
+
         def cell
         def hasError
 
@@ -300,37 +287,26 @@ def logicalCheck(def useLog) {
             }
             i = i + 1
 
-            // 5. Проверка на нулевые значения (графа 8)
-            // TODO (Ramil Timerbaev)
-            if (row.percentInCurrency != null && false) {
-                logger.error('Поле ”<Наименование поля>” при отсутствии сумм не заполняется!')
+            // 5. Проверка на уникальность векселя
+            if (billsList.contains(row.bill)) {
+                logger.error("Повторяющееся значения в графе «Вексель»")
                 return false
+            } else {
+                billsList.add(row.bill)
             }
 
-            // 6. Проверка на нулевые значения (графа 9)
-            // TODO (Ramil Timerbaev)
-            if (row.percentInRuble != null && false) {
-                logger.error('Поле ”<Наименование поля>” при отсутствии сумм не заполняется!')
-                return false
-            }
 
-            // 7. Проверка на нулевые значения (графа 8, 9, 10, 11)
-            if (row.percentInCurrency == 0 &&
-                    row.percentInRuble == 0 &&
-                    row.sumIncomeinCurrency == 0 &&
-                    row.sumIncomeinRuble == 0) {
-                logger.error('Все суммы по операции нулевые!')
-                return false
-            }
+            // 6. Проверка корректности значения в «Графе 3»
+            // TODO
 
-            // 8. Проверка на наличие данных предыдущих отчетных периодов для заполнения графы 10 и графы 11
+            // 7. Проверка на наличие данных предыдущих отчетных периодов для заполнения графы 10 и графы 11
             // TODO (Ramil Timerbaev)
             if (false) {
                 logger.error("Экземпляр за период(ы) <Дата начала отчетного периода1> - <Дата окончания отчетного периода1>, <Дата начала отчетного периода N> - <Дата окончания отчетного периода N> не существует (отсутствуют первичные данные для расчёта)!")
-                false
+                return false
             }
 
-            // 9. Проверка на неотрицательные значения
+            // 8. Проверка на неотрицательные значения
             hasError = false
             ['percentInCurrency', 'percentInRuble'].each {
                 cell = row.getCell(it)
@@ -345,22 +321,21 @@ def logicalCheck(def useLog) {
             }
             hasError = false
 
-            // Арифметическая проверка графы 9
-            if (row.percentInCurrency != calcPercentInCurrency(row)) {
+            // 9. Арифметическая проверка графы 9-11
+            if (row.percentInCurrency != calc9(row)) {
                 logger.warn('Неверно рассчитана графа «Фактически поступившая сумма процентов в рублях»!')
+                return false
             }
-
-            // 10. Арифметическая проверка графы 10
-            if (row.sumIncomeinCurrency != calcSumIncomeinCurrency( row, a, reportDate, daysInYear)) {
+            if (row.sumIncomeinCurrency != calc10(row, a, reportDate, daysInYear)) {
                 logger.warn('Неверно рассчитана графа «Сумма начисленного процентного дохода за отчётный период в валюте»!')
+                return false
             }
-
-            // 11. Арифметическая проверка графы 11
-            if (row.sumIncomeinRuble != calcSumIncomeinRuble(row,reportDate)) {
+            if (row.sumIncomeinRuble != calc11(row, reportDate)) {
                 logger.warn('Неверно рассчитана графа «Сумма начисленного процентного дохода за отчётный период в рублях по курсу Банка России»!')
+                return false
             }
 
-            // 12. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
+            // 10. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
             totalColumns.each { alias ->
                 if (totalSums[alias] == null) {
                     totalSums[alias] = 0
@@ -369,16 +344,14 @@ def logicalCheck(def useLog) {
             }
 
             // Проверки соответствия НСИ.
-            // 1. Проверка кода валюты со справочным (графа 4)
+            // Проверка кода валюты со справочным (графа 4)
             if (!checkNSI(row, "currency", "Код валюты", 15)) {
                 return false
             }
         }
 
-        if (totalRow!=null) {
-           // def totalRow = dataRowHelper.getDataRow(dataRowHelper.getAllCached(),'total')
-
-            // 12. Проверка итогового значений по всей форме (графа 9, 11)
+        if (totalRow != null) {
+            // 10. Проверка итогового значений по всей форме (графа 9, 11)
             for (def alias : totalColumns) {
                 if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
                     logger.error('Итоговые значения рассчитаны неверно!')
@@ -394,11 +367,7 @@ def logicalCheck(def useLog) {
  * Проверка валюты на рубли
  */
 def isRubleCurrency(def currencyCode) {
-    return  refBookService.getStringValue(15,currencyCode,'CODE')=='810'
-}
-
-def getCurrencyCode(def currencyCode) {
-    return  refBookService.getStringValue(15,currencyCode,'CODE')
+    return refBookService.getStringValue(15, currencyCode, 'CODE') == '810'
 }
 
 /**
@@ -431,25 +400,23 @@ void checkOnPrepareOrAcceptance(def value) {
     }
 }
 
-/**
- * Консолидация.
- */
+// Консолидация
 void consolidation() {
     // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
-
+    def rows = new LinkedList<DataRow<Cell>>()
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
+                source.getDataRows().each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
+                        rows.add(row)
                     }
                 }
             }
         }
     }
+    formDataService.getDataRowHelper(formData).save(rows)
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
@@ -590,7 +557,7 @@ def getValue(def value) {
  * Получить курс банка России на указанную дату.
  */
 def getRate(def Date date, def value) {
-    def res = refBookFactory.getDataProvider(22).getRecords(date!=null ? date : new Date(), null, "CODE_NUMBER = $value", null);
+    def res = refBookFactory.getDataProvider(22).getRecords(date != null ? date : new Date(), null, "CODE_NUMBER = $value", null);
     return res.getRecords().get(0).RATE.numberValue
 }
 
