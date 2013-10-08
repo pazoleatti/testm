@@ -46,13 +46,14 @@ LIKE	: ('L'|'l') ('I'|'i') ('K'|'k') ('E'|'e');
 
 fragment DIGIT : '0'..'9' ;
 
-IS_NULL : ('I'|'i')('S'|'s') ' '+ ('N'|'n')('U'|'u')('L'|'l')('L'|'l');
+
 NUMBER : DIGIT+ | FLOAT ;
 ALIAS :	('a'..'z'|'A'..'Z'|'_')+  ('a'..'z'|'A'..'Z'|DIGIT|'_')*;
 
 FLOAT	: DIGIT+ '.' DIGIT+;
 
-STRING :  '\'' .* '\'';
+STRING :  '\'' (~('\'') | '\\\'')* '\'';
+IS_NULL : ('I'|'i')('S'|'s') ' '+ ('N'|'n')('U'|'u')('L'|'l')('L'|'l');
 
 fragment
 HEX_DIGIT : ('0'..'9'|'a'..'f'|'A'..'F') ;
