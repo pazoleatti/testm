@@ -23,14 +23,6 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
-    <!--  MyBatis configuration and DAOs-->
-    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-        <property name="dataSource" ref="dataSource" />
-    </bean>
-    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="com.aplana.sbrf.taxaccounting.dao.script.mapper" />
-    </bean>
-
     <!-- Встроенная тестовая база данных HSQLDB -->
     <jdbc:embedded-database id="dataSource" type="HSQL"/>
 
