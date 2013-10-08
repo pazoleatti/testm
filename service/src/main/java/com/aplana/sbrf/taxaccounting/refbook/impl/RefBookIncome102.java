@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookIncome102DaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -24,9 +25,10 @@ import java.util.*;
 @Service("refBookIncome102")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RefBookIncome102 implements RefBookDataProvider {
-    public final static long REF_BOOK_ID = 52L;
 
-    @Autowired
+    public static final Long REF_BOOK_ID = RefBookIncome102Dao.REF_BOOK_ID;
+
+	@Autowired
     RefBookDao rbDao;
 
     @Autowired
@@ -44,7 +46,7 @@ public class RefBookIncome102 implements RefBookDataProvider {
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return null;  // Этот метод нужен для иерархического справочника и тут он не нужен (Ф. Марат)
+		throw new UnsupportedOperationException();
     }
 
     @Override
@@ -70,7 +72,7 @@ public class RefBookIncome102 implements RefBookDataProvider {
 
     @Override
     public void insertRecords(Date version, List<Map<String, RefBookValue>> records) {
-        // Не требуется
+		throw new UnsupportedOperationException();
     }
 
     @Override
@@ -80,12 +82,12 @@ public class RefBookIncome102 implements RefBookDataProvider {
 
     @Override
     public void deleteRecords(Date version, List<Long> recordIds) {
-        // Не требуется
+		throw new UnsupportedOperationException();
     }
 
     @Override
     public void deleteAllRecords(Date version) {
-        // Не требуется
+		throw new UnsupportedOperationException();
     }
 
     @Override

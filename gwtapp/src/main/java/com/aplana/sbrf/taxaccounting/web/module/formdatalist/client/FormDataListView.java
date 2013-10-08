@@ -62,6 +62,9 @@ public class FormDataListView extends
 
 	@UiField
 	Label titleDesc;
+
+	@UiField
+	Label formHeader;
 	
 	private AsyncDataProvider<FormDataSearchResultItem> dataProvider = new  AsyncDataProvider<FormDataSearchResultItem>() {
 		@Override
@@ -212,6 +215,11 @@ public class FormDataListView extends
 	@Override
 	public void updateTitle(String title){
 		titleDesc.setText(title);
+	}
+
+	@Override
+	public void updateHeader(String title){
+		formHeader.setText(title);
 	}
 
 	private Header<String> getHeader(final String columnName){

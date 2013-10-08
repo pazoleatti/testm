@@ -52,11 +52,11 @@ a, a:visited, a:hover {
 
 .gwt-Button[disabled] {
     cursor: default;
-    color: #888;
+    color: #060;
 }
 
 .gwt-Button[disabled]:hover {
-    border: 1px outset #ccc;
+    border: 1px outset #00940C;
 }
 
 .gwt-SubmitButton {

@@ -19,12 +19,12 @@ public class FilterTreeParser extends Parser {
 		new PredictionContextCache();
 	public static final int
 		T__1=1, T__0=2, LINK_TYPE_OR=3, LINK_TYPE_AND=4, LOWER=5, LENGTH=6, EQUAL=7, 
-		NOTEQUAL=8, MORE=9, LESS=10, LIKE=11, IS_NULL=12, NUMBER=13, ALIAS=14, 
-		FLOAT=15, STRING=16, SPACE=17;
+		NOTEQUAL=8, MORE=9, LESS=10, LIKE=11, NUMBER=12, ALIAS=13, FLOAT=14, STRING=15, 
+		IS_NULL=16, SPACE=17;
 	public static final String[] tokenNames = {
 		"<INVALID>", "')'", "'('", "LINK_TYPE_OR", "LINK_TYPE_AND", "'LOWER'", 
-		"'LENGTH'", "'='", "'!='", "'>'", "'<'", "LIKE", "IS_NULL", "NUMBER", 
-		"ALIAS", "FLOAT", "STRING", "' '"
+		"'LENGTH'", "'='", "'!='", "'>'", "'<'", "LIKE", "NUMBER", "ALIAS", "FLOAT", 
+		"STRING", "IS_NULL", "' '"
 	};
 	public static final int
 		RULE_query = 0, RULE_condition = 1, RULE_link_type = 2, RULE_expr = 3, 
@@ -68,7 +68,7 @@ public class FilterTreeParser extends Parser {
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof FilterTreeListener) ((FilterTreeListener)listener).exitQuery(this);
+			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).exitQuery(this);
 		}
 	}
 
@@ -290,7 +290,7 @@ public class FilterTreeParser extends Parser {
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).exitStandartExpr(this);
+			if ( listener instanceof FilterTreeListener) ((FilterTreeListener)listener).exitStandartExpr(this);
 		}
 	}
 	public static class IsNullExprContext extends ExprContext {
@@ -629,8 +629,8 @@ public class FilterTreeParser extends Parser {
 		"\2\6\2\30\n\2\r\2\16\2\31\3\3\5\3\35\n\3\3\3\3\3\5\3!\n\3\3\3\3\3\6\3"+
 		"%\n\3\r\3\16\3&\3\3\3\3\5\3+\n\3\3\4\3\4\3\5\3\5\3\5\3\5\3\5\3\5\3\5\5"+
 		"\5\66\n\5\3\6\3\6\5\6:\n\6\3\7\3\7\3\b\3\b\3\b\3\b\3\b\3\t\3\t\3\n\3\n"+
-		"\3\13\3\13\3\13\2\f\2\4\6\b\n\f\16\20\22\24\2\7\3\2\5\6\4\2\17\20\22\22"+
-		"\3\2\7\b\4\2\20\20\22\22\3\2\t\rE\2\27\3\2\2\2\4*\3\2\2\2\6,\3\2\2\2\b"+
+		"\3\13\3\13\3\13\2\f\2\4\6\b\n\f\16\20\22\24\2\7\3\2\5\6\4\2\16\17\21\21"+
+		"\3\2\7\b\4\2\17\17\21\21\3\2\t\rE\2\27\3\2\2\2\4*\3\2\2\2\6,\3\2\2\2\b"+
 		"\65\3\2\2\2\n9\3\2\2\2\f;\3\2\2\2\16=\3\2\2\2\20B\3\2\2\2\22D\3\2\2\2"+
 		"\24F\3\2\2\2\26\30\5\4\3\2\27\26\3\2\2\2\30\31\3\2\2\2\31\27\3\2\2\2\31"+
 		"\32\3\2\2\2\32\3\3\2\2\2\33\35\5\6\4\2\34\33\3\2\2\2\34\35\3\2\2\2\35"+
@@ -638,7 +638,7 @@ public class FilterTreeParser extends Parser {
 		"$\7\4\2\2#%\5\4\3\2$#\3\2\2\2%&\3\2\2\2&$\3\2\2\2&\'\3\2\2\2\'(\3\2\2"+
 		"\2()\7\3\2\2)+\3\2\2\2*\34\3\2\2\2* \3\2\2\2+\5\3\2\2\2,-\t\2\2\2-\7\3"+
 		"\2\2\2./\5\n\6\2/\60\5\24\13\2\60\61\5\n\6\2\61\66\3\2\2\2\62\63\5\f\7"+
-		"\2\63\64\7\16\2\2\64\66\3\2\2\2\65.\3\2\2\2\65\62\3\2\2\2\66\t\3\2\2\2"+
+		"\2\63\64\7\22\2\2\64\66\3\2\2\2\65.\3\2\2\2\65\62\3\2\2\2\66\t\3\2\2\2"+
 		"\67:\5\16\b\28:\5\f\7\29\67\3\2\2\298\3\2\2\2:\13\3\2\2\2;<\t\3\2\2<\r"+
 		"\3\2\2\2=>\5\20\t\2>?\7\4\2\2?@\5\22\n\2@A\7\3\2\2A\17\3\2\2\2BC\t\4\2"+
 		"\2C\21\3\2\2\2DE\t\5\2\2E\23\3\2\2\2FG\t\6\2\2G\25\3\2\2\2\t\31\34 &*"+

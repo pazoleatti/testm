@@ -4,7 +4,7 @@
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.rows" value="false"/>
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1851"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="R1A" uuid="c5eaa148-79ec-437d-bf0d-5510b3233345">
 		<queryString language="xPath">
 			<![CDATA[/Файл/Документ/УвКонтрСд/СвКонтрСд]]>
@@ -214,7 +214,7 @@
 			<variableExpression><![CDATA[$F{НомПорСд}==null?
 "------"
 :
-($F{НомПорСд}+"------").substring( 0, 6 )]]></variableExpression>
+($F{НомПорСд}.replace( " ", "-" )+"------").substring( 0, 6 )]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="KodNameSd" class="java.lang.String">
@@ -277,35 +277,35 @@
 			<variableExpression><![CDATA[$F{НаимПредСд}==null?
 "--------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
-($F{НаимПредСд}+"--------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,152)]]></variableExpression>
+($F{НаимПредСд}.replace( " ", "-" )+"--------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,152)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="TNVED" class="java.lang.String">
 			<variableExpression><![CDATA[$F{ТНВЭД}==null?
 "----------"
 :
-($F{ТНВЭД}+"----------").substring(0,10)]]></variableExpression>
+($F{ТНВЭД}.replace( " ", "-" )+"----------").substring(0,10)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="OKP" class="java.lang.String">
 			<variableExpression><![CDATA[$F{ОКП}==null?
 "------"
 :
-($F{ОКП}+"------").substring(0,6)]]></variableExpression>
+($F{ОКП}.replace( " ", "-" )+"------").substring(0,6)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="OKVED" class="java.lang.String">
 			<variableExpression><![CDATA[$F{ОКВЭД}==null?
 "--------"
 :
-($F{ОКВЭД}+"--------").substring(0,8)]]></variableExpression>
+($F{ОКВЭД}.replace( " ", "-" )+"--------").substring(0,8)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="NomerUchSd" class="java.lang.String">
 			<variableExpression><![CDATA[$F{НомУчСд}==null?
 "--------"
 :
-($F{НомУчСд}+"----").substring(0,4)]]></variableExpression>
+($F{НомУчСд}.replace( " ", "-" )+"----").substring(0,4)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="NomDog" class="java.lang.String">
@@ -319,7 +319,7 @@
 			<variableExpression><![CDATA[$F{ОКСМ}==null?
 "---"
 :
-($F{ОКСМ}+"---").substring(0,3)]]></variableExpression>
+($F{ОКСМ}.replace( " ", "-" )+"---").substring(0,3)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="DateDog" class="java.lang.String">
@@ -333,70 +333,70 @@
 			<variableExpression><![CDATA[$F{ОКСМ2}==null?
 "---"
 :
-($F{ОКСМ2}+"---").substring(0,3)]]></variableExpression>
+($F{ОКСМ2}.replace( " ", "-" )+"---").substring(0,3)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="OKSM2" class="java.lang.String">
 			<variableExpression><![CDATA[$F{ОКСМ3}==null?
 "---"
 :
-($F{ОКСМ3}+"---").substring(0,3)]]></variableExpression>
+($F{ОКСМ3}.replace( " ", "-" )+"---").substring(0,3)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="region1" class="java.lang.String">
 			<variableExpression><![CDATA[$F{КодРегион}==null?
 "--"
 :
-($F{КодРегион}+"--").substring(0,2)]]></variableExpression>
+($F{КодРегион}.replace( " ", "-" )+"--").substring(0,2)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="region2" class="java.lang.String">
 			<variableExpression><![CDATA[$F{КодРегионСов}==null?
 "--"
 :
-($F{КодРегионСов}+"--").substring(0,2)]]></variableExpression>
+($F{КодРегионСов}.replace( " ", "-" )+"--").substring(0,2)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="gorod1" class="java.lang.String">
 			<variableExpression><![CDATA[$F{Город}==null?
 "------------------------------"
 :
-($F{Город}+"------------------------------").substring(0,30)]]></variableExpression>
+($F{Город}.replace( " ", "-" )+"------------------------------").substring(0,30)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="gorod2" class="java.lang.String">
 			<variableExpression><![CDATA[$F{ГородСов}==null?
 "------------------------------"
 :
-($F{ГородСов}+"------------------------------").substring(0,30)]]></variableExpression>
+($F{ГородСов}.replace( " ", "-" )+"------------------------------").substring(0,30)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="NasPunkt1" class="java.lang.String">
 			<variableExpression><![CDATA[$F{НаселПункт}==null?
 "------------------------------"
 :
-($F{НаселПункт}+"------------------------------").substring(0,30)]]></variableExpression>
+($F{НаселПункт}.replace( " ", "-" )+"------------------------------").substring(0,30)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="NasPunkt2" class="java.lang.String">
 			<variableExpression><![CDATA[$F{НаселПунктСов}==null?
 "------------------------------"
 :
-($F{НаселПунктСов}+"------------------------------").substring(0,30)]]></variableExpression>
+($F{НаселПунктСов}.replace( " ", "-" )+"------------------------------").substring(0,30)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="KodUslPost" class="java.lang.String">
 			<variableExpression><![CDATA[$F{КодУсловПост}==null?
 "---"
 :
-($F{КодУсловПост}+"---").substring(0,3)]]></variableExpression>
+($F{КодУсловПост}.replace( " ", "-" )+"---").substring(0,3)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="OKEI" class="java.lang.String">
 			<variableExpression><![CDATA[$F{ОКЕИ}==null?
 "---"
 :
-($F{ОКЕИ}+"---").substring(0,3)]]></variableExpression>
+($F{ОКЕИ}.replace( " ", "-" )+"---").substring(0,3)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="kolvo" class="java.lang.String">
@@ -431,49 +431,49 @@
 			<variableExpression><![CDATA[$F{НаимОрг}==null?
 "----------------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
-($F{НаимОрг}+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
+($F{НаимОрг}.replace( " ", "-" )+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="OKSM_R2" class="java.lang.String">
 			<variableExpression><![CDATA[$F{ОКСМ4}==null?
 "---"
 :
-($F{ОКСМ4}+"---").substring(0,3)]]></variableExpression>
+($F{ОКСМ4}.replace( " ", "-" )+"---").substring(0,3)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="INN_R2" class="java.lang.String">
 			<variableExpression><![CDATA[$F{ИННЮЛ}==null?
 "----------"
 :
-($F{ИННЮЛ}+"----------").substring(0,10)]]></variableExpression>
+($F{ИННЮЛ}.replace( " ", "-" )+"----------").substring(0,10)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="KPP" class="java.lang.String">
 			<variableExpression><![CDATA[$F{КПП}==null?
 "---------"
 :
-($F{КПП}+"---------").substring(0,9)]]></variableExpression>
+($F{КПП}.replace( " ", "-" )+"---------").substring(0,9)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="RegNomIn" class="java.lang.String">
 			<variableExpression><![CDATA[$F{РегНомИн}==null?
 "--------------------------------------------------"
 :
-($F{РегНомИн}+"--------------------------------------------------").substring(0,50)]]></variableExpression>
+($F{РегНомИн}.replace( " ", "-" )+"--------------------------------------------------").substring(0,50)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="KodNalIn" class="java.lang.String">
 			<variableExpression><![CDATA[$F{КодНПРег}==null?
 "--------------------------------------------------"
 :
-($F{КодНПРег}+"--------------------------------------------------").substring(0,50)]]></variableExpression>
+($F{КодНПРег}.replace( " ", "-" )+"--------------------------------------------------").substring(0,50)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<variable name="AddressIn" class="java.lang.String">
 			<variableExpression><![CDATA[$F{АдрИнТекст}==null?
 "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
-($F{АдрИнТекст}+"------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,240)]]></variableExpression>
+($F{АдрИнТекст}.replace( " ", "-" )+"------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,240)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 	</subDataset>
@@ -7443,15 +7443,6 @@ $F{ОКАТО}]]></variableExpression>
 				</textElement>
 				<text><![CDATA[ (подпись)]]></text>
 			</staticText>
-			<staticText>
-				<reportElement uuid="ec5b678d-7268-48c5-b63a-a3d963dd2fce" x="1" y="58" width="596" height="20" isPrintWhenDetailOverflows="true">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.2"/>
-				</reportElement>
-				<textElement textAlignment="Center" markup="html">
-					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
-				</textElement>
-				<text><![CDATA[Фамилия  _______________________________________________________________________ И. ____ О.<SUP/>1</SUP> ____]]></text>
-			</staticText>
 			<componentElement>
 				<reportElement uuid="5ef79cc5-5936-4433-b139-ded47ce30d2a" x="0" y="78" width="595" height="734"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
@@ -7815,7 +7806,7 @@ $F{ОКАТО}]]></variableExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{Осн121}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$F{Осн121} == null || $F{Осн121}.equals("") ? "-" : $F{Осн121}]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="529c4c62-a19c-4fb3-990f-bdd22ba67960" x="102" y="145" width="15" height="20"/>
@@ -7829,7 +7820,7 @@ $F{ОКАТО}]]></variableExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{Осн122}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$F{Осн122} == null || $F{Осн122}.equals("") ? "-" : $F{Осн122}]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="20486643-a1d4-4bf3-b0d8-8ec1455560a3" x="162" y="145" width="15" height="20"/>
@@ -7843,7 +7834,7 @@ $F{ОКАТО}]]></variableExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{Осн123}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$F{Осн123} == null || $F{Осн123}.equals("") ? "-" : $F{Осн123}]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="a77b2333-abfc-4e01-be6f-b5969b770c88" x="222" y="145" width="15" height="20"/>
@@ -7857,7 +7848,7 @@ $F{ОКАТО}]]></variableExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{Осн124}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$F{Осн124} == null || $F{Осн124}.equals("") ? "-" : $F{Осн124}]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="5ccae10b-e7bb-40fd-9fef-a79cc78f30f2" x="42" y="207" width="15" height="20"/>
@@ -7871,7 +7862,7 @@ $F{ОКАТО}]]></variableExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{Осн131}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$F{Осн131} == null || $F{Осн131}.equals("") ? "-" : $F{Осн131}]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="cd347436-37e5-4807-90a9-1a89dfc24c33" x="102" y="207" width="15" height="20"/>
@@ -7885,7 +7876,7 @@ $F{ОКАТО}]]></variableExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{Осн132}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$F{Осн132} == null || $F{Осн132}.equals("") ? "-" : $F{Осн132}]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="de307351-bf20-4a89-b8e8-bc72f189ad74" x="162" y="207" width="15" height="20"/>
@@ -7899,7 +7890,7 @@ $F{ОКАТО}]]></variableExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{Осн133}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$F{Осн133} == null || $F{Осн133}.equals("") ? "-" : $F{Осн133}]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="372daa5f-9fa1-45d9-aa5b-8bbb900dcea2" x="222" y="207" width="15" height="20"/>
@@ -7913,7 +7904,7 @@ $F{ОКАТО}]]></variableExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{Осн134}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$F{Осн134} == null || $F{Осн134}.equals("") ? "-" : $F{Осн134}]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="d8d0f661-cb1d-42e1-baf7-bd1ac9952a20" x="282" y="207" width="15" height="20"/>
@@ -7927,7 +7918,7 @@ $F{ОКАТО}]]></variableExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{Осн135}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$F{Осн135} == null || $F{Осн135}.equals("") ? "-" : $F{Осн135}]]></textFieldExpression>
 						</textField>
 						<textField>
 							<reportElement uuid="7e318695-1edb-4b71-9626-03eef1e482f7" x="33" y="506" width="15" height="20"/>
@@ -9182,6 +9173,64 @@ $F{Ист259}]]></textFieldExpression>
 					</jr:listContents>
 				</jr:list>
 			</componentElement>
+			<staticText>
+				<reportElement uuid="cb1aba15-c039-4ddd-a22f-befaedc9eff7" x="1" y="53" width="63" height="20" isPrintWhenDetailOverflows="true">
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.2"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" markup="html">
+					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+					<paragraph rightIndent="5"/>
+				</textElement>
+				<text><![CDATA[Фамилия]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="91baeb96-55ce-4208-934f-25664d3eeab7" x="64" y="53" width="375" height="20" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Фамилия}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="03b502ee-adc8-493d-8481-a9a728f60389" x="439" y="53" width="20" height="20" isPrintWhenDetailOverflows="true">
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.2"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Bottom" markup="html">
+					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[И.]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="f2fa1d6d-d64d-4972-b4cc-ecb2989c5073" x="459" y="53" width="25" height="20" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Имя} == null || $F{Имя}.equals("") ? "" : $F{Имя}.charAt(0)]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="15565d4b-d183-4504-b8b3-76a925208168" x="484" y="53" width="25" height="20" isPrintWhenDetailOverflows="true">
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.2"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Bottom" markup="html">
+					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[О.<SUP/>1</SUP>]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="d1846d89-8af1-4fcc-ae69-724b090af803" x="509" y="53" width="25" height="20" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Отчество} == null || $F{Отчество}.equals("") ? "" : $F{Отчество}.charAt(0)]]></textFieldExpression>
+			</textField>
 		</band>
 		<band height="842">
 			<textField>
@@ -9517,15 +9566,6 @@ $F{Ист259}]]></textFieldExpression>
 				<reportElement uuid="a0456715-4a09-4769-bd37-383bc76fedd3" x="14" y="2" width="115" height="48" isPrintWhenDetailOverflows="true"/>
 				<imageExpression><![CDATA[new java.io.StringBufferInputStream( new org.w3c.tools.codec.Base64Decoder($V{BarcodeImage3}).processString() )]]></imageExpression>
 			</image>
-			<staticText>
-				<reportElement uuid="fad579c3-d491-4554-aaa7-7f137ce928f9" x="-1" y="63" width="596" height="20" isPrintWhenDetailOverflows="true">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.3"/>
-				</reportElement>
-				<textElement textAlignment="Center" markup="html">
-					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
-				</textElement>
-				<text><![CDATA[Фамилия  _______________________________________________________________________ И. ____ О.<SUP/>1</SUP> ____]]></text>
-			</staticText>
 			<componentElement>
 				<reportElement uuid="259925c7-ed3d-4f61-89df-cdbdb81440e0" x="0" y="83" width="595" height="734"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
@@ -14923,6 +14963,64 @@ $F{Ист259}]]></textFieldExpression>
 					</jr:listContents>
 				</jr:list>
 			</componentElement>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="b2617948-508b-40c7-98ae-b117d62231b6" x="64" y="53" width="375" height="20" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Фамилия}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="c84551c7-cd4c-44c5-ba38-57e98ca3d558" x="459" y="53" width="25" height="20" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Имя} == null || $F{Имя}.equals("") ? "" : $F{Имя}.charAt(0)]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="75112a28-ec36-420f-a104-da5100aea03f" x="1" y="53" width="63" height="20" isPrintWhenDetailOverflows="true">
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.2"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" markup="html">
+					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+					<paragraph rightIndent="5"/>
+				</textElement>
+				<text><![CDATA[Фамилия]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="e91e6087-fb69-4faa-a98d-d9c8e362bf27" x="509" y="53" width="25" height="20" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Отчество} == null || $F{Отчество}.equals("") ? "" : $F{Отчество}.charAt(0)]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="ebaf1cbd-5616-4831-956c-020410a43cbd" x="484" y="53" width="25" height="20" isPrintWhenDetailOverflows="true">
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.2"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Bottom" markup="html">
+					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[О.<SUP/>1</SUP>]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="744ab8cf-791a-49f4-a0cf-488c99ed97b6" x="439" y="53" width="20" height="20" isPrintWhenDetailOverflows="true">
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.2"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Bottom" markup="html">
+					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[И.]]></text>
+			</staticText>
 		</band>
 		<band height="842">
 			<textField>
@@ -15258,15 +15356,6 @@ $F{Ист259}]]></textFieldExpression>
 				<reportElement uuid="c38d0fa1-587a-48d6-a532-6468c1f20e96" x="14" y="2" width="115" height="48" isPrintWhenDetailOverflows="true"/>
 				<imageExpression><![CDATA[new java.io.StringBufferInputStream( new org.w3c.tools.codec.Base64Decoder($V{BarcodeImage4}).processString() )]]></imageExpression>
 			</image>
-			<staticText>
-				<reportElement uuid="2d5ee85e-3486-4574-81c3-1f76e86262ad" x="-1" y="63" width="596" height="20">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.4"/>
-				</reportElement>
-				<textElement textAlignment="Center" markup="html">
-					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
-				</textElement>
-				<text><![CDATA[Фамилия  _______________________________________________________________________ И. ____ О.<SUP/>1</SUP> ____]]></text>
-			</staticText>
 			<componentElement>
 				<reportElement uuid="9ee06dc9-3194-40de-94d0-036c7c0a9594" x="0" y="83" width="595" height="730"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
@@ -20828,6 +20917,64 @@ $F{Ист259}]]></textFieldExpression>
 					</jr:listContents>
 				</jr:list>
 			</componentElement>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="2f292719-082d-4195-88cd-6be91d7f4b14" x="64" y="53" width="375" height="20" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Фамилия}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="dfc9633a-37ab-42b7-950c-74da608d8e6c" x="459" y="53" width="25" height="20" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Имя} == null || $F{Имя}.equals("") ? "" : $F{Имя}.charAt(0)]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="0c576234-fec0-463c-bf2d-ce59af028f7d" x="1" y="53" width="63" height="20" isPrintWhenDetailOverflows="true">
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.2"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" markup="html">
+					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+					<paragraph rightIndent="5"/>
+				</textElement>
+				<text><![CDATA[Фамилия]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="c2b2df3c-b307-49ec-87c7-7027a82eb5de" x="509" y="53" width="25" height="20" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Отчество} == null || $F{Отчество}.equals("") ? "" : $F{Отчество}.charAt(0)]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="0ebc9a4a-5ac5-4cfe-b7ef-bfb6079f1a30" x="484" y="53" width="25" height="20" isPrintWhenDetailOverflows="true">
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.2"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Bottom" markup="html">
+					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[О.<SUP/>1</SUP>]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="91ef0c7f-59db-4c71-990e-d48969a339a9" x="439" y="53" width="20" height="20" isPrintWhenDetailOverflows="true">
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.2"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Bottom" markup="html">
+					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[И.]]></text>
+			</staticText>
 		</band>
 	</detail>
 </jasperReport>

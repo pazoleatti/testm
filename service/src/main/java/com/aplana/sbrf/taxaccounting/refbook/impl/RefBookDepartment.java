@@ -25,56 +25,57 @@ import java.util.Map;
 @Service("refBookDepartment")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RefBookDepartment implements RefBookDataProvider {
-    public final static long REF_BOOK_ID = 30;
+
+    public static final Long REF_BOOK_ID = RefBookDepartmentDao.REF_BOOK_ID;
+
     @Autowired
     private RefBookDepartmentDao refBookDepartmentDao;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        // TODO сделать фильтр и sortAttribute
-        return refBookDepartmentDao.getRecords(REF_BOOK_ID, pagingParams, filter, sortAttribute);
+        return refBookDepartmentDao.getRecords(pagingParams, filter, sortAttribute);
     }
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return null;  // нет нужды реализовывать смотри коментарии http://jira.aplana.com/browse/SBRFACCTAX-3245
+		throw new UnsupportedOperationException();
     }
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long recordId) {
-        return refBookDepartmentDao.getRecordData(REF_BOOK_ID, recordId);
+        return refBookDepartmentDao.getRecordData(recordId);
     }
 
     @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
         // В справочнике департментов нет версий там всегда актуальная информация, по крайне мере на текущий момент
         List<Date> result = new ArrayList<Date>(1);
-        result.add(new Date());
+        result.add(new Date(0));
         return result;
     }
 
     @Override
     public void insertRecords(Date version, List<Map<String, RefBookValue>> records) {
-        // нет нужды реализовывать смотри коментарии http://jira.aplana.com/browse/SBRFACCTAX-3245
+		throw new UnsupportedOperationException();
     }
 
     @Override
     public void updateRecords(Date version, List<Map<String, RefBookValue>> records) {
-        // нет нужды реализовывать смотри коментарии http://jira.aplana.com/browse/SBRFACCTAX-3245
+		throw new UnsupportedOperationException();
     }
 
     @Override
     public void deleteRecords(Date version, List<Long> recordIds) {
-        // нет нужды реализовывать смотри коментарии http://jira.aplana.com/browse/SBRFACCTAX-3245
+		throw new UnsupportedOperationException();
     }
 
     @Override
     public void deleteAllRecords(Date version) {
-        // Не нужно
+		throw new UnsupportedOperationException();
     }
 
     @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
-        return null;
+		throw new UnsupportedOperationException();
     }
 }

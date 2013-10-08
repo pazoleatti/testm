@@ -21,6 +21,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
+import com.aplana.sbrf.taxaccounting.service.*;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -45,11 +46,6 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -73,6 +69,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Autowired
 	private DeclarationDataScriptingService declarationDataScriptingService;
+
+    @Autowired
+    private DeclarationTemplateService declarationTemplateService;
 
 	@Autowired
 	private DeclarationTemplateDao declarationTemplateDao;
@@ -260,7 +259,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         validateDeclaration(declarationData.getId(), logger, false);
         // Заполнение отчета и экспорт в формате PDF и XLSX
         JasperPrint jasperPrint = fillReport(xml,
-                declarationTemplateDao.getJasper(declarationData.getDeclarationTemplateId()));
+                declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
         declarationDataDao.setPdfData(declarationData.getId(), exportPDF(jasperPrint));
         declarationDataDao.setXlsxData(declarationData.getId(), exportXLSX(jasperPrint));
 	}
@@ -327,17 +326,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-	private static JasperPrint fillReport(String xml, byte[] jasperTemplate) {
+	private static JasperPrint fillReport(String xml, InputStream jasperTemplate) {
 		try {
-			InputSource inputSource = new InputSource(new StringReader(xml));
+            InputSource inputSource = new InputSource(new StringReader(xml));
 			Document document = JRXmlUtils.parse(inputSource);
 
 			Map<String, Object> params = new HashMap<String, Object>();
 			params.put(JRXPathQueryExecuterFactory.PARAMETER_XML_DATA_DOCUMENT,
 					document);
 
-			return JasperFillManager.fillReport(new ByteArrayInputStream(
-					jasperTemplate), params);
+			return JasperFillManager.fillReport(jasperTemplate, params);
 
 		} catch (Exception e) {
 			throw new ServiceException("Невозможно заполнить отчет", e);
