@@ -153,7 +153,8 @@ create table ref_book_attribute (
   attribute_id number(18),
   visible number(1) default 1 not null,
   precision number(2),
-  width number(9) default 15 not null
+  width number(9) default 15 not null,
+  required number(1) default 0 not null
 );
 
 alter table ref_book_attribute add constraint ref_book_attr_pk primary key (id);
@@ -182,6 +183,7 @@ comment on column ref_book_attribute.attribute_id is 'Код отображае�
 comment on column ref_book_attribute.visible is 'Признак видимости';
 comment on column ref_book_attribute.precision is 'Точность, количество знаков после запятой. Только для атрибутов-чисел';
 comment on column ref_book_attribute.width is 'Ширина столбца. Используется при отображении справочника в виде таблицы';
+comment on column ref_book_attribute.required is 'Признак обязательности поля (1 - обязательно; 0 - нет)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(18) not null,
