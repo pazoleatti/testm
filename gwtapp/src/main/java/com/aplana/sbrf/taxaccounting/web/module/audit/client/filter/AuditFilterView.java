@@ -279,4 +279,11 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     void onPrintButtonClicked(ClickEvent event){
         getUiHandlers().onPrintButtonClicked();
     }
+
+    @UiHandler("archive")
+    void onArchive(ClickEvent event){
+        if(getUiHandlers() != null){
+            getUiHandlers().onArchiveButtonClicked();
+        }
+    }
 }

@@ -7,10 +7,12 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -127,7 +129,24 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		);
 	}
 
-	private void appendSelectWhereClause(StringBuilder sql, LogSystemFilter filter, String prefix) {
+    @Override
+    public void removeRecords(final List<Long> listIds) {
+        JdbcTemplate jt = getJdbcTemplate();
+        jt.batchUpdate("delete from log_system where id = ?",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setLong(1, listIds.get(i));
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return listIds.size();
+                    }
+                });
+    }
+
+    private void appendSelectWhereClause(StringBuilder sql, LogSystemFilter filter, String prefix) {
 		sql.append(" WHERE log_date BETWEEN TO_DATE('").append
 				(formatter.format(filter.getFromSearchDate()))
 				.append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append

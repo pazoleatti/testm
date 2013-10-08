@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.TAUserFull;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+
+import java.util.List;
 
 public interface PrintingService {
 	
@@ -13,5 +13,5 @@ public interface PrintingService {
 	String generateExcelLogEntry(List<LogEntry> listLogEntries);
     String generateExcelUsers(List<TAUserFull> taUserFullList);
     String generateExcelLogSystem(List<LogSystemSearchResultItem> resultItems);
-
+    String generateAuditCsv(List<LogSystemSearchResultItem> resultItems);
 }

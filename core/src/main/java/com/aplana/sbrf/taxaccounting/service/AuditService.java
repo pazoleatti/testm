@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
+import java.util.List;
+
 /**
  * Сервис для работы с журналом аудита
  */
@@ -23,4 +25,10 @@ public interface AuditService {
 	 * Получить данные используемые для фильтрации журналом аудита
 	 */
 	LogSystemFilterAvailableValues getFilterAvailableValues();
+
+    /**
+     * Удаляем набор записей из журнала и сразу создаем запись в ЖА об архивировании.
+     * @param itemList
+     */
+    void removeRecords(List<LogSystemSearchResultItem> itemList, TAUserInfo userInfo);
 }
