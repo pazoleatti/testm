@@ -80,9 +80,9 @@ void generateXML() {
     // Код формы отчетности по КНД
     def String KND = '1110025'
 
-    def okato = departmentParam.OKATO.referenceValue !=null ?  getRefBookValue(3, departmentParam.OKATO.referenceValue).OKATO.stringValue : null
-    def okvedCode = departmentParam.OKVED_CODE.referenceValue !=null ?  getRefBookValue(34, departmentParam.OKVED_CODE.referenceValue).CODE.stringValue : null
-    def taxPlaceTypeCode = departmentParam.TAX_PLACE_TYPE_CODE.referenceValue !=null ?  getRefBookValue(2, departmentParam.TAX_PLACE_TYPE_CODE.referenceValue).CODE.stringValue : null
+    def okato = departmentParam.OKATO.referenceValue != null ? getRefBookValue(3, departmentParam.OKATO.referenceValue).OKATO.stringValue : null
+    def okvedCode = departmentParam.OKVED_CODE.referenceValue != null ? getRefBookValue(34, departmentParam.OKVED_CODE.referenceValue).CODE.stringValue : null
+    def taxPlaceTypeCode = departmentParam.TAX_PLACE_TYPE_CODE.referenceValue != null ? getRefBookValue(2, departmentParam.TAX_PLACE_TYPE_CODE.referenceValue).CODE.stringValue : null
 
     builder.Файл(
             ИдФайл: declarationService.generateXmlFileId(notificationType, departmentId, declarationData.reportPeriodId),
@@ -116,11 +116,14 @@ void generateXML() {
                     def reorgFormCode = departmentParam.REORG_FORM_CODE.referenceValue
                     reorgFormCode = reorgFormCode != null ? getRefBookValue(5, reorgFormCode).CODE.stringValue : null
                     def boolean isReorg = reorgFormCode != null && !reorgFormCode.equals('0')
-                    СвРеоргЮЛ(
-                            [ФормРеорг: reorgFormCode] +
-                                    (isReorg ? [ИННЮЛ: departmentParam.REORG_INN.stringValue] : [:]) +
-                                    (isReorg ? [КПП: departmentParam.REORG_KPP.stringValue] : [:])
-                    )
+
+                    if (reorgFormCode != null) {
+                        СвРеоргЮЛ(
+                                [ФормРеорг: reorgFormCode] +
+                                        (isReorg ? [ИННЮЛ: departmentParam.REORG_INN.stringValue] : [:]) +
+                                        (isReorg ? [КПП: departmentParam.REORG_KPP.stringValue] : [:])
+                        )
+                    }
                 }
             }
             def prPodp = 1
@@ -221,14 +224,14 @@ void generateXML() {
                                                 [ОКВЭД: dealSubjectCode3] +
                                                 [НомУчСд: row.otherNum] +
                                                 [НомДог: row.contractNum] +
-                                                (row.contractDate!= null ? [ДатаДог: row.contractDate.format("dd.MM.yyyy")]: [:]) +
+                                                (row.contractDate != null ? [ДатаДог: row.contractDate.format("dd.MM.yyyy")] : [:]) +
                                                 (countryCode != null ? [ОКСМ: countryCode] : [:]) +
                                                 (deliveryCode != null ? [КодУсловПост: deliveryCode] : [:]) +
                                                 [ОКЕИ: okeiCode] +
                                                 [Количество: row.count] +
                                                 [ЦенаЕдин: row.price] +
                                                 [СтоимИтог: row.total] +
-                                                (row.dealDoneDate!=null ? [ДатаСовСд: row.dealDoneDate.format("dd.MM.yyyy")] : [:])
+                                                (row.dealDoneDate != null ? [ДатаСовСд: row.dealDoneDate.format("dd.MM.yyyy")] : [:])
                                 ) {
                                     def String countryCode1 = row.countryCode1 != null ? getRefBookValue(10, row.countryCode1).CODE.stringValue : '000'
                                     def String region1 = row.region1 != null ? getRefBookValue(4, row.region1).CODE.stringValue : null
@@ -242,7 +245,7 @@ void generateXML() {
                                     def String region2 = row.region2 != null ? getRefBookValue(4, row.region2).CODE.stringValue : null
                                     МестСовСд(
                                             [ОКСМ: countryCode2] +
-                                                    [КодРегион: region2] +
+                                                    (region2 != null ? [КодРегион: region2] : [:]) +
                                                     (row.city2 != null ? [Город: row.city2] : [:]) +
                                                     (row.locality2 != null ? [НаселПункт: row.locality2] : [:])
                                     )
