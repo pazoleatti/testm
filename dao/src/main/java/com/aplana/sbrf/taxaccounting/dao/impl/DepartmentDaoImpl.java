@@ -37,7 +37,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 	@Override
 	@Cacheable(CacheConstants.DEPARTMENT)
 	public Department getDepartment(int id) {
-        System.out.println("getDepartment started");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Fetching department with id = " + id  + " from database");
 		}
@@ -55,7 +54,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
 	@Override
 	public List<Department> getChildren(int parentDepartmentId){
-        System.out.println("getChildren started");
         try {
             return getJdbcTemplate().query(
                     "select * from department where parent_id = ?",
@@ -83,7 +81,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     @Override
     public List<Department> listDepartments(){
-        System.out.println("listDepartments started");
         try {
             return getJdbcTemplate().query(
                     "select * from department",
@@ -137,7 +134,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     @Override
     public List<Department> getAllChildren(int parentDepartmentId) {
-        System.out.println("getAllChildren started");
         try {
             return getJdbcTemplate().query(
                     "select * from department CONNECT BY prior id = parent_id start with id = ?",
