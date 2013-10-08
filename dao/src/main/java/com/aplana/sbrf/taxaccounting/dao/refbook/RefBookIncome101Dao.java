@@ -14,6 +14,9 @@ import java.util.Map;
  * User: ekuvshinov
  */
 public interface RefBookIncome101Dao {
+
+	static final Long REF_BOOK_ID = 50L;
+
     /**
      * Получение записей справочника
      *
@@ -24,24 +27,24 @@ public interface RefBookIncome101Dao {
      * @param sortAttribute
      * @return
      */
-    public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
+    PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
     /**
      * Получение записи справочника по recordId
      * @param recordId
      * @return
      */
-    public Map<String, RefBookValue> getRecordData(Long recordId);
+    Map<String, RefBookValue> getRecordData(Long recordId);
 
     /**
      * Перечень имеющихся отчетных периодов среди записей
      * @return
      */
-    public List<ReportPeriod> gerReportPeriods();
+    List<ReportPeriod> gerReportPeriods();
 
     /**
      * Обновление записей справочника
      * @param records
      */
-    public void updateRecords(List<Map<String, RefBookValue>> records);
+    void updateRecords(List<Map<String, RefBookValue>> records);
 }
