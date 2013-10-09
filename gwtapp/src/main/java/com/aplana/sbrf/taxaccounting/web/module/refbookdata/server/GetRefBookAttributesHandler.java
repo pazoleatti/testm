@@ -42,6 +42,7 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
 			col.setRefBookAttributeId(attribute.getRefBookAttributeId());
 			col.setWidth(attribute.getWidth());
 			col.setAlignment(getHorizontalAlignment(attribute));
+            col.setRequired(attribute.isRequired());
 			columns.add(col);
 		}
 		result.setColumns(columns);
