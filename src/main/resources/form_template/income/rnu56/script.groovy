@@ -18,11 +18,11 @@ switch (formDataEvent) {
         checkCreation()
         break
     case FormDataEvent.CHECK:
-        logicalCheck(true)
+        logicalCheck()
         break
     case FormDataEvent.CALCULATE:
         calc()
-        logicalCheck(false)
+        logicalCheck()
         break
     case FormDataEvent.ADD_ROW:
         addNewRow()
@@ -32,17 +32,17 @@ switch (formDataEvent) {
         break
 // После принятия из Утверждено
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
-        logicalCheck(true)
+        logicalCheck()
         break
 // После принятия из Подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
-        logicalCheck(true)
+        logicalCheck()
         break
 // Консолидация
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
-        logicalCheck(false)
+        logicalCheck()
         break
 }
 
@@ -253,11 +253,9 @@ def calcSumIncomeinRuble(def row) {
 }
 
 /**
- * Логические проверки.
- *
- * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
+ * Логические проверки
  */
-def logicalCheck(def useLog) {
+def logicalCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
 
     if (dataRows.isEmpty()) {
@@ -298,7 +296,7 @@ def logicalCheck(def useLog) {
         }
 
         // 1. Проверка на заполнение поля
-        if (!checkRequiredColumns(row, requiredColumns, useLog)) {
+        if (!checkRequiredColumns(row, requiredColumns)) {
             return false
         }
 
@@ -517,10 +515,9 @@ def getSum(def columnAlias) {
  *
  * @param row строка
  * @param columns список обязательных графов
- * @param useLog нужно ли записывать сообщения в лог
  * @return true - все хорошо, false - есть незаполненные поля
  */
-def checkRequiredColumns(def row, def columns, def useLog) {
+def checkRequiredColumns(def row, def columns) {
     def colNames = []
 
     columns.each {
@@ -530,9 +527,6 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         }
     }
     if (!colNames.isEmpty()) {
-        if (!useLog) {
-            return false
-        }
         def index = getIndex(row) + 1
         def errorMsg = colNames.join(', ')
         if (!isEmpty(index)) {
