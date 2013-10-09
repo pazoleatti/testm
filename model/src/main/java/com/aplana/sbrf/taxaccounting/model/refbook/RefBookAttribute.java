@@ -268,6 +268,7 @@ public class RefBookAttribute implements Serializable {
 		sb.append(", visible=").append(visible);
 		sb.append(", precision=").append(precision);
 		sb.append(", width=").append(width);
+		sb.append(", required=").append(required);
 		sb.append('}');
 		return sb.toString();
 	}
