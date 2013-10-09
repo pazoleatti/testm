@@ -310,7 +310,7 @@ def logicalCheck() {
         }
         if (!colNames.isEmpty()) {
             def msg = colNames.join(', ')
-            logger.error(errorMsg + "неверно рассчитана графы: $msg.")
+            logger.error(errorMsg + "неверно рассчитано значение графы: $msg.")
             return false
         }
 
