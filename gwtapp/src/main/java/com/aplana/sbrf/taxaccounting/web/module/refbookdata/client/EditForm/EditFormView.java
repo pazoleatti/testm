@@ -107,11 +107,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         Label label;
         if (col.isRequired()){
             SafeHtmlBuilder builder = new SafeHtmlBuilder();
-            builder.appendHtmlConstant(col.getName() + "<span class='required'>*</span>");
+            builder.appendHtmlConstant(col.getName() + ":<span class='required'>*</span>");
             HTML span = new HTML(builder.toSafeHtml());
             label = span;
         } else{
-            label = new Label(col.getName());
+            label = new Label(col.getName()+":");
         }
         label.addStyleName("inputLabel");
 
