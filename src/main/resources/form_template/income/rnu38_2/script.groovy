@@ -1,16 +1,16 @@
 package form_template.income.rnu38_2
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 
 /**
- * Форма "РНУ-38.2) Регистр налогового учёта начисленного процентного дохода по ОФЗ, по которым открыта короткая позиция. Отчёт 2".
+ * Форма "РНУ-38.2 Регистр налогового учёта начисленного процентного дохода по ОФЗ, по которым открыта короткая позиция. Отчёт 2".
  *
  * @version 59
  *
  * TODO:
  *      - импорт и миграция
- *      - уточнить пересчет и проверки после консолидации
  *
  * @author rtimerbaev
  */
@@ -35,8 +35,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE :
         consolidation()
-        // TODO (Ramil Timerbaev) уточнить
-        // calc() && logicalCheck()
+        calc() && logicalCheck()
         break
 }
 
@@ -49,6 +48,10 @@ switch (formDataEvent) {
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 def calc() {
+    // если нф консолидированная, то не надо проверять данные из рну 38.1
+    if (formData.kind == FormDataKind.CONSOLIDATED) {
+        return true
+    }
     def data = getData(formData)
     def totalRow = getTotalRowFromRNU38_1()
     if (totalRow == null) {
@@ -105,6 +108,11 @@ def logicalCheck() {
     def requiredColumns = ['amount', 'incomePrev', 'incomeShortPosition', 'totalPercIncome']
     if (!checkRequiredColumns(row, requiredColumns)) {
         return false
+    }
+
+    // если нф консолидированная, то не надо проверять данные из рну 38.1
+    if (formData.kind == FormDataKind.CONSOLIDATED) {
+        return true
     }
 
     def totalRow = getTotalRowFromRNU38_1()
@@ -254,7 +262,7 @@ def getColumnName(def row, def alias) {
  * @param row строка
  */
 def getIndex(def row) {
-    row.getIndex() - 1
+    return row.getIndex() - 1
 }
 
 /**
