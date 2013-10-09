@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPick
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -103,11 +104,14 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
      *  с названием атрибута справочника
      */
     private Label getArrtibuteLabel(RefBookColumn col){
-        Label label = new Label();
+        Label label;
         if (col.isRequired()){
-            label.setText(col.getName()+"*");
+            SafeHtmlBuilder builder = new SafeHtmlBuilder();
+            builder.appendHtmlConstant(col.getName() + "<span class='required'>*</span>");
+            HTML span = new HTML(builder.toSafeHtml());
+            label = span;
         } else{
-            label.setText(col.getName());
+            label = new Label(col.getName());
         }
         label.addStyleName("inputLabel");
 

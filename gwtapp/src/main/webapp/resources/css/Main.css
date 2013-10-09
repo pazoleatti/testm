@@ -169,3 +169,7 @@ h3{
 .formPanel .inputLabel{
     margin-right: 10px;
 }
+
+.formPanel .inputLabel .required{
+    color: #ff0000;
+}
