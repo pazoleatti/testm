@@ -209,6 +209,9 @@ def fillForm() {
         }
     }
 
+    // сортировка
+    sort(data)
+
     /*
      * Заполнение графы 7..9
      * Вычисление ИТОГО для граф 2,7-9
@@ -497,4 +500,16 @@ def getRowByAlias(def data, def alias) {
         }
     }
     return null
+}
+
+/**
+ * Отсорировать данные (по графе 1).
+ *
+ * @param data данные нф (хелпер)
+ */
+void sort(def data) {
+    def rows = getRows(data)
+    rows.subList(0, rows.size() - 1).sort {
+        it.series
+    }
 }
