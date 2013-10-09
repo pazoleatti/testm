@@ -50,7 +50,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		for (RefBookColumn col : attributes) {
 			HorizontalPanel oneField = new HorizontalPanel();
 			oneField.setWidth("100%");
-			Label label = new Label(col.getName());
+            Label label = getArrtibuteLabel(col);
             label.setWordWrap(true);
 			HorizontalPanel panel = new HorizontalPanel();
 			panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
@@ -97,6 +97,22 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		this.widgets = widgets;
 		return widgets;
 	}
+
+    /**
+     *  Label для input'a редактирования значения справочника
+     *  с названием атрибута справочника
+     */
+    private Label getArrtibuteLabel(RefBookColumn col){
+        Label label = new Label();
+        if (col.isRequired()){
+            label.setText(col.getName()+"*");
+        } else{
+            label.setText(col.getName());
+        }
+        label.addStyleName("inputLabel");
+
+        return label;
+    }
 
 	@Override
 	public void fillInputFields(Map<String, RefBookValueSerializable> record) {

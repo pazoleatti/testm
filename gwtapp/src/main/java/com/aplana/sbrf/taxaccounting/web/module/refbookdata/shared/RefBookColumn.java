@@ -13,6 +13,9 @@ public class RefBookColumn implements Serializable{
 	private Long refBookAttributeId;
 	private HorizontalAlignment alignment;
 
+   /** Обязательность заполнения */
+    private boolean required;
+
 	public Long getId() {
 		return id;
 	}
@@ -68,4 +71,12 @@ public class RefBookColumn implements Serializable{
 	public void setAlignment(HorizontalAlignment alignment) {
 		this.alignment = alignment;
 	}
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
 }

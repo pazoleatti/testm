@@ -54,10 +54,7 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        if (allCheck()) {
-            // для сохранения изменений приемников
-            data.commit()
-        }
+        allCheck()
         break
 }
 
@@ -155,6 +152,7 @@ void calc() {
         }
     }
 
+    sort()
     /*
      * Расчеты.
      */
@@ -205,7 +203,6 @@ void calc() {
             row.expensesSum = getGraph20(row)
         }
     }
-    sort()
     // подразделы
     ['A', 'B', 'V', 'G', 'D', 'E'].each { section ->
         firstRow = data.getDataRow(rows,section)
@@ -216,7 +213,7 @@ void calc() {
             lastRow.getCell(it).setValue(getSum(it, firstRow, lastRow))
         }
     }
-    data.save(getRows(data))
+    data.update(rows)
 }
 
 /**
@@ -376,19 +373,19 @@ def logicalCheck() {
                 logger.warn(rowStart + 'неверное значение графы «Сумма расходов, приходящаяся на каждый месяц»!')
             }
 
-            // 9. Проверка итоговых значений формы
-            // графы для которых считать итого (графа 9-13,15-17, 20)
-            def totalColumns = ['amort', 'expensesOnSale', 'sum', 'sumInFact', 'costProperty', 'sumIncProfit',
-                    'profit', 'loss', 'expensesSum']
-            // подразделы
-            for (def section : ['A', 'B', 'V', 'G', 'D', 'E']) {
-                firstRow = data.getDataRow(rows,section)
-                lastRow = data.getDataRow(rows,'total' + section)
-                for (def column : totalColumns) {
-                    if (lastRow.getCell(column).getValue().equals(getSum(column, firstRow, lastRow))) {
-                        logger.error('Итоговые значения рассчитаны неверно!')
-                        return false
-                    }
+        }
+        // 9. Проверка итоговых значений формы
+        // графы для которых считать итого (графа 9-13,15-17, 20)
+        def totalColumns = ['amort', 'expensesOnSale', 'sum', 'sumInFact', 'costProperty', 'sumIncProfit',
+                'profit', 'loss', 'expensesSum']
+        // подразделы
+        for (def section : ['A', 'B', 'V', 'G', 'D', 'E']) {
+            firstRow = data.getDataRow(rows,section)
+            lastRow = data.getDataRow(rows,'total' + section)
+            for (def column : totalColumns) {
+                if (lastRow.getCell(column).getValue().equals(getSum(column, firstRow, lastRow))) {
+                    logger.error('Итоговые значения рассчитаны неверно!')
+                    return false
                 }
             }
         }
