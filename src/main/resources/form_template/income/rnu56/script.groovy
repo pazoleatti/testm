@@ -1,10 +1,10 @@
+package form_template.income.rnu56
+
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType
-import com.aplana.sbrf.taxaccounting.model.FormData
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 import java.math.RoundingMode
-
 /**
  * Скрипт для РНУ-56 (rnu56.groovy)
  * Форма "(РНУ-56) Регистр налогового учёта процентного дохода по дисконтным векселям сторонних эмитентов"
@@ -30,23 +30,15 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
-// проверка при "подготовить"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED:
-        checkOnPrepareOrAcceptance('Подготовка')
+// После принятия из Утверждено
+    case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
+        logicalCheck(true)
         break
-// проверка при "принять"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
-        checkOnPrepareOrAcceptance('Принятие')
-        break
-// проверка при "вернуть из принята в подготовлена"
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
-        checkOnCancelAcceptance()
-        break
-// после принятия из подготовлена
+// После принятия из Подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
-        acceptance()
+        logicalCheck(true)
         break
-// обобщить
+// Консолидация
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
@@ -117,9 +109,6 @@ void calc() {
         return
     }
 
-    /** Отчетная дата. */
-    // def reportDate = getReportDate()
-
     /** Дата начала отчетного периода. */
     def tmp = reportPeriodService.getStartDate(formData.reportPeriodId)
     def startDate = (tmp ? tmp.getTime() : null)
@@ -127,12 +116,6 @@ void calc() {
     /** Дата окончания отчетного периода. */
     tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
     def endDate = (tmp ? tmp.getTime() : null)
-
-    /** Количество дней владения векселем в отчетном периоде. */
-    def countsDays = 1
-
-    /** Курс банка России. */
-    def rate
 
     def index = 0
 
@@ -178,7 +161,7 @@ def calcTermDealBill(def row) {
     if (row.buyDate == null || row.maturity == null) {
         return null
     } else {
-        return round(row.buyDate - row.maturity + 1, 0)
+        return round(row.maturity - row.buyDate + 1, 0)
     }
 }
 
@@ -224,6 +207,7 @@ def calcSumIncomeinCurrency(def row, def startDate, def endDate) {
         if (row.percIncome == null || row.termDealBill == null) {
             return null
         }
+        /** Количество дней владения векселем в отчетном периоде. */
         def countsDays = !row.buyDate.before(startDate) ? endDate - row.buyDate + 1 : endDate - startDate
         if (countsDays == 0) {
             return null
@@ -254,8 +238,7 @@ def calcSumIncomeinRuble(def row) {
             if (row.sumIncomeinCurrency == null) {
                 return null
             }
-            rate = getRate(reportDate, row.currency)
-            tmp = row.sumIncomeinCurrency * rate
+            tmp = row.sumIncomeinCurrency * getRate(getReportDate(), row.currency)
         } else {
             tmp = row.sumIncomeinCurrency
         }
@@ -263,7 +246,7 @@ def calcSumIncomeinRuble(def row) {
         if (row.discountInRub == null) {
             return null
         }
-        tmp = row.discountInRub - getCalcPrevColumn10(row.bill, 'sumIncomeinRuble')
+        tmp = row.discountInRub - getCalcPrevColumn(row.bill, 'sumIncomeinRuble')
     }
 
     return row.sumIncomeinRuble = round(tmp)
@@ -295,9 +278,6 @@ def logicalCheck(def useLog) {
     // графы для которых надо вычислять итого (графа 13, 15)
     def totalColumns = ['discountInRub', 'sumIncomeinRuble']
 
-    // признак наличия итоговых строк
-    def hasTotal = false
-
     /** Дата начала отчетного периода. */
     def tmp = reportPeriodService.getStartDate(formData.reportPeriodId)
     def startDate = (tmp ? tmp.getTime() : null)
@@ -305,9 +285,6 @@ def logicalCheck(def useLog) {
     /** Дата окончания отчетного периода. */
     tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
     def endDate = (tmp ? tmp.getTime() : null)
-
-    /** Отчетная дата. */
-    def reportDate = getReportDate()
 
     // Векселя
     def List<String> billsList = new ArrayList<String>()
@@ -355,14 +332,10 @@ def logicalCheck(def useLog) {
         }
 
         // 6. Проверка на наличие данных предыдущих отчетных периодов для заполнения графы 10 и графы 11
-        // TODO Пока не ясно как проверить
-        // def SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy")
-        // logger.warn('Экземпляр за период(ы) <Дата начала отчетного периода1> - <Дата окончания отчетного периода1>,
-        // <Дата начала отчетного периода N> - <Дата окончания отчетного периода N>
-        // не существует (отсутствуют первичные данные для расчёта)!')
+        // TODO Получить РНУ-56 за прошлые отчетные периоды
 
         // 7. Проверка корректности значения в «Графе 3»
-        // TODO
+        // TODO Получить РНУ-56 за прошлые отчетные периоды
 
         // 8. Проверка корректности расчёта дисконта
         if (row.sum != null && row.price != null && row.sum - row.price <= 0 && (row.discountInCurrency != 0 || row.discountInRub != 0)) {
@@ -412,7 +385,7 @@ def logicalCheck(def useLog) {
             totalSums[alias] += (row.getCell(alias).getValue() ?: 0)
         }
 
-        // Проверки соответствия НСИ.
+        // Проверки соответствия НСИ
         // Проверка кода валюты со справочным
         if (!checkNSI(row, "currency", "Код валюты", 15)) {
             return false
@@ -461,20 +434,6 @@ void checkCreation() {
     }
 }
 
-// Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята"
-void checkOnPrepareOrAcceptance(def value) {
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() { department ->
-        if (department.formTypeId == formData.getFormType().getId()) {
-            def form = formDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-            // если форма существует и статус "принята"
-            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
-                logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
-            }
-        }
-    }
-}
-
 // Консолидация
 void consolidation() {
     // удалить все строки и собрать из источников их строки
@@ -483,7 +442,7 @@ void consolidation() {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row ->
+                formDataService.getDataRowHelper(source).getAllCached().each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
                         rows.add(row)
                     }
@@ -493,31 +452,6 @@ void consolidation() {
     }
     formDataService.getDataRowHelper(formData).save(rows)
     logger.info('Формирование консолидированной формы прошло успешно.')
-}
-
-// Проверки при переходе "Отменить принятие"
-void checkOnCancelAcceptance() {
-    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
-            formData.getFormType().getId(), formData.getKind());
-    DepartmentFormType department = departments.getAt(0);
-    if (department != null) {
-        FormData form = formDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-
-        if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
-            logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
-        }
-    }
-}
-
-// Принять
-void acceptance() {
-    if (!logicalCheck(true)) {
-        return
-    }
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() {
-        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
-    }
 }
 
 // Проверка является ли строка итоговой
@@ -545,30 +479,6 @@ def getIndex(def row) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
     dataRows.indexOf(row)
-}
-
-// TODO (Ramil Timerbaev) учесть графу 3 при суммировании
-/**
- * Cумма ранее начисленного процентного дохода по векселю до отчётного периода
- * (сумма граф 14 из РНУ-56 предыдущих отчётных (налоговых) периодов)
- * выбирается по графе 2 с даты приобретения (графа 3) по дату начала отчетного периода.
- *
- * @param bill вексель
- * @param sumColumnName название графы, по которой суммировать данные
- */
-def getCalcPrevColumn(def bill, def sumColumnName) {
-    def formDataOld = getFormDataOld()
-    def sum = 0
-    if (formDataOld == null) {
-        return 0
-    }
-    def dataRowHelper = formDataService.getDataRowHelper(formDataOld)
-    dataRowHelper.getAllCached().each {
-        if (bill == row.bill) {
-            sum += getValue(row.getCell(sumColumnName).getValue())
-        }
-    }
-    return sum
 }
 
 // Получить данные за предыдущий отчетный период
@@ -661,21 +571,8 @@ def round(def value, def int precision = 2) {
     return value.setScale(precision, RoundingMode.HALF_UP)
 }
 
-// Cумма ранее начисленного процентного дохода по векселю до отчётного периода
-// (сумма граф 10 из РНУ-55 предыдущих отчётных (налоговых) периодов)
-// выбирается по графе 2 с даты приобретения (графа3) по дату начала отчетного периода
-def getCalcPrevColumn10(def bill, def sumColumnName) {
-//    def formDataOld = getFormDataOld()
-//    def sum = 0
-//    if (formDataOld == null) {
-//        return 0
-//    }
-//    formDataOld.dataRows.each {
-//        if (bill == row.bill) {
-//            sum += getValue(row.getCell(sumColumnName).getValue())
-//        }
-//    }
-//    return sum
-    // TODO
+// TODO Сумма граф <sumColumnName> из РНУ-56 предыдущих отчетных периодов, начиная с РНУ,
+// где «Графа 3» принадлежит отчетному периоду
+def getCalcPrevColumn(def bill, def sumColumnName) {
     return 0
 }
