@@ -165,3 +165,7 @@ h3{
     left: 30px;
     bottom: 3px;
 }
+
+.formPanel .inputLabel{
+    margin-right: 10px;
+}
