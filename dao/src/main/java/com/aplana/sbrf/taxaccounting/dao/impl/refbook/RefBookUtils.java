@@ -12,10 +12,10 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -122,5 +122,22 @@ public class RefBookUtils extends AbstractDao {
 			return getJdbcTemplate().queryForInt("select count(*) from (" + ps.getQuery().toString() + ")");
 		}
 	}
+
+    /**
+     *
+     * @param attributes
+     * @param record
+     * @return
+     */
+    public List<String> checkFillRequiredRefBookAtributes(List<RefBookAttribute> attributes, Map<String, RefBookValue> record){
+        List<String> errors = new ArrayList();
+        for (RefBookAttribute a :attributes){
+            if (a.isRequired() && (!record.containsKey(a.getAlias()) || record.get(a.getAlias()).isEmpty())){
+                errors.add(a.getName());
+            }
+        }
+
+        return errors;
+    }
 
 }
