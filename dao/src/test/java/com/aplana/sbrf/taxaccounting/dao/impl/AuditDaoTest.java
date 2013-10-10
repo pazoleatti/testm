@@ -10,7 +10,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -33,6 +35,7 @@ public class AuditDaoTest {
         filter.setFormTypeId(1);
         filter.setFromSearchDate(new Date(1304247365000l));
         filter.setToSearchDate(new Date(1369911365000l));
+        filter.setTaxType(TaxType.TRANSPORT);
 
         PagingResult<LogSystemSearchResultItem> records = auditDao.getLogs(filter);
         LogSystemSearchResultItem logSystem = records.get(0);
@@ -95,5 +98,39 @@ public class AuditDaoTest {
         assertEquals("the best note", logSystemSearchResultItem.getNote());
         assertEquals(1, logSystemSearchResultItem.getUserDepartment().getId());
         assertEquals(2, records.getTotalCount());
+    }
+
+    @Test
+    public void testRemove(){
+        LogSystem logSystem = new LogSystem();
+        logSystem.setId(3l);
+        Date date = new Date();
+        logSystem.setLogDate(date);
+        logSystem.setIp("192.168.72.16");
+        logSystem.setEventId(3);
+        logSystem.setUserId(1);
+        logSystem.setRoles("operator");
+        logSystem.setDepartmentId(1);
+        logSystem.setReportPeriodId(1);
+        logSystem.setDeclarationTypeId(1);
+        logSystem.setFormTypeId(1);
+        logSystem.setFormKindId(2);
+        logSystem.setNote("the best note");
+        logSystem.setUserDepartmentId(1);
+
+        List<Long> listIds = new ArrayList<Long>();
+        listIds.add(1l);
+        listIds.add(3l);
+
+        auditDao.add(logSystem);
+        auditDao.removeRecords(listIds);
+
+        LogSystemFilter filter = new LogSystemFilter();
+        filter.setCountOfRecords(10);
+        filter.setStartIndex(0);
+        filter.setFromSearchDate(new Date(1304247365000l));
+        filter.setToSearchDate(new Date());
+
+        assertEquals(0, auditDao.getLogs(filter).size());
     }
 }

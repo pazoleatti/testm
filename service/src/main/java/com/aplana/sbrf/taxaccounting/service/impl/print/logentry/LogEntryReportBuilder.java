@@ -21,9 +21,12 @@ public class LogEntryReportBuilder extends AbstractXlsxReportBuilder {
 	private int rowNumber = 0;
 	private int cellNumber = 0;
 
+    private static final String fileName = "Список_ошибок_";
+    private static final String postfix = ".xlsx";
+
 	
 	public LogEntryReportBuilder(List<LogEntry> list){
-        super("Список_ошибок_", ".xlsx");
+        super(fileName, postfix);
         this.list = list;
 		this.workBook = new XSSFWorkbook();
 		this.sheet = workBook.createSheet("Учет налогов");

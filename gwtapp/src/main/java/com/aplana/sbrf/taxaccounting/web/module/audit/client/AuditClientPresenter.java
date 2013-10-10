@@ -88,9 +88,8 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<AuditArchiveResult>() {
             @Override
             public void onSuccess(AuditArchiveResult result) {
-                if (result == null)
-                    MessageEvent.fire(AuditClientPresenter.this, "Нет записей за указанную дату.");
                 MessageEvent.fire(AuditClientPresenter.this, "Архивация выполнена успешно.");
+                getView().getBlobFromServer(result.getUuid());
             }
         }, this));
         getProxy().manualReveal(AuditClientPresenter.this);
@@ -99,6 +98,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     interface MyView extends View,HasUiHandlers<AuditClientUIHandler> {
         void setAuditTableData(int startIndex, long count,  List<LogSystemSearchResultItem> itemList);
         void assignDataProvider(int pageSize, AsyncDataProvider<LogSystemSearchResultItem> provider);
+        void getBlobFromServer(String uuid);
     }
 
     @ProxyCodeSplit

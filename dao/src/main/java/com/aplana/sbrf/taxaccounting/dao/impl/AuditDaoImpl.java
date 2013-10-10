@@ -187,6 +187,10 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             }
         }
 
+        if (filter.getTaxType() != null){
+            sql.append(String.format(" AND %stax_type = ", prefix.equals("")?"":"tp.")).append("'" + filter.getTaxType().getCode() + "'");
+        }
+
 		if (filter.getDepartmentId() != null) {
             sql.append(String.format(" AND %sdepartment_id = ", prefix)).append(filter.getDepartmentId());
 		}
@@ -218,7 +222,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	}
 
 	private int getCount(LogSystemFilter filter) {
-		StringBuilder sql = new StringBuilder("select count(*) from log_system");
+		StringBuilder sql = new StringBuilder("select count(*) from log_system ls ");
+        sql.append("left join REPORT_PERIOD rp on ls.report_period_id=rp.\"ID\" ");
+        sql.append("left join TAX_PERIOD tp on rp.tax_period_id=tp.\"ID\" ");
 		appendSelectWhereClause(sql, filter, "");
 		return getJdbcTemplate().queryForInt(sql.toString());
 	}

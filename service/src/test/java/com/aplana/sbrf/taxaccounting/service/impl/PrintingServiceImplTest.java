@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,10 +21,11 @@ public class PrintingServiceImplTest {
 
     private List<LogSystemSearchResultItem> items = new ArrayList<LogSystemSearchResultItem>();
 
-    private PrintingService printingService =  new PrintingServiceImpl();
+    private PrintingServiceImpl printingService =  new PrintingServiceImpl();
 
     @Before
     public void init(){
+
         TARole role = new TARole();
         role.setAlias(USER_ROLE);
         List<TARole> listUserRoles = new ArrayList<TARole>();
@@ -68,6 +69,7 @@ public class PrintingServiceImplTest {
 
     @Test
     public void generateCsvTest(){
-        printingService.generateAuditCsv(items);
+        File file = new File(printingService.generateAuditCsv(items));
+        file.delete();
     }
 }
