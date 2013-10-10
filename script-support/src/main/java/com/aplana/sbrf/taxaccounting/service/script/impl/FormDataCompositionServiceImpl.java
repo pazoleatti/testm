@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -37,13 +35,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 	private DataRowDao dataRowDao;
 
 	@Autowired
-	private FormTypeDao formTypeDao;
-
-	@Autowired
 	private FormTemplateDao formTemplateDao;
-
-	@Autowired
-	private ReportPeriodDao reportPeriodDao;
 
 	@Autowired
 	private FormDataDao formDataDao;
@@ -53,9 +45,6 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 
 	@Autowired
 	private FormDataScriptingService formDataScriptingService;
-
-    @Autowired
-    private DepartmentDao departmentDao;
 
 	@Autowired
 	private LogBusinessService logBusinessService;
@@ -84,8 +73,6 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 	 */
 	@Override
 	public void compose(FormData sformData, int departmentId, int formTypeId, FormDataKind kind) {
-		TaxType taxType = formTypeDao.get(formTypeId).getTaxType();
-
 		// Find form data.
 		FormData dformData = formDataDao.find(formTypeId, kind, departmentId, sformData.getReportPeriodId());
 
@@ -117,11 +104,6 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 			dataRowDao.commit(dformData.getId());
             logBusinessService.add(dformData.getId(), null, scriptComponentContext.getUserInfo(), FormDataEvent.COMPOSE,
                     "Событие инициировано Системой");
-		} else {
-            FormTemplate sformTemplate = formTemplateDao.get(sformData.getFormTemplateId());
-            FormTemplate dformTemplate = formTemplateDao.get(dformData.getFormTemplateId());
-            Department sformDepartment =  departmentDao.getDepartment(dformData.getDepartmentId());
-            scriptComponentContext.getLogger().error("Невозможно принять \""+sformTemplate.getType().getName()+"\", поскольку уже принята форма: "+dformData.getKind().getName()+" \""+dformTemplate.getType().getName()+"\" ("+sformDepartment.getName()+").");
 		}
 	}
 

@@ -9,7 +9,7 @@
     <g:VerticalPanel styleName="{style.editPadding}" width="100%" height="100%">
         <g:cell height="95%">
             <g:ScrollPanel height="100%">
-                <g:VerticalPanel spacing="10" ui:field="editPanel" verticalAlignment="ALIGN_TOP"/>
+                <g:VerticalPanel spacing="10" ui:field="editPanel" styleName="formPanel" verticalAlignment="ALIGN_TOP"/>
             </g:ScrollPanel>
         </g:cell>
         <g:cell>

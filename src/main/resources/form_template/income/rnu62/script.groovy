@@ -47,10 +47,7 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        if (allCheck()) {
-            // для сохранения изменений приемников
-            data.commit()
-        }
+        allCheck()
         break
 }
 
@@ -173,10 +170,8 @@ void calc(){
 
     // проверить обязательные редактируемые поля
     for (def DataRow row : getRows(data)){
-        if (!isTotal(row)){
-            if (!checkRequiredColumns(row, requiredCols.intersect(editableCols))){
-                return
-            }
+        if (!isTotal(row) && !checkRequiredColumns(row, requiredCols.intersect(editableCols))){
+            return
         }
     }
 
@@ -191,20 +186,22 @@ void calc(){
         data.delete(it)
     }
 
-    if (getRows(data).isEmpty()) {
+    def rows = getRows(data)
+    if (rows.isEmpty()) {
         return
     }
 
     // сортировка
-    getRows(data).sort({ DataRow a, DataRow b ->
+    rows.sort({ DataRow a, DataRow b ->
         sortRow(sortColumns, a, b)
     })
+    data.save(rows)
 
     // расчет ячеек
-    getRows(data).each{row->
+    rows.each{row->
         getValues(row, row)
     }
-    data.save(getRows(data))
+    data.update(rows)
 
     //добавление итогов
     totalRow = getTotalRow(data, false)
