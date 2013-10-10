@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao;
+package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 
@@ -12,16 +12,6 @@ import java.util.Map;
  */
 
 public interface ConfigurationDao {
-
-	/**
-	 * Название столбца в базе данных, соответствующее коду параметра
-	 */
-	static final String CODE_COLUMN_NAME = "code";
-
-	/**
-	 * Название столбца в базе данных, соответствующее значению параметра
-	 */
-	static final String VALUE_COLUMN_NAME = "value";
 
 	/**
 	 * Читает из БД значения всех параметров.
