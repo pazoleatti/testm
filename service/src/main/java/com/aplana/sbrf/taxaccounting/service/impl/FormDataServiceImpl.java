@@ -15,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -492,11 +491,10 @@ public class FormDataServiceImpl implements FormDataService {
 	public void doMove(long formDataId, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
 		// Форма не должна быть заблокирована даже текущим пользователем;
 		lockCoreService.checkUnlocked(FormData.class, formDataId, userInfo);
-		// Временный срез формы должен быть в актуальном состоянии
+   		// Временный срез формы должен быть в актуальном состоянии
 		dataRowDao.rollback(formDataId);
 		
-		List<WorkflowMove> availableMoves = formDataAccessService
-				.getAvailableMoves(userInfo, formDataId);
+		List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
 		if (!availableMoves.contains(workflowMove)) {
 			throw new ServiceException(
 					"Переход \""
@@ -510,8 +508,7 @@ public class FormDataServiceImpl implements FormDataService {
 				
         checkDestinations(formData);
 
-		formDataScriptingService.executeScript(userInfo,
-				formData, workflowMove.getEvent(), logger, null);
+		formDataScriptingService.executeScript(userInfo,formData, workflowMove.getEvent(), logger, null);
 		
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
@@ -530,42 +527,74 @@ public class FormDataServiceImpl implements FormDataService {
 						"Произошли ошибки в скрипте, который выполняется после перехода",
 						logger.getEntries());
 			} else {
-				// TODO: Непонятно что этот код здесь делает. Он должен быть в script-support и вызываться из
-				// вызываться из скриптов
-				
-                // compose для приемников после принятия формы или отмены
-                if (workflowMove.getToState() == WorkflowState.ACCEPTED ||
-                        workflowMove.getFromState() == WorkflowState.ACCEPTED) {
-                    
-                    // признак периода ввода остатков
-                    if (!reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
-                        // вызвать compose у форм-приемников
-                        List<DepartmentFormType> departmentFormTypes = departmentFormTypeDao.getFormDestinations(
-                                formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
-                        if (departmentFormTypes != null && !departmentFormTypes.isEmpty()) {
-                            for (DepartmentFormType i: departmentFormTypes) {
-
-                                ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
-                                scriptComponentContext.setUserInfo(userInfo);
-                                scriptComponentContext.setLogger(logger);
-                                ((ScriptComponentContextHolder)formDataCompositionService).setScriptComponentContext(scriptComponentContext);
-
-                                formDataCompositionService.compose(formData, i.getDepartmentId(),
-                                        i.getFormTypeId(), i.getKind());
-                            }
-                        }
-                    }
-                }
+                compose(workflowMove, formData, userInfo, logger);
             }
 		}
 
 		logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
 		auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 				null, formData.getFormType().getId(), formData.getKind().getId(), note);
-
-
 	}
 
+    /**
+     * Логика консолидации при переходе жц
+     *
+     * Функция выполняет консолидацию форм приемников для текущей формы, при ее переходе
+     * со статуса принята, либо в принята.
+     *
+     * Консолидация выполняется следующим образом.
+     * Вызваеся метод compose сервиса formDataCompositionService (formDataCompositionService.compose)
+     * для тех форм-приемников, у которых есть формы в статусе принята. Если у приемника нет форм в
+     * статусе принята то форма приемник удаляется.
+     *
+     * Важно. Консолидация не выполняется в периоде ввода остатков
+     *
+     * <b>Замечение.</b> При поиске формы мы использум getFormDestinations котоый возвращает список
+     * моделей DepartmentFormType. Для получения модели FormData используется поиск через
+     * formDataDao.find, где одним из параметров подставляется formData.getReportPeriodId, и это нормально,
+     * так как источник и приемник у нас находятся в одном отчетном периоде.
+     *
+     *  http://conf.aplana.com/pages/viewpage.action?pageId=8788114
+     */
+    void compose(WorkflowMove workflowMove, FormData formData, TAUserInfo userInfo, Logger logger){
+        // Проверка перехода ЖЦ. Принятие либо отмена принятия
+        if (workflowMove.getToState() == WorkflowState.ACCEPTED || workflowMove.getFromState() == WorkflowState.ACCEPTED) {
+            // признак периода ввода остатков
+            if (!reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
+                // получение списка приемников для текущей формы
+                List<DepartmentFormType> departmentFormTypes = departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
+                // Если найдены приемники то обработаем их
+                if (departmentFormTypes != null && !departmentFormTypes.isEmpty()) {
+                    for (DepartmentFormType i: departmentFormTypes) {
+                        FormData destinationForm = formDataDao.find(i.getFormTypeId(), i.getKind(), i.getDepartmentId(), formData.getReportPeriodId());
+                        // получение источников для текущего приемника i
+                        List<DepartmentFormType> sourceFormTypes = departmentFormTypeDao.getFormSources(i.getDepartmentId(), i.getFormTypeId(), i.getKind());
+                        // количество источников в статусе принята
+                        boolean existAcceptedSources = false;
+                        for (DepartmentFormType s: sourceFormTypes){
+                            FormData sourceForm = formDataDao.find(s.getFormTypeId(), s.getKind(), s.getDepartmentId(), formData.getReportPeriodId());
+                            if (sourceForm !=null && sourceForm.getState().equals(WorkflowState.ACCEPTED)){
+                                existAcceptedSources = true;
+                                break;
+                            }
+                        }
+                        // если текущая форма приемник имеет один и более источников в статусе принята то консолидируем ее, иначе удаляем
+                        if (existAcceptedSources){
+                            ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
+                            scriptComponentContext.setUserInfo(userInfo);
+                            scriptComponentContext.setLogger(logger);
+                            ((ScriptComponentContextHolder)formDataCompositionService).setScriptComponentContext(scriptComponentContext);
+
+                            formDataCompositionService.compose(formData, i.getDepartmentId(),
+                                    i.getFormTypeId(), i.getKind());
+                        } else{
+                            deleteFormData(userInfo, destinationForm.getId());
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 	@Override
 	@Transactional
@@ -594,8 +623,6 @@ public class FormDataServiceImpl implements FormDataService {
 	public ObjectLock<Long> getObjectLock(long formDataId, TAUserInfo userInfo) {
 		return lockCoreService.getLock(FormData.class, formDataId, userInfo);
 	}
-
-
 
     /**
      * Проверка наличия и статуса приемника при осуществлении перевода формы

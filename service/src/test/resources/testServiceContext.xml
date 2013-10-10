@@ -79,5 +79,8 @@
     <bean id="signDataPath" class="java.net.URL">
     	<constructor-arg value="http://ignore/"/>
     </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao"/>
+    </bean>
 
 </beans>

@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +25,8 @@ import java.util.Map;
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 08.10.13 14:39
  */
-@Component
+@Repository
+@Transactional
 public class RefBookUtils extends AbstractDao {
 
 	@Autowired
