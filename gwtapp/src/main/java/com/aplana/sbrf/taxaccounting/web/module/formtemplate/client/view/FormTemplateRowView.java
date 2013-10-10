@@ -288,6 +288,10 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		rows = rowsData;
 		if (rowsData.size() != 0) {
 			formDataTable.setRowData(rowsData);
+			int i = 1;
+			for (DataRow<Cell> row : rowsData) {
+				row.setIndex(i++);
+			}
 			CustomTableBuilder<DataRow<Cell>> builder = new CustomTableBuilder<DataRow<Cell>>(formDataTable, true);
 			formDataTable.setTableBuilder(builder);
 		} else {

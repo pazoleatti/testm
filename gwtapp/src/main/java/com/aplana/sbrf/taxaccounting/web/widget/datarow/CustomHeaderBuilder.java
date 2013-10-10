@@ -46,12 +46,14 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow<C
 	}
 
 	protected void buildOurHeader(List<DataRow<HeaderCell>> newHeaders) {
+		int c = 0;
 		for (DataRow<HeaderCell> header : newHeaders) {
 			TableRowBuilder tr = startRow();
-			for (int i=0; i<offset; i++) {
-				tr.startTH().className(style.header()).text("").endTH();
+			for (; c<offset; c++) {
+				Header defHeader = new TextHeader(getTable().getHeader(c).getValue().toString());
+				buildHeader(tr, defHeader, 0, newHeaders.size());
 			}
-			for (int i=0; i<getTable().getColumnCount(); i++) {
+			for (int i=offset; i<getTable().getColumnCount(); i++) {
 				Header newHeader;
 				String colAlias = ((DataRowColumn)getTable().getColumn(i)).getAlias();
 				if (!newHeaders.isEmpty() && (colAlias != null) && (header.getCell(colAlias).getValue() != null) && !header.getCell(colAlias).hasValueOwner()) {

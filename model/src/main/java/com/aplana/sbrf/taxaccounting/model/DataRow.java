@@ -156,7 +156,7 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
 
 	@Override
 	public boolean containsKey(Object key) {
-		return getCell((String)key) != null;
+		return getCell((String)key, false) != null;
 	}
 
 	@Override
