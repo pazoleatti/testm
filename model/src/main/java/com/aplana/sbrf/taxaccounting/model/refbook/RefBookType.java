@@ -7,17 +7,27 @@ package com.aplana.sbrf.taxaccounting.model.refbook;
  */
 public enum RefBookType {
 
-    EXTERNAL("Внешний справочник"),
-    INTERNAL("Внутренний справочник");
+    INTERNAL(0, "Внутренний справочник"),
+    EXTERNAL(1, "Внешний справочник");
 
+    private final Integer id;
     private final String title;
 
-    private RefBookType(String title) {
+    private RefBookType(Integer id, String title) {
+        this.id = id;
         this.title = title;
     }
 
-	@Override
-	public String toString() {
-		return title;
-	}
+    public Integer getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    @Override
+    public String toString() {
+        return title;
+    }
 }

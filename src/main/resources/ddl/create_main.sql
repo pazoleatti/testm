@@ -132,7 +132,8 @@ create table ref_book (
   id number(18,0) not null,
   name varchar2(200) not null,
   script_id varchar2(36),
-  visible number(1) default 1 not null
+  visible number(1) default 1 not null,
+  type number(1) default 0 not null
 );
 
 alter table ref_book add constraint ref_book_pk primary key (id);

@@ -32,14 +32,22 @@ public interface RefBookDao {
 	/**
 	 * Загружает список всех справочников
 	 * @return
+     * @param typeId тип справочника
+     *               0 - внутренний
+     *               1 - внешний
+     *               null - все
 	 */
-	List<RefBook> getAll();
+	List<RefBook> getAll(Integer typeId);
 
 	/**
 	 * Загружает список всех справочников
 	 * @return
+     * @param typeId тип справочника
+     *               0 - внутренний
+     *               1 - внешний
+     *               null - все
 	 */
-	List<RefBook> getAllVisible();
+	List<RefBook> getAllVisible(Integer typeId);
 
 	/**
 	 * Ищет справочник по коду атрибута

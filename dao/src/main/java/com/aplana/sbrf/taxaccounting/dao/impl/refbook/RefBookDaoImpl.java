@@ -52,16 +52,18 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-	 public List<RefBook> getAll() {
+	 public List<RefBook> getAll(Integer typeId) {
 		return getJdbcTemplate().query(
-				"select id, name, script_id, visible from ref_book order by name",
+				"select id, name, script_id, visible from ref_book where (? is null or type = ?) order by name",
+                new Object[] {typeId, typeId},
 				new RefBookRowMapper());
 	}
 
 	@Override
-	public List<RefBook> getAllVisible() {
+	public List<RefBook> getAllVisible(Integer typeId) {
 		return getJdbcTemplate().query(
-				"select id, name, script_id, visible from ref_book where visible = 1 order by name",
+				"select id, name, script_id, visible from ref_book where visible = 1 and (? is null or type = ?) order by name",
+                new Object[] {typeId, typeId},
 				new RefBookRowMapper());
 	}
 
