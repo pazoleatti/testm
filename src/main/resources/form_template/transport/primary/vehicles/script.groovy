@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 
 /**
  * Форма "Сведения о транспортных средствах, по которым уплачивается транспортный налог".
+ * formTemplateId=201
  *
  * @author ivildanov
  * @author Stanislav Yasinskiy
@@ -78,7 +79,7 @@ void checkUniq() {
 
 // Алгоритм копирования данных из форм предыдущего периода при создании формы
 void copyData() {
-    // TODO разобраться
+    // TODO
 }
 
 //Добавить новую строку
@@ -127,7 +128,7 @@ void calc() {
     dataRowHelper.update(dataRows);
 }
 
-def boolean logicalCheck() {
+def logicalCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
@@ -144,8 +145,8 @@ def boolean logicalCheck() {
             }
         }
         if (!''.equals(errorMsg)) {
-            logger.error("В строке " + row.getIndex() + " не заполнены поля : $errorMsg.")
-            return false;
+            logger.error("Строка $row.rowNumber : не заполнены поля : $errorMsg.")
+            return;
         }
 
         // 2. Проверка на соответствие дат при постановке (снятии) с учёта
@@ -184,56 +185,19 @@ def boolean logicalCheck() {
         if(row.regionName != row.codeOKATO){
             logger.error("Неверное наименование муниципального образования!")
         }
-        checkNSI(row.getCell('tsTypeCode'), "'Неверный код вида ТС!", 42)
+        checkNSI(row.getCell('tsTypeCode'), "Неверный код вида ТС!", 42)
         if(row.tsType != row.tsTypeCode){
             logger.error("Неверный вид ТС!")
         }
-        checkNSI(row.getCell('ecoClass'), "'Неверный код экологического класса!", 40)
+        checkNSI(row.getCell('ecoClass'), "Неверный код экологического класса!", 40)
         checkNSI(row.getCell('baseUnit'), "Неверный код ед. измерения мощности!", 12)
     }
 }
 
 // Проверка соответствия НСИ
 void checkNSI(Cell cell, String msg, Long id) {
-    if (cell.value != null && refBookService.getRecordData(id, cell.value))
+    if (cell.value != null && refBookService.getRecordData(id, cell.value) == null)
         logger.error(msg)
-}
-
-void checkNSI() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    for (def row in dataRows) {
-
-        // Проверка ОКАТО
-        if (!checkOkato(row.codeOKATO)) {
-            logger.error("Неверный код ОКАТО!");
-        }
-
-        // 2. Проверка муниципального образования
-        if (!checkRegionName(row.regionName)) {
-            logger.error("Неверное наименование муниципального образования!");
-        }
-
-        // 3. Проверка кода вида ТС
-        if (checkTsTypeCode(row.tsTypeCode)) {
-            // 4. Проверка вида ТС
-            if (!checkTsType(row.tsTypeCode, row.tsType)) {
-                logger.error('Неверный вид ТС!')
-            }
-        } else {
-            logger.error('Неверный код вида транспортного средства!')
-        }
-
-        // 5. Проверка кода экологического класса
-        if (!checkEcoClass(row.ecoClass)) {
-            logger.error('Неверный код экологического класса!')
-        }
-
-        // 6. Проверка кода ед. измерения мощности
-        if (!checkBaseUnit(row.baseUnit)) {
-            logger.error('Неверный код ед. измерения мощности!')
-        }
-    }
 }
 
 // сортировка ОКАТО - Муниципальное образование - Код вида ТС
@@ -278,92 +242,8 @@ void consolidation() {
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
-/**
- * 1. Проверка ОКАТО
- * В справочнике «Коды ОКАТО» должна быть строка, для которой выполняется условие:
- * «графа 2» (поле «Код ОКАТО») текущей строки формы = «графа 1» (поле «Код ОКАТО») строки справочника
- */
-boolean checkOkato(codeOKATO) {
-    if (codeOKATO != null && getRefBookValue(3, codeOKATO, "OKATO") != null) {
-        return true;
-    }
-    return false;
-}
-
-/**
- * Проверка муниципального образования
- * «Графа 3» (поле «Муниципальное образование, на территории которого зарегистрировано
- * транспортное средство (ТС)») текущей строки формы = «графа 2» (поле «Наименование»)
- * строки справочника «Коды ОКАТО» для указанного значения в «графе 2»
- * (поле «Код ОКАТО») текущей формы
- */
-def checkRegionName(regionName) {
-    if (regionName != null && getRefBookValue(3, regionName, "NAME") != null) {
-        return true;
-    }
-    return false
-}
-
-/**
- * Проверка кода вида ТС
- * В справочнике «Коды видов транспортных средств» должна быть строка, для которой выполняется условие:
- * «графа 4» (поле «Код вида ТС») текущей строки формы = «графа 3» (поле «Код вида ТС») строки справочника
- */
-def checkTsTypeCode(tsTypeCode) {
-    if (tsTypeCode != null && getRefBookValue(42, tsTypeCode, "CODE") != null) {
-        return true;
-    }
-    return false
-}
-
-/**
- * Проверка вида ТС
- *
- * «Графа 5» (поле «Вид ТС») текущей строки формы = «графа 1»
- * (поле «Наименование вида транспортного средства») строки справочника
- * «Коды видов транспортных средств» для указанного значения в «графе 4»
- * («Код вида ТС») текущей формы
- */
-
-def checkTsType(tsTypeCode, tsType) {
-    if (tsTypeCode != null && tsType != null && tsTypeCode == tsType) {
-        return true;
-    }
-    return false
-}
-
-/**
- * Проверка кода экологического класса
- * В справочнике «Экологические классы» должна быть строка, для которой выполняется условие:
- * «графа 8» (поле «Экологический класс») текущей строки формы = «графа 1» (поле «Код экологического класса») строки справочника
- */
-def checkEcoClass(ecoClass) {
-    if (ecoClass != null && getRefBookValue(40, ecoClass, "CODE") != null) {
-        return true;
-    }
-    return false
-}
-
-/**
- * В справочнике «Коды единиц измерения налоговой базы на основании ОКЕИ» должна быть строка, для которой выполняется условие:
- *  «графа 11» (поле «Мощности (ед. измерения)») текущей строки формы = «графа 1» (поле «Код единицы измерения») строки справочника
- *
- *  Проверка кода ед. измерения мощности
- */
-def checkBaseUnit(baseUnit) {
-    if (baseUnit != null && getRefBookValue(12, baseUnit, "CODE") != null) {
-        return true;
-    }
-    return false
-}
-
-/**
- * Получение значения (разменовываение)
- */
+// Получение значения (разменовываение)
 def getRefBookValue(refBookID, recordId, alias) {
-    //logger.info("refBookID, recordId, alias = "+refBookID+", "+ recordId+", "+alias)
-    def refDataProvider = refBookFactory.getDataProvider(refBookID)
-    def record = refDataProvider.getRecordData(recordId)
-
+    def record = refBookFactory.getDataProvider(refBookID).getRecordData(recordId)
     return record != null ? record.get(alias) : null;
 }
