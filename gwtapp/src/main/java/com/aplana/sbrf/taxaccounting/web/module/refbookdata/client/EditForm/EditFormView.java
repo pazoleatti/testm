@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPick
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -50,7 +51,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		for (RefBookColumn col : attributes) {
 			HorizontalPanel oneField = new HorizontalPanel();
 			oneField.setWidth("100%");
-			Label label = new Label(col.getName());
+            Label label = getArrtibuteLabel(col);
             label.setWordWrap(true);
 			HorizontalPanel panel = new HorizontalPanel();
 			panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
@@ -97,6 +98,25 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		this.widgets = widgets;
 		return widgets;
 	}
+
+    /**
+     *  Label для input'a редактирования значения справочника
+     *  с названием атрибута справочника
+     */
+    private Label getArrtibuteLabel(RefBookColumn col){
+        Label label;
+        if (col.isRequired()){
+            SafeHtmlBuilder builder = new SafeHtmlBuilder();
+            builder.appendHtmlConstant(col.getName() + ":<span class='required'>*</span>");
+            HTML span = new HTML(builder.toSafeHtml());
+            label = span;
+        } else{
+            label = new Label(col.getName()+":");
+        }
+        label.addStyleName("inputLabel");
+
+        return label;
+    }
 
 	@Override
 	public void fillInputFields(Map<String, RefBookValueSerializable> record) {

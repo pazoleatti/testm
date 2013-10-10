@@ -1,13 +1,13 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -76,6 +76,8 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
 
     @Override
     public void updateRecords(final List<Map<String, RefBookValue>> records) {
+        final RefBook refBook = refBookDao.get(REF_BOOK_ID);
+
         if (records == null || records.isEmpty()) {
             return;
         }
@@ -84,6 +86,12 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
         Set<Pair<Long, Long>> delList = new HashSet<Pair<Long, Long>>();
 
         for (Map<String, RefBookValue> record : records) {
+            // проверка обязательности заполнения записей справочника
+            List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(refBook.getAttributes(), record);
+            if (errors.size() > 0){
+                throw new DaoException("Поля " + errors.toString() + "являются обязательными для заполнения");
+            }
+
             long repId = record.get("REPORT_PERIOD_ID").getNumberValue().longValue();
             long depId = record.get("DEPARTMENT_ID").getReferenceValue().longValue();
             delList.add(new Pair<Long, Long>(repId, depId));
@@ -97,7 +105,7 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
         getJdbcTemplate().batchUpdate("delete from income_102 where report_period_id = ? and department_id = ?", delObjs,
                 new int[]{Types.NUMERIC, Types.NUMERIC});
 
-        final RefBook refBook = refBookDao.get(REF_BOOK_ID);
+
 
         // Добавление записей
         getJdbcTemplate().batchUpdate(

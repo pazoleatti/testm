@@ -112,4 +112,12 @@ public class RefBookValue implements Serializable {
 	public String toString() {
         return value == null ? "" : value.toString();
 	}
+
+    /**
+     * Проверка наличия установленного значения
+     * @return
+     */
+    public boolean isEmpty(){
+        return value == null;
+    }
 }

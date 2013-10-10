@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
@@ -71,6 +72,8 @@ public class FormDataServiceImpl implements FormDataService {
 	private SignService signService;
 	@Autowired(required = false)
 	private URL signDataPath;
+    @Autowired
+    private DepartmentDao departmentDao;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -505,8 +508,8 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		FormData formData = formDataDao.get(formDataId);
-				
-        checkDestinations(formData);
+
+        checkDestinations(formData, workflowMove);
 
 		formDataScriptingService.executeScript(userInfo,formData, workflowMove.getEvent(), logger, null);
 		
@@ -627,8 +630,11 @@ public class FormDataServiceImpl implements FormDataService {
     /**
      * Проверка наличия и статуса приемника при осуществлении перевода формы
      * в статус "Подготовлена"/"Утверждена"/"Принята".
+     *
+     * @param formData нф источника
+     * @param workflowMove переход
      */
-    private void checkDestinations(FormData formData) {
+    private void checkDestinations(FormData formData, WorkflowMove workflowMove) {
         List<DepartmentFormType> departmentFormTypes =
                 departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
                         formData.getFormType().getId(), formData.getKind());
@@ -636,9 +642,18 @@ public class FormDataServiceImpl implements FormDataService {
             for (DepartmentFormType department: departmentFormTypes) {
                 FormData form = formDataDao.find(department.getFormTypeId(), department.getKind(),
                         department.getDepartmentId(), formData.getReportPeriodId());
-                // если форма существует и статус отличен от "создана"
-                if (form != null && form.getState() != WorkflowState.CREATED) {
-                    throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
+
+                /*
+                Несли форма приемника существует и ее статус отличен от "создана" и переход не является:
+                    - Вернуть из "Утверждена" в "Создана"
+                    - Вернуть из "Подготовлена" в "Создана"
+                    - Вернуть из "Утверждена" в "Подготовлена"
+                 */
+                if (form != null && form.getState() != WorkflowState.CREATED &&
+                        (workflowMove != WorkflowMove.APPROVED_TO_CREATED && workflowMove != WorkflowMove.PREPARED_TO_CREATED && workflowMove != WorkflowMove.APPROVED_TO_PREPARED)) {
+                    Department sformDepartment =  departmentDao.getDepartment(form.getDepartmentId());
+                    throw new ServiceException("Переход невозможен, поскольку уже принята форма: "
+                            + form.getKind().getName() + " \"" + form.getFormType().getName() + "\" (" + sformDepartment.getName() + ").");
                 }
                 if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), department.getDepartmentId())){
                 	throw new ServiceException("Переход невозможен, т.к. у одного из приемников период не отрыт.");

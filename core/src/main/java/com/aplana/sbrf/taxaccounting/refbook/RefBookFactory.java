@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.refbook;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**
@@ -24,10 +25,12 @@ public interface RefBookFactory {
 
 	/**
 	 * Загружает список всех справочников
-	 * @param onlyVisible true - только видимые; false - весь список
-	 * @return
+	 *
+     * @param onlyVisible true - только видимые; false - весь список
+     * @param type тип справочника внутренний/внешний
+     * @return
 	 */
-	List<RefBook> getAll(boolean onlyVisible);
+	List<RefBook> getAll(boolean onlyVisible, RefBookType type);
 
 	/**
 	 * Ищет справочник по коду атрибута

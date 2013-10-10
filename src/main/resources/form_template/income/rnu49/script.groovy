@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
@@ -19,6 +20,7 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *      - уникальность инвентарного номера
+ *      - расчеты и проверки при консолидации
  * TODO заменить значение поля saledPropertyCode и saleCode на значение из справочника
  *
  * @author rtimerbaev
@@ -32,7 +34,7 @@ switch (formDataEvent) {
         allCheck()
         break
     case FormDataEvent.CALCULATE :
-        calc()
+        calculate()
         allCheck()
         break
     case FormDataEvent.ADD_ROW :
@@ -53,11 +55,8 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        calc()
-        if (allCheck()) {
-            // для сохранения изменений приемников
-            data.commit()
-        }
+        calculate()
+        allCheck()
         break
 }
 
@@ -131,18 +130,25 @@ def deleteRow() {
     }
 }
 
-/**
- * Расчеты. Алгоритмы заполнения полей формы.
- */
-void calc() {
+void calculate(){
     def data = data
     def rows = getRows(data)
-    def data46 = getData(formData46)
-    def data45 = getData(formData45)
-    def data12 = getData(formData12)
-    /*
-     * Проверка обязательных полей.
-     */
+    if (formData.kind != FormDataKind.CONSOLIDATED){
+        preCalc(data, rows)
+        sort(data, rows)
+        calc(data, rows)
+        calcTotal(data, rows)
+    } else {
+        sort(data, rows)
+        calcTotal(data, rows)
+    }
+    data.update(rows)
+}
+
+/*
+ * Проверка редактиремых обязательных полей перед расчетом.
+ */
+def preCalc(def data, def rows){
 
     // Список проверяемых столбцов (графа 2..14, 21, 22)
     def requiredColumns = ['firstRecordNumber', 'operationDate', 'reasonNumber', 'reasonDate',
@@ -151,9 +157,19 @@ void calc() {
 
     for (def row : rows) {
         if (!isFixedRow(row) && !checkRequiredColumns(row, requiredColumns)) {
-            return
+            return false
         }
     }
+
+}
+
+/**
+ * Расчеты. Алгоритмы заполнения полей формы.
+ */
+void calc(def data, def rows) {
+    def data46 = getData(formData46)
+    def data45 = getData(formData45)
+    def data12 = getData(formData12)
 
     /*
      * Расчеты.
@@ -205,7 +221,9 @@ void calc() {
             row.expensesSum = getGraph20(row)
         }
     }
-    sort()
+}
+
+void calcTotal(def data, def rows){
     // подразделы
     ['A', 'B', 'V', 'G', 'D', 'E'].each { section ->
         firstRow = data.getDataRow(rows,section)
@@ -216,15 +234,12 @@ void calc() {
             lastRow.getCell(it).setValue(getSum(it, firstRow, lastRow))
         }
     }
-    data.save(getRows(data))
 }
 
 /**
  * Отсортировать / группировать строки
  */
-void sort() {
-    def data = data
-    def rows = getRows(data)
+void sort(def data, def rows) {
     def sortRows = []
     def from
     def to
@@ -241,6 +256,7 @@ void sort() {
     sortRows.each {
         it.sort { it.operationDate }
     }
+    data.save(rows)
 }
 
 /**
@@ -261,12 +277,7 @@ def getRowByAlias(def data, def alias) {
     if (alias == null || alias == '' || data == null) {
         return null
     }
-    for (def row : getRows(data)) {
-        if (alias.equals(row.getAlias())) {
-            return row
-        }
-    }
-    return null
+    return data.getDataRow(getRows(data),alias)
 }
 
 /**
@@ -296,6 +307,11 @@ def logicalCheck() {
             // 1. Обязательность заполнения поля графы (графа 1..22)
             if (!checkRequiredColumns(row, columns)) {
                 return false
+            }
+
+            // для консолидированной формы пропускаем остальные проверки
+            if (formData.kind == FormDataKind.CONSOLIDATED){
+                return true
             }
 
             // 2. Проверка на уникальность поля «инвентарный номер» (графа 6)
@@ -376,19 +392,19 @@ def logicalCheck() {
                 logger.warn(rowStart + 'неверное значение графы «Сумма расходов, приходящаяся на каждый месяц»!')
             }
 
-            // 9. Проверка итоговых значений формы
-            // графы для которых считать итого (графа 9-13,15-17, 20)
-            def totalColumns = ['amort', 'expensesOnSale', 'sum', 'sumInFact', 'costProperty', 'sumIncProfit',
-                    'profit', 'loss', 'expensesSum']
-            // подразделы
-            for (def section : ['A', 'B', 'V', 'G', 'D', 'E']) {
-                firstRow = data.getDataRow(rows,section)
-                lastRow = data.getDataRow(rows,'total' + section)
-                for (def column : totalColumns) {
-                    if (lastRow.getCell(column).getValue().equals(getSum(column, firstRow, lastRow))) {
-                        logger.error('Итоговые значения рассчитаны неверно!')
-                        return false
-                    }
+        }
+        // 9. Проверка итоговых значений формы
+        // графы для которых считать итого (графа 9-13,15-17, 20)
+        def totalColumns = ['amort', 'expensesOnSale', 'sum', 'sumInFact', 'costProperty', 'sumIncProfit',
+                'profit', 'loss', 'expensesSum']
+        // подразделы
+        for (def section : ['A', 'B', 'V', 'G', 'D', 'E']) {
+            firstRow = data.getDataRow(rows,section)
+            lastRow = data.getDataRow(rows,'total' + section)
+            for (def column : totalColumns) {
+                if (lastRow.getCell(column).getValue().equals(getSum(column, firstRow, lastRow))) {
+                    logger.error('Итоговые значения рассчитаны неверно!')
+                    return false
                 }
             }
         }
@@ -503,9 +519,7 @@ void consolidation() {
             deleteRows += row
         }
     }
-    deleteRows.each { row ->
-        data.delete(row)
-    }
+    data.delete(deleteRows)
 
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
@@ -514,7 +528,7 @@ void consolidation() {
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 // подразделы
                 ['A', 'B', 'V', 'G', 'D', 'E'].each { section ->
-                    copyRows(source, formData, section, 'total' + section)
+                    copyRows(getData(source), data, section, 'total' + section)
                 }
             }
         }
@@ -535,19 +549,6 @@ void checkOnCancelAcceptance() {
         if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
             logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
         }
-    }
-}
-
-/**
- * Принять.
- */
-void acceptance() {
-    if (!logicalCheck() || !checkNSI()) {
-        return
-    }
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() {
-        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
     }
 }
 
@@ -606,14 +607,7 @@ def isSection(def section, def row) {
  * Получить номер строки в таблице.
  */
 def getIndex(def row) {
-    getRows(data).indexOf(row)+1
-}
-
-/**
- * Получить номер строки в таблице по псевдонимиу.
- */
-def getIndex(def form, def rowAlias) {
-    return form.dataRows.indexOf(form.getDataRow(rowAlias))
+    return row.getIndex() - 1
 }
 
 /**
@@ -660,21 +654,23 @@ def getRowIndexString(def DataRow row){
 /**
  * Копировать заданный диапозон строк из источника в приемник.
  *
- * @param sourceForm форма источник
- * @param destinationForm форма приемник
- * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно),
- *      если = null, то копировать с 0 строки
+ * @param sourceData хелпер источника
+ * @param destinationData хелпер приемника
+ * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно)
  * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно),
  *      в приемник строки вставляются перед строкой с этим псевдонимом
  */
-void copyRows(def sourceForm, def destinationForm, def fromAlias, def toAlias) {
-    def from = getIndex(sourceForm, fromAlias) + 1
-    def to = getIndex(sourceForm, toAlias)
+void copyRows(def DataRowHelper sourceData, def DataRowHelper destinationData, def fromAlias, def toAlias) {
+    def from = getIndexByAlias(sourceData, fromAlias) + 1
+    def to = getIndexByAlias(sourceData, toAlias)
     if (from > to) {
         return
     }
-    getRows(getData(sourceForm)).subList(from, to).each { row ->
-        getData(destinationForm).insert(row, getIndex(destinationForm, toAlias))
+    def copyRows = getRows(sourceData).subList(from, to)
+    getRows(destinationData).addAll(getIndexByAlias(destinationData, toAlias), copyRows)
+    // поправить индексы, потому что они после вставки не пересчитываются
+    getRows(destinationData).eachWithIndex { row, i ->
+        row.setIndex(i + 1)
     }
 }
 

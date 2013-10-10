@@ -62,28 +62,28 @@ switch (formDataEvent) {
 def addNewRow() {
     def data = getData(formData)
     def newRow = getNewRow()
-    def row
+    def index
 
     if (currentDataRow == null || getIndex(currentDataRow) == -1) {
-        row = getRowByAlias(data, 'totalA')
+        index = getIndexByAlias(data, 'totalA')
     } else if (currentDataRow.getAlias() == null) {
-        row = currentDataRow
+        index = getIndex(currentDataRow) + 1
     } else {
-        row = getRowByAlias(data, 'totalA')
+        index = getIndexByAlias(data, 'totalA')
         switch (currentDataRow.getAlias()) {
             case 'A' :
             case 'totalA' :
-                row = getRowByAlias(data, 'totalA')
+                index = getIndexByAlias(data, 'totalA')
                 break
             case 'B' :
             case 'totalB' :
             case 'total' :
-                row = getRowByAlias(data, 'totalB')
+                index = getIndexByAlias(data, 'totalB')
                 break
         }
     }
 
-    data.insert(newRow, getIndex(row) + 1)
+    data.insert(newRow, index + 1)
 }
 
 /**

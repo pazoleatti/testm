@@ -150,13 +150,13 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetAll() {
-		List<RefBook> refBooks = refBookDao.getAll();
+		List<RefBook> refBooks = refBookDao.getAll(0);
 		Assert.assertEquals(3, refBooks.size());
 	}
 
 	@Test
 	public void testGetAllVisible() {
-		Assert.assertEquals(2, refBookDao.getAllVisible().size());
+		Assert.assertEquals(2, refBookDao.getAllVisible(0).size());
 	}
 
 	@Test

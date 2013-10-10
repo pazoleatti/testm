@@ -91,10 +91,7 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        if (checkAll()) {
-            // для сохранения изменений приемников
-            data.commit()
-        }
+        checkAll()
         break
 }
 
