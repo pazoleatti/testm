@@ -26,9 +26,6 @@ public abstract class AbstractXlsxReportBuilder {
 
     protected Map<Integer, Integer> widthCellsMap = new HashMap<Integer, Integer>();
 
-    /*
-     * Нужно создать в классе наследнике блок static, для определения в нем имени файла
-     */
     private String fileName;
     private String postfix;
 
@@ -83,7 +80,7 @@ public abstract class AbstractXlsxReportBuilder {
 
     /**
      * Выставление области печати для отчета.
-     * Она может маштабироваться самим Excel, в зависимости от ширины области печати.
+     * Она может масштабироваться самим Excel, в зависимости от ширины области печати.
      */
     protected void setPrintSetup(){
         //Nothing

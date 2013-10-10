@@ -13,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -75,4 +77,16 @@ public class AuditServiceImpl implements AuditService {
 		values.setUsers(userService.listAllUsers());
 		return values;
 	}
+
+    @Override
+    @Transactional(readOnly = false)
+    public void removeRecords(List<LogSystemSearchResultItem> items, TAUserInfo userInfo) {
+        if (!items.isEmpty()){
+            List<Long> listIds = new ArrayList<Long>();
+            for (LogSystemSearchResultItem item : items)
+                listIds.add(item.getId());
+            auditDao.removeRecords(listIds);
+        }
+        add(FormDataEvent.ARCHIVE, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, "Архивация ЖА");
+    }
 }

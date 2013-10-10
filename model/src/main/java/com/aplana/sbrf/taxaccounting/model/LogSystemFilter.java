@@ -14,6 +14,7 @@ public class LogSystemFilter implements Serializable {
     private Integer userId;
     private List<Integer> reportPeriodIds;
     private FormDataKind formKind;
+    private TaxType taxType;
     private Integer declarationTypeId;
     private Integer auditFormTypeId;
     private Integer formTypeId;
@@ -21,6 +22,13 @@ public class LogSystemFilter implements Serializable {
     private Date fromSearchDate;
     private Date toSearchDate;
 
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
+    }
 
     /*Стартовый индекс списка записей */
     private int startIndex;

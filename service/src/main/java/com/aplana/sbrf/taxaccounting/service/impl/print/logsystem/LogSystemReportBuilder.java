@@ -24,6 +24,9 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
     private static final String DATE_DATA_FORMAT = "dd.MM.yyyy HH:mm";
     private static final String DATE_FORMAT = "dd.MM.yyyy";
 
+    private static final String fileName = "Журнал_аудита_";
+    private static final String postfix = ".xlsx";
+
     private List<LogSystemSearchResultItem> items;
 
     private static final String dateColumnHeader = "Дата-время";
@@ -40,7 +43,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
     private final Log logger = LogFactory.getLog(getClass());
 
     public LogSystemReportBuilder(List<LogSystemSearchResultItem> items) {
-        super("Журнал_аудита_", ".xlsx");
+        super(fileName, postfix);
         this.workBook = new SXSSFWorkbook(50);
         this.sheet = workBook.createSheet("Журнал аудита");
         sheet.getLastRowNum();

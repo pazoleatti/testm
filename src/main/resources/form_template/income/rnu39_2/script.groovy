@@ -285,7 +285,7 @@ def checkNSI() {
         errorMsg = "В строке $index "
 
         // 1. Проверка кода валюты со справочным (графа 1)
-        if (getRecord(15, row.currencyCode, cache) == null) {
+        if (getRecordById(15, row.currencyCode, cache) == null) {
             logger.warn(errorMsg + 'неверный код валюты!')
         }
     }
@@ -467,7 +467,6 @@ def getColumnName(def row, def alias) {
     return ''
 }
 
-
 /**
  * Проверить заполненость обязательных полей.
  *
@@ -578,7 +577,7 @@ def calc14(def data, def row, def dateStart, def dateEnd, def cache) {
     if ((isA && dateStart <= row.maturityDateCurrent && row.maturityDateCurrent <= dateEnd) ||
             (!isA && row.shortPositionOpen <= row.maturityDateCurrent && row.maturityDateCurrent <= row.shortPositionClose)) {
         // справочник 15 "Общероссийский классификатор валют", атрибут 64 CODE - "Код валюты. Цифровой"
-        def record15 = getRecord(15, row.currencyCode, cache)
+        def record15 = getRecordById(15, row.currencyCode, cache)
         if (record15 != null && record15.CODE.value == '810') {
             tmp = row.amount * row.incomeCurrentCoupon
         } else {
@@ -620,7 +619,7 @@ def roundValue(def value, int precision) {
  * @param cache кеш
  * @return
  */
-def getRecord(def refBookId, def recordId, def cache) {
+def getRecordById(def refBookId, def recordId, def cache) {
     if (cache[refBookId] != null) {
         if (cache[refBookId][recordId] != null) {
             return cache[refBookId][recordId]
@@ -693,8 +692,8 @@ void sort(def data) {
         sectionRows.sort { def a, def b ->
             // графа 1  - currencyCode (справочник)
             // графа 2  - issuer
-            def record15A = getRecord(15, a.currencyCode, cache)
-            def record15B = getRecord(15, b.currencyCode, cache)
+            def record15A = getRecordById(15, a.currencyCode, cache)
+            def record15B = getRecordById(15, b.currencyCode, cache)
             def codeA = (record15A != null ? record15A.CODE.value : null)
             def codeB = (record15B != null ? record15B.CODE.value : null)
             if (codeA == codeB) {

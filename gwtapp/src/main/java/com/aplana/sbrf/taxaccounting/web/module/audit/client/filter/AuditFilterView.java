@@ -137,6 +137,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         lsf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
         // Пользователь
         lsf.setUserId(userId.getValue());
+        lsf.setTaxType(formDataTaxType.getValue());
         return lsf;
     }
 
@@ -278,5 +279,12 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiHandler("printButton")
     void onPrintButtonClicked(ClickEvent event){
         getUiHandlers().onPrintButtonClicked();
+    }
+
+    @UiHandler("archive")
+    void onArchive(ClickEvent event){
+        if(getUiHandlers() != null){
+            getUiHandlers().onArchiveButtonClicked();
+        }
     }
 }

@@ -1,20 +1,13 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -44,8 +37,9 @@ public class RefBookFactoryImpl implements RefBookFactory {
     }
 
     @Override
-    public List<RefBook> getAll(boolean onlyVisible) {
-        return onlyVisible ? refBookDao.getAllVisible() : refBookDao.getAll();
+    public List<RefBook> getAll(boolean onlyVisible, RefBookType type) {
+        Integer typeId = type == null ? null : type.getId();
+        return onlyVisible ? refBookDao.getAllVisible(typeId) : refBookDao.getAll(typeId);
     }
 
     @Override

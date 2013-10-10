@@ -4,8 +4,15 @@ import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
 import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.module.audit.client.archive.AuditArchiveDialogEvent;
+import com.aplana.sbrf.taxaccounting.web.module.audit.client.archive.AuditArchiveDialogPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientArchiveEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSearchEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.filter.AuditFilterPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.audit.shared.AuditArchiveAction;
+import com.aplana.sbrf.taxaccounting.web.module.audit.shared.AuditArchiveResult;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditDataListAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditDataListResult;
 import com.google.gwt.view.client.AsyncDataProvider;
@@ -25,6 +32,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -32,15 +40,23 @@ import java.util.List;
  * Date: 2013
  */
 public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView, AuditClientPresenter.MyProxy>
-        implements AuditClientSearchEvent.MyHandler, AuditClientUIHandler {
+        implements AuditClientSearchEvent.MyHandler, AuditClientArchiveEvent.AuditClientArchiveHandler, AuditArchiveDialogEvent.AuditArchiveHandler, AuditClientUIHandler {
 
     private MyDataProvider dataProvider = new MyDataProvider();
+
+    private AuditArchiveDialogPresenter auditArchiveDialogPresenter;
 
     @ProxyEvent
     @Override
     public void onAuditFormSearchButtonClicked(AuditClientSearchEvent event) {
         dataProvider.update();
         getProxy().manualReveal(AuditClientPresenter.this);
+    }
+
+    @ProxyEvent
+    @Override
+    public void onAuditArchiveButtonClick(AuditClientArchiveEvent event) {
+        addToPopupSlot(auditArchiveDialogPresenter);
     }
 
     public void onRangeChange(final int start, int length) {
@@ -61,9 +77,28 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         });
     }
 
+    @ProxyEvent
+    @Override
+    public void onAuditArchiveClickEvent(AuditArchiveDialogEvent event) {
+        LogSystemFilter logSystemFilter = new LogSystemFilter();
+        logSystemFilter.setToSearchDate(event.getArchiveDate());
+        logSystemFilter.setFromSearchDate(new Date(0));
+        AuditArchiveAction action = new AuditArchiveAction();
+        action.setLogSystemFilter(logSystemFilter);
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<AuditArchiveResult>() {
+            @Override
+            public void onSuccess(AuditArchiveResult result) {
+                MessageEvent.fire(AuditClientPresenter.this, "Архивация выполнена успешно.");
+                getView().getBlobFromServer(result.getUuid());
+            }
+        }, this));
+        getProxy().manualReveal(AuditClientPresenter.this);
+    }
+
     interface MyView extends View,HasUiHandlers<AuditClientUIHandler> {
         void setAuditTableData(int startIndex, long count,  List<LogSystemSearchResultItem> itemList);
         void assignDataProvider(int pageSize, AsyncDataProvider<LogSystemSearchResultItem> provider);
+        void getBlobFromServer(String uuid);
     }
 
     @ProxyCodeSplit
@@ -79,8 +114,9 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     private static final int PAGE_SIZE = 20;
 
     @Inject
-    public AuditClientPresenter(EventBus eventBus, MyView view, MyProxy proxy, AuditFilterPresenter auditFilterPresenter, DispatchAsync dispatcher) {
+    public AuditClientPresenter(EventBus eventBus, MyView view, MyProxy proxy, AuditArchiveDialogPresenter auditArchiveDialogPresenter, AuditFilterPresenter auditFilterPresenter, DispatchAsync dispatcher) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
+        this.auditArchiveDialogPresenter = auditArchiveDialogPresenter;
         this.auditFilterPresenter = auditFilterPresenter;
         this.dispatcher = dispatcher;
         getView().setUiHandlers(this);

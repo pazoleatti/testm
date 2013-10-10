@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
 import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 
+import java.util.List;
+
 /**
  * DAO-Интерфейс для работы с журналом аудита
  */
@@ -20,5 +22,11 @@ public interface AuditDao {
 	 * Добавить информацию об логировании
 	 */
 	void add(LogSystem logSystem);
+
+    /**
+     * Удалить информацию о логировании.
+     * @param integers
+     */
+    void removeRecords(List<Long> integers);
 
 }

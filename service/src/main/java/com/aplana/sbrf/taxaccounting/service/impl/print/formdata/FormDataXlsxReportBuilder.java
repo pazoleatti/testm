@@ -18,8 +18,7 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.springframework.util.ClassUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -41,6 +40,9 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
     private static final String TEMPLATE = ClassUtils
 			.classPackageAsResourcePath(FormDataXlsxReportBuilder.class)
 			+ "/acctax.xlsm";
+
+    private static final String fileName = "Налоговый_отчет_";
+    private static final String postfix = ".xlsm";
 
 	private enum CellType{
 		DATE,
@@ -161,7 +163,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 	private Date creationDate;
 
     public FormDataXlsxReportBuilder() throws IOException {
-        super("Налоговый_отчет_", ".xlsm");
+        super(fileName, postfix);
         InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
         try {
             workBook = WorkbookFactory.create(templeteInputStream);

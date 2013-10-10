@@ -344,35 +344,43 @@ def logicalCheck() {
         // 9. Проверка на неотрицательные значения
         if (row.discountInCurrency == null || row.discountInCurrency < 0) {
             logger.error("Значение графы «${row.getCell('discountInCurrency').column.name}» отрицательное!")
+            return false
         }
         if (row.discountInRub == null || row.discountInRub < 0) {
             logger.error("Значение графы «${row.getCell('discountInRub').column.name}» отрицательное!")
+            return false
         }
 
         // 10. Арифметические проверки граф 8, 9, 12-15
         // Графа 8
         if (row.termDealBill != calcTermDealBill(row)) {
-            logger.warn("Неверно рассчитана графа «${row.getCell('termDealBill').column.name}»!")
+            logger.error("Неверно рассчитана графа «${row.getCell('termDealBill').column.name}»!")
+            return false
         }
         // Графа 9
         if (row.percIncome != calcPercIncome(row)) {
-            logger.warn("Неверно рассчитана графа «${row.getCell('percIncome').column.name}»!")
+            logger.error("Неверно рассчитана графа «${row.getCell('percIncome').column.name}»!")
+            return false
         }
         // Графа 12
         if (row.discountInCurrency != calcDiscountInCurrency(row)) {
-            logger.warn("Неверно рассчитана графа «${row.getCell('discountInCurrency').column.name}»!")
+            logger.error("Неверно рассчитана графа «${row.getCell('discountInCurrency').column.name}»!")
+            return false
         }
         // Графа 13
         if (row.discountInRub != calcDiscountInRub(row)) {
-            logger.warn("Неверно рассчитана графа «${row.getCell('discountInRub').column.name}»!")
+            logger.error("Неверно рассчитана графа «${row.getCell('discountInRub').column.name}»!")
+            return false
         }
         // Графа 14
         if (row.sumIncomeinCurrency != calcSumIncomeinCurrency(row, startDate, endDate)) {
-            logger.warn('Неверно рассчитана графа «Сумма начисленного процентного дохода за отчётный период в валюте»!')
+            logger.error("Неверно рассчитана графа «${row.getCell('sumIncomeinCurrency').column.name}»!")
+            return false
         }
         // Графа 15
         if (row.sumIncomeinRuble != calcSumIncomeinRuble(row)) {
-            logger.warn('Неверно рассчитана графа «Сумма начисленного процентного дохода за отчётный период в рублях по курсу Банка России»!')
+            logger.error("Неверно рассчитана графа «${row.getCell('sumIncomeinRuble').column.name}»!")
+            return false
         }
 
         // 11. Проверка итоговых значений по всей форме (графа 13, 15)
@@ -399,6 +407,8 @@ def logicalCheck() {
             }
         }
     }
+
+    return true
 }
 
 // Проверка соответствия НСИ

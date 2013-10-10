@@ -3,12 +3,14 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -200,5 +202,10 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     public void assignDataProvider(int pageSize, AsyncDataProvider<LogSystemSearchResultItem> provider) {
         auditTable.setPageSize(pageSize);
         provider.addDataDisplay(auditTable);
+    }
+
+    @Override
+    public void getBlobFromServer(String uuid) {
+        Window.open(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid, "", "");
     }
 }

@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -14,9 +17,9 @@ import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsxReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemCsvBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +62,7 @@ public class PrintingServiceImpl implements PrintingService {
 
     private static long REF_BOOK_ID = 8L;
     private static String REF_BOOK_VALUE_NAME = "CODE";
-	
+
 	@Override
 	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean isShowChecked) {
 		if (formDataAccessService.canRead(userInfo, formDataId)) {
@@ -68,7 +71,7 @@ public class PrintingServiceImpl implements PrintingService {
 			FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
 			Department department =  departmentDao.getDepartment(formData.getDepartmentId());
 			ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
-			
+
 			data.setData(formData);
 			data.setDepartment(department);
 			data.setFormTemplate(formTemplate);
@@ -92,12 +95,12 @@ public class PrintingServiceImpl implements PrintingService {
 					userInfo.getUser().getId(), formDataId
 				);
 		}
-		
+
 	}
 
 	@Override
 	public String generateExcelLogEntry(List<LogEntry> listLogEntries) {
-		
+
 		try {
 			LogEntryReportBuilder builder = new LogEntryReportBuilder(listLogEntries);
 			return builder.createReport() ;
@@ -129,4 +132,14 @@ public class PrintingServiceImpl implements PrintingService {
         }
     }
 
+    @Override
+    public String generateAuditCsv(List<LogSystemSearchResultItem> resultItems) {
+        try {
+            LogSystemCsvBuilder logSystemCsvBuilder = new LogSystemCsvBuilder(resultItems);
+            return logSystemCsvBuilder.createReport();
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            throw new ServiceException("Ошибка при архивировании журнала аудита." + LogSystemReportBuilder.class);
+        }
+    }
 }

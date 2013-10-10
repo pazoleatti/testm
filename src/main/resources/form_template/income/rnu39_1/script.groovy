@@ -2,6 +2,7 @@ package form_template.income.rnu39_1
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -111,11 +112,10 @@ def boolean logicalCheck(){
         def values = getValues(row, null)
         for (def colName : values.keySet()) {
             if (row[colName] != values[colName]) {
-                isValid = false
                 def columnName = row.getCell(colName).getColumn().getName().replace('%', '%%')
                 def rowStart = getRowIndexString(row)
                 logger.error("${rowStart}поле $columnName заполнено неверно!")
-                break
+                return false
             }
         }
     }
@@ -174,12 +174,10 @@ void calc(){
         firstRow = data.getDataRow(rows,section)
         lastRow = data.getDataRow(rows,'total' + section)
         getTotalCols().each {
-            lastRow.getCell(it).setValue(getSum(rows, it, firstRow, lastRow))
+            lastRow[it] = getSum(rows, it, firstRow, lastRow)
         }
     }
     data.update(rows)
-
-
 }
 
 void addNewRow(){
@@ -210,21 +208,55 @@ void deleteRow(){
  */
 void consolidation() {
     def data = data
-    // удалить все строки и собрать из источников их строки
-    data.clear()
+    // удалить нефиксированные строки
+    def deleteRows = []
+    getRows(data).each { row ->
+        if (!isTotal(row)) {
+            deleteRows += row
+        }
+    }
+    data.delete(deleteRows)
 
-    for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())) {
-        if (formDataSource.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId)
+    // собрать из источников строки и разместить соответствующим разделам
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def FormData source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                sourceForm = getData(source)
-                for (row in getRows(sourceForm)) {
-                    if (row.getAlias() == null) {
-                        data.insert(row, getRows(data).size() + 1)
-                    }
+                // подразделы
+                ['A1', 'A2', 'A3', 'A4', 'B1', 'B2', 'B3', 'B4'].each { section ->
+                    copyRows(source, formData, section, 'total' + section)
                 }
             }
         }
+    }
+    data.save(getRows(data))
+    logger.info('Формирование консолидированной формы прошло успешно.')
+}
+
+/**
+ * Копировать заданный диапозон строк из источника в приемник.
+ *
+ * @param sourceForm форма источник
+ * @param destinationForm форма приемник
+ * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно),
+ *      если = null, то копировать с 0 строки
+ * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно),
+ *      в приемник строки вставляются перед строкой с этим псевдонимом
+ */
+void copyRows(def FormData sourceForm, def FormData destinationForm, def fromAlias, def toAlias) {
+    def sourceData = getData(sourceForm)
+    def destinationData = getData(destinationForm)
+    def from = getIndexByAlias(sourceData, fromAlias) + 1
+    def to = getIndexByAlias(sourceData, toAlias)
+    if (from > to) {
+        return
+    }
+
+    def copyRows = getRows(sourceData).subList(from, to)
+    getRows(destinationData).addAll(getIndexByAlias(destinationData, toAlias), copyRows)
+    // поправить индексы, потому что они после вставки не пересчитываются
+    getRows(destinationData).eachWithIndex { row, i ->
+        row.setIndex(i + 1)
     }
 }
 
@@ -337,7 +369,7 @@ def checkRequiredColumns(def DataRow row, def ArrayList<String> columns) {
  * @return
  */
 def String getRowIndexString(def DataRow row){
-    def index = getRows(data).indexOf(row)+2
+    def index = getIndex(row)+1
     return "В строке $index "
 }
 
@@ -359,10 +391,20 @@ void sort() {
         }
 
     }
-
     sortRows.each {
         it.sort {  DataRow a, DataRow b ->
-            sortRow(sortColumns, a, b)
+            if (isTotal(a) || isTotal(b)){
+                return 0
+            }
+            def aD = getCurrency(a.currencyCode)
+            def bD = getCurrency(b.currencyCode)
+            if (aD != bD) {
+                return aD <=> bD
+            } else {
+                aD = a.issuer
+                bD = b.issuer
+                return aD <=> bD
+            }
         }
     }
     data.save(rows)
@@ -371,21 +413,9 @@ void sort() {
 /**
  * Получить номер строки в таблице по псевдонимиу (0..n).
  */
-def getIndexByAlias(def data, String rowAlias) {
+def getIndexByAlias(def DataRowHelper data, String rowAlias) {
     def row = getRowByAlias(data,rowAlias)
-    return (row != null ? (getRows(data).indexOf(row)+1) : -1)
-}
-
-int sortRow(List<String> params, DataRow a, DataRow b) {
-    for (String param : params) {
-        def aD = a.getCell(param).value
-        def bD = b.getCell(param).value
-
-        if (aD != bD) {
-            return aD <=> bD
-        }
-    }
-    return 0
+    return (row != null ? getIndex(row) : -1)
 }
 
 /**
@@ -394,16 +424,11 @@ int sortRow(List<String> params, DataRow a, DataRow b) {
  * @param data данные нф
  * @param alias алиас
  */
-def getRowByAlias(def data, def alias) {
+def getRowByAlias(def DataRowHelper data, def alias) {
     if (alias == null || alias == '' || data == null) {
         return null
     }
-    for (def row : getRows(data)) {
-        if (alias.equals(row.getAlias())) {
-            return row
-        }
-    }
-    return null
+    return data.getDataRow(getRows(data),alias)
 }
 
 /**
@@ -439,8 +464,8 @@ def getGraph14(def row){
         if(isRubleCurrency(row.currencyCode)){
             return row.amount * row.incomeCurrentCoupon
         } else {
-            return roundTo(row.currentCouponRate * row.cost * (row.maturityDateCurrent - row.maturityDatePrev) / 360, 2) *
-                    getCourse(row.currencyCode, row.maturityDateCurrent)
+            return roundTo(row.currentCouponRate * row.cost * (row.maturityDateCurrent - row.maturityDatePrev) / 360 *
+                    getCourse(row.currencyCode, row.maturityDateCurrent), 2)
         }
     } else {
         return 0
@@ -505,8 +530,8 @@ BigDecimal roundTo(BigDecimal value, int newScale) {
  * Получить сумму столбца.
  */
 def getSum(def rows, def columnAlias, def rowStart, def rowEnd) {
-    def from = rows.indexOf(rowStart) + 2
-    def to = rows.indexOf(rowEnd)
+    def from = getIndex(rowStart) + 1
+    def to = getIndex(rowEnd) - 1
     if (from > to) {
         return 0
     }
@@ -516,4 +541,11 @@ def getSum(def rows, def columnAlias, def rowStart, def rowEnd) {
 def getReportDate(){
     def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
     return (tmp ? tmp.getTime() + 1 : null)
+}
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    return row.getIndex() - 1
 }
