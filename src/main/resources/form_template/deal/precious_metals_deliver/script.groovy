@@ -868,7 +868,7 @@ def checkHeaderRow(def xml, def headRowCount, def cellNumber, def arrayHeaders) 
 def addData(def xml) {
     Date date = reportPeriodService.get(formData.reportPeriodId).taxPeriod.getEndDate()
 
-    def headShift = getHeaderRowCount() - 1
+    def headShift = getHeaderRowCount()
     def cache = [:]
     def data = formDataService.getDataRowHelper(formData)
     data.clear()
