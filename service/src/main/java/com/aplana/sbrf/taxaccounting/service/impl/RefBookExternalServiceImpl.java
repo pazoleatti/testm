@@ -69,7 +69,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         // архив для загр. спр. "Коды ОКАТО"
         map.put("OKA.*", new Pair<Boolean, Long>(false, 3L));
         // файл для загр. спр. "Организации-участники контролируемых сделок"
-        map.put("organ_info.*", new Pair<Boolean, Long>(true, 9L));
+        map.put("organization.xls", new Pair<Boolean, Long>(true, 9L));
 
         BufferedReader reader = null;
         if (log.isDebugEnabled()) {
