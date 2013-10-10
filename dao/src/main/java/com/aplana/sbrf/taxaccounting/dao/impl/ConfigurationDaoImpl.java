@@ -47,13 +47,26 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
 	}
 
 	@Override
-	public void saveParams(Map<ConfigurationParam, String> params) {
-		List<Object[]> sqlParams = new ArrayList<Object[]>();
-		for (Map.Entry<ConfigurationParam, String> entry : params.entrySet()) {
+	public void saveParams(Map<ConfigurationParam, String> newParams) {
+		Map<ConfigurationParam, String> oldParams = loadParams();
+
+		List<Object[]> insertParams = new ArrayList<Object[]>();
+		List<Object[]> updateParams = new ArrayList<Object[]>();
+		for (Map.Entry<ConfigurationParam, String> entry : newParams.entrySet()) {
 			ConfigurationParam param = entry.getKey();
 			String value = entry.getValue();
-			sqlParams.add(new Object[]{param.toString(), value});
+
+			if (oldParams.containsKey(entry.getKey())) {
+				updateParams.add(new Object[] {value, param.toString()});
+			} else {
+				insertParams.add(new Object[] {value, param.toString()});
+			}
 		}
-		getJdbcTemplate().batchUpdate("update configuration set code = ?, value = ?", sqlParams);
+		if (insertParams.size() > 0) {
+			getJdbcTemplate().batchUpdate("insert into configuration (value, code) values (?, ?)", insertParams);
+		}
+		if (updateParams.size() > 0) {
+			getJdbcTemplate().batchUpdate("update configuration set value = ? where code = ?", updateParams);
+		}
 	}
 }

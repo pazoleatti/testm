@@ -29,6 +29,10 @@ public interface ConfigurationDao {
 	 */
 	Map<ConfigurationParam, String> loadParams();
 
+	/**
+	 * Сохраняет значения параметров в БД. Если параметр в БД отсутствует, то он создается
+	 * @param params
+	 */
 	void saveParams(Map<ConfigurationParam, String> params);
 
 }
