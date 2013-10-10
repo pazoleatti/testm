@@ -2,6 +2,8 @@ package form_template.income.rnu55
 
 import java.math.RoundingMode
 import java.text.SimpleDateFormat
+import com.aplana.sbrf.taxaccounting.model.DataRow
+
 /**
  * Скрипт для РНУ-55 (rnu55.groovy).
  * Форма "(РНУ-55) Регистр налогового учёта процентного дохода по процентным векселям сторонних эмитентов".
@@ -10,7 +12,6 @@ import java.text.SimpleDateFormat
  * @author rtimerbaev
  * @author Stanislav Yasinskiy
  */
-import com.aplana.sbrf.taxaccounting.model.DataRow
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -385,7 +386,7 @@ void consolidation() {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row ->
+                formDataService.getDataRowHelper(source).getAllCached().each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
                         rows.add(row)
                     }
