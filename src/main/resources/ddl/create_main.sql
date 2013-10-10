@@ -1,3 +1,14 @@
+create table configuration (
+  code varchar2(50) not null,
+  value varchar2(50)
+);
+alter table configuration add constraint configuration_pk primary key (code);
+
+comment on table configuration is 'Настройки приложения, конфигурация';
+comment on column configuration.code is 'Код параметра';
+comment on column configuration.value is 'Значение параметра';
+
+-------------------------------------------------------------------------------------------------------------------------------------------
 create table dict_region (
   code varchar2(2) not null,
   name varchar2(510) not null,
