@@ -300,12 +300,6 @@ void logicCheck() {
         }
 
         // Проверка доходов и расходов
-        if (incomeSum != null && consumptionSum != null) {
-            def msg1 = row.getCell('incomeSum').column.name
-            def msg2 = row.getCell('consumptionSum').column.name
-            logger.warn("Строка $rowNum: «$msg1» и «$msg2» не могут быть одновременно заполнены!")
-        }
-
         if (incomeSum == null && consumptionSum == null) {
             def msg1 = row.getCell('incomeSum').column.name
             def msg2 = row.getCell('consumptionSum').column.name
