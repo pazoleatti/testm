@@ -19,6 +19,6 @@ public class UploadDataRowsAction extends AbstractDataRowAction implements Actio
 
     @Override
     public String getName() {
-        return "Загрузка xls шаблона.";
+        return "Импорт данных формы";
     }
 }

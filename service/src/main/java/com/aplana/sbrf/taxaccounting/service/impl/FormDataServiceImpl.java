@@ -1,34 +1,60 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
-import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
-import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import jcifs.smb.SmbFileInputStream;
+
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.*;
-import java.net.URL;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.aplana.sbrf.taxaccounting.core.api.ConfigurationProvider;
+import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.ObjectLock;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.SignService;
+import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
+import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
+import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}.
@@ -40,8 +66,6 @@ import java.util.Map;
 public class FormDataServiceImpl implements FormDataService {
 
 	public static final String IGNORE_URL = "http://ignore/";
-
-    private final Log log = LogFactory.getLog(getClass());
 
 	@Autowired
 	private FormDataDao formDataDao;
@@ -69,8 +93,8 @@ public class FormDataServiceImpl implements FormDataService {
     private EventLauncher eventHandlerLauncher;
 	@Autowired
 	private SignService signService;
-	@Autowired(required = false)
-	private URL signDataPath;
+	@Autowired
+	private ConfigurationProvider configurationProvider;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -157,57 +181,74 @@ public class FormDataServiceImpl implements FormDataService {
                     "Недостаточно прав для импорта данных в налоговую форму");
         }
 
-        boolean checkSuccess = true;
-        File signFileName = null;
         File dataFile = null;
-        if ((signDataPath != null) && !signDataPath.toString().equals(IGNORE_URL)) { //TODO временное решение с IGNORE_URL
-	        try {
-                log.info("Validate signature.");
-                dataFile = File.createTempFile("dataFile", ".original");
-                signFileName = File.createTempFile("signature", ".sign");
-		        OutputStream outputStream =
-				        new FileOutputStream(dataFile);
-		        IOUtils.copy(inputStream, outputStream);
-		        OutputStream outputSignStream =
-				        new FileOutputStream(signFileName);
-		        IOUtils.copy(signDataPath.openStream(), outputSignStream);
-		        checkSuccess = signService.checkSign(dataFile.getAbsolutePath(), signFileName.getAbsolutePath(), 0);
-                inputStream = new FileInputStream(dataFile);
-                log.info("Temporary files: " + dataFile + " : " + signFileName);
-	        } catch (Exception e) {
-		        throw new ServiceException("Произошла ошибка при проверке подписи.", e);
-	        } finally {
-                if(signFileName != null){
-                    signFileName.delete();
-                }
-            }
-        }
-        if (!checkSuccess) {
-	        throw new ServiceException("Электронная подпись некорректна.");
-        }
+        File pKeyFile = null;
+        OutputStream dataFileOutputStream = null;
+        InputStream  dataFileInputStream = null;
+    	OutputStream pKeyFileOutputStream = null;
+    	InputStream pKeyFileInputStream = null;
+        try{
+        	
+	        dataFile = File.createTempFile("dataFile", ".original");
+	        dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
+	        IOUtils.copy(inputStream, dataFileOutputStream);
+	        IOUtils.closeQuietly(dataFileOutputStream);
+	        
+	        String pKeyFileUrl = configurationProvider.getString(ConfigurationParam.FORM_DATA_KEY_FILE);
+	        if (pKeyFileUrl != null) { // Необходимо проверить подпись
+	        	
+		        pKeyFile = File.createTempFile("signature", ".sign");
+				pKeyFileOutputStream = new BufferedOutputStream(new FileOutputStream(pKeyFile));
+				try{
+					pKeyFileInputStream = new BufferedInputStream(new SmbFileInputStream(pKeyFileUrl));
+				} catch (Exception e){
+					throw new ServiceException("Ошибка доступа к файлу базы открытых ключей.", e);
+				}
+		        IOUtils.copy(pKeyFileInputStream, pKeyFileOutputStream);
+	        	IOUtils.closeQuietly(pKeyFileOutputStream);
+	        	IOUtils.closeQuietly(pKeyFileInputStream);
+			              
+			    if (!signService.checkSign(dataFile.getAbsolutePath(), pKeyFile.getAbsolutePath(), 0)){
+			      	throw new ServiceException("Ошибка проверки цифровой подписи.");
+			    }
+			    
+	        }
+	        
+	        FormData fd = formDataDao.get(formDataId);
+	        
+        	dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+        	Map<String, Object> additionalParameters = new HashMap<String, Object>();
+        	additionalParameters.put("ImportInputStream", dataFileInputStream);
+        	additionalParameters.put("UploadFileName", fileName);
+        	formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
+        	IOUtils.closeQuietly(dataFileInputStream);
         
-        FormData fd = formDataDao.get(formDataId);
-
-        Map<String, Object> additionalParameters = new HashMap<String, Object>();
-        additionalParameters.put("ImportInputStream", inputStream);
-        additionalParameters.put("UploadFileName", fileName);
-        formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException(
-                    "Есть критические ошибки при выполнения скрипта",
-                    logger.getEntries());
-        }  else {
-            logger.info("Данные загружены");
-        }
-        
-        logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
-        auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
-                null, fd.getFormType().getId(), fd.getKind().getId(), fileName);
-        
-        IOUtils.closeQuietly(inputStream);
-        
-        if (dataFile != null){
-            dataFile.delete();
+	        if (logger.containsLevel(LogLevel.ERROR)) {
+	            throw new ServiceLoggerException(
+	                    "Есть критические ошибки при выполнения скрипта.",
+	                    logger.getEntries());
+	        }  else {
+	            logger.info("Данные загружены");
+	        }
+	        
+	        logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
+	        auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
+	                null, fd.getFormType().getId(), fd.getKind().getId(), fileName);
+        } catch (ServiceException e){
+        	throw e;
+        } catch (IOException e){
+        	throw new ServiceException(e.getLocalizedMessage(), e);
+        } finally {   
+        	IOUtils.closeQuietly(dataFileOutputStream);
+        	IOUtils.closeQuietly(dataFileInputStream);
+        	IOUtils.closeQuietly(pKeyFileOutputStream);
+        	IOUtils.closeQuietly(pKeyFileInputStream);
+	        if (dataFile != null){
+	            dataFile.delete();
+	        }
+	        if (pKeyFile != null){
+	        	pKeyFile.delete();
+	        }
         }
     }
 

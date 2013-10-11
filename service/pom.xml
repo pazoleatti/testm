@@ -59,6 +59,10 @@
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>jcifs</groupId>
+			<artifactId>jcifs</artifactId>
+		</dependency>
         <dependency>
             <groupId>javax.jms</groupId>
             <artifactId>jms-api</artifactId>
