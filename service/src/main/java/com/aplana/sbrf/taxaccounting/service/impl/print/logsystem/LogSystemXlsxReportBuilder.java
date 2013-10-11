@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.logsystem;
 
 import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
-import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractXlsxReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.*;
@@ -16,7 +16,7 @@ import java.util.List;
  * User: avanteev
  * Класс для построения отчета по "Журналу аудита"
  */
-public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
+public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
     private int rowNumber = 3;
     private int cellNumber = 0;
@@ -29,22 +29,15 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
 
     private List<LogSystemSearchResultItem> items;
 
-    private static final String dateColumnHeader = "Дата-время";
-    private static final String eventColumnHeader = "Событие";
-    private static final String noteColumnHeader = "Текст события";
-    private static final String reportPeriodColumnHeader = "Период";
-    private static final String departmentColumnHeader = "Подразделение";
-    private static final String formDataKindtColumnHeader = "Тип налоговой формы";
-    private static final String formTypetColumnHeader = "Вид налоговой формы/декларации";
-    private static final String userLoginColumnHeader = "Пользователь";
-    private static final String userRolesColumnHeader = "Роль пользователя";
-    private static final String userIpColumnHeader = "IP пользователя";
+    private static String[] headers = new String[]{"Дата-время", "Событие", "Текст события", "Период", "Подразделение",
+            "Тип формы", "Тип налоговой формы", "Вид налоговой формы/декларации",
+            "Пользователь", "Роль пользователя", "IP пользователя"};
 
     private final Log logger = LogFactory.getLog(getClass());
 
-    public LogSystemReportBuilder(List<LogSystemSearchResultItem> items) {
+    public LogSystemXlsxReportBuilder(List<LogSystemSearchResultItem> items) {
         super(fileName, postfix);
-        this.workBook = new SXSSFWorkbook(50);
+        this.workBook = new SXSSFWorkbook();
         this.sheet = workBook.createSheet("Журнал аудита");
         sheet.getLastRowNum();
         this.items = items;
@@ -65,45 +58,11 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
         cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
 
         Row row = sheet.createRow(rowNumber);
-        Cell cell = row.createCell(cellNumber++);
-        cell.setCellStyle(cs);
-        cell.setCellValue(dateColumnHeader);
-
-        cell = row.createCell(cellNumber++);
-        cell.setCellStyle(cs);
-        cell.setCellValue(eventColumnHeader);
-
-        cell = row.createCell(cellNumber++);
-        cell.setCellStyle(cs);
-        cell.setCellValue(noteColumnHeader);
-
-        cell = row.createCell(cellNumber++);
-        cell.setCellStyle(cs);
-        cell.setCellValue(reportPeriodColumnHeader);
-
-        cell = row.createCell(cellNumber++);
-        cell.setCellStyle(cs);
-        cell.setCellValue(departmentColumnHeader);
-
-        cell = row.createCell(cellNumber++);
-        cell.setCellStyle(cs);
-        cell.setCellValue(formDataKindtColumnHeader);
-
-        cell = row.createCell(cellNumber++);
-        cell.setCellStyle(cs);
-        cell.setCellValue(formTypetColumnHeader);
-
-        cell = row.createCell(cellNumber++);
-        cell.setCellStyle(cs);
-        cell.setCellValue(userLoginColumnHeader);
-
-        cell = row.createCell(cellNumber++);
-        cell.setCellStyle(cs);
-        cell.setCellValue(userRolesColumnHeader);
-
-        cell = row.createCell(cellNumber++);
-        cell.setCellStyle(cs);
-        cell.setCellValue(userIpColumnHeader);
+        for (String s : headers){
+            Cell cell = row.createCell(cellNumber++);
+            cell.setCellStyle(cs);
+            cell.setCellValue(s);
+        }
 
         cellNumber = 0;
         rowNumber = rowNumber + 1;
@@ -125,7 +84,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
                 0,
                 0,
                 0,
-                9);
+                10);
         cell.setCellValue("Журнал аудита");
         cell.setCellStyle(cs);
         cellNumber = 0;
@@ -137,7 +96,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
                 1,
                 1,
                 0,
-                9);
+                10);
         sheet.addMergedRegion(regionTitle);
         sheet.addMergedRegion(regionDate);
 
@@ -170,7 +129,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
         for(LogSystemSearchResultItem item : items){
             if (logger.isDebugEnabled())
                 logger.debug("Data table " + item);
-            Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+            Row row = sheet.createRow(rowNumber++);
             Cell cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(sdf.format(item.getLogDate()));
@@ -203,13 +162,21 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
+            cell.setCellValue(item.getFormType() != null?"Налоговые формы" :
+                    item.getDeclarationType() != null?"Декларации":"");
+            fillWidth(cellNumber, cell.getStringCellValue().length());
+            cellNumber++;
+
+            cell = row.createCell(cellNumber);
+            cell.setCellStyle(cs);
             cell.setCellValue(item.getFormKind() != null?item.getFormKind().getName():"");
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(csFormType);
-            cell.setCellValue(item.getFormType() != null?item.getFormType().getName():"");
+            cell.setCellValue(item.getFormType() != null? item.getFormType().getName() :
+                    item.getDeclarationType() != null? item.getDeclarationType().getName() : "");
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
@@ -232,7 +199,6 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
             cellNumber++;
 
             cellNumber = 0;
-            rowNumber = rowNumber + 1;
         }
     }
 

@@ -15,10 +15,10 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
-import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsxReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsmReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemCsvBuilder;
-import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemXlsxReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -84,7 +84,7 @@ public class PrintingServiceImpl implements PrintingService {
             RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
                     getRecordData((long) reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
 			try {
-				FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,isShowChecked, dataRows, refBookValue);
+				FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data,isShowChecked, dataRows, refBookValue);
 				return builder.createReport();
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
@@ -124,11 +124,11 @@ public class PrintingServiceImpl implements PrintingService {
     @Override
     public String generateExcelLogSystem(List<LogSystemSearchResultItem> resultItems) {
         try {
-            LogSystemReportBuilder builder = new LogSystemReportBuilder(resultItems);
+            LogSystemXlsxReportBuilder builder = new LogSystemXlsxReportBuilder(resultItems);
             return builder.createReport();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
-            throw new ServiceException("Ошибка при создании печатной формы." + LogSystemReportBuilder.class);
+            throw new ServiceException("Ошибка при создании печатной формы." + LogSystemXlsxReportBuilder.class);
         }
     }
 
@@ -139,7 +139,7 @@ public class PrintingServiceImpl implements PrintingService {
             return logSystemCsvBuilder.createReport();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
-            throw new ServiceException("Ошибка при архивировании журнала аудита." + LogSystemReportBuilder.class);
+            throw new ServiceException("Ошибка при архивировании журнала аудита." + LogSystemXlsxReportBuilder.class);
         }
     }
 }

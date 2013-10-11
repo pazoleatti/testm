@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsxReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsmReportBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.util.ClassUtils;
@@ -228,7 +228,7 @@ public class FormDataXlsxReportBuilderTestMock {
 
 	@Test
 	public void testReport() throws IOException{
-		FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,true, dataRows, refBookValue);
+		FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data,true, dataRows, refBookValue);
         builder.createReport();
 	}
 }

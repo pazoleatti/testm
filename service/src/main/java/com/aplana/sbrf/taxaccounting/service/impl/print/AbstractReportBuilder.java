@@ -14,7 +14,7 @@ import java.util.Map;
  * User: avanteev
  * Date: 20.05.13
  */
-public abstract class AbstractXlsxReportBuilder {
+public abstract class AbstractReportBuilder {
 
     protected Workbook workBook;
 
@@ -29,7 +29,7 @@ public abstract class AbstractXlsxReportBuilder {
     private String fileName;
     private String postfix;
 
-    protected AbstractXlsxReportBuilder(String fileName, String postfix) {
+    protected AbstractReportBuilder(String fileName, String postfix) {
         this.fileName = fileName;
         this.postfix = postfix;
     }
@@ -42,10 +42,10 @@ public abstract class AbstractXlsxReportBuilder {
      * @throws IOException
      */
     public final String createReport() throws IOException {
+        fillHeader();
         createTableHeaders();
         createDataForTable();
         cellAlignment();
-        fillHeader();
         fillFooter();
         setPrintSetup();
         return flush();

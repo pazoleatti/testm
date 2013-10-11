@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl.print.logsystem;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
-import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractXlsxReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
@@ -15,7 +15,7 @@ import java.util.zip.ZipOutputStream;
 /**
  * User: avanteev
  */
-public class LogSystemCsvBuilder extends AbstractXlsxReportBuilder {
+public class LogSystemCsvBuilder extends AbstractReportBuilder {
 
     private static final SimpleDateFormat SDF_LOG_NAME = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");

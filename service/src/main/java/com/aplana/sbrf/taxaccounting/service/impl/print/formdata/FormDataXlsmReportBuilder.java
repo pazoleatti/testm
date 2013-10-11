@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractXlsxReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -15,10 +15,10 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.springframework.util.ClassUtils;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.StringTokenizer;
  *
  * @author avanteev
  */
-public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
+public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
     private final Log logger = LogFactory.getLog(getClass());
 
@@ -38,7 +38,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 
     private CellStyleBuilder cellStyleBuilder;
     private static final String TEMPLATE = ClassUtils
-			.classPackageAsResourcePath(FormDataXlsxReportBuilder.class)
+			.classPackageAsResourcePath(FormDataXlsmReportBuilder.class)
 			+ "/acctax.xlsm";
 
     private static final String fileName = "Налоговый_отчет_";
@@ -162,7 +162,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 	private Date acceptanceDate;
 	private Date creationDate;
 
-    public FormDataXlsxReportBuilder() throws IOException {
+    public FormDataXlsmReportBuilder() throws IOException {
         super(fileName, postfix);
         InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
         try {
@@ -176,7 +176,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 
 	}
 
-	public FormDataXlsxReportBuilder(FormDataReport data, boolean isShowChecked, List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows, RefBookValue refBookValue)
+	public FormDataXlsmReportBuilder(FormDataReport data, boolean isShowChecked, List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows, RefBookValue refBookValue)
             throws IOException {
 		this();
 		this.data = data.getData();
@@ -191,12 +191,13 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 	}
 
     protected void fillHeader(){
-        HeaderFooter header = ((XSSFSheet)sheet).getFirstHeader();
-        header.setCenter("RATIONAL HEADER");
-        HeaderFooter footerOdd = ((XSSFSheet)sheet).getOddFooter();
-        HeaderFooter footerEven = ((XSSFSheet)sheet).getEvenFooter();
-        footerOdd.setCenter("RATIONAL ODD FOOTER");
-        footerEven.setCenter("RATIONAL EVEN FOOTER");
+
+        //Необходимо чтобы определять нулевые столбцы для Excel, по идее в конце должно делаться
+        for (int i = 0; i < formTemplate.getColumns().size(); i++ ){
+            if (formTemplate.getColumns().get(i).getWidth() == 0){
+                sheet.setColumnWidth(i, 0);
+            }
+        }
 
         //Fill subdivision
         createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION, department.getName(), 0, 0);
@@ -312,7 +313,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                 }
 				Object obj = dataRow.get(column.getAlias());
 				Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, false);
-                fillWidth(cell.getColumnIndex(),column.getWidth());
+                widthCellsMap.put(cell.getColumnIndex(), column.getWidth());
 				if(column instanceof StringColumn){
 					String str = (String)obj;
 					CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, i , j);
