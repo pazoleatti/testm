@@ -61,7 +61,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         filter.setCountOfRecords(length);
         action.setLogSystemFilter(filter);
 
-        dispatcher.execute(action, new AbstractCallback<GetAuditDataListResult>() {
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetAuditDataListResult>() {
             @Override
             public void onSuccess(GetAuditDataListResult result) {
                 if(result==null || result.getTotalCountOfRecords() == 0)
@@ -69,7 +69,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
                 else
                     getView().setAuditTableData(start, result.getTotalCountOfRecords(), result.getRecords());
             }
-        });
+        }, this));
     }
 
     @ProxyEvent
@@ -96,7 +96,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         try{
             PrintAuditDataAction dataAction = new PrintAuditDataAction();
             dataAction.setLogSystemFilter(auditFilterPresenter.getLogSystemFilter());
-            dispatcher.execute(dataAction, new AbstractCallback<PrintAuditDataResult>() {
+            dispatcher.execute(dataAction, CallbackUtils.defaultCallback(new AbstractCallback<PrintAuditDataResult>() {
                 @Override
                 public void onSuccess(PrintAuditDataResult result) {
                     getView().getBlobFromServer(result.getUuid());
@@ -107,7 +107,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
                     MessageEvent.fire(AuditClientPresenter.this,
                             "Не удалось напечатать журнал аудита", caught);
                 }
-            });
+            }, this));
         }catch (Exception e){
             MessageEvent.fire(this,
                     "Не удалось напечатать журнал аудита", e);

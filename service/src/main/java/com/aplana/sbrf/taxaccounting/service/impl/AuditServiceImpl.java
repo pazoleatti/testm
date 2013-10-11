@@ -37,6 +37,8 @@ public class AuditServiceImpl implements AuditService {
 		if (filter.getFromSearchDate() == null || filter.getToSearchDate() == null) {
 			throw new ServiceException("Необходимо ввести поисковые даты \"От\" и \"До\"");
 		}
+        if (filter.getFromSearchDate().compareTo(filter.getToSearchDate()) > 0)
+            throw new ServiceException("Дата \"От\" должна быть меньше или равна дате \"До\"");
 
 		return auditDao.getLogs(filter);
 	}
