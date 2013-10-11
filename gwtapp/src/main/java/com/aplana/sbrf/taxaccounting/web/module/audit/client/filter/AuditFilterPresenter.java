@@ -2,10 +2,13 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientArchiveEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSearchEvent;
-import com.aplana.sbrf.taxaccounting.web.module.audit.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetReportPeriodsAction;
+import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetReportPeriodsResult;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.inject.Inject;
@@ -39,25 +42,7 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
 
     @Override
     public void onPrintButtonClicked() {
-        try{
-            PrintAuditDataAction dataAction = new PrintAuditDataAction();
-            dataAction.setLogSystemFilter(getView().getFilterData());
-            dispatchAsync.execute(dataAction, new AbstractCallback<PrintAuditDataResult>() {
-                @Override
-                public void onSuccess(PrintAuditDataResult result) {
-                    getView().getBlobFromServer(result.getUuid());
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    MessageEvent.fire(AuditFilterPresenter.this,
-                            "Не удалось напечатать журнал аудита", caught);
-                }
-            });
-        }catch (Exception e){
-            MessageEvent.fire(this,
-                    "Не удалось напечатать журнал аудита", e);
-        }
+        AuditFilterPrintEvent.fire(this);
     }
 
     @Override
@@ -77,7 +62,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         void setFormTypeHandler(ValueChangeHandler<AuditFormType> handler);
         void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
         LogSystemFilter getFilterData();
-        void getBlobFromServer(String uuid);
         void setVisibleTaxFields();
         void setVisibleDeclarationFields();
         void hideAll();
@@ -86,7 +70,8 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
     public void initFilterData(){
 
         GetAuditFilterDataAction action = new GetAuditFilterDataAction();
-        dispatchAsync.execute(action, new AbstractCallback<GetAuditFilterDataResult>() {
+        dispatchAsync.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetAuditFilterDataResult>() {
 
             @Override
             public void onSuccess(GetAuditFilterDataResult result) {
@@ -99,7 +84,7 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
                 getView().setFormDataTaxType(result.getTaxTypes());
                 getView().setUserLogins(fillUserMap(auditFilterDataAvaliableValues.getUsers()));
             }
-        });
+        }, this));
 
     }
 

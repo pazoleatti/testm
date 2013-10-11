@@ -158,13 +158,11 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		}
 
 		if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
-            if (filter.getReportPeriodIds().size() != 0)
-                sql.append(String.format(" AND (%sreport_period_id = ", prefix)).append(filter.getReportPeriodIds().get(0));
+            sql.append(String.format(" AND (%sreport_period_id = ", prefix)).append(filter.getReportPeriodIds().get(0));
 			for (int i = 1; i < filter.getReportPeriodIds().size(); i++) {
 				sql.append(String.format(" OR %sreport_period_id = ", prefix)).append(filter.getReportPeriodIds().get(i));
-                if (i == filter.getReportPeriodIds().size() - 1)
-                    sql.append(")");
 			}
+            sql.append(")");
 		}
 
 		if (filter.getFormKind() != null && filter.getFormKind().getId() != 0) {

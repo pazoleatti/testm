@@ -16,6 +16,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.CellPreviewEvent;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -38,7 +40,19 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     @UiField
     FlexiblePager pager;
 
+    private final AsyncDataProvider<LogSystemSearchResultItem> dataProvider = new AsyncDataProvider<LogSystemSearchResultItem>() {
+        @Override
+        protected void onRangeChanged(HasData<LogSystemSearchResultItem> display) {
+            if (getUiHandlers() != null){
+                final Range range = display.getVisibleRange();
+                getUiHandlers().onRangeChange(range.getStart(), range.getLength());
+            }
+        }
+    };
+
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
+
+    private static final int PAGE_SIZE = 20;
 
     private static final String dateColumnHeader = "Дата-время";
     private static final String eventColumnHeader = "Событие";
@@ -150,6 +164,9 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
             }
         };
 
+        auditTable.setPageSize(PAGE_SIZE);
+        dataProvider.addDataDisplay(auditTable);
+
         auditTable.addColumn(dateColumn, dateColumnHeader);
         auditTable.addColumn(eventColumn, eventColumnHeader);
         auditTable.addColumn(noteColumn, noteColumnHeader);
@@ -199,13 +216,16 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     }
 
     @Override
-    public void assignDataProvider(int pageSize, AsyncDataProvider<LogSystemSearchResultItem> provider) {
-        auditTable.setPageSize(pageSize);
-        provider.addDataDisplay(auditTable);
+    public void getBlobFromServer(String uuid) {
+        Window.open(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid, "", "");
     }
 
     @Override
-    public void getBlobFromServer(String uuid) {
-        Window.open(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid, "", "");
+    public void updateData(int pageNumber) {
+        if (pager.getPage() == pageNumber){
+            auditTable.setVisibleRangeAndClearData(auditTable.getVisibleRange(), true);
+        } else {
+            pager.setPage(pageNumber);
+        }
     }
 }

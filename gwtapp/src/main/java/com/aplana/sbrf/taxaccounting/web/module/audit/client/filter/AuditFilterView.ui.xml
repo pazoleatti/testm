@@ -50,7 +50,7 @@
                             <g:Label width="200px" text="Вид налога"/>
                         </g:cell>
                         <g:cell height="25px">
-                            <g:ValueListBox width="200px" ui:field="formDataTaxType" />
+                            <g:ValueListBox width="200px" ui:field="taxType" />
                         </g:cell>
                     </g:VerticalPanel>
                 </g:cell>
@@ -60,7 +60,7 @@
                             <g:Label width="200px" text="Тип формы"/>
                         </g:cell>
                         <g:cell height="25px">
-                            <g:ValueListBox width="200px" ui:field="auditFormType" />
+                            <g:ValueListBox width="200px" ui:field="auditFormTypeId" />
                         </g:cell>
                     </g:VerticalPanel>
                 </g:cell>
@@ -74,7 +74,7 @@
                             <g:Label width="200px" text="Период" />
                         </g:cell>
                         <g:cell height="25px">
-                            <rep:PeriodPickerPopupWidget ui:field="periodPicker" multiselect="true"/>
+                            <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="true"/>
                         </g:cell>
                     </g:VerticalPanel>
                 </g:cell>
