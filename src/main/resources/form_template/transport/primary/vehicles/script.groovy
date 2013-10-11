@@ -132,6 +132,10 @@ def logicalCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
+    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).getTime()
+    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).getTime()
+    def String dFormat = "dd.MM.yyyy"
+
     // Проверенные строки (4-ая провека)
     def List<DataRow<Cell>> checkedRows = new ArrayList<DataRow<Cell>>()
     for (def row in dataRows) {
@@ -145,7 +149,7 @@ def logicalCheck() {
             }
         }
         if (!''.equals(errorMsg)) {
-            logger.error("Строка $row.rowNumber : не заполнены поля : $errorMsg.")
+            logger.error("Строка $row.rowNumber : Не заполнены поля : $errorMsg.")
             return;
         }
 
@@ -177,20 +181,23 @@ def logicalCheck() {
         }
         checkedRows.add(row)
 
-        // 5. Проверка на наличие в списке ТС строк, период владения которых не пересекается с отчётным / налоговым периодом, к которому относится налоговая форма
-        // TODO  regDate...regDateEnd не пересекается с отчётным/налоговым периодом
+        // 5. Проверка на наличие в списке ТС строк, период владения которых не пересекается с отчётным
+        if (row.regDate > dTo || row.regDateEnd < dFrom) {
+            logger.error("Строка $row.rowNumber : Период регистрации ТС (" + row.regDate.format(dFormat) + " - " + row.regDateEnd.format(dFormat) + ") " +
+                    " не пересекается с периодом (" + dFrom.format(dFormat) + " - " + dTo.format(dFormat) + "), за который сформирована налоговая форма!")
+        }
 
         // Проверки соответствия НСИ
-        checkNSI(row.getCell('codeOKATO'), "Неверный код ОКАТО!", 3)
+        checkNSI(row.getCell('codeOKATO'), "Строка $row.rowNumber : Неверный код ОКАТО!", 3)
         if(row.regionName != row.codeOKATO){
-            logger.error("Неверное наименование муниципального образования!")
+            logger.error("Строка $row.rowNumber : Неверное наименование муниципального образования!")
         }
-        checkNSI(row.getCell('tsTypeCode'), "Неверный код вида ТС!", 42)
+        checkNSI(row.getCell('tsTypeCode'), "Строка $row.rowNumber : Неверный код вида ТС!", 42)
         if(row.tsType != row.tsTypeCode){
-            logger.error("Неверный вид ТС!")
+            logger.error("Строка $row.rowNumber : Неверный вид ТС!")
         }
-        checkNSI(row.getCell('ecoClass'), "Неверный код экологического класса!", 40)
-        checkNSI(row.getCell('baseUnit'), "Неверный код ед. измерения мощности!", 12)
+        checkNSI(row.getCell('ecoClass'), "Строка $row.rowNumber : Неверный код экологического класса!", 40)
+        checkNSI(row.getCell('baseUnit'), "Строка $row.rowNumber : Неверный код ед. измерения мощности!", 12)
     }
 }
 

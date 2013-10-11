@@ -5,9 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 
 /**
  * Форма "Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог".
- * @author gavanesov скопировал скрипт из формы "Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог" 
- *                   изменил имена атрибутов, добавил комментарии о необходимости прописать проверки льгот
+ * formTemplateId=202
  *
+ * @author gavanesov
+ * @author Stanislav Yasinskiy
  */
 
 /**
@@ -100,6 +101,10 @@ void setRowIndex() {
 def logicalCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
+    reportPeriodService.getEndDate(formData.reportPeriodId)
+    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).getTime()
+    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).getTime()
+    def String dFormat = "dd.MM.yyyy"
 
     // Проверенные строки (4-ая провека)
     def List<DataRow<Cell>> checkedRows = new ArrayList<DataRow<Cell>>()
@@ -114,12 +119,12 @@ def logicalCheck() {
             }
         }
         if (!''.equals(errorMsg)) {
-            logger.error("Строка $row.rowNumber :  не заполнены поля : $errorMsg.")
+            logger.error("Строка $row.rowNumber :  Не заполнены поля : $errorMsg.")
             return;
         }
 
         // 2. Поверка на соответствие дат использования льготы
-        if(!(row.benefitEndDate.compareTo(row.benefitStartDate) > 0)){
+        if (!(row.benefitEndDate.compareTo(row.benefitStartDate) > 0)) {
             logger.error("Строка $row.rowNumber :  Неверно указаны даты начала и окончания использования льготы!")
         }
 
@@ -141,16 +146,18 @@ def logicalCheck() {
         }
         checkedRows.add(row)
 
-        // 4. Проверка на наличие в списке ТС строк, период использования льготы которых не пересекается с отчётным / налоговым периодом, к которому относится налоговая форма
-        // TODO  benefitStartDate...benefitEndDate не пересекается с отчётным/налоговым периодом
+        // 4. Проверка на наличие в списке ТС строк, период использования льготы которых не пересекается с отчётным
+        if (row.benefitStartDate > dTo || row.benefitEndDate < dFrom) {
+            logger.error("Строка $row.rowNumber : Период использования льготы ТС (" + row.benefitStartDate.format(dFormat) + " - " + row.benefitEndDate.format(dFormat) + ") " +
+                    " не пересекается с периодом (" + dFrom.format(dFormat) + " - " + dTo.format(dFormat) + "), за который сформирована налоговая форма!")
+        }
 
         // Проверки соответствия НСИ
-        checkNSI(row.getCell('codeOKATO'), "Неверный код ОКАТО!", 3)
+        checkNSI(row.getCell('codeOKATO'), "Строка $row.rowNumber : Неверный код ОКАТО!", 3)
 
         // Проверка льготы
-        // TODO проверить
         if (!checkBenefit(row.taxBenefitCode, row.codeOKATO)) {
-            logger.error("Строка $row.rowNumber : выбранная льгота для текущего региона не предусмотрена.")
+            logger.error("Строка $row.rowNumber : Выбранная льгота для текущего региона не предусмотрена.")
         }
     }
 }
@@ -160,7 +167,6 @@ void checkNSI(Cell cell, String msg, Long id) {
     if (cell.value != null && refBookService.getRecordData(id, cell.value) == null)
         logger.error(msg)
 }
-
 
 /**
  * Скрипт для сортировки.
