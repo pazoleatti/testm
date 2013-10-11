@@ -14,10 +14,7 @@ import java.text.SimpleDateFormat
  * Версия ЧТЗ: 57
  *
  * вопросы аналитикам: http://jira.aplana.com/browse/SBRFACCTAX-2488
- *
- * TODO:
- *          -   узнать, как определить дату конца отчетного периода
- *          -   следить за SBRFACCTAX-2376 и добавить проверку кодов валют!
+ *                     http://jira.aplana.com/browse/SBRFACCTAX-4645
  *
  * @author vsergeev
  *
@@ -46,6 +43,9 @@ import java.text.SimpleDateFormat
  * 19   financialResultAdjustment-      Корректировка финансового результата
  */
 switch (formDataEvent) {
+    case FormDataEvent.CREATE:
+        checkCreation()
+        break
     case FormDataEvent.CHECK :
         logicalCheck()
         break
@@ -74,6 +74,18 @@ switch (formDataEvent) {
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
         logicalCheck() && checkNSI()
         break
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = formDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
+    }
 }
 
 /**
@@ -152,7 +164,7 @@ void calc() {
  */
 void addAllStatic() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+
     // добавить строку "итого"
     def totalRow = getCalcTotalRow()
     insert(dataRowHelper, totalRow)
@@ -198,8 +210,8 @@ boolean checkRowsData() {
             logger.error('Неверно указана дата погашения основного долга')
         }
 
-        //  Арифметическая проверка граф 10, 14, 15, 19
-        //  Графы10, 14, 15 должны содержать значение, полученное согласно алгоритмам, описанным в разделе «Алгоритмы заполнения полей формы».
+        //  Арифметическая проверка граф 10, 14, 15,17-19
+        //  Графы 10, 14, 15,17-19 должны содержать значение, полученное согласно алгоритмам, описанным в разделе «Алгоритмы заполнения полей формы».
         if (dataRow.financialResult1!=getFinancialResult1(dataRow)) {
             isValid = false
             logger.error("Неверно рассчитана графа «${dataRow.getCell('financialResult1').column.name}»!")
@@ -207,12 +219,27 @@ boolean checkRowsData() {
 
         if (dataRow.perc!=getPerc(dataRow)) {
             isValid = false
-            logger.error("Неверно рассчитана графа «${dataRow.getCell('dataRow').column.name}»!")
+            logger.error("Неверно рассчитана графа «${dataRow.getCell('perc').column.name}»!")
         }
 
         if (dataRow.loss!=getLoss(dataRow)) {
             isValid = false
             logger.error("Неверно рассчитана графа «${dataRow.getCell('loss').column.name}»!")
+        }
+
+        if (dataRow.financialResult2!= getFinancialResult2(dataRow)) {
+            isValid = false
+            logger.error("Неверно рассчитана графа «${dataRow.getCell('financialResult2').column.name}»!")
+        }
+
+        if (dataRow.maxLoss!= getMaxLoss(dataRow)) {
+            isValid = false
+            logger.error("Неверно рассчитана графа «${dataRow.getCell('maxLoss').column.name}»!")
+        }
+
+        if (dataRow.financialResultAdjustment!=getFinancialResultAdjustment(dataRow)) {
+            isValid = false
+            logger.error("Неверно рассчитана графа «${dataRow.getCell('financialResultAdjustment').column.name}»!")
         }
 
         //Проверка принадлежности даты графы 8 отчетному периоду
@@ -306,7 +333,6 @@ BigDecimal getPerc(def dataRow) {
         final DateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')        //todo (vsergeev) попробовать вынести форматтер и даты в константы
         final firstJan2010 = dateFormat.parse('01.01.2010')
         final thirtyFirstDec2013 = dateFormat.parse('31.12.2013')
-        final thirtyJun2010 = dateFormat.parse('30.06.2010')
         final firstJan2011 = dateFormat.parse('01.01.2011')
 
         BigDecimal x
@@ -327,14 +353,14 @@ BigDecimal getPerc(def dataRow) {
             if (dataRow.concessionsDate.after(firstJan2011) && dataRow.concessionsDate.before(thirtyFirstDec2013)) {
                 x = getXByRateBR(dataRow, repaymentDateDuration, 0.8)
             } else {
-                x = getXByIncomeOnly(dataRow, repaymentDateDuration, 0.15)      //todo (vsergeev) в вопросах аналитикам узнать про проценты (15% как писать в формуле)
+                x = getXByIncomeOnly(dataRow, repaymentDateDuration, 0.15)
             }
         }
 
         if (x.abs() > dataRow.financialResult1.abs()) {
             return dataRow.financialResult1
         } else {
-            return x
+            return x.setScale(2, BigDecimal.ROUND_HALF_UP)
         }
     } else {
         return new BigDecimal(0)
@@ -367,7 +393,6 @@ def getMaxLoss(def dataRow) {
         final DateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')        //todo (vsergeev) попробовать вынести форматтер и даты в константы
         final firstJan2010 = dateFormat.parse('01.01.2010')
         final thirtyFirstDec2013 = dateFormat.parse('31.12.2013')
-        final thirtyJun2010 = dateFormat.parse('30.06.2010')
         final firstJan2011 = dateFormat.parse('01.01.2011')
 
         BigDecimal x
@@ -376,26 +401,26 @@ def getMaxLoss(def dataRow) {
         if (isRoublel(dataRow)) {
             if (dataRow.concessionsDate.after(firstJan2010) && dataRow.concessionsDate.before(thirtyFirstDec2013)) {
                 if (dataRow.rateBR * 1.8 <= dataRow.interestRate) {
-                    x = getXByRateBR(dataRow, repaymentDateDuration, 1.8)
+                    x = dataRow.marketPrice * dataRow.rateBR * 1.8 * repaymentDateDuration
                 } else {
-                    x = getXByInterestRate(dataRow, repaymentDateDuration)
+                    x = dataRow.marketPrice * dataRow.interestRate * repaymentDateDuration
                 }
-                if (dataRow.interestRate == 0) x = getXByRateBR(dataRow, repaymentDateDuration, 1.8)
+                if (dataRow.interestRate == 0) x = dataRow.marketPrice * dataRow.rateBR * repaymentDateDuration
             } else {
-                x = getXByRateBR(dataRow, repaymentDateDuration, 1.1)
+                x = dataRow.marketPrice * dataRow.rateBR * 1.1 * repaymentDateDuration
             }
         } else {
             if (dataRow.concessionsDate.after(firstJan2011) && dataRow.concessionsDate.before(thirtyFirstDec2013)) {
-                x = getXByRateBR(dataRow, repaymentDateDuration, 0.8)
+                x = dataRow.marketPrice * dataRow.rateBR * 0.8 * repaymentDateDuration
             } else {
-                x = getXByIncomeOnly(dataRow, repaymentDateDuration, 0.15)      //todo (vsergeev) в вопросах аналитикам узнать про проценты (15% как писать в формуле)
+                x = dataRow.marketPrice * 0.15 * repaymentDateDuration
             }
         }
 
         if (x.abs() > dataRow.financialResult1.abs()) {
             return dataRow.financialResult1
         } else {
-            return x
+            return x.setScale(2, BigDecimal.ROUND_HALF_UP)
         }
     } else {
         return new BigDecimal(0)
@@ -407,9 +432,9 @@ def getMaxLoss(def dataRow) {
  */
 def getFinancialResultAdjustment(def dataRow) {
     if (dataRow.financialResult1 >= 0 && dataRow.financialResult2 > 0) {
-        return (dataRow.financialResult2 - dataRow.financialResult1).abs()
+        return (dataRow.financialResult2 - dataRow.financialResult1).abs().setScale(2, BigDecimal.ROUND_HALF_UP)
     } else {
-        return -(dataRow.maxLoss - dataRow.loss)
+        return -(dataRow.maxLoss - dataRow.loss).setScale(2, BigDecimal.ROUND_HALF_UP)
     }
 }
 
