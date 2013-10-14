@@ -360,7 +360,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     row.f132 = recNoId
 
     // Графа 9
-    // row.f133, заполняется после графы 50
+    row.f133 = recYesId
 
     // Графа 10
     // row.f134, заполняется после графы 50
@@ -1068,9 +1068,6 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
         // Графа 7 (та же логика, что у графы 3)
         row.f131 = row.f121
-
-        // Графа 9 (та же логика, что у графы 3)
-        row.f133 = row.f121
 
         // Графа 10
         // Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
