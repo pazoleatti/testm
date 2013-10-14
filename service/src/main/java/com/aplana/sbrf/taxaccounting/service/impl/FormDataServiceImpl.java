@@ -1,60 +1,33 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import jcifs.smb.SmbFileInputStream;
-
-import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.aplana.sbrf.taxaccounting.core.api.ConfigurationProvider;
 import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.ObjectLock;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.SignService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+import jcifs.smb.SmbFileInputStream;
+import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}.
@@ -65,9 +38,7 @@ import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder
 @Transactional
 public class FormDataServiceImpl implements FormDataService {
 
-	public static final String IGNORE_URL = "http://ignore/";
-
-	@Autowired
+    @Autowired
 	private FormDataDao formDataDao;
 	@Autowired
 	private FormTemplateDao formTemplateDao;
@@ -133,14 +104,10 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public long createFormData(Logger logger, TAUserInfo userInfo,
 			int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod) {
-		if (formDataAccessService.canCreate(userInfo, formTemplateId, kind,
-				departmentId, reportPeriod.getId())) {
-			return createFormDataWithoutCheck(logger, userInfo,
-					formTemplateId, departmentId, kind, reportPeriod.getId(), false);
-		} else {
-			throw new AccessDeniedException(
-					"Недостаточно прав для создания налоговой формы с указанными параметрами");
-		}
+        formDataAccessService.canCreate(userInfo, formTemplateId, kind,
+                departmentId, reportPeriod.getId());
+        return createFormDataWithoutCheck(logger, userInfo,
+                formTemplateId, departmentId, kind, reportPeriod.getId(), false);
 	}
 	
 	
@@ -234,8 +201,6 @@ public class FormDataServiceImpl implements FormDataService {
 	        logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
 	        auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
 	                null, fd.getFormType().getId(), fd.getKind().getId(), fileName);
-        } catch (ServiceException e){
-        	throw e;
         } catch (IOException e){
         	throw new ServiceException(e.getLocalizedMessage(), e);
         } finally {   
@@ -281,7 +246,7 @@ public class FormDataServiceImpl implements FormDataService {
 		
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getId(), formData.getKind().getId(), null);
+                null, formData.getFormType().getId(), formData.getKind().getId(), null);
 
 		return formData.getId();
 	}
