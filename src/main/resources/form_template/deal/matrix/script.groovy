@@ -360,7 +360,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     row.f132 = recNoId
 
     // Графа 9
-    row.f133 = recYesId
+    row.f133 = recNoId
 
     // Графа 10
     // row.f134, заполняется после графы 50
