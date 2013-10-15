@@ -114,7 +114,7 @@ boolean calc() {
         // графа 11
         if (row.advancePayment != null && row.advancePayment > 0
                 && row.advancePayment != null && row.periodCounts != null && row.periodCounts != 0) {
-            row.outcomeInNalog = roundTo((row.advancePayment / row.periodCounts), 2)
+            row.outcomeInNalog = round(row.advancePayment / row.periodCounts)
         } else {
             row.outcomeInNalog = null
         }
@@ -129,7 +129,7 @@ boolean calc() {
     }
 
     // отсортировать/группировать
-    dataRows.sort { getCodeAttribute(it.code) }
+    dataRows.sort { refBookService.getStringValue(27, it.code, 'CODE') }
     dataRowHelper.update(dataRows);
 
     /** Столбцы для которых надо вычислять итого и итого по коду. Графа 10, 11, 12. */
@@ -289,7 +289,7 @@ def logicalCheck() {
                 return false
             }
             // Проверка символа ОПУ для кода классификации расхода
-            if (!checkNSI(row, "opy", "Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта", 29)) {
+            if (!checkNSI(row, "opy", "Классификатор расходов Сбербанка России для целей налогового учёта", 27)) {
                 return false
             }
         }
@@ -376,35 +376,25 @@ void checkCreation() {
     }
 }
 
-/*
- * Вспомогательные методы.
- */
-
-/**
- * Проверка является ли строка итоговой.
- */
+// Проверка является ли строка итоговой.
 def isTotal(def row) {
     return row != null && row.getAlias() != null && row.getAlias().contains('total')
 }
 
-/**
- * Получить новую строку.
- */
+// Получить новую строку.
 def getNewRow(def alias, def totalColumns, def sums) {
     def newRow = formData.createDataRow()
     newRow.setAlias('total' + alias)
     totalColumns.each {
         newRow.getCell(it).setValue(sums[it])
     }
-    newRow.fix = 'Итого по КНУ ' + (getCodeAttribute(alias))
+    newRow.fix = 'Итого по КНУ ' + (refBookService.getStringValue(27, alias, 'CODE'))
     newRow.getCell('fix').colSpan = 9
     setTotalStyle(newRow)
     return newRow
 }
 
-/**
- * Установить стиль для итоговых строк.
- */
+// Установить стиль для итоговых строк.
 void setTotalStyle(def row) {
     ['rowNumber', 'fix', 'code', 'numberFirstRecord', 'numberFirstRecord', 'opy', 'operationDate',
             'name', 'documentNumber', 'date', 'periodCounts',
@@ -413,16 +403,11 @@ void setTotalStyle(def row) {
     }
 }
 
-/**
- * Посчитать сумму указанного графа для строк с общим кодом классификации
- *
- * @param code код классификации дохода
- * @param alias название графа
- */
+//Посчитать сумму указанного графа для строк с общим кодом классификации
 def calcSumByCode(def code, def alias) {
     def sum = 0
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.each { row ->
+    dataRowHelper.getAllCached().each { row ->
         if (!isTotal(row) && row.code == code) {
             sum += row.getCell(alias).getValue()
         }
@@ -430,14 +415,7 @@ def calcSumByCode(def code, def alias) {
     return sum
 }
 
-/**
- * Проверить заполненость обязательных полей.
- *
- * @param row строка
- * @param columns список обязательных графов
- * @param useLog нужно ли записывать сообщения в лог
- * @return true - все хорошо, false - есть незаполненные поля
- */
+// Проверить заполненость обязательных полей.
 def checkRequiredColumns(def row, def columns) {
     def colNames = []
 
@@ -461,26 +439,15 @@ def checkRequiredColumns(def row, def columns) {
     return true
 }
 
-/**
- * Проверка пустое ли значение.
- */
+// Проверка пустое ли значение.
 def isEmpty(def value) {
     return value == null || value == '' || value == 0
 }
 
-//Получить номер строки в таблице
+// Получить номер строки в таблице
 def getIndex(def row) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.getAllCached().indexOf(row)
-}
-
-/**
- * Получить атрибут 130 - "Код налогового учёта" справочник 27 - "Классификатор расходов Сбербанка России для целей налогового учёта".
- *
- * @param id идентификатор записи справочника
- */
-def getCodeAttribute(def id) {
-    return refBookService.getStringValue(27, id, 'CODE')
 }
 
 /**
@@ -502,20 +469,13 @@ def getColumnName(def row, def alias) {
  * @param data данные нф (helper)
  * @param alias алиас
  */
-def getRowByAlias(def data, def alias) {
-    return data.getDataRow(dataRowHelper.getAllCached(), alias)
+def getRowByAlias(def dataRowHelper, def alias) {
+    return dataRowHelper.getDataRow(dataRowHelper.getAllCached(), alias)
 }
 
-/**
- * Хелпер для округления чисел
- * @param value
- * @param newScale
- * @return
- */
-BigDecimal roundTo(BigDecimal value, int round) {
-    if (value != null) {
-        return value.setScale(round, BigDecimal.ROUND_HALF_UP)
-    } else {
-        return value
+def round(def value, def int precision = 2) {
+    if (value == null) {
+        return null
     }
+    return value.setScale(precision, RoundingMode.HALF_UP)
 }
