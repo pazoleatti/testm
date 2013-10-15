@@ -3,46 +3,45 @@ import java.text.SimpleDateFormat
 /**
  * Скрипт для РНУ-7 (rnu7.groovy).
  * Форма "(РНУ-7) Справка бухгалтера для отражения расходов, учитываемых в РНУ-5, учёт которых требует применения метода начисления".
- *
- * @version 59
+ * formTemplateId=311
  *
  * @author rtimerbaev
  */
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         checkCreation()
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         logicalCheck() && checkNSI()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         calc() && logicalCheck() && checkNSI()
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         addNewRow()
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
 // проверка при "подготовить"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:
         //checkOnPrepareOrAcceptance('Подготовка')
         break
 // проверка при "принять"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
         //checkOnPrepareOrAcceptance('Принятие')
         break
 // проверка при "вернуть из принята в подготовлена"
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
+    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
         //checkOnCancelAcceptance()
         break
 // после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
         //acceptance()
         break
 // обобщить
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         consolidation()
         calc()
         logicalCheck()
@@ -73,31 +72,31 @@ def addNewRow() {
     // Графы 2-5 Заполняется вручную
     ['code', 'balance', 'date', 'docNumber', 'docDate', 'currencyCode',
             //'rateOfTheBankOfRussia',
-            'taxAccountingCurrency', 'accountingCurrency'].each{ column ->
+            'taxAccountingCurrency', 'accountingCurrency'].each { column ->
         newRow.getCell(column).setEditable(true)
         newRow.getCell(column).setStyleAlias('Редактируемая')
     }
 
     def index = 0
-    if (currentDataRow!=null){
+    if (currentDataRow != null) {
         index = currentDataRow.getIndex()
         def row = currentDataRow
-        while(isTotalRow(row) && index>0){
+        while (isTotalRow(row) && index > 0) {
             row = getRows(data).get(--index)
         }
-        if(index!=currentDataRow.getIndex() && !isTotalRow(getRows(data).get(index))){
+        if (index != currentDataRow.getIndex() && !isTotalRow(getRows(data).get(index))) {
             index++
         }
-    }else if (getRows(data).size()>0) {
-        for(int i = getRows(data).size()-1;i>=0;i--){
+    } else if (getRows(data).size() > 0) {
+        for (int i = getRows(data).size() - 1; i >= 0; i--) {
             def row = getRows(data).get(i)
-            if(!isTotalRow(row)){
-                index = getRows(data).indexOf(row)+1
+            if (!isTotalRow(row)) {
+                index = getRows(data).indexOf(row) + 1
                 break
             }
         }
     }
-    data.insert(newRow,index+1)
+    data.insert(newRow, index + 1)
 
 }
 
@@ -109,7 +108,7 @@ def deleteRow() {
     data.delete(currentDataRow)
     // проставление номеров строк
     def i = 1;
-    getRows(data).each{ row->
+    getRows(data).each { row ->
         if (!isTotal(row)) {
             row.rowNumber = i++
         }
@@ -164,24 +163,37 @@ def calc() {
     // справочник 22 "Курсы Валют"
     def refDataProvider = refBookFactory.getDataProvider(22)
 
-    getRows(data).eachWithIndex { row, index ->
+    // графа 10, 12 для последней строки "итого"
+    def total10 = 0
+    def total12 = 0
+
+    for (def row : getRows(data)) {
         // графа 1
-
-        def records = refDataProvider.getRecords(row.date, null, "CODE_NUMBER = " + row.currencyCode, null)
-        if (records != null && records.getRecords() != null && records.getRecords().size() > 0) {
-            // получить первую запись (скорее всего единственную)
-            def record = records.getRecords().getAt(0)
-
-            // пример использования
-            def rate = record.get('RATE') // атрибут "Курс валюты"
-            row.rateOfTheBankOfRussia = rate.getNumberValue()
+        if (row.date != null && row.currencyCode !=null) {
+            def records = refDataProvider.getRecords(row.date, null, "CODE_NUMBER = " + row.currencyCode, null)
+            if (records != null && records.getRecords() != null && records.getRecords().size() > 0) {
+                // получить первую запись (скорее всего единственную)
+                def record = records.getRecords().getAt(0)
+                // пример использования
+                def rate = record.get('RATE') // атрибут "Курс валюты"
+                row.rateOfTheBankOfRussia = rate.getNumberValue()
+            }
         }
 
-        // графа 10 = графа 9 * графа 8
-        row.taxAccountingRuble = round(row.taxAccountingCurrency * row.rateOfTheBankOfRussia, 2)
-
+        // графа 10 = графа 9 * графа 8		
         // графа 12 = графа 11 * графа 8
-        row.ruble = round(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)
+        if (row.rateOfTheBankOfRussia != null) {
+            row.taxAccountingRuble = round(row.taxAccountingCurrency * row.rateOfTheBankOfRussia, 2)
+            row.ruble = round(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)
+
+            total10 += row.taxAccountingRuble
+            total12 += row.ruble
+        } else {
+            row.taxAccountingRuble = null
+            row.ruble = null
+        }
+
+
     }
     // отсортировать/группировать
     data.save(getRows(data).sort { getCodeAttribute(it.code) })
@@ -191,13 +203,6 @@ def calc() {
     }
 
     save(data)
-    // графа 10, 12 для последней строки "итого"
-    def total10 = 0
-    def total12 = 0
-    getRows(data).each { row ->
-        total10 += row.taxAccountingRuble
-        total12 += row.ruble
-    }
 
     /** Столбцы для которых надо вычислять итого и итого по эмитенту. Графа 10, 12. */
     def totalColumns = ['taxAccountingRuble', 'ruble']
@@ -210,7 +215,8 @@ def calc() {
         sums[it] = 0
     }
 
-    getRows(data).eachWithIndex { row, i ->
+    def i = 0
+    for (def row : getRows(data)) {
         if (tmp == null) {
             tmp = row.code
         }
@@ -224,7 +230,8 @@ def calc() {
         // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
         if (i == getRows(data).size() - 1) {
             totalColumns.each {
-                sums[it] += row.getCell(it).getValue()
+                if (row.getCell(it).getValue() != null)
+                    sums[it] += row.getCell(it).getValue()
             }
             totalRows.put(i + 1, getNewRow(row.code, totalColumns, sums))
             totalColumns.each {
@@ -232,13 +239,15 @@ def calc() {
             }
         }
         totalColumns.each {
-            sums[it] += row.getCell(it).getValue()
+            if (row.getCell(it).getValue() != null)
+                sums[it] += row.getCell(it).getValue()
         }
         tmp = row.code
+        i++
     }
 
     // добавить "итого по коду" в таблицу
-    def i = 0
+    i = 0
     totalRows.each { index, row ->
         data.insert(row, index + i + 1)
         i = i + 1
@@ -298,7 +307,7 @@ def logicalCheck() {
                 }
             }
         }
-            checkUniq456(data)
+        checkUniq456(data)
 
         for (def row : getRows(data)) {
             if (isTotal(row)) {
@@ -315,8 +324,6 @@ def logicalCheck() {
                 errorMsg = "В строке $index "
             }
 
-
-
             // 2. Проверка на нулевые значения (графа 9, 10, 11, 12)
             if (row.taxAccountingCurrency == 0 && row.taxAccountingRuble == 0 &&
                     row.accountingCurrency == 0 && row.ruble == 0) {
@@ -330,7 +337,7 @@ def logicalCheck() {
             // («Графа 10»=0 и «Графа 12»>0)
 
             if ((row.taxAccountingRuble > 0 && row.ruble == 0) ||
-                    (row.taxAccountingRuble == 0 && row.ruble > 0))  {
+                    (row.taxAccountingRuble == 0 && row.ruble > 0)) {
                 logger.warn(errorMsg + 'одновременно указаны данные по налоговому (графа 10) и бухгалтерскому (графа 12) учету')
             }
 
@@ -347,7 +354,7 @@ def logicalCheck() {
 
             // 8. Проверка на уникальность поля «№ пп» (графа 1)
             for (def rowB : getRows(data)) {
-                if(!row.equals(rowB) && row.rowNumber ==rowB.rowNumber){
+                if (!row.equals(rowB) && row.rowNumber == rowB.rowNumber) {
                     logger.error('Нарушена уникальность номера по порядку!')
                     return false
                 }
@@ -377,8 +384,6 @@ def logicalCheck() {
                 logger.warn('Операция, указанная в строке ' + row.rowNumber + ', в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-7 в <отчетный период> отчетном периоде.')
             }
 
-
-
             // Проверка итоговых значений по кодам классификации дохода - нахождение кодов классификации
             if (!totalGroupsName.contains(row.code)) {
                 totalGroupsName.add(row.code)
@@ -386,22 +391,22 @@ def logicalCheck() {
 
             // Проверка итогового значений по всей форме - подсчет сумм для общих итогов
             if (row.ruble != null && row.taxAccountingRuble != null)
-            totalColumns.each { alias ->
-                if (totalSums[alias] == null) {
-                    totalSums[alias] = 0
+                totalColumns.each { alias ->
+                    if (totalSums[alias] == null) {
+                        totalSums[alias] = 0
+                    }
+                    totalSums[alias] += row.getCell(alias).getValue()
                 }
-                totalSums[alias] += row.getCell(alias).getValue()
-            }
 
         }
         if (hasTotal) {
-            def totalRow = getRowByAlias(data,'total')
+            def totalRow = getRowByAlias(data, 'total')
 
             // 12. Арифметические проверки расчета итоговых строк «Итого по КНУ»
             for (def codeName : totalGroupsName) {
                 def totalRowAlias = 'total' + codeName
                 if (!checkAlias(getRows(data), totalRowAlias)) {
-                    logger.error("Итоговые значения по КНУ" +  getCodeAttribute(codeName) + " не рассчитаны! Необходимо расчитать данные формы.")
+                    logger.error("Итоговые значения по КНУ" + getCodeAttribute(codeName) + " не рассчитаны! Необходимо расчитать данные формы.")
                     return false
                 }
                 def row = getRowByAlias(data, totalRowAlias)
@@ -436,29 +441,29 @@ def checkDate(def row) {
     def sum = null
     SimpleDateFormat formatY = new SimpleDateFormat('yyyy')
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-        if (row.ruble != null && row.ruble != 0) {
-            // получить (дату - 3 года)
-            dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(row.docDate)) - 3))
-            // получить налоговые и отчетные периоды за найденый промежуток времени [(дата - 3года)..дата]
-            def taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, dateFrom, row.docDate)
-            taxPeriods.each { taxPeriod ->
-                def id = taxPeriod.getId()
-                def reportPeriods = reportPeriodService.listByTaxPeriod(id)
-                reportPeriods.each { reportPeriod ->
-                    // в каждой форме относящейся к этим периодам ищем соответствующие строки и суммируем по 10 графе
-                    def f = formDataService.find(formData.getFormType().getId(), FormDataKind.PRIMARY, formData.getDepartmentId(), reportPeriod.getId())
-                    def d = getData(f)
-                    if (d != null) {
-                        getRows(d).each { r ->
-                            if ((r.balance == row.balance) && (r.docNumber == row.docNumber) && (r.docDate == row.docDate)) {
-                                return true
-                                sum += (sum ?: 0) + r.taxAccountingRuble
-                            }
+    if (row.ruble != null && row.ruble != 0) {
+        // получить (дату - 3 года)
+        dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(row.docDate)) - 3))
+        // получить налоговые и отчетные периоды за найденый промежуток времени [(дата - 3года)..дата]
+        def taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, dateFrom, row.docDate)
+        taxPeriods.each { taxPeriod ->
+            def id = taxPeriod.getId()
+            def reportPeriods = reportPeriodService.listByTaxPeriod(id)
+            reportPeriods.each { reportPeriod ->
+                // в каждой форме относящейся к этим периодам ищем соответствующие строки и суммируем по 10 графе
+                def f = formDataService.find(formData.getFormType().getId(), FormDataKind.PRIMARY, formData.getDepartmentId(), reportPeriod.getId())
+                def d = getData(f)
+                if (d != null) {
+                    getRows(d).each { r ->
+                        if ((r.balance == row.balance) && (r.docNumber == row.docNumber) && (r.docDate == row.docDate)) {
+                            return true
+                            sum += (sum ?: 0) + r.taxAccountingRuble
                         }
                     }
                 }
             }
         }
+    }
     return sum
 }
 
@@ -489,7 +494,6 @@ def checkNSI() {
                 errorMsg = "В строке $index "
             }
 
-
             // 1. Проверка графа «Код налогового учета» (графа 2)
             if (refBookService.getRecordData(expensesClassifierRefBookId, row.code) == null) {
                 logger.warn(errorMsg + 'код налогового учёта в справочнике отсутствует!')
@@ -503,8 +507,7 @@ def checkNSI() {
 
             // Код валюты
             def currCode = refBookService.getRecordData(currencyRefBookId, row.currencyCode)
-            if (row.date != null)
-            {
+            if (row.date != null) {
                 if (currCode == null) {
                     logger.error(errorMsg + 'код валюты в справочнике отсутствует!')
                     return false
@@ -538,7 +541,7 @@ def checkUniq456(def data) {
     for (def row : getRows(data)) {
         if (!isTotal(row)) {
             Map<Integer, Object> m = new HashMap<>();
-            m.put(4, row.code );
+            m.put(4, row.code);
             m.put(5, row.docNumber);
             m.put(6, row.docDate);
             if (notUniq.get(m) != null) {
@@ -554,10 +557,9 @@ def checkUniq456(def data) {
     }
 
     if (!notUniq.isEmpty()) {
-        notUniq = notUniq.sort {it.value}
+        notUniq = notUniq.sort { it.value }
         for (def item : notUniq) {
-            if (item.value.size() > 1)
-            {
+            if (item.value.size() > 1) {
                 StringBuilder numberList = new StringBuilder()
                 item.getValue().each { rNum ->
                     if (numberList.length() != 0) {
@@ -573,7 +575,6 @@ def checkUniq456(def data) {
     }
     return result
 }
-
 
 /**
  * Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята".
@@ -605,7 +606,7 @@ void consolidation() {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceData = getData(source)
-                getRows(sourceData).each { row->
+                getRows(sourceData).each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
                         insert(data, row)
                     }
@@ -762,7 +763,6 @@ def checkRequiredColumns(def row, def columns) {
     return true
 }
 
-
 /**
  * Получить название графы по псевдониму.
  *
@@ -857,6 +857,25 @@ def getNumberAttribute(def id) {
 /**
  * Проверка является ли строка итоговой (любой итоговой, т.е. по коду, либо основной)
  */
-def isTotalRow(row){
-    row.getAlias()==~/total\d*/
+def isTotalRow(row) {
+    row.getAlias() ==~ /total\d*/
+}
+
+/**
+ * Проверить существования строки по алиасу.
+ *
+ * @param list строки нф
+ * @param rowAlias алиас
+ * @return <b>true</b> - строка с указанным алиасом есть, иначе <b>false</b>
+ */
+def checkAlias(def list, def rowAlias) {
+    if (rowAlias == null || rowAlias == "" || list == null || list.isEmpty()) {
+        return false
+    }
+    for (def row : list) {
+        if (row.getAlias() == rowAlias) {
+            return true
+        }
+    }
+    return false
 }

@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -27,6 +29,9 @@ import java.util.Map;
 public class RefBookDepartment implements RefBookDataProvider {
 
     public static final Long REF_BOOK_ID = RefBookDepartmentDao.REF_BOOK_ID;
+
+    @Autowired
+    RefBookDao refBookDao;
 
     @Autowired
     private RefBookDepartmentDao refBookDepartmentDao;
@@ -76,6 +81,8 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
-		throw new UnsupportedOperationException();
+        RefBook refBook = refBookDao.get(REF_BOOK_ID);
+        RefBookAttribute attribute = refBook.getAttribute(attributeId);
+        return refBookDepartmentDao.getRecordData(recordId).get(attribute.getAlias());
     }
 }
