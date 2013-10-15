@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -55,9 +56,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	FlexiblePager pager;
 	@UiField
-	Button addRowButton;
+    LinkButton addRowButton;
 	@UiField
-	Button removeRowButton;
+    LinkButton removeRowButton;
 	@UiField
 	Button originalVersionButton;
 	@UiField
