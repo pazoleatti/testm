@@ -188,12 +188,13 @@ def logicalCheck() {
     def firstRow
     def lastRow
     def sumColumns = getSumColumns()
-    getAliasesSections().each { section ->
+    for (def section : getAliasesSections()) {
         firstRow = getRowByAlias(data, section)
         lastRow = getRowByAlias(data, 'total' + section)
         for (def col : sumColumns) {
-            def value = lastRow.getCell(col).getValue() ?: 0
-            if (value != getSum(col, firstRow, lastRow)) {
+            def value = roundValue(lastRow.getCell(col).getValue() ?: 0, 6)
+            def sum = roundValue(getSum(col, firstRow, lastRow), 6)
+            if (sum != value) {
                 def name = getColumnName(lastRow, col)
                 def number = section
                 logger.error("Неверно рассчитаны итоговые значения для раздела $number в графе \"$name\"!")
@@ -424,7 +425,7 @@ def checkRequiredColumns(def row, def columns) {
 void copyRows(def sourceData, def destinationData, def fromAlias, def toAlias) {
     def from = getIndexByAlias(sourceData, fromAlias) + 1
     def to = getIndexByAlias(sourceData, toAlias)
-    if (from > to) {
+    if (from >= to) {
         return
     }
     def copyRows = getRows(sourceData).subList(from, to)

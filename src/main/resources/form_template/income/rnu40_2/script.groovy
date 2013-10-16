@@ -9,9 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  *
  * @version 59
  *
- * TODO:
- *      - пересчет
- *
  * @author rtimerbaev
  */
 
@@ -24,12 +21,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE :
         calc() && logicalCheck() && checkNSI()
-        break
-    case FormDataEvent.ADD_ROW :
-        addNewRow()
-        break
-    case FormDataEvent.DELETE_ROW :
-        deleteRow()
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
@@ -75,74 +66,38 @@ def addNewRow() {
     data.insert(newRow, index + 1)
 }
 
-// TODO (Ramil Timerbaev) убрать?
-/**
- * Удалить строку.
- */
-def deleteRow() {
-    if (currentDataRow.getAlias() == null) {
-        def data = getData(formData)
-        data.delete(currentDataRow)
-    }
-}
-
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 def calc() {
     def data = getData(formData)
-    def data40_1 = getFromRNU40_1()
-
-    if (data40_1 != null) {
-        return true
-    }
+    def rows = getRows(data)
 
     // удалить нефиксированные строки
     deleteRows(data)
-    def rows = getRows(data)
-    def rows40_1 = getRows(data40_1)
-    if (rows40_1.isEmpty()) {
+
+    def data40_1 = getFromRNU40_1()
+    if (data40_1 == null) {
+        save(data)
         return true
     }
 
-    def from
-    def to
-
     // подразделы, собрать список списков строк каждого раздела
     getAliasesSections().each { section ->
-        from = getIndexByAlias(data40_1, section) + 1
-        to = getIndexByAlias(data40_1, 'total' + section) - 1
-        if (from <= to) {
-            def newRows = []
-            rows[from..to].each { row ->
-                def newRow = formData.createDataRow()
-
-                // TODO (Ramil Timerbaev)
-                // графа 1      атрибут 166 - SBRF_CODE - "Код подразделения в нотации Сбербанка", справочник 30 "Подразделения"
-                newRow.number = row.number
-
-                // графа 2      атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
-                newRow.name = row.name
-
-                // графа 3      атрибут 64  - CODE - "Код валюты. Цифровой", справочник 15 "Общероссийский классификатор валют"
-                newRow.code = row.currencyCode
-
-                // графа 4
-                newRow.cost = row.cost
-
-                // графа 5
-                newRow.bondsCount = row.bondsCount
-
-                // графа 6
-                newRow.percent = row.percent
-
-                newRows.add(newRow)
+        def rows40_1 = getRowsBySection(data40_1, section)
+        def rows40_2 = getRowsBySection(data, section)
+        def newRows = []
+        for (def row : rows40_1) {
+            if (hasCalcRow(row.number, row.name, row.currencyCode, rows40_2)) {
+                continue
             }
-            getRows(data).addAll(getIndexByAlias(data, 'total' + section), newRows)
-            // поправить индексы, потому что они после вставки не пересчитываются
-            getRows(data).eachWithIndex { row, i ->
-                row.setIndex(i + 1)
-            }
+            def newRow = getCalcRowFromRNU_40_1(row.number, row.name, row.currencyCode, rows40_1)
+            newRows.add(newRow)
+            rows40_2.add(newRow)
+        }
+        if (!newRows.isEmpty()) {
+            rows.addAll(getIndexByAlias(data, 'total' + section), newRows)
+            updateIndexes(data)
         }
     }
 
@@ -168,11 +123,16 @@ def calc() {
  */
 def logicalCheck() {
     def data = getData(formData)
+    def rows = getRows(data)
+
+    def data40_1 = getFromRNU40_1()
+    if (data40_1 == null) {
+        return true
+    }
 
     // список проверяемых столбцов (графа 1..6)
     def requiredColumns = ['number', 'name', 'code', 'cost', 'bondsCount', 'percent']
-
-    for (def row : getRows(data)) {
+    for (def row : rows) {
         // 1. Обязательность заполнения поля графы 1..6
         if (!isFixedRow(row) && !checkRequiredColumns(row, requiredColumns)) {
             return false
@@ -182,38 +142,42 @@ def logicalCheck() {
     // алиасы графов для арифметической проверки (графа 1..6)
     def arithmeticCheckAlias = requiredColumns
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
-    def needValue = [:]
     def colNames = []
     def index
     def errorMsg
-    def cache = [:]
 
-    for (def row : getRows(data)) {
-        if (isFixedRow(row)) {
+    // 2. Арифметическая проверка графы 1..6
+    // подразделы, собрать список списков строк каждого раздела
+    for (def section : getAliasesSections()) {
+        def rows40_1 = getRowsBySection(data40_1, section)
+        def rows40_2 = getRowsBySection(data, section)
+        // если в разделе рну 40.1 есть данные, а в аналогичном разделе рну 40.2 нет данных, то ошибка
+        // или наоборот, то тоже ошибка
+        if (rows40_1.isEmpty() && !rows40_2.isEmpty() ||
+                !rows40_1.isEmpty() && rows40_2.isEmpty()) {
+            def number = section
+            logger.error("Неверно рассчитаны значения графов для раздела $number")
+            return false
+        }
+        if (rows40_1.isEmpty() && rows40_2.isEmpty()) {
             continue
         }
+        for (def row : rows40_2) {
+            index = getIndex(row) + 1
+            errorMsg = "В строке $index "
 
-        index = getIndex(row) + 1
-        errorMsg = "В строке $index "
-
-        // 2. Арифметическая проверка графы 1..6
-        needValue['number'] = 0
-        needValue['name'] = 0
-        needValue['code'] = 0
-        needValue['cost'] = 0
-        needValue['bondsCount'] = 0
-        needValue['bondsCount'] = 0
-
-        arithmeticCheckAlias.each { alias ->
-            if (needValue[alias] != row.getCell(alias).getValue()) {
-                def name = getColumnName(row, alias)
-                colNames.add('"' + name + '"')
+            def tmpRow = getCalcRowFromRNU_40_1(row.number, row.name, row.code, rows40_1)
+            arithmeticCheckAlias.each { alias ->
+                if (row.getCell(alias).getValue() != tmpRow.getCell(alias).getValue()) {
+                    def name = getColumnName(row, alias)
+                    colNames.add('"' + name + '"')
+                }
             }
-        }
-        if (!colNames.isEmpty()) {
-            def msg = colNames.join(', ')
-            logger.error(errorMsg + "неверно рассчитано значение графы: $msg.")
-            return false
+            if (!colNames.isEmpty()) {
+                def msg = colNames.join(', ')
+                logger.error(errorMsg + "неверно рассчитано значение графы: $msg.")
+                return false
+            }
         }
     }
 
@@ -225,8 +189,9 @@ def logicalCheck() {
         firstRow = getRowByAlias(data, section)
         lastRow = getRowByAlias(data, 'total' + section)
         for (def col : sumColumns) {
-            def value = lastRow.getCell(col).getValue() ?: 0
-            if (value != getSum(col, firstRow, lastRow)) {
+            def value = roundValue(lastRow.getCell(col).getValue() ?: 0, 6)
+            def sum = roundValue(getSum(col, firstRow, lastRow), 6)
+            if (value != sum) {
                 def name = getColumnName(lastRow, col)
                 def number = section
                 logger.error("Неверно рассчитаны итоговые значения для раздела $number в графе \"$name\"!")
@@ -279,7 +244,13 @@ void consolidation() {
     def data = getData(formData)
 
     // удалить нефиксированные строки
-    deleteRows(data)
+    def deleteRows = []
+    getRows(data).each { row ->
+        if (!isFixedRow(row)) {
+            deleteRows.add(row)
+        }
+    }
+    data.delete(deleteRows)
 
     // собрать из источников строки и разместить соответствующим разделам
     def aliasesSections = getAliasesSections()
@@ -452,15 +423,12 @@ def checkRequiredColumns(def row, def columns) {
 void copyRows(def sourceData, def destinationData, def fromAlias, def toAlias) {
     def from = getIndexByAlias(sourceData, fromAlias) + 1
     def to = getIndexByAlias(sourceData, toAlias)
-    if (from > to) {
+    if (from >= to) {
         return
     }
     def copyRows = getRows(sourceData).subList(from, to)
     getRows(destinationData).addAll(getIndexByAlias(destinationData, toAlias), copyRows)
-    // поправить индексы, потому что они после вставки не пересчитываются
-    getRows(destinationData).eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
+    updateIndexes(destinationData)
 }
 
 /**
@@ -577,5 +545,100 @@ void deleteRows(def data) {
             deleteRows.add(row)
         }
     }
-    data.delete(deleteRows)
+    getRows(data).removeAll(deleteRows) // data.delete(deleteRows)
+    updateIndexes(data)
+}
+
+/**
+ * Поправить индексы, потому что они после вставки не пересчитываются.
+ */
+void updateIndexes(def data) {
+    getRows(data).eachWithIndex { row, i ->
+        row.setIndex(i + 1)
+    }
+}
+
+/**
+ * Получить строки раздела.
+ *
+ * @param data хелпер
+ * @param section алиас начала раздела (н-р: начало раздела - A, итоги раздела - totalA)
+ */
+def getRowsBySection(def data, def section) {
+    from = getIndexByAlias(data, section) + 1
+    to = getIndexByAlias(data, 'total' + section) - 1
+    def rows = getRows(data)
+    return (from <= to ? rows[from..to] : [])
+}
+
+/**
+ * Получить посчитанную строку для рну 40.2 из рну 40.1.
+ * Формируется строка для рну 40.2.
+ * Для формирования строки отбираются данные из 40.1 по номеру и названию тб и коду валюты.
+ * У строк рну 40.1, подходящих под эти условия, суммируются графы 6, 7, 10 в строку рну 40.2 графы 4, 5, 6.
+ *
+ * @param number номер тб
+ * @param name наименование тб
+ * @param code код валюты номинала
+ * @param rows40_1 строки рну 40.1 среди которых искать подходящие (строки должны принадлежать одному разделу)
+ * @return строка рну 40.2
+ */
+def getCalcRowFromRNU_40_1(def number, def name, def code, def rows40_1) {
+    if (rows40_1 == null || rows40_1.isEmpty()) {
+        return null
+    }
+    def calcRow = null
+    for (def row : rows40_1) {
+        if (row.number == number && row.name == name && row.currencyCode == code) {
+            if (calcRow == null) {
+                calcRow = formData.createDataRow()
+                calcRow.number = number
+                calcRow.name = name
+                calcRow.code = code
+                calcRow.cost = 0
+                calcRow.bondsCount = 0
+                calcRow.percent = 0
+            }
+            // графа 4, 5, 6 = графа 6, 7, 10
+            calcRow.cost += row.cost
+            calcRow.bondsCount += row.bondsCount
+            calcRow.percent += row.percent
+        }
+    }
+    return calcRow
+}
+
+/**
+ * Проверить посчитала ли уже для рну 40.2 строка с заданными параметрами (по номеру и названию тб и коду валюты).
+ *
+ * @param number номер тб
+ * @param name наименование тб
+ * @param code код валюты номинала
+ * @param rows40_2 строки рну 40.2 среди которых искать строку (строки должны принадлежать одному разделу)
+ * @return true - строка с такими параметрами уже есть, false - строки нет
+ */
+def hasCalcRow(def number, def name, def code, def rows40_2) {
+    if (rows40_2 != null && !rows40_2.isEmpty()) {
+        for (def row : rows40_2) {
+            if (row.number == number && row.name == name && row.code == code) {
+                return true
+            }
+        }
+    }
+    return false
+}
+
+/**
+ * Округляет число до требуемой точности.
+ *
+ * @param value округляемое число
+ * @param precision точность округления, знаки после запятой
+ * @return округленное число
+ */
+def roundValue(def value, int precision) {
+    if (value != null) {
+        return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
+    } else {
+        return null
+    }
 }
