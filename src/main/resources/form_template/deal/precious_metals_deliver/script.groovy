@@ -300,12 +300,6 @@ void logicCheck() {
         }
 
         // Проверка доходов и расходов
-        if (incomeSum != null && consumptionSum != null) {
-            def msg1 = row.getCell('incomeSum').column.name
-            def msg2 = row.getCell('consumptionSum').column.name
-            logger.warn("Строка $rowNum: «$msg1» и «$msg2» не могут быть одновременно заполнены!")
-        }
-
         if (incomeSum == null && consumptionSum == null) {
             def msg1 = row.getCell('incomeSum').column.name
             def msg2 = row.getCell('consumptionSum').column.name
@@ -868,7 +862,7 @@ def checkHeaderRow(def xml, def headRowCount, def cellNumber, def arrayHeaders) 
 def addData(def xml) {
     Date date = reportPeriodService.get(formData.reportPeriodId).taxPeriod.getEndDate()
 
-    def headShift = getHeaderRowCount() - 1
+    def headShift = getHeaderRowCount()
     def cache = [:]
     def data = formDataService.getDataRowHelper(formData)
     data.clear()
@@ -904,21 +898,24 @@ def addData(def xml) {
         // графа 3
         def map = refBookService.getRecordData(9, newRow.name)
         def String text = row.cell[indexCell].text()
-        if ((text != null && !text.equals(map.INN_KIO.stringValue)) || (text == null && map.INN_KIO.stringValue != null))
-            throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO.stringValue != null)) {
+            logger.warn("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        }
         indexCell++
 
         // графа 4.1
         text = row.cell[indexCell].text()
         map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
-        if ((text != null && !text.equals(map.NAME.stringValue)) || (text == null && map.NAME.stringValue != null))
-            throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if ((text != null && !text.isEmpty() && !text.equals(map.NAME.stringValue)) || ((text == null || text.isEmpty()) && map.NAME.stringValue != null)) {
+            logger.warn("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        }
         indexCell++
 
         // графа 4.2
         text = row.cell[indexCell].text()
-        if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
-            throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if ((text != null && !text.isEmpty() && !text.equals(map.CODE.stringValue)) || ((text == null || text.isEmpty()) && map.CODE.stringValue != null)) {
+            logger.warn("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        }
         indexCell++
 
         // столбец 6
@@ -1026,7 +1023,6 @@ def addData(def xml) {
         newRow.transactionDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
 
         data.insert(newRow, indexRow - headShift)
-        // println(indexRow - headShift)
     }
 }
 

@@ -340,21 +340,24 @@ def addData(def xml, int headRowCount) {
         // графа 3
         def map = refBookService.getRecordData(9, newRow.jurName)
         def String text = row.cell[indexCell].text()
-        if ((text != null && !text.equals(map.INN_KIO.stringValue)) || (text == null && map.INN_KIO.stringValue != null))
-            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO.stringValue != null)) {
+            logger.warn("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        }
         indexCell++
 
         // графа 4
         text = row.cell[indexCell].text()
         map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
-        if ((text != null && !text.equals(map.NAME.stringValue)) || (text == null && map.NAME.stringValue != null))
-            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if ((text != null && !text.isEmpty() && !text.equals(map.NAME.stringValue)) || ((text == null || text.isEmpty()) && map.NAME.stringValue != null)) {
+            logger.warn("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        }
         indexCell++
 
         // графа 5
         text = row.cell[indexCell].text()
-        if ((text != null && !text.equals(map.CODE.stringValue)) || (text == null && map.CODE.stringValue != null))
-            throw new Exception("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if ((text != null && !text.isEmpty() && !text.equals(map.CODE.stringValue)) || ((text == null || text.isEmpty()) && map.CODE.stringValue != null)) {
+            logger.warn("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        }
         indexCell++
 
         // графа 6
@@ -430,41 +433,41 @@ def checkTableHead(def xml, int headRowCount) {
         return false
     }
     def result = (xml.row[0].cell[0] == 'Полное наименование с указанием ОПФ' &&
-            xml.row[1].cell[0] ==  'Гр. 2' &&
+            xml.row[1].cell[0].text().trim() =='Гр. 2' &&
             xml.row[0].cell[1] == 'ИНН/ КИО' &&
-            xml.row[1].cell[1] ==  'Гр. 3' &&
+            xml.row[1].cell[1].text().trim() =='Гр. 3' &&
             xml.row[0].cell[2] == 'Наименование страны регистрации' &&
-            xml.row[1].cell[2] ==  'Гр. 4.1' &&
+            xml.row[1].cell[2].text().trim() =='Гр. 4.1' &&
             xml.row[0].cell[3] == 'Код страны регистрации по классификатору ОКСМ' &&
-            xml.row[1].cell[3] ==  'Гр. 4.2' &&
+            xml.row[1].cell[3].text().trim() == 'Гр. 4.2' &&
             xml.row[0].cell[4] == 'Номер договора' &&
-            xml.row[1].cell[4] ==  'Гр. 5' &&
+            xml.row[1].cell[4].text().trim() =='Гр. 5' &&
             xml.row[0].cell[5] == 'Дата договора' &&
-            xml.row[1].cell[5] ==  'Гр. 6' &&
+            xml.row[1].cell[5].text().trim() =='Гр. 6' &&
             xml.row[0].cell[6] == 'Номер сделки' &&
-            xml.row[1].cell[6] ==  'Гр. 7' &&
+            xml.row[1].cell[6].text().trim() =='Гр. 7' &&
             xml.row[0].cell[7] == 'Дата (заключения) сделки ' &&
-            xml.row[1].cell[7] ==  'Гр. 8' &&
+            xml.row[1].cell[7].text().trim() =='Гр. 8' &&
             xml.row[0].cell[8] == 'Режим переговорных сделок' &&
-            xml.row[1].cell[8] ==  'Гр. 9' &&
+            xml.row[1].cell[8].text().trim() =='Гр. 9' &&
             xml.row[0].cell[9] == 'Дата исполнения  1-ой части сделки ' &&
-            xml.row[1].cell[9] ==  'Гр. 10.1' &&
+            xml.row[1].cell[9].text().trim() =='Гр. 10.1' &&
             xml.row[0].cell[10] == 'Дата исполнения  2-ой части сделки ' &&
-            xml.row[1].cell[10] ==  'Гр. 10.2' &&
+            xml.row[1].cell[10].text().trim() =='Гр. 10.2' &&
             xml.row[0].cell[11] == 'Сумма процентного дохода (руб.)' &&
-            xml.row[1].cell[11] ==  'Гр. 11.1' &&
+            xml.row[1].cell[11].text().trim() =='Гр. 11.1' &&
             xml.row[0].cell[12] == 'Сумма процентного расхода (руб.)' &&
-            xml.row[1].cell[12] ==  'Гр. 11.2' &&
+            xml.row[1].cell[12].text().trim() =='Гр. 11.2' &&
             xml.row[0].cell[13] == 'Цена 1-ой части сделки, ед. валюты' &&
-            xml.row[1].cell[13] ==  'Гр. 12' &&
+            xml.row[1].cell[13].text().trim() =='Гр. 12' &&
             xml.row[0].cell[14] == 'Код валюты расчетов по сделке' &&
-            xml.row[1].cell[14] ==  'Гр. 13' &&
+            xml.row[1].cell[14].text().trim() =='Гр. 13' &&
             xml.row[0].cell[15] == 'Курс ЦБ РФ' &&
-            xml.row[1].cell[15] ==  'Гр. 14' &&
+            xml.row[1].cell[15].text().trim() =='Гр. 14' &&
             xml.row[0].cell[16] == 'Цена 1-ой части сделки, руб.' &&
-            xml.row[1].cell[16] ==  'Гр. 15' &&
+            xml.row[1].cell[16].text().trim() =='Гр. 15' &&
             xml.row[0].cell[17] == 'Дата совершения сделки' &&
-            xml.row[1].cell[17] ==  'Гр. 16')
+            xml.row[1].cell[17].text().trim() =='Гр. 16')
     return result
 }
 
