@@ -95,7 +95,7 @@ def boolean logicalCheck(){
     def rows = getRows(data)
     for (def row : rows){
         def errStart = getRowIndexString(row)
-        if (isTotal(row)){
+        if (isFixed(row)){
             continue
         }
         if (!checkRequiredColumns(row, getRequiredCols())){
@@ -138,7 +138,7 @@ def boolean logicalCheck(){
 def boolean checkNSI(){
     def rows = getRows(data)
     for (def row : rows){
-        if (isTotal(row)){
+        if (isFixed(row)){
             continue
         }
         def errStart = getRowIndexString(row)
@@ -154,7 +154,7 @@ void calc(){
 
     // проверить обязательные редактируемые поля
     for (def DataRow row : getRows(data)){
-        if (!isTotal(row)){
+        if (!isFixed(row)){
             if (!checkRequiredColumns(row, requiredCols.intersect(editableCols))){
                 return
             }
@@ -165,7 +165,7 @@ void calc(){
     def rows = getRows(data)
     // расчет ячеек
     rows.each{row->
-        if (!isTotal(row)) {
+        if (!isFixed(row)) {
             getValues(row, row)
         }
     }
@@ -198,7 +198,7 @@ void addNewRow(){
 }
 
 void deleteRow(){
-    if (!isTotal(currentDataRow)) {
+    if (!isFixed(currentDataRow)) {
         data.delete(currentDataRow)
     }
 }
@@ -211,7 +211,7 @@ void consolidation() {
     // удалить нефиксированные строки
     def deleteRows = []
     getRows(data).each { row ->
-        if (!isTotal(row)) {
+        if (!isFixed(row)) {
             deleteRows += row
         }
     }
@@ -289,14 +289,14 @@ def List<DataRow<Cell>> getRows(def DataRowHelper data) {
 }
 
 /**
- * Проверка является ли строка итоговой.
+ * Проверка является ли строка фиксированной.
  */
-def isTotal(def row) {
+def isFixed(def row) {
     return row != null && row.getAlias() != null
 }
 
 /**
- * Получить новую стролу с заданными стилями.
+ * Получить новую строку с заданными стилями.
  */
 def DataRow getNewRow() {
     def row = formData.createDataRow()
@@ -393,7 +393,7 @@ void sort() {
     }
     sortRows.each {
         it.sort {  DataRow a, DataRow b ->
-            if (isTotal(a) || isTotal(b)){
+            if (isFixed(a) || isFixed(b)){
                 return 0
             }
             def aD = getCurrency(a.currencyCode)
