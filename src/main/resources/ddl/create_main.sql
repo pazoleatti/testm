@@ -138,12 +138,14 @@ create table ref_book (
 
 alter table ref_book add constraint ref_book_pk primary key (id);
 alter table ref_book add constraint ref_book_fk_script_id foreign key (script_id) references blob_data(id);
+alter table ref_book add constraint ref_book_chk_type check (type in (0, 1));
 
 comment on table ref_book is 'Справочник';
 comment on column ref_book.id is 'Уникальный идентификатор';
 comment on column ref_book.name is 'Название справочника';
 comment on column ref_book.script_id is 'Идентификатор связанного скрипта';
 comment on column ref_book.visible is 'Признак видимости';
+comment on column ref_book.type is 'Тип справочника (0 - Внутренний, 1 - Внешний');
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
   id number(18) not null,

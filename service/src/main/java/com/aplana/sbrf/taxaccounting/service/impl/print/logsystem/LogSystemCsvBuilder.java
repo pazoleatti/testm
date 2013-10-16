@@ -17,9 +17,9 @@ import java.util.zip.ZipOutputStream;
  */
 public class LogSystemCsvBuilder extends AbstractReportBuilder {
 
-    private static final SimpleDateFormat SDF_LOG_NAME = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+    private static final SimpleDateFormat SDF_LOG_NAME = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
-    private static final String PATTER_LOG_FILE_NAME = "log_<%s>-<%s>";
+    private static final String PATTER_LOG_FILE_NAME = "log_%s-%s_";
     private static final String ENCODING = "windows-1251";
 
     private static final String POSTFIX = ".zip";

@@ -400,9 +400,7 @@ def round(def value, def int precision = 2) {
     return value.setScale(precision, RoundingMode.HALF_UP)
 }
 
-/**
- * Получить данные за предыдущий месяц
- */
+// Получить данные за предыдущий месяц
 def getFormDataOld() {
     // предыдущий отчётный период
     def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
@@ -431,4 +429,24 @@ def getPrev10and11(def dataOld, def row) {
 def getReportDate() {
     def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
     return (tmp ? tmp.getTime() + 1 : null)
+}
+
+// Консолидация
+void consolidation() {
+    // удалить все строки и собрать из источников их строки
+    def rows = new LinkedList<DataRow<Cell>>()
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                formDataService.getDataRowHelper(source).getAllCached().each { row ->
+                    if (row.getAlias() == null || row.getAlias() == '') {
+                        rows.add(row)
+                    }
+                }
+            }
+        }
+    }
+    formDataService.getDataRowHelper(formData).save(rows)
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
