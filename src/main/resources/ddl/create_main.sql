@@ -145,7 +145,7 @@ comment on column ref_book.id is 'Уникальный идентификато�
 comment on column ref_book.name is 'Название справочника';
 comment on column ref_book.script_id is 'Идентификатор связанного скрипта';
 comment on column ref_book.visible is 'Признак видимости';
-comment on column ref_book.type is 'Тип справочника (0 - Внутренний, 1 - Внешний');
+comment on column ref_book.type is 'Тип справочника (0 - Внутренний, 1 - Внешний)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
   id number(18) not null,
