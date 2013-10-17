@@ -26,19 +26,6 @@ public class LogSystemFilterAvailableValues implements Serializable {
      */
     private List<DeclarationType> declarationTypes;
 
-    /**
-     * Список всех пользователей
-     */
-    private List<TAUser> users;
-
-    public List<TAUser> getUsers() {
-        return users;
-    }
-
-    public void setUsers(List<TAUser> users) {
-        this.users = users;
-    }
-
     public List<Department> getDepartments() {
         return departments;
     }

@@ -1,17 +1,16 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import java.util.List;
 
 /**
  * Реализация фабрики провайдеров данных для справочников
@@ -55,6 +54,8 @@ public class RefBookFactoryImpl implements RefBookFactory {
 			return applicationContext.getBean("refBookIncome101", RefBookDataProvider.class);
         } else if (RefBookIncome102.REF_BOOK_ID.equals(refBookId)) {
 			return applicationContext.getBean("refBookIncome102", RefBookDataProvider.class);
+        } else if (RefBookUser.REF_BOOK_ID.equals(refBookId)) {
+			return applicationContext.getBean("RefBookUser", RefBookDataProvider.class);
         } else {
 			RefBookDataProvider refBookDataProvider = applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);   // Исправление Марата, надо сделать получать данные отдельно для конкретных провайдеров
             if (refBookDataProvider instanceof RefBookUniversal) {

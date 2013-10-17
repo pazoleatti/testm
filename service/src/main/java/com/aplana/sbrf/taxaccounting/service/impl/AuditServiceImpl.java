@@ -7,8 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +25,6 @@ public class AuditServiceImpl implements AuditService {
 	private DepartmentService departmentService;
 	@Autowired
 	private FormTypeDao formTypeDao;
-	@Autowired
-	private TAUserService userService;
 	@Autowired
 	private DeclarationTypeDao declarationTypeDao;
 
@@ -76,7 +72,6 @@ public class AuditServiceImpl implements AuditService {
 		values.setDepartments(departmentService.listDepartments());
 		values.setFormTypes(formTypeDao.getAll());
 		values.setDeclarationTypes(declarationTypeDao.listAll());
-		values.setUsers(userService.listAllUsers());
 		return values;
 	}
 

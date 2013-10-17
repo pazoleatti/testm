@@ -9,6 +9,9 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
@@ -16,9 +19,11 @@ import java.util.*;
  * Провайдер данных для таблицы user
  * @author auldanov
  */
+@Service("RefBookUser")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RefBookUser implements RefBookDataProvider {
 
-    public final static long REF_BOOK_ID = 74L;
+    public static final Long REF_BOOK_ID = 74L;
 
     @Autowired
     RefBookDao refBookDao;
