@@ -248,6 +248,10 @@ public class RefBookAttribute implements Serializable {
 		if (refBookId != null ? !refBookId.equals(that.refBookId) : that.refBookId != null) {
 			return false;
 		}
+        if (required != that.required){
+            return false;
+        }
+
 		return true;
 	}
 
@@ -268,6 +272,7 @@ public class RefBookAttribute implements Serializable {
 		sb.append(", visible=").append(visible);
 		sb.append(", precision=").append(precision);
 		sb.append(", width=").append(width);
+		sb.append(", required=").append(required);
 		sb.append('}');
 		return sb.toString();
 	}

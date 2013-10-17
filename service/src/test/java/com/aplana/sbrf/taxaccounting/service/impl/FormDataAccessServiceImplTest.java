@@ -1,49 +1,33 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.test.FormTypeMockUtils;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.Matchers;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.aplana.sbrf.taxaccounting.test.DepartmentFormTypeMockUtils.mockDepartmentFormType;
 import static com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils.mockDepartment;
 import static com.aplana.sbrf.taxaccounting.test.FormDataMockUtils.mockFormData;
 import static com.aplana.sbrf.taxaccounting.test.FormTemplateMockUtils.mockFormTemplate;
 import static com.aplana.sbrf.taxaccounting.test.ReportPeriodMockUtils.mockReportPeriod;
 import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.mockito.Matchers;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.aplana.sbrf.taxaccounting.test.FormTypeMockUtils;
 
 public class FormDataAccessServiceImplTest {
 	private static FormDataAccessServiceImpl service = new FormDataAccessServiceImpl();
@@ -133,7 +117,6 @@ public class FormDataAccessServiceImplTest {
 		// Сводная форма 1 из тербанка 1 является источником для сводной 1 банка
 		DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
 		List<DepartmentFormType> dfts = new ArrayList<DepartmentFormType>();
-		dfts = new ArrayList<DepartmentFormType>();
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType2.getId(), FormDataKind.SUMMARY));
 		when(departmentFormTypeDao.getFormDestinations(TB1_ID, summaryFormType1.getId(), FormDataKind.SUMMARY)).thenReturn(dfts);
@@ -406,18 +389,18 @@ public class FormDataAccessServiceImplTest {
 		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPER));
 
 		// Оператор может создавать первичные и выходные в своём подразделении
-		assertTrue(service.canCreate(userInfo, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(checkFail(userInfo, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 		
 		// Оператор не может создавать консолидированные и выходные формы даже в своём
-		assertFalse(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertFalse(checkFail(userInfo, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 		
 		// Оператор не может создавать в чужом подразделении 
-		assertFalse(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertFalse(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Оператор не может создавать в своём подразделении, если в подразделении не разрешена работа с такой формой
-		assertFalse(service.canCreate(userInfo, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertFalse(checkFail(userInfo, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
-		assertFalse(service.canCreate(userInfo, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_BALANCED_ID));
+		assertFalse(checkFail(userInfo, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_BALANCED_ID));
 	}
 	
 	@Test 
@@ -425,31 +408,31 @@ public class FormDataAccessServiceImplTest {
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
 
 		// Контролёр может создавать выходные формы
-		assertTrue(service.canCreate(userInfo, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(checkFail(userInfo, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
 		//TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм. Правильно assertFalse
-		assertTrue(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(checkFail(userInfo, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр не может создавать формы, если они не разрешены в подразделении
-		assertFalse(service.canCreate(userInfo, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertFalse(checkFail(userInfo, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
 		//TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм. Правильно assertFalse
 		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
-		assertTrue(service.canCreate(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(checkFail(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр может создать форму в чужом подразделении, если она является источником для одной из форм его подраздлеления 
 		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPER));
-		assertFalse(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertFalse(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
 		
 		// TODO: случай, когда форма в чужом подразделении является источником для другой формы в этом же подразделении, а уже эта вторая форма
 		// является источником для одной из форм подразделения, к которому относится контролёр
 		
 		// Во всех остальных случаях контролёр не сможет создавать формы в чужих подразделениях 
-		assertFalse(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, TB2_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertFalse(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB2_ID, REPORT_PERIOD_ACTIVE_ID));
 		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
-		assertTrue(service.canCreate(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_BALANCED_ID));
+		assertTrue(checkFail(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_BALANCED_ID));
 	}
 	
 	@Test 
@@ -457,24 +440,24 @@ public class FormDataAccessServiceImplTest {
 		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
 
 		// Контролёр УНП может создавать любую разрешённую налоговую форму, в любом подразделении
-		assertTrue(service.canCreate(userInfo, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(checkFail(userInfo, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр УНП не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
 		//TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм. Правильно assertFalse
-		assertTrue(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(checkFail(userInfo, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр УНП не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
 		//TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм. Правильно assertFalse
-		assertTrue(service.canCreate(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
-		assertTrue(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, TB2_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(checkFail(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB2_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр УНП может создавать консолидированные и сводные, передающиеся в вышестоящее подразделение
-		assertTrue(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Однако контролёр УНП не может создавать формы, если они не разрешены в подразедении 
-		assertFalse(service.canCreate(userInfo, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertFalse(checkFail(userInfo, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
-		assertTrue(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_BALANCED_ID));
+		assertTrue(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_BALANCED_ID));
 	}	
 
 	@Test
@@ -633,4 +616,25 @@ public class FormDataAccessServiceImplTest {
 			params.getAvailableWorkflowMoves().toArray()
 		);
 	}
+
+    /**
+     * Проверяет выбрасывается ли ошибка прав доступа и т.д.. Необходим для совместимости написанных тестов и изменениями
+     * сделанными в http://jira.aplana.com/browse/SBRFACCTAX-3939.
+     * @param userInfo
+     * @param formTemplateId
+     * @param kind
+     * @param departmentId
+     * @param reportPeriodId
+     * @return true если не было ошибки
+     */
+    private boolean checkFail(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentId, int reportPeriodId){
+        boolean isThrown = false;
+        try{
+            service.canCreate(userInfo, formTemplateId, kind, departmentId, reportPeriodId);
+            isThrown = true;
+        }catch (ServiceException se){
+        }
+
+        return isThrown;
+    }
 }

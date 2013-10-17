@@ -141,14 +141,6 @@
 		<res-auth>Container</res-auth>
 		<res-sharing-scope>Shareable</res-sharing-scope>
 	</resource-ref>
-
-    <resource-ref>
-        <description>Адрес публичных ключей для проверки подписи</description>
-        <res-ref-name>url/Sign</res-ref-name>
-        <res-type>java.net.URL</res-type>
-        <res-auth>Container</res-auth>
-        <res-sharing-scope>Shareable</res-sharing-scope>
-    </resource-ref>
     
     <resource-ref>
         <description>Адрес директории для загрузки справочников</description>

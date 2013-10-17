@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditToken;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.BookerStatementsTokens;
+import com.aplana.sbrf.taxaccounting.web.module.configuration.client.ConfigurationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigTokens;
@@ -23,6 +24,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -121,6 +123,7 @@ public class GetMainMenuActionHandler extends
             MenuItem settingMenuItem = new MenuItem("Настройки");
             settingMenuItem.getSubMenu().add(new MenuItem("Пользователи системы", NUMBER_SIGN + UserListTokens.secuserPage));
             settingMenuItem.getSubMenu().add(new MenuItem("Импорт данных", NUMBER_SIGN + MigrationTokens.migration));
+            settingMenuItem.getSubMenu().add(new MenuItem("Конфигурационные параметры",	NUMBER_SIGN + ConfigurationPresenter.TOKEN));
 
             menuItems.add(settingMenuItem);
         }
