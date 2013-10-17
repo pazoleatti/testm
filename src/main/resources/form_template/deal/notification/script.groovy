@@ -264,15 +264,15 @@ void generateXML() {
                                 address = map.ADDRESS.stringValue
                             }
                             СвОргУчаст(
-                                    НомПорСд: row.dealNum2,
-                                    ПрОрг: organInfo,
-                                    ОКСМ: countryCode3,
-                                    НаимОрг: organName,
-                                    ИННЮЛ: organINN,
-                                    КПП: organKPP,
-                                    РегНомИн: organRegNum,
-                                    КодНПРег: taxpayerCode,
-                                    АдрИнТекст: address
+                                    [НомПорСд: row.dealNum2] +
+                                            [ПрОрг: organInfo] +
+                                            [ОКСМ: countryCode3] +
+                                            [НаимОрг: organName] +
+                                            (organINN != null ? [ИННЮЛ: organINN] : [:]) +
+                                            (organKPP != null ? [КПП: organKPP] : [:]) +
+                                            (organRegNum != null ? [РегНомИн: organRegNum] : [:]) +
+                                            (taxpayerCode != null ? [КодНПРег: taxpayerCode] : [:]) +
+                                            (address != null ? [АдрИнТекст: address] : [:])
                             )
                         }
                     }
