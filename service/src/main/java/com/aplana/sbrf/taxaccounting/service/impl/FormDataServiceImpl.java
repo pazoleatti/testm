@@ -573,6 +573,9 @@ public class FormDataServiceImpl implements FormDataService {
                 if (departmentFormTypes != null && !departmentFormTypes.isEmpty()) {
                     for (DepartmentFormType i: departmentFormTypes) {
                         FormData destinationForm = formDataDao.find(i.getFormTypeId(), i.getKind(), i.getDepartmentId(), formData.getReportPeriodId());
+                        //В связи с http://jira.aplana.com/browse/SBRFACCTAX-4723
+                        if (destinationForm == null)
+                            continue;
                         // получение источников для текущего приемника i
                         List<DepartmentFormType> sourceFormTypes = departmentFormTypeDao.getFormSources(i.getDepartmentId(), i.getFormTypeId(), i.getKind());
                         // количество источников в статусе принята
