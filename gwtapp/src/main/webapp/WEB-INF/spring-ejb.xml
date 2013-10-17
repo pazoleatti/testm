@@ -9,4 +9,11 @@
                      jndi-name="ejblocal:taxaccounting/migration-ejb.jar/MigrationBean#com.aplana.sbrf.taxaccounting.service.MessageServiceLocal"
                      business-interface="com.aplana.sbrf.taxaccounting.service.MessageService"/>
 
+    <jee:remote-slsb
+            id="taskManager"
+            jndi-name="ejblocal:taxaccounting/scheduler-core.jar/TaskManagerBean#com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal"
+            business-interface="com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager"
+            lookup-home-on-startup="true"
+            />
+
 </beans>

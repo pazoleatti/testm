@@ -23,6 +23,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.menu.server.MainMenuServerModule
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.server.RefBookPickerServerModule;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.server.SigninControlServerModule;
 import com.aplana.sbrf.taxaccounting.web.widget.version.server.ProjectVersionControlServerModule;
+import com.aplana.sbrf.taxaccounting.web.module.scheduler.server.SchedulerServerModule;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -36,7 +37,7 @@ import org.springframework.context.annotation.Import;
         HistoryServerModule.class, UserListServerModule.class, FormDataImportServerModule.class,
         AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class, SourcesServerModule.class,
         DepartmentConfigServerModule.class, BookerStatementsServerModule.class, RefBookPickerServerModule.class,
-        RefBookListServerModule.class, RefBookDataServerModule.class, MigrationServerModule.class})
+        RefBookListServerModule.class, RefBookDataServerModule.class, MigrationServerModule.class, SchedulerServerModule.class})
 @ComponentScan(basePackageClasses = MainServerModule.class)
 @EnableAspectJAutoProxy
 public class MainServerModule {

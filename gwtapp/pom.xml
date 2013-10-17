@@ -133,6 +133,13 @@
             <artifactId>spring-jms</artifactId>
         </dependency>
 
+        <!-- Планировщик задач -->
+        <dependency>
+            <groupId>com.aplana.taxaccounting</groupId>
+            <artifactId>scheduler-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Tester component -->
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
@@ -239,6 +246,11 @@
                 <dependency>
                     <groupId>${project.groupId}</groupId>
                     <artifactId>migration-ejb</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.aplana.taxaccounting</groupId>
+                    <artifactId>scheduler-mock</artifactId>
                     <version>${project.version}</version>
                 </dependency>
 			</dependencies>

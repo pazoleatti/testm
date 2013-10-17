@@ -30,6 +30,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaClientModu
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.version.client.ProjectVersionModule;
+import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerModule;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
@@ -91,5 +92,6 @@ public class ClientModule extends AbstractPresenterModule {
         install(new TaxFormNominationModule());
 		install(new RefBookDataModule());
         install(new MigrationModule());
+        install(new SchedulerModule());
 	}
 }
