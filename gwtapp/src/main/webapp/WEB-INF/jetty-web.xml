@@ -104,11 +104,6 @@
 			<New class="java.util.concurrent.ConcurrentHashMap" />
 		</Arg>
 	</New>
-
-    <New class="org.mortbay.jetty.plus.naming.EnvEntry">
-        <Arg>java:comp/env/url/Sign</Arg>
-        <Arg type="java.net.URL">http://ignore/</Arg>
-    </New>
     
     <New class="org.mortbay.jetty.plus.naming.EnvEntry">
         <Arg>java:comp/env/url/RefBookDirectory</Arg>

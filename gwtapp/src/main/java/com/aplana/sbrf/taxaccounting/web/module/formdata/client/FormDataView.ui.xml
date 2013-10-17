@@ -92,8 +92,8 @@
                         <style:LeftBar>
                             <g:Button ui:field="checkButton">Проверить</g:Button>
                             <g:Button ui:field="recalculateButton">Рассчитать</g:Button>
-                            <g:Button ui:field="addRowButton">Добавить строку</g:Button>
-                            <g:Button ui:field="removeRowButton">Удалить строку</g:Button>
+                            <style:LinkButton ui:field="addRowButton" text="Добавить строку"/>
+                            <style:LinkButton ui:field="removeRowButton" text="Удалить строку"/>
                             <g:Button ui:field="originalVersionButton">Исходная версия</g:Button>
                             <g:Button ui:field="deleteFormButton">Удалить</g:Button>
                         </style:LeftBar>
@@ -127,7 +127,7 @@
                         </g:SimplePanel>
                         <g:HorizontalPanel ui:field="saveCancelPanel" height="100%" spacing="5">
                             <g:Button ui:field="saveButton" text="Сохранить" />
-                            <g:Button ui:field="cancelButton" text="Отмена" />
+                            <g:Button ui:field="cancelButton" text="Выход" />
                             <fileuplod:FileUploadWidget ui:field="fileUploader"/>
                         </g:HorizontalPanel>
                         <g:CheckBox ui:field="showCheckedColumns" value="true"

@@ -21,7 +21,6 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *      - уникальность инвентарного номера
  *      - расчеты и проверки при консолидации
- * TODO заменить значение поля saledPropertyCode и saleCode на значение из справочника
  *
  * @author rtimerbaev
  */
@@ -34,8 +33,9 @@ switch (formDataEvent) {
         allCheck()
         break
     case FormDataEvent.CALCULATE :
-        calculate()
-        allCheck()
+        if (calculate()){
+            allCheck()
+        }
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
@@ -55,8 +55,9 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        calculate()
-        allCheck()
+        if (calculate()){
+            allCheck()
+        }
         break
 }
 
@@ -100,13 +101,13 @@ def addNewRow() {
 
     if (currentDataRow == null || currentDataRow.getIndex() == -1) {
         def row = data.getDataRow(rows,'totalA')
-        data.insert(newRow,getIndex(row))
+        data.insert(newRow,getIndex(row)+1)
     } else if (currentDataRow.getAlias() == null) {
         data.insert(newRow, currentDataRow.getIndex()+1)
     } else {
         def alias = currentDataRow.getAlias()
         def row = data.getDataRow(rows, alias.contains('total') ? alias : 'total' + alias)
-        data.insert(newRow, getIndex(row))
+        data.insert(newRow, getIndex(row)+1)
     }
 }
 
@@ -130,23 +131,29 @@ def deleteRow() {
     }
 }
 
-void calculate(){
+def calculate(){
     def data = data
     def rows = getRows(data)
+    def isValid = true
     if (formData.kind != FormDataKind.CONSOLIDATED){
-        preCalc(data, rows)
-        sort(data, rows)
-        calc(data, rows)
-        calcTotal(data, rows)
+        isValid =  preCalc(data, rows)
+        if (isValid){
+            sort(data, rows)
+            calc(data, rows)
+            calcTotal(data, rows)
+        }
     } else {
         sort(data, rows)
         calcTotal(data, rows)
     }
-    data.update(rows)
+    if(isValid){
+        data.update(rows)
+    }
+    return isValid
 }
 
 /*
- * Проверка редактиремых обязательных полей перед расчетом.
+ * Проверка редактируемых обязательных полей перед расчетом.
  */
 def preCalc(def data, def rows){
 
@@ -160,6 +167,7 @@ def preCalc(def data, def rows){
             return false
         }
     }
+    return true
 
 }
 
@@ -185,10 +193,16 @@ void calc(def data, def rows) {
             def row45 = getRow45(row, data45)
 
             // графа 8
-            row.price = getGraph8(row, row46, row45, data12)
+            def graph8 = getGraph8(row, row46, row45, data12)
+            if (graph8 != null) {
+                row.price = graph8
+            }
 
             // графа 9
-            row.amort = getGraph9(row, row46, row45)
+            def graph9 = getGraph9(row, row46, row45)
+            if (graph9 != null) {
+                row.amort = graph9
+            }
 
             // графа 15
             def tmp
@@ -348,17 +362,19 @@ def logicalCheck() {
             def row45 = getRow45(row, data45)
 
             // Арифметическая проверка графы 8
-            if (row.price != getGraph8(row, row46, row45, data12)) {
+            def graph8 = getGraph8(row, row46, row45, data12)
+            if (graph8!=null && row.price != graph8) {
                 logger.warn(rowStart + 'неверное значение графы «Цена приобретения»!')
             }
 
             // Арифметическая проверка графы 9
-            if (row.amort != getGraph9(row, row46, row45)) {
+            def graph9 = getGraph9(row, row46, row45)
+            if (row.amort != graph9) {
                 logger.warn(rowStart + 'неверное значение графы «Фактически начислено амортизации (отнесено на расходы)»!')
             }
 
             // Арифметическая проверка графы 15
-            if (row.sum - row.marketPrice * 0.8 > 0) {
+            if (graph9!=null && row.sum - row.marketPrice * 0.8 > 0) {
                 tmp = 0
             } else {
                 tmp = row.marketPrice * 0.8 - row.sum
@@ -425,8 +441,10 @@ def checkNSI() {
             def rowStart = getRowIndexString(row)
             // 1. Проверка шифра при реализации амортизируемого имущества
             // Графа 21 (группа «А») = 1 или 2, и графа 22 = 1
+            def saledPropertyCode = getSaledPropertyCode(row.saledPropertyCode)
+            def saleCode = getSaleCode(row.saleCode)
             if (isSection('A', row) &&
-                    ((row.saledPropertyCode != 1 && row.saledPropertyCode != 2) || row.saleCode != 1)) {
+                    ((saledPropertyCode != 1 && saledPropertyCode != 2) || saleCode != 1)) {
                 logger.error(rowStart + 'для реализованного амортизируемого имущества (группа «А») указан неверный шифр!')
                 return false
             }
@@ -434,7 +452,7 @@ def checkNSI() {
             // 2. Проверка шифра при реализации прочего имущества
             // Графа 21 (группа «Б») = 3 или 4, и графа 22 = 1
             if (isSection('B', row) &&
-                    ((row.saledPropertyCode != 3 && row.saledPropertyCode != 4) || row.saleCode != 1)) {
+                    ((saledPropertyCode != 3 && saledPropertyCode != 4) || saleCode != 1)) {
                 logger.error(rowStart + 'для реализованного прочего имущества (группа «Б») указан неверный шифр!')
                 return false
             }
@@ -442,7 +460,7 @@ def checkNSI() {
             // 3. Проверка шифра при списании (ликвидации) амортизируемого имущества
             // Графа 21 (группа «В») = 1 или 2, и графа 22 = 2
             if (isSection('V', row) &&
-                    ((row.saledPropertyCode != 1 && row.saledPropertyCode != 2) || row.saleCode != 2)) {
+                    ((saledPropertyCode != 1 && saledPropertyCode != 2) || saleCode != 2)) {
                 logger.error(rowStart + 'для списанного (ликвидированного) амортизируемого имущества (группа «В») указан неверный шифр!')
                 return false
             }
@@ -450,7 +468,7 @@ def checkNSI() {
             // 4. Проверка шифра при реализации имущественных прав (кроме прав требования, долей паёв)
             // Графа 21 (группа «Г») = 5, и графа 22 = 1
             if (isSection('G', row) &&
-                    (row.saledPropertyCode != 5 || row.saleCode != 1)) {
+                    (saledPropertyCode != 5 || saleCode != 1)) {
                 logger.error(rowStart + 'для реализованных имущественных прав (кроме прав требования, долей паёв) (группа «Г») указан неверный шифр!')
                 return false
             }
@@ -458,33 +476,28 @@ def checkNSI() {
             // 5. Проверка шифра при реализации прав на земельные участки
             // Графа 21 (группа «Д») = 6, и графа 22 = 1
             if (isSection('D', row) &&
-                    (row.saledPropertyCode != 6 || row.saleCode != 1)) {
+                    (saledPropertyCode != 6 || saleCode != 1)) {
                 logger.error(rowStart + 'для реализованных прав на земельные участки (группа «Д») указан неверный шифр!')
                 return false
             }
 
             // 6. Проверка шифра при реализации долей, паёв
             if (isSection('E', row) &&
-                    (row.saledPropertyCode != 7 || row.saleCode != 1)) {
+                    (saledPropertyCode != 7 || saleCode != 1)) {
                 logger.error(rowStart + 'для реализованных имущественных прав (кроме прав требования, долей паёв) (группа «Е») указан неверный шифр!')
                 return false
             }
 
             // 7. Проверка актуальности поля «Шифр вида реализованного (выбывшего) имущества»
             // Проверка соответствия «графы 21» справочным данным справочника «Шифр вида реализованного (выбывшего) имущества»
-            if (false) {
-                logger.warn(rowStart + 'шифр вида реализованного (выбывшего) имущества в справочнике отсутствует!')
+            if (row.saledPropertyCode!=null && getSaledPropertyCode(row.saledPropertyCode)==null) {
+                logger.warn(rowStart + "в справочнике \"Шифр вида реализованного (выбывшего) имущества\" не найдено значение с id = ${row.saledPropertyCode} в поле \"Шифр вида реализованного (выбывшего) имущества\"!")
             }
 
-            // 8. Проверка актуальности поля «Шифр вида реализации (выбытия)»	Проверка соответствия «графы 22» справочным данным справочника «Шифр вида реализации (выбытия)»
-            if (false) {
-                logger.warn(rowStart + 'шифр вида реализации (выбытия) в справочнике отсутствует!')
-            }
-
-            // 9. Проверка актуальности поля «Тип имущества»
-            // Проверка соответствия «графы 23» справочным данным справочника «Тип имущества»
-            if (false) {
-                logger.warn(rowStart + 'тип имущества в справочнике не найден!')
+            // 8. Проверка актуальности поля «Шифр вида реализации (выбытия)»
+            // Проверка соответствия «графы 22» справочным данным справочника «Шифр вида реализации (выбытия)»
+            if (saleCode !=null && getSaleCode(row.saleCode)==null) {
+                logger.warn(rowStart + "в справочнике \"Шифр вида реализации (выбытия)\" не найдено значение с id = ${saleCode} в поле \"Шифр вида реализации (выбытия)\"!")
             }
         }
     }
@@ -617,7 +630,7 @@ def getIndex(def row) {
  * @param columns список обязательных графов
  * @return true - все хорошо, false - есть незаполненные поля
  */
-def checkRequiredColumns(Object row, Object columns) {
+def checkRequiredColumns(DataRow row, List<String> columns) {
     def colNames = []
 
     columns.each {
@@ -724,6 +737,14 @@ def FormData getFormData45(){
     return formDataService.find(341, formData.kind, formDataDepartment.id, formData.reportPeriodId)
 }
 
+/**
+ * Если ничего не возвращает, то ручное заполнение
+ * @param row49
+ * @param row46
+ * @param row45
+ * @param data12
+ * @return
+ */
 def getGraph8(DataRow row49, DataRow row46, DataRow row45, DataRowHelper data12) {
     // графа 8
     // Если «Графа 21» = 1, то
@@ -739,15 +760,16 @@ def getGraph8(DataRow row49, DataRow row46, DataRow row45, DataRowHelper data12)
     // «Графа 8» = «Графа 12» РНУ-12 - сумма, отнесённая на расходы по КНУ 21393, КНУ 21394 и КНУ 21395 до момента реализации прав
     // Если «Графа 21» = 7, то
     // указывается цена их приобретения, включая расходы, связанные с их приобретением;
-    if(row46!=null && row49.saledPropertyCode == 1){
+    def saledPropertyCode = getSaledPropertyCode(row49.saledPropertyCode)
+    if(row46!=null && saledPropertyCode == 1){
         return row46.cost
     }
 
-    if(row45!=null && row49.saledPropertyCode == 2){
+    if(row45!=null && saledPropertyCode == 2){
         return row45.startCost
     }
 
-    if(data12!=null && row49.saledPropertyCode == 6){
+    if(data12!=null && saledPropertyCode == 6){
         def knus = ['21393','21394','21395']
         def sum = 0
         for(def row12:getRows(data12)){
@@ -768,15 +790,16 @@ def getGraph9(def DataRow row49, def DataRow row46, def DataRow row45){
     // Если «Графа 21» = 3, 5, 6, 7 то
     // указывается 0
     // Если «Графа 21» = 4, то заполняется вручную
-    if(row46!=null && row49.saledPropertyCode == 1){
+    def prevSaledPropertyCode = row49.saledPropertyCode
+    if(row46!=null && prevSaledPropertyCode == 1){
         return (row46.cost10perExploitation?:0) + (row46.amortExploitation?:0)
     }
 
-    if(row45!=null && row49.saledPropertyCode == 2){
+    if(row45!=null && prevSaledPropertyCode == 2){
         return row45.cost10perTaxPeriod
     }
 
-    if(row49.saledPropertyCode in [3,5,6,7]){
+    if(prevSaledPropertyCode in [3,5,6,7]){
         return 0
     }
 }
@@ -784,7 +807,7 @@ def getGraph9(def DataRow row49, def DataRow row46, def DataRow row45){
 def getGraph18(def DataRow row49, def DataRow row46){
     // Если «Графа 17» > 0 и «Графа 21» = 1 и «Графа 22» = 1, то указывается значение графы 18 РНУ-46, где графа 6 РНУ-49 = графа 2 РНУ-46
     // Иначе, не заполняется
-    if(row46!=null && row49.loss>0 && row49.saledPropertyCode == 1 && row49.saleCode == 1){
+    if(row46!=null && row49.loss>0 && getSaledPropertyCode(row49.saledPropertyCode) == 1 && getSaleCode(row49.saleCode) == 1){
         return row46.usefullLifeEnd
     }
     return null
@@ -820,6 +843,24 @@ def getCodeAttribute(def id) {
 }
 
 /**
+ * Получить атрибут 804 - "Шифр вида реализованного (выбывшего) имущества" справочник 82 - "Шифры видов реализованного (выбывшего) имущества".
+ *
+ * @param id идентификатор записи справочника
+ */
+def getSaledPropertyCode(def id) {
+    return refBookService.getNumberValue(82, id, 'CODE')
+}
+
+/**
+ * Получить атрибут 806 - "Шифр вида реализации (выбытия)" справочник 83 - "Шифры видов реализации (выбытия)".
+ *
+ * @param id идентификатор записи справочника
+ */
+def getSaleCode(def id) {
+    return refBookService.getNumberValue(83, id, 'CODE')
+}
+
+/**
  * Хелпер для округления чисел
  * @param value
  * @param newScale
@@ -834,7 +875,7 @@ BigDecimal roundTo(BigDecimal value, int round) {
 }
 
 def DataRow getRow46(DataRow row49, DataRowHelper data46) {
-    if(data46!=null && row49.saledPropertyCode == 1){
+    if(data46!=null && getSaledPropertyCode(row49.saledPropertyCode) == 1){
         for(def row46:getRows(data46)){
             if(row46.invNumber == row49.invNumber){
                 return row46
@@ -845,7 +886,7 @@ def DataRow getRow46(DataRow row49, DataRowHelper data46) {
 }
 
 def DataRow getRow45(DataRow row49, DataRowHelper data45) {
-    if(data45!=null && row49.saledPropertyCode == 2){
+    if(data45!=null && getSaledPropertyCode(row49.saledPropertyCode) == 2){
         for(def row45:getRows(data45)){
             if(row45.inventoryNumber == row49.invNumber){
                 return row45

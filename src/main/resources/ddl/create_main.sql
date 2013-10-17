@@ -1,3 +1,14 @@
+create table configuration (
+  code varchar2(50) not null,
+  value varchar2(50)
+);
+alter table configuration add constraint configuration_pk primary key (code);
+
+comment on table configuration is 'Настройки приложения, конфигурация';
+comment on column configuration.code is 'Код параметра';
+comment on column configuration.value is 'Значение параметра';
+
+-------------------------------------------------------------------------------------------------------------------------------------------
 create table dict_region (
   code varchar2(2) not null,
   name varchar2(510) not null,
@@ -138,12 +149,14 @@ create table ref_book (
 
 alter table ref_book add constraint ref_book_pk primary key (id);
 alter table ref_book add constraint ref_book_fk_script_id foreign key (script_id) references blob_data(id);
+alter table ref_book add constraint ref_book_chk_type check (type in (0, 1));
 
 comment on table ref_book is 'Справочник';
 comment on column ref_book.id is 'Уникальный идентификатор';
 comment on column ref_book.name is 'Название справочника';
 comment on column ref_book.script_id is 'Идентификатор связанного скрипта';
 comment on column ref_book.visible is 'Признак видимости';
+comment on column ref_book.type is 'Тип справочника (0 - Внутренний, 1 - Внешний)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
   id number(18) not null,

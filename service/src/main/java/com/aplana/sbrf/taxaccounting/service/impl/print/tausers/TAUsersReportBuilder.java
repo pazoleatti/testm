@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.tausers;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserFull;
-import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractXlsxReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -14,7 +14,7 @@ import java.util.List;
 /**
  *
  */
-public class TAUsersReportBuilder extends AbstractXlsxReportBuilder {
+public class TAUsersReportBuilder extends AbstractReportBuilder {
 
     private List<TAUserFull> taUserList;
 

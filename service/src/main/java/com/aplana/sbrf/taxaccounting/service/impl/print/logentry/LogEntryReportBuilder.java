@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.logentry;
 
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractXlsxReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -10,7 +10,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.util.List;
 
-public class LogEntryReportBuilder extends AbstractXlsxReportBuilder {
+public class LogEntryReportBuilder extends AbstractReportBuilder {
 	
 	private static final String FIRST_COLUMN = "№ п/п";
 	private static final String SECOND_COLUMN = "Тип сообщения";
@@ -104,7 +104,6 @@ public class LogEntryReportBuilder extends AbstractXlsxReportBuilder {
 				cell = row.createCell(cellNumber);
 				cell.setCellStyle(cs);
 				cell.setCellValue("");
-                fillWidth(cellNumber, cell.getStringCellValue().length());
                 cellNumber++;
 				break;
 			default:

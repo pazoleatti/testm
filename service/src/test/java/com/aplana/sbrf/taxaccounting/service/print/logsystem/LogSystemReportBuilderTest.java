@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.print.logsystem;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemReportBuilder;
-import org.apache.commons.digester.plugins.Declaration;
+import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemXlsxReportBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,13 +43,13 @@ public class LogSystemReportBuilderTest {
         item.setUser(user);
         item.setReportPeriod(reportPeriod);
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 130; i++)
             items.add(item);
     }
 
     @Test
     public void test() throws IOException {
-        LogSystemReportBuilder builder = new LogSystemReportBuilder(items);
+        LogSystemXlsxReportBuilder builder = new LogSystemXlsxReportBuilder(items);
         builder.createReport();
     }
 }

@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.*;
+
+import java.util.List;
 
 
 /**
@@ -38,9 +38,8 @@ public interface FormDataAccessService {
 	 * @param kind тип налоговой формы, который создаётся
 	 * @param departmentId идентификатор подразделения, в котором создаётся форма
 	 * @param reportPeriodId идентификатор отчетного периода в котором создается форма
-	 * @return true - если у пользователя есть права, false - в противном случае
 	 */
-	boolean canCreate(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentId, int reportPeriodId);
+	void canCreate(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentId, int reportPeriodId);
 
 	/**
 	 * Проверка того, что у пользователя есть права на удаление карточки с данными налоговой формы

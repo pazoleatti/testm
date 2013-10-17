@@ -34,7 +34,7 @@ public class ExceptionHandlerAspect {
 	@AfterThrowing(pointcut = "target(com.gwtplatform.dispatch.server.actionhandler.ActionHandler) &&"
 			+ "args(action,..)", throwing = "e")
 	public void handleException(@SuppressWarnings("rawtypes") Action action,
-			Exception e) throws ActionException {
+			Throwable e) throws ActionException {
 		String actionName = "";
 		
 		if (action instanceof ActionName)

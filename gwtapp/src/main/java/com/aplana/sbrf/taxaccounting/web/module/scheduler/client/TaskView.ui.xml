@@ -1,0 +1,101 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:style field="css" type="com.aplana.sbrf.taxaccounting.web.module.scheduler.client.TaskView.LinkStyle">
+        .separator {
+            border: 1px dashed #949494;
+            margin: 20px 0px;
+        }
+    </ui:style>
+
+    <ui:style>
+
+        .titleText {
+            font-size: 26px;
+        }
+
+        .titleDesc {
+            font-size: 16px;
+        }
+
+        .paramsBlock {
+            border: 1px solid #949494;
+            border-radius: 3px;
+            padding: 15px;
+            margin: 20px 5px;
+        }
+
+        .paramsTitle {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .paramsButton {
+            margin-top: 10px;
+        }
+    </ui:style>
+
+    <g:ScrollPanel>
+        <g:VerticalPanel>
+            <g:VerticalPanel>
+                <g:cell height="30px">
+                    <g:HorizontalPanel>
+                        <g:Label styleName="{style.titleText}" ui:field="formHeader">Планировщик задач</g:Label>
+                    </g:HorizontalPanel>
+                </g:cell>
+                <g:cell height="20px">
+                    <g:Label styleName="{style.titleDesc}" ui:field="titleDesc">Данные задачи</g:Label>
+                </g:cell>
+                <g:cell height="45px" verticalAlignment="bottom">
+                    <g:HorizontalPanel spacing="5">
+                        <g:Button text="Создать" ui:field="createButton"/>
+                        <g:Button text="Отмена" ui:field="cancelButton"/>
+                    </g:HorizontalPanel>
+                </g:cell>
+            </g:VerticalPanel>
+
+            <g:VerticalPanel>
+                <!-- Базовые параметры -->
+                <g:cell width="750px">
+                    <g:VerticalPanel styleName="{style.paramsBlock}">
+                        <g:HorizontalPanel>
+                            <g:Label styleName="{style.paramsTitle}">Базовые параметры задачи:</g:Label>
+                        </g:HorizontalPanel>
+                        <g:HorizontalPanel spacing="7">
+                            <g:Label text="Название" width="200px"/>
+                            <g:TextBox width="475px" ui:field="taskName"/>
+                        </g:HorizontalPanel>
+                        <g:HorizontalPanel spacing="7">
+                            <g:Label text="Расписание" width="200px"/>
+                            <g:TextBox width="475px" ui:field="taskSchedule"/>
+                        </g:HorizontalPanel>
+                        <g:HorizontalPanel spacing="7">
+                            <g:Label text="Количество повторений" width="200px"/>
+                            <g:TextBox width="475px" ui:field="numberOfRepeats"/>
+                        </g:HorizontalPanel>
+                        <g:HorizontalPanel spacing="7">
+                            <g:Label text="JNDI класса-обработчика" width="200px"/>
+                            <g:TextBox width="475px" ui:field="jndi"/>
+                        </g:HorizontalPanel>
+                    </g:VerticalPanel>
+                </g:cell>
+
+                <!-- Пользовательские параметры -->
+                <g:cell width="750px">
+                    <g:VerticalPanel styleName="{style.paramsBlock}">
+                        <g:HorizontalPanel>
+                            <g:Label styleName="{style.paramsTitle}">Пользовательские параметры задачи:</g:Label>
+                        </g:HorizontalPanel>
+                        <g:VerticalPanel ui:field="paramsPanel"/>
+                        <g:HorizontalPanel styleName="{style.paramsButton}" width="100%"
+                                           horizontalAlignment="ALIGN_RIGHT"
+                                           verticalAlignment="ALIGN_BOTTOM">
+                            <g:Button text="Добавить" ui:field="addParamButton"/>
+                        </g:HorizontalPanel>
+                    </g:VerticalPanel>
+                </g:cell>
+            </g:VerticalPanel>
+        </g:VerticalPanel>
+    </g:ScrollPanel>
+</ui:UiBinder>

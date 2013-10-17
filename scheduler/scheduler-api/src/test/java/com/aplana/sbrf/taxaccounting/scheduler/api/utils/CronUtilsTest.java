@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.scheduler.api.utils;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class CronUtilsTest {
@@ -22,6 +22,6 @@ public class CronUtilsTest {
     @Test
     public void getBaseCronTest() {
         String ibmCron = "0 25 * * * ?";
-        Assert.assertEquals(CronUtils.getBaseCron(ibmCron), "25 * * * ?");
+        Assert.assertEquals(CronUtils.getBaseCron(ibmCron), "25 * * * *");
     }
 }
