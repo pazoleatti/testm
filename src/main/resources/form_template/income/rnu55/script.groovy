@@ -91,7 +91,7 @@ void deleteRow() {
 
 // Ресчет графы 9
 def calc9(def row) {
-    if (row.percentInCurrency != null && row.currency != null && row.implementationDate) {
+    if (row.percentInCurrency != null && row.currency != null && row.implementationDate!=null) {
         rate = 1
         if (!isRubleCurrency(row.currency)) {
             rate = getRate(row.implementationDate, row.currency)
@@ -101,6 +101,7 @@ def calc9(def row) {
         return null
     }
 }
+
 // Ресчет графы 10
 def calc10(def row, def startDate, def endDate, def daysInYear) {
     if (row.buyDate == null || startDate == null || endDate == null || row.nominal == null
@@ -357,9 +358,7 @@ def logicalCheck() {
     return true
 }
 
-/**
- * Проверка валюты на рубли
- */
+// Проверка валюты на рубли
 def isRubleCurrency(def currencyCode) {
     return refBookService.getStringValue(15, currencyCode, 'CODE') == '810'
 }
@@ -496,9 +495,7 @@ def getValue(def value) {
     return (value != null ? value : 0)
 }
 
-/**
- * Получить курс банка России на указанную дату.
- */
+// Получить курс банка России на указанную дату.
 def getRate(def Date date, def value) {
     def res = refBookFactory.getDataProvider(22).getRecords(date != null ? date : new Date(), null, "CODE_NUMBER = $value", null);
     return res.getRecords().get(0).RATE.numberValue

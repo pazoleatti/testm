@@ -136,7 +136,7 @@ void addRow() {
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : size
 
-    dataRowHelper.insert(row, index+1)
+    dataRowHelper.insert(row, index + 1)
 }
 
 void deleteRow() {
@@ -360,7 +360,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     row.f132 = recNoId
 
     // Графа 9
-    // row.f133, заполняется после графы 50
+    row.f133 = recNoId
 
     // Графа 10
     // row.f134, заполняется после графы 50
@@ -771,24 +771,24 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     // Графа 32, Графа 33, Графа 34, Графа 35
     if (type.id == 393 || type.id == 394) {
         sign32 = type.id == 393 ? srcRow.signPhis : srcRow.deliverySign
-		if(sign32!=null){
-        def values32 =  getRefBookValue(18, sign32)
-        if (values32 != null && values32.SIGN.stringValue.equals("Физическая поставка")) {
-            if (type.id == 393) {
-                row.countryCode1 = srcRow.countryCode2
-                row.region1 = srcRow.region1
-                row.city1 = srcRow.city1
-                row.locality1 = srcRow.settlement1
-            }
+        if (sign32 != null) {
+            def values32 = getRefBookValue(18, sign32)
+            if (values32 != null && values32.SIGN.stringValue.equals("Физическая поставка")) {
+                if (type.id == 393) {
+                    row.countryCode1 = srcRow.countryCode2
+                    row.region1 = srcRow.region1
+                    row.city1 = srcRow.city1
+                    row.locality1 = srcRow.settlement1
+                }
 
-            if (type.id == 394) {
-                row.countryCode1 = srcRow.countryCodeNumeric
-                row.region1 = srcRow.regionCode
-                row.city1 = srcRow.city
-                row.locality1 = srcRow.locality
+                if (type.id == 394) {
+                    row.countryCode1 = srcRow.countryCodeNumeric
+                    row.region1 = srcRow.regionCode
+                    row.city1 = srcRow.city
+                    row.locality1 = srcRow.locality
+                }
             }
         }
-		}
     }
 
     // Графа 36, Графа 37, Графа 38, Графа 39
@@ -891,12 +891,16 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 381:
         case 382:
         case 387:
+        case 390:
+        case 391:
+        case 392:
             row.price = srcRow.price
             break
         case 383:
             row.price = srcRow.priceFirstCurrency
             break
         case 384:
+        case 393:
             row.price = srcRow.priceOne
             break
         case 385:
@@ -1064,9 +1068,6 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
         // Графа 7 (та же логика, что у графы 3)
         row.f131 = row.f121
-
-        // Графа 9 (та же логика, что у графы 3)
-        row.f133 = row.f121
 
         // Графа 10
         // Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике

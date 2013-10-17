@@ -1,24 +1,24 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class FormDataAccessServiceImpl implements FormDataAccessService {
@@ -353,23 +353,18 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 
 	@Override
-	public boolean canCreate(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentId, int reportPeriodId) {
+	public void canCreate(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentId, int reportPeriodId) {
 		Department formDataDepartment = departmentService.getDepartment(departmentId);
 		FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 		int formTypeId = formTemplate.getType().getId();
 		FormDataAccessRoles formDataAccess = getFormDataUserAccess(userInfo.getUser(), formDataDepartment.getId(), formTypeId, kind);
-		boolean result = canCreate(formDataAccess, formTypeId, kind, formDataDepartment, reportPeriodDao.get(reportPeriodId));
-		if (logger.isDebugEnabled()) {
-			logger.debug("canCreate: " + result);
-		}
-		return result;
+		canCreate(formDataAccess, formTypeId, kind, formDataDepartment, reportPeriodDao.get(reportPeriodId));
 	}
 
-	private boolean canCreate(FormDataAccessRoles formDataAccess, int formTypeId, FormDataKind kind, Department formDataDepartment, ReportPeriod reportPeriod) {
+	private void canCreate(FormDataAccessRoles formDataAccess, int formTypeId, FormDataKind kind, Department formDataDepartment, ReportPeriod reportPeriod) {
 		if(!reportPeriodService.isActivePeriod(reportPeriod.getId(), formDataDepartment.getId())){
 			//Нельзя создавать НФ для неактивного налогового периода
-			logger.warn(String.format(REPORT_PERIOD_IS_CLOSED, reportPeriod.getId()));
-			return false;
+			throw new ServiceException("Невозможно создать форму, неактивный налоговый период.");
 		}
 		
 		FormType formType = formTypeDao.get(formTypeId);
@@ -383,13 +378,15 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			}
 		}
 		if (!found) {
-			logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE, formTypeId, kind.getId(), formDataDepartment.getId()));
-			return false;
+			throw new ServiceException("В данном подразделении нельзя работать с формами вида " + formType.getName() + " и типа " + kind.getName() + ".");
 		}
-		if (reportPeriodService.isBalancePeriod(reportPeriod.getId(), formDataDepartment.getId())) {
+
+		if (reportPeriodService.isBalancePeriod(reportPeriod.getId(), formDataDepartment.getId())){
 			// период ввода остатков
-			return formDataAccess.isControllerOfCurrentLevel() ||
-					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
+            if(!(formDataAccess.isControllerOfCurrentLevel() ||
+                    formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP())) {
+                throw new AccessDeniedException("Только контролер имеет право создавать формы с перидом ввода остатков.");
+            }
 		} else if((kind == FormDataKind.ADDITIONAL || kind == FormDataKind.PRIMARY) &&
 				formDataAccess.isFormDataHasDestinations()){
 			 /* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
@@ -398,8 +395,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			 Виды форм:
 				 Первичная налоговая форма;
 				 Выходная налоговая форма; */
-			return formDataAccess.isOperatorOfCurrentLevel() || formDataAccess.isControllerOfCurrentLevel() ||
-					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
+            if(!(formDataAccess.isOperatorOfCurrentLevel() || formDataAccess.isControllerOfCurrentLevel() ||
+                    formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP())) {
+                throw new AccessDeniedException("Недостаточно прав для создания налоговой формы с указанными параметрами");
+            }
 		}else if((kind == FormDataKind.ADDITIONAL || kind == FormDataKind.PRIMARY ||
 				kind == FormDataKind.UNP) && !formDataAccess.isFormDataHasDestinations()){
 			 /* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
@@ -409,8 +408,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				 Первичная налоговая форма;
 				 Выходная налоговая форма;
 				 Форма УНП.*/
-			return formDataAccess.isOperatorOfCurrentLevel() || formDataAccess.isControllerOfCurrentLevel() ||
-				formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
+            if(!(formDataAccess.isOperatorOfCurrentLevel() || formDataAccess.isControllerOfCurrentLevel() ||
+				formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP())){
+                throw new AccessDeniedException("Недостаточно прав для создания налоговой формы с указанными параметрами");
+            }
 		} else if ((kind == FormDataKind.SUMMARY || kind == FormDataKind.CONSOLIDATED) && !formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
 			 и НЕ передаваемых на вышестоящий уровень
@@ -419,8 +420,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              	Консолидированная налоговая форма;
 				Сводная налоговая форма подразделения;
 				Сводная налоговая форма Банка.*/
-			return formDataAccess.isControllerOfCurrentLevel() ||
-					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
+            if(!(formDataAccess.isControllerOfCurrentLevel() ||
+					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP())){
+                throw new AccessDeniedException("Недостаточно прав для создания налоговой формы с указанными параметрами");
+            }
 			//return false; //TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм
 		} else if ((kind == FormDataKind.SUMMARY || kind == FormDataKind.CONSOLIDATED) && formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
@@ -429,12 +432,13 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              Виды форм:
              	Консолидированная налоговая форма;
 				Сводная налоговая форма подразделения.*/
-			return formDataAccess.isControllerOfCurrentLevel() ||
-					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
+            if(!(formDataAccess.isControllerOfCurrentLevel() ||
+					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP())){
+                throw new AccessDeniedException("Недостаточно прав для создания налоговой формы с указанными параметрами");
+            }
 			//return false; //TODO: (Marat Fayzullin 19.02.2013) расскомментить после реализации первичных форм, так как автоматически создаваемые НФ создает система
 		}
 		logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_CREATE, kind.getName(), WorkflowState.CREATED.getName()));
-		return false;
 	}
 
 	@Override

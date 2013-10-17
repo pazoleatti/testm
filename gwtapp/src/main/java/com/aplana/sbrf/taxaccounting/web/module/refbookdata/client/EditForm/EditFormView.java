@@ -165,23 +165,28 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			try {
 				switch (field.getKey().getAttributeType()) {
 					case NUMBER:
-						Number number = field.getValue().getValue() == null || field.getValue().getValue().toString().trim().isEmpty()
+						Number number = (field.getValue().getValue() == null || field.getValue().getValue().toString().trim().isEmpty())
 								? null : new BigDecimal((String)field.getValue().getValue());
-						String numberStr = Double.toString(number.doubleValue());
-						String fractionalStr = numberStr.substring(numberStr.indexOf('.')+1);
-						String intStr = Integer.toString(Math.abs(number.intValue()));
-						if ((intStr.length() > 10) || (fractionalStr.length() > 17)) {
-							BadValueException badValueException = new BadValueException();
-							badValueException.setFieldName(field.getKey().getName());
-							badValueException.setDescription("Значение не соответствует формату (27, 10)");
-							throw badValueException;
+						checkRequired(field.getKey(), number);
+						if (number != null) {
+							String numberStr = Double.toString(number.doubleValue());
+							String fractionalStr = numberStr.substring(numberStr.indexOf('.')+1);
+							String intStr = Integer.toString(Math.abs(number.intValue()));
+							if ((intStr.length() > 10) || (fractionalStr.length() > 17)) {
+								BadValueException badValueException = new BadValueException();
+								badValueException.setFieldName(field.getKey().getName());
+								badValueException.setDescription("Значение не соответствует формату (27, 10)");
+								throw badValueException;
+							}
 						}
 						value.setAttributeType(RefBookAttributeType.NUMBER);
 						value.setNumberValue(number);
 						break;
 					case STRING:
-						String string = field.getValue().getValue() == null ? null : (String)field.getValue().getValue();
-						if (string.length() > 2000) {
+						String string = (field.getValue().getValue() == null || ((String)field.getValue().getValue()).trim().isEmpty()) ?
+								null : (String)field.getValue().getValue();
+						checkRequired(field.getKey(), string);
+						if (string!= null && string.length() > 2000) {
 							BadValueException badValueException = new BadValueException();
 							badValueException.setFieldName(field.getKey().getName());
 							badValueException.setDescription("Значение более 2000 символов");
@@ -192,11 +197,13 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 						break;
 					case DATE:
 						Date date = field.getValue().getValue() == null ? null : (Date)field.getValue().getValue();
+						checkRequired(field.getKey(), date);
 						value.setAttributeType(RefBookAttributeType.DATE);
 						value.setDateValue(date);
 						break;
 					case REFERENCE:
 						Long longValue = field.getValue().getValue() == null ? null : (Long)field.getValue().getValue();
+						checkRequired(field.getKey(), longValue);
 						value.setAttributeType(RefBookAttributeType.REFERENCE);
 						value.setReferenceValue(longValue);
 						break;
@@ -216,6 +223,15 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			}
 		}
 		return fieldsValues;
+	}
+
+	private void checkRequired(RefBookColumn attr, Object val) throws BadValueException {
+		if (attr.isRequired() && (val == null)) {
+			BadValueException badValueException = new BadValueException();
+			badValueException.setFieldName(attr.getName());
+			badValueException.setDescription("Обязательно для заполнения");
+			throw badValueException;
+		}
 	}
 
 	@Override

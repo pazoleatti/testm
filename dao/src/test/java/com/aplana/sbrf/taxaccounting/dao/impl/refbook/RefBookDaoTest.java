@@ -1,14 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Map;
-
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,13 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import java.util.*;
 
 //TODO: Необходимо добавить тесты для getRecords с фильтром (Marat Fayzullin 2013-08-31)
 
@@ -65,7 +57,6 @@ public class RefBookDaoTest {
 	public void testGetData1() throws Exception {
 		RefBook refBook = refBookDao.get(1L);
 		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 1, 2013), null, null, refBook.getAttribute(ATTRIBUTE_NAME));
-		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(2, data.size());
 		// проверяем типы значений
@@ -93,7 +84,6 @@ public class RefBookDaoTest {
 	@Test
 	public void testGetData2() throws Exception {
 		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 2, 2013), null, null, null);
-		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(2, data.size());
 		sort(data);
@@ -107,7 +97,6 @@ public class RefBookDaoTest {
 	@Test
 	public void testGetData3() throws Exception {
 		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 3, 2013), null, null, null);
-		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(1, data.size());
 		Map<String, RefBookValue> record2 = data.get(0);
@@ -120,7 +109,6 @@ public class RefBookDaoTest {
 	@Test
 	public void testGetData4() throws Exception {
 		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 1, 2012), null, null, null);
-		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(0, data.size());
 	}
@@ -128,7 +116,6 @@ public class RefBookDaoTest {
 	@Test
 	public void testGetData5() throws Exception {
 		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 1, 2014), null, null, null);
-		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(1, data.size());
 	}

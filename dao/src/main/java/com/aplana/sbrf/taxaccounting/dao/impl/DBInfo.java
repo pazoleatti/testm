@@ -22,7 +22,7 @@ public class DBInfo {
     /**
      * Признак поддержки функции row_number() over (...)
      */
-    private static boolean supportOver;
+    private boolean supportOver;
 
     private DBInfo() {
     }
@@ -36,7 +36,7 @@ public class DBInfo {
         supportOver = !HSQLDB_NAME_ENGINE.equals(dbName);
     }
 
-    public static boolean isSupportOver(){
+    public boolean isSupportOver(){
         return supportOver;
     }
 }
