@@ -338,22 +338,26 @@ def addData(def xml) {
         newRow.rowNumber = indexRow - 2
 
         // графа 2
-        newRow.fullNamePerson = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.fullNamePerson = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
+        def map = newRow.fullNamePerson == null ? null : refBookService.getRecordData(9, newRow.fullNamePerson)
         indexCell++
 
         // графа 3
-        def map = refBookService.getRecordData(9, newRow.fullNamePerson)
-        def String text = row.cell[indexCell].text()
-        if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO.stringValue != null)) {
-            logger.warn("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if (map != null) {
+            def text = row.cell[indexCell].text()
+            if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO.stringValue != null)) {
+                logger.warn("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            }
         }
         indexCell++
 
         // графа 4
-        text = row.cell[indexCell].text()
-        map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
-        if ((text != null && !text.isEmpty() && !text.equals(map.CODE.stringValue)) || ((text == null || text.isEmpty()) && map.CODE.stringValue != null)) {
-            logger.warn("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if (map != null) {
+            def text = row.cell[indexCell].text()
+            map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
+            if ((text != null && !text.isEmpty() && !text.equals(map.CODE.stringValue)) || ((text == null || text.isEmpty()) && map.CODE.stringValue != null)) {
+                logger.warn("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            }
         }
         indexCell++
 
@@ -370,15 +374,13 @@ def addData(def xml) {
         indexCell++
 
         // графа 8
-        newRow.serviceType = getRecordId(11, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.serviceType = getRecordId(11, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // графа 9
-//        newRow.price =
         indexCell++
 
         // графа 10
-//        newRow.cost =
         indexCell++
 
         // графа 11
@@ -414,7 +416,7 @@ def getNumber(def value, int indexRow, int indexCell) {
  *
  * @param value
  */
-def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell) {
+def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory = true) {
     String filter = "LOWER($alias) = LOWER('$value')"
     if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) return cache[ref_id][filter]
@@ -426,9 +428,14 @@ def getRecordId(def ref_id, String alias, String value, Date date, def cache, in
     if (records.size() == 1) {
         cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
-    } else {
-        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
+    def msg = "Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!"
+    if (mandatory) {
+        throw new Exception(msg)
+    } else {
+        logger.warn(msg)
+    }
+    return null
 }
 
 /**
