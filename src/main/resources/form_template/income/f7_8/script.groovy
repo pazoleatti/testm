@@ -1,3 +1,15 @@
+package form_template.income.f7_8
+
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormData
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
+
+import java.text.SimpleDateFormat
+
 /**
  * Скрипт для Ф-7.8 (f7_8.groovy).
  * (Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию
@@ -5,12 +17,10 @@
  *
  * Версия ЧТЗ: 57
  *
- * TODO:
- *
  * @author vsergeev
  *
  * Графы:
- * 1    balanceNumber                   Номер баланс. счёта
+ * 1    balanceNumber                   Номер балансового счёта Справочник 29 Атрибут 152 BALANCE_ACCOUNT
  * 2    operationType                   Вид операции (продажа, погашение, открытие \закрытие короткой позиции)
  * 3    signContractor                  Признак контрагента: 3 - эмитент ценной бумаги, 4 - организатор торговли,
  *                                      5 - прочие
@@ -19,14 +29,15 @@
  * 6    series                          Серия (выпуск)
  * 7    securityKind                    Вид ценной бумаги: 1 - купонная облигация, 2 - дисконтная облигация, 3 - акция
  * 8    signSecurity                    Признак ценной бумаги: «+» - обращающаяся на ОРЦБ; «-» - необращающаяся на ОРЦБ
- * 9    currencyCode                    Код валюты бумаги (номинала)
- * 10   currencyName                    Наименование валюты бумаги (номинала)
+ *                                      Справочник 62 Атрибут 621 CODE
+ * 9    currencyCode                    Код валюты бумаги (номинала) Справочник 15 Атрибут 65 CODE_2
+ * 10   currencyName                    Наименование валюты бумаги (номинала) Справочник 15 Атрибут 66 NAME
  * 11   nominal                         Номинал одной бумаги (ед. вал.)
  * 12   amount                          Количество ценных бумаг (шт.)
  * 13   acquisitionDate                 Дата приобретения, закрытия короткой позиции
  * 14   tradeDate                       Дата совершения сделки
- * 15   currencyCodeTrade               Код валюты расчётов по сделке
- * 16   currencyNameTrade               Наименование валюты расчётов по сделке
+ * 15   currencyCodeTrade               Код валюты расчётов по сделке Справочник 15 Атрибут 65 CODE_2
+ * 16   currencyNameTrade               Наименование валюты расчётов по сделке Справочник 15 Атрибут 66 NAME
  * 17   costWithoutNKD                  Стоимость покупки без НКД, рублей (по курсу на дату приобретения)
  * 18   loss                            Расходы банка, связанные с приобретением, рублей (по курсу на дату приобретения)
  * 19   marketPriceInPerc               % к номиналу (руб.)
@@ -55,173 +66,420 @@
  * 38   excessSellingPrice              Превышение цены реализации для целей налогообложения над ценой реализации (руб.)
  */
 switch (formDataEvent) {
+    case FormDataEvent.CREATE :
+        checkCreation()
+        break
     case FormDataEvent.CHECK :
-        logicalCheck()
+        allCheck()
         break
     case FormDataEvent.CALCULATE :
-        if (beforeCalcChecks()) {
-//            calcDataRows()        //todo (vsergeev) раскомментировать и переделать логику в соответствии с ответом на http://jira.aplana.com/browse/SBRFACCTAX-2531
-            calcTotalDataRows()
-            calcTotalForMonth()
-//            calcTotalForTaxPeriod()       //todo (vsergeev) раскомментировать и доделать
-        }
+        calc()
+        allCheck()
         break
     case FormDataEvent.ADD_ROW :
-        addNewRowAction()
+        addNewRow()
         break
     case FormDataEvent.DELETE_ROW :
         deleteRow()
         break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
+        allCheck()
+        break
+// обобщить
+    case FormDataEvent.COMPOSE :
+        consolidation()
+        calc()
+        allCheck()
+        break
 }
 
-void deleteRow() {
-    if (isDeletable(currentDataRow)) {
-        formData.deleteDataRow(currentDataRow)
-    } else {
-        logger.error('Выделенную строку  нельзя удалить!')
-    }
-}
+void checkCreation() {
+    // отчётный период
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
-void addNewRowAction() {
-    if (currentDataRow == null) {
-        logger.error ('Сперва выделите любую ячейку из строк группы, в которую следует добавить строку')
+    //проверка периода ввода остатков
+    if (reportPeriod != null && reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
+        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
         return
     }
-    def group = getDataRowGroup(currentDataRow)
-    def totalRow = tryGetTotalRowForGroup(group)
-    if (totalRow != null) {
-        def totalRowIndex = formData.getDataRowIndex(totalRow.getAlias())
-        def newRowNumber = Random.newInstance().nextInt(Integer.MAX_VALUE)      //задаем границы, исключая отрицательные значения - знак "минус" ломает поиск по регулярке
-        def newRow = formData.appendDataRow(totalRowIndex, "R$group-$newRowNumber")
-        getAliasesForEditableCols().each {
-            newRow.getCell(it).editable = true
-        }
-    } else {
-        logger.error('В выделенную группу нельзя добавлять новые строки!')
+
+    def findForm = formDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
 }
 
-boolean logicalChecks() {
-    boolean isValid = true
+def allCheck() {
+    return !hasError() && logicalCheck() && checkNSI()
+}
 
-    //проверка на обязательность заполнения полей (предупреждение)
-    isRequiredColsFilled()
-    for (def dataRow : formData.getDataRows()) {
+void calc(){
+    if (beforeCalcChecks()) {
+        sort()
+        calcDataRows()
+        calcOrCheckTotalDataRows(false)
+        calcOrCheckTotalForMonth(false)
+        calcOrCheckTotalForTaxPeriod(false)
+    }
+}
 
-        def tmpMarketPriceRealizationInPerc = getGetMarketPriceRealizationInPerc(dataRow)
-        if (dataRow.marketPriceRealizationInPerc == null ||
-                tmpMarketPriceRealizationInPerc == null &&
-                ( !tmpMarketPriceRealizationInPerc.equals(dataRow.marketPriceRealizationInPerc))) {
+def boolean checkNSI(){
+    def rows = getRows(data)
+    for (def row : rows){
+        if (isFixed(row)){
+            continue
+        }
+        def errStart = getRowIndexString(row)
+    }
+    return true
+}
+
+void deleteRow(){
+    if (!isFixed(currentDataRow)) {
+        data.delete(currentDataRow)
+    }
+}
+
+void addNewRow(){
+    def data = data
+    def rows = getRows(data)
+    DataRow<Cell> newRow = getNewRow()
+    if (currentDataRow == null || currentDataRow.getIndex() == -1) {
+        def row = data.getDataRow(rows,'R1-total')
+        data.insert(newRow,rows.indexOf(row)+1)
+    } else if (currentDataRow.getAlias() == null) {
+        data.insert(newRow, currentDataRow.getIndex()+1)
+    } else {
+        def alias = currentDataRow.getAlias()
+        if (alias in ['R10', 'R11']){
+            alias = 'R9'
+        }
+        def totalAlias = alias.contains('total') ? alias : "$alias-total"
+        def row = data.getDataRow(rows, totalAlias)
+        data.insert(newRow, rows.indexOf(row)+1)
+    }
+}
+
+/**
+ * Консолидация.
+ */
+void consolidation() {
+    def data = data
+    // удалить нефиксированные строки
+    def deleteRows = []
+    getRows(data).each { row ->
+        if (!isFixed(row)) {
+            deleteRows += row
+        }
+    }
+    data.delete(deleteRows)
+
+    // собрать из источников строки и разместить соответствующим разделам
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def FormData source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                // подразделы
+                getGroups().each { section ->
+                    copyRows(source, formData, "$section", "$section-total")
+                }
+            }
+        }
+    }
+    data.save(getRows(data))
+    logger.info('Формирование консолидированной формы прошло успешно.')
+}
+
+/**
+ * Копировать заданный диапозон строк из источника в приемник.
+ *
+ * @param sourceForm форма источник
+ * @param destinationForm форма приемник
+ * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно),
+ *      если = null, то копировать с 0 строки
+ * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно),
+ *      в приемник строки вставляются перед строкой с этим псевдонимом
+ */
+void copyRows(def FormData sourceForm, def FormData destinationForm, def fromAlias, def toAlias) {
+    def sourceData = getData(sourceForm)
+    def destinationData = getData(destinationForm)
+    def from = getIndexByAlias(sourceData, fromAlias) + 1
+    def to = getIndexByAlias(sourceData, toAlias)
+    if (from > to) {
+        return
+    }
+
+    def copyRows = getRows(sourceData).subList(from, to)
+    getRows(destinationData).addAll(getIndexByAlias(destinationData, toAlias), copyRows)
+    // поправить индексы, потому что они после вставки не пересчитываются
+    getRows(destinationData).eachWithIndex { row, i ->
+        row.setIndex(i + 1)
+    }
+}
+
+/**
+ * Получить новую строку с заданными стилями.
+ */
+def DataRow getNewRow() {
+    def row = formData.createDataRow()
+    getEditableCols().each {
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return row
+}
+
+boolean logicalCheck() {
+    def boolean isValid = true
+    def rows = rows
+
+    // проверить обязательные редактируемые поля
+    for (def DataRow row : rows){
+        if (!isFixed(row) && !checkRequiredColumns(row, requiredCols.intersect(editableCols))){
+            isValid = true
+        }
+    }
+    for (def row : rows) {
+        if(isFixed(row)){
+            continue
+        }
+        def errStart = getRowIndexString(row)
+        def graph27 = getGraph27(row)
+        if (graph27 != null && graph27 != row.marketPriceRealizationInPerc) {
             isValid = false
-            logger.error('Неверно указана рыночная цена в процентах при погашении!')
+            logger.error("${errStart}неверно указана рыночная цена в процентах при погашении!")
+        }
+        def graph28 = getGraph28(row)
+        if (graph28 != null && graph28 != row.marketPriceRealizationInRub) {
+            isValid = false
+            logger.error("${errStart}неверно указана рыночная цена в рублях при погашении!")
+        }
+        if (row.excessSellingPrice < 0){
+            isValid = false
+            logger.error("${errStart}превышение цены реализации для целей налогообложения над ценой реализации отрицательное!")
+        }
+        if (isValid) {
+            def values = getValues(row)
+            values.keySet().each{
+                if (values[it] != '' && row[it] != values[it]){// если не ручной ввод и различаются значения
+                    isValid = false
+                    def columnName = getColumnName(row, it)
+                    logger.error("${errStart}неверно рассчитана графа \"$columnName\"")
+                }
+            }
         }
 
     }
-
+    def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    def formDataPrev
+    if (prevReportPeriod !=null){
+        formDataPrev = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, prevReportPeriod.id)
+        //TODO проверить на первом месяце
+        if (formDataPrev == null && prevReportPeriod.taxPeriod.id == reportPeriod.taxPeriod.id) {
+            logger.warn('Отсутствует предыдущий экземпляр отчета')
+        }
+    }
+    if (isValid && !(calcOrCheckTotalDataRows(true) &&
+            calcOrCheckTotalForMonth(true) &&
+            calcOrCheckTotalForTaxPeriod(true))){
+        isValid = false
+    }
     return isValid
 }
 
 /**
- * Проверяет
- * 1.  Обязательность заполнения поля графы (с 1 по 4)
- * @return {@value true} если все обязательные поля заполнены, иначе {@value false}
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ * @return true - все хорошо, false - есть незаполненные поля
  */
-boolean isRequiredColsFilled() {
-    for (def dataRow : formData.getDataRows) {
-        def fieldName = ""                                      //todo (vsergeev) откуда брать наименование поля? в вопросах Аванесову п.4
-        for (def colName : dataRow.keySet()) {
-            if (isBlankOrNull(dataRow.get(colName))) {
-                logger.warn("Поле $fieldName не заполнено!")
-                break
+def checkRequiredColumns(def DataRow row, def ArrayList<String> columns) {
+    def colNames = []
+    columns.each {
+        if (isBlankOrNull(row[it])) {
+            def name = getColumnName(row,it)
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        def errorBegin = getRowIndexString(row)
+        def errorMsg = colNames.join(', ')
+        logger.warn(errorBegin+ "не заполнены колонки : $errorMsg.")
+        return false
+    }
+    return true
+}
+
+/**
+ * Начало предупреждений/ошибок
+ * @param row
+ * @return
+ */
+def String getRowIndexString(def DataRow row){
+    def index = getIndex(row)+1
+    return "В строке $index "
+}
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    return row.getIndex() - 1
+}
+
+def sort(){
+    def data = data
+    def rows = getRows(data)
+    def sortRows = []
+    def from
+    def to
+
+    getGroups().each { section ->
+        from = getIndexByAlias(data, section) + 1
+        to = getIndexByAlias(data, "$section-total") - 1
+        if (from<=to) {
+            sortRows.add(rows[from..to])
+        }
+
+    }
+    sortRows.each {
+        it.sort {  DataRow a, DataRow b ->
+            if (isFixed(a) || isFixed(b)){
+                return 0
+            }
+            def aList = getCompareList(a)
+            def bList = getCompareList(b)
+            for (def aD : aList){
+                bD = bList.get(aList.indexOf(aD))
+                if (aD != bD) {
+                    return aD <=> bD
+                }
             }
         }
     }
+    data.save(rows)
+}
+
+/**
+ * Получить номер строки в таблице по псевдонимиу (0..n).
+ */
+def getIndexByAlias(def DataRowHelper data, String rowAlias) {
+    def row = data.getDataRow(rows, rowAlias)
+    return (row != null ? getIndex(row) : -1)
 }
 
 /**
  * рассчитываем вычисляемые поля для строк с данными, введенными пользователем
  */
 def calcDataRows() {
-    tryGetAllDataRowsWithData().each { dataRow ->
-        dataRow.costAcquisition = getCostAcquisition(dataRow)
-        dataRow.marketPriceRealizationInPerc = getGetMarketPriceRealizationInPerc(dataRow)
-        dataRow.marketPriceRealizationInRub = getMarketPriceRealizationInRub(dataRow)
-        dataRow.costRealization = getCostRealization(dataRow)
-        dataRow.totalLoss = getTotalLoss(dataRow)
-        dataRow.averageWeightedPrice = getAverageWeightedPrice(dataRow)
-        dataRow.termIssue = getTermIssue(dataRow)
-        dataRow.termHold = getTermHold(dataRow)
-        dataRow.interestIncomeCurrency = getInterestIncomeCurrency(dataRow)
-        dataRow.interestIncomeInRub = getInterestIncomeInRub(dataRow)
-        dataRow.realizationResult = getRealizationResult(dataRow)
-        dataRow.excessSellingPrice = getExcessSellingPrice(dataRow)
-    }
-}
-
-/**
- * рассчитываем вычисляемые поля для строк ИТОГО
- */
-void calcTotalDataRows() {
-    def result = [:]
-
-    getExistingGroups().each { group ->
-        def totalRow = tryGetTotalRowForGroup(group)
-        if (totalRow != null) {
-            def dataRows = tryGetDataRowsForGroup(group)
-            result.put(totalRow, dataRows)
+    for (def row :rows){
+        if (isFixed(row)){
+            continue
+        }
+        def values = getValues(row)
+        values.keySet().each{
+            if (values[it] != ''){// если не ручной ввод
+                row[it] = values[it]
+            }
         }
     }
+}
 
-    result.keySet().each { totalRow ->
-        writeResultsToRow(calcTotalResultsForRows(result.get(totalRow)), totalRow)
+def getValues(def DataRow row){
+    def values = [:]
+    allCols.each{
+        values[it] = row.getCell(it).getValue()
     }
-
+    values.marketPriceInPerc = getGraph19(values, row)
+    values.marketPriceInRub = getGraph20(values, row)
+    values.costAcquisition = getGraph21(values)
+    values.marketPriceRealizationInPerc = getGraph27(values, row)
+    values.marketPriceRealizationInRub = getGraph28(values, row)
+    values.costRealization = getGraph29(values)
+    values.totalLoss = getGraph31(values)
+    values.averageWeightedPrice = getGraph32(values, row)
+    values.termIssue = getGraph33(values, row)
+    values.termHold = getGraph34(values)
+    values.interestIncomeCurrency = getGraph35(values)
+    values.interestIncomeInRub = getGraph36(values)
+    values.realizationResult = getGraph37(values)
+    values.excessSellingPrice = getGraph38(values)
+    return values
 }
 
 /**
- * расчитываем значения для строки "Всего за текущий месяц"
+ * рассчитываем вычисляемые поля для строк ИТОГО или проверяем расчет
  */
-void calcTotalForMonth() {      //todo (vsergeev) возможно, нужно будет переписать логику в соответствии с ответом на http://jira.aplana.com/browse/SBRFACCTAX-2534
+def calcOrCheckTotalDataRows(def check) {
+    def data = data
+    def rows = rows
+    def isValid = true
+
+    getGroups().each { group ->
+        def firstRow = data.getDataRow(rows,group)
+        def lastRow = data.getDataRow(rows,"$group-total")
+        def groupRows = rows.subList(getIndex(firstRow)+1, getIndex(lastRow)-1)
+        if (!writeResultsToRowOrCheck(calcTotalResultsForRows(groupRows), lastRow, check)){
+            isValid = false
+        }
+    }
+    return isValid
+}
+
+/**
+ * расчитываем значения для строки "Всего за текущий месяц" или проверяем расчеты
+ */
+def calcOrCheckTotalForMonth(def check) {
     def totalRows = []
 
-    getExistingGroups().each { group ->
-        def totalRow = tryGetTotalRowForGroup(group)
+    getGroups().each { group ->
+        def totalRow = data.getDataRow(rows,"$group-total")
         if (totalRow != null) {
             totalRows.add(totalRow)
         }
     }
-
-    def totalForMonthRow = formData.getDataRow('R10')
-    writeResultsToRow(calcTotalResultsForRows(totalRows), totalForMonthRow)
+    def totalForMonthRow = data.getDataRow(rows,'R10')
+    return writeResultsToRowOrCheck(calcTotalResultsForRows(totalRows), totalForMonthRow, check)
 }
 
 /**
- * рассчитываем значения для строки "Всего за текущий налоговый период"
+ * рассчитываем значения для строки "Всего за текущий налоговый период" или проверяем значения
  */
-void calcTotalForTaxPeriod() {               //todo (vsergeev) отладить
+def calcOrCheckTotalForTaxPeriod(def check) {
+    def data = data
+    def rows = rows
     def reportPeriodId = formData.getReportPeriodId()
     def reportPeriod = reportPeriodService.get(reportPeriodId)
-    def reportPeriodsInTax = reportPeriodService.listByTaxPeriod(reportPeriod.getTaxPeriodId())
+    def prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriod.getId())
 
-    def formDatas = []
-    for (def period : reportPeriodsInTax) {
-        if (! period.getId().equals(reportPeriod))
-            def formDataFromAnotherPeriod =
-                formDataService.find(formData.getFormType(), formData.getKind(), formData.getDepartmentId(), period.getId())
-        if (formDataFromAnotherPeriod != null) {
-            formDatas.add(formDataFromAnotherPeriod)
-        }
+    def formDataPrev
+    if (prevReportPeriod !=null || prevReportPeriod.taxPeriod.id == reportPeriod.taxPeriod.id)
+        formDataPrev = formDataService.find(formData.getFormType(), formData.getKind(), formData.getDepartmentId(), prevReportPeriod.getId())
+    def rowPrev
+    if (formDataPrev != null) {
+        def dataPrev = getData(formDataPrev)
+        rowPrev = dataPrev.getDataRow(getRows(dataPrev),'R10')
     }
 
     def totalForMonthRows = []
-    formDatas.each { fData ->
-        fData.getDataRow('R10')
+    if (rowPrev!=null){
+        totalForMonthRows += rowPrev
     }
 
-    totalForMonthRows.add(formData.getDataRow('R10'))
+    totalForMonthRows += data.getDataRow(rows,'R10')
 
-    def totalForTaxPeriodRow = formData.getDataRow('R11')
-    writeResultsToRow(calcTotalResultsForRows(totalForMonthRows), totalForTaxPeriodRow)
+    def totalForTaxPeriodRow = data.getDataRow(rows,'R11')
+    return writeResultsToRowOrCheck(calcTotalResultsForRows(totalForMonthRows), totalForTaxPeriodRow, check)
 }
 
 /**
@@ -230,13 +488,13 @@ void calcTotalForTaxPeriod() {               //todo (vsergeev) отладить
  */
 def calcTotalResultsForRows(def dataRowsList) {
     def totalResults = [:]
-    getAliasesForTotalCols().each { col ->
+    getTotalCols().each { col ->
         totalResults.put(col, new BigDecimal(0))
     }
 
-    for (def dataRow : dataRowsList) {
+    for (def row : dataRowsList) {
         totalResults.keySet().each { col ->
-            final cellValue = dataRow.get(col)
+            final cellValue = row.get(col)
             if (cellValue != null) {
                 totalResults.put(col, totalResults.get(col) + cellValue)
             }
@@ -249,16 +507,26 @@ def calcTotalResultsForRows(def dataRowsList) {
 }
 
 /**
- * Заносим подсчитанные итоговые значения из мапы в выбранную строку
+ * Заносим подсчитанные итоговые значения из мапы в выбранную строку или проверяем корректность расчета
  *
  * @param results - мапа с подсчитанными итоговыми значениями для строк.
  *                  для ее получения есть метод calcTotalResultsForRows
- * @param dataRow - строка, в которую нужно записать итоговые значения из мапы
+ * @param row - строка, в которую нужно записать итоговые значения из мапы
+ * @param check - флаг проверка это или реальный расчет
  */
-void writeResultsToRow(def results, def dataRow) {
+def writeResultsToRowOrCheck(def results, def row, def check) {
+    def isValid = true
     results.keySet().each { col ->
-        dataRow.put (col, results.get(col))
+        if (!check) {
+            row.put (col, results.get(col))
+        } else {
+            if (results[col] != row[col]){
+                isValid = false
+                logger.error("Итоговые значения рассчитаны неверно!")
+            }
+        }
     }
+    return isValid
 }
 
 /**
@@ -266,104 +534,130 @@ void writeResultsToRow(def results, def dataRow) {
  */
 boolean beforeCalcChecks() {
     boolean isValid = true
-    for (def dataRow : formData.getDataRows()) {
+    for (def row : rows) {
+        if (!isFixed(row) && !checkRequiredColumns(row, requiredCols)){
+            isValid = true
+        }
+    }
+    return isValid
+}
 
-        if (! dataRow.signContractor.equals('5'))       //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
-            logger.warn('графа 3 не равна 5')           //todo (vsergeev) нужен ли идентификатор строки? вопросы Аванесову № 5
+/**
+ * получаем значение для графы 19
+ */
+def getGraph19(def values, def row) {
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    def date = format.parse('01.01.2010')
+    if(values.acquisitionDate < date) {
+        return null // не заполняется
+    } else {
+        return row.marketPriceInPerc //ручной ввод
+    }
+}
+
+/**
+ * получаем значение для графы 20
+ */
+def getGraph20(def values, def row) {
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    def date = format.parse('01.01.2010')
+    if(values.acquisitionDate < date){
+        return values.costWithoutNKD
+    } else {
+        return row.marketPriceInRub //ручной ввод
     }
 
-    return isValid
 }
 
 /**
  * получаем значение для графы 21
  */
-def getCostAcquisition(def dataRow) {
-    return (dataRow.costWithoutNKD > dataRow.marketPriceInRub) ? dataRow.marketPriceInRub : dataRow.costWithoutNKD
+def getGraph21(def row) {
+    return (row.costWithoutNKD > row.marketPriceInRub) ? row.marketPriceInRub : row.costWithoutNKD
 }
 
 /**
  * получаем значение для графы 27
  */
-def getGetMarketPriceRealizationInPerc(def dataRow) {
-    if (dataRow.operationType.equals('Погашение')) {        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
-        dataRow.marketPriceRealizationInPerc = 100
+def getGraph27(def values, def row) {
+    if (values.operationType.equals('Погашение')) {        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
+        values.marketPriceRealizationInPerc = 100
     } else {
-        return null                                         //todo (vsergeev) http://jira.aplana.com/browse/SBRFACCTAX-2521
+        return row.marketPriceRealizationInPerc
     }
 }
 
 /**
  * получаем значение для графы 28
  */
-def getMarketPriceRealizationInRub(def dataRow) {
-    if (dataRow.operationType.equals('Погашение')) {        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
-        dataRow.marketPriceRealizationInRub = dataRow.repaymentWithoutNKD
+def getGraph28(def values, def row) {
+    if (values.operationType.equals('Погашение')) {        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
+        values.marketPriceRealizationInRub = values.repaymentWithoutNKD
     } else {
-        return null                                         //todo (vsergeev) http://jira.aplana.com/browse/SBRFACCTAX-2521
+        return row.marketPriceRealizationInRub
     }
 }
 
 /**
  * получаем значение для графы 29   //todo (vsergeev) после ответа на http://jira.aplana.com/browse/SBRFACCTAX-2522 перепроверить алгоритм
  */
-def getCostRealization(def dataRow) {
-    final signContractorIs4 = dataRow.signContractor.equals('4')        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
-    final signContractorIs5 = dataRow.signContractor.equals('5')        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
+def getGraph29(def row) {
+    final signContractorIs4 = row.signContractor.equals('4')        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
+    final signContractorIs5 = row.signContractor.equals('5')        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
     if (signContractorIs4 && (isBargain() || isNegotiatedDeal())
-            && dataRow.realizationPriceInPerc >= dataRow.marketPriceRealizationInPerc
-            && dataRow.realizationPriceInRub >=  dataRow.marketPriceRealizationInRub
+            && row.realizationPriceInPerc >= row.marketPriceRealizationInPerc
+            && row.realizationPriceInRub >=  row.marketPriceRealizationInRub
             || signContractorIs5
-            || dataRow.realizationPriceInPerc >= dataRow.marketPriceRealizationInPerc
-            && dataRow.costRealization >= dataRow.marketPriceRealizationInRub
+            || row.realizationPriceInPerc >= row.marketPriceRealizationInPerc
+            && row.costRealization >= row.marketPriceRealizationInRub
     ) {
-        return dataRow.realizationPriceInRub
-    } else if (dataRow.operationType.equals('Погашение') && dataRow.signContractor.equals('3')) {        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
-        return dataRow.repaymentWithoutNKD
+        return row.realizationPriceInRub
+    } else if (row.operationType.equals('Погашение') && row.signContractor.equals('3')) {        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
+        return row.repaymentWithoutNKD
     } else if (signContractorIs4 && isNegotiatedDeal()
-            || signContractorIs5) {
-        return dataRow.marketPriceRealizationInRub
+            && row.realizationPriceInPerc < row.marketPriceRealizationInPerc
+            && row.realizationPriceInRub <  row.marketPriceRealizationInRub
+            || signContractorIs5
+            && row.realizationPriceInPerc < row.marketPriceRealizationInPerc
+            && row.realizationPriceInRub <  row.marketPriceRealizationInRub) {
+        return row.marketPriceRealizationInRub
     }
 }
 
 /**
  * получаем значение графы 31
  */
-def getTotalLoss(def dataRow) {
-    return dataRow.costAcquisition + dataRow.loss + dataRow.lossRealization
+def getGraph31(def row) {
+    return row.costAcquisition + row.loss + row.lossRealization
 }
 
 /**
  * получаем значение графы 32
  */
-def getAverageWeightedPrice(def dataRow) {
-    if (! isDiscountBond(dataRow)) {
-        return null
-    }
+def getGraph32(def values, def row) {
+    return !isDiscountBond(values)? null: row.averageWeightedPrice
 }
 
 /**
  * получаем значение графы 33
  */
-def getTermIssue(def dataRow) {
-    if (! isDiscountBond(dataRow)) {
-        return null
-    }
+def getGraph33(def values, def row) {
+    return !isDiscountBond(values)? null: row.termIssue
 }
 
 /**
  * получаем значение графы 34
  */
-def getTermHold(def dataRow) {
-    return  (isDiscountBond(dataRow)) ? dataRow.realizationDate - dataRow.acquisitionDate : null
+def getGraph34(def row) {
+    return  (isDiscountBond(row)) ? row.realizationDate - row.acquisitionDate : null
 }
 
 /**
  * получаем значение графы 35
  */
-def getInterestIncomeCurrency(def dataRow) {
-    if (isDiscountBond(dataRow)) {
-        return (dataRow.nominal - dataRow.averageWeightedPrice) * dataRow.termHold * dataRow.amount / dataRow.termIssue
+def getGraph35(def row) {
+    if (isDiscountBond(row)) {
+        return (row.nominal - row.averageWeightedPrice) * row.termHold * row.amount / row.termIssue
     } else {
         return null
     }
@@ -372,34 +666,35 @@ def getInterestIncomeCurrency(def dataRow) {
 /**
  * получаем значение графы 36
  */
-def getInterestIncomeInRub(def dataRow) {
-    if (dataRow.currencyCode.equals('RUR')) {       //todo (vsergeev) Справочник валют!
-        return dataRow.interestIncomeCurrency
-    } else if (! isDiscountBond(dataRow)) {
+def getGraph36(def row) {
+    if (isRubleCurrency(row.currencyCode)) {
+        return row.interestIncomeCurrency
+    } else if (! isDiscountBond(row)) {
         return null
     }
-    return dataRow.interestIncomeCurrency * 0      //todo (vsergeev) http://jira.aplana.com/browse/SBRFACCTAX-2510
+    return row.interestIncomeCurrency * getCourse(row.currencyCode,row.realizationDate)
 }
 
 /**
  * получаем значение графы 37
  */
-def getRealizationResult(def dataRow) {
-    if (isDiscountBond(dataRow)) {
-        return dataRow.costRealization - dataRow.totalLoss - dataRow.interestIncomeInRub
-    } else if (isCouponBound(dataRow)) {
-        return dataRow.costRealization - dataRow.totalLoss
+def getGraph37(def row) {
+    if (isDiscountBond(row)) {
+        return row.costRealization - row.totalLoss - row.interestIncomeInRub
+    } else if (isCouponBound(row)) {
+        return row.costRealization - row.totalLoss
     }
 }
 
 /**
  * получаем значение для графы 38
  */
-def getExcessSellingPrice(def dataRow) {
-    if (dataRow.realizationPriceInRub > 0) {
-        return dataRow.costRealization - dataRow.realizationPriceInRub
-    } else if (dataRow.realizationPriceInRub == 0) {
-        return dataRow.costRealization - dataRow.repaymentWithoutNKD
+def getGraph38(def row) {
+    logger.info("row = $row")
+    if (row.realizationPriceInRub > 0) {
+        return row.costRealization - row.realizationPriceInRub
+    } else if (row.realizationPriceInRub == 0 && row.repaymentWithoutNKD > 0) {
+        return row.costRealization - row.repaymentWithoutNKD
     }
 }
 
@@ -421,16 +716,16 @@ def isNegotiatedDeal() {
  * определяем, является ли облигация дисконтной
  * @return Если «графа 7» == «2» тогда {@value true} иначе {@value false}
  */
-boolean isDiscountBond(def dataRow) {
-    dataRow.securityKind.equals('2')        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
+boolean isDiscountBond(def row) {
+    row.securityKind.equals('2')        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
 }
 
 /**
  * определяем, является ли облигация купонной
  * @return Если «графа 7» == «1» || «графа 7» == «3» тогда {@value true} иначе {@value false}
  */
-boolean isCouponBound(def dataRow) {
-    dataRow.securityKind.equals('1') || dataRow.securityKind.equals('3')        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
+boolean isCouponBound(def row) {
+    row.securityKind.equals('1') || row.securityKind.equals('3')        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
 }
 
 boolean isBlankOrNull(value) {
@@ -438,96 +733,18 @@ boolean isBlankOrNull(value) {
 }
 
 /**
- * получаем номер группы для строки. по номерам группируются строки, для каждой группы итоги подсчитываются отдельно
- */
-def getDataRowGroup(def dataRow) {
-    def currentRowAlias = dataRow.getAlias()
-    def matcher = (currentRowAlias =~ '^R(\\d+)')
-
-    return (matcher.find(0) && matcher[0].size > 1) ? matcher[0][1] : null
-}
-
-/**
- * получаем список всех строк в группе, которые содержат данные, по номеру группы
- */
-def tryGetDataRowsForGroup(def aliasGroup) {
-    def pattern = '^R' + aliasGroup + '-\\d+'
-    def result = []
-    formData.getDataRows().each { dataRow ->
-        if ((dataRow.getAlias() =~ pattern).matches()) {
-            result.add(dataRow)
-        }
-    }
-
-    return (result.size() > 0) ? result : null
-}
-
-/**
- * получаем список всех строк с данными
- */
-def tryGetAllDataRowsWithData() {
-    return tryGetDataRowsForGroup('\\d+')
-}
-
-def getLastRowAlias(def aliasGroup, def rowsInGroup) {
-    def pattern = '^R' + aliasGroup + '-(\\d+)'
-    def maxIndex = -1
-    def rowWithMaxIndexAlias
-    rowsInGroup.each { rowAlias ->
-        def matcher = (rowAlias =~ pattern)
-        if (matcher.find(0) && matcher[0].size > 1) {
-            try {
-                rowIndex = Integer.parseInt(matcher[0][1])
-                if (maxIndex < rowIndex) {
-                    rowWithMaxIndexAlias = rowAlias
-                    maxIndex = rowIndex
-                }
-            } catch (NumberFormatException ex) {
-                // do nothing
-            }
-        }
-    }
-
-    return rowWithMaxIndexAlias
-}
-
-/**
- * получаем номер строку итогов для группы
- */
-def tryGetTotalRowForGroup(def groupIndex) {
-    if (groupIndex.equals('10') || groupIndex.equals('11')) {       //в 10 и 11 группы нельзя добавлять ячейки
-        return null
-    } else {
-        return formData.getDataRow("R$groupIndex-total")
-    }
-}
-
-/**
- * проверяем, можно ли удалить строку
- * для удаления доступны только строки группы, у которых есть номер (не итоговые и не строки с названием групп)
- */
-boolean isDeletable(def dataRow) {
-    def pattern = '^R\\d+-\\d+'
-    if ((dataRow.getAlias() =~ pattern).matches()) {
-        return true
-    } else {
-        return false
-    }
-}
-
-/**
  * Возвращает алиасы столбцов, значения которых суммируются в итогах
  */
-def getAliasesForTotalCols() {
+def getTotalCols() {
     return ['amount', 'costWithoutNKD', 'loss', 'marketPriceInRub', 'costAcquisition', 'repaymentWithoutNKD',
             'realizationPriceInRub', 'marketPriceRealizationInRub', 'costRealization', 'lossRealization', 'totalLoss',
             'interestIncomeCurrency', 'interestIncomeInRub', 'realizationResult', 'excessSellingPrice']
 }
 
 /**
- * алиасы стольбцов, доступных для редактирования
+ * алиасы столбцов, доступных для редактирования
  */
-def getAliasesForEditableCols() {
+def getEditableCols() {
     return ['balanceNumber', 'operationType', 'signContractor', 'contractorName', 'securityName', 'series',
             'securityKind', 'signSecurity', 'currencyCode', 'currencyName', 'nominal', 'amount', 'acquisitionDate',
             'tradeDate', 'currencyCodeTrade', 'currencyNameTrade', 'costWithoutNKD', 'loss', 'marketPriceInPerc',
@@ -535,21 +752,135 @@ def getAliasesForEditableCols() {
             'realizationPriceInRub', 'marketPriceRealizationInPerc', 'marketPriceRealizationInRub', 'lossRealization']
 }
 
+def getAllCols(){
+    return ['balanceNumber', 'operationType', 'signContractor', 'contractorName', 'securityName', 'series',
+            'securityKind', 'signSecurity', 'currencyCode', 'currencyName', 'nominal', 'amount', 'acquisitionDate',
+            'tradeDate', 'currencyCodeTrade', 'currencyNameTrade', 'costWithoutNKD', 'loss', 'marketPriceInPerc',
+            'marketPriceInRub', 'costAcquisition', 'realizationDate', 'tradeDate2', 'repaymentWithoutNKD',
+            'realizationPriceInPerc', 'realizationPriceInRub', 'marketPriceRealizationInPerc',
+            'marketPriceRealizationInRub', 'costRealization', 'lossRealization', 'totalLoss', 'averageWeightedPrice',
+            'termIssue', 'termHold', 'interestIncomeCurrency', 'interestIncomeInRub', 'realizationResult',
+            'excessSellingPrice']
+}
+
+def getRequiredCols(){
+    return ['balanceNumber', 'operationType', 'signContractor', 'contractorName', 'securityName', 'series',
+            'securityKind', 'signSecurity', 'currencyCode', 'currencyName', 'nominal', 'amount', 'acquisitionDate',
+            'tradeDate', 'currencyCodeTrade', 'currencyNameTrade', 'costWithoutNKD', 'loss', 'marketPriceInPerc',
+            'marketPriceInRub', 'costAcquisition', 'realizationDate', 'tradeDate2', 'repaymentWithoutNKD',
+            'realizationPriceInPerc', 'realizationPriceInRub', 'marketPriceRealizationInPerc',
+            'marketPriceRealizationInRub', 'costRealization', 'lossRealization', 'totalLoss', 'averageWeightedPrice',
+            'termIssue', 'termHold', 'interestIncomeCurrency', 'interestIncomeInRub', 'realizationResult',
+            'excessSellingPrice']
+}
+
+def List<String> getGroups(){
+    return ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9']
+}
+
 /**
- * @return List всех существующих в таблице групп
+ * Хелпер для округления чисел
+ * @param value
+ * @param newScale
+ * @return
  */
-def getExistingGroups() {
-
-    def groups = []
-    def group
-
-    for (def dataRow : formData.getDataRows()) {
-        final currentGroup = getDataRowGroup(dataRow)
-        if (! currentGroup.equals(group)) {
-            group = currentGroup
-            groups.add(group)
-        }
+BigDecimal roundTo(BigDecimal value, int newScale) {
+    if (value != null) {
+        return value.setScale(newScale, BigDecimal.ROUND_HALF_UP)
+    } else {
+        return value
     }
+}
 
-    return groups
+/**
+ * Получить helper формы.
+ */
+def DataRowHelper getData() {
+    return getData(formData)
+}
+
+def DataRowHelper getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
+
+/**
+ * Получить строки формы.
+ */
+def List<DataRow<Cell>> getRows() {
+    return data.getAllCached();
+}
+
+def List<DataRow<Cell>> getRows(def DataRowHelper data) {
+    return data.getAllCached();
+}
+
+/**
+ * Имеются ли фатальные ошибки.
+ */
+def hasError() {
+    return logger.containsLevel(LogLevel.ERROR)
+}
+
+/**
+ * Получить буквенный код валюты
+ */
+def getCurrency(def currencyCode) {
+    return  refBookService.getStringValue(15,currencyCode,'CODE_2')
+}
+
+/**
+ * Получить наименование валюты
+ */
+def getCurrencyName(def currencyCode) {
+    return  refBookService.getStringValue(15,currencyCode,'NAME')
+}
+
+/**
+ * Проверка валюты на рубли
+ */
+def isRubleCurrency(def currencyCode) {
+    return  refBookService.getStringValue(15,currencyCode,'CODE')=='810'
+}
+
+/**
+ * Проверка является ли строка фиксированной.
+ */
+def isFixed(def row) {
+    return row != null && row.getAlias() != null
+}
+
+/**
+ * Получить курс валюты
+ */
+def getCourse(def currency, def date) {
+    if (currency!=null) {
+        def refCourseDataProvider = refBookFactory.getDataProvider(22)
+        def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
+        return res.getRecords().get(0).RATE.getNumberValue()
+    } else {
+        return null
+    }
+}
+
+def getColumnName(def row, def column){
+    return row.getCell(column).getColumn().getName().replace('%', '%%')
+}
+
+def getBalanceNumber(def id) {
+    return refBookService.getStringValue(29, id, 'BALANCE_ACCOUNT')
+}
+
+def getSignSecurity(def id) {
+    return refBookService.getStringValue(62, id, 'CODE')
+}
+
+def getCompareList(DataRow row) {//TODO справочники
+    return [getBalanceNumber(row.balanceNumber),
+        getSignSecurity(row.signSecurity),
+        row.securityKind,
+        row.signContractor,
+        row.operationType]
 }
