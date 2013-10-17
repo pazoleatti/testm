@@ -1,6 +1,6 @@
 create table configuration (
   code varchar2(50) not null,
-  value varchar2(50)
+  value varchar2(510)
 );
 alter table configuration add constraint configuration_pk primary key (code);
 
