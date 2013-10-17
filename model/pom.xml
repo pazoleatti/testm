@@ -12,6 +12,14 @@
 	<artifactId>model</artifactId>
 	<description>АС "Учёт налогов" - Модельные объекты</description>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.aplana.taxaccounting</groupId>
+            <artifactId>scheduler-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
 	<build>
 		<plugins>
 			<plugin>

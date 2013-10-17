@@ -30,6 +30,24 @@
             <version>${project.version}</version>
             <type>ejb</type>
         </dependency>
+        <dependency>
+            <groupId>com.aplana.taxaccounting</groupId>
+            <artifactId>scheduler-core</artifactId>
+            <version>0.3.5</version>
+            <type>ejb</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.ibm.ws</groupId>
+                    <artifactId>ws-runtime</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.aplana.taxaccounting</groupId>
+            <artifactId>scheduler-task</artifactId>
+            <version>0.3.5</version>
+            <type>ejb</type>
+        </dependency>
 	</dependencies>
 
 	<build>
@@ -57,6 +75,16 @@
                             <groupId>${project.groupId}</groupId>
                             <artifactId>mdb</artifactId>
                             <bundleFileName>mdb.jar</bundleFileName>
+                        </ejbModule>
+                        <ejbModule>
+                            <groupId>com.aplana.taxaccounting</groupId>
+                            <artifactId>scheduler-core</artifactId>
+                            <bundleFileName>scheduler-core.jar</bundleFileName>
+                        </ejbModule>
+                        <ejbModule>
+                            <groupId>com.aplana.taxaccounting</groupId>
+                            <artifactId>scheduler-task</artifactId>
+                            <bundleFileName>scheduler-task.jar</bundleFileName>
                         </ejbModule>
 					</modules>
 				</configuration>

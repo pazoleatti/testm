@@ -136,4 +136,12 @@
             <New class="com.aplana.sbrf.taxaccounting.service.MigrationBean"/>
         </Arg>
     </New>
+
+    <!-- Подмена EJB-модуля TaskManager на maven-зависимость для dev-mode -->
+    <New class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>ejblocal:taxaccounting/scheduler-core.jar/TaskManagerBean#com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal</Arg>
+        <Arg>
+            <New class="com.aplana.sbrf.taxaccounting.scheduler.core.manager.TaskManagerMock"/>
+        </Arg>
+    </New>
 </Configure>

@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import java.text.SimpleDateFormat
+import java.math.RoundingMode
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -393,9 +394,7 @@ boolean check(def cell, def value) {
     return true
 }
 
-/**
- * Проверка соответствия НСИ
- */
+// Проверка соответствия НСИ
 boolean checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
     def cell = row.getCell(alias)
     if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
@@ -427,9 +426,7 @@ void consolidation() {
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
-/**
- * Проверка при создании формы.
- */
+// Проверка при создании формы
 void checkCreation() {
     // отчётный период
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)

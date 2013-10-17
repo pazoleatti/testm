@@ -335,10 +335,6 @@ void checkCreation() {
     }
 }
 
-/*
- * Вспомогательные методы.
- */
-
 // Проверка является ли строка итоговой
 def isTotal(def row) {
     return row != null && row.getAlias() != null && row.getAlias().contains('total')
