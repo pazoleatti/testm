@@ -567,11 +567,12 @@ public class FormDataServiceImpl implements FormDataService {
         if (workflowMove.getToState() == WorkflowState.ACCEPTED || workflowMove.getFromState() == WorkflowState.ACCEPTED) {
             // признак периода ввода остатков
             if (!reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
-                // получение списка приемников для текущей формы
+                // получение списка типов приемников для текущей формы
                 List<DepartmentFormType> departmentFormTypes = departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
                 // Если найдены приемники то обработаем их
                 if (departmentFormTypes != null && !departmentFormTypes.isEmpty()) {
                     for (DepartmentFormType i: departmentFormTypes) {
+                        // получим созданные формы с бд
                         FormData destinationForm = formDataDao.find(i.getFormTypeId(), i.getKind(), i.getDepartmentId(), formData.getReportPeriodId());
                         // получение источников для текущего приемника i
                         List<DepartmentFormType> sourceFormTypes = departmentFormTypeDao.getFormSources(i.getDepartmentId(), i.getFormTypeId(), i.getKind());
@@ -593,7 +594,7 @@ public class FormDataServiceImpl implements FormDataService {
 
                             formDataCompositionService.compose(formData, i.getDepartmentId(),
                                     i.getFormTypeId(), i.getKind());
-                        } else{
+                        } else if (destinationForm != null){
                             deleteFormData(userInfo, destinationForm.getId());
                         }
                     }
