@@ -1,14 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.script.FormDataCacheDao;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /*
  * Реализация FormDataService
@@ -33,9 +35,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
 	@Autowired
 	private FormDataDao dao;
-	
-	/*@Autowired
-	private DataRowHelperImpl dataRowServiceImpl;*/
+
+    @Autowired
+    private FormDataCacheDao cacheDao;
 
     private HashMap<Number,DataRowHelper> helperHashMap = new HashMap<Number, DataRowHelper>();
 
@@ -61,14 +63,21 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 		return dataRowHelperImpl;
 	}
 
-	@Override
+    @Override
 	public void setScriptComponentContext(ScriptComponentContext context) {
 		this.scriptComponentContext = context;
 	}
 
-
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    @Override
+    public void fillRefBookCache(Long formDataId, Map<Long, Map<String, RefBookValue>> refBookCache) {
+        if (formDataId == null || refBookCache == null) {
+            return;
+        }
+        refBookCache.putAll(cacheDao.getRefBookMap(formDataId));
     }
 }
