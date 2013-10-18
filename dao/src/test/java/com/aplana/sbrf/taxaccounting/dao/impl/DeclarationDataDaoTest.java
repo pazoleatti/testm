@@ -1,13 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,14 +12,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import java.io.ByteArrayInputStream;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DeclarationDataDaoTest.xml"})
@@ -31,6 +26,9 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 public class DeclarationDataDaoTest {
 	@Autowired
 	private DeclarationDataDao declarationDataDao;
+
+    @Autowired
+    private BlobDataDao blobDataDao;
 	
 	@Test
 	public void testGet() {
@@ -231,7 +229,21 @@ public class DeclarationDataDaoTest {
 		}
 
 		if (failed) {
-			fail("Wrong list of ids: " + expected + " expected but " + received + " received");
+			fail("Wrong list of ids: " + Arrays.toString(expected) + " expected but " + Arrays.toString(received) + " received");
 		}
 	}
+
+    @Test
+    public void setJasperPrintTest(){
+        BlobData blobData = new BlobData();
+        blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
+        blobData.setName("hello.xls");
+        blobData.setInputStream(new ByteArrayInputStream(new byte[]{0, 1, 2, 3}));
+        blobData.setCreationDate(new Date());
+        blobData.setType(0);
+        blobData.setDataSize(76754);
+
+        declarationDataDao.setJasperPrintId(1, blobDataDao.create(blobData));
+        assertEquals(blobData.getUuid(), declarationDataDao.get(1).getJasperPrintId());
+    }
 }

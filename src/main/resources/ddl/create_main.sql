@@ -466,12 +466,14 @@ create table declaration_data (
   data          clob,
   is_accepted       number(1) not null,
   data_pdf        blob,
-  data_xlsx        blob
+  data_xlsx        blob,
+  jasper_print     varchar2(36) 
 );
 alter table declaration_data add constraint declaration_data_pk primary key (id);
 alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template (id);
 alter table declaration_data add constraint declaration_data_fk_rep_per_id foreign key (report_period_id) references report_period (id);
 alter table declaration_data add constraint declaration_data_fk_dep_id foreign key (department_id) references department (id);
+alter table declaration_data add constraint declaration_data_fk_j_print foreign key (jasper_print) references blob_data (id);
 alter table declaration_data add constraint declaration_data_chk_is_accptd check (is_accepted in (0,1));
 alter table declaration_data add constraint declaration_data_uniq_template unique(report_period_id, department_id, declaration_template_id);
 
@@ -484,6 +486,7 @@ comment on column declaration_data.data is 'Данные декларации в
 comment on column declaration_data.is_accepted is 'Признак того, что декларация принята';
 comment on column declaration_data.data_pdf is 'pdf';
 comment on column declaration_data.data_xlsx is 'xlsx';
+comment on column declaration_data.jasper_print is 'Сформированный отчет во внутреннем формате Jasper Reports';
 
 create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------
