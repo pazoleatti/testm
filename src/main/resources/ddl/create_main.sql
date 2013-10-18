@@ -464,17 +464,20 @@ create sequence seq_declaration_template start with 10000;
 create table declaration_data (
   id number(18) not null,
   declaration_template_id number(9) not null,
-  report_period_id    number(9) not null,
-  department_id      number(9) not null,
-  data          clob,
-  is_accepted       number(1) not null,
-  data_pdf        blob,
-  data_xlsx        blob
+  report_period_id        number(9) not null,
+  department_id           number(9) not null,
+  data                    varchar2(36),
+  is_accepted             number(1) not null,
+  data_pdf                varchar2(36),
+  data_xlsx               varchar2(36) 
 );
 alter table declaration_data add constraint declaration_data_pk primary key (id);
 alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template (id);
 alter table declaration_data add constraint declaration_data_fk_rep_per_id foreign key (report_period_id) references report_period (id);
 alter table declaration_data add constraint declaration_data_fk_dep_id foreign key (department_id) references department (id);
+alter table declaration_data add constraint declaration_data_fk_data foreign key (data) references blob_data (id);
+alter table declaration_data add constraint declaration_data_fk_data_pdf foreign key (data_pdf) references blob_data (id);
+alter table declaration_data add constraint declaration_data_fk_data_xlsx foreign key (data_xlsx) references blob_data (id);
 alter table declaration_data add constraint declaration_data_chk_is_accptd check (is_accepted in (0,1));
 alter table declaration_data add constraint declaration_data_uniq_template unique(report_period_id, department_id, declaration_template_id);
 

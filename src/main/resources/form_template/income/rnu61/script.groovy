@@ -82,7 +82,7 @@ void deleteRow() {
 // Ресчет графы 6 и 7
 def calc6and7(def currencyCode, def date) {
     if (currencyCode != null && date != null) {
-        rate = 1
+        def rate = 1
         if (!isRubleCurrency(currencyCode)) {
             rate = getRate(date, currencyCode)
         }
@@ -95,16 +95,17 @@ def calc6and7(def currencyCode, def date) {
 // Ресчет графы 12
 def calc12(def currencyCode) {
     // TODO вопрос к заказчику
-    val =row.sum70606
+    def val =row.sum70606
     if (row.currencyCode != null && isRubleCurrency(row.currencyCode)) {
     } else {
     }
     return val
 }
 
+// Ресчет графы 13
 def calc13(def row, def daysOfYear) {
     // TODO вопрос к заказчику
-    val =0
+    def val =0
     if (row.sum70606 == null) {
         if (row.operationDate < row.paymentEnd) {
             val = round((row.nominal * row.interestRate / 100 * (row.operationDate - row.creationDate)) / daysOfYear) * row.rateBROperation
@@ -116,6 +117,7 @@ def calc13(def row, def daysOfYear) {
     return val
 }
 
+// Ресчет графы 14
 def calc14(def row) {
     // TODO вопрос к заказчику
     val =0
