@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.script.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.dao.script.dictionary.RefBookOkatoDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
