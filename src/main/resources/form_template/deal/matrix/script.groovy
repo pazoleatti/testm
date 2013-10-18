@@ -894,6 +894,11 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 390:
         case 391:
         case 392:
+        case 385:
+        case 386:
+        case 388:
+        case 389:
+        case 394:
             row.price = srcRow.price
             break
         case 383:
@@ -903,26 +908,29 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 393:
             row.price = srcRow.priceOne
             break
-        case 385:
-        case 386:
-        case 388:
-        case 389:
-        case 394:
-            row.price = srcRow.price
-            break
     }
 
     // Графа 44
     switch (type.id) {
+        case 375:
         case 376:
         case 377:
-        case 375:
         case 379:
         case 380:
         case 381:
         case 382:
         case 387:
+        case 392:
             row.total = srcRow.cost
+            break
+        case 383:
+            if(srcRow.percentIncomeSum != null)
+                row.total = srcRow.percentIncomeSum
+            if(srcRow.percentConsumptionSum != null)
+                row.total = srcRow.percentConsumptionSum
+            break
+        case 384:
+            row.total = srcRow.transactionSumRub
             break
         case 385:
             row.total = srcRow.totalCost
@@ -930,15 +938,10 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 386:
         case 388:
         case 389:
-        case 394:
-            row.total = srcRow.total
-            break
         case 390:
         case 391:
+        case 394:
             row.total = srcRow.total
-            break
-        case 392:
-            row.total = srcRow.cost
             break
         case 393:
             row.total = srcRow.totalNds
@@ -985,6 +988,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     switch (type.id) {
         case 376:
         case 377:
+        case 385:
             row.countryCode3 = srcRow.country
             break
         case 375:
@@ -992,9 +996,8 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 380:
         case 381:
         case 382:
-            row.countryCode3 = srcRow.countryCode
-            break
         case 383:
+        case 386:
         case 389:
         case 390:
         case 391:
@@ -1008,16 +1011,8 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 384:
             row.countryCode3 = srcRow.contraCountryCode
             break
-        case 385:
-            row.countryCode3 = srcRow.country
-            break
-        case 386:
-            row.countryCode3 = srcRow.countryCode
-            break
-        case 388:
-            row.countryCode3 = srcRow.countryName
-            break
         case 387:
+        case 388:
             row.countryCode3 = srcRow.countryName
             break
     }
