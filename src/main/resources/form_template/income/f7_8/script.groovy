@@ -133,7 +133,6 @@ void calc(){
 
 def boolean checkNSI(){
     def rows = rows
-    def date = new Date()
     def cache = [:]
     def isValid = true
     for (def row : rows){
@@ -142,27 +141,27 @@ def boolean checkNSI(){
         }
         def errStart = getRowIndexString(row)
         //TODO еще справочники
-        if (row.balanceNumber != null && null == getRecordId(29, 'BALANCE_ACCOUNT',row.balanceNumber, date, cache)){
-            logger.warn(getRefBookErrorMessage(errStart, 29, 'BALANCE_ACCOUNT',row.balanceNumber))
+        if (row.balanceNumber != null && null == getRecordById(29, row.balanceNumber, cache)){
+            logger.warn(getRefBookErrorMessage(errStart, 29, row.balanceNumber))
         }
-        if (row.signSecurity != null && null == getRecordId(62, 'CODE', row.signSeciruty, date, cache)){
-            logger.warn(getRefBookErrorMessage(errStart, 62, 'CODE',row.signSeciruty))
+        if (row.signSecurity != null && null == getRecordById(62, row.signSeciruty, cache)){
+            logger.warn(getRefBookErrorMessage(errStart, 62, row.signSeciruty))
         }
-        if (row.currencyCode != null && null == getRecordId(15, 'CODE_2', row.currencyCode, date, cache)){
+        if (row.currencyCode != null && null == getRecordById(15, row.currencyCode, cache)){
             isValid = false
-            logger.error(getRefBookErrorMessage(errStart, 15, 'CODE_2',row.currencyCode))
+            logger.error(getRefBookErrorMessage(errStart, 15, row.currencyCode))
         }
-        if (row.currencyName != null && null == getRecordId(15, 'NAME', row.currencyName, date, cache)){
+        if (row.currencyName != null && null == getRecordById(15, row.currencyName, cache)){
             isValid = false
-            logger.error(getRefBookErrorMessage(errStart, 15, 'NAME',row.currencyName))
+            logger.error(getRefBookErrorMessage(errStart, 15, row.currencyName))
         }
-        if (row.currencyCodeTrade != null && null == getRecordId(15, 'CODE_2', row.currencyCodeTrade, date, cache)){
+        if (row.currencyCodeTrade != null && null == getRecordById(15, row.currencyCodeTrade, cache)){
             isValid = false
-            logger.error(getRefBookErrorMessage(errStart, 15, 'CODE_2',row.currencyCodeTrade))
+            logger.error(getRefBookErrorMessage(errStart, 15, row.currencyCodeTrade))
         }
-        if (row.currencyNameTrade != null && null == getRecordId(15, 'NAME', row.currencyNameTrade, date, cache)){
+        if (row.currencyNameTrade != null && null == getRecordById(15, row.currencyNameTrade, cache)){
             isValid = false
-            logger.error(getRefBookErrorMessage(errStart, 15, 'NAME',row.currencyNameTrade))
+            logger.error(getRefBookErrorMessage(errStart, 15, row.currencyNameTrade))
         }
 
     }
@@ -899,31 +898,29 @@ def getCompareList(DataRow row) {//TODO справочники
 }
 
 /**
- * Получить id справочника.
+ * Получить запись из справочника по идентифкатору записи.
  *
- * @param ref_id идентификатор справончика
- * @param code атрибут справочника
- * @param value значение для поиска
- * @param date дата актуальности
+ * @param refBookId идентификатор справончика
+ * @param recordId идентификатор записи
  * @param cache кеш
  * @return
  */
-def getRecordId(def ref_id, String code, def value, Date date, def cache) {
-    String filter = code + " = '" + value + "'"
-    if (cache[ref_id]!=null) {
-        if (cache[ref_id][filter] != null) {
-            return cache[ref_id][filter]
+def getRecordById(def refBookId, def recordId, def cache) {
+    if (cache[refBookId] != null) {
+        if (cache[refBookId][recordId] != null) {
+            return cache[refBookId][recordId]
         }
     } else {
-        cache[ref_id] = [:]
+        cache[refBookId] = [:]
     }
-    def refDataProvider = refBookFactory.getDataProvider(ref_id)
-    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
-    if (records.size() == 1) {
-        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
-        return cache[ref_id][filter]
+    def record = refBookService.getRecordData(refBookId, recordId)
+    if (record != null) {
+        cache[refBookId][recordId] = record
+        return cache[refBookId][recordId]
     }
-    // logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
+    // def refBook = refBookFactory.get(refBookId)
+    // def refBookName = refBook.name
+    // logger.error("Не удалось найти запись (id = $recordId) в справочнике $refBookName (id = $refBookId)")
     return null
 }
 
@@ -931,11 +928,9 @@ def getRecordId(def ref_id, String code, def value, Date date, def cache) {
  * Получить сообщение об ошибке  при проверке НСИ
  * @param errStart начало сообщения с номером строки
  * @param ref_id ид справочника
- * @param atr_alias алиас атрибута
  * @param id ид записи (значение в поле)
  */
-void getRefBookErrorMessage(def errStart, def ref_id, def atr_alias, def id){
+void getRefBookErrorMessage(def errStart, def ref_id, def id){
     def refBook = refBookFactory.get(ref_id)
-    def refBookAtr = refBook.getAttribute(atr_alias)
-    logger.warn("${errStart}в справочнике \"${refBook.name}\" не найдено значение с id = ${id} в поле \"${refBookAtr.name}\"!")
+    logger.warn("${errStart}в справочнике \"${refBook.name}\" не найдено значение с id = ${id}!")
 }

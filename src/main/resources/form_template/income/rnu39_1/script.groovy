@@ -51,9 +51,9 @@ switch (formDataEvent) {
 }
 
 /**
- * Графа 1  currencyCode        Код валюты номинала
+ * Графа 1  currencyCode        Код валюты номинала Справочник 15 Атрибут 64 CODE
  * Графа 2  issuer              Эмитент
- * Графа 3  regNumber           Номер государственной регистрации
+ * Графа 3  regNumber           Номер государственной регистрации Справочник 84 Атрибут 813 REG_NUM
  * Графа 4  amount              Количество облигаций (шт.)
  * Графа 5  cost                Номинальная стоимость лота (руб.коп.)
  * Графа 6  shortPositionOpen   Дата открытия короткой позиции
@@ -137,16 +137,23 @@ def boolean logicalCheck(){
 
 def boolean checkNSI(){
     def rows = getRows(data)
+    def cache = [:]
+    def isValid = true
     for (def row : rows){
         if (isFixed(row)){
             continue
         }
         def errStart = getRowIndexString(row)
-        if (row.currencyCode!=null && getCurrency(row.currencyCode)==null) {
-            logger.warn("${errStart}неверный код валюты!")
+        if (row.currencyCode != null && null == getRecordById(15, row.currencyCode, cache)){
+            isValid = false
+            logger.error(getRefBookErrorMessage(errStart, 15, row.currencyCode))
+        }
+        if (row.regNumber != null && null == getRecordById(84, row.regNumber, cache)){
+            isValid = false
+            logger.error(getRefBookErrorMessage(errStart, 84, row.regNumber))
         }
     }
-    return true
+    return isValid
 }
 
 void calc(){
@@ -326,7 +333,6 @@ def List<String> getEditableCols(){
             "currentCouponRate", "incomeCurrentCoupon"]
 }
 
-//TODO не все так просто (пока все поля)
 def List<String> getRequiredCols(){
     return ["currencyCode", "issuer", "regNumber", "amount", "cost",
             "shortPositionOpen", "shortPositionClose", "pkdSumOpen",
@@ -548,4 +554,42 @@ def getReportDate(){
  */
 def getIndex(def row) {
     return row.getIndex() - 1
+}
+
+/**
+ * Получить запись из справочника по идентифкатору записи.
+ *
+ * @param refBookId идентификатор справончика
+ * @param recordId идентификатор записи
+ * @param cache кеш
+ * @return
+ */
+def getRecordById(def refBookId, def recordId, def cache) {
+    if (cache[refBookId] != null) {
+        if (cache[refBookId][recordId] != null) {
+            return cache[refBookId][recordId]
+        }
+    } else {
+        cache[refBookId] = [:]
+    }
+    def record = refBookService.getRecordData(refBookId, recordId)
+    if (record != null) {
+        cache[refBookId][recordId] = record
+        return cache[refBookId][recordId]
+    }
+    // def refBook = refBookFactory.get(refBookId)
+    // def refBookName = refBook.name
+    // logger.error("Не удалось найти запись (id = $recordId) в справочнике $refBookName (id = $refBookId)")
+    return null
+}
+
+/**
+ * Получить сообщение об ошибке  при проверке НСИ
+ * @param errStart начало сообщения с номером строки
+ * @param ref_id ид справочника
+ * @param id ид записи (значение в поле)
+ */
+void getRefBookErrorMessage(def errStart, def ref_id, def id){
+    def refBook = refBookFactory.get(ref_id)
+    logger.warn("${errStart}в справочнике \"${refBook.name}\" не найдено значение с id = ${id}!")
 }
