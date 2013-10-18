@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.ConfigTuple;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.GetConfigurationAction;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.GetConfigurationResult;
@@ -73,6 +74,7 @@ public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyV
 
 	@Override
 	public void save() {
+		LogCleanEvent.fire(this);
 		SaveConfigurationAction action = new SaveConfigurationAction();
 		action.setData(getView().getConfigData());
 		dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SaveConfigurationResult>() {
