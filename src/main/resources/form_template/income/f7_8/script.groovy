@@ -132,14 +132,41 @@ void calc(){
 }
 
 def boolean checkNSI(){
-    def rows = getRows(data)
+    def rows = rows
+    def date = new Date()
+    def cache = [:]
+    def isValid = true
     for (def row : rows){
         if (isFixed(row)){
             continue
         }
         def errStart = getRowIndexString(row)
+        //TODO еще справочники
+        if (row.balanceNumber != null && null == getRecordId(29, 'BALANCE_ACCOUNT',row.balanceNumber, date, cache)){
+            logger.warn(getRefBookErrorMessage(errStart, 29, 'BALANCE_ACCOUNT',row.balanceNumber))
+        }
+        if (row.signSecurity != null && null == getRecordId(62, 'CODE', row.signSeciruty, date, cache)){
+            logger.warn(getRefBookErrorMessage(errStart, 62, 'CODE',row.signSeciruty))
+        }
+        if (row.currencyCode != null && null == getRecordId(15, 'CODE_2', row.currencyCode, date, cache)){
+            isValid = false
+            logger.error(getRefBookErrorMessage(errStart, 15, 'CODE_2',row.currencyCode))
+        }
+        if (row.currencyName != null && null == getRecordId(15, 'NAME', row.currencyName, date, cache)){
+            isValid = false
+            logger.error(getRefBookErrorMessage(errStart, 15, 'NAME',row.currencyName))
+        }
+        if (row.currencyCodeTrade != null && null == getRecordId(15, 'CODE_2', row.currencyCodeTrade, date, cache)){
+            isValid = false
+            logger.error(getRefBookErrorMessage(errStart, 15, 'CODE_2',row.currencyCodeTrade))
+        }
+        if (row.currencyNameTrade != null && null == getRecordId(15, 'NAME', row.currencyNameTrade, date, cache)){
+            isValid = false
+            logger.error(getRefBookErrorMessage(errStart, 15, 'NAME',row.currencyNameTrade))
+        }
+
     }
-    return true
+    return isValid
 }
 
 void deleteRow(){
@@ -252,12 +279,12 @@ boolean logicalCheck() {
             continue
         }
         def errStart = getRowIndexString(row)
-        def graph27 = getGraph27(row)
+        def graph27 = getGraph27(row, row)
         if (graph27 != null && graph27 != row.marketPriceRealizationInPerc) {
             isValid = false
             logger.error("${errStart}неверно указана рыночная цена в процентах при погашении!")
         }
-        def graph28 = getGraph28(row)
+        def graph28 = getGraph28(row, row)
         if (graph28 != null && graph28 != row.marketPriceRealizationInRub) {
             isValid = false
             logger.error("${errStart}неверно указана рыночная цена в рублях при погашении!")
@@ -314,7 +341,7 @@ def checkRequiredColumns(def DataRow row, def ArrayList<String> columns) {
     if (!colNames.isEmpty()) {
         def errorBegin = getRowIndexString(row)
         def errorMsg = colNames.join(', ')
-        logger.warn(errorBegin+ "не заполнены колонки : $errorMsg.")
+        logger.error(errorBegin+ "не заполнены колонки : $errorMsg.")
         return false
     }
     return true
@@ -536,7 +563,7 @@ boolean beforeCalcChecks() {
     boolean isValid = true
     for (def row : rows) {
         if (!isFixed(row) && !checkRequiredColumns(row, requiredCols)){
-            isValid = true
+            isValid = false
         }
     }
     return isValid
@@ -825,20 +852,6 @@ def hasError() {
 }
 
 /**
- * Получить буквенный код валюты
- */
-def getCurrency(def currencyCode) {
-    return  refBookService.getStringValue(15,currencyCode,'CODE_2')
-}
-
-/**
- * Получить наименование валюты
- */
-def getCurrencyName(def currencyCode) {
-    return  refBookService.getStringValue(15,currencyCode,'NAME')
-}
-
-/**
  * Проверка валюты на рубли
  */
 def isRubleCurrency(def currencyCode) {
@@ -883,4 +896,46 @@ def getCompareList(DataRow row) {//TODO справочники
         row.securityKind,
         row.signContractor,
         row.operationType]
+}
+
+/**
+ * Получить id справочника.
+ *
+ * @param ref_id идентификатор справончика
+ * @param code атрибут справочника
+ * @param value значение для поиска
+ * @param date дата актуальности
+ * @param cache кеш
+ * @return
+ */
+def getRecordId(def ref_id, String code, def value, Date date, def cache) {
+    String filter = code + " = '" + value + "'"
+    if (cache[ref_id]!=null) {
+        if (cache[ref_id][filter] != null) {
+            return cache[ref_id][filter]
+        }
+    } else {
+        cache[ref_id] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
+    if (records.size() == 1) {
+        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
+        return cache[ref_id][filter]
+    }
+    // logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
+    return null
+}
+
+/**
+ * Получить сообщение об ошибке  при проверке НСИ
+ * @param errStart начало сообщения с номером строки
+ * @param ref_id ид справочника
+ * @param atr_alias алиас атрибута
+ * @param id ид записи (значение в поле)
+ */
+void getRefBookErrorMessage(def errStart, def ref_id, def atr_alias, def id){
+    def refBook = refBookFactory.get(ref_id)
+    def refBookAtr = refBook.getAttribute(atr_alias)
+    logger.warn("${errStart}в справочнике \"${refBook.name}\" не найдено значение с id = ${id} в поле \"${refBookAtr.name}\"!")
 }
