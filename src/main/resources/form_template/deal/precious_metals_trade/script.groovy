@@ -884,7 +884,7 @@ def addData(def xml, int headRowCount) {
 
         // графа 2.1
         newRow.fullName = getRecordId(9, 'NAME', row.cell[xmlIndexCell].text(), date, xmlIndexRow, newRow.getCell('fullName').column.name, false)
-        def map = newRow.fullName = null ? null : getRefBookValue(9, newRow.fullName)
+        def map = newRow.fullName == null ? null : getRefBookValue(9, newRow.fullName)
         xmlIndexCell++
 
         // графа 2.2
@@ -895,7 +895,7 @@ def addData(def xml, int headRowCount) {
         if (map != null) {
             def text = row.cell[xmlIndexCell].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO.stringValue != null)) {
-                logger.warn("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+                logger.warn("Строка ${xmlIndexRow+2} столбец ${xmlIndexCell+2} содержит значение, отсутствующее в справочнике!")
             }
         }
         xmlIndexCell++
@@ -905,7 +905,7 @@ def addData(def xml, int headRowCount) {
             def text = row.cell[xmlIndexCell].text()
             map = getRefBookValue(10, map.COUNTRY.referenceValue)
             if ((text != null && !text.isEmpty() && !text.equals(map.NAME.stringValue)) || ((text == null || text.isEmpty()) && map.NAME.stringValue != null)) {
-                logger.warn("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+                logger.warn("Строка ${xmlIndexRow+3} столбец ${xmlIndexCell+2} содержит значение, отсутствующее в справочнике!")
             }
         }
         xmlIndexCell++
@@ -914,7 +914,7 @@ def addData(def xml, int headRowCount) {
         if (map != null) {
             def text = row.cell[xmlIndexCell].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.CODE.stringValue)) || ((text == null || text.isEmpty()) && map.CODE.stringValue != null)) {
-                logger.warn("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+                logger.warn("Строка ${xmlIndexRow+3} столбец ${xmlIndexCell+2} содержит значение, отсутствующее в справочнике!")
             }
         }
         xmlIndexCell++
