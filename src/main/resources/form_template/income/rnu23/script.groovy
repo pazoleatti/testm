@@ -14,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  * TODO:
  *      - неясности с консолидацией. Пока убрал расчеты и проверки после консолидации http://jira.aplana.com/browse/SBRFACCTAX-4455.
  *      - поправить загрузку (возможно загрузка не нужна)
- *      - проверки нси: курс валют http://jira.aplana.com/browse/SBRFACCTAX-4446
  *
  * @author rtimerbaev
  */
@@ -24,10 +23,10 @@ switch (formDataEvent) {
         checkCreation()
         break
     case FormDataEvent.CHECK :
-        logicalCheck() && checkNSI()
+        logicalCheck()
         break
     case FormDataEvent.CALCULATE :
-        calc() && logicalCheck() && checkNSI()
+        calc() && logicalCheck()
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
@@ -41,16 +40,16 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        logicalCheck() && checkNSI()
+        logicalCheck()
         break
     case FormDataEvent.COMPOSE : // обобщить
         consolidation()
-        // calc() && logicalCheck() && checkNSI()
+        // calc() && logicalCheck()
         break
     case FormDataEvent.IMPORT :
         importData()
         // TODO (Ramil Timerbaev)
-        // !hasError() && calc() && logicalCheck() && checkNSI()
+        // !hasError() && calc() && logicalCheck()
         break
     case FormDataEvent.MIGRATION :
         importData()
@@ -139,7 +138,7 @@ def calc() {
         }
     }
 
-    // РНУ-22 предыдущего периода
+    // РНУ-23 предыдущего периода
     def formDataOld = getFormDataOld()
     def totalRowOld = getRowByAlias(getData(formDataOld), 'total')
 
@@ -170,28 +169,28 @@ def calc() {
         row.number = i + 1
 
         // графа 13
-        row.incomeCurrency = getColumn13or15(row)
+        row.incomeCurrency = calc13or15(row)
 
         // графа 14
-        row.incomeRuble = roundValue(row.incomeCurrency * row.rateOfTheBankOfRussia, 2)
+        row.incomeRuble = calc14(row)
 
         // графа 15
-        row.accountingCurrency = getColumn13or15(row)
+        row.accountingCurrency = calc13or15(row)
 
         // графа 16
-        row.accountingRuble = roundValue(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)
+        row.accountingRuble = calc16(row)
 
         // графа 17
-        row.preChargeCurrency = roundValue((totalRowOld != null ? totalRowOld.taxPeriodCurrency : 0), 2)
+        row.preChargeCurrency = calc17(totalRowOld)
 
         // графа 18
-        row.preChargeRuble = roundValue((totalRowOld != null ? totalRowOld.taxPeriodRuble : 0), 2)
+        row.preChargeRuble = calc18(totalRowOld)
 
         // графа 19 (дата графа 11 и 12)
-        row.taxPeriodCurrency = getColumn13or15or19(row, row.preAccrualsStartDate, row.preAccrualsEndDate)
+        row.taxPeriodCurrency = calc19(row, row.preAccrualsStartDate, row.preAccrualsEndDate)
 
         // графа 20
-        row.taxPeriodRuble = roundValue(row.taxPeriodCurrency * row.rateOfTheBankOfRussia, 2)
+        row.taxPeriodRuble = calc20(row)
     }
     save(data)
 
@@ -231,6 +230,16 @@ def logicalCheck() {
             }
         }
     }
+
+    // алиасы графов для арифметической проверки (графа 13..20)
+    def arithmeticCheckAlias = ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble',
+            'preChargeCurrency', 'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble']
+    // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
+    def needValue = [:]
+    def colNames = []
+    // РНУ-23 предыдущего периода
+    def formDataOld = getFormDataOld()
+    def totalRowOld = getRowByAlias(getData(formDataOld), 'total')
 
     // суммы строки общих итогов
     def totalSums = [:]
@@ -313,49 +322,26 @@ def logicalCheck() {
         }
         i++
 
-        // 10. Арифметическая проверка графы 13
-        tmp = getColumn13or15(row)
-        if (row.incomeCurrency != tmp) {
-            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма начисленного дохода. Валюта»!')
-        }
+        // 10. Арифметическая проверка графы 13..20
+        needValue['incomeCurrency'] = calc13or15(row)
+        needValue['incomeRuble'] = calc14(row)
+        needValue['accountingCurrency'] = calc13or15(row)
+        needValue['accountingRuble'] = calc16(row)
+        needValue['preChargeCurrency'] = calc17(totalRowOld)
+        needValue['preChargeRuble'] = calc18(totalRowOld)
+        needValue['taxPeriodCurrency'] = calc19(row, row.preAccrualsStartDate, row.preAccrualsEndDate)
+        needValue['taxPeriodRuble'] = calc20(row)
 
-        // 11. Арифметическая проверка графы 14
-        if (row.incomeRuble != roundValue(row.incomeCurrency * row.rateOfTheBankOfRussia, 2)) {
-            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма начисленного дохода. Рубли»!')
+        arithmeticCheckAlias.each { alias ->
+            if (needValue[alias] != row.getCell(alias).getValue()) {
+                def name = getColumnName(row, alias)
+                colNames.add('"' + name + '"')
+            }
         }
-
-        // 12. Арифметическая проверка графы 15
-        tmp = getColumn13or15(row)
-        if (row.accountingCurrency != tmp) {
-            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма дохода, отражённая в бухгалтерском учёте. Валюта»!')
-        }
-
-        // 13. Арифметическая проверка графы 16
-        if (row.accountingRuble != roundValue(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)) {
-            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма дохода, отражённая в бухгалтерском учёте. Рубли»!')
-        }
-
-        // 14. Арифметическая проверка графы 17
-        tmp = getSum(formDataOld, 'taxPeriodCurrency')
-        if (row.preChargeCurrency != tmp) {
-            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма доначисления. Предыдущий период. Валюта»!')
-        }
-
-        // 15. Арифметическая проверка графы 18
-        tmp = getSum(formDataOld, 'taxPeriodRuble')
-        if (row.preChargeRuble != tmp) {
-            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма доначисления. Предыдущий период. Рубли»!')
-        }
-
-        // 16. Арифметическая проверка графы 19
-        tmp = getColumn13or15or19(row, row.preAccrualsStartDate, row.preAccrualsEndDate)
-        if (row.taxPeriodCurrency != tmp) {
-            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма доначисления. Отчётный период. Валюта»!')
-        }
-
-        // 17. Арифметическая проверка графы 20
-        if (row.taxPeriodRuble != roundValue(row.taxPeriodCurrency * row.rateOfTheBankOfRussia, 2)) {
-            logger.warn(errorMsg + 'неверно рассчитана графа «Сумма доначисления. Отчётный период. Рубли»!')
+        if (!colNames.isEmpty()) {
+            def msg = colNames.join(', ')
+            logger.error(errorMsg + "неверно рассчитано значение графы: $msg.")
+            return false
         }
 
         // 18. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
@@ -386,26 +372,6 @@ def logicalCheck() {
         logger.error('Итоговые значения не рассчитаны')
         return false
     }
-    return true
-}
-
-/**
- * Проверки соответствия НСИ.
- */
-def checkNSI() {
-    // TODO (Ramil Timerbaev) курсы валют
-//    def data = getData(formData)
-//    def tmp
-//    for (def row : getRows(data)) {
-//        // 1. Проверка курса валюты со справочным - Проверка актуальности значения» графы 6» на дату по «графе 5»
-//        tmp = row.rateOfTheBankOfRussia
-//        // справочник 22 "Курс валют"
-//        getRecordId(22, String code, def value, Date date, def cache)
-//        if (false) {
-//            logger.warn('Неверный курс валюты!')
-//            return false
-//        }
-//    }
     return true
 }
 
@@ -542,11 +508,9 @@ def isTotal(def row) {
 }
 
 /**
- * Получить значение графы 13 и 15 (аналогично для графа 15 и графа 19)
- *
- * @param row строка нф
+ * Получить значение графы 13 и 15.
  */
-def getColumn13or15(def row) {
+def calc13or15(def row) {
     def date1
     def date2
     if (row.accrualAccountingStartDate != null && row.accrualAccountingEndDate != null) {
@@ -560,17 +524,17 @@ def getColumn13or15(def row) {
     } else {
         return null
     }
-    return getColumn13or15or19(row, date1, date2)
+    return calc19(row, date1, date2)
 }
 
 /**
- * Получить значение графы 13 (аналогично для графа 15 и графа 19)
+ * Получить значение графы 19.
  *
  * @param row строка нф
  * @param date1 дата начала
  * @param date2 дата окончания
  */
-def getColumn13or15or19(def row, def date1, def date2) {
+def calc19(def row, def date1, def date2) {
     if (date1 == null || date2 == null) {
         return 0
     }
@@ -580,6 +544,36 @@ def getColumn13or15or19(def row, def date1, def date2) {
         throw new ServiceLoggerException('Деление на ноль в строке ' + index + '. Возможно неправильно выбраны даты.', logger.getEntries())
     }
     return roundValue((row.amountOfTheGuarantee * row.interestRate) / (division), 2)
+}
+
+def calc14(def row) {
+    return roundValue(row.incomeCurrency * row.rateOfTheBankOfRussia, 2)
+}
+
+def calc16(def row) {
+    return roundValue(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)
+}
+
+/**
+ * Получить значение графы 17
+ *
+ * @param totalRowOld итоговая строка рну 23 предыдущего отчетного периода
+ */
+def calc17(def totalRowOld) {
+    return roundValue((totalRowOld != null ? totalRowOld.taxPeriodCurrency : 0), 2)
+}
+
+/**
+ * Получить значение графы 18
+ *
+ * @param totalRowOld итоговая строка рну 23 предыдущего отчетного периода
+ */
+def calc18(def totalRowOld) {
+    return roundValue((totalRowOld != null ? totalRowOld.taxPeriodRuble : 0), 2)
+}
+
+def calc20(def row) {
+    return roundValue(row.taxPeriodCurrency * row.rateOfTheBankOfRussia, 2)
 }
 
 /**

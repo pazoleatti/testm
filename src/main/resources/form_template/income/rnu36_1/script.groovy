@@ -51,7 +51,7 @@ switch (formDataEvent) {
 // графа 2  - amount
 // графа 3  - nominal
 // графа 4  - shortPositionDate
-// графа 5  - balance2
+// графа 5  - balance2              атрибут 350 - NUMBER - "Номер", справочник 28 "Классификатор доходов Сбербанка России для целей налогового учёта"
 // графа 6  - averageWeightedPrice
 // графа 7  - termBondsIssued
 // графа 8  - percIncome
@@ -238,19 +238,15 @@ def logicalCheck() {
  */
 def checkNSI() {
     def data = getData(formData)
-    def date = new Date()
     def cache = [:]
 
     for (def row : getRows(data)) {
         // графа 5
-        // справочника 29 «Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта»
-        // атрибут 152 "Балансовый счёт" - BALANCE_ACCOUNT
-        if (!isFixedRow(row) && row.balance2 != null && null == getRecordId(29, 'BALANCE_ACCOUNT', row.balance2, date, cache)) {
+        if (!isFixedRow(row) && row.balance2 != null && null == getRecordById(28, row.balance2, cache)) {
             index = getIndex(row) + 1
             logger.warn("В строке $index балансовый счёт в справочнике отсутствует!")
         }
     }
-
     return true
 }
 
@@ -557,30 +553,28 @@ def getCalcTotalValueByAlias(def data, def alias) {
 }
 
 /**
- * Получить id справочника.
+ * Получить запись из справочника по идентифкатору записи.
  *
- * @param ref_id идентификатор справончика
- * @param code атрибут справочника
- * @param value значение для поиска
- * @param date дата актуальности
+ * @param refBookId идентификатор справончика
+ * @param recordId идентификатор записи
  * @param cache кеш
  * @return
  */
-def getRecordId(def ref_id, String code, def value, Date date, def cache) {
-    String filter = code + " = '" + value + "'"
-    if (cache[ref_id]!=null) {
-        if (cache[ref_id][filter] != null) {
-            return cache[ref_id][filter]
+def getRecordById(def refBookId, def recordId, def cache) {
+    if (cache[refBookId] != null) {
+        if (cache[refBookId][recordId] != null) {
+            return cache[refBookId][recordId]
         }
     } else {
-        cache[ref_id] = [:]
+        cache[refBookId] = [:]
     }
-    def refDataProvider = refBookFactory.getDataProvider(ref_id)
-    def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
-    if (records.size() == 1) {
-        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
-        return cache[ref_id][filter]
+    def record = refBookService.getRecordData(refBookId, recordId)
+    if (record != null) {
+        cache[refBookId][recordId] = record
+        return cache[refBookId][recordId]
     }
-    // logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
+    //def refBook = refBookFactory.get(refBookId)
+    //def refBookName = refBook.name
+    //logger.error("Не удалось найти запись (id = $recordId) в справочнике $refBookName (id = $refBookId)")
     return null
 }
