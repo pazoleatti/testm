@@ -1,12 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationDataSearchResultItemMapper;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,15 +11,12 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationDataSearchResultItemMapper;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
+
+import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
 /**
  * Реализация Dao для работы с декларациями
@@ -43,6 +37,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 			d.setDepartmentId(rs.getInt("department_id"));			
 			d.setReportPeriodId(rs.getInt("report_period_id"));			
 			d.setAccepted(rs.getBoolean("is_accepted"));
+            d.setJasperPrintId(rs.getString("jasper_print"));
 			return d;
 		}
 	}
@@ -252,7 +247,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 			declarationData.isAccepted() ? 1 : 0
 		);
 		declarationData.setId(id);
-		return id.longValue();
+		return id;
 	}
 
 	@Override
@@ -274,7 +269,17 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 		return getJdbcTemplate().queryForInt(sql.toString());
 	}
 
-	private void appendFromAndWhereClause(StringBuilder sql, DeclarationDataFilter filter) {
+    @Override
+    public void setJasperPrintId(long declarationDataId, String jasperPrintId) {
+        int count = getJdbcTemplate().update(
+                "update declaration_data set jasper_print = ? where id = ?", jasperPrintId, declarationDataId
+                );
+        if (count == 0) {
+            throw new DaoException("Не удалось записать индекс Jasper-отчета для декларации с uuid = %s, так как она не существует.", jasperPrintId);
+        }
+    }
+
+    private void appendFromAndWhereClause(StringBuilder sql, DeclarationDataFilter filter) {
 		sql.append(" FROM declaration_data dec, declaration_type dectype, department dp, report_period rp, tax_period tp")
 				.append(" WHERE EXISTS (SELECT 1 FROM DECLARATION_TEMPLATE dectemp WHERE dectemp.id = dec.declaration_template_id AND dectemp.declaration_type_id = dectype.id)")
 				.append(" AND dp.id = dec.department_id AND rp.id = dec.report_period_id AND tp.id=rp.tax_period_id");
