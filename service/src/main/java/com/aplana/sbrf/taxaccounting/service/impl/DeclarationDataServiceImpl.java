@@ -77,7 +77,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	private DeclarationTemplateDao declarationTemplateDao;
 
     @Autowired
-    private BlobDataDao blobDataDao;
+    private BlobDataService blobDataService;
 
 	@Autowired
 	private LogBusinessService logBusinessService;
@@ -260,8 +260,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         // Заполнение отчета и экспорт в формате PDF и XLSX
         JasperPrint jasperPrint = fillReport(xml,
                 declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
-        declarationDataDao.setPdfData(declarationData.getId(), exportPDF(jasperPrint));
-        declarationDataDao.setXlsxData(declarationData.getId(), exportXLSX(jasperPrint));
+        declarationDataDao.setPdfData(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""));
+        declarationDataDao.setXlsxData(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportXLSX(jasperPrint)), ""));
 	}
 
     /**
@@ -277,7 +277,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {
             InputStreamReader xsdStream = new InputStreamReader(
-                    blobDataDao.get(declarationTemplate.getXsdId()).getInputStream(), Charset.forName("windows-1251"));
+                    blobDataService.get(declarationTemplate.getXsdId()).getInputStream(), Charset.forName("windows-1251"));
             InputStreamReader xmlStream = new InputStreamReader(
                     new ByteArrayInputStream(xml.getBytes()), Charset.forName("windows-1251"));
 
