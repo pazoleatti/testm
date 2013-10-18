@@ -378,7 +378,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			}
 		}
 		if (!found) {
-			throw new ServiceException("В данном подразделении нельзя работать с формами вида " + formType.getName() + " и типа " + kind.getName() + ".");
+			throw new ServiceException("Форма не назначена подразделению.");
 		}
 
 		if (reportPeriodService.isBalancePeriod(reportPeriod.getId(), formDataDepartment.getId())){
