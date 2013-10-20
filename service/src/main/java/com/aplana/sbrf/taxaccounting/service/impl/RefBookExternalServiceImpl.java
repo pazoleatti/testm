@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import jcifs.smb.SmbFileInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,9 +38,8 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
 
     private Log log = LogFactory.getLog(getClass());
 
-
-    @Autowired
-    private URL refBookDirectory;
+	@Autowired
+	private ConfigurationService configurationService;
 
     @Autowired
     RefBookScriptingService refBookScriptingService;
@@ -71,11 +73,16 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         // файл для загр. спр. "Организации-участники контролируемых сделок"
         map.put("organization.xls", new Pair<Boolean, Long>(true, 9L));
 
+		//TODO добавить проверку ЭЦП (Marat Fayzullin 2013-10-19)
+		Map<ConfigurationParam, String> params = configurationService.getAllConfig(userInfo);
+		String refBookDirectory = params.get(ConfigurationParam.REF_BOOK_DIRECTORY);
+
         BufferedReader reader = null;
         if (log.isDebugEnabled()) {
-            log.debug("RefBook dir: " + String.valueOf(refBookDirectory));
+            log.debug("RefBook dir: " + refBookDirectory);
         }
-        try {
+		//TODO реализовать работу по smb протоколу (Marat Fayzullin 2013-10-19)
+        /*try {
             System.out.println();
             URLConnection conn = refBookDirectory.openConnection();
             reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -118,7 +125,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                     "Неудалось выполнить импорт справочников", e);
         } finally {
             IOUtils.closeQuietly(reader);
-        }
+        }*/
     }
 
 }

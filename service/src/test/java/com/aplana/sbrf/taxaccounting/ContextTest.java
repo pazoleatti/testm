@@ -23,13 +23,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration({"/testServiceContext.xml", "service.xml"})
 public class ContextTest implements ApplicationContextAware {
 	private ApplicationContext applicationContext;
-	
-	@BeforeClass
-	public static void setUp() throws MalformedURLException, NamingException  {
-		URL urlRefBook = new URL("http://refBookImportPath/");
-		SimpleNamingContextBuilder builder = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
-		builder.bind("url/RefBookDirectory", urlRefBook);
-	}
 
 	@Test
 	public void testContext(){
