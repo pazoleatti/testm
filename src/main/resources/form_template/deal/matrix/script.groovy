@@ -450,10 +450,10 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 384:
             if (srcRow.transactionType != null) {
                 def val14Rec = getRefBookValue(16, srcRow.transactionType)
-                if (val14Rec.CODE != null) {
-                    if (val14Rec.CODE.equals('S')) {
+                if (val14Rec != null && val14Rec.CODE != null) {
+                    if (val14Rec.CODE.stringValue.equals('S')) {
                         val14 = '027'
-                    } else if (val14Rec.CODE.equals('B')) {
+                    } else if (val14Rec.CODE.stringValue.equals('B')) {
                         val14 = '026'
                     }
                 }
@@ -480,6 +480,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             }
             break
     }
+
     if (val14 != null) {
         row.taxpayerSideCode = getRecordId(65, 'CODE', "$val14", date)
     }
