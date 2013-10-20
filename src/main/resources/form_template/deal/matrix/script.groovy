@@ -987,12 +987,12 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
     // Графа 49
     switch (type.id) {
-        case 376:
-        case 377:
         case 385:
             row.countryCode3 = srcRow.country
             break
         case 375:
+        case 376:
+        case 377:
         case 379:
         case 380:
         case 381:
