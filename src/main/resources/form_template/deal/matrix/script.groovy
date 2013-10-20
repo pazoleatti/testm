@@ -646,7 +646,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
     // Графа 26
     if (type.id == 393) {
-        dealSubjectCode2 = srcRow.okpCode
+        row.dealSubjectCode2 = srcRow.okpCode
     }
 
     // Графа 27
