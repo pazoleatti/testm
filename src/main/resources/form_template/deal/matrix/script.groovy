@@ -384,9 +384,6 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             val13 = '019'
             break
         case 379:
-        case 381:
-        case 393:
-        case 394:
             val13 = '016'
             break
         case 383:
@@ -395,6 +392,9 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             val13 = '032'
             break
         case 384:
+        case 381:
+        case 393:
+        case 394:
             val13 = '015'
             break
         case 385:
