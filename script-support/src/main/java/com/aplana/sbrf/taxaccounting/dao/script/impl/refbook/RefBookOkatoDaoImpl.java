@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.script.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-import com.aplana.sbrf.taxaccounting.dao.script.dictionary.RefBookOkatoDao;
+import com.aplana.sbrf.taxaccounting.dao.script.refbook.RefBookOkatoDao;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 

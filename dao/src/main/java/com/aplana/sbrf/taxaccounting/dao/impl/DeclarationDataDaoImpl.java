@@ -40,6 +40,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setPdfDataUuid(rs.getString("data_pdf"));
             d.setXlsxDataUuid(rs.getString("data_xlsx"));
             d.setXmlDataUuid(rs.getString("data"));
+            d.setJasperPrintId(rs.getString("jasper_print"));
 			return d;
 		}
 	}
@@ -258,7 +259,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 			declarationData.isAccepted() ? 1 : 0
 		);
 		declarationData.setId(id);
-		return id.longValue();
+		return id;
 	}
 
 	@Override
@@ -280,7 +281,17 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 		return getJdbcTemplate().queryForInt(sql.toString());
 	}
 
-	private void appendFromAndWhereClause(StringBuilder sql, DeclarationDataFilter filter) {
+    @Override
+    public void setJasperPrintId(long declarationDataId, String jasperPrintId) {
+        int count = getJdbcTemplate().update(
+                "update declaration_data set jasper_print = ? where id = ?", jasperPrintId, declarationDataId
+                );
+        if (count == 0) {
+            throw new DaoException("Не удалось записать индекс Jasper-отчета для декларации с uuid = %s, так как она не существует.", jasperPrintId);
+        }
+    }
+
+    private void appendFromAndWhereClause(StringBuilder sql, DeclarationDataFilter filter) {
 		sql.append(" FROM declaration_data dec, declaration_type dectype, department dp, report_period rp, tax_period tp")
 				.append(" WHERE EXISTS (SELECT 1 FROM DECLARATION_TEMPLATE dectemp WHERE dectemp.id = dec.declaration_template_id AND dectemp.declaration_type_id = dectype.id)")
 				.append(" AND dp.id = dec.department_id AND rp.id = dec.report_period_id AND tp.id=rp.tax_period_id");

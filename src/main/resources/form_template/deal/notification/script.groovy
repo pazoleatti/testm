@@ -84,6 +84,11 @@ void generateXML() {
     def okvedCode = departmentParam.OKVED_CODE.referenceValue != null ? getRefBookValue(34, departmentParam.OKVED_CODE.referenceValue).CODE.stringValue : null
     def taxPlaceTypeCode = departmentParam.TAX_PLACE_TYPE_CODE.referenceValue != null ? getRefBookValue(2, departmentParam.TAX_PLACE_TYPE_CODE.referenceValue).CODE.stringValue : null
 
+    def matrixFormData = formDataCollection.getRecords().get(0);
+
+    // Заполнение кэша
+    formDataService.fillRefBookCache(matrixFormData.getId(), refBookCache)
+
     builder.Файл(
             ИдФайл: declarationService.generateXmlFileId(notificationType, departmentId, declarationData.reportPeriodId),
             ВерсПрог: departmentParam.APP_VERSION.stringValue,
@@ -150,7 +155,7 @@ void generateXML() {
             // По строкам матрицы
             УвКонтрСд() {
                 if (formDataCollection.getRecords().size() != 0) {
-                    def dataRowHelper = formDataService.getDataRowHelper(formDataCollection.getRecords().get(0))
+                    def dataRowHelper = formDataService.getDataRowHelper(matrixFormData)
                     // "Да"
                     def Long recYesId = null
                     // "Нет"

@@ -55,8 +55,7 @@ public enum FormDataEvent implements Serializable {
 
     LOGIN(501, "Вход пользователя в Систему"),
     LOGOUT(502, "Выход пользователя из Системы"),
-
-    ARCHIVE(601, "Архивирование журнала событий");
+	LOG_SYSTEM_BACKUP(601, "Архивация журнала аудита");
 
 	private String title;
 	private int code;

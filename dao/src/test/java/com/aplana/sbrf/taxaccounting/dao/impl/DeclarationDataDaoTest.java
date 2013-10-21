@@ -21,6 +21,13 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
+import java.io.ByteArrayInputStream;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DeclarationDataDaoTest.xml"})
@@ -281,6 +288,21 @@ public class DeclarationDataDaoTest {
 
 		if (failed) {
 			fail("Wrong list of ids: " + Arrays.toString(expected) + " expected but " + Arrays.toString(received) + " received");
+			fail("Wrong list of ids: " + Arrays.toString(expected) + " expected but " + Arrays.toString(received) + " received");
 		}
+		}
+
+    @Test
+    public void setJasperPrintTest(){
+        BlobData blobData = new BlobData();
+        blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
+        blobData.setName("hello.xls");
+        blobData.setInputStream(new ByteArrayInputStream(new byte[]{0, 1, 2, 3}));
+        blobData.setCreationDate(new Date());
+        blobData.setType(0);
+        blobData.setDataSize(76754);
+
+        declarationDataDao.setJasperPrintId(1, blobDataDao.create(blobData));
+        assertEquals(blobData.getUuid(), declarationDataDao.get(1).getJasperPrintId());
 	}
 }

@@ -45,7 +45,7 @@ switch (formDataEvent) {
         logicCheck()
         break
 // импорт из xls
-    case FormDataEvent.IMPORT :
+    case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
@@ -71,8 +71,8 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex()  : size
-    row.keySet().each{
+    def index = currentDataRow != null ? currentDataRow.getIndex() : size
+    row.keySet().each {
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     [
@@ -93,7 +93,7 @@ void addRow() {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.insert(row, index+1)
+    dataRowHelper.insert(row, index + 1)
 }
 
 void deleteRow() {
@@ -311,14 +311,14 @@ void importData() {
     }
 
     // добавить данные в форму
-    try{
+    try {
         if (!checkTableHead(xml, 2)) {
             logger.error('Заголовок таблицы не соответствует требуемой структуре!')
             return
         }
         addData(xml)
-    } catch(Exception e) {
-        logger.error(""+e.message)
+    } catch (Exception e) {
+        logger.error("" + e.message)
     }
 }
 
@@ -343,7 +343,7 @@ def addData(def xml) {
             continue
         }
 
-        if ((row.cell.find{it.text()!=""}.toString())=="") {
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
 
@@ -376,33 +376,39 @@ def addData(def xml) {
         indexCell++
 
         // графа 3
-        newRow.contraName = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.contraName = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
+        def map = newRow.contraName == null ? null : refBookService.getRecordData(9, newRow.contraName)
         indexCell++
 
         // графа 4
-        newRow.transactionMode = getRecordId(14, 'MODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.transactionMode = getRecordId(14, 'MODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // графа 5
-        def map = refBookService.getRecordData(9, newRow.contraName)
-        def String text = row.cell[indexCell].text()
-        if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO.stringValue != null)) {
-            logger.warn("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if (map != null) {
+            def text = row.cell[indexCell].text()
+            if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO.stringValue != null)) {
+                logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
+            }
         }
         indexCell++
 
         // графа 6.1
-        text = row.cell[indexCell].text()
-        map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
-        if ((text != null && !text.isEmpty() && !text.equals(map.NAME.stringValue)) || ((text == null || text.isEmpty()) && map.NAME.stringValue != null)) {
-            logger.warn("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if (map != null) {
+            def text = row.cell[indexCell].text()
+            map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
+            if ((text != null && !text.isEmpty() && !text.equals(map.NAME.stringValue)) || ((text == null || text.isEmpty()) && map.NAME.stringValue != null)) {
+                logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
+            }
         }
         indexCell++
 
         // графа 6.2
-        text = row.cell[indexCell].text()
-        if ((text != null && !text.isEmpty() && !text.equals(map.CODE.stringValue)) || ((text == null || text.isEmpty()) && map.CODE.stringValue != null)) {
-            logger.warn("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if (map != null) {
+            def text = row.cell[indexCell].text()
+            if ((text != null && !text.isEmpty() && !text.equals(map.CODE.stringValue)) || ((text == null || text.isEmpty()) && map.CODE.stringValue != null)) {
+                logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
+            }
         }
         indexCell++
 
@@ -411,7 +417,7 @@ def addData(def xml) {
         indexCell++
 
         // графа 9
-        newRow.currency = getRecordId(15, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.currency = getRecordId(15, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // графа 10
@@ -446,12 +452,11 @@ def addData(def xml) {
         indexCell++
 
         // графа 18
-        newRow.transactionType = getRecordId(16, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+        newRow.transactionType = getRecordId(16, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
 
         data.insert(newRow, indexRow - 2)
     }
 }
-
 
 /**
  * Проверить шапку таблицы.
@@ -467,56 +472,56 @@ def checkTableHead(def xml, def headRowCount) {
     }
     def result = (
             xml.row[0].cell[0] == 'Сокращенная форма\nДанные для расчета сумм доходов по сделкам' &&
-            xml.row[1].cell[0] == 'Дата сделки (поставки)' &&
-            xml.row[2].cell[0] == 'гр. 2' &&
+                    xml.row[1].cell[0] == 'Дата сделки (поставки)' &&
+                    xml.row[2].cell[0] == 'гр. 2' &&
 
-            xml.row[1].cell[1] == 'Наименование контрагента и ОПФ' &&
-            xml.row[2].cell[1] == 'гр. 3' &&
+                    xml.row[1].cell[1] == 'Наименование контрагента и ОПФ' &&
+                    xml.row[2].cell[1] == 'гр. 3' &&
 
-            xml.row[1].cell[2] == 'Режим переговорных сделок' &&
-            xml.row[2].cell[2] == 'гр. 4' &&
+                    xml.row[1].cell[2] == 'Режим переговорных сделок' &&
+                    xml.row[2].cell[2] == 'гр. 4' &&
 
-            xml.row[1].cell[3] == 'ИНН/ КИО контрагента' &&
-            xml.row[2].cell[3] == 'гр. 5' &&
+                    xml.row[1].cell[3] == 'ИНН/ КИО контрагента' &&
+                    xml.row[2].cell[3] == 'гр. 5' &&
 
-            xml.row[1].cell[4] == 'Страна местонахождения  контрагента' &&
-            xml.row[2].cell[4] == 'гр. 6.1' &&
+                    xml.row[1].cell[4] == 'Страна местонахождения  контрагента' &&
+                    xml.row[2].cell[4] == 'гр. 6.1' &&
 
-            xml.row[1].cell[5] == 'Код страны местонахождения  контрагента' &&
-            xml.row[2].cell[5] == 'гр. 6.2' &&
+                    xml.row[1].cell[5] == 'Код страны местонахождения  контрагента' &&
+                    xml.row[2].cell[5] == 'гр. 6.2' &&
 
-            xml.row[1].cell[6] == 'Сумма сделки (с учетом НКД), в валюте расчетов' &&
-            xml.row[2].cell[6] == 'гр. 7.1' &&
+                    xml.row[1].cell[6] == 'Сумма сделки (с учетом НКД), в валюте расчетов' &&
+                    xml.row[2].cell[6] == 'гр. 7.1' &&
 
-            xml.row[1].cell[7] == 'Валюта расчетов по сделке' &&
-            xml.row[2].cell[7] == 'гр. 7.2' &&
+                    xml.row[1].cell[7] == 'Валюта расчетов по сделке' &&
+                    xml.row[2].cell[7] == 'гр. 7.2' &&
 
-            xml.row[1].cell[8] == 'Курс ЦБ РФ' &&
-            xml.row[2].cell[8] == 'гр. 7.3' &&
+                    xml.row[1].cell[8] == 'Курс ЦБ РФ' &&
+                    xml.row[2].cell[8] == 'гр. 7.3' &&
 
-            xml.row[1].cell[9] == 'Сумма сделки (с учетом НКД), руб.' &&
-            xml.row[2].cell[9] == 'гр. 7.4' &&
+                    xml.row[1].cell[9] == 'Сумма сделки (с учетом НКД), руб.' &&
+                    xml.row[2].cell[9] == 'гр. 7.4' &&
 
-            xml.row[0].cell[10] == 'Номер договора' &&
-            xml.row[2].cell[10] == 'гр. 8' &&
+                    xml.row[0].cell[10] == 'Номер договора' &&
+                    xml.row[2].cell[10] == 'гр. 8' &&
 
-            xml.row[0].cell[11] == 'Дата договора' &&
-            xml.row[2].cell[11] == 'гр. 9' &&
+                    xml.row[0].cell[11] == 'Дата договора' &&
+                    xml.row[2].cell[11] == 'гр. 9' &&
 
-            xml.row[0].cell[12] == 'Дата (заключения) сделки' &&
-            xml.row[2].cell[12] == 'гр. 10' &&
+                    xml.row[0].cell[12] == 'Дата (заключения) сделки' &&
+                    xml.row[2].cell[12] == 'гр. 10' &&
 
-            xml.row[0].cell[13] == 'Регистрационный код ценной бумаги' &&
-            xml.row[2].cell[13] == 'гр. 11' &&
+                    xml.row[0].cell[13] == 'Регистрационный код ценной бумаги' &&
+                    xml.row[2].cell[13] == 'гр. 11' &&
 
-            xml.row[0].cell[14] == 'Количество бумаг по сделке, шт.' &&
-            xml.row[2].cell[14] == 'гр. 12' &&
+                    xml.row[0].cell[14] == 'Количество бумаг по сделке, шт.' &&
+                    xml.row[2].cell[14] == 'гр. 12' &&
 
-            xml.row[0].cell[15] == 'Цена за 1 шт., руб. ' &&
-            xml.row[2].cell[15] == 'гр. 13' &&
+                    xml.row[0].cell[15] == 'Цена за 1 шт., руб. ' &&
+                    xml.row[2].cell[15] == 'гр. 13' &&
 
-            xml.row[0].cell[16] == 'Тип сделки' &&
-            xml.row[2].cell[16] == 'гр. 14')
+                    xml.row[0].cell[16] == 'Тип сделки' &&
+                    xml.row[2].cell[16] == 'гр. 14')
     return result
 }
 
@@ -538,7 +543,7 @@ def getNumber(def value, int indexRow, int indexCell) {
     try {
         return new BigDecimal(tmp)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
 
@@ -553,17 +558,18 @@ def getDate(def value, int indexRow, int indexCell) {
     try {
         return format.parse(value)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит недопустимый тип данных!")
+        throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит недопустимый тип данных!")
     }
 }
-
 
 /**
  * Получить record_id элемента справочника.
  *
  * @param value
  */
-def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell) {
+def getRecordId(
+        def ref_id, String alias, String value, Date date,
+        def cache, int indexRow, int indexCell, boolean mandatory = true) {
     String filter;
     if (value == null || value.equals("")) {
         filter = alias + " is null"
@@ -580,7 +586,12 @@ def getRecordId(def ref_id, String alias, String value, Date date, def cache, in
     if (records.size() == 1) {
         cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
-    } else {
-        throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
     }
+    def msg = "Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!"
+    if (mandatory) {
+        throw new Exception(msg)
+    } else {
+        logger.warn(msg)
+    }
+    return null
 }

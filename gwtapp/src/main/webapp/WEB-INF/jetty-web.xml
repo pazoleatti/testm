@@ -104,11 +104,6 @@
 			<New class="java.util.concurrent.ConcurrentHashMap" />
 		</Arg>
 	</New>
-    
-    <New class="org.mortbay.jetty.plus.naming.EnvEntry">
-        <Arg>java:comp/env/url/RefBookDirectory</Arg>
-        <Arg type="java.net.URL">file:///home/sgoryachkin/refbook</Arg>
-    </New>
 
     <!-- Подмена JMS-factory в WebSphere на ApacheMQ для теста -->
     <New class="org.mortbay.jetty.plus.naming.Resource">

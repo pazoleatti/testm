@@ -125,4 +125,10 @@ public interface DeclarationDataDao {
 	 * @return количество записей, удовлетворяющих фильтру
 	 */
 	int getCount(DeclarationDataFilter filter);
+
+    /**
+     * Задает скомпилированный и заполненный результат формирования отчета без формата.
+     * @param jasperPrintId
+     */
+    void setJasperPrintId(long declarationDataId, String jasperPrintId);
 }

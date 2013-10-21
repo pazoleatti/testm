@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.ConfigTuple;
@@ -37,7 +38,8 @@ public class SaveConfigurationHandler extends
 		for (ConfigTuple tuple : action.getData()) {
 			map.put(tuple.getParam(), tuple.getValue());
 		}
-		configurationService.saveAllConfig(securityService.currentUserInfo(), map);
+		Logger logger = new Logger();
+		configurationService.saveAllConfig(securityService.currentUserInfo(), logger, map);
 		return new SaveConfigurationResult();
 	}
 
