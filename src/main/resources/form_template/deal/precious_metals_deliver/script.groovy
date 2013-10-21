@@ -13,8 +13,6 @@ import java.text.SimpleDateFormat
  * @author Dmitriy Levykin
  */
 
-// TODO в шаблоне указать справочник для поля "Виды срочных сделок" (SBRFACCTAX-4767)
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkCreation()
@@ -383,8 +381,7 @@ void logicCheck() {
         checkNSI(row, "signPhis", "Признаки физической поставки", 18)
         checkNSI(row, "conditionCode", "Коды условий поставки", 63)
         checkNSI(row, "dependence", "Да/Нет", 38)
-        // TODO blocked by SBRFACCTAX-4767
-        // checkNSI(row, "dealType", "Виды срочных сделок", 61)
+        checkNSI(row, "dealType", "Виды срочных сделок", 85)
     }
 
     //Проверки подитоговых сумм
@@ -907,8 +904,8 @@ def addData(def xml) {
         newRow.contractDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 
-        // TODO графа 7.2 Вид срочной сделки (blocked by SBRFACCTAX-4767)
-        // newRow.dealType = getRecordId(id, field, row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
+        // графа 7.2 Вид срочной сделки
+        newRow.dealType = getRecordId(85, 'CONTRACT_TYPE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // столбец 8
