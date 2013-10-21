@@ -15,7 +15,7 @@ public interface RefBookScriptingService {
     /**
      * Выполнение скрипта отчета по событию
      *
-     * @param userInfo Информация о текущем пользоваетеле
+     * @param userInfo Информация о текущем пользователе
      * @param event событие формы
      * @param refBookId Id справочника
      * @param logger логгер для сохранения ошибок выполнения скриптов.

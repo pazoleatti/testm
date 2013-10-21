@@ -14,8 +14,17 @@ public class DeclarationData extends IdentityObject<Long> {
 	private int reportPeriodId;
 	private int departmentId;
 	private boolean accepted;
+    private String jasperPrintId;
 
-	/**
+    public String getJasperPrintId() {
+        return jasperPrintId;
+    }
+
+    public void setJasperPrintId(String jasperPrintId) {
+        this.jasperPrintId = jasperPrintId;
+    }
+
+    /**
 	 * Получить идентификатор {@link DeclarationTemplate шаблона декларации}, по которому создана данная декларация
 	 * @return идентификатор шаблона декларации
 	 */

@@ -384,9 +384,6 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             val13 = '019'
             break
         case 379:
-        case 381:
-        case 393:
-        case 394:
             val13 = '016'
             break
         case 383:
@@ -395,6 +392,9 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             val13 = '032'
             break
         case 384:
+        case 381:
+        case 393:
+        case 394:
             val13 = '015'
             break
         case 385:
@@ -450,10 +450,10 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 384:
             if (srcRow.transactionType != null) {
                 def val14Rec = getRefBookValue(16, srcRow.transactionType)
-                if (val14Rec.CODE != null) {
-                    if (val14Rec.CODE.equals('S')) {
+                if (val14Rec != null && val14Rec.CODE != null) {
+                    if (val14Rec.CODE.stringValue.equals('S')) {
                         val14 = '027'
-                    } else if (val14Rec.CODE.equals('B')) {
+                    } else if (val14Rec.CODE.stringValue.equals('B')) {
                         val14 = '026'
                     }
                 }
@@ -480,6 +480,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             }
             break
     }
+
     if (val14 != null) {
         row.taxpayerSideCode = getRecordId(65, 'CODE', "$val14", date)
     }
@@ -645,7 +646,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
     // Графа 26
     if (type.id == 393) {
-        dealSubjectCode2 = srcRow.okpCode
+        row.dealSubjectCode2 = srcRow.okpCode
     }
 
     // Графа 27
@@ -986,12 +987,12 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
     // Графа 49
     switch (type.id) {
-        case 376:
-        case 377:
         case 385:
             row.countryCode3 = srcRow.country
             break
         case 375:
+        case 376:
+        case 377:
         case 379:
         case 380:
         case 381:

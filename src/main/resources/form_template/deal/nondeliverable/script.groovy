@@ -766,12 +766,17 @@ def getNumber(def value, int indexRow, int indexCell) {
     }
 }
 
-def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell) {
+def getRecordId(def ref_id, String code, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory = true) {
     def rez = getRecordId(ref_id, code, value, date, cache)
     if (rez == null) {
-        throw new Exception("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
+        def msg = "Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!"
+        if (mandatory) {
+            throw new Exception(msg)
+        } else {
+            logger.warn(msg)
+        }
     }
-    rez
+    return rez
 }
 
 def getDate(def value, int indexRow, int indexCell) {

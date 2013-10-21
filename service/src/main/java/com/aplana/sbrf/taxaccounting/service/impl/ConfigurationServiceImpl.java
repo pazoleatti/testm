@@ -1,13 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.TARole;
@@ -17,6 +9,13 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 @Service
 @Transactional
@@ -31,7 +30,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	@Override
 	public Map<ConfigurationParam, String> getAllConfig(TAUserInfo userInfo) {
-		if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN)){
+		if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN)&&!userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)){
 			throw new AccessDeniedException("Нет прав на просмотр конфигурационных параметров приложения");
 		}
 		Map<ConfigurationParam, String> result = new HashMap<ConfigurationParam, String>();

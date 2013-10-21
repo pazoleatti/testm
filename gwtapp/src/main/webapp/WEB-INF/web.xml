@@ -141,14 +141,6 @@
 		<res-auth>Container</res-auth>
 		<res-sharing-scope>Shareable</res-sharing-scope>
 	</resource-ref>
-    
-    <resource-ref>
-        <description>Адрес директории для загрузки справочников</description>
-        <res-ref-name>url/RefBookDirectory</res-ref-name>
-        <res-type>java.net.URL</res-type>
-        <res-auth>Container</res-auth>
-        <res-sharing-scope>Shareable</res-sharing-scope>
-    </resource-ref>
 
     <resource-ref>
         <description>Transport Connection Factory</description>
@@ -207,7 +199,7 @@
 			<web-resource-name>Unsecured</web-resource-name>
 			<url-pattern>/login</url-pattern>
             <!--<url-pattern>/logout</url-pattern>-->
-			<url-pattern>/favicon.ico</url-pattern>
+			<url-pattern>/resources/*</url-pattern>
 			<url-pattern>/j_security_check</url-pattern>
 			<url-pattern>/GenericAccountManagementService</url-pattern>
 			<url-pattern>/GenericAccountManagementService/*</url-pattern>
