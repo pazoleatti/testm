@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.RefBookExternalService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
@@ -38,6 +39,9 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
 
     @Autowired
     RefBookScriptingService refBookScriptingService;
+
+    @Autowired
+    AuditService auditService;
 
     @Override
     @Transactional
@@ -73,7 +77,8 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         if (log.isDebugEnabled()) {
             log.debug("RefBook dir: " + refBookDirectory);
         }
-
+        // Признак наличия ошибок при импорте
+        boolean withError = false;
         try {
             SmbFile folder = new SmbFile(refBookDirectory);
             for (String fileName : folder.list()) {
@@ -98,12 +103,16 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                                     break;
                                 }
                             }
-                            log.debug("Import RefBook file = "+refBookDirectory + fileName);
+                            log.debug("Import RefBook file = " + refBookDirectory + fileName);
+                            // Обращение к скрипту
                             importRefBook(userInfo, logger, refBookId, is);
                         } catch (Exception e) {
-                            // TODO Levykin: Запись в журнал аудита
-                            log.error("Неудалось выполнить импорт справочника (id = " + refBookId + ") из файла "
-                                    + fileName, e);
+                            withError = true;
+                            // Журнал аудита
+                            auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(),
+                                    null, null, null, null,
+                                    "Не удалось выполнить импорт справочника (id = " + refBookId + ") из файла "
+                                    + fileName);
                         } finally {
                             IOUtils.closeQuietly(is);
                         }
@@ -111,9 +120,15 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                     }
                 }
             }
+            // Журнал аудита
+            auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
+                    null, "Произведен импорт справочников из " + refBookDirectory +
+                    (withError ? " с ошибками" : " без ошибок"));
         } catch (Exception e) {
-            // TODO Levykin: Запись в журнал аудита
-            throw new ServiceException("Неудалось выполнить импорт справочников", e);
+            // Журнал аудита
+            auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
+                    null, "Не удалось выполнить импорт справочников" + refBookDirectory);
+            throw new ServiceException("Не удалось выполнить импорт справочников", e);
         } finally {
             IOUtils.closeQuietly(reader);
         }
