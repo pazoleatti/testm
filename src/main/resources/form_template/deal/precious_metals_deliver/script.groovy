@@ -66,15 +66,16 @@ def getAtributes() {
     [
             rowNum:                     ['rowNum', 'гр. 1', '№ п/п'],
             name:                       ['name', 'гр. 2', 'Полное наименование с указанием ОПФ'],
+            dependence:                 ['dependence', 'гр. 2.2', 'Признак взаимозависимости'],
             innKio:                     ['innKio', 'гр. 3', 'ИНН/ КИО'],
             country:                    ['country', 'гр. 4.1', 'Наименование страны регистрации'],
             countryCode1:               ['countryCode1', 'гр. 4.2', 'Код страны регистрации по классификатору ОКСМ'],
             contractNum:                ['contractNum', 'гр. 5', 'Номер договора'],
             contractDate:               ['contractDate', 'гр. 6', 'Дата договора'],
-            transactionNum:             ['transactionNum', 'гр. 7', 'Номер сделки'],
+            transactionNum:             ['transactionNum', 'гр. 7.1', 'Номер сделки'],
+            dealType:                   ['dealType', 'гр. 7.2', 'Вид срочной сделки'],
             transactionDeliveryDate:    ['transactionDeliveryDate', 'гр. 8', 'Дата заключения сделки'],
             innerCode:                  ['innerCode', 'гр. 9.1', 'Внутренний код'],
-            okpCode:                    ['okpCode', 'гр. 9.2', 'Код по ОКП'],
             unitCountryCode:            ['unitCountryCode', 'гр. 9.3', 'Код страны происхождения предмета сделки'],
             signPhis:                   ['signPhis', 'гр. 10', 'Признак физической поставки драгоценного металла'],
             signTransaction:            ['signTransaction', 'гр. 11', 'Признак внешнеторговой сделки'],
@@ -108,13 +109,13 @@ def getGrafNum(def alias) {
 // гр. 2, гр. 3, гр. 6, гр. 7, гр. 10, гр. 11, гр. 12, гр. 13, гр. 14, гр. 15, гр. 16, гр. 17, гр. 18, гр. 19,
 // гр. 20, гр. 21, гр. 22, гр. 23, гр. 24.
 def getGroupColumns() {
-    ['name', 'innKio', 'contractNum', 'contractDate', 'innerCode', 'okpCode', 'unitCountryCode', 'signPhis',
+    ['name', 'innKio', 'contractNum', 'contractDate', 'innerCode', 'unitCountryCode', 'signPhis',
             'signTransaction', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
             'city2', 'settlement2', 'conditionCode', 'count']
 }
 
 def getEditColumns() {
-    ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode',
+    ['name', 'dependence', 'dealType','contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode',
             'unitCountryCode', 'signPhis', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
             'city2', 'settlement2', 'conditionCode', 'incomeSum', 'consumptionSum', 'transactionDate']
 }
@@ -195,6 +196,8 @@ void logicCheck() {
         [
                 'rowNum', // № п/п
                 'name', // Полное наименование с указанием ОПФ
+                'dependence', // Признак взаимозависимости
+                'dealType', // Вид срочной сделки
                 'innKio', // ИНН/КИО
                 'country', // Наименование страны регистрации
                 'countryCode1', // Код страны по классификатору ОКСМ
@@ -203,7 +206,6 @@ void logicCheck() {
                 'transactionNum', // Номер сделки
                 'transactionDeliveryDate', // Дата заключения сделки
                 'innerCode', // Внутренний код
-                'okpCode', // Код ОКП
                 'unitCountryCode', // Код страны происхождения предмета сделки по классификатору ОКСМ
                 'signPhis', // Признак физической поставки драгоценного металла
                 'signTransaction', // Признак внешнеторговой сделки
@@ -384,9 +386,11 @@ void logicCheck() {
         checkNSI(row, "countryCode3", "ОКСМ", 10)
         checkNSI(row, "region1", "Коды субъектов Российской Федерации", 4)
         checkNSI(row, "region2", "Коды субъектов Российской Федерации", 4)
-        checkNSI(row, "okpCode", "Коды драгоценных металлов", 17)
         checkNSI(row, "signPhis", "Признаки физической поставки", 18)
         checkNSI(row, "conditionCode", "Коды условий поставки", 63)
+        checkNSI(row, "dependence", "Да/Нет", 38)
+        // TODO непонятно что за справочник
+        checkNSI(row, "dealType", "Виды срочных сделок", 61)
     }
 
     //Проверки подитоговых сумм
@@ -473,11 +477,11 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
 
 /**
  * Возвращает строку со значениями полей строки по которым идет группировка
- * ['name', 'innKio', 'contractNum', 'contractDate', 'innerCode', 'okpCode', 'unitCountryCode', 'signPhis',
+ * ['name', 'innKio', 'contractNum', 'contractDate', 'innerCode', 'unitCountryCode', 'signPhis',
  *          'signTransaction', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
  *          'city2', 'settlement2', 'conditionCode', 'count']
  */
-
+// TODO группируем по новым колонкам?  http://jira.aplana.com/browse/SBRFACCTAX-4768
 String getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
@@ -493,9 +497,6 @@ String getValuesByGroupColumn(DataRow row) {
     innerCode = getRefBookValue(17, row.innerCode, 'INNER_CODE')
     if (innerCode != null)
         builder.append(innerCode).append(sep)
-    okpCode = getRefBookValue(17, row.okpCode, 'OKP_CODE')
-    if (okpCode != null)
-        builder.append(okpCode).append(sep)
     unitCountryCode = getRefBookValue(10, row.unitCountryCode, 'CODE')
     if (unitCountryCode != null)
         builder.append(unitCountryCode).append(sep)
@@ -571,9 +572,6 @@ void calc() {
         }
 
         row.totalNds = row.priceOne
-
-        // Код ОКП
-        row.okpCode = row.innerCode
 
         // Расчет полей зависимых от справочников
         if (row.name != null) {
@@ -702,7 +700,7 @@ void addAllStatic() {
 def calcItog(int i, def dataRows) {
     def newRow = formData.createDataRow()
 
-    newRow.getCell('itog').colSpan = 26
+    newRow.getCell('itog').colSpan = 28
     newRow.itog = 'Подитог:'
     newRow.setAlias('itg#'.concat(i.toString()))
     newRow.getCell('fix').colSpan = 2
@@ -802,6 +800,7 @@ void importData() {
  * @param headRowCount количество строк в шапке
  */
 def checkTableHead(def xml) {
+    // TODO + 2 колонки, -1 колонка http://jira.aplana.com/browse/SBRFACCTAX-4768
     def colCount = 28
     def rc = getHeaderRowCount()
     // проверить количество строк и колонок в шапке
@@ -886,6 +885,8 @@ def addData(def xml) {
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
+        // TODO + 2 колонки, -1 колонка http://jira.aplana.com/browse/SBRFACCTAX-4768
+
         def indexCell = 0
         // столбец 1
         newRow.rowNum = newRow.index = indexRow - headShift
@@ -941,10 +942,6 @@ def addData(def xml) {
 
         // столбец 10
         newRow.innerCode = getRecordId(17, 'INNER_CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
-        indexCell++
-
-        // столбец 11
-        newRow.okpCode = getRecordId(17, 'OKP_CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // столбец 12
