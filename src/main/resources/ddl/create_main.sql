@@ -469,17 +469,20 @@ create table declaration_data (
   data                    varchar2(36),
   is_accepted             number(1) not null,
   data_pdf                varchar2(36),
-  data_xlsx               varchar2(36) 
+  data_xlsx               varchar2(36),
+  jasper_print            varchar2(36) 
 );
 alter table declaration_data add constraint declaration_data_pk primary key (id);
 alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template (id);
 alter table declaration_data add constraint declaration_data_fk_rep_per_id foreign key (report_period_id) references report_period (id);
 alter table declaration_data add constraint declaration_data_fk_dep_id foreign key (department_id) references department (id);
+alter table declaration_data add constraint declaration_data_fk_j_print foreign key (jasper_print) references blob_data (id);
 alter table declaration_data add constraint declaration_data_fk_data foreign key (data) references blob_data (id);
 alter table declaration_data add constraint declaration_data_fk_data_pdf foreign key (data_pdf) references blob_data (id);
 alter table declaration_data add constraint declaration_data_fk_data_xlsx foreign key (data_xlsx) references blob_data (id);
 alter table declaration_data add constraint declaration_data_chk_is_accptd check (is_accepted in (0,1));
 alter table declaration_data add constraint declaration_data_uniq_template unique(report_period_id, department_id, declaration_template_id);
+
 
 comment on table declaration_data is 'Налоговые декларации';
 comment on column declaration_data.id is 'Идентификатор (первичный ключ)';
@@ -490,6 +493,7 @@ comment on column declaration_data.data is 'Данные декларации в
 comment on column declaration_data.is_accepted is 'Признак того, что декларация принята';
 comment on column declaration_data.data_pdf is 'pdf';
 comment on column declaration_data.data_xlsx is 'xlsx';
+comment on column declaration_data.jasper_print is 'Сформированный отчет во внутреннем формате Jasper Reports';
 
 create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------
