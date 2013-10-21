@@ -42,30 +42,6 @@ switch (formDataEvent) {
 // графа 5  - bondsCount
 // графа 6  - percent
 
-// TODO (Ramil Timerbaev) убрать?
-/**
- * Добавить новую строку.
- */
-def addNewRow() {
-    def data = getData(formData)
-    def newRow = formData.createDataRow()
-    def index
-
-    if (currentDataRow == null || getIndex(currentDataRow) == -1) {
-        index = getIndexByAlias(data, 'total1')
-    } else if (currentDataRow.getAlias() == null) {
-        index = getIndex(currentDataRow) + 1
-    } else {
-        def alias = currentDataRow.getAlias()
-        if (alias.contains('total')) {
-            index = getIndexByAlias(data, alias)
-        } else {
-            index = getIndexByAlias(data, 'total' + alias)
-        }
-    }
-    data.insert(newRow, index + 1)
-}
-
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
@@ -573,9 +549,11 @@ def getRowsBySection(def data, def section) {
 
 /**
  * Получить посчитанную строку для рну 40.2 из рну 40.1.
+ * <p>
  * Формируется строка для рну 40.2.
  * Для формирования строки отбираются данные из 40.1 по номеру и названию тб и коду валюты.
  * У строк рну 40.1, подходящих под эти условия, суммируются графы 6, 7, 10 в строку рну 40.2 графы 4, 5, 6.
+ * </p>
  *
  * @param number номер тб
  * @param name наименование тб

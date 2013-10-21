@@ -128,17 +128,15 @@ def calc() {
     // отсортировать/группировать
     sort(data)
 
-    def tmp
     getRows(data).eachWithIndex { row, i ->
         // графа 1
         row.number = i + 1
 
         // графа 8
-        tmp = row.income - (row.cost279 - row.costReserve)
-        row.loss = (tmp < 0 ? abs(tmp) : 0)
+        row.loss = calc8(row)
 
         // графа 9
-        row.profit = (tmp >= 0 ? tmp : 0)
+        row.profit = calc9(row)
     }
     save(data)
 
@@ -171,6 +169,12 @@ def logicalCheck() {
 
     def index
     def errorMsg
+
+    // алиасы графов для арифметической проверки (графа 8, 9)
+    def arithmeticCheckAlias = ['loss', 'profit']
+    // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
+    def needValue = [:]
+    def colNames = []
 
     for (def row : getRows(data)) {
         if (isTotal(row)) {
@@ -206,18 +210,22 @@ def logicalCheck() {
             return false
         }
 
-        // 4. Арифметическая проверка графы 8
-        tmp = row.income - (row.cost279 - row.costReserve)
-        if (row.loss != (tmp < 0 ? abs(tmp) : 0)) {
-            logger.warn(errorMsg + 'неверно рассчитана графа «Убыток (руб.)»!')
+        // 4. Арифметическая проверка графы 8, 9
+        needValue['loss'] = calc8(row)
+        needValue['profit'] = calc9(row)
+        arithmeticCheckAlias.each { alias ->
+            if (needValue[alias] != row.getCell(alias).getValue()) {
+                def name = getColumnName(row, alias)
+                colNames.add('"' + name + '"')
+            }
+        }
+        if (!colNames.isEmpty()) {
+            def msg = colNames.join(', ')
+            logger.error(errorMsg + "неверно рассчитано значение графы: $msg.")
+            return false
         }
 
-        // 5. Арифметическая проверка графы 9
-        if (row.profit != (tmp >= 0 ? tmp : 0)) {
-            logger.warn(errorMsg + 'неверное рассчитана графа «Прибыль (руб.)»!')
-        }
-
-        // 6. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
+        // 5. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
         totalColumns.each { alias ->
             if (totalSums[alias] == null) {
                 totalSums[alias] = 0
@@ -229,7 +237,7 @@ def logicalCheck() {
     if (hasTotal) {
         def totalRow = getRowByAlias(data, 'total')
 
-        // 6. Проверка итогового значений по всей форме (графа 5..9)
+        // 5. Проверка итогового значений по всей форме (графа 5..9)
         for (def alias : totalColumns) {
             if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
                 logger.error('Итоговые значения рассчитаны неверно!')
@@ -512,4 +520,21 @@ void sort(def data) {
         }
         return a.date <=> b.date
     }
+}
+
+/**
+ * Получить одинаковую часть расчетов для графы 8 или 9.
+ */
+def calcFor8or9(def row) {
+    return row.income - (row.cost279 - row.costReserve)
+}
+
+def calc8(def row) {
+    def tmp = calcFor8or9(row)
+    return (tmp < 0 ? abs(tmp) : 0)
+}
+
+def calc9(def row) {
+    def tmp = calcFor8or9(row)
+    return (tmp >= 0 ? tmp : 0)
 }
