@@ -1,3 +1,6 @@
+/*
+    blob_data.id = '99e90406-60f0-4a87-b6f0-7f127abf1fbb'
+ */
 package refbook.currency
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
