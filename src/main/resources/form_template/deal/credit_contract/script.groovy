@@ -80,7 +80,7 @@ void addRow() {
 
     // Элемент с кодом «796» подставляется по-умолчанию
     def refDataProvider = refBookFactory.getDataProvider(12);
-    def res = refDataProvider.getRecords(new Date(), null, "CODE = 796", null);
+    def res = refDataProvider.getRecords(new Date(), null, "CODE = '796'", null);
     row.okeiCode = res.getRecords().get(0).record_id.numberValue
 
     dataRowHelper.insert(row, index)
