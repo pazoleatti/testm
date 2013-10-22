@@ -176,8 +176,8 @@ void calc() {
         if (i == dataRows.size() - 1) {
             totalColumns.each {
                 def val = row.getCell(it).getValue()
-                if (val != null)
-                    sums[it] += row.getCell(it).getValue()
+                if(val!=null)
+                    sums[it] += val
             }
             totalRows.put(i + 1, getNewRow(row.interdependence, totalColumns, sums))
             totalColumns.each {
@@ -186,8 +186,8 @@ void calc() {
         }
         totalColumns.each {
             def val = row.getCell(it).getValue()
-            if (val != null)
-                sums[it] += row.getCell(it).getValue()
+            if(val!=null)
+                sums[it] += val
         }
         tmp = row.interdependence
     }
