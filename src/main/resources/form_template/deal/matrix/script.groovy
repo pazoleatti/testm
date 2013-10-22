@@ -644,10 +644,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
 
-    // Графа 26
-    //if (type.id == 393) {
-        // row.dealSubjectCode2 = srcRow.okpCode (http://jira.aplana.com/browse/SBRFACCTAX-4768)
-    //}
+    // Графа 26 Не заполняется
 
     // Графа 27
     def String val27 = null
