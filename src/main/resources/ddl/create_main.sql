@@ -636,7 +636,8 @@ create table department_report_period (
   report_period_id    number(9) not null,
   is_active           number(1) not null,
   is_balance_period   number(1) default 0 not null,
-  report_date         date
+  report_date         date,
+  deadline            date
 );
 comment on table department_report_period is  'Привязка отчетных периодов к подразделениям';
 comment on column department_report_period.department_id is 'Код подразделения';
@@ -644,6 +645,7 @@ comment on column department_report_period.report_period_id is 'Код отче�
 comment on column department_report_period.is_active is 'Признак активности (0 - период закрыт, 1 - период открыт)';
 comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
 comment on column department_report_period.report_date is 'Срок подачи отчётности';
+comment on column department_report_period.deadline is 'Срок сдачи отчётности';
 ------------------------------------------------------------------------------------------------------
 create table task_context(
 id  number(18,0) primary key,
