@@ -16,20 +16,21 @@ public class DeclarationData extends IdentityObject<Long> {
 	private boolean accepted;
     private String jasperPrintId;
 
-    public String getJasperPrintId() {
-        return jasperPrintId;
-    }
-
-    public void setJasperPrintId(String jasperPrintId) {
-        this.jasperPrintId = jasperPrintId;
-    }
-
     /**
      * Идентификаторы бинарных данных в таблице BLOB_DATA
      */
     private String xmlDataUuid;
     private String pdfDataUuid;
     private String xlsxDataUuid;
+    private String jasperPrintUuid;
+
+    public String getJasperPrintUuid() {
+        return jasperPrintUuid;
+    }
+
+    public void setJasperPrintUuid(String jasperPrintUuid) {
+        this.jasperPrintUuid = jasperPrintUuid;
+    }
 
     public String getXmlDataUuid() {
         return xmlDataUuid;

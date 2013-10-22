@@ -24,30 +24,6 @@ public interface DeclarationDataDao {
 	boolean hasXmlData(long declarationDataId);
 	
 	/**
-	 * Получить данные декларации в формате законодателя (XML)
-	 * @param declarationDataId идентификатор декларации
-	 * @return данные декларации в формате законодателя
-	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если такой декларации не существует
-	 */
-	String getXmlData(long declarationDataId);
-	
-	/**
-	 * Получить отчет в формате XLSX
-	 * @param declarationDataId идентификатор декларации
-	 * @return данные декларации в формате законодателя
-	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если такой декларации не существует
-	 */
-	byte[] getXlsxData(long declarationDataId);
-	
-	/**
-	 * Получить отчет в формате PDF
-	 * @param declarationDataId идентификатор декларации
-	 * @return данные декларации в формате законодателя
-	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если такой декларации не существует
-	 */
-	byte[] getPdfData(long declarationDataId);
-	
-	/**
 	 * Сохраняет новую декларацию в БД. 
 	 * Этот метод позволяет сохранять только новые декларации (т.е. те, у которых id == null). 
 	 * При попытке сохранить уже существующий объект (с непустым id) будет выброшен DaoException
@@ -64,31 +40,6 @@ public interface DeclarationDataDao {
 	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если такой декларации не существует
 	 */
 	void setAccepted(long declarationDataId, boolean accepted);
-	
-	/**
-	 * Задать данные декларации в формате законодателя (XML)
-	 * @param declarationDataId идентификтор декларации
-	 * @param xmlDataUuid uuid данных декларации в формате законодателя
-	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если такой декларации не существует
-	 */
-	void setXmlData(long declarationDataId, String xmlDataUuid);
-
-
-	/**
-	 * Задать результат формирования отчета в формате XLSX
-	 * @param declarationDataId идентификтор декларации
-	 * @param xlsxDataUuid uuid данных декларации в формате законодателя
-	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если такой декларации не существует
-	 */
-	void setXlsxData(long declarationDataId, String xlsxDataUuid);
-
-	/**
-	 * Задать результат формирования отчета в формате PDF
-	 * @param declarationDataId идентификтор декларации
-	 * @param pdfDataUuid uuid данных декларации в формате законодателя
-	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если такой декларации не существует
-	 */
-	void setPdfData(long declarationDataId, String pdfDataUuid);
 	
 	/**
 	 * Удалить декларацию
@@ -127,8 +78,8 @@ public interface DeclarationDataDao {
 	int getCount(DeclarationDataFilter filter);
 
     /**
-     * Задает скомпилированный и заполненный результат формирования отчета без формата.
-     * @param jasperPrintId
+     * Обновление данных декларации(как правило только ссылки на blob_data)
+     * @param declarationData
      */
-    void setJasperPrintId(long declarationDataId, String jasperPrintId);
+    void update(DeclarationData declarationData);
 }

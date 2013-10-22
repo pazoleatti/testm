@@ -2,15 +2,11 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.*;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -20,6 +16,7 @@ import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
 import net.sf.jasperreports.engine.util.JRXmlUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,13 +25,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
-
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -48,9 +38,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Сервис для работы с декларациями
@@ -124,13 +112,30 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public void reCreate(Logger logger, long id, TAUserInfo userInfo,
 			Date docDate) {
 		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
-			DeclarationData declarationData = declarationDataDao.get(id);
-        if (declarationData.getJasperPrintId() != null){
-            declarationDataDao.setJasperPrintId(declarationData.getId(), null);
-            blobDataService.delete(declarationData.getJasperPrintId());
+        DeclarationData declarationData = declarationDataDao.get(id);
+        List<String> strings = new ArrayList<String>();
+
+        //Обнуляем данные в таблице блобов
+        if (declarationData.getJasperPrintUuid() != null){
+            strings.add(declarationData.getJasperPrintUuid());
+            declarationData.setJasperPrintUuid(null);
         }
-        if (declarationDataDao.getXlsxData(declarationData.getId()) != null)
-            declarationDataDao.setXlsxData(declarationData.getId(), null);
+        if (declarationData.getXlsxDataUuid() != null){
+            strings.add(declarationData.getXlsxDataUuid());
+            declarationData.setXlsxDataUuid(null);
+        }
+        if (declarationData.getPdfDataUuid() != null){
+            strings.add(declarationData.getPdfDataUuid());
+            declarationData.setPdfDataUuid(null);
+        }
+        if (declarationData.getXmlDataUuid() != null){
+            strings.add(declarationData.getXmlDataUuid());
+            declarationData.setXmlDataUuid(null);
+        }
+        declarationDataDao.update(declarationData);
+        for (String s : strings)
+            blobDataService.delete(s);
+
 		setDeclarationBlobs(logger, declarationData, docDate, userInfo);
 		logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
 		auditService.add(FormDataEvent.SAVE , userInfo, declarationData.getDepartmentId(),
@@ -138,12 +143,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 				declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId(),
 				null, null, null);
 
-
 	}
 
 	@Override
 	public void check(Logger logger, long id, TAUserInfo userInfo) {
-        validateDeclaration(id, logger, true);
+        validateDeclaration(declarationDataDao.get(id), logger, true);
         declarationDataScriptingService.executeScript(userInfo, declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
         // Проверяем ошибки при пересчете
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -184,7 +188,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		if (accepted) {
             DeclarationData declarationData  = declarationDataDao.get(id);
 
-            validateDeclaration(id, logger, true);
+            validateDeclaration(declarationDataDao.get(id), logger, true);
             declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
             declarationData.setAccepted(true);
@@ -218,7 +222,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Override
 	public String getXmlData(long declarationId, TAUserInfo userInfo) {
 		declarationDataAccessService.checkEvents(userInfo, declarationId, FormDataEvent.GET_LEVEL1);
-		return declarationDataDao.getXmlData(declarationId);
+        String xmlUuid = declarationDataDao.get(declarationId).getXmlDataUuid();
+		return new String(getBytesFromInputstream(xmlUuid));
 	}
 
 	@Override
@@ -243,17 +248,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	public byte[] getXlsxData(long id, TAUserInfo userInfo) {
-		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
+        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
         try {
-            byte[] xlsxBytes = declarationDataDao.getXlsxData(id);
-            if (xlsxBytes == null){
-                DeclarationData declarationData = declarationDataDao.get(id);
-                ObjectInputStream objectInputStream = new ObjectInputStream(blobDataService.get(declarationData.getJasperPrintId()).getInputStream());
+            DeclarationData declarationData = declarationDataDao.get(id);
+            if (declarationData.getXlsxDataUuid() != null && !declarationData.getXlsxDataUuid().isEmpty()){
+                return getBytesFromInputstream(declarationData.getXlsxDataUuid());
+            }else {
+                ObjectInputStream objectInputStream = new ObjectInputStream(blobDataService.get(declarationData.getJasperPrintUuid()).getInputStream());
                 JasperPrint jasperPrint = (JasperPrint)objectInputStream.readObject();
-                xlsxBytes = exportXLSX(jasperPrint);
-               // declarationDataDao.setXlsxData(declarationData.getId(), xlsxBytes);
+                byte[] xlsxBytes = exportXLSX(jasperPrint);
+                declarationData.setXlsxDataUuid(blobDataService.create(new ByteArrayInputStream(xlsxBytes), ""));
+                declarationDataDao.update(declarationData);
+                return xlsxBytes;
             }
-            return xlsxBytes;
         } catch (Exception e) {
             throw new ServiceException("Не удалось извлечь объект для печати.", e);
         }
@@ -262,7 +269,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Override
 	public byte[] getPdfData(long id, TAUserInfo userInfo) {
 		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
-		return declarationDataDao.getPdfData(id);
+        DeclarationData declarationData = declarationDataDao.get(id);
+        return getBytesFromInputstream(declarationData.getPdfDataUuid());
 	}
 
 	private void setDeclarationBlobs(Logger logger,
@@ -276,32 +284,31 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CREATE, logger, exchangeParams);
 
 		String xml = XML_HEADER.concat(writer.toString());
-        declarationDataDao.setXmlData(declarationData.getId(), xml);
+        declarationData.setXmlDataUuid(blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""));
 
-        validateDeclaration(declarationData.getId(), logger, false);
+        validateDeclaration(declarationData, logger, false);
         // Заполнение отчета и экспорт в формате PDF и XLSX
         JasperPrint jasperPrint = fillReport(xml,
                 declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
-        declarationDataDao.setPdfData(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""));
-        declarationDataDao.setXlsxData(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportXLSX(jasperPrint)), ""));
-
+        declarationData.setPdfDataUuid(blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""));
         try {
-            declarationDataDao.setJasperPrintId(declarationData.getId(), saveBlobData(jasperPrint));
+            declarationData.setJasperPrintUuid(saveJPBlobData(jasperPrint));
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         }
-        /*declarationDataDao.setXlsxData(declarationData.getId(), exportXLSX(jasperPrint));*/
+        declarationDataDao.update(declarationData);
+        /*declarationDataDao.setXlsxDataUuid(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportXLSX(jasperPrint)), ""));*/
 	}
 
     /**
      * Проверка валидности xml декларации
-     * @param declarationDataId идентификатор данных декларации
+     * @param declarationData идентификатор данных декларации
      * @param logger логгер лог панели
      * @param isErrorFatal признак того, что операция не может быть продолжена с невалидным xml
      */
-    private void validateDeclaration(Long declarationDataId, final Logger logger, final boolean isErrorFatal) {
-        DeclarationData declarationData  = declarationDataDao.get(declarationDataId);
-        String xml = declarationDataDao.getXmlData(declarationData.getId());
+    private void validateDeclaration(DeclarationData declarationData, final Logger logger, final boolean isErrorFatal) {
+        String xmlUuid = declarationData.getXmlDataUuid();
+        String xml = new String(getBytesFromInputstream(xmlUuid));
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
 
         if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {
@@ -373,7 +380,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	private Document getDocument(long declarationDataId) {
 		try {
-			String xml = declarationDataDao.getXmlData(declarationDataId);
+			String xmlUuid = declarationDataDao.get(declarationDataId).getXmlDataUuid();
+            String xml = new String(getBytesFromInputstream(xmlUuid));
 			InputSource inputSource = new InputSource(new StringReader(xml));
 
 			return DocumentBuilderFactory.newInstance().newDocumentBuilder()
@@ -429,15 +437,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		}
 	}
 
-    private String saveBlobData(JasperPrint jasperPrint) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-        objectOutputStream.writeObject(jasperPrint);
-        InputStream inputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-
-        return blobDataService.create(inputStream, "");
-    }
-
 	private static Date getFormattedDate(String stringToDate) {
 		// Преобразуем строку вида "dd.mm.yyyy" в Date
 		try {
@@ -447,12 +446,30 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		}
 	}
 
+    private String saveJPBlobData(JasperPrint jasperPrint) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+        objectOutputStream.writeObject(jasperPrint);
+        InputStream inputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+
+        return blobDataService.create(inputStream, "");
+    }
+
 
 	@Override
 	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
 		return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
 	}
 
-
+    private byte[] getBytesFromInputstream(String blobId){
+        BlobData blobPdfData = blobDataService.get(blobId);
+        ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
+        try {
+            IOUtils.copy(blobPdfData.getInputStream(), arrayOutputStream);
+        } catch (IOException e) {
+            throw new ServiceException("Не удалось извлечь pdf.", e);
+        }
+        return arrayOutputStream.toByteArray();
+    }
 
 }

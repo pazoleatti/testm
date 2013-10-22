@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -23,11 +22,9 @@ import static org.mockito.Mockito.*;
 
 public class DeclarationDataServiceImplTest {
 
-	//private static String XML_DATA = "<?xml version=\"1.0\" encoding=\"windows-1251\"?><Документ Имя=\"Федор\"></Документ>";
-	private static String XML_DATA = "<?xml version=\"1.0\" encoding=\"windows-1251\"?><A/>";
-
-	private DeclarationDataServiceImpl service;
+    private DeclarationDataServiceImpl service;
 	private DeclarationDataDao declarationDataDao;
+    @SuppressWarnings("unused")
 	private DeclarationTemplateService declarationTemplateService;
 	@SuppressWarnings("unused")
 	private DeclarationDataScriptingService declarationDataScriptingService;
@@ -79,7 +76,6 @@ public class DeclarationDataServiceImplTest {
 		
 		// Verify
 		verify(declarationDataDao).get(1l);
-		verify(declarationDataDao).setXmlData(1l, XML_DATA);
 	}
 	
 	//@Test(expected=AccessDeniedException.class)
