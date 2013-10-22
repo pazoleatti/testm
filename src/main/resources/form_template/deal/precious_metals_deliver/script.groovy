@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat
  *
  * @author Dmitriy Levykin
  */
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkCreation()
@@ -66,15 +67,16 @@ def getAtributes() {
     [
             rowNum:                     ['rowNum', 'гр. 1', '№ п/п'],
             name:                       ['name', 'гр. 2', 'Полное наименование с указанием ОПФ'],
+            dependence:                 ['dependence', 'гр. 2.2', 'Признак взаимозависимости'],
             innKio:                     ['innKio', 'гр. 3', 'ИНН/ КИО'],
             country:                    ['country', 'гр. 4.1', 'Наименование страны регистрации'],
             countryCode1:               ['countryCode1', 'гр. 4.2', 'Код страны регистрации по классификатору ОКСМ'],
             contractNum:                ['contractNum', 'гр. 5', 'Номер договора'],
             contractDate:               ['contractDate', 'гр. 6', 'Дата договора'],
-            transactionNum:             ['transactionNum', 'гр. 7', 'Номер сделки'],
+            transactionNum:             ['transactionNum', 'гр. 7.1', 'Номер сделки'],
+            dealType:                   ['dealType', 'гр. 7.2', 'Вид срочной сделки'],
             transactionDeliveryDate:    ['transactionDeliveryDate', 'гр. 8', 'Дата заключения сделки'],
             innerCode:                  ['innerCode', 'гр. 9.1', 'Внутренний код'],
-            okpCode:                    ['okpCode', 'гр. 9.2', 'Код по ОКП'],
             unitCountryCode:            ['unitCountryCode', 'гр. 9.3', 'Код страны происхождения предмета сделки'],
             signPhis:                   ['signPhis', 'гр. 10', 'Признак физической поставки драгоценного металла'],
             signTransaction:            ['signTransaction', 'гр. 11', 'Признак внешнеторговой сделки'],
@@ -96,25 +98,19 @@ def getAtributes() {
     ]
 }
 
-/*
-Возвращает графу вида "гр. хх"
- */
-
+// Возвращает графу вида "гр. хх"
 def getGrafNum(def alias) {
     def atr = getAtributes().find { it -> it.getValue()[0] == alias }
     atr.getValue()[1]
 }
 
-// гр. 2, гр. 3, гр. 6, гр. 7, гр. 10, гр. 11, гр. 12, гр. 13, гр. 14, гр. 15, гр. 16, гр. 17, гр. 18, гр. 19,
-// гр. 20, гр. 21, гр. 22, гр. 23, гр. 24.
+// 2, 3, 5, 6, 14, 15
 def getGroupColumns() {
-    ['name', 'innKio', 'contractNum', 'contractDate', 'innerCode', 'okpCode', 'unitCountryCode', 'signPhis',
-            'signTransaction', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
-            'city2', 'settlement2', 'conditionCode', 'count']
+    ['name', 'dependence', 'country', 'countryCode1',  'signPhis', 'signTransaction']
 }
 
 def getEditColumns() {
-    ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode',
+    ['name', 'dependence', 'dealType', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode',
             'unitCountryCode', 'signPhis', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
             'city2', 'settlement2', 'conditionCode', 'incomeSum', 'consumptionSum', 'transactionDate']
 }
@@ -179,7 +175,6 @@ void logicCheck() {
 
     // Налоговый период
     def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
 
@@ -195,6 +190,8 @@ void logicCheck() {
         [
                 'rowNum', // № п/п
                 'name', // Полное наименование с указанием ОПФ
+                'dependence', // Признак взаимозависимости
+                'dealType', // Вид срочной сделки
                 'innKio', // ИНН/КИО
                 'country', // Наименование страны регистрации
                 'countryCode1', // Код страны по классификатору ОКСМ
@@ -203,7 +200,6 @@ void logicCheck() {
                 'transactionNum', // Номер сделки
                 'transactionDeliveryDate', // Дата заключения сделки
                 'innerCode', // Внутренний код
-                'okpCode', // Код ОКП
                 'unitCountryCode', // Код страны происхождения предмета сделки по классификатору ОКСМ
                 'signPhis', // Признак физической поставки драгоценного металла
                 'signTransaction', // Признак внешнеторговой сделки
@@ -220,8 +216,6 @@ void logicCheck() {
 
         def transactionDeliveryDate = row.transactionDeliveryDate
         def contractDate = row.contractDate
-        // def countryCode2 = row.getCell('countryCode2').value
-        // def countryCode3 = row.getCell('countryCode3').value
         def settlement1 = row.settlement1
         def city1 = row.city1
         def settlement2 = row.settlement2
@@ -384,9 +378,10 @@ void logicCheck() {
         checkNSI(row, "countryCode3", "ОКСМ", 10)
         checkNSI(row, "region1", "Коды субъектов Российской Федерации", 4)
         checkNSI(row, "region2", "Коды субъектов Российской Федерации", 4)
-        checkNSI(row, "okpCode", "Коды драгоценных металлов", 17)
         checkNSI(row, "signPhis", "Признаки физической поставки", 18)
         checkNSI(row, "conditionCode", "Коды условий поставки", 63)
+        checkNSI(row, "dependence", "Да/Нет", 38)
+        checkNSI(row, "dealType", "Виды срочных сделок", 85)
     }
 
     //Проверки подитоговых сумм
@@ -445,8 +440,11 @@ void logicCheck() {
                 def String groupCols = getValuesByGroupColumn(dataRows[itg])
                 def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «$groupCols» в графе"
                 if (groupCols != null) {
-                    if (testItogRow.priceOne != realItogRow.priceOne) {
-                        logger.error(mes + " «${getAtributes().priceOne[2]}»")
+                    if (testItogRow.incomeSum != realItogRow.incomeSum) {
+                        logger.error(mes + " «${getAtributes().incomeSum[2]}»")
+                    }
+                    if (testItogRow.consumptionSum != realItogRow.consumptionSum) {
+                        logger.error(mes + " «${getAtributes().consumptionSum[2]}»")
                     }
                     if (testItogRow.totalNds != realItogRow.totalNds) {
                         logger.error(mes + " «${getAtributes().totalNds[2]}»")
@@ -455,8 +453,6 @@ void logicCheck() {
             }
         }
     }
-
-
 }
 
 /**
@@ -473,68 +469,40 @@ void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
 
 /**
  * Возвращает строку со значениями полей строки по которым идет группировка
- * ['name', 'innKio', 'contractNum', 'contractDate', 'innerCode', 'okpCode', 'unitCountryCode', 'signPhis',
- *          'signTransaction', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
- *          'city2', 'settlement2', 'conditionCode', 'count']
+ *  ['name', 'dependence', 'country', 'countryCode1',  'signPhis', 'signTransaction']
  */
-
 String getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
+
     def map = row.name != null ? refBookService.getRecordData(9, row.name) : null
     if (map != null)
         builder.append(map.NAME.stringValue).append(sep)
-    if (row.innKio != null)
-        builder.append(row.innKio).append(sep)
-    if (row.contractNum != null)
-        builder.append(row.contractNum).append(sep)
-    if (row.contractDate != null)
-        builder.append(row.contractDate).append(sep)
-    innerCode = getRefBookValue(17, row.innerCode, 'INNER_CODE')
-    if (innerCode != null)
-        builder.append(innerCode).append(sep)
-    okpCode = getRefBookValue(17, row.okpCode, 'OKP_CODE')
-    if (okpCode != null)
-        builder.append(okpCode).append(sep)
-    unitCountryCode = getRefBookValue(10, row.unitCountryCode, 'CODE')
-    if (unitCountryCode != null)
-        builder.append(unitCountryCode).append(sep)
+
+    dependence = getRefBookValue(38, row.dependence, 'VALUE')
+    if (dependence != null)
+        builder.append(dependence).append(sep)
+
+    country = getRefBookValue(10, row.country, 'NAME')
+    if (country != null)
+        builder.append(country).append(sep)
+
+    countryCode1 = getRefBookValue(10, row.countryCode1, 'CODE')
+    if (countryCode1 != null)
+        builder.append(countryCode1).append(sep)
+
     signPhis = getRefBookValue(18, row.signPhis, 'SIGN')
     if (signPhis != null)
         builder.append(signPhis).append(sep)
+
     signTransaction = getRefBookValue(38, row.signTransaction, 'VALUE')
     if (signTransaction != null)
         builder.append(signTransaction).append(sep)
-    countryCode2 = getRefBookValue(10, row.countryCode2, 'CODE')
-    if (countryCode2 != null)
-        builder.append(countryCode2).append(sep)
-    region1 = getRefBookValue(4, row.region1, 'CODE')
-    if (region1 != null)
-        builder.append(region1).append(sep)
-    if (row.city1 != null)
-        builder.append(row.city1).append(sep)
-    if (row.settlement1 != null)
-        builder.append(row.settlement1).append(sep)
-    countryCode3 = getRefBookValue(10, row.countryCode3, 'CODE')
-    if (countryCode3 != null)
-        builder.append(countryCode3).append(sep)
-    region2 = getRefBookValue(4, row.region2, 'CODE')
-    if (region2 != null)
-        builder.append(region2).append(sep)
-    if (row.city2 != null)
-        builder.append(row.city2).append(sep)
-    if (row.settlement2 != null)
-        builder.append(row.settlement2).append(sep)
-    conditionCode = getRefBookValue(63, row.conditionCode, 'STRCODE')
-    if (conditionCode != null)
-        builder.append(conditionCode).append(sep)
-    if (row.count != null)
-        builder.append(row.count).append(sep)
 
     def String retVal = builder.toString()
     if (retVal.length() < 2)
         return null
-    retVal.substring(0, retVal.length() - 2)
+    return retVal.substring(0, retVal.length() - 2)
 }
 
 def getRefBookValue(int id, def cell, def alias) {
@@ -571,9 +539,6 @@ void calc() {
         }
 
         row.totalNds = row.priceOne
-
-        // Код ОКП
-        row.okpCode = row.innerCode
 
         // Расчет полей зависимых от справочников
         if (row.name != null) {
@@ -708,18 +673,21 @@ def calcItog(int i, def dataRows) {
     newRow.getCell('fix').colSpan = 2
 
     // Расчеты подитоговых значений
-    BigDecimal totalNdsItg = 0, priceOneItg = 0
+    BigDecimal incomeSumItg = 0, consumptionSumItg = 0, totalNdsItg = 0
     for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
         row = dataRows.get(j)
 
-        priceOne = row.priceOne
+        incomeSum = row.incomeSum
+        consumptionSum = row.consumptionSum
         totalNds = row.totalNds
 
-        priceOneItg += priceOne != null ? priceOne : 0
+        incomeSumItg += incomeSum != null ? incomeSum : 0
+        consumptionSumItg += consumptionSum != null ? consumptionSum : 0
         totalNdsItg += totalNds != null ? totalNds : 0
     }
 
-    newRow.priceOne = priceOneItg
+    newRow.incomeSum = incomeSumItg
+    newRow.consumptionSum = consumptionSumItg
     newRow.totalNds = totalNdsItg
 
     newRow
@@ -802,41 +770,42 @@ void importData() {
  * @param headRowCount количество строк в шапке
  */
 def checkTableHead(def xml) {
-    def colCount = 28
+    def colCount = 29
     def rc = getHeaderRowCount()
     // проверить количество строк и колонок в шапке
     if (xml.row.size() < rc || xml.row[0].cell.size() < colCount) {
         return false
     }
     def result = (
-    checkHeaderRow(xml, rc, 0, ['Полное наименование с указанием ОПФ', '', 'гр. 2']) &&
-            checkHeaderRow(xml, rc, 1, ['ИНН/ КИО', '', 'гр. 3']) &&
-            checkHeaderRow(xml, rc, 2, ['Наименование страны регистрации', '', 'гр. 4.1']) &&
-            checkHeaderRow(xml, rc, 3, ['Код страны регистрации по классификатору ОКСМ', '', 'гр. 4.2']) &&
-            checkHeaderRow(xml, rc, 4, ['Номер договора', '', 'гр. 5']) &&
-            checkHeaderRow(xml, rc, 5, ['Дата договора', '', 'гр. 6']) &&
-            checkHeaderRow(xml, rc, 6, ['Номер сделки', '', 'гр. 7']) &&
-            checkHeaderRow(xml, rc, 7, ['Дата заключения сделки', '', 'гр. 8']) &&
-            checkHeaderRow(xml, rc, 8, ['Характеристика базисного актива', 'Внутренний код', 'гр. 9.1']) &&
-            checkHeaderRow(xml, rc, 9, ['', 'Код по ОКП', 'гр. 9.2']) &&
-            checkHeaderRow(xml, rc, 10, ['', 'Код страны происхождения предмета сделки', 'гр. 9.3']) &&
-            checkHeaderRow(xml, rc, 11, ['Признак физической поставки драгоценного металла', '', 'гр. 10']) &&
-            checkHeaderRow(xml, rc, 12, ['Признак внешнеторговой сделки', '', 'гр. 11']) &&
-            checkHeaderRow(xml, rc, 13, ['Место отправки (погрузки) драгоценного металла в соответствии с товаросопроводительными документами', 'Код страны по классификатору ОКСМ', 'гр. 12.1']) &&
-            checkHeaderRow(xml, rc, 14, ['', 'Регион (код)', 'гр. 12.2']) &&
-            checkHeaderRow(xml, rc, 15, ['', 'Город', 'гр. 12.3']) &&
-            checkHeaderRow(xml, rc, 16, ['', 'Населенный пункт', 'гр. 12.4']) &&
-            checkHeaderRow(xml, rc, 17, ['Место совершения сделки (адрес места доставки (разгрузки) драгоценного металла)', 'Код страны по классификатору ОКСМ', 'гр. 13.1']) &&
-            checkHeaderRow(xml, rc, 18, ['', 'Регион (код)', 'гр. 13.2']) &&
-            checkHeaderRow(xml, rc, 19, ['', 'Город', 'гр. 13.3']) &&
-            checkHeaderRow(xml, rc, 20, ['', 'Населенный пункт', 'гр. 13.4']) &&
-            checkHeaderRow(xml, rc, 21, ['Код условия поставки', '', 'гр. 14']) &&
-            checkHeaderRow(xml, rc, 22, ['Количество', '', 'гр. 15']) &&
-            checkHeaderRow(xml, rc, 23, ['Сумма доходов Банка по данным бухгалтерского учета, руб.', '', 'гр. 16']) &&
-            checkHeaderRow(xml, rc, 24, ['Сумма расходов Банка по данным бухгалтерского учета, руб.', '', 'гр. 17']) &&
-            checkHeaderRow(xml, rc, 25, ['Цена (тариф) за единицу измерения без учета НДС, руб.', '', 'гр. 18']) &&
-            checkHeaderRow(xml, rc, 26, ['Итого стоимость без учета НДС, руб.', '', 'гр. 19']) &&
-            checkHeaderRow(xml, rc, 27, ['Дата совершения сделки', '', 'гр. 20'])
+    checkHeaderRow(xml, rc, 0, ['Полное наименование с указанием ОПФ', '', 'гр. 2.1']) &&
+            checkHeaderRow(xml, rc, 1, ['Признак взаимозависимости', '', 'гр. 2.2']) &&
+            checkHeaderRow(xml, rc, 2, ['ИНН/ КИО', '', 'гр. 3']) &&
+            checkHeaderRow(xml, rc, 3, ['Наименование страны регистрации', '', 'гр. 4.1']) &&
+            checkHeaderRow(xml, rc, 4, ['Код страны регистрации по классификатору ОКСМ', '', 'гр. 4.2']) &&
+            checkHeaderRow(xml, rc, 5, ['Номер договора', '', 'гр. 5']) &&
+            checkHeaderRow(xml, rc, 6, ['Дата договора', '', 'гр. 6']) &&
+            checkHeaderRow(xml, rc, 7, ['Номер сделки', '', 'гр. 7.1']) &&
+            checkHeaderRow(xml, rc, 8, ['Вид срочной сделки', '', 'гр. 7.2']) &&
+            checkHeaderRow(xml, rc, 9, ['Дата заключения сделки', '', 'гр. 8']) &&
+            checkHeaderRow(xml, rc, 10, ['Характеристика базисного актива', 'Внутренний код', 'гр. 9.1']) &&
+            checkHeaderRow(xml, rc, 11, ['', 'Код страны происхождения предмета сделки', 'гр. 9.2']) &&
+            checkHeaderRow(xml, rc, 12, ['Признак физической поставки драгоценного металла', '', 'гр. 10']) &&
+            checkHeaderRow(xml, rc, 13, ['Признак внешнеторговой сделки', '', 'гр. 11']) &&
+            checkHeaderRow(xml, rc, 14, ['Место отправки (погрузки) драгоценного металла в соответствии с товаросопроводительными документами', 'Код страны по классификатору ОКСМ', 'гр. 12.1']) &&
+            checkHeaderRow(xml, rc, 15, ['', 'Регион (код)', 'гр. 12.2']) &&
+            checkHeaderRow(xml, rc, 16, ['', 'Город', 'гр. 12.3']) &&
+            checkHeaderRow(xml, rc, 17, ['', 'Населенный пункт', 'гр. 12.4']) &&
+            checkHeaderRow(xml, rc, 18, ['Место совершения сделки (адрес места доставки (разгрузки) драгоценного металла)', 'Код страны по классификатору ОКСМ', 'гр. 13.1']) &&
+            checkHeaderRow(xml, rc, 19, ['', 'Регион (код)', 'гр. 13.2']) &&
+            checkHeaderRow(xml, rc, 20, ['', 'Город', 'гр. 13.3']) &&
+            checkHeaderRow(xml, rc, 21, ['', 'Населенный пункт', 'гр. 13.4']) &&
+            checkHeaderRow(xml, rc, 22, ['Код условия поставки', '', 'гр. 14']) &&
+            checkHeaderRow(xml, rc, 23, ['Количество', '', 'гр. 15']) &&
+            checkHeaderRow(xml, rc, 24, ['Сумма доходов Банка по данным бухгалтерского учета, руб.', '', 'гр. 16']) &&
+            checkHeaderRow(xml, rc, 25, ['Сумма расходов Банка по данным бухгалтерского учета, руб.', '', 'гр. 17']) &&
+            checkHeaderRow(xml, rc, 26, ['Цена (тариф) за единицу измерения без учета НДС, руб.', '', 'гр. 18']) &&
+            checkHeaderRow(xml, rc, 27, ['Итого стоимость без учета НДС, руб.', '', 'гр. 19']) &&
+            checkHeaderRow(xml, rc, 28, ['Дата совершения сделки', '', 'гр. 20'])
     )
     return result
 }
@@ -890,16 +859,20 @@ def addData(def xml) {
         // столбец 1
         newRow.rowNum = newRow.index = indexRow - headShift
 
-        // столбец 2
+        // столбец 2.1
         newRow.name = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         def map = newRow.name == null ? null : refBookService.getRecordData(9, newRow.name)
+        indexCell++
+
+        // графа 2.2 Признак взаимозависимости
+        newRow.dependence = getRecordId(38, 'VALUE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // графа 3
         if (map != null) {
             def text = row.cell[indexCell].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO.stringValue != null)) {
-                logger.warn("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+                logger.warn("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
             }
         }
         indexCell++
@@ -909,7 +882,7 @@ def addData(def xml) {
             def text = row.cell[indexCell].text()
             map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
             if ((text != null && !text.isEmpty() && !text.equals(map.NAME.stringValue)) || ((text == null || text.isEmpty()) && map.NAME.stringValue != null)) {
-                logger.warn("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+                logger.warn("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
             }
         }
         indexCell++
@@ -918,7 +891,7 @@ def addData(def xml) {
         if (map != null) {
             def text = row.cell[indexCell].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.CODE.stringValue)) || ((text == null || text.isEmpty()) && map.CODE.stringValue != null)) {
-                logger.warn("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+                logger.warn("Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
             }
         }
         indexCell++
@@ -927,8 +900,12 @@ def addData(def xml) {
         newRow.contractNum = row.cell[indexCell].text()
         indexCell++
 
-        // столбец 7
+        // столбец 7.1
         newRow.contractDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 7.2 Вид срочной сделки
+        newRow.dealType = getRecordId(85, 'CONTRACT_TYPE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // столбец 8
@@ -941,10 +918,6 @@ def addData(def xml) {
 
         // столбец 10
         newRow.innerCode = getRecordId(17, 'INNER_CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
-        indexCell++
-
-        // столбец 11
-        newRow.okpCode = getRecordId(17, 'OKP_CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // столбец 12

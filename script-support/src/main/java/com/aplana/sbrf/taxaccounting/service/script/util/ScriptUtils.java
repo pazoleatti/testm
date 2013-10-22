@@ -1,16 +1,16 @@
 package com.aplana.sbrf.taxaccounting.service.script.util;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-
-import com.aplana.sbrf.taxaccounting.model.script.range.Rect;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.script.range.Range;
+import com.aplana.sbrf.taxaccounting.model.script.range.Rect;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,6 +28,11 @@ public final class ScriptUtils {
 	private static final String NOT_SAME_RANGES = "Диапазоны имеют разную размерность";
 
 	private static final String CELL_NOT_FOUND = "Ячейка (\"%s\"; \"%s\") не найдена";
+
+    private static final String WRONG_NUMBER = "Строка %d, колонка %d содержит нечисловое значение \"%s\"!";
+
+    private static final String WRONG_DATE = "Строка %d, колонка %d содержит значение \"%s\", которое не " +
+            "соответствует дате в формате \"%s\"!";
 
 	/**
 	 * Запрещаем создавать экземляры класса
@@ -206,4 +211,73 @@ public final class ScriptUtils {
 		}
 	}
 
+    /**
+     * Получение числа из строки при импорте
+     * @param value Строковое значение
+     * @param indexRow Строка в импортируемом файле
+     * @param indexColumn Колонка в импортируемом файле
+     * @param logger
+     * @param required Обязательность. При установке будет выкидываться исключение, иначе возвращатся null
+     * @return
+     */
+    public static BigDecimal parseNumber(String value, int indexRow, int indexColumn, Logger logger, boolean required) {
+        if (value == null) {
+            return null;
+        }
+        String tmp = value.trim();
+        if (tmp.isEmpty()) {
+            return null;
+        }
+        tmp = tmp.replaceAll(",", ".").replace(" ", "");
+        if (tmp.matches("-?\\d+(\\.\\d+)?")) {
+            return new BigDecimal(tmp);
+        } else {
+            String msg = String.format(WRONG_NUMBER, indexRow, indexColumn, value);
+            if (required == true) {
+                throw new ServiceException(msg);
+            } else {
+                if (logger != null) {
+                    logger.warn(msg);
+                }
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Получение даты из строки при импорте
+     * @param value
+     * @param format
+     * @param indexRow
+     * @param indexColumn
+     * @param logger
+     * @param required
+     * @return
+     */
+    public static Date parseDate(String value, String format, int indexRow, int indexColumn, Logger logger, boolean required) {
+        if (value == null || format == null) {
+            return null;
+        }
+        String tmp = value.trim();
+        if (tmp.isEmpty()) {
+            return null;
+        }
+        Date retVal = null;
+        try {
+            retVal = new SimpleDateFormat(format).parse(tmp);
+        } catch (ParseException ex) {
+        }
+        if (retVal == null) {
+            String msg = String.format(WRONG_DATE, indexRow, indexColumn, value, format);
+            if (required == true) {
+                throw new ServiceException(msg);
+            } else {
+                if (logger != null) {
+                    logger.warn(msg);
+                }
+                return null;
+            }
+        }
+        return retVal;
+    }
 }

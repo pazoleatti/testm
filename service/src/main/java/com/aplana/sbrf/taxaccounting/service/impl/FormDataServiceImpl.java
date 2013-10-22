@@ -575,7 +575,8 @@ public class FormDataServiceImpl implements FormDataService {
                         // получим созданные формы с бд
                         FormData destinationForm = formDataDao.find(i.getFormTypeId(), i.getKind(), i.getDepartmentId(), formData.getReportPeriodId());
                         //В связи с http://jira.aplana.com/browse/SBRFACCTAX-4723
-                        if (destinationForm == null)
+                        // Только для распринятия
+                        if (destinationForm == null && workflowMove.getFromState() == WorkflowState.ACCEPTED)
                             continue;
                         // получение источников для текущего приемника i
                         List<DepartmentFormType> sourceFormTypes = departmentFormTypeDao.getFormSources(i.getDepartmentId(), i.getFormTypeId(), i.getKind());

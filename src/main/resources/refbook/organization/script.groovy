@@ -1,3 +1,6 @@
+/*
+    blob_data.id = 'ba9bb7ca-697c-b0c2-9999-e262617A9784'
+ */
 package refbook.organization
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent

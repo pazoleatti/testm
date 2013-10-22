@@ -19,16 +19,15 @@ public class FormDataServiceTest {
     FormDataService formDataService;
 
     @Test
-    public void test(){
+    public void test() {
         FormData formData1 = new FormData();
         formData1.setId(1L);
         FormData formData2 = new FormData();
         formData2.setId(2L);
-        System.out.println("dataRowHelperImpl: " + formDataService.getDataRowHelper(formData1));
-        System.out.println("dataRowHelperImpl: " + formDataService.getDataRowHelper(formData2));
-        System.out.println("dataRowHelperImpl: " + formDataService.getDataRowHelper(formData1));
-        System.out.println("dataRowHelperImpl: " + formDataService.getDataRowHelper(formData2));
-
+        formDataService.getDataRowHelper(formData1);
+        formDataService.getDataRowHelper(formData2);
+        formDataService.getDataRowHelper(formData1);
+        formDataService.getDataRowHelper(formData2);
     }
 
     @Test(expected = ServiceException.class)
