@@ -98,6 +98,10 @@ def allCheck() {
 def boolean logicalCheck(){
     def numbers = []
     def totalRow = null
+    if(formDataPrev==null){
+        logger.error("Не найдены экземпляры РНУ-62 за прошлый отчетный период!")
+        return false
+    }
     for (def DataRow row : getRows(data)){
         if(!isTotal(row) && !checkRequiredColumns(row,requiredCols)){
             return false
@@ -108,10 +112,6 @@ def boolean logicalCheck(){
         def rowStart = getRowIndexString(row)
         def dateEnd = reportPeriodService.getEndDate(formData.reportPeriodId).getTime()
         def dateStart = reportPeriodService.getStartDate(formData.reportPeriodId).getTime()
-        if(formDataPrev==null){
-            logger.error("Не найдены экземпляры РНУ-62 за прошлый отчетный период!")
-            return false
-        }
         if (row.operationDate.compareTo(dateStart)<0 || row.operationDate.compareTo(dateEnd)>0){
             logger.error("${rowStart}дата совершения операции вне границ отчетного периода!")
             return false
@@ -170,6 +170,11 @@ def boolean checkNSI(){
 
 void calc(){
     def data = data
+
+    if(formDataPrev==null){
+        logger.error("Не найдены экземпляры РНУ-62 за прошлый отчетный период!")
+        return
+    }
 
     // проверить обязательные редактируемые поля
     for (def DataRow row : getRows(data)){
