@@ -688,7 +688,7 @@ void addAllStatic() {
 def calcItog(int i, def dataRows) {
     def newRow = formData.createDataRow()
 
-    newRow.getCell('itog').colSpan = 26
+    newRow.getCell('itog').colSpan = 25
     newRow.itog = 'Подитог:'
     newRow.setAlias('itg#'.concat(i.toString()))
     newRow.getCell('fix').colSpan = 2
