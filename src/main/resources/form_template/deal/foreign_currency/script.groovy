@@ -35,12 +35,16 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
-// После принятия из Утверждено
-    case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
-        logicCheck()
-        break
-// После принятия из Подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+        deleteAllStatic()
+        sort()
+        calc()
+        addAllStatic()
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
 // Консолидация
@@ -368,10 +372,18 @@ void calc() {
         if (row.getAlias() != null) {
             continue
         }
+
         // Порядковый номер строки
         row.rowNumber = index++
+
         // Расчет поля "Цена"
-        row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
+        if (row.incomeSum != null && row.outcomeSum == null)
+            row.price = row.incomeSum
+        else if (row.outcomeSum != null && row.incomeSum == null)
+            row.price = row.outcomeSum
+        else
+            row.price = null
+
         // Расчет поля "Итого"
         row.total = row.price
 
@@ -484,7 +496,7 @@ void addAllStatic() {
 def calcItog(int i, def dataRows) {
     def newRow = formData.createDataRow()
 
-    newRow.getCell('itog').colSpan = 11
+    newRow.getCell('itog').colSpan = 13
     newRow.itog = 'Подитог:'
     newRow.setAlias('itg#'.concat(i.toString()))
     newRow.getCell('fix').colSpan = 2

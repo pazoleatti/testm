@@ -656,7 +656,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             val27 = '70.32.2'
             break
         case 375:
-            val27 = '72.2'
+            val27 = '79.20'
             break
         case 379:
         case 380:

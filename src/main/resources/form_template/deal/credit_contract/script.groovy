@@ -29,12 +29,13 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
-// После принятия из Утверждено
-    case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
-        logicCheck()
-        break
-// После принятия из Подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+        calc()
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
 // Консолидация
@@ -80,7 +81,7 @@ void addRow() {
 
     // Элемент с кодом «796» подставляется по-умолчанию
     def refDataProvider = refBookFactory.getDataProvider(12);
-    def res = refDataProvider.getRecords(new Date(), null, "CODE = 796", null);
+    def res = refDataProvider.getRecords(new Date(), null, "CODE = '796'", null);
     row.okeiCode = res.getRecords().get(0).record_id.numberValue
 
     dataRowHelper.insert(row, index)
