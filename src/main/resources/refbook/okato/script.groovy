@@ -1,3 +1,6 @@
+/*
+    blob_data.id = '99462c1e-1376-4fbe-8e31-eceb4ca470af'
+ */
 package refbook.okato
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent

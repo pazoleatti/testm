@@ -54,24 +54,27 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 		 *  если это первый отчетный период в данном налоговом периоде
 		 *  то возвращать последний отчетный период с предыдущего налогово периода
 		 */
-		if (reportPeriodlist.size() > 0 && reportPeriodlist.get(reportPeriodlist.size() - 1).getId() == reportPeriodId){
+		if (reportPeriodlist.size() > 0 && reportPeriodlist.get(0).getId() == reportPeriodId){
 			List<TaxPeriod> taxPeriodlist = taxPeriodDao.listByTaxType(thisTaxPeriod.getTaxType());
 			for (int i = 0; i < taxPeriodlist.size(); i++){
-				if (taxPeriodlist.get(i).getId() == thisTaxPeriod.getId()){
+				if (taxPeriodlist.get(i).getId().equals(thisTaxPeriod.getId())){
+                    if (i == 0) {
+                        return null;
+                    }
 					// получим список отчетных периодов для данного налогового периода
 					reportPeriodlist = reportPeriodDao.listByTaxPeriod(taxPeriodlist.get(i - 1).getId());
 					// вернем последний отчетный период
-					return reportPeriodlist.get(0);
+					return reportPeriodlist.size() > 0 ? reportPeriodlist.get(reportPeriodlist.size() - 1) : null;
 				}
 			}
-		}
-		// не первый отчетный период в данныом налоговом
-		for (int i = 0; i < reportPeriodlist.size() - 1; i++){
-			if (reportPeriodlist.get(i).getId() == reportPeriodId) {
-				return reportPeriodlist.get(i + 1);
-			}
-		}
-
+		} else {
+            // не первый отчетный период в данном налоговом
+            for (int i = 0; i < reportPeriodlist.size() - 1; i++){
+                if (reportPeriodlist.get(i).getId().equals(reportPeriodId)) {
+                    return reportPeriodlist.get(i - 1);
+                }
+            }
+        }
 		return null;
 	}
 

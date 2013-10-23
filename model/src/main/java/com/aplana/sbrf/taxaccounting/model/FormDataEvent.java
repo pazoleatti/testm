@@ -54,7 +54,8 @@ public enum FormDataEvent implements Serializable {
 	IMPORT_TRANSPORT_FILE(401, "Загрузка ТФ"),
 
     LOGIN(501, "Вход пользователя в Систему"),
-    LOGOUT(502, "Выход пользователя из Системы");
+    LOGOUT(502, "Выход пользователя из Системы"),
+	LOG_SYSTEM_BACKUP(601, "Архивация журнала аудита");
 
 	private String title;
 	private int code;

@@ -27,6 +27,7 @@ public class ReportPeriodServiceTest {
 		
         // Mock для taxPeriodDao
         TaxPeriodDao taxPeriodDao = mock(TaxPeriodDao.class);
+
         // 1 налоговый период
         TaxPeriod taxPeriod1 = new TaxPeriod();
         taxPeriod1.setId(1);
@@ -35,10 +36,12 @@ public class ReportPeriodServiceTest {
         Calendar cl = Calendar.getInstance();
         cl.set(2012, 1, 1);
         taxPeriod1.setStartDate(cl.getTime());
+
         // 2 налоговый период
         TaxPeriod taxPeriod2 = new TaxPeriod();
         taxPeriod2.setId(2);
         taxPeriod2.setTaxType(TaxType.TRANSPORT);
+
         // 3 налоговый период
         TaxPeriod taxPeriod3 = new TaxPeriod();
         taxPeriod3.setId(3);
@@ -67,20 +70,23 @@ public class ReportPeriodServiceTest {
 
 		// подготовка списка отчетных периодов для 1 налогового периода 
 		List<ReportPeriod> reportPeriodListBy1Period= new ArrayList<ReportPeriod>();
-		reportPeriodListBy1Period.add(reportPeriod4);
-        reportPeriodListBy1Period.add(getReportPeriod(3, taxPeriod1, 3, 3));
-        reportPeriodListBy1Period.add(reportPeriod2);
         reportPeriodListBy1Period.add(reportPeriod1);
+        reportPeriodListBy1Period.add(reportPeriod2);
+        reportPeriodListBy1Period.add(getReportPeriod(3, taxPeriod1, 3, 3));
+        reportPeriodListBy1Period.add(reportPeriod4);
+
         // подготовка списка отчетных периодов для 2 налогового периода
         List<ReportPeriod> reportPeriodListBy2Period= new ArrayList<ReportPeriod>();
-        reportPeriodListBy2Period.add(getReportPeriod(6, taxPeriod2, 2, 2));
         reportPeriodListBy2Period.add(getReportPeriod(5, taxPeriod2, 1, 1));
+        reportPeriodListBy2Period.add(getReportPeriod(6, taxPeriod2, 2, 2));
+
         // подготовка списка отчетных периодов для 3 налогового периода
         List<ReportPeriod> reportPeriodListBy3Period= new ArrayList<ReportPeriod>();
-        reportPeriodListBy3Period.add(getReportPeriod(8, taxPeriod3, 2, 2));
         reportPeriodListBy3Period.add(getReportPeriod(7, taxPeriod3, 1, 1));
+        reportPeriodListBy3Period.add(getReportPeriod(8, taxPeriod3, 2, 2));
 
-		
+
+
 		when(reportPeriodDao.listByTaxPeriod(1)).thenReturn(reportPeriodListBy1Period);
         when(reportPeriodDao.listByTaxPeriod(2)).thenReturn(reportPeriodListBy2Period);
         when(reportPeriodDao.listByTaxPeriod(3)).thenReturn(reportPeriodListBy3Period);
