@@ -737,7 +737,7 @@ void consolidation() {
 }
 
 def getHeaderRowCount() {
-    return 3
+    return 2
 }
 
 /**
