@@ -87,7 +87,8 @@ void generateXML() {
     def matrixFormData = formDataCollection.getRecords().get(0);
 
     // Заполнение кэша
-    formDataService.fillRefBookCache(matrixFormData.getId(), refBookCache)
+    // TODO Levykin ошибка в сервисе при value == null. Исправить и раскомментировать.
+    // formDataService.fillRefBookCache(matrixFormData.getId(), refBookCache)
 
     builder.Файл(
             ИдФайл: declarationService.generateXmlFileId(notificationType, departmentId, declarationData.reportPeriodId),
