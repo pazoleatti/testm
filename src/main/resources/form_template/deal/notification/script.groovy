@@ -83,12 +83,12 @@ void generateXML() {
     def okato = departmentParam.OKATO.referenceValue != null ? getRefBookValue(3, departmentParam.OKATO.referenceValue).OKATO.stringValue : null
     def okvedCode = departmentParam.OKVED_CODE.referenceValue != null ? getRefBookValue(34, departmentParam.OKVED_CODE.referenceValue).CODE.stringValue : null
     def taxPlaceTypeCode = departmentParam.TAX_PLACE_TYPE_CODE.referenceValue != null ? getRefBookValue(2, departmentParam.TAX_PLACE_TYPE_CODE.referenceValue).CODE.stringValue : null
-
-    def matrixFormData = formDataCollection.getRecords().get(0);
+    def matrixRecords = formDataCollection.getRecords()
 
     // Заполнение кэша
-    // TODO Levykin ошибка в сервисе при value == null. Исправить и раскомментировать.
-    // formDataService.fillRefBookCache(matrixFormData.getId(), refBookCache)
+    if (!matrixRecords.isEmpty()) {
+        formDataService.fillRefBookCache(matrixRecords.get(0).getId(), refBookCache)
+    }
 
     builder.Файл(
             ИдФайл: declarationService.generateXmlFileId(notificationType, departmentId, declarationData.reportPeriodId),
@@ -155,8 +155,8 @@ void generateXML() {
 
             // По строкам матрицы
             УвКонтрСд() {
-                if (formDataCollection.getRecords().size() != 0) {
-                    def dataRowHelper = formDataService.getDataRowHelper(matrixFormData)
+                if (!matrixRecords.isEmpty()) {
+                    def dataRowHelper = formDataService.getDataRowHelper(matrixRecords.get(0))
                     // "Да"
                     def Long recYesId = null
                     // "Нет"
