@@ -97,7 +97,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 		GetRefBookValuesAction action = new GetRefBookValuesAction();
 		action.setSearchPattern(getView().getSearchPattern());
 		action.setFilter(filter);
-		action.setPagingParams(new PagingParams(offset, max));
+		action.setPagingParams(new PagingParams(offset + 1, max));
 		action.setRefBookAttrId(refBookAttrId);
 		action.setVersion(version);
 
