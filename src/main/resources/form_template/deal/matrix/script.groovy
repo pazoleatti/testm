@@ -360,7 +360,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     row.f132 = recNoId
 
     // Графа 9
-    // row.f133, заполняется после графы 50
+    row.f133 = recNoId
 
     // Графа 10
     // row.f134, заполняется после графы 50
@@ -384,9 +384,6 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             val13 = '019'
             break
         case 379:
-        case 381:
-        case 393:
-        case 394:
             val13 = '016'
             break
         case 383:
@@ -395,6 +392,9 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             val13 = '032'
             break
         case 384:
+        case 381:
+        case 393:
+        case 394:
             val13 = '015'
             break
         case 385:
@@ -450,10 +450,10 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 384:
             if (srcRow.transactionType != null) {
                 def val14Rec = getRefBookValue(16, srcRow.transactionType)
-                if (val14Rec.CODE != null) {
-                    if (val14Rec.CODE.equals('S')) {
+                if (val14Rec != null && val14Rec.CODE != null) {
+                    if (val14Rec.CODE.stringValue.equals('S')) {
                         val14 = '027'
-                    } else if (val14Rec.CODE.equals('B')) {
+                    } else if (val14Rec.CODE.stringValue.equals('B')) {
                         val14 = '026'
                     }
                 }
@@ -480,6 +480,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             }
             break
     }
+
     if (val14 != null) {
         row.taxpayerSideCode = getRecordId(65, 'CODE', "$val14", date)
     }
@@ -643,10 +644,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
 
-    // Графа 26
-    if (type.id == 393) {
-        dealSubjectCode2 = srcRow.okpCode
-    }
+    // Графа 26 Не заполняется
 
     // Графа 27
     def String val27 = null
@@ -894,6 +892,11 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 390:
         case 391:
         case 392:
+        case 385:
+        case 386:
+        case 388:
+        case 389:
+        case 394:
             row.price = srcRow.price
             break
         case 383:
@@ -903,26 +906,29 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 393:
             row.price = srcRow.priceOne
             break
-        case 385:
-        case 386:
-        case 388:
-        case 389:
-        case 394:
-            row.price = srcRow.price
-            break
     }
 
     // Графа 44
     switch (type.id) {
+        case 375:
         case 376:
         case 377:
-        case 375:
         case 379:
         case 380:
         case 381:
         case 382:
         case 387:
+        case 392:
             row.total = srcRow.cost
+            break
+        case 383:
+            if(srcRow.percentIncomeSum != null)
+                row.total = srcRow.percentIncomeSum
+            if(srcRow.percentConsumptionSum != null)
+                row.total = srcRow.percentConsumptionSum
+            break
+        case 384:
+            row.total = srcRow.transactionSumRub
             break
         case 385:
             row.total = srcRow.totalCost
@@ -930,15 +936,10 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 386:
         case 388:
         case 389:
-        case 394:
-            row.total = srcRow.total
-            break
         case 390:
         case 391:
+        case 394:
             row.total = srcRow.total
-            break
-        case 392:
-            row.total = srcRow.cost
             break
         case 393:
             row.total = srcRow.totalNds
@@ -983,18 +984,18 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
     // Графа 49
     switch (type.id) {
-        case 376:
-        case 377:
+        case 385:
             row.countryCode3 = srcRow.country
             break
         case 375:
+        case 376:
+        case 377:
         case 379:
         case 380:
         case 381:
         case 382:
-            row.countryCode3 = srcRow.countryCode
-            break
         case 383:
+        case 386:
         case 389:
         case 390:
         case 391:
@@ -1008,16 +1009,8 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 384:
             row.countryCode3 = srcRow.contraCountryCode
             break
-        case 385:
-            row.countryCode3 = srcRow.country
-            break
-        case 386:
-            row.countryCode3 = srcRow.countryCode
-            break
-        case 388:
-            row.countryCode3 = srcRow.countryName
-            break
         case 387:
+        case 388:
             row.countryCode3 = srcRow.countryName
             break
     }
@@ -1068,9 +1061,6 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
         // Графа 7 (та же логика, что у графы 3)
         row.f131 = row.f121
-
-        // Графа 9 (та же логика, что у графы 3)
-        row.f133 = row.f121
 
         // Графа 10
         // Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике

@@ -24,7 +24,10 @@ public class RefBookAttribute implements Serializable {
 	/** Тип атрибута */
 	private RefBookAttributeType attributeType;
 
-	/** Если тип атрибута "Ссылка", то данное поле задает справочник, из которого будут подставляться данные. Например,
+    /** Обязательность заполнения */
+    private boolean required;
+
+    /** Если тип атрибута "Ссылка", то данное поле задает справочник, из которого будут подставляться данные. Например,
 	 * для справочника "Книга" в атрибуте "Автор" указываем код справочника "Человек".
 	 */
 	private Long refBookId;
@@ -193,6 +196,22 @@ public class RefBookAttribute implements Serializable {
 		this.alias = alias;
 	}
 
+    /**
+     * Возвращает обязательность поля
+     * @return
+     */
+    public boolean isRequired() {
+        return required;
+    }
+
+    /**
+     * Устанавливает обязательность атрибута
+     * @param required
+     */
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -229,6 +248,10 @@ public class RefBookAttribute implements Serializable {
 		if (refBookId != null ? !refBookId.equals(that.refBookId) : that.refBookId != null) {
 			return false;
 		}
+        if (required != that.required){
+            return false;
+        }
+
 		return true;
 	}
 
@@ -249,6 +272,7 @@ public class RefBookAttribute implements Serializable {
 		sb.append(", visible=").append(visible);
 		sb.append(", precision=").append(precision);
 		sb.append(", width=").append(width);
+		sb.append(", required=").append(required);
 		sb.append('}');
 		return sb.toString();
 	}

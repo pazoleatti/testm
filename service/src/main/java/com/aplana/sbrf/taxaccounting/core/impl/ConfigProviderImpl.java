@@ -21,7 +21,7 @@ public class ConfigProviderImpl implements ConfigurationProvider{
 	@Override
 	public String getString(ConfigurationParam property, String defaultValue) {
 		Map<ConfigurationParam, String> param = configDao.loadParams();
-		String value = param.get(property.name());
+		String value = param.get(property);
 		return StringUtils.hasText(value) ? value : defaultValue;
 	}
 	

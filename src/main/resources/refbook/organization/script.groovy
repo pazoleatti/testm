@@ -1,10 +1,12 @@
+/*
+    blob_data.id = 'ba9bb7ca-697c-b0c2-9999-e262617A9784'
+ */
 package refbook.organization
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
-
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 /**
  * Cкрипт справочника «Организации - участники контролируемых сделок»
  *
@@ -44,12 +46,6 @@ void importFromXLS() {
     } catch (Exception e) {
         logger.error(e.message)
     }
-
-    // def final Long refBookID = 9L
-//    def dataProvider = refBookFactory.getDataProvider(refBookID)
-//    def RefBook refBook = refBookFactory.get(refBookID)
-//    def SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd")
-
 }
 
 // Проверить шапку таблицы
@@ -124,7 +120,14 @@ def getNumber(def value) {
     if (value == null || "".equals(value.trim())) {
         return null
     }
-    return new BigDecimal(value.trim())
+
+    def tr =  value.trim()
+
+    if (!tr.matches("-?\\d+(.\\d+)?")) {
+        return null
+    }
+
+    return new BigDecimal(tr)
 }
 
 def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell) {

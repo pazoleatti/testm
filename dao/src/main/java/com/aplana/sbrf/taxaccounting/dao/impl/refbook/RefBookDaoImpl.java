@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -38,6 +39,9 @@ import java.util.*;
 public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
 	private static final Log logger = LogFactory.getLog(RefBookDaoImpl.class);
+
+    @Autowired
+    private RefBookUtils refBookUtils;
 
     @Override
     public RefBook get(Long refBookId) {
@@ -101,7 +105,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private List<RefBookAttribute> getAttributes(Long refBookId) {
         try {
             return getJdbcTemplate().query(
-                    "select id, name, alias, type, reference_id, attribute_id, visible, precision, width " +
+                    "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required " +
                             "from ref_book_attribute where ref_book_id = ? order by ord",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookAttributeRowMapper());
@@ -125,6 +129,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             result.setVisible(rs.getBoolean("visible"));
             result.setPrecision(rs.getInt("precision"));
             result.setWidth(rs.getInt("width"));
+            result.setRequired(rs.getBoolean("required"));
             return result;
         }
     }
@@ -382,6 +387,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             recordIds.add(new Object[]{recordId});
             // записываем значения ячеек
             Map<String, RefBookValue> record = records.get(i);
+            List<RefBookAttribute> attributes = refBook.getAttributes();
+
+            // проверка обязательности заполнения записей справочника
+            List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
+            if (errors.size() > 0){
+                throw new DaoException("Поля " + errors.toString() + "являются обязательными для заполнения");
+            }
+
             for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
                 String attributeAlias = entry.getKey();
                 if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) ||
@@ -452,6 +465,25 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             List<Object[]> delValues = new LinkedList<Object[]>();
             for (int i = 0; i < records.size(); i++) {
                 Map<String, RefBookValue> record = records.get(i);
+
+                // проверка обязательности заполнения записей справочника
+                List<RefBookAttribute> attributes = refBook.getAttributes();
+                List<String> errors = refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
+
+                if (errors.size() > 0) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Поля ");
+                    for (int j = 0; j < errors.size(); j++) {
+                        String field = errors.get(j);
+                        sb.append("«").append(field).append("»");
+                        if (j != errors.size() - 1) {
+                            sb.append(", ");
+                        }
+                    }
+                    sb.append(" являются обязательными для заполнения.");
+                    throw new DaoException(sb.toString());
+                }
+
                 // создаем строки справочника
                 Long rowId = getRowId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
 
@@ -507,7 +539,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
             // + REF_BOOK_VALUE
             jt.batchUpdate(INSERT_REF_BOOK_VALUE, listValues);
-        } catch (Exception ex) {
+        }
+        catch (DaoException ex) {
+            throw ex;
+        }
+        catch (Exception ex) {
 			throw new DaoException("Не удалось обновить значения справочника", ex);
         }
     }

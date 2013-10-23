@@ -6,14 +6,19 @@ import com.aplana.sbrf.taxaccounting.service.script.ImportService;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 @Service("importService")
 public class ImportServiceImpl implements ImportService {
@@ -109,7 +114,7 @@ public class ImportServiceImpl implements ImportService {
      * Получить текстовый xml из CSV файла.
      *
      * @param inputStream данные из файла
-     * @param charset кодировка
+     * @param charset     кодировка
      */
     private String getXMLStringFromCSV(InputStream inputStream, String charset) throws IOException {
         InputStreamReader isr = new InputStreamReader(inputStream, charset);
@@ -117,7 +122,7 @@ public class ImportServiceImpl implements ImportService {
 
         StringBuilder sb = new StringBuilder();
         sb.append("<data>").append(ENTER);
-        String [] rowCells;
+        String[] rowCells;
         // количество пустых строк
         int countEmptyRow = 0;
         while ((rowCells = reader.readNext()) != null) {
@@ -143,11 +148,11 @@ public class ImportServiceImpl implements ImportService {
     /**
      * Добавить строку в xml (при обработке CSV).
      *
-     * @param sb текст xml
+     * @param sb       текст xml
      * @param rowCells список значении из CSV
-     * @param rowName наименование добавляемой строки (обычная строка с данными - <b>row</b>, итоговая строка - <b>rowTotal</b>)
+     * @param rowName  наименование добавляемой строки (обычная строка с данными - <b>row</b>, итоговая строка - <b>rowTotal</b>)
      */
-    void addRow(StringBuilder sb, String [] rowCells, String rowName) {
+    void addRow(StringBuilder sb, String[] rowCells, String rowName) {
         if (rowCells == null) {
             return;
         }
@@ -163,9 +168,9 @@ public class ImportServiceImpl implements ImportService {
     /**
      * Получить текстовый xml из XLS файла.
      *
-     * @param inputStream данные из файла
-     * @param startStr начало таблицы (шапка первой колонки)
-     * @param endStr конец табцицы (надпись "итого" или значения после таблицы)
+     * @param inputStream  данные из файла
+     * @param startStr     начало таблицы (шапка первой колонки)
+     * @param endStr       конец табцицы (надпись "итого" или значения после таблицы)
      * @param columnsCount количество колонок в таблице
      */
     private String getXMLStringFromXLS(InputStream inputStream, String startStr, String endStr, Integer columnsCount) throws IOException {
@@ -185,15 +190,15 @@ public class ImportServiceImpl implements ImportService {
         StringBuilder sb = new StringBuilder();
         sb.append("<data>").append(ENTER);
 
-        ArrayList<Integer> skipList = getSkipCol(sheet, firstP);
+        Set<Integer> skipSet = getSkipCol(sheet, firstP);
 
         String rowStr;
         int indexRow = -1;
-        Iterator rows = sheet.rowIterator();
 
-        while (rows.hasNext()) {
-            indexRow += 1;
-            HSSFRow row = (HSSFRow) rows.next();
+        for (int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum(); i ++)
+        {
+            indexRow++;
+            HSSFRow row = sheet.getRow(i);
 
             // брать строки с позиции начала таблицы
             if (indexRow < firstP.getY()) {
@@ -205,7 +210,7 @@ public class ImportServiceImpl implements ImportService {
             }
 
             // получить значения ячеек строки
-            rowStr = getRowString(row, firstP.getX(), columnsCount, skipList);
+            rowStr = getRowString(row, firstP.getX(), columnsCount, skipSet);
             sb.append(rowStr);
         }
         sb.append("</data>");
@@ -215,21 +220,41 @@ public class ImportServiceImpl implements ImportService {
     /**
      * Получить номера столбцов которые нужно пропустить.
      *
-     * @param sheet лист XLS
+     * @param sheet  лист XLS
      * @param firstP начало таблицы
      */
-    ArrayList<Integer> getSkipCol(HSSFSheet sheet, Point firstP) {
-        ArrayList<Integer> value = new ArrayList<Integer>();
-        Iterator rows = sheet.rowIterator();
+    Set<Integer> getSkipCol(HSSFSheet sheet, Point firstP) {
+        Set<Integer> value = new HashSet<Integer>();
+        // Список объединенных столбцов
+        Set<Integer> mergeRegion = new HashSet<Integer>();
+        for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
+            CellRangeAddress adr = sheet.getMergedRegion(i);
+            if (adr.getFirstRow() != firstP.getY() + 2) {
+                continue;
+            }
+            for (int j = adr.getFirstRow(); j <= adr.getLastRow(); j++) {
+                for (int k = adr.getFirstColumn(); k <= adr.getLastColumn(); k++) {
+                    mergeRegion.add(k);
+                }
+            }
+        }
+        if (mergeRegion.isEmpty()) {
+            return value;
+        }
+
         int indexRow = -1;
-        while (rows.hasNext()) {
+
+        for (int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum(); i++) {
             indexRow += 1;
-            HSSFRow row = (HSSFRow) rows.next();
+            HSSFRow row = sheet.getRow(i);
+            if (row == null) {
+                continue;
+            }
 
             // брать строки с позиции начала таблицы
-            if (indexRow < (firstP.getY()+2)) {
+            if (indexRow < (firstP.getY() + 2)) {
                 continue;
-            } else if (indexRow > (firstP.getY()+2)) {
+            } else if (indexRow > (firstP.getY() + 2)) {
                 break;
             }
             Iterator<Cell> iterator = row.cellIterator();
@@ -238,9 +263,13 @@ public class ImportServiceImpl implements ImportService {
             while (iterator.hasNext()) {
                 indexCol++;
                 // получить значение ячейки
-                cellValue = getCellValue((HSSFCell)iterator.next());
-                if (cellValue==null || "".equals(cellValue)) {
-                    value.add(indexCol);
+                HSSFCell cell = ((HSSFCell) iterator.next());
+                // Пропускаем ячейки только в объединенных столбцах
+                if (mergeRegion.contains(cell.getColumnIndex())) {
+                    cellValue = getCellValue(cell);
+                    if (cellValue == null || "".equals(cellValue)) {
+                        value.add(indexCol);
+                    }
                 }
             }
         }
@@ -251,7 +280,7 @@ public class ImportServiceImpl implements ImportService {
      * Получить текстовый xml из XML файла.
      *
      * @param inputStream данные из файла
-     * @param charset кодировка
+     * @param charset     кодировка
      */
     private String getXMLStringFromXML(InputStream inputStream, String charset) throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -286,7 +315,7 @@ public class ImportServiceImpl implements ImportService {
         String cellValue;
         Iterator<Cell> iterator = row.cellIterator();
         while (iterator.hasNext()) {
-            cellValue = getCellValue((HSSFCell)iterator.next());
+            cellValue = getCellValue((HSSFCell) iterator.next());
             sb.append(TAB).append(TAB).append("<cell>");
             sb.append(cellValue != null ? cellValue : "");
             sb.append("</cell>").append(ENTER);
@@ -298,11 +327,11 @@ public class ImportServiceImpl implements ImportService {
     /**
      * Получить в строковом виде строку из таблицы экселя
      *
-     * @param row строка из таблицы
-     * @param colP номер ячейки с которой брать данные
+     * @param row          строка из таблицы
+     * @param colP         номер ячейки с которой брать данные
      * @param columnsCount количество столбцов в таблице
      */
-    private String getRowString(HSSFRow row, Integer colP, Integer columnsCount, ArrayList<Integer> skipList) {
+    private String getRowString(HSSFRow row, Integer colP, Integer columnsCount, Set<Integer> skipSet) {
         if (row == null) {
             return "<row/>";
         }
@@ -315,8 +344,10 @@ public class ImportServiceImpl implements ImportService {
         while (iterator.hasNext()) {
             indexCol++;
             // получить значение ячейки
-            cellValue = getCellValue((HSSFCell)iterator.next());
-            if (skipList.contains(indexCol)) continue;
+            cellValue = getCellValue((HSSFCell) iterator.next());
+            if (skipSet.contains(indexCol)) {
+                continue;
+            }
             if (colP != null && indexCol + row.getFirstCellNum() < colP.shortValue()) {
                 continue;
             }
@@ -387,21 +418,21 @@ public class ImportServiceImpl implements ImportService {
             return null;
         }
         // найти координату startStr
-        Iterator rows = sheet.rowIterator();
         int firstRow = -1;
         int firstCol = 0;
         boolean isFind = false;
-        while (rows.hasNext() && !isFind) {
+
+        for (int i = sheet.getFirstRowNum();  i <= sheet.getLastRowNum() && !isFind ; i++) {
             firstRow++;
             firstCol = -1;
-            HSSFRow row = (HSSFRow) rows.next();
+            HSSFRow row = sheet.getRow(i);
             if (row == null) {
                 continue;
             }
             Iterator<Cell> cells = row.cellIterator();
             while (cells.hasNext()) {
                 firstCol++;
-                String cell = getCellValue((HSSFCell)cells.next());
+                String cell = getCellValue((HSSFCell) cells.next());
                 if (value.equals(cell)) {
                     firstCol = firstCol + row.getFirstCellNum();
                     isFind = true;

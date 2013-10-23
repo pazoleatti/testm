@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
     <import resource="classpath:testScriptSupportContext.xml" />
-    <beans>
-        <bean name="formDataService" class="com.aplana.sbrf.taxaccounting.service.script.impl.FormDataServiceImpl"/>
-        <bean name="dataRowHelperImpl" class="com.aplana.sbrf.taxaccounting.service.script.impl.DataRowHelperImpl" scope="prototype"/>
-    </beans>
 
-
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.refbook.RefBookFactory"/>
+    </bean>
 </beans>

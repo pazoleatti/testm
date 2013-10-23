@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.ConfigurationProvider;
 import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
@@ -15,17 +16,14 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
-
+import jcifs.smb.SmbFileInputStream;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
-import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -40,11 +38,7 @@ import java.util.Map;
 @Transactional
 public class FormDataServiceImpl implements FormDataService {
 
-	public static final String IGNORE_URL = "http://ignore/";
-
-    private final Log log = LogFactory.getLog(getClass());
-
-	@Autowired
+    @Autowired
 	private FormDataDao formDataDao;
 	@Autowired
 	private FormTemplateDao formTemplateDao;
@@ -70,8 +64,8 @@ public class FormDataServiceImpl implements FormDataService {
     private EventLauncher eventHandlerLauncher;
 	@Autowired
 	private SignService signService;
-	@Autowired(required = false)
-	private URL signDataPath;
+	@Autowired
+	private ConfigurationProvider configurationProvider;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -110,14 +104,10 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public long createFormData(Logger logger, TAUserInfo userInfo,
 			int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod) {
-		if (formDataAccessService.canCreate(userInfo, formTemplateId, kind,
-				departmentId, reportPeriod.getId())) {
-			return createFormDataWithoutCheck(logger, userInfo,
-					formTemplateId, departmentId, kind, reportPeriod.getId(), false);
-		} else {
-			throw new AccessDeniedException(
-					"Недостаточно прав для создания налоговой формы с указанными параметрами");
-		}
+        formDataAccessService.canCreate(userInfo, formTemplateId, kind,
+                departmentId, reportPeriod.getId());
+        return createFormDataWithoutCheck(logger, userInfo,
+                formTemplateId, departmentId, kind, reportPeriod.getId(), false);
 	}
 	
 	
@@ -158,57 +148,72 @@ public class FormDataServiceImpl implements FormDataService {
                     "Недостаточно прав для импорта данных в налоговую форму");
         }
 
-        boolean checkSuccess = true;
-        File signFileName = null;
         File dataFile = null;
-        if ((signDataPath != null) && !signDataPath.toString().equals(IGNORE_URL)) { //TODO временное решение с IGNORE_URL
-	        try {
-                log.info("Validate signature.");
-                dataFile = File.createTempFile("dataFile", ".original");
-                signFileName = File.createTempFile("signature", ".sign");
-		        OutputStream outputStream =
-				        new FileOutputStream(dataFile);
-		        IOUtils.copy(inputStream, outputStream);
-		        OutputStream outputSignStream =
-				        new FileOutputStream(signFileName);
-		        IOUtils.copy(signDataPath.openStream(), outputSignStream);
-		        checkSuccess = signService.checkSign(dataFile.getAbsolutePath(), signFileName.getAbsolutePath(), 0);
-                inputStream = new FileInputStream(dataFile);
-                log.info("Temporary files: " + dataFile + " : " + signFileName);
-	        } catch (Exception e) {
-		        throw new ServiceException("Произошла ошибка при проверке подписи.", e);
-	        } finally {
-                if(signFileName != null){
-                    signFileName.delete();
-                }
-            }
-        }
-        if (!checkSuccess) {
-	        throw new ServiceException("Электронная подпись некорректна.");
-        }
+        File pKeyFile = null;
+        OutputStream dataFileOutputStream = null;
+        InputStream  dataFileInputStream = null;
+    	OutputStream pKeyFileOutputStream = null;
+    	InputStream pKeyFileInputStream = null;
+        try{
+        	
+	        dataFile = File.createTempFile("dataFile", ".original");
+	        dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
+	        IOUtils.copy(inputStream, dataFileOutputStream);
+	        IOUtils.closeQuietly(dataFileOutputStream);
+	        
+	        String pKeyFileUrl = configurationProvider.getString(ConfigurationParam.FORM_DATA_KEY_FILE);
+	        if (pKeyFileUrl != null) { // Необходимо проверить подпись
+	        	
+		        pKeyFile = File.createTempFile("signature", ".sign");
+				pKeyFileOutputStream = new BufferedOutputStream(new FileOutputStream(pKeyFile));
+				try{
+					pKeyFileInputStream = new BufferedInputStream(new SmbFileInputStream(pKeyFileUrl));
+				} catch (Exception e){
+					throw new ServiceException("Ошибка доступа к файлу базы открытых ключей.", e);
+				}
+		        IOUtils.copy(pKeyFileInputStream, pKeyFileOutputStream);
+	        	IOUtils.closeQuietly(pKeyFileOutputStream);
+	        	IOUtils.closeQuietly(pKeyFileInputStream);
+			              
+			    if (!signService.checkSign(dataFile.getAbsolutePath(), pKeyFile.getAbsolutePath(), 0)){
+			      	throw new ServiceException("Ошибка проверки цифровой подписи.");
+			    }
+			    
+	        }
+	        
+	        FormData fd = formDataDao.get(formDataId);
+	        
+        	dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+        	Map<String, Object> additionalParameters = new HashMap<String, Object>();
+        	additionalParameters.put("ImportInputStream", dataFileInputStream);
+        	additionalParameters.put("UploadFileName", fileName);
+        	formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
+        	IOUtils.closeQuietly(dataFileInputStream);
         
-        FormData fd = formDataDao.get(formDataId);
-
-        Map<String, Object> additionalParameters = new HashMap<String, Object>();
-        additionalParameters.put("ImportInputStream", inputStream);
-        additionalParameters.put("UploadFileName", fileName);
-        formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException(
-                    "Есть критические ошибки при выполнения скрипта",
-                    logger.getEntries());
-        }  else {
-            logger.info("Данные загружены");
-        }
-        
-        logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
-        auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
-                null, fd.getFormType().getId(), fd.getKind().getId(), fileName);
-        
-        IOUtils.closeQuietly(inputStream);
-        
-        if (dataFile != null){
-            dataFile.delete();
+	        if (logger.containsLevel(LogLevel.ERROR)) {
+	            throw new ServiceLoggerException(
+	                    "Есть критические ошибки при выполнения скрипта.",
+	                    logger.getEntries());
+	        }  else {
+	            logger.info("Данные загружены");
+	        }
+	        
+	        logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
+	        auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
+	                null, fd.getFormType().getId(), fd.getKind().getId(), fileName);
+        } catch (IOException e){
+        	throw new ServiceException(e.getLocalizedMessage(), e);
+        } finally {   
+        	IOUtils.closeQuietly(dataFileOutputStream);
+        	IOUtils.closeQuietly(dataFileInputStream);
+        	IOUtils.closeQuietly(pKeyFileOutputStream);
+        	IOUtils.closeQuietly(pKeyFileInputStream);
+	        if (dataFile != null){
+	            dataFile.delete();
+	        }
+	        if (pKeyFile != null){
+	        	pKeyFile.delete();
+	        }
         }
     }
 
@@ -241,7 +246,7 @@ public class FormDataServiceImpl implements FormDataService {
 		
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getId(), formData.getKind().getId(), null);
+                null, formData.getFormType().getId(), formData.getKind().getId(), null);
 
 		return formData.getId();
 	}
@@ -492,11 +497,10 @@ public class FormDataServiceImpl implements FormDataService {
 	public void doMove(long formDataId, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
 		// Форма не должна быть заблокирована даже текущим пользователем;
 		lockCoreService.checkUnlocked(FormData.class, formDataId, userInfo);
-		// Временный срез формы должен быть в актуальном состоянии
+   		// Временный срез формы должен быть в актуальном состоянии
 		dataRowDao.rollback(formDataId);
 		
-		List<WorkflowMove> availableMoves = formDataAccessService
-				.getAvailableMoves(userInfo, formDataId);
+		List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
 		if (!availableMoves.contains(workflowMove)) {
 			throw new ServiceException(
 					"Переход \""
@@ -510,8 +514,7 @@ public class FormDataServiceImpl implements FormDataService {
 				
         checkDestinations(formData);
 
-		formDataScriptingService.executeScript(userInfo,
-				formData, workflowMove.getEvent(), logger, null);
+		formDataScriptingService.executeScript(userInfo,formData, workflowMove.getEvent(), logger, null);
 		
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
@@ -530,42 +533,79 @@ public class FormDataServiceImpl implements FormDataService {
 						"Произошли ошибки в скрипте, который выполняется после перехода",
 						logger.getEntries());
 			} else {
-				// TODO: Непонятно что этот код здесь делает. Он должен быть в script-support и вызываться из
-				// вызываться из скриптов
-				
-                // compose для приемников после принятия формы или отмены
-                if (workflowMove.getToState() == WorkflowState.ACCEPTED ||
-                        workflowMove.getFromState() == WorkflowState.ACCEPTED) {
-                    
-                    // признак периода ввода остатков
-                    if (!reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
-                        // вызвать compose у форм-приемников
-                        List<DepartmentFormType> departmentFormTypes = departmentFormTypeDao.getFormDestinations(
-                                formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
-                        if (departmentFormTypes != null && !departmentFormTypes.isEmpty()) {
-                            for (DepartmentFormType i: departmentFormTypes) {
-
-                                ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
-                                scriptComponentContext.setUserInfo(userInfo);
-                                scriptComponentContext.setLogger(logger);
-                                ((ScriptComponentContextHolder)formDataCompositionService).setScriptComponentContext(scriptComponentContext);
-
-                                formDataCompositionService.compose(formData, i.getDepartmentId(),
-                                        i.getFormTypeId(), i.getKind());
-                            }
-                        }
-                    }
-                }
+                compose(workflowMove, formData, userInfo, logger);
             }
 		}
 
 		logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
 		auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 				null, formData.getFormType().getId(), formData.getKind().getId(), note);
-
-
 	}
 
+    /**
+     * Логика консолидации при переходе жц
+     *
+     * Функция выполняет консолидацию форм приемников для текущей формы, при ее переходе
+     * со статуса принята, либо в принята.
+     *
+     * Консолидация выполняется следующим образом.
+     * Вызваеся метод compose сервиса formDataCompositionService (formDataCompositionService.compose)
+     * для тех форм-приемников, у которых есть формы в статусе принята. Если у приемника нет форм в
+     * статусе принята то форма приемник удаляется.
+     *
+     * Важно. Консолидация не выполняется в периоде ввода остатков
+     *
+     * <b>Замечение.</b> При поиске формы мы использум getFormDestinations котоый возвращает список
+     * моделей DepartmentFormType. Для получения модели FormData используется поиск через
+     * formDataDao.find, где одним из параметров подставляется formData.getReportPeriodId, и это нормально,
+     * так как источник и приемник у нас находятся в одном отчетном периоде.
+     *
+     *  http://conf.aplana.com/pages/viewpage.action?pageId=8788114
+     */
+    void compose(WorkflowMove workflowMove, FormData formData, TAUserInfo userInfo, Logger logger){
+        // Проверка перехода ЖЦ. Принятие либо отмена принятия
+        if (workflowMove.getToState() == WorkflowState.ACCEPTED || workflowMove.getFromState() == WorkflowState.ACCEPTED) {
+            // признак периода ввода остатков
+            if (!reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
+                // получение списка типов приемников для текущей формы
+                List<DepartmentFormType> departmentFormTypes = departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
+                // Если найдены приемники то обработаем их
+                if (departmentFormTypes != null && !departmentFormTypes.isEmpty()) {
+                    for (DepartmentFormType i: departmentFormTypes) {
+                        // получим созданные формы с бд
+                        FormData destinationForm = formDataDao.find(i.getFormTypeId(), i.getKind(), i.getDepartmentId(), formData.getReportPeriodId());
+                        //В связи с http://jira.aplana.com/browse/SBRFACCTAX-4723
+                        // Только для распринятия
+                        if (destinationForm == null && workflowMove.getFromState() == WorkflowState.ACCEPTED)
+                            continue;
+                        // получение источников для текущего приемника i
+                        List<DepartmentFormType> sourceFormTypes = departmentFormTypeDao.getFormSources(i.getDepartmentId(), i.getFormTypeId(), i.getKind());
+                        // количество источников в статусе принята
+                        boolean existAcceptedSources = false;
+                        for (DepartmentFormType s: sourceFormTypes){
+                            FormData sourceForm = formDataDao.find(s.getFormTypeId(), s.getKind(), s.getDepartmentId(), formData.getReportPeriodId());
+                            if (sourceForm !=null && sourceForm.getState().equals(WorkflowState.ACCEPTED)){
+                                existAcceptedSources = true;
+                                break;
+                            }
+                        }
+                        // если текущая форма приемник имеет один и более источников в статусе принята то консолидируем ее, иначе удаляем
+                        if (existAcceptedSources){
+                            ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
+                            scriptComponentContext.setUserInfo(userInfo);
+                            scriptComponentContext.setLogger(logger);
+                            ((ScriptComponentContextHolder)formDataCompositionService).setScriptComponentContext(scriptComponentContext);
+
+                            formDataCompositionService.compose(formData, i.getDepartmentId(),
+                                    i.getFormTypeId(), i.getKind());
+                        } else if (destinationForm != null){
+                            deleteFormData(userInfo, destinationForm.getId());
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 	@Override
 	@Transactional
@@ -594,8 +634,6 @@ public class FormDataServiceImpl implements FormDataService {
 	public ObjectLock<Long> getObjectLock(long formDataId, TAUserInfo userInfo) {
 		return lockCoreService.getLock(FormData.class, formDataId, userInfo);
 	}
-
-
 
     /**
      * Проверка наличия и статуса приемника при осуществлении перевода формы

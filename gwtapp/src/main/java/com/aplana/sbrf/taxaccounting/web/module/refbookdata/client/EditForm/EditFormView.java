@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPick
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -50,7 +51,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		for (RefBookColumn col : attributes) {
 			HorizontalPanel oneField = new HorizontalPanel();
 			oneField.setWidth("100%");
-			Label label = new Label(col.getName());
+            Label label = getArrtibuteLabel(col);
             label.setWordWrap(true);
 			HorizontalPanel panel = new HorizontalPanel();
 			panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
@@ -97,6 +98,25 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		this.widgets = widgets;
 		return widgets;
 	}
+
+    /**
+     *  Label для input'a редактирования значения справочника
+     *  с названием атрибута справочника
+     */
+    private Label getArrtibuteLabel(RefBookColumn col){
+        Label label;
+        if (col.isRequired()){
+            SafeHtmlBuilder builder = new SafeHtmlBuilder();
+            builder.appendHtmlConstant(col.getName() + ":<span class='required'>*</span>");
+            HTML span = new HTML(builder.toSafeHtml());
+            label = span;
+        } else{
+            label = new Label(col.getName()+":");
+        }
+        label.addStyleName("inputLabel");
+
+        return label;
+    }
 
 	@Override
 	public void fillInputFields(Map<String, RefBookValueSerializable> record) {
@@ -145,23 +165,28 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			try {
 				switch (field.getKey().getAttributeType()) {
 					case NUMBER:
-						Number number = field.getValue().getValue() == null || field.getValue().getValue().toString().trim().isEmpty()
+						Number number = (field.getValue().getValue() == null || field.getValue().getValue().toString().trim().isEmpty())
 								? null : new BigDecimal((String)field.getValue().getValue());
-						String numberStr = Double.toString(number.doubleValue());
-						String fractionalStr = numberStr.substring(numberStr.indexOf('.')+1);
-						String intStr = Integer.toString(Math.abs(number.intValue()));
-						if ((intStr.length() > 10) || (fractionalStr.length() > 17)) {
-							BadValueException badValueException = new BadValueException();
-							badValueException.setFieldName(field.getKey().getName());
-							badValueException.setDescription("Значение не соответствует формату (27, 10)");
-							throw badValueException;
+						checkRequired(field.getKey(), number);
+						if (number != null) {
+							String numberStr = Double.toString(number.doubleValue());
+							String fractionalStr = numberStr.substring(numberStr.indexOf('.')+1);
+							String intStr = Integer.toString(Math.abs(number.intValue()));
+							if ((intStr.length() > 10) || (fractionalStr.length() > 17)) {
+								BadValueException badValueException = new BadValueException();
+								badValueException.setFieldName(field.getKey().getName());
+								badValueException.setDescription("Значение не соответствует формату (27, 10)");
+								throw badValueException;
+							}
 						}
 						value.setAttributeType(RefBookAttributeType.NUMBER);
 						value.setNumberValue(number);
 						break;
 					case STRING:
-						String string = field.getValue().getValue() == null ? null : (String)field.getValue().getValue();
-						if (string.length() > 2000) {
+						String string = (field.getValue().getValue() == null || ((String)field.getValue().getValue()).trim().isEmpty()) ?
+								null : (String)field.getValue().getValue();
+						checkRequired(field.getKey(), string);
+						if (string!= null && string.length() > 2000) {
 							BadValueException badValueException = new BadValueException();
 							badValueException.setFieldName(field.getKey().getName());
 							badValueException.setDescription("Значение более 2000 символов");
@@ -172,11 +197,13 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 						break;
 					case DATE:
 						Date date = field.getValue().getValue() == null ? null : (Date)field.getValue().getValue();
+						checkRequired(field.getKey(), date);
 						value.setAttributeType(RefBookAttributeType.DATE);
 						value.setDateValue(date);
 						break;
 					case REFERENCE:
 						Long longValue = field.getValue().getValue() == null ? null : (Long)field.getValue().getValue();
+						checkRequired(field.getKey(), longValue);
 						value.setAttributeType(RefBookAttributeType.REFERENCE);
 						value.setReferenceValue(longValue);
 						break;
@@ -196,6 +223,15 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			}
 		}
 		return fieldsValues;
+	}
+
+	private void checkRequired(RefBookColumn attr, Object val) throws BadValueException {
+		if (attr.isRequired() && (val == null)) {
+			BadValueException badValueException = new BadValueException();
+			badValueException.setFieldName(attr.getName());
+			badValueException.setDescription("Обязательно для заполнения");
+			throw badValueException;
+		}
 	}
 
 	@Override

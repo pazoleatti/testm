@@ -1,7 +1,0 @@
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:d='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker'
-             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client'
-             xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
-
-</ui:UiBinder>
