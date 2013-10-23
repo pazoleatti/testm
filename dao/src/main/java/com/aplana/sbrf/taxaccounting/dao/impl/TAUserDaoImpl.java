@@ -1,13 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,10 +18,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 @Transactional(readOnly=true)
@@ -51,7 +46,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			TAUser result = new TAUser();
 			result.setId(rs.getInt("id"));
 			result.setName(rs.getString("name"));
-			result.setActive(rs.getBoolean("is_active"));
+			result.setActive(rs.getInt("is_active")==1?true:false);
 			result.setDepartmentId(rs.getInt("department_id"));
 			result.setLogin(rs.getString("login"));
 			result.setEmail(rs.getString("email"));
@@ -171,10 +166,10 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	@Transactional(readOnly=false)
 	@Override
 	@CacheEvict(value="User", key="#userId", beforeInvocation=true)
-	public void setUserIsActive(int userId, boolean isActive) {
+	public void setUserIsActive(int userId, int isActive) {
 		int rows = getJdbcTemplate().update("update sec_user set is_active=? where id = ?", 
 				new Object[]{isActive, userId},
-				new int[]{Types.BOOLEAN, Types.INTEGER});
+				new int[]{Types.NUMERIC, Types.NUMERIC});
 		if(rows == 0)
 			throw new DaoException("Пользователя с id = " + userId + " не существует. Не удалось выставить флаг active.");
 		
