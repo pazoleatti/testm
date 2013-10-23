@@ -20,7 +20,7 @@ import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.LoadingStateChangeEvent;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -50,7 +50,7 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 	private static Binder binder = GWT.create(Binder.class);
 
 	@UiField
-	CellTable<RefBookItem> cellTable;
+	DataGrid<RefBookItem> cellTable;
 
 	@UiField
 	TextBox txtFind;

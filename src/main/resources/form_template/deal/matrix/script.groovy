@@ -644,10 +644,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
 
-    // Графа 26
-    if (type.id == 393) {
-        row.dealSubjectCode2 = srcRow.okpCode
-    }
+    // Графа 26 Не заполняется
 
     // Графа 27
     def String val27 = null
@@ -659,7 +656,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             val27 = '70.32.2'
             break
         case 375:
-            val27 = '72.2'
+            val27 = '79.20'
             break
         case 379:
         case 380:
