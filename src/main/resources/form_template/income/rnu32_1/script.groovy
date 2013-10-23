@@ -85,19 +85,20 @@ void checkUniq() {
  */
 def addRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
     def newRow = getNewRow()
     def index
 
     if (currentDataRow == null || currentDataRow.getIndex() == -1) {
-        index = getIndexByAlias(dataRowHelper, 'total1')
+        index = getIndexByAlias(dataRows, 'total1')
     } else if (currentDataRow.getAlias() == null) {
         index = currentDataRow.getIndex()
     } else {
         def alias = currentDataRow.getAlias()
         if (alias.contains('total')) {
-            index = getIndexByAlias(dataRowHelper, alias)
+            index = getIndexByAlias(dataRows, alias)
         } else {
-            index = getIndexByAlias(dataRowHelper, 'total' + alias)
+            index = getIndexByAlias(dataRows, 'total' + alias)
         }
     }
     dataRowHelper.insert(newRow, index + 1)
@@ -140,22 +141,22 @@ def calc() {
         // графа 1
         row.number = row.name
         // графа 15
-        row.incomePrev = calc15(row, lastDay, cache, dataRowHelper)
+        row.incomePrev = calc15(row, lastDay, cache, dataRows)
         // графа 16
-        row.incomeShortPosition = calc16(row, lastDay, cache, dataRowHelper)
+        row.incomeShortPosition = calc16(row, lastDay, cache, dataRows)
         // графа 17
         row.percIncome = calc17(row, lastDay, cache)
         // графа 18
         row.totalPercIncome = calc18(row)
     }
 
-    sort(dataRowHelper)
+    sort(dataRows)
 
     // посчитать итоги по разделам
     def sumColumns = getSumColumns()
     getAliasesSections().each { section ->
-        def firstRow = getRowByAlias(dataRowHelper, section)
-        def lastRow = getRowByAlias(dataRowHelper, 'total' + section)
+        def firstRow = getRowByAlias(dataRows, section)
+        def lastRow = getRowByAlias(dataRows, 'total' + section)
         sumColumns.each {
             lastRow.getCell(it).setValue(getSum(it, firstRow, lastRow))
         }
@@ -217,8 +218,8 @@ def logicalCheck() {
         }
 
         // 3. Арифметическая проверка графы 15..18
-        needValue['incomePrev'] = calc15(row, lastDay, cache, dataRowHelper)
-        needValue['incomeShortPosition'] = calc16(row, lastDay, cache, dataRowHelper)
+        needValue['incomePrev'] = calc15(row, lastDay, cache, dataRows)
+        needValue['incomeShortPosition'] = calc16(row, lastDay, cache, dataRows)
         needValue['percIncome'] = calc17(row, lastDay, cache)
         needValue['totalPercIncome'] = calc18(row)
 
@@ -240,8 +241,8 @@ def logicalCheck() {
     def lastRow
     def sumColumns = getSumColumns()
     for (def section : getAliasesSections()) {
-        firstRow = getRowByAlias(dataRowHelper, section)
-        lastRow = getRowByAlias(dataRowHelper, 'total' + section)
+        firstRow = getRowByAlias(dataRows, section)
+        lastRow = getRowByAlias(dataRows, 'total' + section)
         for (def col : sumColumns) {
             def value = roundValue(lastRow.getCell(col).getValue() ?: 0, 6)
             def sum = roundValue(getSum(col, firstRow, lastRow), 6)
@@ -313,9 +314,10 @@ void consolidation() {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceDataRowHelper = formDataService.getDataRowHelper(source)
+                def sourceDataRows = sourceDataRowHelper.getAllCached()
                 // копирование данных по разделам
                 aliasesSections.each { section ->
-                    copyRows(sourceDataRowHelper, dataRowHelper, section, 'total' + section)
+                    copyRows(sourceDataRows, dataRows, section, 'total' + section)
                 }
             }
         }
@@ -338,8 +340,7 @@ void importData() {
 /**
  * Отсорировать данные (по графе 1, 2).
  */
-void sort(def dataRowHelper) {
-    def dataRows = dataRowHelper.getAllCached()
+void sort(def dataRows) {
     // список со списками строк каждого раздела для сортировки
     def sortRows = []
     def from
@@ -347,8 +348,8 @@ void sort(def dataRowHelper) {
 
     // подразделы, собрать список списков строк каждого раздела
     getAliasesSections().each { section ->
-        from = getIndexByAlias(dataRowHelper, section) + 1
-        to = getIndexByAlias(dataRowHelper, 'total' + section) - 1
+        from = getIndexByAlias(dataRows, section) + 1
+        to = getIndexByAlias(dataRows, 'total' + section) - 1
         if (from <= to) {
             sortRows.add(dataRows[from..to])
         }
@@ -381,23 +382,21 @@ void sort(def dataRowHelper) {
 /**
  * Копировать заданный диапозон строк из источника в приемник.
  *
- * @param sourceDataRowHelper хелпер источника
- * @param destinationDataRowHelper хелпер приемника
+ * @param sourceDataRows строки источника
+ * @param destinationDataRows строки приемника
  * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно)
  * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно),
  *      в приемник строки вставляются перед строкой с этим псевдонимом
  */
-void copyRows(def sourceDataRowHelper, def destinationDataRowHelper, def fromAlias, def toAlias) {
-    def from = getIndexByAlias(sourceDataRowHelper, fromAlias) + 1
-    def to = getIndexByAlias(sourceDataRowHelper, toAlias)
+void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def toAlias) {
+    def from = getIndexByAlias(sourceDataRows, fromAlias) + 1
+    def to = getIndexByAlias(sourceDataRows, toAlias)
     if (from >= to) {
         return
     }
-    def sourceDataRows = sourceDataRowHelper.getAllCached()
     def copyRows = sourceDataRows.subList(from, to)
-    def dataRows = destinationDataRowHelper.getAllCached()
-    dataRows.addAll(getIndexByAlias(destinationDataRowHelper, toAlias), copyRows)
-    updateIndexes(destinationDataRowHelper)
+    dataRows.addAll(getIndexByAlias(destinationDataRows, toAlias), copyRows)
+    updateIndexes(destinationDataRows)
 }
 
 /**
@@ -417,16 +416,15 @@ def getSumColumns() {
 /**
  * Получить номер строки в таблице по псевдонимиу (0..n).
  */
-def getIndexByAlias(def dataRowHelper, String rowAlias) {
-    def row = getRowByAlias(dataRowHelper, rowAlias)
+def getIndexByAlias(def dataRows, String rowAlias) {
+    def row = getRowByAlias(dataRows, rowAlias)
     return (row != null ? row.getIndex() - 1 : -1)
 }
 
 /**
  * Поправить индексы, потому что они после вставки не пересчитываются.
  */
-void updateIndexes(def dataRowHelper) {
-    def dataRows = dataRowHelper.getAllCached()
+void updateIndexes(def dataRows) {
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
@@ -435,14 +433,13 @@ void updateIndexes(def dataRowHelper) {
 /**
  * Получить строку по алиасу.
  *
- * @param dataRowHelper данные нф
+ * @param dataRows данные нф
  * @param alias алиас
  */
-def getRowByAlias(def dataRowHelper, def alias) {
-    if (alias == null || alias == '' || dataRowHelper == null) {
+def getRowByAlias(def dataRows, def alias) {
+    if (alias == null || alias == '' || dataRows == null) {
         return null
     }
-    def dataRows = dataRowHelper.getAllCached()
     for (def row : dataRows) {
         if (alias.equals(row.getAlias())) {
             return row
@@ -516,13 +513,13 @@ def checkRequiredColumns(def row, def columns) {
  * @param row строка нф
  * @param lastDay последний день отчетного месяца
  * @param cache кеш
- * @param dataRowHelper данные нф
+ * @param dataRows строки нф
  */
-def calc15(def row, def lastDay, def cache, def dataRowHelper) {
+def calc15(def row, def lastDay, def cache, def dataRows) {
     def tmp = null
     if (row.shortPositionData < row.maturityDate) {
         def t = lastDay - row.maturityDate
-        tmp = calc15or16(row, lastDay, cache, t, dataRowHelper)
+        tmp = calc15or16(row, lastDay, cache, t, dataRows)
     }
     return roundValue(tmp, 2)
 }
@@ -533,13 +530,13 @@ def calc15(def row, def lastDay, def cache, def dataRowHelper) {
  * @param row строка нф
  * @param lastDay последний день отчетного месяца
  * @param cache кеш
- * @param dataRowHelper данные нф
+ * @param dataRows данные нф
  */
-def calc16(def row, def lastDay, def cache, def dataRowHelper) {
+def calc16(def row, def lastDay, def cache, def dataRows) {
     def tmp = null
     if (row.shortPositionData < row.maturityDate) {
         def t = lastDay - row.shortPositionData
-        tmp = calc15or16(row, lastDay, cache, t, dataRowHelper)
+        tmp = calc15or16(row, lastDay, cache, t, dataRows)
     }
     return roundValue(tmp, 2)
 }
@@ -550,15 +547,15 @@ def calc16(def row, def lastDay, def cache, def dataRowHelper) {
  * @param row строка нф
  * @param lastDay последний день отчетного месяца
  * @param cache кеш
- * @param dataRowHelper данные нф
+ * @param dataRows строки нф
  * @param t количество дней между последним днем месяца и графой 6 или графой 11
  */
-def calc15or16(def row, def lastDay, def cache, def t, def dataRowHelper) {
-    if (row.getIndex() < getIndexByAlias(dataRowHelper, '6')) {
+def calc15or16(def row, def lastDay, def cache, def t, def dataRows) {
+    if (row.getIndex() < getIndexByAlias(dataRows, '6')) {
         // Для ценных бумаг, учтенных в подразделах 1, 2, 3, 4, 5
         checkDivision(row.currentPeriod, "Деление на ноль в строке ${row.getIndex()}: графа 12.")
         return row.countsBonds * roundValue(row.incomeCurrentCoupon * t / row.currentPeriod, 2)
-    } else if (row.getIndex() < getIndexByAlias(dataRowHelper, '8')) {
+    } else if (row.getIndex() < getIndexByAlias(dataRows, '8')) {
         // Для ценных бумаг, учтенных в подразделах 6 и 7
         // справочник 22 "Курс валют", атрибут 81 RATE - "Курс валют", атрибут 80 CODE_NUMBER - Цифровой код валюты
         def record22 = getRecord(22, 'CODE_NUMBER', row.code, lastDay, cache)
@@ -598,14 +595,12 @@ def calc18(def row) {
 /**
  * Получить сумму столбца.
  */
-def getSum(def columnAlias, def rowStart, def rowEnd) {
+def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
     def from = rowStart.getIndex()
     def to = rowEnd.getIndex() - 2
     if (from > to) {
         return 0
     }
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
     return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
 }
 
