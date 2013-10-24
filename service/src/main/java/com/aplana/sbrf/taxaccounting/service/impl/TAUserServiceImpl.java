@@ -80,6 +80,7 @@ public class TAUserServiceImpl implements TAUserService {
 					"Назначенное пользователю " + user.getLogin() + " подразделение не присутствует в справочнике «Подразделения» Системы");
 		try {
             logger.info("Обновленее информации пользователя " + user.getLogin() + " updateUser()");
+            user.setId(userDao.getUserIdByLogin(user.getLogin()));
 			userDao.updateUser(user);
 		} catch (DaoException e) {
             logger.error("Ошибка при обновлении информации пользователя " + user.getLogin() + " updateUser().", e);
