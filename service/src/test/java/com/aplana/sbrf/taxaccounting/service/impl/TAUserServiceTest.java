@@ -1,22 +1,21 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.exception.WSException;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TAUserServiceTest {
 	
@@ -79,7 +78,7 @@ public class TAUserServiceTest {
 		service.setUserIsActive(user.getLogin(), false);
 	}
 	
-	@Test
+	@Test(expected = WSException.class)
 	public void testServiceUpdateUserInfo(){
 		service.updateUser(user);
 	}

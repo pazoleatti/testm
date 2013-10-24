@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,11 +13,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"TAUserDaoTest.xml"})
@@ -84,7 +83,7 @@ public class TAUserDaoTest {
 		TAUser userDB = userDao.getUser(userId);
 		Assert.assertEquals(1, userDB.getDepartmentId());
 		
-		userDao.setUserIsActive(user.getId(),user.isActive());
+		userDao.setUserIsActive(user.getId(),user.isActive()?1:0);
 		userDB = userDao.getUser(userId);
 		Assert.assertFalse(userDB.isActive());
 	}

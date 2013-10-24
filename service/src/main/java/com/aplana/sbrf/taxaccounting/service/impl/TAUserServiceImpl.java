@@ -1,21 +1,20 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.TAUserFull;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserFull;
 import com.aplana.sbrf.taxaccounting.model.exception.WSException;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service("taUserService")
 @Transactional
@@ -34,7 +33,7 @@ public class TAUserServiceImpl implements TAUserService {
 			int userId = userDao.getUserIdByLogin(login);
 			return userDao.getUser(userId);
 		} catch (DaoException e) {
-			throw new WSException(WSException.SudirErrorCodes.SUDIR_004, "Ошибка при получении пользователя по логину." + e.toString());
+			throw new WSException(WSException.SudirErrorCodes.SUDIR_004, "Ошибка при получении пользователя по логину." + e.getLocalizedMessage());
 		}
 		
 	}
@@ -48,19 +47,22 @@ public class TAUserServiceImpl implements TAUserService {
 	public void setUserIsActive(String login, boolean isActive) {
 		try {
 			int userId = userDao.getUserIdByLogin(login);
-			userDao.setUserIsActive(userId, isActive);
-		} catch (DaoException e) {
-			throw new WSException(WSException.SudirErrorCodes.SUDIR_004,
-					"Пользователь с таким логином не найдем в БД.");
+			userDao.setUserIsActive(userId, isActive?1:0);
+		}catch (EmptyResultDataAccessException e){
+            throw new WSException(WSException.SudirErrorCodes.SUDIR_004,
+                    "Пользователя с login = " + login + " не существует.");
+        }catch (DaoException e) {
+			throw new WSException(WSException.SudirErrorCodes.SUDIR_001,
+					"Ошибка при модификации пользователя." + e.getLocalizedMessage());
 		}
 		
 	}
 
 	@Override
 	public void updateUser(TAUser user) {
-		if(userDao.getUserIdByLogin(user.getLogin()) != 0)
-			throw new WSException(WSException.SudirErrorCodes.SUDIR_005,
-					"Пользователь с таким логином уже существует.");
+        if(userDao.checkUserLogin(user.getLogin()) == 0)
+            throw new WSException(WSException.SudirErrorCodes.SUDIR_004,
+                    "Пользователя с login = " + user.getLogin() + " не существует.");
 		for(TARole role : user.getRoles()){
 			if(userDao.checkUserRole(role.getAlias()) == 0)
 				throw new WSException(WSException.SudirErrorCodes.SUDIR_008,
@@ -68,12 +70,12 @@ public class TAUserServiceImpl implements TAUserService {
 		}
 		if(departmentDao.getDepartment(user.getDepartmentId()) == null)
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_008,
-					"Назначенное пользователю подразделение не присутствует в справочнике «Подразделения» Системы");
+					"Назначенное пользователю " + user.getLogin() + " подразделение не присутствует в справочнике «Подразделения» Системы");
 		try {
 			userDao.updateUser(user);
 		} catch (DaoException e) {
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_000 ,
-					"Ошибка при модификации пользователя." + e.toString());
+					"Ошибка при модификации пользователя " + user.getLogin() + "." + e.getLocalizedMessage());
 		}
 	}
 
@@ -95,7 +97,7 @@ public class TAUserServiceImpl implements TAUserService {
 			return userDao.createUser(user);
 		} catch (DaoException e) {
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_000 ,
-					"Ошибка при создании пользователя." + e.toString());
+					"Ошибка при создании пользователя." + e.getLocalizedMessage());
 		}
 		
 		
