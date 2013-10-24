@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -32,8 +33,8 @@ public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDa
         @Override
         public Pair<Long, Pair<String, RefBookValue>> mapRow(ResultSet rs, int rowNum) throws SQLException {
 
-            RefBookAttributeType type;
-            Object value;
+            RefBookAttributeType type = null;
+            Object value = null;
 
             switch (rs.getInt("type")) {
                 case 1:
@@ -42,7 +43,10 @@ public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDa
                     break;
                 case 2:
                     type = RefBookAttributeType.NUMBER;
-                    value = rs.getBigDecimal("number_value").setScale(rs.getInt("precision"));
+                    BigDecimal val = rs.getBigDecimal("number_value");
+                    if (val != null) {
+                        value = val.setScale(rs.getInt("precision"));
+                    }
                     break;
                 case 3:
                     type = RefBookAttributeType.DATE;
@@ -52,8 +56,6 @@ public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDa
                     type = RefBookAttributeType.REFERENCE;
                     value = rs.getLong("reference_value");
                     break;
-                default:
-                    return null;
             }
 
             RefBookValue rbValue = new RefBookValue(type, value);

@@ -162,7 +162,6 @@ void addRow() {
             }
         }
     }
-    row.count = 1
     dataRowHelper.insert(row, index + 1)
 }
 
@@ -526,12 +525,16 @@ void calc() {
         if (row.getAlias() != null) {
             continue
         }
+
         // Порядковый номер строки
         row.rowNum = index++
+
+        // Количество
+        row.count = 1
+
         // Графы 27 и 28 из 25 и 26
         incomeSum = row.incomeSum
         consumptionSum = row.consumptionSum
-
         if (incomeSum != null && consumptionSum == null) {
             row.priceOne = incomeSum
         } else if (incomeSum == null && consumptionSum != null) {
@@ -568,6 +571,20 @@ void calc() {
             row.region2 = null
             row.city2 = null
             row.settlement2 = null
+        }
+
+        // Сбарсываем "Регион РФ" если страна не Россия
+        if (row.countryCode2 != null) {
+            def country = refBookService.getStringValue(10, row.countryCode2, 'CODE')
+            if (country != null && country != '643') {
+                    row.region1 = null
+            }
+        }
+        if (row.countryCode3 != null) {
+            def country = refBookService.getStringValue(10, row.countryCode3, 'CODE')
+            if (country != null && country != '643') {
+                row.region2 = null
+            }
         }
 
         if (row.countryCode2 == row.countryCode3) {
@@ -671,7 +688,7 @@ void addAllStatic() {
 def calcItog(int i, def dataRows) {
     def newRow = formData.createDataRow()
 
-    newRow.getCell('itog').colSpan = 26
+    newRow.getCell('itog').colSpan = 25
     newRow.itog = 'Подитог:'
     newRow.setAlias('itg#'.concat(i.toString()))
     newRow.getCell('fix').colSpan = 2
@@ -720,7 +737,7 @@ void consolidation() {
 }
 
 def getHeaderRowCount() {
-    return 3
+    return 2
 }
 
 /**

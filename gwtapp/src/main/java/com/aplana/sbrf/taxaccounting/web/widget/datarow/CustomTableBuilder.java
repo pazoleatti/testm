@@ -174,7 +174,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 		// End the row.
 		tr.endTR();
 		// После билда всех строк очищаем список спанов
-		if (cellTable.getRowCount() == (absRowIndex+1)) {
+		if (cellTable.getPageSize() == (absRowIndex+1)) {
 			globalSpans.clear();
 		}
 	}
