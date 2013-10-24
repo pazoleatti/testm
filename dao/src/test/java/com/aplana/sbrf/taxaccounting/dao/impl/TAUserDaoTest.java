@@ -118,6 +118,7 @@ public class TAUserDaoTest {
 		Assert.assertEquals("@sard",userDao.getUser(user.getId()).getEmail());
 		Assert.assertEquals("Контролёр Банка",userDao.getUser(user.getId()).getName());
 		Assert.assertEquals("ROLE_OPER",userDao.getUser(userDao.getUserIdByLogin(user.getLogin())).getRoles().get(0).getAlias());
+        Assert.assertEquals("ROLE_CONTROL_UNP",userDao.getUser(userDao.getUserIdByLogin(user.getLogin())).getRoles().get(1).getAlias());
 		Assert.assertEquals(2,userDao.getUser(userDao.getUserIdByLogin(user.getLogin())).getRoles().size());
 	}
 	
