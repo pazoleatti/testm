@@ -125,6 +125,12 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         GetDepartmentCombinedResult result = new GetDepartmentCombinedResult();
         result.setDepartmentCombined(depCombined);
+
+        // Если запись не нашлась, то готовим новую
+        if (result.getDepartmentCombined().getDepartmentId() == null && action.getDepartmentId() != null) {
+            result.getDepartmentCombined().setDepartmentId(action.getDepartmentId().longValue());
+        }
+
         // Признак открытости
         result.setReportPeriodActive(reportService.isActivePeriod(action.getReportPeriodId(), action.getDepartmentId()));
 

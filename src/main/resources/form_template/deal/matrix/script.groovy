@@ -472,10 +472,11 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             val14 = '030'
             break
         case 394:
-            if (srcRow.outcomeSum == null) {
+			if (srcRow.outcomeSum != null && srcRow.incomeSum != null) {
+                val14 = srcRow.outcomeSum < srcRow.incomeSum ? '027' : '026'
+            } else if (srcRow.outcomeSum == null) {
                 val14 = '027'
-            }
-            if (srcRow.incomeSum == null) {
+            } else {
                 val14 = '026'
             }
             break
