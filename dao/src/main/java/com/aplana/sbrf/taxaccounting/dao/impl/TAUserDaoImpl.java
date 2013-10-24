@@ -158,7 +158,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			});
 			return keyHolder.getKey().intValue();
 		} catch (DataAccessException e) {
-			throw new DaoException("Пользователя с login = " + user.getLogin() + " не удалось сохранить." + e.toString());
+			throw new DaoException("Пользователя с login = " + user.getLogin() + " не удалось сохранить." + e.getLocalizedMessage());
 		} 
 		
 	}
@@ -204,7 +204,8 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			
 			
 		} catch (DataAccessException e) {
-			throw new DaoException("Не удалось обновить метаинформацию о пользователе с login = " + user.getLogin());
+			throw new DaoException("Не удалось обновить метаинформацию о пользователе с login = " + user.getLogin() + "."
+            + e.getLocalizedMessage());
 		}
 		if(user.getRoles().size() != 0)
 			updateUserRoles(user);
@@ -238,7 +239,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			});
 			logger.debug("User update roles success " + user);
 		} catch (DataAccessException e) {
-			throw new DaoException("Не удалось обновить роли для пользователя с login = " + user.getLogin());
+			throw new DaoException("Не удалось обновить роли для пользователя с login = " + user.getLogin() + "." + e.getLocalizedMessage());
 		}
 		
 	}
@@ -248,7 +249,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		try {
 			return getJdbcTemplate().queryForList("select id from sec_user", Integer.class);
 		} catch (DataAccessException e) {
-			throw new DaoException("Ошибка при получении пользователей. ");
+			throw new DaoException("Ошибка при получении пользователей. " + e.getLocalizedMessage());
 		}
 	}
 

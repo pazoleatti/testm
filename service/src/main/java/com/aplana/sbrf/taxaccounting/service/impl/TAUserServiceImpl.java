@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserFull;
 import com.aplana.sbrf.taxaccounting.model.exception.WSException;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -25,17 +27,20 @@ public class TAUserServiceImpl implements TAUserService {
 	
 	@Autowired
 	DepartmentDao departmentDao;
+
+    private final Log logger = LogFactory.getLog(getClass());
 	
 	
 	@Override
 	public TAUser getUser(String login) {
+        logger.info("Получение информации пользователя по логину " + login + " getUser()");
 		try {
 			int userId = userDao.getUserIdByLogin(login);
 			return userDao.getUser(userId);
 		} catch (DaoException e) {
+            logger.error("Ошибка при получении пользователя по логину" + login, e);
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_004, "Ошибка при получении пользователя по логину." + e.getLocalizedMessage());
 		}
-		
 	}
 
 	@Override
@@ -46,12 +51,14 @@ public class TAUserServiceImpl implements TAUserService {
 	@Override
 	public void setUserIsActive(String login, boolean isActive) {
 		try {
+            logger.info("Обновленее активности пользователя по логину " + login + " setUserIsActive()");
 			int userId = userDao.getUserIdByLogin(login);
 			userDao.setUserIsActive(userId, isActive?1:0);
 		}catch (EmptyResultDataAccessException e){
             throw new WSException(WSException.SudirErrorCodes.SUDIR_004,
                     "Пользователя с login = " + login + " не существует.");
         }catch (DaoException e) {
+            logger.error("Ошибка при обновлении пользователя по логину " + login + " setUserIsActive().", e);
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_001,
 					"Ошибка при модификации пользователя." + e.getLocalizedMessage());
 		}
@@ -72,8 +79,11 @@ public class TAUserServiceImpl implements TAUserService {
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_008,
 					"Назначенное пользователю " + user.getLogin() + " подразделение не присутствует в справочнике «Подразделения» Системы");
 		try {
+            logger.info("Обновленее информации пользователя " + user.getLogin() + " updateUser()");
+            user.setId(userDao.getUserIdByLogin(user.getLogin()));
 			userDao.updateUser(user);
 		} catch (DaoException e) {
+            logger.error("Ошибка при обновлении информации пользователя " + user.getLogin() + " updateUser().", e);
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_000 ,
 					"Ошибка при модификации пользователя " + user.getLogin() + "." + e.getLocalizedMessage());
 		}
@@ -94,8 +104,10 @@ public class TAUserServiceImpl implements TAUserService {
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_008,
 					"Назначенное пользователю подразделение не присутствует в справочнике «Подразделения» Системы");
 		try {
+            logger.info("Созданее  пользователя " + user.getLogin() + " createUser()");
 			return userDao.createUser(user);
 		} catch (DaoException e) {
+            logger.error("Ошибка создания пользователя " + user.getLogin() + " createUser().", e);
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_000 ,
 					"Ошибка при создании пользователя." + e.getLocalizedMessage());
 		}
@@ -105,6 +117,7 @@ public class TAUserServiceImpl implements TAUserService {
 
 	@Override
 	public List<TAUser> listAllUsers() {
+        logger.info("Полученее списка пользоаателей  listAllUsers()");
 		List<TAUser> taUserList = new ArrayList<TAUser>();
 		for(Integer userId : userDao.getUserIds())
 			taUserList.add(userDao.getUser(userId));

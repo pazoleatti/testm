@@ -636,7 +636,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
         case 391:
         case 392:
-            row.dealSubjectName = 'Операции с финансовыми инструментами срочных сделок'
+            row.dealSubjectName = 'Операции с производными финансовыми инструментами'
             break
         case 393:
         case 394:
