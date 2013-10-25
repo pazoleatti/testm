@@ -211,6 +211,12 @@ alter table task_context add constraint task_context_uniq_task_name unique (task
 
 alter table user_session add constraint user_session_uniq_session_id unique (session_id);
 alter table user_session add constraint user_session_uniq_user_login unique (user_login);
+
+alter table notifications add constraint notification_fk_report_period foreign key (report_period_id) references report_period (id);
+alter table notifications add constraint notification_fk_sender foreign key (sender_department_id) references department (id);
+alter table notifications add constraint notification_fk_receiver foreign key (receiver_department_id) references department (id);
+alter table notifications add constraint notification_fk_sec_user foreign key (first_reader_id) references sec_user (id);
+
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);
