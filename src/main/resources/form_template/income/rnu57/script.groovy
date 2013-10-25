@@ -104,7 +104,7 @@ boolean checkCalculatedCells() {
     def rnu56FormData = getRnu56FormData()
 
     for (def dataRow : rows) {
-        if ( ! isInTotalRowsAliases(dataRow.getAlias())) {      //строку итогов не проверяем
+        if ( ! isTotal(dataRow)) {      //строку итогов не проверяем
             def rnu55Row = getRnu55Row(rnu55FormData, dataRow)
             def rnu56Row = getRnu56Row(rnu56FormData, dataRow)
 
@@ -139,13 +139,12 @@ def calcValues(def data) {
     def rnu56FormData = getRnu56FormData()
 
     for (def dataRow : getRows(data)) {
-        if ( ! isInTotalRowsAliases(dataRow.getAlias())) {      //строку итогов не заполняем
+        if ( ! isTotal(dataRow)) {      //строку итогов не заполняем
             def rnu55Row = getRnu55Row(rnu55FormData, dataRow)
             def rnu56Row = getRnu56Row(rnu56FormData, dataRow)
 
             def values = getValues(dataRow, rnu55Row, rnu56Row, rnu56FormData)
 
-            //TODO проверить корректность расчетов
             values.keySet().each { colName ->
                 dataRow[colName] = values[colName]
             }
@@ -159,16 +158,18 @@ def calcValues(def data) {
  */
 def getValues(def dataRow, def rnu55Row, def rnu56Row, def rnu56FormData) {
     def values = [:]
-
+    allColsAliases.each{
+        values[it] = dataRow.getCell(it).getValue()
+    }
     values.with {
-        purchasePrice = getPurchasePrice(dataRow, rnu55Row, rnu56Row)
-        purchaseOutcome = getPurchaseOutcome(dataRow, rnu55Row, rnu56Row)
-        percentInRuble = getPercentInRuble(dataRow, rnu55Row, rnu56Row)
-        percent = getPercent(dataRow, rnu55Row, rnu56Row, rnu56FormData)
-        implementationpPriceTax = getImplementationPriceTax(dataRow, rnu55Row, rnu56Row)
-        allIncome = getAllIncome(dataRow)
-        implementationPriceUp = getImplementationPriceUp(dataRow)
-        income = getIncome(dataRow)
+        purchasePrice = getGraph4(values, rnu55Row, rnu56Row)
+        purchaseOutcome = getGraph5(values, rnu55Row, rnu56Row)
+        price = getGraph9(values, rnu55Row, rnu56Row)
+        percent = getGraph10(values, rnu55Row, rnu56Row, rnu56FormData)
+        implementationpPriceTax = getGraph11(values, rnu55Row, rnu56Row)
+        allIncome = getGraph12(values)
+        implementationPriceUp = getGraph13(values)
+        income = getGraph14(values)
     }
 
     return values
@@ -200,7 +201,7 @@ def getRnu56Row(def rnu56formData, def dataRow) {
     }
 }
 
-def getPurchasePrice(def dataRow, def rnu55DataRow, def rnu56DataRow) {
+def getGraph4(def dataRow, def rnu55DataRow, def rnu56DataRow) {
     if (isHasTheSameBills(dataRow, rnu55DataRow)) {
         return calcPurchasePrice(rnu55DataRow)
     }
@@ -213,7 +214,7 @@ def calcPurchasePrice(def dataRow) {
     dataRow.nominal * getCourseForCurrencyByDate(dataRow.currency, dataRow.buyDate)
 }
 
-def getPurchaseOutcome(def dataRow, def rnu55DataRow, def rnu56DataRow) {
+def getGraph5(def dataRow, def rnu55DataRow, def rnu56DataRow) {
     if (isHasTheSameBills(dataRow, rnu55DataRow)) {
         return rnu55DataRow.sumIncomeinRuble
     }
@@ -222,7 +223,7 @@ def getPurchaseOutcome(def dataRow, def rnu55DataRow, def rnu56DataRow) {
     }
 }
 
-def getPercentInRuble(def dataRow, def rnu55DataRow, def rnu56DataRow) {
+def getGraph9(def dataRow, def rnu55DataRow, def rnu56DataRow) {
     if (isHasTheSameBills(dataRow, rnu56DataRow)) {
         if (rnu56DataRow.maturity == dataRow.implementationDate) {
             return 0
@@ -245,7 +246,7 @@ def getPercentInRuble(def dataRow, def rnu55DataRow, def rnu56DataRow) {
     }
 }
 
-def getPercent(def dataRow, def rnu55DataRow, def rnu56DataRow, def rnu56FormData) {
+def getGraph10(def dataRow, def rnu55DataRow, def rnu56DataRow, def rnu56FormData) {
     def data56 = getData(rnu56FormData)
     if (isHasTheSameBills(dataRow, rnu56DataRow)) {
         return rnu56DataRow.discountInRub
@@ -259,7 +260,7 @@ def getPercent(def dataRow, def rnu55DataRow, def rnu56DataRow, def rnu56FormDat
     }
 }
 
-def getImplementationPriceTax(Object dataRow, Object rnu55DataRow, Object rnu56DataRow) {
+def getGraph11(def dataRow, DataRow rnu55DataRow, DataRow rnu56DataRow) {
     final def tmpValue = 0.8 * dataRow.price
     if (isHasTheSameBills(dataRow, rnu55DataRow)) {
         if (dataRow.implementationPrice >= tmpValue) {
@@ -277,11 +278,11 @@ def getImplementationPriceTax(Object dataRow, Object rnu55DataRow, Object rnu56D
     }
 }
 
-def getAllIncome(def dataRow) {
+def getGraph12(def dataRow) {
     return dataRow.purchasePrice + dataRow.purchaseOutcome + dataRow.implementationOutcome
 }
 
-def getImplementationPriceUp(def dataRow) {
+def getGraph13(def dataRow) {
     def tmpOne = dataRow.implementationpPriceTax - dataRow.implementationPrice
     def tmpTwo = dataRow.implementationpPriceTax + dataRow.percent - dataRow.implementationPrice
     if (dataRow.percent == 0){
@@ -296,7 +297,7 @@ def getImplementationPriceUp(def dataRow) {
     }
 }
 
-def getIncome(def dataRow) {
+def getGraph14(def dataRow) {
     return dataRow.implementationpPriceTax - dataRow.allIncome
 }
 
@@ -329,16 +330,6 @@ def isHasTheSameBills(def dataRow1, dataRow2) {
     return (dataRow1.bill == dataRow2.bill)
 }
 
-/********************************   ОБЩИЕ ФУНКЦИИ   ********************************/
-
-/**
- * false, если в строке нет символов или строка null
- * true, если в строке есть символы
- */
-boolean isBlankOrNull(value) {
-    return (value == null || value.equals(''))
-}
-
 /***********   ФУНКЦИИ ДЛЯ ПРОВЕРКИ ОБЯЗАТЕЛЬНЫХ ДЛЯ ЗАПОЛНЕНИЯ ДАННЫХ   ***********/
 
 boolean logicalCheckPreCalc(){
@@ -367,9 +358,20 @@ boolean checkAll() {
 boolean logicalChecks(boolean checkNumbers){
     def numbers = []
     for (def row : getRows(data)){
+        if(isTotal(row)){
+            continue
+        }
         def rowStart = getRowIndexString(row)
         def dateEnd = reportPeriodService.getEndDate(formData.reportPeriodId).getTime()
         def dateStart = reportPeriodService.getStartDate(formData.reportPeriodId).getTime()
+        if (rnu55FormData == null){
+            logger.error("Отсутствуют данные в РНУ-55!")
+            return false
+        }
+        if (rnu56FormData == null){
+            logger.error("Отсутствуют данные в РНУ-56!")
+            return false
+        }
         if (row.purchaseDate.compareTo(dateEnd)>0){
             logger.error("${rowStart}дата приобретения вне границ отчетного периода!")
             return false
@@ -386,16 +388,17 @@ boolean logicalChecks(boolean checkNumbers){
                 numbers += row.number
             }
         }
-        if (rnu55FormData == null){
-            logger.error("Отсутствуют данные в РНУ-55!")
-            return false
-        }
-        if (rnu56FormData == null){
-            logger.error("Отсутствуют данные в РНУ-56!")
-            return false
-        }
     }
     return true
+}
+
+/**
+ * возвращает список алиасов всех обязательных для заполнения столбцов
+ */
+def getAllColsAliases() {
+    return ['number', 'bill', 'purchaseDate', 'purchasePrice', 'purchaseOutcome', 'implementationDate', 'implementationPrice',
+            'implementationOutcome', 'price', 'percent', 'implementationpPriceTax', 'allIncome',
+            'implementationPriceUp', 'income']
 }
 
 /**
@@ -432,7 +435,7 @@ boolean checkColsFilledByAliases(List colsAliases) {
     def data = data
     def rows = getRows(data)
     for (def dataRow in rows){
-        if (!isInTotalRowsAliases(dataRow.getAlias()) && !checkRequiredColumns(dataRow,colsAliases)) {
+        if (!isTotal(dataRow) && !checkRequiredColumns(dataRow,colsAliases)) {
             return false
         }
     }
@@ -540,12 +543,8 @@ def calcTotal(def data) {
     }
 }
 
-/**
- * false, если алиас строки не входит в список алиасов итоговых строк
- * true, если алиас строки входит в алиас итоговых строк
- */
-boolean isInTotalRowsAliases(def alias){
-    return (totalRowsAliases.find {totalAlias -> alias == totalAlias} != null)
+def isTotal(def row) {
+    return row != null && row.getAlias() != null && (row.getAlias() in getTotalRowsAliases())
 }
 
 /**
@@ -570,7 +569,7 @@ def getTotalResults() {
     def result = [:]
     for (def colAlias : getTotalColsAliases()) {
         result.put(colAlias, getRows(data).sum {row ->
-            if (! isInTotalRowsAliases(row.getAlias())) {    //строка не входит в итоговые
+            if (! isTotal(row)) {    //строка не входит в итоговые
                 row[colAlias]
             } else {
                 0

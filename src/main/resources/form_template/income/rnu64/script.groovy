@@ -10,170 +10,124 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 import java.text.SimpleDateFormat
 
 /**
- * РНУ-64
+ * (РНУ-64) Регистр налогового учёта затрат, связанных с проведением сделок РЕПО
+ * formTemplateId=355
+ *
  * @author auldanov
- *
- * @version 55
- *
- * Описание столбцов
- * 1. number - № пп
- * 2. date - Дата сделки
- * 3. part - Часть сделки Справочник
- * 4. dealingNumber - Номер сделки
- * 5. bondKind - Вид ценных бумаг
- * 6. costs - Затраты (руб.коп.)
+ * @author Stanislav Yasinskiy
  */
 
-/**
- * Выполнение действий по событиям
- *
- */
+// графа 1 - number
+// графа 2 - date
+// графа 3 - part
+// графа 4 - dealingNumber
+// графа 5 - costs
+
 switch (formDataEvent) {
-    // Инициирование Пользователем проверки данных формы в статусе «Создана», «Подготовлена», «Утверждена», «Принята»
-    case FormDataEvent.CHECK:
-        //1. Логические проверки значений налоговой формы
-        logicalCheck()
-        //2. Проверки соответствия НСИ
-        //NCICheck()
-        break
-    // Инициирование Пользователем создания формы
     case FormDataEvent.CREATE:
-        checkBeforeCreate()
-        //1.    Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при создании формы.
-        //2.    Логические проверки значений налоговой.
-        // ?? logicalCheck()
-        //3.    Проверки соответствия НСИ.
+        checkCreation()
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        //1.    Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Подготовлена».
-        //2.    Логические проверки значений налоговой формы.
+    case FormDataEvent.CHECK:
         logicalCheck()
-        //3.    Проверки соответствия НСИ.
         break
-
-    // проверка при "вернуть из принята в подготовлена"
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
-        // 1.   Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
-        break
-
-    // после вернуть из принята в подготовлена
-    case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_PREPARED:
-        break
-
-    // отменить принятие
-    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
-        // 1.   Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
-        break
-
-    // Событие добавить строку
-    case FormDataEvent.ADD_ROW:
-        addNewRow()
-        setRowIndex()
-        break
-
-    // событие удалить строку
-    case FormDataEvent.DELETE_ROW:
-        deleteRow()
-        setRowIndex()
-        break
-
     case FormDataEvent.CALCULATE:
         calc()
         logicalCheck()
         break
-
+    case FormDataEvent.ADD_ROW:
+        addNewRow()
+        break
+    case FormDataEvent.DELETE_ROW:
+        deleteRow()
+        break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+        logicalCheck()
+        break
+// после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+        break
+// обобщить
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
-        !hasError() && logicalCheck()
-        break
-    // после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
         logicalCheck()
         break
-    // загрузка xml
-    case FormDataEvent.IMPORT :
+    case FormDataEvent.IMPORT:
         importData()
-        if (!hasError()) {
+        if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
         }
         break
-    case FormDataEvent.MIGRATION :
+    case FormDataEvent.MIGRATION:
         importData()
-        if (!hasError()) {
-            def total = getCalcTotalRow()
-            def data = getData(formData)
-            insert(data, total)
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            def dataRowHelper = formDataService.getDataRowHelper(formData)
+            dataRowHelper.insert(getCalcTotalRow(), dataRowHelper.getAllCached().size() + 1)
         }
         break
 }
 
-/**
- * Добавление новой строки
- */
-def addNewRow() {
-    def data = getData(formData)
-    DataRow<Cell> newRow = formData.createDataRow()
-    ['date', 'part', 'dealingNumber', 'bondKind', 'costs'].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
+//Добавить новую строку
+void addNewRow() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def row = formData.createDataRow()
+    def dataRows = dataRowHelper.getAllCached()
+    def size = dataRows.size()
+    def index = currentDataRow != null ? (currentDataRow.getIndex() + 1) : (size == 0 ? 1 : (size + 1))
+    ['date', 'part', 'dealingNumber', 'costs'].each {
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
     }
-    def index = 0
-    if (currentDataRow!=null){
-        index = currentDataRow.getIndex()
-        def row = currentDataRow
-        while(row.getAlias()!=null && index>0){
-            row = getRows(data).get(--index)
-        }
-        if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
-            index++
-        }
-    }else if (getRows(data).size()>0) {
-        for(int i = getRows(data).size()-1;i>=0;i--){
-            def row = getRows(data).get(i)
-            if(row.getAlias()==null){
-                index = getRows(data).indexOf(row)+1
-                break
-            }
-        }
-    }
-    data.insert(newRow,index+1)
+    dataRowHelper.insert(row, index)
 }
 
-/**
- * Удаление строки
- *
- * @author Ivildanov
- * вынес пересчет №пп в отдельную процедуру
- */
-def deleteRow() {
-    // def row = (DataRow)additionalParameter
-    def row = currentDataRow
-    if (!isTotalRow(row)) {
-        // удаление строки
-        getData(formData).delete(row)
-    }
+// Удалить строку
+void deleteRow() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.delete(currentDataRow)
 }
 
-/**
- * Заполнение полей формы
- * 6.1.2.3  Алгоритмы заполнения полей формы
- */
-def fillForm() {
-    def data = getData(formData)
+def calc() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+
+    // удалить строку "итого"
+    for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
+        row = (DataRow) iter.next()
+        if (isTotalRow(row)) {
+            iter.remove()
+            dataRowHelper.delete(row)
+        }
+    }
+
+    if (dataRows.isEmpty()) {
+        return
+    }
+
+    // отсортировать/группировать
+    dataRows.sort({ DataRow a, DataRow b ->
+        def aTime = a.date != null ? (a.date as Date).time : null
+        def bTime = b.date != null ? (b.date as Date).time : null
+        if (aTime == bTime) {
+            aNumber = a.dealingNumber != null ? a.dealingNumber as String : null;
+            bNumber = b.dealingNumber != null ? b.dealingNumber as String : null;
+            return aNumber <=> bNumber
+        }
+        return aTime <=> bTime
+    })
 
     def i = 1
-    getRows(data).each { row ->
+    for (def row in dataRows) {
         if (isTotalRow(row)) {
             row.number = i++
         }
     }
-    data.save(getRows(data))
+    dataRowHelper.save(dataRows)
 
     // добавляем строки итого
     def newRowQuarter = formData.createDataRow()
@@ -184,7 +138,7 @@ def fillForm() {
     newRowQuarter.costs = getQuarterTotal()
     newRowQuarter.setAlias("totalQuarter")
     setTotalStyle(newRowQuarter)
-    data.insert(newRowQuarter, getRows(data).size() + 1)
+    dataRowHelper.insert(newRowQuarter, dataRows.size() + 1)
 
     // строка Итого за текущий отчетный (налоговый) период
     def newRowTotal = formData.createDataRow()
@@ -194,44 +148,27 @@ def fillForm() {
     newRowTotal.costs = getTotalValue()
     newRowTotal.setAlias("total")
     setTotalStyle(newRowTotal)
-    data.insert(newRowTotal, getRows(data).size() + 1)
+    dataRowHelper.insert(newRowTotal, dataRows.size() + 1)
 }
 
-/**
- * Удаляет все статические строки(ИТОГО) во всей форме
- */
-void deleteAllStatic(DataRowHelper form) {
-    List<DataRow<Cell>> forDelete = new ArrayList<>();
-    for (row in form.allCached) {
-        if (row.getAlias() != null) {
-            forDelete.add(row)
-        }
-    }
-    for (row in forDelete) {
-        form.delete(row)
-    }
-}
-
-/**
- * Логические проверки
- */
 def logicalCheck() {
-    def data = getData(formData)
-    def totalQuarterRow = null
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
     def totalRow = null
+    def totalQuarterRow = null
     reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
 
-    for (def row : getRows(data)) {
-        // Обязательность заполнения поля графы (с 1 по 6); фатальная; Поле ”Наименование поля” не заполнено!
+    for (def row : dataRows) {
+        // 1. Проверка на заполнение поля
         if (!isTotalRow(row)) {
-            def requiredColumns = ['number', 'date', 'part', 'dealingNumber', 'bondKind', 'costs']
-            if(!checkRequiredColumns(row, requiredColumns)){
+            def requiredColumns = ['number', 'date', 'part', 'dealingNumber', 'costs']
+            if (!checkRequiredColumns(row, requiredColumns)) {
                 return false
             }
 
-            // Проверка даты совершения операции и границ отчетного периода; фатальная; Дата совершения операции вне границ отчетного периода!
-            if (!isTotalRow(row) && row.date != null && !(
+            // 2. Проверка даты совершения операции и границ отчетного периода
+            if (row.date != null && !(
             (reportPeriodStartDate.getTime().equals(row.date) || row.date.after(reportPeriodStartDate.getTime())) &&
                     (reportPeriodEndDate.getTime().equals(row.date) || row.date.before(reportPeriodEndDate.getTime()))
             )) {
@@ -239,22 +176,20 @@ def logicalCheck() {
                 return false
             }
 
-            getRows(data).each { rowItem ->
+            // 3. Проверка на уникальность поля «№ пп»
+            for (def rowItem : dataRows) {
                 if (!isTotalRow(row) && row.number == rowItem.number && !row.equals(rowItem)) {
                     logger.error("В строке " + row.number + " нарушена уникальность номера по порядку!")
                     return false
                 }
             }
 
-            // Проверка на нулевые значения; фатальная; Все суммы по операции нулевые!
+            // 4. Проверка на нулевые значения
             if (row.costs == 0) {
                 logger.error("В строке " + row.number + " все суммы по операции нулевые!")
                 return false
             }
-            // Проверка актуальности поля «Часть сделки»; не фатальная;
-            if (row.part != null && getPart(row.part) == null) {
-                logger.warn("В строке " + row.number + " поле ”Часть сделки” указано неверно!")
-            }
+
         } else if (isMainTotalRow(row)) {
             totalRow = row
         } else if (isQuarterTotal(row)) {
@@ -264,13 +199,13 @@ def logicalCheck() {
 
     // проверка на наличие итоговых строк, иначе будет ошибка
     if (totalQuarterRow != null || totalRow != null) {
-        // Проверка итоговых значений за текущий квартал; фатальная; Итоговые значения за текущий квартал рассчитаны неверно!
+        // 5. Проверка итоговых значений за текущий квартал
         if (totalQuarterRow != null && totalQuarterRow.costs != getQuarterTotal()) {
             logger.error('Итоговые значения за текущий квартал рассчитаны неверно!')
             return false
         }
 
-        // Проверка итоговых значений за текущий отчётный (налоговый) период; фатальная; Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!
+        // 6. Проверка итоговых значений за текущий отчётный (налоговый) период
         if (totalRow != null && totalRow.costs != getTotalValue()) {
             logger.error('Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!')
             return false
@@ -286,7 +221,6 @@ def logicalCheck() {
  * @param columns список обязательных графов
  */
 def checkRequiredColumns(def row, def columns) {
-    def data = getData(formData)
     def colNames = []
 
     def cell
@@ -298,12 +232,25 @@ def checkRequiredColumns(def row, def columns) {
         }
     }
     if (!colNames.isEmpty()) {
-        def index = getRows(data).indexOf(row) + 1
+        def index = row.number
         def errorMsg = colNames.join(', ')
-        logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        if (index != null) {
+            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            index = getIndex(row) + 1
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        }
         return false
     }
     return true
+}
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.getAllCached().indexOf(row)
 }
 
 /**
@@ -319,25 +266,23 @@ def getColumnName(def row, def alias) {
     return ''
 }
 
-/**
- * Скрипт для проверки создания.
- */
-void checkBeforeCreate() {
+// Проверка при создании формы.
+void checkCreation() {
     // отчётный период
-    //def reportPeriod = reportPeriodService.get()
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     //проверка периода ввода остатков
-    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
+    if (reportPeriod != null && reportPeriodService.isBalancePeriod(reportPeriod.id, formData.departmentId)) {
         logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
         return
     }
 
-    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+    def findForm = formDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
-
 }
 
 /**
@@ -363,9 +308,10 @@ def isTotalRow(row) {
 
 // функция возвращает итоговые значения за текущий квартал
 def getQuarterTotal() {
-    def data = getData(formData)
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
     def row6val = 0
-    getRows(data).each { row ->
+    for (def row : dataRows) {
         if (!isTotalRow(row)) {
             row6val += row.costs ?: 0
         }
@@ -375,16 +321,17 @@ def getQuarterTotal() {
 
 // Функция возвращает итоговые значения за текущий отчётный (налоговый) период
 def getTotalValue() {
-    def data = getData(formData)
-    quarterRow = data.getDataRow(getRows(data), 'totalQuarter')
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    quarterRow = dataRowHelper.getDataRow(dataRows, 'totalQuarter')
     // возьмем форму за предыдущий отчетный период
     def prevQuarter = quarterService.getPrevReportPeriod(formData.reportPeriodId)
     if (prevQuarter != null) {
         prevQuarterFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, prevQuarter.id);
 
         if (prevQuarterFormData != null && prevQuarterFormData.state == WorkflowState.ACCEPTED) {
-            prevQuarterData = getData(prevQuarterFormData)
-            def prevQuarterTotalRow = prevQuarterData.getDataRow(getRows(prevQuarterData), "total")
+            prevQuarterData = formDataService.getDataRowHelper(prevQuarterFormData)
+            def prevQuarterTotalRow = prevQuarterData.getDataRow(prevQuarterData.getAllCached(), "total")
             return quarterRow.costs + prevQuarterTotalRow.costs
         } else {
             //  Если предыдущей формы нет (либо она не принята)  то B = 0
@@ -396,104 +343,31 @@ def getTotalValue() {
     }
 }
 
-/**
- * Установка номера строки.
- *
- * @author Ivildanov
- */
-void setRowIndex() {
-    def data = getData(formData)
-    def i = 1;
-    getRows(data).each { rowItem ->
-        if (!isTotalRow(rowItem)) {
-            rowItem.number = i++
-        }
-    }
-    data.save(getRows(data))
-}
-
-/**
- * Скрипт для сортировки.
- *
- * @author Ivildanov
- */
-void sort() {
-    data = getData(formData)
-    if (data!=null && !data.getAllCached().isEmpty()) {
-        data.getAllCached().sort({ DataRow a, DataRow b ->
-            def aTime = a.date!=null?(a.date as Date).time:null
-            def bTime = b.date!=null?(b.date as Date).time:null
-            if (aTime == bTime) {
-                aNumber = a.dealingNumber!=null?a.dealingNumber as String:null;
-                bNumber = b.dealingNumber!=null?b.dealingNumber as String:null;
-                return aNumber <=> bNumber
-            }
-            return aTime <=> bTime
-        })
-    }
-}
-
-/**
- * Консолидация.
- */
+// Консолидация
 void consolidation() {
-    def data = getData(formData)
     // удалить все строки и собрать из источников их строки
-    data.clear()
-    def newRows = []
-
+    def rows = new LinkedList<DataRow<Cell>>()
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                getRows(getData(source)).each { row ->
+                formDataService.getDataRowHelper(source).getAllCached().each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        newRows.add(row)
+                        rows.add(row)
                     }
                 }
             }
         }
     }
-    if (!newRows.isEmpty()) {
-        data.insert(newRows, 1)
-    }
+    formDataService.getDataRowHelper(formData).save(rows)
     logger.info('Формирование консолидированной формы прошло успешно.')
-}
-
-/**
- * Получить данные формы.
- *
- * @param formData форма
- */
-def getData(def formData) {
-    if (formData != null && formData.id != null) {
-        return formDataService.getDataRowHelper(formData)
-    }
-    return null
-}
-
-/**
- * Получить строки формы.
- *
- * @param formData форма
- */
-def getRows(def data) {
-    def cached = data.getAllCached()
-    return cached
-}
-
-/**
- * Получить код части сделки
- */
-def getPart(def part) {
-    return refBookService.getNumberValue(60, part, 'CODE');
 }
 
 /**
  * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
-    ['number', 'fix', 'date', 'part', 'dealingNumber', 'bondKind', 'costs'].each {
+    ['number', 'fix', 'date', 'part', 'dealingNumber', 'costs'].each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
     }
 }
@@ -541,7 +415,7 @@ void importData() {
         } else {
             logger.error("Нет итоговой строки.")
         }
-    } catch(Exception e) {
+    } catch (Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
 }
@@ -556,7 +430,7 @@ def addData(def xml) {
     def date = new Date()
     def cache = [:]
 
-    def data = getData(formData)
+    def data = formDataService.getDataRowHelper(formData)
     data.clear()
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def newRows = []
@@ -586,8 +460,8 @@ def addData(def xml) {
         index++
 
         // графа 5
-        newRow.bondKind = row.field[index].text()
-        index++
+        // TODO bondKind выпилена из РНУ, а из файла для импорта?
+        // index++
 
         // графа 6
         newRow.costs = getNumber(row.field[index].@value.text())
@@ -616,8 +490,8 @@ def addData(def xml) {
 def getNewRow() {
     def row = formData.createDataRow()
 
-    // графа 1..10
-    ['date', 'part', 'dealingNumber', 'bondKind', 'costs'].each {
+    // графа 2..5
+    ['date', 'part', 'dealingNumber', 'costs'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
@@ -663,23 +537,12 @@ def isEmpty(def value) {
 }
 
 /**
- * Расчет полностью
- */
-void calc() {
-    form = getData(formData)
-    deleteAllStatic(form)
-    sort()
-    fillForm()
-}
-
-
-/**
  * Рассчитать, проверить и сравнить итоги.
  *
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    def totalColumns = [6 : 'costs']
+    def totalColumns = [6: 'costs']
 
     def totalCalc = getCalcTotalRow()
     def errorColums = []
@@ -697,23 +560,6 @@ void checkTotalRow(def totalRow) {
 }
 
 /**
- * Имеются ли фатальные ошибки.
- */
-def hasError() {
-    return logger.containsLevel(LogLevel.ERROR)
-}
-
-/**
- * Вставить новыую строку в конец нф.
- *
- * @param data данные нф
- * @param row строка
- */
-void insert(def data, def row) {
-    data.insert(row, getRows(data).size() + 1)
-}
-
-/**
  * Получить id справочника.
  *
  * @param ref_id идентификатор справончика
@@ -725,7 +571,7 @@ void insert(def data, def row) {
  */
 def getRecordId(def ref_id, String code, def value, Date date, def cache) {
     String filter = code + " = '" + value + "'"
-    if (cache[ref_id]!=null) {
+    if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) {
             return cache[ref_id][filter]
         }
@@ -734,14 +580,13 @@ def getRecordId(def ref_id, String code, def value, Date date, def cache) {
     }
     def refDataProvider = refBookFactory.getDataProvider(ref_id)
     def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
-    if (records.size() == 1){
+    if (records.size() == 1) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
     logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
     return null
 }
-
 
 /**
  * Получить итоговую строку с суммами.
@@ -760,11 +605,12 @@ def getCalcTotalRow() {
  * Получить сумму столбца.
  */
 def getSum(def columnAlias) {
-    def data = getData(formData)
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
     def from = 0
-    def to = getRows(data).size() - 1
+    def to = dataRows.size() - 1
     if (from > to) {
         return 0
     }
-    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
+    return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
 }

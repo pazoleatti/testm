@@ -67,5 +67,6 @@ public class BlobDataDaoTest {
     public void deleteTest(){
         blobDataDao.create(blobData);
         blobDataDao.delete(blobData.getUuid());
+        Assert.assertNull(blobDataDao.get(blobData.getUuid()));
     }
 }

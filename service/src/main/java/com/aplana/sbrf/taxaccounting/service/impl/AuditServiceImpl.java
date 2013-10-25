@@ -84,6 +84,6 @@ public class AuditServiceImpl implements AuditService {
                 listIds.add(item.getId());
             auditDao.removeRecords(listIds);
         }
-        add(FormDataEvent.ARCHIVE, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, "Архивация ЖА");
+        add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, "Архивация ЖА");
     }
 }

@@ -1,20 +1,15 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-
+import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.BlobData;
+import java.sql.*;
 
 /**
  * User: avanteev
@@ -75,7 +70,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
                     new Object[]{uuid},
                     new int[]{Types.CHAR});
         }catch (DataAccessException e){
-            throw new DaoException(String.format("Не удалось найти запись с id = %s", uuid), e);
+            throw new DaoException(String.format("Не удалось удалить запись с id = %s", uuid), e);
         }
     }
 
@@ -115,7 +110,8 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
                     new int[]{Types.CHAR},
                     new BlobDataRowMapper());
         }catch (EmptyResultDataAccessException e){
-            throw new DaoException(String.format("Не удалось найти запись с id = %s", uuid), e);
+            /*throw new DaoException(String.format("Не удалось найти запись с id = %s", uuid), e);*/
+            return null;
         }
     }
 

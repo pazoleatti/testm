@@ -115,6 +115,7 @@ create table ref_book (
   visible number(1) default 1 not null,
   type number(1) default 0 not null
 );
+
 comment on table ref_book is 'Справочник';
 comment on column ref_book.id is 'Уникальный идентификатор';
 comment on column ref_book.name is 'Название справочника';
@@ -348,15 +349,16 @@ create sequence seq_declaration_template start with 10000;
 create table declaration_data (
   id number(18) not null,
   declaration_template_id number(9) not null,
-  report_period_id    number(9) not null,
   report_period_id        number(9) not null,
   department_id           number(9) not null,
   data                    varchar2(36),
   is_accepted             number(1) not null,
   data_pdf                varchar2(36),
   data_xlsx               varchar2(36),
-  jasper_print     varchar2(36)
+  jasper_print            varchar2(36) 
 );
+
+
 
 comment on table declaration_data is 'Налоговые декларации';
 comment on column declaration_data.id is 'Идентификатор (первичный ключ)';
@@ -634,7 +636,8 @@ create table department_report_period (
   report_period_id    number(9) not null,
   is_active           number(1) not null,
   is_balance_period   number(1) default 0 not null,
-  report_date         date
+  report_date         date,
+  deadline            date
 );
 comment on table department_report_period is  'Привязка отчетных периодов к подразделениям';
 comment on column department_report_period.department_id is 'Код подразделения';
@@ -642,6 +645,7 @@ comment on column department_report_period.report_period_id is 'Код отче�
 comment on column department_report_period.is_active is 'Признак активности (0 - период закрыт, 1 - период открыт)';
 comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
 comment on column department_report_period.report_date is 'Срок подачи отчётности';
+comment on column department_report_period.deadline is 'Срок сдачи отчётности';
 ------------------------------------------------------------------------------------------------------
 create table task_context(
 id  number(18,0) primary key,

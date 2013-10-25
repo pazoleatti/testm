@@ -1,20 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
@@ -22,9 +7,27 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+import org.apache.poi.util.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /*
  * author auldanov
@@ -74,6 +77,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Autowired
     private PeriodService periodService;
 
+    @Autowired
+    BlobDataService blobDataService;
+
 	@Override
 	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
 		return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
@@ -94,12 +100,17 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         Map<String, RefBookValue> departmentParam = departmentParams.get(0);
 
         Calendar calendar = Calendar.getInstance();
-		stringBuilder.append('_' +
-				departmentParam.get("TAX_ORGAN_CODE").toString() + '_' +
-				departmentParam.get("TAX_ORGAN_CODE").toString() + '_' +
-				departmentParam.get("INN").toString() + departmentParam.get("KPP").toString() + '_' +
-				dateFormat.format(calendar.getTime()) + '_' +
-				UUID.randomUUID().toString().toUpperCase());
+		stringBuilder.append('_').
+                append(departmentParam.get("TAX_ORGAN_CODE").toString()).
+                append('_').
+                append(departmentParam.get("TAX_ORGAN_CODE").toString()).
+                append('_').
+                append(departmentParam.get("INN").toString()).
+                append(departmentParam.get("KPP").toString()).
+                append('_').
+                append(dateFormat.format(calendar.getTime())).
+                append('_').
+                append(UUID.randomUUID().toString().toUpperCase());
 
 		return stringBuilder.toString();
 	}
@@ -147,7 +158,14 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public String getXmlData(long declarationDataId) {
-        return declarationDataDao.getXmlData(declarationDataId);
+        BlobData blobData = blobDataService.get(declarationDataDao.get(declarationDataId).getXlsxDataUuid());
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            IOUtils.copy(blobData.getInputStream(), byteArrayOutputStream);
+        } catch (IOException e) {
+            throw new ServiceException("Не удалось извлечь xml для скрипта.", e);
+        }
+        return new String(byteArrayOutputStream.toByteArray());
     }
 
     @Override

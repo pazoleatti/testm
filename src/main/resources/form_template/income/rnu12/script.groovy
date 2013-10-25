@@ -159,7 +159,7 @@ boolean calc() {
             totalColumns.each {
                 def val = row.getCell(it).getValue()
                 if(val!=null)
-                    sums[it] += row.getCell(it).getValue()
+                    sums[it] += val
             }
             totalRows.put(i + 1, getNewRow(row.code, totalColumns, sums))
             totalColumns.each {
@@ -169,7 +169,7 @@ boolean calc() {
         totalColumns.each {
             def val = row.getCell(it).getValue()
             if(val!=null)
-                sums[it] += row.getCell(it).getValue()
+                sums[it] += val
         }
         tmp = row.code
     }

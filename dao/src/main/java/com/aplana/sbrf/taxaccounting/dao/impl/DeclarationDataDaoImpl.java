@@ -34,14 +34,17 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 			DeclarationData d = new DeclarationData();
 			d.setId(rs.getLong("id"));
 			d.setDeclarationTemplateId(rs.getInt("declaration_template_id"));
-			d.setDepartmentId(rs.getInt("department_id"));			
-			d.setReportPeriodId(rs.getInt("report_period_id"));			
+			d.setDepartmentId(rs.getInt("department_id"));
+			d.setReportPeriodId(rs.getInt("report_period_id"));
 			d.setAccepted(rs.getBoolean("is_accepted"));
-            d.setJasperPrintId(rs.getString("jasper_print"));
+            d.setPdfDataUuid(rs.getString("data_pdf"));
+            d.setXlsxDataUuid(rs.getString("data_xlsx"));
+            d.setXmlDataUuid(rs.getString("data"));
+            d.setJasperPrintUuid(rs.getString("jasper_print"));
 			return d;
 		}
 	}
-	
+
 	@Override
 	public DeclarationData get(long declarationDataId) {
 		try {
@@ -54,105 +57,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 			throw new DaoException(DECLARATION_NOT_FOUND_MESSAGE, declarationDataId);
 		}
 	}
-	
+
 	@Override
 	public boolean hasXmlData(long declarationDataId) {
 		return getJdbcTemplate().queryForInt("select count(*) from declaration_data where data is not null and id = ?", declarationDataId) == 1;
 	}
 
-	@Override
-	public String getXmlData(long declarationDataId) {
-		try {
-			return getJdbcTemplate().queryForObject(
-				"select data from declaration_data where id = ?",
-				new Object[] { declarationDataId },
-				String.class
-			);
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException(DECLARATION_NOT_FOUND_MESSAGE, declarationDataId);
-		}
-	}
-	
-
-	@Override
-	public byte[] getXlsxData(long id) {
-		try {
-			return getJdbcTemplate().queryForObject(
-				"select data_xlsx from declaration_data where id = ?",
-				new Object[] { id },
-				byte[].class
-			);
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException(DECLARATION_NOT_FOUND_MESSAGE, id);
-		}
-	}
-
-	@Override
-	public byte[] getPdfData(long id) {
-		try {
-			return getJdbcTemplate().queryForObject(
-				"select data_pdf from declaration_data where id = ?",
-				new Object[] { id },
-				byte[].class
-			);
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException(DECLARATION_NOT_FOUND_MESSAGE, id);
-		}
-	}
-
-	@Override
-	public void setXmlData(long id, String xmlData) {
-		int count = getJdbcTemplate().update(
-			"update declaration_data set data = ? where id = ?",
-			new Object[] {
-				xmlData,
-				id
-			},
-			new int[] {
-				Types.VARCHAR,
-				Types.NUMERIC
-			}
-		);
-		if (count == 0) {
-			throw new DaoException("Не удалось сохранить данные в формате законодателя для декларации с id = %d, так как она не существует.");
-		}
-	}
-	
-	@Override
-	public void setXlsxData(long id, byte[] xlsxData) {
-		int count = getJdbcTemplate().update(
-				"update declaration_data set data_xlsx = ? where id = ?",
-				new Object[] {
-					xlsxData,
-					id
-				},
-				new int[] {
-					Types.BINARY,
-					Types.NUMERIC
-				}
-			);
-			if (count == 0) {
-				throw new DaoException("Не удалось сохранить данные в формате законодателя для декларации с id = %d, так как она не существует.");
-			}
-	}
-
-	@Override
-	public void setPdfData(long id, byte[] pdfData) {
-		int count = getJdbcTemplate().update(
-				"update declaration_data set data_pdf = ? where id = ?",
-				new Object[] {
-					pdfData,
-					id
-				},
-				new int[] {
-					Types.BINARY,
-					Types.NUMERIC
-				}
-			);
-			if (count == 0) {
-				throw new DaoException("Не удалось сохранить данные в формате законодателя для декларации с id = %d, так как она не существует.");
-			}
-	}
 
 	@Override
 	public void delete(long id) {
@@ -247,7 +157,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 			declarationData.isAccepted() ? 1 : 0
 		);
 		declarationData.setId(id);
-		return id;
+		return id.longValue();
 	}
 
 	@Override
@@ -269,17 +179,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 		return getJdbcTemplate().queryForInt(sql.toString());
 	}
 
-    @Override
-    public void setJasperPrintId(long declarationDataId, String jasperPrintId) {
-        int count = getJdbcTemplate().update(
-                "update declaration_data set jasper_print = ? where id = ?", jasperPrintId, declarationDataId
-                );
-        if (count == 0) {
-            throw new DaoException("Не удалось записать индекс Jasper-отчета для декларации с uuid = %s, так как она не существует.", jasperPrintId);
-        }
-    }
-
-    private void appendFromAndWhereClause(StringBuilder sql, DeclarationDataFilter filter) {
+	private void appendFromAndWhereClause(StringBuilder sql, DeclarationDataFilter filter) {
 		sql.append(" FROM declaration_data dec, declaration_type dectype, department dp, report_period rp, tax_period tp")
 				.append(" WHERE EXISTS (SELECT 1 FROM DECLARATION_TEMPLATE dectemp WHERE dectemp.id = dec.declaration_template_id AND dectemp.declaration_type_id = dectype.id)")
 				.append(" AND dp.id = dec.department_id AND rp.id = dec.report_period_id AND tp.id=rp.tax_period_id");
@@ -341,6 +241,29 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 		}
 	}
 
+    @Override
+    public void update(DeclarationData declarationData) {
+        int count = getJdbcTemplate().update(
+                "update declaration_data set data = ?, data_pdf = ?, data_xlsx = ?, jasper_print = ? where id = ?",
+                new Object[] {
+                        declarationData.getXmlDataUuid(),
+                        declarationData.getPdfDataUuid(),
+                        declarationData.getXlsxDataUuid(),
+                        declarationData.getJasperPrintUuid(),
+                        declarationData.getId()
+                },
+                new int[] {
+                        Types.VARCHAR,
+                        Types.VARCHAR,
+                        Types.VARCHAR,
+                        Types.VARCHAR,
+                        Types.NUMERIC
+                }
+        );
+        if (count == 0) {
+            throw new DaoException("Не удалось обновить декларацию с id = %d, так как она не существует.");
+        }
+    }
 
 
 }

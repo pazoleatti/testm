@@ -10,7 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  * @version 59
  *
  * TODO:
- *      - нет уcловии в проверках соответствия НСИ
+ *      - поменять тип графы 3 и 4 на справочник, после того как будет готов справочник для графы 3 - задача http://jira.aplana.com/browse/SBRFACCTAX-4738
  *
  * @author rtimerbaev
  */
@@ -44,9 +44,8 @@ switch (formDataEvent) {
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
         break
     case FormDataEvent.COMPOSE :
-        // TODO (Ramil Timerbaev)
         consolidation()
-        // calc() && logicalCheck() && checkNSI()
+        calc() && logicalCheck() && checkNSI()
         break
     case FormDataEvent.IMPORT :
         importData()
@@ -69,8 +68,8 @@ switch (formDataEvent) {
 // графа 0  - forLabel - для вывода надписей
 // графа 1  - number
 // графа 2  - debtor
-// графа 3  - provision
-// графа 4  - nameBalanceAccount
+// графа 3  - provision                             атрибут ?? - ?? - "Код обеспечения", справочник ?? "Обеспечение"
+// графа 4  - nameBalanceAccount                    атрибут 152 - BALANCE_ACCOUNT - "Номер балансового счёта", справочник 29 "Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта"
 // графа 5  - debt45_90DaysSum
 // графа 6  - debt45_90DaysNormAllocation50per
 // графа 7  - debt45_90DaysReserve
@@ -90,7 +89,7 @@ switch (formDataEvent) {
 def addNewRow() {
     def data = getData(formData)
     def newRow = formData.createDataRow()
-    def index
+    def index = 0
 
     if (currentDataRow == null ||
             getIndex(currentDataRow) == -1 ||
@@ -129,7 +128,7 @@ def addNewRow() {
         }
         setEdit(newRow, 'B')
     }
-    data.insert(newRow, index ? index + 1: 0)
+    data.insert(newRow, index + 1)
 }
 
 /**
@@ -147,6 +146,15 @@ def deleteRow() {
  */
 def calc() {
     def data = getData(formData)
+
+    // TODO (Ramil Timerbaev) проверка наличия рну-6 перед расчетом - аналитик сказала пока убрать
+//    def rowsRnu6 = getRnuRowsById(318)
+//    if (rowsRnu6 == null) {
+//        def name = '"(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения метода начисления"'
+//        logger.info("Не найдены экземпляры $name за текущий отчетный период!")
+//        return false
+//    }
+
     /*
      * Проверка обязательных полей.
      */
@@ -168,7 +176,7 @@ def calc() {
     }
 
     // отсортировать/группировать
-    sort()
+    sort(data)
 
     /*
      * Расчеты
@@ -186,35 +194,31 @@ def calc() {
 
             if (isFirst) {
                 // графа 6
-                row.debt45_90DaysNormAllocation50per = 50
+                row.debt45_90DaysNormAllocation50per = calc6()
 
                 // графа 7
-                tmp = row.debt45_90DaysSum * row.debt45_90DaysNormAllocation50per / 100
-                row.debt45_90DaysReserve = roundValue(tmp, 2)
+                row.debt45_90DaysReserve = calc7(row)
 
                 // графа 9
-                row.debtOver90DaysNormAllocation100per = 100
+                row.debtOver90DaysNormAllocation100per = calc9()
 
                 // графа 10
-                tmp = row.debtOver90DaysSum * row.debtOver90DaysNormAllocation100per / 100
-                row.debtOver90DaysReserve = roundValue(tmp, 2)
+                row.debtOver90DaysReserve = calc10(row)
 
                 // графа 11
-                row.totalReserve = row.debt45_90DaysReserve + row.debtOver90DaysReserve
+                row.totalReserve = calc11(row)
 
                 // графа 14
-                row.calcReserve = (row.totalReserve + row.useReserve > row.reservePrev ?
-                    row.totalReserve + row.useReserve - row.reservePrev : 0)
+                row.calcReserve = calc14(row)
 
                 // графа 15
-                row.reserveRecovery = (row.totalReserve + row.useReserve < row.reservePrev ?
-                    row.reservePrev - (row.totalReserve + row.useReserve) : 0)
+                row.reserveRecovery = calc15(row)
 
                 // графа 13 - стоит поле остальных потому что в расчетах используются графа 14, 15
-                row.reserveCurrent = row.reservePrev + row.calcReserve - row.reserveRecovery - row.useReserve
+                row.reserveCurrent = calc13(row)
             } else {
                 // графа 13
-                row.reserveCurrent = row.reservePrev - row.useReserve
+                row.reserveCurrent = calc13AB(row)
             }
         }
     }
@@ -280,7 +284,14 @@ def logicalCheck() {
     // для раздера А и Б - графы 1, 2, 4, 12, 16
     requiredColumnsAB = ['number', 'debtor', 'nameBalanceAccount', 'reservePrev', 'useReserve']
 
-    def tmp
+    // алиасы графов для арифметической проверки (6, 7, 9..11, 13..15)
+    def arithmeticCheckAlias = ['debt45_90DaysNormAllocation50per', 'debt45_90DaysReserve',
+            'debtOver90DaysNormAllocation100per', 'debtOver90DaysReserve', 'totalReserve',
+            'reserveCurrent', 'calcReserve', 'reserveRecovery']
+    // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
+    def needValue = [:]
+    def colNames = []
+
     def isFirst
     def index
     def errorMsg
@@ -301,57 +312,32 @@ def logicalCheck() {
         errorMsg = "В строке $index "
 
         if (isFirst) {
-            // 2. Арифметическая проверка графы 7
-            tmp = row.debt45_90DaysSum * row.debt45_90DaysNormAllocation50per / 100
-            if (row.debt45_90DaysReserve != roundValue(tmp, 2)) {
-                logger.warn(errorMsg + ' неверно рассчитана графа «Задолженность от 45 до 90 дней. Расчётный резерв»!')
-            }
+            // 3. Арифметическая проверка графы 6, 7, 9..11, 13..15
+            needValue['debt45_90DaysNormAllocation50per'] = calc6()
+            needValue['debt45_90DaysReserve'] = calc7(row)
+            needValue['debtOver90DaysNormAllocation100per'] = calc9()
+            needValue['debtOver90DaysReserve'] = calc10(row)
+            needValue['totalReserve'] = calc11(row)
+            needValue['reserveCurrent'] = calc13(row)
+            needValue['calcReserve'] = calc14(row)
+            needValue['reserveRecovery'] = calc15(row)
 
-            // 3. Арифметическая проверка графы 10
-            tmp = row.debtOver90DaysSum * row.debtOver90DaysNormAllocation100per / 100
-            if (row.debtOver90DaysReserve != roundValue(tmp, 2)) {
-                logger.warn(errorMsg + 'неверно рассчитана графа «Задолженность более 90 дней. Расчётный резерв»!')
+            arithmeticCheckAlias.each { alias ->
+                if (needValue[alias] != row.getCell(alias).getValue()) {
+                    def name = getColumnName(row, alias)
+                    colNames.add('"' + name + '"')
+                }
             }
-
-            // 4. Арифметическая проверка графы 11
-            if (row.totalReserve != row.debt45_90DaysReserve + row.debtOver90DaysReserve) {
-                logger.warn(errorMsg + 'наверное значение графы «Итого расчётный резерв»')
-            }
-
-            // 5. Арифметическая проверка графы 13
-            tmp = row.reservePrev + row.calcReserve - row.reserveRecovery - row.useReserve
-            if (row.reserveCurrent != tmp) {
-                logger.warn(errorMsg + 'неверно рассчитана графа «Резерв на отчётную дату. Текущую»!')
-            }
-
-            // 6. Арифметическая проверка графы 14
-            tmp = (row.totalReserve + row.useReserve > row.reservePrev ?
-                row.totalReserve + row.useReserve - row.reservePrev : 0)
-            if (row.calcReserve != tmp) {
-                logger.warn(errorMsg + 'неверно рассчитана графа «Изменение фактического резерва. Доначисление резерва с отнесением на расходы код 22670»!')
-            }
-
-            // 7. Арифметическая проверка графы 15
-            tmp = (row.totalReserve + row.useReserve < row.reservePrev ?
-                row.reservePrev - (row.totalReserve + row.useReserve) : 0)
-            if (row.reserveRecovery != tmp) {
-                logger.warn(errorMsg + 'неверно рассчитана графа «Изменение фактического резерва. Восстановление резерва на доходах код 13091»!')
-            }
-
-            // 8. Арифметическая проверка графы 6
-            if (row.debt45_90DaysNormAllocation50per != 50) {
-                logger.warn(errorMsg + 'неверно рассчитана графа «Задолженность от 45 до 90 дней. Норматив отчислений 50%»!')
-            }
-
-            // 9. Арифметическая проверка графы 9
-            if (row.debtOver90DaysNormAllocation100per != 100) {
-                logger.warn(errorMsg + 'неверно рассчитана графа «Задолженность более 90 дней. Норматив отчислений 100%»!')
+            if (!colNames.isEmpty()) {
+                def msg = colNames.join(', ')
+                logger.error(errorMsg + "неверно рассчитано значение графы: $msg.")
+                return false
             }
         } else {
-            // 5. Арифметическая проверка графы 13
-            tmp = row.reservePrev - row.useReserve
-            if (row.reserveCurrent != tmp) {
-                logger.warn(errorMsg + 'неверно рассчитана графа «Резерв на отчётную дату. Текущую»!')
+            // 3. Арифметическая проверка графы 13
+            if (row.reserveCurrent != calc13AB(row)) {
+                def msg = colNames.join(', ')
+                logger.error(errorMsg + "неверно рассчитано значение графы: $msg.")
             }
         }
 
@@ -409,6 +395,7 @@ def checkNSI() {
     def data = getData(formData)
     def index
     def errorMsg
+    def cache = [:]
     for (def row : getRows(data)) {
         if (isTotal(row)) {
             continue
@@ -418,11 +405,13 @@ def checkNSI() {
         errorMsg = "В строке $index "
 
         // 1. Проверка актуальности поля «Обеспечение» (графа 3)
+        // TODO (Ramil Timerbaev) getRecordById(??, ??, cache) == null
         if (false) {
             logger.warn(errorMsg + 'обеспечение в справочнике отсутствует!')
         }
 
         // 2. Проверка счёта бухгалтерского учёта для данного РНУ (графа 4)
+        // TODO (Ramil Timerbaev) getRecordById(29, ??, cache) == null
         if (false) {
             logger.error(errorMsg + 'операция в РНУ не учитывается!')
             return false
@@ -445,13 +434,12 @@ void consolidation() {
     }
     getRows(data).removeAll(deleteRows)
 
-    def sourceData
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                sourceData = getData(source)
+                def sourceData = getData(source)
                 copyRows(sourceData, data, null, 'total')
                 copyRows(sourceData, data, 'A', 'totalA')
                 copyRows(sourceData, data, 'B', 'totalB')
@@ -777,7 +765,7 @@ def addData(def xml) {
     def data = getData(formData)
     data.clear()
 
-    // def date = new Date()
+    def date = new Date()
     def cache = [:]
     def newRows = []
     def index = 0
@@ -790,7 +778,6 @@ def addData(def xml) {
         setEdit(newRow, null) // TODO (Ramil Timerbaev) задать раздел
         def indexCell = 0
 
-        // графа 0 - forLabel - для вывода надписей
         // графа 1
         newRow.number = getNumber(row.cell[indexCell].text())
         index++
@@ -800,11 +787,13 @@ def addData(def xml) {
         index++
 
         // графа 3
-        newRow.provision = row.cell[indexCell].text()
+        // TODO (Ramil Timerbaev) получить значение из справочника
+        newRow.provision = getRecord(0, '', row.cell[indexCell].text(), date, cache)
         index++
 
         // графа 4
-        newRow.nameBalanceAccount = row.cell[indexCell].text()
+        // TODO (Ramil Timerbaev) получить значение из справочника
+        newRow.nameBalanceAccount = getRecord(29, 'BALANCE_ACCOUNT', row.cell[indexCell].text(), date, cache)
         index++
 
         // графа 5
@@ -893,31 +882,60 @@ def getNumber(def value) {
 }
 
 /**
- * Получить id справочника.
+ * Получить запись из справочника по идентифкатору записи.
  *
- * @param ref_id идентификатор справончика
- * @param code атрибут справочника
- * @param value значение для поиска
- * @param date дата актуальности
+ * @param refBookId идентификатор справончика
+ * @param recordId идентификатор записи
  * @param cache кеш
  * @return
  */
-def getRecordId(def ref_id, String code, def value, Date date, def cache) {
-    String filter = code + " = '" + value + "'"
-    if (cache[ref_id]!=null) {
-        if (cache[ref_id][filter] != null) {
-            return cache[ref_id][filter]
+def getRecordById(def refBookId, def recordId, def cache) {
+    if (cache[refBookId] != null) {
+        if (cache[refBookId][recordId] != null) {
+            return cache[refBookId][recordId]
         }
     } else {
-        cache[ref_id] = [:]
+        cache[refBookId] = [:]
     }
-    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def record = refBookService.getRecordData(refBookId, recordId)
+    if (record != null) {
+        cache[refBookId][recordId] = record
+        return cache[refBookId][recordId]
+    }
+    // def refBook = refBookFactory.get(refBookId)
+    // def refBookName = refBook.name
+    // logger.error("Не удалось найти запись (id = $recordId) в справочнике $refBookName (id = $refBookId)")
+    return null
+}
+
+/**
+ * Получить запись из справочника по фильту на дату.
+ *
+ * @param refBookId идентификатор справончика
+ * @param code атрибут справочника по которому искать данные
+ * @param value значение для поиска
+ * @param date дата актуальности
+ * @param cache кеш
+ * @return запись справочника
+ */
+def getRecord(def refBookId, String code, def value, Date date, def cache) {
+    String filter = code + " = '" + value + "'"
+    if (cache[refBookId] != null) {
+        if (cache[refBookId][filter] != null) {
+            return cache[refBookId][filter]
+        }
+    } else {
+        cache[refBookId] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(refBookId)
     def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
     if (records.size() == 1) {
-        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
-        return cache[ref_id][filter]
+        cache[refBookId][filter] = records.get(0)
+        return cache[refBookId][filter]
     }
-    logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
+    def refBook = refBookFactory.get(refBookId)
+    def refBookName = refBook.name
+    logger.error("Не удалось найти запись в справочнике $refBookName (id = $refBookId) с атрибутом $code равным $value!")
     return null
 }
 
@@ -1031,8 +1049,7 @@ def getTotalColumnsAB() {
 /**
  * Отсортировать / группировать строки
  */
-void sort() {
-    def data = getData(formData)
+void sort(def data) {
     def rows = getRows(data)
     def sortRows = []
     def from
@@ -1061,17 +1078,62 @@ void sort() {
                 if (a.provision == b.provision) {
                     return a.debtor <=> b.debtor
                 }
+                // TODO (Ramil Timerbaev)
+                // def recordA = getRecordById(??, a.valuablePaper, cache)
+                // def recordB = getRecordById(??, b.valuablePaper, cache)
+                // def a = (recordA != null ? recordA.???.value : null)
+                // def b = (recordB != null ? recordB.???.value : null)
+                // return a <=> b
                 return a.provision <=> b.provision
         }
     }
 }
 
-// TODO (Ramil Timerbaev)
 /**
- * Для отладки. Потом убрать
+ * Получить строки из нф по заданному идентификатору нф.
  */
-void log(def message) {
-    def s = '===== ' + message
-    logger.info(s)
-    // System.out.println(s)
+def getRnuRowsById(def id) {
+    def formDataRNU = formDataService.find(id, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+    def data = getData(formDataRNU)
+    return (data ? getRows(data) : null)
+}
+
+def calc6() {
+    return 50
+}
+
+def calc7(def row) {
+    def tmp = row.debt45_90DaysSum * row.debt45_90DaysNormAllocation50per / 100
+    return roundValue(tmp, 2)
+}
+
+def calc9() {
+    return 100
+}
+
+def calc10(def row) {
+    def tmp = row.debtOver90DaysSum * row.debtOver90DaysNormAllocation100per / 100
+    return roundValue(tmp, 2)
+}
+
+def calc11(def row) {
+    return row.debt45_90DaysReserve + row.debtOver90DaysReserve
+}
+
+def calc14(def row) {
+    return (row.totalReserve + row.useReserve > row.reservePrev ?
+        row.totalReserve + row.useReserve - row.reservePrev : 0)
+}
+
+def calc15(def row) {
+    return (row.totalReserve + row.useReserve < row.reservePrev ?
+        row.reservePrev - (row.totalReserve + row.useReserve) : 0)
+}
+
+def calc13(def row) {
+    return row.reservePrev + row.calcReserve - row.reserveRecovery - row.useReserve
+}
+
+def calc13AB(def row) {
+    return row.reservePrev - row.useReserve
 }

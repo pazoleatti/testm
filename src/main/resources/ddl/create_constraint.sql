@@ -29,6 +29,7 @@ alter table blob_data add constraint blob_data_chk_type check (type in (0, 1));
 
 alter table ref_book add constraint ref_book_pk primary key (id);
 alter table ref_book add constraint ref_book_fk_script_id foreign key (script_id) references blob_data(id);
+alter table ref_book add constraint ref_book_chk_type check (type in (0, 1));
 
 alter table ref_book_attribute add constraint ref_book_attr_pk primary key (id);
 alter table ref_book_attribute add constraint ref_book_attr_chk_visible check (visible in (0, 1));
@@ -100,8 +101,12 @@ alter table declaration_data add constraint declaration_data_fk_decl_t_id foreig
 alter table declaration_data add constraint declaration_data_fk_rep_per_id foreign key (report_period_id) references report_period (id);
 alter table declaration_data add constraint declaration_data_fk_dep_id foreign key (department_id) references department (id);
 alter table declaration_data add constraint declaration_data_fk_j_print foreign key (jasper_print) references blob_data (id);
+alter table declaration_data add constraint declaration_data_fk_data foreign key (data) references blob_data (id);
+alter table declaration_data add constraint declaration_data_fk_data_pdf foreign key (data_pdf) references blob_data (id);
+alter table declaration_data add constraint declaration_data_fk_data_xlsx foreign key (data_xlsx) references blob_data (id);
 alter table declaration_data add constraint declaration_data_chk_is_accptd check (is_accepted in (0,1));
 alter table declaration_data add constraint declaration_data_uniq_template unique(report_period_id, department_id, declaration_template_id);
+
 
 alter table form_data add constraint form_data_pk primary key (id);
 alter table form_data add constraint form_data_fk_form_templ_id foreign key (form_template_id) references form_template(id);

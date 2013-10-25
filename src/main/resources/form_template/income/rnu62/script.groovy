@@ -98,6 +98,10 @@ def allCheck() {
 def boolean logicalCheck(){
     def numbers = []
     def totalRow = null
+    if(formDataPrev==null){
+        logger.error("Не найдены экземпляры РНУ-62 за прошлый отчетный период!")
+        return false
+    }
     for (def DataRow row : getRows(data)){
         if(!isTotal(row) && !checkRequiredColumns(row,requiredCols)){
             return false
@@ -126,12 +130,11 @@ def boolean logicalCheck(){
             logger.error("${rowStart}все суммы по операции нулевые!")
             return false
         }
+        if(getRowPrev(formDataPrev, row)==null){
+            logger.error("${rowStart}отсутствуют данные в РНУ-62 за предыдущий отчетный период!")
+            return false
+        }
         //TODO проверить, в аналитике неадекватно описано
-        //FIXME раскомментить
-//        if(getRowPrev(row)==null){
-//            logger.error("${rowStart}отсутствуют данные в РНУ-62 за предыдущий отчетный период!")
-//            return false
-//        }
         def values = getValues(row, null)
         for (def colName : calcColsWithoutNSI) {
             if (row[colName] != values[colName]) {
@@ -167,6 +170,11 @@ def boolean checkNSI(){
 
 void calc(){
     def data = data
+
+    if(formDataPrev==null){
+        logger.error("Не найдены экземпляры РНУ-62 за прошлый отчетный период!")
+        return
+    }
 
     // проверить обязательные редактируемые поля
     for (def DataRow row : getRows(data)){
@@ -399,14 +407,14 @@ int sortRow(List<String> params, DataRow a, DataRow b) {
 }
 
 /**
- * получаем мапу со значениями, расчитанными для каждой конкретной строки
+ * получаем мапу со значениями, расчитанными для каждой конкретной строки или сразу записываем в строку (для расчетов)
  */
 def getValues(def row, def result) {
     if(result == null){
         result = [:]
     }
 
-    def rowPrev = getRowPrev(row)
+    def rowPrev = getRowPrev(formDataPrev, row)
     result.with {
         rowNumber=getGraph1(row)
         rateBRBillDate=getGraph7(row)
@@ -525,10 +533,15 @@ def isRubleCurrency(def currencyCode) {
 
 def FormData getFormDataPrev() {
     def reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-    return reportPeriodPrev? formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriodPrev.id):null
+    def formDataPrev = reportPeriodPrev? formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriodPrev.id):null
+    if (formDataPrev != null && formDataPrev.state == WorkflowState.ACCEPTED){
+        return formDataPrev
+    } else {
+        return null
+    }
 }
 
-def DataRow getRowPrev(def DataRow row) {
+def DataRow getRowPrev(def formDataPrev, def DataRow row) {
     if (formDataPrev != null) {
         def dataPrev = getData(formDataPrev)
         for(def rowPrev : getRows(dataPrev)){
