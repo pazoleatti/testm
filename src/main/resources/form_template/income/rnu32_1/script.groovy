@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  * Форма "(РНУ-32.1) Регистр налогового учёта начисленного процентного дохода по облигациям, по которым открыта короткая позиция. Отчёт 1".
  *
  * TODO:
- *      - алгоритм заполнения графы 15 - нет описания для подраздела 8 (возможно раздел 8 надо убрать?) - http://jira.aplana.com/browse/SBRFACCTAX-4779
  *      - логическая проверка 2 - проблемы с форматом TTBBBB - http://jira.aplana.com/browse/SBRFACCTAX-4780
  *      - импорт и миграция еще не сделаны
  *
@@ -101,7 +100,7 @@ def addRow() {
             index = getIndexByAlias(dataRows, 'total' + alias)
         }
     }
-    dataRowHelper.insert(newRow, index + 1)
+    dataRowHelper.insert(newRow, index)
 }
 
 /**
@@ -158,7 +157,7 @@ def calc() {
         def firstRow = getRowByAlias(dataRows, section)
         def lastRow = getRowByAlias(dataRows, 'total' + section)
         sumColumns.each {
-            lastRow.getCell(it).setValue(getSum(it, firstRow, lastRow))
+            lastRow.getCell(it).setValue(getSum(dataRows, it, firstRow, lastRow))
         }
     }
     dataRowHelper.save(dataRows)
@@ -182,7 +181,6 @@ def logicalCheck() {
             return false
         }
     }
-    return true // TODO (Ramil Timerbaev)
 
     // алиасы графов для арифметической проверки (графа 15..18)
     def arithmeticCheckAlias = ['incomePrev', 'incomeShortPosition', 'percIncome', 'totalPercIncome']
@@ -245,7 +243,7 @@ def logicalCheck() {
         lastRow = getRowByAlias(dataRows, 'total' + section)
         for (def col : sumColumns) {
             def value = roundValue(lastRow.getCell(col).getValue() ?: 0, 6)
-            def sum = roundValue(getSum(col, firstRow, lastRow), 6)
+            def sum = roundValue(getSum(dataRows, col, firstRow, lastRow), 6)
             if (sum != value) {
                 def name = getColumnName(lastRow, col)
                 def number = section
@@ -348,8 +346,8 @@ void sort(def dataRows) {
 
     // подразделы, собрать список списков строк каждого раздела
     getAliasesSections().each { section ->
-        from = getIndexByAlias(dataRows, section) + 1
-        to = getIndexByAlias(dataRows, 'total' + section) - 1
+        from = getIndexByAlias(dataRows, section)
+        to = getIndexByAlias(dataRows, 'total' + section) - 2
         if (from <= to) {
             sortRows.add(dataRows[from..to])
         }
@@ -389,13 +387,13 @@ void sort(def dataRows) {
  *      в приемник строки вставляются перед строкой с этим псевдонимом
  */
 void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def toAlias) {
-    def from = getIndexByAlias(sourceDataRows, fromAlias) + 1
-    def to = getIndexByAlias(sourceDataRows, toAlias)
+    def from = getIndexByAlias(sourceDataRows, fromAlias)
+    def to = getIndexByAlias(sourceDataRows, toAlias) - 1
     if (from >= to) {
         return
     }
     def copyRows = sourceDataRows.subList(from, to)
-    dataRows.addAll(getIndexByAlias(destinationDataRows, toAlias), copyRows)
+    destinationDataRows.addAll(getIndexByAlias(destinationDataRows, toAlias) - 1, copyRows)
     updateIndexes(destinationDataRows)
 }
 
@@ -414,11 +412,11 @@ def getSumColumns() {
 }
 
 /**
- * Получить номер строки в таблице по псевдонимиу (0..n).
+ * Получить номер строки в таблице по псевдонимиу (1..n).
  */
 def getIndexByAlias(def dataRows, String rowAlias) {
     def row = getRowByAlias(dataRows, rowAlias)
-    return (row != null ? row.getIndex() - 1 : -1)
+    return (row != null ? row.getIndex() : -1)
 }
 
 /**
@@ -551,18 +549,15 @@ def calc16(def row, def lastDay, def cache, def dataRows) {
  * @param t количество дней между последним днем месяца и графой 6 или графой 11
  */
 def calc15or16(def row, def lastDay, def cache, def t, def dataRows) {
-    if (row.getIndex() < getIndexByAlias(dataRows, '6')) {
-        // Для ценных бумаг, учтенных в подразделах 1, 2, 3, 4, 5
+    if (row.getIndex() < getIndexByAlias(dataRows, '7')) {
+        // Для ценных бумаг, учтенных в подразделах 1, 2, 3, 4, 5, 6
         checkDivision(row.currentPeriod, "Деление на ноль в строке ${row.getIndex()}: графа 12.")
         return row.countsBonds * roundValue(row.incomeCurrentCoupon * t / row.currentPeriod, 2)
-    } else if (row.getIndex() < getIndexByAlias(dataRows, '8')) {
-        // Для ценных бумаг, учтенных в подразделах 6 и 7
+    } else {
+        // Для ценных бумаг, учтенных в подразделах 7 и 8
         // справочник 22 "Курс валют", атрибут 81 RATE - "Курс валют", атрибут 80 CODE_NUMBER - Цифровой код валюты
         def record22 = getRecord(22, 'CODE_NUMBER', row.code, lastDay, cache)
         return roundValue(row.currentCouponRate * row.faceValue * t / 360, 2) * record22.RATE.value
-    } else {
-        // TODO (Ramil Timerbaev) в чтз нет описано вычисления для ценных бумаг, учтенных в подразделе 8
-        return 0
     }
 }
 

@@ -7,8 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 /**
  * Форма "(РНУ-40.2) Регистр налогового учёта начисленного процентного дохода по прочим дисконтным облигациям. Отчёт 2".
  *
- * @version 59
- *
  * @author rtimerbaev
  */
 
@@ -397,13 +395,13 @@ def checkRequiredColumns(def row, def columns) {
  *      в приемник строки вставляются перед строкой с этим псевдонимом
  */
 void copyRows(def sourceData, def destinationData, def fromAlias, def toAlias) {
-    def from = getIndexByAlias(sourceData, fromAlias) + 1
-    def to = getIndexByAlias(sourceData, toAlias)
+    def from = getIndexByAlias(sourceData, fromAlias)
+    def to = getIndexByAlias(sourceData, toAlias) - 1
     if (from >= to) {
         return
     }
     def copyRows = getRows(sourceData).subList(from, to)
-    getRows(destinationData).addAll(getIndexByAlias(destinationData, toAlias), copyRows)
+    getRows(destinationData).addAll(getIndexByAlias(destinationData, toAlias) - 1, copyRows)
     updateIndexes(destinationData)
 }
 

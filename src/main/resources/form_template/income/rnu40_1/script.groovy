@@ -68,10 +68,10 @@ def addNewRow() {
     def newRow = getNewRow()
     def index
 
-    if (currentDataRow == null || getIndex(currentDataRow) == -1) {
+    if (currentDataRow == null || currentDataRow.getIndex() == -1) {
         index = getIndexByAlias(data, 'total1')
     } else if (currentDataRow.getAlias() == null) {
-        index = getIndex(currentDataRow) + 1
+        index = currentDataRow.getIndex()
     } else {
         def alias = currentDataRow.getAlias()
         if (alias.contains('total')) {
@@ -80,7 +80,7 @@ def addNewRow() {
             index = getIndexByAlias(data, 'total' + alias)
         }
     }
-    data.insert(newRow, index + 1)
+    data.insert(newRow, index)
 }
 
 /**
@@ -167,7 +167,7 @@ def logicalCheck() {
             continue
         }
 
-        index = getIndex(row) + 1
+        index = row.getIndex()
         errorMsg = "В строке $index "
 
         // 2. Проверка наименования террбанка
@@ -178,7 +178,7 @@ def logicalCheck() {
 
         // 3. Арифметическая проверка графы 10
         if (calc10(row, lastDay, cache) != row.getCell('percent').getValue()) {
-            def name = getColumnName(row, 'percent')
+            def name = row.getCell('percent').column.name
             logger.error(errorMsg + "неверно рассчитано значение графы: $name.")
             return false
         }
@@ -195,7 +195,7 @@ def logicalCheck() {
             def value = roundValue(lastRow.getCell(col).getValue() ?: 0, 6)
             def sum = roundValue(getSum(col, firstRow, lastRow), 6)
             if (sum != value) {
-                def name = getColumnName(lastRow, col)
+                def name = lastRow.getCell(col).column.name
                 def number = section
                 logger.error("Неверно рассчитаны итоговые значения для раздела $number в графе \"$name\"!")
                 return false
@@ -219,7 +219,7 @@ def checkNSI() {
             continue
         }
 
-        index = getIndex(row) + 1
+        index = row.getIndex()
         errorMsg = "В строке $index "
 
         // 1. Проверка актуальности поля «Номер территориального банка»	(графа 1)
@@ -304,13 +304,6 @@ def isFixedRow(def row) {
 }
 
 /**
- * Получить номер строки в таблице (0..n).
- */
-def getIndex(def row) {
-    return row.getIndex() - 1
-}
-
-/**
  * Получить строку по алиасу.
  *
  * @param data данные нф
@@ -329,11 +322,11 @@ def getRowByAlias(def data, def alias) {
 }
 
 /**
- * Получить номер строки в таблице по псевдонимиу (0..n).
+ * Получить номер строки в таблице по псевдонимиу (1..n).
  */
 def getIndexByAlias(def data, String rowAlias) {
     def row = getRowByAlias(data, rowAlias)
-    return (row != null ? getIndex(row) : -1)
+    return (row != null ? row.getIndex() : -1)
 }
 
 /**
@@ -376,19 +369,6 @@ def getData(def formData) {
 }
 
 /**
- * Получить название графы по псевдониму.
- *
- * @param row строка
- * @param alias псевдоним графы
- */
-def getColumnName(def row, def alias) {
-    if (row != null && alias != null) {
-        return row.getCell(alias).getColumn().getName().replace('%', '%%')
-    }
-    return ''
-}
-
-/**
  * Проверить заполненость обязательных полей.
  *
  * @param row строка
@@ -400,12 +380,12 @@ def checkRequiredColumns(def row, def columns) {
 
     columns.each {
         if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-            def name = getColumnName(row, it)
+            def name = row.getCell(it).column.name
             colNames.add('"' + name + '"')
         }
     }
     if (!colNames.isEmpty()) {
-        def index = getIndex(row) + 1
+        def index = row.getIndex()
         def errorMsg = colNames.join(', ')
         logger.error("В $index строке не заполнены колонки : $errorMsg.")
         return false
@@ -423,13 +403,13 @@ def checkRequiredColumns(def row, def columns) {
  *      в приемник строки вставляются перед строкой с этим псевдонимом
  */
 void copyRows(def sourceData, def destinationData, def fromAlias, def toAlias) {
-    def from = getIndexByAlias(sourceData, fromAlias) + 1
-    def to = getIndexByAlias(sourceData, toAlias)
+    def from = getIndexByAlias(sourceData, fromAlias)
+    def to = getIndexByAlias(sourceData, toAlias) - 1
     if (from >= to) {
         return
     }
     def copyRows = getRows(sourceData).subList(from, to)
-    getRows(destinationData).addAll(getIndexByAlias(destinationData, toAlias), copyRows)
+    getRows(destinationData).addAll(getIndexByAlias(destinationData, toAlias) - 1, copyRows)
     // поправить индексы, потому что они после вставки не пересчитываются
     getRows(destinationData).eachWithIndex { row, i ->
         row.setIndex(i + 1)
@@ -475,8 +455,8 @@ void sort(def data) {
 
     // подразделы, собрать список списков строк каждого раздела
     getAliasesSections().each { section ->
-        from = getIndexByAlias(data, section) + 1
-        to = getIndexByAlias(data, 'total' + section) - 1
+        from = getIndexByAlias(data, section)
+        to = getIndexByAlias(data, 'total' + section) - 2
         if (from <= to) {
             sortRows.add(rows[from..to])
         }
@@ -517,8 +497,8 @@ def getSumColumns() {
  * Получить сумму столбца.
  */
 def getSum(def columnAlias, def rowStart, def rowEnd) {
-    def from = getIndex(rowStart) + 1
-    def to = getIndex(rowEnd) - 1
+    def from = rowStart.getIndex()
+    def to = rowEnd.getIndex() - 2
     if (from > to) {
         return 0
     }
@@ -607,8 +587,8 @@ def getRecord(def refBookId, String code, def value, Date date, def cache) {
  */
 def calc10(def row, def lastDay, def cache) {
     def tmp
-    checkDivision(row.bondsCount, 'Деление на ноль в строке ' + (getIndex(row) + 1) + ': графа 7.')
-    checkDivision(row.circulationTerm, 'Деление на ноль в строке ' + (getIndex(row) + 1) + ': графа 9.')
+    checkDivision(row.bondsCount, 'Деление на ноль в строке ' + row.getIndex() + ': графа 7.')
+    checkDivision(row.circulationTerm, 'Деление на ноль в строке ' + row.getIndex() + ': графа 9.')
     tmp = ((row.cost / row.bondsCount) - row.upCost) * ((lastDay - row.buyDate) / row.circulationTerm) * row.bondsCount
     tmp = roundValue(tmp, 2)
 
@@ -616,7 +596,6 @@ def calc10(def row, def lastDay, def cache) {
     def record22 = getRecord(22, 'CODE_NUMBER', row.currencyCode, lastDay, cache)
 
     tmp = tmp * record22.RATE.value
-
 
     return roundValue(tmp, 2)
 }
