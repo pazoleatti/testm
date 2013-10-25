@@ -664,7 +664,7 @@ create_time date not null
 );
 create sequence seq_user_session start with 100;
 ------------------------------------------------------------------------------------------------------
-create table notifications(
+create table notification(
 id number(9) primary key,
 report_period_id number(9) not null, 
 sender_department_id number(9) not null, 
@@ -675,12 +675,12 @@ create_date date not null,
 deadline date not null
 );
 
-comment on table notifications is 'Оповещения';
-comment on column notifications.report_period_id is 'идентификатор отчетного периода'; 
-comment on column notifications.sender_department_id is 'идентификатор подразделения-отправителя'; 
-comment on column notifications.receiver_department_id is 'идентификатор подразделения-получателя'; 
-comment on column notifications.first_reader_id is 'идентификатор первого пользователя, прочитавшего оповещение'; 
-comment on column notifications.text is 'текст оповещения';
-comment on column notifications.create_date is 'дата создания оповещения';
-comment on column notifications.deadline is 'дата сдачи отчетности';
+comment on table notification is 'Оповещения';
+comment on column notification.report_period_id is 'идентификатор отчетного периода'; 
+comment on column notification.sender_department_id is 'идентификатор подразделения-отправителя'; 
+comment on column notification.receiver_department_id is 'идентификатор подразделения-получателя'; 
+comment on column notification.first_reader_id is 'идентификатор первого пользователя, прочитавшего оповещение'; 
+comment on column notification.text is 'текст оповещения';
+comment on column notification.create_date is 'дата создания оповещения';
+comment on column notification.deadline is 'дата сдачи отчетности';
 --------------------------------------------------------------------------------------------------------

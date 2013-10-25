@@ -69,4 +69,4 @@ drop table tax_period;
 drop table form_type;
 drop table dict_region;
 drop table configuration;
-drop table notifications;
+drop table notification;
