@@ -636,8 +636,7 @@ create table department_report_period (
   report_period_id    number(9) not null,
   is_active           number(1) not null,
   is_balance_period   number(1) default 0 not null,
-  report_date         date,
-  deadline            date
+  report_date         date
 );
 comment on table department_report_period is  'Привязка отчетных периодов к подразделениям';
 comment on column department_report_period.department_id is 'Код подразделения';
@@ -645,7 +644,6 @@ comment on column department_report_period.report_period_id is 'Код отче�
 comment on column department_report_period.is_active is 'Признак активности (0 - период закрыт, 1 - период открыт)';
 comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
 comment on column department_report_period.report_date is 'Срок подачи отчётности';
-comment on column department_report_period.deadline is 'Срок сдачи отчётности';
 ------------------------------------------------------------------------------------------------------
 create table task_context(
 id  number(18,0) primary key,
@@ -666,3 +664,23 @@ create_time date not null
 );
 create sequence seq_user_session start with 100;
 ------------------------------------------------------------------------------------------------------
+create table notifications(
+id number(9) primary key,
+report_period_id number(9) not null, 
+sender_department_id number(9) not null, 
+receiver_department_id number(9) not null, 
+first_reader_id number(9) null, 
+text varchar2(2000) not null, 
+create_date date not null, 
+deadline date not null
+);
+
+comment on table notifications is 'Оповещения';
+comment on column notifications.report_period_id is 'идентификатор отчетного периода'; 
+comment on column notifications.sender_department_id is 'идентификатор подразделения-отправителя'; 
+comment on column notifications.receiver_department_id is 'идентификатор подразделения-получателя'; 
+comment on column notifications.first_reader_id is 'идентификатор первого пользователя, прочитавшего оповещение'; 
+comment on column notifications.text is 'текст оповещения';
+comment on column notifications.create_date is 'дата создания оповещения';
+comment on column notifications.deadline is 'дата сдачи отчетности';
+--------------------------------------------------------------------------------------------------------
