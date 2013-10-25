@@ -79,15 +79,17 @@ Map<String, RefBookValue> getRecord(DataRow<Cell> row) {
     map.put("TAXPAYER_CODE", new RefBookValue(RefBookAttributeType.STRING, row.taxpayerCode))
     map.put("REG_NUM", new RefBookValue(RefBookAttributeType.STRING, row.regNum))
     map.put("COUNTRY", new RefBookValue(RefBookAttributeType.REFERENCE, row.country))
+    map.put("OFFSHORE", new RefBookValue(RefBookAttributeType.REFERENCE, row.offshore))
+    map.put("DOP_INFO", new RefBookValue(RefBookAttributeType.STRING, row.dopInfo))
+    map.put("SKOLKOVO", new RefBookValue(RefBookAttributeType.REFERENCE, row.skolkovo))
     map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, row.refBookRecord))
 
-    map
+    return map
 }
 
 void deleteRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.delete(currentDataRow)
-    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 void addRow() {
@@ -99,7 +101,8 @@ void addRow() {
     row.keySet().each {
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
-    ['name', 'country', 'regNum', 'taxpayerCode', 'address', 'inn', 'kpp', 'code', 'editSign', 'refBookRecord'].each {
+    ['name', 'country', 'regNum', 'taxpayerCode', 'address', 'inn', 'kpp', 'code',
+            'offshore', 'dopInfo', 'skolkovo', 'editSign', 'refBookRecord'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
@@ -120,7 +123,7 @@ void logicCheck() {
         def rowNum = row.getIndex()
         // Проверка заполненности полей в строках НЕ на удаление
         if (row.editSign == null || refBookService.getRecordData(80, row.editSign).CODE.numberValue != 2) {
-            ['rowNum', 'name', 'country', 'address', 'inn', 'code', 'editSign'].each {
+            ['rowNum', 'name', 'country', 'address', 'inn', 'code', 'editSign', 'offshore', 'skolkovo'].each {
                 def rowCell = row.getCell(it)
                 if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                     def msg = rowCell.column.name

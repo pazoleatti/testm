@@ -540,6 +540,8 @@ public class FormDataServiceImpl implements FormDataService {
             }
 		}
 
+        dataRowDao.commit(formData.getId());
+
 		logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
 		auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 				null, formData.getFormType().getId(), formData.getKind().getId(), note);

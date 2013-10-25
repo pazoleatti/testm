@@ -74,7 +74,7 @@ comment on column form_template.data_headers is 'Описание заголов
 ---------------------------------------------------------------------------------------------------
 create table form_style (
   id					     number(9) not null,
-  alias				     varchar(80) not null,
+  alias				     varchar2(80) not null,
   form_template_id number(9) not null,
   font_color			 number(3) null,
   back_color			 number(3) null,
@@ -186,14 +186,14 @@ comment on column ref_book_value.reference_value is 'Значение ссылк
 ------------------------------------------------------------------------------------------------------
 create table form_column (
   id number(9) not null,
-  name varchar(1000) not null,
+  name varchar2(1000) not null,
   form_template_id number(9) not null,
   ord number(9) not null,
-  alias varchar(100) not null,
+  alias varchar2(100) not null,
   type char(1) not null,
   width number(9) not null,
   precision number(9),
-  group_name varchar(1000),
+  group_name varchar2(1000),
   max_length number(4),
   checking  number(1) default 0 not null,
   attribute_id number(18),
@@ -303,7 +303,7 @@ create sequence seq_income_102 start with 100;
 create table declaration_type (
   id       number(9) not null,
   tax_type    char(1) not null,
-  name      varchar(80) not null
+  name      varchar2(80) not null
 );
 comment on table declaration_type is ' Виды деклараций';
 comment on column declaration_type.id is 'Идентификатор (первичный ключ)';
@@ -328,10 +328,10 @@ create table declaration_template (
   version    varchar2(20) not null,
   is_active   number(1) not null,
   create_script       clob,
-  jrxml               VARCHAR2(36),
-  jasper              VARCHAR2(36),
+  jrxml               varchar2(36),
+  jasper              varchar2(36),
   declaration_type_id number(9) not null,
-  XSD VARCHAR2(36)
+  XSD varchar2(36) 
 );
 comment on table declaration_template is 'Шаблоны налоговых деклараций';
 comment on column declaration_template.id is 'Идентификатор (первичный ключ)';
@@ -424,7 +424,7 @@ comment on column form_data_performer.phone is 'Телефон';
 create table data_row (
   id number(18) not null,
   form_data_id number(18) not null,
-  alias varchar(20),
+  alias varchar2(20),
   ord number(14,0) not null,
   type number(1) not null
 );
@@ -517,8 +517,8 @@ comment on column form_data_source.src_department_form_type_id is 'Иденти�
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 create table sec_user (
   id number(9) not null,
-  login varchar(255) not null,
-  name varchar(50) not null,
+  login varchar2(255) not null,
+  name varchar2(50) not null,
   department_id number(9) not null,
   is_active number(1) not null,
   email varchar2(128)
@@ -535,7 +535,7 @@ create sequence seq_sec_user start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table object_lock (
   object_id number(20) not null,
-  class varchar(100) not null,
+  class varchar2(100) not null,
   user_id number(9) not null,
   lock_time date not null
 );
@@ -547,8 +547,8 @@ comment on column object_lock.lock_time is 'Время блокировки';
 -------------------------------------------------------------------------------------------------------------------------------------
 create table sec_role (
   id number(9) not null,
-  alias varchar(20) not null,
-  name varchar(50) not null
+  alias varchar2(20) not null,
+  name varchar2(50) not null
 );
 comment on table sec_role is 'Системные роли';
 comment on column sec_role.id is 'Первичный ключ';
