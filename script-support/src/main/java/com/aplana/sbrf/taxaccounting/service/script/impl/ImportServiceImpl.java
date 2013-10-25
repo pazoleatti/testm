@@ -15,7 +15,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 @Service("importService")
 public class ImportServiceImpl implements ImportService {
@@ -187,15 +190,15 @@ public class ImportServiceImpl implements ImportService {
         StringBuilder sb = new StringBuilder();
         sb.append("<data>").append(ENTER);
 
-        ArrayList<Integer> skipList = getSkipCol(sheet, firstP);
+        Set<Integer> skipSet = getSkipCol(sheet, firstP);
 
         String rowStr;
         int indexRow = -1;
-        Iterator rows = sheet.rowIterator();
 
-        while (rows.hasNext()) {
-            indexRow += 1;
-            HSSFRow row = (HSSFRow) rows.next();
+        for (int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum(); i ++)
+        {
+            indexRow++;
+            HSSFRow row = sheet.getRow(i);
 
             // брать строки с позиции начала таблицы
             if (indexRow < firstP.getY()) {
@@ -207,7 +210,7 @@ public class ImportServiceImpl implements ImportService {
             }
 
             // получить значения ячеек строки
-            rowStr = getRowString(row, firstP.getX(), columnsCount, skipList);
+            rowStr = getRowString(row, firstP.getX(), columnsCount, skipSet);
             sb.append(rowStr);
         }
         sb.append("</data>");
@@ -220,8 +223,8 @@ public class ImportServiceImpl implements ImportService {
      * @param sheet  лист XLS
      * @param firstP начало таблицы
      */
-    ArrayList<Integer> getSkipCol(HSSFSheet sheet, Point firstP) {
-        ArrayList<Integer> value = new ArrayList<Integer>();
+    Set<Integer> getSkipCol(HSSFSheet sheet, Point firstP) {
+        Set<Integer> value = new HashSet<Integer>();
         // Список объединенных столбцов
         Set<Integer> mergeRegion = new HashSet<Integer>();
         for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
@@ -238,11 +241,15 @@ public class ImportServiceImpl implements ImportService {
         if (mergeRegion.isEmpty()) {
             return value;
         }
-        Iterator rows = sheet.rowIterator();
+
         int indexRow = -1;
-        while (rows.hasNext()) {
+
+        for (int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum(); i++) {
             indexRow += 1;
-            HSSFRow row = (HSSFRow) rows.next();
+            HSSFRow row = sheet.getRow(i);
+            if (row == null) {
+                continue;
+            }
 
             // брать строки с позиции начала таблицы
             if (indexRow < (firstP.getY() + 2)) {
@@ -324,7 +331,7 @@ public class ImportServiceImpl implements ImportService {
      * @param colP         номер ячейки с которой брать данные
      * @param columnsCount количество столбцов в таблице
      */
-    private String getRowString(HSSFRow row, Integer colP, Integer columnsCount, ArrayList<Integer> skipList) {
+    private String getRowString(HSSFRow row, Integer colP, Integer columnsCount, Set<Integer> skipSet) {
         if (row == null) {
             return "<row/>";
         }
@@ -338,7 +345,9 @@ public class ImportServiceImpl implements ImportService {
             indexCol++;
             // получить значение ячейки
             cellValue = getCellValue((HSSFCell) iterator.next());
-            if (skipList.contains(indexCol)) continue;
+            if (skipSet.contains(indexCol)) {
+                continue;
+            }
             if (colP != null && indexCol + row.getFirstCellNum() < colP.shortValue()) {
                 continue;
             }
@@ -409,14 +418,14 @@ public class ImportServiceImpl implements ImportService {
             return null;
         }
         // найти координату startStr
-        Iterator rows = sheet.rowIterator();
         int firstRow = -1;
         int firstCol = 0;
         boolean isFind = false;
-        while (rows.hasNext() && !isFind) {
+
+        for (int i = sheet.getFirstRowNum();  i <= sheet.getLastRowNum() && !isFind ; i++) {
             firstRow++;
             firstCol = -1;
-            HSSFRow row = (HSSFRow) rows.next();
+            HSSFRow row = sheet.getRow(i);
             if (row == null) {
                 continue;
             }

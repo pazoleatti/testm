@@ -26,7 +26,9 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED:
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
         logicCheck()
         break
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
@@ -77,15 +79,17 @@ Map<String, RefBookValue> getRecord(DataRow<Cell> row) {
     map.put("TAXPAYER_CODE", new RefBookValue(RefBookAttributeType.STRING, row.taxpayerCode))
     map.put("REG_NUM", new RefBookValue(RefBookAttributeType.STRING, row.regNum))
     map.put("COUNTRY", new RefBookValue(RefBookAttributeType.REFERENCE, row.country))
+    map.put("OFFSHORE", new RefBookValue(RefBookAttributeType.REFERENCE, row.offshore))
+    map.put("DOP_INFO", new RefBookValue(RefBookAttributeType.STRING, row.dopInfo))
+    map.put("SKOLKOVO", new RefBookValue(RefBookAttributeType.REFERENCE, row.skolkovo))
     map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, row.refBookRecord))
 
-    map
+    return map
 }
 
 void deleteRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.delete(currentDataRow)
-    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 void addRow() {
@@ -97,7 +101,8 @@ void addRow() {
     row.keySet().each {
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
-    ['name', 'country', 'regNum', 'taxpayerCode', 'address', 'inn', 'kpp', 'code', 'editSign', 'refBookRecord'].each {
+    ['name', 'country', 'regNum', 'taxpayerCode', 'address', 'inn', 'kpp', 'code',
+            'offshore', 'dopInfo', 'skolkovo', 'editSign', 'refBookRecord'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
@@ -118,7 +123,7 @@ void logicCheck() {
         def rowNum = row.getIndex()
         // Проверка заполненности полей в строках НЕ на удаление
         if (row.editSign == null || refBookService.getRecordData(80, row.editSign).CODE.numberValue != 2) {
-            ['rowNum', 'name', 'country', 'address', 'inn', 'code', 'editSign'].each {
+            ['rowNum', 'name', 'country', 'address', 'inn', 'code', 'editSign', 'offshore', 'skolkovo'].each {
                 def rowCell = row.getCell(it)
                 if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                     def msg = rowCell.column.name
@@ -165,10 +170,10 @@ void logicCheck() {
             val = row.inn
             if (val != null) {
                 def msg = row.getCell("inn").column.name
-                if (!val.matches('[0-9]*')) {
+                if (!val.matches('([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}')) {
                     logger.error("Строка $rowNum: «$msg» содержит недопустимые символы!")
                 } else {
-                    def res = refDataProvider.getRecords(new Date(), null, "INN_KIO = $val", null);
+                    def res = refDataProvider.getRecords(new Date(), null, "INN_KIO = '$val'", null);
                     if (res.getRecords().size() > 0) {
                         logger.warn("Строка $rowNum: «$msg» уже существует в справочнике «Организации – участники контролируемых сделок»!")
                     }
@@ -176,11 +181,16 @@ void logicCheck() {
             }
             // КПП
             val = row.kpp
-            if (row.kpp != null) {
-                def res = refDataProvider.getRecords(new Date(), null, "KPP = $val", null);
-                if (res.getRecords().size() > 0) {
-                    def msg = row.getCell("kpp").column.name
-                    logger.warn("Строка $rowNum: «$msg» уже существует в справочнике «Организации – участники контролируемых сделок»!")
+            if (val != null) {
+                val = val.toString()
+                def msg = row.getCell("kpp").column.name
+                if (!val.matches('([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-F]{2})([0-9]{3})')) {
+                    logger.error("Строка $rowNum: «$msg» содержит недопустимые символы!")
+                } else {
+                    def res = refDataProvider.getRecords(new Date(), null, "KPP = $val", null);
+                    if (res.getRecords().size() > 0) {
+                        logger.warn("Строка $rowNum: «$msg» уже существует в справочнике «Организации – участники контролируемых сделок»!")
+                    }
                 }
             }
         }
