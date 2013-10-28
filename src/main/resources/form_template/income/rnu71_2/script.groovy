@@ -6,12 +6,11 @@ import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 /**
  * Скрипт для РНУ-71.2
  * Форма "(РНУ-71.2) Регистр налогового учёта уступки права требования после предусмотренного кредитным договором срока погашения основного долга в отношении сделок уступки прав требования в пользу Взаимозависимых лиц и резидентов оффшорных зон"
- *  TODO графа 10
+ *  TODO графа 10, 18
  *  @author bkinzyabulatov
  */
 
@@ -230,7 +229,7 @@ def getGraph15(def row, def rowPrev, def startDate, def endDate) {
 }
 
 def getGraph16(def row) {
-    return row.lossThisTaxPeriod - (row.amount - row.amountForReserve)
+    return row.lossThisTaxPeriod?:0 - (row.amount - row.amountForReserve)
 }
 
 def getGraph17(def row, def rowPrev, def startDate, def endDate) {
@@ -242,6 +241,7 @@ def getGraph17(def row, def rowPrev, def startDate, def endDate) {
     return null
 }
 
+//TODO уточнить
 def getGraph18(def row, def endDate) {
     if (row.result < 0){
         if (row.part2Date < endDate) {

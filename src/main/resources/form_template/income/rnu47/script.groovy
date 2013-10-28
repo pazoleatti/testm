@@ -1,5 +1,14 @@
 package form_template.income.rnu47
 
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormData
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
+
 /**
  * Скрипт для РНУ-47 (rnu47.groovy).
  * Форма "(РНУ-47) Регистр налогового учёта «ведомость начисленной амортизации по основным средствам,
@@ -10,7 +19,6 @@ package form_template.income.rnu47
  *
  * TODO:
  *      -   не доделаны проверки 2, 3
- *      -   нет консолидации
  *
  * @author vsergeev
  *
@@ -30,7 +38,7 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK :
         def rnu46FormData = getRnu46FormData()
         if (rnu46FormData==null) {
-            logger.error("Отсутствуют данные РНУ-46!")
+            logger.error("Не найдены экземпляры РНУ-46 за текущий отчетный период!")
             return
         }
         logicalCheck()
@@ -38,7 +46,12 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE :
         def rnu46FormData = getRnu46FormData()
         if (rnu46FormData==null) {
-            logger.error("Отсутствуют данные РНУ-46!")
+            logger.error("Не найдены экземпляры РНУ-46 за текущий отчетный период!")
+            return
+        }
+        def formDataOld = getFormDataOld()
+        if (formDataOld == null && !isFirstPeriod()) {
+            logger.error("Не найдены экземпляры РНУ-47 за прошлый отчетный период!!")
             return
         }
         calc()
@@ -47,6 +60,21 @@ switch (formDataEvent) {
     case FormDataEvent.ADD_ROW :
         break
     case FormDataEvent.DELETE_ROW :
+        break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
+        logicalCheck()
+        break
+// обобщить
+    case FormDataEvent.COMPOSE :
+        consolidation()
+        calc()
+        !hasError() && logicalCheck()
         break
 }
 
@@ -68,7 +96,7 @@ void checkCreation() {
 def getRnu46FormData(){
     def formData46 = formDataService.find(342, formData.kind, formDataDepartment.id, formData.reportPeriodId)
     if (formData46!=null) {
-        return getData(formData46)
+        return formDataService.getDataRowHelper(formData46)
     }
     return null
 }
@@ -78,7 +106,7 @@ def getRnu46FormData(){
  */
 void calc(){
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = getRows(dataRowHelper)
+    def dataRows = dataRowHelper.allCached
 
     // расчет для первых 11 строк
     def row1_11 = calcRows1_11()
@@ -99,7 +127,7 @@ void calc(){
         }
     }
 
-    save(dataRowHelper)
+    dataRowHelper.save(dataRows)
 }
 
 /**
@@ -107,7 +135,7 @@ void calc(){
  */
 def calcRows1_11(){
     def rnu46FormData = getRnu46FormData()
-    def rnu46Rows = getRows(rnu46FormData)
+    def rnu46Rows = rnu46FormData.allCached
     def groupList = 0..10
     def value = [:]
     groupList.each{group ->
@@ -121,7 +149,7 @@ def calcRows1_11(){
  */
 def getTotalValues(){
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = getRows(dataRowHelper)
+    def dataRows = dataRowHelper.allCached
     def group12 = ['R1', 'R2', 'R8', 'R9', 'R10']
     def group13 = ['R3', 'R4', 'R5', 'R6', 'R7']
     def value = [11: [:], 12: [:]]
@@ -129,11 +157,11 @@ def getTotalValues(){
     // расчет для строк 12-13
     dataRows.eachWithIndex{row, index->
         if (group12.contains(row.getAlias())) {
-            value[11].sumCurrentPeriodTotal = (value[11].sumCurrentPeriodTotal?:new BigDecimal(0))+row.sumCurrentPeriodTotal?:new BigDecimal(0)
+            value[11].sumCurrentPeriodTotal = (value[11].sumCurrentPeriodTotal?:new BigDecimal(0))+(row.sumCurrentPeriodTotal?:new BigDecimal(0))
             value[11].sumTaxPeriodTotal = (value[11].sumCurrentPeriodTotal?:new BigDecimal(0))+(row.sumCurrentPeriodTotal?:new BigDecimal(0))
         } else if (group13.contains(row.getAlias())) {
-            value[12].sumCurrentPeriodTotal = (value[12].sumCurrentPeriodTotal?:new BigDecimal(0))+row.sumCurrentPeriodTotal?:new BigDecimal(0)
-            value[12].sumTaxPeriodTotal = (value[12].sumTaxPeriodTotal?:new BigDecimal(0))+row.sumTaxPeriodTotal?:new BigDecimal(0)
+            value[12].sumCurrentPeriodTotal = (value[12].sumCurrentPeriodTotal?:new BigDecimal(0))+(row.sumCurrentPeriodTotal?:new BigDecimal(0))
+            value[12].sumTaxPeriodTotal = (value[12].sumTaxPeriodTotal?:new BigDecimal(0))+(row.sumTaxPeriodTotal?:new BigDecimal(0))
         }
     }
     return value
@@ -163,11 +191,9 @@ def calc3_6(def rows, def group) {
  * логические проверки (таблица 149)
  */
 void logicalCheck(){
-    //  Проверка на заполнение поля «<Наименование поля>»
-    if (true){//requiredColsFilled()){
-        groupRowsCheck()
-        totalRowCheck()
-    }
+    rnu46check()
+    groupRowsCheck()
+    totalRowCheck()
 }
 
 /**
@@ -177,7 +203,7 @@ boolean totalRowCheck() {
     boolean isValid = true
 
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = getRows(dataRowHelper)
+    def dataRows = dataRowHelper.allCached
 
     def totalValues = getTotalValues()
     dataRows.eachWithIndex{row, index->
@@ -192,6 +218,21 @@ boolean totalRowCheck() {
     return isValid
 }
 
+boolean rnu46check(){
+    def hasData = false
+    def groupList = 0..10
+    for ( def row :rnu46FormData.allCached) {
+        if (refBookService.getNumberValue(71,row.amortGroup,'GROUP') in groupList) {
+            hasData = true
+        }
+    }
+    if (!hasData) {
+        logger.error("Отсутствуют данные РНУ-46!")
+    }
+    return hasData
+
+}
+
 /**
  *  Проверка суммы расходов в виде капитальных вложений с начала года
  *  Проверка суммы начисленной амортизации с начала года
@@ -199,14 +240,20 @@ boolean totalRowCheck() {
 boolean groupRowsCheck() {
     boolean isValid = true
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = getRows(dataRowHelper)
+    def dataRows = dataRowHelper.allCached
 
     def groupRowsAliases = ['R0', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10']
     def formDataOld = getFormDataOld()
-    def dataOld = getData(formDataOld)
+    def dataOld = formDataOld != null ? formDataService.getDataRowHelper(formDataOld) : null
+    // значения для первых 11 строк
+    def row1_11 = calcRows1_11()
 
     for (def row : dataRows) {
-        if (!groupRowsAliases.contains(row.getAlias())) {
+        if (row.getAlias() in groupRowsAliases) {
+            if (checkRequiredColumns(row, allColumns)){
+                return false
+            }
+        } else {
             continue
         }
         //2.		Проверка суммы расходов в виде капитальных вложений с начала года
@@ -218,13 +265,13 @@ boolean groupRowsCheck() {
             logger.error(invalidCapitalForm)
         } else
         //2.2	графа 4 = графа 3 + графа 4 за предыдущий месяц;
-        // (если текущий отчетный период – январь, то слагаемое «по графе 4 за предыдущий месяц» в формуле считается равным «0.00»)
-        if (! (row.sumTaxPeriodTotal == (row.sumCurrentPeriodTotal + getSumTaxPeriodTotalFromPreviousMonth(dataOld, row.getAlias())))) {
+        // TODO (если текущий отчетный период – январь, то слагаемое «по графе 4 за предыдущий месяц» в формуле считается равным «0.00»)
+        if (row.sumCurrentPeriodTotal != null && !(row.sumTaxPeriodTotal == (row.sumCurrentPeriodTotal + getSumTaxPeriodTotalFromPreviousMonth(dataOld, row.getAlias())))) {
             isValid = false
             logger.error(invalidCapitalForm)
         } else
         //2.3	графа 4 = ?графа 3 за все месяцы текущего года, начиная с января и включая текущий отчетный период.
-        if (! (row.sumTaxPeriodTotal == getSumCurrentQuarterTotalForAllPeriods()) )  {
+        if (! (row.sumTaxPeriodTotal == getSumCurrentQuarterTotalForAllPeriods(row.getAlias())) )  {
             isValid = false
             logger.error(invalidCapitalForm)
         }
@@ -238,15 +285,23 @@ boolean groupRowsCheck() {
         } else
         //3.2   графа 6 = графа 5 + графа 6 за предыдущий месяц;
         //  (если текущий отчетный период – январь, то слагаемое «по графе 6 за предыдущий месяц» в формуле считается равным «0.00»)
-        if (! (row.amortTaxPeriod == (row.amortPeriod + getAmortTaxPeriodFromPreviousMonth(dataOld, row.getAlias()))) ) {
+        if (row.amortPeriod != null && !(row.amortTaxPeriod == (row.amortPeriod + getAmortTaxPeriodFromPreviousMonth(dataOld, row.getAlias()))) ) {
             isValid = false;
             logger.error(invalidAmortSumms)
         }
         //3.3   графа 6 = ?графа 5 за все месяцы текущего года, начиная с января и включая текущий отчетный период.
-        if (! (row.amortTaxPeriod == getAmortQuarterForAllPeriods()) ) {
+        if (! (row.amortTaxPeriod == getAmortQuarterForAllPeriods(row.getAlias())) ) {
             isValid = false
             logger.error(invalidAmortSumms)
         }
+
+        def index = row.getIndex() - 1
+        if (index<11) {
+            row1_11[index].each{k,v->
+                row[k] = v
+            }
+        }
+
     }
 
     return isValid
@@ -256,7 +311,10 @@ boolean groupRowsCheck() {
  * Получить данные за предыдущий месяц
  *
  */
-def getFormDataOld() {
+def FormData getFormDataOld() {
+    if (isFirstPeriod()) {//TODO нужно брать за предыдущий месяц(если текущий отчетный период – январь, то слагаемое «по графе 4 за предыдущий месяц» в формуле считается равным «0.00»)
+        return null
+    }
     // предыдущий отчётный период
     def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
 
@@ -265,42 +323,54 @@ def getFormDataOld() {
     if (reportPeriodOld != null) {
         formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
     }
-
-    return null //TODO (Lenar Khaziev) нужно брать за предыдущий месяц(если текущий отчетный период – январь, то слагаемое «по графе 4 за предыдущий месяц» в формуле считается равным «0.00»)
+    return formDataOld
 }
 
+/**
+ * Получить данные за определенный период
+ *
+ */
+def FormData getFormDataPeriod(def reportPeriod) {
+    def formDataPeriod = null
+    if (reportPeriod != null) {
+        formDataPeriod = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id)
+    }
+    return formDataPeriod
+}
 
 /**
- * Проверяет
- * 1.  Обязательность заполнения полей графы (с 3 по 6)
- * @return {@value true} если все обязательные поля заполнены, иначе {@value false}
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ * @return true - все хорошо, false - есть незаполненные поля
  */
-boolean requiredColsFilled() {
-    def formIsValid = true
-
-    for (def dataRow : formData.dataRows) {
-        def parameterName = dataRow.amortGroup
-        for (def colName : dataRow.keySet()) {
-            final cell = dataRow.getCell(colName)
-            if (cell.isEditable()) {
-                if (isBlankOrNull(cell.getValue())){
-                    logger.error("Поле \"$parameterName\" не заполнено!")
-                    break
-                }
-            }
+boolean checkRequiredColumns(def DataRow row, def ArrayList<String> columns) {
+    def colNames = []
+    columns.each {
+        if (isBlankOrNull(row.getCell(it).getValue())) {
+            def name = row.getCell(it).column.name
+            colNames.add('"' + name + '"')
         }
     }
-
-    return formIsValid
+    if (!colNames.isEmpty()) {
+        def errorMsg = colNames.join(', ')
+        logger.error("В строке ${row.getIndex()} не заполнены колонки : $errorMsg.")
+        return false
+    }
+    return true
 }
 
 /**
  * возвращает значение графы 4 за предыдущий месяц
  * @return
  */
-def getSumTaxPeriodTotalFromPreviousMonth(def dataRows, def alias) {
-    for(def row: dataRows) {
-        if (row.getAlias()==alias) return row.sumTaxPeriodTotal
+def getSumTaxPeriodTotalFromPreviousMonth(def DataRowHelper dataRowHelper, def alias) {
+    if (dataRowHelper != null) {
+        def row = dataRowHelper.getDataRow(dataRowHelper.allCached, alias)
+        if(row != null){
+            return row.sumTaxPeriodTotal
+        }
     }
     return 0
 }
@@ -310,60 +380,57 @@ def getSumTaxPeriodTotalFromPreviousMonth(def dataRows, def alias) {
  * возвращает значение графы 6 за предыдущий месяц
  * @return
  */
-def getAmortTaxPeriodFromPreviousMonth(def dataRows, def alias) {
-    for(def row: dataRows) {
-        if (row.getAlias()==alias) return row.amortTaxPeriod
+def getAmortTaxPeriodFromPreviousMonth(def DataRowHelper dataRowHelper, def alias) {
+    if (dataRowHelper != null) {
+        def row = dataRowHelper.getDataRow(dataRowHelper.allCached, alias)
+        if(row != null){
+            return row.amortTaxPeriod
+        }
     }
     return 0
 }
 
 /**
  * возвращает значение графы 3 за все месяцы текущего года, включая текущий отчетный период
+ * TODO актуализировать / добавить выдачу ошибок при отсутствии значений
  * @return
  */
-def getSumCurrentQuarterTotalForAllPeriods() {
-    return new BigDecimal(0)    //TODO (Lenar Khaziev) еще не понятно как реализовать
+def getSumCurrentQuarterTotalForAllPeriods(def alias) {
+    def ReportPeriod reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    def TaxPeriod taxPeriod = reportPeriod.taxPeriod
+    def List<ReportPeriod> periodList = reportPeriodService.listByTaxPeriod(taxPeriod.id)
+    return periodList.sum{ period ->
+        if (period.order < reportPeriod.order) {
+            def formDataPeriod = getFormDataPeriod(period)
+            def DataRowHelper dataRowHelper = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod) : null
+            def row = dataRowHelper != null ? dataRowHelper.getDataRow(dataRowHelper.allCached, alias) : null
+            return row!=null ? row.sumCurrentPeriodTotal : 0
+        }
+        return 0
+    }
 }
 
 /**
- * возвращает значение графы 3 за все месяцы текущего года, включая текущий отчетный период
+ * возвращает значение графы 6 за все месяцы текущего года, включая текущий отчетный период
+ * TODO актуализировать / добавить выдачу ошибок при отсутствии значений
  * @return
  */
-def getAmortQuarterForAllPeriods() {
-    return new BigDecimal(0)    //TODO (Lenar Khaziev) еще не понятно как реализовать
+def getAmortQuarterForAllPeriods(def alias) {
+    def ReportPeriod reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    def TaxPeriod taxPeriod = reportPeriod.taxPeriod
+    def List<ReportPeriod> periodList = reportPeriodService.listByTaxPeriod(taxPeriod.id)
+    return periodList.sum{ period ->
+        if (period.order < reportPeriod.order) {
+            def formDataPeriod = getFormDataPeriod(period)
+            def DataRowHelper dataRowHelper = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod) : null
+            def row = dataRowHelper != null ? dataRowHelper.getDataRow(dataRowHelper.allCached, alias) : null
+            return row!=null ? row.amortTaxPeriod : 0
+        }
+        return 0
+    }
 }
 boolean isBlankOrNull(value) {
     value == null || value.equals('')
-}
-
-/**
- * Получить данные формы.
- *
- * @param formData форма
- */
-def getData(def formData) {
-    if (formData != null && formData.id != null) {
-        return formDataService.getDataRowHelper(formData)
-    }
-    return null
-}
-
-/**
- * Получить строку по алиасу.
- *
- * @param data данные нф (helper)
- */
-def getRows(def data) {
-    return data.getAllCached();
-}
-
-/**
- * Сохранить измененные значения нф.
- *
- * @param data данные нф (helper)
- */
-void save(def data) {
-    data.save(getRows(data))
 }
 
 /**
@@ -371,4 +438,64 @@ void save(def data) {
  */
 def hasError() {
     return logger.containsLevel(LogLevel.ERROR)
+}
+
+// TODO Проверка на первый месяц
+boolean isFirstPeriod(){
+    def ReportPeriod reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    return reportPeriod.order == 1
+}
+
+def getAllColumns(){
+    return ["amortGroup", "sumCurrentPeriodTotal", "sumTaxPeriodTotal", "amortPeriod", "amortTaxPeriod"]
+}
+
+def getCalcColumns(){
+    return ["sumCurrentPeriodTotal", "sumTaxPeriodTotal", "amortPeriod", "amortTaxPeriod"]
+}
+
+/**
+ * Консолидация.
+ */
+void consolidation() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    // удалить все строки и собрать из источников их строки
+    def rows = dataRowHelper.allCached
+    rows.each{ row ->
+        calcColumns.each{ column ->
+            row[column] = null
+        }
+    }
+
+    for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())) {
+        if (formDataSource.formTypeId == formData.getFormType().getId()) {
+            def source = formDataService.find(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                sourceForm = formDataService.getDataRowHelper(source)
+                addRowsToRows(rows, sourceForm.allCached)
+            }
+        }
+    }
+    dataRowHelper.save(rows)
+}
+
+void addRowsToRows(def rows, def addRows){
+    rows.each{ row ->
+        def addRow = getRowByAlias(addRows, row.getAlias())
+        calcColumns.each{ column ->
+            def value = row[column]
+            row[column] = (value == null) ? addRow[column] : (value + (addRow[column]?:0))
+        }
+    }
+}
+
+def DataRow getRowByAlias(def rows, def alias){
+    if (isBlankOrNull(alias)) {
+        for (def row : rows){
+            if (alias == row.getAlias()){
+                return row
+            }
+        }
+    }
+    return null
 }
