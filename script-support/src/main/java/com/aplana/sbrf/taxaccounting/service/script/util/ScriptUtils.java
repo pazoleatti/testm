@@ -10,8 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Библиотека скриптовых функций
@@ -22,17 +21,55 @@ import java.util.List;
 
 public final class ScriptUtils {
 
-	private static final String WRONG_COLUMN_TYPE = "В указанном диапазоне столбцов \"%s\" - \"%s\" должны " +
-			"быть только столбцы численного типа. Столбец \"%s\" имеет неверный тип.";
+	private static final String WRONG_COLUMN_TYPE = "В указанном диапазоне граф «%s» - «%s» должны " +
+			"быть только графы численного типа. Графа «%s» имеет неверный тип.";
 
 	private static final String NOT_SAME_RANGES = "Диапазоны имеют разную размерность";
 
-	private static final String CELL_NOT_FOUND = "Ячейка (\"%s\"; \"%s\") не найдена";
+	private static final String CELL_NOT_FOUND = "Ячейка («%s», «%s») не найдена";
 
-    private static final String WRONG_NUMBER = "Строка %d, колонка %d содержит нечисловое значение \"%s\"!";
+    private static final String WRONG_NUMBER = "Строка %d, графа %d содержит нечисловое значение «%s»!";
 
-    private static final String WRONG_DATE = "Строка %d, колонка %d содержит значение \"%s\", которое не " +
-            "соответствует дате в формате \"%s\"!";
+    private static final String WRONG_DATE = "Строка %d, графа %d содержит значение «%s», которое не " +
+            "соответствует дате в формате «%s»!";
+
+    private static String WRONG_HEADER_EQUALS = "Заголовок таблицы не соответствует требуемой структуре. " +
+            "Ожидается «%s» вместо «%s»!";
+
+    private static String WRONG_HEADER_COL_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
+            "Количество граф менее ожидаемого!";
+
+    private static String WRONG_HEADER_ROW_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
+            "Количество строк в заголовке менее ожидаемого!";
+
+    private static String GROUP_WRONG_ITOG = "Группа «%s» не имеет строки подитога!";
+
+    private static String GROUP_WRONG_ITOG_ROW = "Строка %d: Строка подитога не относится к какой-либо группе!";
+
+    private static String GROUP_WRONG_ITOG_SUM = "Строка %d: Неверное итоговое значение по группе «%s» в графе «%s»";
+
+    private static String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
+
+    /**
+     * Интерфейс для переопределения алгоритма расчета
+     */
+    public interface CalcAliasRow {
+        DataRow<Cell> calc(int index, List<DataRow<Cell>> dataRows);
+    }
+
+    /**
+     * Интерфейс для получения строки со значениями в группе
+     */
+    public interface GroupString {
+        String getString(DataRow<Cell> row);
+    }
+
+    /**
+     * Интерфейс для проверки сумм в итоговых строках
+     */
+    public interface CheckGroupSum {
+        String check(DataRow<Cell> row1, DataRow<Cell> row2);
+    }
 
 	/**
 	 * Запрещаем создавать экземляры класса
@@ -186,6 +223,7 @@ public final class ScriptUtils {
 
 	/**
 	 *	Функция копирует данные из одной таблицы в другую
+     *
 	 *	@param fromFrom таблица - источник
 	 *	@param toForm таблица - приемник
 	 *	@param fromRange диапазон для копирования из источника
@@ -213,6 +251,7 @@ public final class ScriptUtils {
 
     /**
      * Получение числа из строки при импорте
+     *
      * @param value Строковое значение
      * @param indexRow Строка в импортируемом файле
      * @param indexColumn Колонка в импортируемом файле
@@ -233,7 +272,7 @@ public final class ScriptUtils {
             return new BigDecimal(tmp);
         } else {
             String msg = String.format(WRONG_NUMBER, indexRow, indexColumn, value);
-            if (required == true) {
+            if (required) {
                 throw new ServiceException(msg);
             } else {
                 if (logger != null) {
@@ -246,6 +285,7 @@ public final class ScriptUtils {
 
     /**
      * Получение даты из строки при импорте
+     *
      * @param value
      * @param format
      * @param indexRow
@@ -269,7 +309,7 @@ public final class ScriptUtils {
         }
         if (retVal == null) {
             String msg = String.format(WRONG_DATE, indexRow, indexColumn, value, format);
-            if (required == true) {
+            if (required) {
                 throw new ServiceException(msg);
             } else {
                 if (logger != null) {
@@ -279,5 +319,237 @@ public final class ScriptUtils {
             }
         }
         return retVal;
+    }
+
+    /**
+     * Удаление всех строк с алиасами (подитоги и т.п.)
+     *
+     * @param dataRows
+     * @return true если удаления были
+     */
+    public static boolean deleteAllAliased(List<DataRow<Cell>> dataRows) {
+        List<DataRow<Cell>> delList = new LinkedList<DataRow<Cell>>();
+        boolean changed = false;
+        for (DataRow<Cell> row : dataRows) {
+            if (row.getAlias() != null) {
+                delList.add(row);
+                changed = true;
+            }
+        }
+        dataRows.removeAll(delList);
+        return changed;
+    }
+
+    /**
+     * Добавление строк с алиасами (подитоги и т.п.)
+     *
+     * @param dataRows
+     * @param calcAliasRow
+     */
+    public static void addAllAliased(List<DataRow<Cell>> dataRows, CalcAliasRow calcAliasRow,
+                                     List<String> groupColumns) {
+        for (int i = 0; i < dataRows.size(); i++) {
+            DataRow<Cell> row = dataRows.get(i);
+            DataRow<Cell> nextRow = null;
+            if (i < dataRows.size() - 1) {
+                nextRow = dataRows.get(i + 1);
+            }
+            if (row.getAlias() != null) {
+                continue;
+            }
+            if (nextRow == null || isDiffRow(row, nextRow, groupColumns)) {
+                DataRow<Cell> aliasedRow = calcAliasRow.calc(i, dataRows);
+                dataRows.add(++i, aliasedRow);
+            }
+        }
+    }
+
+    /**
+     * Сравнение двух строк
+     *
+     * @param row
+     * @param nextRow
+     * @param groupColumns
+     * @return
+     */
+    public static boolean isDiffRow(DataRow row, DataRow nextRow, List<String> groupColumns) {
+        for (String alias : groupColumns) {
+            Object v1 = row.getCell(alias).getValue();
+            Object v2 = nextRow.getCell(alias).getValue();
+            if (v1 == null && v2 == null) {
+                continue;
+            }
+            if (v1 == null || v1 != null && !v1.equals(v2)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Сортировка строк
+     *
+     * @param dataRows
+     * @param groupColums
+     */
+    public static void sortRows(List<DataRow<Cell>> dataRows, final List<String> groupColums) {
+        Collections.sort(dataRows, new Comparator<DataRow<Cell>>() {
+            @Override
+            public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+                for (String alias : groupColums) {
+                    Object v1 = o1.getCell(alias).getValue();
+                    Object v2 = o2.getCell(alias).getValue();
+                    if (v1 == null && v2 == null) {
+                        return 0;
+                    }
+                    if (v1 == null && v2 != null) {
+                        return 1;
+                    }
+                    if (v1 != null && v2 == null) {
+                        return -1;
+                    }
+                    if (v1 instanceof Comparable) {
+                        return ((Comparable) v1).compareTo(v2);
+                    }
+                    return 0;
+                }
+                return 0;
+            }
+        });
+    }
+
+    /**
+     * Проверка итоговых строк
+     *
+     * @param dataRows
+     * @param testItogRows
+     * @param itogRows
+     * @param logger
+     * @param groupString
+     * @param checkGroupSum
+     * @param groupColums
+     */
+    public static void checkItogRows(List<DataRow<Cell>> dataRows, List<DataRow<Cell>> testItogRows, List<DataRow<Cell>> itogRows,
+                       List<String> groupColums, Logger logger, GroupString groupString,
+                       CheckGroupSum checkGroupSum) {
+        if (testItogRows.size() > itogRows.size()) {
+            // Итоговые строки были удалены
+            for (int i = 0; i < dataRows.size(); i++) {
+                DataRow<Cell> row = dataRows.get(i);
+                DataRow<Cell> nextRow = dataRows.get(i + 1);
+                if (row.getAlias() == null) {
+                    if (nextRow == null || nextRow.getAlias() == null && isDiffRow(row, nextRow, groupColums)) {
+                        String groupCols = groupString.getString(row);
+                        if (groupCols != null) {
+                            logger.error(String.format(GROUP_WRONG_ITOG, groupCols));
+                        }
+                    }
+                }
+            }
+        } else if (testItogRows.size() < itogRows.size()) {
+            // Неитоговые строки были удалены
+            for (int i = 0; i < dataRows.size(); i++) {
+                if (dataRows.get(i).getAlias() != null) {
+                    if (i - 1 < -1 || dataRows.get(i - 1).getAlias() != null) {
+                        logger.error(String.format(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex()));
+                    }
+                }
+            }
+        } else {
+            for (int i = 0; i < testItogRows.size(); i++) {
+                DataRow<Cell> testItogRow = testItogRows.get(i);
+                DataRow<Cell> realItogRow = itogRows.get(i);
+                int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""));
+                if (dataRows.get(itg).getAlias() != null) {
+                    logger.error(String.format(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex()));
+                } else {
+                    String groupCols = groupString.getString(dataRows.get(itg));
+                    if (groupCols != null) {
+                        String checkStr = checkGroupSum.check(testItogRow, realItogRow);
+                        if (checkStr != null) {
+                            logger.error(String.format(GROUP_WRONG_ITOG_SUM, realItogRow.getIndex(), groupCols, checkStr));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Заголовок колонки по алиасу
+     *
+     * @param row
+     * @param alias
+     * @return
+     */
+    public static String getColumnName(DataRow<Cell> row, String alias) {
+
+        if (row == null || alias == null) {
+            return "";
+        }
+        Cell cell = row.getCell(alias);
+        if (cell == null) {
+            return "";
+        }
+        return cell.getColumn().getName().replace("%", "%%");
+    }
+
+    /**
+     * Проверка заголовка импортируемого файла на соответствие размерности
+     *
+     * @param currentColSize
+     * @param currentRowSize
+     * @param referenceColSize
+     * @param referenceRowSize
+     */
+    public static void checkHeaderSize(int currentColSize, int currentRowSize, int referenceColSize, int referenceRowSize) {
+        if (currentColSize < referenceColSize) {
+            throw new ServiceException(WRONG_HEADER_COL_SIZE);
+        }
+        if (currentRowSize < referenceRowSize) {
+            throw new ServiceException(WRONG_HEADER_ROW_SIZE);
+        }
+    }
+
+    /**
+     * Сравнение строки с эталонной
+     *
+     * @return null если строки совпадают, иначе текст ошибки
+     */
+    public static void checkHeaderEquals(Map<Object, String> headerMapping) {
+        for (Object currentString : headerMapping.keySet()) {
+            String referenceString = headerMapping.get(currentString);
+            if (currentString == null || referenceString == null) {
+                continue;
+            }
+            if (currentString.toString().trim().equalsIgnoreCase(referenceString.trim())) {
+                continue;
+            }
+            throw new ServiceException(String.format(WRONG_HEADER_EQUALS, referenceString, currentString));
+        }
+    }
+
+    /**
+     * Проверка пустых значений
+     *
+     * @param row
+     * @param index
+     * @param nonEmptyColums
+     * @param logger
+     * @param required
+     */
+    public static void checkNonEmptyColumns(DataRow<Cell> row, int index, List<String> nonEmptyColums, Logger logger,
+                                            boolean required) {
+        for (String alias : nonEmptyColums) {
+            Cell rowCell = row.getCell(alias);
+            if (rowCell.getValue() == null || rowCell.getValue().toString().isEmpty()) {
+                String msg = String.format(WRONG_NON_EMPTY, index, getColumnName(row, alias));
+                if (required) {
+                    logger.error(msg);
+                } else {
+                    logger.warn(msg);
+                }
+            }
+        }
     }
 }
