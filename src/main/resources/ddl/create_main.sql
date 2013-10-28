@@ -668,7 +668,7 @@ create table notification(
 id number(9) primary key,
 report_period_id number(9) not null, 
 sender_department_id number(9) not null, 
-receiver_department_id number(9) not null, 
+receiver_department_id number(9) null, 
 first_reader_id number(9) null, 
 text varchar2(2000) not null, 
 create_date date not null, 
