@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentFormTypeService;
 import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.script.refbook.RefBookService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
@@ -25,7 +24,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 /*
@@ -38,15 +36,6 @@ import java.util.*;
 public class FormDataServiceImpl implements FormDataService, ScriptComponentContextHolder, ApplicationContextAware {
 
     private ScriptComponentContext scriptComponentContext;
-
-    private static final String FIND_ERROR = "FormData не сохранена, id = null.";
-    private static final String COMPOSE_SUCCESS = "Формирование консолидированной формы прошло успешно.";
-    private static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Строка %d, колонка %d содержит значение, отсутствующее в справочнике «%s»!";
-    private static final String REF_BOOK_ROW_NOT_FOUND_ERROR = "Строка %d, графа «%s» содержит значение, отсутствующее в справочнике «%s»!";
-    private static final String REF_BOOK_NOT_FOUND_ERROR = "В справочнике «%s» не найдено значение «%s», соответствующее атрибуту «%s»!";
-    private static final String REF_BOOK_DEREFERENCE_ERROR = "Строка %d, графа «%s»: В справочнике «%s» не найден элемент с id = %d»!";
-    private static final String CHECK_UNIQ_ERROR = "Налоговая форма с заданными параметрами уже существует!";
-    private static final String CHECK_BALANCE_PERIOD_ERROR = "Налоговая форма не может создаваться в периоде ввода остатков!";
 
     @Autowired
     private FormDataDao dao;
@@ -63,9 +52,6 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Autowired
     private RefBookService refBookService;
 
-    @Autowired
-    private ReportPeriodService reportPeriodService;
-
     private HashMap<Number, DataRowHelper> helperHashMap = new HashMap<Number, DataRowHelper>();
 
     private static ApplicationContext applicationContext;
@@ -78,7 +64,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public DataRowHelper getDataRowHelper(FormData formData) {
         if (formData.getId() == null) {
-            throw new ServiceException(FIND_ERROR);
+            throw new ServiceException("FormData не сохранена, id = null.");
         }
         if (helperHashMap.containsKey(formData.getId())) {
             return helperHashMap.get(formData.getId());
@@ -132,7 +118,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         }
         dataRowHelper.save(rows);
         if (logger != null) {
-            logger.info(COMPOSE_SUCCESS);
+            logger.info("Формирование консолидированной формы прошло успешно.");
         }
     }
 
@@ -237,8 +223,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         if (retVal != null) {
             return retVal;
         }
-        RefBook rb = refBookFactory.get(refBookId);
-        String msg = String.format(REF_BOOK_NOT_FOUND_IMPORT_ERROR, rowIndex, colIndex, rb.getName());
+        String msg = "Строка " + rowIndex + ", колонка " + colIndex + " содержит значение, отсутствующее в справочнике!";
         if (required) {
             throw new ServiceException(msg);
         } else {
@@ -255,10 +240,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         if (retVal != null) {
             return retVal;
         }
-        RefBook rb = refBookFactory.get(refBookId);
-        String msg = columnName == null ?
-                String.format(REF_BOOK_NOT_FOUND_ERROR, rb.getName(), value, rb.getAttribute(alias).getName()) :
-                String.format(REF_BOOK_ROW_NOT_FOUND_ERROR, rowIndex, columnName, rb.getName());
+        String msg = "Строка " + rowIndex + "Графа «" + columnName + "» содержит значение, отсутствующее в справочнике!";
         if (required) {
             throw new ServiceException(msg);
         } else {
@@ -268,8 +250,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
-    public Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId,
-                                                     Map<Long, Map<String, RefBookValue>> refBookCache) {
+    public Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId, Map<Long, Map<String, RefBookValue>> refBookCache) {
         if (recordId == null) {
             return null;
         }
@@ -277,52 +258,5 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId));
         }
         return refBookCache.get(recordId);
-    }
-
-    @Override
-    public boolean checkNSI(long refBookId, Map<Long, Map<String, RefBookValue>> refBookCache, DataRow<Cell> row,
-                         String alias, Logger logger, boolean required) {
-        if (row == null || alias == null) {
-            return true;
-        }
-        Cell cell = row.getCell(alias);
-        if (cell == null || cell.getValue() == null) {
-            return true;
-        }
-        Object value = cell.getValue();
-        if (value instanceof BigDecimal && getRefBookValue(refBookId,
-                ((BigDecimal) value).longValue(), refBookCache) == null) {
-            RefBook rb = refBookFactory.get(refBookId);
-            String msg = String.format(REF_BOOK_DEREFERENCE_ERROR, row.getIndex(), cell.getColumn().getName(),
-                    rb.getName(), value);
-            if (required) {
-                logger.error(msg);
-            } else {
-                logger.warn(msg);
-            }
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean checkUnique(FormData formData, Logger logger) {
-        if (find(formData.getFormType().getId(), formData.getKind(), formData.getDepartmentId(),
-                formData.getReportPeriodId()) != null) {
-            logger.error(CHECK_UNIQ_ERROR);
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean checksBalancePeriod(FormData formData, Logger logger) {
-        ReportPeriod reportPeriod = reportPeriodService.get(formData.getReportPeriodId());
-        if (reportPeriod != null && reportPeriodService.isBalancePeriod(formData.getReportPeriodId(),
-                formData.getDepartmentId())) {
-            logger.error(CHECK_BALANCE_PERIOD_ERROR);
-            return false;
-        }
-        return true;
     }
 }

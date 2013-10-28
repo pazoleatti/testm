@@ -123,35 +123,5 @@ public interface FormDataService {
      * @param refBookCache
      * @return
      */
-    Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId,
-                                              Map<Long, Map<String, RefBookValue>> refBookCache);
-
-    /**
-     * Проверка НСИ (возможность разыменования)
-     * @param refBookId
-     * @param refBookCache
-     * @param row
-     * @param alias
-     * @param logger
-     * @param required Фатальность
-     * @return
-     */
-    boolean checkNSI(long refBookId, Map<Long, Map<String, RefBookValue>> refBookCache, DataRow<Cell> row,
-                  String alias, Logger logger, boolean required);
-
-    /**
-     * Проверка формы на уникальность с аналогичными параметрам
-     * @param formData
-     * @param logger
-     * @return
-     */
-    boolean checkUnique(FormData formData, Logger logger);
-
-    /**
-     * Проверка отчетного периода. Не должен быть периодом ввода остатков.
-     * @param formData
-     * @param logger
-     * @return
-     */
-    boolean checksBalancePeriod(FormData formData, Logger logger);
+    Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId, Map<Long, Map<String, RefBookValue>> refBookCache);
 }
