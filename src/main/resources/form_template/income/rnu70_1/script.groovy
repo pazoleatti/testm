@@ -1,4 +1,4 @@
-package form_template.income.rnu70_2
+package form_template.income.rnu70_1
 
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
@@ -6,11 +6,12 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 
 /**
- * Скрипт для РНУ-70.2.
- * (РНУ-70.2) Регистр налогового учёта уступки права требования до наступления, предусмотренного кредитным договором
- * срока погашения основного долга в отношении сделок уступки прав требования в пользу Взаимозависимых лиц и резидентов оффшорных зон
- * formTemplateId=357
+ * Скрипт для РНУ-70.1.
+ * (РНУ-70.1) Регистр налогового учёта уступки права требования до наступления предусмотренного кредитным договором
+ * срока погашения основного долга
+ * formTemplateId=504
  *
+ * @author vsergeev
  * @author Stanislav Yasinskiy
  *
  */
@@ -27,7 +28,7 @@ switch (formDataEvent) {
         sort()
         calc()
         addAllStatic()
-        logicalCheck()
+        !hasError() && logicalCheck()
         break
     case FormDataEvent.ADD_ROW:
         addNewRow()
@@ -43,7 +44,8 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicalCheck()
         break
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED: // после принятия из подготовлена
+// после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
         logicalCheck()
         break
 }
@@ -66,10 +68,6 @@ switch (formDataEvent) {
 * 15   loss                     -      Убыток, превышающий проценты по долговому обязательству, рассчитанные с учётом
 *                                      ст. 269 НК РФ за период от даты уступки  права требования до даты платежа по
 *                                      договору
-* 16   marketPrice              -      Рыночная цена прав требования для целей налогообложения
-* 17   financialResult2         -      Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения
-* 18   maxLoss                  -      Максимальная сумма убытка, рассчитанного исходя из рыночной цены для целей налогообложения
-* 19   financialResultAdjustment-      Корректировка финансового результата
 **/
 
 /**
@@ -88,40 +86,40 @@ void checkCreation() {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def data = getData(formData)
 
     def index = 0
     if (currentDataRow != null) {
         index = currentDataRow.getIndex()
         def row = currentDataRow
         while (row.getAlias() != null && index > 0) {
-            row = getRows(dataRowHelper).get(--index)
+            row = getRows(data).get(--index)
         }
-        if (index != currentDataRow.getIndex() && getRows(dataRowHelper).get(index).getAlias() == null) {
+        if (index != currentDataRow.getIndex() && getRows(data).get(index).getAlias() == null) {
             index++
         }
-    } else if (getRows(dataRowHelper).size() > 0) {
-        for (int i = getRows(dataRowHelper).size() - 1; i >= 0; i--) {
-            def row = getRows(dataRowHelper).get(i)
+    } else if (getRows(data).size() > 0) {
+        for (int i = getRows(data).size() - 1; i >= 0; i--) {
+            def row = getRows(data).get(i)
             if (!isFixedRow(row)) {
-                index = getRows(dataRowHelper).indexOf(row) + 1
+                index = getRows(data).indexOf(row) + 1
                 break
             }
         }
     }
-    dataRowHelper.insert(getNewRow(), index + 1)
+    data.insert(getNewRow(), index + 1)
 }
 
 
 def recalculateNumbers() {
     def index = 1
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    getRows(dataRowHelper).each { row ->
+    def data = getData(formData)
+    getRows(data).each { row ->
         if (!isFixedRow(row)) {
             row.rowNumber = index++
         }
     }
-    dataRowHelper.save(getRows(dataRowHelper))
+    data.save(getRows(data))
 }
 
 /**
@@ -129,8 +127,8 @@ def recalculateNumbers() {
  */
 def deleteRow() {
     if (currentDataRow != null && currentDataRow.getAlias() == null) {
-        def dataRowHelper = formDataService.getDataRowHelper(formData)
-        dataRowHelper.delete(currentDataRow)
+        def data = getData(formData)
+        data.delete(currentDataRow)
     }
 }
 
@@ -142,13 +140,12 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
     for (def dataRow : dataRows) {
+        // графа 7
         dataRow.financialResult1 = getFinancialResult1(dataRow)
         dataRow.rateBR = getRateBR(dataRow, reportDate)
         dataRow.perc = getPerc(dataRow)
         dataRow.loss = getLoss(dataRow)
-        dataRow.financialResult2 = getFinancialResult2(dataRow)
-        dataRow.maxLoss = getMaxLoss(dataRow)
-        dataRow.financialResultAdjustment = getFinancialResultAdjustment(dataRow)
+
     }
     dataRowHelper.update(dataRows)
 }
@@ -158,20 +155,19 @@ void calc() {
  */
 void addAllStatic() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
 
     // добавить строку "итого"
     def totalRow = getCalcTotalRow()
-    data.insert(totalRow, dataRows.size() + 1)
-
+    insert(dataRowHelper, totalRow)
 
     // посчитать "Итого по <Наименование контрагента>"
     def totalRows = getCalcTotalName()
 
     // добавить "Итого по <Наименование контрагента>" в таблицу
-    def i = 1
+    def i = 0
     totalRows.each { index, row ->
-        dataRowHelper.insert(row, index + i++)
+        dataRowHelper.insert(row, index + i + 1)
+        i++
     }
 }
 
@@ -220,21 +216,6 @@ boolean checkRowsData() {
         if (dataRow.loss != getLoss(dataRow)) {
             isValid = false
             logger.error("Неверно рассчитана графа «${dataRow.getCell('loss').column.name}»!")
-        }
-
-        if (dataRow.financialResult2 != getFinancialResult2(dataRow)) {
-            isValid = false
-            logger.error("Неверно рассчитана графа «${dataRow.getCell('financialResult2').column.name}»!")
-        }
-
-        if (dataRow.maxLoss != getMaxLoss(dataRow)) {
-            isValid = false
-            logger.error("Неверно рассчитана графа «${dataRow.getCell('maxLoss').column.name}»!")
-        }
-
-        if (dataRow.financialResultAdjustment != getFinancialResultAdjustment(dataRow)) {
-            isValid = false
-            logger.error("Неверно рассчитана графа «${dataRow.getCell('financialResultAdjustment').column.name}»!")
         }
 
         //Проверка принадлежности даты графы 8 отчетному периоду
@@ -374,67 +355,6 @@ def getLoss(def dataRow) {
     }
 }
 
-/**
- * вычисляем значение для графы 17
- */
-def getFinancialResult2(def dataRow) {
-    return dataRow.marketPrice - dataRow.cost
-}
-
-/**
- * вычисляем значение для графы 18
- */
-def getMaxLoss(def dataRow) {
-    if (dataRow.financialResult1 < 0) {
-        final DateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
-        final firstJan2010 = dateFormat.parse('01.01.2010')
-        final thirtyFirstDec2013 = dateFormat.parse('31.12.2013')
-        final firstJan2011 = dateFormat.parse('01.01.2011')
-
-        BigDecimal x
-
-        final repaymentDateDuration = getRepaymentDateDuration(dataRow)
-        if (isRoublel(dataRow)) {
-            if (dataRow.concessionsDate.after(firstJan2010) && dataRow.concessionsDate.before(thirtyFirstDec2013)) {
-                if (dataRow.rateBR * 1.8 <= dataRow.interestRate) {
-                    x = dataRow.marketPrice * dataRow.rateBR * 1.8 * repaymentDateDuration
-                } else {
-                    x = dataRow.marketPrice * dataRow.interestRate * repaymentDateDuration
-                }
-                if (dataRow.interestRate == 0) x = dataRow.marketPrice * dataRow.rateBR * repaymentDateDuration
-            } else {
-                x = dataRow.marketPrice * dataRow.rateBR * 1.1 * repaymentDateDuration
-            }
-        } else {
-            if (dataRow.concessionsDate.after(firstJan2011) && dataRow.concessionsDate.before(thirtyFirstDec2013)) {
-                x = dataRow.marketPrice * dataRow.rateBR * 0.8 * repaymentDateDuration
-            } else {
-                x = dataRow.marketPrice * 0.15 * repaymentDateDuration
-            }
-        }
-
-        if (x.abs() > dataRow.financialResult1.abs()) {
-            return dataRow.financialResult1
-        } else {
-            return x.setScale(2, BigDecimal.ROUND_HALF_UP)
-        }
-    } else {
-        return new BigDecimal(0)
-    }
-}
-
-/**
- * вычисляем значение для графы 19
- */
-def getFinancialResultAdjustment(def dataRow) {
-    if (dataRow.financialResult1 >= 0 && dataRow.financialResult2 > 0) {
-        return (dataRow.financialResult2 - dataRow.financialResult1).abs().setScale(2, BigDecimal.ROUND_HALF_UP)
-    } else {
-        return -(dataRow.maxLoss - dataRow.loss).setScale(2, BigDecimal.ROUND_HALF_UP)
-    }
-}
-
-
 boolean isBlankOrNull(value) {
     value == null || value.equals('')
 }
@@ -483,8 +403,6 @@ def getCountDaysInYear(def date) {
 // вспомогательная функция для расчета графы 14
 // «Графа 14» = «Графа 9» * «Графа 13» * («Графа 7» - «Графа 8») / 365(366);
 BigDecimal getXByInterestRate(def dataRow, def repaymentDateDuration) {
-    if (dataRow.income == null || dataRow.interestRate == null || repaymentDateDuration== null)
-        return null
     x2 = dataRow.income * dataRow.interestRate * repaymentDateDuration
     return x2.setScale(2, BigDecimal.ROUND_HALF_UP)
 }
@@ -492,8 +410,6 @@ BigDecimal getXByInterestRate(def dataRow, def repaymentDateDuration) {
 // вспомогательная функция для расчета графы 14
 // «Графа 14» = «Графа 9» * «Графа 12» * index * («Графа 7» – «Графа 8») / 365(366)
 BigDecimal getXByRateBR(def dataRow, def repaymentDateDuration, BigDecimal index) {
-    if (dataRow.income == null || dataRow.rateBR == null || repaymentDateDuration== null || index== null)
-        return null
     x = dataRow.income * dataRow.rateBR * index * repaymentDateDuration
     return x.setScale(2, BigDecimal.ROUND_HALF_UP)
 }
@@ -501,15 +417,11 @@ BigDecimal getXByRateBR(def dataRow, def repaymentDateDuration, BigDecimal index
 // вспомогательная функция для расчета графы 14
 // «Графа 14» = «Графа 9» * 15% * («Графа 7» - «Графа 8») / 365(366);
 BigDecimal getXByIncomeOnly(def dataRow, def repaymentDateDuration, BigDecimal index) {
-    if (dataRow.income == null || repaymentDateDuration== null || index== null)
-        return null
     x = dataRow.income * index * repaymentDateDuration
     return x.setScale(2, BigDecimal.ROUND_HALF_UP)
 }
 
 boolean isInPeriod(Date date) {
-    if ( reportDate == null || date== null)
-        return null
     return reportDate.after(date) && reportPeriodService.getStartDate(formData.reportPeriodId).getTime().before(date)
 }
 
@@ -518,14 +430,14 @@ boolean isInPeriod(Date date) {
  */
 def getEditableColsNames() {
     return ['name', 'inn', 'number', 'date', 'cost', 'repaymentDate', 'concessionsDate', 'income',
-            'currencyDebtObligation', 'rateBR', 'interestRate', 'marketPrice']
+            'currencyDebtObligation', 'rateBR', 'interestRate']
 }
 
 /**
- * Графы для которых надо вычислять итого и итого по эмитенту (графа 9, 10, 14, 15, 19 )
+ * Графы для которых надо вычислять итого и итого по эмитенту (графа 9, 10, 14, 15 )
  */
 def getTotalColumns() {
-    return ['income', 'financialResult1', 'perc', 'loss', 'financialResultAdjustment']
+    return ['income', 'financialResult1', 'perc', 'loss']
 }
 
 /**
@@ -570,11 +482,17 @@ def getRowNumber(def alias, def data) {
  */
 void setTotalStyle(def row) {
     ['name', 'inn', 'number', 'date', 'cost', 'repaymentDate', 'concessionsDate', 'income',
-            'financialResult1', 'currencyDebtObligation', 'rateBR', 'interestRate', 'perc', 'loss',
-            'marketPrice', 'financialResult2', 'maxLoss', 'financialResultAdjustment'].each {
+            'financialResult1', 'currencyDebtObligation', 'rateBR', 'interestRate', 'perc', 'loss'].each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
         row.getCell(it).editable = false
     }
+}
+
+/**
+ * Имеются ли фатальные ошибки.
+ */
+def hasError() {
+    return logger.containsLevel(LogLevel.ERROR)
 }
 
 /**
@@ -596,7 +514,7 @@ def getReportDate() {
  * Отсорировать данные (по графе 2, 5, 4).
  */
 void sort() {
-    formDataService.getDataRowHelper(formData).getAllCached().sort({ DataRow a, DataRow b ->
+    getData(formData).getAllCached().sort({ DataRow a, DataRow b ->
         if (a.name == b.name && a.date == b.date) {
             return a.number <=> b.number
         }
@@ -612,7 +530,7 @@ void sort() {
  * Получить итоговую строку с суммами.
  */
 def getCalcTotalRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def data = getData(formData)
     // создаем строку
     def totalRow = formData.createDataRow()
     totalRow.setAlias('total')
@@ -624,8 +542,8 @@ def getCalcTotalRow() {
     }
 
     // ищем снизу вверх итоговую строку по эмитету
-    for (int j = dataRowHelper.getAllCached().size() - 1; j >= 0; j--) {
-        DataRow<Cell> srow = dataRowHelper.getAllCached().get(j)
+    for (int j = data.getAllCached().size() - 1; j >= 0; j--) {
+        DataRow<Cell> srow = data.getAllCached().get(j)
         if ((srow.getAlias() == null)) {
             for (column in totalColumns) {
                 if (srow.get(column) != null) {
@@ -661,7 +579,7 @@ def getCalcTotalName() {
  * Посчитать строку "Итого по <Наименование контрагента>"
  */
 def getCalcTotalNameRow(def row) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRowHelper = getData(formData)
     def tRow = getPrevRowWithoutAlias(row)
     def newRow = formData.createDataRow()
     newRow.setAlias('total' + getRowNumber(tRow.name, dataRowHelper))
@@ -710,7 +628,7 @@ void deleteAllStatic() {
  * Ищем вверх по форме первую строку без альяса
  */
 DataRow getPrevRowWithoutAlias(DataRow row) {
-    int pos = formDataService.getDataRowHelper(formData).getAllCached().indexOf(row)
+    int pos = getData(formData).getAllCached().indexOf(row)
     for (int i = pos; i >= 0; i--) {
         if (getRow(i).getAlias() == null) {
             return getRow(i)
@@ -724,10 +642,32 @@ DataRow getPrevRowWithoutAlias(DataRow row) {
  * @author ivildanov
  */
 DataRow<Cell> getRow(int i) {
-    def data = formDataService.getDataRowHelper(formData)
+    def data = getData(formData)
     if ((i < data.getAllCached().size()) && (i >= 0)) {
         return data.getAllCached().get(i)
     } else {
         return null
     }
+}
+
+/**
+ * Вставить новыую строку в конец нф.
+ *
+ * @param data данные нф
+ * @param row строка
+ */
+void insert(def data, def row) {
+    data.insert(row, getRows(data).size() + 1)
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
 }
