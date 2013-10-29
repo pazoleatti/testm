@@ -114,6 +114,38 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
 }
 
+// Получение xml с общими проверками
+def getXML(def String startStr, def String endStr){
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        logger.error('Имя файла не должно быть пустым')
+        return
+    }
+
+    def is = ImportInputStream
+    if (is == null) {
+        logger.error('Поток данных пуст')
+        return
+    }
+
+    if (!fileName.endsWith('.xls')) {
+        logger.error('Выбранный файл не соответствует формату xls!')
+        return
+    }
+
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
+    if (xmlString == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
+        return
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
+        return
+    }
+    return xml
+}
+
 //// Кастомные методы
 
 // Логические проверки
@@ -474,28 +506,8 @@ String getValuesByGroupColumn(DataRow row) {
 
 // Получение импортируемых данных.
 void importData() {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        logger.error('Имя файла не должно быть пустым')
-        return
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        logger.error('Поток данных пуст')
-        return
-    }
-    if (!fileName.endsWith('.xls')) {
-        logger.error('Выбранный файл не соответствует формату xls!')
-        return
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', 'Полное наименование с указанием ОПФ', 'Подитог:')
-    if (xmlString == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
+    def xml = getXML('Полное наименование с указанием ОПФ', 'Подитог:')
     if (xml == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
 
@@ -738,6 +750,7 @@ def addData(def xml, int headRowCount) {
 
         // графа 21
         newRow.dealDoneDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
         rows.add(newRow)
     }
     dataRowHelper.save(rows)

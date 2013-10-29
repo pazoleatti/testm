@@ -52,25 +52,33 @@ switch (formDataEvent) {
 }
 
 //// Кэши и константы
-@Field def providerCache = [:]
-@Field def recordCache = [:]
-@Field def refBookCache = [:]
+@Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+@Field
+def refBookCache = [:]
 
 // Редактируемые атрибуты
-@Field def editableColumns = ['fullNamePerson', 'sum', 'docNumber', 'docDate', 'count', 'date']
+@Field
+def editableColumns = ['fullNamePerson', 'sum', 'docNumber', 'docDate', 'count', 'date']
 
 // Автозаполняемые атрибуты
-@Field def autoFillColumns = ['rowNumber', 'inn', 'countryCode', 'price', 'cost']
+@Field
+def autoFillColumns = ['rowNumber', 'inn', 'countryCode', 'price', 'cost']
 
 // Проверяемые на пустые значения атрибуты
-@Field def nonEmptyColumns = ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'sum', 'docNumber', 'docDate', 'count',
+@Field
+def nonEmptyColumns = ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'sum', 'docNumber', 'docDate', 'count',
         'price', 'cost', 'date']
 
 // Дата окончания отчетного периода
-@Field def reportPeriodEndDate = null
+@Field
+def reportPeriodEndDate = null
 
 // Текущая дата
-@Field def currentDate = new Date()
+@Field
+def currentDate = new Date()
 
 //// Обертки методов
 
@@ -96,6 +104,38 @@ def getRecordId(def Long refBookId, def String alias, def String value, def int 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+}
+
+// Получение xml с общими проверками
+def getXML(def String startStr, def String endStr){
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        logger.error('Имя файла не должно быть пустым')
+        return
+    }
+
+    def is = ImportInputStream
+    if (is == null) {
+        logger.error('Поток данных пуст')
+        return
+    }
+
+    if (!fileName.endsWith('.xls')) {
+        logger.error('Выбранный файл не соответствует формату xls!')
+        return
+    }
+
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
+    if (xmlString == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
+        return
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        logger.error('Отсутствие значении после обработки потока данных')
+        return
+    }
+    return xml
 }
 
 //// Кастомные методы
@@ -175,9 +215,9 @@ void calc() {
         row.cost = row.sum
 
         // Расчет полей зависимых от справочников
-            def map =  getRefBookValue(9, row.fullNamePerson)
-            row.inn = map?.INN_KIO?.stringValue
-            row.countryCode = map?.COUNTRY?.referenceValue
+        def map = getRefBookValue(9, row.fullNamePerson)
+        row.inn = map?.INN_KIO?.stringValue
+        row.countryCode = map?.COUNTRY?.referenceValue
 
     }
     dataRowHelper.update(dataRows);
@@ -185,35 +225,14 @@ void calc() {
 
 // Получение импортируемых данных
 void importData() {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        logger.error('Имя файла не должно быть пустым')
-        return
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        logger.error('Поток данных пуст')
-        return
-    }
-    if (!fileName.endsWith('.xls')) {
-        logger.error('Выбранный файл не соответствует формату xls!')
-        return
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', 'Полное наименование юридического лица с указанием ОПФ', null)
-    if (xmlString == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
+    def xml = getXML('Полное наименование юридического лица с указанием ОПФ', null)
     if (xml == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
         return
     }
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 9, 3)
 
     def headerMapping = [
-            (xml.row[0].cell[0]): 'Полное наименование юридического лица с указанием ОПФ',
             (xml.row[0].cell[1]): 'ИНН/ КИО',
             (xml.row[0].cell[2]): 'Код страны по классификатору ОКСМ',
             (xml.row[0].cell[3]): 'Сумма расходов Банка, руб.',
@@ -237,17 +256,17 @@ void importData() {
 
     checkHeaderEquals(headerMapping)
 
-    addData(xml)
+    addData(xml, 2)
 }
 
 // Заполнить форму данными
-def addData(def xml) {
+def addData(def xml, int headRowCount) {
     reportPeriodEndDate = reportPeriodService?.get(formData?.reportPeriodId)?.taxPeriod?.getEndDate()
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
     def int xlsIndexRow = 0
-    def int rowOffset= 3
+    def int rowOffset = 3
     def int colOffset = 2
 
     def rows = new LinkedList<DataRow<Cell>>()
@@ -257,7 +276,7 @@ def addData(def xml) {
         xlsIndexRow = xmlIndexRow + rowOffset
 
         // пропустить шапку таблицы
-        if (xmlIndexRow <= 2) {
+        if (xmlIndexRow <= headRowCount) {
             continue
         }
 
@@ -277,7 +296,7 @@ def addData(def xml) {
         def xmlIndexCol = 0
 
         // графа 1
-        newRow.rowNumber = xmlIndexRow - 2
+        newRow.rowNumber = xmlIndexRow - headRowCount
 
         // графа 2
         newRow.fullNamePerson = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -316,7 +335,7 @@ def addData(def xml) {
         xmlIndexCol++
 
         // графа 8
-        newRow.count =  parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.count = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
 
         // графа 9
@@ -326,7 +345,8 @@ def addData(def xml) {
         xmlIndexCol++
 
         // графа 11
-        newRow.date =  parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
