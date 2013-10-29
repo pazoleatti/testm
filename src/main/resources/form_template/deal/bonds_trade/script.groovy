@@ -3,7 +3,7 @@ package form_template.deal.bonds_trade
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -46,10 +46,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-        }
+        calc()
+        logicCheck()
         break
 }
 
@@ -115,30 +113,22 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 def getXML(def String startStr, def String endStr) {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
     if (fileName == null || fileName == '') {
-        logger.error('Имя файла не должно быть пустым')
-        return
+        throw new ServiceException('Имя файла не должно быть пустым')
     }
-
     def is = ImportInputStream
     if (is == null) {
-        logger.error('Поток данных пуст')
-        return
+        throw new ServiceException('Поток данных пуст')
     }
-
     if (!fileName.endsWith('.xls')) {
-        logger.error('Выбранный файл не соответствует формату xls!')
-        return
+        throw new ServiceException('Выбранный файл не соответствует формату xls!')
     }
-
     def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
     if (xmlString == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
     }
     return xml
 }
@@ -256,9 +246,6 @@ void calc() {
 // Получение импортируемых данных
 void importData() {
     def xml = getXML('Сокращенная форма\nДанные для расчета сумм доходов по сделкам', null)
-    if (xml == null) {
-        return
-    }
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 17, 3)
 
