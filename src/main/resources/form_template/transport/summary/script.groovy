@@ -2,6 +2,7 @@ package form_template.transport.summary
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
@@ -247,7 +248,7 @@ void checkNSI() {
          * «графа 10» текущей строки формы = «графа 1» строки справочника
          */
         if (row.ecoClass!=null && getRefBookValue(40, row.ecoClass, "NAME") == null) {// refEcoClassDataProvider.getRecords(new Date(), null, "NAME LIKE '"+row.ecoClass+"'", null).getRecords().size == 0) {
-            logger.error("Неверный экологический класс. Строка: "+row.getIndex())
+            logger.error("Неверный экологический класс! Строка: "+row.getIndex())
         }
 
         /**
@@ -259,7 +260,7 @@ void checkNSI() {
             def region = getRegionByOkatoOrg(row.okato)
             query = "TAX_BENEFIT_ID ="+row.taxBenefitCode+" AND DICT_REGION_ID = "+region.record_id
             if (refTaxBenefitParameters.getRecords(new Date(), null, query, null).getRecords().size() == 0){
-                logger.error("Выбранная льгота для текущего региона не предусмотрена . Строка: "+row.getIndex())
+                logger.error("Выбранная льгота для текущего региона не предусмотрена! Строка: "+row.getIndex())
             }
         }
     }
@@ -443,6 +444,7 @@ def fillForm() {
             def  refDataProvideTransportRate = refBookFactory.getDataProvider(41)
             // запрос по выборке данных из справочника
             def query = " and ((MIN_POWER is null or MIN_POWER < "+row.taxBase+") and (MAX_POWER is null or MAX_POWER > "+row.taxBase+"))"+
+                    "and (UNIT_OF_POWER is null or UNIT_OF_POWER = " + row.taxBaseOkeiUnit + ")" +
                     "and ((MIN_AGE is null or MIN_AGE < "+row.years+") and (MAX_AGE is null or MAX_AGE > "+row.years+"))";
 
             /**
@@ -838,6 +840,7 @@ def consolidation(){
     def dataRowHelper = getData(formData)
     List dataRows = new ArrayList<DataRow<Cell>>()
     List<DataRow<Cell>> sourses202 = new ArrayList()
+    List<Department> departments = new ArrayList()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
@@ -846,6 +849,7 @@ def consolidation(){
             def sourceDataRows = sourceDataRowHelper.allCached
             // формы типа 202 собираем, проверяем на пересечение, для дальнейшего использования
             if (source.formType.id == 202){
+                Department sDepartment = departmentService.get(it.departmentId)
                 sourceDataRows.each{ sRow ->
                      /**
                      * Если нашлись две строки с одинаковыми данными то ее не добавляем
@@ -860,12 +864,17 @@ def consolidation(){
                         if (row.taxBenefitCode == sRow.taxBenefitCode &&
                             row.benefitStartDate.equals(sRow.benefitStartDate) &&
                             row.benefitEndDate.equals(sRow.benefitEndDate)){
-
-                            logger.warn("Обнаружены несколько разных строк для Код Окато="+sRow.codeOKATO+",Идентификационный номер = "+sRow.identNumber+", Регистрационный знак="+sRow.regNumber+". Строки : "+sRow.getIndex()+", "+row.getIndex())
+                            def department = departments.get(sourses202.indexOf(row))
+                            logger.error("Обнаружены несколько разных строк, у которых совпадают Код ОКАТО = " + sRow.codeOKATO
+                                    + ", Идентификационный номер = " + sRow.identNumber + ", Регистрационный знак=" + sRow.regNumber
+                                    + " для форм «Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог» в подразделениях «"
+                                    + sDepartment.name + "», «" + department.name + "». Строки : "+sRow.getIndex()+", "+row.getIndex())
+                            departments.remove(sourses202.indexOf(row))
                             sourses202.remove(sRow)
                         }
                     } else{
                         sourses202.add(sRow)
+                        departments.add(sDepartment)
                     }
                 }
             } else{
@@ -1065,13 +1074,16 @@ def consolidation(){
         if (!use){
             def ref = refBookFactory.getDataProvider(30)
             def records = ref.getRecords(new Date(), null, "ID = "+formData.departmentId, null)
+            def department = departments.get(sourses202.indexOf(v))
 
             String name
             if (records.size() == 1){
                 name = records.get(0).NAME;
             }
 
-            logger.warn("Для строки "+cnt+" "+name+" \"Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог\"  не найдены соответствующие ТС  в  формах \"Сведения о транспортных средствах, по которым уплачивается транспортный налог\"")
+            logger.warn("Для строки "+cnt+" "+" в форме \"Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог\" подразделения "
+                    + department.name + " указана льгота для  транспортного средства, не указанного в одной из форм \"Сведения о транспортных средствах, по которым уплачивается транспортный налог\" . Код ОКАТО = " + v.codeOKATO
+                    + ", Идентификационный номер = " + v.identNumber + ", Регистрационный знак=" + v.regNumber + "!")
         }
     }
     dataRowHelper.save(dataRows)
