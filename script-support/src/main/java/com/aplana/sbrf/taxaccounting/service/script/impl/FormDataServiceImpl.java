@@ -325,7 +325,4 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         }
         return true;
     }
-
-    // getColumnName
-    // checkTableHead
 }

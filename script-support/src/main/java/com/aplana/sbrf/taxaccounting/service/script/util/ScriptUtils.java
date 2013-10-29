@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.script.range.Range;
 import com.aplana.sbrf.taxaccounting.model.script.range.Rect;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -49,6 +50,9 @@ public final class ScriptUtils {
     private static String GROUP_WRONG_ITOG_SUM = "Строка %d: Неверное итоговое значение по группе «%s» в графе «%s»";
 
     private static String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
+
+    private static String WRONG_CALC = "Строка %d: Неверное значение граф: %s!";
+
 
     /**
      * Интерфейс для переопределения алгоритма расчета
@@ -549,6 +553,37 @@ public final class ScriptUtils {
                 } else {
                     logger.warn(msg);
                 }
+            }
+        }
+    }
+
+    /**
+     * Арифметическая проверка
+     *
+     * @param row
+     * @param calcColumns
+     * @param calcValues
+     * @param logger
+     * @param required
+     */
+    public static void checkCalc(DataRow<Cell> row, List<String> calcColumns, Map<String, Object> calcValues,
+                                 Logger logger, boolean required) {
+        List<String> errorColumns = new LinkedList<String>();
+        for (String alias : calcColumns) {
+            if (!calcValues.containsKey(alias) && row.getCell(alias).getValue() == null) {
+                continue;
+            }
+            if (!calcValues.containsKey(alias) || !calcValues.get(alias).equals(row.getCell(alias).getValue())) {
+                errorColumns.add('"' + getColumnName(row, alias) + '"');
+            }
+        }
+        if (!errorColumns.isEmpty()) {
+            String msg = String.format("WRONG_CALC", row.getIndex(),
+                    StringUtils.collectionToDelimitedString(errorColumns, ", "));
+            if (required) {
+                logger.error(msg);
+            } else {
+                logger.warn(msg);
             }
         }
     }
