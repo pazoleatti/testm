@@ -571,11 +571,15 @@ def addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def int xmlIndexRow = -1
+    def int xlsIndexRow = 0
+    def int rowOffset= 3
+    def int colOffset = 2
 
     def rows = new LinkedList<DataRow<Cell>>()
 
     for (def row : xml.row) {
         xmlIndexRow++
+        xlsIndexRow = xmlIndexRow + rowOffset
 
         // пропустить шапку таблицы
         if (xmlIndexRow <= headRowCount) {
@@ -595,145 +599,145 @@ def addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
-        def int xmlIndexCell = 0
+        def int xmlIndexCol = 0
 
         // графа 1
         newRow.rowNum = xmlIndexRow - headRowCount
 
         // графа 2.1
-        newRow.fullName = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCell].text(), xmlIndexRow, xmlIndexCell)
+        newRow.fullName = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         def map = getRefBookValue(9, newRow.fullName)
-        xmlIndexCell++
+        xmlIndexCol++
 
         // графа 2.2
-        newRow.interdependence = getRecordIdImport(38, 'VALUE', row.cell[xmlIndexCell].text(), xmlIndexRow, xmlIndexCell)
-        xmlIndexCell++
+        newRow.interdependence = getRecordIdImport(38, 'VALUE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 3
         if (map != null) {
-            def text = row.cell[xmlIndexCell].text()
+            def text = row.cell[xmlIndexCol].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO?.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO?.stringValue != null)) {
-                logger.warn("Строка ${xmlIndexRow + 2} столбец ${xmlIndexCell + 2} содержит значение, отсутствующее в справочнике!")
+                logger.warn("Строка ${xlsIndexRow} столбец ${xmlIndexCol + colOffset} содержит значение, отсутствующее в справочнике!")
             }
         }
-        xmlIndexCell++
+        xmlIndexCol++
 
         // графа 4.1
         if (map != null) {
-            def text = row.cell[xmlIndexCell].text()
+            def text = row.cell[xmlIndexCol].text()
             map = getRefBookValue(10, map.COUNTRY?.referenceValue)
             if (map != null) {
                 if ((text != null && !text.isEmpty() && !text.equals(map.NAME?.stringValue)) || ((text == null || text.isEmpty()) && map.NAME?.stringValue != null)) {
-                    logger.warn("Строка ${xmlIndexRow + 3} столбец ${xmlIndexCell + 2} содержит значение, отсутствующее в справочнике!")
+                    logger.warn("Строка ${xlsIndexRow} столбец ${xmlIndexCol + colOffset} содержит значение, отсутствующее в справочнике!")
                 }
             }
         }
-        xmlIndexCell++
+        xmlIndexCol++
 
         // графа 4.2
         if (map != null) {
-            def text = row.cell[xmlIndexCell].text()
+            def text = row.cell[xmlIndexCol].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map.CODE?.stringValue != null)) {
-                logger.warn("Строка ${xmlIndexRow + 3} столбец ${xmlIndexCell + 2} содержит значение, отсутствующее в справочнике!")
+                logger.warn("Строка ${xlsIndexRow} столбец ${xmlIndexCol + colOffset} содержит значение, отсутствующее в справочнике!")
             }
         }
-        xmlIndexCell++
+        xmlIndexCol++
 
         // графа 5
-        newRow.docNumber = row.cell[xmlIndexCell].text()
-        xmlIndexCell++
+        newRow.docNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 6
-        newRow.docDate = parseDate(row.cell[xmlIndexCell].text(), "dd.MM.yyyy", xmlIndexRow, xmlIndexCell, logger, false)
-        xmlIndexCell++
+        newRow.docDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 7
-        newRow.dealNumber = row.cell[xmlIndexCell].text()
-        xmlIndexCell++
+        newRow.dealNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 8
-        newRow.dealDate = parseDate(row.cell[xmlIndexCell].text(), "dd.MM.yyyy", xmlIndexRow, xmlIndexCell, logger, false)
-        xmlIndexCell++
+        newRow.dealDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 9
-        newRow.dealFocus = getRecordIdImport(20, 'DIRECTION', row.cell[xmlIndexCell].text(), xmlIndexRow, xmlIndexCell)
-        xmlIndexCell++
+        newRow.dealFocus = getRecordIdImport(20, 'DIRECTION', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 10
-        newRow.deliverySign = getRecordIdImport(18, 'SIGN', row.cell[xmlIndexCell].text(), xmlIndexRow, xmlIndexCell)
-        xmlIndexCell++
+        newRow.deliverySign = getRecordIdImport(18, 'SIGN', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 11
-        newRow.metalName = getRecordIdImport(17, 'INNER_CODE', row.cell[xmlIndexCell].text(), xmlIndexRow, xmlIndexCell)
-        xmlIndexCell++
+        newRow.metalName = getRecordIdImport(17, 'INNER_CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 12
-        newRow.foreignDeal = getRecordIdImport(38, 'VALUE', row.cell[xmlIndexCell].text(), xmlIndexRow, xmlIndexCell)
-        xmlIndexCell++
+        newRow.foreignDeal = getRecordIdImport(38, 'VALUE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 13.1
-        newRow.countryCodeNumeric = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCell].text(), xmlIndexRow, xmlIndexCell)
-        xmlIndexCell++
+        newRow.countryCodeNumeric = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 13.2
-        String code = row.cell[xmlIndexCell].text()
+        String code = row.cell[xmlIndexCol].text()
         if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
-        newRow.regionCode = getRecordIdImport(4, 'CODE', code, xmlIndexRow, xmlIndexCell)
-        xmlIndexCell++
+        newRow.regionCode = getRecordIdImport(4, 'CODE', code, xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 13.3
-        newRow.city = row.cell[xmlIndexCell].text()
-        xmlIndexCell++
+        newRow.city = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 13.4
-        newRow.locality = row.cell[xmlIndexCell].text()
-        xmlIndexCell++
+        newRow.locality = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 14.1
-        newRow.countryCodeNumeric2 = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCell].text(), xmlIndexRow, xmlIndexCell)
-        xmlIndexCell++
+        newRow.countryCodeNumeric2 = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 14.2
-        code = row.cell[xmlIndexCell].text()
+        code = row.cell[xmlIndexCol].text()
         if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
-        newRow.region2 = getRecordIdImport(4, 'CODE', code, xmlIndexRow, xmlIndexCell)
-        xmlIndexCell++
+        newRow.region2 = getRecordIdImport(4, 'CODE', code, xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 14.3
-        newRow.city2 = row.cell[xmlIndexCell].text()
-        xmlIndexCell++
+        newRow.city2 = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 14.4
-        newRow.locality2 = row.cell[xmlIndexCell].text()
-        xmlIndexCell++
+        newRow.locality2 = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 15
-        newRow.deliveryCode = getRecordIdImport(63, 'STRCODE', row.cell[xmlIndexCell].text(), xmlIndexRow, xmlIndexCell)
-        xmlIndexCell++
+        newRow.deliveryCode = getRecordIdImport(63, 'STRCODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 16
-        xmlIndexCell++
+        xmlIndexCol++
 
         // графа 17
-        newRow.incomeSum = parseNumber(row.cell[xmlIndexCell].text(), xmlIndexRow, xmlIndexCell, logger, false)
-        xmlIndexCell++
+        newRow.incomeSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 18
-        newRow.outcomeSum = parseNumber(row.cell[xmlIndexCell].text(), xmlIndexRow, xmlIndexCell, logger, false)
-        xmlIndexCell++
+        newRow.outcomeSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 19
-        xmlIndexCell++
+        xmlIndexCol++
 
         // графа 20
-        xmlIndexCell++
+        xmlIndexCol++
 
         // графа 21
-        newRow.dealDoneDate = parseDate(row.cell[xmlIndexCell].text(), "dd.MM.yyyy", xmlIndexRow, xmlIndexCell, logger, false)
+        newRow.dealDoneDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         rows.add(newRow)
     }
     dataRowHelper.save(rows)

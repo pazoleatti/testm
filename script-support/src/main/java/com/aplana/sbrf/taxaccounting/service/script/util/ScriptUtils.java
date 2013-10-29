@@ -28,9 +28,9 @@ public final class ScriptUtils {
 
 	private static final String CELL_NOT_FOUND = "Ячейка («%s», «%s») не найдена";
 
-    private static final String WRONG_NUMBER = "Строка %d, графа %d содержит нечисловое значение «%s»!";
+    private static final String WRONG_NUMBER = "Строка %d столбец %d содержит нечисловое значение «%s»!";
 
-    private static final String WRONG_DATE = "Строка %d, графа %d содержит значение «%s», которое не " +
+    private static final String WRONG_DATE = "Строка %d столбец %d содержит значение «%s», которое не " +
             "соответствует дате в формате «%s»!";
 
     private static String WRONG_HEADER_EQUALS = "Заголовок таблицы не соответствует требуемой структуре. " +
