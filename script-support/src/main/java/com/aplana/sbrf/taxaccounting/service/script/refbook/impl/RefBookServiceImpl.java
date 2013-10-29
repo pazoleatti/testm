@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.refbook.RefBookService;
@@ -24,7 +25,7 @@ public class RefBookServiceImpl implements RefBookService {
     public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
         try{
             return factory.getDataProvider(refBookId).getRecordData(recordId);
-        } catch (EmptyResultDataAccessException e){
+        } catch (DaoException e){
             return null;
         }
     }

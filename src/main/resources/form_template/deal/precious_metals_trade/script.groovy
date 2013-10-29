@@ -37,8 +37,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
-// Консолидация
-    case FormDataEvent.COMPOSE:
+    case FormDataEvent.COMPOSE: // Консолидация
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
         logicCheck()
@@ -72,12 +71,12 @@ def autoFillColumns = ['rowNum', 'inn', 'countryName', 'countryCode', 'foreignDe
 
 // Группируемые атрибуты
 @Field
-def groupColums = ['fullName', 'inn', 'docNumber', 'docDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal',
+def groupColumns = ['fullName', 'inn', 'docNumber', 'docDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal',
         'deliveryCode']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColums = ['rowNum', 'fullName', 'interdependence', 'inn', 'countryName', 'countryCode', 'docNumber',
+def nonEmptyColumns = ['rowNum', 'fullName', 'interdependence', 'inn', 'countryName', 'countryCode', 'docNumber',
         'docDate', 'dealNumber', 'dealDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal', 'count',
         'price', 'total', 'dealDoneDate']
 
@@ -117,9 +116,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 //// Кастомные методы
 
-/**
- * Логические проверки
- */
+// Логические проверки
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -144,7 +141,7 @@ void logicCheck() {
         def docDateCell = row.getCell('docDate')
         def dealDateCell = row.getCell('dealDate')
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColums, logger, false)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
 
         // Корректность даты договора
         def dt = docDateCell.value
@@ -226,6 +223,10 @@ void logicCheck() {
         }
 
         // Проверка внешнеторговой сделки
+        def Boolean deliveryPhis = null
+        if (row.deliverySign != null) {
+            deliveryPhis = getRefBookValue(18, row.deliverySign)?.CODE?.numberValue == 1
+        }
         def msg14 = row.getCell('foreignDeal').column.name
         if (row.countryCodeNumeric == row.countryCodeNumeric2) {
             if (row.foreignDeal != recNoId) {
@@ -257,34 +258,30 @@ void logicCheck() {
         }
 
         // Проверка заполнения региона отправки
-        if (row.countryCodeNumeric != null) {
-            def country = getRefBookValue(10, row.countryCodeNumeric).CODE?.stringValue
-            if (country != null) {
-                def regionName = row.getCell('regionCode').column.name
-                def countryName = row.getCell('countryCodeNumeric').column.name
-                if (country == '643' && row.regionCode == null) {
-                    logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» " +
-                            "указан код 643!")
-                } else if (country != '643' && row.regionCode != null) {
-                    logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» " +
-                            "указан код, отличный от 643!")
-                }
+        def country = getRefBookValue(10, row.countryCodeNumeric)?.CODE?.stringValue
+        if (country != null) {
+            def regionName = row.getCell('regionCode').column.name
+            def countryName = row.getCell('countryCodeNumeric').column.name
+            if (country == '643' && row.regionCode == null) {
+                logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» " +
+                        "указан код 643!")
+            } else if (country != '643' && row.regionCode != null) {
+                logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» " +
+                        "указан код, отличный от 643!")
             }
         }
 
         // Проверка заполнения региона доставки
-        if (row.countryCodeNumeric2 != null) {
-            def country = getRefBookValue(10, row.countryCodeNumeric2).CODE?.stringValue
-            if (country != null) {
-                def regionName = row.getCell('region2').column.name
-                def countryName = row.getCell('countryCodeNumeric2').column.name
-                if (country == '643' && row.region2 == null) {
-                    logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» " +
-                            "указан код 643!")
-                } else if (country != '643' && row.region2 != null) {
-                    logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» " +
-                            "указан код, отличный от 643!")
-                }
+        country = getRefBookValue(10, row.countryCodeNumeric2)?.CODE?.stringValue
+        if (country != null) {
+            def regionName = row.getCell('region2').column.name
+            def countryName = row.getCell('countryCodeNumeric2').column.name
+            if (country == '643' && row.region2 == null) {
+                logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» " +
+                        "указан код 643!")
+            } else if (country != '643' && row.region2 != null) {
+                logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» " +
+                        "указан код, отличный от 643!")
             }
         }
 
@@ -312,13 +309,13 @@ void checkItog(def dataRows) {
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
             return calcItog(i, testRows)
         }
-    }, groupColums);
+    }, groupColumns);
     // Рассчитанные строки итогов
     def testItogRows = testRows.findAll { it -> it.getAlias() != null }
     // Имеющиеся строки итогов
     def itogRows = dataRows.findAll { it -> it.getAlias() != null }
 
-    checkItogRows(dataRows, testItogRows, itogRows, groupColums, logger, new GroupString() {
+    checkItogRows(dataRows, testItogRows, itogRows, groupColumns, logger, new GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
             return getValuesByGroupColumn(row)
@@ -337,15 +334,19 @@ void checkItog(def dataRows) {
     });
 }
 
-/**
- * Алгоритмы заполнения полей формы.
- */
+// Алгоритмы заполнения полей формы
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     if (dataRows.isEmpty()) {
         return
     }
+
+    // "Да"
+    def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
+    // "Нет"
+    def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
+
     // Удаление подитогов
     deleteAllAliased(dataRows)
 
@@ -368,23 +369,16 @@ void calc() {
         row.count = 1
 
         // Расчет полей зависимых от справочников
-        if (row.fullName != null) {
-            def map = getRefBookValue(9, row.fullName)
-            row.inn = map.INN_KIO?.stringValue
-            row.countryCode = map.COUNTRY?.referenceValue
-            row.countryName = map.COUNTRY?.referenceValue
-        } else {
-            row.inn = null
-            row.countryCode = null
-            row.countryName = null
-        }
+        def map = getRefBookValue(9, row.fullName)
+        row.inn = map?.INN_KIO?.stringValue
+        row.countryCode = map?.COUNTRY?.referenceValue
+        row.countryName = map?.COUNTRY?.referenceValue
 
         // Признак физической поставки
         def Boolean deliveryPhis = null
         if (row.deliverySign != null) {
             deliveryPhis = getRefBookValue(18, row.deliverySign)?.CODE?.numberValue == 1
         }
-
         if (deliveryPhis != null && deliveryPhis) {
             row.countryCodeNumeric = null
             row.regionCode = null
@@ -396,15 +390,11 @@ void calc() {
             row.locality2 = null
         }
 
-        if (row.countryCodeNumeric == row.countryCodeNumeric2 || deliveryPhis) {
-            row.foreignDeal = getRecordId(38, 'CODE', '0', index, row.getCell('foreignDeal').column.name)
-        } else {
-            row.foreignDeal = getRecordId(38, 'CODE', '1', index, row.getCell('foreignDeal').column.name)
-        }
+        row.foreignDeal = (row.countryCodeNumeric == row.countryCodeNumeric2 || deliveryPhis) ? recNoId : recYesId
     }
 
     // Сортировка
-    sortRows(dataRows, groupColums)
+    sortRows(dataRows, groupColumns)
 
     // Добавление подитов
     addAllAliased(dataRows, new CalcAliasRow() {
@@ -412,7 +402,7 @@ void calc() {
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
             return calcItog(i, dataRows)
         }
-    }, groupColums);
+    }, groupColumns);
 
     // Если нет сортировки и подитогов, то dataRowHelper.update(dataRows);
     dataRowHelper.save(dataRows);
@@ -452,7 +442,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
 String getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
-    def map = row.fullName != null ? getRefBookValue(9, row.fullName) : null
+    def map = getRefBookValue(9, row.fullName)
     if (map != null)
         builder.append(map.NAME?.stringValue).append(sep)
     if (row.inn != null)
@@ -511,7 +501,8 @@ void importData() {
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 28, 3)
 
-    def headerMapping = [(xml.row[0].cell[1]): 'Признак взаимозависимости',
+    def headerMapping = [
+            (xml.row[0].cell[1]): 'Признак взаимозависимости',
             (xml.row[0].cell[2]): 'ИНН/ КИО',
             (xml.row[0].cell[3]): 'Наименование страны регистрации',
             (xml.row[0].cell[4]): 'Код страны регистрации по классификатору ОКСМ',
@@ -566,7 +557,8 @@ void importData() {
             (xml.row[2].cell[24]): 'гр. 18',
             (xml.row[2].cell[25]): 'гр. 19',
             (xml.row[2].cell[26]): 'гр. 20',
-            (xml.row[2].cell[27]): 'гр. 21']
+            (xml.row[2].cell[27]): 'гр. 21'
+    ]
 
     checkHeaderEquals(headerMapping)
 
@@ -579,7 +571,6 @@ def addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def int xmlIndexRow = -1
-    def int rowIndex = 0
 
     def rows = new LinkedList<DataRow<Cell>>()
 
@@ -591,19 +582,15 @@ def addData(def xml, int headRowCount) {
             continue
         }
 
-        rowIndex++
-
         if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
 
         def newRow = formData.createDataRow()
-
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-
         autoFillColumns.each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
@@ -615,7 +602,7 @@ def addData(def xml, int headRowCount) {
 
         // графа 2.1
         newRow.fullName = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCell].text(), xmlIndexRow, xmlIndexCell)
-        def map = newRow.fullName == null ? null : getRefBookValue(9, newRow.fullName)
+        def map = getRefBookValue(9, newRow.fullName)
         xmlIndexCell++
 
         // графа 2.2
