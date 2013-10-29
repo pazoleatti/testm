@@ -3,7 +3,7 @@ package form_template.deal.corporate_credit
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -46,10 +46,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-        }
+        calc()
+        logicCheck()
         break
 }
 
@@ -112,30 +110,22 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 def getXML(def String startStr, def String endStr) {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
     if (fileName == null || fileName == '') {
-        logger.error('Имя файла не должно быть пустым')
-        return
+        throw new ServiceException('Имя файла не должно быть пустым')
     }
-
     def is = ImportInputStream
     if (is == null) {
-        logger.error('Поток данных пуст')
-        return
+        throw new ServiceException('Поток данных пуст')
     }
-
     if (!fileName.endsWith('.xls')) {
-        logger.error('Выбранный файл не соответствует формату xls!')
-        return
+        throw new ServiceException('Выбранный файл не соответствует формату xls!')
     }
-
     def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
     if (xmlString == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
     }
     return xml
 }
@@ -220,7 +210,7 @@ void calc() {
         row.cost = row.sum
 
         // Расчет полей зависимых от справочников
-        def map = refBookService.getRecordData(9, row.fullNamePerson)
+        def map = getRefBookValue(9, row.fullNamePerson)
         row.inn = map?.INN_KIO?.stringValue
         row.countryName = map?.COUNTRY?.referenceValue
     }
@@ -231,9 +221,6 @@ void calc() {
 // Получение импортируемых данных
 void importData() {
     def xml = getXML('Полное наименование юридического лица с указанием ОПФ', null)
-    if (xml == null) {
-        return
-    }
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 10, 3)
 
@@ -303,7 +290,7 @@ void addData(def xml, int headRowCount) {
         newRow.rowNumber = xmlIndexRow - headRowCount
 
         // графа 2
-        newRow.fullNamePerson = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+        newRow.fullNamePerson = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         def map = getRefBookValue(9, newRow.fullNamePerson)
         xmlIndexCol++
 
