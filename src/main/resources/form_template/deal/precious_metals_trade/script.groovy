@@ -578,7 +578,7 @@ void importData() {
 }
 
 // Заполнить форму данными
-def addData(def xml, int headRowCount) {
+void addData(def xml, int headRowCount) {
     reportPeriodEndDate = reportPeriodService?.get(formData?.reportPeriodId)?.taxPeriod?.getEndDate()
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 

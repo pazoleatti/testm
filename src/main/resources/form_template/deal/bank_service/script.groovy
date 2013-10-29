@@ -268,7 +268,7 @@ void importData() {
 }
 
 // Заполнить форму данными
-def addData(def xml, int headRowCount) {
+void addData(def xml, int headRowCount) {
     reportPeriodEndDate = reportPeriodService?.get(formData?.reportPeriodId)?.taxPeriod?.getEndDate()
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
@@ -324,7 +324,7 @@ def addData(def xml, int headRowCount) {
         if (map != null) {
             def text = row.cell[xmlIndexCol].text()
             map = getRefBookValue(10, map.COUNTRY?.referenceValue)
-            if ((text != null && !text.isEmpty() && !text.equals(map.FULLNAME?.stringValue)) || ((text == null || text.isEmpty()) && map.FULLNAME?.stringValue != null)) {
+            if ((text != null && !text.isEmpty() && !text.equals(map?.FULLNAME?.stringValue)) || ((text == null || text.isEmpty()) && map?.FULLNAME?.stringValue != null)) {
                 logger.warn("Строка ${xlsIndexRow} столбец ${xmlIndexCol + colOffset} содержит значение, отсутствующее в справочнике!")
             }
         }
