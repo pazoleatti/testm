@@ -190,6 +190,14 @@ public class ImportServiceImpl implements ImportService {
         StringBuilder sb = new StringBuilder();
         sb.append("<data>").append(ENTER);
 
+        // запись смещения для excel-файла
+        sb.append("<infoXLS>").append(ENTER);
+        String[] tmp = {Integer.toString(firstP.getY() + 1)};
+        addRow(sb, tmp, "rowOffset");
+        tmp[0] = Integer.toString(firstP.getX() + 1);
+        addRow(sb, tmp, "colOffset");
+        sb.append("</infoXLS>").append(ENTER);
+
         Set<Integer> skipSet = getSkipCol(sheet, firstP);
 
         String rowStr;
