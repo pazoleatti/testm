@@ -106,7 +106,7 @@ def getRecordId(def Long refBookId, def String alias, def String value, def int 
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 // Получение xml с общими проверками
@@ -229,7 +229,7 @@ void calc() {
         bondCount = row.bondCount
 
         if (transactionSumRub != null && bondCount != null && bondCount != 0) {
-            row.priceOne = transactionSumRub / bondCount;
+            row.priceOne = transactionSumRub / bondCount
         }
 
         // Расчет полей зависимых от справочников
@@ -238,7 +238,7 @@ void calc() {
         row.contraCountry = map?.COUNTRY?.referenceValue
         row.contraCountryCode = map?.COUNTRY?.referenceValue
     }
-    dataRowHelper.update(dataRows);
+    dataRowHelper.update(dataRows)
 }
 
 // Получение импортируемых данных

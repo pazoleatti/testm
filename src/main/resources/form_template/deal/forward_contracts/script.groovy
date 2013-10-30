@@ -106,7 +106,7 @@ def getRecordId(def Long refBookId, def String alias, def String value, def int 
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 // Получение xml с общими проверками
@@ -146,12 +146,12 @@ void logicCheck() {
     def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
     def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    def rowNum = 0;
+    def rowNum = 0
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
-        rowNum++;
+        rowNum++
 
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
 
@@ -224,7 +224,7 @@ void checkItog(def dataRows) {
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
             return calcItog(i, testRows)
         }
-    }, groupColumns);
+    }, groupColumns)
     // Рассчитанные строки итогов
     def testItogRows = testRows.findAll { it -> it.getAlias() != null }
     // Имеющиеся строки итогов
@@ -244,9 +244,9 @@ void checkItog(def dataRows) {
             if (row1.total != row2.total) {
                 return getColumnName(row1, 'total')
             }
-            return null;
+            return null
         }
-    });
+    })
 }
 
 // Алгоритмы заполнения полей формы
@@ -263,7 +263,7 @@ void calc() {
     // Сортировка
     sortRows(dataRows, groupColumns)
 
-    def index = 1;
+    def index = 1
     for (row in dataRows) {
         // Порядковый номер строки
         row.rowNumber = index++
@@ -289,9 +289,9 @@ void calc() {
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
             return calcItog(i, dataRows)
         }
-    }, groupColumns);
+    }, groupColumns)
 
-    dataRowHelper.save(dataRows);
+    dataRowHelper.save(dataRows)
 }
 
 // Расчет подитогового значения
@@ -322,7 +322,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
 // Возвращает строку со значениями полей строки по которым идет группировка
 String getValuesByGroupColumn(DataRow row) {
     def sep = ", "
-    StringBuilder builder = new StringBuilder()
+    def StringBuilder builder = new StringBuilder()
     def map = getRefBookValue(9, row.fullName)
     if (map != null)
         builder.append(map.NAME?.stringValue).append(sep)

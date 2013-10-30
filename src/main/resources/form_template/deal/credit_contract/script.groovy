@@ -101,7 +101,7 @@ def getRecordId(def Long refBookId, def String alias, def String value, def int 
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 // Получение xml с общими проверками
@@ -212,7 +212,7 @@ void calc() {
         row.innKio = map?.INN_KIO?.stringValue
         row.country = map?.COUNTRY?.referenceValue
     }
-    dataRowHelper.update(dataRows);
+    dataRowHelper.update(dataRows)
 }
 
 // Получение импортируемых данных
