@@ -218,15 +218,15 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                                             НалСтавка: getRefBookValue(41, tRow.taxRate, "VALUE"),
                                                             СумИсчисл: tRow.calculatedTaxSum,
                                                     ]
-                                                    +   (tRow.benefitEndDate && tRow.benefitStartDate? [ЛьготМесТС: (tRow.benefitEndDate.year*12 + tRow.benefitEndDate.month) - (tRow.benefitStartDate.year*12 + tRow.benefitStartDate.month)]: [])+
+                                                    +   (taxBenefitCode && tRow.benefitStartDate? [ЛьготМесТС: getBenefitMonths(tRow)]: [])+
                                                     [
                                                             СумИсчислУпл: tRow.taxSumToPay,
                                                     ]+
-                                                    (tRow.coefKl ? [КоэфКл: tRow.coefKl]:[]),
+                                                    (taxBenefitCode && tRow.coefKl ? [КоэфКл: tRow.coefKl]:[]),
                                     ){
 
                                         // генерация КодОсвНал
-                                        if ((!(taxBenefitCode.equals("20220")) && !(taxBenefitCode.equals("20230")) && taxBenefitCode != null)){
+                                        if (taxBenefitCode != null && !(taxBenefitCode.equals("20220")) && !(taxBenefitCode.equals("20230"))){
                                             def l = taxBenefitCode;
                                             def x = "";
                                             if (l.equals("30200")){
@@ -252,11 +252,11 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
 
                                         // вычисление ЛьготУменСум
                                         // не заполняется если Код налоговой льготы = 30200, 20200, 20210 или 20230
-                                        if (!(taxBenefitCode.equals("30200"))
+                                        if (taxBenefitCode != null
+                                                && !(taxBenefitCode.equals("30200"))
                                                 && !(taxBenefitCode.equals("20200"))
                                                 && !(taxBenefitCode.equals("20210"))
-                                                && !(taxBenefitCode.equals("20230"))
-                                                && taxBenefitCode != null){
+                                                && !(taxBenefitCode.equals("20230"))){
 
                                             // вычисление КодУменСум
                                             def param = getParam(tRow.taxBenefitCode, tRow.okato);
@@ -275,13 +275,13 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
 
                                         // ЛьготСнижСтав
                                         // не заполняется если Код налоговой льготы = 30200, 20200, 20210 или 20220
-                                        if (!(taxBenefitCode.equals("30200"))
+                                        if (taxBenefitCode != null
+                                                && !(taxBenefitCode.equals("30200"))
                                                 && !(taxBenefitCode.equals("20200"))
                                                 && !(taxBenefitCode.equals("20210"))
-                                                && !(taxBenefitCode.equals("20220"))
-                                                && taxBenefitCode != null){
+                                                && !(taxBenefitCode.equals("20220"))){
 
-                                            // вычисление КодУменСум
+                                            // вычисление КодСнижСтав
                                             def valL = tRow.taxBenefitCode;
                                             def param = getParam(tRow.taxBenefitCode, tRow.okato);
                                             if (param != null) {
@@ -458,4 +458,16 @@ def getParam(taxBenefitCode, okato){
         }
     }
 
+}
+
+def getBenefitMonths(def row) {
+    def periodStart = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
+    def periodEnd = reportPeriodService.getEndDate(declarationData.reportPeriodId).getTime()
+    if ((row.benefitEndDate != null && row.benefitEndDate < periodStart) || row.benefitStartDate > periodEnd){
+        return 0
+    } else {
+        def end = row.benefitEndDate == null || row.benefitEndDate > periodEnd ? periodEnd : row.benefitEndDate
+        def start = row.benefitStartDate < periodStart ? periodStart : row.benefitStartDate
+        return (end.year * 12 + end.month) - (start.year * 12 + start.month) + 1
+    }
 }
