@@ -24,12 +24,8 @@ public class DataRowEditableCellUtils {
 		} else {
 			editableCell = true;
 		}
-		if ((columnContext.getMode() == ColumnContext.Mode.READONLY_MODE)
-				|| (columnContext.getMode() == ColumnContext.Mode.NORMAL_EDIT_MODE && !editableCell)) {
-			return false;
-		} else {
-			return true;
-		}
+		return !((columnContext.getMode() == ColumnContext.Mode.READONLY_MODE)
+				|| (columnContext.getMode() == ColumnContext.Mode.NORMAL_EDIT_MODE && !editableCell));
 	}
 
 }

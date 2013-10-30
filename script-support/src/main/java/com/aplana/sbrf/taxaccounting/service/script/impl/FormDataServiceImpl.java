@@ -66,7 +66,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Autowired
     private ReportPeriodService reportPeriodService;
 
-    private HashMap<Number, DataRowHelper> helperHashMap = new HashMap<Number, DataRowHelper>();
+    private Map<Number, DataRowHelper> helperHashMap = new HashMap<Number, DataRowHelper>();
 
     private static ApplicationContext applicationContext;
 

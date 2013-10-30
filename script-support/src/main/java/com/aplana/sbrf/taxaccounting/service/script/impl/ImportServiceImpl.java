@@ -23,19 +23,19 @@ import java.util.Set;
 @Service("importService")
 public class ImportServiceImpl implements ImportService {
 
-    private final String XLS = "xls";
-    private final String RNU = "rnu";
-    private final String XML = "xml";
-    private final String DEFAULT_CHARSET = "UTF-8";
-    private final String ENTER = "\r\n";
-    private final String TAB = "\t";
-    private final char SEPARATOR = '|';
+    private static final String XLS = "xls";
+    private static final String RNU = "rnu";
+    private static final String XML = "xml";
+    private static final String DEFAULT_CHARSET = "UTF-8";
+    private static final String ENTER = "\r\n";
+    private static final String TAB = "\t";
+    private static final char SEPARATOR = '|';
     /**
      * Используется при обработке файла формата *.rnu (csv),
      * чтобы избежать ошибку при разборе строки файла: в случаях когда есть открывающий (нечетный) двойной апостраф,
      * но нет закрывающего (четного).
      */
-    private final char QUOTE = '\'';
+    private static final char QUOTE = '\'';
 
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 

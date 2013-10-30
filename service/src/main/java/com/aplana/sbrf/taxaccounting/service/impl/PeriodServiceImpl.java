@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -31,7 +30,7 @@ import java.util.*;
 @Transactional
 public class PeriodServiceImpl implements PeriodService{
 	
-	public static final Long PERIOD$CODE$REFBOOK = 8L;
+	private static final Long PERIOD_CODE_REFBOOK = 8L;
 
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
@@ -41,9 +40,6 @@ public class PeriodServiceImpl implements PeriodService{
 
 	@Autowired
 	private DepartmentReportPeriodDao departmentReportPeriodDao;
-
-	@Autowired
-	private RefBookDao refBookDao;
 
 	@Autowired
 	private RefBookFactory rbFactory;
@@ -70,21 +66,13 @@ public class PeriodServiceImpl implements PeriodService{
 	@Override
 	public boolean isActivePeriod(int reportPeriodId, long departmentId) {
 		DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriodId, departmentId);
-		if (drp == null || !drp.isActive()){
-			return false;
-		} else {
-			return true;
-		}
+		return drp != null && drp.isActive();
 	}
 	
 	@Override
 	public boolean isBalancePeriod(int reportPeriodId, long departmentId) {
 		DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriodId, departmentId);
-		if (drp == null || !drp.isBalance()){
-			return false;
-		} else {
-			return true;
-		}
+		return drp != null && drp.isBalance();
 	}
 
 	@Override
@@ -130,7 +118,7 @@ public class PeriodServiceImpl implements PeriodService{
 
 		ReportPeriod newReportPeriod;
 		if (reportPeriods.isEmpty()) {
-			RefBook refBook = rbFactory.get(PERIOD$CODE$REFBOOK);
+			RefBook refBook = rbFactory.get(PERIOD_CODE_REFBOOK);
 			RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
 			Map<String, RefBookValue> record = provider.getRecordData(Long.valueOf(dictionaryTaxPeriodId));
 			newReportPeriod = new ReportPeriod();

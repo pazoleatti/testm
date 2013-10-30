@@ -69,7 +69,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 	
 	@UiHandler("reloadButton")
 	void onReloadButtonClick(ClickEvent event) {
-		getUiHandlers().reload();;
+		getUiHandlers().reload();
 	}
 
 	@Override

@@ -218,8 +218,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                         ? creationDate : null;
 
         arr = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().toCharArray();
-        if(XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("март") ||
-                XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("август"))
+        if(XlsxReportMetadata.sdf_m.format(printDate).equalsIgnoreCase("март") ||
+                XlsxReportMetadata.sdf_m.format(printDate).equalsIgnoreCase("август"))
         {
             String month = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase() + "а";
             arr = month.toCharArray();

@@ -30,9 +30,6 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 	@Autowired
 	private	PeriodService periodService;
 
-	@Autowired
-	private DepartmentService departmentService;
-
 	public GetPeriodDataHandler() {
 		super(GetPeriodDataAction.class);
 	}

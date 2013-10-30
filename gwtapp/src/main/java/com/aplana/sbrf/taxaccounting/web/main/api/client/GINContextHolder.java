@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.main.api.client;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 
-public class GINContextHolder {
+public final class GINContextHolder {
 
 	private GINContextHolder(){
 		super();

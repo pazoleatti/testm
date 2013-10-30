@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 @Service
 @Transactional
 public class BookerStatementsServiceImpl implements BookerStatementsService {
-    private static final long INCOME_101 = 50L;
+	private static final long INCOME_101 = 50L;
     private static final long INCOME_102 = 52L;
 
     private static final String I_101_REPORT_PERIOD_ID = "REPORT_PERIOD_ID";
@@ -55,13 +55,30 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     private static final long MAX_FILE_ROW = 10000L;
 
     private static final String BAD_FILE_MSG = "Формат файла не соответствуют ожидаемому формату. Файл не может быть загружен.";
+
     private static final String NO_DATA_FILE_MSG = "Файл не содержит данных. Файл не может быть загружен.";
     private static final String IO_WORKBOOK_EXCEPTION = "Не могу прочитать загруженный Excel фаил.";
     private static final String REPORT_PERIOD_CLOSED = "Указан закрытый период. Файл не может быть загружен.";
     private static final String REPORT_PERIOD_INVALID = "Отчетный период не указан.";
     private static final String FILE_NULL = "Не указан фаил.";
+	private static final String ATTRIBUTE_ACCOUNT_NO = "Номер счета";
+	private static final String ATTRIBUTE_NAME = "Название";
+	private static final String ATTRIBUTE_INCOME_REMAINS = "Входящие остатки";
+	private static final String ATTRIBUTE_REPORT_PERIOD_TURN = "Обороты за отчетный период";
+	private static final String ATTRIBUTE_OUTCOME_REMAINS = "Исходящие остатки";
+	private static final String ON_DEBET = "по дебету";
+	private static final String ON_CREDIT = "по кредиту";
+	private static final String ATTRIBUTE_INCOME_REMAINS_ON_DEBET = "Входящие остатки по дебету";
+	private static final String ATTRIBUTE_INCOME_REMAINS_ON_CREDIT = "Входящие остатки по кредиту";
+	private static final String ATTRIBUTE_REPORT_PERIOD_TURN_ON_DEBET = "Обороты за отчетный период по дебету";
+	private static final String ATTRIBUTE_REPORT_PERIOD_TURN_ON_CREDIT = "Обороты за отчетный период по кредиту";
+	private static final String ATTRIBUTE_OUTCOME_REMAINS_ON_DEBET = "Исходящие остатки по дебету";
+	private static final String ATTRIBUTE_OUTCOME_REMAINS_ON_CREDIT = "Исходящие остатки по кредиту";
+	private static final String ATTRIBUTE_ARTICLE_NAME = "Наименование статьи";
+	private static final String ATTRIBUTE_OPU_CODE = "Код ОПУ";
+	private static final String ATTRIBUTE_SUM = "Сумма";
 
-    @Autowired
+	@Autowired
     PeriodService reportPeriodService;
 
     @Autowired
@@ -167,11 +184,11 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     Cell cell = cells.next();
                     int colNum = cell.getColumnIndex();
                     String colName = cell.getStringCellValue().trim();
-                    if ((colNum == 1 && !colName.equals("Номер счета"))
-                            || (colNum == 2 && !colName.equals("Название"))
-                            || (colNum == 4 && !colName.equals("Входящие остатки"))
-                            || (colNum == 6 && !colName.equals("Обороты за отчетный период"))
-                            || (colNum == 8 && !colName.equals("Исходящие остатки")))
+                    if ((colNum == 1 && !colName.equals(ATTRIBUTE_ACCOUNT_NO))
+                            || (colNum == 2 && !colName.equals(ATTRIBUTE_NAME))
+                            || (colNum == 4 && !colName.equals(ATTRIBUTE_INCOME_REMAINS))
+                            || (colNum == 6 && !colName.equals(ATTRIBUTE_REPORT_PERIOD_TURN))
+                            || (colNum == 8 && !colName.equals(ATTRIBUTE_OUTCOME_REMAINS)))
                         throw new ServiceException(BAD_FILE_MSG);
                 }
             }
@@ -182,8 +199,8 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     Cell cell = cells.next();
                     int colNum = cell.getColumnIndex();
                     String colName = cell.getStringCellValue().trim();
-                    if (((colNum == 4 || colNum == 6 || colNum == 8) && !colName.equals("по дебету"))
-                            || ((colNum == 5 || colNum == 7 || colNum == 9) && !colName.equals("по кредиту")))
+                    if (((colNum == 4 || colNum == 6 || colNum == 8) && !colName.equals(ON_DEBET))
+                            || ((colNum == 5 || colNum == 7 || colNum == 9) && !colName.equals(ON_CREDIT)))
                         throw new ServiceException(BAD_FILE_MSG);
                 }
             }
@@ -383,40 +400,40 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         if (typeID == INCOME_101) {
             switch (columnIndex) {
                 case 1:
-                    colName = "Номер счета";
+                    colName = ATTRIBUTE_ACCOUNT_NO;
                     break;
                 case 2:
-                    colName = "Название";
+                    colName = ATTRIBUTE_NAME;
                     break;
                 case 4:
-                    colName = "Входящие остатки по дебету";
+                    colName = ATTRIBUTE_INCOME_REMAINS_ON_DEBET;
                     break;
                 case 5:
-                    colName = "Входящие остатки по кредиту";
+                    colName = ATTRIBUTE_INCOME_REMAINS_ON_CREDIT;
                     break;
                 case 6:
-                    colName = "Обороты за отчетный период по дебету";
+                    colName = ATTRIBUTE_REPORT_PERIOD_TURN_ON_DEBET;
                     break;
                 case 7:
-                    colName = "Обороты за отчетный период по кредиту";
+                    colName = ATTRIBUTE_REPORT_PERIOD_TURN_ON_CREDIT;
                     break;
                 case 8:
-                    colName = "Исходящие остатки по дебету";
+                    colName = ATTRIBUTE_OUTCOME_REMAINS_ON_DEBET;
                     break;
                 case 9:
-                    colName = "Исходящие остатки по кредиту";
+                    colName = ATTRIBUTE_OUTCOME_REMAINS_ON_CREDIT;
                     break;
             }
         } else {
             switch (columnIndex) {
                 case 2:
-                    colName = "Наименование статьи";
+                    colName = ATTRIBUTE_ARTICLE_NAME;
                     break;
                 case 3:
-                    colName = "Код ОПУ";
+                    colName = ATTRIBUTE_OPU_CODE;
                     break;
                 case 6:
-                    colName = "Сумма";
+                    colName = ATTRIBUTE_SUM;
                     break;
             }
         }

@@ -58,14 +58,6 @@ public class DeclarationDataSearchServiceImplTest {
 		when(departmentDeclarationTypeDao.getDepartmentIdsByTaxType(TaxType.INCOME)).thenReturn(incomeDepartmentIds);
 		ReflectionTestUtils.setField(service, "departmentDeclarationTypeDao", departmentDeclarationTypeDao);
 		
-
-		DepartmentDao departmentDao = mock(DepartmentDao.class);
-		// В подразделении 1 есть только декларация INCOME_DECLARATION_TYPE_ID_1
-
-		Department department1 = mockDepartment(1, null, DepartmentType.TERBANK);
-		when(departmentDao.getDepartment(1)).thenReturn(department1);
-		ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
-		
 		DeclarationTypeDao declarationTypeDao = mock(DeclarationTypeDao.class);
 		DeclarationType incomeDeclarationType1 = mockDeclarationType(INCOME_DECLARATION_TYPE_ID_1, TaxType.INCOME);
 		DeclarationType incomeDeclarationType2 = mockDeclarationType(INCOME_DECLARATION_TYPE_ID_2, TaxType.INCOME);
