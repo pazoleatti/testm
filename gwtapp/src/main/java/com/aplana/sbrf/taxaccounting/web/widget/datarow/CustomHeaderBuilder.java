@@ -33,13 +33,16 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow<C
 		return true;
     }
 
-	private void buildHeader(TableRowBuilder out, Header<?> header, int colSpan, int rowSpan) {
+	private void buildHeader(TableRowBuilder out, Header<?> header, int colSpan, int rowSpan, boolean needBorder) {
 		Style style = getTable().getResources().style();
 		StringBuilder classesBuilder = new StringBuilder(style.header());
 
 		TableCellBuilder th = out.startTH().colSpan(colSpan).rowSpan(rowSpan).className(classesBuilder.toString());
 
 		Context context = new Context(0, 2, header.getKey());
+		if (!needBorder) {
+			th.style().borderStyle(com.google.gwt.dom.client.Style.BorderStyle.NONE);
+		}
 		renderHeader(th, context, header);
 
 		th.endTH();
@@ -51,14 +54,15 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow<C
 			TableRowBuilder tr = startRow();
 			for (; c<offset; c++) {
 				Header defHeader = new TextHeader(getTable().getHeader(c).getValue().toString());
-				buildHeader(tr, defHeader, 0, newHeaders.size());
+				buildHeader(tr, defHeader, 0, newHeaders.size(), true);
 			}
 			for (int i=offset; i<getTable().getColumnCount(); i++) {
 				Header newHeader;
 				String colAlias = ((DataRowColumn)getTable().getColumn(i)).getAlias();
 				if (!newHeaders.isEmpty() && (colAlias != null) && (header.getCell(colAlias).getValue() != null) && !header.getCell(colAlias).hasValueOwner()) {
 					newHeader = new TextHeader(header.getCell(colAlias).getValue().toString());
-					buildHeader(tr, newHeader, header.getCell(colAlias).getColSpan(), header.getCell(colAlias).getRowSpan());
+					boolean needBorder = header.getCell(colAlias).getColumn().getWidth() != 0;
+					buildHeader(tr, newHeader, header.getCell(colAlias).getColSpan(), header.getCell(colAlias).getRowSpan(), needBorder);
 				}
 
 			}
