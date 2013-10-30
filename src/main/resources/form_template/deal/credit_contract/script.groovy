@@ -214,7 +214,6 @@ void calc() {
         row.innKio = map?.INN_KIO?.stringValue
         row.country = map?.COUNTRY?.referenceValue
     }
-
     dataRowHelper.update(dataRows);
 }
 

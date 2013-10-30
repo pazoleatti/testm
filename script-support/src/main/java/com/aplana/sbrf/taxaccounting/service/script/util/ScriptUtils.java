@@ -326,6 +326,20 @@ public final class ScriptUtils {
     }
 
     /**
+     * Перевод даты в нужный формат
+     *
+     * @param date
+     * @param format
+     * @return
+     */
+    public static String formatDate(Date date, String format) {
+        if (date == null || format == null) {
+            return null;
+        }
+        return new SimpleDateFormat(format).format(date);
+    }
+
+    /**
      * Удаление всех строк с алиасами (подитоги и т.п.)
      *
      * @param dataRows
@@ -454,7 +468,7 @@ public final class ScriptUtils {
             // Неитоговые строки были удалены
             for (int i = 0; i < dataRows.size(); i++) {
                 if (dataRows.get(i).getAlias() != null) {
-                    if (i - 1 < -1 || dataRows.get(i - 1).getAlias() != null) {
+                    if (i < 1 || dataRows.get(i - 1).getAlias() != null) {
                         logger.error(String.format(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex()));
                     }
                 }
