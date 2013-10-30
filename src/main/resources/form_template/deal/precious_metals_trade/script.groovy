@@ -69,7 +69,7 @@ def autoFillColumns = ['rowNum', 'inn', 'countryName', 'countryCode', 'foreignDe
 
 // Группируемые атрибуты
 @Field
-def groupColumns = ['fullName', 'inn', 'docNumber', 'docDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal',
+def groupColumns = ['fullName', 'docNumber', 'docDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal',
         'deliveryCode']
 
 // Проверяемые на пустые значения атрибуты
@@ -372,11 +372,11 @@ void calc() {
     // Удаление подитогов
     deleteAllAliased(dataRows)
 
+    // Сортировка
+    sortRows(dataRows, groupColumns)
+
     def index = 1;
     for (row in dataRows) {
-        if (row.getAlias() != null) {
-            continue
-        }
         // Порядковый номер строки
         row.rowNum = index++
         // Расчет поля "Цена"
@@ -415,9 +415,6 @@ void calc() {
         row.foreignDeal = (row.countryCodeNumeric == row.countryCodeNumeric2 || deliveryPhis) ? recNoId : recYesId
     }
 
-    // Сортировка
-    sortRows(dataRows, groupColumns)
-
     // Добавление подитов
     addAllAliased(dataRows, new CalcAliasRow() {
         @Override
@@ -442,8 +439,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     // Расчеты подитоговых значений
     def BigDecimal priceItg = 0, totalItg = 0
     for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
-        row = dataRows.get(j)
-
+        def row = dataRows.get(j)
         def price = row.price
         def total = row.total
 
@@ -457,18 +453,13 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     return newRow
 }
 
-/**
- *  Возвращает строку со значениями полей строки по которым идет группировка
- *  ['fullName', 'inn', 'docNumber', 'docDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal', 'deliveryCode']
- */
+// Возвращает строку со значениями полей строки по которым идет группировка
 String getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     StringBuilder builder = new StringBuilder()
     def map = getRefBookValue(9, row.fullName)
     if (map != null)
         builder.append(map.NAME?.stringValue).append(sep)
-    if (row.inn != null)
-        builder.append(row.inn).append(sep)
     if (row.docNumber != null)
         builder.append(row.docNumber).append(sep)
     if (row.docDate != null)
@@ -491,7 +482,7 @@ String getValuesByGroupColumn(DataRow row) {
     def String retVal = builder.toString()
     if (retVal.length() < 2)
         return null
-    retVal.substring(0, retVal.length() - 2)
+    return retVal.substring(0, retVal.length() - 2)
 }
 
 // Получение импортируемых данных.
