@@ -138,11 +138,10 @@ void logicCheck() {
         return
     }
 
-    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-    def dFrom = taxPeriod.getStartDate()
-    def dTo = taxPeriod.getEndDate()
-    def rowNum = 0
+    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
+    def rowNum = 0
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -248,7 +247,7 @@ void importData() {
 
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService?.get(formData?.reportPeriodId)?.taxPeriod?.getEndDate()
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1

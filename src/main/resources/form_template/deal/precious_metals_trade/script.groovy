@@ -145,13 +145,12 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
-    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-    def dFrom = taxPeriod.getStartDate()
-    def dTo = taxPeriod.getEndDate()
 
-    // "Да"
+    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
+
+    // "Да" и "Нет"
     def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
-    // "Нет"
     def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
 
     def rowNum = 0;
@@ -446,7 +445,6 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
         priceItg += price != null ? price : 0
         totalItg += total != null ? total : 0
     }
-
     newRow.price = priceItg
     newRow.total = totalItg
 
@@ -557,7 +555,7 @@ void importData() {
 
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService?.get(formData?.reportPeriodId)?.taxPeriod?.getEndDate()
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def int xmlIndexRow = -1

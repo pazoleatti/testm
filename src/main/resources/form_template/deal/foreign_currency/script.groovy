@@ -143,9 +143,9 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
-    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-    def dFrom = taxPeriod.getStartDate()
-    def dTo = taxPeriod.getEndDate()
+
+    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
     def rowNum = 0;
     for (row in dataRows) {
@@ -196,7 +196,7 @@ void logicCheck() {
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 
-        //Проверки соответствия НСИ
+        // Проверки соответствия НСИ
         checkNSI(9, row, "fullName")
         checkNSI(10, row, "countryName")
         checkNSI(10, row, "countryCode")
@@ -285,7 +285,6 @@ void calc() {
         }
     }, groupColumns);
 
-    // Если нет сортировки и подитогов, то dataRowHelper.update(dataRows);
     dataRowHelper.save(dataRows);
 }
 
@@ -308,7 +307,6 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
         priceItg += price != null ? price : 0
         totalItg += total != null ? total : 0
     }
-
     newRow.price = priceItg
     newRow.total = totalItg
 
@@ -384,7 +382,7 @@ void importData() {
 
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService?.get(formData?.reportPeriodId)?.taxPeriod?.getEndDate()
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
@@ -438,7 +436,7 @@ void addData(def xml, int headRowCount) {
         // графа 4.1
         if (map != null) {
             def text = row.cell[xmlIndexCol].text()
-            map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
+            map = getRefBookValue(10, map.COUNTRY.referenceValue)
             if ((text != null && !text.isEmpty() && !text.equals(map?.NAME?.stringValue)) || ((text == null || text.isEmpty()) && map?.NAME?.stringValue != null)) {
                 logger.warn("Строка ${xlsIndexRow} столбец ${xmlIndexCol + colOffset} содержит значение, отсутствующее в справочнике!")
             }
