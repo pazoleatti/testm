@@ -321,7 +321,7 @@ public class PeriodServiceImpl implements PeriodService{
         cal.set(Calendar.YEAR, reportPeriod.getYear());
 
         // для налога на прибыль, периоды вложены в друг дгруга
-        if (taxPeriod.getTaxType() == TaxType.INCOME){
+        if (taxPeriod.getTaxType() == TaxType.INCOME || taxPeriod.getTaxType() == TaxType.DEAL){
             // Calendar.MONTH = 0 это январь
             cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + reportPeriod.getMonths() - 1);
         }
