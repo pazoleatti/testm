@@ -24,6 +24,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -324,5 +325,25 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             return false;
         }
         return true;
+    }
+
+    @Override
+    public FormData getFormDataPrev(FormData formData, int departmentId) {
+        ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.getReportPeriodId());
+        if (prevReportPeriod != null) {
+            return find(formData.getFormType().getId(), formData.getKind(), departmentId, prevReportPeriod.getId());
+        }
+        return null;
+    }
+
+    @Override
+    public boolean existAcceptedFormDataPrev(FormData formData, int departmentId) {
+        FormData prevFormData = getFormDataPrev(formData, formData.getReportPeriodId());
+        if (prevFormData != null && prevFormData.getState() == WorkflowState.ACCEPTED) {
+            DataRowHelper dataRowHelper = getDataRowHelper(prevFormData);
+            List<DataRow<Cell>> prevDataRows = dataRowHelper.getAllCached();
+            return !CollectionUtils.isEmpty(prevDataRows);
+        }
+        return false;
     }
 }

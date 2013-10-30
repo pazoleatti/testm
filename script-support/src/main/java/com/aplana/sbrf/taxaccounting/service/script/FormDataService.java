@@ -154,4 +154,23 @@ public interface FormDataService {
      * @return
      */
     boolean checksBalancePeriod(FormData formData, Logger logger);
+
+    /**
+     * Получение формы за указанный отчетный период
+     *
+     * @param formData
+     * @param departmentId
+     * @return
+     */
+    FormData getFormDataPrev(FormData formData, int departmentId);
+
+    /**
+     * Проверка наличия принятой формы за предыдущий период.
+     * Если форма без строк, то считается отсутствующей.
+     *
+     * @param formData
+     * @param departmentId
+     * @return
+     */
+    boolean existAcceptedFormDataPrev(FormData formData, int departmentId);
 }
