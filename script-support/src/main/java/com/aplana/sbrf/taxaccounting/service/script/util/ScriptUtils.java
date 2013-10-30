@@ -587,12 +587,13 @@ public final class ScriptUtils {
             if (!calcValues.containsKey(alias) && row.getCell(alias).getValue() == null) {
                 continue;
             }
-            if (!calcValues.containsKey(alias) || !calcValues.get(alias).equals(row.getCell(alias).getValue())) {
+            if (!calcValues.containsKey(alias) ||
+                    (calcValues.get(alias) != null && !calcValues.get(alias).equals(row.getCell(alias).getValue()))) {
                 errorColumns.add('"' + getColumnName(row, alias) + '"');
             }
         }
         if (!errorColumns.isEmpty()) {
-            String msg = String.format("WRONG_CALC", row.getIndex(),
+            String msg = String.format(WRONG_CALC, row.getIndex(),
                     StringUtils.collectionToDelimitedString(errorColumns, ", "));
             if (required) {
                 logger.error(msg);
