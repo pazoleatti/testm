@@ -584,11 +584,10 @@ public final class ScriptUtils {
                                  Logger logger, boolean required) {
         List<String> errorColumns = new LinkedList<String>();
         for (String alias : calcColumns) {
-            if (!calcValues.containsKey(alias) && row.getCell(alias).getValue() == null) {
+            if (calcValues.get(alias) == null && row.getCell(alias).getValue() == null) {
                 continue;
             }
-            if (!calcValues.containsKey(alias) ||
-                    (calcValues.get(alias) != null && !calcValues.get(alias).equals(row.getCell(alias).getValue()))) {
+            if (calcValues.get(alias) == null || !calcValues.get(alias).equals(row.getCell(alias).getValue())) {
                 errorColumns.add('"' + getColumnName(row, alias) + '"');
             }
         }
