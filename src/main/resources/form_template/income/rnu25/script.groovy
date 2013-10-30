@@ -15,6 +15,20 @@ import groovy.transform.Field
  * @author rtimerbaev
  */
 
+// графа 1  - rowNumber
+// графа 2  - regNumber
+// графа 3  - tradeNumber
+// графа 4  - lotSizePrev
+// графа 5  - lotSizeCurrent
+// графа 6  - reserve
+// графа 7  - cost
+// графа 8  - signSecurity          атрибут 621 CODE "Код признака" - справочник 62 "Признаки ценных бумаг"
+// графа 9  - marketQuotation
+// графа 10 - costOnMarketQuotation
+// графа 11 - reserveCalcValue
+// графа 12 - reserveCreation
+// графа 13 - reserveRecovery
+
 /** Признак периода ввода остатков. */
 def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
 
@@ -82,26 +96,6 @@ switch (formDataEvent) {
         migration()
         break
 }
-
-// графа 1  - rowNumber
-// графа 2  - regNumber
-// графа 3  - tradeNumber
-// графа 4  - lotSizePrev
-// графа 5  - lotSizeCurrent
-// графа 6  - reserve
-// графа 7  - cost
-// графа 8  - signSecurity          атрибут 621 CODE "Код признака" - справочник 62 "Признаки ценных бумаг"
-// графа 9  - marketQuotation
-// графа 10 - costOnMarketQuotation
-// графа 11 - reserveCalcValue
-// графа 12 - reserveCreation
-// графа 13 - reserveRecovery
-
-// TODO (Ramil Timerbaev)
-//@Field
-//def dataRowHelper = formDataService.getDataRowHelper(formData)
-//@Field
-//def dataRows = dataRowHelper.getAllCached()
 
 //// Кэши и константы
 @Field
@@ -194,7 +188,7 @@ def deleteRow() {
 /** Расчеты. Алгоритмы заполнения полей формы. */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = dataRowHelper.allCached
 
     // удалить строку "итого" и "итого по ГРН: ..."
     deleteAllAliased(dataRows)
@@ -207,13 +201,10 @@ void calc() {
     }
 
     def formDataOld = getFormDataOld()
-    def dataRowsOld = (formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.getAllCached() : null)
-    def rowNumber = 0
-    // получить номер последний строки предыдущей формы если текущая форма не первая в этом году и это не событие импорта
-    if (formData.periodOrder > 1 && !isImport &&
-            dataRowsOld != null && !dataRowsOld.isEmpty()) {
-        rowNumber = dataRowsOld[dataRowsOld.size() - 2].rowNumber
-    }
+    def dataRowsOld = (formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null)
+
+    // получить номер последний строки предыдущей формы если это не событие импорта
+    def rowNumber = (isImport ? 0 : getPrevRowNumber(dataRowsOld))
     dataRows.each { row ->
         if (!isImport) {
             // графа 1
@@ -293,7 +284,7 @@ void calc() {
 /** Логические проверки. */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = dataRowHelper.allCached
 
     def rowNum = 0
     for (def row : dataRows) {
@@ -305,7 +296,7 @@ void logicCheck() {
     }
 
     def formDataOld = getFormDataOld()
-    def dataRowsOld = (formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.getAllCached() : null)
+    def dataRowsOld = (formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null)
 
     if (dataRowsOld != null && !dataRowsOld.isEmpty()) {
         // 1. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 11)
@@ -355,21 +346,9 @@ void logicCheck() {
     // список групп кодов классификации для которых надо будет посчитать суммы
     def totalGroupsName = []
 
-    def rowNumber = 0
-    // получить номер последний строки предыдущей формы если текущая форма не первая в этом году
-    logger.info('===== formData.periodOrder = ' + formData.periodOrder) // TODO (Ramil Timerbaev)
-    logger.info('===== dataRowsOld = ' + dataRowsOld) // TODO (Ramil Timerbaev)
-    logger.info('===== !dataRowsOld.isEmpty() = ' + !dataRowsOld.isEmpty()) // TODO (Ramil Timerbaev)
-    if (formData.periodOrder > 1 &&
-            dataRowsOld != null && !dataRowsOld.isEmpty()) {
-        rowNumber = dataRowsOld[dataRowsOld.size() - 2].rowNumber
-        logger.info('===== ' + rowNumber) // TODO (Ramil Timerbaev)
-    } else {
-        logger.info('===== niiiiiiiiiiiiil') // TODO (Ramil Timerbaev)
-    }
-    def index
     def errorMsg
 
+    def rowNumber = getPrevRowNumber(dataRowsOld)
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -586,7 +565,7 @@ void migration() {
     importData()
     if (!logger.containsLevel(LogLevel.ERROR)) {
         def dataRowHelper = formDataService.getDataRowHelper(formData)
-        def dataRows = dataRowHelper.getAllCached()
+        def dataRows = dataRowHelper.allCached
         def total = getCalcTotalRow(dataRows)
         dataRowHelper.insert(total, dataRows.size() + 1)
     }
@@ -669,7 +648,6 @@ def getFormDataOld() {
     def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
 
     // РНУ-25 за предыдущий отчетный период
-    def formDataOld = null
     if (reportPeriodOld != null) {
         formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
     }
@@ -767,7 +745,7 @@ def checkPrevPeriod() {
     def formDataOld = getFormDataOld()
     if (formDataOld != null) {
         def dataRowHelperOld = formDataService.getDataRowHelper(formDataOld)
-        dataRowsOld = dataRowHelperOld.getAllCached()
+        dataRowsOld = dataRowHelperOld.allCached
     }
 
     if (formDataOld?.state == WorkflowState.ACCEPTED && !dataRowsOld.isEmpty()) {
@@ -930,7 +908,7 @@ def getRowNumber(def alias, def dataRows) {
  */
 void checkTotalRow(def totalRow) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = dataRowHelper.allCached
     def totalCalc = getCalcTotalRow(dataRows)
 
     def totalColumns = [4 : 'lotSizePrev', 5 : 'lotSizeCurrent', 7 : 'cost', 10 : 'costOnMarketQuotation',
@@ -960,4 +938,20 @@ def getCalcTotalRow(def dataRows) {
         totalRow.getCell(alias).setValue(getSum(dataRows, alias))
     }
     return totalRow
+}
+
+/**
+ * Получить значение "Номер по порядку" из формы предыдущего периода.
+ *
+ * @param dataRowsOld строки предыдущего периода
+ */
+def getPrevRowNumber(def dataRowsOld) {
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    // получить номер последний строки предыдущей формы если текущая форма не первая в этом году
+    if (reportPeriod != null && reportPeriod.order > 1 &&
+            dataRowsOld != null && !dataRowsOld.isEmpty()) {
+        // пропустить последние 2 строки - итоги общие и итоги последнего раздела
+        return dataRowsOld[dataRowsOld.size() - 3].rowNumber
+    }
+    return 0
 }
