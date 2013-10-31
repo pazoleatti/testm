@@ -512,7 +512,7 @@ comment on column form_data_source.src_department_form_type_id is 'Иденти�
 create table sec_user (
   id number(9) not null,
   login varchar2(255) not null,
-  name varchar2(50) not null,
+  name varchar2(512) not null,
   department_id number(9) not null,
   is_active number(1) not null,
   email varchar2(128)
