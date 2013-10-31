@@ -241,7 +241,7 @@ void logicCheck() {
                     break
             }
             if (isHaveNotEmptyField) {
-                StringBuilder builder = new StringBuilder();
+                StringBuilder builder = new StringBuilder()
                 for (int i = 0; i < checkField.size(); i++) {
                     builder.append("«").append(getAtributes().get(checkField.get(i))[2])
                             .append("» ").append("(")
@@ -520,7 +520,7 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    def index = 1;
+    def index = 1
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -599,7 +599,7 @@ void calc() {
             }
         }
     }
-    dataRowHelper.update(dataRows);
+    dataRowHelper.update(dataRows)
 }
 
 /**
@@ -641,7 +641,7 @@ void sort() {
     dataRows.sort({ DataRow a, DataRow b ->
         sortRow(getGroupColumns(), a, b)
     })
-    dataRowHelper.save(dataRows);
+    dataRowHelper.save(dataRows)
 }
 
 int sortRow(List<String> params, DataRow a, DataRow b) {
@@ -721,7 +721,7 @@ void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.clear()
 
-    int index = 1;
+    int index = 1
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (source != null

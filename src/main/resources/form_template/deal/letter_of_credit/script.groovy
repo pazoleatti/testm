@@ -3,10 +3,8 @@ package form_template.deal.letter_of_credit
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-
-import java.text.SimpleDateFormat
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import groovy.transform.Field
 
 /**
  * 386 - Предоставление инструментов торгового финансирования и непокрытых аккредитивов (11)
@@ -14,32 +12,25 @@ import java.text.SimpleDateFormat
  *
  * @author Stanislav Yasinskiy
  */
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        checkUniq()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        deleteAllStatic()
-        sort()
         calc()
-        addAllStatic()
         logicCheck()
         break
     case FormDataEvent.CHECK:
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        addRow()
+        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
-        deleteRow()
+        formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
-        deleteAllStatic()
-        sort()
         calc()
-        addAllStatic()
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
@@ -47,141 +38,126 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
-// Консолидация
-    case FormDataEvent.COMPOSE:
-        consolidation()
-        deleteAllStatic()
-        sort()
+    case FormDataEvent.COMPOSE: // Консолидация
+        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
-        addAllStatic()
         logicCheck()
         break
-// импорт из xls
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            deleteAllStatic()
-            sort()
-            calc()
-            addAllStatic()
-            logicCheck()
-        }
+        calc()
+        logicCheck()
         break
 }
 
-def getAtributes(){
-    [
-            rowNumber:   ['rowNumber',   'гр. 1', '№ п/п'],
-            fullName:    ['fullName',    'гр. 2', 'Полное наименование с указанием ОПФ'],
-            inn:         ['inn',         'гр. 3', 'ИНН/ КИО'],
-            countryName: ['countryName', 'гр. 4', 'Страна регистрации'],
-            docNumber:   ['docNumber',   'гр. 5', 'Номер договора'],
-            docDate:     ['docDate',     'гр. 6', 'Дата договора'],
-            dealNumber:  ['dealNumber',  'гр. 7', 'Номер сделки'],
-            dealDate:    ['dealDate',    'гр. 8', 'Дата сделки'],
-            sum:         ['sum',         'гр. 9', 'Сумма доходов Банка по данным бухгалтерского учета, руб.'],
-            price:       ['price',       'гр. 10','Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.'],
-            total:       ['total',       'гр. 11','Итого стоимость без учета НДС, акцизов и пошлины, руб.'],
-            dealDoneDate:['dealDoneDate','гр. 12','Дата совершения сделки']
-    ]
+//// Кэши и константы
+@Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+@Field
+def refBookCache = [:]
+
+// Редактируемые атрибуты
+@Field
+def editableColumns = ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'dealDoneDate']
+
+// Автозаполняемые атрибуты
+@Field
+def autoFillColumns = ['rowNumber', 'inn', 'countryCode', 'price', 'total']
+
+// Группируемые атрибуты
+@Field
+def groupColumns = ['fullName', 'docNumber', 'docDate']
+
+// Проверяемые на пустые значения атрибуты
+@Field
+def nonEmptyColumns = ['rowNumber', 'fullName', 'inn', 'countryCode', 'docNumber', 'docDate', 'dealNumber',
+        'dealDate', 'sum', 'price', 'total', 'dealDoneDate']
+
+// Дата окончания отчетного периода
+@Field
+def reportPeriodEndDate = null
+
+// Текущая дата
+@Field
+def currentDate = new Date()
+
+//// Обертки методов
+
+// Проверка НСИ
+boolean checkNSI(def refBookId, def row, def alias) {
+    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
 }
 
-def getGroupColumns() {
-    ['fullName', 'inn', 'docNumber', 'docDate']
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
 
-def getEditColumns() {
-    ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'dealDoneDate']
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
+                boolean required = true) {
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
+            currentDate, rowIndex, cellName, logger, required)
 }
 
-void deleteRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.delete(currentDataRow)
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
-void addRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def row = formData.createDataRow()
-    def dataRows = dataRowHelper.getAllCached()
-    def size = dataRows.size()
-    def index = 0
-    row.keySet().each {
-        row.getCell(it).setStyleAlias('Автозаполняемая')
+// Получение xml с общими проверками
+def getXML(def String startStr, def String endStr) {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        throw new ServiceException('Имя файла не должно быть пустым')
     }
-    getEditColumns().each {
-        row.getCell(it).editable = true
-        row.getCell(it).setStyleAlias('Редактируемая')
+    def is = ImportInputStream
+    if (is == null) {
+        throw new ServiceException('Поток данных пуст')
     }
-    if (currentDataRow != null) {
-        index = currentDataRow.getIndex()
-        def pointRow = currentDataRow
-        while (pointRow.getAlias() != null && index > 0) {
-            pointRow = dataRows.get(--index)
-        }
-        if (index != currentDataRow.getIndex() && dataRows.get(index).getAlias() == null) {
-            index++
-        }
-    } else if (size > 0) {
-        for (int i = size - 1; i >= 0; i--) {
-            def pointRow = dataRows.get(i)
-            if (pointRow.getAlias() == null) {
-                index = dataRows.indexOf(pointRow) + 1
-                break
-            }
-        }
+    if (!fileName.endsWith('.xls')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xls!')
     }
-    dataRowHelper.insert(row, index + 1)
-}
-/**
- * Проверяет уникальность в отчётном периоде и вид
- * (не был ли ранее сформирован отчет, параметры которого совпадают с параметрами, указанными пользователем )
- */
-void checkUniq() {
-    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
-    if (findForm != null) {
-        logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
+    if (xmlString == null) {
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
     }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
+    }
+    return xml
 }
 
-/**
- * Логические проверки
- */
+//// Кастомные методы
+
+// Логические проверки
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    if (dataRows.isEmpty()) {
+        return
+    }
 
-    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-    def dFrom = taxPeriod.getStartDate()
-    def dTo = taxPeriod.getEndDate()
+    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    def dataRows = dataRowHelper.getAllCached()
     def rowNum = 0
     for (row in dataRows) {
-        rowNum++
         if (row.getAlias() != null) {
             continue
         }
+        rowNum++
+
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+
         def dealDateCell = row.getCell('dealDate')
         def docDateCell = row.getCell('docDate')
-        [
-                'rowNumber',   // № п/п
-                'fullName',    // Полное наименование юридического лица с указанием ОПФ
-                'inn',         // ИНН/КИО
-                'countryCode', // Страна регистрации
-                'docNumber',   // Номер договора
-                'docDate',     // Дата договора
-                'dealNumber',  // Номер сделки
-                'dealDate',    // Дата сделки
-                'sum',         // Сумма доходов Банка по данным бухгалтерского учета, руб.
-                'price',       // Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.
-                'total',       // Итого стоимость без учета НДС, акцизов и пошлин, руб.
-                'dealDoneDate' // Дата совершения сделки
-        ].each {
-            def rowCell = row.getCell(it)
-            if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
-                def msg = rowCell.column.name
-                logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
-            }
-        }
+
         //  Корректность даты договора
         def dt = docDateCell.value
         if (dt != null && (dt < dFrom || dt > dTo)) {
@@ -214,174 +190,65 @@ void logicCheck() {
             def msg2 = dealDateCell.column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
-        //Проверки соответствия НСИ
-        checkNSI(row, "fullName", "Организации-участники контролируемых сделок", 9)
-        checkNSI(row, "countryCode", "ОКСМ", 10)
+        // Проверки соответствия НСИ
+        checkNSI(9, row, "fullName")
+        checkNSI(10, row, "countryCode")
     }
 
-    //Проверки подитоговых сумм
+}
+
+// Проверки подитоговых сумм
+void checkItog(def dataRows) {
     def testRows = dataRows.findAll { it -> it.getAlias() == null }
-    //добавляем итоговые строки для проверки
-    for (int i = 0; i < testRows.size(); i++) {
-        def testRow = testRows.get(i)
-        def nextRow = null
-
-        if (i < testRows.size() - 1) {
-            nextRow = testRows.get(i + 1)
+    addAllAliased(testRows, new CalcAliasRow() {
+        @Override
+        DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
+            return calcItog(i, testRows)
         }
-
-        if (testRow.getAlias() == null && nextRow == null || isDiffRow(testRow, nextRow, getGroupColumns())) {
-            def itogRow = calcItog(i, testRows)
-            testRows.add(++i, itogRow)
-        }
-    }
-
+    }, groupColumns)
+    // Рассчитанные строки итогов
     def testItogRows = testRows.findAll { it -> it.getAlias() != null }
+    // Имеющиеся строки итогов
     def itogRows = dataRows.findAll { it -> it.getAlias() != null }
 
-
-    if (testItogRows.size() > itogRows.size()) {            //если удалили итоговые строки
-
-        for (int i = 0; i < dataRows.size(); i++) {
-            def row = dataRows[i]
-            def nextRow = dataRows[i + 1]
-            if (row.getAlias() == null) {
-                if (nextRow == null ||
-                        nextRow.getAlias() == null && isDiffRow(row, nextRow, getGroupColumns())) {
-                    def String groupCols = getValuesByGroupColumn(row)
-                    if (groupCols != null) {
-                        logger.error("Группа «$groupCols» не имеет строки подитога!")
-                    }
-                }
-            }
+    checkItogRows(dataRows, testItogRows, itogRows, groupColumns, logger, new GroupString() {
+        @Override
+        String getString(DataRow<Cell> row) {
+            return getValuesByGroupColumn(row)
         }
-
-    } else if (testItogRows.size() < itogRows.size()) {     //если удалили все обычные строки, значит где то 2 подряд подитог.строки
-
-        for (int i = 0; i < dataRows.size(); i++) {
-            if (dataRows[i].getAlias() != null) {
-                if (i - 1 < -1 || dataRows[i - 1].getAlias() != null) {
-                    logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
-                }
+    }, new CheckGroupSum() {
+        @Override
+        String check(DataRow<Cell> row1, DataRow<Cell> row2) {
+            if (row1.price != row2.price) {
+                return getColumnName(row1, 'price')
             }
-        }
-    } else {
-        def totalName = getAtributes().total[2]
-        def priceName = getAtributes().price[2]
-        def sumName = getAtributes().sum[2]
-
-        for (int i = 0; i < testItogRows.size(); i++) {
-            def testItogRow = testItogRows[i]
-            def realItogRow = itogRows[i]
-            int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
-            if (dataRows[itg].getAlias() != null) {
-                logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
-            } else {
-                def String groupCols = getValuesByGroupColumn(dataRows[itg])
-                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «$groupCols» в графе"
-                if (groupCols != null) {
-                    if (testItogRow.price != realItogRow.price) {
-                        logger.error(mes + " «${priceName}»")
-                    }
-                    if (testItogRow.total != realItogRow.total) {
-                        logger.error(mes + " «${totalName}»")
-                    }
-                    if (testItogRow.sum != realItogRow.sum) {
-                        logger.error(mes + " «${sumName}»")
-                    }
-                }
+            if (row1.total != row2.total) {
+                return getColumnName(row1, 'total')
             }
+            if (row1.sum != row2.sum) {
+                return getColumnName(row1, 'sum')
+            }
+            return null
         }
-    }
-}
-
-/**
- * проверяет разные ли строки по значениям полей группировки
- * @param a первая  строка
- * @param b вторая строка
- * @return true - разные, false = одинаковые
- */
-boolean isDiffRow(DataRow row, DataRow nextRow, def groupColumns) {
-    def rez = false
-    groupColumns.each { def n ->
-        rez = rez || (row.get(n) != nextRow.get(n))
-    }
-    return rez
-}
-
-/**
- * Проверка соответствия НСИ
- */
-void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
-    def cell = row.getCell(alias)
-    if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
-        def msg2 = cell.column.name
-        def rowNum = row.getIndex()
-        logger.warn("Строка $rowNum: В справочнике «$msg» не найден элемент «$msg2»!")
-    }
-}
-
-/**
- * Возвращает строку со значениями полей строки по которым идет группировка
- * ['fullName', 'inn', 'docNumber', 'docDate']
- */
-String getValuesByGroupColumn(DataRow row) {
-    def sep = ", "
-    StringBuilder builder = new StringBuilder()
-    def map = row.fullName != null ? refBookService.getRecordData(9, row.fullName) : null
-    if (map != null)
-        builder.append(map.NAME.stringValue).append(sep)
-    if (row.inn != null)
-        builder.append(row.inn).append(sep)
-    if (row.docNumber != null)
-        builder.append(row.docNumber).append(sep)
-    if (row.docDate != null)
-        builder.append(row.docDate).append(sep)
-
-    def String retVal = builder.toString()
-    if (retVal.length() < 2)
-        return null
-    retVal.substring(0, retVal.length() - 2)
-}
-
-/**
- * Сортировка строк
- */
-void sort() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-
-    dataRows.sort({ DataRow a, DataRow b ->
-        sortRow(getGroupColumns(), a, b)
     })
-
-    dataRowHelper.save(dataRows);
 }
 
-int sortRow(List<String> params, DataRow a, DataRow b) {
-    for (String param : params) {
-        def aD = a.getCell(param).value
-        def bD = b.getCell(param).value
-
-        if (aD != bD) {
-            return aD <=> bD
-        }
-    }
-    return 0
-}
-
-/**
- * Алгоритмы заполнения полей формы.
- */
+// Алгоритмы заполнения полей формы
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    def int index = 1
-    for (row in dataRows) {
-        if (row.getAlias() != null) {
-            continue
-        }
+    def dataRows = dataRowHelper.allCached
+    if (dataRows.isEmpty()) {
+        return
+    }
 
+    // Удаление подитогов
+    deleteAllAliased(dataRows)
+
+    // Сортировка
+    sortRows(dataRows, groupColumns)
+
+    def index = 1
+    for (row in dataRows) {
         // Порядковый номер строки
         row.rowNumber = index++
         // Расчет поля "Цена"
@@ -390,80 +257,24 @@ void calc() {
         row.total = row.sum
 
         // Расчет полей зависимых от справочников
-        if (row.fullName != null) {
-            def map = refBookService.getRecordData(9, row.fullName)
-            row.inn = map.INN_KIO.stringValue
-            row.countryCode = map.COUNTRY.referenceValue
-        } else {
-            row.inn = null
-            row.countryCode = null
-        }
+        def map = getRefBookValue(9, row.fullName)
+        row.inn = map?.INN_KIO?.stringValue
+        row.countryCode = map?.COUNTRY?.referenceValue
     }
-    dataRowHelper.update(dataRows);
+
+    // Добавление подитов
+    addAllAliased(dataRows, new CalcAliasRow() {
+        @Override
+        DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
+            return calcItog(i, dataRows)
+        }
+    }, groupColumns)
+
+    dataRowHelper.save(dataRows)
 }
 
-/**
- * Консолидация
- */
-void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
-
-    int index = 1;
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (source != null && source.state == WorkflowState.ACCEPTED) {
-            formDataService.getDataRowHelper(source).getAllCached().each { row ->
-                if (row.getAlias() == null) {
-                    dataRowHelper.insert(row, index++)
-                }
-            }
-        }
-    }
-}
-
-/**
- * Удаление всех статическиех строк "Подитог" из списка строк
- */
-void deleteAllStatic() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-
-    for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
-        def row = (DataRow) iter.next()
-        if (row.getAlias() != null) {
-            iter.remove()
-            dataRowHelper.delete(row)
-        }
-    }
-}
-
-/**
- * Проставляет статические строки
- */
-void addAllStatic() {
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-
-        def dataRowHelper = formDataService.getDataRowHelper(formData)
-        def dataRows = dataRowHelper.getAllCached()
-
-        for (int i = 0; i < dataRows.size(); i++) {
-            def row = dataRows.get(i)
-            def nextRow = null
-
-            if (i < dataRows.size() - 1) {
-                nextRow = dataRows.get(i + 1)
-            }
-            if (row.getAlias() == null)
-                if (nextRow == null || isDiffRow(row, nextRow, getGroupColumns())) {
-                    def itogRow = calcItog(i, dataRows)
-                    dataRowHelper.insert(itogRow, ++i + 1)
-                }
-        }
-    }
-}
-
-def calcItog(int i, def dataRows) {
+// Расчет подитогового значения
+DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     def newRow = formData.createDataRow()
 
     newRow.getCell('itog').colSpan = 8
@@ -475,7 +286,6 @@ def calcItog(int i, def dataRows) {
     def BigDecimal sumItg = 0, priceitg = 0, totalItg = 0
     for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
         def row = dataRows.get(j)
-
         def sum = row.sum
         def price = row.price
         def total = row.total
@@ -484,77 +294,85 @@ def calcItog(int i, def dataRows) {
         priceitg += price != null ? price : 0
         totalItg += total != null ? total : 0
     }
-
     newRow.sum = sumItg
     newRow.price = priceitg
     newRow.total = totalItg
 
-    newRow
+    return newRow
 }
 
-/**
- * Получение импортируемых данных.
- */
+// Возвращает строку со значениями полей строки по которым идет группировка
+String getValuesByGroupColumn(DataRow row) {
+    def sep = ", "
+    StringBuilder builder = new StringBuilder()
+    def map = getRefBookValue(9, row.fullName)
+    if (map != null)
+        builder.append(map.NAME.stringValue).append(sep)
+    if (row.docNumber != null)
+        builder.append(row.docNumber).append(sep)
+    if (row.docDate != null)
+        builder.append(formatDate(row.docDate, 'dd.MM.yyyy')).append(sep)
+
+    def String retVal = builder.toString()
+    if (retVal.length() < 2)
+        return null
+    return retVal.substring(0, retVal.length() - 2)
+}
+
+
+// Получение импортируемых данных
 void importData() {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        logger.error('Имя файла не должно быть пустым')
-        return
-    }
+    def xml = getXML('Полное наименование с указанием ОПФ', 'Подитог')
 
-    def is = ImportInputStream
-    if (is == null) {
-        logger.error('Поток данных пуст')
-        return
-    }
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 11, 3)
 
-    if (!fileName.endsWith('.xls')) {
-        logger.error('Выбранный файл не соответствует формату xls!')
-        return
-    }
+    def headerMapping = [
+            (xml.row[0].cell[1]): 'ИНН/ КИО',
+            (xml.row[0].cell[2]): 'Страна регистрации',
+            (xml.row[0].cell[3]): 'Номер договора',
+            (xml.row[0].cell[4]): 'Дата договора',
+            (xml.row[0].cell[5]): 'Номер сделки',
+            (xml.row[0].cell[6]): 'Дата сделки',
+            (xml.row[0].cell[7]): 'Сумма доходов Банка по данным бухгалтерского учета, руб.',
+            (xml.row[0].cell[8]): 'Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.',
+            (xml.row[0].cell[9]): 'Итого стоимость без учета НДС, акцизов и пошлины, руб.',
+            (xml.row[0].cell[10]): 'Дата совершения сделки',
+            (xml.row[2].cell[0]): 'гр. 2',
+            (xml.row[2].cell[1]): 'гр. 3',
+            (xml.row[2].cell[2]): 'гр. 4',
+            (xml.row[2].cell[3]): 'гр. 5',
+            (xml.row[2].cell[4]): 'гр. 6',
+            (xml.row[2].cell[5]): 'гр. 7',
+            (xml.row[2].cell[6]): 'гр. 8',
+            (xml.row[2].cell[7]): 'гр. 9',
+            (xml.row[2].cell[8]): 'гр. 10',
+            (xml.row[2].cell[9]): 'гр. 11',
+            (xml.row[2].cell[10]): 'гр. 12'
+    ]
 
-    def xmlString = importService.getData(is, fileName, 'windows-1251', 'Полное наименование с указанием ОПФ', 'Подитог')
-    if (xmlString == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
-    }
+    checkHeaderEquals(headerMapping)
 
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
-    }
-
-    // добавить данные в форму
-    try {
-        if (!checkTableHead(xml, 3)) {
-            logger.error('Заголовок таблицы не соответствует требуемой структуре!')
-            return
-        }
-        addData(xml)
-    } catch (Exception e) {
-        logger.error("" + e.message)
-    }
+    addData(xml, 2)
 }
 
-/**
- * Заполнить форму данными.
- *
- * @param xml данные
- */
-def addData(def xml) {
-    Date date = reportPeriodService.get(formData.reportPeriodId).taxPeriod.getEndDate()
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
 
-    def cache = [:]
-    def data = formDataService.getDataRowHelper(formData)
-    data.clear()
+    def xmlIndexRow = -1
+    def int xlsIndexRow = 0
+    def int rowOffset = 3
+    def int colOffset = 2
 
-    def indexRow = -1
+    def rows = new LinkedList<DataRow<Cell>>()
+
     for (def row : xml.row) {
-        indexRow++
+        xmlIndexRow++
+        xlsIndexRow = xmlIndexRow + rowOffset
 
         // пропустить шапку таблицы
-        if (indexRow <= 2) {
+        if (xmlIndexRow <= headRowCount) {
             continue
         }
 
@@ -563,184 +381,74 @@ def addData(def xml) {
         }
 
         def newRow = formData.createDataRow()
-        getEditColumns().each {
+        editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
 
-        def indexCell = 0
+        def xmlIndexCol = 0
+
         // графа 1
-        newRow.rowNumber = indexRow - 2
+        newRow.rowNumber = xmlIndexRow - 2
 
         // графа 2
-        newRow.fullName = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
-        def map = newRow.fullName == null ? null : refBookService.getRecordData(9, newRow.fullName)
-        indexCell++
+        newRow.fullName = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        def map = getRefBookValue(9, newRow.fullName)
+        xmlIndexCol++
 
         // графа 3
         if (map != null) {
-            def text = row.cell[indexCell].text()
-            if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO.stringValue != null)) {
-                logger.warn("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            def text = row.cell[xmlIndexCol].text()
+            if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO?.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO?.stringValue != null)) {
+                logger.warn("Строка ${xlsIndexRow} столбец ${xmlIndexCol + colOffset} содержит значение, отсутствующее в справочнике!")
             }
         }
-        indexCell++
+        xmlIndexCol++
 
         // графа 4
         if (map != null) {
-            def text = row.cell[indexCell].text()
-            map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
-            if ((text != null && !text.isEmpty() && !text.equals(map.FULLNAME.stringValue)) || ((text == null || text.isEmpty()) && map.FULLNAME.stringValue != null)) {
-                if ((text != null && !text.isEmpty() && !text.equals(map.CODE.stringValue)) || ((text == null || text.isEmpty()) && map.CODE.stringValue != null)) {
-                    logger.warn("Строка ${indexRow+3} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+            def text = row.cell[xmlIndexCol].text()
+            map = getRefBookValue(10, map.COUNTRY?.referenceValue)
+            if ((text != null && !text.isEmpty() && !text.equals(map?.FULLNAME?.stringValue)) || ((text == null || text.isEmpty()) && map?.FULLNAME?.stringValue != null)) {
+                if ((text != null && !text.isEmpty() && !text.equals(map?.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map?.CODE?.stringValue != null)) {
+                    logger.warn("Строка ${xlsIndexRow} столбец ${xmlIndexCol + colOffset} содержит значение, отсутствующее в справочнике!")
                 }
             }
         }
-        indexCell++
+        xmlIndexCol++
 
         // графа 5
-        newRow.docNumber = row.cell[indexCell].text()
-        indexCell++
+        newRow.docNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 6
-        newRow.docDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
+        newRow.docDate =  parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 7
-        newRow.dealNumber = row.cell[indexCell].text()
-        indexCell++
+        newRow.dealNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 8
-        newRow.dealDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
+        newRow.dealDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 9
-        newRow.sum = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
+        newRow.sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 10
-        indexCell++
-
+        xmlIndexCol++
         // графа 11
-        indexCell++
+        xmlIndexCol++
 
         // графа 12
-        newRow.dealDoneDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
+        newRow.dealDoneDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
-        data.insert(newRow, indexRow - 2)
+        rows.add(newRow)
     }
-}
-
-/**
- * Проверить шапку таблицы.
- *
- * @param xml данные
- * @param headRowCount количество строк в шапке
- */
-def checkTableHead(def xml, def headRowCount) {
-    def colCount = 11
-    // проверить количество строк и колонок в шапке
-    if (xml.row.size() < headRowCount || xml.row[0].cell.size() < colCount) {
-        return false
-    }
-
-    def result = (
-    xml.row[0].cell[0] == 'Полное наименование с указанием ОПФ' &&
-            xml.row[2].cell[0] == 'гр. 2' &&
-
-            xml.row[0].cell[1] == 'ИНН/ КИО' &&
-            xml.row[2].cell[1] == 'гр. 3' &&
-
-            xml.row[0].cell[2] == 'Страна регистрации' &&
-            xml.row[2].cell[2] == 'гр. 4' &&
-
-            xml.row[0].cell[3] == 'Номер договора' &&
-            xml.row[2].cell[3] == 'гр. 5' &&
-
-            xml.row[0].cell[4] == 'Дата договора' &&
-            xml.row[2].cell[4] == 'гр. 6' &&
-
-            xml.row[0].cell[5] == 'Номер сделки' &&
-            xml.row[2].cell[5] == 'гр. 7' &&
-
-            xml.row[0].cell[6] == 'Дата сделки' &&
-            xml.row[2].cell[6] == 'гр. 8' &&
-
-            xml.row[0].cell[7] == 'Сумма доходов Банка по данным бухгалтерского учета, руб.' &&
-            xml.row[2].cell[7] == 'гр. 9' &&
-
-            xml.row[0].cell[8] == 'Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.' &&
-            xml.row[2].cell[8] == 'гр. 10' &&
-
-            xml.row[0].cell[9] == 'Итого стоимость без учета НДС, акцизов и пошлины, руб.' &&
-            xml.row[2].cell[9] == 'гр. 11' &&
-
-            xml.row[0].cell[10] == 'Дата совершения сделки' &&
-            xml.row[2].cell[10] == 'гр. 12')
-    return result
-}
-
-/**
- * Получить числовое значение.
- *
- * @param value строка
- */
-def getNumber(def value, int indexRow, int indexCell) {
-    if (value == null) {
-        return null
-    }
-    def tmp = value.trim()
-    if ("".equals(tmp)) {
-        return null
-    }
-    // поменять запятую на точку и убрать пробелы
-    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
-    try {
-        return new BigDecimal(tmp)
-    } catch (Exception e) {
-        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
-    }
-}
-
-/**
- * Получить дату по строковому представлению (формата дд.ММ.гггг)
- */
-def getDate(def value, int indexRow, int indexCell) {
-    if (value == null || value == '') {
-        return null
-    }
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    try {
-        return format.parse(value)
-    } catch (Exception e) {
-        throw new Exception("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит недопустимый тип данных!")
-    }
-}
-
-/**
- * Получить record_id элемента справочника.
- *
- * @param value
- */
-def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory = true) {
-    String filter = "LOWER($alias) = LOWER('$value')"
-    if (value == '') filter = "$alias is null"
-    if (cache[ref_id] != null) {
-        if (cache[ref_id][filter] != null) return cache[ref_id][filter]
-    } else {
-        cache[ref_id] = [:]
-    }
-    def refDataProvider = refBookFactory.getDataProvider(ref_id)
-    def records = refDataProvider.getRecords(date, null, filter, null)
-    if (records.size() == 1) {
-        cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        return cache[ref_id][filter]
-    }
-    def msg = "Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!"
-    if (mandatory) {
-        throw new Exception(msg)
-    } else {
-        logger.warn(msg)
-    }
-    return null
+    dataRowHelper.save(rows)
 }
