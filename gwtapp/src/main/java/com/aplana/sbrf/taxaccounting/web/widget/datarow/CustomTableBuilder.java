@@ -159,7 +159,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 				}
 
 				String colWidth = cellTable.getColumnWidth(column);
-				if (colWidth.equals("0em")) { //TODO Нужно динамически проверять еденицу измерения
+				if (colWidth.equals("0em") || colWidth.equals("0px")) {
 					td.style().borderStyle(Style.BorderStyle.NONE);
 				}
 
