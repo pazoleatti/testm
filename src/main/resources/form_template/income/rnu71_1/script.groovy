@@ -165,6 +165,50 @@ def getXML(def String startStr, def String endStr) {
     return xml
 }
 
+//// Некастомные методы
+/**
+ * Сравнивает по графам сумму строк и соответствующую им итоговую строку
+ * @param rowsForSum список строк для определения сумм по графам
+ * @param sumRow итоговая строка для проверки
+ * @return
+ */
+def checkSumWithRow(def rowsForSum, def sumRow){
+    def totalResults = [:]
+    def isValid = true
+    totalColumns.each { col ->
+        totalResults.put(col, new BigDecimal(0))
+    }
+    for (def row : rowsForSum) {
+        totalResults.keySet().each { col ->
+            final cellValue = row.get(col)
+            if (cellValue != null) {
+                totalResults.put(col, totalResults.get(col) + cellValue)
+            }
+        }
+    }
+    //Оставил each если понадобится выдавать более сложные сообщения об ошибках
+    totalResults.keySet().each { col ->
+        if (totalResults[col] != sumRow[col]){
+            isValid = false
+        }
+    }
+    return isValid
+}
+
+/**
+ * Хелпер для округления чисел
+ * @param value
+ * @param newScale
+ * @return
+ */
+BigDecimal roundTo(BigDecimal value, int newScale) {
+    if (value != null) {
+        return value.setScale(newScale, BigDecimal.ROUND_HALF_UP)
+    } else {
+        return value
+    }
+}
+
 //// Кастомные методы
 
 // Логические проверки
@@ -439,41 +483,5 @@ def getGraph15(def row, def rowPrev, def startDate, def endDate) {
         return rowPrev?.lossNextQuarter
     } else {
         return null //не заполняется
-    }
-}
-
-def checkSumWithRow(def rowsForSum, def sumRow){
-    def totalResults = [:]
-    def isValid = true
-    totalColumns.each { col ->
-        totalResults.put(col, new BigDecimal(0))
-    }
-    for (def row : rowsForSum) {
-        totalResults.keySet().each { col ->
-            final cellValue = row.get(col)
-            if (cellValue != null) {
-                totalResults.put(col, totalResults.get(col) + cellValue)
-            }
-        }
-    }
-    totalResults.keySet().each { col ->
-        if (totalResults[col] != sumRow[col]){
-            isValid = false
-        }
-    }
-    return isValid
-}
-
-/**
- * Хелпер для округления чисел
- * @param value
- * @param newScale
- * @return
- */
-BigDecimal roundTo(BigDecimal value, int newScale) {
-    if (value != null) {
-        return value.setScale(newScale, BigDecimal.ROUND_HALF_UP)
-    } else {
-        return value
     }
 }
