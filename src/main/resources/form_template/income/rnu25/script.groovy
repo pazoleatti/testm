@@ -2,6 +2,7 @@ package form_template.income.rnu25
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
@@ -11,6 +12,9 @@ import groovy.transform.Field
  * TODO:
  *      - в перечне полей графа 9 - необязательная, в логических проверках входит в обязательные поля
  *              http://jira.aplana.com/browse/SBRFACCTAX-4871
+ *      - уточнить у аналитика когда проверять наличие формы предыдущего периода (только перед вычислениями или перед проверками и импорте тоже)
+ *      - уточнить у аналитика про сообщение "Итоговые значения по ГРН $codeName не рассчитаны! Необходимо рассчитать данные формы."
+ *      - уточнить у аналитика про графу 2 ГРН, размер по аналитике 13, в настройке было 18, но почему то даже 18 не хватает, пока выставил 30
  *
  * @author rtimerbaev
  */
@@ -29,32 +33,25 @@ import groovy.transform.Field
 // графа 12 - reserveCreation
 // графа 13 - reserveRecovery
 
-/** Признак периода ввода остатков. */
-def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
-        if (!isBalancePeriod && !checkPrevPeriod()) {
-            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
-        }
         logicCheck()
         break
     case FormDataEvent.CALCULATE :
-        if (!isBalancePeriod && !checkPrevPeriod()) {
-            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
-            return
-        }
+        prevPeriodCheck()
         calc()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW :
-        addNewRow()
+        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW :
-        deleteRow()
+        if (currentDataRow != null && currentDataRow.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
+        }
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
@@ -62,10 +59,6 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        if (!isBalancePeriod && !checkPrevPeriod()) {
-            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
-            return
-        }
         logicCheck()
         break
     // после принятия из подготовлена
@@ -73,26 +66,15 @@ switch (formDataEvent) {
         break
     // обобщить
     case FormDataEvent.COMPOSE :
-        consolidation()
-        // TODO (Ramil Timerbaev) уточнить нужен ли пересчет при консолидации? и если не нужен то надо ли проверять наличие итоговой строки?
+        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
-        !logger.containsLevel(LogLevel.ERROR) && logicCheck()
+        logicCheck()
         break
     case FormDataEvent.IMPORT :
-        if (!isBalancePeriod && !checkPrevPeriod()) {
-            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
-            return
-        }
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-        }
+        calc()
         break
     case FormDataEvent.MIGRATION :
-        if (!isBalancePeriod && !checkPrevPeriod()) {
-            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
-            return
-        }
         migration()
         break
 }
@@ -131,7 +113,7 @@ def nonEmptyColumns = ['rowNumber', 'regNumber', 'tradeNumber', 'lotSizeCurrent'
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4..7, 10..13)
 @Field
-def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserve', 'cost', 'costOnMarketQuotation',
+def totalSumColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserve', 'cost', 'costOnMarketQuotation',
         'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
 
 // Дата окончания отчетного периода
@@ -173,18 +155,6 @@ def getNumber(def value, def indexRow, def indexCol) {
     return parseNumber(value, indexRow, indexCol, logger, true)
 }
 
-/** Добавить новую строку. */
-def addNewRow() {
-    formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
-}
-
-/** Удалить строку. */
-def deleteRow() {
-    if (currentDataRow.getAlias() == null) {
-        formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
-    }
-}
-
 /** Расчеты. Алгоритмы заполнения полей формы. */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -199,6 +169,9 @@ void calc() {
     if (!isImport) {
         sortRows(dataRows, groupColumns)
     }
+
+    // список групп кодов классификации для которых надо будет посчитать суммы
+    def totalGroupsName = []
 
     def formDataOld = getFormDataOld()
     def dataRowsOld = (formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null)
@@ -226,6 +199,11 @@ void calc() {
 
         // графа 13
         row.reserveRecovery = calc13(row)
+
+        // для итоговых значений по ГРН
+        if (!totalGroupsName.contains(row.regNumber)) {
+            totalGroupsName.add(row.regNumber)
+        }
     }
 
     // добавить строку "итого"
@@ -237,45 +215,23 @@ void calc() {
         return
     }
 
-    // посчитать "итого по ГРН:..."
-    def totalRows = [:]
-    def tmp = null
-    def sums = [:]
-    totalColumns.each {
-        sums[it] = 0
-    }
+    // обновить индексы строк
     dataRows.eachWithIndex { row, i ->
-        if (row.getAlias() == null) {
-            if (tmp == null) {
-                tmp = row.regNumber
-            }
-            // если код расходы поменялся то создать новую строку "итого по ГРН:..."
-            if (tmp != row.regNumber) {
-                totalRows.put(i, getNewTotalRow(tmp, totalColumns, sums, dataRows))
-                totalColumns.each {
-                    sums[it] = 0
-                }
-            }
-            // если строка последняя то сделать для ее кода расхода новую строку "итого по ГРН:..."
-            if (i == dataRows.size() - 2) {
-                totalColumns.each {
-                    sums[it] += (row.getCell(it).value ?: 0)
-                }
-                totalRows.put(i + 1, getNewTotalRow(row.regNumber, totalColumns, sums, dataRows))
-                totalColumns.each {
-                    sums[it] = 0
-                }
-            }
-            totalColumns.each {
-                sums[it] += (row.getCell(it).value ?: 0)
-            }
-            tmp = row.regNumber
-        }
+        row.setIndex(i + 1)
     }
-    // добавить "итого по ГРН:..." в таблицу
+    // итоговые значения по ГРН
     def i = 0
-    totalRows.each { index, row ->
-        dataRows.add(index + i, row)
+    for (def codeName : totalGroupsName) {
+        // получить строки группы
+        def rows = getGroupRows(dataRows, codeName)
+        // получить алиас для подитоговой строки по ГРН
+        def totalRowAlias = 'total' + rows[0].rowNumber.toString()
+        // сформировать подитоговую строку ГРН с суммами
+        def subTotalRow = getCalcSubtotalsRow(rows, codeName, totalRowAlias)
+        // получить индекс последней строки в группе
+        def lastRowIndex = rows[rows.size() - 1].getIndex() + i
+        // вставить строку с итогами по ГРН
+        dataRows.add(lastRowIndex, subTotalRow)
         i++
     }
     dataRowHelper.save(dataRows)
@@ -286,18 +242,8 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def rowNum = 0
-    for (def row : dataRows) {
-        if (row.getAlias() != null) {
-            continue
-        }
-        // 15. Обязательность заполнения поля графы 1..3, 5..13
-        checkNonEmptyColumns(row, ++rowNum, nonEmptyColumns, logger, true)
-    }
-
     def formDataOld = getFormDataOld()
     def dataRowsOld = (formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null)
-
     if (dataRowsOld != null && !dataRowsOld.isEmpty()) {
         // 1. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 11)
         //      в текущем отчетном периоде (выполняется один раз для всего экземпляра)
@@ -337,16 +283,8 @@ void logicCheck() {
     def arithmeticCheckAlias = ['reserve', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
-
-    // суммы строки общих итогов
-    def totalSums = [:]
-    totalColumns.each { alias ->
-        totalSums[alias] = 0
-    }
     // список групп кодов классификации для которых надо будет посчитать суммы
     def totalGroupsName = []
-
-    def errorMsg
 
     def rowNumber = getPrevRowNumber(dataRowsOld)
     for (def row : dataRows) {
@@ -354,8 +292,8 @@ void logicCheck() {
             continue
         }
 
-        index = row.getIndex()
-        errorMsg = "Строка $index: "
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
 
         // 2. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 5, 6, 13)
         if (row.lotSizeCurrent == 0 && row.reserve != row.reserveRecovery) {
@@ -428,6 +366,9 @@ void logicCheck() {
             logger.error("РНУ сформирован некорректно! " + errorMsg + "Не выполняется условие: Если «графа $curCol» = «графа $prevCol» формы РНУ-25 за предыдущий отчётный период, то «графа $curCol2»  = «графа $prevCol2» формы РНУ-25 за предыдущий отчётный период.")
         }
 
+        // 15. Обязательность заполнения поля графы 1..3, 5..13
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+
         // 16. Проверка на уникальность поля «№ пп» (графа 1)
         if (++rowNumber != row.rowNumber) {
             logger.error('Нарушена уникальность номера по порядку!')
@@ -444,14 +385,6 @@ void logicCheck() {
         // 18. Проверка итоговых значений по ГРН
         if (!totalGroupsName.contains(row.regNumber)) {
             totalGroupsName.add(row.regNumber)
-        }
-
-        // 19. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
-        totalColumns.each { alias ->
-            if (totalSums[alias] == null) {
-                totalSums[alias] = 0
-            }
-            totalSums[alias] += (row.getCell(alias).value ?: 0)
         }
 
         // Проверки соответствия НСИ
@@ -477,12 +410,13 @@ void logicCheck() {
         }
     }
 
-    // Проверка итоговых строк
-    def totalRow = dataRowHelper.getDataRow(dataRows, 'total')
-
     // 17. Проверка итоговых значений по ГРН
     for (def codeName : totalGroupsName) {
-        def totalRowAlias = 'total' + getRowNumber(codeName, dataRows)
+        // получить строки группы
+        def rows = getGroupRows(dataRows, codeName)
+        // получить алиас для подитоговой строки по ГРН
+        def totalRowAlias = 'total' + rows[0].rowNumber.toString()
+        // получить посчитанную строку с итогами по ГРН
         def row
         try {
             row = dataRowHelper.getDataRow(dataRows, totalRowAlias)
@@ -490,30 +424,21 @@ void logicCheck() {
             logger.error("Итоговые значения по ГРН $codeName не рассчитаны! Необходимо рассчитать данные формы.")
             continue
         }
-        for (def alias : totalColumns) {
-            if (calcSumByCode(dataRows, codeName, alias) != row.getCell(alias).value) {
-                logger.error("Итоговые значения по ГРН $codeName рассчитаны неверно!")
-            }
+        // сформировать подитоговую строку ГРН с суммами
+        def tmpRow = getCalcSubtotalsRow(rows, codeName, totalRowAlias)
+
+        // сравнить строки
+        if (isDiffRow(row, tmpRow, totalSumColumns)) {
+            logger.error("Итоговые значения по ГРН $codeName рассчитаны неверно!")
         }
     }
 
     // 18. Проверка итогового значений по всей форме
-    for (def alias : totalColumns) {
-        if (totalSums[alias] != totalRow.getCell(alias).value) {
-            logger.error('Итоговые значения рассчитаны неверно!')
-            break
-        }
+    def totalRow = dataRowHelper.getDataRow(dataRows, 'total')
+    def tmpTotalRow = getCalcTotalRow(dataRows)
+    if (isDiffRow(totalRow, tmpTotalRow, totalSumColumns)) {
+        logger.error('Итоговые значения рассчитаны неверно!')
     }
-}
-
-/** Консолидация. */
-void consolidation() {
-    formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
-}
-
-/** Проверка при создании формы. */
-void checkCreation() {
-    formDataService.checkUnique(formData, logger)
 }
 
 /** Получение импортируемых данных. */
@@ -575,35 +500,15 @@ void migration() {
  * Вспомогательные методы.
  */
 
-/** Получить сумму столбца. */
-def getSum(def dataRows, def columnAlias) {
-    def sum = 0
-    dataRows.each { row ->
-        if (row.getAlias() == null) {
-            sum += (row.getCell(columnAlias).value ?: 0)
-        }
-    }
-    return sum
-}
-
-/** Получить новую строку. */
-def getNewTotalRow(def alias, def totalColumns, def sums, def dataRows) {
-    def newRow = formData.createDataRow()
-    newRow.setAlias('total' + getRowNumber(alias, dataRows))
-    newRow.regNumber = alias + ' итог'
-    setTotalStyle(newRow)
-    totalColumns.each {
-        newRow.getCell(it).setValue(sums[it])
-    }
-    return newRow
-}
-
 /** Получить новую строку с заданными стилями. */
 def getNewRow() {
     def newRow = formData.createDataRow()
     editableColumns.each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
     return newRow
 }
@@ -635,13 +540,6 @@ def checkOld(def row, def likeColumnName, def curColumnName, def prevColumnName,
     }
 }
 
-/** Установить стиль для итоговых строк. */
-void setTotalStyle(def row) {
-    allColumns.each {
-        row.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-}
-
 /** Получить данные за предыдущий отчетный период. */
 def getFormDataOld() {
     // предыдущий отчётный период
@@ -649,26 +547,78 @@ def getFormDataOld() {
 
     // РНУ-25 за предыдущий отчетный период
     if (reportPeriodOld != null) {
-        formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
+        return formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
     }
-    return formDataOld
+    return null
+}
+
+/** Получить общую итоговую строку с суммами. */
+def getCalcTotalRow(def dataRows) {
+    getTotalRow(dataRows, 'Общий итог', 'total')
 }
 
 /**
- * Посчитать сумму указанного графа для строк с общим кодом классификации.
+ * Получить подитоговую строку ГРН по коду классификации дохода.
  *
  * @param dataRows строки формы
  * @param regNumber код классификации дохода
- * @param alias название графа
+ * @param totalRowAlias псевдоним сформированной строки
  */
-def calcSumByCode(def dataRows, def regNumber, def alias) {
-    def sum = 0
+def getCalcSubtotalsRow(def dataRows, def regNumber, def totalRowAlias) {
+    return getTotalRow(dataRows, regNumber + ' итог', totalRowAlias)
+}
+
+/**
+ * Сформировать итоговую строку с суммами.
+ *
+ * @param dataRows строки формы
+ * @param regNumberValue значение графы "код классификации дохода"
+ * @param alias алиас сформированной строки
+ */
+def getTotalRow(def dataRows, def regNumberValue, def alias) {
+    def newRow = formData.createDataRow()
+    newRow.setAlias(alias)
+    newRow.regNumber = regNumberValue
+    allColumns.each {
+        newRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    calcSums(dataRows, newRow)
+    return newRow
+}
+
+/**
+ * Посчитать суммы для строки. Значения рассчитываются по итоговым графам - глобальная переменная totalSumColumns
+ *
+ * @param dataRows строки значения которой суммируются
+ * @param sumsRow строка в которую записать суммы
+ */
+void calcSums(def dataRows, def sumsRow) {
+    totalSumColumns.each { alias ->
+        sumsRow.getCell(alias).value = 0
+    }
     dataRows.each { row ->
-        if (row.getAlias() == null && row.regNumber == regNumber) {
-            sum += (row.getCell(alias).value ?: 0)
+        if (row.getAlias() == null) {
+            totalSumColumns.each { alias ->
+                sumsRow.getCell(alias).value += (row.getCell(alias).value ?: 0)
+            }
         }
     }
-    return sum
+}
+
+/**
+ * Поиск строк с одинаковым кодом классификации дохода.
+ *
+ * @param dataRows строки формы
+ * @param regNumber код классификации дохода
+ */
+def getGroupRows(def dataRows, def regNumber) {
+    def rows = []
+    dataRows.each { row ->
+        if (row.getAlias() == null && row.regNumber == regNumber) {
+            rows.add(row)
+        }
+    }
+    return rows
 }
 
 /**
@@ -737,21 +687,6 @@ def calc13(def row) {
     }
     def tmp = (row.reserveCalcValue ?: 0) - (row.reserve ?: 0)
     return roundTo2(tmp < 0 ? -tmp : 0)
-}
-
-/** Проверить данные за предыдущий отчетный период. */
-def checkPrevPeriod() {
-    def dataRowsOld = null
-    def formDataOld = getFormDataOld()
-    if (formDataOld != null) {
-        def dataRowHelperOld = formDataService.getDataRowHelper(formDataOld)
-        dataRowsOld = dataRowHelperOld.allCached
-    }
-
-    if (formDataOld?.state == WorkflowState.ACCEPTED && !dataRowsOld.isEmpty()) {
-        return true
-    }
-    return false
 }
 
 /**
@@ -827,7 +762,7 @@ def addData(def xml) {
 
         newRows.add(newRow)
     }
-    dataRowHelper.insert(newRows, 1)
+    dataRowHelper.save(newRows)
 
     // итоговая строка
     if (xml.rowTotal.size() == 1) {
@@ -888,20 +823,6 @@ BigDecimal roundTo2(BigDecimal value) {
 }
 
 /**
- * Получение первого rowNumber по regNumber.
- *
- * @param alias
- * @param dataRows строки нф
- */
-def getRowNumber(def alias, def dataRows) {
-    for (def row: dataRows) {
-        if (row.regNumber == alias) {
-            return row.rowNumber.toString()
-        }
-    }
-}
-
-/**
  * Cравнить итоги.
  *
  * @param totalRow итоговая строка из транспортного файла
@@ -911,11 +832,11 @@ void checkTotalRow(def totalRow) {
     def dataRows = dataRowHelper.allCached
     def totalCalc = getCalcTotalRow(dataRows)
 
-    def totalColumns = [4 : 'lotSizePrev', 5 : 'lotSizeCurrent', 7 : 'cost', 10 : 'costOnMarketQuotation',
+    def totalSumColumns = [4 : 'lotSizePrev', 5 : 'lotSizeCurrent', 7 : 'cost', 10 : 'costOnMarketQuotation',
             11 : 'reserveCalcValue', 12 : 'reserveCreation', 13 : 'reserveRecovery']
     def errorColums = []
     if (totalCalc != null) {
-        totalColumns.each { index, columnAlias ->
+        totalSumColumns.each { index, columnAlias ->
             if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
                 errorColums.add(index)
             }
@@ -927,31 +848,29 @@ void checkTotalRow(def totalRow) {
     }
 }
 
-/** Получить итоговую строку с суммами. */
-def getCalcTotalRow(def dataRows) {
-    def totalRow = formData.createDataRow()
-
-    totalRow.setAlias('total')
-    totalRow.regNumber = 'Общий итог'
-    setTotalStyle(totalRow)
-    totalColumns.each { alias ->
-        totalRow.getCell(alias).setValue(getSum(dataRows, alias))
-    }
-    return totalRow
-}
-
 /**
  * Получить значение "Номер по порядку" из формы предыдущего периода.
  *
  * @param dataRowsOld строки предыдущего периода
  */
 def getPrevRowNumber(def dataRowsOld) {
+    if (dataRowsOld == null || dataRowsOld.isEmpty()) {
+        return 0
+    }
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     // получить номер последний строки предыдущей формы если текущая форма не первая в этом году
-    if (reportPeriod != null && reportPeriod.order > 1 &&
-            dataRowsOld != null && !dataRowsOld.isEmpty()) {
+    if (reportPeriod != null && reportPeriod.order > 1) {
         // пропустить последние 2 строки - итоги общие и итоги последнего раздела
         return dataRowsOld[dataRowsOld.size() - 3].rowNumber
     }
     return 0
+}
+
+/** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
+void prevPeriodCheck() {
+    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+        def formName = formData.getFormType().getName()
+        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+    }
 }
