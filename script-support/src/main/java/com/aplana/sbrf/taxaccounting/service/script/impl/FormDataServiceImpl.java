@@ -338,7 +338,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Override
     public boolean existAcceptedFormDataPrev(FormData formData, int departmentId) {
-        FormData prevFormData = getFormDataPrev(formData, formData.getReportPeriodId());
+        FormData prevFormData = getFormDataPrev(formData, departmentId);
         if (prevFormData != null && prevFormData.getState() == WorkflowState.ACCEPTED) {
             DataRowHelper dataRowHelper = getDataRowHelper(prevFormData);
             List<DataRow<Cell>> prevDataRows = dataRowHelper.getAllCached();
