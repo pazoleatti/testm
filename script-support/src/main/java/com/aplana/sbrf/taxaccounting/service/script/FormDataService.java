@@ -173,4 +173,26 @@ public interface FormDataService {
      * @return
      */
     boolean existAcceptedFormDataPrev(FormData formData, int departmentId);
+
+    /**
+     * Получение записи справочника
+     *
+     * @param refBookId
+     * @param recordCache
+     * @param providerCache
+     * @param refBookCache
+     * @param alias
+     * @param value
+     * @param date
+     * @param rowIndex
+     * @param columnName
+     * @param logger
+     * @param required
+     * @return
+     */
+    Map<String, RefBookValue> getRefBookRecord(Long refBookId, Map<Long, Map<String, Long>> recordCache,
+                                               Map<Long, RefBookDataProvider> providerCache,
+                                               Map<Long, Map<String, RefBookValue>> refBookCache,
+                                               String alias, String value, Date date,
+                                               int rowIndex, String columnName, Logger logger, boolean required);
 }
