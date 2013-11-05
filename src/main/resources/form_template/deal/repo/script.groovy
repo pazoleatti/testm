@@ -212,6 +212,7 @@ void logicCheck() {
         checkNSI(15, row, "currencyCode")
     }
 }
+
 // Алгоритмы заполнения полей формы
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)

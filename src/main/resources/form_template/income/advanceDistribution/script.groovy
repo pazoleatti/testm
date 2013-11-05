@@ -3,6 +3,7 @@ package form_template.income.advanceDistribution
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+import groovy.transform.Field
 
 /**
  * Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации.
@@ -13,6 +14,27 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  * @author akadyrgulov
  * @author <a href="mailto:Ramil.Timerbaev@aplana.com">Тимербаев Рамиль</a>
  */
+// графа 1  - number
+// графа 2  - regionBank
+// графа 3  - regionBankDivision
+// графа 4  - kpp
+// графа 5  - propertyPrice
+// графа 6  - workersCount
+// графа 7  - subjectTaxCredit
+// графа 8  - calcFlag
+// графа 9  - obligationPayTax
+// графа 10 - baseTaxOf
+// графа 11 - baseTaxOfRub
+// графа 12 - subjectTaxStavka
+// графа 13 - taxSum
+// графа 14 - taxSumOutside
+// графа 15 - taxSumToPay
+// графа 16 - taxSumToReduction
+// графа 17 - everyMontherPaymentAfterPeriod
+// графа 18 - everyMonthForKvartalNextPeriod
+// графа 19 - everyMonthForSecondKvartalNextPeriod
+// графа 20 - everyMonthForThirdKvartalNextPeriod
+// графа 21 - everyMonthForFourthKvartalNextPeriod
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
@@ -53,34 +75,16 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        logicalCheck(true)
+        logicalCheckAfterCalc(true)
         checkNSI()
         // для сохранения изменении приемников
         getData(formData).commit()
         break
 }
 
-// графа 1  - number
-// графа 2  - regionBank
-// графа 3  - regionBankDivision
-// графа 4  - kpp
-// графа 5  - propertyPrice
-// графа 6  - workersCount
-// графа 7  - subjectTaxCredit
-// графа 8  - calcFlag
-// графа 9  - obligationPayTax
-// графа 10 - baseTaxOf
-// графа 11 - baseTaxOfRub
-// графа 12 - subjectTaxStavka
-// графа 13 - taxSum
-// графа 14 - taxSumOutside
-// графа 15 - taxSumToPay
-// графа 16 - taxSumToReduction
-// графа 17 - everyMontherPaymentAfterPeriod
-// графа 18 - everyMonthForKvartalNextPeriod
-// графа 19 - everyMonthForSecondKvartalNextPeriod
-// графа 20 - everyMonthForThirdKvartalNextPeriod
-// графа 21 - everyMonthForFourthKvartalNextPeriod
+// Текущая дата
+@Field
+def currentDate = new Date()
 
 /**
  * Добавить новую строку.
@@ -166,6 +170,10 @@ void calc() {
         return
     }
 
+    logicalCheckBeforeCalc()
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
     // отсортировать/группировать
     getRows(data).sort { a, b ->
         if (a.regionBank == b.regionBank && a.regionBankDivision == b.regionBankDivision) {
@@ -201,14 +209,14 @@ void calc() {
     // расчет графы 1..4, 8..21
     getRows(data).eachWithIndex { row, i ->
 
-        def departmentRecords = departmentRefDataProvider.getRecords(new Date(), null, "ID = '" + row.regionBankDivision + "'", null);
+        def departmentRecords = departmentRefDataProvider.getRecords(currentDate, null, "ID = '" + row.regionBankDivision + "'", null);
         if (departmentRecords == null || departmentRecords.getRecords().isEmpty()) {
             logger.error('Не найдено родительское подразделение для строки ' + (row.number ?: getIndex(data, row)))
             return
         }
         def departmentParam = departmentRecords.getRecords().getAt(0)
 
-        def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(new Date(), null, "DEPARTMENT_ID = '" + row.regionBankDivision + "'", null);
+        def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = '" + row.regionBankDivision + "'", null);
         if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.getRecords().isEmpty()) {
             logger.error('Не найдены настройки подразделения для строки ' + (row.number ?: getIndex(data, row)))
             return
@@ -300,12 +308,81 @@ void calc() {
     save(data)
 }
 
+void logicalCheckBeforeCalc() {
+    def data = getData(formData)
+
+    // справочник "Подразделения"
+    def departmentRefDataProvider = refBookFactory.getDataProvider(30)
+
+    // справочник "Параметры подразделения по налогу на прибыль"
+    def departmentParamIncomeRefDataProvider = refBookFactory.getDataProvider(33)
+
+    def fieldNumber = 0
+    getRows(data).eachWithIndex { row, i ->
+        if (isFixedRow(row)) {
+            return
+        }
+        fieldNumber++
+
+        def departmentRecords = departmentRefDataProvider.getRecords(currentDate, null, "ID = '" + row.regionBankDivision + "'", null);
+        if (departmentRecords == null || departmentRecords.getRecords().isEmpty()) {
+            logger.error('Не найдено родительское подразделение для строки ' + (row.number ?: getIndex(data, row)))
+            return
+        }
+
+        def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = '" + row.regionBankDivision + "'", null);
+        if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.getRecords().isEmpty()) {
+            logger.error('Не найдены настройки подразделения для строки ' + (row.number ?: getIndex(data, row)))
+            return
+        }
+        def incomeParam = departmentParamIncomeRecords.getRecords().getAt(0)
+
+        def departmentParam = departmentRecords.getRecords().getAt(0)
+
+        long centralId = 113 // ID Центрального аппарата.
+        // У Центрального аппарата родительским подразделением должен быть он сам
+        if (centralId != row.regionBankDivision) {
+        // графа 2 - название подразделения
+            if (departmentParam.get('PARENT_ID')?.getReferenceValue()==null) {
+                logger.error("Строка $fieldNumber: Для подразделения «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение атрибута «Наименование подразделения»!")
+            }
+        }
+
+        // графа 4 - кпп
+        if (incomeParam?.get('record_id')?.getNumberValue() == null) {
+            logger.error("Строка $fieldNumber: Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «КПП»!")
+        }
+
+        // графа 8 - Признак расчёта
+        if (incomeParam?.get('TYPE')?.getReferenceValue() == null) {
+            logger.error("Строка $fieldNumber: Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «Признак расчёта»!")
+        }
+
+        // графа 9 - Обязанность по уплате налога
+        if (incomeParam?.get('OBLIGATION')?.getReferenceValue() == null) {
+            logger.error("Строка $fieldNumber: Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «Обязанность по уплате налога»!")
+        }
+
+        // графа 12
+        if (incomeParam?.get('record_id')?.getNumberValue() == null) {
+            logger.error("Строка $fieldNumber: Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «Ставка налога в бюджет субъекта (%%)»!")
+        }
+
+    }
+
+}
+
 /**
  * Логические проверки.
  *
  * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
 def logicalCheck(def useLog) {
+    logicalCheckBeforeCalc()
+    logicalCheckAfterCalc(useLog)
+}
+
+def logicalCheckAfterCalc(def useLog) {
     def data = getData(formData)
 
     if (!getRows(data).isEmpty()) {

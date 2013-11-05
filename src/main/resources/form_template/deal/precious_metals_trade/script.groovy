@@ -159,10 +159,11 @@ void logicCheck() {
             continue
         }
         rowNum++
-        def docDateCell = row.getCell('docDate')
-        def dealDateCell = row.getCell('dealDate')
 
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+
+        def docDateCell = row.getCell('docDate')
+        def dealDateCell = row.getCell('dealDate')
 
         // Корректность даты договора
         def dt = docDateCell.value
@@ -363,9 +364,8 @@ void calc() {
         return
     }
 
-    // "Да"
+    // "Да" / "Нет"
     def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
-    // "Нет"
     def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
 
     // Удаление подитогов
@@ -477,6 +477,7 @@ String getValuesByGroupColumn(DataRow row) {
     deliveryCode = getRefBookValue(63, row.deliveryCode)?.STRCODE?.stringValue
     if (deliveryCode != null)
         builder.append(deliveryCode).append(sep)
+
     def String retVal = builder.toString()
     if (retVal.length() < 2)
         return null

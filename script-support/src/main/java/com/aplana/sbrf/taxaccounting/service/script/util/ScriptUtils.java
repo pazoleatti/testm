@@ -418,7 +418,7 @@ public final class ScriptUtils {
                     Object v1 = o1.getCell(alias).getValue();
                     Object v2 = o2.getCell(alias).getValue();
                     if (v1 == null && v2 == null) {
-                        return 0;
+                        continue;
                     }
                     if (v1 == null && v2 != null) {
                         return 1;
@@ -427,9 +427,13 @@ public final class ScriptUtils {
                         return -1;
                     }
                     if (v1 instanceof Comparable) {
-                        return ((Comparable) v1).compareTo(v2);
+                        int result = ((Comparable) v1).compareTo(v2);
+                        if (result != 0) {
+                            return result;
+                        }
+                    } else {
+                        continue;
                     }
-                    return 0;
                 }
                 return 0;
             }
