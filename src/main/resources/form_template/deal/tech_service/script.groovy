@@ -416,7 +416,7 @@ def addData(def xml) {
         indexCell++
 
         // графа 8
-        newRow.country = getRecordId(10, 'CODE_3', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
+        newRow.country = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
         // графа 9
