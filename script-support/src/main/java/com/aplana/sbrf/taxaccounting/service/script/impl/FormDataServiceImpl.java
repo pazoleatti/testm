@@ -64,7 +64,6 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Autowired
     private RefBookService refBookService;
-    private RefBookService refBookService;
 
     @Autowired
     private ReportPeriodService reportPeriodService;
