@@ -427,9 +427,13 @@ public final class ScriptUtils {
                         return -1;
                     }
                     if (v1 instanceof Comparable) {
-                        return ((Comparable) v1).compareTo(v2);
+                        int result = ((Comparable) v1).compareTo(v2);
+                        if (result != 0) {
+                            return result;
+                        }
+                    } else {
+                        return 0;
                     }
-                    return 0;
                 }
                 return 0;
             }
