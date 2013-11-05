@@ -69,7 +69,7 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 			}
 		} else {
             // не первый отчетный период в данном налоговом
-            for (int i = 0; i < reportPeriodlist.size() - 1; i++){
+            for (int i = 0; i < reportPeriodlist.size(); i++){
                 if (reportPeriodlist.get(i).getId().equals(reportPeriodId)) {
                     return reportPeriodlist.get(i - 1);
                 }
