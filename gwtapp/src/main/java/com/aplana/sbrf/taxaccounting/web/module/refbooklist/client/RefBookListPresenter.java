@@ -46,8 +46,6 @@ public class RefBookListPresenter extends Presenter<RefBookListPresenter.MyView,
     public interface MyView extends View, HasUiHandlers<RefBookListUiHandlers> {
         void setTableData(List<TableModel> tableData);
         String getFilter();
-        boolean isInternalFilter();
-        boolean isExternalFilter();
     }
 
     @Inject
@@ -67,13 +65,7 @@ public class RefBookListPresenter extends Presenter<RefBookListPresenter.MyView,
     @Override
     public void onFindClicked() {
         filterText = getView().getFilter();
-        if (getView().isExternalFilter()) {
-            filterRefBookType = RefBookType.EXTERNAL;
-        } else if (getView().isInternalFilter()) {
-            filterRefBookType = RefBookType.INTERNAL;
-        } else {
-            filterRefBookType = null;
-        }
+        filterRefBookType = null;
         loadData(filterRefBookType, filterText);
     }
 
