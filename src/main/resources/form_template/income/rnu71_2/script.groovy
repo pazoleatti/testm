@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
+import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 import groovy.transform.Field
 
 /**
@@ -281,7 +281,7 @@ void logicCheck(){
             }
         }
 
-        addAllAliased(testRows, new ScriptUtils.CalcAliasRow() {
+        addAllAliased(testRows, new CalcAliasRow() {
             @Override
             DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
                 return calcItog(i, rows)
@@ -292,12 +292,12 @@ void logicCheck(){
         // Имеющиеся строки итогов
         def itogRows = dataRows.findAll { it -> it.getAlias() != null }
 
-        checkItogRows(testRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
+        checkItogRows(testRows, testItogRows, itogRows, groupColumns, logger, new GroupString() {
             @Override
             String getString(DataRow<Cell> dataRow) {
                 return dataRow.contragent
             }
-        }, new ScriptUtils.CheckGroupSum() {
+        }, new CheckGroupSum() {
             @Override
             String check(DataRow<Cell> row1, DataRow<Cell> row2) {
                 if (row1.contragent != row2.contragent) {
@@ -344,7 +344,7 @@ void calc(){
     }
 
     // Добавить строки итогов/подитогов
-    addAllAliased(dataRows, new ScriptUtils.CalcAliasRow() {
+    addAllAliased(dataRows, new CalcAliasRow() {
         @Override
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
             return calcItog(i, rows)
