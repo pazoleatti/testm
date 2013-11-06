@@ -381,7 +381,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 8
-        newRow.country = getRecordIdImport(10, 'CODE_3', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        newRow.country = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
         // графа 9

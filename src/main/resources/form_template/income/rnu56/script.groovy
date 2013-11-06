@@ -161,7 +161,7 @@ void calc() {
     // TODO Levykin Переписать
     // добавить строку "итого" (графа 13, 15)
     // def totalRow = calcTotalRow(dataRows)
-    // dataRowHelper.insert(totalRow, index + 1)
+    // dataRowHelper.insert(totalRow, dataRows.size + 1)
 
     dataRowHelper.save(dataRows)
 }
