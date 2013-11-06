@@ -1,21 +1,14 @@
 package form_template.income.rnu115
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
+
+import java.math.RoundingMode
 
 /**
  * (РНУ-115) Регистр налогового учёта доходов, возникающих в связи с применением в сделках по предоставлению
  * Межбанковских кредитов Взаимозависимым лицам и резидентам оффшорных зон Процентных ставок,
  * не соответствующих рыночному уровню (369)
- *
- * 1  - number
- * 2  - date
- * 3  - depo
- * 4  - reasonNumber
- * 5  - reasonDate
- * 6  - taxSum
- * 7  - factSum
  *
  * @author Stanislav Yasinskiy
  */
@@ -35,7 +28,9 @@ switch (formDataEvent) {
         formDataService.addRow(formData, currentDataRow, editableColumns, null)
         break
     case FormDataEvent.DELETE_ROW:
-        formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow != null && currentDataRow.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
+        }
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
@@ -62,11 +57,18 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['date', 'depo', 'reasonNumber', 'reasonDate', 'taxSum', 'factSum']
+def editableColumns = ['transactionKind', 'transactionNumber', 'transactionDate', 'transactionDateEnd', 'inn',
+        'transactionType', 'currencyCode', 'currencyVolume', 'currencyCodeLiabilities', 'currencyVolumeSale', 'price',
+        'marketPrice'
+        // TODO временно ручной ввод (в аналитике нет алгоритма расчета)
+        , 'priceRequest', 'priceLiability'
+]
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['number', 'date', 'depo', 'reasonNumber', 'reasonDate', 'taxSum', 'factSum']
+def nonEmptyColumns = ['number', 'transactionKind', 'transactionNumber', 'transactionDate', 'transactionDateEnd', 'inn',
+        'country', 'contractor', 'transactionType', 'currencyCode', 'currencyVolume', 'currencyCodeLiabilities',
+        'currencyVolumeSale', 'price', 'priceRequest', 'priceLiability', 'request', 'liability']
 
 // Текущая дата
 @Field
@@ -96,7 +98,8 @@ void prevPeriodCheck() {
     def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         def formName = formData.getFormType().getName()
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+        // TODO вернуть после проверки
+        // throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
     }
 }
 
@@ -107,29 +110,115 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    if (dataRows.isEmpty()) {
-        return
-    }
+    if (!dataRows.isEmpty()) {
 
-    // Удаление подитогов
-    deleteAllAliased(dataRows)
+        // Удаление подитогов
+        deleteAllAliased(dataRows)
 
-    // Дата начала отчетного периода
-    def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    // Дата окончания отчетного периода
-    def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+        // номер последний строки предыдущей формы
+        def index = getPrevRowNumber()
 
-    // номер последний строки предыдущей формы
-    def index = getPrevRowNumber()
+        for (row in dataRows) {
+            // графа 1
+            row.number = ++index
 
-    for (row in dataRows) {
-        // графа 1
-        row.number = ++index
+            // Расчет полей зависимых от справочников
+            def map = getRefBookValue(9, row.inn)
+            row.contractor = map?.NAME?.stringValue
+            row.country = map?.COUNTRY?.referenceValue
+
+            // TODO пока нет справочника
+            transactionKind = 'премия по опциону' //getRefBookValue(-1, row.transactionKind).ATTRIBUTE.stringValue
+
+            // TODO временно ручной ввод (в аналитике нет алгоритма расчета)
+            //row.priceRequest = calcPrice(row, row.currencyCode, transactionKind)
+            //row.priceLiability = calcPrice(row, row.currencyCodeLiabilities, transactionKind)
+
+            row.request = calcRequest(row, transactionKind)
+            row.liability = calcLiability(row, transactionKind)
+            row.income = calcIncomeOutcome(row, 1)
+            row.outcome = calcIncomeOutcome(row, -1)
+            row.incomeDeviation = calcIncomeOutcomeDeviation(row, 1, transactionKind)
+            row.outcomeDeviation = calcIncomeOutcomeDeviation(row, -1, transactionKind)
+        }
     }
 
     dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size + 1)
 
     dataRowHelper.save(dataRows)
+}
+
+// Расчет графы 15, 16
+def calcPrice(def row, def code, def transactionKind) {
+    if (transactionKind == null || row.transactionDateEnd == null || code == null) {
+        return null
+    }
+    Date date = new Date()
+    if (transactionKind != 'премия по опциону') {
+        date = row.transactionDateEnd
+    }
+    // TODO временно ручной ввод (в аналитике нет алгоритма расчета)
+    return "курс валюты code на дату date"
+}
+
+// Расчет графы 17
+def calcRequest(def row, def transactionKind) {
+    if (transactionKind == null || row.currencyVolume == null || row.priceRequest == null
+            || transactionKind != 'премия по опциону') {
+        return null
+    }
+    return (row.currencyVolume * row.priceRequest).setScale(2, RoundingMode.HALF_UP)
+}
+
+// Расчет графы 18
+def calcLiability(def row, def transactionKind) {
+    if (row.transactionKind == null || row.currencyVolumeSale == null || row.priceLiability == null
+            || transactionKind != 'премия по опциону') {
+        return null
+    }
+    return (-1 * row.currencyVolumeSale * row.priceLiability).setScale(2, RoundingMode.HALF_UP)
+}
+
+// Расчет графы 19, 20
+def calcIncomeOutcome(def row, def income) {
+    if (row.request == null || row.liability == null) {
+        return null
+    }
+    def sum = row.request + row.liability
+    return sum * income > 0 ? sum.setScale(2, RoundingMode.HALF_UP) : 0.00
+}
+
+// Расчет графы 22, 23
+def calcIncomeOutcomeDeviation(def row, def incomeMode, def transactionKind) {
+    def inoutcome = incomeMode == 1 ? row.income : row.outcome
+
+    if (inoutcome == null || row.transactionKind == null || row.transactionType == null || row.price == null
+            || row.marketPrice == null || row.currencyVolumeSale == null || row.priceRequest == null ||
+            row.priceLiability == null || row.currencyVolume == null) {
+        return null
+    }
+
+    if (inoutcome == 0) {
+        return 0
+    } else {
+        if (transactionKind == 'кассовая сделка' || transactionKind == 'кассовая сделка') {
+            def transactionType = getRefBookValue(16, row.transactionType).TYPE.stringValue
+            if (transactionType == 'продажа' && row.price >= row.marketPrice) {
+                return row.price >= row.marketPrice ? 0 : row.currencyVolumeSale * (row.marketPrice - row.price) * row.priceRequest
+            }
+            if (transactionType == 'покупка' && row.price <= row.marketPrice) {
+                return row.price <= row.marketPrice ? 0 : row.currencyVolume * (row.price - row.marketPrice) * row.priceLiability
+            }
+        } else if (transactionKind != 'премия по опциону') {
+            if (inoutcome > 0 && row.price * incomeMode > row.marketPrice) {
+                return 0
+            }
+            if (row.price * incomeMode < row.marketPrice) {
+                return (row.marketPrice - row.price) * (incomeMode == 1 ? row.priceRequest : row.priceLiability)
+            }
+        }
+    }
+    return null
 }
 
 // Логические проверки
@@ -141,16 +230,16 @@ void logicCheck() {
 
     def i = getPrevRowNumber()
 
+    // алиасы графов для арифметической проверки (графа 8, 9, 12-15)
+    // TODO priceRequest и priceLiability пока заполняются в ручную (вопрос по аналитике)
+    def arithmeticCheckAlias = ['request', 'liability', 'income', 'outcome', 'incomeDeviation', 'outcomeDeviation']
+    // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
+    def needValue = [:]
+
     // суммы строки общих итогов
     def totalSums = [:]
     // графы для которых надо вычислять итого
-    def totalColumns = ['taxSum', 'factSum']
-
-    // Дата начала отчетного периода
-    def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    // Дата окончания отчетного периода
-    def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
+    def totalColumns = ['currencyVolume', 'currencyVolumeSale', 'request', 'outcome']
     def totalRow = null
 
     def index
@@ -164,25 +253,26 @@ void logicCheck() {
         index = row.getIndex()
         errorMsg = "Строка $index: "
 
-        // 3. Проверка на заполнение поля
+        // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        // 1. Проверка даты совершения операции и границ отчётного периода
-        if (row.date != null && (row.date.after(endDate) || row.date.before(startDate))) {
-            logger.error(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
-        }
-
-        // 2. Проверка на нулевые значения
-        if ((row.taxSum == null || row.taxSum == 0) && (row.factSum == null || row.factSum == 0)) {
-            logger.error(errorMsg + 'Суммы по операции нулевые!!')
-        }
-
-        // 4. Проверка на уникальность поля «№ пп»
+        // 2. Проверка на уникальность поля «№ пп»
         if (++i != row.number) {
             logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
-        // 5. Арифметическая проверка итоговой строки
+        // 3 Арифметические проверки
+        // TODO пока нет справочника
+        transactionKind = 'премия по опциону' //getRefBookValue(-1, row.transactionKind).ATTRIBUTE.stringValue
+        needValue['request'] = calcRequest(row, transactionKind)
+        needValue['liability'] = calcLiability(row, transactionKind)
+        needValue['income'] = calcIncomeOutcome(row, 1)
+        needValue['outcome'] = calcIncomeOutcome(row, -1)
+        needValue['incomeDeviation'] = calcIncomeOutcomeDeviation(row, 1, transactionKind)
+        needValue['outcomeDeviation'] = calcIncomeOutcomeDeviation(row, -1, transactionKind)
+        checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+
+        // 4. Арифметическая проверка итоговой строки
         totalColumns.each { alias ->
             if (totalSums[alias] == null) {
                 totalSums[alias] = 0
@@ -194,6 +284,9 @@ void logicCheck() {
     if (totalRow != null) {
         // 5. Арифметическая проверка итоговой строки
         for (def alias : totalColumns) {
+            if (totalSums[alias] == null) {
+                totalSums[alias] = 0
+            }
             if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
                 def name = getColumnName(totalRow, alias)
                 logger.error("Итоговые значения рассчитаны неверно в графе «$name»!")
@@ -216,12 +309,18 @@ def getSum(def dataRows, def columnAlias) {
 def calcTotalRow(def dataRows) {
     def totalRow = formData.createDataRow()
     totalRow.setAlias('total')
-    totalRow.fix = 'Итого'
-    totalRow.getCell('fix').colSpan = 5
-    ['number', 'fix', 'taxSum', 'factSum'].each {
+    totalRow.transactionNumber = 'Итого'
+    totalRow.getCell('transactionNumber').colSpan = 9
+    totalRow.getCell('fix').colSpan = 2
+    totalRow.getCell('price').colSpan = 3
+    totalRow.getCell('liability').colSpan = 2
+    totalRow.getCell('marketPrice').colSpan = 3
+
+    ['number', 'transactionNumber', 'fix', 'price', 'currencyVolume', 'currencyVolumeSale', 'request', 'outcome',
+            'liability', 'marketPrice'].each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
-    ['taxSum', 'factSum'].each { alias ->
+    ['currencyVolume', 'currencyVolumeSale', 'request', 'outcome'].each { alias ->
         totalRow.getCell(alias).setValue(getSum(dataRows, alias))
     }
     return totalRow
