@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -191,19 +192,21 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     /**
-     * Получение Id записи справочника
-     * @param refBookId
-     * @param recordCache
-     * @param providerCache
-     * @param alias
-     * @param value
-     * @param date
-     * @return
+     * Получение записи справочника
      */
-    private Long getRefBookRecordId(Long refBookId,
-                                    Map<Long, Map<String, Long>> recordCache,
-                                    Map<Long, RefBookDataProvider> providerCache, String alias,
-                                    String value, Date date) {
+    private Map<String, RefBookValue> getRefBookRecord(Long refBookId, Map<Long, Map<String, Long>> recordCache,
+                                                       Map<Long, RefBookDataProvider> providerCache,
+                                                       String alias, String value, Date date) {
+        return getRefBookRecord(refBookId, recordCache, providerCache, null, alias, value, date);
+    }
+
+    /**
+     * Получение записи справочника
+     */
+    private Map<String, RefBookValue> getRefBookRecord(Long refBookId, Map<Long, Map<String, Long>> recordCache,
+                                                       Map<Long, RefBookDataProvider> providerCache,
+                                                       Map<Long, Map<String, RefBookValue>> refBookCache,
+                                                       String alias, String value, Date date) {
         if (refBookId == null) {
             return null;
         }
@@ -211,10 +214,17 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         String filter = value == null || value.isEmpty() ? alias + " is null" :
                 "LOWER(" + alias + ") = LOWER('" + value + "')";
 
+
         if (recordCache.containsKey(refBookId)) {
-            Long retVal = recordCache.get(refBookId).get(filter);
-            if (retVal != null) {
-                return retVal;
+            Long recordId = recordCache.get(refBookId).get(filter);
+            if (recordId != null) {
+                if (refBookCache != null) {
+                    return refBookCache.get(recordId);
+                } else {
+                    Map<String, RefBookValue> retVal = new HashMap<String, RefBookValue>();
+                    retVal.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId));
+                    return retVal;
+                }
             }
         } else {
             recordCache.put(refBookId, new HashMap<String, Long>());
@@ -223,18 +233,44 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         RefBookDataProvider provider = getRefBookProvider(refBookFactory, refBookId, providerCache);
         PagingResult<Map<String, RefBookValue>> records = provider.getRecords(date, null, filter, null);
         if (records.size() == 1) {
-            Long retVal = records.get(0).get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
-            recordCache.get(refBookId).put(filter, retVal);
+            Map<String, RefBookValue> retVal = records.get(0);
+            Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
+            recordCache.get(refBookId).put(filter, recordId);
+            if (refBookCache != null)
+                refBookCache.put(recordId, retVal);
             return retVal;
         }
         return null;
     }
 
     @Override
+    public Map<String, RefBookValue> getRefBookRecord(Long refBookId, Map<Long, Map<String, Long>> recordCache,
+                                                      Map<Long, RefBookDataProvider> providerCache,
+                                                      Map<Long, Map<String, RefBookValue>> refBookCache,
+                                                      String alias, String value, Date date,
+                                                      int rowIndex, String columnName, Logger logger, boolean required) {
+        Map<String, RefBookValue> retVal = getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, date);
+        if (retVal != null) {
+            return retVal;
+        }
+        RefBook rb = refBookFactory.get(refBookId);
+        String msg = columnName == null ?
+                String.format(REF_BOOK_NOT_FOUND_ERROR, rb.getName(), value, rb.getAttribute(alias).getName()) :
+                String.format(REF_BOOK_ROW_NOT_FOUND_ERROR, rowIndex, columnName, rb.getName());
+        if (required) {
+            throw new ServiceException(msg);
+        } else {
+            logger.warn(msg);
+        }
+        return null;
+    }
+
+    @Override
     public Long getRefBookRecordIdImport(Long refBookId, Map<Long, Map<String, Long>> recordCache,
-                                   Map<Long, RefBookDataProvider> providerCache, String alias, String value, Date date,
-                                   int rowIndex, int colIndex, Logger logger, boolean required) {
-        Long retVal = getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, date);
+                                         Map<Long, RefBookDataProvider> providerCache, String alias, String value,
+                                         Date date, int rowIndex, int colIndex, Logger logger, boolean required) {
+        Long retVal = getRefBookRecord(refBookId, recordCache, providerCache, alias, value, date)
+                .get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
         if (retVal != null) {
             return retVal;
         }
@@ -252,7 +288,8 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     public Long getRefBookRecordId(Long refBookId, Map<Long, Map<String, Long>> recordCache,
                                    Map<Long, RefBookDataProvider> providerCache, String alias, String value, Date date,
                                    int rowIndex, String columnName, Logger logger, boolean required) {
-        Long retVal = getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, date);
+        Long retVal = getRefBookRecord(refBookId, recordCache, providerCache, alias, value, date)
+                .get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
         if (retVal != null) {
             return retVal;
         }
@@ -282,7 +319,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Override
     public boolean checkNSI(long refBookId, Map<Long, Map<String, RefBookValue>> refBookCache, DataRow<Cell> row,
-                         String alias, Logger logger, boolean required) {
+                            String alias, Logger logger, boolean required) {
         if (row == null || alias == null) {
             return true;
         }

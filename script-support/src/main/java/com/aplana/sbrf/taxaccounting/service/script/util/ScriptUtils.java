@@ -605,4 +605,20 @@ public final class ScriptUtils {
             }
         }
     }
+
+    /**
+     * Возвращает DataRow по алиасу.
+     */
+    public static DataRow getDataRow(List<DataRow<Cell>> dataRows, String rowAlias) {
+        if (rowAlias == null) {
+            throw new NullPointerException("Row alias cannot be null");
+        }
+        for (DataRow<Cell> row : dataRows) {
+            if (rowAlias.equals(row.getAlias())) {
+                return row;
+            }
+        }
+        throw new IllegalArgumentException("Wrong row alias requested: "
+                + rowAlias);
+    }
 }

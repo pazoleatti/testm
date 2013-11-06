@@ -161,7 +161,7 @@ void calc() {
     // TODO Levykin Переписать
     // добавить строку "итого" (графа 13, 15)
     // def totalRow = calcTotalRow(dataRows)
-    // dataRowHelper.insert(totalRow, index + 1)
+    // dataRowHelper.insert(totalRow, dataRows.size + 1)
 
     dataRowHelper.save(dataRows)
 }
@@ -387,7 +387,7 @@ void logicCheck() {
             if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
                 logger.info('======= t = ' + totalSums[alias]) // TODO (Ramil Timerbaev)
                 logger.info('======= c = ' + totalRow.getCell(alias).getValue()) // TODO (Ramil Timerbaev)
-                def name = getColumnName(totalRow, 'alias')
+                def name = getColumnName(totalRow, alias)
                 logger.error("Итоговые значения рассчитаны неверно в графе «$name»!")
             }
         }

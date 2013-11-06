@@ -34,8 +34,8 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
 
     private Log log = LogFactory.getLog(getClass());
 
-	@Autowired
-	private ConfigurationService configurationService;
+    @Autowired
+    private ConfigurationService configurationService;
 
     @Autowired
     RefBookScriptingService refBookScriptingService;
@@ -69,14 +69,20 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         // файл для загр. спр. "Организации-участники контролируемых сделок"
         map.put("organization.xls", new Pair<Boolean, Long>(true, 9L));
 
-		//TODO добавить проверку ЭЦП (Marat Fayzullin 2013-10-19)
-		Map<ConfigurationParam, String> params = configurationService.getAllConfig(userInfo);
-		String refBookDirectory = params.get(ConfigurationParam.REF_BOOK_DIRECTORY);
+        //TODO добавить проверку ЭЦП (Marat Fayzullin 2013-10-19)
+        Map<ConfigurationParam, String> params = configurationService.getAllConfig(userInfo);
+        String refBookDirectory = params.get(ConfigurationParam.REF_BOOK_DIRECTORY);
 
         BufferedReader reader = null;
         if (log.isDebugEnabled()) {
             log.debug("RefBook dir: " + refBookDirectory);
         }
+
+        if (refBookDirectory == null || refBookDirectory.trim().isEmpty()) {
+            throw new ServiceException("Не указан путь к директории для импорта справочников");
+        }
+        refBookDirectory = refBookDirectory.trim();
+
         // Признак наличия ошибок при импорте
         boolean withError = false;
         try {
@@ -112,7 +118,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                             auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(),
                                     null, null, null, null,
                                     "Не удалось выполнить импорт справочника (id = " + refBookId + ") из файла "
-                                    + fileName);
+                                            + fileName);
                         } finally {
                             IOUtils.closeQuietly(is);
                         }
