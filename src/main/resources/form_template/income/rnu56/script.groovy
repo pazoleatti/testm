@@ -387,7 +387,7 @@ void logicCheck() {
             if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
                 logger.info('======= t = ' + totalSums[alias]) // TODO (Ramil Timerbaev)
                 logger.info('======= c = ' + totalRow.getCell(alias).getValue()) // TODO (Ramil Timerbaev)
-                def name = getColumnName(totalRow, 'alias')
+                def name = getColumnName(totalRow, alias)
                 logger.error("Итоговые значения рассчитаны неверно в графе «$name»!")
             }
         }
