@@ -269,10 +269,13 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     public Long getRefBookRecordIdImport(Long refBookId, Map<Long, Map<String, Long>> recordCache,
                                          Map<Long, RefBookDataProvider> providerCache, String alias, String value,
                                          Date date, int rowIndex, int colIndex, Logger logger, boolean required) {
-        Long retVal = getRefBookRecord(refBookId, recordCache, providerCache, alias, value, date)
-                .get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
-        if (retVal != null) {
-            return retVal;
+        Map<String, RefBookValue> record = getRefBookRecord(refBookId, recordCache, providerCache, alias, value, date);
+
+        if (record != null) {
+            Long retVal = record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
+            if (retVal != null) {
+                return retVal;
+            }
         }
         RefBook rb = refBookFactory.get(refBookId);
         String msg = String.format(REF_BOOK_NOT_FOUND_IMPORT_ERROR, rowIndex, colIndex, rb.getName());
@@ -288,10 +291,13 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     public Long getRefBookRecordId(Long refBookId, Map<Long, Map<String, Long>> recordCache,
                                    Map<Long, RefBookDataProvider> providerCache, String alias, String value, Date date,
                                    int rowIndex, String columnName, Logger logger, boolean required) {
-        Long retVal = getRefBookRecord(refBookId, recordCache, providerCache, alias, value, date)
-                .get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
-        if (retVal != null) {
-            return retVal;
+        Map<String, RefBookValue> record = getRefBookRecord(refBookId, recordCache, providerCache, alias, value, date);
+
+        if (record != null) {
+            Long retVal = record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
+            if (retVal != null) {
+                return retVal;
+            }
         }
         RefBook rb = refBookFactory.get(refBookId);
         String msg = columnName == null ?
