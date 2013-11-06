@@ -257,16 +257,18 @@ public class ImportServiceImpl implements ImportService {
             } else if (indexRow > (firstP.getY() + 2)) {
                 break;
             }
-            Iterator<Cell> iterator = row.cellIterator();
+
             int indexCol = -1;
-            String cellValue;
-            while (iterator.hasNext()) {
+            for (int j = row.getFirstCellNum(); j < row.getLastCellNum(); j++) {
                 indexCol++;
                 // получить значение ячейки
-                HSSFCell cell = ((HSSFCell) iterator.next());
+                HSSFCell cell = row.getCell(j);
+                if (cell == null) {
+                    continue;
+                }
                 // Пропускаем ячейки только в объединенных столбцах
                 if (mergeRegion.contains(cell.getColumnIndex())) {
-                    cellValue = getCellValue(cell);
+                    String cellValue = getCellValue(cell);
                     if (cellValue == null || "".equals(cellValue)) {
                         value.add(indexCol);
                     }
@@ -312,10 +314,9 @@ public class ImportServiceImpl implements ImportService {
         }
         StringBuilder sb = new StringBuilder();
         sb.append(TAB).append("<row>").append(ENTER);
-        String cellValue;
         Iterator<Cell> iterator = row.cellIterator();
         while (iterator.hasNext()) {
-            cellValue = getCellValue((HSSFCell) iterator.next());
+            String cellValue = getCellValue((HSSFCell) iterator.next());
             sb.append(TAB).append(TAB).append("<cell>");
             sb.append(cellValue != null ? cellValue : "");
             sb.append("</cell>").append(ENTER);
@@ -337,14 +338,11 @@ public class ImportServiceImpl implements ImportService {
         }
         StringBuilder sb = new StringBuilder();
         sb.append(TAB).append("<row>").append(ENTER);
-        String cellValue;
 
-        Iterator<Cell> iterator = row.cellIterator();
         int indexCol = -1;
-        while (iterator.hasNext()) {
+        for (int i = row.getFirstCellNum(); i < row.getLastCellNum(); i++) {
             indexCol++;
-            // получить значение ячейки
-            cellValue = getCellValue((HSSFCell) iterator.next());
+            String cellValue = getCellValue(row.getCell(i));
             if (skipSet.contains(indexCol)) {
                 continue;
             }
@@ -429,10 +427,9 @@ public class ImportServiceImpl implements ImportService {
             if (row == null) {
                 continue;
             }
-            Iterator<Cell> cells = row.cellIterator();
-            while (cells.hasNext()) {
+            for (int j = row.getFirstCellNum(); j < row.getLastCellNum(); j++) {
                 firstCol++;
-                String cell = getCellValue((HSSFCell) cells.next());
+                String cell = getCellValue(row.getCell(j));
                 if (value.equals(cell)) {
                     firstCol = firstCol + row.getFirstCellNum();
                     isFind = true;

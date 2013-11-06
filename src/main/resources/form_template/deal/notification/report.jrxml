@@ -9816,7 +9816,7 @@ $F{Ист259}]]></textFieldExpression>
 				<textElement>
 					<font fontName="Courier New" size="16"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ТипПредСд}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ТипПредСд} == null ? "-" : $F{ТипПредСд}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement uuid="94c91705-abdc-4b7c-b20b-3100e0b3f54c" x="17" y="155" width="575" height="20"/>
@@ -12830,7 +12830,7 @@ $F{Ист259}]]></textFieldExpression>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{OKVED}.charAt( 6 )]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{OKVED} == null ? "-" : $V{OKVED}.charAt( 6 )]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement uuid="6374af11-4eb9-45ea-8924-69f5eaa56a23" x="416" y="318" width="15" height="20"/>
@@ -12840,7 +12840,7 @@ $F{Ист259}]]></textFieldExpression>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{OKVED}.charAt( 3 )]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{OKVED} == null ? "-" : $V{OKVED}.charAt( 3 )]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement uuid="1074e322-7b4a-483e-a260-b58b9aa96786" x="476" y="318" width="15" height="20"/>
@@ -12850,7 +12850,7 @@ $F{Ист259}]]></textFieldExpression>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{OKVED}.charAt( 7 )]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{OKVED} == null ? "-" : $V{OKVED}.charAt( 7 )]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement uuid="83e8c2db-4bd1-484a-92d1-8b0d2dfa767e" x="386" y="318" width="15" height="20"/>
@@ -12860,7 +12860,7 @@ $F{Ист259}]]></textFieldExpression>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{OKVED}.charAt( 1 )]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{OKVED} == null ? "-" : $V{OKVED}.charAt( 1 )]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement uuid="bd1bbf9b-181b-4992-8191-3c1c23801040" x="431" y="318" width="15" height="20"/>
@@ -12870,7 +12870,7 @@ $F{Ист259}]]></textFieldExpression>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{OKVED}.charAt( 4 )]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{OKVED} == null ? "-" : $V{OKVED}.charAt( 4 )]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement uuid="8b4e02ae-f971-4e98-bdc1-c629049f63b5" x="371" y="318" width="15" height="20"/>
@@ -12880,7 +12880,7 @@ $F{Ист259}]]></textFieldExpression>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{OKVED}.charAt( 0 )]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{OKVED} == null ? "-" : $V{OKVED}.charAt( 0 )]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement uuid="ae40f53f-c147-49a1-bc34-66a10539c93f" x="401" y="318" width="15" height="20"/>

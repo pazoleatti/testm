@@ -282,6 +282,8 @@ void generateXML() {
                             )
                         }
                     }
+                }  else{
+                    СвКонтрСд()
                 }
             }
         }
