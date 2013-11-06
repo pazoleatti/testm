@@ -1,11 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import groovy.lang.GroovyClassLoader;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -15,7 +11,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 /**
  * Базовый класс для сервисов, работающих с groovy-скриптами
@@ -85,9 +83,8 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 				line = stackElement.getLineNumber();
 				break;
 			}
-		}			
-		logger.error("Ошибка исполнения [строка %d]: %s", line, message);
+		}
+		logger.error("Ошибка исполнения [%d]: %s", line, message);
 		this.logger.error("An error occured during script execution", e);
 	}
-	
 }
