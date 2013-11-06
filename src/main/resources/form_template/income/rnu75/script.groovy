@@ -33,7 +33,9 @@ switch (formDataEvent) {
         formDataService.addRow(formData, currentDataRow, editableColumns, null)
         break
     case FormDataEvent.DELETE_ROW:
-        formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow != null && currentDataRow.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
+        }
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
@@ -105,24 +107,18 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    if (dataRows.isEmpty()) {
-        return
-    }
+    if (!dataRows.isEmpty()) {
 
-    // Удаление подитогов
-    deleteAllAliased(dataRows)
+        // Удаление подитогов
+        deleteAllAliased(dataRows)
 
-    // Дата начала отчетного периода
-    def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    // Дата окончания отчетного периода
-    def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+        // номер последний строки предыдущей формы
+        def index = getPrevRowNumber()
 
-    // номер последний строки предыдущей формы
-    def index = getPrevRowNumber()
-
-    for (row in dataRows) {
-        // графа 1
-        row.number = ++index
+        for (row in dataRows) {
+            // графа 1
+            row.number = ++index
+        }
     }
 
     dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size + 1)
@@ -192,6 +188,9 @@ void logicCheck() {
     if (totalRow != null) {
         // 5. Арифметическая проверка итоговой строки
         for (def alias : totalColumns) {
+            if (totalSums[alias] == null) {
+                totalSums[alias] = 0
+            }
             if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
                 def name = getColumnName(totalRow, alias)
                 logger.error("Итоговые значения рассчитаны неверно в графе «$name»!")
