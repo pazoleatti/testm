@@ -318,6 +318,12 @@ void logicalCheckBeforeCalc() {
     def departmentParamIncomeRefDataProvider = refBookFactory.getDataProvider(33)
 
     def fieldNumber = 0
+
+    def sumTaxRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = '1'", null);
+    if (sumTaxRecords == null || sumTaxRecords.getRecords().isEmpty() || getValue(sumTaxRecords.getRecords().getAt(0), 'SUM_TAX')==null) {
+        logger.error("В форме настроек подразделений (подразделение «УНП») не задано значение атрибута «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
+    }
+
     getRows(data).eachWithIndex { row, i ->
         if (isFixedRow(row)) {
             return
