@@ -10,9 +10,7 @@ import java.math.RoundingMode
  *
  * TODO:
  *      - http://jira.aplana.com/browse/SBRFACCTAX-4845 - РНУ-56. Алгоритм заполнения графы 14 и 15.
- *      - http://jira.aplana.com/browse/SBRFACCTAX-4849 - РНУ-56. Графа 13 при значении null.
  *      - http://jira.aplana.com/browse/SBRFACCTAX-4853 - РНУ-56. Обязательные поля.
- *      - проверить проверку предыдущих форм после того как в 0.3.5 поправят получение предыдущего периода (после мержа с 0.3.2)
  *      - после SBRFACCTAX-4845 сделать логическую проверку 6 и 7
  *
  * @author rtimerbaev
@@ -21,7 +19,7 @@ import java.math.RoundingMode
 // графа 1  - number
 // графа 2  - bill
 // графа 3  - buyDate
-// графа 4  - currency - атрибут 64 - NAME - "Код валюты. Цифровой", справочник 15 "Общероссийский классификатор валют"
+// графа 4  - currency
 // графа 5  - nominal
 // графа 6  - price
 // графа 7  - maturity
@@ -84,9 +82,14 @@ def editableColumns = ['bill', 'buyDate', 'currency', 'nominal', 'price', 'matur
 def nonEmptyColumns = ['number', 'bill', 'buyDate', 'currency', 'nominal', 'price', 'maturity', 'termDealBill',
         'sumIncomeinCurrency', 'sumIncomeinRuble']
 
-// Текущая дата
+// Атрибуты для итогов
 @Field
-def currentDate = new Date()
+def totalColumns = ['discountInRub', 'sumIncomeinRuble']
+
+// Все атрибуты
+@Field
+def allColumns = ['number', 'bill', 'buyDate', 'currency', 'nominal', 'price', 'maturity', 'termDealBill', 'percIncome',
+        'implementationDate', 'sum', 'discountInCurrency', 'discountInRub', 'sumIncomeinCurrency', 'sumIncomeinRuble']
 
 //// Обертки методов
 
@@ -96,11 +99,18 @@ boolean checkNSI(def refBookId, def row, def alias) {
 }
 
 // Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
+def getRecord(def Long refBookId, def String alias, def String value, def int rowIndex, def String columnName,
                 def Date date, boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, date, rowIndex,
-            cellName, logger, required)
+    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, date,
+            rowIndex, columnName, logger, required)
 }
+
+// Поиск записи в справочнике по значению (для расчетов)
+//def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
+//                boolean required = true) {
+//    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
+//            currentDate, rowIndex, cellName, logger, required)
+//}
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
@@ -125,11 +135,7 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    if (dataRows.isEmpty()) {
-        return
-    }
-
-    // Удаление подитогов
+    // Удаление итогов
     deleteAllAliased(dataRows)
 
     // Дата начала отчетного периода
@@ -138,8 +144,8 @@ void calc() {
     // Дата окончания отчетного периода
     def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    // номер последний строки предыдущей формы
-    def index = getPrevRowNumber()
+    // Номер последний строки предыдущей формы
+    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
 
     for (row in dataRows) {
         // графа 1
@@ -158,24 +164,21 @@ void calc() {
         row.sumIncomeinRuble = calcSumIncomeinRuble(row, endDate)
     }
 
-    // TODO Levykin Переписать
-    // добавить строку "итого" (графа 13, 15)
-    // def totalRow = calcTotalRow(dataRows)
-    // dataRowHelper.insert(totalRow, dataRows.size + 1)
-
+    // Добавление итогов
+    dataRows.add(getTotalRow(dataRows))
     dataRowHelper.save(dataRows)
 }
 
 // Расчет графы 8
-def calcTermDealBill(def row) {
+BigDecimal calcTermDealBill(def row) {
     if (row.buyDate == null || row.maturity == null) {
         return null
     }
-    return (row.maturity - row.buyDate + 1)
+    return row.maturity - row.buyDate + 1
 }
 
 // Расчет графы 9
-def calcPercIncome(def row) {
+BigDecimal calcPercIncome(def row) {
     if (row.nominal == null || row.price == null) {
         return null
     }
@@ -183,7 +186,7 @@ def calcPercIncome(def row) {
 }
 
 // Расчет графы 12
-def calcDiscountInCurrency(def row) {
+BigDecimal calcDiscountInCurrency(def row) {
     if (row.sum == null || row.price == null) {
         return null
     }
@@ -191,17 +194,18 @@ def calcDiscountInCurrency(def row) {
 }
 
 // Расчет графы 13
-def calcDiscountInRub(def row) {
+BigDecimal calcDiscountInRub(def row) {
     if (row.discountInCurrency != null) {
         if (row.currency != null && !isRubleCurrency(row.currency)) {
-            def record = null
+            def map = null
             if (row.implementationDate != null) {
                 // значение поля «Курс валюты» справочника «Курсы валют» на дату из «Графы 10»
-                record = getRecordId(22, 'CODE_NUMBER', "${row.currency}", row.number?.intValue(), getColumnName(row, 'currency'),
-                        row.implementationDate)
+                map = getRecord(22, 'CODE_NUMBER', "${row.currency}", row.number?.intValue(),
+                        getColumnName(row, 'currency'), row.implementationDate)
             }
-            if (record != null) {
-                return (row.discountInCurrency * getRefBookValue(22, record)?.RATE?.numberValue)?.setScale(2, RoundingMode.HALF_UP)
+            if (map != null) {
+                return (row.discountInCurrency * map?.RATE?.numberValue)?.setScale(2,
+                        RoundingMode.HALF_UP)
             }
         } else {
             return row.discountInCurrency
@@ -211,7 +215,7 @@ def calcDiscountInRub(def row) {
 }
 
 // Расчет графы 14
-def calcSumIncomeinCurrency(def row, def startDate, def endDate) {
+BigDecimal calcSumIncomeinCurrency(def row, def startDate, def endDate) {
     if (startDate == null || endDate == null || row.implementationDate == null) {
         return null
     }
@@ -244,7 +248,7 @@ def calcSumIncomeinCurrency(def row, def startDate, def endDate) {
 }
 
 // Расчет графы 15
-def calcSumIncomeinRuble(def row, def endDate) {
+BigDecimal calcSumIncomeinRuble(def row, def endDate) {
     def tmp
     if (row.sum != null) {
         if (!isRubleCurrency(row.currency)) {
@@ -256,7 +260,6 @@ def calcSumIncomeinRuble(def row, def endDate) {
             tmp = row.sumIncomeinCurrency
         }
     } else {
-        // TODO (Ramil Timerbaev) http://jira.aplana.com/browse/SBRFACCTAX-4849 - РНУ-56. Графа 13 при значении null.
         if (row.discountInRub == null) {
             return null
         }
@@ -266,9 +269,7 @@ def calcSumIncomeinRuble(def row, def endDate) {
     return tmp
 }
 
-/**
- * Логические проверки
- */
+// Логические проверки
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
 
@@ -276,19 +277,13 @@ void logicCheck() {
         return
     }
 
-    def i = getPrevRowNumber()
+    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
 
     // алиасы графов для арифметической проверки (графа 8, 9, 12-15)
-    def arithmeticCheckAlias = ['termDealBill', 'percIncome', 'discountInCurrency', 'discountInRub', 'sumIncomeinCurrency', 'sumIncomeinRuble']
+    def arithmeticCheckAlias = ['termDealBill', 'percIncome', 'discountInCurrency', 'discountInRub',
+            'sumIncomeinCurrency', 'sumIncomeinRuble']
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
-    //def colNames = []
-
-    // суммы строки общих итогов
-    def totalSums = [:]
-
-    // графы для которых надо вычислять итого (графа 13, 15)
-    def totalColumns = ['discountInRub', 'sumIncomeinRuble']
 
     // Дата начала отчетного периода
     def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
@@ -299,18 +294,12 @@ void logicCheck() {
     // Векселя
     def List<String> billsList = new ArrayList<String>()
 
-    def totalRow = null
-
-    def index
-    def errorMsg
-
-    for (def row : dataRows) {
+   for (def row : dataRows) {
         if (row.getAlias() != null) {
-            totalRow = row
             continue
         }
-        index = row.getIndex()
-        errorMsg = "Строка $index: "
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
@@ -341,13 +330,14 @@ void logicCheck() {
         }
 
         // 6. Проверка на наличие данных предыдущих отчетных периодов для заполнения графы 14 и графы 15
-        // TODO Получить РНУ-56 за прошлые отчетные периоды
+        // TODO Получить РНУ-56 за прошлые отчетные периоды (вопрос к аналитикам)
 
         // 7. Проверка корректности значения в «Графе 3»
-        // TODO Получить РНУ-56 за прошлые отчетные периоды
+        // TODO Получить РНУ-56 за прошлые отчетные периоды (вопрос к аналитикам)
 
         // 8. Проверка корректности расчёта дисконта
-        if (row.sum != null && row.price != null && row.sum - row.price <= 0 && (row.discountInCurrency != 0 || row.discountInRub != 0)) {
+        if (row.sum != null && row.price != null && row.sum - row.price <= 0 && (row.discountInCurrency != 0
+                || row.discountInRub != 0)) {
             logger.error(errorMsg + 'Расчёт дисконта некорректен!')
         }
 
@@ -369,40 +359,12 @@ void logicCheck() {
 
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
-        // 11. Проверка итоговых значений по всей форме (графа 13, 15)
-        totalColumns.each { alias ->
-            if (totalSums[alias] == null) {
-                totalSums[alias] = 0
-            }
-            totalSums[alias] += (row.getCell(alias).getValue() ?: 0)
-        }
-
         // Проверки соответствия НСИ
         checkNSI(15, row, 'currency') // Проверка кода валюты
     }
 
-    if (totalRow != null) {
-        // 11. Проверка итогового значений по всей форме (графа 13, 15)
-        for (def alias : totalColumns) {
-            if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
-                logger.info('======= t = ' + totalSums[alias]) // TODO (Ramil Timerbaev)
-                logger.info('======= c = ' + totalRow.getCell(alias).getValue()) // TODO (Ramil Timerbaev)
-                def name = getColumnName(totalRow, alias)
-                logger.error("Итоговые значения рассчитаны неверно в графе «$name»!")
-            }
-        }
-    }
-}
-
-// Получить сумму столбца
-def getSum(def dataRows, def columnAlias) {
-    def sum = 0
-    dataRows.each { row ->
-        if (row.getAlias() == null) {
-            sum += row.getCell(columnAlias).numberValue ?: 0
-        }
-    }
-    return sum
+    // 11. Арифметические проверки итогов
+    checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
 // Проверка валюты на рубли
@@ -413,7 +375,7 @@ def isRubleCurrency(def currencyCode) {
 
 // Получить курс банка России на указанную дату
 def getRate(def Date date, def value) {
-    return getRecordId(22, 'CODE_NUMBER', "$value", -1, null, date ?: new Date(), true)?.RATE?.numberValue
+    return getRecord(22, 'CODE_NUMBER', "$value", -1, null, date ?: new Date(), true)?.RATE?.numberValue
 }
 
 // TODO (Ramil Timerbaev) http://jira.aplana.com/browse/SBRFACCTAX-4845 - РНУ-56. Алгоритм заполнения графы 14 и 15.
@@ -440,7 +402,7 @@ def getCalcPrevColumn(def bill, def sumColumnName, def reportPeriodId) {
         def find = false
         for (def row : prevDataRows) {
             if (row.bill == bill && row.buyDate >= startDate && row.buyDate <= endDate) {
-                sum += (row.getCell(sumColumnName).numberValue ?: 0)
+                sum += row.getCell(sumColumnName).value ?: 0
                 find = true
             }
         }
@@ -453,36 +415,14 @@ def getCalcPrevColumn(def bill, def sumColumnName, def reportPeriodId) {
     return 0
 }
 
-def calcTotalRow(def dataRows) {
-    // итого (графа 13, 15)
+// Расчет итоговой строки
+def getTotalRow(def dataRows) {
     def totalRow = formData.createDataRow()
     totalRow.setAlias('total')
     totalRow.bill = 'Итого'
-    totalRow.getCell('bill').colSpan = 11
-    ['number', 'bill', 'buyDate', 'currency', 'nominal',
-            'price', 'maturity', 'termDealBill', 'percIncome',
-            'implementationDate', 'sum', 'discountInCurrency',
-            'discountInRub', 'sumIncomeinCurrency', 'sumIncomeinRuble'].each {
+    allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
-    ['discountInRub', 'sumIncomeinRuble'].each { alias ->
-        totalRow.getCell(alias).setValue(getSum(dataRows, alias))
-    }
+    calcTotalSum(dataRows, totalRow, totalColumns)
     return totalRow
-}
-
-/** Получить значение "Номер по порядку" из формы предыдущего периода. */
-def getPrevRowNumber() {
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    // получить номер последний строки предыдущей формы если текущая форма не первая в этом году
-    if (reportPeriod != null && reportPeriod.order == 1) {
-        return 0
-    }
-    def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
-    def prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
-    if (prevDataRows != null && !prevDataRows.isEmpty()) {
-        // пропустить последнюю итоговую строку
-        return prevDataRows[prevDataRows.size - 2].number
-    }
-    return 0
 }

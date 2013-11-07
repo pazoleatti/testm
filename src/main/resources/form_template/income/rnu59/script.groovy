@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 import java.text.SimpleDateFormat
 
+// TODO Форма будет удалена http://jira.aplana.com/browse/SBRFACCTAX-2357
+
 /**
  * РНУ-59
  * @author auldanov
