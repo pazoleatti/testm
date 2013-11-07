@@ -256,6 +256,7 @@ void logicCheck(){
             continue
         }
 
+        rowNum++
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
 
         def rowStart

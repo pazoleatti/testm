@@ -33,7 +33,9 @@ switch (formDataEvent) {
         formDataService.addRow(formData, currentDataRow, editableColumns, null)
         break
     case FormDataEvent.DELETE_ROW:
-        formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow != null && currentDataRow.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
+        }
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
@@ -65,6 +67,10 @@ def editableColumns = ['date', 'depo', 'reasonNumber', 'reasonDate', 'taxSum', '
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['number', 'date', 'depo', 'reasonNumber', 'reasonDate', 'taxSum', 'factSum']
+
+// Сумируемые колонки в фиксированной с троке
+@Field
+def totalColumns = ['taxSum', 'factSum']
 
 // Текущая дата
 @Field
@@ -105,24 +111,18 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    if (dataRows.isEmpty()) {
-        return
-    }
+    if (!dataRows.isEmpty()) {
 
-    // Удаление подитогов
-    deleteAllAliased(dataRows)
+        // Удаление подитогов
+        deleteAllAliased(dataRows)
 
-    // Дата начала отчетного периода
-    def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    // Дата окончания отчетного периода
-    def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+        // номер последний строки предыдущей формы
+        def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
 
-    // номер последний строки предыдущей формы
-    def index = getPrevRowNumber()
-
-    for (row in dataRows) {
-        // графа 1
-        row.number = ++index
+        for (row in dataRows) {
+            // графа 1
+            row.number = ++index
+        }
     }
 
     dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size + 1)
@@ -137,26 +137,18 @@ void logicCheck() {
         return
     }
 
-    def i = getPrevRowNumber()
-
-    // суммы строки общих итогов
-    def totalSums = [:]
-    // графы для которых надо вычислять итого
-    def totalColumns = ['taxSum', 'factSum']
+    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
 
     // Дата начала отчетного периода
     def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     // Дата окончания отчетного периода
     def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    def totalRow = null
-
     def index
     def errorMsg
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
-            totalRow = row
             continue
         }
         index = row.getIndex()
@@ -179,37 +171,12 @@ void logicCheck() {
         if (++i != row.number) {
             logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
-
-        // 5. Арифметическая проверка итоговой строки
-        totalColumns.each { alias ->
-            if (totalSums[alias] == null) {
-                totalSums[alias] = 0
-            }
-            totalSums[alias] += (row.getCell(alias).getValue() ?: 0)
-        }
     }
 
-    if (totalRow != null) {
-        // 5. Арифметическая проверка итоговой строки
-        for (def alias : totalColumns) {
-            if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
-                def name = getColumnName(totalRow, alias)
-                logger.error("Итоговые значения рассчитаны неверно в графе «$name»!")
-            }
-        }
-    }
+    // 5. Арифметическая проверка итоговой строки
+    checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
-// Получить сумму столбца
-def getSum(def dataRows, def columnAlias) {
-    def sum = 0
-    dataRows.each { row ->
-        if (row.getAlias() == null) {
-            sum += row.getCell(columnAlias).getValue() ?: 0
-        }
-    }
-    return sum
-}
 
 def calcTotalRow(def dataRows) {
     def totalRow = formData.createDataRow()
@@ -219,24 +186,7 @@ def calcTotalRow(def dataRows) {
     ['number', 'fix', 'taxSum', 'factSum'].each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
-    ['taxSum', 'factSum'].each { alias ->
-        totalRow.getCell(alias).setValue(getSum(dataRows, alias))
-    }
-    return totalRow
-}
+    calcTotalSum(dataRows, totalRow, totalColumns)
 
-// Получить значение "Номер по порядку" из формы предыдущего периода
-def int getPrevRowNumber() {
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    // получить номер последний строки предыдущей формы если текущая форма не первая в этом году
-    if (reportPeriod != null && reportPeriod.order == 1) {
-        return 0
-    }
-    def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
-    def prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
-    if (prevDataRows != null && !prevDataRows.isEmpty()) {
-        // пропустить последнюю итоговую строку
-        return prevDataRows.get(prevDataRows.size - 2).number
-    }
-    return 0
+    return totalRow
 }

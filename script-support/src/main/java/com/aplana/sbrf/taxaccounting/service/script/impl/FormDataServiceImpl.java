@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /*
@@ -49,6 +50,8 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     private static final String REF_BOOK_DEREFERENCE_ERROR = "Строка %d, графа «%s»: В справочнике «%s» не найден элемент с id = %d»!";
     private static final String CHECK_UNIQ_ERROR = "Налоговая форма с заданными параметрами уже существует!";
     private static final String CHECK_BALANCE_PERIOD_ERROR = "Налоговая форма не может создаваться в периоде ввода остатков!";
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     @Autowired
     private FormDataDao dao;
@@ -214,9 +217,10 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         String filter = value == null || value.isEmpty() ? alias + " is null" :
                 "LOWER(" + alias + ") = LOWER('" + value + "')";
 
+        String dateStr = sdf.format(date);
 
         if (recordCache.containsKey(refBookId)) {
-            Long recordId = recordCache.get(refBookId).get(filter);
+            Long recordId = recordCache.get(refBookId).get(dateStr + filter);
             if (recordId != null) {
                 if (refBookCache != null) {
                     return refBookCache.get(recordId);
@@ -235,7 +239,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         if (records.size() == 1) {
             Map<String, RefBookValue> retVal = records.get(0);
             Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
-            recordCache.get(refBookId).put(filter, recordId);
+            recordCache.get(refBookId).put(dateStr + filter, recordId);
             if (refBookCache != null)
                 refBookCache.put(recordId, retVal);
             return retVal;
@@ -377,6 +381,25 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             return find(formData.getFormType().getId(), formData.getKind(), departmentId, prevReportPeriod.getId());
         }
         return null;
+    }
+
+    @Override
+    public int getFormDataPrevRowCount(FormData formData, int departmentId) {
+        ReportPeriod reportPeriod = reportPeriodService.get(formData.getReportPeriodId());
+        if (reportPeriod != null && reportPeriod.getOrder() == 1) {
+            return 0;
+        }
+        FormData prevFormData = getFormDataPrev(formData, departmentId);
+        List<DataRow<Cell>> prevDataRows = (prevFormData != null ? getDataRowHelper(prevFormData).getAllCached() : null);
+        int counter = 0;
+        if (prevDataRows != null && !prevDataRows.isEmpty()) {
+            for (DataRow<Cell> row : prevDataRows) {
+                if (row.getAlias() == null) {
+                    counter++;
+                }
+            }
+        }
+        return counter;
     }
 
     @Override

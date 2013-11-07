@@ -53,6 +53,7 @@ public final class ScriptUtils {
 
     private static String WRONG_CALC = "Строка %d: Неверное значение граф: %s!";
 
+    private static String WRONG_TOTAL = "Итоговые значения рассчитаны неверно в графе «%s»!";
 
     /**
      * Интерфейс для переопределения алгоритма расчета
@@ -591,7 +592,8 @@ public final class ScriptUtils {
             if (calcValues.get(alias) == null && row.getCell(alias).getValue() == null) {
                 continue;
             }
-            if (calcValues.get(alias) == null || !calcValues.get(alias).equals(row.getCell(alias).getValue())) {
+            if (calcValues.get(alias) == null
+                    || ((BigDecimal) calcValues.get(alias)).compareTo((BigDecimal) row.getCell(alias).getValue()) != 0) {
                 errorColumns.add('"' + getColumnName(row, alias) + '"');
             }
         }
@@ -620,5 +622,71 @@ public final class ScriptUtils {
         }
         throw new IllegalArgumentException("Wrong row alias requested: "
                 + rowAlias);
+    }
+
+    /**
+     * Расчет итогового значения, являющегося суммой по ячейкам одноименной графы
+     *
+     * @param dataRows
+     * @param totalRow
+     * @param columns
+     */
+    public static void calcTotalSum(List<DataRow<Cell>> dataRows, DataRow<Cell> totalRow, List<String> columns) {
+        for (String alias : columns) {
+            BigDecimal sum = BigDecimal.valueOf(0);
+            for (DataRow<Cell> row : dataRows) {
+                if (row.getAlias() == null) {
+                    BigDecimal val = (BigDecimal) row.getCell(alias).getValue();
+                    if (val != null) {
+                        sum = sum.add(val);
+                    }
+                }
+            }
+            totalRow.getCell(alias).setValue(sum);
+        }
+    }
+
+    /**
+     * Проверка расчета сумм итогов
+     *
+     * @param dataRows
+     * @param columns
+     * @param logger
+     * @param required
+     */
+    public static void checkTotalSum(List<DataRow<Cell>> dataRows, List<String> columns, Logger logger,
+                                     boolean required) {
+        DataRow<Cell> totalRow = null;
+        Map<String, BigDecimal> totalSums = new HashMap<String, BigDecimal>();
+        for (DataRow<Cell> row : dataRows) {
+            if (row.getAlias() != null) {
+                totalRow = row;
+                continue;
+            }
+            for (String alias : columns) {
+                if (!totalSums.containsKey(alias)) {
+                    totalSums.put(alias, BigDecimal.valueOf(0));
+                }
+                BigDecimal val = (BigDecimal) row.getCell(alias).getValue();
+                if (val != null) {
+                    totalSums.put(alias, totalSums.get(alias).add(val));
+                }
+            }
+        }
+        if (totalRow != null) {
+            for (String alias : columns) {
+                if (!totalSums.containsKey(alias)) {
+                    totalSums.put(alias, BigDecimal.valueOf(0));
+                }
+                if (totalSums.get(alias).compareTo((BigDecimal)totalRow.getCell(alias).getValue()) != 0) {
+                    String msg = String.format(WRONG_TOTAL, getColumnName(totalRow, alias));
+                    if (required) {
+                        logger.error(msg);
+                    } else {
+                        logger.warn(msg);
+                    }
+                }
+            }
+        }
     }
 }
