@@ -125,7 +125,7 @@ void calc() {
     deleteAllAliased(dataRows)
 
     // Номер последней строки формы из предыдущего периода
-    def index = getPrevRowNumber()
+    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
 
     for (row in dataRows) {
         // графа 1
@@ -169,7 +169,7 @@ void logicCheck() {
     // Дата окончания отчетного периода
     def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    def index = getPrevRowNumber()
+    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -219,21 +219,6 @@ def getTotalRow(def dataRows) {
     }
     calcTotalSum(dataRows, totalRow, totalColumns)
     return totalRow
-}
-
-// Получить значение "Номер по порядку" из формы предыдущего периода
-def getPrevRowNumber() {
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    if (reportPeriod != null && reportPeriod.order == 1) {
-        return 0
-    }
-    def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
-    def prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
-    if (prevDataRows != null && !prevDataRows.isEmpty()) {
-        // Пропустить последнюю итоговую строку
-        return prevDataRows[prevDataRows.size - 2].number
-    }
-    return 0
 }
 
 // Экземпляр формы по типу

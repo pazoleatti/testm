@@ -156,13 +156,23 @@ public interface FormDataService {
     boolean checksBalancePeriod(FormData formData, Logger logger);
 
     /**
-     * Получение формы за указанный отчетный период
+     * Получение формы за предыдущий отчетный период
      *
      * @param formData
      * @param departmentId
      * @return
      */
     FormData getFormDataPrev(FormData formData, int departmentId);
+
+    /**
+     * Получение числа неитоговых строк в форме за предыдущий отчетный период
+     * Если указанная форма первая в году или предыдущих форм нет, то результат будет 0
+     *
+     * @param formData
+     * @param departmentId
+     * @return
+     */
+    int getFormDataPrevRowCount(FormData formData, int departmentId);
 
     /**
      * Проверка наличия принятой формы за предыдущий период.
