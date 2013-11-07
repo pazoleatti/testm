@@ -1,5 +1,6 @@
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 /**
  * (РНУ-111) Регистр налогового учёта доходов, возникающих в связи с применением в сделках по предоставлению Межбанковских кредитов Взаимозависимым лицам и резидентам оффшорных зон Процентных ставок, не соответствующих рыночному уровню
@@ -91,13 +92,6 @@ boolean checkNSI(def refBookId, def row, def alias) {
     return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
 }
 
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                def Date date, boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, date, rowIndex,
-            cellName, logger, required)
-}
-
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
@@ -110,12 +104,12 @@ void calc() {
     // РНУ-5
     if (getFormDataRnu(317) == null) {
         def ftRnu5 = formTemplateService.get(317);
-        // throw new ServiceException("Не найдены экземпляры «${ftRnu5.name}» за текущий отчетный период!")
+        throw new ServiceException("Не найдены экземпляры «${ftRnu5.name}» за текущий отчетный период!")
     }
     // РНУ-6
     if (getFormDataRnu(318) == null) {
         def ftRnu6 = formTemplateService.get(318);
-        // throw new ServiceException("Не найдены экземпляры «${ftRnu6.name}» за текущий отчетный период!")
+        throw new ServiceException("Не найдены экземпляры «${ftRnu6.name}» за текущий отчетный период!")
     }
 
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -151,10 +145,7 @@ void calc() {
     }
 
     // Добавление итогов
-    def totalRow = getTotalRow(dataRows)
-    println("totalRow = "+totalRow)
-    dataRows.add(totalRow)
-
+    dataRows.add(getTotalRow(dataRows))
     dataRowHelper.save(dataRows)
 }
 
