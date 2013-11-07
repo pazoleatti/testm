@@ -35,14 +35,9 @@ def refBookCache = [:]
 @Field
 def currentDate = new Date()
 
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex = -1, def String cellName = null,
-                boolean required = false) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
-}
-
 void importFromXML() {
     def dataProvider = refBookFactory.getDataProvider(4L)
+    def dataProviderOKATO = refBookFactory.getDataProvider(3L)
     def refBook = refBookFactory.get(4L)
     def SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd")
     def reader = null
@@ -117,17 +112,17 @@ void importFromXML() {
                         def OKATO_DEFINITION = recordsMap.get("OKATO_DEFINITION")?.toString()
                         if (OKATO_DEFINITION!=null && OKATO_DEFINITION!=""){
                             def map = mapper.get("OKATO_FULL")
-                            def recordID = getRecordId(3, 'OKATO', OKATO_DEFINITION+"0"*(11-OKATO_DEFINITION.size()))
+                            def recordID = getRecordId(dataProviderOKATO, 'OKATO', OKATO_DEFINITION+"0"*(11-OKATO_DEFINITION.size()), currentDate)
                             if (recordID!=null) recordsMap.put(map.name,  new RefBookValue(RefBookAttributeType.REFERENCE, recordID))
                             else logger.info("Для элемента ${recordsMap.get("NAME")?.toString()} справочника «Коды субъектов Российской Федерации» в справочнике «Коды ОКАТО» не найдено соответствующее значение.")
                         } else {
                             recordsMap.put("OKATO", new RefBookValue(RefBookAttributeType.STRING, ""))
                         }
-                        def recordID = getRecordId(4, 'CODE', recordsMap.get("CODE").toString())
+                        def recordID = getRecordId(dataProvider, 'CODE', recordsMap.get("CODE").toString(), currentDate)
                         if (recordID==null) insertList.add(recordsMap)
                         break
                     case 3:
-                        def recordID = getRecordId(4, 'CODE', recordsMap.get("CODE").toString())
+                        def recordID = getRecordId(dataProvider, 'CODE', recordsMap.get("CODE").toString(), currentDate)
                         if (recordID!=null) deleteList.add(recordID)
                         break
                     case 2:
@@ -135,13 +130,13 @@ void importFromXML() {
                         def OKATO_DEFINITION = recordsMap.get("OKATO_DEFINITION")?.toString()
                         if (OKATO_DEFINITION!=null && OKATO_DEFINITION!=""){
                             def map = mapper.get("OKATO_FULL")
-                            def recordID = getRecordId(3, 'OKATO', OKATO_DEFINITION+"0"*(11-OKATO_DEFINITION.size()))
+                            def recordID = getRecordId(dataProviderOKATO, 'OKATO', OKATO_DEFINITION+"0"*(11-OKATO_DEFINITION.size()), currentDate)
                             if (recordID!=null) recordsMap.put(map.name,  new RefBookValue(RefBookAttributeType.REFERENCE, recordID))
                             else logger.info("Для элемента ${recordsMap.get("NAME")?.toString()} справочника «Коды субъектов Российской Федерации» в справочнике «Коды ОКАТО» не найдено соответствующее значение.")
                         } else {
                             recordsMap.put("OKATO", new RefBookValue(RefBookAttributeType.STRING, ""))
                         }
-                        def recordID = getRecordId(4, 'CODE', recordsMap.get("CODE").toString())
+                        def recordID = getRecordId(dataProvider, 'CODE', recordsMap.get("CODE").toString(), currentDate)
                         if (recordID!=null){
                             recordsMap.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordID))
                             updateList.add(recordsMap)
@@ -175,4 +170,13 @@ class Model {
         this.type = type
         this.name = name
     }
+}
+
+def getRecordId(def dataProvider, String alias, String value, Date date) {
+    String filter = "LOWER($alias) = LOWER('$value')"
+    def records = dataProvider.getRecords(date, null, filter, null).getRecords()
+    if (records.size() == 1) {
+        return (records.get(0).record_id.toString() as Long)
+    }
+    return null
 }
