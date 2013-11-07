@@ -93,7 +93,7 @@ def editableColumns = ["transactionNumber", "transactionKind", "contractor", "tr
 @Field
 def autoFillColumns = ["rowNumber", "income", "outcome", "deviationMinPrice", "deviationMaxPrice"]
 
-// Автозаполняемые атрибуты
+// Обязательно заполняемые атрибуты
 @Field
 def nonEmptyColumns = ["rowNumber", "transactionNumber", "transactionKind", "contractor", "transactionDate",
         "transactionEndDate", "resolveDate", "transactionType", "courseFix", "course", "minPrice", "maxPrice",
@@ -294,10 +294,10 @@ void setGraph10(def row, def result) {
 }
 
 void setGraph11(def row, def result) {
+    def graph6 = getRefBookValue(16, row.transactionType)?.TYPE?.stringValue
     switch (row.transactionKind){
         case "DF FX":
         case "NDF FX":
-            def graph6 = getRefBookValue(16, row.transactionType)?.TYPE?.stringValue
             if (row.minPrice <= row.courseFix && row.courseFix <= row.maxPrice ||
                     "Покупка".equals(graph6) && row.courseFix <= row.maxPrice ||
                     "Продажа".equals(graph6) && row.courseFix >= row.maxPrice){
@@ -317,7 +317,6 @@ void setGraph11(def row, def result) {
             }
             break
         case "FRA":
-            def graph6 = getRefBookValue(16, row.transactionType)?.TYPE?.stringValue
             if (row.minPrice <= row.courseFix && row.courseFix <= row.maxPrice ||
                     "Покупка".equals(graph6) && row.courseFix <= row.minPrice ||//различие от пред
                     "Продажа".equals(graph6) && row.courseFix >= row.maxPrice){
@@ -338,7 +337,6 @@ void setGraph11(def row, def result) {
             break
         case "DF PM":
         case "NDF PM":
-            def graph6 = getRefBookValue(16, row.transactionType)?.TYPE?.stringValue
             if (row.minPrice <= row.courseFix && row.courseFix <= row.maxPrice ||
                     "Покупка".equals(graph6) && row.courseFix <= row.minPrice ||//различие от пред
                     "Продажа".equals(graph6) && row.courseFix >= row.maxPrice){
