@@ -592,7 +592,7 @@ public final class ScriptUtils {
             if (calcValues.get(alias) == null && row.getCell(alias).getValue() == null) {
                 continue;
             }
-            if (calcValues.get(alias) == null
+            if (calcValues.get(alias) == null || row.getCell(alias).getValue() == null
                     || ((BigDecimal) calcValues.get(alias)).compareTo((BigDecimal) row.getCell(alias).getValue()) != 0) {
                 errorColumns.add('"' + getColumnName(row, alias) + '"');
             }
