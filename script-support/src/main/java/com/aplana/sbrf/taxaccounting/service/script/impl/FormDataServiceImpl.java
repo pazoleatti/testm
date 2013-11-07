@@ -384,6 +384,25 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
+    public int getFormDataPrevRowCount(FormData formData, int departmentId) {
+        ReportPeriod reportPeriod = reportPeriodService.get(formData.getReportPeriodId());
+        if (reportPeriod != null && reportPeriod.getOrder() == 1) {
+            return 0;
+        }
+        FormData prevFormData = getFormDataPrev(formData, departmentId);
+        List<DataRow<Cell>> prevDataRows = (prevFormData != null ? getDataRowHelper(prevFormData).getAllCached() : null);
+        int counter = 0;
+        if (prevDataRows != null && !prevDataRows.isEmpty()) {
+            for (DataRow<Cell> row : prevDataRows) {
+                if (row.getAlias() == null) {
+                    counter++;
+                }
+            }
+        }
+        return counter;
+    }
+
+    @Override
     public boolean existAcceptedFormDataPrev(FormData formData, int departmentId) {
         FormData prevFormData = getFormDataPrev(formData, departmentId);
         if (prevFormData != null && prevFormData.getState() == WorkflowState.ACCEPTED) {
