@@ -19,12 +19,6 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE :
         checkCreation()
         break
-    case FormDataEvent.CHECK :
-        logicalCheck()
-        break
-    case FormDataEvent.CALCULATE :
-        calc() && logicalCheck()
-        break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
@@ -35,7 +29,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE :
         consolidation()
-        calc() && logicalCheck()
+        logicalCheck()
         break
 }
 
@@ -45,62 +39,12 @@ switch (formDataEvent) {
 // графа 4  - totalPercIncome
 
 /**
- * Расчеты. Алгоритмы заполнения полей формы.
- */
-def calc() {
-    // если нф консолидированная, то не надо проверять данные из рну 38.1
-    if (formData.kind == FormDataKind.CONSOLIDATED) {
-        return true
-    }
-    def data = getData(formData)
-    def totalRow = getTotalRowFromRNU38_1()
-    if (totalRow == null) {
-        for (def row : getRows(data)) {
-            // графа 1
-            row.amount = null
-
-            // графа 2
-            row.incomePrev = null
-
-            // графа 3
-            row.incomeShortPosition = null
-
-            // графа 4
-            row.totalPercIncome = null
-        }
-        return true
-    }
-
-    /*
-     * Расчеты.
-     */
-
-    for (def row : getRows(data)) {
-        // графа 1
-        row.amount = totalRow.amount
-
-        // графа 2
-        row.incomePrev = totalRow.incomePrev
-
-        // графа 3
-        row.incomeShortPosition = totalRow.incomeShortPosition
-
-        // графа 4
-        row.totalPercIncome = row.incomePrev + row.incomeShortPosition
-    }
-
-    save(data)
-    return true
-}
-
-/**
  * Логические проверки.
  */
 def logicalCheck() {
     def data = getData(formData)
     if (getRows(data).isEmpty()) {
-        logger.error('Отсутствуют данные')
-        return false
+        return true
     }
     def row = getRows(data).get(0)
 
@@ -157,20 +101,38 @@ void consolidation() {
     def newRows = []
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceData = getData(source)
+        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        if (source != null && source.state == WorkflowState.ACCEPTED) {
+            def sourceData = getData(source)
+            if (it.formTypeId == formData.getFormType().getId()) {
+            //if (formData.kind == FormDataKind.CONSOLIDATED) {
+                // Консолидация данных из первичной рну-38.2 в консолидированную рну-38.2.
                 getRows(sourceData).each { row ->
                     newRows.add(row)
                 }
+            } else {
+                // Консолидация данных из первичной рну-38.1 в первичную рну-38.2.
+                def totalRow = getRowByAlias(sourceData, 'total')
+                def newRow = formData.createDataRow()
+                // графа 1..4
+                newRow.amount = totalRow.amount
+                newRow.incomePrev = totalRow.incomePrev
+                newRow.incomeShortPosition = totalRow.incomeShortPosition
+                newRow.totalPercIncome = newRow.incomePrev + newRow.incomeShortPosition
+                newRows.add(newRow)
             }
         }
     }
     if (!newRows.isEmpty()) {
         data.insert(newRows, 1)
+        updateIndexes(data)
     }
-    logger.info('Формирование консолидированной формы прошло успешно.')
+    save(data)
+    if (formData.kind == FormDataKind.CONSOLIDATED) {
+        logger.info('Формирование консолидированной формы прошло успешно.')
+    } else {
+        logger.info('Формирование первичной формы РНУ-38.2 прошло успешно.')
+    }
 }
 
 /**
@@ -203,14 +165,7 @@ void checkCreation() {
 def getTotalRowFromRNU38_1() {
     def formDataRNU_38_1 = formDataService.find(334, formData.kind, formDataDepartment.id, formData.reportPeriodId)
     def dataRNU_38_1 = getData(formDataRNU_38_1)
-    if (dataRNU_38_1 != null) {
-        for (def row : getRows(dataRNU_38_1)) {
-            if (row.getAlias() == 'total') {
-                return row
-            }
-        }
-    }
-    return null
+    return getRowByAlias(dataRNU_38_1, 'total')
 }
 
 /**
@@ -287,4 +242,33 @@ def checkRequiredColumns(def row, def columns) {
         return false
     }
     return true
+}
+
+/**
+ * Получить строку по алиасу.
+ *
+ * @param data хелпер
+ * @param alias алиас
+ */
+def getRowByAlias(def data, def alias) {
+    if (alias == null || alias == '') {
+        return null
+    }
+    if (data != null) {
+        for (def row : getRows(data)) {
+            if (alias.equals(row.getAlias())) {
+                return row
+            }
+        }
+    }
+    return null
+}
+
+/**
+ * Поправить индексы, потому что они после вставки не пересчитываются.
+ */
+void updateIndexes(def data) {
+    getRows(data).eachWithIndex { row, i ->
+        row.setIndex(i + 1)
+    }
 }

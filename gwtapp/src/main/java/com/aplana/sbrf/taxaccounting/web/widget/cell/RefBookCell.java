@@ -145,12 +145,12 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 					int exceedOffsetY = parent.getParentElement().getAbsoluteBottom();					
 
 					// Сдвигаем попап, если он не помещается в окно
-					if ((panel.getAbsoluteLeft() + panel.getOffsetWidth()) > windowWidth) {
-						exceedOffsetX -= panel.getOffsetWidth();
+					if ((exceedOffsetX + panel.getOffsetWidth()) > windowWidth) {
+						exceedOffsetX = parent.getParentElement().getAbsoluteRight() - panel.getOffsetWidth();
 					}
 
-					if ((parent.getAbsoluteTop() + panel.getOffsetHeight()) > windowHeight) {
-						exceedOffsetY -= panel.getOffsetHeight() + parent.getParentElement().getOffsetHeight();
+					if ((exceedOffsetY + panel.getOffsetHeight()) > windowHeight) {
+						exceedOffsetY = parent.getParentElement().getAbsoluteTop() - panel.getOffsetHeight();
 					}
 					panel.setPopupPosition(exceedOffsetX, exceedOffsetY);
 

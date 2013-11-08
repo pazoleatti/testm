@@ -182,7 +182,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 		if (isForm) {
 			MessageEvent.fire(SourcesPresenter.this, "Налоговая форма уже назначена в качестве источника");
 		} else {
-			MessageEvent.fire(SourcesPresenter.this, "Декларация уже назначена в качестве источника");
+			MessageEvent.fire(SourcesPresenter.this, "Источник уже назначен декларации");
 		}
 	}
 

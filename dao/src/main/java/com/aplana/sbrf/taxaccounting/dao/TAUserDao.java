@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+
+import java.util.List;
 
 /**
  * DAO-интерфейс для работы с пользователями системы
@@ -35,7 +35,7 @@ public interface TAUserDao {
 	 * Активирует/блокирует существующего пользователя
 	 * @param {@link TAUser} user идентификатор пользователя
 	 */
-	void setUserIsActive(int userId, boolean isActive);
+	void setUserIsActive(int userId, int isActive);
 
 	/**
 	 * Обновляет существующего пользователя. Sql строка формируется в вызывающем сервисе, 

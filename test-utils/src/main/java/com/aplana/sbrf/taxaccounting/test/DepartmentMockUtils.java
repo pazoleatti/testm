@@ -3,10 +3,7 @@ package com.aplana.sbrf.taxaccounting.test;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 
 public final class DepartmentMockUtils {

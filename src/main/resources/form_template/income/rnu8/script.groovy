@@ -11,46 +11,42 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 /**
  * Скрипт для РНУ-8.
  * Форма "(РНУ-8) Простой регистр налогового учёта «Требования»".
- *
- * @version 59
+ * formTemplateId=320
  *
  * @author rtimerbaev
+ * @author Stanislav Yasinskiy
  */
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         checkCreation()
         break
-    case FormDataEvent.CHECK :
-        allCheck()
+    case FormDataEvent.CHECK:
+        logicalCheck()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         calc()
-        allCheck()
+        logicalCheck()
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         addNewRow()
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED: // после принятия из подготовлена
         allCheck()
         break
-// обобщить
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         consolidation()
         calc()
-        if (allCheck()) {
-            // для сохранения изменений приемников
-            data.commit()
-        }
+        logicalCheck()
         break
 }
 
@@ -61,176 +57,120 @@ switch (formDataEvent) {
 // графа 5  - income
 // графа 6  - outcome
 
-def allCheck() {
-    return !hasError() && logicalCheck() && checkNSI()
-}
-
-/**
- * Имеются ли фатальные ошибки.
- */
-def hasError() {
-    return logger.containsLevel(LogLevel.ERROR)
-}
-
-/**
- * Вставка строки в случае если форма генерирует динамически строки итого (на основе данных введённых пользователем)
- */
+//Добавить новую строку
 void addNewRow() {
-    def data = data
-    DataRow<Cell> newRow = getNewRow()
-    def index = 0
-    if (currentDataRow!=null){
-        index = currentDataRow.getIndex()
-        def row = currentDataRow
-        while(row.getAlias()!=null && index>0){
-            row = getRows(data).get(--index)
-        }
-        if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
-            index++
-        }
-    }else if (getRows(data).size()>0) {
-        for(int i = getRows(data).size()-1;i>=0;i--){
-            def row = getRows(data).get(i)
-            if(row.getAlias()==null){
-                index = getRows(data).indexOf(row)+1
-                break
-            }
-        }
-    }
-    data.insert(newRow,index+1)
-}
-
-/**
- * Добавить новую строку.
- */
-def DataRow getNewRow() {
-    def DataRow row = formData.createDataRow()
-
-    // графа 3,5,6
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def row = formData.createDataRow()
+    def dataRows = dataRowHelper.getAllCached()
+    def size = dataRows.size()
+    def index = currentDataRow != null ? (currentDataRow.getIndex() + 1) : (size == 0 ? 1 : (size + 1))
     ['balance', 'income', 'outcome'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    return row
+    dataRowHelper.insert(row, index)
 }
 
-/**
- * Удалить строку.
- */
-def deleteRow() {
-    if (!isTotal(currentDataRow)) {
-        data.delete(currentDataRow)
-    }
+// Удалить строку
+void deleteRow() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.delete(currentDataRow)
 }
 
-/**
- * Расчеты. Алгоритмы заполнения полей формы.
- */
 void calc() {
-    def data = data
-    if (getRows(data).isEmpty()) {
-        return
-    }
-    /*
-	 * Проверка обязательных полей.
-	 */
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
 
-    // список проверяемых столбцов (графа 3,5,6)
-    def requiredColumns = ['balance', 'income', 'outcome']
-    for (def row : getRows(data)) {
-        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns)) {
-            return
-        }
-    }
-
-    // удалить строки "итого" и "итого по коду"
-    def delRow = []
-    getRows(data).each { row ->
+    // удалить строку "итого"
+    for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
+        row = (DataRow) iter.next()
         if (isTotal(row)) {
-            delRow += row
+            iter.remove()
+            dataRowHelper.delete(row)
         }
     }
-    delRow.each { row ->
-        data.delete(row)
-    }
-    if (getRows(data).isEmpty()) {
+
+    if (dataRows.isEmpty()) {
         return
     }
 
     // отсортировать/группировать
-    getRows(data).sort { getKnu(it.balance) }
+    dataRows.sort({ getKnu(it.balance) })
 
-    // графа 1
-    getRows(data).eachWithIndex { row, index ->
-        row.number = index + 1
-        row.code = row.balance
-        row.name = row.balance
-    }
-    data.save(getRows(data))
-
-    /** Столбцы для которых надо вычислять итого и итого по коду. Графа 5, 6. */
-    def totalColumns = ['income', 'outcome']
-
-    // добавить строку "итого"
-    def DataRow totalRow = formData.createDataRow()
-    totalRow.setAlias('total')
-    totalRow.getCell("fix").setColSpan(2)
-    totalRow.fix = 'Итого'
-    setTotalStyle(totalRow)
-    totalColumns.each { alias ->
-        totalRow.getCell(alias).setValue(getSum(alias))
-    }
-    data.insert(totalRow,getRows(data).size()+1)
+    // посчитать "итого"
+    def totalIncome = 0
+    def totalOutcom = 0
 
     // посчитать "итого по коду"
+    def totalColumns = ['income', 'outcome']
     def totalRows = [:]
     def tmp = null
     def sums = [:]
     totalColumns.each {
         sums[it] = 0
     }
-    getRows(data).eachWithIndex { row, i ->
-        if (!isTotal(row)) {
-            if (tmp == null) {
-                tmp = row.code
-            }
-            // если код расходы поменялся то создать новую строку "итого по коду"
-            if (tmp != row.code) {
-                totalRows.put(i, getNewRow(tmp, totalColumns, sums))
-                totalColumns.each {
-                    sums[it] = 0
-                }
-            }
-            // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
-            if (i == getRows(data).size() - 2) {
-                totalColumns.each {
-                    sums[it] += row.getCell(it).getValue()
-                }
-                totalRows.put(i + 1, getNewRow(row.code, totalColumns, sums))
-                totalColumns.each {
-                    sums[it] = 0
-                }
-            }
-            totalColumns.each {
-                sums[it] += row.getCell(it).getValue()
-            }
+
+    dataRows.eachWithIndex { row, i ->
+        row.number = i
+
+        if (row.income !=null)
+            totalIncome += row.income
+        if (row.outcome !=null)
+            totalOutcom += row.outcome
+
+        if (tmp == null) {
             tmp = row.code
         }
+        // если код расходы поменялся то создать новую строку "итого по коду"
+        if (tmp != row.code) {
+            totalRows.put(i, getNewRow(tmp, totalColumns, sums))
+            totalColumns.each {
+                sums[it] = 0
+            }
+        }
+        // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
+        if (i == dataRows.size() - 1) {
+            totalColumns.each {
+                def val = row.getCell(it).getValue()
+                if(val!=null)
+                    sums[it] += val
+            }
+            totalRows.put(i + 1, getNewRow(row.code, totalColumns, sums))
+            totalColumns.each {
+                sums[it] = 0
+            }
+        }
+        totalColumns.each {
+            def val = row.getCell(it).getValue()
+            if(val!=null)
+                sums[it] += val
+        }
+        tmp = row.code
     }
+    dataRowHelper.save(dataRows)
+
+    // добавить строку "итого"
+    def DataRow totalRow = formData.createDataRow()
+    totalRow.setAlias('total')
+    totalRow.getCell("fix").setColSpan(4)
+    totalRow.fix = 'Итого'
+    setTotalStyle(totalRow)
+    totalRow.income = totalIncome
+    totalRow.outcome = totalOutcom
+    dataRowHelper.insert(totalRow, dataRows.size() + 1)
 
     // добавить "итого по коду" в таблицу
-    def i = 0
+    i = 0
     totalRows.each { index, row ->
-        data.insert(row, index + i + 1)
+        dataRowHelper.insert(row, index + i + 1)
         i++
     }
 }
 
-/**
- * Логические проверки.
- */
 def logicalCheck() {
-    if (!getRows(data).isEmpty()) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    if (!dataRows.isEmpty()) {
         def numberList = []
 
         // список проверяемых столбцов (графа 1..6)
@@ -248,7 +188,7 @@ def logicalCheck() {
         // список групп кодов классификации для которых надо будет посчитать суммы
         def totalGroupsName = []
 
-        for (def row : getRows(data)) {
+        for (def row : dataRows) {
             if (isTotal(row)) {
                 hasTotal = true
                 continue
@@ -263,16 +203,18 @@ def logicalCheck() {
             if (numberList.contains(row.number)) {
                 logger.error("Нарушена уникальность номера по порядку ${row.number}!")
                 return false
-            }else{
+            } else {
                 numberList.add(row.number)
             }
 
-            // 3. Проверка итоговых значений по кодам классификации дохода - нахождение кодов классификации
+            // 3. Проверка соответствия балансового счета коду налогового учета
+
+            // 4. Проверка итоговых значений по кодам классификации дохода - нахождение кодов классификации
             if (!totalGroupsName.contains(row.code)) {
                 totalGroupsName.add(row.code)
             }
 
-            // 4. Проверка итогового значених по всей форме - подсчет сумм для общих итогов
+            // 5. Проверка итогового значених по всей форме - подсчет сумм для общих итогов
             totalColumns.each { alias ->
                 if (totalSums[alias] == null) {
                     totalSums[alias] = 0
@@ -283,30 +225,32 @@ def logicalCheck() {
 
 
         if (hasTotal) {
-            def totalRow = data.getDataRow(getRows(data),'total')
+            def totalRow = data.getDataRow(getRows(data), 'total')
 
-            // 3. Проверка итоговых значений по кодам классификации дохода
+            // 4. Проверка итоговых значений по кодам классификации дохода
             for (def codeName : totalGroupsName) {
-                def row = data.getDataRow(getRows(data),'total' + codeName)
+                def row = data.getDataRow(getRows(data), 'total' + codeName)
                 for (def alias : totalColumns) {
                     if (calcSumByCode(codeName, alias) != row.getCell(alias).getValue()) {
-                        def colName = getColumnName(row,alias)
+                        def colName = getColumnName(row, alias)
                         logger.error("Неверное итоговое значение по коду ${getKnu(codeName)} столбца \"$colName\"!")
                         return false
                     }
                 }
             }
 
-            // 4. Проверка итогового значений по всей форме
+            // 5. Проверка итогового значений по всей форме
             for (def alias : totalColumns) {
                 if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
-                    def colName = getColumnName(totalRow,alias)
+                    def colName = getColumnName(totalRow, alias)
                     logger.error("Неверное итоговое значение столбца \"$colName\"!")
                     return false
                 }
             }
         }
     }
+    checkNSI()
+
     return true
 }
 
@@ -318,18 +262,18 @@ def checkNSI() {
         if (!isTotal(row)) {
             def rowStart = getRowIndexString(row)
             // 1. Проверка графы «Код налогового учета»
-            if (row.code!=null && getKnu(row.code)==null) {
-                logger.warn(rowStart+'код налогового учета в справочнике отсутствует!!')
+            if (row.code != null && getKnu(row.code) == null) {
+                logger.warn(rowStart + 'код налогового учета в справочнике отсутствует!!')
             }
 
             // 2. Проверка графы «Балансовый счет. Номер»
-            if (row.balance!=null && getIncomeType(row.balance)==null) {
-                logger.warn(rowStart+'операция в РНУ не учитывается!')
+            if (row.balance != null && getIncomeType(row.balance) == null) {
+                logger.warn(rowStart + 'операция в РНУ не учитывается!')
             }
 
             // 3. Проверка графы «Балансовый счет. Наименование»
-            if (row.name!=null && getNumber(row.name)==null) {
-                logger.warn(rowStart+'балансовый счёт в справочнике отсутствует!')
+            if (row.name != null && getNumber(row.name) == null) {
+                logger.warn(rowStart + 'балансовый счёт в справочнике отсутствует!')
             }
         }
     }
@@ -341,7 +285,7 @@ def checkNSI() {
  * @param row
  * @return
  */
-def getRowIndexString(def DataRow row){
+def getRowIndexString(def DataRow row) {
     def index = row.number
     if (index != null) {
         return "В строке \"№ пп\" равной $index "
@@ -364,36 +308,34 @@ void consolidation() {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                getRows(getData(source)).each { row->
+                getRows(getData(source)).each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        data.insert(row,getRows(data).size()+1)
+                        data.insert(row, getRows(data).size() + 1)
                     }
                 }
             }
         }
     }
     def ignoredRows = []
-    for(def row : getRows(data)){
+    for (def row : getRows(data)) {
         if (!ignoredRows.contains(row)) {
-            for(def rowB : getRows(data)){
-                if(row!=rowB && row.balance==rowB.balance && !ignoredRows.contains(rowB)){
-                    row.income+=rowB.income
-                    row.outcome+=rowB.outcome
+            for (def rowB : getRows(data)) {
+                if (row != rowB && row.balance == rowB.balance && !ignoredRows.contains(rowB)) {
+                    row.income += rowB.income
+                    row.outcome += rowB.outcome
                     ignoredRows.add(rowB)
                 }
             }
         }
     }
     data.save(getRows(data))
-    ignoredRows.each{
+    ignoredRows.each {
         data.delete(it)
     }
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
-/**
- * Проверка при создании формы.
- */
+// Проверка при создании формы.
 void checkCreation() {
     // отчётный период
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
@@ -428,7 +370,7 @@ def isTotal(def row) {
  */
 def getSum(def columnAlias) {
     def from = 0
-    def to = getRows(data).size()-1
+    def to = getRows(data).size() - 1
     if (from > to) {
         return 0
     }
@@ -442,7 +384,7 @@ def getNewRow(def alias, def totalColumns, def sums) {
     def newRow = formData.createDataRow()
     newRow.setAlias('total' + alias)
     newRow.getCell("fix").setColSpan(2)
-    newRow.fix = 'Итого по КНУ '+getKnu(alias)
+    newRow.fix = 'Итого по КНУ ' + getKnu(alias)
     setTotalStyle(newRow)
     totalColumns.each {
         newRow.getCell(it).setValue(sums[it])
@@ -501,7 +443,7 @@ def checkRequiredColumns(def row, def columns) {
     if (!colNames.isEmpty()) {
         def errorBegin = getRowIndexString(row)
         def errorMsg = colNames.join(', ')
-        logger.error(errorBegin+ "не заполнены колонки : $errorMsg.")
+        logger.error(errorBegin + "не заполнены колонки : $errorMsg.")
         return false
     }
     return true
@@ -519,7 +461,7 @@ def DataRowHelper getData(def formData) {
     return null
 }
 
-def DataRowHelper getData(){
+def DataRowHelper getData() {
     return getData(formData)
 }
 

@@ -471,8 +471,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 // проверка обязательности заполнения записей справочника
                 List<RefBookAttribute> attributes = refBook.getAttributes();
                 List<String> errors = refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
-                if (errors.size() > 0){
-                    throw new DaoException("Поля " + errors.toString() + " являются обязательными для заполнения");
+
+                if (errors.size() > 0) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Поля ");
+                    for (int j = 0; j < errors.size(); j++) {
+                        String field = errors.get(j);
+                        sb.append("«").append(field).append("»");
+                        if (j != errors.size() - 1) {
+                            sb.append(", ");
+                        }
+                    }
+                    sb.append(" являются обязательными для заполнения.");
+                    throw new DaoException(sb.toString());
                 }
 
                 // создаем строки справочника
@@ -530,7 +541,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
             // + REF_BOOK_VALUE
             jt.batchUpdate(INSERT_REF_BOOK_VALUE, listValues);
-        } catch (Exception ex) {
+        }
+        catch (DaoException ex) {
+            throw ex;
+        }
+        catch (Exception ex) {
 			throw new DaoException("Не удалось обновить значения справочника", ex);
         }
     }

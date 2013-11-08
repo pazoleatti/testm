@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.gwtplatform.mvp.client.UiHandlers;

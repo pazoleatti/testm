@@ -1,14 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -22,6 +13,14 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepa
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Dmitriy Levykin
@@ -105,8 +104,11 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 paramsMap.put(DepartmentParamAliases.TAX_RATE.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getTaxRate()));
                 paramsMap.put(DepartmentParamAliases.TYPE.name(), new RefBookValue(RefBookAttributeType.REFERENCE, depCombined.getType()));
             }
-
-            provider.updateRecords(calendarFrom.getTime(), Arrays.asList(paramsMap));
+            if (depCombined.getRecordId() == null) {
+                provider.insertRecords(calendarFrom.getTime(), Arrays.asList(paramsMap));
+            } else {
+                provider.updateRecords(calendarFrom.getTime(), Arrays.asList(paramsMap));
+            }
         }
 
         return new SaveDepartmentCombinedResult();

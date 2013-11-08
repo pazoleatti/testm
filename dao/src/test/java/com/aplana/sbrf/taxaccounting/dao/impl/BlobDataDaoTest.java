@@ -1,13 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Date;
-import java.util.UUID;
-
+import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,9 +12,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ClassUtils;
 
-import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.BlobData;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * User: avanteev
@@ -65,10 +63,10 @@ public class BlobDataDaoTest {
         blobDataDao.save(blobData);
     }
 
-    @Test(expected = DaoException.class)
+    @Test
     public void deleteTest(){
         blobDataDao.create(blobData);
         blobDataDao.delete(blobData.getUuid());
-        blobDataDao.get(blobData.getUuid());
+        Assert.assertNull(blobDataDao.get(blobData.getUuid()));
     }
 }

@@ -37,9 +37,6 @@ public class DeclarationDataAccessServiceImpl implements
 	private DeclarationDataDao declarationDataDao;
 
 	@Autowired
-	private ReportPeriodDao reportPeriodDao;
-
-	@Autowired
 	private PeriodService reportPeriodService;
 	
 	@Autowired

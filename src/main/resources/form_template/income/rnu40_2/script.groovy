@@ -7,8 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 /**
  * Форма "(РНУ-40.2) Регистр налогового учёта начисленного процентного дохода по прочим дисконтным облигациям. Отчёт 2".
  *
- * @version 59
- *
  * @author rtimerbaev
  */
 
@@ -41,30 +39,6 @@ switch (formDataEvent) {
 // графа 4  - cost
 // графа 5  - bondsCount
 // графа 6  - percent
-
-// TODO (Ramil Timerbaev) убрать?
-/**
- * Добавить новую строку.
- */
-def addNewRow() {
-    def data = getData(formData)
-    def newRow = formData.createDataRow()
-    def index
-
-    if (currentDataRow == null || getIndex(currentDataRow) == -1) {
-        index = getIndexByAlias(data, 'total1')
-    } else if (currentDataRow.getAlias() == null) {
-        index = getIndex(currentDataRow) + 1
-    } else {
-        def alias = currentDataRow.getAlias()
-        if (alias.contains('total')) {
-            index = getIndexByAlias(data, alias)
-        } else {
-            index = getIndexByAlias(data, 'total' + alias)
-        }
-    }
-    data.insert(newRow, index + 1)
-}
 
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
@@ -421,13 +395,13 @@ def checkRequiredColumns(def row, def columns) {
  *      в приемник строки вставляются перед строкой с этим псевдонимом
  */
 void copyRows(def sourceData, def destinationData, def fromAlias, def toAlias) {
-    def from = getIndexByAlias(sourceData, fromAlias) + 1
-    def to = getIndexByAlias(sourceData, toAlias)
+    def from = getIndexByAlias(sourceData, fromAlias)
+    def to = getIndexByAlias(sourceData, toAlias) - 1
     if (from >= to) {
         return
     }
     def copyRows = getRows(sourceData).subList(from, to)
-    getRows(destinationData).addAll(getIndexByAlias(destinationData, toAlias), copyRows)
+    getRows(destinationData).addAll(getIndexByAlias(destinationData, toAlias) - 1, copyRows)
     updateIndexes(destinationData)
 }
 
@@ -573,9 +547,11 @@ def getRowsBySection(def data, def section) {
 
 /**
  * Получить посчитанную строку для рну 40.2 из рну 40.1.
+ * <p>
  * Формируется строка для рну 40.2.
  * Для формирования строки отбираются данные из 40.1 по номеру и названию тб и коду валюты.
  * У строк рну 40.1, подходящих под эти условия, суммируются графы 6, 7, 10 в строку рну 40.2 графы 4, 5, 6.
+ * </p>
  *
  * @param number номер тб
  * @param name наименование тб
@@ -600,9 +576,9 @@ def getCalcRowFromRNU_40_1(def number, def name, def code, def rows40_1) {
                 calcRow.percent = 0
             }
             // графа 4, 5, 6 = графа 6, 7, 10
-            calcRow.cost += row.cost
-            calcRow.bondsCount += row.bondsCount
-            calcRow.percent += row.percent
+            calcRow.cost += (row.cost ?: 0)
+            calcRow.bondsCount += (row.bondsCount ?: 0)
+            calcRow.percent += (row.percent ?: 0)
         }
     }
     return calcRow

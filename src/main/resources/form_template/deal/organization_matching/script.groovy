@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import groovy.transform.Field
 
 /**
  * 410 - Согласование организации
@@ -21,18 +22,33 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        addRow()
+        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
-        deleteRow()
+        formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED:
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
         logicCheck()
         break
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
         accepted()
         break
 }
+
+// Редактируемые атрибуты
+@Field
+def editableColumns = ['name', 'country', 'regNum', 'taxpayerCode', 'address', 'inn', 'kpp', 'code',
+        'offshore', 'dopInfo', 'skolkovo', 'editSign', 'refBookRecord']
+
+// Автозаполняемые атрибуты
+@Field
+def autoFillColumns = ['rowNum']
+
+// Проверяемые на пустые значения атрибуты
+@Field
+def nonEmptyColumns = ['rowNum', 'name', 'country', 'address', 'inn', 'code', 'editSign', 'offshore', 'skolkovo']
 
 void accepted() {
     def List<Map<String, RefBookValue>> updateList = new ArrayList<Map<String, RefBookValue>>()
@@ -77,36 +93,16 @@ Map<String, RefBookValue> getRecord(DataRow<Cell> row) {
     map.put("TAXPAYER_CODE", new RefBookValue(RefBookAttributeType.STRING, row.taxpayerCode))
     map.put("REG_NUM", new RefBookValue(RefBookAttributeType.STRING, row.regNum))
     map.put("COUNTRY", new RefBookValue(RefBookAttributeType.REFERENCE, row.country))
+    map.put("OFFSHORE", new RefBookValue(RefBookAttributeType.REFERENCE, row.offshore))
+    map.put("DOP_INFO", new RefBookValue(RefBookAttributeType.STRING, row.dopInfo))
+    map.put("SKOLKOVO", new RefBookValue(RefBookAttributeType.REFERENCE, row.skolkovo))
     map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, row.refBookRecord))
 
-    map
+    return map
 }
 
-void deleteRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.delete(currentDataRow)
-    dataRowHelper.save(dataRowHelper.getAllCached())
-}
 
-void addRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def row = formData.createDataRow()
-    def dataRows = dataRowHelper.getAllCached()
-    def size = dataRows.size()
-    def index = currentDataRow != null ? (currentDataRow.getIndex() + 1) : (size == 0 ? 1 : (size + 1))
-    row.keySet().each {
-        row.getCell(it).setStyleAlias('Автозаполняемая')
-    }
-    ['name', 'country', 'regNum', 'taxpayerCode', 'address', 'inn', 'kpp', 'code', 'editSign', 'refBookRecord'].each {
-        row.getCell(it).editable = true
-        row.getCell(it).setStyleAlias('Редактируемая')
-    }
-    dataRowHelper.insert(row, index)
-}
-
-/**
- * Логические проверки
- */
+// Логические проверки
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
@@ -116,9 +112,10 @@ void logicCheck() {
             continue
         }
         def rowNum = row.getIndex()
+        editSignCode = refBookService.getRecordData(80, row.editSign).CODE.numberValue
         // Проверка заполненности полей в строках НЕ на удаление
-        if (row.editSign == null || refBookService.getRecordData(80, row.editSign).CODE.numberValue != 2) {
-            ['rowNum', 'name', 'country', 'address', 'inn', 'code', 'editSign'].each {
+        if (row.editSign == null || editSignCode != 2) {
+            nonEmptyColumns.each {
                 def rowCell = row.getCell(it)
                 if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                     def msg = rowCell.column.name
@@ -136,12 +133,12 @@ void logicCheck() {
             }
         }
         // Проверка на заполнение атрибута «Запись справочника»
-        if (row.editSign != null && row.refBookRecord == null && refBookService.getRecordData(80, row.editSign).CODE.numberValue != 0) {
+        if (row.editSign != null && row.refBookRecord == null && editSignCode != 0) {
             def msg = row.getCell('refBookRecord').column.name
             logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
         }
         // Проверка уникальности полей в рамках справочника «Организации – участники контролируемых сделок»
-        if (row.editSign == null || refBookService.getRecordData(80, row.editSign).CODE.numberValue == 0) {
+        if (row.editSign == null || editSignCode == 0) {
             def refDataProvider = refBookFactory.getDataProvider(9)
             // Рег. номер организации
             def val = row.regNum
@@ -165,10 +162,10 @@ void logicCheck() {
             val = row.inn
             if (val != null) {
                 def msg = row.getCell("inn").column.name
-                if (!val.matches('[0-9]*')) {
+                if (!val.matches('([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}')) {
                     logger.error("Строка $rowNum: «$msg» содержит недопустимые символы!")
                 } else {
-                    def res = refDataProvider.getRecords(new Date(), null, "INN_KIO = $val", null);
+                    def res = refDataProvider.getRecords(new Date(), null, "INN_KIO = '$val'", null);
                     if (res.getRecords().size() > 0) {
                         logger.warn("Строка $rowNum: «$msg» уже существует в справочнике «Организации – участники контролируемых сделок»!")
                     }
@@ -176,11 +173,16 @@ void logicCheck() {
             }
             // КПП
             val = row.kpp
-            if (row.kpp != null) {
-                def res = refDataProvider.getRecords(new Date(), null, "KPP = $val", null);
-                if (res.getRecords().size() > 0) {
-                    def msg = row.getCell("kpp").column.name
-                    logger.warn("Строка $rowNum: «$msg» уже существует в справочнике «Организации – участники контролируемых сделок»!")
+            if (val != null) {
+                val = val.toString()
+                def msg = row.getCell("kpp").column.name
+                if (!val.matches('([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-F]{2})([0-9]{3})')) {
+                    logger.error("Строка $rowNum: «$msg» содержит недопустимые символы!")
+                } else {
+                    def res = refDataProvider.getRecords(new Date(), null, "KPP = $val", null);
+                    if (res.getRecords().size() > 0) {
+                        logger.warn("Строка $rowNum: «$msg» уже существует в справочнике «Организации – участники контролируемых сделок»!")
+                    }
                 }
             }
         }
@@ -198,9 +200,7 @@ void logicCheck() {
         logger.error("Одна запись справочника не может быть отредактирована более одного раза в одной и той же форме!")
 }
 
-/**
- * Алгоритмы заполнения полей формы.
- */
+// Алгоритмы заполнения полей формы
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()

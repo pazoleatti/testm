@@ -15,24 +15,27 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 @Service("importService")
 public class ImportServiceImpl implements ImportService {
 
-    private final String XLS = "xls";
-    private final String RNU = "rnu";
-    private final String XML = "xml";
-    private final String DEFAULT_CHARSET = "UTF-8";
-    private final String ENTER = "\r\n";
-    private final String TAB = "\t";
-    private final char SEPARATOR = '|';
+    private static final String XLS = "xls";
+    private static final String RNU = "rnu";
+    private static final String XML = "xml";
+    private static final String DEFAULT_CHARSET = "UTF-8";
+    private static final String ENTER = "\r\n";
+    private static final String TAB = "\t";
+    private static final char SEPARATOR = '|';
     /**
      * Используется при обработке файла формата *.rnu (csv),
      * чтобы избежать ошибку при разборе строки файла: в случаях когда есть открывающий (нечетный) двойной апостраф,
      * но нет закрывающего (четного).
      */
-    private final char QUOTE = '\'';
+    private static final char QUOTE = '\'';
 
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -187,15 +190,23 @@ public class ImportServiceImpl implements ImportService {
         StringBuilder sb = new StringBuilder();
         sb.append("<data>").append(ENTER);
 
-        ArrayList<Integer> skipList = getSkipCol(sheet, firstP);
+        // запись смещения для excel-файла
+        sb.append("<infoXLS>").append(ENTER);
+        String[] tmp = {Integer.toString(firstP.getY() + 1)};
+        addRow(sb, tmp, "rowOffset");
+        tmp[0] = Integer.toString(firstP.getX() + 1);
+        addRow(sb, tmp, "colOffset");
+        sb.append("</infoXLS>").append(ENTER);
+
+        Set<Integer> skipSet = getSkipCol(sheet, firstP);
 
         String rowStr;
         int indexRow = -1;
-        Iterator rows = sheet.rowIterator();
 
-        while (rows.hasNext()) {
-            indexRow += 1;
-            HSSFRow row = (HSSFRow) rows.next();
+        for (int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum(); i ++)
+        {
+            indexRow++;
+            HSSFRow row = sheet.getRow(i);
 
             // брать строки с позиции начала таблицы
             if (indexRow < firstP.getY()) {
@@ -207,7 +218,7 @@ public class ImportServiceImpl implements ImportService {
             }
 
             // получить значения ячеек строки
-            rowStr = getRowString(row, firstP.getX(), columnsCount, skipList);
+            rowStr = getRowString(row, firstP.getX(), columnsCount, skipSet);
             sb.append(rowStr);
         }
         sb.append("</data>");
@@ -220,8 +231,8 @@ public class ImportServiceImpl implements ImportService {
      * @param sheet  лист XLS
      * @param firstP начало таблицы
      */
-    ArrayList<Integer> getSkipCol(HSSFSheet sheet, Point firstP) {
-        ArrayList<Integer> value = new ArrayList<Integer>();
+    Set<Integer> getSkipCol(HSSFSheet sheet, Point firstP) {
+        Set<Integer> value = new HashSet<Integer>();
         // Список объединенных столбцов
         Set<Integer> mergeRegion = new HashSet<Integer>();
         for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
@@ -238,11 +249,15 @@ public class ImportServiceImpl implements ImportService {
         if (mergeRegion.isEmpty()) {
             return value;
         }
-        Iterator rows = sheet.rowIterator();
+
         int indexRow = -1;
-        while (rows.hasNext()) {
+
+        for (int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum(); i++) {
             indexRow += 1;
-            HSSFRow row = (HSSFRow) rows.next();
+            HSSFRow row = sheet.getRow(i);
+            if (row == null) {
+                continue;
+            }
 
             // брать строки с позиции начала таблицы
             if (indexRow < (firstP.getY() + 2)) {
@@ -250,16 +265,18 @@ public class ImportServiceImpl implements ImportService {
             } else if (indexRow > (firstP.getY() + 2)) {
                 break;
             }
-            Iterator<Cell> iterator = row.cellIterator();
+
             int indexCol = -1;
-            String cellValue;
-            while (iterator.hasNext()) {
+            for (int j = row.getFirstCellNum(); j < row.getLastCellNum(); j++) {
                 indexCol++;
                 // получить значение ячейки
-                HSSFCell cell = ((HSSFCell) iterator.next());
+                HSSFCell cell = row.getCell(j);
+                if (cell == null) {
+                    continue;
+                }
                 // Пропускаем ячейки только в объединенных столбцах
                 if (mergeRegion.contains(cell.getColumnIndex())) {
-                    cellValue = getCellValue(cell);
+                    String cellValue = getCellValue(cell);
                     if (cellValue == null || "".equals(cellValue)) {
                         value.add(indexCol);
                     }
@@ -305,10 +322,9 @@ public class ImportServiceImpl implements ImportService {
         }
         StringBuilder sb = new StringBuilder();
         sb.append(TAB).append("<row>").append(ENTER);
-        String cellValue;
         Iterator<Cell> iterator = row.cellIterator();
         while (iterator.hasNext()) {
-            cellValue = getCellValue((HSSFCell) iterator.next());
+            String cellValue = getCellValue((HSSFCell) iterator.next());
             sb.append(TAB).append(TAB).append("<cell>");
             sb.append(cellValue != null ? cellValue : "");
             sb.append("</cell>").append(ENTER);
@@ -324,21 +340,20 @@ public class ImportServiceImpl implements ImportService {
      * @param colP         номер ячейки с которой брать данные
      * @param columnsCount количество столбцов в таблице
      */
-    private String getRowString(HSSFRow row, Integer colP, Integer columnsCount, ArrayList<Integer> skipList) {
+    private String getRowString(HSSFRow row, Integer colP, Integer columnsCount, Set<Integer> skipSet) {
         if (row == null) {
             return "<row/>";
         }
         StringBuilder sb = new StringBuilder();
         sb.append(TAB).append("<row>").append(ENTER);
-        String cellValue;
 
-        Iterator<Cell> iterator = row.cellIterator();
         int indexCol = -1;
-        while (iterator.hasNext()) {
+        for (int i = row.getFirstCellNum(); i < row.getLastCellNum(); i++) {
             indexCol++;
-            // получить значение ячейки
-            cellValue = getCellValue((HSSFCell) iterator.next());
-            if (skipList.contains(indexCol)) continue;
+            String cellValue = getCellValue(row.getCell(i));
+            if (skipSet.contains(indexCol)) {
+                continue;
+            }
             if (colP != null && indexCol + row.getFirstCellNum() < colP.shortValue()) {
                 continue;
             }
@@ -409,21 +424,20 @@ public class ImportServiceImpl implements ImportService {
             return null;
         }
         // найти координату startStr
-        Iterator rows = sheet.rowIterator();
         int firstRow = -1;
         int firstCol = 0;
         boolean isFind = false;
-        while (rows.hasNext() && !isFind) {
+
+        for (int i = sheet.getFirstRowNum();  i <= sheet.getLastRowNum() && !isFind ; i++) {
             firstRow++;
             firstCol = -1;
-            HSSFRow row = (HSSFRow) rows.next();
+            HSSFRow row = sheet.getRow(i);
             if (row == null) {
                 continue;
             }
-            Iterator<Cell> cells = row.cellIterator();
-            while (cells.hasNext()) {
+            for (int j = row.getFirstCellNum(); j < row.getLastCellNum(); j++) {
                 firstCol++;
-                String cell = getCellValue((HSSFCell) cells.next());
+                String cell = getCellValue(row.getCell(j));
                 if (value.equals(cell)) {
                     firstCol = firstCol + row.getFirstCellNum();
                     isFind = true;

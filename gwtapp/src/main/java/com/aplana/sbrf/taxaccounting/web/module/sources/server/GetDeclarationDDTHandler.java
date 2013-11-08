@@ -28,10 +28,7 @@ public class GetDeclarationDDTHandler
 	@Autowired
 	private SourceService sourceService;
 
-	@Autowired
-	private DepartmentService departmentService;
-
-    public GetDeclarationDDTHandler() {
+	public GetDeclarationDDTHandler() {
         super(GetDeclarationDDTAction.class);
     }
 

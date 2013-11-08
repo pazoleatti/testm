@@ -11,7 +11,7 @@ public interface DeclarationDataDao {
 	 * Получить декларацию
 	 * @param declarationDataId идентификатор декларации
 	 * @return объект декларации
-	 * @throws DaoException если такой декларации не существует
+	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если такой декларации не существует
 	 */
 	DeclarationData get(long declarationDataId);
 
@@ -24,36 +24,12 @@ public interface DeclarationDataDao {
 	boolean hasXmlData(long declarationDataId);
 	
 	/**
-	 * Получить данные декларации в формате законодателя (XML)
-	 * @param declarationDataId идентификатор декларации
-	 * @return данные декларации в формате законодателя
-	 * @throws DaoException если такой декларации не существует
-	 */
-	String getXmlData(long declarationDataId);
-	
-	/**
-	 * Получить отчет в формате XLSX
-	 * @param declarationDataId идентификатор декларации
-	 * @return данные декларации в формате законодателя
-	 * @throws DaoException если такой декларации не существует
-	 */
-	byte[] getXlsxData(long declarationDataId);
-	
-	/**
-	 * Получить отчет в формате PDF
-	 * @param declarationDataId идентификатор декларации
-	 * @return данные декларации в формате законодателя
-	 * @throws DaoException если такой декларации не существует
-	 */
-	byte[] getPdfData(long declarationDataId);
-	
-	/**
 	 * Сохраняет новую декларацию в БД. 
 	 * Этот метод позволяет сохранять только новые декларации (т.е. те, у которых id == null). 
 	 * При попытке сохранить уже существующий объект (с непустым id) будет выброшен DaoException
 	 * @param declarationData объект декларации
 	 * @return идентификатор сохранённой записи
-	 * @throws DaoException если передана декларация с непустым id
+	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если передана декларация с непустым id
 	 */
 	long saveNew(DeclarationData declarationData);
 	
@@ -61,39 +37,14 @@ public interface DeclarationDataDao {
 	 * Установить флаг принятия декларации
 	 * @param declarationDataId идентификатор декларации
 	 * @param accepted признак принятия
-	 * @throws DaoException если такой декларации не существует
+	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если такой декларации не существует
 	 */
 	void setAccepted(long declarationDataId, boolean accepted);
 	
 	/**
-	 * Задать данные декларации в формате законодателя (XML)
-	 * @param declarationDataId идентификтор декларации
-	 * @param xmlData данные декларации в формате законодателя
-	 * @throws DaoException если такой декларации не существует
-	 */
-	void setXmlData(long declarationDataId, String xmlData);
-	
-	
-	/**
-	 * Задать результат формирования отчета в формате XLSX 
-	 * @param declarationDataId идентификтор декларации
-	 * @param xmlData данные декларации в формате законодателя
-	 * @throws DaoException если такой декларации не существует
-	 */
-	void setXlsxData(long declarationDataId, byte[] xlsxData);
-	
-	/**
-	 * Задать результат формирования отчета в формате PDF
-	 * @param declarationDataId идентификтор декларации
-	 * @param xmlData данные декларации в формате законодателя
-	 * @throws DaoException если такой декларации не существует
-	 */
-	void setPdfData(long declarationDataId, byte[] pdfData);
-	
-	/**
 	 * Удалить декларацию
 	 * @param declarationDataId идентификатор декларации
-	 * @throws DaoException если такой декларации не существует
+	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если такой декларации не существует
 	 */
 	void delete(long declarationDataId);
 
@@ -115,7 +66,7 @@ public interface DeclarationDataDao {
 	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
 	 * @param reportPeriodId идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
 	 * @return декларацию или null, если такой декларации не найдено
-	 * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
+	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
 	 */
 	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
 
@@ -125,4 +76,10 @@ public interface DeclarationDataDao {
 	 * @return количество записей, удовлетворяющих фильтру
 	 */
 	int getCount(DeclarationDataFilter filter);
+
+    /**
+     * Обновление данных декларации(как правило только ссылки на blob_data)
+     * @param declarationData
+     */
+    void update(DeclarationData declarationData);
 }

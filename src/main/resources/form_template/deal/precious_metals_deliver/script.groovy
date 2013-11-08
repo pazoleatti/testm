@@ -3,9 +3,8 @@ package form_template.deal.precious_metals_deliver
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-
-import java.text.SimpleDateFormat
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import groovy.transform.Field
 
 /**
  * 393 - Поставочные срочные сделки с драгоценными металлами (18)
@@ -14,214 +13,157 @@ import java.text.SimpleDateFormat
  */
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        deleteAllStatic()
-        sort()
         calc()
-        addAllStatic()
         logicCheck()
         break
     case FormDataEvent.CHECK:
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        addRow()
+        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
-        deleteRow()
+        formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
-// После принятия из Утверждено
-    case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
-        logicCheck()
-        break
-// После принятия из Подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
-        logicCheck()
-        break
-// Консолидация
-    case FormDataEvent.COMPOSE:
-        consolidation()
-        deleteAllStatic()
-        sort()
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
         calc()
-        addAllStatic()
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
-// Импорт
+    case FormDataEvent.COMPOSE: // Консолидация
+        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        calc()
+        logicCheck()
+        break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            deleteAllStatic()
-            sort()
-            calc()
-            addAllStatic()
-            logicCheck()
-        }
+        calc()
+        logicCheck()
         break
 }
 
-def getAtributes() {
-    [
-            rowNum:                     ['rowNum', 'гр. 1', '№ п/п'],
-            name:                       ['name', 'гр. 2', 'Полное наименование с указанием ОПФ'],
-            innKio:                     ['innKio', 'гр. 3', 'ИНН/ КИО'],
-            country:                    ['country', 'гр. 4.1', 'Наименование страны регистрации'],
-            countryCode1:               ['countryCode1', 'гр. 4.2', 'Код страны регистрации по классификатору ОКСМ'],
-            contractNum:                ['contractNum', 'гр. 5', 'Номер договора'],
-            contractDate:               ['contractDate', 'гр. 6', 'Дата договора'],
-            transactionNum:             ['transactionNum', 'гр. 7', 'Номер сделки'],
-            transactionDeliveryDate:    ['transactionDeliveryDate', 'гр. 8', 'Дата заключения сделки'],
-            innerCode:                  ['innerCode', 'гр. 9.1', 'Внутренний код'],
-            okpCode:                    ['okpCode', 'гр. 9.2', 'Код по ОКП'],
-            unitCountryCode:            ['unitCountryCode', 'гр. 9.3', 'Код страны происхождения предмета сделки'],
-            signPhis:                   ['signPhis', 'гр. 10', 'Признак физической поставки драгоценного металла'],
-            signTransaction:            ['signTransaction', 'гр. 11', 'Признак внешнеторговой сделки'],
-            countryCode2:               ['countryCode2', 'гр. 12.1', 'Код страны по классификатору ОКСМ'],
-            region1:                    ['region1', 'гр. 12.2', 'Регион (код)'],
-            city1:                      ['city1', 'гр. 12.3', 'Город'],
-            settlement1:                ['settlement1', 'гр. 12.4', 'Населенный пункт'],
-            countryCode3:               ['countryCode3', 'гр. 13.1', 'Код страны по классификатору ОКСМ'],
-            region2:                    ['region2', 'гр. 13.2', 'Регион (код)'],
-            city2:                      ['city2', 'гр. 13.3', 'Город'],
-            settlement2:                ['settlement2', 'гр. 13.4', 'Населенный пункт'],
-            conditionCode:              ['conditionCode', 'гр. 14', 'Код условия поставки'],
-            count:                      ['count', 'гр. 15', 'Количество'],
-            incomeSum:                  ['incomeSum', 'гр. 16', 'Сумма доходов Банка по данным бухгалтерского учета, руб.'],
-            consumptionSum:             ['consumptionSum', 'гр. 17', 'Сумма расходов Банка по данным бухгалтерского учета, руб.'],
-            priceOne:                   ['priceOne', 'гр. 18', 'Цена (тариф) за единицу измерения без учета НДС, руб.'],
-            totalNds:                   ['totalNds', 'гр. 19', 'Итого стоимость без учета НДС, руб.'],
-            transactionDate:            ['transactionDate', 'гр. 20', 'Дата совершения сделки']
-    ]
+//// Кэши и константы
+@Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+@Field
+def refBookCache = [:]
+
+// Редактируемые атрибуты
+@Field
+def editableColumns = ['name', 'dependence', 'dealType', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode',
+        'unitCountryCode', 'signPhis', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
+        'city2', 'settlement2', 'conditionCode', 'incomeSum', 'consumptionSum', 'transactionDate']
+
+// Автозаполняемые атрибуты
+@Field
+def autoFillColumns = ['rowNum', 'innKio', 'country', 'countryCode1', 'dealType', 'signTransaction', 'count', 'priceOne',
+        'totalNds']
+
+// Группируемые атрибуты
+@Field
+def groupColumns = ['name', 'dependence', 'country', 'countryCode1', 'signPhis', 'signTransaction']
+
+// Проверяемые на пустые значения атрибуты
+@Field
+def nonEmptyColumns = ['rowNum', 'name', 'dependence', 'dealType', 'innKio', 'country', 'countryCode1', 'contractNum',
+        'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode', 'unitCountryCode', 'signPhis',
+        'signTransaction', 'count', 'priceOne', 'totalNds', 'transactionDate']
+
+// Дата окончания отчетного периода
+@Field
+def reportPeriodEndDate = null
+
+// Текущая дата
+@Field
+def currentDate = new Date()
+
+//// Обертки методов
+
+// Проверка НСИ
+boolean checkNSI(def refBookId, def row, def alias) {
+    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
 }
 
-/*
-Возвращает графу вида "гр. хх"
- */
-
-def getGrafNum(def alias) {
-    def atr = getAtributes().find { it -> it.getValue()[0] == alias }
-    atr.getValue()[1]
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
 
-// гр. 2, гр. 3, гр. 6, гр. 7, гр. 10, гр. 11, гр. 12, гр. 13, гр. 14, гр. 15, гр. 16, гр. 17, гр. 18, гр. 19,
-// гр. 20, гр. 21, гр. 22, гр. 23, гр. 24.
-def getGroupColumns() {
-    ['name', 'innKio', 'contractNum', 'contractDate', 'innerCode', 'okpCode', 'unitCountryCode', 'signPhis',
-            'signTransaction', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
-            'city2', 'settlement2', 'conditionCode', 'count']
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
+                boolean required = true) {
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
+            currentDate, rowIndex, cellName, logger, required)
 }
 
-def getEditColumns() {
-    ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode',
-            'unitCountryCode', 'signPhis', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
-            'city2', 'settlement2', 'conditionCode', 'incomeSum', 'consumptionSum', 'transactionDate']
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
-/**
- * Проверка при создании формы.
- */
-void checkCreation() {
-    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
-            formData.reportPeriodId)
-
-    if (findForm != null) {
-        logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
+// Получение xml с общими проверками
+def getXML(def String startStr, def String endStr) {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        throw new ServiceException('Имя файла не должно быть пустым')
     }
+    def is = ImportInputStream
+    if (is == null) {
+        throw new ServiceException('Поток данных пуст')
+    }
+    if (!fileName.endsWith('.xls')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xls!')
+    }
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
+    if (xmlString == null) {
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
+    }
+    return xml
 }
 
-void addRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def row = formData.createDataRow()
-    def dataRows = dataRowHelper.getAllCached()
-    def size = dataRows.size()
-    def index = 0
-    row.keySet().each {
-        row.getCell(it).setStyleAlias('Автозаполняемая')
-    }
-    getEditColumns().each {
-        row.getCell(it).editable = true
-        row.getCell(it).setStyleAlias('Редактируемая')
-    }
-    if (currentDataRow != null) {
-        index = currentDataRow.getIndex()
-        def pointRow = currentDataRow
-        while (pointRow.getAlias() != null && index > 0) {
-            pointRow = dataRows.get(--index)
-        }
-        if (index != currentDataRow.getIndex() && dataRows.get(index).getAlias() == null) {
-            index++
-        }
-    } else if (size > 0) {
-        for (int i = size - 1; i >= 0; i--) {
-            def pointRow = dataRows.get(i)
-            if (pointRow.getAlias() == null) {
-                index = dataRows.indexOf(pointRow) + 1
-                break
-            }
-        }
-    }
-    row.count = 1
-    dataRowHelper.insert(row, index + 1)
-}
+//// Кастомные методы
 
-void deleteRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.delete(currentDataRow)
-}
-
-/**
- * Логические проверки
- */
+// Логические проверки
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    if (dataRows.isEmpty()) {
+        return
+    }
 
-    // Налоговый период
-    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    def dFrom = taxPeriod.getStartDate()
-    def dTo = taxPeriod.getEndDate()
-
-    def dataRows = dataRowHelper.getAllCached()
+    // "Да" и "Нет"
+    def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
+    def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
 
     def rowNum = 0
     for (row in dataRows) {
-        rowNum++
         if (row.getAlias() != null) {
             continue
         }
+        rowNum++
 
-        [
-                'rowNum', // № п/п
-                'name', // Полное наименование с указанием ОПФ
-                'innKio', // ИНН/КИО
-                'country', // Наименование страны регистрации
-                'countryCode1', // Код страны по классификатору ОКСМ
-                'contractNum', // Номер договора
-                'contractDate', // Дата договора
-                'transactionNum', // Номер сделки
-                'transactionDeliveryDate', // Дата заключения сделки
-                'innerCode', // Внутренний код
-                'okpCode', // Код ОКП
-                'unitCountryCode', // Код страны происхождения предмета сделки по классификатору ОКСМ
-                'signPhis', // Признак физической поставки драгоценного металла
-                'signTransaction', // Признак внешнеторговой сделки
-                'count', // Количество
-                'priceOne', // Цена (тариф) за единицу измерения без учета НДС, руб.
-                'totalNds', // Итого стоимость без учета НДС, руб.
-                'transactionDate' // Дата совершения сделки
-        ].each {
-            if (row.getCell(it).value == null || row.getCell(it).value.toString().isEmpty()) {
-                msg = row.getCell(it).column.name
-                logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
-            }
-        }
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
 
         def transactionDeliveryDate = row.transactionDeliveryDate
         def contractDate = row.contractDate
-        // def countryCode2 = row.getCell('countryCode2').value
-        // def countryCode3 = row.getCell('countryCode3').value
         def settlement1 = row.settlement1
         def city1 = row.city1
         def settlement2 = row.settlement2
@@ -234,8 +176,7 @@ void logicCheck() {
         def transactionDate = row.transactionDate
 
         // Проверка зависимости от признака физической поставки
-        def signPhis = row.signPhis
-        if (signPhis != null && refBookService.getNumberValue(18, signPhis, 'CODE') == 1) {
+        if (getRefBookValue(18, signPhis)?.CODE?.numberValue == 1) {
             def isHaveNotEmptyField = false
             def checkField = ['countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2', 'city2', 'settlement2', 'conditionCode']
             for (it in checkField) {
@@ -244,7 +185,7 @@ void logicCheck() {
                     break
             }
             if (isHaveNotEmptyField) {
-                StringBuilder builder = new StringBuilder();
+                StringBuilder builder = new StringBuilder()
                 for (int i = 0; i < checkField.size(); i++) {
                     builder.append("«").append(getAtributes().get(checkField.get(i))[2])
                             .append("» ").append("(")
@@ -275,9 +216,8 @@ void logicCheck() {
 
         // Корректность заполнения признака внешнеторговой сделки
         def msg14 = row.getCell('signTransaction').column.name
-        def sign = refBookService.getNumberValue(38, row.signTransaction, 'CODE')
-        if (row.countryCode2 == row.countryCode3 && sign != 0 ||
-                row.countryCode2 != row.countryCode3 && sign != 1) {
+        if (row.countryCode2 == row.countryCode3 && row.signTransaction != recNoId ||
+                row.countryCode2 != row.countryCode3 && row.signTransaction != recYesId) {
             logger.warn("Строка $rowNum: «$msg14» не соответствует сведениям о стране отправке и о стране доставки драгоценных металлов!")
         }
 
@@ -349,217 +289,111 @@ void logicCheck() {
         }
 
         // Проверка заполнения региона отправки
-        if (row.countryCode2 != null) {
-            def country = refBookService.getStringValue(10, row.countryCode2, 'CODE')
-            if (country != null) {
-                def regionName = row.getCell('region1').column.name
-                def countryName = row.getCell('countryCode2').column.name
-                if (country == '643' && row.region1 == null) {
-                    logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
-                } else if (country != '643' && row.region1 != null) {
-                    logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
-                }
+        def country = getRefBookValue(10, row.countryCode2)?.CODE?.stringValue
+        if (country != null) {
+            def regionName = row.getCell('region1').column.name
+            def countryName = row.getCell('countryCode2').column.name
+            if (country == '643' && row.region1 == null) {
+                logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
+            } else if (country != '643' && row.region1 != null) {
+                logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
             }
         }
 
         // Проверка заполнения региона доставки
-        if (row.countryCode3 != null) {
-            def country = refBookService.getStringValue(10, row.countryCode3, 'CODE')
-            if (country != null) {
-                def regionName = row.getCell('region2').column.name
-                def countryName = row.getCell('countryCode3').column.name
-                if (country == '643' && row.region2 == null) {
-                    logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
-                } else if (country != '643' && row.region2 != null) {
-                    logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
-                }
+        country = getRefBookValue(10, row.countryCode3)?.CODE?.stringValue
+        if (country != null) {
+            def regionName = row.getCell('region2').column.name
+            def countryName = row.getCell('countryCode3').column.name
+            if (country == '643' && row.region2 == null) {
+                logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
+            } else if (country != '643' && row.region2 != null) {
+                logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
             }
         }
 
         // Проверки соответствия НСИ
-        checkNSI(row, "name", "Организации-участники контролируемых сделок", 9)
-        checkNSI(row, "countryCode1", "ОКСМ", 10)
-        checkNSI(row, "unitCountryCode", "ОКСМ", 10)
-        checkNSI(row, "country", "ОКСМ", 10)
-        checkNSI(row, "countryCode3", "ОКСМ", 10)
-        checkNSI(row, "region1", "Коды субъектов Российской Федерации", 4)
-        checkNSI(row, "region2", "Коды субъектов Российской Федерации", 4)
-        checkNSI(row, "okpCode", "Коды драгоценных металлов", 17)
-        checkNSI(row, "signPhis", "Признаки физической поставки", 18)
-        checkNSI(row, "conditionCode", "Коды условий поставки", 63)
+        checkNSI(9, row, "name")
+        checkNSI(10, row, "countryCode1")
+        checkNSI(10, row, "unitCountryCode")
+        checkNSI(10, row, "country")
+        checkNSI(10, row, "countryCode3")
+        checkNSI(4, row, "region1")
+        checkNSI(4, row, "region2")
+        checkNSI(18, row, "signPhis")
+        checkNSI(63, row, "conditionCode")
+        checkNSI(38, row, "dependence")
+        checkNSI(85, row, "dealType")
     }
 
-    //Проверки подитоговых сумм
+    checkItog(dataRows)
+}
+
+// Проверки подитоговых сумм
+void checkItog(def dataRows) {
     def testRows = dataRows.findAll { it -> it.getAlias() == null }
-    //добавляем итоговые строки для проверки
-    for (int i = 0; i < testRows.size(); i++) {
-        def testRow = testRows.get(i)
-        def nextRow = null
-
-        if (i < testRows.size() - 1) {
-            nextRow = testRows.get(i + 1)
+    addAllAliased(testRows, new CalcAliasRow() {
+        @Override
+        DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
+            return calcItog(i, testRows)
         }
-
-        if (testRow.getAlias() == null && nextRow == null || isDiffRow(testRow, nextRow, getGroupColumns())) {
-            def itogRow = calcItog(i, testRows)
-            testRows.add(++i, itogRow)
-        }
-    }
-
+    }, groupColumns)
+    // Рассчитанные строки итогов
     def testItogRows = testRows.findAll { it -> it.getAlias() != null }
+    // Имеющиеся строки итогов
     def itogRows = dataRows.findAll { it -> it.getAlias() != null }
 
-    if (testItogRows.size() > itogRows.size()) {            //если удалили итоговые строки
-
-        for (int i = 0; i < dataRows.size(); i++) {
-            def row = dataRows[i]
-            def nextRow = dataRows[i + 1]
-            if (row.getAlias() == null) {
-                if (nextRow == null ||
-                        nextRow.getAlias() == null && isDiffRow(row, nextRow, getGroupColumns())) {
-                    def String groupCols = getValuesByGroupColumn(row)
-                    if (groupCols != null) {
-                        logger.error("Группа «$groupCols» не имеет строки подитога!")
-                    }
-                }
-            }
+    checkItogRows(dataRows, testItogRows, itogRows, groupColumns, logger, new GroupString() {
+        @Override
+        String getString(DataRow<Cell> row) {
+            return getValuesByGroupColumn(row)
         }
-
-    } else if (testItogRows.size() < itogRows.size()) {     //если удалили все обычные строки, значит где то 2 подряд подитог.строки
-
-        for (int i = 0; i < dataRows.size(); i++) {
-            if (dataRows[i].getAlias() != null) {
-                if (i - 1 < -1 || dataRows[i - 1].getAlias() != null) {
-                    logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
-                }
+    }, new CheckGroupSum() {
+        @Override
+        String check(DataRow<Cell> row1, DataRow<Cell> row2) {
+            if (row1.incomeSum != row2.incomeSum) {
+                return getColumnName(row1, 'incomeSum')
             }
-        }
-    } else {
-        for (int i = 0; i < testItogRows.size(); i++) {
-            def testItogRow = testItogRows[i]
-            def realItogRow = itogRows[i]
-            int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""))
-            if (dataRows[itg].getAlias() != null) {
-                logger.error("Строка ${dataRows[i].getIndex()}: Строка подитога не относится к какой-либо группе!")
-            } else {
-                def String groupCols = getValuesByGroupColumn(dataRows[itg])
-                def mes = "Строка ${realItogRow.getIndex()}: Неверное итоговое значение по группе «$groupCols» в графе"
-                if (groupCols != null) {
-                    if (testItogRow.priceOne != realItogRow.priceOne) {
-                        logger.error(mes + " «${getAtributes().priceOne[2]}»")
-                    }
-                    if (testItogRow.totalNds != realItogRow.totalNds) {
-                        logger.error(mes + " «${getAtributes().totalNds[2]}»")
-                    }
-                }
+            if (row1.consumptionSum != row2.consumptionSum) {
+                return getColumnName(row1, 'total')
             }
+            if (row1.totalNds != row2.totalNds) {
+                return getColumnName(row1, 'total')
+            }
+            return null
         }
-    }
-
-
+    })
 }
 
-/**
- * Проверка соответствия НСИ
- */
-void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
-    def cell = row.getCell(alias)
-    if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
-        def msg2 = cell.column.name
-        def rowNum = row.getIndex()
-        logger.warn("Строка $rowNum: В справочнике «$msg» не найден элемент «$msg2»!")
-    }
-}
-
-/**
- * Возвращает строку со значениями полей строки по которым идет группировка
- * ['name', 'innKio', 'contractNum', 'contractDate', 'innerCode', 'okpCode', 'unitCountryCode', 'signPhis',
- *          'signTransaction', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
- *          'city2', 'settlement2', 'conditionCode', 'count']
- */
-
-String getValuesByGroupColumn(DataRow row) {
-    def sep = ", "
-    StringBuilder builder = new StringBuilder()
-    def map = row.name != null ? refBookService.getRecordData(9, row.name) : null
-    if (map != null)
-        builder.append(map.NAME.stringValue).append(sep)
-    if (row.innKio != null)
-        builder.append(row.innKio).append(sep)
-    if (row.contractNum != null)
-        builder.append(row.contractNum).append(sep)
-    if (row.contractDate != null)
-        builder.append(row.contractDate).append(sep)
-    innerCode = getRefBookValue(17, row.innerCode, 'INNER_CODE')
-    if (innerCode != null)
-        builder.append(innerCode).append(sep)
-    okpCode = getRefBookValue(17, row.okpCode, 'OKP_CODE')
-    if (okpCode != null)
-        builder.append(okpCode).append(sep)
-    unitCountryCode = getRefBookValue(10, row.unitCountryCode, 'CODE')
-    if (unitCountryCode != null)
-        builder.append(unitCountryCode).append(sep)
-    signPhis = getRefBookValue(18, row.signPhis, 'SIGN')
-    if (signPhis != null)
-        builder.append(signPhis).append(sep)
-    signTransaction = getRefBookValue(38, row.signTransaction, 'VALUE')
-    if (signTransaction != null)
-        builder.append(signTransaction).append(sep)
-    countryCode2 = getRefBookValue(10, row.countryCode2, 'CODE')
-    if (countryCode2 != null)
-        builder.append(countryCode2).append(sep)
-    region1 = getRefBookValue(4, row.region1, 'CODE')
-    if (region1 != null)
-        builder.append(region1).append(sep)
-    if (row.city1 != null)
-        builder.append(row.city1).append(sep)
-    if (row.settlement1 != null)
-        builder.append(row.settlement1).append(sep)
-    countryCode3 = getRefBookValue(10, row.countryCode3, 'CODE')
-    if (countryCode3 != null)
-        builder.append(countryCode3).append(sep)
-    region2 = getRefBookValue(4, row.region2, 'CODE')
-    if (region2 != null)
-        builder.append(region2).append(sep)
-    if (row.city2 != null)
-        builder.append(row.city2).append(sep)
-    if (row.settlement2 != null)
-        builder.append(row.settlement2).append(sep)
-    conditionCode = getRefBookValue(63, row.conditionCode, 'STRCODE')
-    if (conditionCode != null)
-        builder.append(conditionCode).append(sep)
-    if (row.count != null)
-        builder.append(row.count).append(sep)
-
-    def String retVal = builder.toString()
-    if (retVal.length() < 2)
-        return null
-    retVal.substring(0, retVal.length() - 2)
-}
-
-def getRefBookValue(int id, def cell, def alias) {
-    def map = cell != null ? refBookService.getRecordData(id, cell) : null
-    return map == null ? null : map.get(alias).stringValue
-}
-
-/**
- * Расчеты. Алгоритмы заполнения полей формы.
- */
+// Алгоритмы заполнения полей формы
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = dataRowHelper.allCached
+    if (dataRows.isEmpty()) {
+        return
+    }
 
-    def index = 1;
+    // "Да" / "Нет"
+    def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
+    def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
+
+    // Удаление подитогов
+    deleteAllAliased(dataRows)
+
+    // Сортировка
+    sortRows(dataRows, groupColumns)
+
+    def index = 1
     for (row in dataRows) {
-        if (row.getAlias() != null) {
-            continue
-        }
         // Порядковый номер строки
         row.rowNum = index++
+
+        // Количество
+        row.count = 1
+
         // Графы 27 и 28 из 25 и 26
         incomeSum = row.incomeSum
         consumptionSum = row.consumptionSum
-
         if (incomeSum != null && consumptionSum == null) {
             row.priceOne = incomeSum
         } else if (incomeSum == null && consumptionSum != null) {
@@ -572,25 +406,18 @@ void calc() {
 
         row.totalNds = row.priceOne
 
-        // Код ОКП
-        row.okpCode = row.innerCode
-
         // Расчет полей зависимых от справочников
-        if (row.name != null) {
-            def map = refBookService.getRecordData(9, row.name)
-            row.innKio = map.INN_KIO.stringValue
-            row.country = map.COUNTRY.referenceValue
-            row.countryCode1 = map.COUNTRY.referenceValue
-        } else {
-            row.innKio = null
-            row.country = null
-            row.countryCode1 = null
-        }
+        def map = getRefBookValue(9, row.name)
+        row.innKio = map?.INN_KIO?.stringValue
+        row.country = map?.COUNTRY?.referenceValue
+        row.countryCode1 = map?.COUNTRY?.referenceValue
 
         // Признак физической поставки
-        def boolean deliveryPhis = refBookService.getNumberValue(18, row.signPhis, 'CODE') == 1
-
-        if (deliveryPhis) {
+        def Boolean deliveryPhis = null
+        if (row.deliverySign != null) {
+            deliveryPhis = getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 1
+        }
+        if (deliveryPhis != null && deliveryPhis) {
             row.countryCode2 = null
             row.region1 = null
             row.city1 = null
@@ -601,277 +428,176 @@ void calc() {
             row.settlement2 = null
         }
 
-        if (row.countryCode2 == row.countryCode3) {
-            def valNo = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 0", null)
-            if (valNo != null && valNo.size() == 1) {
-                row.signTransaction = valNo.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-            }
-        } else {
-            def valYes = refBookFactory.getDataProvider(38L).getRecords(new Date(), null, "CODE = 1", null)
-            if (valYes != null && valYes.size() == 1) {
-                row.signTransaction = valYes.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-            }
+        // Сбарсываем "Регион РФ" если страна не Россия
+        def country = getRefBookValue(10, row.countryCode2)?.CODE?.stringValue
+        if (country != null && country != '643') {
+            row.region1 = null
         }
-    }
-    dataRowHelper.update(dataRows);
-}
-
-/**
- * проверяет разные ли строки по значениям полей группировки
- * @param a первая  строка
- * @param b вторая строка
- * @return true - разные, false = одинаковые
- */
-boolean isDiffRow(DataRow row, DataRow nextRow, def groupColumns) {
-    def rez = false
-    groupColumns.each { def n ->
-        rez = rez || (row.get(n) != nextRow.get(n))
-    }
-    return rez
-}
-
-/**
- * Удаление всех статическиех строк "Подитог" из списка строк
- */
-void deleteAllStatic() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-
-    for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
-        row = (DataRow) iter.next()
-        if (row.getAlias() != null) {
-            iter.remove()
-            dataRowHelper.delete(row)
+        country = getRefBookValue(10, row.countryCode3)?.CODE?.stringValue
+        if (country != null && country != '643') {
+            row.region2 = null
         }
+
+        row.signTransaction = (row.countryCode2 == row.countryCode3) ? recNoId : recYesId
     }
-}
 
-/**
- * Сортировка строк по гр.
- */
-void sort() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    dataRows.sort({ DataRow a, DataRow b ->
-        sortRow(getGroupColumns(), a, b)
-    })
-    dataRowHelper.save(dataRows);
-}
-
-int sortRow(List<String> params, DataRow a, DataRow b) {
-    for (String param : params) {
-        aD = a.getCell(param).value
-        bD = b.getCell(param).value
-
-        if (aD != bD) {
-            return aD <=> bD
+    // Добавление подитов
+    addAllAliased(dataRows, new CalcAliasRow() {
+        @Override
+        DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
+            return calcItog(i, dataRows)
         }
-    }
-    return 0
+    }, groupColumns)
+
+    // Если нет сортировки и подитогов, то dataRowHelper.update(dataRows)
+    dataRowHelper.save(dataRows)
 }
 
-/**
- * Проставляет статические строки
- */
-void addAllStatic() {
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        def dataRowHelper = formDataService.getDataRowHelper(formData)
-        def dataRows = dataRowHelper.getAllCached()
-
-        for (int i = 0; i < dataRows.size(); i++) {
-            def row = dataRows.get(i)
-            def nextRow = null
-
-            if (i < dataRows.size() - 1) {
-                nextRow = dataRows.get(i + 1)
-            }
-            if (row.getAlias() == null)
-                if (nextRow == null || isDiffRow(row, nextRow, getGroupColumns())) {
-                    def itogRow = calcItog(i, dataRows)
-                    dataRowHelper.insert(itogRow, ++i + 1)
-                }
-        }
-    }
-}
-
-/**
- * Расчет подитогового значения
- * @param i
- * @return
- */
-def calcItog(int i, def dataRows) {
+// Расчет подитогового значения
+DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     def newRow = formData.createDataRow()
 
-    newRow.getCell('itog').colSpan = 26
+    newRow.getCell('itog').colSpan = 25
     newRow.itog = 'Подитог:'
     newRow.setAlias('itg#'.concat(i.toString()))
     newRow.getCell('fix').colSpan = 2
 
     // Расчеты подитоговых значений
-    BigDecimal totalNdsItg = 0, priceOneItg = 0
+    BigDecimal incomeSumItg = 0, consumptionSumItg = 0, totalNdsItg = 0
     for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
-        row = dataRows.get(j)
+        def row = dataRows.get(j)
+        def incomeSum = row.incomeSum
+        def consumptionSum = row.consumptionSum
+        def totalNds = row.totalNds
 
-        priceOne = row.priceOne
-        totalNds = row.totalNds
-
-        priceOneItg += priceOne != null ? priceOne : 0
+        incomeSumItg += incomeSum != null ? incomeSum : 0
+        consumptionSumItg += consumptionSum != null ? consumptionSum : 0
         totalNdsItg += totalNds != null ? totalNds : 0
     }
-
-    newRow.priceOne = priceOneItg
+    newRow.incomeSum = incomeSumItg
+    newRow.consumptionSum = consumptionSumItg
     newRow.totalNds = totalNdsItg
 
-    newRow
+    return newRow
 }
 
-/**
- * Консолидация
- */
-void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
+// Возвращает строку со значениями полей строки по которым идет группировка
+String getValuesByGroupColumn(DataRow row) {
+    def sep = ", "
+    StringBuilder builder = new StringBuilder()
 
-    int index = 1;
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (source != null
-                && source.state == WorkflowState.ACCEPTED
-                && source.getFormType().getId() == formData.getFormType().getId()) {
-            formDataService.getDataRowHelper(source).getAllCached().each { row ->
-                if (row.getAlias() == null) {
-                    dataRowHelper.insert(row, index++)
-                }
-            }
-        }
-    }
+    def map = getRefBookValue(9, row.name)
+    if (map != null)
+        builder.append(map.NAME.stringValue).append(sep)
+
+    dependence = getRefBookValue(38, row.dependence)?.VALUE?.stringValue
+    if (dependence != null)
+        builder.append(dependence).append(sep)
+
+    country = getRefBookValue(38, row.country)?.NAME?.stringValue
+    if (country != null)
+        builder.append(country).append(sep)
+
+    countryCode1 = getRefBookValue(10, row.countryCode1)?.CODE?.stringValue
+    if (countryCode1 != null)
+        builder.append(countryCode1).append(sep)
+
+    signPhis = getRefBookValue(18, row.signPhis)?.SIGN?.stringValue
+    if (signPhis != null)
+        builder.append(signPhis).append(sep)
+
+    signTransaction =  getRefBookValue(38, row.signTransaction)?.VALUE?.stringValue
+    if (signTransaction != null)
+        builder.append(signTransaction).append(sep)
+
+    def String retVal = builder.toString()
+    if (retVal.length() < 2)
+        return null
+    return retVal.substring(0, retVal.length() - 2)
 }
 
-def getHeaderRowCount() {
-    return 3
-}
-
-/**
- * Получение импортируемых данных.
- */
+// Получение импортируемых данных.
 void importData() {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        logger.error('Имя файла не должно быть пустым')
-        return
-    }
+    def xml = getXML('Полное наименование с указанием ОПФ', 'Подитог:')
 
-    def is = ImportInputStream
-    if (is == null) {
-        logger.error('Поток данных пуст')
-        return
-    }
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 29, 2)
 
-    if (!fileName.endsWith('.xls')) {
-        logger.error('Выбранный файл не соответствует формату xls!')
-        return
-    }
+    def headerMapping = [
+            (xml.row[0].cell[1]): 'Признак взаимозависимости',
+            (xml.row[0].cell[2]): 'ИНН/ КИО',
+            (xml.row[0].cell[3]): 'Наименование страны регистрации',
+            (xml.row[0].cell[4]): 'Код страны регистрации по классификатору ОКСМ',
+            (xml.row[0].cell[5]): 'Номер договора',
+            (xml.row[0].cell[6]): 'Дата договора',
+            (xml.row[0].cell[7]): 'Номер сделки',
+            (xml.row[0].cell[8]): 'Вид срочной сделки',
+            (xml.row[0].cell[9]): 'Дата заключения сделки',
+            (xml.row[0].cell[10]): 'Характеристика базисного актива',
+            (xml.row[0].cell[12]): 'Признак физической поставки драгоценного металла',
+            (xml.row[0].cell[13]): 'Признак внешнеторговой сделки',
+            (xml.row[0].cell[14]): 'Место отправки (погрузки) драгоценного металла в соответствии с товаросопроводительными документами',
+            (xml.row[0].cell[18]): 'Место совершения сделки (адрес места доставки (разгрузки) драгоценного металла)',
+            (xml.row[0].cell[22]): 'Код условия поставки',
+            (xml.row[0].cell[23]): 'Количество',
+            (xml.row[0].cell[24]): 'Сумма доходов Банка по данным бухгалтерского учета, руб.',
+            (xml.row[0].cell[25]): 'Сумма расходов Банка по данным бухгалтерского учета, руб.',
+            (xml.row[0].cell[26]): 'Цена (тариф) за единицу измерения без учета НДС, руб.',
+            (xml.row[0].cell[27]): 'Итого стоимость без учета НДС, руб.',
+            (xml.row[0].cell[28]): 'Дата совершения сделки',
+            (xml.row[2].cell[0]): 'гр. 2.1',
+            (xml.row[2].cell[1]): 'гр. 2.2',
+            (xml.row[2].cell[2]): 'гр. 3',
+            (xml.row[2].cell[3]): 'гр. 4.1',
+            (xml.row[2].cell[4]): 'гр. 4.2',
+            (xml.row[2].cell[5]): 'гр. 5',
+            (xml.row[2].cell[6]): 'гр. 6',
+            (xml.row[2].cell[7]): 'гр. 7.1',
+            (xml.row[2].cell[8]): 'гр. 7.2',
+            (xml.row[2].cell[9]): 'гр. 8',
+            (xml.row[2].cell[10]): 'гр. 9.1',
+            (xml.row[2].cell[11]): 'гр. 9.2',
+            (xml.row[2].cell[12]): 'гр. 10',
+            (xml.row[2].cell[13]): 'гр. 11',
+            (xml.row[2].cell[14]): 'гр. 12.1',
+            (xml.row[2].cell[15]): 'гр. 12.2',
+            (xml.row[2].cell[16]): 'гр. 12.3',
+            (xml.row[2].cell[17]): 'гр. 12.4',
+            (xml.row[2].cell[18]): 'гр. 13.1',
+            (xml.row[2].cell[19]): 'гр. 13.2',
+            (xml.row[2].cell[20]): 'гр. 13.3',
+            (xml.row[2].cell[21]): 'гр. 13.4',
+            (xml.row[2].cell[22]): 'гр. 14',
+            (xml.row[2].cell[23]): 'гр. 15',
+            (xml.row[2].cell[24]): 'гр. 16',
+            (xml.row[2].cell[25]): 'гр. 17',
+            (xml.row[2].cell[26]): 'гр. 18',
+            (xml.row[2].cell[27]): 'гр. 19',
+            (xml.row[2].cell[28]): 'гр. 20'
+    ]
 
-    def xmlString = importService.getData(is, fileName, 'windows-1251', 'Полное наименование с указанием ОПФ', 'Подитог:')
-    if (xmlString == null) {
-        logger.error('Отсутствие значения после обработки потока данных')
-        return
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        logger.error('Ошибка в обработке данных!')
-        return
-    }
+    checkHeaderEquals(headerMapping)
 
-    // добавить данные в форму
-    try {
-        if (!checkTableHead(xml)) {
-            logger.error('Заголовок таблицы не соответствует требуемой структуре!')
-            return
-        }
-        addData(xml)
-    } catch (Exception e) {
-        logger.error("Ошибка при заполнении данных с файла! " + e.message)
-    }
+    addData(xml, 2)
 }
 
-/**
- * Проверить шапку таблицы.
- *
- * @param xml данные
- * @param headRowCount количество строк в шапке
- */
-def checkTableHead(def xml) {
-    def colCount = 28
-    def rc = getHeaderRowCount()
-    // проверить количество строк и колонок в шапке
-    if (xml.row.size() < rc || xml.row[0].cell.size() < colCount) {
-        return false
-    }
-    def result = (
-    checkHeaderRow(xml, rc, 0, ['Полное наименование с указанием ОПФ', '', 'гр. 2']) &&
-            checkHeaderRow(xml, rc, 1, ['ИНН/ КИО', '', 'гр. 3']) &&
-            checkHeaderRow(xml, rc, 2, ['Наименование страны регистрации', '', 'гр. 4.1']) &&
-            checkHeaderRow(xml, rc, 3, ['Код страны регистрации по классификатору ОКСМ', '', 'гр. 4.2']) &&
-            checkHeaderRow(xml, rc, 4, ['Номер договора', '', 'гр. 5']) &&
-            checkHeaderRow(xml, rc, 5, ['Дата договора', '', 'гр. 6']) &&
-            checkHeaderRow(xml, rc, 6, ['Номер сделки', '', 'гр. 7']) &&
-            checkHeaderRow(xml, rc, 7, ['Дата заключения сделки', '', 'гр. 8']) &&
-            checkHeaderRow(xml, rc, 8, ['Характеристика базисного актива', 'Внутренний код', 'гр. 9.1']) &&
-            checkHeaderRow(xml, rc, 9, ['', 'Код по ОКП', 'гр. 9.2']) &&
-            checkHeaderRow(xml, rc, 10, ['', 'Код страны происхождения предмета сделки', 'гр. 9.3']) &&
-            checkHeaderRow(xml, rc, 11, ['Признак физической поставки драгоценного металла', '', 'гр. 10']) &&
-            checkHeaderRow(xml, rc, 12, ['Признак внешнеторговой сделки', '', 'гр. 11']) &&
-            checkHeaderRow(xml, rc, 13, ['Место отправки (погрузки) драгоценного металла в соответствии с товаросопроводительными документами', 'Код страны по классификатору ОКСМ', 'гр. 12.1']) &&
-            checkHeaderRow(xml, rc, 14, ['', 'Регион (код)', 'гр. 12.2']) &&
-            checkHeaderRow(xml, rc, 15, ['', 'Город', 'гр. 12.3']) &&
-            checkHeaderRow(xml, rc, 16, ['', 'Населенный пункт', 'гр. 12.4']) &&
-            checkHeaderRow(xml, rc, 17, ['Место совершения сделки (адрес места доставки (разгрузки) драгоценного металла)', 'Код страны по классификатору ОКСМ', 'гр. 13.1']) &&
-            checkHeaderRow(xml, rc, 18, ['', 'Регион (код)', 'гр. 13.2']) &&
-            checkHeaderRow(xml, rc, 19, ['', 'Город', 'гр. 13.3']) &&
-            checkHeaderRow(xml, rc, 20, ['', 'Населенный пункт', 'гр. 13.4']) &&
-            checkHeaderRow(xml, rc, 21, ['Код условия поставки', '', 'гр. 14']) &&
-            checkHeaderRow(xml, rc, 22, ['Количество', '', 'гр. 15']) &&
-            checkHeaderRow(xml, rc, 23, ['Сумма доходов Банка по данным бухгалтерского учета, руб.', '', 'гр. 16']) &&
-            checkHeaderRow(xml, rc, 24, ['Сумма расходов Банка по данным бухгалтерского учета, руб.', '', 'гр. 17']) &&
-            checkHeaderRow(xml, rc, 25, ['Цена (тариф) за единицу измерения без учета НДС, руб.', '', 'гр. 18']) &&
-            checkHeaderRow(xml, rc, 26, ['Итого стоимость без учета НДС, руб.', '', 'гр. 19']) &&
-            checkHeaderRow(xml, rc, 27, ['Дата совершения сделки', '', 'гр. 20'])
-    )
-    return result
-}
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
 
-def checkHeaderRow(def xml, def headRowCount, def cellNumber, def arrayHeaders) {
-    for (int i = 0; i < headRowCount; i++) {
-        String value = xml.row[i].cell[cellNumber]
-        //убираем перевод строки, множественное использование пробелов
-        value = value.replaceAll('\\n', '').replaceAll('\\r', '').replaceAll(' {2,}', ' ').trim()
-        if (value != arrayHeaders[i]) {
-            //println("row index '"+ i +"' row value '" + value + "' cellNumber '" + cellNumber + "' value '" + arrayHeaders[i] + "'")
-            return false
-        }
-    }
-    return true
-}
+    def int xmlIndexRow = -1
+    def int xlsIndexRow = 0
+    def int rowOffset = 3
+    def int colOffset = 2
 
-/**
- * Заполнить форму данными.
- *
- * @param xml данные
- */
-def addData(def xml) {
-    Date date = reportPeriodService.get(formData.reportPeriodId).taxPeriod.getEndDate()
+    def rows = new LinkedList<DataRow<Cell>>()
 
-    def headShift = getHeaderRowCount()
-    def cache = [:]
-    def data = formDataService.getDataRowHelper(formData)
-    data.clear()
-
-    def indexRow = -1     // пропустить шапку таблицы
     for (def row : xml.row) {
-        indexRow++
+        xmlIndexRow++
+        xlsIndexRow = xmlIndexRow + rowOffset
+
         // пропустить шапку таблицы
-        if (indexRow <= headShift) {
+        if (xmlIndexRow <= headRowCount) {
             continue
         }
 
@@ -880,209 +606,160 @@ def addData(def xml) {
         }
 
         def newRow = formData.createDataRow()
-        ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode',
-                'unitCountryCode', 'signPhis', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
-                'city2', 'settlement2', 'conditionCode', 'count', 'incomeSum', 'consumptionSum', 'transactionDate'].each {
+        editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
 
-        def indexCell = 0
+        def xmlIndexCol = 0
+
         // столбец 1
-        newRow.rowNum = newRow.index = indexRow - headShift
+        newRow.rowNum =  xmlIndexRow - headRowCount
 
-        // столбец 2
-        newRow.name = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
-        indexCell++
+        // столбец 2.1
+        newRow.name = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        def map = getRefBookValue(9, newRow.name)
+        xmlIndexCol++
+
+        // графа 2.2 Признак взаимозависимости
+        newRow.dependence = getRecordIdImport(38, 'VALUE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 3
-        def map = refBookService.getRecordData(9, newRow.name)
-        def String text = row.cell[indexCell].text()
-        if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO.stringValue != null)) {
-            logger.warn("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if (map != null) {
+            def text = row.cell[xmlIndexCol].text()
+            if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO?.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO?.stringValue != null)) {
+                logger.warn("Строка ${xlsIndexRow} столбец ${xmlIndexCol + colOffset} содержит значение, отсутствующее в справочнике!")
+            }
         }
-        indexCell++
+        xmlIndexCol++
 
         // графа 4.1
-        text = row.cell[indexCell].text()
-        map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
-        if ((text != null && !text.isEmpty() && !text.equals(map.NAME.stringValue)) || ((text == null || text.isEmpty()) && map.NAME.stringValue != null)) {
-            logger.warn("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if (map != null) {
+            def text = row.cell[xmlIndexCol].text()
+            map = getRefBookValue(10, map.COUNTRY?.referenceValue)
+            if ((text != null && !text.isEmpty() && !text.equals(map?.NAME?.stringValue)) || ((text == null || text.isEmpty()) && map?.NAME?.stringValue != null)) {
+                logger.warn("Строка ${xlsIndexRow} столбец ${xmlIndexCol + colOffset} содержит значение, отсутствующее в справочнике!")
+            }
         }
-        indexCell++
+        xmlIndexCol++
 
         // графа 4.2
-        text = row.cell[indexCell].text()
-        if ((text != null && !text.isEmpty() && !text.equals(map.CODE.stringValue)) || ((text == null || text.isEmpty()) && map.CODE.stringValue != null)) {
-            logger.warn("Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!")
+        if (map != null) {
+            def text = row.cell[xmlIndexCol].text()
+            if ((text != null && !text.isEmpty() && !text.equals(map?.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map?.CODE?.stringValue != null)) {
+                logger.warn("Строка ${xlsIndexRow} столбец ${xmlIndexCol + colOffset} содержит значение, отсутствующее в справочнике!")
+            }
         }
-        indexCell++
+        xmlIndexCol++
 
         // столбец 6
-        newRow.contractNum = row.cell[indexCell].text()
-        indexCell++
+        newRow.contractNum = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
-        // столбец 7
+        // столбец 7.1
+        newRow.contractDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
-        newRow.contractDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
+        // графа 7.2 Вид срочной сделки
+        newRow.dealType = getRecordIdImport(85, 'CONTRACT_TYPE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // столбец 8
-        newRow.transactionNum = row.cell[indexCell].text()
-        indexCell++
+        newRow.transactionNum = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // столбец 9
-        newRow.transactionDeliveryDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
+        newRow.transactionDeliveryDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // столбец 10
-        newRow.innerCode = getRecordId(17, 'INNER_CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
-        indexCell++
-
-        // столбец 11
-        newRow.okpCode = getRecordId(17, 'OKP_CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
-        indexCell++
+        newRow.innerCode = getRecordIdImport(17, 'INNER_CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // столбец 12
-        newRow.unitCountryCode = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
-        indexCell++
+        newRow.unitCountryCode = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // столбец 13
-        newRow.signPhis = getRecordId(18, 'SIGN', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
-        indexCell++
+        newRow.signPhis = getRecordIdImport(18, 'SIGN', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // столбец 14
-        newRow.signTransaction = getRecordId(38, 'VALUE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
-        indexCell++
+        newRow.signTransaction =  getRecordIdImport(38, 'VALUE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // столбец 15
-        newRow.countryCode2 = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
-        indexCell++
+        newRow.countryCode2 = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // столбец 16
-        String code = row.cell[indexCell].text()
+        String code = row.cell[xmlIndexCol].text()
         if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
-        newRow.region1 = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell, false)
-        indexCell++
+        newRow.region1 = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // столбец 17
-        newRow.city1 = row.cell[indexCell].text()
-        indexCell++
+        newRow.city1 = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // столбец 18
-        newRow.settlement1 = row.cell[indexCell].text()
-        indexCell++
+        newRow.settlement1 = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // столбец 19
-        newRow.countryCode3 = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
-        indexCell++
+        newRow.countryCode3 = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // столбец 20
-        code = row.cell[indexCell].text()
+        code = row.cell[xmlIndexCol].text()
         if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
-        newRow.region2 = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell, false)
-        indexCell++
+        newRow.region2 = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // столбец 21
-        newRow.city2 = row.cell[indexCell].text()
-        indexCell++
+        newRow.city2 = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // столбец 22
-        newRow.settlement2 = row.cell[indexCell].text()
-        indexCell++
+        newRow.settlement2 = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // столбец 23
-        newRow.conditionCode = getRecordId(63, 'STRCODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
-        indexCell++
+        newRow.conditionCode = getRecordIdImport(63, 'STRCODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // столбец 24
-        newRow.count = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
+        newRow.count = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // столбец 25
-        newRow.incomeSum = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
+        newRow.incomeSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // столбец 26
-        newRow.consumptionSum = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
+        newRow.consumptionSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // столбец 27
-        newRow.priceOne = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
+        newRow.priceOne = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // столбец 28
-        newRow.totalNds = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
+        newRow.totalNds = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // столбец 29
-        newRow.transactionDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
+        newRow.transactionDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
-        data.insert(newRow, indexRow - headShift)
+        rows.add(newRow)
     }
-}
-
-/**
- * Получить числовое значение.
- *
- * @param value строка
- */
-def getNumber(def value, int indexRow, int indexCell) {
-    if (value == null) {
-        return null
-    }
-    def tmp = value.trim()
-    if ("".equals(tmp)) {
-        return null
-    }
-    // поменять запятую на точку и убрать пробелы
-    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
-    try {
-        return new BigDecimal(tmp)
-    } catch (Exception e) {
-        throw new Exception("Строка ${indexRow - (getHeaderRowCount() - 1)} столбец ${indexCell + 2} содержит недопустимый тип данных!")
-    }
-}
-
-/**
- * Получить record_id элемента справочника.
- *
- * @param value
- */
-def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory = true) {
-    String filter = "LOWER($alias) = LOWER('$value')"
-    if (value == '') filter = "$alias is null"
-    if (cache[ref_id] != null) {
-        if (cache[ref_id][filter] != null) return cache[ref_id][filter]
-    } else {
-        cache[ref_id] = [:]
-    }
-    def refDataProvider = refBookFactory.getDataProvider(ref_id)
-    def records = refDataProvider.getRecords(date, null, filter, null)
-    if (records.size() == 1) {
-        cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        return cache[ref_id][filter]
-    } else if (mandatory || value != '') {
-        throw new Exception("Строка ${indexRow - (getHeaderRowCount() - 1)} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
-    }
-    return null
-}
-
-/**
- * Получить дату по строковому представлению (формата дд.ММ.гггг)
- */
-def getDate(def value, int indexRow, int indexCell) {
-    if (value == null || value == '') {
-        return null
-    }
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    try {
-        return format.parse(value)
-    } catch (Exception e) {
-        throw new Exception("Строка ${indexRow - (getHeaderRowCount() - 1)} столбец ${indexCell + 2} содержит недопустимый тип данных!")
-    }
+    dataRowHelper.save(rows)
 }

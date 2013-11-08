@@ -33,6 +33,7 @@ import org.springframework.jdbc.support.KeyHolder;
 // можно избежать
 // (Semyon Goryachkin 19.04.2013) а ещё помоему JDBC поддерживает работу со
 // списками параметров
+// (Marat Fayzullin 29.10.2013) да, поддерживает через, например, batchUpdate()
 public final class SqlUtils {
 
 	/**

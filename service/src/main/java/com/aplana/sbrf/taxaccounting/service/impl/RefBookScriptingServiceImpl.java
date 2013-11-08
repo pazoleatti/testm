@@ -98,7 +98,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             }
         }
 
-        logger.setMessageDecorator(new ScriptMessageDecorator(event.getTitle()));
+        logger.setMessageDecorator(new ScriptMessageDecorator("Импорт данных справочника «"+refBook.getName()+"»"));
         executeScript(bindings, script, logger);
         logger.setMessageDecorator(null);
     }

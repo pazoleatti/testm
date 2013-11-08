@@ -19,7 +19,7 @@ public class SaveConfigurationAction extends UnsecuredActionImpl<SaveConfigurati
 	
 	@Override
 	public String getName() {
-		return "Получение конфигурационных параметров";
+		return "Сохранение конфигурационных параметров";
 	}
 	
 }

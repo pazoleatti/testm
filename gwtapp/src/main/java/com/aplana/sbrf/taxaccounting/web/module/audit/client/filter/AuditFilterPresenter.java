@@ -57,7 +57,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         void setDeclarationType(Map<Integer, String> declarationTypesMap);
         void setFormDataKind(List<FormDataKind> list);
         void setFormDataTaxType(List<TaxType> taxTypeList);
-        void setUserLogins(Map<Integer, String> userLoginsMap);
         void setValueListBoxHandler(ValueChangeHandler<TaxType> handler);
         void setFormTypeHandler(ValueChangeHandler<AuditFormType> handler);
         void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
@@ -82,7 +81,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
                 getView().setDeclarationType(fillDeclarationTypeMap(auditFilterDataAvaliableValues.getDeclarationTypes()));
                 getView().setFormDataKind(result.getFormDataKinds());
                 getView().setFormDataTaxType(result.getTaxTypes());
-                getView().setUserLogins(fillUserMap(auditFilterDataAvaliableValues.getUsers()));
             }
         }, this));
 
@@ -110,15 +108,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         formTypesMap.put(null, "");
         for(DeclarationType formType : source){
             formTypesMap.put(formType.getId(), formType.getName());
-        }
-        return formTypesMap;
-    }
-
-    private Map<Integer, String> fillUserMap(List<TAUser> source){
-        Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
-        formTypesMap.put(null, "");
-        for(TAUser user : source){
-            formTypesMap.put(user.getId(), user.getName());
         }
         return formTypesMap;
     }

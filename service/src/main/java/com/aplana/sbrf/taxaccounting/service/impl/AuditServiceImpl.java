@@ -7,10 +7,9 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -28,8 +27,6 @@ public class AuditServiceImpl implements AuditService {
 	@Autowired
 	private FormTypeDao formTypeDao;
 	@Autowired
-	private TAUserService userService;
-	@Autowired
 	private DeclarationTypeDao declarationTypeDao;
 
 	@Override
@@ -44,7 +41,7 @@ public class AuditServiceImpl implements AuditService {
 	}
 
 	@Override
-	@Transactional(readOnly = false)
+	@Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
 	public void add(FormDataEvent event, TAUserInfo userInfo, int departmentId, Integer reportPeriodId,
 					Integer declarationTypeId, Integer formTypeId, Integer formKindId, String note) {
 		LogSystem log = new LogSystem();
@@ -76,7 +73,6 @@ public class AuditServiceImpl implements AuditService {
 		values.setDepartments(departmentService.listDepartments());
 		values.setFormTypes(formTypeDao.getAll());
 		values.setDeclarationTypes(declarationTypeDao.listAll());
-		values.setUsers(userService.listAllUsers());
 		return values;
 	}
 
@@ -89,6 +85,6 @@ public class AuditServiceImpl implements AuditService {
                 listIds.add(item.getId());
             auditDao.removeRecords(listIds);
         }
-        add(FormDataEvent.ARCHIVE, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, "Архивация ЖА");
+        add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, "Архивация ЖА");
     }
 }

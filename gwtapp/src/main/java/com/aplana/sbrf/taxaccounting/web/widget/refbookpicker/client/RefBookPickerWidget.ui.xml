@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
 	xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager">
-	<g:VerticalPanel  height="350px" width="500px">
+	<g:VerticalPanel height="350px" width="800px">
 		<g:cell>
 			<g:HorizontalPanel width="100%" verticalAlignment="ALIGN_MIDDLE">
 				<g:cell>
@@ -24,9 +24,9 @@
 			</g:HorizontalPanel>
 		</g:cell>
 		<g:cell height="100%" width="100%">
-			<g:ScrollPanel height="100%" width="100%">
-				<style:GenericCellTable ui:field="cellTable" styleName="dictionaryPickerTable" />
-			</g:ScrollPanel>
+			<g:ResizeLayoutPanel height="100%" width="100%">
+				<style:GenericDataGrid ui:field="cellTable" height="100%"/>
+			</g:ResizeLayoutPanel>
 		</g:cell>
 		<g:cell>
 			<g:HorizontalPanel verticalAlignment='ALIGN_BOTTOM'

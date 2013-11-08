@@ -56,7 +56,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     		
     		for (Department department : this.listAll()) {
     			departmentSet.put(department.getId(), department);
-			};
+			}
 			
     	} else { //Иначе рассчитываем необходимые для отображения
     		

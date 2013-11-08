@@ -2,18 +2,32 @@ package form_template.income.rnu30
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
- * Форма "(РНУ-30) Расчёт резерва по сомнительным долгам на основании результатов инвентаризации сомнительной задолженности и безнадежных долгов.".
- *
- * @version 59
- *
- * TODO:
- *      - нет уcловии в проверках соответствия НСИ
+ * Форма "(РНУ-30) Расчёт резерва по сомнительным долгам на основании результатов инвентаризации сомнительной задолженности и безнадежных долгов".
  *
  * @author rtimerbaev
  */
+
+// графа 0  - fix - для вывода надписей
+// графа 1  - number
+// графа 2  - debtor
+// графа 3  - provision                             атрибут 822 - CODE - "Код обеспечения", справочник 86 "Обеспечение"
+// графа 4  - nameBalanceAccount                    атрибут 152 - BALANCE_ACCOUNT - "Номер балансового счёта", справочник 29 "Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта"
+// графа 5  - debt45_90DaysSum
+// графа 6  - debt45_90DaysNormAllocation50per
+// графа 7  - debt45_90DaysReserve
+// графа 8  - debtOver90DaysSum
+// графа 9  - debtOver90DaysNormAllocation100per
+// графа 10 - debtOver90DaysReserve
+// графа 11 - totalReserve
+// графа 12 - reservePrev
+// графа 13 - reserveCurrent
+// графа 14 - calcReserve
+// графа 15 - reserveRecovery
+// графа 16 - useReserve
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
@@ -44,78 +58,54 @@ switch (formDataEvent) {
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
         break
     case FormDataEvent.COMPOSE :
-        // TODO (Ramil Timerbaev)
         consolidation()
-        // calc() && logicalCheck() && checkNSI()
+        calc() && logicalCheck() && checkNSI()
         break
     case FormDataEvent.IMPORT :
         importData()
-        // TODO (Ramil Timerbaev)
-        if (!hasError() /*&& calc() && logicalCheck() && checkNSI()*/) {
-            logger.info('Закончена загрузка файла ' + UploadFileName)
-        }
+        // !hasError() && calc() && logicalCheck() && checkNSI()
         break
     case FormDataEvent.MIGRATION :
-        importData()
-        if (!hasError()) {
-            def total = getCalcTotalRow()
-            def data = getData(formData)
-            insert(data, total)
-            logger.info('Закончена загрузка файла ' + UploadFileName)
-        }
+        migration()
         break
 }
-
-// графа 0  - forLabel - для вывода надписей
-// графа 1  - number
-// графа 2  - debtor
-// графа 3  - provision
-// графа 4  - nameBalanceAccount
-// графа 5  - debt45_90DaysSum
-// графа 6  - debt45_90DaysNormAllocation50per
-// графа 7  - debt45_90DaysReserve
-// графа 8  - debtOver90DaysSum
-// графа 9  - debtOver90DaysNormAllocation100per
-// графа 10 - debtOver90DaysReserve
-// графа 11 - totalReserve
-// графа 12 - reservePrev
-// графа 13 - reserveCurrent
-// графа 14 - calcReserve
-// графа 15 - reserveRecovery
-// графа 16 - useReserve
 
 /**
  * Добавить новую строку.
  */
 def addNewRow() {
-    def data = getData(formData)
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
     def newRow = formData.createDataRow()
-    def index
+    def index = 0
 
-    if (currentDataRow == null ||
-            getIndex(currentDataRow) == -1 ||
+    if (currentDataRow == null) {
+
+        // в первые строки
+        setEdit(newRow, null)
+    } else if (currentDataRow.getIndex() == -1 ||
             'total'.equals(currentDataRow.getAlias()) ||
-            isFirstSection(data, currentDataRow)) {
+            isFirstSection(dataRows, currentDataRow)) {
 
         // в первые строки
         if ('total'.equals(currentDataRow.getAlias())) {
-            index = getIndex(getRowByAlias(data, 'total'))
+            index = getRowByAlias(dataRows, 'total').getIndex()
         } else {
-            index = getIndex(currentDataRow) + 1
+            index = currentDataRow.getIndex() + 1
         }
         setEdit(newRow, null)
-    } else if (isSection(data, currentDataRow, 'A') ||
+    } else if (isSection(dataRows, currentDataRow, 'A') ||
             'totalA'.equals(currentDataRow.getAlias()) ||
             'A'.equals(currentDataRow.getAlias())) {
 
         // в раздел А
         if ('totalA'.equals(currentDataRow.getAlias()) || 'A'.equals(currentDataRow.getAlias())) {
-            index = getIndex(getRowByAlias(data, 'totalA'))
+            index = getRowByAlias(dataRows, 'totalA').getIndex()
         } else {
-            index = getIndex(currentDataRow) + 1
+            index = currentDataRow.getIndex() + 1
         }
         setEdit(newRow, 'A')
-    } else if (isSection(data, currentDataRow, 'B') ||
+    } else if (isSection(dataRows, currentDataRow, 'B') ||
             'totalAll'.equals(currentDataRow.getAlias()) ||
             'totalB'.equals(currentDataRow.getAlias()) ||
             'B'.equals(currentDataRow.getAlias())) {
@@ -123,22 +113,22 @@ def addNewRow() {
         // в раздел Б
         if ('totalAll'.equals(currentDataRow.getAlias()) || 'totalB'.equals(currentDataRow.getAlias()) ||
                 'B'.equals(currentDataRow.getAlias())) {
-            index = getIndex(getRowByAlias(data, 'totalB'))
+            index = getRowByAlias(dataRows, 'totalB').getIndex()
         } else {
-            index = getIndex(currentDataRow) + 1
+            index = currentDataRow.getIndex() + 1
         }
         setEdit(newRow, 'B')
     }
-    data.insert(newRow, index ? index + 1: 0)
+    dataRowHelper.insert(newRow, index)
 }
 
 /**
  * Удалить строку.
  */
 def deleteRow() {
-    if (!isFixedRow(currentDataRow)) {
-        def data = getData(formData)
-        data.delete(currentDataRow)
+    if (currentDataRow.getAlias() == null) {
+        def dataRowHelper = formDataService.getDataRowHelper(formData)
+        dataRowHelper.delete(currentDataRow)
     }
 }
 
@@ -146,7 +136,17 @@ def deleteRow() {
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 def calc() {
-    def data = getData(formData)
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+
+    // TODO (Ramil Timerbaev) проверка наличия рну-6 перед расчетом - аналитик сказала пока убрать
+//    def rowsRnu6 = getRnuRowsById(318)
+//    if (rowsRnu6 == null) {
+//        def name = '"(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения метода начисления"'
+//        logger.info("Не найдены экземпляры $name за текущий отчетный период!")
+//        return false
+//    }
+
     /*
      * Проверка обязательных полей.
      */
@@ -158,9 +158,9 @@ def calc() {
     // Список проверяемых столбцов для раздела А и Б (графа 2, 4, 12, 16)
     requiredColumnsAB = ['debtor', 'nameBalanceAccount', 'reservePrev', 'useReserve']
 
-    for (def row : getRows(data)) {
-        if (!isFixedRow(row)) {
-            def requiredColumns = (isFirstSection(data, row) ? requiredColumns1 : requiredColumnsAB)
+    for (def row : dataRows) {
+        if (row.getAlias() == null) {
+            def requiredColumns = (isFirstSection(dataRows, row) ? requiredColumns1 : requiredColumnsAB)
             if (!checkRequiredColumns(row, requiredColumns)) {
                 return false
             }
@@ -168,7 +168,7 @@ def calc() {
     }
 
     // отсортировать/группировать
-    sort()
+    sort(dataRows)
 
     /*
      * Расчеты
@@ -177,64 +177,59 @@ def calc() {
     def isFirst
     def tmp
     def index = 1
-    getRows(data).each { row ->
-        if (!isFixedRow(row)) {
-            isFirst = isFirstSection(data, row)
+    dataRows.each { row ->
+        if (row.getAlias() == null) {
+            isFirst = isFirstSection(dataRows, row)
 
             // графа 1
             row.number = index++
 
             if (isFirst) {
                 // графа 6
-                row.debt45_90DaysNormAllocation50per = 50
+                row.debt45_90DaysNormAllocation50per = calc6()
 
                 // графа 7
-                tmp = row.debt45_90DaysSum * row.debt45_90DaysNormAllocation50per / 100
-                row.debt45_90DaysReserve = roundValue(tmp, 2)
+                row.debt45_90DaysReserve = calc7(row)
 
                 // графа 9
-                row.debtOver90DaysNormAllocation100per = 100
+                row.debtOver90DaysNormAllocation100per = calc9()
 
                 // графа 10
-                tmp = row.debtOver90DaysSum * row.debtOver90DaysNormAllocation100per / 100
-                row.debtOver90DaysReserve = roundValue(tmp, 2)
+                row.debtOver90DaysReserve = calc10(row)
 
                 // графа 11
-                row.totalReserve = row.debt45_90DaysReserve + row.debtOver90DaysReserve
+                row.totalReserve = calc11(row)
 
                 // графа 14
-                row.calcReserve = (row.totalReserve + row.useReserve > row.reservePrev ?
-                    row.totalReserve + row.useReserve - row.reservePrev : 0)
+                row.calcReserve = calc14(row)
 
                 // графа 15
-                row.reserveRecovery = (row.totalReserve + row.useReserve < row.reservePrev ?
-                    row.reservePrev - (row.totalReserve + row.useReserve) : 0)
+                row.reserveRecovery = calc15(row)
 
                 // графа 13 - стоит поле остальных потому что в расчетах используются графа 14, 15
-                row.reserveCurrent = row.reservePrev + row.calcReserve - row.reserveRecovery - row.useReserve
+                row.reserveCurrent = calc13(row)
             } else {
                 // графа 13
-                row.reserveCurrent = row.reservePrev - row.useReserve
+                row.reserveCurrent = calc13AB(row)
             }
         }
     }
-    save(data)
 
     // Первые строки (графа 5, 7, 8, 10..16)
     def totalColumns1 = getTotalColumns1()
-    def totalRow = getRowByAlias(data, 'total')
+    def totalRow = getRowByAlias(dataRows, 'total')
 //    totalColumns1.each { alias ->
 //        totalRow.getCell(alias).setValue(0)
 //    }
     totalColumns1.each { alias ->
-        totalRow.getCell(alias).setValue(getSum(data, alias, totalRow))
+        totalRow.getCell(alias).setValue(getSum(dataRows, alias, totalRow))
     }
 
-    def aRow =getRowByAlias(data, 'A')
-    def totalARow = getRowByAlias(data, 'totalA')
+    def aRow = getRowByAlias(dataRows, 'A')
+    def totalARow = getRowByAlias(dataRows, 'totalA')
 
-    def bRow = getRowByAlias(data, 'B')
-    def totalBRow = getRowByAlias(data, 'totalB')
+    def bRow = getRowByAlias(dataRows, 'B')
+    def totalBRow = getRowByAlias(dataRows, 'totalB')
 
     // раздел А и Б (графа 12, 13, 16)
     def totalColumnsAB = getTotalColumnsAB()
@@ -243,12 +238,12 @@ def calc() {
 //        totalBRow.getCell(alias).setValue(0)
 //    }
     totalColumnsAB.each { alias ->
-        totalARow.getCell(alias).setValue(getSum(data, alias, aRow, totalARow))
-        totalBRow.getCell(alias).setValue(getSum(data, alias, bRow, totalBRow))
+        totalARow.getCell(alias).setValue(getSum(dataRows, alias, aRow, totalARow))
+        totalBRow.getCell(alias).setValue(getSum(dataRows, alias, bRow, totalBRow))
     }
 
     // Всего (графа 5, 7, 8, 10..16)
-    def totalAllRow = getRowByAlias(data, 'totalAll')
+    def totalAllRow = getRowByAlias(dataRows, 'totalAll')
     ['debt45_90DaysSum', 'debt45_90DaysReserve', 'debtOver90DaysSum',
             'debtOver90DaysReserve', 'totalReserve', 'reservePrev',
             'reserveCurrent', 'calcReserve', 'reserveRecovery', 'useReserve'].each { alias ->
@@ -257,8 +252,7 @@ def calc() {
                 getValue(totalBRow.getCell(alias).getValue())
         totalAllRow.getCell(alias).setValue(tmp)
     }
-    save(data)
-
+    dataRowHelper.save(dataRows)
     return true
 }
 
@@ -266,8 +260,8 @@ def calc() {
  * Логические проверки.
  */
 def logicalCheck() {
-    def data = getData(formData)
-    def i = 1
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
 
     // для первых строк - графы 1..16
     requiredColumns1 = ['number', 'debtor', 'provision', 'nameBalanceAccount',
@@ -280,16 +274,25 @@ def logicalCheck() {
     // для раздера А и Б - графы 1, 2, 4, 12, 16
     requiredColumnsAB = ['number', 'debtor', 'nameBalanceAccount', 'reservePrev', 'useReserve']
 
-    def tmp
+    // алиасы графов для арифметической проверки (6, 7, 9..11, 13..15)
+    def arithmeticCheckAlias = ['debt45_90DaysNormAllocation50per', 'debt45_90DaysReserve',
+            'debtOver90DaysNormAllocation100per', 'debtOver90DaysReserve', 'totalReserve',
+            'reserveCurrent', 'calcReserve', 'reserveRecovery']
+    // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
+    def needValue = [:]
+    def colNames = []
+
     def isFirst
     def index
     def errorMsg
-    for (def row : getRows(data)) {
-        if (isFixedRow(row)) {
+    def i = 1
+
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
             continue
         }
 
-        isFirst = isFirstSection(data, row)
+        isFirst = isFirstSection(dataRows, row)
 
         // 1. Обязательность заполнения полей
         def requiredColumns = (isFirst ? requiredColumns1 :  requiredColumnsAB)
@@ -297,61 +300,36 @@ def logicalCheck() {
             return false
         }
 
-        index = getIndex(row) + 1
+        index = row.getIndex()
         errorMsg = "В строке $index "
 
         if (isFirst) {
-            // 2. Арифметическая проверка графы 7
-            tmp = row.debt45_90DaysSum * row.debt45_90DaysNormAllocation50per / 100
-            if (row.debt45_90DaysReserve != roundValue(tmp, 2)) {
-                logger.warn(errorMsg + ' неверно рассчитана графа «Задолженность от 45 до 90 дней. Расчётный резерв»!')
-            }
+            // 3. Арифметическая проверка графы 6, 7, 9..11, 13..15
+            needValue['debt45_90DaysNormAllocation50per'] = calc6()
+            needValue['debt45_90DaysReserve'] = calc7(row)
+            needValue['debtOver90DaysNormAllocation100per'] = calc9()
+            needValue['debtOver90DaysReserve'] = calc10(row)
+            needValue['totalReserve'] = calc11(row)
+            needValue['reserveCurrent'] = calc13(row)
+            needValue['calcReserve'] = calc14(row)
+            needValue['reserveRecovery'] = calc15(row)
 
-            // 3. Арифметическая проверка графы 10
-            tmp = row.debtOver90DaysSum * row.debtOver90DaysNormAllocation100per / 100
-            if (row.debtOver90DaysReserve != roundValue(tmp, 2)) {
-                logger.warn(errorMsg + 'неверно рассчитана графа «Задолженность более 90 дней. Расчётный резерв»!')
+            arithmeticCheckAlias.each { alias ->
+                if (needValue[alias] != row.getCell(alias).getValue()) {
+                    def name = getColumnName(row, alias)
+                    colNames.add('"' + name + '"')
+                }
             }
-
-            // 4. Арифметическая проверка графы 11
-            if (row.totalReserve != row.debt45_90DaysReserve + row.debtOver90DaysReserve) {
-                logger.warn(errorMsg + 'наверное значение графы «Итого расчётный резерв»')
-            }
-
-            // 5. Арифметическая проверка графы 13
-            tmp = row.reservePrev + row.calcReserve - row.reserveRecovery - row.useReserve
-            if (row.reserveCurrent != tmp) {
-                logger.warn(errorMsg + 'неверно рассчитана графа «Резерв на отчётную дату. Текущую»!')
-            }
-
-            // 6. Арифметическая проверка графы 14
-            tmp = (row.totalReserve + row.useReserve > row.reservePrev ?
-                row.totalReserve + row.useReserve - row.reservePrev : 0)
-            if (row.calcReserve != tmp) {
-                logger.warn(errorMsg + 'неверно рассчитана графа «Изменение фактического резерва. Доначисление резерва с отнесением на расходы код 22670»!')
-            }
-
-            // 7. Арифметическая проверка графы 15
-            tmp = (row.totalReserve + row.useReserve < row.reservePrev ?
-                row.reservePrev - (row.totalReserve + row.useReserve) : 0)
-            if (row.reserveRecovery != tmp) {
-                logger.warn(errorMsg + 'неверно рассчитана графа «Изменение фактического резерва. Восстановление резерва на доходах код 13091»!')
-            }
-
-            // 8. Арифметическая проверка графы 6
-            if (row.debt45_90DaysNormAllocation50per != 50) {
-                logger.warn(errorMsg + 'неверно рассчитана графа «Задолженность от 45 до 90 дней. Норматив отчислений 50%»!')
-            }
-
-            // 9. Арифметическая проверка графы 9
-            if (row.debtOver90DaysNormAllocation100per != 100) {
-                logger.warn(errorMsg + 'неверно рассчитана графа «Задолженность более 90 дней. Норматив отчислений 100%»!')
+            if (!colNames.isEmpty()) {
+                def msg = colNames.join(', ')
+                logger.error(errorMsg + "неверно рассчитано значение графы: $msg.")
+                return false
             }
         } else {
-            // 5. Арифметическая проверка графы 13
-            tmp = row.reservePrev - row.useReserve
-            if (row.reserveCurrent != tmp) {
-                logger.warn(errorMsg + 'неверно рассчитана графа «Резерв на отчётную дату. Текущую»!')
+            // 3. Арифметическая проверка графы 13
+            if (row.reserveCurrent != calc13AB(row)) {
+                def msg = colNames.join(', ')
+                logger.error(errorMsg + "неверно рассчитано значение графы: $msg.")
             }
         }
 
@@ -366,12 +344,12 @@ def logicalCheck() {
     def columns
 
     // 10. Проверка итоговых значений по строкам, не входящим в состав раздел А и Б (графа 5, 7, 8, 10..16)
-    def totalRow = getRowByAlias(data, 'total')
+    def totalRow = getRowByAlias(dataRows, 'total')
     columns = ['debt45_90DaysSum', 'debt45_90DaysReserve', 'debtOver90DaysSum',
             'debtOver90DaysReserve', 'totalReserve', 'reservePrev',
             'reserveCurrent', 'calcReserve', 'reserveRecovery', 'useReserve']
     for (def alias : columns) {
-        if (totalRow.getCell(alias).getValue() != getSum(data, alias, totalRow)) {
+        if (totalRow.getCell(alias).getValue() != getSum(dataRows, alias, totalRow)) {
             def name = getColumnName(totalRow, alias)
             logger.error("Итоговые значения для \"$name\" рассчитаны неверно!")
             return false
@@ -379,21 +357,21 @@ def logicalCheck() {
     }
 
     // 11 + 12. Проверка итоговых значений по строкам из раздела А и B
-    def aRow = getRowByAlias(data, 'A')
-    def totalARow = getRowByAlias(data, 'totalA')
+    def aRow = getRowByAlias(dataRows, 'A')
+    def totalARow = getRowByAlias(dataRows, 'totalA')
 
-    def bRow = getRowByAlias(data, 'B')
-    def totalBRow = getRowByAlias(data, 'totalB')
+    def bRow = getRowByAlias(dataRows, 'B')
+    def totalBRow = getRowByAlias(dataRows, 'totalB')
 
     //  раздел А и Б (графа 12, 13, 16)
     columns = ['reservePrev', 'reserveCurrent', 'useReserve']
     for (def alias : columns) {
-        if (totalARow.getCell(alias).getValue() != getSum(data, alias, aRow, totalARow)) {
+        if (totalARow.getCell(alias).getValue() != getSum(dataRows, alias, aRow, totalARow)) {
             def name = getColumnName(totalARow, alias)
             logger.error("Итоговые значения для \"$name\" раздела А рассчитаны неверно!")
             return false
         }
-        if (totalBRow.getCell(alias).getValue() != getSum(data, alias, bRow, totalBRow)) {
+        if (totalBRow.getCell(alias).getValue() != getSum(dataRows, alias, bRow, totalBRow)) {
             def name = getColumnName(totalBRow, alias)
             logger.error("Итоговые значения для \"$name\" раздела Б рассчитаны неверно!")
             return false
@@ -406,24 +384,27 @@ def logicalCheck() {
  * Проверки соответствия НСИ.
  */
 def checkNSI() {
-    def data = getData(formData)
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+
     def index
     def errorMsg
-    for (def row : getRows(data)) {
-        if (isTotal(row)) {
+    def cache = [:]
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
             continue
         }
 
-        index = getIndex(row) + 1
+        index = row.getIndex()
         errorMsg = "В строке $index "
 
         // 1. Проверка актуальности поля «Обеспечение» (графа 3)
-        if (false) {
+        if (row.provision != null && getRecordById(86, row.provision, cache) == null) {
             logger.warn(errorMsg + 'обеспечение в справочнике отсутствует!')
         }
 
         // 2. Проверка счёта бухгалтерского учёта для данного РНУ (графа 4)
-        if (false) {
+        if (row.nameBalanceAccount != null && getRecordById(29, row.nameBalanceAccount, cache) == null) {
             logger.error(errorMsg + 'операция в РНУ не учитывается!')
             return false
         }
@@ -435,30 +416,32 @@ def checkNSI() {
  * Консолидация.
  */
 void consolidation() {
-    def data = getData(formData)
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+
     // удалить нефиксированные строки
     def deleteRows = []
-    getRows(data).each { row ->
-        if (!isFixedRow(row)) {
+    dataRows.each { row ->
+        if (row.getAlias() == null) {
             deleteRows.add(row)
         }
     }
-    getRows(data).removeAll(deleteRows)
+    dataRows.removeAll(deleteRows)
 
-    def sourceData
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                sourceData = getData(source)
-                copyRows(sourceData, data, null, 'total')
-                copyRows(sourceData, data, 'A', 'totalA')
-                copyRows(sourceData, data, 'B', 'totalB')
+            def sourceFormData = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
+                def sourceDataRowHelper = formDataService.getDataRowHelper(sourceFormData)
+                def sourceDataRows = sourceDataRowHelper.getAllCached()
+                copyRows(sourceDataRows, dataRows, null, 'total')
+                copyRows(sourceDataRows, dataRows, 'A', 'totalA')
+                copyRows(sourceDataRows, dataRows, 'B', 'totalB')
             }
         }
     }
-    save(data)
+    dataRowHelper.save(dataRows)
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
@@ -532,87 +515,66 @@ void importData() {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
 }
+void migration() {
+    importData()
+    if (!hasError()) {
+        def total = getCalcTotalRow()
+        def dataRowHelper = formDataService.getDataRowHelper(formData)
+        def dataRows = dataRowHelper.getAllCached()
+        dataRowHelper.insert(total, dataRows.size + 1)
+    }
+}
 
 /*
  * Вспомогательные методы.
  */
 
 /**
- * Проверка является ли строка итоговой.
+ * Получить номер строки в таблице по псевдонимиу (1..n).
  */
-def isTotal(def row) {
-    return row != null && row.getAlias() != null && row.getAlias().contains('total')
+def getIndexByAlias(def dataRows, String rowAlias) {
+    def row = getRowByAlias(dataRows, rowAlias)
+    return (row != null ? row.getIndex() : -1)
 }
 
 /**
- * Проверка является ли строка фиксированной.
+ * Получить сумму графы в указанном диапозоне строк.
  */
-def isFixedRow(def row) {
-    return row != null && row.getAlias() != null
-}
-
-/**
- * Проверка пустое ли значение.
- */
-def isEmpty(def value) {
-    return value == null || value == '' || value == 0
-}
-
-/**
- * Получить номер строки в таблице (0..n).
- *
- * @param row строка
- */
-def getIndex(def row) {
-    row.getIndex() - 1
-}
-
-/**
- * Получить номер строки в таблице по псевдонимиу (0..n).
- */
-def getIndexByAlias(def data, String rowAlias) {
-    def row = getRowByAlias(data, rowAlias)
-    return (row != null ? getIndex(row) : -1)
-}
-
-/**
- * Получить сумму столбца.
- */
-def getSum(def data, def columnAlias, def rowStart, def rowEnd) {
-    def from = getIndex(rowStart) + 1
-    def to = getIndex(rowEnd) - 1
+def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
+    def from = rowStart.getIndex()
+    def to = rowEnd.getIndex() - 2
     if (from > to) {
         return 0
     }
-    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
+    return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
 }
 
 /**
- * Получить сумму столбца.
+ * Получить сумму графы c первой строки и до указанной.
  */
-def getSum(def data, def columnAlias, def rowEnd) {
+def getSum(def dataRows, def columnAlias, def rowEnd) {
     def from = 0
-    def to = getIndex(rowEnd) - 1
+    def to = rowEnd.getIndex() - 2
     if (from > to) {
         return 0
     }
-    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
+    return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
 }
 
 /**
  * Проверить принадлежит ли указанная строка к первому разделу (до строки "итого").
  */
-def isFirstSection(def data, def row) {
-    return row != null && getIndex(row) < getIndex(getRowByAlias(data, 'total'))
+def isFirstSection(def dataRows, def row) {
+    return row != null && row.getIndex() < getRowByAlias(dataRows, 'total').getIndex()
 }
 
 /**
  * Проверить принадлежит ли указанная строка к разделу (A или B).
  */
-def isSection(def data, def row, def section) {
+def isSection(def dataRows, def row, def section) {
     return row != null &&
-            getIndex(row) > getIndexByAlias(data, section) &&
-            getIndex(row) < getIndexByAlias(data, 'total' + section)
+            row.getIndex() > getIndexByAlias(dataRows, section) &&
+            row.getIndex() < getIndexByAlias(dataRows, 'total' + section)
 }
 
 /**
@@ -665,14 +627,9 @@ def checkRequiredColumns(def row, def columns) {
         }
     }
     if (!colNames.isEmpty()) {
-        def index = row.number
         def errorMsg = colNames.join(', ')
-        if (!isEmpty(index)) {
-            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-        } else {
-            index = getIndex(row) + 1
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
-        }
+        index = row.getIndex()
+        logger.error("В строке $index не заполнены колонки : $errorMsg.")
         return false
     }
     return true
@@ -686,84 +643,33 @@ def checkRequiredColumns(def row, def columns) {
  */
 def getColumnName(def row, def alias) {
     if (row != null && alias != null) {
-        return row.getCell(alias).getColumn().getName().replace('%', '%%')
+        return row.getCell(alias).column.name.replace('%', '%%')
     }
     return ''
 }
 
 /**
- * Получить список строк формы.
- *
- * @param data данные нф (helper)
- */
-def getRows(def data) {
-    return data.getAllCached();
-}
-
-/**
- * Сохранить измененные значения нф.
- *
- * @param data данные нф (helper)
- */
-void save(def data) {
-    data.save(getRows(data))
-}
-
-/**
- * Вставить новую строку в конец нф.
- *
- * @param data данные нф
- * @param row строка
- */
-void insert(def data, def row) {
-    data.insert(row, getRows(data).size() + 1)
-}
-
-/**
- * Удалить строку из нф
- *
- * @param data данные нф (helper)
- * @param row строка для удаления
- */
-void deleteRow(def data, def row) {
-    data.delete(row)
-}
-
-/**
- * Получить данные формы.
- *
- * @param formData форма
- */
-def getData(def formData) {
-    if (formData != null && formData.id != null) {
-        return formDataService.getDataRowHelper(formData)
-    }
-    return null
-}
-
-/**
  * Копировать заданный диапозон строк из источника в приемник.
  *
- * @param sourceData даныне источника
- * @param destinationData данные приемника
+ * @param sourceDataRows строки источника
+ * @param destinationDataRows строки приемника
  * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно),
  *      если = null, то копировать с 0 строки
  * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно),
  *      в приемник строки вставляются перед строкой с этим псевдонимом
  */
-void copyRows(def sourceData, def destinationData, def fromAlias, def toAlias) {
-    def from = (fromAlias != null ? getIndexByAlias(sourceData, fromAlias) + 1 : 0)
-    def to = getIndexByAlias(sourceData, toAlias)
+void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def toAlias) {
+    def from = (fromAlias != null ? getIndexByAlias(sourceDataRows, fromAlias) : 0)
+    def to = getIndexByAlias(sourceDataRows, toAlias) - 1
     if (from > to) {
         return
     }
-    def copyRows = getRows(sourceData).subList(from, to)
-    getRows(destinationData).addAll(getIndexByAlias(destinationData, toAlias), copyRows)
+    def copyRows = sourceDataRows.subList(from, to)
+    destinationDataRows.addAll(getIndexByAlias(destinationDataRows, toAlias) - 1, copyRows)
     // поправить индексы, потому что они после вставки не пересчитываются
-    getRows(destinationData).eachWithIndex { row, i ->
+    destinationDataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
-    save(destinationData)
 }
 
 /**
@@ -774,10 +680,10 @@ void copyRows(def sourceData, def destinationData, def fromAlias, def toAlias) {
  * return итоговая строка
  */
 def addData(def xml) {
-    def data = getData(formData)
-    data.clear()
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.clear()
 
-    // def date = new Date()
+    def date = new Date()
     def cache = [:]
     def newRows = []
     def index = 0
@@ -790,7 +696,6 @@ def addData(def xml) {
         setEdit(newRow, null) // TODO (Ramil Timerbaev) задать раздел
         def indexCell = 0
 
-        // графа 0 - forLabel - для вывода надписей
         // графа 1
         newRow.number = getNumber(row.cell[indexCell].text())
         index++
@@ -800,11 +705,13 @@ def addData(def xml) {
         index++
 
         // графа 3
-        newRow.provision = row.cell[indexCell].text()
+        // TODO (Ramil Timerbaev) получить значение из справочника
+        newRow.provision = getRecord(86, '', row.cell[indexCell].text(), date, cache)
         index++
 
         // графа 4
-        newRow.nameBalanceAccount = row.cell[indexCell].text()
+        // TODO (Ramil Timerbaev) получить значение из справочника
+        newRow.nameBalanceAccount = getRecord(29, 'BALANCE_ACCOUNT', row.cell[indexCell].text(), date, cache)
         index++
 
         // графа 5
@@ -857,7 +764,7 @@ def addData(def xml) {
 
         newRows.add(newRow)
     }
-    data.insert(newRows, 1)
+    dataRowHelper.insert(newRows, 1)
 
     // итоговая строка
     if (xml.rowTotal.size() > 0) {
@@ -893,45 +800,74 @@ def getNumber(def value) {
 }
 
 /**
- * Получить id справочника.
+ * Получить запись из справочника по идентифкатору записи.
  *
- * @param ref_id идентификатор справончика
- * @param code атрибут справочника
- * @param value значение для поиска
- * @param date дата актуальности
+ * @param refBookId идентификатор справончика
+ * @param recordId идентификатор записи
  * @param cache кеш
  * @return
  */
-def getRecordId(def ref_id, String code, def value, Date date, def cache) {
-    String filter = code + " = '" + value + "'"
-    if (cache[ref_id]!=null) {
-        if (cache[ref_id][filter] != null) {
-            return cache[ref_id][filter]
+def getRecordById(def refBookId, def recordId, def cache) {
+    if (cache[refBookId] != null) {
+        if (cache[refBookId][recordId] != null) {
+            return cache[refBookId][recordId]
         }
     } else {
-        cache[ref_id] = [:]
+        cache[refBookId] = [:]
     }
-    def refDataProvider = refBookFactory.getDataProvider(ref_id)
+    def record = refBookService.getRecordData(refBookId, recordId)
+    if (record != null) {
+        cache[refBookId][recordId] = record
+        return cache[refBookId][recordId]
+    }
+    // def refBook = refBookFactory.get(refBookId)
+    // def refBookName = refBook.name
+    // logger.error("Не удалось найти запись (id = $recordId) в справочнике $refBookName (id = $refBookId)")
+    return null
+}
+
+/**
+ * Получить запись из справочника по фильту на дату.
+ *
+ * @param refBookId идентификатор справончика
+ * @param code атрибут справочника по которому искать данные
+ * @param value значение для поиска
+ * @param date дата актуальности
+ * @param cache кеш
+ * @return запись справочника
+ */
+def getRecord(def refBookId, String code, def value, Date date, def cache) {
+    String filter = code + " = '" + value + "'"
+    if (cache[refBookId] != null) {
+        if (cache[refBookId][filter] != null) {
+            return cache[refBookId][filter]
+        }
+    } else {
+        cache[refBookId] = [:]
+    }
+    def refDataProvider = refBookFactory.getDataProvider(refBookId)
     def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
     if (records.size() == 1) {
-        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
-        return cache[ref_id][filter]
+        cache[refBookId][filter] = records.get(0)
+        return cache[refBookId][filter]
     }
-    logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
+    def refBook = refBookFactory.get(refBookId)
+    def refBookName = refBook.name
+    logger.error("Не удалось найти запись в справочнике $refBookName (id = $refBookId) с атрибутом $code равным $value!")
     return null
 }
 
 /**
  * Получить строку по алиасу.
  *
- * @param data данные нф
+ * @param dataRows строки нф
  * @param alias алиас
  */
-def getRowByAlias(def data, def alias) {
-    if (alias == null || alias == '' || data == null) {
+def getRowByAlias(def dataRows, def alias) {
+    if (alias == null || alias == '' || dataRows == null) {
         return null
     }
-    for (def row : getRows(data)) {
+    for (def row : dataRows) {
         if (alias.equals(row.getAlias())) {
             return row
         }
@@ -990,17 +926,18 @@ def getCalcTotalRow() {
     def totalRow = formData.createDataRow()
     totalRow.setAlias('total')
     totalRow.contract = 'Итого'
-    setTotalStyle(totalRow)
 
     def totalColumns = getTotalColumns()
-    def data = getData(formData)
     def tmp
     // задать нули
     totalColumns.each { alias ->
         totalRow.getCell(alias).setValue(0)
     }
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+
     // просуммировать значения неитоговых строк
-    for (def row : getRows(data)) {
+    for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
         }
@@ -1031,28 +968,33 @@ def getTotalColumnsAB() {
 /**
  * Отсортировать / группировать строки
  */
-void sort() {
-    def data = getData(formData)
-    def rows = getRows(data)
+void sort(def dataRows) {
     def sortRows = []
     def from
     def to
 
     // первые строки
     from = 0
-    to = getIndexByAlias(data, 'total') - 1
-    sortRows.add(rows[from..to])
+    to = getIndexByAlias(dataRows, 'total') - 2
+    if (from <= to) {
+        sortRows.add(dataRows[from..to])
+    }
 
     // раздел А
-    from = getIndexByAlias(data, 'A') + 1
-    to = getIndexByAlias(data, 'totalA') - 1
-    sortRows.add(rows[from..to])
+    from = getIndexByAlias(dataRows, 'A')
+    to = getIndexByAlias(dataRows, 'totalA') - 2
+    if (from <= to) {
+        sortRows.add(dataRows[from..to])
+    }
 
     // раздела Б
-    from = getIndexByAlias(data, 'B') + 1
-    to = getIndexByAlias(data, 'totalB') - 1
-    sortRows.add(rows[from..to])
+    from = getIndexByAlias(dataRows, 'B')
+    to = getIndexByAlias(dataRows, 'totalB') - 2
+    if (from <= to) {
+        sortRows.add(dataRows[from..to])
+    }
 
+    def cache = [:]
     sortRows.each {
         it.sort {
             // графа 2  - debtor
@@ -1061,17 +1003,68 @@ void sort() {
                 if (a.provision == b.provision) {
                     return a.debtor <=> b.debtor
                 }
-                return a.provision <=> b.provision
+                def recordA = (a.provision ? getRecordById(86, a.provision, cache) : null)
+                def recordB = (b.provision ? getRecordById(86, b.provision, cache) : null)
+                def codeA = (recordA != null ? recordA.CODE.value : null)
+                def codeB = (recordB != null ? recordB.CODE.value : null)
+                return codeA <=> codeB
         }
     }
 }
 
-// TODO (Ramil Timerbaev)
 /**
- * Для отладки. Потом убрать
+ * Получить строки из нф по заданному идентификатору нф.
  */
-void log(def message) {
-    def s = '===== ' + message
-    logger.info(s)
-    // System.out.println(s)
+def getRnuRowsById(def id) {
+    def formDataRNU = formDataService.find(id, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+    if (formDataRNU != null) {
+        def dataRowHelper = formDataService.getDataRowHelper(formDataRNU)
+        def dataRows = dataRowHelper.getAllCached()
+        return dataRows
+    }
+    return null
+}
+
+def calc6() {
+    return 50
+}
+
+def calc7(def row) {
+    def tmp = row.debt45_90DaysSum * row.debt45_90DaysNormAllocation50per / 100
+    return roundValue(tmp, 2)
+}
+
+def calc9() {
+    return 100
+}
+
+def calc10(def row) {
+    def tmp = row.debtOver90DaysSum * row.debtOver90DaysNormAllocation100per / 100
+    return roundValue(tmp, 2)
+}
+
+def calc11(def row) {
+    return row.debt45_90DaysReserve + row.debtOver90DaysReserve
+}
+
+def calc14(def row) {
+    return (row.totalReserve + row.useReserve > row.reservePrev ?
+        row.totalReserve + row.useReserve - row.reservePrev : 0)
+}
+
+def calc15(def row) {
+    return (row.totalReserve + row.useReserve < row.reservePrev ?
+        row.reservePrev - (row.totalReserve + row.useReserve) : 0)
+}
+
+def calc13(def row) {
+    return row.reservePrev + row.calcReserve - row.reserveRecovery - row.useReserve
+}
+
+def calc13AB(def row) {
+    return row.reservePrev - row.useReserve
+}
+
+def getTotalColumns() {
+    return []
 }

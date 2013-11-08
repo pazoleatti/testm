@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -41,9 +42,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiField
     CustomDateBox toSearchDate;
 
-    @UiField(provided = true)
-    ValueListBox<Integer> userId;
-
     @UiField
     DepartmentPickerPopupWidget departmentSelectionTree;
 
@@ -71,10 +69,12 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiField
     Panel declarationTypePanel;
 
+    @UiField
+    RefBookPickerPopupWidget user;
+
 	private static final int oneDayTime = 24 * 60 * 60 * 1000;
 
     private Map<Integer, String> formTypesMap;
-    private Map<Integer, String> userLoginMap;
     private Map<Integer, String> declarationTypesMap;
 
     @Override
@@ -131,7 +131,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         lsf.setFromSearchDate(fromSearchDate.getValue());
         lsf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
         // Пользователь
-        lsf.setUserId(userId.getValue());
+        lsf.setUserId(user.getValue());
         lsf.setTaxType(taxType.getValue());
         return lsf;
     }
@@ -162,11 +162,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         formKind.setValue(null);
         declarationTypePanel.setVisible(false);
         declarationTypeId.setValue(null);
-    }
-
-    public void setUserLogins(Map<Integer, String> userLoginsMap) {
-        this.userLoginMap = userLoginsMap;
-        userId.setAcceptableValues(userLoginsMap.keySet());
     }
 
     @Override
@@ -234,16 +229,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
                     return "";
                 }
                 return declarationTypesMap.get(object);
-            }
-        });
-
-        userId = new ValueListBox<Integer>(new AbstractRenderer<Integer>() {
-            @Override
-            public String render(Integer object) {
-                if (object == null) {
-                    return "";
-                }
-                return userLoginMap.get(object);
             }
         });
 

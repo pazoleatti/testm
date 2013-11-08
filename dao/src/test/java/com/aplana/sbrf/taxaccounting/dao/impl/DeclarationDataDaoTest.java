@@ -1,14 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.util.List;
-
-import org.junit.Assert;
+import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.*;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +12,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import java.io.ByteArrayInputStream;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DeclarationDataDaoTest.xml"})
@@ -31,6 +26,21 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 public class DeclarationDataDaoTest {
 	@Autowired
 	private DeclarationDataDao declarationDataDao;
+
+    @Autowired
+    private BlobDataDao blobDataDao;
+    private  BlobData blobData;
+
+    @Before
+    public void init(){
+        blobData = new BlobData();
+        blobData.setName("");
+        blobData.setDataSize(10);
+        blobData.setInputStream(new ByteArrayInputStream("test-data-string-2".getBytes()));
+        blobData.setCreationDate(new Date());
+        blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
+        blobData.setType(0);
+    }
 	
 	@Test
 	public void testGet() {
@@ -57,26 +67,26 @@ public class DeclarationDataDaoTest {
 	
 	@Test
 	public void testHasXmlData() {
-		assertTrue(declarationDataDao.hasXmlData(1));
+        assertFalse(declarationDataDao.hasXmlData(1));
 		assertFalse(declarationDataDao.hasXmlData(2));
 	}
 	
 	@Test
 	public void testGetData() {
-		String data = declarationDataDao.getXmlData(1);
-		assertEquals("test-data-string-1", data);
+		String data = declarationDataDao.get(1).getXmlDataUuid();
+		assertNull(data);
 	}
 	
 	@Test
 	public void testGetDataEmpty() {
-		String data = declarationDataDao.getXmlData(2);
+		String data = declarationDataDao.get(2).getXmlDataUuid();
 		assertNull(data);
 	}
 	
 	
 	@Test(expected=DaoException.class)
 	public void testGetDataNotExisted() {
-		declarationDataDao.getXmlData(1000l);
+		declarationDataDao.get(1000l);
 	}
 	
 	@Test
@@ -137,28 +147,6 @@ public class DeclarationDataDaoTest {
 		d.setReportPeriodId(6);		
 		declarationDataDao.saveNew(d);
 	}
-	
-	
-	@Test
-	public void saveXmlData() {
-		declarationDataDao.setXmlData(7, "test-data-string-2");
-		String data = declarationDataDao.getXmlData(7);
-		assertEquals("test-data-string-2", data);
-	}
-	
-	@Test
-	public void saveReportPdfData() {
-		declarationDataDao.setPdfData(7, "test-data-string-2".getBytes());
-		byte[] data = declarationDataDao.getPdfData(7);
-		Assert.assertArrayEquals("test-data-string-2".getBytes(), data);
-	}
-	
-	@Test
-	public void saveReportXlsxData() {
-		declarationDataDao.setXlsxData(7, "test-data-string-2".getBytes());
-		byte[] data = declarationDataDao.getXlsxData(7);
-		Assert.assertArrayEquals("test-data-string-2".getBytes(), data);
-	}
 
 	@Test
 	public void findPageTest(){
@@ -213,6 +201,30 @@ public class DeclarationDataDaoTest {
 		assertNull(declaration);
 	}
 
+    @Test
+    public void updateTest(){
+        DeclarationData declarationDataOld = declarationDataDao.get(1);
+        DeclarationData declarationDataNew = new DeclarationData();
+        declarationDataNew.setId(declarationDataOld.getId());
+
+        String xmlId = blobDataDao.create(blobData);
+        declarationDataNew.setXmlDataUuid(xmlId);
+
+        blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
+        String pdfId = blobDataDao.create(blobData);
+        declarationDataNew.setPdfDataUuid(pdfId);
+
+        blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
+        String xlsxId = blobDataDao.create(blobData);
+        declarationDataNew.setXlsxDataUuid(xlsxId);
+
+        declarationDataDao.update(declarationDataNew);
+        assertNotEquals(declarationDataOld.getXmlDataUuid(), declarationDataNew.getXmlDataUuid());
+        assertNotEquals(declarationDataOld.getPdfDataUuid(), declarationDataNew.getPdfDataUuid());
+        assertNotEquals(declarationDataOld.getXlsxDataUuid(), declarationDataNew.getXlsxDataUuid());
+        assertEquals(blobData.getUuid(), declarationDataDao.get(1).getXlsxDataUuid());
+    }
+
 	private void assertIdsEquals(long[] expected, List<DeclarationDataSearchResultItem> items) {
 		if (expected.length != items.size()) {
 			fail("List size mismatch: " + expected.length + " expected but " + items.size() + " received");
@@ -231,7 +243,8 @@ public class DeclarationDataDaoTest {
 		}
 
 		if (failed) {
-			fail("Wrong list of ids: " + expected + " expected but " + received + " received");
+			fail("Wrong list of ids: " + Arrays.toString(expected) + " expected but " + Arrays.toString(received) + " received");
+			fail("Wrong list of ids: " + Arrays.toString(expected) + " expected but " + Arrays.toString(received) + " received");
 		}
 	}
 }

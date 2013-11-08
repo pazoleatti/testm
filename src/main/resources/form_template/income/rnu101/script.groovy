@@ -1,7 +1,7 @@
 /**
  * РНУ-101
  * @author auldanov
- * TODO
+ * TODO Форма будет удалена http://jira.aplana.com/browse/SBRFACCTAX-2364
  *
  * @version 59
  *
