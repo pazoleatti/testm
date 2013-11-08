@@ -174,16 +174,6 @@ void calc() {
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
     }
-    // отсортировать/группировать
-    getRows(data).sort { a, b ->
-        if (a.regionBank == b.regionBank && a.regionBankDivision == b.regionBankDivision) {
-            return b.kpp <=> a.kpp
-        }
-        if (a.regionBank == b.regionBank) {
-            return -(b.regionBankDivision <=> a.regionBankDivision)
-        }
-        return -(b.regionBank <=> a.regionBank)
-    }
 
     def propertyPriceSumm = getSumAll(data, "propertyPrice")
     def workersCountSumm = getSumAll(data, "workersCount")
@@ -211,14 +201,14 @@ void calc() {
 
         def departmentRecords = departmentRefDataProvider.getRecords(currentDate, null, "ID = '" + row.regionBankDivision + "'", null);
         if (departmentRecords == null || departmentRecords.getRecords().isEmpty()) {
-            logger.error('Не найдено родительское подразделение для строки ' + (row.number ?: getIndex(data, row)))
+            logger.error('Не найдено родительское подразделение для строки ' + (i+1))
             return
         }
         def departmentParam = departmentRecords.getRecords().getAt(0)
 
         def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = '" + row.regionBankDivision + "'", null);
         if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.getRecords().isEmpty()) {
-            logger.error('Не найдены настройки подразделения для строки ' + (row.number ?: getIndex(data, row)))
+            logger.error('Не найдены настройки подразделения для строки ' + (i+1))
             return
         }
         def incomeParam = departmentParamIncomeRecords.getRecords().getAt(0)
@@ -231,10 +221,6 @@ void calc() {
         } else {
             parentDepartmentId = departmentParam.get('PARENT_ID').getReferenceValue()
         }
-
-
-        // графа 1
-        row.number = i + 1
 
         // графа 2 - название подразделения
         row.regionBank = parentDepartmentId
@@ -260,6 +246,23 @@ void calc() {
 
         // графа 13..21
         calcColumnFrom13To21(row, sumNal, reportPeriod)
+    }
+
+    // отсортировать можно только после расчета графы regionBank
+    getRows(data).sort { a, b ->
+        if (a.regionBank == b.regionBank && a.regionBankDivision == b.regionBankDivision) {
+            return b.kpp <=> a.kpp
+        }
+        if (a.regionBank == b.regionBank) {
+            return -(b.regionBankDivision <=> a.regionBankDivision)
+        }
+        return -(b.regionBank <=> a.regionBank)
+    }
+
+    //
+    getRows(data).eachWithIndex { row, i ->
+        // графа 1
+        row.number = i + 1
     }
 
     // добавить строку ЦА (скорректрированный) (графа 1..21)
