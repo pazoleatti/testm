@@ -31,61 +31,18 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 
 	@Override
 	public PagingResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
-		FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
-
-		formDataDaoFilter.setDepartmentIds(formDataFilter.getDepartmentIds());
-		formDataDaoFilter.setReportPeriodIds(formDataFilter.getReportPeriodIds());
-
-		if(formDataFilter.getFormDataKind() == null){
-			FormDataKind[] formDataKinds = FormDataKind.values();
-			formDataDaoFilter.setFormDataKind(Arrays.asList(formDataKinds));
-		} else {
-			formDataDaoFilter.setFormDataKind(Arrays.asList(formDataFilter.getFormDataKind()));
-		}
-
-		if(formDataFilter.getFormTypeId() == null){
-			formDataDaoFilter.setFormTypeIds(null);
-		} else {
-			formDataDaoFilter.setFormTypeIds(Arrays.asList(formDataFilter.getFormTypeId()));
-		}
-
-		if(formDataFilter.getFormState() == null){
-			WorkflowState[] formStates = WorkflowState.values();
-			formDataDaoFilter.setStates(Arrays.asList(formStates));
-		} else {
-			formDataDaoFilter.setStates(Arrays.asList(formDataFilter.getFormState()));
-		}
-
-		formDataDaoFilter.setReturnState(formDataFilter.getReturnState());
-
-		if(formDataFilter.getTaxType() == null){
-			//В текущей реализации мы всегда идем по ветке else и сюда не попадаем, но  данное условие
-			//добавлено, на случай, если в дальнейщем будет функциональность выбора по всем типам налога.
-			TaxType[] taxTypes = TaxType.values();
-			formDataDaoFilter.setTaxTypes(Arrays.asList(taxTypes));
-		} else {
-			formDataDaoFilter.setTaxTypes(Arrays.asList(formDataFilter.getTaxType()));
-		}
-		
-		// Добавляем условия для отбрасывания форм, на которые у пользователя нет прав доступа
-		// Эти условия должны быть согласованы с реализацией в FormDataAccessServiceImpl		
-		formDataDaoFilter.setUserDepartmentId(userInfo.getUser().getDepartmentId());
-		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-			formDataDaoFilter.setAccessFilterType(AccessFilterType.ALL);
-		} else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
-			formDataDaoFilter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT_AND_SOURCES);
-		} else if (userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
-			formDataDaoFilter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT);
-		} else {
-			throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
-		}
-
-		return formDataSearchDao.findPage(formDataDaoFilter, formDataFilter.getSearchOrdering(),
+		return formDataSearchDao.findPage(createFormDataDaoFilter(userInfo, formDataFilter), formDataFilter.getSearchOrdering(),
 				formDataFilter.isAscSorting(), new PagingParams(formDataFilter.getStartIndex(),
 				formDataFilter.getCountOfRecords()));
 	}
 
-	@Override
+    @Override
+    public List<Long> findDataIdsByUserAndFilter(TAUserInfo userInfo, FormDataFilter filter) {
+        return formDataSearchDao.findIdsByFilter(createFormDataDaoFilter(userInfo, filter));
+    }
+
+
+    @Override
 	public List<Department> listAllDepartmentsByParentDepartmentId(int parentDepartmentId) {
 		List<Department> departmentList = new ArrayList<Department>();
 		departmentList.add(departmentService.getDepartment(parentDepartmentId));
@@ -168,4 +125,57 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			kindList.remove(FormDataKind.SUMMARY);
 		}
 	}
+
+    private FormDataDaoFilter createFormDataDaoFilter(TAUserInfo userInfo, FormDataFilter formDataFilter){
+        FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
+
+        formDataDaoFilter.setDepartmentIds(formDataFilter.getDepartmentIds());
+        formDataDaoFilter.setReportPeriodIds(formDataFilter.getReportPeriodIds());
+
+        if(formDataFilter.getFormDataKind() == null){
+            FormDataKind[] formDataKinds = FormDataKind.values();
+            formDataDaoFilter.setFormDataKind(Arrays.asList(formDataKinds));
+        } else {
+            formDataDaoFilter.setFormDataKind(Arrays.asList(formDataFilter.getFormDataKind()));
+        }
+
+        if(formDataFilter.getFormTypeId() == null){
+            formDataDaoFilter.setFormTypeIds(null);
+        } else {
+            formDataDaoFilter.setFormTypeIds(Arrays.asList(formDataFilter.getFormTypeId()));
+        }
+
+        if(formDataFilter.getFormState() == null){
+            WorkflowState[] formStates = WorkflowState.values();
+            formDataDaoFilter.setStates(Arrays.asList(formStates));
+        } else {
+            formDataDaoFilter.setStates(Arrays.asList(formDataFilter.getFormState()));
+        }
+
+        formDataDaoFilter.setReturnState(formDataFilter.getReturnState());
+
+        if(formDataFilter.getTaxType() == null){
+            //В текущей реализации мы всегда идем по ветке else и сюда не попадаем, но  данное условие
+            //добавлено, на случай, если в дальнейщем будет функциональность выбора по всем типам налога.
+            TaxType[] taxTypes = TaxType.values();
+            formDataDaoFilter.setTaxTypes(Arrays.asList(taxTypes));
+        } else {
+            formDataDaoFilter.setTaxTypes(Arrays.asList(formDataFilter.getTaxType()));
+        }
+
+        // Добавляем условия для отбрасывания форм, на которые у пользователя нет прав доступа
+        // Эти условия должны быть согласованы с реализацией в FormDataAccessServiceImpl
+        formDataDaoFilter.setUserDepartmentId(userInfo.getUser().getDepartmentId());
+        if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+            formDataDaoFilter.setAccessFilterType(AccessFilterType.ALL);
+        } else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
+            formDataDaoFilter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT_AND_SOURCES);
+        } else if (userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
+            formDataDaoFilter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT);
+        } else {
+            throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
+        }
+
+        return formDataDaoFilter;
+    }
 }

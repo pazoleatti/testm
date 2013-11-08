@@ -76,4 +76,9 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 		Collections.sort(result.getDeclarationTypes(), new DeclarationTypeAlphanumericComparator());
 		return result;
 	}
+
+    @Override
+    public List<Long> getDeclarationIds(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering, boolean asc) {
+        return declarationDao.findIdsByFilter(declarationFilter, ordering, asc);
+    }
 }

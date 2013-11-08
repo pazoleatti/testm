@@ -34,7 +34,17 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
     @UiField
     FlexiblePager pager;
 
-    final AsyncDataProvider<LogBusinessSearchResultItem> dataProvider;
+    final AsyncDataProvider<LogBusinessSearchResultItem> dataProvider = new AsyncDataProvider<LogBusinessSearchResultItem>() {
+        @Override
+        protected void onRangeChanged(HasData<LogBusinessSearchResultItem> display) {
+            System.out.println("!!!");
+            if (getUiHandlers() != null){
+                System.out.println("!!!!");
+                final Range range = display.getVisibleRange();
+                getUiHandlers().onRangeChange(range.getStart(), range.getLength());
+            }
+        }
+    };
 
 
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
@@ -162,16 +172,8 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
         logBusinessTable.addColumn(userRolesColumn, userRolesColumnHeader);
         logBusinessTable.addColumn(userIpColumn, userIpColumnHeader);
 
-        dataProvider = new AsyncDataProvider<LogBusinessSearchResultItem>() {
-            @Override
-            protected void onRangeChanged(HasData<LogBusinessSearchResultItem> display) {
-                if (getUiHandlers() != null){
-                    final Range range = display.getVisibleRange();
-                    getUiHandlers().onRangeChange(range.getStart(), range.getLength());
-                }
-            }
-        };
         dataProvider.addDataDisplay(logBusinessTable);
+        pager.setDisplay(logBusinessTable);
     }
 
     @Override

@@ -68,8 +68,8 @@ public class HistoryBusinessPresenter extends Presenter<HistoryBusinessPresenter
     public HistoryBusinessPresenter(EventBus eventBus, MyView view, MyProxy proxy, HistoryBusinessFilterPresenter historyBusinessFilterPresenter, DispatchAsync dispatcher) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
-        getView().setUiHandlers(this);
         this.historyBusinessFilterPresenter = historyBusinessFilterPresenter;
+        getView().setUiHandlers(this);
     }
 
     interface MyView extends View, HasUiHandlers<HistoryBusinessUIHandler>{
@@ -93,5 +93,6 @@ public class HistoryBusinessPresenter extends Presenter<HistoryBusinessPresenter
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
         historyBusinessFilterPresenter.initFilterData();
+        getView().updateData(0);
     }
 }

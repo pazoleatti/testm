@@ -37,7 +37,6 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
         dispatchAsync.execute(action, new AbstractCallback<GetHistoryBusinessReportPeriodsResult>() {
             @Override
             public void onSuccess(GetHistoryBusinessReportPeriodsResult result) {
-                System.out.println("Success!");
                 getView().setReportPeriodPicker(result.getReportPeriodList());
             }
         });

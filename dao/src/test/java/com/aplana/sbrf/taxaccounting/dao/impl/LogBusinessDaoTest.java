@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.LogBusiness;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -98,6 +99,26 @@ public class LogBusinessDaoTest {
 		assertEquals(new Date(14253454568000l).getTime(), acceptanceDate.getTime());
 		assertEquals(new Date(13253454568000l).getTime(), creationDate.getTime());
 	}
+
+    @Test
+    public void testGetLogsBusiness() {
+        LogBusinessFilterValuesDao filterValuesDao = new LogBusinessFilterValuesDao();
+        filterValuesDao.setDepartmentId(1);
+        filterValuesDao.setFromSearchDate(new Date(13253454586354l));
+        filterValuesDao.setToSearchDate(new Date(14253454568354l));
+        filterValuesDao.setStartIndex(0);
+        filterValuesDao.setCountOfRecords(1);
+        List<Long> formDataIds = new ArrayList<Long>();
+        formDataIds.add(1l);
+        List<Long> declarationIds = new ArrayList<Long>();
+        declarationIds.add(1l);
+        declarationIds.add(2l);
+
+        PagingResult<LogBusinessSearchResultItem> resultItems = logBusinessDao.getLogsBusiness(formDataIds, declarationIds, filterValuesDao);
+        assertEquals(1, resultItems.getTotalCount());
+        assertEquals(1, resultItems.size());
+        assertEquals("ТБ1", resultItems.get(0).getDepartment().getName());
+    }
 
 	private LogBusiness createFormLogBusiness(int event_id, long id, Date date) {
 		LogBusiness logBusiness = new LogBusiness();
