@@ -414,7 +414,9 @@ def getValues(def dataRows, def row, def resultRow, def startDate, def endDate) 
     if(resultRow == null){
         resultRow = [:]
     }
-    def rowPrev = getRowPrev(row)
+    def reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+    def formDataPrev = reportPeriodPrev? formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriodPrev.id):null
+    def rowPrev = getRowPrev(formDataPrev, row)
     resultRow.with {
         rowNumber = getGraph1(dataRows, row)
         result = getGraph11(row)
@@ -430,14 +432,16 @@ def getValues(def dataRows, def row, def resultRow, def startDate, def endDate) 
     return resultRow
 }
 
-def getRowPrev(def row){
-    def prevDataRowHelper = formDataService.getDataRowHelper(formData)
-    for (def rowPrev in prevDataRowHelper.allCached){
-        if ((row.contragent == rowPrev.contragent &&
-                row.inn == rowPrev.inn &&
-                row.assignContractNumber == rowPrev.assignContractNumber &&
-                row.assignContractDate == rowPrev.assignContractDate)){
-            return rowPrev
+def getRowPrev(def formDataPrev, def row){
+    if (formDataPrev != null) {
+        def prevDataRowHelper = formDataService.getDataRowHelper(formDataPrev)
+        for (def rowPrev in prevDataRowHelper.allCached){
+            if ((row.contragent == rowPrev.contragent &&
+                    row.inn == rowPrev.inn &&
+                    row.assignContractNumber == rowPrev.assignContractNumber &&
+                    row.assignContractDate == rowPrev.assignContractDate)){
+                return rowPrev
+            }
         }
     }
 }
