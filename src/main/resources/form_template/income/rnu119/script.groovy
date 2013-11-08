@@ -9,8 +9,6 @@ import groovy.transform.Field
  * Форма "(РНУ-119) Регистр налогового учёта доходов и расходов, по сделкам своп, квалифицированным в качестве операций с ФИСС для целей налогообложения".
  *
  * TODO:
- *      - графа 2.2: Должно содержать значение поля «Вид сделки» справочника «Виды сделок»:CCIRS, IRS,CCS.
- *              потом прикрутить http://jira.aplana.com/browse/SBRFACCTAX-4917
  *      - расчет графы 15.1 и 15.2 непонтяности с ручным вводом в чтз
  *
  * @author rtimerbaev
@@ -18,7 +16,7 @@ import groovy.transform.Field
 
 // графа 1  - 1    - number
 // графа 2  - 2.1  - transactionNumber
-// графа 3  - 2.2  - transactionKind                атрибут ??? CODE "Вид сделки" - справочник 00 "Виды сделок"
+// графа 3  - 2.2  - transactionKind                атрибут 831 KIND "Вид сделки" - справочник 91 "Виды сделок"
 // графа 4  - 2.3  - contractor
 // графа 5  - 2.4  - transactionType                атрибут 70 TYPE "Тип сделки" - справочник 16 "Типы сделок"
 // графа 6  - 2.5  - coursFirstPart
@@ -227,8 +225,7 @@ void logicCheck() {
         }
 
         // 3. Проверка на заполнение граф 8.1 - 8.3, 10, 11, 13
-        //def kind = getRefBookValue(??, row.transactionKind)?.?????.value // TODO (Ramil Timerbaev) http://jira.aplana.com/browse/SBRFACCTAX-4917
-        def kind = 'CCIRS'
+        def kind = getRefBookValue(91, row.transactionKind)?.KIND?.value
         if (kind == 'CCIRS' || kind == 'IRS') {
             checkNonEmptyColumns(row, index, nonEmptyColumns2, logger, true)
         }
@@ -248,7 +245,7 @@ void logicCheck() {
 
         // Проверки соответствия НСИ
         // 1. Проверка соответствия справочнику «Вид сделки» (графа 2.2)
-        // checkNSI(???, row, 'transactionKind') // TODO (Ramil Timerbaev) http://jira.aplana.com/browse/SBRFACCTAX-4917
+        checkNSI(91, row, 'transactionKind')
 
         // 2. Проверка соответствия справочнику «Типы сделок» (графа 2.4)
         checkNSI(16, row, 'transactionType')
@@ -324,7 +321,7 @@ void migration() {
     if (!logger.containsLevel(LogLevel.ERROR)) {
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.allCached
-        def total = getCalcTotalRow(dataRows)
+        def total = getTotalRow(dataRows)
         dataRowHelper.insert(total, dataRows.size() + 1)
     }
 }
@@ -404,8 +401,7 @@ def calc15(def row) {
     }
     def value15_1 = null
     def value15_2 = null
-    //def kind = getRefBookValue(??, row.transactionKind)?.?????.value // TODO (Ramil Timerbaev)
-    def kind = 'CCIRS'
+    def kind = getRefBookValue(91, row.transactionKind)?.KIND?.value
     if (kind == 'CCIRS' || kind == 'IRS') {
         def code11 = getRefBookValue(72, row.liabilityInterestRateValue)?.CODE?.value
         if (code11 == 'fix') {
