@@ -147,7 +147,7 @@ void calc() {
 }
 
 // Расчет графы 15, 16
-def calcPrice(def row, def currency) {
+def BigDecimal calcPrice(def row, def currency) {
     if (row.getCell(currency).value == null || row.transactionDateEnd == null) {
         return null
     }
@@ -157,7 +157,7 @@ def calcPrice(def row, def currency) {
 }
 
 // Расчет графы 17
-def calcRequest(def row, def transactionKind) {
+def BigDecimal calcRequest(def row, def transactionKind) {
     if (transactionKind == null || row.currencyVolume == null || row.priceRequest == null
             || transactionKind != 'премия по опциону') {
         return null
@@ -166,7 +166,7 @@ def calcRequest(def row, def transactionKind) {
 }
 
 // Расчет графы 18
-def calcLiability(def row, def transactionKind) {
+def BigDecimal calcLiability(def row, def transactionKind) {
     if (row.transactionKind == null || row.currencyVolumeSale == null || row.priceLiability == null
             || transactionKind != 'премия по опциону') {
         return null
@@ -175,7 +175,7 @@ def calcLiability(def row, def transactionKind) {
 }
 
 // Расчет графы 19, 20
-def calcIncomeOutcome(def row, def income) {
+def BigDecimal calcIncomeOutcome(def row, def income) {
     if (row.request == null || row.liability == null) {
         return null
     }
@@ -184,7 +184,7 @@ def calcIncomeOutcome(def row, def income) {
 }
 
 // Расчет графы 22, 23
-def calcIncomeOutcomeDeviation(def row, def incomeMode, def transactionKind) {
+def BigDecimal calcIncomeOutcomeDeviation(def row, def incomeMode, def transactionKind) {
     def inoutcome = incomeMode == 1 ? row.income : row.outcome
 
     if (inoutcome == null || row.transactionKind == null || row.transactionType == null || row.price == null
@@ -248,7 +248,7 @@ void logicCheck() {
         if (++i != row.number) {
             logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
-        BigDecimal
+
         // 3 Арифметические проверки расчета неитоговых граф
         // TODO пока нет справочника
         transactionKind = 'премия по опциону' //getRefBookValue(-1, row.transactionKind).ATTRIBUTE.stringValue
