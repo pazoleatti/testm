@@ -77,7 +77,7 @@ public class RefBookHelperImpl implements RefBookHelper {
 			if (RefBookAttributeType.REFERENCE.equals(type)) {
 				Long longRefValue = record.get(alias).getReferenceValue();
 				if (longRefValue == null) {
-					result.put(alias, new String());
+					result.put(alias, "");
 				} else {
 					if (refBook.getId().equals(refBookAttribute.getRefBookId())) {
 						RefBookValue val = provider.getValue(longRefValue,

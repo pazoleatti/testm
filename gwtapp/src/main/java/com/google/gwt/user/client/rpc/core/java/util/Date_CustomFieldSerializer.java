@@ -16,7 +16,7 @@ public final class Date_CustomFieldSerializer extends
 	/**
 	 * Сброс/восстановление UTC
 	 * 
-	 * @param date
+	 * @param time
 	 * @param plus
 	 * 
 	 * @return
@@ -28,8 +28,7 @@ public final class Date_CustomFieldSerializer extends
 		Date getOffsetDate = new Date();
 		long offset = getOffsetDate.getTimezoneOffset() * 60000;
 		// *
-		long result = time + (plus ? offset : -offset);
-		return result;
+		return time + (plus ? offset : -offset);
 	}
 
 	public static void deserialize(SerializationStreamReader streamReader,

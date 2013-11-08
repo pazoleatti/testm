@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
-public class RefBookDataTokens {
+public final class RefBookDataTokens {
 
 	private RefBookDataTokens() {
 	}

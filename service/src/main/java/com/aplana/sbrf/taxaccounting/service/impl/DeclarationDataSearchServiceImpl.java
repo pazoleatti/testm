@@ -27,9 +27,6 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 	private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
 
 	@Autowired
-	private DepartmentDao departmentDao;
-	
-	@Autowired
 	private SourceService sourceService;
 	
 

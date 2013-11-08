@@ -22,12 +22,14 @@ import java.text.SimpleDateFormat
  * Графы:
  * 1    balanceNumber                   Номер балансового счёта Справочник 29 Атрибут 152 BALANCE_ACCOUNT
  * 2    operationType                   Вид операции (продажа, погашение, открытие \закрытие короткой позиции)
+ *                                      Справочник 87 Атрибут 824 OPERATION_TYPE
  * 3    signContractor                  Признак контрагента: 3 - эмитент ценной бумаги, 4 - организатор торговли,
- *                                      5 - прочие
+ *                                      5 - прочие Справочник 88 Атрибут 825 CODE
  * 4    contractorName                  Наименование контрагента
  * 5    securityName                    Наименование ценной бумаги (включая наименование эмитента)
  * 6    series                          Серия (выпуск)
  * 7    securityKind                    Вид ценной бумаги: 1 - купонная облигация, 2 - дисконтная облигация, 3 - акция
+ *                                      Справочник 89 Атрибут 827 CODE
  * 8    signSecurity                    Признак ценной бумаги: «+» - обращающаяся на ОРЦБ; «-» - необращающаяся на ОРЦБ
  *                                      Справочник 62 Атрибут 621 CODE
  * 9    currencyCode                    Код валюты бумаги (номинала) Справочник 15 Атрибут 65 CODE_2
@@ -140,12 +142,21 @@ def boolean checkNSI(){
             continue
         }
         def errStart = getRowIndexString(row)
-        //TODO еще справочники
+
         if (row.balanceNumber != null && null == getRecordById(29, row.balanceNumber, cache)){
             logger.warn(getRefBookErrorMessage(errStart, 29, row.balanceNumber))
         }
-        if (row.signSecurity != null && null == getRecordById(62, row.signSeciruty, cache)){
-            logger.warn(getRefBookErrorMessage(errStart, 62, row.signSeciruty))
+        if (row.operationType != null && null == getRecordById(87, row.operationType, cache)){
+            logger.warn(getRefBookErrorMessage(errStart, 87, row.operationType))
+        }
+        if (row.signContractor != null && null == getRecordById(88, row.signContractor, cache)){
+            logger.warn(getRefBookErrorMessage(errStart, 88, row.signContractor))
+        }
+        if (row.securityKind != null && null == getRecordById(89, row.securityKind, cache)){
+            logger.warn(getRefBookErrorMessage(errStart, 89, row.securityKind))
+        }
+        if (row.signSecurity != null && null == getRecordById(62, row.signSecurity, cache)){
+            logger.warn(getRefBookErrorMessage(errStart, 62, row.signSecurity))
         }
         if (row.currencyCode != null && null == getRecordById(15, row.currencyCode, cache)){
             isValid = false
@@ -606,7 +617,7 @@ def getGraph21(def row) {
  * получаем значение для графы 27
  */
 def getGraph27(def values, def row) {
-    if (values.operationType.equals('Погашение')) {        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
+    if (getOperationType(values.operationType).equals('Погашение')) {
         values.marketPriceRealizationInPerc = 100
     } else {
         return row.marketPriceRealizationInPerc
@@ -617,7 +628,7 @@ def getGraph27(def values, def row) {
  * получаем значение для графы 28
  */
 def getGraph28(def values, def row) {
-    if (values.operationType.equals('Погашение')) {        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
+    if (getOperationType(values.operationType).equals('Погашение')) {
         values.marketPriceRealizationInRub = values.repaymentWithoutNKD
     } else {
         return row.marketPriceRealizationInRub
@@ -628,8 +639,8 @@ def getGraph28(def values, def row) {
  * получаем значение для графы 29   //todo (vsergeev) после ответа на http://jira.aplana.com/browse/SBRFACCTAX-2522 перепроверить алгоритм
  */
 def getGraph29(def row) {
-    final signContractorIs4 = row.signContractor.equals('4')        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
-    final signContractorIs5 = row.signContractor.equals('5')        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
+    final signContractorIs4 = getSignContractor(row.signContractor) == 4
+    final signContractorIs5 = getSignContractor(row.signContractor) == 5
     if (signContractorIs4 && (isBargain() || isNegotiatedDeal())
             && row.realizationPriceInPerc >= row.marketPriceRealizationInPerc
             && row.realizationPriceInRub >=  row.marketPriceRealizationInRub
@@ -638,7 +649,7 @@ def getGraph29(def row) {
             && row.costRealization >= row.marketPriceRealizationInRub
     ) {
         return row.realizationPriceInRub
-    } else if (row.operationType.equals('Погашение') && row.signContractor.equals('3')) {        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
+    } else if (getOperationType(row.operationType).equals('Погашение') && getSignContractor(row.signContractor) == 3) {
         return row.repaymentWithoutNKD
     } else if (signContractorIs4 && isNegotiatedDeal()
             && row.realizationPriceInPerc < row.marketPriceRealizationInPerc
@@ -743,7 +754,7 @@ def isNegotiatedDeal() {
  * @return Если «графа 7» == «2» тогда {@value true} иначе {@value false}
  */
 boolean isDiscountBond(def row) {
-    row.securityKind.equals('2')        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
+    getSecurityKind(row.securityKind) == 2
 }
 
 /**
@@ -751,7 +762,7 @@ boolean isDiscountBond(def row) {
  * @return Если «графа 7» == «1» || «графа 7» == «3» тогда {@value true} иначе {@value false}
  */
 boolean isCouponBound(def row) {
-    row.securityKind.equals('1') || row.securityKind.equals('3')        //todo (vsergeev) нужен справочник!!! http://jira.aplana.com/browse/SBRFACCTAX-2504
+    getSecurityKind(row.securityKind) == 1 || getSecurityKind(row.securityKind) == 3
 }
 
 boolean isBlankOrNull(value) {
@@ -885,16 +896,28 @@ def getBalanceNumber(def id) {
     return refBookService.getStringValue(29, id, 'BALANCE_ACCOUNT')
 }
 
+def getOperationType(def id) {
+    return refBookService.getStringValue(87, id, 'OPERATION_TYPE')
+}
+
+def getSignContractor(def id) {
+    return refBookService.getNumberValue(88, id, 'CODE')
+}
+
+def getSecurityKind(def id) {
+    return refBookService.getNumberValue(89, id, 'CODE')
+}
+
 def getSignSecurity(def id) {
     return refBookService.getStringValue(62, id, 'CODE')
 }
 
-def getCompareList(DataRow row) {//TODO справочники
+def getCompareList(DataRow row) {
     return [getBalanceNumber(row.balanceNumber),
         getSignSecurity(row.signSecurity),
-        row.securityKind,
-        row.signContractor,
-        row.operationType]
+        getSecurityKind(row.securityKind),
+        getSignContractor(row.signContractor),
+        getOperationType(row.operationType)]
 }
 
 /**

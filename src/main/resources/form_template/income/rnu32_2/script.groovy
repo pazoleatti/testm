@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  * Форма "(РНУ-32.2) Регистр налогового учёта начисленного процентного дохода по облигациям, по которым открыта короткая позиция. Отчёт 2".
  *
  * TODO:
- *      - в рну 32.2 нет фиксированных строк итого как в рну 40.2 хотя рнушки очень похожи, возможно в рну 32.2 надо добавить итоги
+ *      - логическая проверка 1 - проблемы с форматом TTBBBB - http://jira.aplana.com/browse/SBRFACCTAX-4780 - РНУ-32.1 Формат графы 1 "Номер территориального банка"
  *
  * @author rtimerbaev
  */
@@ -61,7 +61,7 @@ def calc() {
 
     // подразделы, собрать список списков строк каждого раздела
     getAliasesSections().each { section ->
-        def rows32_1 = getRowsBySection(dataRows32_1, section)
+        def rows32_1 = getRowsBySection32_1(dataRows32_1, section)
         def rows32_2 = getRowsBySection(dataRows, section)
         def newRows = []
         for (def row : rows32_1) {
@@ -73,22 +73,13 @@ def calc() {
             rows32_2.add(newRow)
         }
         if (!newRows.isEmpty()) {
-            dataRows.addAll(getIndexByAlias(dataRows, 'total' + section), newRows)
+            dataRows.addAll(getIndexByAlias(dataRows, section) + 1, newRows)
             updateIndexes(dataRows)
         }
     }
 
-    sort(dataRowHelper)
+    sort(dataRows)
 
-    // посчитать итоги по разделам
-    def sumColumns = getSumColumns()
-    getAliasesSections().each { section ->
-        def firstRow = getRowByAlias(dataRows, section)
-        def lastRow = getRowByAlias(dataRows, 'total' + section)
-        sumColumns.each {
-            lastRow.getCell(it).setValue(getSum(dataRows, it, firstRow, lastRow))
-        }
-    }
     dataRowHelper.save(dataRows)
     return true
 }
@@ -108,11 +99,14 @@ def logicalCheck() {
     // список проверяемых столбцов (графа 1..6)
     def requiredColumns = ['number', 'name', 'code', 'cost', 'bondsCount', 'percent']
     for (def row : dataRows) {
-        // 1. Обязательность заполнения поля графы 1..6
+        // 2. Обязательность заполнения поля графы 1..6
         if (row.getAlias() == null && !checkRequiredColumns(row, requiredColumns)) {
             return false
         }
     }
+
+    // 1. Проверка формата номера подразделения	Формат графы 1: ТТВВВВ	1	Неправильно указан номер подразделения (формат: ТТВВВВ)!
+    // TODO (Ramil Timerbaev) http://jira.aplana.com/browse/SBRFACCTAX-4780	- РНУ-32.1 Формат графы 1 "Номер территориального банка"
 
     // алиасы графов для арифметической проверки (графа 1..6)
     def arithmeticCheckAlias = requiredColumns
@@ -121,10 +115,10 @@ def logicalCheck() {
     def index
     def errorMsg
 
-    // 2. Арифметическая проверка графы 1..6
+    // 3. Арифметическая проверка графы 1..6
     // подразделы, собрать список списков строк каждого раздела
     for (def section : getAliasesSections()) {
-        def rows32_1 = getRowsBySection(dataRows32_1, section)
+        def rows32_1 = getRowsBySection32_1(dataRows32_1, section)
         def rows32_2 = getRowsBySection(dataRows, section)
         // если в разделе рну 32.1 есть данные, а в аналогичном разделе рну 32.2 нет данных, то ошибка
         // или наоборот, то тоже ошибка
@@ -151,23 +145,6 @@ def logicalCheck() {
             if (!colNames.isEmpty()) {
                 def msg = colNames.join(', ')
                 logger.error(errorMsg + "неверно рассчитано значение графы: $msg.")
-                return false
-            }
-        }
-    }
-
-    // 3. Арифметическая проверка строк промежуточных итогов (графа 5, 6)
-    def sumColumns = getSumColumns()
-    getAliasesSections().each { section ->
-        def firstRow = getRowByAlias(dataRows, section)
-        def lastRow = getRowByAlias(dataRows, 'total' + section)
-        for (def col : sumColumns) {
-            def value = roundValue(lastRow.getCell(col).getValue() ?: 0, 6)
-            def sum = roundValue(getSum(dataRows, col, firstRow, lastRow), 6)
-            if (value != sum) {
-                def name = lastRow.getCell(col).column.name
-                def number = section
-                logger.error("Неверно рассчитаны итоговые значения для раздела $number в графе \"$name\"!")
                 return false
             }
         }
@@ -239,8 +216,12 @@ void consolidation() {
                 def sourceDataRows = sourcedataRowHelper.getAllCached()
                 // копирование данных по разделам
                 aliasesSections.each { section ->
-                    copyRows(sourceDataRows, dataRows, section, 'total' + section)
+                    copyRows(sourceDataRows, dataRows, section, (Integer.valueOf(section) + 1).toString())
                 }
+//                (1..6).each { section ->
+//                    copyRows(sourceDataRows, dataRows, section.toString(), (Integer.valueOf(section) + 1).toString())
+//                }
+//                copyRows(sourceDataRows, dataRows, '7', null)
             }
         }
     }
@@ -258,10 +239,6 @@ void checkUniq() {
         logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
     }
 }
-
-/*
- * Вспомогательные методы.
- */
 
 /**
  * Получить строку по алиасу.
@@ -282,11 +259,11 @@ def getRowByAlias(def dataRows, def alias) {
 }
 
 /**
- * Получить номер строки в таблице по псевдонимиу (0..n).
+ * Получить номер строки в таблице по псевдонимиу (1..n).
  */
 def getIndexByAlias(def dataRows, String rowAlias) {
     def row = getRowByAlias(dataRows, rowAlias)
-    return (row != null ? row.getIndex() - 1 : -1)
+    return (row != null ? row.getIndex() : -1)
 }
 
 /**
@@ -319,19 +296,18 @@ def checkRequiredColumns(def row, def columns) {
  *
  * @param sourceDataRows строки источника
  * @param destinationDataRows хелпер приемника
- * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно)
- * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно),
+ * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно),
  *      в приемник строки вставляются перед строкой с этим псевдонимом
+ * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно)
  */
 void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def toAlias) {
-    def from = getIndexByAlias(sourceDataRows, fromAlias) + 1
-    def to = getIndexByAlias(sourceDataRows, toAlias)
+    def from = getIndexByAlias(sourceDataRows, fromAlias)
+    def to = (toAlias != '8' ? getIndexByAlias(sourceDataRows, toAlias) - 1 : sourceDataRows.size())
     if (from >= to) {
         return
     }
     def copyRows = sourceDataRows.subList(from, to)
-    dataRows = destinationDataRowHelper.getAllCached()
-    dataRows.addAll(getIndexByAlias(destinationDataRows, toAlias), copyRows)
+    destinationDataRows.addAll(getIndexByAlias(destinationDataRows, fromAlias) + 1, copyRows)
     updateIndexes(destinationDataRows)
 }
 
@@ -355,8 +331,8 @@ void sort(def dataRows) {
 
     // подразделы, собрать список списков строк каждого раздела
     getAliasesSections().each { section ->
-        from = getIndexByAlias(dataRows, section) + 1
-        to = getIndexByAlias(dataRows, 'total' + section) - 1
+        from = getIndexByAlias(dataRows, section)
+        to = getIndexByAlias(dataRows, 'total' + section) - 2
         if (from <= to) {
             sortRows.add(dataRows[from..to])
         }
@@ -411,13 +387,6 @@ def getRecordById(def refBookId, def recordId, def cache) {
 }
 
 /**
- * Получить список графов для которых вычисляются итоги (графа 5, 6).
- */
-def getSumColumns() {
-    return ['bondsCount', 'percent']
-}
-
-/**
  * Получить сумму столбца.
  *
  * @param dataRows строки нф
@@ -468,16 +437,29 @@ void updateIndexes(def dataRows) {
 }
 
 /**
- * Получить строки раздела.
+ * Получить строки раздела для рну 32.1 (там где есть заголовок раздела и итоги раздела).
  *
  * @param dataRows строки нф
- * @param section алиас начала раздела (н-р: начало раздела - A, итоги раздела - totalA)
+ * @param section алиас начала раздела (н-р: начало раздела - заголовок раздела A, конец раздела - итоги раздела totalA)
  */
-def getRowsBySection(def dataRows, def section) {
-    from = getIndexByAlias(dataRows, section) + 1
-    to = getIndexByAlias(dataRows, 'total' + section) - 1
+def getRowsBySection32_1(def dataRows, def section) {
+    from = getIndexByAlias(dataRows, section)
+    to = getIndexByAlias(dataRows, 'total' + section) - 2
     return (from <= to ? dataRows[from..to] : [])
 }
+
+/**
+ * Получить строки раздела рну 32.2 (там где есть заголовок раздела, но НЕТ итогов раздела).
+ *
+ * @param dataRows строки нф
+ * @param section алиас начала раздела (н-р: начало раздела - заголовок раздела A, конец раздела - следующий заголовок раздела B)
+ */
+def getRowsBySection(def dataRows, def section) {
+    from = getIndexByAlias(dataRows, section)
+    to = (section != '8' ? getIndexByAlias(dataRows, (Integer.valueOf(section) + 1).toString()) - 2 : dataRows.size() - 1)
+    return (from <= to ? dataRows[from..to] : [])
+}
+
 
 /**
  * Получить посчитанную строку для рну 32.2 из рну 32.1.

@@ -44,7 +44,7 @@ public class PdfViewerWidget extends Composite implements PdfViewerView {
 		pdfPage.setPixelSize(DEFAULT_PAGE_WIDTH, DEFAULT_PAGE_HEIGHT);
 
 		for (int i=50; i<=200; i+=10) {
-			scale.addItem(String.valueOf(i) + "%");
+			scale.addItem(i + "%");
 		}
 		scale.setSelectedIndex(DEFAULT_SCALE_POSITION); //Select 100%
 

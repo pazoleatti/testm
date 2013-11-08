@@ -1,18 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.server;
 
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskContext;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.GetTableDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.GetTableDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -21,7 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -32,12 +26,6 @@ import java.util.*;
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP')")
 @Component
 public class GetRefBookTableDataHandler extends AbstractActionHandler<GetTableDataAction, GetTableDataResult> {
-
-    @Autowired
-    private DepartmentService departmentService;
-
-    @Autowired
-    private SecurityService securityService;
 
     @Autowired
     RefBookFactory refBookFactory;

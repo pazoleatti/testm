@@ -4,9 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Создание новой задачи для планировщика
