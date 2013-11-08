@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -149,6 +150,6 @@ public interface PeriodService {
      * @param taxType
      * @return
      */
-    public List<ReportPeriod> getAllPeriodsByTaxType(TaxType taxType, boolean backOrder); 
+    public List<ReportPeriod> getAllPeriodsByTaxType(TaxType taxType, boolean backOrder);
     
 }

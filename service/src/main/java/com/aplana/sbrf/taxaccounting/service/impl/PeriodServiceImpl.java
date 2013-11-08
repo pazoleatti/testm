@@ -378,8 +378,4 @@ public class PeriodServiceImpl implements PeriodService{
 		}
 		return reportPeriods;
 	}
-
-	
-
-
 }
