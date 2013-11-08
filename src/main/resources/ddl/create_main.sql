@@ -683,4 +683,6 @@ comment on column notification.first_reader_id is 'идентификатор п
 comment on column notification.text is 'текст оповещения';
 comment on column notification.create_date is 'дата создания оповещения';
 comment on column notification.deadline is 'дата сдачи отчетности';
+
+create sequence seq_notification start with 10000;
 --------------------------------------------------------------------------------------------------------
