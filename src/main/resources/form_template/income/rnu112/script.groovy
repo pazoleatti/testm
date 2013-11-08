@@ -1,19 +1,11 @@
-package form_template.income.rnu75
+package form_template.income.rnu112
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * (РНУ-75) Регистр налогового учёта доходов по операциям депозитария (366)
- *
- * 1  - number
- * 2  - date
- * 3  - depo
- * 4  - reasonNumber
- * 5  - reasonDate
- * 6  - taxSum
- * 7  - factSum
+ * (РНУ-112) Регистр налогового учета сделок РЕПО и сделок займа ценными бумагами (374)
  *
  * @author Stanislav Yasinskiy
  */
@@ -62,15 +54,17 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['date', 'depo', 'reasonNumber', 'reasonDate', 'taxSum', 'factSum']
+def editableColumns = ['check', 'transactionNumber', 'contractor', 'dateFirstPart', 'dateSecondPart',
+        'incomeDate', 'outcomeDate', 'rateREPO']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['number', 'date', 'depo', 'reasonNumber', 'reasonDate', 'taxSum', 'factSum']
+def nonEmptyColumns = ['number', 'check', 'transactionNumber', 'contractor', 'country', 'dateFirstPart', 'dateSecondPart',
+        'incomeDate', 'outcomeDate', 'rateREPO', 'maxRate', 'outcome', 'marketRate', 'income', 'sum']
 
 // Сумируемые колонки в фиксированной с троке
 @Field
-def totalColumns = ['taxSum', 'factSum']
+def totalColumns = ['outcomeDate', 'rateREPO', 'marketRate', 'income']
 
 // Текущая дата
 @Field
@@ -116,12 +110,25 @@ void calc() {
         // Удаление подитогов
         deleteAllAliased(dataRows)
 
+        // "Да"
+        def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
+
         // номер последний строки предыдущей формы
         def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
 
         for (row in dataRows) {
             // графа 1
             row.number = ++index
+
+            // Расчет полей зависимых от справочников
+            def map = getRefBookValue(9, row.contractor)
+            row.country = map?.COUNTRY?.referenceValue
+
+            row.maxRate = calcMaxRate(row)
+            row.outcome = calcOutcome(row)
+            row.marketRate = calcMarketRate(row, recYesId)
+            row.income = calcIncome(row, recYesId)
+            row.sum = calcSum(row)
         }
     }
 
@@ -130,63 +137,69 @@ void calc() {
     dataRowHelper.save(dataRows)
 }
 
+// Расчет графы 11
+def BigDecimal calcMaxRate(def row) {
+    // TODO вопросы к заказчику
+    if (row.outcomeDate == 0 || row.dateFirstPart == null) {
+        return null
+    }
+    currencyCode = ''
+    rate = 0
+    if (currencyCode == '810') {
+        return rate * 1.8
+    } else {
+        return rate * 1.8
+    }
+}
+
+// Расчет графы 12
+def BigDecimal calcOutcome(def row) {
+    if (row.outcomeDate == null || row.rateREPO == null || row.maxRate == null) {
+        return null
+    }
+    if (row.outcomeDate > 0) {
+        return (row.rateREPO > row.maxRate) ? (row.outcomeDate / (row.rateREPO * row.maxRate)) : row.outcomeDate
+    } else if (row.outcomeDate == 0) {
+        return 0
+    }
+    return null
+}
+
+// Расчет графы 13
+def BigDecimal calcMarketRate(def row, def recYesId) {
+    if (row.incomeDate != null && row.check == recYesId) {
+        // TODO вопрос к заказчику
+        return row.marketRate
+    }
+    return null
+}
+
+// Расчет графы 14
+def BigDecimal calcIncome(def row, def recYesId) {
+    if (row.marketRate == null || row.rateREPO == null || row.incomeDate == null || row.check != recYesId) {
+        return null
+    }
+    if (row.incomeDate > 0) {
+        return (row.marketRate > row.rateREPO) ? (row.incomeDate / (row.rateREPO * row.marketRate)) : row.incomeDate
+    }
+    return 0
+}
+
+// Расчет графы 15
+def BigDecimal calcSum(def row) {
+    if (row.incomeDate != null && row.check == recYesId && row.income != null) {
+        return row.income - row.incomeDate
+    }
+    return null
+}
+
 // Логические проверки
+// TODO проверки логические не описаны вовсе
 void logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
-    if (dataRows.isEmpty()) {
-        return
-    }
 
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
-
-    // Дата начала отчетного периода
-    def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    // Дата окончания отчетного периода
-    def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
-    def index
-    def errorMsg
-
-    for (def row : dataRows) {
-        if (row.getAlias() != null) {
-            continue
-        }
-        index = row.getIndex()
-        errorMsg = "Строка $index: "
-
-        // 3. Проверка на заполнение поля
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
-
-        // 1. Проверка даты совершения операции и границ отчётного периода
-        if (row.date != null && (row.date.after(endDate) || row.date.before(startDate))) {
-            logger.error(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
-        }
-
-        // 2. Проверка на нулевые значения
-        if ((row.taxSum == null || row.taxSum == 0) && (row.factSum == null || row.factSum == 0)) {
-            logger.error(errorMsg + 'Суммы по операции нулевые!!')
-        }
-
-        // 4. Проверка на уникальность поля «№ пп»
-        if (++i != row.number) {
-            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
-        }
-    }
-
-    // 5. Арифметическая проверка итоговой строки
-    checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
 
 def calcTotalRow(def dataRows) {
-    def totalRow = formData.createDataRow()
-    totalRow.setAlias('total')
-    totalRow.fix = 'Итого'
-    totalRow.getCell('fix').colSpan = 5
-    ['number', 'fix', 'taxSum', 'factSum'].each {
-        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    calcTotalSum(dataRows, totalRow, totalColumns)
 
-    return totalRow
 }

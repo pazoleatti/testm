@@ -228,14 +228,14 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                     ){
 
                                         // генерация КодОсвНал
-                                        if (taxBenefitCode != null){
-                                            def l = taxBenefitCode.toString()
-                                            def x = ' ' * 12 // TODO (Ramil Timerbaev) уточнить что присваивать при незаполнении
-                                            if (l == '20220' || l =='20230') {
-                                                l = ' ' * 5 // TODO (Ramil Timerbaev) уточнить что присваивать при незаполнении
-                                            }
-                                            if (l != '30200') {
+                                        if (taxBenefitCode != null && (taxBenefitCode.equals('30200') || taxBenefitCode.equals('20210'))) {
+                                            def l = taxBenefitCode;
+                                            def x = "";
+                                            if (l.equals("30200")) {
+                                                //
+                                            } else {
                                                 def param = getParam(tRow.taxBenefitCode, tRow.okato);
+
                                                 if (param != null) {
                                                     def section = param.SECTION.toString()
                                                     def item = param.ITEM.toString()
@@ -245,7 +245,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                                             + (subitem.size() < 4 ? '0' * (4 - subitem.size()) + subitem : subitem))
                                                 }
                                             }
-                                            def kodOsnNal = l + '/' + x
+                                            def kodOsnNal = (l != "" ? l.toString():"0000") +"/"+ x
                                             ЛьготОсвНал(
                                                     КодОсвНал: kodOsnNal,
                                                     СумОсвНал: tRow.benefitSum
@@ -254,45 +254,40 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
 
                                         // вычисление ЛьготУменСум
                                         // не заполняется если Код налоговой льготы = 30200, 20200, 20210 или 20230
-                                        if (taxBenefitCode != null
-                                                && !(taxBenefitCode.equals("30200"))
-                                                && !(taxBenefitCode.equals("20200"))
-                                                && !(taxBenefitCode.equals("20210"))
-                                                && !(taxBenefitCode.equals("20230"))){
+                                        if (taxBenefitCode != null && taxBenefitCode.equals("20220")) {
 
                                             // вычисление КодУменСум
                                             def param = getParam(tRow.taxBenefitCode, tRow.okato);
                                             def valL = tRow.taxBenefitCode;
                                             if (param != null) {
-                                                def valX = ((param.SECTION.toString().size() < 4 ? ("0"*(4 - param.SECTION.toString().size())) : param.SECTION.toString())
-                                                        + (param.ITEM.toString().size() < 4 ? ("0"*(4 - param.ITEM.toString().size())) : param.ITEM.toString())
-                                                        + (param.SUBITEM.toString().size() < 4 ? ("0"*(4 - param.SUBITEM.toString().size())) : param.SUBITEM.toString()))
+                                                def section = param.SECTION.toString()
+                                                def item = param.ITEM.toString()
+                                                def subitem = param.SUBITEM.toString()
+                                                def valX = ((section.size() < 4 ? '0' * (4 - section.size()) + section : section)
+                                                        + (item.size() < 4 ? '0' * (4 - item.size()) + item: item)
+                                                        + (subitem.size() < 4 ? '0' * (4 - subitem.size()) + subitem : subitem))
 
                                                 def kodUmenSum = (valL != "" ? valL.toString():"0000") +"/"+ valX
-
-
                                                 ЛьготУменСум(КодУменСум: kodUmenSum, СумУменСум: tRow.benefitSum)
                                             }
                                         }
 
                                         // ЛьготСнижСтав
                                         // не заполняется если Код налоговой льготы = 30200, 20200, 20210 или 20220
-                                        if (taxBenefitCode != null
-                                                && !(taxBenefitCode.equals("30200"))
-                                                && !(taxBenefitCode.equals("20200"))
-                                                && !(taxBenefitCode.equals("20210"))
-                                                && !(taxBenefitCode.equals("20220"))){
+                                        if (taxBenefitCode != null && taxBenefitCode.equals("20230")) {
 
                                             // вычисление КодСнижСтав
                                             def valL = tRow.taxBenefitCode;
                                             def param = getParam(tRow.taxBenefitCode, tRow.okato);
                                             if (param != null) {
-                                                def valX = ((param.SECTION.toString().size() < 4 ? "0"*(4 - param.SECTION.toString().size()) : param.SECTION.toString())
-                                                        + (param.ITEM.toString().size() < 4 ? "0"*(4 - param.ITEM.toString().size()) : param.ITEM.toString())
-                                                        + (param.SUBITEM.toString().size() < 4 ? "0"*(4 - param.SUBITEM.toString().size()) : param.SUBITEM.toString()))
+                                                def section = param.SECTION.toString()
+                                                def item = param.ITEM.toString()
+                                                def subitem = param.SUBITEM.toString()
+                                                def valX = ((section.size() < 4 ? '0' * (4 - section.size()) + section : section)
+                                                        + (item.size() < 4 ? '0' * (4 - item.size()) + item: item)
+                                                        + (subitem.size() < 4 ? '0' * (4 - subitem.size()) + subitem : subitem))
 
                                                 def kodNizhStav = (valL != "" ? valL.toString():"0000") +"/"+ valX
-
                                                 ЛьготСнижСтав(КодСнижСтав: kodNizhStav, СумСнижСтав: tRow.benefitSum)
                                             }
                                         }
