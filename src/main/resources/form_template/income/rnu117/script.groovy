@@ -14,7 +14,7 @@ import groovy.transform.Field
  *
  * Графа 1    rowNumber           № пп
  * Графа 2.1  transactionNumber   Общая информация о сделке. Номер сделки
- * Графа 2.2  transactionKind     Общая информация о сделке. Вид сделки
+ * Графа 2.2  transactionKind     Общая информация о сделке. Вид сделки 91 справочник 831 атрибут KIND
  * Графа 2.3  contractor          Общая информация о сделке. Наименование контрагента
  * Графа 3    transactionDate     Дата заключения сделки
  * Графа 4    transactionEndDate  Дата окончания сделки
@@ -183,7 +183,12 @@ void logicCheck() {
         }else {
             numbers += row.rowNumber
         }
-        def values = getValues(dataRows, row, null)
+        def values = [:]
+
+        setGraph1(dataRows, row, values)
+        setGraph10(row, values)
+        setGraph11(row, values)
+
         for (def colName : autoFillColumns) {
             if (row[colName] != values[colName]){
                 isValid = false
@@ -219,7 +224,9 @@ void calc() {
 
     // Расчет ячеек
     dataRows.each{row->
-        getValues(dataRows, row, row)
+        setGraph1(dataRows, row, row)
+        setGraph10(row, row)
+        setGraph11(row, row)
     }
 
     // Добавление строки итогов
@@ -244,27 +251,12 @@ void calc() {
     dataRowHelper.save(dataRows)
 }
 
-/**
- * получаем мапу со значениями, расчитанными для каждой конкретной строки или сразу записываем в строку (для расчетов)
- */
-def getValues(def dataRows, def row, def result) {
-    if(result == null){
-        result = [:]
-    }
-
-    setGraph1(dataRows, row, result)
-    setGraph10(row, result)
-    setGraph11(row, result)
-
-    return result
-}
-
 void setGraph1(def dataRows, def row, def result) {
     result.rowNumber = dataRows.indexOf(row) + 1
 }
 
 void setGraph10(def row, def result) {
-    switch (row.transactionKind){
+    switch (getRefBookValue(91,row.transactionKind).KIND.stringValue){
         case "DF FX":
         case "DF PM":
         case "NDF PM":
@@ -295,7 +287,7 @@ void setGraph10(def row, def result) {
 
 void setGraph11(def row, def result) {
     def graph6 = getRefBookValue(16, row.transactionType)?.TYPE?.stringValue
-    switch (row.transactionKind){
+    switch (getRefBookValue(91,row.transactionKind).KIND.stringValue){
         case "DF FX":
         case "NDF FX":
             if (row.minPrice <= row.courseFix && row.courseFix <= row.maxPrice ||

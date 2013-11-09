@@ -190,7 +190,11 @@ void logicCheck() {
         }else {
             numbers += row.rowNumber
         }
-        def values = getValues(dataRows, row, null)
+        def values = [:]
+        setGraph1(dataRows, row, values)
+        setGraph9(row, values)
+        setGraph11(row, values)
+        setGraph13(row, values)
         for (def colName : autoFillColumns) {
             if (row[colName] != values[colName]){
                 isValid = false
@@ -226,7 +230,10 @@ void calc() {
 
     // Расчет ячеек
     dataRows.each{row->
-        getValues(dataRows, row, row)
+        setGraph1(dataRows, row, row)
+        setGraph9(row, row)
+        setGraph11(row, row)
+        setGraph13(row, row)
     }
 
     // Добавление строки итогов
