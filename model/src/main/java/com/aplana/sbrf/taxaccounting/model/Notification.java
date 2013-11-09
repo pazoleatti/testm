@@ -14,7 +14,7 @@ public class Notification implements Serializable {
     private Integer reportPeriodId;
     private Integer senderDepartmentId;
     private Integer receiverDepartmentId;
-    private int firstReaderId;
+    private Integer firstReaderId;
     private String text;
     private Date createDate;
     private Date deadline;
@@ -51,11 +51,11 @@ public class Notification implements Serializable {
         this.receiverDepartmentId = receiverDepartmentId;
     }
 
-    public int getFirstReaderId() {
+    public Integer getFirstReaderId() {
         return firstReaderId;
     }
 
-    public void setFirstReaderId(int firstReaderId) {
+    public void setFirstReaderId(Integer firstReaderId) {
         this.firstReaderId = firstReaderId;
     }
 
@@ -81,19 +81,5 @@ public class Notification implements Serializable {
 
     public void setDeadline(Date deadline) {
         this.deadline = deadline;
-    }
-
-    @Override
-    public String toString() {
-        return "Notification{" +
-                "id=" + id +
-                ", reportPeriodId=" + reportPeriodId +
-                ", senderDepartmentId=" + senderDepartmentId +
-                ", receiverDepartmentId=" + receiverDepartmentId +
-                ", firstReaderId=" + firstReaderId +
-                ", text='" + text + '\'' +
-                ", createDate=" + createDate +
-                ", deadline=" + deadline +
-                '}';
     }
 }

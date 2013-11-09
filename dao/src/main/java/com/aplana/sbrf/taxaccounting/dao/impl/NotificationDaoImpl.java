@@ -98,8 +98,16 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                 ps.setInt(1, generateId("seq_notification", Integer.class));
                 ps.setInt(2, elem.getReportPeriodId());
                 ps.setInt(3, elem.getSenderDepartmentId());
-                ps.setInt(4, elem.getReceiverDepartmentId());
-                ps.setInt(5, elem.getFirstReaderId());
+                if (elem.getReceiverDepartmentId() != null) {
+                    ps.setInt(4, elem.getReceiverDepartmentId());
+                } else {
+                    ps.setNull(4, Types.NUMERIC);
+                }
+                if (elem.getFirstReaderId() != null) {
+                    ps.setInt(5, elem.getFirstReaderId());
+                } else {
+                    ps.setNull(5, Types.NUMERIC);
+                }
                 ps.setString(6, elem.getText());
                 ps.setDate(7, new java.sql.Date(elem.getCreateDate().getTime()));
                 ps.setDate(8, new java.sql.Date(elem.getDeadline().getTime()));
@@ -131,7 +139,6 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             }
         }
         sql.append(")");
-        System.out.println("sql: "+sql);
         getJdbcTemplate().update(sql.toString(),
                 new Object[]{reportPeriodId},
                 new int[]{Types.NUMERIC});

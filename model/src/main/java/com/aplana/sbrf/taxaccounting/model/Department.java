@@ -145,12 +145,4 @@ public class Department implements Serializable {
 	public void setSbrfCode(String sbrfCode) {
 		this.sbrfCode = sbrfCode;
 	}
-
-    @Override
-    public String toString() {
-        return "Department{" +
-                "parentId=" + parentId +
-                ", id=" + id +
-                '}';
-    }
 }
