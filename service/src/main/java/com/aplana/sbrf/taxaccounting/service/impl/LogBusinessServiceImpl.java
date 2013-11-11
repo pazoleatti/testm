@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -35,7 +36,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
     public PagingResult<LogBusinessSearchResultItem> getLogsBusiness(TAUserInfo userInfo, LogBusinessFilterValues filter) {
         FormDataFilter formDataFilter = new FormDataFilter();
         formDataFilter.setTaxType(filter.getTaxType());
-        formDataFilter.setDepartmentIds(Arrays.asList(filter.getDepartmentId()));
+        formDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId()) : new ArrayList<Integer>());
         formDataFilter.setFormDataKind(filter.getFormKind());
         formDataFilter.setFormTypeId(filter.getFormTypeId());
         formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
@@ -44,7 +45,8 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 
         DeclarationDataFilter declarationDataFilter = new DeclarationDataFilter();
         declarationDataFilter.setTaxType(filter.getTaxType());
-        declarationDataFilter.setDepartmentIds(Arrays.asList(filter.getDepartmentId()));
+        declarationDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId())
+                : new ArrayList<Integer>());
         declarationDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
         List<Long> declarationDataIds =
                 declarationDataSearchService.getDeclarationIds(declarationDataFilter, DeclarationDataSearchOrdering.ID, false);

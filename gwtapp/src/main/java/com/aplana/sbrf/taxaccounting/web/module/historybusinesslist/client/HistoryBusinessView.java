@@ -37,9 +37,7 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
     final AsyncDataProvider<LogBusinessSearchResultItem> dataProvider = new AsyncDataProvider<LogBusinessSearchResultItem>() {
         @Override
         protected void onRangeChanged(HasData<LogBusinessSearchResultItem> display) {
-            System.out.println("!!!");
             if (getUiHandlers() != null){
-                System.out.println("!!!!");
                 final Range range = display.getVisibleRange();
                 getUiHandlers().onRangeChange(range.getStart(), range.getLength());
             }

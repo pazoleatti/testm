@@ -31,7 +31,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 
 	@Override
 	public PagingResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
-		return formDataSearchDao.findPage(createFormDataDaoFilter(userInfo, formDataFilter), formDataFilter.getSearchOrdering(),
+        return formDataSearchDao.findPage(createFormDataDaoFilter(userInfo, formDataFilter), formDataFilter.getSearchOrdering(),
 				formDataFilter.isAscSorting(), new PagingParams(formDataFilter.getStartIndex(),
 				formDataFilter.getCountOfRecords()));
 	}
