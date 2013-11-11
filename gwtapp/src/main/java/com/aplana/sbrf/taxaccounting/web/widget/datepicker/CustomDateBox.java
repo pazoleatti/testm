@@ -32,6 +32,8 @@ public class CustomDateBox extends Composite implements HasEnabled, HasVisibilit
 	@UiField
 	Image dateImage;
 
+    private Date value;
+
 	public CustomDateBox() {
 		initWidget(ourUiBinder.createAndBindUi(this));
 
@@ -52,8 +54,7 @@ public class CustomDateBox extends Composite implements HasEnabled, HasVisibilit
 		datePicker.addValueChangeHandler(new ValueChangeHandler<Date>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Date> event) {
-				dateBox.setValue(format.format(event.getValue()));
-				lastValidDate = format.format(event.getValue());
+                CustomDateBox.this.setValue(event.getValue(), true);
 				datePickerPanel.hide();
 			}
 		});
@@ -76,29 +77,31 @@ public class CustomDateBox extends Composite implements HasEnabled, HasVisibilit
 
 	@Override
 	public Date getValue() {
-		if (dateBox.getValue().isEmpty()) return null;
-		else return format.parse(dateBox.getValue());
+		return value;
 	}
 
 	@Override
 	public void setValue(Date value) {
-		lastValidDate = format.format(value);
-		dateBox.setValue(format.format(value));
+        this.setValue(value, false);
 	}
 
 	@Override
 	public void setValue(Date value, boolean fireEvents) {
-		dateBox.setValue(format.format(value), fireEvents);
+        if (value != null) {
+            lastValidDate = format.format(value);
+            dateBox.setValue(format.format(value), fireEvents);
+        } else {
+            dateBox.setValue(null, fireEvents);
+        }
+        this.value = value;
+        if (fireEvents) {
+            ValueChangeEvent.fire(this, value);
+        }
 	}
 
 	@Override
 	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Date> handler) {
 		return addHandler(handler, ValueChangeEvent.getType());
-	}
-
-	@Override
-	public void fireEvent(GwtEvent<?> event) {
-		dateBox.fireEvent(event);
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.shared;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class TableRow implements Serializable {
 
@@ -12,6 +13,7 @@ public class TableRow implements Serializable {
 	private Boolean periodCondition;
 	private boolean isSubHeader;
     private Boolean balance;
+    private Date deadline;
 
 	public int getId() {
 		return id;
@@ -75,5 +77,13 @@ public class TableRow implements Serializable {
 
     public void setBalance(Boolean balance) {
         this.balance = balance;
+    }
+
+    public Date getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(Date deadline) {
+        this.deadline = deadline;
     }
 }

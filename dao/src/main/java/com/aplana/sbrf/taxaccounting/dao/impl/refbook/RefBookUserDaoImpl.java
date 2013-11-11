@@ -21,7 +21,6 @@ import java.util.Map;
  * @author auldanov
  */
 @Repository
-@Transactional
 class RefBookUserDaoImpl extends AbstractDao implements RefBookUserDao {
 
     @Autowired

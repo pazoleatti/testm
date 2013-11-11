@@ -44,11 +44,12 @@
                             <w:IncrementButton minValue="1920" maxValue="2100" ui:field="toBox"></w:IncrementButton>
                             <g:Button ui:field="find">Поиск</g:Button>
                             <g:Button ui:field="closePeriod">Закрыть период</g:Button>
+                            <g:Button ui:field="setDeadlineButton">Назначить срок сдачи</g:Button>
 
                         </g:HorizontalPanel>
                         <g:HorizontalPanel>
                             <g:Label>Подразделение:</g:Label>
-                            <picker:DepartmentPickerPopupWidget header="Подразделение"  ui:field="departmentPicker"  multiselection="false"/>
+                            <picker:DepartmentPickerModalWidget header="Подразделение"  ui:field="departmentPicker"  multiSelection="false"/>
                             <style:LinkAnchor img="resources/img/starfish-16.png" text="Открыть период" ui:field="openPeriod"/>
                         </g:HorizontalPanel>
 

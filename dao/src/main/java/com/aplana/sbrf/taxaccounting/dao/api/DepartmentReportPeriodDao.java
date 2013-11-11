@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
+import java.util.Date;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
@@ -20,6 +21,14 @@ public interface DepartmentReportPeriodDao {
 	 * @param departmentReportPeriod
 	 */
 	void save(DepartmentReportPeriod departmentReportPeriod);
+
+    /**
+     * Обновляет срок сдачи отчетности
+     * @param reportPeriodId
+     * @param departmentIds
+     * @param deadline
+     */
+    void updateDeadline(int reportPeriodId, List<Integer> departmentIds, Date deadline);
 
 	/**
 	 * Открыть закрыть период для подразделения

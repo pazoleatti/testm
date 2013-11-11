@@ -13,7 +13,6 @@ public class TaskParam implements Serializable, Comparable {
     private static final long serialVersionUID = 8101116436573622004L;
     public static final String INVALID_PROP_ERROR_MESSAGE_TEPLATE = "Incorrect input parameter %s = %s";
     public static final String DATE_FORMAT = "dd.MM.yyyy";
-    private static final SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
 
     private Integer id;
     private String name;
@@ -89,6 +88,7 @@ public class TaskParam implements Serializable, Comparable {
                     result = Boolean.valueOf(getValue());
                     break;
                 case DATE:
+                    SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
                     result = df.parse(getValue());
                     break;
                 case STRING:

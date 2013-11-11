@@ -7,12 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.NotificationService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataAction;
@@ -30,6 +31,15 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 	@Autowired
 	private	PeriodService periodService;
 
+	@Autowired
+	private DepartmentService departmentService;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private SourceService sourceService;
+
 	public GetPeriodDataHandler() {
 		super(GetPeriodDataAction.class);
 	}
@@ -39,12 +49,20 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 		GetPeriodDataResult res = new GetPeriodDataResult();
 		//TODO Перенести фильтрацию по датам в сервисы
 		List<DepartmentReportPeriod> reportPeriods = periodService.listByDepartmentId(action.getDepartmentId());
+
+        //Получаем подразделение-получатель
+        //TODO заглушка. Надо получать родительское подразделение по источникам-приемникам из виджета подразделений
+        Department receiverDepartment = departmentService.getParent((int) action.getDepartmentId());
+
+        //Получаем оповещения по связке отправитель-получатель. В дальнейшем отберем по отчетному периоду
+        Map<Integer, Notification> notifications = notificationService.mapByDepartments((int) action.getDepartmentId(),
+                receiverDepartment != null ? receiverDepartment.getId() : null);
 		Collections.sort(reportPeriods, new Comparator<DepartmentReportPeriod>(){
 			@Override
 			public int compare(DepartmentReportPeriod o1,
 					DepartmentReportPeriod o2) {
                 return o1.getReportPeriod().getOrder() - o2.getReportPeriod().getOrder();
-            }
+                  }
 		});
 		Map<Integer, List<TableRow>> per = new TreeMap<Integer, List<TableRow>>();
 		for (DepartmentReportPeriod period : reportPeriods) {
@@ -62,6 +80,8 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 				row.setReportPeriodId(period.getReportPeriod().getId());
 				row.setSubHeader(false);
                 row.setBalance(period.isBalance());
+                row.setDeadline(notifications.containsKey(period.getReportPeriod().getId()) ?
+                        notifications.get(period.getReportPeriod().getId()).getDeadline() : null);
 				per.get(periodYear).add(row);
 			}
 		}

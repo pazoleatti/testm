@@ -1,5 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:style field="css" type="com.aplana.sbrf.taxaccounting.web.module.scheduler.client.TaskView.LinkStyle">
         .separator {
@@ -75,8 +76,8 @@
                             <g:TextBox width="475px" ui:field="numberOfRepeats"/>
                         </g:HorizontalPanel>
                         <g:HorizontalPanel spacing="7">
-                            <g:Label text="JNDI класса-обработчика" width="200px"/>
-                            <g:TextBox width="475px" ui:field="jndi"/>
+                            <g:Label text="Тип задачи" width="200px"/>
+                            <style:ListBoxWithTooltip width="475px" ui:field="jndi"/>
                         </g:HorizontalPanel>
                     </g:VerticalPanel>
                 </g:cell>

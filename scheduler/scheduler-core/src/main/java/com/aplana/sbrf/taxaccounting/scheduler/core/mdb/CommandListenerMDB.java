@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.scheduler.core.mdb;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.ejb.TransactionManagement;
@@ -18,17 +21,18 @@ import javax.jms.MessageListener;
 )
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class CommandListenerMDB implements MessageListener {
+    private static final Log LOG = LogFactory.getLog(CommandListenerMDB.class);
 
     @Override
     public void onMessage(Message message) {
-        System.out.println("onMessage started");
+        LOG.info("onMessage started");
         /*try {
             TextMessage textMessage = (TextMessage) message;
             TaskContext context = TaskUtils.contextToObject(textMessage.getText());
-            System.out.println("jndi: " + context.getJndi());
+            LOG.info("jndi: " + context.getJndi());
             Map<String, TaskParam> customProps = context.getParams();
-            System.out.println("id: " + (Integer) customProps.get("id").getTypifiedValue());
-            System.out.println("isFalse: " + (Boolean) customProps.get("isFalse").getTypifiedValue());
+            LOG.info("id: " + (Integer) customProps.get("id").getTypifiedValue());
+            LOG.info("isFalse: " + (Boolean) customProps.get("isFalse").getTypifiedValue());
         } catch (Exception e) {
             e.printStackTrace();
         }*/

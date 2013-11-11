@@ -1,14 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 
 import java.util.List;
-import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.TableRow;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerModalWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.incrementbutton.IncrementButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -27,7 +28,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
 	interface Binder extends UiBinder<Widget, PeriodsView> { }
 
-	private static final String[] COLUMN_NAMES = {"Период", "Состояние", "Ввод остатков"};
+	private static final String[] COLUMN_NAMES = {"Период", "Состояние", "Ввод остатков", "Срок сдачи отчетности"};
 
 	@UiField
 	Label title;
@@ -47,8 +48,11 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	@UiField
 	Widget closePeriod;
 
+    @UiField
+    Widget setDeadlineButton;
+
 	@UiField
-	DepartmentPickerPopupWidget departmentPicker;
+    DepartmentPickerModalWidget departmentPicker;
 
 	private SingleSelectionModel<TableRow> selectionModel = new SingleSelectionModel<TableRow>();
 
@@ -91,11 +95,19 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
             }
         };
 
+        TextColumn<TableRow> deadlineColumn = new TextColumn<TableRow>() {
+            @Override
+            public String getValue(TableRow object) {
+                return (object.getDeadline() != null) ? DateTimeFormat.getFormat("dd.MM.yyyy").format(object.getDeadline()) : "";
+            }
+        };
+
 
 
 		periodsTable.addColumn(periodNameColumn, COLUMN_NAMES[0]);
 		periodsTable.addColumn(periodConditionColumn, COLUMN_NAMES[1]);
         periodsTable.addColumn(periodBalanceColumn, COLUMN_NAMES[2]);
+        periodsTable.addColumn(deadlineColumn, COLUMN_NAMES[3]);
 
 		periodsTable.setSelectionModel(selectionModel);
 
@@ -124,8 +136,8 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	}
 
 	@Override
-	public void setFilterData(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, int yearFrom, int yearTo) {
-		departmentPicker.setAvalibleValues(departments, avalDepartments);
+	public void setFilterData(List<Department> departments, List<DepartmentPair> selectedDepartments, int yearFrom, int yearTo) {
+		departmentPicker.setAvailableValues(departments);
 		departmentPicker.setValue(selectedDepartments);
 		fromBox.setValue(yearFrom);
 		toBox.setValue(yearTo);
@@ -148,7 +160,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	}
 
 	@Override
-	public long getDepartmentId() {
+	public DepartmentPair getDepartmentId() {
 		return departmentPicker.getValue().get(0);
 	}
 
@@ -180,6 +192,13 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 			getUiHandlers().openPeriod();
 		}
 	}
+
+    @UiHandler("setDeadlineButton")
+    void onSetDeadlineClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().setDeadline();
+        }
+    }
 
 	@Override
 	public void setReadOnly(boolean readOnly) {

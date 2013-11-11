@@ -6,4 +6,5 @@ public interface PeriodsUiHandlers extends UiHandlers {
 	void closePeriod();
 	void openPeriod();
 	void onFindButton();
+    void setDeadline();
 }

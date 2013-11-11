@@ -2,15 +2,13 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 import com.aplana.sbrf.taxaccounting.model.TaskParamTypeValues;
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
-import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.CreateTaskAction;
-import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.CreateTaskResult;
-import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoAction;
-import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoResult;
+import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -81,6 +79,8 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
 
         String getJndi();
 
+        void setJndiList(List<TaskInfoItem> jndiList);
+
         void clearForm();
 
         void setTaskData(GetTaskInfoResult taskData);
@@ -96,24 +96,35 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
     }
 
     @Override
-    public void prepareFromRequest(PlaceRequest request) {
+    public void prepareFromRequest(final PlaceRequest request) {
         super.prepareFromRequest(request);
-        getView().clearForm();
-        if (request.getParameter(SchedulerTokens.taskId, null) != null) {
-            Long currentTaskId = ParamUtils.getLong(request,
-                    SchedulerTokens.taskId);
+        GetAvailableTasksAction initAction = new GetAvailableTasksAction();
+        dispatcher.execute(initAction, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetAvailableTasksResult>() {
+                    @Override
+                    public void onSuccess(GetAvailableTasksResult result) {
+                        //Инициализация формы
+                        getView().setJndiList(result.getJndiList());
+                        getView().clearForm();
 
-            //Получаем данные задачи
-            GetTaskInfoAction action = new GetTaskInfoAction();
-            action.setTaskId(currentTaskId);
-            dispatcher.execute(action, CallbackUtils
-                    .defaultCallback(new AbstractCallback<GetTaskInfoResult>() {
-                        @Override
-                        public void onSuccess(GetTaskInfoResult result) {
-                            getView().setTaskData(result);
+                        //Загрузка информации по задаче, если она была выбрана
+                        if (request.getParameter(SchedulerTokens.taskId, null) != null) {
+                            Long currentTaskId = ParamUtils.getLong(request,
+                                    SchedulerTokens.taskId);
+
+                            //Получаем данные задачи
+                            GetTaskInfoAction action = new GetTaskInfoAction();
+                            action.setTaskId(currentTaskId);
+                            dispatcher.execute(action, CallbackUtils
+                                    .defaultCallback(new AbstractCallback<GetTaskInfoResult>() {
+                                        @Override
+                                        public void onSuccess(GetTaskInfoResult result) {
+                                            getView().setTaskData(result);
+                                        }
+                                    }, TaskPresenter.this));
                         }
-                    }, TaskPresenter.this));
-        }
+                    }
+                }, TaskPresenter.this));
     }
 
     @Override
@@ -328,10 +339,6 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
      */
     private boolean validateForm() {
         StringBuilder validateMsg = new StringBuilder();
-        System.out.println("getView().getTaskName().isEmpty(): "+getView().getTaskName().isEmpty());
-        System.out.println("getView().getTaskSchedule().isEmpty(): "+getView().getTaskSchedule().isEmpty());
-        System.out.println("getView().getNumberOfRepeats().isEmpty(): "+getView().getNumberOfRepeats().isEmpty());
-        System.out.println("getView().getJndi().isEmpty(): "+getView().getJndi().isEmpty());
         if (getView().getTaskName().isEmpty()) {
             validateMsg.append("Не заполнено поле 'Название'").append("; ");
         }

@@ -31,7 +31,7 @@ public enum TaskState {
 
     public static TaskState getStateById(Integer id) {
         for (TaskState state : TaskState.values()) {
-            if (state.getId() == id) {
+            if (state.getId().equals(id)) {
                 return state;
             }
         }

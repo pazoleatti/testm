@@ -14,7 +14,7 @@ import groovy.transform.Field
  *
  * Графа 1    rowNumber           № пп
  * Графа 2.1  transactionNumber   Общая информация о сделке. Номер сделки
- * Графа 2.2  transactionKind     Общая информация о сделке. Вид сделки
+ * Графа 2.2  transactionKind     Общая информация о сделке. Вид сделки 91 справочник 831 атрибут KIND
  * Графа 2.3  contractor          Общая информация о сделке. Наименование контрагента
  * Графа 3    transactionDate     Дата заключения сделки
  * Графа 4    transactionEndDate  Дата окончания сделки
@@ -91,7 +91,7 @@ def editableColumns = ["transactionNumber", "transactionKind", "contractor", "tr
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ["rowNumber", "income", "outcome", "deviationMinPrice", "deviationMaxPrice"]
+def arithmeticCheckAlias = ["income", "outcome", "deviationMinPrice", "deviationMaxPrice"]
 
 // Обязательно заполняемые атрибуты
 @Field
@@ -157,39 +157,33 @@ def getXML(def String startStr, def String endStr) {
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def numbers = []
     def totalRow = null
-    def rowNum = 0
+    // Номер последний строки предыдущей формы
+    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
     for (def DataRow row : dataRows){
         if (row?.getAlias()?.contains('itg')) {
             totalRow = row
             continue
         }
 
-        rowNum++
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
 
-        def rowStart
-        def index = row.rowNumber
-        if (index != null) {
-            rowStart = "В строке \"№ пп\" равной $index "
-        } else {
-            index = dataRows.indexOf(row) + 1
-            rowStart = "В строке $index "
+        // Проверка на заполнение поля
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+
+
+        if (++i != row.rowNumber) {
+            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
-        if (row.rowNumber in numbers){
-            logger.error("${rowStart}нарушена уникальность номера по порядку ${row.rowNumber}!")
-        }else {
-            numbers += row.rowNumber
-        }
-        def values = getValues(dataRows, row, null)
-        for (def colName : autoFillColumns) {
-            if (row[colName] != values[colName]){
-                isValid = false
-                logger.error("${rowStart}неверно рассчитана графа \"${getColumnName(row,colName)}\"!")
-            }
-        }
+        def values = [:]
+
+        setGraph10(row, values)
+        setGraph11(row, values)
+
+        checkCalc(row, arithmeticCheckAlias, values, logger, true)
+
         // Проверки соответствия НСИ
         checkNSI(16, row, "transactionType")
     }
@@ -217,9 +211,14 @@ void calc() {
     // Удаление итогов
     deleteAllAliased(dataRows)
 
+    // Номер последний строки предыдущей формы
+    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+
     // Расчет ячеек
     dataRows.each{row->
-        getValues(dataRows, row, row)
+        row.rowNumber=++index
+        setGraph10(row, row)
+        setGraph11(row, row)
     }
 
     // Добавление строки итогов
@@ -244,36 +243,17 @@ void calc() {
     dataRowHelper.save(dataRows)
 }
 
-/**
- * получаем мапу со значениями, расчитанными для каждой конкретной строки или сразу записываем в строку (для расчетов)
- */
-def getValues(def dataRows, def row, def result) {
-    if(result == null){
-        result = [:]
-    }
-
-    setGraph1(dataRows, row, result)
-    setGraph10(row, result)
-    setGraph11(row, result)
-
-    return result
-}
-
-void setGraph1(def dataRows, def row, def result) {
-    result.rowNumber = dataRows.indexOf(row) + 1
-}
-
 void setGraph10(def row, def result) {
-    switch (row.transactionKind){
+    switch (getRefBookValue(91,row.transactionKind).KIND.stringValue){
         case "DF FX":
         case "DF PM":
         case "NDF PM":
             def sum9 = row.request + row.liability
             if (sum9 > 0){
                 result.income = sum9
-                result.outcome = 0
+                result.outcome = BigDecimal.ZERO
             } else {
-                result.income = 0
+                result.income = BigDecimal.ZERO
                 result.outcome = sum9
             }
             break
@@ -281,9 +261,9 @@ void setGraph10(def row, def result) {
         case "FRA":
             if (row.request != null){
                 result.income = row.request
-                result.outcome = 0
+                result.outcome = BigDecimal.ZERO
             } else if (row.liability != null) {
-                result.income = 0
+                result.income = BigDecimal.ZERO
                 result.outcome = row.liability
             }
             break
@@ -295,44 +275,44 @@ void setGraph10(def row, def result) {
 
 void setGraph11(def row, def result) {
     def graph6 = getRefBookValue(16, row.transactionType)?.TYPE?.stringValue
-    switch (row.transactionKind){
+    switch (getRefBookValue(91,row.transactionKind).KIND.stringValue){
         case "DF FX":
         case "NDF FX":
             if (row.minPrice <= row.courseFix && row.courseFix <= row.maxPrice ||
                     "Покупка".equals(graph6) && row.courseFix <= row.maxPrice ||
                     "Продажа".equals(graph6) && row.courseFix >= row.maxPrice){
-                result.deviationMinPrice = 0
-                result.deviationMaxPrice = 0
+                result.deviationMinPrice = BigDecimal.ZERO
+                result.deviationMaxPrice = BigDecimal.ZERO
             }
             def sum10 = row.income + row.outcome
             if ("Покупка".equals(graph6) && row.courseFix > row.maxPrice){
-                result.deviationMinPrice = 0
+                result.deviationMinPrice = BigDecimal.ZERO
                 //«Графа 11.2» = («Графа.10.1» + «Графа 10.2») х («Графа 7.2» -«Графа 8.2») / («Графа 7.2» -«Графа 7.1») – («Графа 10.1» + «Графа 10.2»)
                 result.deviationMaxPrice = sum10 * (row.course - row.maxPrice) / (row.course - row.courseFix) - sum10
             }
             if ("Продажа".equals(graph6) && row.courseFix < row.maxPrice){
                 //«Графа 11.1» = («Графа.10.1» + «Графа 10.2») х («Графа 8.1» -»Графа 7.2») / («Графа 7.1» - «Графа 7.2») - («Графа.10.1» + «Графа 10.2»)
                 result.deviationMinPrice = sum10 * (row.minPrice - row.course) / (row.courseFix - row.course) - sum10
-                result.deviationMaxPrice = 0
+                result.deviationMaxPrice = BigDecimal.ZERO
             }
             break
         case "FRA":
             if (row.minPrice <= row.courseFix && row.courseFix <= row.maxPrice ||
                     "Покупка".equals(graph6) && row.courseFix <= row.minPrice ||//различие от пред
                     "Продажа".equals(graph6) && row.courseFix >= row.maxPrice){
-                result.deviationMinPrice = 0
-                result.deviationMaxPrice = 0
+                result.deviationMinPrice = BigDecimal.ZERO
+                result.deviationMaxPrice = BigDecimal.ZERO
             }
             def sum10 = row.income + row.outcome
             if ("Покупка".equals(graph6) && row.courseFix > row.maxPrice){
-                result.deviationMinPrice = 0
+                result.deviationMinPrice = BigDecimal.ZERO
                 //«Графа 11.2» = («Графа.10.1» + «Графа 10.2») х («Графа 7.2» -«Графа 8.2») / («Графа 7.2» -«Графа 7.1») – («Графа 10.1» + «Графа 10.2»)
                 result.deviationMaxPrice = sum10 * (row.course - row.maxPrice) / (row.course - row.courseFix) - sum10
             }
             if ("Продажа".equals(graph6) && row.courseFix < row.minPrice){//различие от пред
                 //«Графа 11.1» = («Графа.10.1» + «Графа 10.2») х («Графа 8.1» -»Графа 7.2») / («Графа 7.1» - «Графа 7.2») - («Графа.10.1» + «Графа 10.2»)
                 result.deviationMinPrice = sum10 * (row.minPrice - row.course) / (row.courseFix - row.course) - sum10
-                result.deviationMaxPrice = 0
+                result.deviationMaxPrice = BigDecimal.ZERO
             }
             break
         case "DF PM":
@@ -340,19 +320,19 @@ void setGraph11(def row, def result) {
             if (row.minPrice <= row.courseFix && row.courseFix <= row.maxPrice ||
                     "Покупка".equals(graph6) && row.courseFix <= row.minPrice ||//различие от пред
                     "Продажа".equals(graph6) && row.courseFix >= row.maxPrice){
-                result.deviationMinPrice = 0
-                result.deviationMaxPrice = 0
+                result.deviationMinPrice = BigDecimal.ZERO
+                result.deviationMaxPrice = BigDecimal.ZERO
             }
             def sum10 = row.income + row.outcome
             if ("Покупка".equals(graph6) && row.courseFix > row.maxPrice){
-                result.deviationMinPrice = 0
+                result.deviationMinPrice = BigDecimal.ZERO
                 //«Графа 11.2» = («Графа.10.1» + «Графа 10.2») х («Графа 7.2» -«Графа 8.2») / («Графа 7.2» -«Графа 7.1») – («Графа 10.1» + «Графа 10.2»)
                 result.deviationMaxPrice = sum10 * (row.course - row.maxPrice) / (row.course - row.courseFix) - sum10
             }
             if ("Продажа".equals(graph6) && row.courseFix < row.minPrice){//различие от пред
                 //«Графа 11.1» = («Графа.10.1» + «Графа 10.2») х («Графа 8.1» -»Графа 7.2») / («Графа 7.1» - «Графа 7.2») - («Графа.10.1» + «Графа 10.2»)
                 result.deviationMinPrice = sum10 * (row.minPrice - row.course) / (row.courseFix - row.course) - sum10
-                result.deviationMaxPrice = 0
+                result.deviationMaxPrice = BigDecimal.ZERO
             }
             break
         default:
