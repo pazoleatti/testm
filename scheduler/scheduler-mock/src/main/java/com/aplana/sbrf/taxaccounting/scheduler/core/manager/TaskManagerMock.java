@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.scheduler.core.manager;
 
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskContext;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskData;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskState;
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.*;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
 import org.apache.commons.logging.Log;
@@ -152,5 +149,12 @@ public class TaskManagerMock implements TaskManager {
             }
         }
         return false;
+    }
+
+    @Override
+    public List<TaskJndiInfo> getTasksJndi() throws TaskSchedulingException {
+        List<TaskJndiInfo> taskInfo = new ArrayList<TaskJndiInfo>();
+        taskInfo.add(new TaskJndiInfo("test", "testJndi"));
+        return taskInfo;
     }
 }

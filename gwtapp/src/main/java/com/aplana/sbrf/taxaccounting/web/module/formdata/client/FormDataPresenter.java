@@ -359,7 +359,7 @@ public class FormDataPresenter extends
                                 forceEditMode = result.isBalancePeriod();
                                 
                                 getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
-                                        + String.valueOf(result.getFormData().getFormType().getTaxType()));
+                                        + result.getFormData().getFormType().getTaxType());
                                 getView().setColumnsData(
                                         formData.getFormColumns(),
                                         readOnlyMode,

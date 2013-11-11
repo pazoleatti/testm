@@ -50,9 +50,6 @@ public class GetFormDataHandler extends
 	private PeriodService reportPeriodService;
 
 	@Autowired
-	private PeriodService taxPeriodService;
-
-	@Autowired
 	private DepartmentService departmentService;
 
 	@Autowired

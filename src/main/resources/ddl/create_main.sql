@@ -518,7 +518,7 @@ comment on column form_data_source.src_department_form_type_id is 'Иденти�
 create table sec_user (
   id number(9) not null,
   login varchar2(255) not null,
-  name varchar2(50) not null,
+  name varchar2(512) not null,
   department_id number(9) not null,
   is_active number(1) not null,
   email varchar2(128)
@@ -528,7 +528,7 @@ comment on column sec_user.id is 'Первичный ключ';
 comment on column sec_user.login is 'Логин пользователя';
 comment on column sec_user.name is 'Полное имя пользователя';
 comment on column sec_user.department_id is 'Идентификатор подразделения';
-comment on column sec_user.is_active is 'Признак активностии пользователя';
+comment on column sec_user.is_active is 'Признак активности пользователя';
 comment on column sec_user.email is 'Адрес электронной почты';
 
 create sequence seq_sec_user start with 10000;
@@ -542,7 +542,7 @@ create table object_lock (
 comment on table object_lock is 'Сведения о пользовательских блокировках объектов';
 comment on column object_lock.object_id is 'Идентификатор объекта';
 comment on column object_lock.class is 'Имя класса объекта';
-comment on column object_lock.user_id is 'Идентифкатор пользователя, заблокировавшего объект';
+comment on column object_lock.user_id is 'Идентификатор пользователя, заблокировавшего объект';
 comment on column object_lock.lock_time is 'Время блокировки';
 -------------------------------------------------------------------------------------------------------------------------------------
 create table sec_role (
@@ -683,4 +683,6 @@ comment on column notification.first_reader_id is 'идентификатор п
 comment on column notification.text is 'текст оповещения';
 comment on column notification.create_date is 'дата создания оповещения';
 comment on column notification.deadline is 'дата сдачи отчетности';
+
+create sequence seq_notification start with 10000;
 --------------------------------------------------------------------------------------------------------

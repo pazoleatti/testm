@@ -3,7 +3,7 @@ package form_template.deal.precious_metals_trade
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -44,10 +44,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-        }
+        calc()
+        logicCheck()
         break
 }
 
@@ -71,7 +69,7 @@ def autoFillColumns = ['rowNum', 'inn', 'countryName', 'countryCode', 'foreignDe
 
 // Группируемые атрибуты
 @Field
-def groupColumns = ['fullName', 'inn', 'docNumber', 'docDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal',
+def groupColumns = ['fullName', 'docNumber', 'docDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal',
         'deliveryCode']
 
 // Проверяемые на пустые значения атрибуты
@@ -111,37 +109,29 @@ def getRecordId(def Long refBookId, def String alias, def String value, def int 
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 // Получение xml с общими проверками
-def getXML(def String startStr, def String endStr){
+def getXML(def String startStr, def String endStr) {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
     if (fileName == null || fileName == '') {
-        logger.error('Имя файла не должно быть пустым')
-        return
+        throw new ServiceException('Имя файла не должно быть пустым')
     }
-
     def is = ImportInputStream
     if (is == null) {
-        logger.error('Поток данных пуст')
-        return
+        throw new ServiceException('Поток данных пуст')
     }
-
     if (!fileName.endsWith('.xls')) {
-        logger.error('Выбранный файл не соответствует формату xls!')
-        return
+        throw new ServiceException('Выбранный файл не соответствует формату xls!')
     }
-
     def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
     if (xmlString == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
     }
     return xml
 }
@@ -155,25 +145,25 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
-    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-    def dFrom = taxPeriod.getStartDate()
-    def dTo = taxPeriod.getEndDate()
 
-    // "Да"
+    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
+
+    // "Да" и "Нет"
     def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
-    // "Нет"
     def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
 
-    def rowNum = 0;
+    def rowNum = 0
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
-        rowNum++;
-        def docDateCell = row.getCell('docDate')
-        def dealDateCell = row.getCell('dealDate')
+        rowNum++
 
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+
+        def docDateCell = row.getCell('docDate')
+        def dealDateCell = row.getCell('dealDate')
 
         // Корректность даты договора
         def dt = docDateCell.value
@@ -200,7 +190,7 @@ void logicCheck() {
                     break
             }
             if (isHaveNotEmptyField) {
-                StringBuilder builder = new StringBuilder();
+                StringBuilder builder = new StringBuilder()
                 for (int i = 0; i < checkField.size(); i++) {
                     builder.append("«").append(getAtributes().get(checkField.get(i))[2])
                             .append("» ").append("(")
@@ -215,13 +205,13 @@ void logicCheck() {
         }
 
         // Проверка заполнения населенного пункта
-        localityCell = row.getCell('locality');
-        cityCell = row.getCell('city');
+        localityCell = row.getCell('locality')
+        cityCell = row.getCell('city')
         if (localityCell.value != null && !localityCell.value.toString().isEmpty() && cityCell.value != null && !cityCell.value.toString().isEmpty()) {
             logger.warn("Строка $rowNum: Если указан «${localityCell.column.name}», не должен быть указан «${cityCell.column.name}»!")
         }
-        localityCell = row.getCell('locality2');
-        cityCell = row.getCell('city2');
+        localityCell = row.getCell('locality2')
+        cityCell = row.getCell('city2')
         if (localityCell.value != null && !localityCell.value.toString().isEmpty() && cityCell.value != null && !cityCell.value.toString().isEmpty()) {
             logger.warn("Строка $rowNum: Если указан «${localityCell.column.name}», не должен быть указан «${cityCell.column.name}»!")
         }
@@ -341,7 +331,7 @@ void checkItog(def dataRows) {
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
             return calcItog(i, testRows)
         }
-    }, groupColumns);
+    }, groupColumns)
     // Рассчитанные строки итогов
     def testItogRows = testRows.findAll { it -> it.getAlias() != null }
     // Имеющиеся строки итогов
@@ -361,9 +351,9 @@ void checkItog(def dataRows) {
             if (row1.total != row2.total) {
                 return getColumnName(row1, 'total')
             }
-            return null;
+            return null
         }
-    });
+    })
 }
 
 // Алгоритмы заполнения полей формы
@@ -374,19 +364,18 @@ void calc() {
         return
     }
 
-    // "Да"
+    // "Да" / "Нет"
     def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
-    // "Нет"
     def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
 
     // Удаление подитогов
     deleteAllAliased(dataRows)
 
-    def index = 1;
+    // Сортировка
+    sortRows(dataRows, groupColumns)
+
+    def index = 1
     for (row in dataRows) {
-        if (row.getAlias() != null) {
-            continue
-        }
         // Порядковый номер строки
         row.rowNum = index++
         // Расчет поля "Цена"
@@ -425,19 +414,16 @@ void calc() {
         row.foreignDeal = (row.countryCodeNumeric == row.countryCodeNumeric2 || deliveryPhis) ? recNoId : recYesId
     }
 
-    // Сортировка
-    sortRows(dataRows, groupColumns)
-
     // Добавление подитов
     addAllAliased(dataRows, new CalcAliasRow() {
         @Override
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
             return calcItog(i, dataRows)
         }
-    }, groupColumns);
+    }, groupColumns)
 
-    // Если нет сортировки и подитогов, то dataRowHelper.update(dataRows);
-    dataRowHelper.save(dataRows);
+    // Если нет сортировки и подитогов, то dataRowHelper.update(dataRows)
+    dataRowHelper.save(dataRows)
 }
 
 // Расчет подитогового значения
@@ -452,33 +438,26 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     // Расчеты подитоговых значений
     def BigDecimal priceItg = 0, totalItg = 0
     for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
-        row = dataRows.get(j)
-
+        def row = dataRows.get(j)
         def price = row.price
         def total = row.total
 
         priceItg += price != null ? price : 0
         totalItg += total != null ? total : 0
     }
-
     newRow.price = priceItg
     newRow.total = totalItg
 
     return newRow
 }
 
-/**
- *  Возвращает строку со значениями полей строки по которым идет группировка
- *  ['fullName', 'inn', 'docNumber', 'docDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal', 'deliveryCode']
- */
+// Возвращает строку со значениями полей строки по которым идет группировка
 String getValuesByGroupColumn(DataRow row) {
     def sep = ", "
-    StringBuilder builder = new StringBuilder()
+    def StringBuilder builder = new StringBuilder()
     def map = getRefBookValue(9, row.fullName)
     if (map != null)
         builder.append(map.NAME?.stringValue).append(sep)
-    if (row.inn != null)
-        builder.append(row.inn).append(sep)
     if (row.docNumber != null)
         builder.append(row.docNumber).append(sep)
     if (row.docDate != null)
@@ -498,18 +477,16 @@ String getValuesByGroupColumn(DataRow row) {
     deliveryCode = getRefBookValue(63, row.deliveryCode)?.STRCODE?.stringValue
     if (deliveryCode != null)
         builder.append(deliveryCode).append(sep)
+
     def String retVal = builder.toString()
     if (retVal.length() < 2)
         return null
-    retVal.substring(0, retVal.length() - 2)
+    return retVal.substring(0, retVal.length() - 2)
 }
 
 // Получение импортируемых данных.
 void importData() {
     def xml = getXML('Полное наименование с указанием ОПФ', 'Подитог:')
-    if (xml == null) {
-        return
-    }
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 28, 3)
 
@@ -578,13 +555,13 @@ void importData() {
 }
 
 // Заполнить форму данными
-def addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService?.get(formData?.reportPeriodId)?.taxPeriod?.getEndDate()
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def int xmlIndexRow = -1
     def int xlsIndexRow = 0
-    def int rowOffset= 3
+    def int rowOffset = 3
     def int colOffset = 2
 
     def rows = new LinkedList<DataRow<Cell>>()
@@ -744,7 +721,6 @@ def addData(def xml, int headRowCount) {
 
         // графа 19
         xmlIndexCol++
-
         // графа 20
         xmlIndexCol++
 

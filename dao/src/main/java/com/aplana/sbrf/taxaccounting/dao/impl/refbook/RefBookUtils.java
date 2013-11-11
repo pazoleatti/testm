@@ -26,7 +26,6 @@ import java.util.Map;
  * @since 08.10.13 14:39
  */
 @Repository
-@Transactional
 public class RefBookUtils extends AbstractDao {
 
 	@Autowired

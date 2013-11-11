@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class DepartmentReportPeriod implements Serializable{
 	private static final long serialVersionUID = 5623552659772659276L;
@@ -44,5 +45,4 @@ public class DepartmentReportPeriod implements Serializable{
 	public void setReportPeriod(ReportPeriod reportPeriod) {
 		this.reportPeriod = reportPeriod;
 	}
-	
 }

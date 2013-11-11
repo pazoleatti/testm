@@ -154,4 +154,55 @@ public interface FormDataService {
      * @return
      */
     boolean checksBalancePeriod(FormData formData, Logger logger);
+
+    /**
+     * Получение формы за предыдущий отчетный период
+     *
+     * @param formData
+     * @param departmentId
+     * @return
+     */
+    FormData getFormDataPrev(FormData formData, int departmentId);
+
+    /**
+     * Получение числа неитоговых строк в форме за предыдущий отчетный период
+     * Если указанная форма первая в году или предыдущих форм нет, то результат будет 0
+     *
+     * @param formData
+     * @param departmentId
+     * @return
+     */
+    int getFormDataPrevRowCount(FormData formData, int departmentId);
+
+    /**
+     * Проверка наличия принятой формы за предыдущий период.
+     * Если форма без строк, то считается отсутствующей.
+     *
+     * @param formData
+     * @param departmentId
+     * @return
+     */
+    boolean existAcceptedFormDataPrev(FormData formData, int departmentId);
+
+    /**
+     * Получение записи справочника
+     *
+     * @param refBookId
+     * @param recordCache
+     * @param providerCache
+     * @param refBookCache
+     * @param alias
+     * @param value
+     * @param date
+     * @param rowIndex
+     * @param columnName
+     * @param logger
+     * @param required
+     * @return
+     */
+    Map<String, RefBookValue> getRefBookRecord(Long refBookId, Map<Long, Map<String, Long>> recordCache,
+                                               Map<Long, RefBookDataProvider> providerCache,
+                                               Map<Long, Map<String, RefBookValue>> refBookCache,
+                                               String alias, String value, Date date,
+                                               int rowIndex, String columnName, Logger logger, boolean required);
 }

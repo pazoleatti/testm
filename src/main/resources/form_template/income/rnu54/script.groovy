@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
+import java.text.SimpleDateFormat
+
 /**
  * Форма "(РНУ-54) Регистр налогового учёта открытых сделок РЕПО с обязательством покупки по 2-й части".
  *
@@ -14,8 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  * @author rtimerbaev
  */
 
-import java.text.SimpleDateFormat
-
+// TODO Форма будет удалена http://jira.aplana.com/browse/SBRFACCTAX-2353
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
         checkCreation()

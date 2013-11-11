@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.scheduler.api.manager;
 
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskContext;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskData;
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 
 import java.util.List;
@@ -86,4 +87,11 @@ public interface TaskManager {
      * @throws TaskSchedulingException
      */
     public Boolean isTaskExist(Long taskId) throws TaskSchedulingException;
+
+    /**
+     * Возвращает информацию о доступных пользовательских задачах
+     * @return информация о задачах
+     * @throws TaskSchedulingException
+     */
+    List<TaskJndiInfo> getTasksJndi() throws TaskSchedulingException;
 }

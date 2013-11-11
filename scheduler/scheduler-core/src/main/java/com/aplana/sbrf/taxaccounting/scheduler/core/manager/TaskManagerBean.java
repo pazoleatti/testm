@@ -1,15 +1,14 @@
 package com.aplana.sbrf.taxaccounting.scheduler.core.manager;
 
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.*;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
+import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTask;
+import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
 import com.aplana.sbrf.taxaccounting.scheduler.core.task.TaskExecutorRemoteHome;
 import com.aplana.sbrf.taxaccounting.scheduler.core.utils.TaskUtils;
 import com.ibm.websphere.scheduler.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskContext;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskData;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskState;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerRemote;
@@ -19,6 +18,11 @@ import com.aplana.sbrf.taxaccounting.scheduler.core.service.TaskServiceLocal;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
+import javax.naming.Binding;
+import javax.naming.InitialContext;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.rmi.PortableRemoteObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +34,9 @@ import java.util.Map;
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 public class TaskManagerBean implements TaskManager {
     private static final Log LOG = LogFactory.getLog(TaskManagerBean.class);
+
+    /** Базовый jndi-путь с которого начинается поиск задач */
+    private static final String BASE_JNDI_NAME = "ejb";
 
     @Resource(name = "sched/TaskScheduler")
     private Scheduler scheduler;
@@ -188,6 +195,57 @@ public class TaskManagerBean implements TaskManager {
         } catch (Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw new TaskSchedulingException("Не удалось проверить существование задачи", e);
+        }
+    }
+
+    @Override
+    public List<TaskJndiInfo> getTasksJndi() throws TaskSchedulingException {
+        LOG.info("Obtaining all tasks jndi");
+        try {
+            InitialContext ic = new InitialContext();
+            NamingEnumeration<Binding> tasks = ic.listBindings(BASE_JNDI_NAME);
+            List<TaskJndiInfo> jndiInfo = new ArrayList<TaskJndiInfo>();
+            while (tasks.hasMore()) {
+                Binding binding = tasks.next();
+                traverseJndiTree(binding, BASE_JNDI_NAME, ic, jndiInfo);
+            }
+            return jndiInfo;
+        } catch (NamingException e) {
+            throw new TaskSchedulingException(e);
+        }
+    }
+
+    /**
+     * Обход дерева jndi элементов
+     * @param item элемент дерева
+     * @param jndiName составное jndi-имя элемента дерева
+     * @param ic ejb-контекст
+     * @param jndiInfo список найденных задач планировщика
+     * @throws NamingException
+     */
+    private void traverseJndiTree(Binding item, String jndiName, InitialContext ic, List<TaskJndiInfo> jndiInfo) throws NamingException {
+        if (item.getObject() instanceof UserTask) {
+            UserTask userTask = (UserTask) PortableRemoteObject.narrow(item.getObject(), UserTask.class);
+            StringBuilder jndi = new StringBuilder(jndiName)
+                    .append("/")
+                    .append(userTask.getTaskClassName())
+                    .append("#")
+                    .append(UserTaskRemote.class.getName());
+            jndiInfo.add(new TaskJndiInfo(userTask.getTaskName(), jndi.toString()));
+        }
+
+        String newJndiName = jndiName + "/" + item.getName();
+        NamingEnumeration<Binding> bindings = null;
+
+        try {
+            bindings = ic.listBindings(newJndiName);
+        } catch (NamingException e) {
+            //Ничего не делаем. Просто проверка на существование элемента
+            return;
+        }
+
+        while (bindings.hasMore()) {
+            traverseJndiTree(bindings.next(), newJndiName, ic, jndiInfo);
         }
     }
 

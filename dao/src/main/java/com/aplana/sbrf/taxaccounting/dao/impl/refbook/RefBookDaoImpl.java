@@ -35,7 +35,6 @@ import java.util.*;
  * @since 04.07.13 18:48
  */
 @Repository
-@Transactional
 public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
 	private static final Log logger = LogFactory.getLog(RefBookDaoImpl.class);

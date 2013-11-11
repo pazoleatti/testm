@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.script.range.Range;
 import com.aplana.sbrf.taxaccounting.model.script.range.Rect;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -49,6 +50,10 @@ public final class ScriptUtils {
     private static String GROUP_WRONG_ITOG_SUM = "Строка %d: Неверное итоговое значение по группе «%s» в графе «%s»";
 
     private static String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
+
+    private static String WRONG_CALC = "Строка %d: Неверное значение граф: %s!";
+
+    private static String WRONG_TOTAL = "Итоговые значения рассчитаны неверно в графе «%s»!";
 
     /**
      * Интерфейс для переопределения алгоритма расчета
@@ -322,6 +327,20 @@ public final class ScriptUtils {
     }
 
     /**
+     * Перевод даты в нужный формат
+     *
+     * @param date
+     * @param format
+     * @return
+     */
+    public static String formatDate(Date date, String format) {
+        if (date == null || format == null) {
+            return null;
+        }
+        return new SimpleDateFormat(format).format(date);
+    }
+
+    /**
      * Удаление всех строк с алиасами (подитоги и т.п.)
      *
      * @param dataRows
@@ -400,7 +419,7 @@ public final class ScriptUtils {
                     Object v1 = o1.getCell(alias).getValue();
                     Object v2 = o2.getCell(alias).getValue();
                     if (v1 == null && v2 == null) {
-                        return 0;
+                        continue;
                     }
                     if (v1 == null && v2 != null) {
                         return 1;
@@ -409,9 +428,13 @@ public final class ScriptUtils {
                         return -1;
                     }
                     if (v1 instanceof Comparable) {
-                        return ((Comparable) v1).compareTo(v2);
+                        int result = ((Comparable) v1).compareTo(v2);
+                        if (result != 0) {
+                            return result;
+                        }
+                    } else {
+                        continue;
                     }
-                    return 0;
                 }
                 return 0;
             }
@@ -450,7 +473,7 @@ public final class ScriptUtils {
             // Неитоговые строки были удалены
             for (int i = 0; i < dataRows.size(); i++) {
                 if (dataRows.get(i).getAlias() != null) {
-                    if (i - 1 < -1 || dataRows.get(i - 1).getAlias() != null) {
+                    if (i < 1 || dataRows.get(i - 1).getAlias() != null) {
                         logger.error(String.format(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex()));
                     }
                 }
@@ -548,6 +571,120 @@ public final class ScriptUtils {
                     logger.error(msg);
                 } else {
                     logger.warn(msg);
+                }
+            }
+        }
+    }
+
+    /**
+     * Арифметическая проверка
+     *
+     * @param row
+     * @param calcColumns
+     * @param calcValues
+     * @param logger
+     * @param required
+     */
+    public static void checkCalc(DataRow<Cell> row, List<String> calcColumns, Map<String, Object> calcValues,
+                                 Logger logger, boolean required) {
+        List<String> errorColumns = new LinkedList<String>();
+        for (String alias : calcColumns) {
+            if (calcValues.get(alias) == null && row.getCell(alias).getValue() == null) {
+                continue;
+            }
+            if (calcValues.get(alias) == null || row.getCell(alias).getValue() == null
+                    || ((BigDecimal) calcValues.get(alias)).compareTo((BigDecimal) row.getCell(alias).getValue()) != 0) {
+                errorColumns.add('"' + getColumnName(row, alias) + '"');
+            }
+        }
+        if (!errorColumns.isEmpty()) {
+            String msg = String.format(WRONG_CALC, row.getIndex(),
+                    StringUtils.collectionToDelimitedString(errorColumns, ", "));
+            if (required) {
+                logger.error(msg);
+            } else {
+                logger.warn(msg);
+            }
+        }
+    }
+
+    /**
+     * Возвращает DataRow по алиасу.
+     */
+    public static DataRow getDataRow(List<DataRow<Cell>> dataRows, String rowAlias) {
+        if (rowAlias == null) {
+            throw new NullPointerException("Row alias cannot be null");
+        }
+        for (DataRow<Cell> row : dataRows) {
+            if (rowAlias.equals(row.getAlias())) {
+                return row;
+            }
+        }
+        throw new IllegalArgumentException("Wrong row alias requested: "
+                + rowAlias);
+    }
+
+    /**
+     * Расчет итогового значения, являющегося суммой по ячейкам одноименной графы
+     *
+     * @param dataRows
+     * @param totalRow
+     * @param columns
+     */
+    public static void calcTotalSum(List<DataRow<Cell>> dataRows, DataRow<Cell> totalRow, List<String> columns) {
+        for (String alias : columns) {
+            BigDecimal sum = BigDecimal.valueOf(0);
+            for (DataRow<Cell> row : dataRows) {
+                if (row.getAlias() == null) {
+                    BigDecimal val = (BigDecimal) row.getCell(alias).getValue();
+                    if (val != null) {
+                        sum = sum.add(val);
+                    }
+                }
+            }
+            totalRow.getCell(alias).setValue(sum);
+        }
+    }
+
+    /**
+     * Проверка расчета сумм итогов
+     *
+     * @param dataRows
+     * @param columns
+     * @param logger
+     * @param required
+     */
+    public static void checkTotalSum(List<DataRow<Cell>> dataRows, List<String> columns, Logger logger,
+                                     boolean required) {
+        DataRow<Cell> totalRow = null;
+        Map<String, BigDecimal> totalSums = new HashMap<String, BigDecimal>();
+        for (DataRow<Cell> row : dataRows) {
+            if (row.getAlias() != null) {
+                totalRow = row;
+                continue;
+            }
+            for (String alias : columns) {
+                if (!totalSums.containsKey(alias)) {
+                    totalSums.put(alias, BigDecimal.valueOf(0));
+                }
+                BigDecimal val = (BigDecimal) row.getCell(alias).getValue();
+                if (val != null) {
+                    totalSums.put(alias, totalSums.get(alias).add(val));
+                }
+            }
+        }
+        if (totalRow != null) {
+            for (String alias : columns) {
+                if (!totalSums.containsKey(alias)) {
+                    totalSums.put(alias, BigDecimal.valueOf(0));
+                }
+                if (totalSums.get(alias).compareTo((BigDecimal)totalRow.getCell(alias).getValue()) != 0) {
+                    String msg = String.format(WRONG_TOTAL, getColumnName(totalRow, alias));
+                    if (required) {
+                        logger.error(msg);
+                    } else {
+                        logger.warn(msg);
+                    }
                 }
             }
         }

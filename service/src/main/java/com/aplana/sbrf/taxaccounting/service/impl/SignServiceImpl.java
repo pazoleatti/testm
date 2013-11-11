@@ -69,11 +69,6 @@ public class SignServiceImpl implements SignService {
         //-------------- деинициализация --------------------------------
         total += Bicr4.cr_pkbase_close(pkBase);
         total += Bicr4.cr_uninit(init);
-
-        if (total == 0) {
-            return true;
-        } else {
-            return false;
-        }
+		return total == 0;
     }
 }

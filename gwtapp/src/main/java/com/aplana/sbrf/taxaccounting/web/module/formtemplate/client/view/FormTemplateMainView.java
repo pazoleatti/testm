@@ -126,7 +126,7 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 		}
 
 		for (BaseTab tab : tabList) {
-			tab.setTargetHistoryToken(tab.getTargetHistoryToken() + String.valueOf(formId));
+			tab.setTargetHistoryToken(tab.getTargetHistoryToken() + formId);
 		}
 
 		this.formId = formId;

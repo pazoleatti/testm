@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared;
 
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.gwtplatform.dispatch.shared.Result;
 

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,6 +27,7 @@ import java.util.Map;
  */
 @Service("refBookDepartment")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Transactional
 public class RefBookDepartment implements RefBookDataProvider {
 
     public static final Long REF_BOOK_ID = RefBookDepartmentDao.REF_BOOK_ID;

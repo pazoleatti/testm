@@ -3,7 +3,7 @@ package form_template.deal.bank_service
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -44,10 +44,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-        }
+        calc()
+        logicCheck()
         break
 }
 
@@ -103,37 +101,29 @@ def getRecordId(def Long refBookId, def String alias, def String value, def int 
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 // Получение xml с общими проверками
-def getXML(def String startStr, def String endStr){
+def getXML(def String startStr, def String endStr) {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
     if (fileName == null || fileName == '') {
-        logger.error('Имя файла не должно быть пустым')
-        return
+        throw new ServiceException('Имя файла не должно быть пустым')
     }
-
     def is = ImportInputStream
     if (is == null) {
-        logger.error('Поток данных пуст')
-        return
+        throw new ServiceException('Поток данных пуст')
     }
-
     if (!fileName.endsWith('.xls')) {
-        logger.error('Выбранный файл не соответствует формату xls!')
-        return
+        throw new ServiceException('Выбранный файл не соответствует формату xls!')
     }
-
     def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
     if (xmlString == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
     }
     return xml
 }
@@ -148,11 +138,10 @@ void logicCheck() {
         return
     }
 
-    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-    def dFrom = taxPeriod.getStartDate()
-    def dTo = taxPeriod.getEndDate()
-    def rowNum = 0
+    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
+    def rowNum = 0
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -227,15 +216,12 @@ void calc() {
         row.country = map?.COUNTRY?.referenceValue
         row.countryCode = map?.COUNTRY?.referenceValue
     }
-    dataRowHelper.update(dataRows);
+    dataRowHelper.update(dataRows)
 }
 
 // Получение импортируемых данных
 void importData() {
     def xml = getXML('Полное наименование с указанием ОПФ', null)
-    if (xml == null) {
-        return
-    }
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 10, 3)
 
@@ -268,8 +254,8 @@ void importData() {
 }
 
 // Заполнить форму данными
-def addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService?.get(formData?.reportPeriodId)?.taxPeriod?.getEndDate()
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
@@ -324,7 +310,7 @@ def addData(def xml, int headRowCount) {
         if (map != null) {
             def text = row.cell[xmlIndexCol].text()
             map = getRefBookValue(10, map.COUNTRY?.referenceValue)
-            if ((text != null && !text.isEmpty() && !text.equals(map.FULLNAME?.stringValue)) || ((text == null || text.isEmpty()) && map.FULLNAME?.stringValue != null)) {
+            if ((text != null && !text.isEmpty() && !text.equals(map?.FULLNAME?.stringValue)) || ((text == null || text.isEmpty()) && map?.FULLNAME?.stringValue != null)) {
                 logger.warn("Строка ${xlsIndexRow} столбец ${xmlIndexCol + colOffset} содержит значение, отсутствующее в справочнике!")
             }
         }

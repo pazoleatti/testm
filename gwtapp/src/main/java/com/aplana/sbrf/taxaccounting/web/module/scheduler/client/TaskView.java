@@ -2,8 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoResult;
+import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.TaskInfoItem;
+import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -11,6 +14,8 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+
+import java.util.List;
 
 
 /**
@@ -35,8 +40,8 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     @UiField
     TextBox numberOfRepeats;
 
-    @UiField
-    TextBox jndi;
+    @UiField(provided = true)
+    ListBoxWithTooltip<TaskInfoItem> jndi;
 
     @UiField
     Button addParamButton;
@@ -45,6 +50,8 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     VerticalPanel paramsPanel;
 
     @UiField LinkStyle css;
+
+    private List<TaskInfoItem> jndiList;
 
     interface LinkStyle extends CssResource {
         String separator();
@@ -56,6 +63,15 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     @Inject
     @UiConstructor
     public TaskView(final Binder uiBinder) {
+        jndi = new ListBoxWithTooltip<TaskInfoItem>(new AbstractRenderer<TaskInfoItem>() {
+            @Override
+            public String render(TaskInfoItem info) {
+                if (info != null) {
+                    return info.getName();
+                }
+                return "";
+            }
+        });
         initWidget(uiBinder.createAndBindUi(this));
     }
 
@@ -107,7 +123,15 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
 
     @Override
     public String getJndi() {
-        return jndi.getValue();
+        return jndi.getValue().getJndi();
+    }
+
+    @Override
+    public void setJndiList(List<TaskInfoItem> jndiList) {
+        jndiList.add(null);
+        this.jndiList = jndiList;
+        jndi.setAcceptableValues(jndiList);
+        jndi.setValue(null);
     }
 
     @Override
@@ -118,12 +142,12 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
         taskName.setValue("");
         taskSchedule.setValue("");
         numberOfRepeats.setValue("");
-        jndi.setValue("");
+        jndi.setValue(null);
 
         taskName.setReadOnly(false);
         taskSchedule.setReadOnly(false);
         numberOfRepeats.setReadOnly(false);
-        jndi.setReadOnly(false);
+        jndi.setEnabled(false);
     }
 
     @Override
@@ -136,11 +160,21 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
         taskSchedule.setReadOnly(true);
         numberOfRepeats.setValue(String.valueOf(taskData.getNumberOfRepeats()));
         numberOfRepeats.setReadOnly(true);
-        jndi.setValue(taskData.getUserTaskJndi());
-        jndi.setReadOnly(true);
+
+        jndi.setValue(findJndiInfo(taskData.getUserTaskJndi()));
+        jndi.setEnabled(true);
 
         for (TaskParamModel param : taskData.getParams()) {
             getUiHandlers().onAddParam(param);
         }
+    }
+
+    private TaskInfoItem findJndiInfo(String jndi) {
+        for (TaskInfoItem info : jndiList) {
+            if (info.getJndi().equals(jndi)) {
+                return info;
+            }
+        }
+        return null;
     }
 }

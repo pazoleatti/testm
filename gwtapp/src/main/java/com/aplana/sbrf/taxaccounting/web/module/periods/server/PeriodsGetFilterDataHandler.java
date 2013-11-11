@@ -3,15 +3,11 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
@@ -60,7 +56,10 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	    res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(filterValues
 			    .getDepartmentIds()).values()));
 	    res.setAvalDepartments(filterValues.getDepartmentIds());
-	    res.setSelectedDepartment(userInfo.getUser().getDepartmentId());
+
+        //TODO переделать на источники-приемники
+        Department userDepartment = departmentService.getDepartment(userInfo.getUser().getDepartmentId());
+	    res.setSelectedDepartment(new DepartmentPair(userDepartment.getId(), userDepartment.getParentId(), userDepartment.getName()));
 
 	    // По умолчанию отчетный период не выбран
 	    res.setCurrentReportPeriod(null);

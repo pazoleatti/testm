@@ -5,6 +5,7 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.Renderer;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ValueListBox;
 
@@ -52,4 +53,8 @@ public class ListBoxWithTooltip<T> extends ValueListBox<T> {
 			}
 		}
 	}
+
+    public void setEnabled(boolean isEnabled) {
+        DOM.setElementPropertyBoolean(this.getElement(), "disabled", isEnabled);
+    }
 }

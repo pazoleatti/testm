@@ -31,7 +31,6 @@ import java.util.*;
  * @author Dmitriy Levykin
  */
 @Repository
-@Transactional
 public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncome102Dao {
 
 	private static final String TABLE_NAME = "INCOME_102";

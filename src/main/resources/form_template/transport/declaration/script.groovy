@@ -74,12 +74,13 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
 
     def builder = new MarkupBuilder(xml)
     if (!declarationData.isAccepted()) {
+        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
         builder.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId, declarationData.getReportPeriodId()), ВерсПрог: departmentParamTransport.APP_VERSION, ВерсФорм:departmentParamTransport.FORMAT_VERSION) {
             Документ(
                     КНД:"1152004",
                     ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"), //new Date().format("dd.MM.yyyy"),
                     Период: 34,
-                    ОтчетГод: reportPeriodService.get(declarationData.reportPeriodId).taxPeriod.startDate.format('yyyy'),
+                    ОтчетГод: reportPeriod.taxPeriod.startDate.format('yyyy'),
                     КодНО: departmentParamTransport.TAX_ORGAN_CODE,
                     // TODO учесть что потом будут корректирующие периоды
                     НомКорр: "0",
@@ -167,14 +168,15 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                 resultMap[row.okato].taxSumToPay += row.taxSumToPay ?:0;
                                 // вспомогательный taxBase
                                 resultMap[row.okato].taxBase += row.taxBase ?: 0
+                                def taxRate = getRefBookValue(41, row.taxRate, 'VALUE').value
                                 // вспомогательный taxRate
-                                resultMap[row.okato].taxRate += row.taxRate ?: 0
+                                resultMap[row.okato].taxRate += taxRate ?: 0
                                 // АвПУКв1 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за первый квартал //// Заполняется в 1, 2, 3, 4 отчетном периоде.
-                                resultMap[row.okato].amountOfTheAdvancePayment1  += 0.25*resultMap[row.okato].taxBase*resultMap[row.okato].taxRate
+                                resultMap[row.okato].amountOfTheAdvancePayment1  += 0.25 * row.taxBase * taxRate
                                 // АвПУКв2 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за второй квартал //// Заполняется во 2, 3, 4 отчетном периоде.
-                                resultMap[row.okato].amountOfTheAdvancePayment2  += 0.25*resultMap[row.okato].taxBase*resultMap[row.okato].taxRate
+                                resultMap[row.okato].amountOfTheAdvancePayment2  += (reportPeriod.order > 1 ? 0.25 * row.taxBase * taxRate : 0)
                                 // АвПУКв3 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за третий квартал //// Заполняется во 3, 4 отчетном периоде.
-                                resultMap[row.okato].amountOfTheAdvancePayment3  += 0.25*resultMap[row.okato].taxBase*resultMap[row.okato].taxRate
+                                resultMap[row.okato].amountOfTheAdvancePayment3  += (reportPeriod.order > 2 ? 0.25 * row.taxBase * taxRate : 0)
                                 // НалПУ = НалИсчисл – (АвПУКв1+ АвПУКв2+ АвПУКв3)
                                 resultMap[row.okato].amountOfTaxPayable = resultMap[row.okato].calculationOfTaxes - (
                                 resultMap[row.okato].amountOfTheAdvancePayment1 + resultMap[row.okato].amountOfTheAdvancePayment2 + resultMap[row.okato].amountOfTheAdvancePayment3
@@ -215,82 +217,77 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                                             ВыпускТС: tRow.years, //
                                                             ВладенТС: tRow.ownMonths,
                                                             КоэфКв: tRow.coef362,
-                                                            НалСтавка: getRefBookValue(41, tRow.taxRate, "VALUE"),
+                                                            НалСтавка: tRow.taxRate,
                                                             СумИсчисл: tRow.calculatedTaxSum,
                                                     ]
-                                                    +   (tRow.benefitEndDate && tRow.benefitStartDate? [ЛьготМесТС: (tRow.benefitEndDate.year*12 + tRow.benefitEndDate.month) - (tRow.benefitStartDate.year*12 + tRow.benefitStartDate.month)]: [])+
+                                                    +   (taxBenefitCode && tRow.benefitStartDate? [ЛьготМесТС: getBenefitMonths(tRow)]: [])+
                                                     [
                                                             СумИсчислУпл: tRow.taxSumToPay,
                                                     ]+
-                                                    (tRow.coefKl ? [КоэфКл: tRow.coefKl]:[]),
+                                                    (taxBenefitCode && tRow.coefKl ? [КоэфКл: tRow.coefKl]:[]),
                                     ){
 
                                         // генерация КодОсвНал
-                                        if ((!(taxBenefitCode.equals("20220")) && !(taxBenefitCode.equals("20230")) && taxBenefitCode != null)){
+                                        if (taxBenefitCode != null && (taxBenefitCode.equals('30200') || taxBenefitCode.equals('20210'))) {
                                             def l = taxBenefitCode;
                                             def x = "";
-                                            if (l.equals("30200")){
-                                                x = 30200
-                                            } else{
+                                            if (l.equals("30200")) {
+                                                //
+                                            } else {
                                                 def param = getParam(tRow.taxBenefitCode, tRow.okato);
 
                                                 if (param != null) {
-                                                    x = ((param.SECTION.toString().size() < 4 ? "0"*(4 - param.SECTION.toString().size()) : param.SECTION.toString())
-                                                            + (param.ITEM.toString().size() < 4 ? "0"*(4 - param.ITEM.toString().size()) : param.ITEM.toString())
-                                                            + (param.SUBITEM.toString().size() < 4 ? "0"*(4 - param.SUBITEM.toString().size()) : param.SUBITEM.toString()))
-
-
-                                                    def kodOsnNal = (l != "" ? l.toString():"0000") +"/"+ x
-
-                                                    ЛьготОсвНал(
-                                                            КодОсвНал: kodOsnNal,
-                                                            СумОсвНал: tRow.benefitSum
-                                                    )
+                                                    def section = param.SECTION.toString()
+                                                    def item = param.ITEM.toString()
+                                                    def subitem = param.SUBITEM.toString()
+                                                    x = ((section.size() < 4 ? '0' * (4 - section.size()) + section : section)
+                                                            + (item.size() < 4 ? '0' * (4 - item.size()) + item: item)
+                                                            + (subitem.size() < 4 ? '0' * (4 - subitem.size()) + subitem : subitem))
                                                 }
                                             }
+                                            def kodOsnNal = (l != "" ? l.toString():"0000") +"/"+ x
+                                            ЛьготОсвНал(
+                                                    КодОсвНал: kodOsnNal,
+                                                    СумОсвНал: tRow.benefitSum
+                                            )
                                         }
 
                                         // вычисление ЛьготУменСум
                                         // не заполняется если Код налоговой льготы = 30200, 20200, 20210 или 20230
-                                        if (!(taxBenefitCode.equals("30200"))
-                                                && !(taxBenefitCode.equals("20200"))
-                                                && !(taxBenefitCode.equals("20210"))
-                                                && !(taxBenefitCode.equals("20230"))
-                                                && taxBenefitCode != null){
+                                        if (taxBenefitCode != null && taxBenefitCode.equals("20220")) {
 
                                             // вычисление КодУменСум
                                             def param = getParam(tRow.taxBenefitCode, tRow.okato);
                                             def valL = tRow.taxBenefitCode;
                                             if (param != null) {
-                                                def valX = ((param.SECTION.toString().size() < 4 ? ("0"*(4 - param.SECTION.toString().size())) : param.SECTION.toString())
-                                                        + (param.ITEM.toString().size() < 4 ? ("0"*(4 - param.ITEM.toString().size())) : param.ITEM.toString())
-                                                        + (param.SUBITEM.toString().size() < 4 ? ("0"*(4 - param.SUBITEM.toString().size())) : param.SUBITEM.toString()))
+                                                def section = param.SECTION.toString()
+                                                def item = param.ITEM.toString()
+                                                def subitem = param.SUBITEM.toString()
+                                                def valX = ((section.size() < 4 ? '0' * (4 - section.size()) + section : section)
+                                                        + (item.size() < 4 ? '0' * (4 - item.size()) + item: item)
+                                                        + (subitem.size() < 4 ? '0' * (4 - subitem.size()) + subitem : subitem))
 
                                                 def kodUmenSum = (valL != "" ? valL.toString():"0000") +"/"+ valX
-
-
                                                 ЛьготУменСум(КодУменСум: kodUmenSum, СумУменСум: tRow.benefitSum)
                                             }
                                         }
 
                                         // ЛьготСнижСтав
                                         // не заполняется если Код налоговой льготы = 30200, 20200, 20210 или 20220
-                                        if (!(taxBenefitCode.equals("30200"))
-                                                && !(taxBenefitCode.equals("20200"))
-                                                && !(taxBenefitCode.equals("20210"))
-                                                && !(taxBenefitCode.equals("20220"))
-                                                && taxBenefitCode != null){
+                                        if (taxBenefitCode != null && taxBenefitCode.equals("20230")) {
 
-                                            // вычисление КодУменСум
+                                            // вычисление КодСнижСтав
                                             def valL = tRow.taxBenefitCode;
                                             def param = getParam(tRow.taxBenefitCode, tRow.okato);
                                             if (param != null) {
-                                                def valX = ((param.SECTION.toString().size() < 4 ? "0"*(4 - param.SECTION.toString().size()) : param.SECTION.toString())
-                                                        + (param.ITEM.toString().size() < 4 ? "0"*(4 - param.ITEM.toString().size()) : param.ITEM.toString())
-                                                        + (param.SUBITEM.toString().size() < 4 ? "0"*(4 - param.SUBITEM.toString().size()) : param.SUBITEM.toString()))
+                                                def section = param.SECTION.toString()
+                                                def item = param.ITEM.toString()
+                                                def subitem = param.SUBITEM.toString()
+                                                def valX = ((section.size() < 4 ? '0' * (4 - section.size()) + section : section)
+                                                        + (item.size() < 4 ? '0' * (4 - item.size()) + item: item)
+                                                        + (subitem.size() < 4 ? '0' * (4 - subitem.size()) + subitem : subitem))
 
                                                 def kodNizhStav = (valL != "" ? valL.toString():"0000") +"/"+ valX
-
                                                 ЛьготСнижСтав(КодСнижСтав: kodNizhStav, СумСнижСтав: tRow.benefitSum)
                                             }
                                         }
@@ -458,4 +455,16 @@ def getParam(taxBenefitCode, okato){
         }
     }
 
+}
+
+def getBenefitMonths(def row) {
+    def periodStart = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
+    def periodEnd = reportPeriodService.getEndDate(declarationData.reportPeriodId).getTime()
+    if ((row.benefitEndDate != null && row.benefitEndDate < periodStart) || row.benefitStartDate > periodEnd){
+        return 0
+    } else {
+        def end = row.benefitEndDate == null || row.benefitEndDate > periodEnd ? periodEnd : row.benefitEndDate
+        def start = row.benefitStartDate < periodStart ? periodStart : row.benefitStartDate
+        return (end.year * 12 + end.month) - (start.year * 12 + start.month) + 1
+    }
 }
