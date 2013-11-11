@@ -1,4 +1,4 @@
-package com.aplana
+package com.aplana.taxaccounting
 
 /**
  * Утилита для синхронизации шаблонов НФ
@@ -10,25 +10,31 @@ package com.aplana
  * Сборка исполнимого приложения:
  * gradle installApp
  *
- * TODO Реализована только выгрузка из БД. Реализовать загрузку из файловой системы.
- *
  * @author Dmitriy Levykin
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  */
 class Main {
 
     //// Константы
+    // production-mode params
+//    def static paramsMap = [login: 'conf', pass: 'conf',
+//            serverAddress: 'http://172.16.127.18:9080',
+//            rootPath: '/taxaccounting-dist/gwtapp',
+//            loginPath: '/j_security_check',
+//            downloadPath: '/download/formTemplate/download']
+    // dev-mode params
     def static paramsMap = [login: 'conf', pass: 'conf',
-            serverAddress: 'http://172.16.127.18:9080',
-            rootPath: '/taxaccounting-dist/gwtapp',
+            serverAddress: 'http://127.0.0.1:8888',
+            rootPath: '',
             loginPath: '/j_security_check',
-            downloadPath: '/download/formTemplate/download']
+            downloadPath: '/download/formTemplate/download',
+            uploadPath: '/download/formTemplate/upload']
 
-// Шаблоны в файловой системе
-// def resourcesPath = '../src/main/resources/form_template'
+    // Шаблоны в файловой системе
+    // def static resourcesPath = '../src/main/resources/form_template'
     def static resourcesPath = 'C:/form_template'
 
-// Маппинг шаблонов
+    // Маппинг шаблонов
     def static templates = [deal: [
             380: 'auctions_property',
             382: 'bank_service',
@@ -56,11 +62,24 @@ class Main {
     public static void main(String[] args) {
         def api = SyncAPI.getInstance(paramsMap)
         api.login()
+        downloadAll(api)
+        // uploadAll(api)
+        api.close()
+    }
+
+    private static void downloadAll(SyncAPI api) {
         templates.each { taxType ->
             taxType.value.each { template ->
                 api.downloadTemplate(template.key, "$resourcesPath/${taxType.key}/${template.value}/")
             }
         }
-        api.close()
+    }
+
+    private static void uploadAll(SyncAPI api) {
+        templates.each { taxType ->
+            taxType.value.each { template ->
+                api.uploadTemplate(template.key, "$resourcesPath/${taxType.key}/${template.value}/")
+            }
+        }
     }
 }
