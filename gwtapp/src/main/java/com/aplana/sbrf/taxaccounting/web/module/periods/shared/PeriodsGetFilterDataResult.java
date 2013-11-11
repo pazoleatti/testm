@@ -18,7 +18,7 @@ public class PeriodsGetFilterDataResult implements Result {
 	
 	private List<Department> departments;
 	private Set<Integer> avalDepartments;
-	private Integer selectedDepartment;
+	private DepartmentPair selectedDepartment;
 	private boolean enableDepartmentPicker;
 	private boolean readOnly;
 
@@ -83,11 +83,11 @@ public class PeriodsGetFilterDataResult implements Result {
 		this.avalDepartments = avalDepartments;
 	}
 
-	public Integer getSelectedDepartment() {
+	public DepartmentPair getSelectedDepartment() {
 		return selectedDepartment;
 	}
 
-	public void setSelectedDepartment(Integer selectedDepartment) {
+	public void setSelectedDepartment(DepartmentPair selectedDepartment) {
 		this.selectedDepartment = selectedDepartment;
 	}
 

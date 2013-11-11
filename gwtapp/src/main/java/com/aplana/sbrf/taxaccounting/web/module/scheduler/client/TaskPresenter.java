@@ -328,10 +328,6 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
      */
     private boolean validateForm() {
         StringBuilder validateMsg = new StringBuilder();
-        System.out.println("getView().getTaskName().isEmpty(): "+getView().getTaskName().isEmpty());
-        System.out.println("getView().getTaskSchedule().isEmpty(): "+getView().getTaskSchedule().isEmpty());
-        System.out.println("getView().getNumberOfRepeats().isEmpty(): "+getView().getNumberOfRepeats().isEmpty());
-        System.out.println("getView().getJndi().isEmpty(): "+getView().getJndi().isEmpty());
         if (getView().getTaskName().isEmpty()) {
             validateMsg.append("Не заполнено поле 'Название'").append("; ");
         }

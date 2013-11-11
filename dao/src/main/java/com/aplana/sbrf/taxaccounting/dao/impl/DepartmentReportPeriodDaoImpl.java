@@ -3,8 +3,10 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Date;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.RowMapper;
@@ -59,7 +61,15 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 						departmentReportPeriod.isBalance());
 	}
 
-	@Override
+    @Override
+    public void updateDeadline(int reportPeriodId, List<Integer> departmentIds, Date deadline) {
+        getJdbcTemplate()
+                .update("update DEPARTMENT_REPORT_PERIOD set DEADLINE=? where REPORT_PERIOD_ID=? and DEPARTMENT_ID IN " +
+                        SqlUtils.transformToSqlInStatement(departmentIds),
+                        deadline, reportPeriodId);
+    }
+
+    @Override
 	@Transactional(readOnly=false)
 	public void updateActive(int reportPeriodId, Long departmentId,
 			boolean active) {
