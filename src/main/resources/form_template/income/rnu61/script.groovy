@@ -10,8 +10,8 @@ import java.math.RoundingMode
 
 /**
  * Скрипт для РНУ-61
- * Форма "(РНУ-61) Регистр налогового учёта расходов по процентным векселям ОАО «Сбербанк России», учёт которых требует применения метода начисления"
- * formTemplateId=352
+ * Форма "(РНУ-61) Регистр налогового учёта расходов по процентным векселям ОАО «Сбербанк России»,
+ * учёт которых требует применения метода начисления"  (352)
  *
  * графа 1  - rowNumber
  * графа 2  - billNumber
@@ -31,8 +31,6 @@ import java.math.RoundingMode
  * @author akadyrgulov
  * @author Stanislav Yasinskiy
  */
-
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)

@@ -9,4 +9,5 @@ target
 .gwt
 bin
 *~
+.gradle
 libpeerconnection.log
