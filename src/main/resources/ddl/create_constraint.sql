@@ -1,8 +1,5 @@
 alter table configuration add constraint configuration_pk primary key (code);
 
-alter table dict_region add constraint dict_region_pk primary key (code);
-alter table dict_region add constraint dict_region_uniq_okato_def unique (okato_definition);
-
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
 
