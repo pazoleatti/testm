@@ -678,7 +678,9 @@ public final class ScriptUtils {
                 if (!totalSums.containsKey(alias)) {
                     totalSums.put(alias, BigDecimal.valueOf(0));
                 }
-                if (totalSums.get(alias).compareTo((BigDecimal)totalRow.getCell(alias).getValue()) != 0) {
+                BigDecimal value = (BigDecimal) totalRow.getCell(alias).getValue();
+                BigDecimal totalValue = (value != null ? value : new BigDecimal(0));
+                if (totalSums.get(alias).compareTo(totalValue) != 0) {
                     String msg = String.format(WRONG_TOTAL, getColumnName(totalRow, alias));
                     if (required) {
                         logger.error(msg);
