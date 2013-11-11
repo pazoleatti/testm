@@ -16,4 +16,16 @@ public interface UserTask {
      * @throws TaskExecutionException
      */
     void execute(Map<String, TaskParam> params) throws TaskExecutionException;
+
+    /**
+     * Возвращает название задачи. Необходимо для отображения списка задач
+     * @return название задачи
+     */
+    String getTaskName();
+
+    /**
+     * Возвращает название класса задачи. Необходимо для отображения списка задач
+     * @return название класса задачи
+     */
+    String getTaskClassName();
 }

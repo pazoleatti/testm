@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -24,6 +25,7 @@ import java.util.*;
  */
 @Service("refBookIncome102")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Transactional
 public class RefBookIncome102 implements RefBookDataProvider {
 
     public static final Long REF_BOOK_ID = RefBookIncome102Dao.REF_BOOK_ID;

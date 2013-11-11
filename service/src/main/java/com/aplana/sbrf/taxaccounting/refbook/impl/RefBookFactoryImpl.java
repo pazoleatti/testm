@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ import java.util.List;
  * @since 11.07.13 11:22
  */
 @Service("refBookFactory")
+@Transactional
 public class RefBookFactoryImpl implements RefBookFactory {
 
     @Autowired

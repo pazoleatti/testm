@@ -24,18 +24,24 @@ public class SimpleUserTask implements UserTask {
     @Override
     public void execute(Map<String, TaskParam> params) throws TaskExecutionException {
         LOG.info("SimpleUserTask started");
-        try {
-            boolean b = (Boolean) params.get("testB").getTypifiedValue();
-            int i = (Integer) params.get("testI").getTypifiedValue();
-            float f = (Float) params.get("testF").getTypifiedValue();
-            Date d = (Date) params.get("testD").getTypifiedValue();
-            System.out.println(b);
-            System.out.println(i);
-            System.out.println(f);
-            System.out.println(d);
-        } catch (InvalidTaskParamException e) {
-            LOG.error(e.getLocalizedMessage(), e);
-            throw new TaskExecutionException("Ошибка получения параметров", e);
+        for (Map.Entry<String, TaskParam> entry : params.entrySet()) {
+            try {
+                LOG.info(entry.getKey() + " : " + params.get(entry.getKey()).getTypifiedValue());
+            } catch (InvalidTaskParamException e) {
+                LOG.error(e.getLocalizedMessage(), e);
+                throw new TaskExecutionException("Ошибка получения параметров", e);
+            }
+
         }
+    }
+
+    @Override
+    public String getTaskName() {
+        return "Тестовая задача";
+    }
+
+    @Override
+    public String getTaskClassName() {
+        return SimpleUserTask.class.getSimpleName();
     }
 }

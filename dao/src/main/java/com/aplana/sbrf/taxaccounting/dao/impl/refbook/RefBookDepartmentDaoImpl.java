@@ -20,7 +20,6 @@ import java.util.Map;
  * User: ekuvshinov
  */
 @Repository
-@Transactional
 public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepartmentDao {
 
 	private static final String TABLE_NAME = "DEPARTMENT";
