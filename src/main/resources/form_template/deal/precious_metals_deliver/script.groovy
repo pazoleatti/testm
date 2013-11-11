@@ -917,47 +917,47 @@ def addData(def xml) {
         }
         indexCell++
 
-        // столбец 6
+        // графа 5
         newRow.contractNum = row.cell[indexCell].text()
         indexCell++
 
-        // столбец 7.1
+        // графа 6
         newRow.contractDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
+        indexCell++
+
+        // графа 7.1
+        newRow.transactionNum = row.cell[indexCell].text()
         indexCell++
 
         // графа 7.2 Вид срочной сделки
         newRow.dealType = getRecordId(85, 'CONTRACT_TYPE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
-        // столбец 8
-        newRow.transactionNum = row.cell[indexCell].text()
-        indexCell++
-
-        // столбец 9
+        // графа 8
         newRow.transactionDeliveryDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 
-        // столбец 10
+        // графа 9.1
         newRow.innerCode = getRecordId(17, 'INNER_CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
-        // столбец 12
+        //  графа 9.2
         newRow.unitCountryCode = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
-        // столбец 13
+        // графа 10
         newRow.signPhis = getRecordId(18, 'SIGN', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
-        // столбец 14
+        // графа 11
         newRow.signTransaction = getRecordId(38, 'VALUE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
-        // столбец 15
+        // графа 12.1
         newRow.countryCode2 = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
-        // столбец 16
+        // графа 12.2
         String code = row.cell[indexCell].text()
         if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
@@ -965,19 +965,19 @@ def addData(def xml) {
         newRow.region1 = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell, false)
         indexCell++
 
-        // столбец 17
+        // графа 12.3
         newRow.city1 = row.cell[indexCell].text()
         indexCell++
 
-        // столбец 18
+        // графа 12.4
         newRow.settlement1 = row.cell[indexCell].text()
         indexCell++
 
-        // столбец 19
+        // графа 13.1
         newRow.countryCode3 = getRecordId(10, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
-        // столбец 20
+        // графа 13.2
         code = row.cell[indexCell].text()
         if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
@@ -985,39 +985,39 @@ def addData(def xml) {
         newRow.region2 = getRecordId(4, 'CODE', code, date, cache, indexRow, indexCell, false)
         indexCell++
 
-        // столбец 21
+        // графа 13.3
         newRow.city2 = row.cell[indexCell].text()
         indexCell++
 
-        // столбец 22
+        // графа 13.4
         newRow.settlement2 = row.cell[indexCell].text()
         indexCell++
 
-        // столбец 23
+        // графа 14
         newRow.conditionCode = getRecordId(63, 'STRCODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
         indexCell++
 
-        // столбец 24
+        // графа 15
         newRow.count = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 
-        // столбец 25
+        // графа 16
         newRow.incomeSum = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 
-        // столбец 26
+        // графа 17
         newRow.consumptionSum = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 
-        // столбец 27
+        // графа 18
         newRow.priceOne = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 
-        // столбец 28
+        // графа 19
         newRow.totalNds = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
         indexCell++
 
-        // столбец 29
+        // графа 20
         newRow.transactionDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
 
         data.insert(newRow, indexRow - headShift)
