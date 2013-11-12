@@ -24,12 +24,10 @@ switch (formDataEvent) {
 }
 
 void importFromXML() {
-    // TODO данные нереализованного справочника (http://jira.aplana.com/browse/SBRFACCTAX-4933)
-    id = 1 // id справочника
-    stringCode = "code" // имя аттрибута "Внутренний код"
-    stringRate = "rate" // имя аттрибута "Курс драгоценного металла"
+    def final REFBOOK_ID = 90
+    stringCode = "CODE" // имя аттрибута "Внутренний код"
+    stringRate = "RATE" // имя аттрибута "Курс драгоценного металла"
 
-    def final REFBOOK_ID = id
     def dataProvider = refBookFactory.getDataProvider(REFBOOK_ID)
     def refBook = refBookFactory.get(REFBOOK_ID)
     def SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
@@ -66,8 +64,9 @@ void importFromXML() {
                 if (reader.getName().equals(QName.valueOf("StartDateTime"))) {
                     version = sdf.parse(reader.getElementText())
                     dataProvider.getRecords(version, null, null, null).records.each {
-                        if (it.get(stringCode) != null)
-                            recordsDB.put(it.get(stringCode).stringValue, it.get(RefBook.RECORD_ID_ALIAS).numberValue)
+                        if (it.get(stringCode) != null) {
+                            recordsDB.put(it.get(stringCode).referenceValue, it.get(RefBook.RECORD_ID_ALIAS).numberValue)
+                        }
                     }
                 }
 
@@ -78,7 +77,13 @@ void importFromXML() {
 
                 // Код драг. металла
                 if (rateSector && reader.getName().equals(QName.valueOf("Code"))) {
-                    code = reader.getElementText().toLong()
+                    def String val = reader.getElementText()
+                    def records = refBookFactory.getDataProvider(17).getRecords(version, null, "LOWER(INNER_CODE) = LOWER('$val')", null)
+                    if (records.size() > 0) {
+                        code = records.get(0).record_id.numberValue
+                    } else{
+                        throw new Exception("В справочнике «Коды драгоценных металлов» отсутствует элемент с кодом '$val'")
+                    }
                 }
 
                 // Курс драг. металла
@@ -106,14 +111,8 @@ void importFromXML() {
         reader?.close()
     }
 
-    if (!updateList.empty)
-        dataProvider.updateRecords(version, updateList)
-    if (!insertList.empty)
-        dataProvider.insertRecords(version, insertList)
-
-    //дебаг
-    //  println("version = " + version)
-    //  println("insert record count = " + insertList.size())
-    //  println("update record count = " + updateList.size())
-
+   if (!updateList.empty)
+       dataProvider.updateRecords(version, updateList)
+   if (!insertList.empty)
+       dataProvider.insertRecords(version, insertList)
 }
