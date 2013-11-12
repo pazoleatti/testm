@@ -1,7 +1,7 @@
 /*
     blob_data.id = '99e90406-60f0-4a87-b6f0-7f127abf1fbb'
  */
-package refbook.currency
+package refbook.currency_rate
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
