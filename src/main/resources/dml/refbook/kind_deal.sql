@@ -5,7 +5,12 @@ DF PM  Поставочный форвард на драгоценные мет�
 NDF PM  Беспоставочный (расчетный) форвард на драгоценные металлы
 CCIRS  Валютно-процентный своп
 IRS  Процентный своп
-CCS  Валютный своп*/
+CCS  Валютный своп
+DOP FX	Поставочный опцион на валюту
+NDOP FX	Беспоставочный (расчетный) опцион на валюту
+DOP PM	Поставочный опцион на драгоценные металлы
+NDOP PM	Беспоставочный (расчетный) опцион на драгоценные металлы
+*/
 -- Виды сделок
 insert into REF_BOOK_RECORD(ID, RECORD_ID, REF_BOOK_ID, VERSION, STATUS) values (seq_ref_book_record.nextval,1,91,to_date('01.01.2012','dd.mm.yyyy'),0);
 insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE) values(seq_ref_book_record.currval,831,'DF FX',null,null,null);
@@ -31,6 +36,18 @@ insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, 
 insert into REF_BOOK_RECORD(ID, RECORD_ID, REF_BOOK_ID, VERSION, STATUS) values (seq_ref_book_record.nextval,8,91,to_date('01.01.2012','dd.mm.yyyy'),0);
 insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE) values(seq_ref_book_record.currval,831,'CCS',null,null,null);
 insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE) values(seq_ref_book_record.currval,832,'Валютный своп',null,null,null);
+insert into REF_BOOK_RECORD(ID, RECORD_ID, REF_BOOK_ID, VERSION, STATUS) values (seq_ref_book_record.nextval,9,91,to_date('01.01.2012','dd.mm.yyyy'),0);
+insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE) values(seq_ref_book_record.currval,831,'DOP FX',null,null,null);
+insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE) values(seq_ref_book_record.currval,832,'Поставочный опцион на валюту',null,null,null);
+insert into REF_BOOK_RECORD(ID, RECORD_ID, REF_BOOK_ID, VERSION, STATUS) values (seq_ref_book_record.nextval,10,91,to_date('01.01.2012','dd.mm.yyyy'),0);
+insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE) values(seq_ref_book_record.currval,831,'NDOP FX',null,null,null);
+insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE) values(seq_ref_book_record.currval,832,'Беспоставочный (расчетный) опцион на валюту',null,null,null);
+insert into REF_BOOK_RECORD(ID, RECORD_ID, REF_BOOK_ID, VERSION, STATUS) values (seq_ref_book_record.nextval,11,91,to_date('01.01.2012','dd.mm.yyyy'),0);
+insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE) values(seq_ref_book_record.currval,831,'DOP PM',null,null,null);
+insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE) values(seq_ref_book_record.currval,832,'Поставочный опцион на драгоценные металлы',null,null,null);
+insert into REF_BOOK_RECORD(ID, RECORD_ID, REF_BOOK_ID, VERSION, STATUS) values (seq_ref_book_record.nextval,12,91,to_date('01.01.2012','dd.mm.yyyy'),0);
+insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE) values(seq_ref_book_record.currval,831,'NDOP PM',null,null,null);
+insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE) values(seq_ref_book_record.currval,832,'Беспоставочный (расчетный) опцион на драгоценные металлы',null,null,null);
 commit;
 --запрос
 /*with t as (select
