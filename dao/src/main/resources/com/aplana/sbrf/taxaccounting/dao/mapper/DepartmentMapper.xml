@@ -8,7 +8,6 @@
 		<result property="type"/>
         <result property="sbrfCode" column="sbrf_code"/>
         <result property="shortname"/>
-        <result property="dictRegionId" column="dict_region_id"/>
         <result property="tbIndex" column="tb_index"/>
 	</resultMap>
 </mapper>

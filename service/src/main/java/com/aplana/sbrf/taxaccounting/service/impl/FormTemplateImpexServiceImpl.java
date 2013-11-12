@@ -68,7 +68,7 @@ public class FormTemplateImpexServiceImpl implements
 			zos.putNextEntry(ze);
 			if (ft.getScript() != null) {
 				zos.write(ft.getScript().getBytes(ENCODING));
-			}
+            }
 			zos.closeEntry();
 			
 			// DataRows
@@ -115,21 +115,22 @@ public class FormTemplateImpexServiceImpl implements
 					FormTemplateContent ftc;
 					JAXBContext jaxbContext = JAXBContext.newInstance(FormTemplateContent.class);
 					Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-					ftc = (FormTemplateContent) jaxbUnmarshaller.unmarshal(new ByteArrayInputStream(files.get(CONTENT_FILE)));
+					ftc = (FormTemplateContent) jaxbUnmarshaller.unmarshal(
+                            new InputStreamReader(new ByteArrayInputStream(files.get(CONTENT_FILE)), ENCODING));
 					ftc.fillFormTemplate(ft);
 				}
 				if (files.get(SCRIPT_FILE).length != 0) {
-					ft.setScript(new String(files.get(SCRIPT_FILE)));
-				}
+					ft.setScript(new String(files.get(SCRIPT_FILE), ENCODING));
+                }
 				if (files.get(ROWS_FILE).length != 0) {
 					ft.getRows().clear();
 					ft.getRows().addAll(xmlSerializationUtils.deserialize
-							(new String(files.get(ROWS_FILE)), ft.getColumns(), ft.getStyles(), Cell.class));
+							(new String(files.get(ROWS_FILE), ENCODING), ft.getColumns(), ft.getStyles(), Cell.class));
 				}
 				if (files.get(HEADERS_FILE).length != 0) {
 					ft.getHeaders().clear();
 					ft.getHeaders().addAll(xmlSerializationUtils.deserialize
-							(new String(files.get(HEADERS_FILE)), ft.getColumns(), ft.getStyles(), HeaderCell.class));
+							(new String(files.get(HEADERS_FILE), ENCODING), ft.getColumns(), ft.getStyles(), HeaderCell.class));
 				}
             	formTemplateDao.save(ft);
             } else {
