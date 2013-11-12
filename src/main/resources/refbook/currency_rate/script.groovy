@@ -63,8 +63,9 @@ void importFromXML() {
                 if (reader.getName().equals(QName.valueOf("StartDateTime"))) {
                     version = sdf.parse(reader.getElementText())
                     dataProvider.getRecords(version, null, null, null).records.each {
-                        if (it.get("CODE_NUMBER") != null)
-                            recordsDB.put(it.get("CODE_NUMBER").stringValue, it.get(RefBook.RECORD_ID_ALIAS).numberValue)
+                        if (it.get("CODE_NUMBER") != null) {
+                            recordsDB.put(it.get("CODE_NUMBER").referenceValue, it.get(RefBook.RECORD_ID_ALIAS).numberValue)
+                        }
                     }
                 }
 
@@ -75,7 +76,14 @@ void importFromXML() {
 
                 // Код валюты
                 if (currencySector && reader.getName().equals(QName.valueOf("Code"))) {
-                    code = reader.getElementText().toLong()
+                    def String val = reader.getElementText()
+                    def records = refBookFactory.getDataProvider(15).getRecords(version, null, "LOWER(CODE) = LOWER('$val')", null)
+                    if (records.size() > 0) {
+                        code = records.get(0).record_id.numberValue
+                    } else{
+                        code = null
+                        logger.warn("В справочнике «Общероссийский классификатор валют» отсутствует элемент с кодом '$val'")
+                    }
                 }
 
                 // Курс валюты
@@ -85,7 +93,7 @@ void importFromXML() {
             }
 
             // Запись в лист
-            if (reader.endElement && reader.getName().equals(QName.valueOf("CurrencyRate"))) {
+            if (reader.endElement && reader.getName().equals(QName.valueOf("CurrencyRate")) && code!=null) {
                 recordsMap = new HashMap<String, RefBookValue>()
                 recordsMap.put("CODE_NUMBER", new RefBookValue(codeType, code))
                 recordsMap.put("RATE", new RefBookValue(rateType, rate))
@@ -103,21 +111,8 @@ void importFromXML() {
         reader?.close()
     }
 
-// TODO аккуратно проверить запись в бд
     if (!updateList.empty)
         dataProvider.updateRecords(version, updateList)
     if (!insertList.empty)
         dataProvider.insertRecords(version, insertList)
-
-//дебаг
-    println("version = " + version)
-    println("insert record count = " + insertList.size())
-    println("update record count = " + updateList.size())
-//recordsList.each { map ->
-//    println("==========================")
-//    map.each {
-//        println("attr = " + it.key + "; value = [s:" + it.value.getStringValue() + "; n:" + it.value.getNumberValue()
-//                + "; d:" + it.value.getDateValue() + "; r:" + it.value.getReferenceValue()+"]")
-//    }
-//}
 }
