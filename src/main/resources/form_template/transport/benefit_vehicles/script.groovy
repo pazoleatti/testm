@@ -1,3 +1,5 @@
+package form_template.transport.benefit_vehicles
+
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 /**
  * Форма "Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог".
