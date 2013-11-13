@@ -14,3 +14,5 @@ dependencies {
 }
 
 mainClassName = "com.aplana.taxaccounting.Main"
+
+sourceCompatibility = 1.6
