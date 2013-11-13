@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.UniversalFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
@@ -12,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,9 @@ public class RefBookUtils extends AbstractDao {
 
 	@Autowired
 	private RefBookDao refBookDao;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
 	/**
 	 * Формирует простой sql-запрос по принципу: один справочник - одна таблица
@@ -56,7 +61,11 @@ public class RefBookUtils extends AbstractDao {
 		ps.appendQuery(" t");
 
 		PreparedStatementData filterPS = new PreparedStatementData();
-		Filter.getFilterQuery(filter, new SimpleFilterTreeListener(refBook, filterPS));
+        SimpleFilterTreeListener simpleFilterTreeListener =  applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+        simpleFilterTreeListener.setRefBook(refBook);
+        simpleFilterTreeListener.setPs(filterPS);
+
+		Filter.getFilterQuery(filter, simpleFilterTreeListener);
 		if (filterPS.getQuery().length() > 0) {
 			ps.appendQuery(" WHERE ");
 			ps.appendQuery(filterPS.getQuery().toString());

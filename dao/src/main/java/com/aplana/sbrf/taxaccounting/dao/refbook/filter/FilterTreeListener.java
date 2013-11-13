@@ -3,6 +3,9 @@ package com.aplana.sbrf.taxaccounting.dao.refbook.filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.FilterTreeParser;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 /**
  * This interface defines a complete listener for a parse tree produced by
@@ -32,6 +35,72 @@ public interface FilterTreeListener extends ParseTreeListener {
 	void exitStrtype(@NotNull FilterTreeParser.StrtypeContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link FilterTreeParser#alias}.
+	 * @param ctx the parse tree
+	 */
+	void enterAlias(@NotNull FilterTreeParser.AliasContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FilterTreeParser#alias}.
+	 * @param ctx the parse tree
+	 */
+	void exitAlias(@NotNull FilterTreeParser.AliasContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link FilterTreeParser#query}.
+	 * @param ctx the parse tree
+	 */
+	void enterQuery(@NotNull FilterTreeParser.QueryContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FilterTreeParser#query}.
+	 * @param ctx the parse tree
+	 */
+	void exitQuery(@NotNull FilterTreeParser.QueryContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link FilterTreeParser#internlAlias}.
+	 * @param ctx the parse tree
+	 */
+	void enterInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FilterTreeParser#internlAlias}.
+	 * @param ctx the parse tree
+	 */
+	void exitInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link FilterTreeParser#number}.
+	 * @param ctx the parse tree
+	 */
+	void enterNumber(@NotNull FilterTreeParser.NumberContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FilterTreeParser#number}.
+	 * @param ctx the parse tree
+	 */
+	void exitNumber(@NotNull FilterTreeParser.NumberContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link FilterTreeParser#operand}.
+	 * @param ctx the parse tree
+	 */
+	void enterOperand(@NotNull FilterTreeParser.OperandContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FilterTreeParser#operand}.
+	 * @param ctx the parse tree
+	 */
+	void exitOperand(@NotNull FilterTreeParser.OperandContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link FilterTreeParser#externalAlias}.
+	 * @param ctx the parse tree
+	 */
+	void enterExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FilterTreeParser#externalAlias}.
+	 * @param ctx the parse tree
+	 */
+	void exitExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link FilterTreeParser#funcwrap}.
 	 * @param ctx the parse tree
 	 */
@@ -54,15 +123,15 @@ public interface FilterTreeListener extends ParseTreeListener {
 	void exitOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link FilterTreeParser#query}.
+	 * Enter a parse tree produced by {@link FilterTreeParser#string}.
 	 * @param ctx the parse tree
 	 */
-	void enterQuery(@NotNull FilterTreeParser.QueryContext ctx);
+	void enterString(@NotNull FilterTreeParser.StringContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FilterTreeParser#query}.
+	 * Exit a parse tree produced by {@link FilterTreeParser#string}.
 	 * @param ctx the parse tree
 	 */
-	void exitQuery(@NotNull FilterTreeParser.QueryContext ctx);
+	void exitString(@NotNull FilterTreeParser.StringContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link FilterTreeParser#standartExpr}.
@@ -87,26 +156,26 @@ public interface FilterTreeListener extends ParseTreeListener {
 	void exitWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link FilterTreeParser#operand}.
+	 * Enter a parse tree produced by {@link FilterTreeParser#eAlias}.
 	 * @param ctx the parse tree
 	 */
-	void enterOperand(@NotNull FilterTreeParser.OperandContext ctx);
+	void enterEAlias(@NotNull FilterTreeParser.EAliasContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FilterTreeParser#operand}.
+	 * Exit a parse tree produced by {@link FilterTreeParser#eAlias}.
 	 * @param ctx the parse tree
 	 */
-	void exitOperand(@NotNull FilterTreeParser.OperandContext ctx);
+	void exitEAlias(@NotNull FilterTreeParser.EAliasContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link FilterTreeParser#functype}.
+	 * Enter a parse tree produced by {@link FilterTreeParser#link_type}.
 	 * @param ctx the parse tree
 	 */
-	void enterFunctype(@NotNull FilterTreeParser.FunctypeContext ctx);
+	void enterLink_type(@NotNull FilterTreeParser.Link_typeContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FilterTreeParser#functype}.
+	 * Exit a parse tree produced by {@link FilterTreeParser#link_type}.
 	 * @param ctx the parse tree
 	 */
-	void exitFunctype(@NotNull FilterTreeParser.FunctypeContext ctx);
+	void exitLink_type(@NotNull FilterTreeParser.Link_typeContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link FilterTreeParser#isNullExpr}.
@@ -120,15 +189,15 @@ public interface FilterTreeListener extends ParseTreeListener {
 	void exitIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link FilterTreeParser#link_type}.
+	 * Enter a parse tree produced by {@link FilterTreeParser#functype}.
 	 * @param ctx the parse tree
 	 */
-	void enterLink_type(@NotNull FilterTreeParser.Link_typeContext ctx);
+	void enterFunctype(@NotNull FilterTreeParser.FunctypeContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FilterTreeParser#link_type}.
+	 * Exit a parse tree produced by {@link FilterTreeParser#functype}.
 	 * @param ctx the parse tree
 	 */
-	void exitLink_type(@NotNull FilterTreeParser.Link_typeContext ctx);
+	void exitFunctype(@NotNull FilterTreeParser.FunctypeContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link FilterTreeParser#simpleoperand}.
