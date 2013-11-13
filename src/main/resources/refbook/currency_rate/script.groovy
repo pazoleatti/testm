@@ -1,7 +1,7 @@
 /*
     blob_data.id = '99e90406-60f0-4a87-b6f0-7f127abf1fbb'
  */
-package refbook.precious_metals
+package refbook.currency_rate
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
@@ -13,10 +13,12 @@ import javax.xml.stream.XMLInputFactory
 import java.text.SimpleDateFormat
 
 /**
- * скрипт загрузки справочника "Курсы драгоценных металлов" из КСШ
+ * скрипт справочника "Курсы валют" из КСШ
  *
  * @author Stanislav Yasinskiy
  */
+
+
 switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importFromXML()
@@ -24,31 +26,26 @@ switch (formDataEvent) {
 }
 
 void importFromXML() {
-    // TODO данные нереализованного справочника (http://jira.aplana.com/browse/SBRFACCTAX-4933)
-    id = 1 // id справочника
-    stringCode = "code" // имя аттрибута "Внутренний код"
-    stringRate = "rate" // имя аттрибута "Курс драгоценного металла"
-
-    def final REFBOOK_ID = id
+    def final REFBOOK_ID = 22
     def dataProvider = refBookFactory.getDataProvider(REFBOOK_ID)
     def refBook = refBookFactory.get(REFBOOK_ID)
     def SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
     def reader = null
     def Date version = null  //дата актуальности
-    def boolean rateSector = false // флаг присутствия в секции с курсами
+    def boolean currencySector = false // флаг присутствия в секции с курсами
     def Map<String, RefBookValue> recordsMap // аттрибут и его значение
     def List<Map<String, RefBookValue>> insertList = new ArrayList<Map<String, RefBookValue>>() // новые записи
     def List<Map<String, RefBookValue>> updateList = new ArrayList<Map<String, RefBookValue>>() // измененные записи
-    def Long code = null // код драг. металла
-    def Double rate = null // курс драг. металла
+    def Long code = null // код валюты
+    def Double rate = null // курс валюты
     def RefBookAttributeType codeType = null // тип кода
     def RefBookAttributeType rateType = null // тип курса
     def Map<String, Number> recordsDB = new HashMap<String, Number>() // записи в БД
 
     refBook.attributes.each {
-        if (it.alias.equals(stringCode))
+        if (it.alias.equals("CODE_NUMBER"))
             codeType = it.attributeType
-        else if (it.alias.equals(stringRate))
+        else if (it.alias.equals("RATE"))
             rateType = it.attributeType
     }
 
@@ -66,32 +63,40 @@ void importFromXML() {
                 if (reader.getName().equals(QName.valueOf("StartDateTime"))) {
                     version = sdf.parse(reader.getElementText())
                     dataProvider.getRecords(version, null, null, null).records.each {
-                        if (it.get(stringCode) != null)
-                            recordsDB.put(it.get(stringCode).stringValue, it.get(RefBook.RECORD_ID_ALIAS).numberValue)
+                        if (it.get("CODE_NUMBER") != null) {
+                            recordsDB.put(it.get("CODE_NUMBER").referenceValue, it.get(RefBook.RECORD_ID_ALIAS).numberValue)
+                        }
                     }
                 }
 
                 //Дошли до секции с курсами
-                if (reader.getName().equals(QName.valueOf("PreciousMetalRates"))) {
-                    rateSector = true
+                if (reader.getName().equals(QName.valueOf("CurrencyRates"))) {
+                    currencySector = true
                 }
 
-                // Код драг. металла
-                if (rateSector && reader.getName().equals(QName.valueOf("Code"))) {
-                    code = reader.getElementText().toLong()
+                // Код валюты
+                if (currencySector && reader.getName().equals(QName.valueOf("Code"))) {
+                    def String val = reader.getElementText()
+                    def records = refBookFactory.getDataProvider(15).getRecords(version, null, "LOWER(CODE) = LOWER('$val')", null)
+                    if (records.size() > 0) {
+                        code = records.get(0).record_id.numberValue
+                    } else{
+                        code = null
+                        logger.warn("В справочнике «Общероссийский классификатор валют» отсутствует элемент с кодом '$val'")
+                    }
                 }
 
-                // Курс драг. металла
-                if (rateSector && reader.getName().equals(QName.valueOf("Rate"))) {
+                // Курс валюты
+                if (currencySector && reader.getName().equals(QName.valueOf("Rate"))) {
                     rate = reader.getElementText().toDouble()
                 }
             }
 
             // Запись в лист
-            if (reader.endElement && reader.getName().equals(QName.valueOf("PreciousMetalRate"))) {
+            if (reader.endElement && reader.getName().equals(QName.valueOf("CurrencyRate")) && code!=null) {
                 recordsMap = new HashMap<String, RefBookValue>()
-                recordsMap.put(stringCode, new RefBookValue(codeType, code))
-                recordsMap.put(stringRate, new RefBookValue(rateType, rate))
+                recordsMap.put("CODE_NUMBER", new RefBookValue(codeType, code))
+                recordsMap.put("RATE", new RefBookValue(rateType, rate))
                 if (recordsDB.containsKey(code)) {
                     recordsMap.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordsDB.get(code)))
                     updateList.add(recordsMap)
@@ -110,10 +115,4 @@ void importFromXML() {
         dataProvider.updateRecords(version, updateList)
     if (!insertList.empty)
         dataProvider.insertRecords(version, insertList)
-
-    //дебаг
-    //  println("version = " + version)
-    //  println("insert record count = " + insertList.size())
-    //  println("update record count = " + updateList.size())
-
 }
