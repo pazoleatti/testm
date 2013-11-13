@@ -100,7 +100,6 @@ def getEditColumns() {
 void deleteRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.delete(currentDataRow)
-    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 void addRow() {
