@@ -16,7 +16,7 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        // TODO prevPeriodCheck()
+        prevPeriodCheck()
         calc()
         logicCheck()
         break
@@ -256,6 +256,6 @@ def getNewRow(def alias, def sum) {
     return newRow
 }
 
-def getKnu(def code) {
+def String getKnu(def code) {
     return getRefBookValue(28, code)?.CODE.stringValue
 }
