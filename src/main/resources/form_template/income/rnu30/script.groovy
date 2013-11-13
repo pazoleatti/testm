@@ -11,7 +11,6 @@ import groovy.transform.Field
  *
  * TODO:
  *      - загрузка и импорт не доделаны
- *      - проверка наличия рну-6 перед расчетом - аналитик сказала пока убрать (в расчетах пока не используется и в чтз тоже нет)
  *
  * @author rtimerbaev
  */
@@ -39,11 +38,11 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.ADD_ROW :
         addRow()
@@ -59,7 +58,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED : // проверка при "вернуть из принята в подготовлена"
         break
@@ -68,11 +67,11 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.IMPORT :
         importData()
-        // !logger.containsLevel(LogLevel.ERROR) && calc() && logicalCheck() && checkNSI()
+        // !logger.containsLevel(LogLevel.ERROR) && calc() && logicCheck() && checkNSI()
         break
     case FormDataEvent.MIGRATION :
         migration()
@@ -197,14 +196,6 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    // TODO (Ramil Timerbaev) проверка наличия рну-6 перед расчетом - аналитик сказала пока убрать
-//    def rowsRnu6 = getRnuRowsById(318)
-//    if (rowsRnu6 == null) {
-//        def name = '"(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения метода начисления"'
-//        logger.info("Не найдены экземпляры $name за текущий отчетный период!")
-//        return false
-//    }
-
     // отсортировать/группировать
     sort(dataRows)
 
@@ -262,7 +253,7 @@ void calc() {
     dataRowHelper.save(dataRows)
 }
 
-void logicalCheck() {
+void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -283,7 +274,7 @@ void logicalCheck() {
         }
         def isFirst = isFirstSection(dataRows, row)
         def index = row.getIndex()
-        def errorMsg = "В строке $index "
+        def errorMsg = "Строка $index: "
         
         // 1. Обязательность заполнения полей
         def nonEmptyColumns = (isFirst ? requiredColumns1 :  requiredColumnsAB)
@@ -735,17 +726,6 @@ void sort(def dataRows) {
                 return codeA <=> codeB
         }
     }
-}
-
-/** Получить строки из нф по заданному идентификатору нф. */
-def getRnuRowsById(def id) {
-    def formDataRNU = formDataService.find(id, formData.kind, formDataDepartment.id, formData.reportPeriodId)
-    if (formDataRNU != null) {
-        def dataRowHelper = formDataService.getDataRowHelper(formDataRNU)
-        def dataRows = dataRowHelper.allCached
-        return dataRows
-    }
-    return null
 }
 
 def calc6() {
