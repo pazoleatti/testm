@@ -35,7 +35,7 @@ public class AuthenticationUserDetailsServiceImpl implements
 	public UserDetails loadUserDetails(Authentication token)
 			throws UsernameNotFoundException {
 		String userName = token.getName();
-		TAUser user = userService.getUser(userName);
+		TAUser user = userService.getUser(userName.toLowerCase());
 		if (user == null) {
 			String message = "User with login '" + userName
 					+ "' was not found in TaxAccounting database";

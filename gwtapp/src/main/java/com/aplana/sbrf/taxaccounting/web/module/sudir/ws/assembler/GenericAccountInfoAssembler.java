@@ -1,9 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
@@ -12,6 +8,10 @@ import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.ArrayOf
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAccountInfo;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAttribute;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.departmentendpoint.TaxAccDepartment;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class GenericAccountInfoAssembler {
 	
@@ -22,7 +22,7 @@ public class GenericAccountInfoAssembler {
 		for (GenericAttribute item : gai.getAttributes().getItem()) {
 			switch (fieldNames.get(item.getName())) {
 			case 0:
-				user.setLogin(item.getValues().getItem().get(0));
+				user.setLogin(item.getValues().getItem().get(0).toLowerCase());
 				break;
 			case 1:
 				StringBuilder sb = new StringBuilder();
