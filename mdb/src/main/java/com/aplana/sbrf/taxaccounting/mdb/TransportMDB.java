@@ -1,3 +1,5 @@
+package com.aplana.sbrf.taxaccounting.mdb;
+
 import com.aplana.sbrf.taxaccounting.service.MappingService;
 import com.aplana.sbrf.taxaccounting.service.TransportInterceptor;
 import org.apache.commons.logging.Log;
@@ -13,6 +15,11 @@ import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 
+/**
+ * MDB-модуль для импорта справочников
+ *
+ * @author Dmitriy Levykin
+ */
 @MessageDriven(activationConfig = {
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
         @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/transportQueue")})
