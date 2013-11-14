@@ -270,7 +270,6 @@ void logicCheck() {
             logger.error(errorMsg + "Деление на ноль: «$name» имеет нулевое значение.")
         }
 
-        logger.info(""+row.getCell('calcPeriodAccountingEndDate').column)
         //для расчета графы 12
         if (row.calcPeriodAccountingEndDate != null && rowPrev.calcPeriodBeginDate != null &&
                 (row.calcPeriodAccountingEndDate - rowPrev.calcPeriodBeginDate + 1) == 0) {
