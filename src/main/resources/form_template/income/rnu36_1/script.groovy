@@ -260,6 +260,8 @@ void consolidation() {
     }
     if (!deleteRows.isEmpty()) {
         dataRows.removeAll(deleteRows)
+        // поправить индексы, потому что они после изменения не пересчитываются
+        updateIndexes(dataRows)
     }
 
     // собрать из источников строки и разместить соответствующим разделам
@@ -317,9 +319,7 @@ void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def to
     def copyRows = sourceDataRows.subList(from, to)
     destinationDataRows.addAll(getDataRow(destinationDataRows, toAlias).getIndex() - 1, copyRows)
     // поправить индексы, потому что они после вставки не пересчитываются
-    destinationDataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
+    updateIndexes(destinationDataRows)
 }
 
 /** Получить новую строку с заданными стилями. */
@@ -366,4 +366,11 @@ def getSum(def dataRows, def labelRow, def totalRow, def alias) {
         return 0
     }
     return summ(formData, dataRows, new ColumnRange(alias, from, to))
+}
+
+/** Поправить индексы. */
+void updateIndexes(def dataRows) {
+    dataRows.eachWithIndex { row, i ->
+        row.setIndex(i + 1)
+    }
 }
