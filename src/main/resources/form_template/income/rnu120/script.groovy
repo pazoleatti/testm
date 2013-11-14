@@ -39,11 +39,11 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
-        logicCheckBeforeCalc()
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.CALCULATE :
-        logicCheckBeforeCalc()
+        prevPeriodCheck()
         calc()
         logicCheck()
         break
@@ -61,7 +61,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        logicCheckBeforeCalc()
+        prevPeriodCheck()
         logicCheck()
         break
 }
@@ -196,30 +196,17 @@ void calc() {
     dataRowHelper.save(dataRows)
 }
 
-/** Логические проверки. */
-void logicCheckBeforeCalc() {
+// Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
+void prevPeriodCheck() {
     def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         // TODO потом поменять после проверки
         // throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
-        def formName = formData.getFormType().getName()
         logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
-    }
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
-    def rowNumber = 0
-    for (def row : dataRows) {
-        if (row.getAlias() != null) {
-            continue
-        }
-        rowNumber++
-
-        //проверка заполнения редактируемых обязательных полей
-        checkNonEmptyColumns(row, rowNumber, editableColumns, logger, true)
     }
 }
 
+/** Логические проверки. */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -234,6 +221,7 @@ void logicCheck() {
             continue
         }
         rowNumber++
+        errorMsg = "Строка $rowNumber: "
 
         def rowPrev = getRowPrev(row, dataRowsPrev)
 
@@ -242,15 +230,15 @@ void logicCheck() {
             (row!=it && row.numberAccount==it.numberAccount)
         }
         if (find!=null) {
-            logger.error("Строка $rowNumber: Номер ссудного счета не уникальный!")
+            logger.error(errorMsg + "Номер ссудного счета не уникальный!")
         }
 
         // 1. Проверка на заполнение поля «<Наименование поля>» (1 .. 17)
-        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns - editableColumns, logger, true)
+        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, true)
 
         // 2. Проверка на уникальность поля «№ пп»
         if (rowNumber != row.number) {
-            logger.error("Строка $rowNumber: Нарушена уникальность номера по порядку!")
+            logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
         // 3. Арифметические проверки расчета неитоговых граф
@@ -272,8 +260,39 @@ void logicCheck() {
                 RefBook rb = refBookFactory.get(22);
                 def rbName = rb.getName()
                 def attrName = rb.getAttribute('RATE').getName()
-                logger.error("Строка $rowNumber: В справочнике «$rbName» не найдено значение «${row.course}», соответствующее атрибуту «$attrName»!")
+                logger.error("В справочнике «$rbName» не найдено значение «${row.course}», соответствующее атрибуту «$attrName»!")
             }
+        }
+
+        // 5. Проверки деления на 0
+        if (row.baseForCalculation == 0) {
+            def name = row.getCell('baseForCalculation').column.name
+            logger.error(errorMsg + "Деление на ноль: «$name» имеет нулевое значение.")
+        }
+
+        logger.info(""+row.getCell('calcPeriodAccountingEndDate').column)
+        //для расчета графы 12
+        if (row.calcPeriodAccountingEndDate != null && rowPrev.calcPeriodBeginDate != null &&
+                (row.calcPeriodAccountingEndDate - rowPrev.calcPeriodBeginDate + 1) == 0) {
+            def name1 = row.getCell('calcPeriodAccountingEndDate').column.name+"(${row.getCell('calcPeriodAccountingEndDate').column.groupName})"
+            def name2 = row.getCell('calcPeriodBeginDate').column.name+"(${row.getCell('calcPeriodBeginDate').column.groupName})"
+            logger.error(errorMsg + "Деление на ноль: количество дней между «$name1» и «$name2»(за предыдущий период) равно 0.")
+        }
+
+        //для расчета графы 13
+        if (row.calcPeriodAccountingEndDate != null && row.calcPeriodAccountingBeginDate != null &&
+                (row.calcPeriodAccountingEndDate - row.calcPeriodAccountingBeginDate + 1)==0) {
+            def name1 = row.getCell('calcPeriodAccountingEndDate').column.name+"(${row.getCell('calcPeriodAccountingEndDate').column.groupName})"
+            def name2 = row.getCell('calcPeriodAccountingBeginDate').column.name+"(${row.getCell('calcPeriodAccountingBeginDate').column.groupName})"
+            logger.error(errorMsg + "Деление на ноль: количество дней между «$name1» и «$name2» равно 0.")
+        }
+
+        //для расчета графы 15, 17
+        if (row.calcPeriodEndDate != null && row.calcPeriodBeginDate != null &&
+                (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1) == 0) {
+            def name1 = row.getCell('calcPeriodEndDate').column.name+"(${row.getCell('calcPeriodEndDate').column.groupName})"
+            def name2 = row.getCell('calcPeriodBeginDate').column.name+"(${row.getCell('calcPeriodBeginDate').column.groupName})"
+            logger.error(errorMsg + "Деление на ноль: количество дней между «$name1» и «$name2» равно 0.")
         }
     }
 
@@ -299,8 +318,12 @@ def getTotalRow(def dataRows) {
 
 def calc12(def row, def rowPrev) {
     if (row.booAccount!=null) {
+        if (row.debtBalance==null || row.course==null || row.interestRate==null ||
+            row.baseForCalculation==null || row.baseForCalculation==0 || row.calcPeriodAccountingEndDate==null ||
+            rowPrev.calcPeriodBeginDate==null || (row.calcPeriodAccountingEndDate - rowPrev.calcPeriodBeginDate + 1)==0 ||
+            rowPrev.accrualPrev==null) return null
         BigDecimal x = row.debtBalance * row.course * row.interestRate / row.baseForCalculation *
-                (row.calcPeriodAccountingBeginDate - rowPrev.calcPeriodBeginDate + 1) - rowPrev.accrualPrev
+                (row.calcPeriodAccountingEndDate - rowPrev.calcPeriodBeginDate + 1) - rowPrev.accrualPrev
         return roundValue(x, 2)
     }
     return null
@@ -308,6 +331,9 @@ def calc12(def row, def rowPrev) {
 
 def calc13(def row) {
     if (true) {
+        if (row.debtBalance==null || row.interestRate==null || row.baseForCalculation==null ||
+            row.baseForCalculation==0 || row.calcPeriodAccountingEndDate==null || row.calcPeriodAccountingBeginDate==null ||
+            (row.calcPeriodAccountingEndDate - row.calcPeriodAccountingBeginDate + 1)==0) return null
         BigDecimal x = row.debtBalance * row.interestRate / row.baseForCalculation *
                 (row.calcPeriodAccountingBeginDate - row.calcPeriodAccountingBeginDate + 1)
         return roundValue(x, 2)
@@ -320,6 +346,9 @@ def calc14(def row, def rowPrev) {
 }
 
 def calc15(def row) {
+    if (row.debtBalance==null || row.interestRate==null || row.baseForCalculation==null ||
+        row.baseForCalculation==0 || row.calcPeriodEndDate==null || row.calcPeriodBeginDate==null ||
+        (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1)==0) return null
     BigDecimal x = row.debtBalance * row.interestRate / row.baseForCalculation *
             (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1)
     return roundValue(x, 2)
@@ -328,10 +357,17 @@ def calc15(def row) {
 def calc17(def row, def rowPrev) {
     BigDecimal x
     if (true) {
+        if (row.debtBalance==null || row.marketInterestRate==null || row.baseForCalculation==null ||
+                row.baseForCalculation==0 || row.calcPeriodAccountingEndDate==null || rowPrev.calcPeriodBeginDate==null ||
+                (row.calcPeriodAccountingEndDate - rowPrev.calcPeriodBeginDate + 1)==0 || rowPrev.accrualReportPeriod==null ||
+                rowPrev.sumRate==null) return null
         x = row.debtBalance * row.marketInterestRate / row.baseForCalculation *
                 (row.calcPeriodAccountingBeginDate - rowPrev.calcPeriodBeginDate + 1) -
                 rowPrev.accrualReportPeriod - rowPrev.sumRate
     } else {
+        if (row.debtBalance==null || row.marketInterestRate==null || row.baseForCalculation==null ||
+                row.baseForCalculation==0 || row.calcPeriodEndDate==null || row.calcPeriodBeginDate==null ||
+                (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1)==0 || row.accrualPrev==null) return null
         x = row.debtBalance * row.marketInterestRate / row.baseForCalculation *
                 (row.calcPeriodEndDate - rowPrev.calcPeriodBeginDate + 1) - row.accrualPrev
     }
