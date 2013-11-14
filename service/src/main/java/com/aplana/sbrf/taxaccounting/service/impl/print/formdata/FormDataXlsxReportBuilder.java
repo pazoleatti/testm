@@ -207,7 +207,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
         printDate = ((data.getState() == WorkflowState.ACCEPTED || data.getState() == WorkflowState.APPROVED) && acceptanceDate!=null)
                 ? acceptanceDate :
                 ((data.getState() == WorkflowState.CREATED || data.getState() == WorkflowState.PREPARED) && creationDate!=null)
-                        ? creationDate : null;
+                        ? creationDate : new Date();
 
         arr = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().toCharArray();
         if(XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("март") ||
@@ -295,6 +295,8 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
                     continue;
                 }
                 if (column.getWidth() == 0 && column.getAlias() != null){
+                    if (formTemplate.getColumns().size() == i + 1)
+                        continue;
                     Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, false);
                     CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, i + 1, j);
                     cell.setCellStyle(cellStyle);

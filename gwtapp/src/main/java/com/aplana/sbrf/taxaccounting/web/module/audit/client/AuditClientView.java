@@ -12,8 +12,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.CellPreviewEvent;
+import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -35,6 +34,10 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
 
     @UiField
     FlexiblePager pager;
+
+    private AbstractDataProvider<LogSystemSearchResultItem> dataProvider;
+
+    private static final int PAGE_SIZE = 20;
 
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
 
@@ -148,6 +151,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
             }
         };
 
+        auditTable.setPageSize(PAGE_SIZE);
         auditTable.addColumn(dateColumn, dateColumnHeader);
         auditTable.addColumn(eventColumn, eventColumnHeader);
         auditTable.addColumn(noteColumn, noteColumnHeader);
@@ -174,6 +178,16 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
 		    }
 	    });
 
+        dataProvider = new AbstractDataProvider<LogSystemSearchResultItem>() {
+            @Override
+            protected void onRangeChanged(HasData<LogSystemSearchResultItem> display) {
+                if (getUiHandlers() != null){
+                    final Range range = display.getVisibleRange();
+                    getUiHandlers().onRangeChange(range.getStart(), range.getLength());
+                }
+            }
+        };
+        dataProvider.addDataDisplay(auditTable);
         pager.setDisplay(auditTable);
     }
 
@@ -197,8 +211,12 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     }
 
     @Override
-    public void assignDataProvider(int pageSize, AsyncDataProvider<LogSystemSearchResultItem> provider) {
-        auditTable.setPageSize(pageSize);
-        provider.addDataDisplay(auditTable);
+    public void updateData(int pageNumber) {
+        if (pager.getPage() == pageNumber){
+            auditTable.setVisibleRangeAndClearData(auditTable.getVisibleRange(), true);
+        } else {
+            pager.setPage(pageNumber);
+        }
     }
+
 }
