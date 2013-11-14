@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
@@ -124,5 +125,20 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
     @Override
     public boolean isBalancePeriod(int reportPeriodId, long departmentId) {
         return reportPeriodService.isBalancePeriod(reportPeriodId, departmentId);
+    }
+
+    @Override
+    public Calendar getMonthStartDate(FormData formData) {
+        return reportPeriodService.getMonthStartDate(formData);
+    }
+
+    @Override
+    public Calendar getMonthEndDate(FormData formData) {
+        return reportPeriodService.getMonthEndDate(formData);
+    }
+
+    @Override
+    public Calendar getMonthReportDate(FormData formData) {
+        return reportPeriodService.getMonthReportDate(formData);
     }
 }
