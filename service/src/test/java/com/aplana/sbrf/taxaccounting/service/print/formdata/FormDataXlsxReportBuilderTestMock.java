@@ -120,7 +120,7 @@ public class FormDataXlsxReportBuilderTestMock {
         colDate16.setWidth(10);
         colDate17.setWidth(10);
         colDate18.setWidth(10);
-        colDate19.setWidth(10);
+        colDate19.setWidth(0);
 
 		
 		columns.add(colNum);
