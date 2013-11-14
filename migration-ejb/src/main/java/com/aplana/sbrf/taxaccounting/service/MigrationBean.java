@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Resource;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -28,6 +29,7 @@ import java.util.*;
 @Local(MessageServiceLocal.class)
 @Interceptors(MigrationInterceptor.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+@Resource(name = "jdbc/TaxAccDS_MIGRATION", type = javax.sql.DataSource.class, authenticationType = Resource.AuthenticationType.CONTAINER)
 public class MigrationBean implements MessageService {
 
     private final Log logger = LogFactory.getLog(getClass());

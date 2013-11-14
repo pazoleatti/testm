@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.TransportInterceptor;
-import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.annotation.Resource;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.ejb.TransactionAttribute;
@@ -29,7 +29,6 @@ import javax.jms.TextMessage;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.ByteArrayInputStream;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +42,7 @@ import java.util.Map;
         @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/transportQueueMQ")})
 @Interceptors(TransportInterceptor.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+@Resource(name = "jdbc/TaxAccDS", type = javax.sql.DataSource.class, authenticationType = Resource.AuthenticationType.CONTAINER)
 public class RateMDB implements MessageListener {
 
     private static final Log logger = LogFactory.getLog(RateMDB.class);
@@ -54,7 +54,9 @@ public class RateMDB implements MessageListener {
     private static String ERROR_PUBLIC = "Сообщение не содержит публичные курсы";
     private static String ERROR_VALUE = "Сообщение не содержит значений";
     private static String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
-    private static String ERROR_IMPORT = "Произошли ошибки в скрипте импорта справочника";
+    private static String ERROR_IMPORT = "Произошли ошибки в скрипте импорта справочника id = %d";
+    private static String SUCCESS_IMPORT = "Импорт сообщения из КСШ успешно произведен";
+    private static String ERROR_AUDIT = "Ошибка записи в журнал аудита";
 
     @Autowired
     RefBookScriptingService refBookScriptingService;
@@ -73,10 +75,7 @@ public class RateMDB implements MessageListener {
 
     @Override
     public void onMessage(Message message) {
-        // TODO Убрать отладочный код для сферы
-        System.out.println(new Date() + " RateMDB >>> " + message);
         TAUserInfo userInfo = getUser();
-
 
         if (message == null || !(message instanceof TextMessage)) {
             logger.error(ERROR_FORMAT);
@@ -117,7 +116,7 @@ public class RateMDB implements MessageListener {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser saxParser = factory.newSAXParser();
 
-        final MutableLong refBookIdMutable = new MutableLong();
+        final Long[] refBookId = new Long[1];
 
         DefaultHandler handler = new DefaultHandler() {
 
@@ -158,7 +157,7 @@ public class RateMDB implements MessageListener {
                     if (bOperName) {
                         bOperName = false;
                         String operName = new String(ch, start, length);
-                        refBookIdMutable.setValue(rateMapping.get(operName));
+                        refBookId[0] = rateMapping.get(operName);
                     } else if (bExRateBlock) {
                         bExRateBlock = false;
                         String exRateBlock = new String(ch, start, length);
@@ -192,10 +191,10 @@ public class RateMDB implements MessageListener {
 
         try {
             saxParser.parse(new ByteArrayInputStream(fileText.getBytes(RATE_ENCODING)), handler);
-            if (refBookIdMutable.longValue() == 0L) {
-                throw new ServiceException(ERROR_RATE);
+            if (refBookId[0] == null) {
+                throw new ServiceException(ERROR_FORMAT);
             }
-            runScript(refBookIdMutable.longValue(), fileText, userInfo);
+            runScript(refBookId[0], fileText, userInfo);
         } catch (ServiceException ex) {
             logger.error(ex.getMessage(), ex);
             addLog(userInfo, ex.getMessage());
@@ -221,9 +220,11 @@ public class RateMDB implements MessageListener {
             logger.error(e);
         }
         if (logger.containsLevel(LogLevel.ERROR)) {
-            addLog(userInfo, ERROR_IMPORT);
-            throw new ServiceLoggerException(ERROR_IMPORT, logger.getEntries());
+            String msg = String.format(ERROR_IMPORT, refBookId);
+            addLog(userInfo, msg);
+            throw new ServiceLoggerException(msg, logger.getEntries());
         }
+        addLog(userInfo, SUCCESS_IMPORT);
     }
 
     /**
@@ -235,9 +236,11 @@ public class RateMDB implements MessageListener {
     private void addLog(TAUserInfo userInfo, String msg) {
         try {
             // Ошибка записи в журнал аудита не должна откатывать импорт
-            auditService.add(FormDataEvent.IMPORT, userInfo, 0, null, null, null, null, msg);
+            if (auditService != null) {
+                auditService.add(FormDataEvent.IMPORT, userInfo, 1, null, null, null, null, msg);
+            }
         } catch (Exception e) {
-            logger.error("Ошибка записи в журнал аудита", e);
+            logger.error(ERROR_AUDIT, e);
         }
     }
 }

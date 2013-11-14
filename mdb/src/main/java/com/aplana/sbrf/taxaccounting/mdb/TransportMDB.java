@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Resource;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.ejb.TransactionAttribute;
@@ -25,6 +26,7 @@ import javax.jms.MessageListener;
         @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/transportQueue")})
 @Interceptors(TransportInterceptor.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+@Resource(name = "jdbc/TaxAccDS", type = javax.sql.DataSource.class, authenticationType = Resource.AuthenticationType.CONTAINER)
 public class TransportMDB implements MessageListener {
 
     @Autowired

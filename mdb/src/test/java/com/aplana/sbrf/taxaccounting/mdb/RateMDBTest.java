@@ -259,6 +259,11 @@ public class RateMDBTest {
         rmdb.onMessage(new TextMessageImpl(output.toString()));
     }
 
+//    @Test
+//    public void onMessageTest3() throws Exception {
+//        rmdb.onMessage(new TextMessageImpl("Bad123"));
+//    }
+
     private static InputStream getCurrencyRateStream() {
         return RateMDBTest.class.getResourceAsStream("public-currency_1.xml");
     }
