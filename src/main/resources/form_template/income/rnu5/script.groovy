@@ -233,7 +233,7 @@ void logicCheck() {
     //4. Арифметическая проверка итоговых значений по каждому <Коду классификации расходов>
     totalRows.each { key, val ->
         if (totalRows.get(key) != sumRowsByCode.get(key)) {
-            def msg =  row.getCell('sum').column.name
+            def msg =  formData.createDataRow().getCell('sum').column.name
             logger.error("Неверное итоговое значение по коду '$key' графы «$msg»!")
         }
     }
@@ -256,5 +256,5 @@ def getNewRow(def alias, def sum) {
 }
 
 def String getKnu(def code) {
-    return getRefBookValue(27, code)?.CODE.stringValue
+    return getRefBookValue(27, code)?.CODE?.stringValue
 }
