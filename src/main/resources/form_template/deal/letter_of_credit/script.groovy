@@ -546,8 +546,8 @@ def addData(def xml) {
     Date date = reportPeriodService.get(formData.reportPeriodId).taxPeriod.getEndDate()
 
     def cache = [:]
-    def data = formDataService.getDataRowHelper(formData)
-    data.clear()
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def rows = new LinkedList()
 
     def indexRow = -1
     for (def row : xml.row) {
@@ -627,8 +627,9 @@ def addData(def xml) {
         // графа 12
         newRow.dealDoneDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
 
-        data.insert(newRow, indexRow - 2)
+        rows.add(newRow)
     }
+    dataRowHelper.save(rows)
 }
 
 /**

@@ -853,13 +853,11 @@ def checkTableHead(def xml, def headRowCount) {
 def addData(def xml, int headRowCount) {
     Date date = reportPeriodService.get(formData.reportPeriodId).taxPeriod.getEndDate()
 
-    def data = formDataService.getDataRowHelper(formData)
-    data.clear()
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def rows = new LinkedList()
 
     def xmlIndexRow = -1
     def rowIndex = 0
-
-    def rows = new LinkedList<DataRow<Cell>>()
 
     for (def row : xml.row) {
         xmlIndexRow++
@@ -1020,7 +1018,7 @@ def addData(def xml, int headRowCount) {
         newRow.dealDoneDate = getDate(row.cell[xmlIndexCell].text(), xmlIndexRow, newRow.getCell('dealDoneDate').column.name)
         rows.add(newRow)
     }
-    data.insert(rows, 1)
+    dataRowHelper.save(rows)
 }
 
 /**
