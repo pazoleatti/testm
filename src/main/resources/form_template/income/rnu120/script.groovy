@@ -198,10 +198,12 @@ void calc() {
 
 /** Логические проверки. */
 void logicCheckBeforeCalc() {
-    def formPrev = getFormPrev()
-    if ((formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
+    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+        // TODO потом поменять после проверки
+        // throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+        def formName = formData.getFormType().getName()
         logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
-        return
     }
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
