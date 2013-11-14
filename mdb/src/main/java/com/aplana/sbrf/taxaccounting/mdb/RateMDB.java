@@ -40,7 +40,7 @@ import java.util.Map;
  */
 @MessageDriven(activationConfig = {
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/Q_MDB")})
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/transportQueueMQ")})
 @Interceptors(TransportInterceptor.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class RateMDB implements MessageListener {
