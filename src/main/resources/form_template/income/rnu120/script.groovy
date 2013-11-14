@@ -39,19 +39,11 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
-        def formPrev = getFormPrev()
-        if ((formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
-            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
-            return
-        }
+        logicCheckBeforeCalc()
         logicCheck()
         break
     case FormDataEvent.CALCULATE :
-        def formPrev = getFormPrev()
-        if ((formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
-            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
-            return
-        }
+        logicCheckBeforeCalc()
         calc()
         logicCheck()
         break
@@ -69,16 +61,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        def formPrev = getFormPrev()
-        if ((formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
-            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
-            return
-        }
-        logicCheck()
-        break
-    case FormDataEvent.COMPOSE :
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
-        calc()
+        logicCheckBeforeCalc()
         logicCheck()
         break
 }
@@ -98,11 +81,11 @@ def allColumns = ['number', 'numberAccount', 'debtBalance', 'operationDate',
         'calcPeriodAccountingEndDate', 'calcPeriodBeginDate', 'calcPeriodEndDate', 'taxAccount', 'booAccount',
         'accrualPrev', 'accrualReportPeriod', 'marketInterestRate', 'sumRate']
 
-// Редактируемые атрибуты (графа 2 .. 4, 6 .. 10, 16)
+// Редактируемые атрибуты (графа 2 .. 4, 5, 6 .. 10, 11, 16)
 // TODO - Непонятно что делать с графой 11
 @Field
 def editableColumns = ['numberAccount', 'debtBalance', 'operationDate',
-        'interestRate', 'baseForCalculation', 'calcPeriodAccountingBeginDate',
+        'course', 'interestRate', 'baseForCalculation', 'calcPeriodAccountingBeginDate',
         'calcPeriodAccountingEndDate', 'calcPeriodBeginDate', 'calcPeriodEndDate', 'marketInterestRate']
 
 // Автозаполняемые атрибуты
@@ -126,7 +109,7 @@ def groupColums = ['numberAccount', 'operationDate']
 
 // алиасы графов для арифметической проверки
 @Field
-def arithmeticCheckAlias = ['course', 'booAccount', 'taxAccount', 'accrualPrev', 'accrualReportPeriod', 'accrualReportPeriod', 'sumRate']
+def arithmeticCheckAlias = ['booAccount', 'taxAccount', 'accrualPrev', 'accrualReportPeriod', 'accrualReportPeriod', 'sumRate']
 
 // Дата окончания отчетного периода
 @Field
@@ -138,10 +121,6 @@ def currentDate = new Date()
 
 //// Обертки методов
 
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -194,9 +173,6 @@ void calc() {
         // графа 1
         row.number = ++rowNumber
 
-        // графа 5
-        row.course = getCourse('RUB', row.operationDate)
-
         // графа 13
         row.booAccount = calc13(row)
 
@@ -221,6 +197,27 @@ void calc() {
 }
 
 /** Логические проверки. */
+void logicCheckBeforeCalc() {
+    def formPrev = getFormPrev()
+    if ((formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
+        logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+        return
+    }
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def rowNumber = 0
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        rowNumber++
+
+        //проверка заполнения редактируемых обязательных полей
+        checkNonEmptyColumns(row, rowNumber, editableColumns, logger, true)
+    }
+}
+
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -238,8 +235,16 @@ void logicCheck() {
 
         def rowPrev = getRowPrev(row, dataRowsPrev)
 
+        // 0. Проверка уникальности значий в графе «Номер ссудного счета»
+        def find = dataRows.find{it->
+            (row!=it && row.numberAccount==it.numberAccount)
+        }
+        if (find!=null) {
+            logger.error("Строка $rowNumber: Номер ссудного счета не уникальный!")
+        }
+
         // 1. Проверка на заполнение поля «<Наименование поля>» (1 .. 17)
-        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns - editableColumns, logger, true)
 
         // 2. Проверка на уникальность поля «№ пп»
         if (rowNumber != row.number) {
@@ -248,7 +253,6 @@ void logicCheck() {
 
         // 3. Арифметические проверки расчета неитоговых граф
         calcValues = [
-                course: getCourse('RUB', row.operationDate),
                 booAccount: calc13(row),
                 taxAccount: calc12(row, rowPrev),
                 accrualPrev: calc14(row, rowPrev),
@@ -256,6 +260,19 @@ void logicCheck() {
                 sumRate: calc17(row, rowPrev)
         ]
         checkCalc(row, arithmeticCheckAlias, calcValues, logger, true)
+
+        // 4. Проверка курса валюты
+        if (row.operationDate != null && row.course != null) {
+            def name = row.getCell('course').column.name
+            def dataProvider = refBookFactory.getDataProvider(22)
+            def record = dataProvider.getRecords(row.operationDate, null, "RATE = $row.course", null);
+            if (record.size() == 0) {
+                RefBook rb = refBookFactory.get(22);
+                def rbName = rb.getName()
+                def attrName = rb.getAttribute('RATE').getName()
+                logger.error("Строка $rowNumber: В справочнике «$rbName» не найдено значение «${row.course}», соответствующее атрибуту «$attrName»!")
+            }
+        }
     }
 
     // 4. Арифметические проверки расчета итоговой графы
@@ -317,23 +334,6 @@ def calc17(def row, def rowPrev) {
                 (row.calcPeriodEndDate - rowPrev.calcPeriodBeginDate + 1) - row.accrualPrev
     }
     return roundValue(x, 2)
-}
-
-/**
- * Получить курс валюты
- */
-def getCourse(def currencyCode, def date) {
-    if (currencyCode!=null) {
-        def currency = getRecordId(15, 'CODE_2', currencyCode, -1, null, true)
-        def res = getRefBookRecord(22, 'CODE_NUMBER', "$currency", date, -1, null, true)
-        if (res==null) {
-            logger.info("RUB")
-            return 1
-        }
-        return res.RATE.getNumberValue()
-    } else {
-        return 1
-    }
 }
 
 // Получить данные за предыдущий период
