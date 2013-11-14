@@ -171,7 +171,7 @@ void generateXML() {
                     mapYesNo.put(recYesId, '1')
                     mapYesNo.put(recNoId, '0')
 
-                    for (row in dataRowHelper.getAllCached()) {
+                    for (row in dataRowHelper.getAllSaved()) {
                         if (row.getAlias() != null) {
                             continue
                         }

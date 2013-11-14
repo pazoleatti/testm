@@ -20,6 +20,8 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 
+import java.util.List;
+
 /**
  * Реализация фабрики провайдеров данных для справочников
  *
@@ -34,9 +36,6 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
     @Autowired
     private ApplicationContext applicationContext;
-    
-    @Autowired
-    RefBookScriptingService refBookScriptingService;
 
     @Override
     public RefBook get(Long refBookId) {
@@ -69,6 +68,4 @@ public class RefBookFactoryImpl implements RefBookFactory {
 			return refBookDataProvider;
         }
     }
-
-
 }

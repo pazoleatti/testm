@@ -744,6 +744,7 @@ $F{ДатаДок}]]></variableExpression>
 :
 ($F{НаимОрг_Р2}.replace( " ", "-" )+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
 	</variable>
+	<filterExpression><![CDATA[Integer.parseInt($F{НомПорСд})<34]]></filterExpression>
 	<title>
 		<band height="842" splitType="Stretch">
 			<textField>
@@ -1251,7 +1252,7 @@ $F{ДатаДок}]]></variableExpression>
 				<text><![CDATA[подтверждающего полномочия представителя]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="e64368e9-8f93-434e-be88-ec25b08db9b8" x="17" y="813" width="293" height="18"/>
+				<reportElement uuid="e64368e9-8f93-434e-be88-ec25b08db9b8" x="17" y="813" width="327" height="18"/>
 				<textElement verticalAlignment="Bottom">
 					<font fontName="Arial" size="6" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
