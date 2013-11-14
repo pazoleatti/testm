@@ -174,7 +174,7 @@ def getXML(def String startStr, def String endStr) {
  */
 def getCourse(def row, def date) {
     def currency = row.currencyCode
-    if (currency!=null && !isRubleCurrency(currency)) {
+    if (date!=null && currency!=null && !isRubleCurrency(currency)) {
         def res = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache,
                 'CODE_NUMBER', currency, date, row.getIndex(), getColumnName(row, "currencyCode"), logger, false)
         return res.RATE.getNumberValue()
@@ -233,9 +233,9 @@ void logicCheck(){
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def totalRow = null
-    def prevPeriodThisTaxPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-    def formDataPrev = formDataPrev
-    if(prevPeriodThisTaxPeriod!=null && formDataPrev==null){
+    def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+    formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
+    if(formDataPrev==null){
         //TODO получить РНУ-62 за прошлый период
         logger.warn("Не найдены экземпляры РНУ-62 за прошлый отчетный период!")
     }
@@ -268,22 +268,22 @@ void logicCheck(){
                 isZeroEmpty(row.sum)){
             logger.error(errorMsg + "Все суммы по операции нулевые!")
         }
-        if(prevPeriodThisTaxPeriod!=null && getRowPrev(formDataPrev, row)==null){
+        def rowPrev = getRowPrev(formDataPrev, row)
+        if(rowPrev==null){
             //TODO получить РНУ-62 за прошлый период
             logger.warn(errorMsg + "Отсутствуют данные в РНУ-62 за предыдущий отчетный период!")
         }
         def values = [:]
 
-        def rowPrev = getRowPrev(formDataPrev, row)
         //TODO проверить, в аналитике неадекватно описано
         values.with {
-            rateBRBillDate=getGraph7(row)
-            rateBROperationDate=getGraph8(row)
-            sumStartInCurrency=getGraph14(row, rowPrev)
-            sumStartInRub=getGraph15(rowPrev)
-            sumEndInCurrency=getGraph16(row)
-            sumEndInRub=getGraph17(row)
-            sum=getGraph18(row)
+            rateBRBillDate=roundTo(getGraph7(row), 2)
+            rateBROperationDate=roundTo(getGraph8(row), 2)
+            sumStartInCurrency=roundTo(getGraph14(row, rowPrev), 2)
+            sumStartInRub=roundTo(getGraph15(rowPrev), 2)
+            sumEndInCurrency=roundTo(getGraph16(row, dFrom), 2)
+            sumEndInRub=roundTo(getGraph17(row), 2)
+            sum=roundTo(getGraph18(row), 2)
         }
 
         // Проверяем расчеты для параметров(14-18), не использующих справочники, остальные (7,8) проверяются ниже
@@ -306,7 +306,8 @@ void logicCheck(){
 void calc(){
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def formDataPrev = formDataPrev
+    def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+    formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
 
     if(reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)!=null && formDataPrev==null){
         //Прерываем расчет, при проверке сообщение выведется
@@ -322,19 +323,20 @@ void calc(){
 
     // Номер последний строки предыдущей формы
     def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
 
     // Расчет ячеек
     dataRows.each{row->
         def rowPrev = getRowPrev(formDataPrev, row)
         row.with {
             rowNumber=++index
-            rateBRBillDate=getGraph7(row)
-            rateBROperationDate=getGraph8(row)
-            sumStartInCurrency=getGraph14(row, rowPrev)
-            sumStartInRub=getGraph15(rowPrev)
-            sumEndInCurrency=getGraph16(row)
-            sumEndInRub=getGraph17(row)
-            sum=getGraph18(row)
+            rateBRBillDate=roundTo(getGraph7(row), 2)
+            rateBROperationDate=roundTo(getGraph8(row), 2)
+            sumStartInCurrency=roundTo(getGraph14(row, rowPrev), 2)
+            sumStartInRub=roundTo(getGraph15(rowPrev), 2)
+            sumEndInCurrency=roundTo(getGraph16(row, dFrom), 2)
+            sumEndInRub=roundTo(getGraph17(row), 2)
+            sum=roundTo(getGraph18(row), 2)
         }
     }
 
@@ -375,7 +377,7 @@ BigDecimal getGraph14(def row, def rowPrev) {
         if (rowPrev !=null){
             return rowPrev.sumEndInCurrency
         } else {
-            return 0
+            return BigDecimal.ZERO
         }
     }
 }
@@ -384,20 +386,28 @@ BigDecimal getGraph15(def rowPrev) {
     if (rowPrev !=null){
         return rowPrev.sumEndInRub
     } else {
-        return 0
+        return BigDecimal.ZERO
     }
 }
 
-BigDecimal getGraph16(def row) {
+BigDecimal getGraph16(def row, def dFrom) {
     def tmp
-    if (row.operationDate < row.paymentTermStart){
-        tmp = (row.nominal - row.sellingPrice)*(row.operationDate - row.creationDate) / (row.paymentTermStart - row.creationDate)
+    if (row.operationDate != null && row.paymentTermStart != null && row.operationDate < row.paymentTermStart){
+        if (row.nominal != null && row.sellingPrice != null && row.creationDate != null) {
+            tmp = (row.nominal - row.sellingPrice)*(row.operationDate - row.creationDate) / (row.paymentTermStart - row.creationDate)
+        } else {
+            tmp = null
+        }
     }
-    if (row.operationDate > row.paymentTermStart){
-        tmp = row.nominal - row.sellingPrice
+    if (row.operationDate != null && row.paymentTermStart != null && row.operationDate > row.paymentTermStart){
+        if (row.nominal != null && row.sellingPrice != null) {
+            tmp = row.nominal - row.sellingPrice
+        } else {
+            tmp = null
+        }
     }
     if (row.rateWithDiscCoef != null){
-        countDaysInYear = getCountDaysInYear(reportPeriodService.getStartDate(formData.reportPeriodId).time)
+        countDaysInYear = getCountDaysInYear(dFrom)
         if (row.interestRate < row.rateWithDiscCoef){
             tmp = row.sellingPrice * (row.operationDate - row.creationDate) / countDaysInYear * row.interestRate / 100
         } else {
@@ -411,12 +421,12 @@ BigDecimal getGraph16(def row) {
     }
 
     if (row.paymentTermEnd != null && row.operationDate != null && getDiffBetweenYears(row.paymentTermEnd, row.operationDate)>=3){
-        tmp = 0
+        tmp = BigDecimal.ZERO
     }
     if(!isRubleCurrency(row.currencyCode)){
         tmp = null
     }
-    return ((BigDecimal)tmp)?.setScale(2, BigDecimal.ROUND_HALF_UP)
+    return tmp
 }
 
 BigDecimal getGraph17(def row) {
@@ -424,11 +434,23 @@ BigDecimal getGraph17(def row) {
     if(row.rateWithDiscCoef != null &&
         row.sumStartInCurrency != null &&
         row.sumEndInCurrency != null){
-        if(row.operationDate >= row.paymentTermStart){
-            tmp = (row.nominal * row.rateBROperationDate)-(row.sellingPrice * row.rateBRBillDate)
+        if (row.operationDate != null && row.paymentTermStart != null) {
+            if(row.operationDate >= row.paymentTermStart){
+                if (row.nominal != null && row.rateBROperationDate != null && row.sellingPrice != null && row.rateBRBillDate != null) {
+                    tmp = (row.nominal * row.rateBROperationDate)-(row.sellingPrice * row.rateBRBillDate)
+                } else {
+                    tmp = null
+                }
+            } else {
+               //TODO "второй строкой"?
+                if (row.sumStartInRub != null && row.rateBROperationDate != null && row.sellingPrice != null && row.rateBRBillDate != null) {
+                    tmp = (row.sellingPrice * (row.rateBROperationDate - row.rateBRBillDate)) + row.sumStartInRub
+                } else {
+                    tmp = null
+                }
+            }
         } else {
-           //TODO "второй строкой"?
-            tmp = (row.sellingPrice * (row.rateBROperationDate - row.rateBRBillDate)).setScale(2, BigDecimal.ROUND_HALF_UP) + row.sumStartInRub
+            return null
         }
     } else {
         tmp = (row.sumEndInCurrency != null && row.rateBROperationDate != null) ? (row.sumEndInCurrency * row.rateBROperationDate) : null//TODO check
@@ -451,3 +473,8 @@ def DataRow getRowPrev(def formDataPrev, def DataRow row) {
     }
     return null
 }
+
+BigDecimal roundTo(BigDecimal value, int newScale) {
+    return value?.setScale(newScale, BigDecimal.ROUND_HALF_UP)
+}
+

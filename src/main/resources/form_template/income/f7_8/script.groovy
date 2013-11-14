@@ -329,12 +329,14 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-    def formDataPrev
-    if (prevReportPeriod !=null){
-        formDataPrev = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, prevReportPeriod.id)
-        if (formDataPrev == null && !isFirstPeriod()) {
-            logger.warn('Отсутствует предыдущий экземпляр отчета')
+    if (!isFirstPeriod()) {
+        def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+        def formDataPrev
+        if (prevReportPeriod !=null){
+            formDataPrev = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, prevReportPeriod.id)
+            if (formDataPrev == null) {
+                logger.warn('Отсутствует предыдущий экземпляр отчета')
+            }
         }
     }
     for (def row : dataRows) {
@@ -550,7 +552,7 @@ BigDecimal getGraph29(def row) {
 }
 
 BigDecimal getGraph31(def row) {
-    if (row.costAcquisition != null && row.loss != null && row.lossRealization && null) {
+    if (row.costAcquisition != null && row.loss != null && row.lossRealization != null) {
         return row.costAcquisition + row.loss + row.lossRealization
     } else {
         return null

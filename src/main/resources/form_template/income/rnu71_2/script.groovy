@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 import groovy.transform.Field
 
@@ -98,7 +97,7 @@ def editableColumns = ["contragent", "inn", "assignContractNumber", "assignContr
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ["rowNumber", "result", "part2Date", "lossThisQuarter", "lossNextQuarter", "lossThisTaxPeriod",
+def autoFillColumns = ["result", "lossThisQuarter", "lossNextQuarter", "lossThisTaxPeriod",
         "taxClaimPrice", "correctThisPrev", "correctThisThis", "correctThisNext"]
 
 // Группируемые атрибуты
@@ -121,56 +120,6 @@ def reportPeriodEndDate = null
 // Текущая дата
 @Field
 def currentDate = new Date()
-
-//// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
-}
-
-// Разыменование записи справочника
-def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
-}
-
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xls')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
-    }
-    return xml
-}
 
 //// Некастомные методы
 /**
@@ -202,112 +151,101 @@ def checkSumWithRow(def rowsForSum, def sumRow){
     return isValid
 }
 
-/**
- * Хелпер для округления чисел
- * @param value
- * @param newScale
- * @return
- */
 BigDecimal roundTo(BigDecimal value, int newScale) {
-    if (value != null) {
-        return value.setScale(newScale, BigDecimal.ROUND_HALF_UP)
-    } else {
-        return value
-    }
+    return value?.setScale(newScale, BigDecimal.ROUND_HALF_UP)
 }
 
 //// Кастомные методы
-
-// Логические проверки
 void logicCheck(){
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def numbers = []
 
     def dFrom = reportPeriodService.getStartDate(formData.getReportPeriodId())?.time
     def dTo = reportPeriodService.getEndDate(formData.getReportPeriodId())?.time
-
-    def rowNum = 0
+    def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+    formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
+    // Номер последний строки предыдущей формы
+    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
     for (def DataRow row : dataRows){
         //проверка и пропуск итогов
         if (row?.getAlias()?.contains('itg')) {
             continue
         }
-        rowNum++
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
 
-        def index = row.rowNumber
-        def rowStart
-        if (index != null) {
-            rowStart = "В строке \"№ пп\" равной $index "
-        } else {
-            index = dataRows.indexOf(row) + 1
-            rowStart = "В строке $index "
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+
+        def values = [:]
+        def rowPrev = getRowPrev(formDataPrev, row)
+        values.with {
+            result = roundTo(getGraph11(row), 2)
+            part2Date = getGraph12(row)
+            lossThisQuarter = roundTo(getGraph13(row, dTo), 2)
+            lossNextQuarter = roundTo(getGraph14(row, dTo), 2)
+            lossThisTaxPeriod = roundTo(getGraph15(row, rowPrev, dFrom, dTo), 2)
+            taxClaimPrice = roundTo(getGraph16(row), 2)
+            correctThisPrev = roundTo(getGraph17(row, rowPrev, dFrom, dTo), 2)
+            correctThisThis = roundTo(getGraph18(row, dTo), 2)
+            correctThisNext = roundTo(getGraph19(row, dTo), 2)
+        }
+        checkCalc(row, autoFillColumns, values, logger, true)
+
+        if (row.part2Date != values.part2Date){
+            logger.error(errorMsg + "Неверное значение графы ${getColumnName(row, 'part2Date')}!")
         }
         if (!(row.repaymentDate in (dFrom..dTo))){
-            logger.error("${rowStart}дата совершения операции вне границ отчетного периода!")
+            logger.error(errorMsg + "Дата совершения операции вне границ отчетного периода!")
         }
-        if (row.rowNumber in numbers){
-            logger.error("${rowStart}нарушена уникальность номера по порядку ${row.rowNumber}!")
-        }else {
-            numbers += row.rowNumber
+        if (++i != row.rowNumber) {
+            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
         if (row.income == 0 && row.lossThisQuarter == 0 && row.lossNextQuarter == 0){
-            logger.error("${rowStart}все суммы по операции нулевые!")
+            logger.error(errorMsg + "Все суммы по операции нулевые!")
         }
         if (row.dateOfAssignment < row.repaymentDate){
-            logger.error("${rowStart}неверно указана дата погашения основного долга!")
+            logger.error(errorMsg + "Неверно указана дата погашения основного долга!")
         }
         if (row.amount > 0 && row.income > 0 && row.repaymentDate == null &&
                 row.dateOfAssignment == null && row.lossThisTaxPeriod != null){
-            logger.error("${rowStart}в момент уступки права требования «Графа 15» не заполняется!")
+            logger.error(errorMsg + "В момент уступки права требования «Графа 15» не заполняется!")
         }
         if (row.lossThisTaxPeriod > 0 &&
                 ((row.amount == null && row.result != null) ||
                         row.lossThisQuarter != null ||
                         row.lossNextQuarter != null)){
-            logger.error("${rowStart}в момент отнесения второй половины убытка на расходы графы кроме графы 15 и графы 12 не заполняются!")
+            logger.error(errorMsg + "В момент отнесения второй половины убытка на расходы графы кроме графы 15 и графы 12 не заполняются!")
         }
-
-        def testRows = dataRows.findAll{ it -> it.getAlias() == null }
-
-        def values = getValues(testRows, row, null, dFrom, dTo)
-        for (def colName : autoFillColumns) {
-            if (row[colName] != values[colName]) {
-                isValid = false
-                def columnName = row.getCell(colName).column.name
-                logger.error("${rowStart}неверно рассчитана графа \"$columnName\"!")
-            }
-        }
-
-        addAllAliased(testRows, new CalcAliasRow() {
-            @Override
-            DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
-                return calcItog(i, rows)
-            }
-        }, groupColumns)
-        // Рассчитанные строки итогов
-        def testItogRows = testRows.findAll { it -> it.getAlias() != null }
-        // Имеющиеся строки итогов
-        def itogRows = dataRows.findAll { it -> it.getAlias() != null }
-
-        checkItogRows(testRows, testItogRows, itogRows, groupColumns, logger, new GroupString() {
-            @Override
-            String getString(DataRow<Cell> dataRow) {
-                return dataRow.contragent
-            }
-        }, new CheckGroupSum() {
-            @Override
-            String check(DataRow<Cell> row1, DataRow<Cell> row2) {
-                if (row1.contragent != row2.contragent) {
-                    return getColumnName(row1, 'contragent')
-                }
-                return null
-            }
-        })
     }
-    def totalRow = dataRowHelper.getDataRow(dataRows, 'itg')
+    def testRows = dataRows.findAll{ it -> it.getAlias() == null }
+
+    addAllAliased(testRows, new CalcAliasRow() {
+        @Override
+        DataRow<Cell> calc(int ind, List<DataRow<Cell>> rows) {
+            return calcItog(ind, rows)
+        }
+    }, groupColumns)
+    // Рассчитанные строки итогов
+    def testItogRows = testRows.findAll { it -> it.getAlias() != null }
+    // Имеющиеся строки итогов
+    def itogRows = dataRows.findAll { it -> it.getAlias() != null }
+
+    checkItogRows(testRows, testItogRows, itogRows, groupColumns, logger, new GroupString() {
+        @Override
+        String getString(DataRow<Cell> dataRow) {
+            return dataRow.contragent
+        }
+    }, new CheckGroupSum() {
+        @Override
+        String check(DataRow<Cell> row1, DataRow<Cell> row2) {
+            if (row1.contragent != row2.contragent) {
+                return getColumnName(row1, 'contragent')
+            }
+            return null
+        }
+    })
+    def totalRow = getDataRow(dataRows, 'itg')
     def totalRowList = dataRows.findAll{ it -> it.getAlias() != null && it.getAlias() != 'itg' }
     if(!checkSumWithRow(totalRowList, totalRow)){
         logger.error("Итоговые значения рассчитаны неверно!")
@@ -319,10 +257,8 @@ void calc(){
     def dataRows = dataRowHelper.allCached
 
     def reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-    def formDataPrev = reportPeriodPrev? formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriodPrev.id):null
-    if (formDataPrev != null && formDataPrev.state != WorkflowState.ACCEPTED){
-        formDataPrev = null
-    }
+    def formDataPrev = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
     if(formDataPrev==null && !reportPeriodService.isBalancePeriod(reportPeriodPrev.id, formData.departmentId)){
         logger.error("Не найдены экземпляры РНУ-71.1 за прошлый отчетный период!")
         return
@@ -336,11 +272,25 @@ void calc(){
 
     def dFrom = reportPeriodService.getStartDate(formData.getReportPeriodId())?.time
     def dTo = reportPeriodService.getEndDate(formData.getReportPeriodId())?.time
+
+    // Номер последний строки предыдущей формы
+    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+
+    // Расчет ячеек
     for(def row : dataRows) {
-        if(row?.getAlias()?.contains('itg')){
-            continue
+        def rowPrev = getRowPrev(formDataPrev, row)
+        row.with {
+            rowNumber = ++index
+            result = roundTo(getGraph11(row), 2)
+            part2Date = getGraph12(row)
+            lossThisQuarter = roundTo(getGraph13(row, dTo), 2)
+            lossNextQuarter = roundTo(getGraph14(row, dTo), 2)
+            lossThisTaxPeriod = roundTo(getGraph15(row, rowPrev, dFrom, dTo), 2)
+            taxClaimPrice = roundTo(getGraph16(row), 2)
+            correctThisPrev = roundTo(getGraph17(row, rowPrev, dFrom, dTo), 2)
+            correctThisThis = roundTo(getGraph18(row, dTo), 2)
+            correctThisNext = roundTo(getGraph19(row, dTo), 2)
         }
-        getValues(dataRows, row, row, dFrom, dTo)
     }
 
     // Добавить строки итогов/подитогов
@@ -401,37 +351,6 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     return newRow
 }
 
-/**
- * Получаем мапу со значениями, расчитанными для каждой конкретной строки или сразу записываем в строку (для расчетов)
- * @param dataRows
- * @param row исходная строка
- * @param resultRow результируемая строка в которую записывают значения (в режиме расчета)
- * @param startDate
- * @param endDate
- * @return карту со значениями (в режиме проверки)
- */
-def getValues(def dataRows, def row, def resultRow, def startDate, def endDate) {
-    if(resultRow == null){
-        resultRow = [:]
-    }
-    def reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-    def formDataPrev = reportPeriodPrev? formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriodPrev.id):null
-    def rowPrev = getRowPrev(formDataPrev, row)
-    resultRow.with {
-        rowNumber = getGraph1(dataRows, row)
-        result = getGraph11(row)
-        part2Date = getGraph12(row)
-        lossThisQuarter = getGraph13(row, endDate)
-        lossNextQuarter = getGraph14(row, endDate)
-        lossThisTaxPeriod = getGraph15(row, rowPrev, startDate, endDate)
-        taxClaimPrice = getGraph16(row)
-        correctThisPrev = getGraph17(row, rowPrev, startDate, endDate)
-        correctThisThis = getGraph18(row, endDate)
-        correctThisNext = getGraph19(row, endDate)
-    }
-    return resultRow
-}
-
 def getRowPrev(def formDataPrev, def row){
     if (formDataPrev != null) {
         def prevDataRowHelper = formDataService.getDataRowHelper(formDataPrev)
@@ -446,34 +365,28 @@ def getRowPrev(def formDataPrev, def row){
     }
 }
 
-def getGraph1(def dataRows, def row) {
-    def i = 0
-    for (def dataRow : dataRows){
-        if (dataRow.getAlias()==null){
-            i++
-            if (row == dataRow){
-                return i
-            }
-        }
+def getGraph11(def row) {
+    if (row.income != null && row.amount != null && row.amountForReserve != null) {
+        return row.income - (row.amount - row.amountForReserve)
+    } else {
+        return null
     }
 }
 
-def getGraph11(def row) {
-    return row.income - (row.amount - row.amountForReserve)
-}
-
 def getGraph12(def row) {
-    return row.dateOfAssignment ?
-        (row.dateOfAssignment + 45) :
-        null //не заполняется
+    return row.dateOfAssignment ? (row.dateOfAssignment + 45) : null //не заполняется
 }
 
 def getGraph13(def row, def endDate) {
-    if(row.result < 0){
-        if (row.part2Date <= endDate){
-            return row.result
-        }else{
-            return row.result?roundTo(row.result * 0.5, 2):null
+    if(row.result != null && row.result < 0){
+        if (row.part2Date != null && endDate != null) {
+            if (row.part2Date <= endDate){
+                return row.result
+            }else{
+                return row.result ? row.result * 0.5 : null
+            }
+        } else {
+            return null
         }
     } else {
         return null //не заполняется
@@ -481,11 +394,15 @@ def getGraph13(def row, def endDate) {
 }
 
 def getGraph14(def row, def endDate) {
-    if(row.result < 0){
-        if (row.part2Date <= endDate){
-            return 0
-        }else{
-            return row.result?roundTo(row.result * 0.5, 2):null
+    if(row.result != null && row.result < 0){
+        if (row.part2Date != null && endDate != null) {
+            if (row.part2Date <= endDate){
+                return BigDecimal.ZERO
+            }else{
+                return row.result ? row.result * 0.5 : null
+            }
+        } else {
+            return null
         }
     } else {
         return null //не заполняется
@@ -493,19 +410,31 @@ def getGraph14(def row, def endDate) {
 }
 
 def getGraph15(def row, def rowPrev, def startDate, def endDate) {
-    def period = (startDate..endDate)
-    if (!(row.dateOfAssignment in period) && (row.part2Date in period)){
-        return rowPrev?.lossNextQuarter
+    if (startDate != null && endDate != null) {
+        def period = (startDate..endDate)
+        if (row.dateOfAssignment != null && row.part2Date != null && !(row.dateOfAssignment in period) && (row.part2Date in period)){
+            return rowPrev?.lossNextQuarter
+        } else {
+            return null //не заполняется
+        }
     } else {
-        return null //не заполняется
+        return null
     }
 }
 
 def getGraph16(def row) {
-    return row.lossThisTaxPeriod?:0 - (row.amount - row.amountForReserve)
+    if (row.lossThisTaxPeriod != null && row.amount != null && row.amountForReserve != null) {
+        return row.lossThisTaxPeriod - (row.amount - row.amountForReserve)
+    } else {
+        return null
+    }
 }
 
 def getGraph17(def row, def rowPrev, def startDate, def endDate) {
+    if (row.dateOfAssignment == null || startDate == null || row.part2Date == null || endDate == null ||
+            row.result == null) {
+        return null
+    }
     if (row.dateOfAssignment < startDate && row.part2Date in (startDate..endDate)) {
         if (row.result < 0){
             return rowPrev.correctThisNext
@@ -516,31 +445,67 @@ def getGraph17(def row, def rowPrev, def startDate, def endDate) {
 
 //TODO уточнить
 def getGraph18(def row, def endDate) {
-    if (row.result < 0){
-        if (row.part2Date < endDate) {
-            return abs(row.taxClaimPrice) - abs(row.result)
-        }
-        if (row.part2Date > endDate) {
-            return (abs(row.taxClaimPrice) - abs(row.result)) * 0.5
+    if (row.result != null) {
+        if (row.result < 0){
+            if (row.part2Date != null && endDate != null) {
+                if (row.part2Date < endDate) {
+                    if (row.taxClaimPrice != null) {
+                        return abs(row.taxClaimPrice) - abs(row.result)
+                    } else {
+                        return null
+                    }
+                }
+                if (row.part2Date > endDate) {
+                    if (row.taxClaimPrice != null) {
+                        return (abs(row.taxClaimPrice) - abs(row.result)) * 0.5
+                    } else {
+                        return null
+                    }
+                }
+            } else {
+                return null
+            }
+        } else {
+            if (row.taxClaimPrice != null) {
+                if (row.taxClaimPrice > row.result) {
+                    return row.taxClaimPrice - row.result
+                }
+            } else {
+                return null
+            }
         }
     } else {
-        if (row.taxClaimPrice > row.result) {
-            return row.taxClaimPrice - row.result
-        }
+        return null
     }
 }
 
 def getGraph19(def row, def endDate) {
-    if (row.result < 0){
-        if (row.part2Date < endDate) {
-            return 0
-        }
-        if (row.part2Date > endDate) {
-            return (abs(row.taxClaimPrice) - abs(row.result)) * 0.5
+    if (row.result != null) {
+        if (row.result < 0){
+            if (row.part2Date != null && endDate != null) {
+                if (row.part2Date < endDate) {
+                    return BigDecimal.ZERO
+                }
+                if (row.part2Date > endDate) {
+                    if (row.taxClaimPrice != null) {
+                        return (abs(row.taxClaimPrice) - abs(row.result)) * 0.5
+                    } else {
+                        return null
+                    }
+                }
+            } else {
+                return null
+            }
+        } else {
+            if (row.taxClaimPrice != null) {
+                if (row.taxClaimPrice > row.result) {
+                    return null
+                }
+            } else {
+                return null
+            }
         }
     } else {
-        if (row.taxClaimPrice > row.result) {
-            return null
-        }
+        return null
     }
 }

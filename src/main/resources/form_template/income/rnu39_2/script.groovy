@@ -8,9 +8,6 @@ import groovy.transform.Field
 /**
  * Форма "(РНУ-39.2) Регистр налогового учёта процентного дохода по коротким позициям. Отчёт 2(квартальный)".
  *
- * TODO:
- *      - уточнить как получать дату первого, последнего и отчетного дня для месяца
- *
  * @author rtimerbaev
  */
 
@@ -73,7 +70,7 @@ def refBookCache = [:]
 
 // Все атрибуты
 @Field
-def allColumns = []
+def allColumns = ['currencyCode', 'issuer', 'regNumber', 'amount', 'cost', 'shortPositionOpen', 'shortPositionClose', 'pkdSumOpen', 'pkdSumClose', 'maturityDatePrev', 'maturityDateCurrent', 'currentCouponRate', 'incomeCurrentCoupon', 'couponIncome', 'totalPercIncome']
 
 // Редактируемые атрибуты (графа 1..13)
 @Field
@@ -171,9 +168,8 @@ void calc() {
     // отсортировать/группировать
     sort(dataRows)
 
-    // TODO (Ramil Timerbaev) получение даты начала и окончания для месяца
-    def dateStart = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
-    def dateEnd =  reportPeriodService.getEndDate(formData.reportPeriodId)?.time
+    def dateStart = reportPeriodService.getMonthStartDate(formData)?.time
+    def dateEnd =  reportPeriodService.getMonthEndDate(formData)?.time
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -202,10 +198,9 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    // TODO (Ramil Timerbaev) уточнить как получать дату первого, последнего и отчетного дня для месяца
-    def reportDay = reportPeriodService.getReportDate(formData.reportPeriodId)?.time
-    def dateStart = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
-    def dateEnd =  reportPeriodService.getEndDate(formData.reportPeriodId)?.time
+    def reportDay = reportPeriodService.getMonthReportDate(formData)?.time
+    def dateStart = reportPeriodService.getMonthStartDate(formData)?.time
+    def dateEnd =  reportPeriodService.getMonthEndDate(formData)?.time
 
     // список проверяемых столбцов (графа 1..13)
     def requiredColumns = nonEmptyColumns

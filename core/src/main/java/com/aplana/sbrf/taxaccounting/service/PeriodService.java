@@ -1,10 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 
 import java.util.Calendar;
@@ -151,5 +147,28 @@ public interface PeriodService {
      * @return
      */
     public List<ReportPeriod> getAllPeriodsByTaxType(TaxType taxType, boolean backOrder);
-    
+
+    /**
+     * Получить дату начала месяца.
+     *
+     * @param formData данные формы
+     * @return
+     */
+    public Calendar getMonthStartDate(FormData formData);
+
+    /**
+     * Получить дату окончания месяца.
+     *
+     * @param formData данные формы
+     * @return
+     */
+    public Calendar getMonthEndDate(FormData formData);
+
+    /**
+     * Получить отчетную дату месяцы месяца.
+     *
+     * @param formData данные формы
+     * @return
+     */
+    public Calendar getMonthReportDate(FormData formData);
 }
