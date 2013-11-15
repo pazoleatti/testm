@@ -269,22 +269,10 @@ void logicCheck() {
     // Дата окончания отчетного периода
     def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    //две карты: одна с реальными значениями итого по кодам, а вторая - с рассчитанными
-    def totalRows = [:]
-    def sumRowsByCode = [:]
-    //две карты: одна с реальными значениями итого по кодам, а вторая - с рассчитанными
-    def totalRows2 = [:]
-    def sumRowsByCode2 = [:]
-
     def index
     def errorMsg
 
     for (def row : dataRows) {
-        if (row.getAlias() ==~ /total\d+/) { // если подитог
-            totalRows[row.getAlias().replace('total', '')] = row.taxAccountingRuble
-            totalRows2[row.getAlias().replace('total', '')] = row.ruble
-            continue
-        }
         if (row.getAlias() != null) {
             continue
         }
@@ -361,19 +349,6 @@ void logicCheck() {
         needValue['ruble'] = calc12(row)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
-        // 10. Арифметические проверки расчета итоговых строк «Итого по КНУ»
-        def code = getKnu(row.kny)
-        if (sumRowsByCode[code] != null) {
-            sumRowsByCode[code] += row.taxAccountingRuble ?: 0
-        } else {
-            sumRowsByCode[code] = row.taxAccountingRuble ?: 0
-        }
-        if (sumRowsByCode2[code] != null) {
-            sumRowsByCode2[code] += row.ruble ?: 0
-        } else {
-            sumRowsByCode2[code] = row.ruble ?: 0
-        }
-
         // 12. Проверка наличия суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
         // 13. Проверка значения суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
         if (row.docDate != null) {
@@ -417,18 +392,7 @@ void logicCheck() {
     }
 
     // 10. Арифметические проверки расчета итоговых строк «Итого по КНУ»
-    totalRows.each { key, val ->
-        if (totalRows.get(key) != sumRowsByCode.get(key)) {
-            def msg = formData.createDataRow().getCell('taxAccountingRuble').column.name
-            logger.error("Неверное итоговое значение по коду '$key' графы «$msg»!")
-        }
-    }
-    totalRows2.each { key, val ->
-        if (totalRows2.get(key) != sumRowsByCode2.get(key)) {
-            def msg = formData.createDataRow().getCell('ruble').column.name
-            logger.error("Неверное итоговое значение по коду '$key' графы «$msg»!")
-        }
-    }
+    checkSubTotalSum(dataRows, totalColumns, logger, true)
 
     // 11. Арифметические проверки расчета строки общих итогов
     checkTotalSum(dataRows, totalColumns, logger, true)

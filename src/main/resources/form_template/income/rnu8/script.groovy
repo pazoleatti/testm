@@ -1,7 +1,6 @@
 package form_template.income.rnu8
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -128,8 +127,7 @@ void calc() {
             }
             // если код расходы поменялся то создать новую строку "итого по коду"
             if (tmp != row.code) {
-                def code = getKnu(tmp)
-                totalRows.put(i, getNewRow(code, sum, sum2))
+                totalRows.put(i, getNewRow(getKnu(tmp), sum, sum2))
                 sum = 0
                 sum2 = 0
             }
@@ -137,8 +135,7 @@ void calc() {
             if (i == dataRows.size() - 1) {
                 sum += (row.income ?: 0)
                 sum2 += (row.outcome ?: 0)
-                def code = getKnu(row.code)
-                def totalRowCode = getNewRow(code, sum, sum2)
+                def totalRowCode = getNewRow(getKnu(row.code), sum, sum2)
                 totalRows.put(i + 1, totalRowCode)
                 sum = 0
                 sum2 = 0
@@ -236,10 +233,10 @@ void logicCheck() {
         } else {
             sum1[code] = row.income ?: 0
         }
-        if (sum2 [code] != null) {
-            sum2 [code] += row.outcome ?: 0
+        if (sum2[code] != null) {
+            sum2[code] += row.outcome ?: 0
         } else {
-            sum2 [code] = row.outcome ?: 0
+            sum2[code] = row.outcome ?: 0
         }
     }
 
@@ -251,7 +248,7 @@ void logicCheck() {
         }
     }
     totalRows2.each { key, val ->
-        if (totalRows2.get(key) != sum2 .get(key)) {
+        if (totalRows2.get(key) != sum2.get(key)) {
             def msg = formData.createDataRow().getCell('outcome').column.name
             logger.error("Неверное итоговое значение по коду '$key' графы «$msg»!")
         }
