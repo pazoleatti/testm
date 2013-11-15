@@ -853,8 +853,8 @@ def addData(def xml) {
 
     def headShift = getHeaderRowCount()
     def cache = [:]
-    def data = formDataService.getDataRowHelper(formData)
-    data.clear()
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def rows = new LinkedList()
 
     def indexRow = -1     // пропустить шапку таблицы
     for (def row : xml.row) {
@@ -1020,8 +1020,9 @@ def addData(def xml) {
         // графа 20
         newRow.transactionDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
 
-        data.insert(newRow, indexRow - headShift)
+        rows.add(newRow)
     }
+    dataRowHelper.save(rows)
 }
 
 /**

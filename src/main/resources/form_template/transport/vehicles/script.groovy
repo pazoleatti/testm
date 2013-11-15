@@ -1,4 +1,4 @@
-package form_template.transport.primary.vehicles
+package form_template.transport.vehicles
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 /**
