@@ -168,8 +168,8 @@ void calc() {
     // отсортировать/группировать
     sort(dataRows)
 
-    def dateStart = reportPeriodService.getMonthStartDate(formData)?.time
-    def dateEnd =  reportPeriodService.getMonthEndDate(formData)?.time
+    def dateStart = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder)?.time
+    def dateEnd =  reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -198,9 +198,9 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def reportDay = reportPeriodService.getMonthReportDate(formData)?.time
-    def dateStart = reportPeriodService.getMonthStartDate(formData)?.time
-    def dateEnd =  reportPeriodService.getMonthEndDate(formData)?.time
+    def reportDay = reportPeriodService.getMonthReportDate(formData.reportPeriodId, formData.periodOrder)?.time
+    def dateStart = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder)?.time
+    def dateEnd =  reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
 
     // список проверяемых столбцов (графа 1..13)
     def requiredColumns = nonEmptyColumns
@@ -254,7 +254,7 @@ void logicCheck() {
         def firstRow = getDataRow(dataRows, section)
         def lastRow = getDataRow(dataRows, 'total' + section)
         for (def col : totalColumns) {
-            def value = lastRow.getCell(col).getValue() ?: 0
+            def value = lastRow.getCell(col).value ?: 0
             if (value != getSum(dataRows, col, firstRow, lastRow)) {
                 def name = getColumnName(lastRow, col)
                 def number = section[1]

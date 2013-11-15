@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -224,8 +223,7 @@ public class PeriodServiceImplTest {
         cl.clear();
         cl.set(2012, Calendar.FEBRUARY, 1);
 
-        FormData fd = getFormDataOfMonthPeriod();
-        assertEquals(service.getMonthStartDate(fd), cl);
+        assertEquals(service.getMonthStartDate(8, 2), cl);
     }
 
     @Test
@@ -234,8 +232,7 @@ public class PeriodServiceImplTest {
         cl.clear();
         cl.set(2012, Calendar.FEBRUARY, 29);
 
-        FormData fd = getFormDataOfMonthPeriod();
-        assertEquals(service.getMonthEndDate(fd), cl);
+        assertEquals(service.getMonthEndDate(8, 2), cl);
     }
 
     @Test
@@ -244,14 +241,6 @@ public class PeriodServiceImplTest {
         cl.clear();
         cl.set(2012, Calendar.MARCH, 1);
 
-        FormData fd = getFormDataOfMonthPeriod();
-        assertEquals(service.getMonthReportDate(fd), cl);
-    }
-
-    private FormData getFormDataOfMonthPeriod() {
-        FormData fd = new FormData();
-        fd.setReportPeriodId(8);
-        fd.setPeriodOrder(2);
-        return fd;
+        assertEquals(service.getMonthReportDate(8, 2), cl);
     }
 }

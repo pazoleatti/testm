@@ -368,33 +368,24 @@ public class PeriodServiceImpl implements PeriodService{
 	}
 
     @Override
-    public Calendar getMonthStartDate(FormData formData) {
-        if (formData.getPeriodOrder() == null) {
-            return null;
-        }
-        Calendar dateStart = getStartDate(formData.getReportPeriodId());
-        dateStart.set(Calendar.MONTH, dateStart.get(Calendar.MONTH) + formData.getPeriodOrder() - 1);
+    public Calendar getMonthStartDate(int reportPeriodId, int periodOrder) {
+        Calendar dateStart = getStartDate(reportPeriodId);
+        dateStart.set(Calendar.MONTH, dateStart.get(Calendar.MONTH) + periodOrder - 1);
         return dateStart;
     }
 
     @Override
-    public Calendar getMonthEndDate(FormData formData) {
-        if (formData.getPeriodOrder() == null) {
-            return null;
-        }
-        Calendar dateStart = getStartDate(formData.getReportPeriodId());
-        dateStart.set(Calendar.MONTH, dateStart.get(Calendar.MONTH) + formData.getPeriodOrder());
+    public Calendar getMonthEndDate(int reportPeriodId, int periodOrder) {
+        Calendar dateStart = getStartDate(reportPeriodId);
+        dateStart.set(Calendar.MONTH, dateStart.get(Calendar.MONTH) + periodOrder);
         dateStart.set(Calendar.DAY_OF_MONTH, dateStart.get(Calendar.DAY_OF_MONTH) - 1);
         return dateStart;
     }
 
     @Override
-    public Calendar getMonthReportDate(FormData formData) {
-        if (formData.getPeriodOrder() == null) {
-            return null;
-        }
-        Calendar dateStart = getStartDate(formData.getReportPeriodId());
-        dateStart.set(Calendar.MONTH, dateStart.get(Calendar.MONTH) + formData.getPeriodOrder());
+    public Calendar getMonthReportDate(int reportPeriodId, int periodOrder) {
+        Calendar dateStart = getStartDate(reportPeriodId);
+        dateStart.set(Calendar.MONTH, dateStart.get(Calendar.MONTH) + periodOrder);
         dateStart.set(Calendar.DAY_OF_MONTH, dateStart.get(Calendar.DAY_OF_MONTH));
         return dateStart;
     }

@@ -4,7 +4,6 @@ import java.util.Calendar;
 import java.util.List;
 
 
-import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
@@ -82,24 +81,27 @@ public interface ReportPeriodService {
     /**
      * Получить дату начала месяца.
      *
-     * @param formData данные формы
+     * @param reportPeriodId идентификатор отчетного период
+     * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
      * @return
      */
-    public Calendar getMonthStartDate(FormData formData);
+    public Calendar getMonthStartDate(int reportPeriodId, int periodOrder);
 
     /**
      * Получить дату окончания месяца.
      *
-     * @param formData данные формы
+     * @param reportPeriodId идентификатор отчетного период
+     * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
      * @return
      */
-    public Calendar getMonthEndDate(FormData formData);
+    public Calendar getMonthEndDate(int reportPeriodId, int periodOrder);
 
     /**
      * Получить отчетную дату месяцы месяца.
      *
-     * @param formData данные формы
+     * @param reportPeriodId идентификатор отчетного период
+     * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
      * @return
      */
-    public Calendar getMonthReportDate(FormData formData);
+    public Calendar getMonthReportDate(int reportPeriodId, int periodOrder);
 }
