@@ -178,7 +178,7 @@ void logicCheck(){
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         def values = [:]
-        def rowPrev = getRowPrev(formDataPrev, row)
+        def rowPrev = getRowPrev(formDataPrev?.allCached, row)
         values.with {
             result = roundTo(getGraph11(row), 2)
             part2Date = getGraph12(row)
@@ -278,7 +278,7 @@ void calc(){
 
     // Расчет ячеек
     for(def row : dataRows) {
-        def rowPrev = getRowPrev(formDataPrev, row)
+        def rowPrev = getRowPrev(formDataPrev?.allCached, row)
         row.with {
             rowNumber = ++index
             result = roundTo(getGraph11(row), 2)
@@ -351,10 +351,9 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     return newRow
 }
 
-def getRowPrev(def formDataPrev, def row){
-    if (formDataPrev != null) {
-        def prevDataRowHelper = formDataService.getDataRowHelper(formDataPrev)
-        for (def rowPrev in prevDataRowHelper.allCached){
+def getRowPrev(def dataRowsPrev, def row){
+    if (dataRowsPrev != null) {
+        for (def rowPrev in dataRowsPrev){
             if ((row.contragent == rowPrev.contragent &&
                     row.inn == rowPrev.inn &&
                     row.assignContractNumber == rowPrev.assignContractNumber &&
