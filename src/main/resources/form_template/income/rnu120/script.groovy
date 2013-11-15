@@ -313,7 +313,7 @@ void logicCheck() {
 def getTotalRow(def dataRows) {
     def newRow = formData.createDataRow()
     newRow.setAlias('total')
-    newRow.numberAccount = 'Итого:'
+    newRow.numberAccount = 'Итого'
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
