@@ -217,8 +217,4 @@
         <mime-type>text/xml;charset=utf-8</mime-type>
     </mime-mapping>
 
-    <session-config>
-        <session-timeout>0</session-timeout>
-    </session-config>
-
 </web-app>
