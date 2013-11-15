@@ -156,8 +156,11 @@ def getNumber(def value, def indexRow, def indexCol) {
 /** Расчеты. Алгоритмы заполнения полей формы. */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    def dataRowsPrev = formDataService.getDataRowHelper(getFormPrev()).allCached
+    def dataRows = dataRowHelper.getAllCached()
+
+    def dataRowHelperPrev = getFormDataPrev()
+    if (dataRowHelperPrev==null) return
+    def dataRowsPrev = dataRowHelperPrev.getAllCached()
 
     // удалить строку "итого"
     deleteAllAliased(dataRows)
@@ -209,8 +212,11 @@ void prevPeriodCheck() {
 /** Логические проверки. */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    def dataRowsPrev = formDataService.getDataRowHelper(getFormPrev()).allCached
+    def dataRows = dataRowHelper.getAllCached()
+
+    def dataRowHelperPrev = getFormDataPrev()
+    if (dataRowHelperPrev==null) return
+    def dataRowsPrev = dataRowHelperPrev.getAllCached()
 
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def calcValues = [:]
@@ -374,25 +380,28 @@ def calc17(def row, def rowPrev) {
 }
 
 // Получить данные за предыдущий период
-FormData getFormPrev() {
+def getFormDataPrev() {
     def reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-    FormData formPrev = null
+    def formPrev = null
     if (reportPeriodPrev != null) {
         formPrev = formDataService.find(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id)
+        if (formPrev!=null && formPrev.id != null) {
+            return formDataService.getDataRowHelper(formPrev)
+        }
     }
     return formPrev
 }
 
 // Получить данные за предыдущий период
 def getRowPrev(def row, def dataRowsPrev) {
-    if (formPrev!=null) {
+    if (dataRowsPrev!=null) {
         for (def rowPrev in dataRowsPrev) {
             if (row.numberAccount == rowPrev.numberAccount) {
                 return rowPrev
             }
         }
     }
-    return null
+    return [:]
 }
 
 def roundValue(def value, int precision) {
