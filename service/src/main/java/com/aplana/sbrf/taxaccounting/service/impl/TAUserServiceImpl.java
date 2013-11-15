@@ -35,7 +35,7 @@ public class TAUserServiceImpl implements TAUserService {
 	public TAUser getUser(String login) {
         logger.info("Получение информации пользователя по логину " + login + " getUser()");
 		try {
-			int userId = userDao.getUserIdByLogin(login);
+			int userId = userDao.getUserIdByLogin(login.toLowerCase());
 			return userDao.getUser(userId);
 		} catch (DaoException e) {
             logger.error("Ошибка при получении пользователя по логину" + login, e);
@@ -52,7 +52,7 @@ public class TAUserServiceImpl implements TAUserService {
 	public void setUserIsActive(String login, boolean isActive) {
 		try {
             logger.info("Обновленее активности пользователя по логину " + login + " setUserIsActive()");
-			int userId = userDao.getUserIdByLogin(login);
+			int userId = userDao.getUserIdByLogin(login.toLowerCase());
 			userDao.setUserIsActive(userId, isActive?1:0);
 		}catch (EmptyResultDataAccessException e){
             throw new WSException(WSException.SudirErrorCodes.SUDIR_004,
@@ -67,7 +67,7 @@ public class TAUserServiceImpl implements TAUserService {
 
 	@Override
 	public void updateUser(TAUser user) {
-        if(userDao.checkUserLogin(user.getLogin()) == 0)
+        if(userDao.checkUserLogin(user.getLogin().toLowerCase()) == 0)
             throw new WSException(WSException.SudirErrorCodes.SUDIR_004,
                     "Пользователя с login = " + user.getLogin() + " не существует.");
 		for(TARole role : user.getRoles()){
@@ -80,7 +80,7 @@ public class TAUserServiceImpl implements TAUserService {
 					"Назначенное пользователю " + user.getLogin() + " подразделение не присутствует в справочнике «Подразделения» Системы");
 		try {
             logger.info("Обновленее информации пользователя " + user.getLogin() + " updateUser()");
-            user.setId(userDao.getUserIdByLogin(user.getLogin()));
+            user.setId(userDao.getUserIdByLogin(user.getLogin().toLowerCase()));
 			userDao.updateUser(user);
 		} catch (DaoException e) {
             logger.error("Ошибка при обновлении информации пользователя " + user.getLogin() + " updateUser().", e);
@@ -91,7 +91,7 @@ public class TAUserServiceImpl implements TAUserService {
 
 	@Override
 	public int createUser(TAUser user) {
-		if(userDao.checkUserLogin(user.getLogin()) != 0)
+		if(userDao.checkUserLogin(user.getLogin().toLowerCase()) != 0)
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_005,
 					"Пользователь с таким логином уже существует.");
 		for(TARole role : user.getRoles()){
