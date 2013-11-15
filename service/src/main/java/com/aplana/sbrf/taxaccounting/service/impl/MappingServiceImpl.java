@@ -101,11 +101,6 @@ public class MappingServiceImpl implements MappingService {
 
             Logger logger = new Logger();
 
-            // TODO Debug
-            System.out.println(">> CreateFormData from file = " + filename + " departmentId = "
-                    + departmentId + " reportPeriodId = " + reportPeriodId + " formTypeId = " + formTypeId
-                    + " formTemplateId = " + formTemplateId);
-
             long formDataId = formDataService.createFormData(logger,
                     userInfo,
                     formTemplateId,

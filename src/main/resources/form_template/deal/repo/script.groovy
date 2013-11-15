@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import groovy.transform.Field
 
 import java.text.SimpleDateFormat
 
@@ -53,6 +54,12 @@ switch (formDataEvent) {
         break
 }
 
+// Кэш провайдеров
+@Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+
 /**
  * Проверка при создании формы.
  */
@@ -70,7 +77,7 @@ void addRow() {
     def row = formData.createDataRow()
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
-    def index = currentDataRow != null ? (currentDataRow.getIndex()+1) : (size == 0 ? 1 : (size+1))
+    def index = currentDataRow != null ? (currentDataRow.getIndex() + 1) : (size == 0 ? 1 : (size + 1))
     row.keySet().each{
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
@@ -305,9 +312,8 @@ void importData() {
 def addData(def xml, int headRowCount) {
     Date date = reportPeriodService.get(formData.reportPeriodId).taxPeriod.getEndDate()
 
-    def cache = [:]
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
+    def rows = new LinkedList()
 
     def indexRow = -1
     for (def row : xml.row) {
@@ -318,7 +324,7 @@ def addData(def xml, int headRowCount) {
             continue
         }
 
-        if (row.cell.findAll{it.text()!=""}.size()<=2) {
+        if (row.cell.findAll { it.text() != "" }.size() <= 2) {
             break
         }
 
@@ -335,7 +341,7 @@ def addData(def xml, int headRowCount) {
         newRow.rowNum = indexRow - headRowCount
 
         // графа 2
-        newRow.jurName = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
+        newRow.jurName = getRecordId(9, 'NAME', row.cell[indexCell].text(), date, indexRow, indexCell, false)
         def map = newRow.jurName == null ? null : refBookService.getRecordData(9, newRow.jurName)
         indexCell++
 
@@ -384,7 +390,7 @@ def addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 10
-        newRow.dealsMode = getRecordId(14, 'MODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
+        newRow.dealsMode = getRecordId(14, 'MODE', row.cell[indexCell].text(), date, indexRow, indexCell, false)
         indexCell++
 
         // графа 11
@@ -408,7 +414,7 @@ def addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 16
-        newRow.currencyCode = getRecordId(15, 'CODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell, false)
+        newRow.currencyCode = getRecordId(15, 'CODE', row.cell[indexCell].text(), date, indexRow, indexCell, false)
         indexCell++
 
         // графа 17
@@ -422,8 +428,9 @@ def addData(def xml, int headRowCount) {
         // графа 19
         newRow.transactionDate = getDate(row.cell[indexCell].text(), indexRow, indexCell)
 
-        dataRowHelper.insert(newRow, indexRow - headRowCount)
+        rows.add(newRow)
     }
+    dataRowHelper.save(rows)
 }
 
 /**
@@ -500,35 +507,6 @@ def getNumber(def value, int indexRow, int indexCell) {
 }
 
 /**
- * Получить record_id элемента справочника.
- *
- * @param value
- */
-def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory = true) {
-    String filter = "LOWER($alias) = LOWER('$value')"
-    if (value=='') filter = "$alias is null"
-    if (cache[ref_id]!=null) {
-        if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
-    } else {
-        cache[ref_id] = [:]
-    }
-    def refDataProvider = refBookFactory.getDataProvider(ref_id)
-    def records = refDataProvider.getRecords(date, null, filter, null)
-    if (records.size() == 1){
-        cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        return cache[ref_id][filter]
-    }
-    def msg = "Строка ${indexRow+2} столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!"
-    if (mandatory) {
-        throw new Exception(msg)
-    } else {
-        logger.warn(msg)
-    }
-    return null
-}
-
-
-/**
  * Получить дату по строковому представлению (формата дд.ММ.гггг)
  */
 def getDate(def value, int indexRow, int indexCell) {
@@ -541,4 +519,42 @@ def getDate(def value, int indexRow, int indexCell) {
     } catch (Exception e) {
         throw new Exception("Строка ${indexRow+2} столбец ${indexCell+2} содержит недопустимый тип данных!")
     }
+}
+
+def getProvider(def long providerId) {
+    if (!providerCache.containsKey(providerId)) {
+        providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
+    }
+    return providerCache.get(providerId)
+}
+
+/**
+ * Получить record_id элемента справочника.
+ *
+ * @param value
+ */
+def getRecordId(def ref_id, String alias, String value, Date date, int rowIndex, int indexCell, boolean mandatory = true) {
+    String filter = "LOWER($alias) = LOWER('$value')"
+    if (value == '') filter = "$alias is null"
+    if (recordCache[ref_id] != null) {
+        if (recordCache[ref_id][filter] != null) {
+            return recordCache[ref_id][filter]
+        }
+    } else {
+        recordCache[ref_id] = [:]
+    }
+    def refDataProvider = getProvider(ref_id)
+    def records = refDataProvider.getRecords(date, null, filter, null)
+    if (records.size() == 1) {
+        recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        return recordCache[ref_id][filter]
+    } else {
+        def msg = "Строка ${rowIndex+2}, столбец ${indexCell+2} содержит значение, отсутствующее в справочнике!"
+        if (mandatory) {
+            throw new Exception(msg)
+        } else {
+            logger.warn(msg)
+        }
+    }
+    return null
 }
