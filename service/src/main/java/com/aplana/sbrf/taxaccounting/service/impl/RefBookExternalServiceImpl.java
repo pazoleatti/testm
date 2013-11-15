@@ -63,15 +63,15 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         // регулярка файла/архива  - true/false  - id
         Map<String, Pair<Boolean, Long>> map = new HashMap<String, Pair<Boolean, Long>>();
         // файл для загр. спр. "Коды ОКАТО"
-        map.put("payments.OKATO..*", new Pair<Boolean, Long>(true, 3L));
+        map.put("public-currency_1.xml", new Pair<Boolean, Long>(true, 22L));
         // архив для загр. спр. "Коды ОКАТО"
-        map.put("OKA.*", new Pair<Boolean, Long>(false, 3L));
+        //map.put("OKA.*", new Pair<Boolean, Long>(false, 3L));
         // файл для загр. спр. "Организации-участники контролируемых сделок"
-        map.put("organization.xls", new Pair<Boolean, Long>(true, 9L));
+        //map.put("organization.xls", new Pair<Boolean, Long>(true, 9L));
 
         //TODO добавить проверку ЭЦП (Marat Fayzullin 2013-10-19)
-        Map<ConfigurationParam, String> params = configurationService.getAllConfig(userInfo);
-        String refBookDirectory = params.get(ConfigurationParam.REF_BOOK_DIRECTORY);
+        //Map<ConfigurationParam, String> params = configurationService.getAllConfig(userInfo);
+        String refBookDirectory = "smb://SYASINSKIY-PC/shareTest/";
 
         BufferedReader reader = null;
         if (log.isDebugEnabled()) {
