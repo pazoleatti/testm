@@ -3,7 +3,7 @@
  */
 
 // Путь к корневой папке для определенного вида налога, например C:\workspace\sbrfacctax\src\main\resources\form_template\deal\
-def scriptLocation = 'C:\\Users\\user\\workspaceIdea\\sbrfacctax\\src\\main\\resources\\form_template\\deal\\'
+def scriptLocation = 'C:\\workspace\\sbrfacctax\\src\\main\\resources\\form_template\\deal\\'
 
 // Маппинг
 // FORM_TEMPLATE.ID -> Имя папки
@@ -23,7 +23,7 @@ def map = [
         392: "nondeliverable", // Беспоставочные срочные сделки
         410: "organization_matching", // Согласование организации
         393: "precious_metals_deliver", // Поставочные срочные сделки с драгоценными металлами
-        //394: "precious_metals_trade", // Купля-продажа драгоценных металлов
+        394: "precious_metals_trade", // Купля-продажа драгоценных металлов
         376: "rent_provision", // Предоставление нежилых помещений в аренду
         383: "repo", // Сделки РЕПО
         381: "securities", // Приобретение и реализация ценных бумаг (долей в уставном капитале)
