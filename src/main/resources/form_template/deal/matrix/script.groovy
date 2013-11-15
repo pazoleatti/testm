@@ -303,7 +303,6 @@ void deleteAllStatic() {
  */
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
 
     def rows = new LinkedList<DataRow<Cell>>()
 
@@ -319,7 +318,7 @@ void consolidation() {
         }
     }
 
-    dataRowHelper.insert(rows, 1)
+    dataRowHelper.save(rows)
 }
 
 /**
