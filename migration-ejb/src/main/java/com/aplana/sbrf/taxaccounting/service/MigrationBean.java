@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.dao.MigrationDao;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
 import com.aplana.sbrf.taxaccounting.model.migration.MigrationSendResult;
 import com.aplana.sbrf.taxaccounting.model.migration.enums.NalogFormType;
@@ -181,8 +182,7 @@ public class MigrationBean implements MessageService {
         MigrationSendResult result = new MigrationSendResult();
         if (migrationDao == null)  {
             // В dev-mode попадем сюда, это нормально
-            logger.error("Объект MigrationDao не найден.");
-            return result;
+            throw new ServiceException("В Dev-mode не реализована отправка JMS-сообщений.");
         }
         try {
             connection = connectionFactory.createConnection();
@@ -200,7 +200,6 @@ public class MigrationBean implements MessageService {
             logger.error("Ошибка подготовки JMS. " + e.getMessage(), e);
             return result;
         }
-
         return result;
     }
 }
