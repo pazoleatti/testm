@@ -11,6 +11,8 @@
        http://www.springframework.org/schema/jee/spring-jee.xsd">
 
     <jee:jndi-lookup id="dataSource" jndi-name="jdbc/TaxAccDS_MIGRATION"/>
+    <jee:jndi-lookup id="jms/transportConnectionFactory" jndi-name="jms/transportConnectionFactory" expected-type="javax.jms.ConnectionFactory"/>
+    <jee:jndi-lookup id="jms/transportQueue" jndi-name="jms/transportQueue" expected-type="javax.jms.Queue"/>
 
     <import resource="classpath:com/aplana/sbrf/taxaccounting/dao.xml"/>
 

@@ -17,8 +17,6 @@ import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
 import javax.jms.*;
 import javax.jms.Queue;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import java.util.*;
 
 /**
@@ -35,8 +33,12 @@ public class MigrationBean implements MessageService {
     private final Log logger = LogFactory.getLog(getClass());
     private static final String FILENAME_PROPERTY_NAME = "FILENAME";
     private static final String DATA_PROPERTY_NAME = "DATA";
-    private static final String JMS_FACTORY = "jms/transportConnectionFactory";
-    private static final String JMS_QUEUE = "jms/transportQueue";
+
+    @Resource(name="jms/transportConnectionFactory")
+    private ConnectionFactory connectionFactory;
+
+    @Resource(name="jms/transportQueue")
+    private Queue queue;
 
     // РНУ для миграции
     private static long[] rnus = {25L, 26L, 27L, 31L, 51L, 53L, 54L, 59L, 60L, 64L};
@@ -50,8 +52,6 @@ public class MigrationBean implements MessageService {
     @Autowired
     private MigrationDao migrationDao;
 
-    private ConnectionFactory connectionFactory;
-    private Queue queue;
     private Connection connection;
     private Session session;
     private MessageProducer messageProducer;
@@ -184,15 +184,6 @@ public class MigrationBean implements MessageService {
             logger.error("Объект MigrationDao не найден.");
             return result;
         }
-        try {
-            InitialContext jndiContext = new InitialContext();
-            connectionFactory = (ConnectionFactory) jndiContext.lookup(JMS_FACTORY);
-            queue = (Queue) jndiContext.lookup(JMS_QUEUE);
-        } catch (NamingException e) {
-            logger.error("Ресурс \"" + JMS_FACTORY + "\" или \"" + JMS_QUEUE + "\"  не найден. " + e.getMessage(), e);
-            return result;
-        }
-
         try {
             connection = connectionFactory.createConnection();
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
