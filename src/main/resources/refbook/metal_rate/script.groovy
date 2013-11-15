@@ -63,8 +63,11 @@ void importFromXML() {
                 // Версия справочника
                 if (reader.getName().equals(QName.valueOf("StartDateTime"))) {
                     version = sdf.parse(reader.getElementText())
+                    //println("version = " + version)
                     dataProvider.getRecords(version, null, null, null).records.each {
                         if (it.get(stringCode) != null) {
+                            //println("it.get(stringCode).referenceValue = " + it.get(stringCode).referenceValue + "; " +
+                            //"it.get(RefBook.RECORD_ID_ALIAS).numberValue = " + it.get(RefBook.RECORD_ID_ALIAS).numberValue)
                             recordsDB.put(it.get(stringCode).referenceValue, it.get(RefBook.RECORD_ID_ALIAS).numberValue)
                         }
                     }
@@ -81,8 +84,9 @@ void importFromXML() {
                     def records = refBookFactory.getDataProvider(17).getRecords(version, null, "LOWER(INNER_CODE) = LOWER('$val')", null)
                     if (records.size() > 0) {
                         code = records.get(0).record_id.numberValue
-                    } else{
-                        throw new Exception("В справочнике «Коды драгоценных металлов» отсутствует элемент с кодом '$val'")
+                    } else {
+                        code = null
+                        println("В справочнике «Коды драгоценных металлов» отсутствует элемент с кодом '$val'")
                     }
                 }
 
@@ -93,11 +97,14 @@ void importFromXML() {
             }
 
             // Запись в лист
-            if (reader.endElement && reader.getName().equals(QName.valueOf("PreciousMetalRate"))) {
+            if (reader.endElement && reader.getName().equals(QName.valueOf("PreciousMetalRate")) && code != null) {
                 recordsMap = new HashMap<String, RefBookValue>()
                 recordsMap.put(stringCode, new RefBookValue(codeType, code))
                 recordsMap.put(stringRate, new RefBookValue(rateType, rate))
+                //println("code = " + code)
+                //println("rate = " + rate)
                 if (recordsDB.containsKey(code)) {
+                    //println("recordsDB.get(code) = " + recordsDB.get(code))
                     recordsMap.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordsDB.get(code)))
                     updateList.add(recordsMap)
                 } else {
@@ -111,8 +118,11 @@ void importFromXML() {
         reader?.close()
     }
 
-   if (!updateList.empty)
-       dataProvider.updateRecords(version, updateList)
-   if (!insertList.empty)
-       dataProvider.insertRecords(version, insertList)
+    println("insert records = " + insertList)
+    println("update records = " + updateList)
+
+    if (!updateList.empty)
+        dataProvider.updateRecords(version, updateList)
+    if (!insertList.empty)
+        dataProvider.insertRecords(version, insertList)
 }

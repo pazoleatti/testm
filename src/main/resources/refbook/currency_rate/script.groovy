@@ -80,9 +80,9 @@ void importFromXML() {
                     def records = refBookFactory.getDataProvider(15).getRecords(version, null, "LOWER(CODE) = LOWER('$val')", null)
                     if (records.size() > 0) {
                         code = records.get(0).record_id.numberValue
-                    } else{
+                    } else {
                         code = null
-                        logger.warn("В справочнике «Общероссийский классификатор валют» отсутствует элемент с кодом '$val'")
+                        println("В справочнике «Общероссийский классификатор валют» отсутствует элемент с кодом '$val'")
                     }
                 }
 
@@ -93,7 +93,7 @@ void importFromXML() {
             }
 
             // Запись в лист
-            if (reader.endElement && reader.getName().equals(QName.valueOf("CurrencyRate")) && code!=null) {
+            if (reader.endElement && reader.getName().equals(QName.valueOf("CurrencyRate")) && code != null) {
                 recordsMap = new HashMap<String, RefBookValue>()
                 recordsMap.put("CODE_NUMBER", new RefBookValue(codeType, code))
                 recordsMap.put("RATE", new RefBookValue(rateType, rate))
@@ -110,6 +110,9 @@ void importFromXML() {
     } finally {
         reader?.close()
     }
+
+    println("insert records = " + insertList)
+    println("update records = " + updateList)
 
     if (!updateList.empty)
         dataProvider.updateRecords(version, updateList)
