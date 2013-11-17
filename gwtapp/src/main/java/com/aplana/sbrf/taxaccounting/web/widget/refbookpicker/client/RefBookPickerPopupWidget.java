@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client;
 
 import java.util.Date;
 
+import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.PanelCloseAction;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -40,11 +41,20 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
     @UiField
     Image selectButton;
 
+    /** Признак модальности окна */
+    private boolean modal;
+
     public RefBookPickerPopupWidget() {
         initWidget(binder.createAndBindUi(this));
         popupPanel = new PopupPanel(true, true);
         refBookPiker = new RefBookPickerWidget();
         popupPanel.add(refBookPiker);
+        refBookPiker.setClosedPanelAction(new PanelCloseAction() {
+            @Override
+            public void onClose() {
+                popupPanel.hide();
+            }
+        });
         refBookPiker.addValueChangeHandler(new ValueChangeHandler<Long>() {
             @Override
             public void onValueChange(ValueChangeEvent<Long> event) {
@@ -73,7 +83,12 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 			    if ((text.getAbsoluteTop() + popupPanel.getOffsetHeight()) > windowHeight) {
 				    exceedOffsetY -= popupPanel.getOffsetHeight() + text.getOffsetHeight();
 			    }
-			    popupPanel.setPopupPosition(exceedOffsetX, exceedOffsetY);
+                if (!modal) {
+                    popupPanel.setPopupPosition(exceedOffsetX, exceedOffsetY);
+                } else {
+                    popupPanel.setAutoHideEnabled(false);
+                    popupPanel.center();
+                }
 		    }
 	    });
     }
@@ -169,5 +184,24 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 		this.filter = filter;
 	}
 
+    @Override
+    public boolean isModal() {
+        return modal;
+    }
 
+    @Override
+    public void setModal(boolean modal) {
+        this.modal = modal;
+    }
+
+    @Override
+    public void setTitlePanelVisibility(boolean visible) {
+        refBookPiker.setTitlePanelVisibility(visible);
+    }
+
+    @Override
+    public void setTitleText(String title) {
+        refBookPiker.setTitlePanelVisibility(true);
+        refBookPiker.setTitleText(title);
+    }
 }

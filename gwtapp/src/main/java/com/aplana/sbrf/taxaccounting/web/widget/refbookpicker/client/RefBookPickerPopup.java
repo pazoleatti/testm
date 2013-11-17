@@ -39,4 +39,12 @@ public interface RefBookPickerPopup extends HasValue<Long>, IsWidget, HasEnabled
 
 	public void setFilter(String filter);
 
+    public boolean isModal();
+
+    public void setModal(boolean modal);
+
+    public void setTitlePanelVisibility(boolean visible);
+
+    public void setTitleText(String title);
+
 }

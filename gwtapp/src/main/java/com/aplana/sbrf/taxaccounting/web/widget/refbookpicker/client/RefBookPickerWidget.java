@@ -4,15 +4,14 @@ import java.util.Date;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.PanelCloseAction;
+import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.TitlePanelWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidgetPresenter.MyView;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.RefBookItem;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -22,11 +21,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.LoadingStateChangeEvent;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.ValueListBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.HasData;
@@ -60,6 +55,9 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 
 	@UiField
 	FlexiblePager pager;
+
+    @UiField
+    TitlePanelWidget titlePanel;
 	
 	private AsyncDataProvider<RefBookItem> dataProvider = new AsyncDataProvider<RefBookItem>() {
 		@Override
@@ -68,7 +66,6 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 			uiHandlers.rangeChanged(range.getStart(), range.getLength());
 		}
 	};
-	
 	
 	public RefBookPickerWidget() {
 		version = new ValueListBox<Date>(new DateTimeFormatRenderer());
@@ -286,6 +283,19 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 		return uiHandlers.getDereferenceValue();
 	}
 
+    @Override
+    public void setClosedPanelAction(PanelCloseAction action) {
+        titlePanel.setClosedPanelAction(action);
+    }
 
+    @Override
+    public void setTitlePanelVisibility(boolean visible) {
+        titlePanel.setVisible(visible);
+    }
+
+    @Override
+    public void setTitleText(String title) {
+        titlePanel.setValue(title);
+    }
 
 }
