@@ -126,7 +126,7 @@
 
     <!-- Подмена EJB-модуля MigrationBean на maven-зависимость для dev-mode -->
     <New class="org.mortbay.jetty.plus.naming.Resource">
-        <Arg>ejblocal:${buildName}/migration-ejb.jar/MigrationBean#com.aplana.sbrf.taxaccounting.service.MessageServiceLocal</Arg>
+        <Arg>ejblocal:taxaccounting/migration-ejb.jar/MigrationBean#com.aplana.sbrf.taxaccounting.service.MessageServiceLocal</Arg>
         <Arg>
             <New class="com.aplana.sbrf.taxaccounting.service.MigrationBean"/>
         </Arg>
