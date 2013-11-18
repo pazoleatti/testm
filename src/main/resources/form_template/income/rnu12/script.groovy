@@ -243,7 +243,7 @@ void logicCheck() {
         index = row.getIndex()
         errorMsg = "Строка $index: "
 
-        //Проверка на заполнение поля
+        // Проверка на заполнение поля
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 1. Проверка даты совершения операции и границ отчетного периода (графа 5)
@@ -274,7 +274,7 @@ void logicCheck() {
         needValue['outcomeInNalog'] = calc11(row)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
-        // Проверки соответствия НСИ.
+        // Проверки соответствия НСИ
         checkNSI(27, row, "code")
         checkNSI(27, row, "opy")
     }
