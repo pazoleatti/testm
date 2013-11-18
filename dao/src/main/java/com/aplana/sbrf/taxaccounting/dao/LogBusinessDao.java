@@ -25,12 +25,12 @@ public interface LogBusinessDao {
 	List<LogBusiness> getFormLogsBusiness(long formId);
 
     /**
-     * Получить информацию об историей событий НФ и деклараций.
+     * Получить информацию об историии событий НФ и деклараций.
      * @param formDataIds
      * @param declarationDataIds
      * @return
      */
-    PagingResult<LogSystemSearchResultItem> getLogsBusiness(List<Long> formDataIds, List<Long> declarationDataIds, LogBusinessFilterValuesDao filter);
+    PagingResult<LogSearchResultItem> getLogsBusiness(List<Long> formDataIds, List<Long> declarationDataIds, LogBusinessFilterValuesDao filter);
 
 	/**
 	 * Получить дату последнего принятия налоговой формы

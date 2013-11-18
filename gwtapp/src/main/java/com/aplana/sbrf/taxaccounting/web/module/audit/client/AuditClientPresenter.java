@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 
+import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
-import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -65,7 +65,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
             @Override
             public void onSuccess(GetAuditDataListResult result) {
                 if(result==null || result.getTotalCountOfRecords() == 0)
-                    getView().setAuditTableData(start, 0, new ArrayList<LogSystemSearchResultItem>());
+                    getView().setAuditTableData(start, 0, new ArrayList<LogSearchResultItem>());
                 else
                     getView().setAuditTableData(start, result.getTotalCountOfRecords(), result.getRecords());
             }
@@ -115,7 +115,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     }
 
     interface MyView extends View,HasUiHandlers<AuditClientUIHandler> {
-        void setAuditTableData(int startIndex, long count,  List<LogSystemSearchResultItem> itemList);
+        void setAuditTableData(int startIndex, long count,  List<LogSearchResultItem> itemList);
         void getBlobFromServer(String uuid);
         void updateData(int pageNumber);
     }

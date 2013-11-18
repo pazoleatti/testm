@@ -19,7 +19,7 @@ public class PrintingServiceImplTest {
     private final static int USER_DEPARTMENT_ID = 1;
     private final static String USER_ROLE = "ROLE_CONTROL_UNP";
 
-    private List<LogSystemSearchResultItem> items = new ArrayList<LogSystemSearchResultItem>();
+    private List<LogSearchResultItem> items = new ArrayList<LogSearchResultItem>();
 
     private PrintingServiceImpl printingService =  new PrintingServiceImpl();
 
@@ -39,7 +39,7 @@ public class PrintingServiceImplTest {
         user.setRoles(listUserRoles);
         user.setActive(true);
 
-        LogSystemSearchResultItem item =  new LogSystemSearchResultItem();
+        LogSearchResultItem item =  new LogSearchResultItem();
         item.setUser(user);
         ReportPeriod rp =  new ReportPeriod();
         TaxPeriod taxPeriod = new TaxPeriod();

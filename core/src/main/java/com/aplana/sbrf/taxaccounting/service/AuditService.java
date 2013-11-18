@@ -13,7 +13,7 @@ public interface AuditService {
 	 * @param logSystemFilter фильтр по которому происходит поиск необходимых данных
 	 * @return объект, представляющий искомую информацию из журанала аудита
 	 * */
-	PagingResult<LogSystemSearchResultItem> getLogsByFilter(LogSystemFilter logSystemFilter);
+	PagingResult<LogSearchResultItem> getLogsByFilter(LogSystemFilter logSystemFilter);
 
 	/**
 	 * Добавить информацию об логировании
@@ -30,5 +30,5 @@ public interface AuditService {
      * Удаляем набор записей из журнала и сразу создаем запись в ЖА об архивировании.
      * @param itemList
      */
-    void removeRecords(List<LogSystemSearchResultItem> itemList, TAUserInfo userInfo);
+    void removeRecords(List<LogSearchResultItem> itemList, TAUserInfo userInfo);
 }

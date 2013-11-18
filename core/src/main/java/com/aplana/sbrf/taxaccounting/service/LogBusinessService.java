@@ -29,7 +29,7 @@ public interface LogBusinessService {
      * @param filter
      * @return
      */
-    PagingResult<LogSystemSearchResultItem> getLogsBusiness(TAUserInfo userInfo, LogBusinessFilterValues filter);
+    PagingResult<LogSearchResultItem> getLogsBusiness(TAUserInfo userInfo, LogBusinessFilterValues filter);
 
 	/**
 	 * Добавить информацию об логировании

@@ -15,11 +15,11 @@ import java.util.List;
  */
 public class LogSystemReportBuilderTest {
 
-    private List<LogSystemSearchResultItem> items = new ArrayList<LogSystemSearchResultItem>();
+    private List<LogSearchResultItem> items = new ArrayList<LogSearchResultItem>();
 
     @Before
     public void init(){
-        LogSystemSearchResultItem item = new LogSystemSearchResultItem();
+        LogSearchResultItem item = new LogSearchResultItem();
         FormType type = new FormType();
         Department department = new Department();
         department.setName("Начальный");

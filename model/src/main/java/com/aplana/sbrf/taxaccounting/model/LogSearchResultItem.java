@@ -7,7 +7,7 @@ import java.util.Date;
  * User: ibukanov
  * Модельный класс к журналу аудита, возвращаемый клиенту как поисковый резултат
  */
-public class LogSystemSearchResultItem implements Serializable {
+public class LogSearchResultItem implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private Long id;

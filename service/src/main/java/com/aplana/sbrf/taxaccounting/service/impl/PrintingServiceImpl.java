@@ -122,7 +122,7 @@ public class PrintingServiceImpl implements PrintingService {
     }
 
     @Override
-    public String generateExcelLogSystem(List<LogSystemSearchResultItem> resultItems) {
+    public String generateExcelLogSystem(List<LogSearchResultItem> resultItems) {
         try {
             LogSystemXlsxReportBuilder builder = new LogSystemXlsxReportBuilder(resultItems);
             return builder.createReport();
@@ -133,7 +133,7 @@ public class PrintingServiceImpl implements PrintingService {
     }
 
     @Override
-    public String generateAuditCsv(List<LogSystemSearchResultItem> resultItems) {
+    public String generateAuditCsv(List<LogSearchResultItem> resultItems) {
         try {
             LogSystemCsvBuilder logSystemCsvBuilder = new LogSystemCsvBuilder(resultItems);
             return logSystemCsvBuilder.createReport();

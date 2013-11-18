@@ -33,7 +33,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 	}
 
     @Override
-    public PagingResult<LogSystemSearchResultItem> getLogsBusiness(TAUserInfo userInfo, LogBusinessFilterValues filter) {
+    public PagingResult<LogSearchResultItem> getLogsBusiness(TAUserInfo userInfo, LogBusinessFilterValues filter) {
         FormDataFilter formDataFilter = new FormDataFilter();
         formDataFilter.setTaxType(filter.getTaxType());
         /*formDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId()) : new ArrayList<Integer>());*/

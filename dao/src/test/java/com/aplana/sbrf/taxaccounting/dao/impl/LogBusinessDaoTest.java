@@ -120,7 +120,7 @@ public class LogBusinessDaoTest {
         declarationIds.add(1l);
         declarationIds.add(2l);
 
-        PagingResult<LogSystemSearchResultItem> resultItems = logBusinessDao.getLogsBusiness(formDataIds, declarationIds, filterValuesDao);
+        PagingResult<LogSearchResultItem> resultItems = logBusinessDao.getLogsBusiness(formDataIds, declarationIds, filterValuesDao);
         assertEquals(1, resultItems.getTotalCount());
         assertEquals(1, resultItems.size());
         /*assertEquals("Банк", resultItems.get(0).getDepartment().getName());*/

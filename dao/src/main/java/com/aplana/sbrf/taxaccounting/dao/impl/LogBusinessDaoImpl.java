@@ -71,11 +71,11 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 		}
 	}
 
-    private final class LogSystemSearchResultItemRowMapper implements RowMapper<LogSystemSearchResultItem> {
+    private final class LogSystemSearchResultItemRowMapper implements RowMapper<LogSearchResultItem> {
 
         @Override
-        public LogSystemSearchResultItem mapRow(ResultSet rs, int rowNum) throws SQLException {
-            LogSystemSearchResultItem log = new LogSystemSearchResultItem();
+        public LogSearchResultItem mapRow(ResultSet rs, int rowNum) throws SQLException {
+            LogSearchResultItem log = new LogSearchResultItem();
             log.setId(rs.getLong("id"));
             log.setLogDate(new Date(rs.getTimestamp("log_date").getTime()));
             log.setRoles(rs.getString("roles"));
@@ -120,7 +120,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 	}
 
     @Override
-    public PagingResult<LogSystemSearchResultItem> getLogsBusiness(List<Long> formDataIds, List<Long> declarationDataIds, LogBusinessFilterValuesDao filter) {
+    public PagingResult<LogSearchResultItem> getLogsBusiness(List<Long> formDataIds, List<Long> declarationDataIds, LogBusinessFilterValuesDao filter) {
         Map<String, Object> names = new HashMap<String, Object>();
         names.put("formDataIds", formDataIds);
         names.put("declarationDataIds", declarationDataIds);
@@ -161,12 +161,12 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         sql.append(")");
         if (filter.getCountOfRecords() != 0)
             sql.append(" where rn between :startIndex and :endIndex order by id desc");
-        List<LogSystemSearchResultItem> records = getNamedParameterJdbcTemplate().query(sql.toString(),
+        List<LogSearchResultItem> records = getNamedParameterJdbcTemplate().query(sql.toString(),
                 names,
                 new LogSystemSearchResultItemRowMapper()
         );
 
-        return new PagingResult<LogSystemSearchResultItem>(records, getCount(formDataIds, declarationDataIds, names));
+        return new PagingResult<LogSearchResultItem>(records, getCount(formDataIds, declarationDataIds, names));
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client;
 
 import com.aplana.sbrf.taxaccounting.model.LogBusinessFilterValues;
-import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -57,7 +57,7 @@ public class HistoryBusinessPresenter extends Presenter<HistoryBusinessPresenter
             @Override
             public void onSuccess(GetHistoryBusinessListResult result) {
                 if(result.getRecords()==null && result.getTotalCountOfRecords() == 0){
-                    getView().setAuditTableData(start, 0, new ArrayList<LogSystemSearchResultItem>());
+                    getView().setAuditTableData(start, 0, new ArrayList<LogSearchResultItem>());
                 }
                 else{
                     getView().setAuditTableData(start, result.getTotalCountOfRecords(), result.getRecords());
@@ -103,7 +103,7 @@ public class HistoryBusinessPresenter extends Presenter<HistoryBusinessPresenter
     }
 
     interface MyView extends View, HasUiHandlers<HistoryBusinessUIHandler>{
-        void setAuditTableData(int startIndex, long count,  List<LogSystemSearchResultItem> itemList);
+        void setAuditTableData(int startIndex, long count,  List<LogSearchResultItem> itemList);
         void updateData(int pageNumber);
         void getBlobFromServer(String uuid);
     }

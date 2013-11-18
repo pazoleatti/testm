@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.server;
 
-import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -45,7 +45,7 @@ public class PrintLogBusinessHandler extends AbstractActionHandler<PrintLogBusin
     @Override
     public PrintLogBusinessResult execute(PrintLogBusinessAction action, ExecutionContext context) throws ActionException {
         try {
-            PagingResult<LogSystemSearchResultItem> records = logBusinessService.getLogsBusiness(securityService.currentUserInfo(), action.getFilterValues());
+            PagingResult<LogSearchResultItem> records = logBusinessService.getLogsBusiness(securityService.currentUserInfo(), action.getFilterValues());
             System.out.println(records.getTotalCount());
             String filePath = printingService.generateExcelLogSystem(records);
             InputStream fileInputStream = new FileInputStream(filePath);
