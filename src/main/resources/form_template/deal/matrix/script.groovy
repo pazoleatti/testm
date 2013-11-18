@@ -646,7 +646,31 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
 
-    // Графа 26 Не заполняется
+    // Графа 26
+    def val26 = null
+    switch (type.id) {
+        case 393:
+            val26 = srcRow.innerCode
+            break
+        case 394:
+            val26 = srcRow.metalName
+            break
+    }
+    if (val26 != null) {
+        def String innerCode = getRefBookValue(17, val26).INNER_CODE.stringValue
+        def String code = null;
+        if ("А33".equals(innerCode)) {
+            code = '1751402'
+        } else if ("А76".equals(innerCode)) {
+            code = '1751200'
+        } else if ("А98".equals(innerCode)) {
+            code = '1753407'
+        } else if ("А99".equals(innerCode)) {
+           code = '1752204'
+        }
+        if(code !=null)
+            row.dealSubjectCode2 = getRecordId(68, 'CODE', code, date)
+    }
 
     // Графа 27
     def String val27 = null
