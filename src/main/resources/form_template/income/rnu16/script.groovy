@@ -17,7 +17,6 @@ import groovy.transform.Field
  * @author akadyrgulov
  * @author Stanislav Yasinskiy
  * */
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -62,7 +61,7 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['code', 'incomeType', 'sum']
+def editableColumns = ['code', 'sum']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -115,8 +114,8 @@ void calc() {
 
         for (row in dataRows) {
             row.rowNumber = ++number
+            row.incomeType = row.code
         }
-
     }
 
     dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size + 1)
@@ -157,6 +156,10 @@ void logicCheck() {
         // 2. Проверка на уникальность поля «№ пп»
         if (++i != row.rowNumber) {
             logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
+        }
+
+        if (row.code != row.incomeType) {
+            logger.error(errorMsg + "Вид (наименование) дохода не соответствует коду налогового учета!")
         }
 
         // Проверки соответствия НСИ
