@@ -23,7 +23,7 @@
 
                 <g:FlowPanel height="60px">
                     <g:Label text="Подразделение"/>
-                    <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" header="Выбор подразделения"/>
+                    <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" header="Выбор подразделения" modal="true"/>
                 </g:FlowPanel>
 
                 <g:FlowPanel height="60px">

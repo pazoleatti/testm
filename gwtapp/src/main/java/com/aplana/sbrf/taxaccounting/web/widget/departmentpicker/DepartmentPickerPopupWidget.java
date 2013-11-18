@@ -5,8 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.HasModalMode;
-import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.PanelClosingAction;
+import com.aplana.sbrf.taxaccounting.web.widget.closabledialog.ClosableDialogBox;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -28,7 +27,7 @@ import com.google.gwt.user.client.ui.Widget;
  * Виджет для выбора подразделений
  * @author Eugene Stetsenko
  */
-public class DepartmentPickerPopupWidget extends Composite implements HasEnabled, DepartmentPicker, HasModalMode {
+public class DepartmentPickerPopupWidget extends Composite implements HasEnabled, DepartmentPicker {
 
 	private PopupPanel popup;
 
@@ -66,10 +65,16 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 	private static Binder uiBinder = GWT.create(Binder.class);
 
 	@UiConstructor
-	public DepartmentPickerPopupWidget(String header, boolean multiselection) {
+	public DepartmentPickerPopupWidget(String header, boolean multiselection, boolean modal) {
 		initWidget(uiBinder.createAndBindUi(this));
 		// TODO move to ui.xml
-		this.popup = new PopupPanel(true, true);
+        this.modal = modal;
+        if (modal) {
+            popup = new ClosableDialogBox(false, true);
+            ((ClosableDialogBox) popup).setText(header);
+        } else {
+            popup = new PopupPanel(true, true);
+        }
 		popup.setPixelSize(300, 370);
 		departmentPiker = new DepartmentPickerWidget(header, multiselection);
 
@@ -83,13 +88,6 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 				ValueChangeEvent.fire(DepartmentPickerPopupWidget.this, event.getValue());
 			}
 		});
-
-        departmentPiker.setPanelClosingAction(new PanelClosingAction() {
-            @Override
-            public void onClose() {
-                popup.hide();
-            }
-        });
 	}
 
 
@@ -100,7 +98,6 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
                     panel.getAbsoluteTop() + panel.getOffsetHeight());
             popup.show();
         } else {
-            popup.setAutoHideEnabled(false);
             popup.center();
         }
 	}
@@ -163,29 +160,10 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 	}
 
     @Override
-    public boolean isModal() {
-        return modal;
-    }
-
-    @Override
-    public void setModal(boolean modal) {
-        this.modal = modal;
-    }
-
-    @Override
-    public void setPanelClosingAction(PanelClosingAction action) {
-        departmentPiker.setPanelClosingAction(action);
-    }
-
-    @Override
-    public void setTitlePanelVisibility(boolean visible) {
-        departmentPiker.setTitlePanelVisibility(visible);
-    }
-
-    @Override
-    public void setTitleText(String title) {
-        departmentPiker.setTitlePanelVisibility(true);
-        departmentPiker.setTitleText(title);
+    public void setTitle(String title) {
+        if (popup instanceof ClosableDialogBox) {
+            ((ClosableDialogBox) popup).setText(title);
+        }
     }
 
 }

@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.PanelClosingAction;
-import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.TitlePanelWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidgetPresenter.MyView;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.RefBookItem;
 import com.google.gwt.core.client.GWT;
@@ -55,9 +53,6 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 
 	@UiField
 	FlexiblePager pager;
-
-    @UiField
-    TitlePanelWidget titlePanel;
 	
 	private AsyncDataProvider<RefBookItem> dataProvider = new AsyncDataProvider<RefBookItem>() {
 		@Override
@@ -282,20 +277,5 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 	public String getDereferenceValue() {
 		return uiHandlers.getDereferenceValue();
 	}
-
-    @Override
-    public void setPanelClosingAction(PanelClosingAction action) {
-        titlePanel.setClosedPanelAction(action);
-    }
-
-    @Override
-    public void setTitlePanelVisibility(boolean visible) {
-        titlePanel.setVisible(visible);
-    }
-
-    @Override
-    public void setTitleText(String title) {
-        titlePanel.setValue(title);
-    }
 
 }

@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client;
 
 import java.util.Date;
 
-import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.HasTitlePanel;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IsWidget;
 
@@ -12,7 +11,7 @@ import com.google.gwt.user.client.ui.IsWidget;
  * @author sgoryachkin
  * 
  */
-public interface RefBookPicker extends HasValue<Long>, IsWidget, HasTitlePanel {
+public interface RefBookPicker extends HasValue<Long>, IsWidget {
 	
 	/**
 	 * Устанавливает параметры и инициализирует компонент.

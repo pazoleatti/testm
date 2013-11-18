@@ -48,7 +48,7 @@
                         </g:HorizontalPanel>
                         <g:HorizontalPanel>
                             <g:Label>Подразделение:</g:Label>
-                            <picker:DepartmentPickerPopupWidget header="Подразделение"  ui:field="departmentPicker"  multiselection="false"/>
+                            <picker:DepartmentPickerPopupWidget header="Подразделение"  ui:field="departmentPicker"  multiselection="false" modal="true"/>
                             <style:LinkAnchor img="resources/img/starfish-16.png" text="Открыть период" ui:field="openPeriod"/>
                         </g:HorizontalPanel>
 

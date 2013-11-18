@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client;
 
 import java.util.Date;
 
-import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.HasModalMode;
-import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.HasTitlePanel;
 import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasValue;
@@ -16,8 +14,7 @@ import com.google.gwt.user.client.ui.IsWidget;
  * @author sgoryachkin
  * 
  */
-public interface RefBookPickerPopup extends HasValue<Long>, IsWidget, HasEnabled, LeafValueEditor<Long>,
-        HasTitlePanel, HasModalMode {
+public interface RefBookPickerPopup extends HasValue<Long>, IsWidget, HasEnabled, LeafValueEditor<Long> {
 	
 	public void setDereferenceValue(String value);
 	public String getDereferenceValue();
@@ -41,9 +38,5 @@ public interface RefBookPickerPopup extends HasValue<Long>, IsWidget, HasEnabled
 	public String getFilter();
 
 	public void setFilter(String filter);
-
-    public void setTitlePanelVisibility(boolean visible);
-
-    public void setTitleText(String title);
 
 }
