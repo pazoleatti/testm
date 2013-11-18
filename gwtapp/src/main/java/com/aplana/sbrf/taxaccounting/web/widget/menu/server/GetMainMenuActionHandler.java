@@ -12,12 +12,13 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.Decla
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
+import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.HistoryBusinessToken;
 import com.aplana.sbrf.taxaccounting.web.module.migration.client.MigrationTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
+import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerTokens;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesTokens;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationToken;
-import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerTokens;
 import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuAction;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuResult;
@@ -25,7 +26,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -150,6 +150,7 @@ public class GetMainMenuActionHandler extends
                 settingMenuItem.getSubMenu().add(
                         new MenuItem("Указание форм-источников",
                                 NUMBER_SIGN + SourcesTokens.SOURCES + ";" + SourcesTokens.FORM_FLAG + "=" + true));
+                settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + HistoryBusinessToken.HISTORY_BUSINESS));
             }
             
             menuItems.add(settingMenuItem);

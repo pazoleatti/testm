@@ -8,22 +8,62 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 /**
  * This class provides an empty implementation of {@link com.aplana.sbrf.taxaccounting.dao.refbook.filter.FilterTreeListener},
  * which can be extended to create a listener which only needs to handle a subset
  * of the available methods.
  */
+@Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Qualifier("universalFilterTreeListener")
 public class UniversalFilterTreeListener implements FilterTreeListener {
     // модель для preparedStatement
     PreparedStatementData ps;
+
     // справочник
     private RefBook refBook;
 
-    public UniversalFilterTreeListener(RefBook refBook, PreparedStatementData preparedStatementData){
-        ps = preparedStatementData;
-        this.refBook = refBook;
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    /**
+     * объект-компаньен, реализует функционал
+     * работы с внешними справочниками
+     */
+    private ForeignKeyResolver forignKeyResolver;
+
+    @PostConstruct
+    public void init(){
+        forignKeyResolver = applicationContext.getBean("foreignKeyResolver", ForeignKeyResolver.class);
     }
+
+    public PreparedStatementData getPs() {
+        return ps;
+    }
+
+    public void setPs(PreparedStatementData ps) {
+        this.ps = ps;
+        forignKeyResolver.setPs(ps);
+    }
+
+    public RefBook getRefBook() {
+        return refBook;
+    }
+
+    public void setRefBook(RefBook refBook) {
+        this.refBook = refBook;
+        forignKeyResolver.setRefBook(refBook);
+    }
+
 
 	@Override public void enterNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) {
         if (ctx.link_type() != null){
@@ -36,19 +76,17 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 	@Override public void exitNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) { }
 
     @Override
-    public void enterStrtype(@NotNull FilterTreeParser.StrtypeContext ctx) {
-        if (ctx.ALIAS() != null){
-            ps.appendQuery(buildAliasStr(ctx.getText()));
-        } else if(ctx.STRING() != null){
-            ps.appendQuery("?");
-            ps.addParam(ctx.getText().substring(1, ctx.getText().length() - 1));
-        } else  {
-            appendToQuery(ctx.getText());
-        }
+    public void enterStrtype(@NotNull FilterTreeParser.StrtypeContext ctx) {}
+
+    @Override
+    public void exitStrtype(@NotNull FilterTreeParser.StrtypeContext ctx) {}
+
+    @Override
+    public void enterAlias(@NotNull FilterTreeParser.AliasContext ctx) {
     }
 
     @Override
-    public void exitStrtype(@NotNull FilterTreeParser.StrtypeContext ctx) { }
+    public void exitAlias(@NotNull FilterTreeParser.AliasContext ctx) {}
 
     @Override
     public void enterFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
@@ -69,20 +107,51 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 
 	@Override public void exitOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx) { }
 
-	@Override public void enterQuery(@NotNull FilterTreeParser.QueryContext ctx) { }
+    @Override
+    public void enterString(@NotNull FilterTreeParser.StringContext ctx) {
+        ps.appendQuery("?");
+        // Строка по умолчанию содерижт символы кавычек. Пример " 'Текст' "
+        ps.addParam(ctx.getText().substring(1, ctx.getText().length() - 1));
+    }
+
+    @Override
+    public void exitString(@NotNull FilterTreeParser.StringContext ctx) {}
+
+    @Override public void enterQuery(@NotNull FilterTreeParser.QueryContext ctx) {
+
+    }
 
 	@Override
-    public void exitQuery(@NotNull FilterTreeParser.QueryContext ctx) { }
+    public void exitQuery(@NotNull FilterTreeParser.QueryContext ctx) {
+        forignKeyResolver.setSqlPartsOfJoin();
+    }
+
+    @Override
+    public void enterInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx) {
+        ps.appendQuery(buildAliasStr(ctx.getText()));
+    }
+
+    @Override
+    public void exitInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx) {}
+
+    @Override
+    public void enterNumber(@NotNull FilterTreeParser.NumberContext ctx) {
+        ps.appendQuery(ctx.getText());
+    }
+
+    @Override
+    public void exitNumber(@NotNull FilterTreeParser.NumberContext ctx) {}
 
     @Override
     public void enterStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {}
 
     @Override
-    public void exitStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) { }
+    public void exitStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {}
 
 	@Override public void enterWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx) {
         if (ctx.link_type() != null){
-            appendToQuery(ctx.link_type().getText());
+            ps.appendQuery(" ");
+            ps.appendQuery(ctx.link_type().getText());
         }
         ps.appendQuery("(");
     }
@@ -92,10 +161,28 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
     }
 
     @Override
+    public void enterEAlias(@NotNull FilterTreeParser.EAliasContext ctx) {
+        forignKeyResolver.enterEAliasNode(ctx.ALIAS().getText());
+    }
+
+    @Override
+    public void exitEAlias(@NotNull FilterTreeParser.EAliasContext ctx) {
+        forignKeyResolver.exitEAliasNode();
+    }
+
+    @Override
     public void enterOperand(@NotNull FilterTreeParser.OperandContext ctx) { }
 
     @Override
     public void exitOperand(@NotNull FilterTreeParser.OperandContext ctx) { }
+
+    @Override
+    public void enterExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx) {
+        forignKeyResolver.enterExternalAliasNode(ctx.ALIAS().getText());
+    }
+
+    @Override
+    public void exitExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx) {}
 
     @Override
     public void enterFunctype(@NotNull FilterTreeParser.FunctypeContext ctx) { }
@@ -116,16 +203,7 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 	@Override public void exitLink_type(@NotNull FilterTreeParser.Link_typeContext ctx) { }
 
     @Override
-    public void enterSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx) {
-        if (ctx.ALIAS() != null){
-            ps.appendQuery(buildAliasStr(ctx.getText()));
-        } else if(ctx.STRING() != null){
-            ps.appendQuery("?");
-            ps.addParam(ctx.getText().substring(1, ctx.getText().length() - 1));
-        } else {
-            ps.appendQuery(ctx.getText());
-        }
-    }
+    public void enterSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx) {}
 
     @Override
     public void exitSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx) {}
@@ -137,11 +215,6 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 	@Override public void visitTerminal(@NotNull TerminalNode node) {}
 
 	@Override public void visitErrorNode(@NotNull ErrorNode node) { }
-
-    private void appendToQuery(String queryPart){
-        ps.appendQuery(" ");
-        ps.appendQuery(queryPart);
-    }
 
     private String buildAliasStr(String alias){
         StringBuffer sb = new StringBuffer();

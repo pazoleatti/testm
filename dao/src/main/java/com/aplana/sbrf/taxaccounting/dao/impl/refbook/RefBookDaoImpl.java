@@ -16,11 +16,11 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -41,6 +41,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Autowired
     private RefBookUtils refBookUtils;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Override
     public RefBook get(Long refBookId) {
@@ -193,6 +196,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     refBookId, sortAttribute.getAlias()));
         }
 
+        PreparedStatementData filterPS = new PreparedStatementData();
+        UniversalFilterTreeListener universalFilterTreeListener =  applicationContext.getBean("universalFilterTreeListener", UniversalFilterTreeListener.class);
+        universalFilterTreeListener.setRefBook(refBook);
+        universalFilterTreeListener.setPs(filterPS);
+        Filter.getFilterQuery(filter, universalFilterTreeListener);
+
         StringBuilder fromSql = new StringBuilder("\nfrom\n");
         fromSql.append("  ref_book_record r join t on (r.version = t.version and r.record_id = t.record_id)\n");
 
@@ -241,14 +250,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             fromSql.append(attribute.getId());
             fromSql.append("\n");
         }
+
+        // добавляем join'ы относящиеся к фильтру
+        if (filterPS.getJoinPartsOfQuery() != null){
+            fromSql.append(filterPS.getJoinPartsOfQuery());
+        }
+
         ps.appendQuery(fromSql.toString());
         ps.appendQuery("where\n  r.ref_book_id = ");
         ps.appendQuery("?");
         ps.addParam(refBookId);
         ps.appendQuery(" and\n  status <> -1\n");
 
-        PreparedStatementData filterPS = new PreparedStatementData();
-        Filter.getFilterQuery(filter, new UniversalFilterTreeListener(refBook, filterPS));
+        // обработка параметров фильтра
         if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" and\n ");
             ps.appendQuery(filterPS.getQuery().toString());

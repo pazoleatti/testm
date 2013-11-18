@@ -1,8 +1,12 @@
 package form_template.income.rnu44
 
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+import groovy.transform.Field
 
 /**
  * Скрипт для РНУ-44 (rnu44.groovy).
@@ -12,7 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  *
  * Версия ЧТЗ: 64
  *
- *
+ * @author lhaziev
  * @author vsergeev
  *
  * Графы:
@@ -53,7 +57,7 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  */
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
         def rnu49FormData = getRnu49FormData()
@@ -61,7 +65,7 @@ switch (formDataEvent) {
             logger.error("Отсутствуют данные РНУ-49!")
             return
         }
-        logicalCheckWithTotalDataRowCheck()
+        logicalCheck()
         break
     case FormDataEvent.CALCULATE :
         def rnu49FormData = getRnu49FormData()
@@ -69,16 +73,16 @@ switch (formDataEvent) {
             logger.error("Отсутствуют данные РНУ-49!")
             return
         }
-        if (logicalCheckWithoutTotalDataRowCheck()) {
-            calc()
-            !hasError() && logicalCheckWithTotalDataRowCheck()
-        }
+        calc()
+        logicalCheck()
         break
     case FormDataEvent.ADD_ROW :
-        addNewRow()
+        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW :
-        deleteRow()
+        if (currentDataRow != null && currentDataRow.getAlias() == null) {
+            formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        }
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
@@ -86,20 +90,68 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        logicalCheckWithTotalDataRowCheck()
+        def rnu49FormData = getRnu49FormData()
+        if (rnu49FormData==null) {
+            logger.error("Отсутствуют данные РНУ-49!")
+            return
+        }
+        logicalCheck()
+        break
+// после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+// обобщить
+    case FormDataEvent.COMPOSE:
+        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        calc()
+        logicalCheck()
         break
 }
 
-/**
- * Проверка при создании формы.
- */
-void checkCreation() {
-    def findForm = formDataService.find(formData.formType.id,
-            formData.kind, formData.departmentId, formData.reportPeriodId)
+//// Кэши и константы
+@Field def providerCache = [:]
 
-    if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
-    }
+// все атрибуты
+@Field
+def allColumns = ['number', 'operationDate', 'name', 'inventoryNumber', 'baseNumber', 'baseDate', 'summ']
+
+// Редактируемые атрибуты
+@Field def editableColumns = ['name', 'inventoryNumber']
+
+// Автозаполняемые атрибуты
+@Field def autoFillColumns = allColumns - editableColumns//['operationDate', 'baseNumber', 'baseDate', 'summ']
+
+// Проверяемые на пустые значения атрибуты
+@Field def nonEmptyColumns = ['number', 'operationDate', 'name', 'inventoryNumber', 'baseNumber', 'baseDate', 'summ']
+
+// Атрибуты итоговых строк для которых вычисляются суммы
+@Field
+def totalSumColumns = ['summ']
+
+// алиасы графов для арифметической проверки
+@Field
+def arithmeticCheckAlias = ['summ']//['operationDate', 'baseNumber', 'baseDate', 'summ']
+
+// алиасы графов для арифметической проверки
+@Field
+def otherCheckAlias = ['operationDate', 'baseNumber', 'baseDate']
+
+// Дата окончания отчетного периода
+@Field def reportPeriodEndDate = null
+
+// Текущая дата
+@Field def currentDate = new Date()
+
+//границы раздела "А" в РНУ-49
+@Field String rnu49AIndex = 'A'
+
+//границы раздела "А" в РНУ-49
+@Field String rnu49TotalAIndex = 'totalA'
+
+//// Обертки методов
+
+// Проверка НСИ
+boolean checkNSI(def refBookId, def row, def alias) {
+    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
 }
 
 /**
@@ -108,60 +160,33 @@ void checkCreation() {
 
 def calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = getRows(dataRowHelper)
+    def dataRows = dataRowHelper.getAllCached()
 
     def rnu49FormData = getRnu49FormData()
+    if (rnu49FormData==null) return
+    def rnu49Rows = rnu49FormData.getAllCached()
 
+    // удалить строку "итого"
+    deleteAllAliased(dataRows)
+
+    def index = 1
     if (rnu49FormData!=null) {
-    for (def dataRow : dataRows) {
-        if ( ! isFixedRow(dataRow)) {      //строку итогов не заполняем
-            def rnu49Row = getRnu49Row(rnu49FormData, dataRow)
+        for (def dataRow : dataRows) {
+            def rnu49Row = getRnu49Row(rnu49Rows, dataRow)
+
+            dataRow.number = index++
 
             def values = getValues(rnu49Row)
-
             values.keySet().each { colName ->
                 dataRow[colName] = values[colName]
             }
         }
-    }
-    def totalResults = getTotalResults()
-    dataRows.each { dataRow ->
-        if (isFixedRow(dataRow)) {
-            getTotalColsAliases().each { colName ->
-                dataRow[colName] = totalResults[colName]
-            }
-        }
-    }
-    }
-    save(dataRowHelper)
-}
 
-boolean checkCalculatedCells() {
-    def isValid = true
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = getRows(dataRowHelper)
-
-    def rnu49FormData = getRnu49FormData()
-
-    if (rnu49FormData!=null) {
-    for (def dataRow : dataRows) {
-        if ( !isFixedRow(dataRow)) {      //строку итогов не проверяем
-            def rnu49Row = getRnu49Row(rnu49FormData, dataRow)
-
-            def values = getValues(rnu49Row)
-
-            for (def colName : values.keySet()) {
-                if (dataRow[colName] != values[colName]) {
-                    isValid = false
-                    def fieldNumber = dataRow.getIndex()
-                    String msg = getColumnName(dataRow, colName)
-                    logger.error("Строка $fieldNumber: Неверно рассчитана графа «$msg»!")
-                }
-            }
-        }
+        // добавить строку "итого"
+        def totalRow = getTotalRow(dataRows)
+        dataRows.add(totalRow)
     }
-    }
-    return isValid
+    dataRowHelper.save(dataRows)
 }
 
 /**
@@ -169,8 +194,8 @@ boolean checkCalculatedCells() {
  */
 def getRnu49FormData() {
     def formData49 = formDataService.find(312, formData.kind, formDataDepartment.id, formData.reportPeriodId)
-    if (formData49!=null) {
-        return getData(formData49)
+    if (formData49!=null && formData49.id != null) {
+        return formDataService.getDataRowHelper(formData49)
     }
     return null
 }
@@ -178,27 +203,16 @@ def getRnu49FormData() {
 /**
  * В разделе А РНУ-49 находим строку, для которой «графа 6» = «графа 4» текущей строки формы РНУ-44.
  */
-def getRnu49Row(def rnu49FormData, def dataRow) {
-    def rnu49Rows = getRows(rnu49FormData)
+def getRnu49Row(def rnu49Rows, def dataRow) {
     //находим границы раздела "А" в РНУ-49
-
-    def startToSearchIndex = rnu49Rows.indexOf(rnu49FormData.getDataRow(rnu49Rows, getRnu49AIndex()))
-    def endToSearchIndex = rnu49Rows.indexOf(rnu49FormData.getDataRow(rnu49Rows, getRnu49TotalAIndex()))
+    def startToSearchIndex = rnu49Rows.indexOf(getDataRow(rnu49Rows, rnu49AIndex))
+    def endToSearchIndex = rnu49Rows.indexOf(getDataRow(rnu49Rows, rnu49TotalAIndex))
 
     def indexRow = (startToSearchIndex..endToSearchIndex).find { index ->
         rnu49Rows[index].invNumber == dataRow.inventoryNumber
     }
     return indexRow?rnu49Rows[indexRow]:[:]
 }
-
-def getRnu49AIndex(){
-    return 'A'
-}
-
-def getRnu49TotalAIndex(){
-    return 'totalA'
-}
-
 
 /**
  * получаем мапу со значениями, расчитанными для каждой конкретной строки
@@ -232,274 +246,69 @@ def getSumm(rnu49Row) {
     return rnu49Row.sum
 }
 
-/***********   ФУНКЦИИ ДЛЯ ПРОВЕРКИ ОБЯЗАТЕЛЬНЫХ ДЛЯ ЗАПОЛНЕНИЯ ДАННЫХ   ***********/
-
-/**
- * перед расчетами проверяем заполнение только ячеек, доступных для ввода. т.к.
- * они нам нужны для расчетов, а рассчитываемые - не нужны
- */
-boolean logicalCheckWithoutTotalDataRowCheck() {
-    return checkColsFilledByAliases(getEditableColsAliases())
-}
-
 /**
  * проверяем все данные формы на обязательное и корректное заполнение
  */
-boolean logicalCheckWithTotalDataRowCheck() {
-    if (checkColsFilledByAliases(getAllRequiredColsAliases()) ) {
-        return (checkInventoryNumber() && checkCalculatedCells() && checkTotalResults())
-    }
+boolean logicalCheck(){
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
 
-    return false
-}
+    def rnu49FormData = getRnu49FormData()
+    if (rnu49FormData==null) return
+    def rnu49Rows = rnu49FormData.getAllCached()
 
-/**
- * проверяем заполнения столбцов по алиасам этих столбцов
- */
-boolean checkColsFilledByAliases(List colsAliases) {
-    boolean isValid = true
-    def dataRows = getRows(formDataService.getDataRowHelper(formData))
-    dataRows.each { dataRow ->
-        if (! isFixedRow(dataRow)) {       //итоговые строки не проверяем
-            isValid &= checkRequiredColumns(dataRow, colsAliases)
+    def calcValues = [:]
+    def rowNumber = 0
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            continue
         }
-    }
+        rowNumber++
+        errorMsg = "Строка $rowNumber: "
 
-    return isValid
-}
+        // 0.
+        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, true)
 
-/**
- * возвращает список алиасов всех обязательных для заполнения столбцов
- */
-def getAllRequiredColsAliases() {
-    return ['operationDate', 'name', 'inventoryNumber', 'baseNumber', 'baseDate', 'summ']
-}
-
-/**
- * проверяем актуальность Инвентарного номера
- */
-boolean checkInventoryNumber() {
-    def dataRows = getRows(formDataService.getDataRowHelper(formData))
-    for(def row: dataRows) {
+        // 1. Проверка уникальности значий в графе «Номер ссудного счета»
         def find = dataRows.find{it->
             (row!=it && row.inventoryNumber==it.inventoryNumber)
         }
         if (find!=null) {
-            logger.error("Инвентарный номер не уникальный!")
-            return false
+            logger.error(errorMsg + "Инвентарный номер не уникальный!")
         }
-    }
-    return true
-}
 
-/**
- * проверяем актуальность итоговых значения
- */
-boolean checkTotalResults() {
-    def isValid = true
-    def controlTotalResults = getTotalResults()
+        // 2. Проверка на уникальность поля «№ пп»
+        if (rowNumber != row.number) {
+            logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
+        }
 
-    def dataRows = getRows(formDataService.getDataRowHelper(formData))
-    dataRows.each { dataRow ->
-        if (isFixedRow(dataRow)) {
-            for (def colName : controlTotalResults.keySet()) {
-                if (dataRow[colName] != controlTotalResults[colName]) {
-                    isValid = false
-                    def fieldNumber = dataRow.getIndex()
-                    String msg = getColumnName(dataRow, colName)
-                    logger.error("Строка $fieldNumber: Неверно рассчитана графа «$msg»!")
-                }
+        // 3. Арифметические проверки расчета неитоговых граф
+        def rnu49Row = getRnu49Row(rnu49Rows, row)
+        if (rnu49Row==[:]) {
+            logger.error(errorMsg + "Отсутствуют данные в РНУ-49!")
+        }
+        calcValues = getValues(rnu49Row)
+        checkCalc(row, arithmeticCheckAlias, calcValues, logger, true)
+        for (def colName : otherCheckAlias) {
+            if (row[colName] != calcValues[colName]) {
+                String msg = getColumnName(row, colName)
+                logger.error(errorMsg+"Неверно рассчитана графа «$msg»!")
             }
         }
     }
-
-    return isValid
+    // 4. Арифметические проверки расчета итоговой графы
+    checkTotalSum(dataRows, totalSumColumns, logger, true)
 }
 
-/***********   ДОБАВЛЕНИЕ СТРОКИ В ТАБЛИЦУ С ФИКСИРОВАННЫМИ СТРОКАМИ ИТОГОВ   ***********/
-
-/**
- * Добавить новую строку.
- */
-def addNewRow() {
-    def data = getData(formData)
-
-    def index = 0
-    if (currentDataRow!=null){
-        index = currentDataRow.getIndex()
-        def row = currentDataRow
-        while(row.getAlias()!=null && index>0){
-            row = getRows(data).get(--index)
-        }
-        if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
-            index++
-        }
-    }else if (getRows(data).size()>0) {
-        for(int i = getRows(data).size()-1;i>=0;i--){
-            def row = getRows(data).get(i)
-            if(!isFixedRow(row)){
-                index = getRows(data).indexOf(row)+1
-                break
-            }
-        }
-    }
-    data.insert(newRow,index+1)
-}
-
-
-/**
- * Получить новую стролу с заданными стилями.
- */
-def getNewRow() {
+/** Сформировать итоговую строку с суммами. */
+def getTotalRow(def dataRows) {
     def newRow = formData.createDataRow()
-
-    getEditableColsAliases().each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
+    newRow.setAlias('total')
+    newRow.fix = 'Итого'
+    newRow.getCell('fix').colSpan = 1
+    allColumns.each {
+        newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
+    calcTotalSum(dataRows, newRow, totalSumColumns)
     return newRow
-}
-
-/**
- * возвращает список алиасов столбцов, доступных для редактирования пользователем
- */
-def getEditableColsAliases() {
-    return ['name', 'inventoryNumber']
-}
-
-/**
- * Проверка является ли строка итоговой.
- */
-def isFixedRow(def row) {
-    return row != null && row.getAlias() != null && row.getAlias().contains('total')
-}
-
-/**
- * возвращает список алиасов для итоговых строк
- */
-def getTotalRowsAliases() {
-    return ['total']
-}
-
-/***********   УДАЛЕНИЕ СТРОКИ ИЗ ТАБЛИЦЫ С ФИКСИРОВАННЫМИ СТРОКАМИ ИТОГОВ   ***********/
-
-/**
- * Удалить строку.
- */
-def deleteRow() {
-    if (!isFixedRow(currentDataRow)) {
-        getData(formData).delete(currentDataRow)
-    } else {
-        logger.error ('Невозможно удалить фиксированную строку!')
-    }
-}
-
-/***********   ОБЩИЕ ФУНКЦИИ ДЛЯ СТОЛБЦОВ, ПО КОТОРЫМ ПОДВОДЯТСЯ ИТОГИ   ***********/
-
-/**
- * находим для всех строк, кроме итоговых, суммы по столбцам, по которым подводят итоги
- * возвращаем мапу вида алиас_столбца -> итоговое_значение
- */
-def getTotalResults() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    def totalRow = [:]
-    for (def colAlias : getTotalColsAliases()) {
-        totalRow.put(colAlias, dataRows.sum {row ->
-            if (! isFixedRow(row)) {    //строка не входит в итоговые
-                row[colAlias]
-            } else {
-                0
-            }
-        })
-    }
-    return totalRow
-}
-
-/**
- * возвращает список алиасов для стобцов, по которым подводятся итоги
- */
-def getTotalColsAliases() {
-    return ['summ']
-}
-
-/**
- * Получить данные формы.
- *
- * @param formData форма
- */
-def getData(def formData) {
-    if (formData != null && formData.id != null) {
-        return formDataService.getDataRowHelper(formData)
-    }
-    return null
-}
-
-/**
- * Получить строку по алиасу.
- *
- * @param data данные нф (helper)
- */
-def getRows(def data) {
-    return data.getAllCached();
-}
-
-/**
- * Сохранить измененные значения нф.
- *
- * @param data данные нф (helper)
- */
-void save(def data) {
-    data.save(getRows(data))
-}
-
-/**
- * Проверить заполненость обязательных полей.
- *
- * @param row строка
- * @param columns список обязательных графов
- * @return true - все хорошо, false - есть незаполненные поля
- */
-def checkRequiredColumns(def row, def columns) {
-    def colNames = []
-
-    columns.each {
-        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-            def name = getColumnName(row, it)
-            colNames.add('"' + name + '"')
-        }
-    }
-    if (!colNames.isEmpty()) {
-        def index = row.number
-        def errorMsg = colNames.join(', ')
-        if (index != null) {
-            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-        } else {
-            def data = getData(formData)
-            index = getRows(data).indexOf(row) + 1
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
-        }
-        return false
-    }
-    return true
-}
-
-/**
- * Получить название графы по псевдониму.
- *
- * @param row строка
- * @param alias псевдоним графы
- */
-def getColumnName(def row, def alias) {
-    if (row != null && alias != null) {
-        return row.getCell(alias).getColumn().getName().replace('%', '%%')
-    }
-    return ''
-}
-
-/**
- * Имеются ли фатальные ошибки.
- */
-def hasError() {
-    return logger.containsLevel(LogLevel.ERROR)
 }

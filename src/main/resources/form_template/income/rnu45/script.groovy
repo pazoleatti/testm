@@ -185,7 +185,7 @@ def BigDecimal calc9(def row) {
 // Ресчет графы 10
 def BigDecimal calc10(def row, def reportDateStart, def reportDate, def oldRow10) {
     Calendar buyDate = calc10and11(row)
-    if (buyDate != null && reportDateStart != null && reportDate != null)
+    if (buyDate != null && reportDateStart != null && reportDate != null && row.amortizationMonth != null)
         return row.amortizationMonth + ((buyDate.get(Calendar.MONTH) == Calendar.JANUARY || (buyDate.after(reportDateStart) && buyDate.before(reportDate))) ? 0 : ((oldRow10 == null) ? 0 : oldRow10))
     return null
 }
@@ -222,6 +222,11 @@ def logicCheck() {
         //Начальная дата отчетного периода
         def reportDateStart = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
+        // алиасы графов для арифметической проверки
+        def arithmeticCheckAlias = ['depreciationRate', 'amortizationMonth', 'amortizationSinceYear', 'amortizationSinceUsed']
+        // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
+        def needValue = [:]
+
         def index
         def errorMsg
 
@@ -249,23 +254,13 @@ def logicCheck() {
             }
 
             // 4. Арифметические проверки расчета неитоговых граф
-            // графа 8
-            if (row.depreciationRate != calc8(row)) {
-                logger.error(errorMsg + "Неверно рассчитана графа «Первоначальная стоимость (руб.)»!")
-            }
-            // графа 9
-            if (row.amortizationMonth != calc9(row)) {
-                logger.error(errorMsg + "Неверно рассчитана графа «Сумма начисленной амортизации за месяц (руб.)»!")
-            }
+            needValue['depreciationRate'] = calc8(row)
+            needValue['amortizationMonth'] = calc9(row)
             prevValues = getPrev10and11(dataOld, row)
-            // графа 10
-            if (row.amortizationSinceYear != calc10(row, reportDateStart, reportDate, prevValues[0])) {
-                logger.error(errorMsg + "Неверно рассчитана графа «Сумма начисленной амортизации с начала года (руб.)»!")
-            }
-            // графа 11
-            if (row.amortizationSinceUsed != calc11(row, reportDateStart, reportDate, prevValues[1])) {
-                logger.error(errorMsg + "Неверно рассчитана графа «Сумма начисленной амортизации с даты ввода в эксплуатацию (руб.)»!")
-            }
+            needValue['amortizationSinceYear'] = calc10(row, reportDateStart, reportDate, prevValues[0])
+            needValue['amortizationSinceUsed'] = calc11(row, reportDateStart, reportDate, prevValues[1])
+            checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+
         }
         // 5. Арифметические проверки расчета итоговой строки
         checkTotalSum(dataRows, totalColumns, logger, true)

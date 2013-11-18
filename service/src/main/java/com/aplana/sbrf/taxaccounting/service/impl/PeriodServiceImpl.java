@@ -366,4 +366,27 @@ public class PeriodServiceImpl implements PeriodService{
 		}
 		return reportPeriods;
 	}
+
+    @Override
+    public Calendar getMonthStartDate(int reportPeriodId, int periodOrder) {
+        Calendar dateStart = getStartDate(reportPeriodId);
+        dateStart.set(Calendar.MONTH, dateStart.get(Calendar.MONTH) + periodOrder - 1);
+        return dateStart;
+    }
+
+    @Override
+    public Calendar getMonthEndDate(int reportPeriodId, int periodOrder) {
+        Calendar dateStart = getStartDate(reportPeriodId);
+        dateStart.set(Calendar.MONTH, dateStart.get(Calendar.MONTH) + periodOrder);
+        dateStart.set(Calendar.DAY_OF_MONTH, dateStart.get(Calendar.DAY_OF_MONTH) - 1);
+        return dateStart;
+    }
+
+    @Override
+    public Calendar getMonthReportDate(int reportPeriodId, int periodOrder) {
+        Calendar dateStart = getStartDate(reportPeriodId);
+        dateStart.set(Calendar.MONTH, dateStart.get(Calendar.MONTH) + periodOrder);
+        dateStart.set(Calendar.DAY_OF_MONTH, dateStart.get(Calendar.DAY_OF_MONTH));
+        return dateStart;
+    }
 }

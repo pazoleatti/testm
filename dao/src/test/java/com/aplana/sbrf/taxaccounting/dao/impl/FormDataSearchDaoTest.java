@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -120,6 +121,18 @@ public class FormDataSearchDaoTest {
 		}
 
 	}
+
+    @Test
+    public void testFindIdsByFilter() {
+        FormDataDaoFilter filter = new FormDataDaoFilter();
+        filter.setUserDepartmentId(Department.ROOT_BANK_ID);
+        filter.setAccessFilterType(AccessFilterType.ALL);
+        List<Long> res = formDataSearchDao.findIdsByFilter(filter);
+
+        assertArrayEquals(new Long[]{18l, 17l, 16l, 15l, 14l, 13l, 12l, 11l, 10l, 9l, 8l, 7l, 6l, 5l, 4l, 3l, 2l, 1l}, res.toArray());
+
+        assertEquals(formDataSearchDao.findByFilter(filter).size(), res.size());
+    }
 	
 	/**
 	 * Проверяем разные способы сортировки

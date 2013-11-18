@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
+import java.util.List;
+
 /**
  * Dao-объект для работы с {@link DeclarationData декларациями}
  * @author dsultanbekov
@@ -59,6 +61,8 @@ public interface DeclarationDataDao {
 	 */
 	PagingResult<DeclarationDataSearchResultItem> findPage(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering,
 	                                          boolean ascSorting, PagingParams paginatedSearchParams);
+
+    List<Long> findIdsByFilter(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering, boolean ascSorting);
 
 	/**
 	 * Ищет декларацию по заданным параметрам.

@@ -2,48 +2,17 @@ package form_template.income.rnu36_1
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+import groovy.transform.Field
 
 /**
  * Форма "(РНУ-36.1) Регистр налогового учёта начисленного процентного дохода по ГКО. Отчёт 1".
  *
  * TODO:
- *		- уточнить как получать дату последнего и отчетного дня для месяца в методе getLastDayReportPeriod() getReportDate()
+ *		- уточнить как получать дату последнего и отчетного дня для месяца
  *
  * @author rtimerbaev
  */
-
-switch (formDataEvent) {
-    case FormDataEvent.CREATE :
-        checkCreation()
-        break
-    case FormDataEvent.CHECK :
-        logicalCheck() && checkNSI()
-        break
-    case FormDataEvent.CALCULATE :
-        calc() && logicalCheck() && checkNSI()
-        break
-    case FormDataEvent.ADD_ROW :
-        addNewRow()
-        break
-    case FormDataEvent.DELETE_ROW :
-        deleteRow()
-        break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        logicalCheck() && checkNSI()
-        break
-    case FormDataEvent.COMPOSE :
-        consolidation()
-        calc() && logicalCheck() && checkNSI()
-        break
-}
 
 // графа 1  - series
 // графа 2  - amount
@@ -54,210 +23,233 @@ switch (formDataEvent) {
 // графа 7  - termBondsIssued
 // графа 8  - percIncome
 
-/**
- * Добавить новую строку.
- */
-def addNewRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+switch (formDataEvent) {
+    case FormDataEvent.CREATE :
+        formDataService.checkUnique(formData, logger)
+        break
+    case FormDataEvent.CHECK :
+        logicCheck()
+        break
+    case FormDataEvent.CALCULATE :
+        calc()
+        logicCheck()
+        break
+    case FormDataEvent.ADD_ROW :
+        addRow()
+        break
+    case FormDataEvent.DELETE_ROW :
+        if (currentDataRow != null && currentDataRow.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
+        }
+        break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        logicCheck()
+        break
+    case FormDataEvent.COMPOSE :
+        consolidation()
+        calc()
+        logicCheck()
+        break
+}
 
-    def newRow = getNewRow()
+//// Кэши и константы
+@Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+@Field
+def refBookCache = [:]
+
+// все атрибуты
+@Field
+def allColumns = ['series', 'amount', 'nominal', 'shortPositionDate', 'balance2', 'averageWeightedPrice', 'termBondsIssued', 'percIncome']
+
+// Редактируемые атрибуты (графа 2..8)
+@Field
+def editableColumns = ['series', 'amount', 'nominal', 'shortPositionDate', 'balance2', 'averageWeightedPrice', 'termBondsIssued']
+
+// Автозаполняемые атрибуты
+@Field
+def autoFillColumns = allColumns - editableColumns
+
+// Проверяемые на пустые значения атрибуты (графа 2..8)
+@Field
+def nonEmptyColumns = ['series', 'amount', 'nominal', 'shortPositionDate', 'balance2', 'averageWeightedPrice', 'termBondsIssued', 'percIncome']
+
+// Атрибуты итоговых строк для которых вычисляются суммы (графа 2, 8)
+@Field
+def totalColumns = ['amount', 'percIncome']
+
+// Дата окончания отчетного периода
+@Field
+def reportPeriodEndDate = null
+
+// Текущая дата
+@Field
+def currentDate = new Date()
+
+//// Обертки методов
+
+// Проверка НСИ
+boolean checkNSI(def refBookId, def row, def alias) {
+    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+}
+
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
+                boolean required = true) {
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
+            currentDate, rowIndex, cellName, logger, required)
+}
+
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+}
+
+// Получение числа из строки при импорте
+def getNumber(def value, def indexRow, def indexCol) {
+    return parseNumber(value, indexRow, indexCol, logger, true)
+}
+
+def addRow() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
     def index
 
     if (currentDataRow == null || currentDataRow.getIndex() == -1) {
-        index = getIndexByAlias(dataRows, 'totalA')
+        index = getDataRow(dataRows, 'totalA').getIndex()
     } else if (currentDataRow.getAlias() == null) {
         index = currentDataRow.getIndex()
     } else {
-        index = getIndexByAlias(dataRows, 'totalA')
+        index = getDataRow(dataRows, 'totalA').getIndex()
         switch (currentDataRow.getAlias()) {
             case 'A' :
             case 'totalA' :
-                index = getIndexByAlias(dataRows, 'totalA')
+                index = getDataRow(dataRows, 'totalA').getIndex()
                 break
             case 'B' :
             case 'totalB' :
             case 'total' :
-                index = getIndexByAlias(dataRows, 'totalB')
+                index = getDataRow(dataRows, 'totalB').getIndex()
                 break
         }
     }
-
-    dataRowHelper.insert(newRow, index + 1)
+    dataRowHelper.insert(getNewRow(), index)
 }
 
-/**
- * Удалить строку.
- */
-def deleteRow() {
-    if (currentDataRow.getAlias() == null) {
-        def dataRowHelper = formDataService.getDataRowHelper(formData)
-        dataRowHelper.delete(currentDataRow)
-    }
-}
-
-/**
- * Расчеты. Алгоритмы заполнения полей формы.
- */
-def calc() {
+void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-
-    /*
-     * Проверка обязательных полей.
-     */
-
-    // список проверяемых столбцов (графа 2..7)
-    def requiredColumns = ['series', 'amount', 'nominal', 'shortPositionDate',
-            'balance2', 'averageWeightedPrice', 'termBondsIssued']
-    for (def row : dataRows) {
-        if (row.getAlias() == null && !checkRequiredColumns(row, requiredColumns)) {
-            return false
-        }
-    }
-
-    /*
-     * Расчеты.
-     */
+    def dataRows = dataRowHelper.allCached
 
     // последний день отчетного месяца
-    def lastDay = getLastDayReportPeriod()
+    def lastDay = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
 
     dataRows.each { row ->
         if (row.getAlias() == null) {
             // графа 8
-            row.percIncome = getColumn8(row, lastDay)
+            row.percIncome = calcPercIncome(row, lastDay)
         }
     }
 
     // графы для которых надо вычислять итого А и Б (графа 2, 8)
-    def totalColumns = ['amount', 'percIncome']
-    def tmp
-    ['A', 'B'].each {
-        def row = getRowByAlias(dataRows, it)
-        def totalRow = getRowByAlias(dataRows, 'total' + it)
-
-        // посчитать итоги раздела
-        def from = row.getIndex()
-        def to = totalRow.getIndex() - 2
-        totalColumns.each { alias ->
-            // если нет строк в разделе то в итоги 0
-            tmp = (from <= to ? summ(formData, dataRows, new ColumnRange(alias, from, to)) : 0)
-            totalRow.getCell(alias).setValue(tmp)
-        }
+    def rowA = getDataRow(dataRows, 'A')
+    def rowB = getDataRow(dataRows, 'B')
+    def totalRowA = getDataRow(dataRows, 'totalA')
+    def totalRowB = getDataRow(dataRows, 'totalB')
+    totalColumns.each { alias ->
+        totalRowA.getCell(alias).value = getSum(dataRows, rowA, totalRowA, alias)
+        totalRowB.getCell(alias).value = getSum(dataRows, rowB, totalRowB, alias)
     }
-
     // посчитать Итого
-    getRowByAlias(dataRows, 'total').percIncome = getCalcTotalValueByAlias(dataRows, 'percIncome')
+    getDataRow(dataRows, 'total').percIncome = (totalRowA.percIncome ?: 0) - (totalRowB.percIncome ?: 0)
     dataRowHelper.save(dataRows)
-    return true
 }
 
-/**
- * Логические проверки.
- */
-def logicalCheck() {
+void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-
-    // список проверяемых столбцов (графа 2..8)
-    def requiredColumns = ['series', 'amount', 'nominal', 'shortPositionDate',
-            'balance2', 'averageWeightedPrice', 'termBondsIssued', 'percIncome']
-
-    for (def row : dataRows) {
-        // . Проверка обязательных полей (графа 2..7)
-        if (row.getAlias() == null && !checkRequiredColumns(row, requiredColumns)) {
-            return false
-        }
-    }
-
-    // графы для которых надо вычислять итого А и Б (графа 2, 8)
-    def totalColumns = ['amount', 'percIncome']
+    def dataRows = dataRowHelper.allCached
 
     // последний день отчетного месяца
-    def lastDay = getLastDayReportPeriod()
+    def lastDay = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
 
     // отчетная дата
-    def reportDay = getReportDate()
-    def index
-    def errorMsg
+    def reportDay = reportPeriodService.getReportDate(formData.reportPeriodId)?.time
+
+    // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
+    def needValue = [:]
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
         }
 
-        index = row.getIndex()
-        errorMsg = "В строке $index "
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
+
+        // . Проверка обязательных полей (графа 2..8)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 1. Проверка даты приобретения (открытия короткой позиции) (графа 4)
         if (row.shortPositionDate > reportDay) {
             logger.error(errorMsg + 'неверно указана дата приобретения (открытия короткой позиции)!')
-            return false
         }
 
         // 2. Арифметическая проверка графы 8
-        if (row.termBondsIssued != null || row.termBondsIssued != 0) {
-            if (row.percIncome > getColumn8(row, lastDay)) {
-                logger.warn(errorMsg + 'неверно рассчитана графа «Процентный доход с даты приобретения»!')
-            }
+        needValue['percIncome'] = calcPercIncome(row, lastDay)
+        checkCalc(row, ['percIncome'], needValue, logger, false)
+
+        // Проверки соответствия НСИ (графа 5)
+        checkNSI(28, row, 'balance2')
+
+        // проверки деления на ноль
+        if (row.termBondsIssued == 0) {
+            def name = getColumnName(row, 'termBondsIssued')
+            logger.error(errorMsg + "деление на ноль: \"$name\" имеет нулевое значение.")
         }
     }
 
-    // 3, 4. Проверка итоговых значений по разделу А и B
-    // графы для которых надо вычислять итого А и Б (графа 2, 8)
-    ['A', 'B'].each { section ->
-        def row = getRowByAlias(dataRows, section)
-        def totalRow = getRowByAlias(dataRows, 'total' + section)
-
-        // посчитать итоги раздела
-        def from = row.getIndex()
-        def to = totalRow.getIndex() - 2
-        totalColumns.each { alias ->
-            // если нет строк в разделе то в итоги 0
-            tmp = (from <= to ? summ(formData, dataRows, new ColumnRange(alias, from, to)) : 0)
-            if (totalRow.getCell(alias).getValue() != tmp) {
-                logger.error("Итоговые значений для раздела $section рассчитаны неверно!")
-            }
+    // 3. Проверка итоговых значений по разделу А
+    def rowA = getDataRow(dataRows, 'A')
+    def totalRowA = getDataRow(dataRows, 'totalA')
+    for (def alias : totalColumns) {
+        def tmpA = getSum(dataRows, rowA, totalRowA, alias)
+        if (totalRowA.getCell(alias).value != tmpA) {
+            logger.error("Итоговые значений для раздела A рассчитаны неверно:!")
+            break
         }
     }
-    if (hasError()) {
-        return false
+
+    // 4. Проверка итоговых значений по разделу Б
+    def totalRowB = getDataRow(dataRows, 'totalB')
+    def rowB = getDataRow(dataRows, 'B')
+    for (def alias : totalColumns) {
+        def tmpB = getSum(dataRows, rowB, totalRowB, alias)
+        if (totalRowB.getCell(alias).value != tmpB) {
+            logger.error("Итоговые значений для раздела Б рассчитаны неверно:!")
+            break
+        }
     }
 
     // 5. Проверка итоговых значений по всей форме
-    def totalRow = getRowByAlias(dataRows, 'total')
-    if (totalRow.percIncome != getCalcTotalValueByAlias(dataRows, 'percIncome')) {
-        logger.error('Итоговые значений рассчитаны неверно!')
-        return false
-    }
-    return true
+    getDataRow(dataRows, 'total').percIncome = (totalRowA.percIncome ?: 0) - (totalRowB.percIncome ?: 0)
 }
 
-/**
- * Проверки соответствия НСИ.
- */
-def checkNSI() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-
-    def cache = [:]
-    for (def row : dataRows) {
-        // графа 5
-        if (row.getAlias() == null && row.balance2 != null && null == getRecordById(28, row.balance2, cache)) {
-            index = row.getIndex()
-            logger.warn("В строке $index балансовый счёт в справочнике отсутствует!")
-        }
-    }
-    return true
-}
-
-/**
- * Консолидация.
- */
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = dataRowHelper.allCached
 
     // удалить нефиксированные строки
     def deleteRows = []
@@ -268,6 +260,8 @@ void consolidation() {
     }
     if (!deleteRows.isEmpty()) {
         dataRows.removeAll(deleteRows)
+        // поправить индексы, потому что они после изменения не пересчитываются
+        updateIndexes(dataRows)
     }
 
     // собрать из источников строки и разместить соответствующим разделам
@@ -276,7 +270,7 @@ void consolidation() {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceDataRowHelper = formDataService.getDataRowHelper(source)
-                def sourceDataRows = sourceDataRowHelper.getAllCached()
+                def sourceDataRows = sourceDataRowHelper.allCached
                 copyRows(sourceDataRows, dataRows, 'A', 'totalA')
                 copyRows(sourceDataRows, dataRows, 'B', 'totalB')
             }
@@ -284,26 +278,6 @@ void consolidation() {
     }
     dataRowHelper.save(dataRows)
     logger.info('Формирование консолидированной формы прошло успешно.')
-}
-
-/**
- * Проверка при создании формы.
- */
-void checkCreation() {
-    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-
-    //проверка периода ввода остатков
-    if (isBalancePeriod) {
-        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
-        return
-    }
-
-    def findForm = formDataService.find(formData.formType.id,
-            formData.kind, formData.departmentId, formData.reportPeriodId)
-
-    if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
-    }
 }
 
 /*
@@ -316,61 +290,15 @@ void checkCreation() {
  * @param row строка
  * @param lastDay последний день отчетного месяца
  */
-def getColumn8(def row, def lastDay) {
-    checkDivision(row.termBondsIssued, row.getIndex())
+def calcPercIncome(def row, def lastDay) {
+    if (row.termBondsIssued == null || row.termBondsIssued == 0 ||
+            lastDay == null || row.nominal == null || row.averageWeightedPrice == null ||
+            row.shortPositionDate == null || row.amount == null) {
+        return null
+    }
     def tmp = ((row.nominal - row.averageWeightedPrice) *
             (lastDay - row.shortPositionDate) / row.termBondsIssued) * row.amount
     return roundValue(tmp, 2)
-}
-
-/**
- * Получить номер строки в таблице по псевдонимиу (1..n).
- */
-def getIndexByAlias(def dataRows, String rowAlias) {
-    def row = getRowByAlias(dataRows, rowAlias)
-    return (row != null ? row.getIndex() : -1)
-}
-
-/**
- * Получить строку по алиасу.
- *
- * @param dataRows строки нф
- * @param alias алиас
- */
-def getRowByAlias(def dataRows, def alias) {
-    if (alias == null || alias == '' || dataRows == null) {
-        return null
-    }
-    for (def row : dataRows) {
-        if (alias.equals(row.getAlias())) {
-            return row
-        }
-    }
-    return null
-}
-
-/**
- * Проверить заполненость обязательных полей.
- *
- * @param row строка
- * @param columns список обязательных графов
- * @return true - все хорошо, false - есть незаполненные поля
- */
-def checkRequiredColumns(def row, def columns) {
-    def colNames = []
-
-    columns.each {
-        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-            colNames.add('"' + row.getCell(it).column.name + '"')
-        }
-    }
-    if (!colNames.isEmpty()) {
-        def errorMsg = colNames.join(', ')
-        def index = row.getIndex()
-        logger.error("В строке $index не заполнены колонки : $errorMsg.")
-        return false
-    }
-    return true
 }
 
 /**
@@ -383,30 +311,26 @@ def checkRequiredColumns(def row, def columns) {
  *      в приемник строки вставляются перед строкой с этим псевдонимом
  */
 void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def toAlias) {
-    def from = getIndexByAlias(sourceDataRows, fromAlias)
-    def to = getIndexByAlias(sourceDataRows, toAlias) - 1
+    def from = getDataRow(sourceDataRows, fromAlias).getIndex()
+    def to = getDataRow(sourceDataRows, toAlias).getIndex() - 1
     if (from > to) {
         return
     }
     def copyRows = sourceDataRows.subList(from, to)
-    destinationDataRows.addAll(getIndexByAlias(destinationDataRows, toAlias) - 1, copyRows)
+    destinationDataRows.addAll(getDataRow(destinationDataRows, toAlias).getIndex() - 1, copyRows)
     // поправить индексы, потому что они после вставки не пересчитываются
-    destinationDataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
+    updateIndexes(destinationDataRows)
 }
 
-/**
- * Получить новую стролу с заданными стилями.
- */
+/** Получить новую строку с заданными стилями. */
 def getNewRow() {
     def newRow = formData.createDataRow()
-    newRow.getCell('percIncome').styleAlias = 'Вычисляемая'
-    // графа 1..7
-    ['series', 'amount', 'nominal', 'shortPositionDate',
-            'balance2', 'averageWeightedPrice', 'termBondsIssued'].each {
+    editableColumns.each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).styleAlias = 'Редактируемая'
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).styleAlias = 'Автозаполняемая'
     }
     return newRow
 }
@@ -427,73 +351,26 @@ def roundValue(def value, int precision) {
 }
 
 /**
- * Проверка деления на ноль.
+ * Получить сумму для указанной графы.
  *
- * @param division делитель
- * @param index номер строки
+ * @param dataRows строки
+ * @param labelRow строка начала раздела
+ * @param totalRow строка итогов раздела
+ * @param alias алиас графы для которой суммируются данные
  */
-void checkDivision(def division, def index) {
-    if (division == 0) {
-        throw new ServiceLoggerException("Деление на ноль в строке $index.", logger.getEntries())
+def getSum(def dataRows, def labelRow, def totalRow, def alias) {
+    def from = labelRow.getIndex()
+    def to = totalRow.getIndex() - 2
+    // если нет строк в разделе то в итоги 0
+    if (from > to) {
+        return 0
     }
+    return summ(formData, dataRows, new ColumnRange(alias, from, to))
 }
 
-/**
- * Имеются ли фатальные ошибки.
- */
-def hasError() {
-    return logger.containsLevel(LogLevel.ERROR)
-}
-
-// TODO (Ramil Timerbaev) уточнить как получать дату последнего дня для месяца
-/**
- * Получить последний день отчетного периода (месяца)
- */
-def getLastDayReportPeriod() {
-    def last = reportPeriodService.getEndDate(formData.reportPeriodId)
-    return (last ? last.time : null)
-}
-
-/**
- * Получить отчетную дату.
- */
-def getReportDate() {
-    def reportDay = reportPeriodService.getReportDate(formData.reportPeriodId)
-    return (reportDay ? reportDay.time : null)
-}
-
-/**
- * Посчитать значение итоговой строки по алиасу.
- */
-def getCalcTotalValueByAlias(def dataRows, def alias) {
-    def totalRowA = getRowByAlias(dataRows, 'totalA')
-    def totalRowB = getRowByAlias(dataRows, 'totalB')
-    return (totalRowA.getCell(alias).getValue() ?: 0) - (totalRowB.getCell(alias).getValue() ?: 0)
-}
-
-/**
- * Получить запись из справочника по идентифкатору записи.
- *
- * @param refBookId идентификатор справончика
- * @param recordId идентификатор записи
- * @param cache кеш
- * @return
- */
-def getRecordById(def refBookId, def recordId, def cache) {
-    if (cache[refBookId] != null) {
-        if (cache[refBookId][recordId] != null) {
-            return cache[refBookId][recordId]
-        }
-    } else {
-        cache[refBookId] = [:]
+/** Поправить индексы. */
+void updateIndexes(def dataRows) {
+    dataRows.eachWithIndex { row, i ->
+        row.setIndex(i + 1)
     }
-    def record = refBookService.getRecordData(refBookId, recordId)
-    if (record != null) {
-        cache[refBookId][recordId] = record
-        return cache[refBookId][recordId]
-    }
-    //def refBook = refBookFactory.get(refBookId)
-    //def refBookName = refBook.name
-    //logger.error("Не удалось найти запись (id = $recordId) в справочнике $refBookName (id = $refBookId)")
-    return null
 }

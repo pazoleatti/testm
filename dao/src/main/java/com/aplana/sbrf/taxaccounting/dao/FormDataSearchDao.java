@@ -20,6 +20,8 @@ public interface FormDataSearchDao {
 	 * запросу
 	 */
 	List<FormDataSearchResultItem> findByFilter(FormDataDaoFilter filter);
+
+    List<Long> findIdsByFilter(FormDataDaoFilter filter);
 	
 	/**
 	 * Возвращает список {@link FormDataSearchResultItem}, представляющий набор данных по налоговым формам, удовлетворяющих 

@@ -13,6 +13,9 @@ public class PreparedStatementData {
 	// запрос
 	private StringBuilder query = new StringBuilder();
 
+	// часть с join'ами
+    private String joinPartsOfQuery;
+
 	// набор параметров
 	private List<Object> params = new ArrayList<Object>();
 
@@ -50,5 +53,13 @@ public class PreparedStatementData {
 
     public void appendQuery(String query){
         this.query.append(query);
+    }
+
+    public void setJoinPartsOfQuery(String joinPartsOfQuery){
+        this.joinPartsOfQuery = joinPartsOfQuery;
+    }
+
+    public String getJoinPartsOfQuery(){
+        return joinPartsOfQuery;
     }
 }

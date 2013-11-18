@@ -378,9 +378,7 @@ def roundValue(def value, int precision) {
     }
 }
 
-/**
- * Получить итоговую строку с суммами за месяц.
- */
+/** Получить итоговую строку с суммами за месяц. */
 def getTotalMonthRow(def dataRows) {
     def newRow = formData.createDataRow()
     newRow.setAlias('month')
@@ -515,9 +513,7 @@ def calc27(def row, def code) {
     return roundValue(tmp, 2)
 }
 
-/**
- * Получить нф за предыдущий месяц
- */
+/** Получить нф за предыдущий месяц. */
 def getDataRowsOld() {
     // TODO (Ramil Timerbaev) сделать получение нф за предыдущий месяц
     // предыдущий отчётный период
@@ -531,9 +527,7 @@ def getDataRowsOld() {
     return null
 }
 
-/**
- * Получить строки из нф по заданному идентификатору нф.
- */
+/** Получить строки из нф по заданному идентификатору нф. */
 def getRnuRowsById(def id) {
     def formDataRNU = formDataService.find(id, formData.kind, formDataDepartment.id, formData.reportPeriodId)
     if (formDataRNU != null) {

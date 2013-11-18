@@ -4,12 +4,14 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormDataSearchResultItemMapper;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
@@ -101,8 +103,26 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		sql.append(" order by fd.id desc");
 		return getJdbcTemplate().query(sql.toString(), new FormDataSearchResultItemMapper());
 	}
-	
-	public void appendOrderByClause(StringBuilder sql, FormDataSearchOrdering ordering, boolean ascSorting) {
+
+    @Override
+    public List<Long> findIdsByFilter(FormDataDaoFilter filter) {
+        StringBuilder sql = new StringBuilder();
+        appendSelectClause(sql);
+        appendFromAndWhereClause(sql, filter);
+        if (logger.isTraceEnabled()) {
+            logger.trace(sql);
+        }
+        sql.append(" order by fd.id desc");
+
+        return getJdbcTemplate().query(sql.toString(), new RowMapper<Long>() {
+            @Override
+            public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return rs.getLong("form_data_id");
+            }
+        });
+    }
+
+    public void appendOrderByClause(StringBuilder sql, FormDataSearchOrdering ordering, boolean ascSorting) {
 		sql.append(" order by ");
 		
 		String column = null;
@@ -176,4 +196,6 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		appendFromAndWhereClause(sql, filter);
 		return getJdbcTemplate().queryForInt(sql.toString());
 	}
+
+
 }

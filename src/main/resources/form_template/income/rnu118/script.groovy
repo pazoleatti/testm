@@ -9,7 +9,6 @@ import groovy.transform.Field
  * Форма "(РНУ-117) Регистр налогового учёта доходов и расходов, по операциям со сделками форвард, квалифицированным в качестве операций с ФИСС для целей налогообложения"
  *
  * @author bkinzyabulatov
- * TODO справочник вид сделки
  *
  * Графа 1    rowNumber           № пп
  * Графа 2.1  transactionNumber   Общая информация о сделке. Номер сделки
@@ -93,12 +92,12 @@ def editableColumns = ["transactionNumber", "contractor", "transactionKind",
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ["rowNumber", "course", "deviationMinPrice", "deviationMaxPrice",
+def arithmeticCheckAlias = ["course", "deviationMinPrice", "deviationMaxPrice",
         "income", "outcome"]
 
 // Обязательно заполняемые атрибуты
 @Field
-def nonEmptyColumns = ["rowNumber", "transactionNumber", "contractor", "transactionKind",
+def nonEmptyColumns = ["transactionNumber", "contractor", "transactionKind",
         "transactionDate", "transactionEndDate"]
 @Field
 def nonEmptyColumnsPt2 = ["bonusSize", "bonusCurrency", "bonusSum", "course", "minPrice", "maxPrice",
@@ -162,45 +161,33 @@ def getXML(def String startStr, def String endStr) {
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def numbers = []
     def totalRow = null
-    def rowNum = 0
+    // Номер последний строки предыдущей формы
+    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
     for (def DataRow row : dataRows){
         if (row?.getAlias()?.contains('itg')) {
             totalRow = row
             continue
         }
 
-        rowNum++
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
+
         // Поля 1-4 обязательны для заполнения. Если заполнено 5, то 6-11.2 тоже обязательны
         def requiredColumns = row.transactionCalcDate != null ? (nonEmptyColumns + nonEmptyColumnsPt2) : nonEmptyColumns
-        checkNonEmptyColumns(row, rowNum, requiredColumns, logger, true)
+        checkNonEmptyColumns(row, index, requiredColumns, logger, true)
 
-        def rowStart
-        def index = row.rowNumber
-        if (index != null) {
-            rowStart = "В строке \"№ пп\" равной $index "
-        } else {
-            index = dataRows.indexOf(row) + 1
-            rowStart = "В строке $index "
+        if (++i != row.rowNumber) {
+            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
-        if (row.rowNumber in numbers){
-            logger.error("${rowStart}нарушена уникальность номера по порядку ${row.rowNumber}!")
-        }else {
-            numbers += row.rowNumber
-        }
         def values = [:]
-        setGraph1(dataRows, row, values)
         setGraph9(row, values)
         setGraph11(row, values)
         setGraph13(row, values)
-        for (def colName : autoFillColumns) {
-            if (row[colName] != values[colName]){
-                isValid = false
-                logger.error("${rowStart}неверно рассчитана графа \"${getColumnName(row,colName)}\"!")
-            }
-        }
+
+        checkCalc(row, arithmeticCheckAlias, values, logger, true)
+
         // Проверки соответствия НСИ
         checkNSI(15, row, "bonusCurrency")
     }
@@ -228,9 +215,12 @@ void calc() {
     // Удаление итогов
     deleteAllAliased(dataRows)
 
+    // Номер последний строки предыдущей формы
+    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+
     // Расчет ячеек
     dataRows.each{row->
-        setGraph1(dataRows, row, row)
+        row.rowNumber=++index
         setGraph9(row, row)
         setGraph11(row, row)
         setGraph13(row, row)
@@ -258,26 +248,6 @@ void calc() {
     dataRowHelper.save(dataRows)
 }
 
-/**
- * получаем мапу со значениями, расчитанными для каждой конкретной строки или сразу записываем в строку (для расчетов)
- */
-def getValues(def dataRows, def row, def result) {
-    if(result == null){
-        result = [:]
-    }
-
-    setGraph1(dataRows, row, result)
-    setGraph9(row, result)
-    setGraph11(row, result)
-    setGraph13(row, result)
-
-    return result
-}
-
-void setGraph1(def dataRows, def row, def result) {
-    result.rowNumber = dataRows.indexOf(row) + 1
-}
-
 void setGraph9(def row, def result) {
     def recordId = row.bonusCurrency ? getRecordId(22, 'CODE_NUMBER', "${row.bonusCurrency}", row.rowNumber?.intValue(), getColumnName(row, 'bonusCurrency'),
             row.transactionCalcDate) : null
@@ -292,7 +262,7 @@ void setGraph11(def row, def result) {
     }
     if (0 < row.bonusSize && row.bonusSize < row.minPrice){
         result.deviationMinPrice = (row.minPrice - row.bonusSize) / row.course
-        result.deviationMaxPrice = 0
+        result.deviationMaxPrice = BigDecimal.ZERO
         return
     }
     if (row.maxPrice == null) {
@@ -302,13 +272,13 @@ void setGraph11(def row, def result) {
     }
     if (0 < row.bonusSize && row.bonusSize > row.minPrice ||
             0 > row.bonusSize && row.bonusSize > -row.maxPrice){
-        result.deviationMinPrice = 0
-        result.deviationMaxPrice = 0
+        result.deviationMinPrice = BigDecimal.ZERO
+        result.deviationMaxPrice = BigDecimal.ZERO
         return
     }
     if (0 > row.bonusSize && row.bonusSize < -row.maxPrice){
         result.deviationMaxPrice = (-row.maxPrice - row.bonusSize) * row.course
-        result.deviationMinPrice = 0
+        result.deviationMinPrice = BigDecimal.ZERO
     }
 }
 

@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import static org.junit.Assert.assertTrue;
+
 //TODO: Необходимо добавить тесты для getRecords с фильтром (Marat Fayzullin 2013-08-31)
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -418,12 +420,18 @@ public class RefBookDaoTest {
         // До удаления
         PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(rbId, delDate, new PagingParams(), null,
                 null);
-        Assert.assertTrue(data.size() == 2);
+        assertTrue(data.size() == 2);
         // Удаление
         refBookDao.deleteAllRecords(rbId, delDate);
         // После удаления
         data = refBookDao.getRecords(rbId, delDate, new PagingParams(), null, null);
-        Assert.assertTrue(data.size() == 0);
+        assertTrue(data.size() == 0);
     }
 
+    @Test
+    public void testUseForignStatements(){
+        Date version = getDate(1, 2, 2013);                                                                                 // order is null and
+        PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, version, new PagingParams(), "author.name like 'Петренко%'", null);
+        assertTrue(data.size() == 1);
+    }
 }

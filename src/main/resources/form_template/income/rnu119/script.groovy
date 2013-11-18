@@ -3,13 +3,18 @@ package form_template.income.rnu119
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
+
+import java.text.SimpleDateFormat
 
 /**
  * Форма "(РНУ-119) Регистр налогового учёта доходов и расходов, по сделкам своп, квалифицированным в качестве операций с ФИСС для целей налогообложения".
  *
  * TODO:
- *      - расчет графы 15.1 и 15.2 непонтяности с ручным вводом в чтз
+ *      - расчет графы 15.1 и 15.2: непонтяности с ручным вводом в чтз, а также используется какая то 2.7
+ *      - доделать расчет графы 5.2: пока недоделан потому что расчет графы 5.2 невозможен из за отсутствия валюты
  *
  * @author rtimerbaev
  */
@@ -100,7 +105,7 @@ def allColumns = ['fix', 'number', 'transactionNumber', 'transactionKind', 'cont
 
 // Редактируемые атрибуты (графа 2.1 .. 5.1, 6..13)
 @Field
-def editableColumns = ['transactionNumber', 'transactionKind', 'contractor', 'transactionType', 'coursFirstPart', 'coursSecondPart', 'transactionDate', 'transactionEndDate', 'transactionCalcDate', 'price', 'minPrice', 'maxPrice', 'interestRateValue', 'interestSpreadValue', 'interestRateSize', 'execFirstPart', 'execSecondPart', 'requestAmount', 'liabilityInterestRateValue', 'liabilityInterestSpreadValue', 'liabilityInterestRateSize', 'liabilityExecFirstPart', 'liabilityExecSecondPart', 'liabilityAmount']
+def editableColumns = ['transactionNumber', 'transactionKind', 'contractor', 'transactionType', 'coursFirstPart', 'coursSecondPart', 'transactionDate', 'transactionEndDate', 'transactionCalcDate', 'course', 'price', 'minPrice', 'maxPrice', 'interestRateValue', 'interestSpreadValue', 'interestRateSize', 'execFirstPart', 'execSecondPart', 'requestAmount', 'liabilityInterestRateValue', 'liabilityInterestSpreadValue', 'liabilityInterestRateSize', 'liabilityExecFirstPart', 'liabilityExecSecondPart', 'liabilityAmount']
 
 // Автозаполняемые атрибуты
 @Field
@@ -121,6 +126,9 @@ def reportPeriodEndDate = null
 // Текущая дата
 @Field
 def currentDate = new Date()
+
+@Field
+def sdf = new SimpleDateFormat('dd.MM.yyyy')
 
 //// Обертки методов
 
@@ -152,7 +160,7 @@ def getRefBookRecord(def Long refBookId, def String alias, def String value, def
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 // Получение числа из строки при импорте
@@ -172,6 +180,9 @@ void calc() {
     dataRows.each { row ->
         // графа 1
         row.number = ++rowNumber
+
+        // графа 5.2
+        row.course = calc5_2(row)
 
         // графа 14.1
         row.income = calc14_1(row)
@@ -202,8 +213,8 @@ void logicCheck() {
     def nonEmptyColumns2 = ['interestRateValue', 'interestSpreadValue', 'interestRateSize',
             'requestAmount', 'liabilityInterestRateValue', 'liabilityInterestSpreadValue',
             'liabilityInterestRateSize', 'liabilityAmount']
-    // алиасы графов для арифметической проверки (графа 14.11 .. 15.2)
-    def arithmeticCheckAlias = ['income', 'outcome', 'deviationMinPrice', 'deviationMaxPrice']
+    // алиасы графов для арифметической проверки (графа 5.2. 14.11 .. 15.2)
+    def arithmeticCheckAlias = ['course', 'income', 'outcome', 'deviationMinPrice', 'deviationMaxPrice']
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
 
@@ -237,6 +248,7 @@ void logicCheck() {
 
         // 4. Арифметические проверки расчета неитоговых граф
         def values = calc15(row)
+        needValue['course'] = calc5_2(row)
         needValue['income'] = calc14_1(row)
         needValue['outcome'] = calc14_2(row)
         needValue['deviationMinPrice'] = values[0]
@@ -251,15 +263,12 @@ void logicCheck() {
         checkNSI(16, row, 'transactionType')
 
         // 3. Проверка курса валюты	(графа 5.2)
-        if (row.transactionDate != null && row.course != null) {
-            def name = row.getCell('course').column.name
-            def record = getRefBookRecord(22, 'RATE', row.course, row.transactionDate, index, name, false)
-            if (record == null) {
-                RefBook rb = refBookFactory.get(22);
-                def rbName = rb.getName()
-                def attrName = rb.getAttribute('RATE').getName()
-                logger.error(errorMsg + "В справочнике «$rbName» не найдено значение «${row.course}», соответствующее атрибуту «$attrName»!")
-            }
+        if (row.transactionDate != null && row.course != null &&
+                getRecord(22, "RATE = $row.course", row.transactionDate) == null) {
+            RefBook rb = refBookFactory.get(22)
+            def rbName = rb.getName()
+            def attrName = rb.getAttribute('RATE').getName()
+            logger.error(errorMsg + "В справочнике «$rbName» не найдено значение «${row.course}», соответствующее атрибуту «$attrName»!")
         }
 
         // 4. Проверка значения процентной ставки
@@ -354,6 +363,20 @@ def getTotalRow(def dataRows) {
     }
     calcTotalSum(dataRows, newRow, totalSumColumns)
     return newRow
+}
+
+// TODO (Ramil Timerbaev) этот метод пока недоделан потому что расчет графы 5.2 невозможен
+def calc5_2(def row) {
+    if (row.transactionDate == null || row.course == null) {
+        return null
+    }
+    def tmp = row.course
+    def kind = getRefBookValue(91, row.transactionKind)?.KIND?.value
+    if (kind == 'CCS') {
+        // TODO (Ramil Timerbaev) getRecord(22, "RATE = $row.course", row.transactionDate)
+        tmp = row.course
+    }
+    return roundValue(tmp, 2)
 }
 
 def calc14_1(def row) {
@@ -628,4 +651,48 @@ void checkTotalRow(def totalRow) {
 
 def abs(def value) {
     return (value < 0 ? -value : value)
+}
+
+/**
+ * Аналог FormDataServiceImpl.getRefBookRecord(...) но ожидающий получения из справочника больше одной записи.
+ *
+ * @return первая из найденных записей
+ */
+def getRecord(def refBookId, def filter, Date date) {
+    if (refBookId == null) {
+        return null
+    }
+    String dateStr = sdf.format(date)
+    if (recordCache.containsKey(refBookId)) {
+        Long recordId = recordCache.get(refBookId).get(dateStr + filter)
+        if (recordId != null) {
+            if (refBookCache != null) {
+                return refBookCache.get(recordId)
+            } else {
+                def retVal = new HashMap<String, RefBookValue>()
+                retVal.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId))
+                return retVal
+            }
+        }
+    } else {
+        recordCache.put(refBookId, [:])
+    }
+
+    def provider
+    if (!providerCache.containsKey(refBookId)) {
+        providerCache.put(refBookId, refBookFactory.getDataProvider(refBookId))
+    }
+    provider = providerCache.get(refBookId)
+
+    def records = provider.getRecords(date, null, filter, null)
+    // отличие от FormDataServiceImpl.getRefBookRecord(...)
+    if (records.size() > 0) {
+        def retVal = records.get(0)
+        Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue()
+        recordCache.get(refBookId).put(dateStr + filter, recordId)
+        if (refBookCache != null)
+            refBookCache.put(recordId, retVal)
+        return retVal
+    }
+    return null
 }
