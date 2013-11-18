@@ -660,13 +660,13 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         def String innerCode = getRefBookValue(17, val26).INNER_CODE.stringValue
         def String code = null;
         if ("А33".equals(innerCode)) {
-            code = '1751402'
+            code = '17 5140 2'
         } else if ("А76".equals(innerCode)) {
-            code = '1751200'
+            code = '17 5120 0'
         } else if ("А98".equals(innerCode)) {
-            code = '1753407'
+            code = '17 5340 7'
         } else if ("А99".equals(innerCode)) {
-           code = '1752204'
+           code = '17 5220 4'
         }
         if(code !=null)
             row.dealSubjectCode2 = getRecordId(68, 'CODE', code, date)
@@ -694,8 +694,6 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 388:
         case 391:
         case 392:
-        case 393:
-        case 394:
             val27 = '65.23'
             break
         case 382:
