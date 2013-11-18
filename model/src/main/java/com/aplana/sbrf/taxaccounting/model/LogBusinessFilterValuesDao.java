@@ -9,12 +9,21 @@ public class LogBusinessFilterValuesDao {
     private Integer departmentId;
     private Date fromSearchDate;
     private Date toSearchDate;
+    private Long userId;
 
     /*Стартовый индекс списка записей */
     private int startIndex;
 
     /*Количество записей, которые нужно вернуть*/
     private int countOfRecords;
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
     public int getStartIndex() {
         return startIndex;

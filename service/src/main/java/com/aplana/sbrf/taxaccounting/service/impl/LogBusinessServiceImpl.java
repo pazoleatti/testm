@@ -33,21 +33,21 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 	}
 
     @Override
-    public PagingResult<LogBusinessSearchResultItem> getLogsBusiness(TAUserInfo userInfo, LogBusinessFilterValues filter) {
+    public PagingResult<LogSystemSearchResultItem> getLogsBusiness(TAUserInfo userInfo, LogBusinessFilterValues filter) {
         FormDataFilter formDataFilter = new FormDataFilter();
         formDataFilter.setTaxType(filter.getTaxType());
-        formDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId()) : new ArrayList<Integer>());
+        /*formDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId()) : new ArrayList<Integer>());*/
         formDataFilter.setFormDataKind(filter.getFormKind());
         formDataFilter.setFormTypeId(filter.getFormTypeId());
         formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
         List<Long> formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
-
 
         DeclarationDataFilter declarationDataFilter = new DeclarationDataFilter();
         declarationDataFilter.setTaxType(filter.getTaxType());
         declarationDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId())
                 : new ArrayList<Integer>());
         declarationDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
+        declarationDataFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
         List<Long> declarationDataIds =
                 declarationDataSearchService.getDeclarationIds(declarationDataFilter, DeclarationDataSearchOrdering.ID, false);
 
@@ -57,6 +57,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
         filterValuesDao.setFromSearchDate(filter.getFromSearchDate());
         filterValuesDao.setStartIndex(filter.getStartIndex());
         filterValuesDao.setDepartmentId(filter.getDepartmentId());
+        filterValuesDao.setUserId(filter.getUserId());
 
         return logBusinessDao.getLogsBusiness(formDataIds, declarationDataIds, filterValuesDao);
     }

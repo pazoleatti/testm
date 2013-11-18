@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared;
 
-import com.aplana.sbrf.taxaccounting.model.LogBusinessSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class GetHistoryBusinessListResult implements Result {
     private long totalCountOfRecords;
-    private List<LogBusinessSearchResultItem> records;
+    private List<LogSystemSearchResultItem> records;
 
     public long getTotalCountOfRecords() {
         return totalCountOfRecords;
@@ -20,11 +20,11 @@ public class GetHistoryBusinessListResult implements Result {
         this.totalCountOfRecords = totalCountOfRecords;
     }
 
-    public List<LogBusinessSearchResultItem> getRecords() {
+    public List<LogSystemSearchResultItem> getRecords() {
         return records;
     }
 
-    public void setRecords(List<LogBusinessSearchResultItem> records) {
+    public void setRecords(List<LogSystemSearchResultItem> records) {
         this.records = records;
     }
 }

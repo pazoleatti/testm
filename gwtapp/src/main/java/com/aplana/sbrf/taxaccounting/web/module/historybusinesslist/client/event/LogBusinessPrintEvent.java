@@ -7,7 +7,7 @@ import com.google.gwt.event.shared.HasHandlers;
 /**
  * User: avanteev
  */
-public class LogBusinessSearchEvent extends GwtEvent<LogBusinessSearchEvent.MyHandler> {
+public class LogBusinessPrintEvent extends GwtEvent<LogBusinessPrintEvent.MyHandler> {
     @Override
     public Type<MyHandler> getAssociatedType() {
         return getType();
@@ -15,7 +15,11 @@ public class LogBusinessSearchEvent extends GwtEvent<LogBusinessSearchEvent.MyHa
 
     @Override
     protected void dispatch(MyHandler handler) {
-        handler.onLogBusinessSearchButtonClicked(this);
+        handler.onLogBusinessPrintClicked(new LogBusinessPrintEvent());
+    }
+
+    public static interface MyHandler extends EventHandler {
+        void onLogBusinessPrintClicked(LogBusinessPrintEvent event);
     }
 
     private static final Type<MyHandler> TYPE = new Type<MyHandler>();
@@ -24,11 +28,8 @@ public class LogBusinessSearchEvent extends GwtEvent<LogBusinessSearchEvent.MyHa
         return TYPE;
     }
 
-    public static interface MyHandler extends EventHandler {
-        void onLogBusinessSearchButtonClicked(LogBusinessSearchEvent event);
+    public static void fire(HasHandlers source) {
+        source.fireEvent(new LogBusinessPrintEvent());
     }
 
-    public static void fire(HasHandlers source) {
-        source.fireEvent(new LogBusinessSearchEvent());
-    }
 }

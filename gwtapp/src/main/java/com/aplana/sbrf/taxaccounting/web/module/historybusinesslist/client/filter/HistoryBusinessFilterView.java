@@ -250,4 +250,10 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
             getUiHandlers().getReportPeriods(event.getValue());
         }
     }
+
+    @UiHandler("printButton")
+    void onPrintClicked(ClickEvent event){
+        if (getUiHandlers() != null)
+            getUiHandlers().onPrintButtonClicked();
+    }
 }

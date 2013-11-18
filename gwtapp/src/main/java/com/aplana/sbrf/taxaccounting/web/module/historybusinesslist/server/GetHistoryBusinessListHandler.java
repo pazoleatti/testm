@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.server;
 
-import com.aplana.sbrf.taxaccounting.model.LogBusinessSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
@@ -34,7 +34,7 @@ public class GetHistoryBusinessListHandler extends AbstractActionHandler<GetHist
     @Override
     public GetHistoryBusinessListResult execute(GetHistoryBusinessListAction action, ExecutionContext context) throws ActionException {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        PagingResult<LogBusinessSearchResultItem> resultItems = logBusinessService.getLogsBusiness(userInfo, action.getFilterValues());
+        PagingResult<LogSystemSearchResultItem> resultItems = logBusinessService.getLogsBusiness(userInfo, action.getFilterValues());
         GetHistoryBusinessListResult result = new GetHistoryBusinessListResult();
         result.setRecords(resultItems);
         result.setTotalCountOfRecords(resultItems.getTotalCount());

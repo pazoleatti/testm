@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.filt
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.event.LogBusinessPrintEvent;
 import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.event.LogBusinessSearchEvent;
 import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.*;
 import com.google.inject.Inject;
@@ -45,6 +46,11 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
     @Override
     public void onSearchClicked() {
         LogBusinessSearchEvent.fire(this);
+    }
+
+    @Override
+    public void onPrintButtonClicked() {
+        LogBusinessPrintEvent.fire(this);
     }
 
     public interface MyView extends View,HasUiHandlers<HistoryBusinessUIHandler> {

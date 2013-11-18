@@ -1,14 +1,18 @@
 package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client;
 
-import com.aplana.sbrf.taxaccounting.model.LogBusinessSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.LogBusinessFilterValues;
+import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.event.LogBusinessPrintEvent;
 import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.event.LogBusinessSearchEvent;
 import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.filter.HistoryBusinessFilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.GetHistoryBusinessListAction;
 import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.GetHistoryBusinessListResult;
-import com.aplana.sbrf.taxaccounting.model.LogBusinessFilterValues;
+import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.PrintLogBusinessAction;
+import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.PrintLogBusinessResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -28,7 +32,7 @@ import java.util.List;
  * User: avanteev
  */
 public class HistoryBusinessPresenter extends Presenter<HistoryBusinessPresenter.MyView,HistoryBusinessPresenter.MyProxy>
-        implements LogBusinessSearchEvent.MyHandler, HistoryBusinessUIHandler {
+        implements LogBusinessSearchEvent.MyHandler, LogBusinessPrintEvent.MyHandler, HistoryBusinessUIHandler {
 
     static final Object TYPE_historyBusinessPresenter = new Object();
 
@@ -39,7 +43,7 @@ public class HistoryBusinessPresenter extends Presenter<HistoryBusinessPresenter
     @ProxyEvent
     @Override
     public void onLogBusinessSearchButtonClicked(LogBusinessSearchEvent event) {
-
+        getView().updateData(0);
     }
 
     @Override
@@ -52,12 +56,38 @@ public class HistoryBusinessPresenter extends Presenter<HistoryBusinessPresenter
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetHistoryBusinessListResult>() {
             @Override
             public void onSuccess(GetHistoryBusinessListResult result) {
-                if(result==null || result.getTotalCountOfRecords() == 0)
-                    getView().setAuditTableData(start, 0, new ArrayList<LogBusinessSearchResultItem>());
-                else
+                if(result.getRecords()==null && result.getTotalCountOfRecords() == 0){
+                    getView().setAuditTableData(start, 0, new ArrayList<LogSystemSearchResultItem>());
+                }
+                else{
                     getView().setAuditTableData(start, result.getTotalCountOfRecords(), result.getRecords());
+                }
             }
         }, this));
+    }
+
+    @ProxyEvent
+    @Override
+    public void onLogBusinessPrintClicked(LogBusinessPrintEvent event) {
+        try{
+            PrintLogBusinessAction action = new PrintLogBusinessAction();
+            action.setFilterValues(historyBusinessFilterPresenter.getLogSystemFilter());
+            dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<PrintLogBusinessResult>() {
+                @Override
+                public void onSuccess(PrintLogBusinessResult result) {
+                    getView().getBlobFromServer(result.getUuid());
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    MessageEvent.fire(HistoryBusinessPresenter.this,
+                            "Не удалось напечатать журнал аудита", caught);
+                }
+            }, this));
+        }catch (Exception e){
+            MessageEvent.fire(this,
+                    "Не удалось напечатать журнал аудита", e);
+        }
     }
 
     @ProxyCodeSplit
@@ -73,8 +103,9 @@ public class HistoryBusinessPresenter extends Presenter<HistoryBusinessPresenter
     }
 
     interface MyView extends View, HasUiHandlers<HistoryBusinessUIHandler>{
-        void setAuditTableData(int startIndex, long count,  List<LogBusinessSearchResultItem> itemList);
+        void setAuditTableData(int startIndex, long count,  List<LogSystemSearchResultItem> itemList);
         void updateData(int pageNumber);
+        void getBlobFromServer(String uuid);
     }
 
     @Override

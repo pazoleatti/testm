@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -37,6 +38,10 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 
 	private static final String DECLARATION_NOT_FOUND_MESSAGE = "Декларация с id = %d не найдена в БД";
 	private static final String FORM_NOT_FOUND_MESSAGE = "Налоговая форма с id = %d не найдена в БД";
+
+    private static final String dbDateFormat = "YYYYMMDD";
+    private static final String dateFormat = "yyyyMMdd";
+    private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
 
 	private static final class LogBusinessRowMapper implements RowMapper<LogBusiness> {
 		@Override
@@ -66,11 +71,11 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 		}
 	}
 
-    private final class LogBusinessSearchResultItemRowMapper implements RowMapper<LogBusinessSearchResultItem> {
+    private final class LogSystemSearchResultItemRowMapper implements RowMapper<LogSystemSearchResultItem> {
 
         @Override
-        public LogBusinessSearchResultItem mapRow(ResultSet rs, int rowNum) throws SQLException {
-            LogBusinessSearchResultItem log = new LogBusinessSearchResultItem();
+        public LogSystemSearchResultItem mapRow(ResultSet rs, int rowNum) throws SQLException {
+            LogSystemSearchResultItem log = new LogSystemSearchResultItem();
             log.setId(rs.getLong("id"));
             log.setLogDate(new Date(rs.getTimestamp("log_date").getTime()));
             log.setRoles(rs.getString("roles"));
@@ -115,15 +120,17 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 	}
 
     @Override
-    public PagingResult<LogBusinessSearchResultItem> getLogsBusiness(List<Long> formDataIds, List<Long> declarationDataIds, LogBusinessFilterValuesDao filter) {
+    public PagingResult<LogSystemSearchResultItem> getLogsBusiness(List<Long> formDataIds, List<Long> declarationDataIds, LogBusinessFilterValuesDao filter) {
         Map<String, Object> names = new HashMap<String, Object>();
         names.put("formDataIds", formDataIds);
         names.put("declarationDataIds", declarationDataIds);
         names.put("departmentId", filter.getDepartmentId());
+        names.put("userId", filter.getUserId());
         names.put("fromDate", filter.getFromSearchDate());
         names.put("toDate", filter.getToSearchDate());
         names.put("startIndex", filter.getStartIndex() + 1);
         names.put("endIndex", filter.getStartIndex() + filter.getCountOfRecords());
+        System.out.println("dao: " + filter.getStartIndex() + " " + filter.getCountOfRecords());
 
         StringBuilder sql = new StringBuilder("select * from (select fd.kind as form_kind_id, lb.*, rp.id as report_period_id, dt.id as declaration_type_id, ft.id as form_type_id, " +
                 "rownum as rn from log_business lb ");
@@ -137,15 +144,29 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         sql.append("left join declaration_data dd on lb.declaration_data_id=dd.\"ID\" ");
         sql.append("left join declaration_template dtemp on dd.declaration_template_id=dtemp.\"ID\" ");
         sql.append("left join declaration_type dt on dtemp.declaration_type_id=dt.\"ID\" ");
-        sql.append(" where form_data_id in (:formDataIds) ").
-                append("or declaration_data_id in (:declarationDataIds) and user_department_id = :departmentId and log_date between :fromDate and :toDate)");
-        sql.append(" where rn between :startIndex and :endIndex order by id desc");
-        List<LogBusinessSearchResultItem> records = getNamedParameterJdbcTemplate().query(sql.toString(),
+        sql.append(" WHERE lb.log_date BETWEEN TO_DATE('").append
+                (formatter.format(filter.getFromSearchDate()))
+                .append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append
+                (formatter.format(filter.getToSearchDate()))
+                .append("', '").append(dbDateFormat).append("')");
+        sql.append(filter.getDepartmentId() == null?"":" and lb.user_department_id = :departmentId");
+        sql.append(filter.getUserId() == null ? "" : " and lb.user_id = :userId");
+        if (formDataIds != null && !formDataIds.isEmpty() && declarationDataIds != null && !declarationDataIds.isEmpty())
+            sql.append(" and (form_data_id in (:formDataIds) or declaration_data_id in (:declarationDataIds))");
+        else if (formDataIds != null && !formDataIds.isEmpty())
+            sql.append(" and form_data_id in (:formDataIds)");
+        else if (declarationDataIds != null && !declarationDataIds.isEmpty())
+            sql.append(" and declaration_data_id in (:declarationDataIds)");
+
+        sql.append(")");
+        if (filter.getCountOfRecords() != 0)
+            sql.append(" where rn between :startIndex and :endIndex order by id desc");
+        List<LogSystemSearchResultItem> records = getNamedParameterJdbcTemplate().query(sql.toString(),
                 names,
-                new LogBusinessSearchResultItemRowMapper()
+                new LogSystemSearchResultItemRowMapper()
         );
 
-        return new PagingResult<LogBusinessSearchResultItem>(records, getCount(filter, names));
+        return new PagingResult<LogSystemSearchResultItem>(records, getCount(formDataIds, declarationDataIds, names));
     }
 
     @Override
@@ -200,9 +221,18 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 		);
 	}
 
-    private int getCount(LogBusinessFilterValuesDao filter, Map<String, Object> names) {
-        return getNamedParameterJdbcTemplate().queryForInt("select count(*) from log_business where form_data_id in (:formDataIds) " +
-                "or declaration_data_id in (:declarationDataIds) and user_department_id = :departmentId and log_date between :fromDate and :toDate",
+    private int getCount(List<Long> formDataIds, List<Long> declarationDataIds,Map<String, Object> names) {
+        StringBuilder sql = new StringBuilder("select count(*) from log_business where");
+        sql.append(" log_date between :fromDate and :toDate");
+        sql.append(names.get("departmentId") == null? "" :" and user_department_id = :departmentId");
+        sql.append(names.get("userId") == null ? "" : " and user_id = :userId");
+        if (formDataIds != null && !formDataIds.isEmpty() && declarationDataIds != null && !declarationDataIds.isEmpty())
+            sql.append(" and (form_data_id in (:formDataIds) or declaration_data_id in (:declarationDataIds))");
+        else if (formDataIds != null && !formDataIds.isEmpty())
+            sql.append(" and form_data_id in (:formDataIds)");
+        else if (declarationDataIds != null && !declarationDataIds.isEmpty())
+            sql.append(" and declaration_data_id in (:declarationDataIds)");
+        return getNamedParameterJdbcTemplate().queryForInt(sql.toString(),
                 names);
     }
 }

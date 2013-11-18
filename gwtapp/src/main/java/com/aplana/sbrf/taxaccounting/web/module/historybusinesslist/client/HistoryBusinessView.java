@@ -1,16 +1,20 @@
 package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client;
 
-import com.aplana.sbrf.taxaccounting.model.LogBusinessSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
@@ -29,14 +33,14 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
     Panel filterContentPanel;
 
     @UiField
-    GenericDataGrid<LogBusinessSearchResultItem> logBusinessTable;
+    GenericDataGrid<LogSystemSearchResultItem> logBusinessTable;
 
     @UiField
     FlexiblePager pager;
 
-    final AsyncDataProvider<LogBusinessSearchResultItem> dataProvider = new AsyncDataProvider<LogBusinessSearchResultItem>() {
+    final AsyncDataProvider<LogSystemSearchResultItem> dataProvider = new AsyncDataProvider<LogSystemSearchResultItem>() {
         @Override
-        protected void onRangeChanged(HasData<LogBusinessSearchResultItem> display) {
+        protected void onRangeChanged(HasData<LogSystemSearchResultItem> display) {
             if (getUiHandlers() != null){
                 final Range range = display.getVisibleRange();
                 getUiHandlers().onRangeChange(range.getStart(), range.getLength());
@@ -66,45 +70,45 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
         initWidget(uiBinder.createAndBindUi(this));
 
         //Инициализация колонок
-        TextColumn<LogBusinessSearchResultItem> dateColumn = new TextColumn<LogBusinessSearchResultItem>() {
+        TextColumn<LogSystemSearchResultItem> dateColumn = new TextColumn<LogSystemSearchResultItem>() {
             @Override
-            public String getValue(LogBusinessSearchResultItem object) {
+            public String getValue(LogSystemSearchResultItem object) {
                 return format.format(object.getLogDate());
             }
         };
 
-        TextColumn<LogBusinessSearchResultItem> eventColumn = new TextColumn<LogBusinessSearchResultItem>() {
+        TextColumn<LogSystemSearchResultItem> eventColumn = new TextColumn<LogSystemSearchResultItem>() {
             @Override
-            public String getValue(LogBusinessSearchResultItem object) {
+            public String getValue(LogSystemSearchResultItem object) {
                 return object.getEvent().getTitle();
             }
         };
 
-        TextColumn<LogBusinessSearchResultItem> noteColumn = new TextColumn<LogBusinessSearchResultItem>() {
+        TextColumn<LogSystemSearchResultItem> noteColumn = new TextColumn<LogSystemSearchResultItem>() {
             @Override
-            public String getValue(LogBusinessSearchResultItem object) {
+            public String getValue(LogSystemSearchResultItem object) {
                 return object.getNote();
             }
         };
 
-        TextColumn<LogBusinessSearchResultItem> reportPeriodColumn = new TextColumn<LogBusinessSearchResultItem>() {
+        TextColumn<LogSystemSearchResultItem> reportPeriodColumn = new TextColumn<LogSystemSearchResultItem>() {
             @Override
-            public String getValue(LogBusinessSearchResultItem object) {
+            public String getValue(LogSystemSearchResultItem object) {
                 return object.getReportPeriod()!=null?object.getReportPeriod().getName() + " " + object.getReportPeriod().getYear()
                         : "";
             }
         };
 
-        TextColumn<LogBusinessSearchResultItem> departmentColumn = new TextColumn<LogBusinessSearchResultItem>() {
+        TextColumn<LogSystemSearchResultItem> departmentColumn = new TextColumn<LogSystemSearchResultItem>() {
             @Override
-            public String getValue(LogBusinessSearchResultItem object) {
+            public String getValue(LogSystemSearchResultItem object) {
                 return object.getDepartment().getName();
             }
         };
 
-        TextColumn<LogBusinessSearchResultItem> typeColumn = new TextColumn<LogBusinessSearchResultItem>() {
+        TextColumn<LogSystemSearchResultItem> typeColumn = new TextColumn<LogSystemSearchResultItem>() {
             @Override
-            public String getValue(LogBusinessSearchResultItem object) {
+            public String getValue(LogSystemSearchResultItem object) {
                 if (object.getFormType() != null) {
                     return "Налоговые формы";
                 }
@@ -115,9 +119,9 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
             }
         };
 
-        TextColumn<LogBusinessSearchResultItem> formDataKindColumn = new TextColumn<LogBusinessSearchResultItem>() {
+        TextColumn<LogSystemSearchResultItem> formDataKindColumn = new TextColumn<LogSystemSearchResultItem>() {
             @Override
-            public String getValue(LogBusinessSearchResultItem object) {
+            public String getValue(LogSystemSearchResultItem object) {
                 if (object.getFormKind() != null) {
                     return object.getFormKind().getName();
                 } else {
@@ -126,9 +130,9 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
             }
         };
 
-        TextColumn<LogBusinessSearchResultItem> formDeclTypeColumn = new TextColumn<LogBusinessSearchResultItem>() {
+        TextColumn<LogSystemSearchResultItem> formDeclTypeColumn = new TextColumn<LogSystemSearchResultItem>() {
             @Override
-            public String getValue(LogBusinessSearchResultItem object) {
+            public String getValue(LogSystemSearchResultItem object) {
                 if(object.getFormType() != null)
                     return object.getFormType().getName();
                 else
@@ -136,23 +140,23 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
             }
         };
 
-        TextColumn<LogBusinessSearchResultItem> userLoginColumn = new TextColumn<LogBusinessSearchResultItem>() {
+        TextColumn<LogSystemSearchResultItem> userLoginColumn = new TextColumn<LogSystemSearchResultItem>() {
             @Override
-            public String getValue(LogBusinessSearchResultItem object) {
+            public String getValue(LogSystemSearchResultItem object) {
                 return object.getUser().getLogin();
             }
         };
 
-        TextColumn<LogBusinessSearchResultItem> userRolesColumn = new TextColumn<LogBusinessSearchResultItem>() {
+        TextColumn<LogSystemSearchResultItem> userRolesColumn = new TextColumn<LogSystemSearchResultItem>() {
             @Override
-            public String getValue(LogBusinessSearchResultItem object) {
+            public String getValue(LogSystemSearchResultItem object) {
                 return object.getRoles();
             }
         };
 
-        TextColumn<LogBusinessSearchResultItem> userIpColumn = new TextColumn<LogBusinessSearchResultItem>() {
+        TextColumn<LogSystemSearchResultItem> userIpColumn = new TextColumn<LogSystemSearchResultItem>() {
             @Override
-            public String getValue(LogBusinessSearchResultItem object) {
+            public String getValue(LogSystemSearchResultItem object) {
                 return object.getIp();
             }
         };
@@ -169,6 +173,20 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
         logBusinessTable.addColumn(userLoginColumn, userLoginColumnHeader);
         logBusinessTable.addColumn(userRolesColumn, userRolesColumnHeader);
         logBusinessTable.addColumn(userIpColumn, userIpColumnHeader);
+        logBusinessTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSystemSearchResultItem>() {
+            @Override
+            public void onCellPreview(CellPreviewEvent<LogSystemSearchResultItem> event) {
+                if ("mouseover".equals(event.getNativeEvent().getType())) {
+                    long index = (event.getIndex() - (pager.getPage() * logBusinessTable.getPageSize()));
+                    TableCellElement cellElement = logBusinessTable.getRowElement((int) index).getCells().getItem(event.getColumn());
+                    if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
+                        cellElement.removeAttribute("title");
+                    } else {
+                        cellElement.setTitle(cellElement.getInnerText());
+                    }
+                }
+            }
+        });
 
         dataProvider.addDataDisplay(logBusinessTable);
         pager.setDisplay(logBusinessTable);
@@ -185,9 +203,9 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
     }
 
     @Override
-    public void setAuditTableData(int startIndex, long count, List<LogBusinessSearchResultItem> itemList) {
+    public void setAuditTableData(int startIndex, long count, List<LogSystemSearchResultItem> itemList) {
         logBusinessTable.setRowCount((int) count);
-        logBusinessTable.setRowData(itemList);
+        logBusinessTable.setRowData(startIndex, itemList);
     }
 
     @Override
@@ -197,6 +215,11 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
         } else {
             pager.setPage(pageNumber);
         }
+    }
+
+    @Override
+    public void getBlobFromServer(String uuid) {
+        Window.open(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid, "", "");
     }
 
 }
