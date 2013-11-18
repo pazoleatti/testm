@@ -243,7 +243,7 @@ void logicCheck() {
         def firstRow = getDataRow(dataRows, section)
         def lastRow = getDataRow(dataRows, 'total' + section)
         for (def col : totalSumColumns) {
-            def value = roundValue(lastRow.getCell(col).getValue() ?: 0, 6)
+            def value = roundValue(lastRow.getCell(col).value ?: 0, 6)
             def sum = roundValue(getSum(dataRows, col, firstRow, lastRow), 6)
             if (sum != value) {
                 def name = lastRow.getCell(col).column.name
@@ -283,6 +283,7 @@ void consolidation() {
         }
     }
     dataRowHelper.save(dataRows)
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /*
