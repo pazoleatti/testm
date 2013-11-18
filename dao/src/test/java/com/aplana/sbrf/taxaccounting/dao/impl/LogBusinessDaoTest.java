@@ -126,6 +126,33 @@ public class LogBusinessDaoTest {
         /*assertEquals("Банк", resultItems.get(0).getDepartment().getName());*/
     }
 
+    @Test
+    public void testRemoveRecords(){
+        LogBusiness logSystem = createFormLogBusiness(FormDataEvent.CREATE.getCode(), 3l, new Date());
+
+        List<Long> listIds = new ArrayList<Long>();
+        listIds.add(1l);
+        listIds.add(3l);
+
+        assertEquals(1, logBusinessDao.getFormLogsBusiness(1).size());
+
+        logBusinessDao.add(logSystem);
+        assertEquals(2, logBusinessDao.getFormLogsBusiness(1).size());
+
+        logBusinessDao.removeRecords(listIds);
+
+        LogBusinessFilterValuesDao filter = new LogBusinessFilterValuesDao();
+        filter.setCountOfRecords(10);
+        filter.setStartIndex(0);
+        filter.setFromSearchDate(new Date(1304247365000l));
+        filter.setToSearchDate(new Date());
+
+        List<Long> formDataIds = new ArrayList<Long>();
+        formDataIds.add(1l);
+
+        assertEquals(1, logBusinessDao.getLogsBusiness(formDataIds, null, filter).size());
+    }
+
 	private LogBusiness createFormLogBusiness(int event_id, long id, Date date) {
 		LogBusiness logBusiness = new LogBusiness();
 		logBusiness.setId(id);

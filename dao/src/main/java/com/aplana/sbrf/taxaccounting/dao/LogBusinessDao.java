@@ -51,4 +51,11 @@ public interface LogBusinessDao {
 	 * @param logBusiness информация для хранения истории
 	 */
 	void add(LogBusiness logBusiness);
+
+    /**
+     * Удаление записей истории событий.
+     * Используется при архивации.
+     * @param listIds
+     */
+    void removeRecords(List<Long> listIds);
 }

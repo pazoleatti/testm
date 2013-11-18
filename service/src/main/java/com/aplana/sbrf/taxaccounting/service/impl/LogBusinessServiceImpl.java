@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
@@ -27,6 +28,9 @@ public class LogBusinessServiceImpl implements LogBusinessService {
     @Autowired
     private DeclarationDataSearchService declarationDataSearchService;
 
+    @Autowired
+    private AuditService auditService;
+
 	@Override
 	public List<LogBusiness> getFormLogsBusiness(long formId) {
 		return logBusinessDao.getFormLogsBusiness(formId);
@@ -34,22 +38,50 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 
     @Override
     public PagingResult<LogSearchResultItem> getLogsBusiness(TAUserInfo userInfo, LogBusinessFilterValues filter) {
+        List<Long> formDataIds = null;
+        List<Long> declarationDataIds = null;
         FormDataFilter formDataFilter = new FormDataFilter();
-        formDataFilter.setTaxType(filter.getTaxType());
-        /*formDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId()) : new ArrayList<Integer>());*/
-        formDataFilter.setFormDataKind(filter.getFormKind());
-        formDataFilter.setFormTypeId(filter.getFormTypeId());
-        formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
-        List<Long> formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
-
         DeclarationDataFilter declarationDataFilter = new DeclarationDataFilter();
-        declarationDataFilter.setTaxType(filter.getTaxType());
-        declarationDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId())
-                : new ArrayList<Integer>());
-        declarationDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
-        declarationDataFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
-        List<Long> declarationDataIds =
-                declarationDataSearchService.getDeclarationIds(declarationDataFilter, DeclarationDataSearchOrdering.ID, false);
+
+        switch (filter.getAuditFormTypeId() != null ? filter.getAuditFormTypeId() : 0){
+            case 1:
+
+                formDataFilter.setTaxType(filter.getTaxType());
+                /*formDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId()) : new ArrayList<Integer>());*/
+                formDataFilter.setFormDataKind(filter.getFormKind());
+                formDataFilter.setFormTypeId(filter.getFormTypeId());
+                formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
+                formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
+                break;
+            case 2:
+
+                declarationDataFilter.setTaxType(filter.getTaxType());
+                declarationDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId())
+                        : new ArrayList<Integer>());
+                declarationDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
+                declarationDataFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
+                declarationDataIds =
+                        declarationDataSearchService.getDeclarationIds(declarationDataFilter, DeclarationDataSearchOrdering.ID, false);
+                break;
+            default:
+                formDataFilter.setTaxType(filter.getTaxType());
+                /*formDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId()) : new ArrayList<Integer>());*/
+                formDataFilter.setFormDataKind(filter.getFormKind());
+                formDataFilter.setFormTypeId(filter.getFormTypeId());
+                formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
+                formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
+
+                declarationDataFilter.setTaxType(filter.getTaxType());
+                declarationDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId())
+                        : new ArrayList<Integer>());
+                declarationDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
+                declarationDataFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
+                declarationDataIds =
+                        declarationDataSearchService.getDeclarationIds(declarationDataFilter, DeclarationDataSearchOrdering.ID, false);
+                break;
+        }
+
+
 
         LogBusinessFilterValuesDao filterValuesDao = new LogBusinessFilterValuesDao();
         filterValuesDao.setCountOfRecords(filter.getCountOfRecords());
@@ -83,7 +115,19 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 		logBusinessDao.add(log);
 	}
 
-	@Override
+    @Override
+    @Transactional(readOnly = false)
+    public void removeRecords(List<LogSearchResultItem> items, TAUserInfo userInfo) {
+        if (!items.isEmpty()){
+            List<Long> listIds = new ArrayList<Long>();
+            for (LogSearchResultItem item : items)
+                listIds.add(item.getId());
+            logBusinessDao.removeRecords(listIds);
+        }
+        auditService.add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, "Архивация ЖА");
+    }
+
+    @Override
 	public List<LogBusiness> getDeclarationLogsBusiness(long declarationId) {
 		return logBusinessDao.getDeclarationLogsBusiness(declarationId);
 	}

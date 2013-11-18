@@ -11,10 +11,12 @@ import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -130,7 +132,6 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         names.put("toDate", filter.getToSearchDate());
         names.put("startIndex", filter.getStartIndex() + 1);
         names.put("endIndex", filter.getStartIndex() + filter.getCountOfRecords());
-        System.out.println("dao: " + filter.getStartIndex() + " " + filter.getCountOfRecords());
 
         StringBuilder sql = new StringBuilder("select * from (select fd.kind as form_kind_id, lb.*, rp.id as report_period_id, dt.id as declaration_type_id, ft.id as form_type_id, " +
                 "rownum as rn from log_business lb ");
@@ -220,6 +221,23 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 				logBusiness.getNote()
 		);
 	}
+
+    @Override
+    public void removeRecords(final List<Long> listIds) {
+        JdbcTemplate jt = getJdbcTemplate();
+        jt.batchUpdate("delete from log_business where id = ?",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setLong(1, listIds.get(i));
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return listIds.size();
+                    }
+                });
+    }
 
     private int getCount(List<Long> formDataIds, List<Long> declarationDataIds,Map<String, Object> names) {
         StringBuilder sql = new StringBuilder("select count(*) from log_business where");
