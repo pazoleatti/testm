@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client;
 
 import java.util.Date;
 
-import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.PanelCloseAction;
+import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.PanelClosingAction;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -49,7 +49,7 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
         popupPanel = new PopupPanel(true, true);
         refBookPiker = new RefBookPickerWidget();
         popupPanel.add(refBookPiker);
-        refBookPiker.setClosedPanelAction(new PanelCloseAction() {
+        refBookPiker.setPanelClosingAction(new PanelClosingAction() {
             @Override
             public void onClose() {
                 popupPanel.hide();
@@ -192,6 +192,11 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
     @Override
     public void setModal(boolean modal) {
         this.modal = modal;
+    }
+
+    @Override
+    public void setPanelClosingAction(PanelClosingAction action) {
+        refBookPiker.setPanelClosingAction(action);
     }
 
     @Override

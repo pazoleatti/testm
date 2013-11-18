@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.HasModalMode;
+import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.PanelClosingAction;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -26,7 +28,7 @@ import com.google.gwt.user.client.ui.Widget;
  * Виджет для выбора подразделений
  * @author Eugene Stetsenko
  */
-public class DepartmentPickerPopupWidget extends Composite implements HasEnabled, DepartmentPicker{
+public class DepartmentPickerPopupWidget extends Composite implements HasEnabled, DepartmentPicker, HasModalMode {
 
 	private PopupPanel popup;
 
@@ -43,6 +45,9 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 	
 	@UiField
 	Panel panel;
+
+    /** Признак модальности окна */
+    private boolean modal;
 
 	@Override
 	public boolean isEnabled() {
@@ -78,14 +83,26 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 				ValueChangeEvent.fire(DepartmentPickerPopupWidget.this, event.getValue());
 			}
 		});
+
+        departmentPiker.setPanelClosingAction(new PanelClosingAction() {
+            @Override
+            public void onClose() {
+                popup.hide();
+            }
+        });
 	}
 
 
 	@UiHandler("selectButton")
 	void onSelectButtonClicked(ClickEvent event){
-		popup.setPopupPosition(panel.getAbsoluteLeft(),
-				panel.getAbsoluteTop() + panel.getOffsetHeight());
-		popup.show();
+        if (!modal) {
+            popup.setPopupPosition(panel.getAbsoluteLeft(),
+                    panel.getAbsoluteTop() + panel.getOffsetHeight());
+            popup.show();
+        } else {
+            popup.setAutoHideEnabled(false);
+            popup.center();
+        }
 	}
 	
 	@UiHandler("clearButton")
@@ -144,5 +161,31 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 	public void setHeader(String header) {
 		departmentPiker.setHeader(header);
 	}
+
+    @Override
+    public boolean isModal() {
+        return modal;
+    }
+
+    @Override
+    public void setModal(boolean modal) {
+        this.modal = modal;
+    }
+
+    @Override
+    public void setPanelClosingAction(PanelClosingAction action) {
+        departmentPiker.setPanelClosingAction(action);
+    }
+
+    @Override
+    public void setTitlePanelVisibility(boolean visible) {
+        departmentPiker.setTitlePanelVisibility(visible);
+    }
+
+    @Override
+    public void setTitleText(String title) {
+        departmentPiker.setTitlePanelVisibility(true);
+        departmentPiker.setTitleText(title);
+    }
 
 }

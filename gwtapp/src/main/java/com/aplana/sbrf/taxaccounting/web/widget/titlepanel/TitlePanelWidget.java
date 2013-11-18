@@ -31,7 +31,7 @@ public class TitlePanelWidget extends Composite implements HasValue<String> {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
-    public void setClosedPanelAction(final PanelCloseAction action) {
+    public void setClosedPanelAction(final PanelClosingAction action) {
         closeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

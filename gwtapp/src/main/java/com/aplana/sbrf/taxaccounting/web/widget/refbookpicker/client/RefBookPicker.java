@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client;
 
 import java.util.Date;
 
-import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.PanelCloseAction;
+import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.HasTitlePanel;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IsWidget;
 
@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.IsWidget;
  * @author sgoryachkin
  * 
  */
-public interface RefBookPicker extends HasValue<Long>, IsWidget {
+public interface RefBookPicker extends HasValue<Long>, IsWidget, HasTitlePanel {
 	
 	/**
 	 * Устанавливает параметры и инициализирует компонент.
@@ -61,22 +61,4 @@ public interface RefBookPicker extends HasValue<Long>, IsWidget {
 	 * @return
 	 */
 	public String getDereferenceValue();
-
-    /**
-     * Устанавливает действие, выполняемое при закрытии компонента
-     * @param action
-     */
-    void setClosedPanelAction(PanelCloseAction action);
-
-    /**
-     * Устанавливает видимость панели с заголовком окна
-     * @param visible
-     */
-    void setTitlePanelVisibility(boolean visible);
-
-    /**
-     * Устанавливает заголовок окна
-     * @param title
-     */
-    void setTitleText(String title);
 }

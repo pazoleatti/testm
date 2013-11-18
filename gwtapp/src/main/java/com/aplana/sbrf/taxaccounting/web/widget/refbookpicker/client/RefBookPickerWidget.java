@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.PanelCloseAction;
+import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.PanelClosingAction;
 import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.TitlePanelWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidgetPresenter.MyView;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.RefBookItem;
@@ -284,7 +284,7 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 	}
 
     @Override
-    public void setClosedPanelAction(PanelCloseAction action) {
+    public void setPanelClosingAction(PanelClosingAction action) {
         titlePanel.setClosedPanelAction(action);
     }
 

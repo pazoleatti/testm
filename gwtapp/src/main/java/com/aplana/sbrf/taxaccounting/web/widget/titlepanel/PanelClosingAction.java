@@ -7,6 +7,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.titlepanel;
  * Time: 14:49
  * To change this template use File | Settings | File Templates.
  */
-public interface PanelCloseAction {
+public interface PanelClosingAction {
     void onClose();
 }

@@ -12,6 +12,8 @@ import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.PanelClosingAction;
+import com.aplana.sbrf.taxaccounting.web.widget.titlepanel.TitlePanelWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -38,10 +40,13 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class DepartmentPickerWidget extends Composite implements
 		DepartmentPicker, HasHandlers {
 
-	interface Binder extends UiBinder<VerticalPanel, DepartmentPickerWidget> {
+    interface Binder extends UiBinder<VerticalPanel, DepartmentPickerWidget> {
 	}
 
 	private static Binder uiBinder = GWT.create(Binder.class);
+
+    @UiField
+    TitlePanelWidget titlePanel;
 
 	@UiField
 	public Label header;
@@ -270,5 +275,19 @@ public class DepartmentPickerWidget extends Composite implements
 		this.header.setText(header);
 	}
 
+    @Override
+    public void setPanelClosingAction(PanelClosingAction action) {
+        titlePanel.setClosedPanelAction(action);
+    }
+
+    @Override
+    public void setTitlePanelVisibility(boolean visible) {
+        titlePanel.setVisible(visible);
+    }
+
+    @Override
+    public void setTitleText(String title) {
+        titlePanel.setValue(title);
+    }
 
 }
