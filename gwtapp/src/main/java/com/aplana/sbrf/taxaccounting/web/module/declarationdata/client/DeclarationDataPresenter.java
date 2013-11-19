@@ -164,6 +164,7 @@ public class DeclarationDataPresenter
 									@Override
 									public void onSuccess(
 											RefreshDeclarationDataResult result) {
+                                        LogAddEvent.fire(DeclarationDataPresenter.this, result.getLogEntries());
 										MessageEvent.fire(
 												DeclarationDataPresenter.this,
 												"Декларация обновлена");
