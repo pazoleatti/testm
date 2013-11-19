@@ -169,12 +169,12 @@ def calc() {
     // удалить строку "итого"
     deleteAllAliased(dataRows)
 
-    def index = 1
+    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
     if (rnu49FormData!=null) {
         for (def dataRow : dataRows) {
             def rnu49Row = getRnu49Row(rnu49Rows, dataRow)
 
-            dataRow.number = index++
+            dataRow.number = ++index
 
             def values = getValues(rnu49Row)
             values.keySet().each { colName ->
@@ -258,7 +258,7 @@ boolean logicalCheck(){
     def rnu49Rows = rnu49FormData.getAllCached()
 
     def calcValues = [:]
-    def rowNumber = 0
+    def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
