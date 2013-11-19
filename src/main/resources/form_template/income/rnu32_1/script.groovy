@@ -228,7 +228,6 @@ void logicCheck() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
-        // TODO (Ramil Timerbaev) этой проверки нет в чтз, уточнить у аналитика нужна ли она (в рну 40.1 аналогичную проверку добавили)
         // . Проверка наименования террбанка
         if (row.number != row.name) {
             logger.error(errorMsg + 'номер территориального банка не соответствует названию.')
