@@ -560,7 +560,9 @@ def fillForm() {
                 def  refDataProvideTaxBenefit = refBookFactory.getDataProvider(7)
                 // запрос по выборке данных из справочника
                 def query = "TAX_BENEFIT_ID = "+row.taxBenefitCode+" and DICT_REGION_ID = "+region.record_id
-                def records = refDataProvideTaxBenefit.getRecords(new Date(), null, query, null).getRecords()
+                def records = refDataProvideTaxBenefit.getRecords(
+                        reportPeriodService.getEndDate(formData.reportPeriodId).time,
+                        null, query, null).getRecords()
 
                 if (records.size() == 0){
                     logger.error("Ошибка при получении параметров налоговых льгот. Строка: "+row.getIndex())
@@ -570,7 +572,6 @@ def fillForm() {
                     loweringRates = records.get(0).RATE.numberValue
                 }
             }
-
 
             if (row.taxRate != null){
                 def taxRate = getRefBookValue(41, row.taxRate, "VALUE").numberValue
