@@ -129,9 +129,7 @@ def calc() {
     for (def row : getRows(data)) {
         if (!isTotal(row)) {
             // список проверяемых столбцов (графа ..)
-            def requiredColumns = ['code', 'balance', 'date', 'docNumber', 'docDate', 'currencyCode',
-                    //'rateOfTheBankOfRussia',
-                    'taxAccountingCurrency', 'accountingCurrency']
+            def requiredColumns = ['code', 'balance', 'date', 'docNumber', 'docDate', 'currencyCode']
             if (!checkRequiredColumns(row, requiredColumns)) {
                 return false
             }
@@ -169,31 +167,21 @@ def calc() {
 
     for (def row : getRows(data)) {
         // графа 1
-        if (row.date != null && row.currencyCode !=null) {
-            def records = refDataProvider.getRecords(row.date, null, "CODE_NUMBER = " + row.currencyCode, null)
-            if (records != null && records.getRecords() != null && records.getRecords().size() > 0) {
-                // получить первую запись (скорее всего единственную)
-                def record = records.getRecords().getAt(0)
-                // пример использования
-                def rate = record.get('RATE') // атрибут "Курс валюты"
-                row.rateOfTheBankOfRussia = rate.getNumberValue()
-            }
+        row.rateOfTheBankOfRussia = null
+        def records = refDataProvider.getRecords(row.date, null, "CODE_NUMBER = " + row.currencyCode, null)
+        if (records != null && records.getRecords() != null && records.getRecords().size() > 0) {
+            row.rateOfTheBankOfRussia = records.getRecords().getAt(0).RATE.numberValue
+        } else {
+            logger.error("В справочнике \"Курсы валют\" не найдено значение поля \"Курс Банка России\".")
+            return false
         }
 
         // графа 10 = графа 9 * графа 8		
         // графа 12 = графа 11 * графа 8
-        if (row.rateOfTheBankOfRussia != null) {
-            row.taxAccountingRuble = round(row.taxAccountingCurrency * row.rateOfTheBankOfRussia, 2)
-            row.ruble = round(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)
-
-            total10 += row.taxAccountingRuble
-            total12 += row.ruble
-        } else {
-            row.taxAccountingRuble = null
-            row.ruble = null
-        }
-
-
+        row.taxAccountingRuble = round((row.taxAccountingCurrency != null ? row.taxAccountingCurrency : 0) * row.rateOfTheBankOfRussia, 2)
+        total10 += row.taxAccountingRuble
+        row.ruble = round((row.accountingCurrency != null ? row.accountingCurrency : 0) * row.rateOfTheBankOfRussia, 2)
+        total12 += row.ruble
     }
     // отсортировать/группировать
     data.save(getRows(data).sort { getCodeAttribute(it.code) })
