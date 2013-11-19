@@ -1,14 +1,18 @@
 package form_template.income.rnu32_2
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+import groovy.transform.Field
+import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 
 /**
  * Форма "(РНУ-32.2) Регистр налогового учёта начисленного процентного дохода по облигациям, по которым открыта короткая позиция. Отчёт 2".
  *
  * TODO:
  *      - логическая проверка 1 - проблемы с форматом TTBBBB - http://jira.aplana.com/browse/SBRFACCTAX-4780 - РНУ-32.1 Формат графы 1 "Номер территориального банка"
+ *      - невозможно проверить форму пока не будет готова рну 32.1.
  *
  * @author rtimerbaev
  */
@@ -22,13 +26,14 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
-        checkUniq()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
-        logicalCheck() && checkNSI()
+        logicalCheck()
         break
     case FormDataEvent.CALCULATE :
-        calc() && logicalCheck() && checkNSI()
+        calc()
+        logicalCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
@@ -39,256 +44,165 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE :
         consolidation()
-        calc() && logicalCheck() && checkNSI()
+        calc()
+        logicalCheck()
         break
 }
 
-/**
- * Расчеты. Алгоритмы заполнения полей формы.
- */
-def calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+//// Кэши и константы
+@Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+@Field
+def refBookCache = [:]
 
-    // удалить нефиксированные строки
-    deleteRows(dataRows)
+// Проверяемые на пустые значения атрибуты (графа 1..6)
+@Field
+def nonEmptyColumns = ['number', 'name', 'code', 'cost', 'bondsCount', 'percent']
 
-    def dataRows32_1 = getFromRNU32_1()
-    if (dataRows32_1 == null) {
-        dataRowHelper.save(dataRows)
-        return true
-    }
+// список алиасов подразделов
+@Field
+def sections = ['1', '2', '3', '4', '5', '6', '7', '8']
 
-    // подразделы, собрать список списков строк каждого раздела
-    getAliasesSections().each { section ->
-        def rows32_1 = getRowsBySection32_1(dataRows32_1, section)
-        def rows32_2 = getRowsBySection(dataRows, section)
-        def newRows = []
-        for (def row : rows32_1) {
-            if (hasCalcRow(row.number, row.name, row.code, rows32_2)) {
-                continue
-            }
-            def newRow = getCalcRowFromRNU_32_1(row.number, row.name, row.code, rows32_1)
-            newRows.add(newRow)
-            rows32_2.add(newRow)
-        }
-        if (!newRows.isEmpty()) {
-            dataRows.addAll(getIndexByAlias(dataRows, section) + 1, newRows)
-            updateIndexes(dataRows)
-        }
-    }
+// Дата окончания отчетного периода
+@Field
+def reportPeriodEndDate = null
 
-    sort(dataRows)
+// Текущая дата
+@Field
+def currentDate = new Date()
 
-    dataRowHelper.save(dataRows)
-    return true
+//// Обертки методов
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
 
-/**
- * Логические проверки.
- */
-def logicalCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
+                boolean required = true) {
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
+            currentDate, rowIndex, cellName, logger, required)
+}
 
+// Поиск записи в справочнике по значению (для расчетов) + по дате
+def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
+                     boolean required = true) {
+    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            day, rowIndex, cellName, logger, required)
+}
+
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+}
+
+// Получение числа из строки при импорте
+def getNumber(def value, def indexRow, def indexCol) {
+    return parseNumber(value, indexRow, indexCol, logger, true)
+}
+
+void calc() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sort(dataRows)
+    dataRowHelper.save(dataRows)
+}
+
+void logicalCheck() {
     def dataRows32_1 = getFromRNU32_1()
     if (dataRows32_1 == null) {
-        return true
+        return
     }
-
-    // список проверяемых столбцов (графа 1..6)
-    def requiredColumns = ['number', 'name', 'code', 'cost', 'bondsCount', 'percent']
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
     for (def row : dataRows) {
-        // 2. Обязательность заполнения поля графы 1..6
-        if (row.getAlias() == null && !checkRequiredColumns(row, requiredColumns)) {
-            return false
+        if (row.getAlias() != null) {
+            return
         }
+        // 1. Проверка формата номера подразделения	Формат графы 1: ТТВВВВ	1	Неправильно указан номер подразделения (формат: ТТВВВВ)!
+        // TODO (Ramil Timerbaev) http://jira.aplana.com/browse/SBRFACCTAX-4780	- РНУ-32.1 Формат графы 1 "Номер территориального банка"
+
+        // 2. Обязательность заполнения поля графы 1..6
+        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
     }
-
-    // 1. Проверка формата номера подразделения	Формат графы 1: ТТВВВВ	1	Неправильно указан номер подразделения (формат: ТТВВВВ)!
-    // TODO (Ramil Timerbaev) http://jira.aplana.com/browse/SBRFACCTAX-4780	- РНУ-32.1 Формат графы 1 "Номер территориального банка"
-
-    // алиасы графов для арифметической проверки (графа 1..6)
-    def arithmeticCheckAlias = requiredColumns
-    // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
-    def colNames = []
-    def index
-    def errorMsg
 
     // 3. Арифметическая проверка графы 1..6
-    // подразделы, собрать список списков строк каждого раздела
-    for (def section : getAliasesSections()) {
+    def arithmeticCheckAlias = nonEmptyColumns
+    for (def section : sections) {
         def rows32_1 = getRowsBySection32_1(dataRows32_1, section)
         def rows32_2 = getRowsBySection(dataRows, section)
-        // если в разделе рну 32.1 есть данные, а в аналогичном разделе рну 32.2 нет данных, то ошибка
-        // или наоборот, то тоже ошибка
+        // если в разделе рну 32.1 есть данные, а в аналогичном разделе рну 32.2 нет данных, то ошибка или наоборот, то тоже ошибка
         if (rows32_1.isEmpty() && !rows32_2.isEmpty() ||
                 !rows32_1.isEmpty() && rows32_2.isEmpty()) {
             def number = section
             logger.error("Неверно рассчитаны значения графов для раздела $number")
-            return false
+            continue
         }
         if (rows32_1.isEmpty() && rows32_2.isEmpty()) {
             continue
         }
         for (def row : rows32_2) {
-            index = row.getIndex()
-            errorMsg = "В строке $index "
-
             def tmpRow = getCalcRowFromRNU_32_1(row.number, row.name, row.code, rows32_1)
-            arithmeticCheckAlias.each { alias ->
-                if (row.getCell(alias).getValue() != tmpRow.getCell(alias).getValue()) {
-                    def name = row.getCell(alias).column.name
-                    colNames.add('"' + name + '"')
-                }
-            }
-            if (!colNames.isEmpty()) {
-                def msg = colNames.join(', ')
-                logger.error(errorMsg + "неверно рассчитано значение графы: $msg.")
-                return false
+            if (tmpRow) {
+                checkCalc(row, arithmeticCheckAlias, tmpRow, logger, true)
             }
         }
     }
-    return true
 }
 
-/**
- * Проверки соответствия НСИ.
- */
-def checkNSI() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-
-    def index
-    def errorMsg
-    def cache = [:]
-
-    for (def row : dataRows) {
-        if (row.getAlias() != null) {
-            continue
-        }
-
-        index = row.getIndex()
-        errorMsg = "В строке $index "
-
-        def recordDivision = getRecordById(30, row.number, cache)
-
-        // 1. Проверка актуальности поля «Номер территориального банка»	(графа 1)
-        // 2. Проверка актуальности поля «Наименование территориального банка / подразделения Центрального аппарата» (графа 2)
-        if (recordDivision == null) {
-            logger.warn(errorMsg + 'неверный номер территориального банка!')
-            logger.warn(errorMsg + 'неверное наименование территориального банка/ подразделения Центрального аппарата!')
-        }
-
-        // 3. Проверка актуальности поля «Код валюты номинала» (графа 3)
-        if (getRecordById(15, row.code, cache) == null) {
-            logger.error(errorMsg + 'неверный код валюты!')
-            return false
-        }
-    }
-    return true
-}
-
-/**
- * Консолидация.
- */
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = dataRowHelper.allCached
 
     // удалить нефиксированные строки
-    // deleteRows()
-    def deleteRows = []
-    dataRows.each { row ->
-        if (row.getAlias() == null) {
-            deleteRows.add(row)
-        }
-    }
-    dataRowHelper.delete(deleteRows)
+    deleteRows(dataRows)
 
     // собрать из источников строки и разместить соответствующим разделам
-    def aliasesSections = getAliasesSections()
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
-        if (it.formTypeId == formData.formType.id) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourcedataRowHelper = formDataService.getDataRowHelper(source)
-                def sourceDataRows = sourcedataRowHelper.getAllCached()
+        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        if (source != null && source.state == WorkflowState.ACCEPTED) {
+            def sourceDataRows = formDataService.getDataRowHelper(source).allCached
+            if (it.formTypeId == formData.formType.id) {
+                // Консолидация данных из первичной рну-32.2 в консолидированную рну-32.2.
                 // копирование данных по разделам
-                aliasesSections.each { section ->
-                    copyRows(sourceDataRows, dataRows, section, (Integer.valueOf(section) + 1).toString())
+                sections.each { section ->
+                    def toAlias = (Integer.valueOf(section) + 1).toString()
+                    copyRows(sourceDataRows, dataRows, section, toAlias)
                 }
-//                (1..6).each { section ->
-//                    copyRows(sourceDataRows, dataRows, section.toString(), (Integer.valueOf(section) + 1).toString())
-//                }
-//                copyRows(sourceDataRows, dataRows, '7', null)
+            } else {
+                // Консолидация данных из первичной рну-32.1 в первичную рну-32.2.
+                // подразделы, собрать список списков строк каждого раздела
+                sections.each { section ->
+                    def rows32_1 = getRowsBySection32_1(sourceDataRows, section)
+                    def rows32_2 = getRowsBySection(dataRows, section)
+                    def newRows = []
+                    for (def row : rows32_1) {
+                        if (hasCalcRow(row.number, row.name, row.code, rows32_2)) {
+                            continue
+                        }
+                        def newRow = getCalcRowFromRNU_32_1(row.number, row.name, row.code, rows32_1)
+                        newRows.add(newRow)
+                        rows32_2.add(newRow)
+                    }
+                    if (!newRows.isEmpty()) {
+                        dataRows.addAll(getDataRow(dataRows, section).getIndex(), newRows)
+                        updateIndexes(dataRows)
+                    }
+                }
             }
         }
     }
     dataRowHelper.save(dataRows)
-    logger.info('Формирование консолидированной формы прошло успешно.')
-}
-
-/**
- * Проверяет уникальность в отчётном периоде и вид
- * (не был ли ранее сформирован отчет, параметры которого совпадают с параметрами, указанными пользователем )
- */
-void checkUniq() {
-    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
-    if (findForm != null) {
-        logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
+    if (formData.kind == FormDataKind.CONSOLIDATED) {
+        logger.info('Формирование консолидированной формы прошло успешно.')
+    } else {
+        logger.info('Формирование первичной формы РНУ-32.2 прошло успешно.')
     }
-}
-
-/**
- * Получить строку по алиасу.
- *
- * @param dataRows строки нф
- * @param alias алиас
- */
-def getRowByAlias(def dataRows, def alias) {
-    if (alias == null || alias == '' || dataRows == null) {
-        return null
-    }
-    for (def row : dataRows) {
-        if (alias.equals(row.getAlias())) {
-            return row
-        }
-    }
-    return null
-}
-
-/**
- * Получить номер строки в таблице по псевдонимиу (1..n).
- */
-def getIndexByAlias(def dataRows, String rowAlias) {
-    def row = getRowByAlias(dataRows, rowAlias)
-    return (row != null ? row.getIndex() : -1)
-}
-
-/**
- * Проверить заполненость обязательных полей.
- *
- * @param row строка
- * @param columns список обязательных графов
- * @return true - все хорошо, false - есть незаполненные поля
- */
-def checkRequiredColumns(def row, def columns) {
-    def colNames = []
-
-    columns.each {
-        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-            def name = row.getCell(it).column.name
-            colNames.add('"' + name + '"')
-        }
-    }
-    if (!colNames.isEmpty()) {
-        def index = row.getIndex()
-        def errorMsg = colNames.join(', ')
-        logger.error("В $index строке не заполнены колонки : $errorMsg.")
-        return false
-    }
-    return true
 }
 
 /**
@@ -301,58 +215,38 @@ def checkRequiredColumns(def row, def columns) {
  * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно)
  */
 void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def toAlias) {
-    def from = getIndexByAlias(sourceDataRows, fromAlias)
-    def to = (toAlias != '8' ? getIndexByAlias(sourceDataRows, toAlias) - 1 : sourceDataRows.size())
+    def from = getDataRow(sourceDataRows, fromAlias).getIndex()
+    def to = (toAlias != '8' ? getDataRow(sourceDataRows, toAlias).getIndex() - 1 : sourceDataRows.size())
     if (from >= to) {
         return
     }
     def copyRows = sourceDataRows.subList(from, to)
-    destinationDataRows.addAll(getIndexByAlias(destinationDataRows, fromAlias) + 1, copyRows)
+    destinationDataRows.addAll(getDataRow(destinationDataRows, fromAlias).getIndex() - 1, copyRows)
     updateIndexes(destinationDataRows)
 }
 
-/**
- * Получить список алиасов подразделов
- */
-def getAliasesSections() {
-    return ['1', '2', '3', '4', '5', '6', '7', '8']
-}
-
-/**
- * Отсорировать данные (по графе 1, 2).
- *
- * @param dataRows строки нф
- */
+/** Отсорировать данные (по графе 1, 2). */
 void sort(def dataRows) {
     // список со списками строк каждого раздела для сортировки
     def sortRows = []
-    def from
-    def to
-
     // подразделы, собрать список списков строк каждого раздела
-    getAliasesSections().each { section ->
-        from = getIndexByAlias(dataRows, section)
-        to = getIndexByAlias(dataRows, 'total' + section) - 2
-        if (from <= to) {
-            sortRows.add(dataRows[from..to])
+    sections.each { section ->
+        def rows = getRowsBySection(dataRows, section)
+        if (!rows.isEmpty()) {
+            sortRows.add(rows)
         }
     }
-
-    def cache = [:]
     // отсортировать строки каждого раздела
     sortRows.each { sectionRows ->
         sectionRows.sort { def a, def b ->
             // графа 1  - number (справочник)
             // графа 2  - name (справочник)
-
-            def recordA = getRecordById(30, a.number, cache)
-            def recordB = getRecordById(30, b.number, cache)
-
-            def numberA = (recordA != null ? recordA.SBRF_CODE.value : null)
-            def numberB = (recordB != null ? recordB.SBRF_CODE.value : null)
-
-            def nameA = (recordA != null ? recordA.NAME.value : null)
-            def nameB = (recordB != null ? recordB.NAME.value : null)
+            def recordA = getRefBookValue(30, a.number)
+            def recordB = getRefBookValue(30, b.number)
+            def numberA = recordA?.SBRF_CODE?.value
+            def numberB = recordB?.SBRF_CODE?.value
+            def nameA = recordA?.NAME?.value
+            def nameB = recordB?.NAME?.value
 
             if (numberA == numberB) {
                 return nameA <=> nameB
@@ -363,37 +257,12 @@ void sort(def dataRows) {
 }
 
 /**
- * Получить запись из справочника по идентифкатору записи.
- *
- * @param refBookId идентификатор справончика
- * @param recordId идентификатор записи
- * @param cache кеш
- * @return
- */
-def getRecordById(def refBookId, def recordId, def cache) {
-    if (cache[refBookId] != null) {
-        if (cache[refBookId][recordId] != null) {
-            return cache[refBookId][recordId]
-        }
-    } else {
-        cache[refBookId] = [:]
-    }
-    def record = refBookService.getRecordData(refBookId, recordId)
-    if (record != null) {
-        cache[refBookId][recordId] = record
-        return cache[refBookId][recordId]
-    }
-    return null
-}
-
-/**
  * Получить сумму столбца.
  *
  * @param dataRows строки нф
  * @param columnAlias алиас графы который суммировать
  * @param rowStart строка начала суммиравония
  * @param rowEnd строка окончания суммирования
- * @return
  */
 def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
     def from = rowStart.getIndex()
@@ -404,18 +273,16 @@ def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
     return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
 }
 
-/**
- * Получить строки из нф РНУ-32.1.
- */
+/** Получить строки из нф РНУ-32.1. */
 def getFromRNU32_1() {
     def formDataRNU = formDataService.find(330, formData.kind, formDataDepartment.id, formData.reportPeriodId)
-    def dataRowHelper = formDataService.getDataRowHelper(formDataRNU)
-    return dataRowHelper.getAllCached()
+    if (formDataRNU != null) {
+        return formDataService.getDataRowHelper(formDataRNU)?.allCached
+    }
+    return null
 }
 
-/**
- * Удалить нефиксированные строки.
- */
+/** Удалить нефиксированные строки. */
 void deleteRows(def dataRows) {
     def deleteRows = []
     dataRows.each { row ->
@@ -423,13 +290,11 @@ void deleteRows(def dataRows) {
             deleteRows.add(row)
         }
     }
-    dataRows.removeAll(deleteRows) // data.delete(deleteRows)
+    dataRows.removeAll(deleteRows)
     updateIndexes(dataRows)
 }
 
-/**
- * Поправить индексы, потому что они после вставки не пересчитываются.
- */
+/** Поправить индексы, потому что они после вставки не пересчитываются. */
 void updateIndexes(def dataRows) {
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
@@ -443,8 +308,8 @@ void updateIndexes(def dataRows) {
  * @param section алиас начала раздела (н-р: начало раздела - заголовок раздела A, конец раздела - итоги раздела totalA)
  */
 def getRowsBySection32_1(def dataRows, def section) {
-    from = getIndexByAlias(dataRows, section)
-    to = getIndexByAlias(dataRows, 'total' + section) - 2
+    def from = getDataRow(dataRows, section).getIndex()
+    def to = getDataRow(dataRows, 'total' + section).getIndex() - 2
     return (from <= to ? dataRows[from..to] : [])
 }
 
@@ -455,8 +320,9 @@ def getRowsBySection32_1(def dataRows, def section) {
  * @param section алиас начала раздела (н-р: начало раздела - заголовок раздела A, конец раздела - следующий заголовок раздела B)
  */
 def getRowsBySection(def dataRows, def section) {
-    from = getIndexByAlias(dataRows, section)
-    to = (section != '8' ? getIndexByAlias(dataRows, (Integer.valueOf(section) + 1).toString()) - 2 : dataRows.size() - 1)
+    def from = getDataRow(dataRows, section).getIndex()
+    def toAlias = (Integer.valueOf(section) + 1).toString()
+    def to = (section != '8' ? getDataRow(dataRows, toAlias).getIndex() - 2 : dataRows.size() - 1)
     return (from <= to ? dataRows[from..to] : [])
 }
 
