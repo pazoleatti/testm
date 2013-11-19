@@ -8,9 +8,6 @@ import groovy.transform.Field
 /**
  * Форма "(РНУ-36.1) Регистр налогового учёта начисленного процентного дохода по ГКО. Отчёт 1".
  *
- * TODO:
- *		- уточнить как получать дату последнего и отчетного дня для месяца
- *
  * @author rtimerbaev
  */
 
@@ -155,7 +152,7 @@ void calc() {
     def dataRows = dataRowHelper.allCached
 
     // последний день отчетного месяца
-    def lastDay = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
+    def lastDay = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
 
     dataRows.each { row ->
         if (row.getAlias() == null) {
@@ -183,10 +180,10 @@ void logicCheck() {
     def dataRows = dataRowHelper.allCached
 
     // последний день отчетного месяца
-    def lastDay = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
+    def lastDay = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
 
     // отчетная дата
-    def reportDay = reportPeriodService.getReportDate(formData.reportPeriodId)?.time
+    def reportDay = reportPeriodService.getMonthReportDate(formData.reportPeriodId, formData.periodOrder)?.time
 
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]

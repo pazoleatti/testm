@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
+import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 
 /**
  * Форма "(РНУ-40.2) Регистр налогового учёта начисленного процентного дохода по прочим дисконтным облигациям. Отчёт 2".
@@ -120,20 +121,19 @@ void calc() {
 }
 
 void logicalCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
     def dataRows40_1 = getRowsRNU40_1()
     if (dataRows40_1 == null) {
         return
     }
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             return
         }
         // 1. Обязательность заполнения поля графы 1..6
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
         // Проверки соответствия НСИ
         // 1. Проверка актуальности поля «Номер территориального банка»	(графа 1)
@@ -165,7 +165,9 @@ void logicalCheck() {
         }
         for (def row : rows40_2) {
             def tmpRow = getCalcRowFromRNU_40_1(row.number, row.name, row.code, rows40_1)
-            checkCalc(row, arithmeticCheckAlias, tmpRow, logger, true)
+            if (tmpRow) {
+                checkCalc(row, arithmeticCheckAlias, tmpRow, logger, true)
+            }
         }
     }
 

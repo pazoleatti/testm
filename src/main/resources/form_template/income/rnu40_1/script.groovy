@@ -169,7 +169,7 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def lastDay = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
+    def lastDay = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -199,7 +199,7 @@ void logicCheck() {
 
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
-    def lastDay = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
+    def lastDay = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
