@@ -28,7 +28,6 @@ import java.util.*;
 @Local(MessageServiceLocal.class)
 @Interceptors(MigrationInterceptor.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-@Resource(name = "jdbc/TaxAccDS_MIGRATION", type = javax.sql.DataSource.class, authenticationType = Resource.AuthenticationType.CONTAINER)
 public class MigrationBean implements MessageService {
 
     private final Log logger = LogFactory.getLog(getClass());
