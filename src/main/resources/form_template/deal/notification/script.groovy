@@ -227,7 +227,7 @@ void generateXML() {
                                 ПерПредСд(
                                         [НаимПредСд: row.dealSubjectName] +
                                                 (dealSubjectCode2 != null ? [ОКП: dealSubjectCode2] : [:]) +
-                                                [ОКВЭД: dealSubjectCode3] +
+                                                (dealSubjectCode3 != null ? [ОКВЭД: dealSubjectCode3] : [:]) +
                                                 [НомУчСд: row.otherNum] +
                                                 [НомДог: row.contractNum] +
                                                 (row.contractDate != null ? [ДатаДог: row.contractDate.format("dd.MM.yyyy")] : [:]) +
