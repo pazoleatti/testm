@@ -192,14 +192,12 @@ void logicCheck() {
         // Проверка заполнения доходов и расходов Банка
         def incomeSumCell = row.getCell('incomeSum')
         def outcomeSumCell = row.getCell('outcomeSum')
-        def msgIn = incomeSumCell.column.name
-        def msgOut = outcomeSumCell.column.name
-        if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            logger.warn("Строка $rowNum: «$msgIn» и «$msgOut» не могут быть одновременно заполнены!")
-        }
         if (incomeSumCell.value == null && outcomeSumCell.value == null) {
+            def msgIn = incomeSumCell.column.name
+            def msgOut = outcomeSumCell.column.name
             logger.warn("Строка $rowNum: Одна из граф «$msgIn» и «$msgOut» должна быть заполнена!")
         }
+
         //  Корректность даты договора
         def dt = docDateCell.value
         if (dt != null && (dt < dFrom || dt > dTo)) {
@@ -377,12 +375,11 @@ void calc() {
         row.rowNumber = index++
 
         // Расчет поля "Цена"
-        if (row.incomeSum != null && row.outcomeSum == null)
-            row.price = row.incomeSum
-        else if (row.outcomeSum != null && row.incomeSum == null)
-            row.price = row.outcomeSum
-        else
-            row.price = null
+        if (row.incomeSum != null && row.outcomeSum != null) {
+            row.price = (row.incomeSum - row.outcomeSum).abs()
+        } else {
+            row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
+        }
 
         // Расчет поля "Итого"
         row.total = row.price
