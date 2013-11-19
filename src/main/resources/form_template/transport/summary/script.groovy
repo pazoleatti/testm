@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
  * Форма "Расчет суммы налога по каждому транспортному средству".
+ * formTemplateId=200
  */
 
 switch (formDataEvent) {
@@ -554,21 +555,19 @@ def fillForm() {
         if (row.taxBenefitCode != null) {
             def taxBenefitCode = getRefBookValue(6, row.taxBenefitCode, 'CODE').stringValue
             // получение параметров региона
-            if (taxBenefitCode != '20210' && taxBenefitCode != '30200') {
-                if (row.taxBenefitCode){
-                    // датапровайдер для справочника "Параметры налоговых льгот"
-                    def  refDataProvideTaxBenefit = refBookFactory.getDataProvider(7)
-                    // запрос по выборке данных из справочника
-                    def query = "TAX_BENEFIT_ID = "+row.taxBenefitCode+" and DICT_REGION_ID = "+region.record_id
-                    def records = refDataProvideTaxBenefit.getRecords(new Date(), null, query, null).getRecords()
+            if (taxBenefitCode == '20220' || taxBenefitCode == '20230') {
+                // датапровайдер для справочника "Параметры налоговых льгот"
+                def  refDataProvideTaxBenefit = refBookFactory.getDataProvider(7)
+                // запрос по выборке данных из справочника
+                def query = "TAX_BENEFIT_ID = "+row.taxBenefitCode+" and DICT_REGION_ID = "+region.record_id
+                def records = refDataProvideTaxBenefit.getRecords(new Date(), null, query, null).getRecords()
 
-                    if (records.size() == 0){
-                        logger.error("Ошибка при получении параметров налоговых льгот. Строка: "+row.getIndex())
-                        return;
-                    } else{
-                        reducingPerc = records.get(0).percent
-                        loweringRates = records.get(0).rate
-                    }
+                if (records.size() == 0){
+                    logger.error("Ошибка при получении параметров налоговых льгот. Строка: "+row.getIndex())
+                    return;
+                } else{
+                    reducingPerc = records.get(0).PERCENT.numberValue
+                    loweringRates = records.get(0).RATE.numberValue
                 }
             }
 
@@ -847,7 +846,7 @@ def consolidation(){
             // формы типа 202 собираем, проверяем на пересечение, для дальнейшего использования
             if (source.formType.id == 202){
                 sourceDataRows.each{ sRow ->
-                     /**
+                    /**
                      * Если нашлись две строки с одинаковыми данными то ее не добавляем
                      * в общий список, и проверим остальные поля
                      */
@@ -858,8 +857,8 @@ def consolidation(){
                         DataRow<Cell> row = contains
                         // если поля совпадают то ругаемся и убираем текущую совпавшую с коллекции
                         if (row.taxBenefitCode == sRow.taxBenefitCode &&
-                            row.benefitStartDate.equals(sRow.benefitStartDate) &&
-                            row.benefitEndDate.equals(sRow.benefitEndDate)){
+                                row.benefitStartDate.equals(sRow.benefitStartDate) &&
+                                row.benefitEndDate.equals(sRow.benefitEndDate)){
 
                             logger.warn("Обнаружены несколько разных строк для Код Окато="+sRow.codeOKATO+",Идентификационный номер = "+sRow.identNumber+", Регистрационный знак="+sRow.regNumber+". Строки : "+sRow.getIndex()+", "+row.getIndex())
                             sourses202.remove(sRow)
