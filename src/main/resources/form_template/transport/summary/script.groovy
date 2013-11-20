@@ -37,6 +37,7 @@ switch (formDataEvent) {
         consolidation()
         fillForm()
         sort()
+        calculationTotal()
         setRowIndex()
         break
 // проверить
