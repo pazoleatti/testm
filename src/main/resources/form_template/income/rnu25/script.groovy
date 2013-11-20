@@ -13,13 +13,12 @@ import groovy.transform.Field
  *      - в перечне полей графа 9 - необязательная, в логических проверках входит в обязательные поля
  *              http://jira.aplana.com/browse/SBRFACCTAX-4871
  *      - уточнить у аналитика когда проверять наличие формы предыдущего периода (только перед вычислениями или перед проверками и импорте тоже)
- *      - уточнить у аналитика про сообщение "Итоговые значения по ГРН $codeName не рассчитаны! Необходимо рассчитать данные формы."
- *      - уточнить у аналитика про графу 2 ГРН, размер по аналитике 13, в настройке было 18, но почему то даже 18 не хватает, пока выставил 30
  *
  * @author rtimerbaev
  */
 
 // графа 1  - rowNumber
+// графа -  - fix
 // графа 2  - regNumber
 // графа 3  - tradeNumber
 // графа 4  - lotSizePrev
@@ -89,7 +88,7 @@ def refBookCache = [:]
 
 // все атрибуты
 @Field
-def allColumns = ['rowNumber', 'regNumber', 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent',
+def allColumns = ['rowNumber', 'fix', 'regNumber', 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent',
         'reserve', 'cost', 'signSecurity', 'marketQuotation', 'costOnMarketQuotation',
         'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
 
@@ -565,7 +564,7 @@ def getCalcTotalRow(def dataRows) {
  * @param totalRowAlias псевдоним сформированной строки
  */
 def getCalcSubtotalsRow(def dataRows, def regNumber, def totalRowAlias) {
-    return getTotalRow(dataRows, regNumber + ' итог', totalRowAlias)
+    return getTotalRow(dataRows, regNumber.trim() + ' итог', totalRowAlias)
 }
 
 /**
@@ -578,7 +577,8 @@ def getCalcSubtotalsRow(def dataRows, def regNumber, def totalRowAlias) {
 def getTotalRow(def dataRows, def regNumberValue, def alias) {
     def newRow = formData.createDataRow()
     newRow.setAlias(alias)
-    newRow.regNumber = regNumberValue
+    newRow.fix = regNumberValue
+    newRow.getCell('fix').colSpan = 2
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
