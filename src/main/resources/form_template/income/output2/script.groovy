@@ -12,6 +12,8 @@ import java.text.SimpleDateFormat
 
 /**
  * 6.3.2    Расчет налога на прибыль с доходов, удерживаемого налоговым агентом
+ *
+ * formTemplateId=307
  */
 
 DataRowHelper getData() {
@@ -113,24 +115,24 @@ void checkDecl() {
 void logicCheck() {
     // справочник "Коды субъектов Российской Федерации"
     def refDataProvider = refBookFactory.getDataProvider(4)
-
+    def rowNum = 0
     for (row in getRows(data)) {
-
+        rowNum++
         for (alias in ['title', 'subdivisionRF', 'surname', 'name', 'dividendDate', 'sumDividend', 'sumTax']) {
             if (row.getCell(alias).value == null) {
-                logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '%%') + ' не заполнено')
+                logger.error("Строка $rowNum: Поле " + row.getCell(alias).column.name.replace('%', '%%') + " не заполнено")
             }
         }
 
         String zipCode = (String) row.zipCode;
         if (zipCode == null || zipCode.length() != 6 || !zipCode.matches('[0-9]*')) {
-            logger.error('Неправильно указан почтовый индекс!')
+            logger.error("Строка $rowNum: Неправильно указан почтовый индекс!")
         }
         if (!logger.containsLevel(LogLevel.ERROR)) {
             // графа 3 - справочник "Коды субъектов Российской Федерации"
             def record = refDataProvider.getRecordData(row.subdivisionRF)
             if (record == null) {
-                logger.warn('Неверное наименование субъекта РФ!')
+                logger.warn("Строка $rowNum: Неверное наименование субъекта РФ!")
             }
         }
     }
