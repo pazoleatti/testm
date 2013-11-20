@@ -95,6 +95,7 @@ void generateXML() {
             ВерсПрог: departmentParam.APP_VERSION.stringValue,
             ВерсФорм: departmentParam.FORMAT_VERSION.stringValue) {
         Документ(
+                // Общие атрибуты для всех листов уведомления (титульный лист)
                 // Код формы отчетности по КНД
                 КНД: KND,
                 // Дата формирования документа
@@ -109,6 +110,7 @@ void generateXML() {
                 // Код места, по которому представляется документ
                 ПоМесту: taxPlaceTypeCode
         ) {
+            // Общие атрибуты для всех листов уведомления
             СвНП(
                     ОКАТО: okato,
                     ОКВЭД: okvedCode,
@@ -175,6 +177,8 @@ void generateXML() {
                         if (row.getAlias() != null) {
                             continue
                         }
+
+                        // Раздел 1А. Сведения о контролируемой сделке (группе однородных сделок)
                         СвКонтрСд(
                                 НомПорСд: row.dealNum1
                         ) {
@@ -216,6 +220,8 @@ void generateXML() {
                                             (row.outcomeIncludingRegulation != null ? [СумРасхСдРег: row.outcomeIncludingRegulation] : [:])
                             )
                             def String dealType = row.dealType != null ? getRefBookValue(64, row.dealType).CODE.numberValue : null
+
+                            // Раздел 1Б. Сведения о предмете сделки (группы однородных сделок)
                             СвПредмСд(
                                     ТипПредСд: dealType
                             ) {
@@ -269,8 +275,10 @@ void generateXML() {
                                 taxpayerCode = map.TAXPAYER_CODE.stringValue
                                 address = map.ADDRESS.stringValue
                             }
+
+                            // Раздел 2.Сведения об организации – участнике контролируемой сделки (группы однородных сделок)
                             СвОргУчаст(
-                                    [НомПорСд: row.dealNum2] +
+                                    [НомПорСд: row.dealNum3] +
                                             [ПрОрг: organInfo] +
                                             [ОКСМ: countryCode3] +
                                             [НаимОрг: organName] +
