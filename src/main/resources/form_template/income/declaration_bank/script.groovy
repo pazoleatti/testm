@@ -129,41 +129,37 @@ def isFirstPeriod = (reportPeriod != null && reportPeriod.order == 1)
  */
 
 def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
-if (formDataCollection == null || formDataCollection.records.isEmpty()) {
-    logger.error('Отсутствуют выходные или сводные налоговые формы в статусе "Принят". Формирование декларации невозможно.')
-    return
-}
 
 /** Доходы сложные уровня Банка "Сводная форма начисленных доходов". */
-def formDataComplexIncome = formDataCollection.find(departmentId, 302, FormDataKind.SUMMARY)
+def formDataComplexIncome = formDataCollection?.find(departmentId, 302, FormDataKind.SUMMARY)
 def dataRowsHelperComplexIncome = getDataRowHelper(formDataComplexIncome)
 
 /** Доходы простые уровня Банка "Расшифровка видов доходов, учитываемых в простых РНУ". */
-def formDataSimpleIncome = formDataCollection.find(departmentId, 301, FormDataKind.SUMMARY)
+def formDataSimpleIncome = formDataCollection?.find(departmentId, 301, FormDataKind.SUMMARY)
 def dataRowsHelperSimpleIncome = getDataRowHelper(formDataSimpleIncome)
 
 /** Расходы сложные уровня Банка "Сводная форма начисленных расходов". */
-def formDataComplexConsumption = formDataCollection.find(departmentId, 303, FormDataKind.SUMMARY)
+def formDataComplexConsumption = formDataCollection?.find(departmentId, 303, FormDataKind.SUMMARY)
 def dataRowsHelperComplexConsumption = getDataRowHelper(formDataComplexConsumption)
 
 /** Расходы простые уровня Банка "Расшифровка видов расходов, учитываемых в простых РНУ". */
-def formDataSimpleConsumption = formDataCollection.find(departmentId, 304, FormDataKind.SUMMARY)
+def formDataSimpleConsumption = formDataCollection?.find(departmentId, 304, FormDataKind.SUMMARY)
 def dataRowsHelperSimpleConsumption = getDataRowHelper(formDataSimpleConsumption)
 
 /** Сводная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
-def formDataAdvance = formDataCollection.find(departmentId, 500, FormDataKind.SUMMARY)
+def formDataAdvance = formDataCollection?.find(departmentId, 500, FormDataKind.SUMMARY)
 def dataRowsHelperAdvance = getDataRowHelper(formDataAdvance)
 
 /** Сведения для расчёта налога с доходов в виде дивидендов. */
-def formDataDividend = formDataCollection.find(departmentId, 306, FormDataKind.ADDITIONAL)
+def formDataDividend = formDataCollection?.find(departmentId, 306, FormDataKind.ADDITIONAL)
 def dataRowsHelperDividend = getDataRowHelper(formDataDividend)
 
 /** Расчет налога на прибыль с доходов, удерживаемого налоговым агентом. */
-def formDataTaxAgent = formDataCollection.find(departmentId, 307, FormDataKind.ADDITIONAL)
+def formDataTaxAgent = formDataCollection?.find(departmentId, 307, FormDataKind.ADDITIONAL)
 def dataRowsHelperTaxAgent = getDataRowHelper(formDataTaxAgent)
 
 /** Выходная налоговая форма «Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика». */
-def formDataTaxSum = formDataCollection.find(departmentId, 308, FormDataKind.ADDITIONAL)
+def formDataTaxSum = formDataCollection?.find(departmentId, 308, FormDataKind.ADDITIONAL)
 def dataRowsHelperTaxSum = getDataRowHelper(formDataTaxSum)
 
 /*
@@ -485,23 +481,25 @@ if (needLogicalCheck) {
         return
     }
 
-    // Проверки Приложения № 3 к Листу 02 - Проверка отрицательной разницы (убыток) от реализации права требования долга до наступления срока платежа, определенной налогоплательщиком в соответствии с п. 1 статьи 279 НК
+    // Проверки Приложения № 3 к Листу 02 - Проверка отрицательной разницы (убыток) от реализации права требования
+    // долга до наступления срока платежа, определенной налогоплательщиком в соответствии с п. 1 статьи 279 НК
     // строка 100 = ВыручРеалПТДоСр = viruchRealPTDoSr
     // строка 120 = СтоимРеалПТДоСр = stoimRealPTDoSr
     // строка 140 = Убыт1Соот269	= ubit1Soot269
     // строка 150 = Убыт1Прев269	= ubit1Prev269
     if (stoimRealPTDoSr > viruchRealPTDoSr ?
-        ubit1Prev269 != stoimRealPTDoSr - viruchRealPTDoSr - ubit1Soot269 : ubit1Prev269 == 0) {
+        (ubit1Prev269 != stoimRealPTDoSr - viruchRealPTDoSr - ubit1Soot269) : (ubit1Prev269 != 0)) {
         logger.error('Результат текущего расчёта не прошёл проверку, приведённую в порядке заполнения налоговой декларации по налогу на прибыль организации.')
         return
     }
 
-    // Проверки Приложения № 3 к Листу 02 - Проверка отрицательной разницы (убыток), полученной налогоплательщиком при уступке права требования долга после наступления срока платежа в соответствии с п. 2 статьи 279 НК
+    // Проверки Приложения № 3 к Листу 02 - Проверка отрицательной разницы (убыток), полученной налогоплательщиком
+    // при уступке права требования долга после наступления срока платежа в соответствии с п. 2 статьи 279 НК
     // строка 110 = ВыручРеалПТПосСр = viruchRealPTPosSr
     // строка 130 = СтоимРеалПТПосСр = stoimRealPTPosSr
     // строка 160 = Убыт2РеалПТ		 = ubit2RealPT
     if (stoimRealPTPosSr > viruchRealPTPosSr ?
-        ubit2RealPT != stoimRealPTPosSr - viruchRealPTPosSr : ubit2RealPT == 0) {
+        (ubit2RealPT != stoimRealPTPosSr - viruchRealPTPosSr) : (ubit2RealPT != 0)) {
         logger.error('Результат текущего расчёта не прошёл проверку, приведённую в порядке заполнения налоговой декларации по налогу на прибыль организации.')
         return
     }

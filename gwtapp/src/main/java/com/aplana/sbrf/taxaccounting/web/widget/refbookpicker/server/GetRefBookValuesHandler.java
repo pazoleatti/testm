@@ -1,15 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.server;
 
-import java.text.NumberFormat;
-import java.text.ParsePosition;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Component;
-
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -24,6 +14,15 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.RefBookItem
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Component;
+
+import java.text.NumberFormat;
+import java.text.ParsePosition;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author sgoryachkin
@@ -93,8 +92,8 @@ public class GetRefBookValuesHandler extends
 					if (resultSearch.length() > 0) {
 						resultSearch.append(" or ");
 					}
-					resultSearch.append(attribute.getAlias()).append(" like ")
-							.append("'%" + serachPattern.trim() + "%'");
+                    resultSearch.append("LOWER(").append(attribute.getAlias()).append(")").append(" like ")
+                            .append("'%" + serachPattern.trim().toLowerCase() + "%'");
 				}/*
 				 * else if
 				 * (RefBookAttributeType.NUMBER.equals(attribute.getAttributeType

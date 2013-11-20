@@ -159,7 +159,7 @@ public class ImportServiceImpl implements ImportService {
         sb.append(TAB).append("<").append(rowName).append(">").append(ENTER);
         for (String cell : rowCells) {
             sb.append(TAB).append(TAB).append("<cell>");
-            sb.append(cell);
+            sb.append(cell.trim());
             sb.append("</cell>").append(ENTER);
         }
         sb.append(TAB).append("</").append(rowName).append(">").append(ENTER);

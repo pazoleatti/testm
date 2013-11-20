@@ -28,7 +28,6 @@ import java.util.*;
 @Local(MessageServiceLocal.class)
 @Interceptors(MigrationInterceptor.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-@Resource(name = "jdbc/TaxAccDS_MIGRATION", type = javax.sql.DataSource.class, authenticationType = Resource.AuthenticationType.CONTAINER)
 public class MigrationBean implements MessageService {
 
     private final Log logger = LogFactory.getLog(getClass());
@@ -83,16 +82,7 @@ public class MigrationBean implements MessageService {
         logger.debug("Count of examples = " + list.size());
         int count = 0;
 
-        Set<Integer> typesDebugSet = new HashSet<Integer>();
-
         for (Exemplar ex : list) {
-            // TODO Пропускаем для проверки. Иначе будет слишком много файлов отправлено.
-            if (typesDebugSet.contains(ex.getRnuTypeId())) {
-                continue;
-            } else {
-                typesDebugSet.add(ex.getRnuTypeId());
-            }
-
             logger.debug("Start forming file. ExemplarId = " + ex.getExemplarId());
             try {
                 String filename = null;

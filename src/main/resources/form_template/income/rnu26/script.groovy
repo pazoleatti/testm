@@ -902,7 +902,7 @@ def addData(def xml) {
     for (def row : xml.row) {
         def newRow = getNewRow()
 
-        def indexCell = 0
+        def indexCell = 1
 
         newRow.rowNumber = getNumber(row.cell[indexCell].text())
         indexCell++
@@ -980,28 +980,28 @@ def addData(def xml) {
         def total = formData.createDataRow()
 
         // графа 6
-        total.lotSizePrev = getNumber(row.cell[5].text())
+        total.lotSizePrev = getNumber(row.cell[6].text())
 
         // графа 7
-        total.lotSizeCurrent = getNumber(row.cell[6].text())
+        total.lotSizeCurrent = getNumber(row.cell[7].text())
 
         // графа 8
-        total.reserveCalcValuePrev = getNumber(row.cell[7].text())
+        total.reserveCalcValuePrev = getNumber(row.cell[8].text())
 
         // графа 9
-        total.cost = getNumber(row.cell[8].text())
+        total.cost = getNumber(row.cell[9].text())
 
         // графа 14
-        total.costOnMarketQuotation = getNumber(row.cell[13].text())
+        total.costOnMarketQuotation = getNumber(row.cell[14].text())
 
         // графа 15
-        total.reserveCalcValue = getNumber(row.cell[14].text())
+        total.reserveCalcValue = getNumber(row.cell[15].text())
 
         // графа 16
-        total.reserveCreation = getNumber(row.cell[15].text())
+        total.reserveCreation = getNumber(row.cell[16].text())
 
         // графа 17
-        total.reserveRecovery = getNumber(row.cell[16].text())
+        total.reserveRecovery = getNumber(row.cell[17].text())
 
         return total
     } else {

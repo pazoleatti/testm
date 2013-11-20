@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.closabledialog;
 
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
@@ -67,9 +68,10 @@ public class ClosableDialogBox  extends DialogBox {
     {
         NativeEvent nativeEvent = event.getNativeEvent();
 
-        if (!event.isCanceled()
+        if ((!event.isCanceled()
                 && (event.getTypeInt() == Event.ONCLICK)
                 && isCloseEvent(nativeEvent))
+                ||(Event.ONKEYUP == event.getTypeInt() && event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE))
         {
             this.hide();
         }

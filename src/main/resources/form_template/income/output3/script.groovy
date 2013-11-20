@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 /**
  * 6.3.3    Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика
+ * formTemplateId=308
  */
 
 DataRowHelper getDataRowsHelper() {
@@ -119,7 +120,7 @@ void logicCheck() {
     for (row in dataRowsHelper.getAllCached()) {
         for (alias in ['paymentType', 'okatoCode', 'budgetClassificationCode', 'dateOfPayment', 'sumTax']) {
             if (row.getCell(alias).value == null) {
-                logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '') + ' не заполнено')
+                logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '%%') + ' не заполнено')
             }
         }
     }
