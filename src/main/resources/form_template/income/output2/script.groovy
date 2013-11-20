@@ -118,7 +118,7 @@ void logicCheck() {
 
         for (alias in ['title', 'subdivisionRF', 'surname', 'name', 'dividendDate', 'sumDividend', 'sumTax']) {
             if (row.getCell(alias).value == null) {
-                logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '') + ' не заполнено')
+                logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '%%') + ' не заполнено')
             }
         }
 

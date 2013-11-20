@@ -719,21 +719,20 @@ def calcItog(int i, def dataRows) {
  */
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
-
-    int index = 1;
+    def rows = new LinkedList<DataRow<Cell>>()
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (source != null
                 && source.state == WorkflowState.ACCEPTED
                 && source.getFormType().getId() == formData.getFormType().getId()) {
-            formDataService.getDataRowHelper(source).getAllCached().each { row ->
+            formDataService.getDataRowHelper(source).getAll().each { row ->
                 if (row.getAlias() == null) {
-                    dataRowHelper.insert(row, index++)
+                    rows.add(row)
                 }
             }
         }
     }
+    dataRowHelper.save(rows)
 }
 
 def getHeaderRowCount() {
@@ -869,9 +868,8 @@ def addData(def xml) {
         }
 
         def newRow = formData.createDataRow()
-        ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode',
-                'unitCountryCode', 'signPhis', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
-                'city2', 'settlement2', 'conditionCode', 'count', 'incomeSum', 'consumptionSum', 'transactionDate'].each {
+
+        getEditColumns().each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }

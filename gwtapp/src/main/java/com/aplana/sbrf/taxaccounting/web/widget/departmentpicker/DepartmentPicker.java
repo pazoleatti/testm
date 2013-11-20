@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.HasValue;
 /**
  * @author Eugene Stetsenko
  */
-public interface DepartmentPicker extends HasValue<List<Integer>>{
+public interface DepartmentPicker extends HasValue<List<Integer>> {
 
 	void setAvalibleValues(List<Department> departments, Set<Integer> availableDepartments);
 	

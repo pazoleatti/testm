@@ -38,7 +38,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class DepartmentPickerWidget extends Composite implements
 		DepartmentPicker, HasHandlers {
 
-	interface Binder extends UiBinder<VerticalPanel, DepartmentPickerWidget> {
+    interface Binder extends UiBinder<VerticalPanel, DepartmentPickerWidget> {
 	}
 
 	private static Binder uiBinder = GWT.create(Binder.class);
@@ -269,6 +269,5 @@ public class DepartmentPickerWidget extends Composite implements
 	public void setHeader(String header) {
 		this.header.setText(header);
 	}
-
 
 }

@@ -59,13 +59,10 @@ def checkAndbildXml(){
         logger.error("Ошибка определения даты конца отчетного периода")
     }
 
-    // получаем подразделение так как в настройках хранится record_id а не значение
-    department = getModRefBookValue(30, "ID = "+declarationData.departmentId)
-    departmentParamTransport = getModRefBookValue(31, "DEPARTMENT_ID = "+department.record_id, reportDate)
-
+    departmentParamTransport = getModRefBookValue(31, "DEPARTMENT_ID = "+declarationData.departmentId, reportDate)
 
     if (checkTransportParams(departmentParamTransport)){
-        bildXml(departmentParamTransport, formDataCollection, department)
+        bildXml(departmentParamTransport, formDataCollection, declarationData.departmentId)
     }
 }
 
@@ -371,8 +368,8 @@ def getModRefBookValue(refBookId, filter, date = new Date()){
     def refBookProvider = refBookFactory.getDataProvider(refBookId)
     // записи
     def records = refBookProvider.getRecords(date, null, filter, null).getRecords();
-    if (records.size() != 1){
-        throw new Exception("Ошибка получения значения из справочника refBookId = "+refBookId)
+    if (records == null || records.size() == 0) {
+        throw new Exception("Ошибка при получении настроек обособленного подразделения")
     }
     // значение справочника в виде мапы
     def record = records[0]

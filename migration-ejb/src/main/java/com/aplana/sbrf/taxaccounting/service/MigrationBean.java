@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.dao.MigrationDao;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
 import com.aplana.sbrf.taxaccounting.model.migration.MigrationSendResult;
 import com.aplana.sbrf.taxaccounting.model.migration.enums.NalogFormType;
@@ -17,8 +18,6 @@ import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
 import javax.jms.*;
 import javax.jms.Queue;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import java.util.*;
 
 /**
@@ -29,14 +28,17 @@ import java.util.*;
 @Local(MessageServiceLocal.class)
 @Interceptors(MigrationInterceptor.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-@Resource(name = "jdbc/TaxAccDS_MIGRATION", type = javax.sql.DataSource.class, authenticationType = Resource.AuthenticationType.CONTAINER)
 public class MigrationBean implements MessageService {
 
     private final Log logger = LogFactory.getLog(getClass());
     private static final String FILENAME_PROPERTY_NAME = "FILENAME";
     private static final String DATA_PROPERTY_NAME = "DATA";
-    private static final String JMS_FACTORY = "jms/transportConnectionFactory";
-    private static final String JMS_QUEUE = "jms/transportQueue";
+
+    @Resource(name="jms/transportConnectionFactory")
+    private ConnectionFactory connectionFactory;
+
+    @Resource(name="jms/transportQueue")
+    private Queue queue;
 
     // РНУ для миграции
     private static long[] rnus = {25L, 26L, 27L, 31L, 51L, 53L, 54L, 59L, 60L, 64L};
@@ -50,8 +52,6 @@ public class MigrationBean implements MessageService {
     @Autowired
     private MigrationDao migrationDao;
 
-    private ConnectionFactory connectionFactory;
-    private Queue queue;
     private Connection connection;
     private Session session;
     private MessageProducer messageProducer;
@@ -82,16 +82,7 @@ public class MigrationBean implements MessageService {
         logger.debug("Count of examples = " + list.size());
         int count = 0;
 
-        Set<Integer> typesDebugSet = new HashSet<Integer>();
-
         for (Exemplar ex : list) {
-            // TODO Пропускаем для проверки. Иначе будет слишком много файлов отправлено.
-            if (typesDebugSet.contains(ex.getRnuTypeId())) {
-                continue;
-            } else {
-                typesDebugSet.add(ex.getRnuTypeId());
-            }
-
             logger.debug("Start forming file. ExemplarId = " + ex.getExemplarId());
             try {
                 String filename = null;
@@ -181,18 +172,8 @@ public class MigrationBean implements MessageService {
         MigrationSendResult result = new MigrationSendResult();
         if (migrationDao == null)  {
             // В dev-mode попадем сюда, это нормально
-            logger.error("Объект MigrationDao не найден.");
-            return result;
+            throw new ServiceException("В Dev-mode не реализована отправка JMS-сообщений.");
         }
-        try {
-            InitialContext jndiContext = new InitialContext();
-            connectionFactory = (ConnectionFactory) jndiContext.lookup(JMS_FACTORY);
-            queue = (Queue) jndiContext.lookup(JMS_QUEUE);
-        } catch (NamingException e) {
-            logger.error("Ресурс \"" + JMS_FACTORY + "\" или \"" + JMS_QUEUE + "\"  не найден. " + e.getMessage(), e);
-            return result;
-        }
-
         try {
             connection = connectionFactory.createConnection();
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -209,7 +190,6 @@ public class MigrationBean implements MessageService {
             logger.error("Ошибка подготовки JMS. " + e.getMessage(), e);
             return result;
         }
-
         return result;
     }
 }

@@ -17,7 +17,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.annotation.Resource;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.ejb.TransactionAttribute;
@@ -39,10 +38,9 @@ import java.util.Map;
  */
 @MessageDriven(activationConfig = {
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/transportQueueMQ")})
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/rateQueue")})
 @Interceptors(TransportInterceptor.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-@Resource(name = "jdbc/TaxAccDS", type = javax.sql.DataSource.class, authenticationType = Resource.AuthenticationType.CONTAINER)
 public class RateMDB implements MessageListener {
 
     private static final Log logger = LogFactory.getLog(RateMDB.class);
@@ -55,7 +53,7 @@ public class RateMDB implements MessageListener {
     private static String ERROR_VALUE = "Сообщение не содержит значений";
     private static String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
     private static String ERROR_IMPORT = "Произошли ошибки в скрипте импорта справочника id = %d";
-    private static String SUCCESS_IMPORT = "Импорт сообщения из КСШ успешно произведен";
+    private static String SUCCESS_IMPORT = "Импорт файла из КСШ успешно произведен";
     private static String ERROR_AUDIT = "Ошибка записи в журнал аудита";
 
     @Autowired

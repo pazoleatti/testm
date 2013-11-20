@@ -57,7 +57,7 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 	public void suspendAccount(String accountId)
 			throws GenericAccountManagementException_Exception {
 		try {
-			userService.setUserIsActive(accountId.toLowerCase(), false);
+			userService.setUserIsActive(accountId, false);
 		} catch (WSException e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
 			gam.setGenericSudirStatusCode(e.getErrorCode().toString());
@@ -69,13 +69,13 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			gam.setDetails(WSException.SudirErrorCodes.SUDIR_001.detailCode());
 			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		}
-		
+
 	}
 
 	public void createAccount(GenericAccountInfo accountInfo)
 			throws GenericAccountManagementException_Exception {
 		validationService.validate(accountInfo);
-		
+
 		try {
 			TAUser user = gais.assembleUser(accountInfo);
 			userService.createUser(user);
@@ -90,13 +90,13 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			gam.setDetails(WSException.SudirErrorCodes.SUDIR_001.detailCode());
 			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		}
-		
+
 	}
 
 	public void modifyAccount(GenericAccountInfo accountInfo)
 			throws GenericAccountManagementException_Exception {
 		validationService.validate(accountInfo);
-		
+
 		try {
 			TAUser user = gais.assembleUser(accountInfo);
 			userService.updateUser(user);
@@ -111,13 +111,13 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			gam.setDetails(WSException.SudirErrorCodes.SUDIR_001.detailCode());
 			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		}
-		
+
 	}
 
 	public void restoreAccount(String accountId)
 			throws GenericAccountManagementException_Exception {
 		try {
-			userService.setUserIsActive(accountId.toLowerCase(), true);
+			userService.setUserIsActive(accountId, true);
 		} catch (WSException e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
 			gam.setGenericSudirStatusCode(e.getErrorCode().toString());
