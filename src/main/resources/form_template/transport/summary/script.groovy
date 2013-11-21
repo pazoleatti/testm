@@ -314,7 +314,8 @@ def checkRequiredField() {
  * Проверка при "отменить принятие".
  */
 void checkToCancelAccept() {
-    if (declarationService.find(1, formData.departmentId, formData.reportPeriodId) != null) {
+    def declarationData = declarationService.find(1, formData.departmentId, formData.reportPeriodId)
+    if (declarationData != null && declarationData.accepted) {
         logger.error('Отмена принятия сводной налоговой формы невозможно, т.к. уже подготовлена декларация.')
     }
 }
