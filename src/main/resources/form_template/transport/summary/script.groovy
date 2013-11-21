@@ -581,7 +581,8 @@ def fillForm() {
                 } else if (taxBenefitCode == '20220') {
                     row.benefitSum = round(row.taxBase * taxRate * row.coefKl * reducingPerc / 100, 0)
                 } else if (taxBenefitCode == '20230') {
-                    row.benefitSum = round(row.coefKl * taxRate * (taxRate - loweringRates), 0)
+                    // «графа 20»=ОКРУГЛ («графа 19» * «графа 8»* («графа 14» – «пониженная ставка»); 0);
+                    row.benefitSum = round(row.coefKl * row.taxBase * (taxRate - loweringRates), 0)
                 } else {
                     row.benefitSum = 0
                 }

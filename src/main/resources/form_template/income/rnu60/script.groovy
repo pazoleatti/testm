@@ -10,6 +10,8 @@ import java.text.SimpleDateFormat
 
 /**
  * 6.41 (РНУ-60) Регистр налогового учёта закрытых сделок РЕПО с обязательством покупки по 2-й части
+ * formTemplateId=351
+ *
  * ЧТЗ http://conf.aplana.com/pages/viewpage.action?pageId=8588102 ЧТЗ_сводные_НФ_Ф2_Э1_т2.doc
  * @author ekuvshinov
  */
@@ -320,34 +322,24 @@ BigDecimal calc9(DataRow row) {
     BigDecimal result
     BigDecimal a = (row.acquisitionPrice ?: 0) - (row.salePrice ?: 0)
     BigDecimal c = a.abs().setScale(2, BigDecimal.ROUND_HALF_UP)
-
-    /**
-     * Если  .A>0, то
-     «графа 9» = 0
-     «графа 10» = B
-     Иначе Если  A<0
-     «графа 9» = C
-     «графа 10» = 0
-     Иначе
-     «графа 9»= «графа 10» = 0
-
-     где
-     A=«графа8» - «графа7»
-     B=ОКРУГЛ(A;2),
-     C= ОКРУГЛ(ABS(A);2),
-
-     ABS() – операция получения модуля(абсолютного значения)  числа.
-
-     Реализация немного проще и логичней чем в аналитике, но она даёт теже самые результаты
-     вообщем оптимизированный вариант
-
-     */
     if (a < 0) {
         result = c
     } else {
         result = 0
     }
-    return roundTo2(result)
+    return result
+}
+
+BigDecimal calc10(DataRow row) {
+    BigDecimal result
+    BigDecimal a = (row.acquisitionPrice ?: 0) - (row.salePrice ?: 0)
+    BigDecimal b = a.setScale(2, BigDecimal.ROUND_HALF_UP)
+    if (a > 0) {
+        result = b
+    } else {
+        result = 0
+    }
+    return result
 }
 
 /**
@@ -362,41 +354,6 @@ BigDecimal roundTo2(BigDecimal value) {
     } else {
         return value
     }
-}
-
-BigDecimal calc10(DataRow row) {
-    BigDecimal result
-    BigDecimal a = (row.acquisitionPrice ?: 0) - (row.salePrice ?: 0)
-    BigDecimal b = a.setScale(2, BigDecimal.ROUND_HALF_UP)
-
-    /**
-     * Если  .A>0, то
-     «графа 9» = 0
-     «графа 10» = B
-     Иначе Если  A<0
-     «графа 9» = C
-     «графа 10» = 0
-     Иначе
-     «графа 9»= «графа 10» = 0
-
-     где
-     A=«графа8» - «графа7»
-     B=ОКРУГЛ(A;2),
-     C= ОКРУГЛ(ABS(A);2),
-
-     ABS() – операция получения модуля(абсолютного значения)  числа.
-
-     Реализация немного проще и логичней чем в аналитике, но она даёт теже самые результаты
-     вообщем оптимизированный вариант
-
-     */
-
-    if (a > 0) {
-        result = b
-    } else {
-        result = 0
-    }
-    return roundTo2(result)
 }
 
 /**
