@@ -17,37 +17,37 @@
         }
     </ui:style>
 
-	<g:DialogBox height="100%" width="250px" glassEnabled="true" text="Создание налоговой формы">
+	<g:DialogBox height="100%" width="400px" glassEnabled="true" text="Создание налоговой формы">
         <g:VerticalPanel height="100%" width="100%">
             <g:FlowPanel addStyleNames="{style.content}">
 
                 <g:FlowPanel height="60px">
                     <g:Label text="Подразделение"/>
-                    <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" header="Выбор подразделения" modal="true"/>
+                    <dep:DepartmentPickerPopupWidget width="400px" ui:field="departmentPicker" multiselection="false" header="Выбор подразделения" modal="true"/>
                 </g:FlowPanel>
 
                 <g:FlowPanel height="60px">
                     <g:Label text="Отчетный период"/>
-                    <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="false"/>
+                    <rep:PeriodPickerPopupWidget width="400px" ui:field="reportPeriodIds" multiselect="false"/>
                 </g:FlowPanel>
 
                 <g:FlowPanel height="60px">
                     <g:Label text="Тип налоговой формы"/>
-                    <g:ValueListBox width="205px" ui:field="formDataKind" />
+                    <g:ValueListBox width="400px" ui:field="formDataKind" />
                 </g:FlowPanel>
 
                 <g:FlowPanel height="60px">
                     <g:Label text="Вид налоговой формы"/>
-                    <style:ListBoxWithTooltip width="205px" ui:field="formTypeId" showTooltip="true"/>
+                    <style:ListBoxWithTooltip width="400px" ui:field="formTypeId" showTooltip="true"/>
                 </g:FlowPanel>
 
             </g:FlowPanel>
 
             <style:Bar>
-                <style:LeftBar addStyleNames="{style.buttonBar}">
-                    <g:Button ui:field="continueButton" text="Далее"/>
-                    <g:Button ui:field="cancelButton" text="Отмена"/>
-                </style:LeftBar>
+                <style:RightBar addStyleNames="{style.buttonBar}">
+                    <g:Button ui:field="continueButton" text="Создать"/>
+                    <g:Button ui:field="cancelButton" text="Закрыть"/>
+                </style:RightBar>
             </style:Bar>
 
         </g:VerticalPanel>
