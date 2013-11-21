@@ -16,6 +16,7 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
+        logicalCheckBeforeCalc()
         calc()
         logicCheck()
         break
@@ -47,6 +48,11 @@ def recordCache = [:]
 @Field
 def refBookCache = [:]
 
+
+// Все атрибуты
+@Field
+def allColumns = ['fix', 'regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit']
+
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['regionBankDivision', 'avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit']
@@ -66,10 +72,6 @@ def groupColumns = ['regionBankDivision', 'regionBank']
 // Атрибуты для итогов
 @Field
 def totalColumns = ['avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit']
-
-// Все атрибуты
-@Field
-def allColumns = ['fix', 'regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit']
 
 // Текущая дата
 @Field
@@ -97,6 +99,55 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 //// Кастомные методы
 
 // Логические проверки
+void logicalCheckBeforeCalc() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    // справочник "Подразделения"
+    def departmentRefDataProvider = refBookFactory.getDataProvider(30)
+
+    // справочник "Параметры подразделения по налогу на прибыль"
+    def departmentParamIncomeRefDataProvider = refBookFactory.getDataProvider(33)
+
+    def fieldNumber = 0
+    for (row in dataRows) {
+        if (row != null && row.getAlias() != null) {
+            continue
+        }
+        fieldNumber++
+
+        def departmentRecords
+        if (row.regionBankDivision!=null) departmentRecords = departmentRefDataProvider.getRecords(currentDate, null, "ID = '" + row.regionBankDivision + "'", null)?.getRecords()
+        if (departmentRecords == null || departmentRecords.isEmpty()) {
+            logger.error("Строка $fieldNumber: Не найдено родительское подразделение!")
+        } else {
+            def departmentParam = departmentRecords.getAt(0)
+
+            long centralId = 113 // ID Центрального аппарата.
+            // У Центрального аппарата родительским подразделением должен быть он сам
+            if (centralId != row.regionBankDivision) {
+                // графа 2 - название подразделения
+                if (departmentParam.get('PARENT_ID')?.getReferenceValue()==null) {
+                    logger.error("Строка $fieldNumber: Для подразделения «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение атрибута «Наименование подразделения»!")
+                }
+            }
+        }
+
+        def departmentParamIncomeRecords
+        if (row.regionBankDivision!=null) departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = '" + row.regionBankDivision + "'", null)?.getRecords();
+        if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.isEmpty()) {
+            logger.error("Строка $fieldNumber: Не найдены настройки подразделения!")
+        } else {
+            def incomeParam = departmentParamIncomeRecords.getAt(0)
+
+            // графа 4 - кпп
+            if (incomeParam?.get('record_id')?.getNumberValue() == null) {
+                logger.error("Строка $fieldNumber: Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «КПП»!")
+            }
+        }
+    }
+}
+
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -104,14 +155,20 @@ void logicCheck() {
         return
     }
 
-    def rowNum = 0
+    def rowNumber = 0
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
-        rowNum++
+        rowNumber++
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        // 1. Проверка на заполнение поля «<Наименование поля>»
+        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, false)
+
+        // 2. Проверка на уникальность поля «№ пп»
+        if (rowNumber != row.number) {
+            logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
+        }
 
         // Проверки соответствия НСИ
         checkNSI(30, row, "regionBank")
@@ -143,61 +200,62 @@ void calc() {
     for (row in dataRows) {
         index++
 
-        def departmentRecords
-        if (row.regionBankDivision!=null) departmentRecords = departmentRefDataProvider.getRecords(currentDate, null, "ID = '" + row.regionBankDivision + "'", null);
-        if (departmentRecords == null || departmentRecords.getRecords().isEmpty()) {
-            logger.error("Строка ${index}: Не найдено родительское подразделение." )
-            continue
-        }
-        def departmentParam = departmentRecords.getRecords().getAt(0)
-
-        def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = '" + row.regionBankDivision + "'", null);
-        if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.getRecords().isEmpty()) {
-            logger.error("Строка ${index}: Не найдены настройки подразделения.")
-            continue
-        }
-        def incomeParam = departmentParamIncomeRecords.getRecords().getAt(0)
-
-        def parentDepartmentId = null;
-        long centralId = 113 // ID Центрального аппарата.
-        // У Центрального аппарата родительским подразделением должен быть он сам
-        if (centralId == row.regionBankDivision) {
-            parentDepartmentId = centralId
-        } else {
-            parentDepartmentId = departmentParam.get('PARENT_ID').getReferenceValue()
-        }
-
         // графа 2 - название подразделения
-        row.regionBank = parentDepartmentId
+        row.regionBank = calc2(row, departmentRefDataProvider)
 
         // графа 4 - кпп
-        row.kpp = incomeParam.get('record_id').getNumberValue()
-    }
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
+        row.kpp = calc4(row, departmentParamIncomeRefDataProvider)
     }
     // Сортировка
     dataRows.sort { a, b ->
-        if (getRefBookValue(30, a.regionBank)?.NAME?.stringValue == getRefBookValue(30, b.regionBank)?.NAME?.stringValue) {
-            return -(getRefBookValue(30, b.regionBankDivision)?.NAME?.stringValue <=> getRefBookValue(30, a.regionBankDivision)?.NAME?.stringValue)
+        def regionBankA = getRefBookValue(30, a.regionBank)?.NAME?.stringValue
+        def regionBankB = getRefBookValue(30, b.regionBank)?.NAME?.stringValue
+        if (regionBankA == regionBankB) {
+            def regionBankDivisionA = getRefBookValue(30, a.regionBankDivision)?.NAME?.stringValue
+            def regionBankDivisionB = getRefBookValue(30, b.regionBankDivision)?.NAME?.stringValue
+            return (regionBankDivisionA <=> regionBankDivisionB)
         }
-        return -(getRefBookValue(30, b.regionBank)?.NAME?.stringValue <=> getRefBookValue(30, a.regionBank)?.NAME?.stringValue)
+        return (regionBankA <=> regionBankB)
     }
 
-    index = 1
+    index = 0
     for (row in dataRows) {
         // графа 1
-        row.number = index++
+        row.number = ++index
     }
     dataRows.add(getTotalRow(dataRows))
     dataRowHelper.save(dataRows)
 }
 
-/**
- * Проверка является ли строка фиксированной.
- */
-def isFixedRow(def row) {
-    return row != null && row.getAlias() != null
+
+// графа 2 - название подразделения
+def calc2(def row, def departmentRefDataProvider) {
+    def departmentRecords
+    if (row.regionBankDivision!=null) departmentRecords = departmentRefDataProvider.getRecords(currentDate, null, "ID = '" + row.regionBankDivision + "'", null)?.getRecords()
+    if (departmentRecords == null || departmentRecords.isEmpty()) {
+        return null
+    }
+    def departmentParam = departmentRecords.getAt(0)
+
+    long centralId = 113 // ID Центрального аппарата.
+    // У Центрального аппарата родительским подразделением должен быть он сам
+    if (centralId == row.regionBankDivision) {
+        return centralId
+    } else {
+        return departmentParam.get('PARENT_ID').getReferenceValue()
+    }
+}
+
+// графа 4 - кпп
+def calc4(def row, def departmentParamIncomeRefDataProvider){
+    def departmentParamIncomeRecords
+    if (row.regionBankDivision!=null) departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = '" + row.regionBankDivision + "'", null)?.getRecords();
+    if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.isEmpty()) {
+        return null
+    }
+    def incomeParam = departmentParamIncomeRecords.getAt(0)
+
+    return incomeParam.get('record_id').getNumberValue()
 }
 
 // Расчет итоговой строки
