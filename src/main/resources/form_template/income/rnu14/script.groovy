@@ -2,6 +2,7 @@ package form_template.income.rnu14
 /**
  * Скрипт для УНП (unp.groovy).
  * Форма "УНП"("РНУ-14 - Регистр налогового учёта нормируемых расходов").
+ * formTemplateId=321
  *
  * @version 1
  *
