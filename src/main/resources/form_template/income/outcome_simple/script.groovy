@@ -17,7 +17,7 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 import java.text.SimpleDateFormat
 
 /**
- * Форма "Расшифровка видов расходов, учитываемых в простых РНУ (расходы простые)".
+ * Форма "Расходы, учитываемые в простых РНУ (расходы простые)".
  *
  * @version 46
  */

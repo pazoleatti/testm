@@ -153,7 +153,7 @@ void calc() {
                 formPrev = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, period.id)
                 if (formPrev != null) {
                     for (rowPrev in formDataService.getDataRowHelper(formPrev).getAll()) {
-                        if (rowPrev.financialYear == row.financialYear) {
+                        if (rowPrev.financialYear.format('yyyy') == row.financialYear.format('yyyy')) {
                             result += rowPrev.taxSumFromPeriod + rowPrev.taxSumFromPeriodAll
                         }
                     }
