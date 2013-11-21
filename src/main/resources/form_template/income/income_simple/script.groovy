@@ -486,6 +486,7 @@ def consolidationSummary() {
     }
     if (dataPrev != null && reportPeriodService.get(formData.reportPeriodId).order != 1) {
         getRows567().each { rowNum ->
+            DataRow row = data.getDataRow(getRows(data), 'R' + rowNum)
             //«графа 5» +=«графа 5» формы предыдущего отчётного периода (не учитывается при расчете в первом отчётном периоде)
             def rowPrev = dataPrev.getDataRow(getRows(dataPrev), 'R' + rowNum)
             row.rnu6Field10Sum += rowPrev.rnu6Field10Sum
@@ -495,6 +496,7 @@ def consolidationSummary() {
             row.rnu6Field12PrevTaxPeriod += rowPrev.rnu6Field12PrevTaxPeriod
         }
         getRows8().each { rowNum ->
+            DataRow row = data.getDataRow(getRows(data), 'R' + rowNum)
             //«графа 8» +=«графа 8» формы предыдущего отчётного периода (не учитывается при расчете в первом отчётном периоде)
             def rowPrev = dataPrev.getDataRow(getRows(dataPrev), 'R' + rowNum)
             row.rnu4Field5Accepted += rowPrev.rnu4Field5Accepted
