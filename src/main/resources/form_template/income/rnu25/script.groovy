@@ -3,6 +3,7 @@ package form_template.income.rnu25
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+import groovy.transform.Field
 
 /**
  * Форма "(РНУ-25) Регистр налогового учёта расчёта резерва под возможное обесценение ГКО, ОФЗ и ОБР в целях налогообложения".
@@ -13,7 +14,9 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
  */
 
 /** Признак периода ввода остатков. */
-def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+@Field
+def isBalancePeriod
+isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
@@ -126,7 +129,7 @@ def addNewRow() {
             }
         }
     }
-    data.insert(newRow,index+1)
+    data.insert(getNewRow(),index+1)
 }
 
 def recalculateNumbers(){
@@ -146,9 +149,15 @@ def recalculateNumbers(){
 def getNewRow() {
     def newRow = formData.createDataRow()
 
-    // графа 2..5, 7..9
-    ['regNumber', 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent',
-            'cost', 'signSecurity', 'marketQuotation',].each {
+    def columns
+    if (isBalancePeriod) {
+        // все строки, кроме графы 1
+        columns = ['regNumber', 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', 'reserve', 'cost', 'signSecurity', 'marketQuotation', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
+    } else {
+        // графа 2..5, 7..9
+        columns = ['regNumber', 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', 'cost', 'signSecurity', 'marketQuotation']
+    }
+    columns.each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
@@ -203,6 +212,7 @@ void calc() {
         sort(data)
     }
 
+    // в периоде ввода остатков ничего не пересчитываем
     def tmp
     def formDataOld = getFormDataOld()
     def dataOld = getData(formDataOld)
@@ -213,27 +223,29 @@ void calc() {
             row.rowNumber = index + 1
         }
 
-        // графа 6
-        row.reserve = getValueForColumn6(dataOld, row)
+        if (!isBalancePeriod) {
+            // графа 6
+            row.reserve = getValueForColumn6(dataOld, row)
 
-        // графа 10
-        row.costOnMarketQuotation = (row.marketQuotation ? roundTo2(row.lotSizeCurrent * row.marketQuotation) : 0)
+            // графа 10
+            row.costOnMarketQuotation = (row.marketQuotation ? roundTo2(row.lotSizeCurrent * row.marketQuotation) : 0)
 
-        // графа 11
-        if (getSign(row.signSecurity) == '+') {
-            def a = (row.cost ?: 0)
-            tmp = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
-        } else {
-            tmp = 0
+            // графа 11
+            if (getSign(row.signSecurity) == '+') {
+                def a = (row.cost ?: 0)
+                tmp = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
+            } else {
+                tmp = 0
+            }
+            row.reserveCalcValue = roundTo2(tmp)
+
+            // графа 12
+            tmp = roundTo2((row.reserveCalcValue?:0) - (row.reserve?:0))
+            row.reserveCreation = (tmp > 0 ? tmp : 0)
+
+            // графа 13
+            row.reserveRecovery = (tmp < 0 ? Math.abs(tmp) : 0)
         }
-        row.reserveCalcValue = roundTo2(tmp)
-
-        // графа 12
-        tmp = roundTo2((row.reserveCalcValue?:0) - (row.reserve?:0))
-        row.reserveCreation = (tmp > 0 ? tmp : 0)
-
-        // графа 13
-        row.reserveRecovery = (tmp < 0 ? Math.abs(tmp) : 0)
     }
     save(data)
 
@@ -308,12 +320,6 @@ def logicalCheck() {
         }
     }
 
-//    // Проверока наличия итоговой строки
-//    if (!checkAlias(getRows(data), 'total')) {
-//        logger.error('Итоговые значения не рассчитаны')
-//        return false
-//    }
-
     def formDataOld = getFormDataOld()
     def dataOld = getData(formDataOld)
 
@@ -363,7 +369,6 @@ def logicalCheck() {
 
         def name
         def tmp
-        def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
 
         for (def row : getRows(data)) {
             if (isFixedRow(row)) {
@@ -392,8 +397,10 @@ def logicalCheck() {
 
             // 4. Проверка при нулевом значении размера лота на предыдущую отчётную дату (графа 4, 6, 13)
             if (row.lotSizePrev == 0 && (row.reserve != 0 || row.reserveRecovery != 0)) {
-                logger.error(errorMsg + 'графы 6 и 13 ненулевые!')
-                return false
+                loggerError(errorMsg + 'графы 6 и 13 ненулевые!')
+                if (!isBalancePeriod) {
+                    return false
+                }
             }
 
             // 5. Проверка необращающихся акций (графа 8, 11, 12)
@@ -404,21 +411,27 @@ def logicalCheck() {
 
             // 6. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 13)
             if (sign == '+' && row.reserveCalcValue - row.reserve > 0 && row.reserveRecovery != 0) {
-                logger.error(errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
-                return false
+                loggerError(errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
+                if (!isBalancePeriod) {
+                    return false
+                }
             }
 
             // 7. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 12)
             if (sign == '+' && row.reserveCalcValue - row.reserve < 0 && row.reserveCreation != 0) {
-                logger.error(errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
-                return false
+                loggerError(errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
+                if (!isBalancePeriod) {
+                    return false
+                }
             }
 
             // 8. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 13)
             if (sign == '+' && row.reserveCalcValue - row.reserve == 0 &&
                     (row.reserveCreation != 0 || row.reserveRecovery != 0)) {
-                logger.error(errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
-                return false
+                loggerError(errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
+                if (!isBalancePeriod) {
+                    return false
+                }
             }
 
             // 9. Проверка на положительные значения при наличии созданного резерва
@@ -429,8 +442,10 @@ def logicalCheck() {
 
             // 10. Проверка корректности создания резерва (графа 6, 11, 12, 13)
             if (row.reserve + row.reserveCreation != row.reserveCalcValue + row.reserveRecovery) {
-                logger.error(errorMsg + 'резерв сформирован некорректно!')
-                return false
+                loggerError(errorMsg + 'резерв сформирован некорректно!')
+                if (!isBalancePeriod) {
+                    return false
+                }
             }
 
             // 11. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 4, 5 (за предыдущий период) )
@@ -439,8 +454,10 @@ def logicalCheck() {
                 def curCol2 = 4
                 def prevCol = 3
                 def prevCol2 = 5
-                logger.error("РНУ сформирован некорректно! " + errorMsg + "Не выполняется условие: Если «графа $curCol» = «графа $prevCol» формы РНУ-25 за предыдущий отчётный период, то «графа $curCol2»  = «графа $prevCol2» формы РНУ-25 за предыдущий отчётный период.")
-                return false
+                loggerError("РНУ сформирован некорректно! " + errorMsg + "Не выполняется условие: Если «графа $curCol» = «графа $prevCol» формы РНУ-25 за предыдущий отчётный период, то «графа $curCol2»  = «графа $prevCol2» формы РНУ-25 за предыдущий отчётный период.")
+                if (!isBalancePeriod) {
+                    return false
+                }
             }
 
             // 12. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 6, 11 (за предыдущий период) )
@@ -449,54 +466,60 @@ def logicalCheck() {
                 def curCol2 = 3
                 def prevCol = 6
                 def prevCol2 = 11
-                logger.error("РНУ сформирован некорректно! " + errorMsg + "Не выполняется условие: Если «графа $curCol» = «графа $prevCol» формы РНУ-25 за предыдущий отчётный период, то «графа $curCol2»  = «графа $prevCol2» формы РНУ-25 за предыдущий отчётный период.")
-                return false
+                loggerError("РНУ сформирован некорректно! " + errorMsg + "Не выполняется условие: Если «графа $curCol» = «графа $prevCol» формы РНУ-25 за предыдущий отчётный период, то «графа $curCol2»  = «графа $prevCol2» формы РНУ-25 за предыдущий отчётный период.")
+                if (!isBalancePeriod) {
+                    return false
+                }
             }
 
             // 16. Проверка на уникальность поля «№ пп» (графа 1)
             if (i != row.rowNumber) {
-                logger.error('Нарушена уникальность номера по порядку!')   // TODO (Aydar Kadyrgulov)
-                return false
+                loggerError('Нарушена уникальность номера по порядку!') // TODO (Aydar Kadyrgulov)
+                if (!isBalancePeriod) {
+                    return false
+                }
             }
             i += 1
 
             // 17. Арифметические проверки граф 6, 10, 11, 12, 13 =========================
-            // графа 6
-            if (row.reserve != getValueForColumn6(dataOld, row)) {
-                name = getColumnName(row, 'reserve')
-                logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
-            }
+            if (!isBalancePeriod) {
+                // графа 6
+                if (row.reserve != getValueForColumn6(dataOld, row)) {
+                    name = getColumnName(row, 'reserve')
+                    logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
+                }
 
-            // графа 10
-            tmp = (row.marketQuotation ? roundTo2(row.lotSizeCurrent * row.marketQuotation) : 0)
-            if (row.costOnMarketQuotation != tmp) {
-                name = getColumnName(row, 'costOnMarketQuotation')
-                logger.warn(errorMsg + "Неверно рассчитана графа «$name»!")
-            }
+                // графа 10
+                tmp = (row.marketQuotation ? roundTo2(row.lotSizeCurrent * row.marketQuotation) : 0)
+                if (row.costOnMarketQuotation != tmp) {
+                    name = getColumnName(row, 'costOnMarketQuotation')
+                    logger.warn(errorMsg + "Неверно рассчитана графа «$name»!")
+                }
 
-            // графа 11
-            if (sign == '+') {
-                def a = (row.cost == null ? 0 : row.cost)
-                tmp = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
-            } else {
-                tmp = 0
-            }
-            if (row.reserveCalcValue != roundTo2(tmp)) {
-                name = getColumnName(row, 'reserveCalcValue')
-                logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
-            }
+                // графа 11
+                if (sign == '+') {
+                    def a = (row.cost == null ? 0 : row.cost)
+                    tmp = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
+                } else {
+                    tmp = 0
+                }
+                if (row.reserveCalcValue != roundTo2(tmp)) {
+                    name = getColumnName(row, 'reserveCalcValue')
+                    logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
+                }
 
-            // графа 12
-            tmp = roundTo2(row.reserveCalcValue - row.reserve)
-            if (row.reserveCreation != (tmp > 0 ? tmp : 0)) {
-                name = getColumnName(row, 'reserveCreation')
-                logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
-            }
+                // графа 12
+                tmp = roundTo2(row.reserveCalcValue - row.reserve)
+                if (row.reserveCreation != (tmp > 0 ? tmp : 0)) {
+                    name = getColumnName(row, 'reserveCreation')
+                    logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
+                }
 
-            // графа 13
-            if (row.reserveRecovery != (tmp < 0 ? Math.abs(tmp) : 0)) {
-                name = getColumnName(row, 'reserveRecovery')
-                logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
+                // графа 13
+                if (row.reserveRecovery != (tmp < 0 ? Math.abs(tmp) : 0)) {
+                    name = getColumnName(row, 'reserveRecovery')
+                    logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
+                }
             }
             // 17. конец арифметической проверки =================================
 
@@ -521,16 +544,20 @@ def logicalCheck() {
             if (totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
                 def curCol = 4
                 def prevCol = 5
-                logger.error("РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе $curCol = «Общий итог» по графе $prevCol формы РНУ-25 за предыдущий отчётный период.")
-                return false
+                loggerError("РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе $curCol = «Общий итог» по графе $prevCol формы РНУ-25 за предыдущий отчётный период.")
+                if (!isBalancePeriod) {
+                    return false
+                }
             }
 
             // 14. Проверка корректности заполнения РНУ (графа 6, 11 (за предыдущий период))
             if (totalRow.reserve != totalRowOld.reserveCalcValue) {
                 def curCol = 6
                 def prevCol = 11
-                logger.error("РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе $curCol = «Общий итог» по графе $prevCol формы РНУ-25 за предыдущий отчётный период.")
-                return false
+                loggerError("РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе $curCol = «Общий итог» по графе $prevCol формы РНУ-25 за предыдущий отчётный период.")
+                if (!isBalancePeriod) {
+                    return false
+                }
             }
         }
 
@@ -548,8 +575,10 @@ def logicalCheck() {
                 def row = getRowByAlias(data, 'total' + getRowNumber(codeName, data))
                 for (def alias : totalColumns) {
                     if (calcSumByCode(data, codeName, alias) != row.getCell(alias).getValue()) {
-                        logger.error("Итоговые значения по ГРН $codeName рассчитаны неверно!")
-                        return false
+                        loggerError("Итоговые значения по ГРН $codeName рассчитаны неверно!")
+                        if (!isBalancePeriod) {
+                            return false
+                        }
                     }
                 }
             }
@@ -557,8 +586,10 @@ def logicalCheck() {
             // 18. Проверка итогового значений по всей форме
             for (def alias : totalColumns) {
                 if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
-                    logger.error('Итоговые значения рассчитаны неверно!')
-                    return false
+                    loggerError('Итоговые значения рассчитаны неверно!')
+                    if (!isBalancePeriod) {
+                        return false
+                    }
                 }
             }
         }
@@ -746,6 +777,7 @@ def checkOld(def row, def likeColumnName, def curColumnName, def prevColumnName,
             return true
         }
     }
+    return false
 }
 
 /**
@@ -763,6 +795,9 @@ void setTotalStyle(def row) {
  * Получить данные за предыдущий отчетный период
  */
 def getFormDataOld() {
+    if (isBalancePeriod) {
+        return null
+    }
     // предыдущий отчётный период
     def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
 
@@ -1110,7 +1145,7 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
-    logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
+    loggerError("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
     return null
 }
 
@@ -1204,7 +1239,7 @@ void checkTotalRow(def totalRow) {
     }
     if (!errorColums.isEmpty()) {
         def columns = errorColums.join(', ')
-        logger.error("Итоговая сумма в графе $columns в транспортном файле некорректна")
+        loggerError("Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
 }
 
@@ -1248,5 +1283,13 @@ void sort(def data) {
             return a.tradeNumber <=> b.tradeNumber
         }
         return a.regNumber <=> b.regNumber
+    }
+}
+
+def loggerError(def msg) {
+    if (isBalancePeriod) {
+        logger.warn(msg)
+    } else {
+        logger.error(msg)
     }
 }

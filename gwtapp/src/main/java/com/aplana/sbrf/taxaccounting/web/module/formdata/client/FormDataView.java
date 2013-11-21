@@ -484,4 +484,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         fileUploader.addValueChangeHandler(changeHandler);
     }
 
+    @Override
+    public void setPagingVisible(boolean visible) {
+        pager.setVisible(visible);
+        dockPanel.setWidgetSize(pager, visible ? 30 : 0);
+    }
 }
