@@ -20,7 +20,7 @@ switch (formDataEvent) {
         def formPrev = getFormPrev()
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
         if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
-            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+            logger.error("Форма предыдущего периода не существует или не находится в статусе «Принята»")
             return
         }
         logicalCheck() && checkNSI()
@@ -29,7 +29,7 @@ switch (formDataEvent) {
         def formPrev = getFormPrev()
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
         if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
-            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+            logger.error("Форма предыдущего периода не существует или не находится в статусе «Принята»")
             return
         }
         deleteAllStatic()
@@ -59,7 +59,7 @@ switch (formDataEvent) {
         def formPrev = getFormPrev()
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
         if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
-            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+            logger.error("Форма предыдущего периода не существует или не находится в статусе «Принята»")
             return
         }
         logicalCheck() && checkNSI()
@@ -69,7 +69,7 @@ switch (formDataEvent) {
         def formPrev = getFormPrev()
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
         if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
-            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+            logger.error("Форма предыдущего периода не существует или не находится в статусе «Принята»")
             return
         }
         consolidation()
@@ -83,7 +83,7 @@ switch (formDataEvent) {
         def formPrev = getFormPrev()
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
         if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
-            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
             return
         }
         importData()
@@ -96,7 +96,7 @@ switch (formDataEvent) {
         def formPrev = getFormPrev()
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
         if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
-            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+            logger.error("Форма предыдущего периода не существует или не находится в статусе «Принята»")
             return
         }
         importData()

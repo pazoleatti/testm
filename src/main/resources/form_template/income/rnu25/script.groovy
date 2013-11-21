@@ -21,13 +21,13 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CHECK :
         if (!isBalancePeriod && !checkPrevPeriod()) {
-            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
         }
         logicalCheck() && checkNSI()
         break
     case FormDataEvent.CALCULATE :
         if (!isBalancePeriod && !checkPrevPeriod()) {
-            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
             return
         }
         calc()
@@ -48,7 +48,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
         if (!isBalancePeriod && !checkPrevPeriod()) {
-            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
             return
         }
         logicalCheck() && checkNSI()
@@ -65,7 +65,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT :
         if (!isBalancePeriod && !checkPrevPeriod()) {
-            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
             return
         }
         importData()
@@ -75,7 +75,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.MIGRATION :
         if (!isBalancePeriod && !checkPrevPeriod()) {
-            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
             return
         }
         importData()
