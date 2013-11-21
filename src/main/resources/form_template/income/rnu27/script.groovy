@@ -66,12 +66,6 @@ switch (formDataEvent) {
         break
     // обобщить
     case FormDataEvent.COMPOSE :
-        def formPrev = getFormPrev()
-        // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-        if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
-            logger.error("Форма предыдущего периода не существует или не находится в статусе «Принята»")
-            return
-        }
         consolidation()
         deleteAllStatic()
         sort()

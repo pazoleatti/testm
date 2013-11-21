@@ -363,6 +363,7 @@ def logicalCheck() {
 
         def name
         def tmp
+        def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
 
         for (def row : getRows(data)) {
             if (isFixedRow(row)) {
@@ -433,7 +434,7 @@ def logicalCheck() {
             }
 
             // 11. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 4, 5 (за предыдущий период) )
-            if (checkOld(row, 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', dataOld)) {
+            if (!isBalancePeriod && checkOld(row, 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', dataOld)) {
                 def curCol = 3
                 def curCol2 = 4
                 def prevCol = 3
@@ -443,7 +444,7 @@ def logicalCheck() {
             }
 
             // 12. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 6, 11 (за предыдущий период) )
-            if (checkOld(row, 'tradeNumber', 'reserve', 'reserveCalcValue', dataOld)) {
+            if (!isBalancePeriod && checkOld(row, 'tradeNumber', 'reserve', 'reserveCalcValue', dataOld)) {
                 def curCol = 3
                 def curCol2 = 3
                 def prevCol = 6
