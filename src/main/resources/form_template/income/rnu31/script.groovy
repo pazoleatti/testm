@@ -121,7 +121,7 @@ def logicalCheck() {
     if (!isFirstMonth()) {
         // 1. Проверка наличия предыдущего экземпляра отчета
         if (rowOld == null) {
-            logger.error('Отсутствует предыдущий экземпляр отчета')
+            logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
             return false
         }
 
@@ -193,12 +193,6 @@ void consolidation() {
  * Проверка при создании формы.
  */
 void checkCreation() {
-    //проверка периода ввода остатков
-    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
-        logger.error('Налоговая форма не может быть в периоде ввода остатков.')
-        return
-    }
-
     def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 

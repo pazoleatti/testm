@@ -190,7 +190,7 @@ public class RateMDB implements MessageListener {
         try {
             saxParser.parse(new ByteArrayInputStream(fileText.getBytes(RATE_ENCODING)), handler);
             if (refBookId[0] == null) {
-                throw new ServiceException(ERROR_FORMAT);
+                throw new ServiceException(ERROR_RATE);
             }
             runScript(refBookId[0], fileText, userInfo);
         } catch (ServiceException ex) {

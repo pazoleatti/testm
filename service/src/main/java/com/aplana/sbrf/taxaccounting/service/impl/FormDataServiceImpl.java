@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder
 import jcifs.smb.SmbFileInputStream;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,8 +58,6 @@ public class FormDataServiceImpl implements FormDataService {
     @Autowired
     private DepartmentFormTypeDao departmentFormTypeDao;
     @Autowired
-    private FormDataCompositionService formDataCompositionService;
-    @Autowired
     private PeriodService reportPeriodService;
     @Autowired
     private EventLauncher eventHandlerLauncher;
@@ -66,6 +65,8 @@ public class FormDataServiceImpl implements FormDataService {
 	private SignService signService;
 	@Autowired
 	private ConfigurationProvider configurationProvider;
+	@Autowired
+	private ApplicationContext applicationContext;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -596,8 +597,9 @@ public class FormDataServiceImpl implements FormDataService {
                             ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
                             scriptComponentContext.setUserInfo(userInfo);
                             scriptComponentContext.setLogger(logger);
-                            ((ScriptComponentContextHolder)formDataCompositionService).setScriptComponentContext(scriptComponentContext);
 
+							FormDataCompositionService formDataCompositionService = applicationContext.getBean(FormDataCompositionService.class);
+                            ((ScriptComponentContextHolder)formDataCompositionService).setScriptComponentContext(scriptComponentContext);
                             formDataCompositionService.compose(formData, i.getDepartmentId(),
                                     i.getFormTypeId(), i.getKind());
                         } else if (destinationForm != null){

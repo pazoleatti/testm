@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat
 
 /**
  * Форма "(РНУ-53) Регистр налогового учёта открытых сделок РЕПО с обязательством продажи по 2-й части".
+ * formTemplateId=346
  *
  * @version 1
  *
@@ -19,46 +20,46 @@ import java.text.SimpleDateFormat
  */
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         checkCreation()
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         logicalCheck() && checkNSI()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         calc()
         !hasError() && logicalCheck() && checkNSI()
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         addNewRow()
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicalCheck() && checkNSI()
         break
-    // после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+// после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
         logicalCheck() && checkNSI()
         break
-    // обобщить
-    case FormDataEvent.COMPOSE :
+// обобщить
+    case FormDataEvent.COMPOSE:
         consolidation()
         !hasError() && logicalCheck() && checkNSI()
         break
-    case FormDataEvent.IMPORT :
+    case FormDataEvent.IMPORT:
         importData()
         if (!hasError()) {
             calc()
         }
         break
-    case FormDataEvent.MIGRATION :
+    case FormDataEvent.MIGRATION:
         importData()
         if (!hasError()) {
             def total = getCalcTotalRow()
@@ -89,25 +90,25 @@ def addNewRow() {
     def data = getData(formData)
     DataRow<Cell> newRow = getNewRow()
     def index = 0
-    if (currentDataRow!=null){
+    if (currentDataRow != null) {
         index = currentDataRow.getIndex()
         def row = currentDataRow
-        while(row.getAlias()!=null && index>0){
+        while (row.getAlias() != null && index > 0) {
             row = getRows(data).get(--index)
         }
-        if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
+        if (index != currentDataRow.getIndex() && getRows(data).get(index).getAlias() == null) {
             index++
         }
-    }else if (getRows(data).size()>0) {
-        for(int i = getRows(data).size()-1;i>=0;i--){
+    } else if (getRows(data).size() > 0) {
+        for (int i = getRows(data).size() - 1; i >= 0; i--) {
             def row = getRows(data).get(i)
-            if(row.getAlias()==null){
-                index = getRows(data).indexOf(row)+1
+            if (row.getAlias() == null) {
+                index = getRows(data).indexOf(row) + 1
                 break
             }
         }
     }
-    data.insert(newRow,index+1)
+    data.insert(newRow, index + 1)
 }
 
 /**
@@ -124,12 +125,12 @@ void checkBeforeCalc(DataRowHelper form) {
     for (row in form.allCached) {
         // 2. Проверка даты первой части РЕПО (графа 7)
         if (!(row.part1REPODate < reportDate)) {
-            logger.error('Неверно указана дата первой части сделки в строке '+ (form.allCached.indexOf(row)+1)+'!')
+            logger.error('Неверно указана дата первой части сделки в строке ' + (form.allCached.indexOf(row) + 1) + '!')
             return
         }
         // 3. Проверка даты второй части РЕПО (графа 8)
         if (!(row.part2REPODate >= reportDate)) {
-            logger.error('Неверно указана дата второй части сделки в строке '+ (form.allCached.indexOf(row)+1)+'!')
+            logger.error('Неверно указана дата второй части сделки в строке ' + (form.allCached.indexOf(row) + 1) + '!')
             return
         }
     }
@@ -178,9 +179,9 @@ void calc() {
     def course = 1
 
     def tmp = 0
-    def a, b ,c
+    def a, b, c
 
-    getRows(data).eachWithIndex { row, i ->
+    for (def row : getRows(data)) {
 
         // графа 9, 10 - при импорте не рассчитывать эти графы
         if (formDataEvent != FormDataEvent.IMPORT) {
@@ -189,9 +190,9 @@ void calc() {
             a = calcAForColumn9or10(row, reportDate, course)
             b = 0
             c = 0
-            if (a!=null && a > 0) {
+            if (a != null && a > 0) {
                 c = roundTo2(a)
-            } else if (a!=null && a < 0) {
+            } else if (a != null && a < 0) {
                 b = roundTo2(-a)
             }
             row.income = c
@@ -237,7 +238,7 @@ void calc() {
     data.save(getRows(data))
 
     // строка итого
-    if (getRows(data).size()>0) {
+    if (getRows(data).size() > 0) {
         def totalRow = getCalcTotalRow()
         insert(data, totalRow)
     }
@@ -280,7 +281,7 @@ def logicalCheck() {
             }
             def index = row.tadeNumber
             def errorMsg
-            if (index!=null && index!='') {
+            if (index != null && index != '') {
                 errorMsg = "В строке \"Номер сделки\" равной $index "
             } else {
                 index = row.getIndex()
@@ -292,18 +293,18 @@ def logicalCheck() {
                 return false
             }
 
-            if (row.currencyCode!=null) {
-                course = getCourse(row.currencyCode,lastDayReportPeriod)
+            if (row.currencyCode != null) {
+                course = getCourse(row.currencyCode, lastDayReportPeriod)
             }
 
             // 2. Проверка даты первой части РЕПО (графа 7)
             if (!(row.part1REPODate < reportDate)) {
-                logger.error(errorMsg + 'неверно указана дата первой части сделки в строке '+ (getRows(data).indexOf(row)+1)+'!')
+                logger.error(errorMsg + 'неверно указана дата первой части сделки в строке ' + (getRows(data).indexOf(row) + 1) + '!')
                 return false
             }
             // 3. Проверка даты второй части РЕПО (графа 8)
             if (!(row.part2REPODate >= reportDate)) {
-                logger.error(errorMsg + 'неверно указана дата второй части сделки в строке '+ (getRows(data).indexOf(row)+1)+'!')
+                logger.error(errorMsg + 'неверно указана дата второй части сделки в строке ' + (getRows(data).indexOf(row) + 1) + '!')
                 return false
             }
 
@@ -322,12 +323,12 @@ def logicalCheck() {
 
             // 6. Проверка финансового результата
             tmp = calcAForColumn9or10(row, reportDate, course)
-            if (tmp!=null && tmp > 0 && row.income != roundTo2(tmp)) {
+            if (tmp != null && tmp > 0 && row.income != roundTo2(tmp)) {
                 logger.warn(errorMsg + 'неверно определены доходы')
             }
 
             // 7. Проверка финансового результата
-            if (tmp!=null && tmp < 0 && row.outcome != roundTo2(-tmp)) {
+            if (tmp != null && tmp < 0 && row.outcome != roundTo2(-tmp)) {
                 logger.warn(errorMsg + 'неверно определены расходы')
             }
 
@@ -336,9 +337,9 @@ def logicalCheck() {
             a = calcAForColumn9or10(row, reportDate, course)
             b = 0
             c = 0
-            if (a!=null && a > 0) {
+            if (a != null && a > 0) {
                 c = roundTo2(a)
-            } else if (a!=null && a < 0) {
+            } else if (a != null && a < 0) {
                 b = roundTo2(-a)
             }
             // графа 9
@@ -354,7 +355,7 @@ def logicalCheck() {
 
             // графа 11
             def col11 = roundTo2(calc11(row, lastDayReportPeriod))
-            if (col11!=null && col11!=row.rateBR) {
+            if (col11 != null && col11 != row.rateBR) {
                 name = getColumnName(row, 'rateBR')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
@@ -402,7 +403,7 @@ def logicalCheck() {
 
         // 8. Проверка итоговых значений формы  Заполняется автоматически (графа 5, 6, 9, 10, 12, 13).
         if (hasTotalRow) {
-            def totalRow = data.getDataRow(getRows(data),'total')
+            def totalRow = data.getDataRow(getRows(data), 'total')
             def totalSumColumns = ['acquisitionPrice', 'salePrice', 'income',
                     'outcome', 'outcome269st', 'outcomeTax']
             for (def alias : totalSumColumns) {
@@ -439,7 +440,7 @@ def checkNSI() {
 
             def index = row.tadeNumber
             def errorMsg
-            if (index!=null && index!='') {
+            if (index != null && index != '') {
                 errorMsg = "В строке \"Номер сделки\" равной $index "
             } else {
                 index = row.getIndex()
@@ -447,13 +448,13 @@ def checkNSI() {
             }
 
             // 1. Проверка кода валюты со справочным (графа 3)
-            if (row.currencyCode!=null && getCurrency(row.currencyCode)==null) {
+            if (row.currencyCode != null && getCurrency(row.currencyCode) == null) {
                 logger.warn(errorMsg + 'неверный код валюты!')
             }
 
             // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
             def col11 = roundTo2(calc11(row, lastDayReportPeriod))
-            if (col11!=null && col11!=row.rateBR) {
+            if (col11 != null && col11 != row.rateBR) {
                 logger.error(errorMsg + 'неверно указана ставка Банка России!')
                 return false
             }
@@ -475,7 +476,7 @@ void consolidation() {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                getRows(getData(source)).each { row->
+                getRows(getData(source)).each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
                         newRows.add(row)
                     }
@@ -500,7 +501,7 @@ void checkCreation() {
     //def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     //проверка периода ввода остатков
-    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId,formData.departmentId)) {
+    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
         logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
         return
     }
@@ -556,12 +557,10 @@ void importData() {
         } else {
             logger.error("Нет итоговой строки.")
         }
-    } catch(Exception e) {
+    } catch (Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
 }
-
-
 
 /*
  * Вспомогательные методы.
@@ -627,7 +626,7 @@ def calc12Value(def row, def coef, def reportDate, def days) {
 def getSum(def columnAlias) {
     def data = getData(formData)
     def from = 0
-    def to = getLastInsertIndex()-2
+    def to = getLastInsertIndex() - 2
     if (from > to) {
         return 0
     }
@@ -657,13 +656,13 @@ def getIndex(def row) {
  * Получить индекс строки "итого" или (если ее нет) то индекс за последней строкой
  * @return
  */
-def getLastInsertIndex(){
+def getLastInsertIndex() {
     def data = getData(formData)
     def size = getRows(data).size()
-    if(size >0 && getRows(data).get(size-1).getAlias()!=null){
+    if (size > 0 && getRows(data).get(size - 1).getAlias() != null) {
         return size;
-    } else{
-        return size+1;
+    } else {
+        return size + 1;
     }
 }
 
@@ -740,8 +739,8 @@ def getColumnName(def row, def alias) {
  * @param course курс
  */
 def calcAForColumn9or10(def row, def reportDate, def course) {
-    if (row.acquisitionPrice!=null && row.salePrice!=null && reportDate!=null && row.part1REPODate!=null && row.part2REPODate!=null && course!=null) {
-    // ((«графа 6» - «графа 5») х (отчетная дата – «графа 7») / («графа 8» - «графа 7»)) х курс ЦБ РФ
+    if (row.acquisitionPrice != null && row.salePrice != null && reportDate != null && row.part1REPODate != null && row.part2REPODate != null && course != null) {
+        // ((«графа 6» - «графа 5») х (отчетная дата – «графа 7») / («графа 8» - «графа 7»)) х курс ЦБ РФ
         return ((row.salePrice - row.acquisitionPrice) *
                 (reportDate - row.part1REPODate) /
                 (row.part2REPODate - row.part1REPODate)) * course
@@ -757,23 +756,23 @@ def calcAForColumn9or10(def row, def reportDate, def course) {
  * @param row
  * @param rateDate
  */
-def calc11(DataRow row, def rateDate){
+def calc11(DataRow row, def rateDate) {
     def currency = getCurrency(row.currencyCode)
     def rate = getRate(rateDate)
     // Если «графа 10» = 0, то « графа 11» не заполняется; && Если «графа 3» не заполнена, то « графа 11» не заполняется
-    if (!isTotal(row) && row.outcome != 0 && row.currencyCode != null){
+    if (!isTotal(row) && row.outcome != 0 && row.currencyCode != null) {
         // Если «графа 3» = 810, то «графа 11» = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на дату «отчетная дата»,
-        if (currency == '810')    {
+        if (currency == '810') {
             return rate
-        } else{ // Если «графа 3» ≠ 810), то
+        } else { // Если «графа 3» ≠ 810), то
             // Если «отчетная дата» принадлежит периоду с 01.09.2008 по 31.12.2009 (включительно), то «графа 11» = 22;
-            if (inPeriod(rateDate, '01.09.2008', '31.12.2009')){
+            if (inPeriod(rateDate, '01.09.2008', '31.12.2009')) {
                 return 22
-            } else if (inPeriod(rateDate, '01.01.2011', '31.12.2012')){
+            } else if (inPeriod(rateDate, '01.01.2011', '31.12.2012')) {
                 // Если «отчетная дата» принадлежит периоду с 01.01.2011 по 31.12.2012 (включительно), то
                 // графа 11 = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на дату «отчетная дата»;
                 return rate
-            } else{
+            } else {
                 //Если  «отчетная дата» не принадлежит отчётным периодам с 01.09.2008 по 31.12.2009 (включительно), с 01.01.2011 по 31.12.2012 (включительно)),
                 //то  «графа 11» = 15.
                 return 15
@@ -835,42 +834,41 @@ BigDecimal roundTo2(BigDecimal value) {
  * Получить ставку рефинансирования ЦБ РФ
  */
 def getRate(def date) {
-    if (date!=null) {
-        def refDataProvider = refBookFactory.getDataProvider(23)
-        def res = refDataProvider.getRecords(date, null, null, null);
-        return res.getRecords().get(0).RATE.getNumberValue()
-    }else{
-        return null;
+    if (date != null) {
+        def res = refBookFactory.getDataProvider(23).getRecords(date, null, null, null);
+        if (res.getRecords() != null && res.getRecords().size() > 0)
+            return res.getRecords().get(0).RATE.getNumberValue()
     }
+    return null
 }
 
 /**
  * Получить цифровой код валюты
  */
 def getCurrency(def currencyCode) {
-    return  refBookService.getStringValue(15,currencyCode,'CODE')
+    return refBookService.getStringValue(15, currencyCode, 'CODE')
 }
 
 /**
  * Проверка валюты на рубли
  */
 def isRubleCurrency(def currencyCode) {
-    return  refBookService.getStringValue(15,currencyCode,'CODE')=='810'
+    return refBookService.getStringValue(15, currencyCode, 'CODE') == '810'
 }
 
 /**
  * Получить курс валюты
  */
 def getCourse(def currency, def date) {
-    if (currency!=null && !isRubleCurrency(currency)) {
-        def refCourseDataProvider = refBookFactory.getDataProvider(22)
-        def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
-        return res.getRecords().get(0).RATE.getNumberValue()
-    } else if ( isRubleCurrency(currency)){
-        return 1;
-    } else {
-        return null
-    }
+    if (currency != null && date != null)
+        if (isRubleCurrency(currency)) {
+            return 1
+        } else {
+            def res = refBookFactory.getDataProvider(22).getRecords(date, null, 'CODE_NUMBER=' + currency, null);
+            if (res.getRecords() != null && res.getRecords().size() > 0)
+                return res.getRecords().get(0).RATE.getNumberValue()
+        }
+    return null
 }
 
 /**
@@ -1007,14 +1005,14 @@ def getNumber(def value) {
  */
 def getRecords(def ref_id, String code, String value, Date date, def cache) {
     String filter = code + " like '" + value.replaceAll(' ', '') + "%'"
-    if (cache[ref_id]!=null) {
-        if (cache[ref_id][filter]!=null) return cache[ref_id][filter]
+    if (cache[ref_id] != null) {
+        if (cache[ref_id][filter] != null) return cache[ref_id][filter]
     } else {
         cache[ref_id] = [:]
     }
     def refDataProvider = refBookFactory.getDataProvider(ref_id)
     def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
-    if (records.size() == 1){
+    if (records.size() == 1) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
@@ -1028,7 +1026,7 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    def totalColumns = [5 : 'acquisitionPrice', 6 : 'salePrice', 9 : 'income', 10 : 'outcome', 12 : 'outcome269st', 13 : 'outcomeTax']
+    def totalColumns = [5: 'acquisitionPrice', 6: 'salePrice', 9: 'income', 10: 'outcome', 12: 'outcome269st', 13: 'outcomeTax']
 
     def totalCalc = getCalcTotalRow()
     def errorColums = []
