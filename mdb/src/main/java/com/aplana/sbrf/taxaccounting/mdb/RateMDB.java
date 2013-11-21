@@ -127,6 +127,8 @@ public class RateMDB implements MessageListener {
             boolean bCcy = false;
             boolean bCode = false;
 
+            String operName = null;
+
             @Override
             public void startElement(String uri, String localName, String qName, Attributes attributes)
                     throws SAXException {
@@ -154,7 +156,7 @@ public class RateMDB implements MessageListener {
                 if (bSendRateRq) {
                     if (bOperName) {
                         bOperName = false;
-                        String operName = new String(ch, start, length);
+                        operName = new String(ch, start, length);
                         refBookId[0] = rateMapping.get(operName);
                     } else if (bExRateBlock) {
                         bExRateBlock = false;
@@ -167,6 +169,13 @@ public class RateMDB implements MessageListener {
                         String exRateType = new String(ch, start, length);
                         if (!"PUBLIC-1".equalsIgnoreCase(exRateType) && !"PUBLIC-5".equalsIgnoreCase(exRateType)) {
                             throw new ServiceException(ERROR_RATE);
+                        }
+                        if (operName != null && (
+                                operName.equalsIgnoreCase("Currency")
+                                        && !exRateType.equalsIgnoreCase("PUBLIC-1")
+                                        || operName.equalsIgnoreCase("Metal")
+                                        && !exRateType.equalsIgnoreCase("PUBLIC-5"))) {
+                            throw new ServiceException(ERROR_FORMAT);
                         }
                     } else if (bExRateDetails && bRateParamType) {
                         bRateParamType = false;
@@ -214,7 +223,12 @@ public class RateMDB implements MessageListener {
         try {
             additionalParameters.put("inputStream", new ByteArrayInputStream(fileText.getBytes(RATE_ENCODING)));
             refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
-        } catch (Exception e) {
+        }
+        catch (ServiceException e) {
+            addLog(userInfo, e.getMessage());
+            return;
+        }
+        catch (Exception e) {
             logger.error(e);
         }
         if (logger.containsLevel(LogLevel.ERROR)) {
