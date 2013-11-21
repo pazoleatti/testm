@@ -61,14 +61,16 @@ void calc() {
 
     for(DataRow row in dataRowsHelper.getAllCached()) {
         row.okatoCode = "45293554000"
-        if (providerPaymentType.getValue((Long) row.paymentType, 100L).getStringValue() == '1') {
-            row.budgetClassificationCode = '18210101040011000110'
-        }
-        if (providerPaymentType.getValue((Long) row.paymentType, 100L).getStringValue() == '3') {
-            row.budgetClassificationCode = '18210101070011000110'
-        }
-        if (providerPaymentType.getValue((Long) row.paymentType, 100L).getStringValue() == '4') {
-            row.budgetClassificationCode = '18210101060011000110'
+        if (row.paymentType != null) {
+            if (providerPaymentType.getValue((Long) row.paymentType, 100L).getStringValue() == '1') {
+                row.budgetClassificationCode = '18210101040011000110'
+            }
+            if (providerPaymentType.getValue((Long) row.paymentType, 100L).getStringValue() == '3') {
+                row.budgetClassificationCode = '18210101070011000110'
+            }
+            if (providerPaymentType.getValue((Long) row.paymentType, 100L).getStringValue() == '4') {
+                row.budgetClassificationCode = '18210101060011000110'
+            }
         }
     }
 }
@@ -120,7 +122,7 @@ void logicCheck() {
     for (row in dataRowsHelper.getAllCached()) {
         for (alias in ['paymentType', 'okatoCode', 'budgetClassificationCode', 'dateOfPayment', 'sumTax']) {
             if (row.getCell(alias).value == null) {
-                logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '%%') + ' не заполнено')
+                logger.error('Поле «' + row.getCell(alias).column.name.replace('%', '%%') + '» не заполнено')
             }
         }
     }
