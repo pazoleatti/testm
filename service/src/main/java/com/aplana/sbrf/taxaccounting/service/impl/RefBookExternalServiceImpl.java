@@ -68,6 +68,8 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         map.put("OKA.*", new Pair<Boolean, Long>(false, 3L));
         // файл для загр. спр. "Организации-участники контролируемых сделок"
         map.put("organization.xls", new Pair<Boolean, Long>(true, 9L));
+        // файл для загр. спр. "Коды субъектов Российской Федерации"
+        map.put("generaluse.AS_RNU.???.??", new Pair<Boolean, Long>(true, 4L));
 
         //TODO добавить проверку ЭЦП (Marat Fayzullin 2013-10-19)
         Map<ConfigurationParam, String> params = configurationService.getAllConfig(userInfo);
