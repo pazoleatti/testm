@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.server;
 
-import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -24,7 +24,7 @@ import java.io.InputStream;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class PrintLogBusinessHandler extends AbstractActionHandler<PrintLogBusinessAction, PrintLogBusinessResult> {
     public PrintLogBusinessHandler() {
         super(PrintLogBusinessAction.class);
@@ -45,8 +45,7 @@ public class PrintLogBusinessHandler extends AbstractActionHandler<PrintLogBusin
     @Override
     public PrintLogBusinessResult execute(PrintLogBusinessAction action, ExecutionContext context) throws ActionException {
         try {
-            PagingResult<LogSystemSearchResultItem> records = logBusinessService.getLogsBusiness(securityService.currentUserInfo(), action.getFilterValues());
-            System.out.println(records.getTotalCount());
+            PagingResult<LogSearchResultItem> records = logBusinessService.getLogsBusiness(securityService.currentUserInfo(), action.getFilterValues());
             String filePath = printingService.generateExcelLogSystem(records);
             InputStream fileInputStream = new FileInputStream(filePath);
 

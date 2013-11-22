@@ -30,7 +30,7 @@ public class AuditServiceImpl implements AuditService {
 	private DeclarationTypeDao declarationTypeDao;
 
 	@Override
-	public PagingResult<LogSystemSearchResultItem> getLogsByFilter(LogSystemFilter filter) {
+	public PagingResult<LogSearchResultItem> getLogsByFilter(LogSystemFilter filter) {
 		if (filter.getFromSearchDate() == null || filter.getToSearchDate() == null) {
 			throw new ServiceException("Необходимо ввести поисковые даты \"От\" и \"До\"");
 		}
@@ -53,8 +53,9 @@ public class AuditServiceImpl implements AuditService {
 		StringBuilder roles = new StringBuilder();
 		for (TARole role : userInfo.getUser().getRoles()) {
 			roles.append(role.getName());
+            roles.append(",");
 		}
-		log.setRoles(roles.toString());
+		log.setRoles(roles.toString().substring(0,roles.toString().length() - 1));
 
 		log.setDepartmentId(departmentId);
 		log.setReportPeriodId(reportPeriodId);
@@ -78,10 +79,10 @@ public class AuditServiceImpl implements AuditService {
 
     @Override
     @Transactional(readOnly = false)
-    public void removeRecords(List<LogSystemSearchResultItem> items, TAUserInfo userInfo) {
+    public void removeRecords(List<LogSearchResultItem> items, TAUserInfo userInfo) {
         if (!items.isEmpty()){
             List<Long> listIds = new ArrayList<Long>();
-            for (LogSystemSearchResultItem item : items)
+            for (LogSearchResultItem item : items)
                 listIds.add(item.getId());
             auditDao.removeRecords(listIds);
         }

@@ -29,7 +29,7 @@ public interface LogBusinessService {
      * @param filter
      * @return
      */
-    PagingResult<LogSystemSearchResultItem> getLogsBusiness(TAUserInfo userInfo, LogBusinessFilterValues filter);
+    PagingResult<LogSearchResultItem> getLogsBusiness(TAUserInfo userInfo, LogBusinessFilterValues filter);
 
 	/**
 	 * Добавить информацию об логировании
@@ -40,4 +40,11 @@ public interface LogBusinessService {
 	 * @param note текст
 	 */
 	void add(Long formDataId, Long declarationId, TAUserInfo userInfo, FormDataEvent event, String note);
+
+    /**
+     * Удаляем набор записей из истории и сразу создаем запись в ЖА об архивировании.
+     * @param items
+     * @param userInfo
+     */
+    void removeRecords(List<LogSearchResultItem> items, TAUserInfo userInfo);
 }

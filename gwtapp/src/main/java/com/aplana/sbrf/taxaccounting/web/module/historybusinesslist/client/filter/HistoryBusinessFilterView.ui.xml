@@ -145,13 +145,12 @@
                 <g:Label height="20px" text="Дата архивации: " />
                 <style:LinkAnchor  text="Выгрузить в xlsx" ui:field="printButton" img="resources/img/printer-16.png"
                                    title="Выгрузка отчета в excel"/>
-                <g:cell height="50px"  verticalAlignment="bottom">
+                <g:cell height="30px"  verticalAlignment="bottom">
                     <g:HorizontalPanel>
                         <g:cell>
                             <style:Bar>
                                 <style:LeftBar>
                                     <g:Button ui:field="search">Поиск</g:Button>
-                                    <g:Button ui:field="archive">Архивировать</g:Button>
                                 </style:LeftBar>
                             </style:Bar>
                         </g:cell>

@@ -169,7 +169,7 @@ void calc() {
     sortRows(dataRows, groupColums)
 
     // расчет
-    def rowNumber = 0
+    def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
     dataRows.each { row ->
         def rowPrev = getRowPrev(row, dataRowsPrev)
 
@@ -221,7 +221,7 @@ void logicCheck() {
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def calcValues = [:]
 
-    def rowNumber = 0
+    def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue

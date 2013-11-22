@@ -1,9 +1,12 @@
-package form_template.income.rnu71_2
+package form_template.income.rnu71_1
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+
+import java.math.RoundingMode
+
 import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 import groovy.transform.Field
 
@@ -122,30 +125,17 @@ def currentDate = new Date()
  * @return
  */
 def checkSumWithRow(def rowsForSum, def sumRow){
-    def totalResults = [:]
+    def totalResults = formData.createDataRow()
     def isValid = true
-    totalColumns.each { col ->
-        totalResults.put(col, new BigDecimal(0))
-    }
-    for (def row : rowsForSum) {
-        totalResults.keySet().each { col ->
-            final cellValue = row.get(col)
-            if (cellValue != null) {
-                totalResults.put(col, totalResults.get(col) + cellValue)
-            }
-        }
-    }
+    calcTotalSum(rowsForSum, totalResults, totalColumns)
     //Оставил each если понадобится выдавать более сложные сообщения об ошибках
-    totalResults.keySet().each { col ->
-        if (totalResults[col] != sumRow[col]){
+    for (col in totalColumns) {
+        if (totalResults[col] != sumRow[col]) {
             isValid = false
+            break
         }
     }
     return isValid
-}
-
-BigDecimal roundTo(BigDecimal value, int newScale) {
-    return value?.setScale(newScale, BigDecimal.ROUND_HALF_UP)
 }
 
 //// Кастомные методы
@@ -173,11 +163,11 @@ void logicCheck(){
         def values = [:]
         def rowPrev = getRowPrev(formDataPrev?.allCached, row)
         values.with {
-            result = roundTo(getGraph11(row), 2)
+            result = getGraph11(row)
             part2Date = getGraph12(row)
-            lossThisQuarter = roundTo(getGraph13(row, dTo), 2)
-            lossNextQuarter = roundTo(getGraph14(row, dTo), 2)
-            lossThisTaxPeriod = roundTo(getGraph15(row, rowPrev, dFrom, dTo), 2)
+            lossThisQuarter = getGraph13(row, dTo)
+            lossNextQuarter = getGraph14(row, dTo)
+            lossThisTaxPeriod = getGraph15(row, rowPrev, dFrom, dTo)
         }
         checkCalc(row, autoFillColumns, values, logger, true)
 
@@ -235,8 +225,8 @@ void logicCheck(){
         }
     })
     def totalRow = getDataRow(dataRows, 'itg')
-    def totalRowList = dataRows.findAll{ it -> it.getAlias() != null && it.getAlias() != 'itg' }
-    if(!checkSumWithRow(totalRowList, totalRow)){
+    def sumRowList = dataRows.findAll{ it -> it.getAlias() == null}
+    if(!checkSumWithRow(sumRowList, totalRow)){
         logger.error("Итоговые значения рассчитаны неверно!")
     }
 }
@@ -270,11 +260,11 @@ void calc(){
         def rowPrev = getRowPrev(formDataPrev?.allCached, row)
         row.with {
             rowNumber = ++index
-            result = roundTo(getGraph11(row), 2)
+            result = getGraph11(row)
             part2Date = getGraph12(row)
-            lossThisQuarter = roundTo(getGraph13(row, dTo), 2)
-            lossNextQuarter = roundTo(getGraph14(row, dTo), 2)
-            lossThisTaxPeriod = roundTo(getGraph15(row, rowPrev, dFrom, dTo), 2)
+            lossThisQuarter = getGraph13(row, dTo)
+            lossNextQuarter = getGraph14(row, dTo)
+            lossThisTaxPeriod = getGraph15(row, rowPrev, dFrom, dTo)
         }
     }
 
@@ -302,7 +292,7 @@ void calc(){
             totalRow[it] += row[it] != null ? row[it] : 0
         }
     }
-    dataRows.add(dataRows.size(), totalRow)
+    dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
 }
 
@@ -351,9 +341,7 @@ def getRowPrev(def dataRowsPrev, def row){
 
 def getGraph11(def row) {
     if (row.income != null && row.amount != null && row.amountForReserve != null) {
-        return row.income - (row.amount - row.amountForReserve)
-    } else {
-        return null
+        return (row.income - (row.amount - row.amountForReserve)).setScale(2, RoundingMode.HALF_UP)
     }
 }
 
@@ -362,46 +350,40 @@ def getGraph12(def row) {
 }
 
 def getGraph13(def row, def endDate) {
+    def tmp
     if(row.result != null && row.result < 0){
         if (row.part2Date != null && endDate != null) {
             if (row.part2Date <= endDate){
-                return row.result
+                tmp = row.result
             }else{
-                return row.result ? row.result * 0.5 : null
+                tmp = row.result * 0.5
             }
-        } else {
-            return null
         }
-    } else {
-        return null //не заполняется
     }
+    return tmp?.setScale(2, RoundingMode.HALF_UP)
 }
 
 def getGraph14(def row, def endDate) {
+    def tmp
     if(row.result != null && row.result < 0){
         if (row.part2Date != null && endDate != null) {
             if (row.part2Date <= endDate){
-                return BigDecimal.ZERO
+                tmp = BigDecimal.ZERO
             }else{
-                return row.result ? row.result * 0.5 : null
+                tmp = row.result * 0.5
             }
-        } else {
-            return null
         }
-    } else {
-        return null //не заполняется
     }
+    return tmp?.setScale(2, RoundingMode.HALF_UP)
 }
 
 def getGraph15(def row, def rowPrev, def startDate, def endDate) {
+    def tmp
     if (startDate != null && endDate != null) {
         def period = (startDate..endDate)
         if (row.dateOfAssignment != null && row.part2Date != null && !(row.dateOfAssignment in period) && (row.part2Date in period)){
-            return rowPrev?.lossNextQuarter
-        } else {
-            return null //не заполняется
+            tmp = rowPrev?.lossNextQuarter
         }
-    } else {
-        return null
     }
+    return tmp?.setScale(2, RoundingMode.HALF_UP)
 }

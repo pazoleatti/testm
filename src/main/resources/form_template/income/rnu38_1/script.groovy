@@ -6,9 +6,6 @@ import groovy.transform.Field
 /**
  * Форма "РНУ-38.1" "Регистр налогового учёта начисленного процентного дохода по ОФЗ, по которым открыта короткая позиция. Отчёт 1".
  *
- * TODO:
- *		- уточнить как получать дату последнего и отчетного дня для месяца
- *
  * @author ivildanov
  *
  * Графы
@@ -138,11 +135,10 @@ void logicCheck() {
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
 
-    // TODO (Ramil Timerbaev) уточнить как получать дату последнего и отчетного дня для месяца
     // отчетная дата
-    def reportDay = reportPeriodService.getReportDate(formData.reportPeriodId)?.time
+    def reportDay = reportPeriodService.getMonthReportDate(formData.reportPeriodId, formData.periodOrder)?.time
     // последний день месяца
-    def lastDay = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
+    def lastDay = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -190,9 +186,8 @@ void calc() {
     // отсортировать/группировать
     sortRows(dataRows, groupColumns)
 
-    // TODO (Ramil Timerbaev) уточнить как получать дату последнего дня для месяца
     // последний день месяца
-    def lastDay = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
+    def lastDay = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
     for (def row : dataRows) {
         // графа 7
         row.incomePrev = calc7(row, lastDay)

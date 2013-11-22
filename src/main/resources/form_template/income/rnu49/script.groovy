@@ -221,7 +221,7 @@ void calc(def data, def rows) {
                 row.loss = 0
             } else {
                 // графа 17
-                row.loss = abs(row.profit)
+                row.loss = row.profit?.abs()
                 row.profit = 0
             }
 
