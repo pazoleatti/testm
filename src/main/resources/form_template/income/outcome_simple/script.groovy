@@ -132,9 +132,9 @@ void calculationBasicSum() {
             //Строки 213-217 расчет 8-й графы (при консолидации из сводных)
             def formDataRNU14 = getFormDataRNU14()
             if (formDataRNU14 != null) {
-                for (def rowRNU14 : getData(formDataRNU14).getAllCached()) {
-                    if (row.consumptionTypeId == rowRNU14.knu) {
-                        row.rnu5Field5Accepted = rowRNU14.overApprovedNprms
+                for (def rowRNU14 : getData(formDataRNU14).allCached) {
+                    if (rowRNU14.inApprovedNprms != rowRNU14.sum && row.consumptionTypeId == rowRNU14.knu) {
+                        row.rnu5Field5Accepted = rowRNU14.inApprovedNprms
                     }
                 }
             }
@@ -561,7 +561,7 @@ def getFormDataComplex() {
  * Получить данные формы РНУ-14 (id = 321)
  */
 def getFormDataRNU14() {
-    return formDataService.find(321, FormDataKind.PRIMARY, formDataDepartment.id, formData.reportPeriodId)
+    return formDataService.find(321, FormDataKind.UNP, formDataDepartment.id, formData.reportPeriodId)
 }
 
 /**

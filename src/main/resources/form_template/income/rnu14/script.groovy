@@ -39,10 +39,6 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
         checkOnCancelAcceptance()
         break
-// после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
-        acceptance()
-        break
 // обобщить
     case FormDataEvent.COMPOSE:
 //        consolidation()
@@ -95,9 +91,15 @@ void calc() {
             // КНУ которых совпадает со значениями в colBase (или colTax если налоговый период)
             if (getRows(data).indexOf(row)!=4 && getRows(data).indexOf(row)!=1) {//не 5-я и 2-я строка
                 def normBase = 0
-                def rowB = getRowPeriodAddNormBase()
-                if (rowB!=null){
-                    normBase += rowB.rnu5Field5Accepted?:0 + rowB.rnu7Field10Sum?:0  - rowB.rnu7Field12Accepted?:0
+                /** Отчётный период. */
+                def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+                /** Признак налоговый ли это период. */
+                def isTaxPeriod = (reportPeriod != null && reportPeriod.order == 4)
+                for(def knu:(isTaxPeriod?knuTax:knuBase)){
+                    def rowB = getTotalRowFromRNU(knu)
+                    if (rowB!=null){
+                        normBase += (rowB.rnu5Field5Accepted?:0) + (rowB.rnu7Field10Sum?:0)  - (rowB.rnu7Field12Accepted?:0)
+                    }
                 }
                 row.normBase = normBase
             } else if (getRows(data).indexOf(row)==1){//2-я строка(сложнее)
@@ -204,19 +206,6 @@ void checkOnCancelAcceptance() {
         if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
             logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
         }
-    }
-}
-
-/**
- * Принять.
- */
-void acceptance() {
-    if (!logicalCheck(true)) {
-        return
-    }
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() {
-        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
     }
 }
 
@@ -382,17 +371,4 @@ def getKnuSimpleRNU6() {
     return ['10001', '10006', '10300', '10310', '10320', '10330', '10340', '10350',
             '10360', '10470', '10480', '10490', '10571', '10590', '10610', '10640',
             '10680', '10690', '11340', '11350', '11370', '11375']
-}
-
-def getRowPeriodAddNormBase() {
-    /** Отчётный период. */
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    /** Признак налоговый ли это период. */
-    def isTaxPeriod = (reportPeriod != null && reportPeriod.order == 4)
-    for (def knu : (isTaxPeriod ? knuTax : knuBase)) {
-        def rowB = getTotalRowFromRNU(knu)
-        return rowB
-    }
-    return null;
-
 }
