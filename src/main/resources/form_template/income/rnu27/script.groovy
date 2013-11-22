@@ -8,6 +8,10 @@ import groovy.transform.Field
 /**
  * 6.12 (РНУ-27) Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения
  * ЧТЗ http://conf.aplana.com/pages/viewpage.action?pageId=8588102 ЧТЗ_сводные_НФ_Ф2_Э1_т2.doc
+ *
+ * TODO:
+ *      - костыль! в ТФ в столбце для графы 2 могут быть строки содержащие "<" и ">", в ImportServiceImpl они заменяются на &lt и &gt, при записи в форму надо поменять назад, в 0.3.6 это будет вынесено в ScriptUtils
+ *
  * @author ekuvshinov
  */
 
@@ -1078,7 +1082,10 @@ def addData(def xml) {
         indexCell++
 
         // графа 2
-        newRow.issuer = row.cell[indexCell].text()
+        // TODO (Ramil Timerbaev) костыль! в ТФ в столбце для графы 2 могут быть строки содержащие "<" и ">",
+        // в ImportServiceImpl они заменяются на &lt и &gt, при записи в форму надо поменять назад, в 0.3.6 это будет вынесено в ScriptUtils
+        def tmp = row.cell[indexCell].text()
+        newRow.issuer = tmp.replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&amp;', '&')
         indexCell++
 
         // графа 3
