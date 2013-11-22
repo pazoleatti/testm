@@ -444,7 +444,7 @@ def logicalCheck(DataRowHelper form) {
                                 if (findRow.code == row.code && findRow.docNumber == row.docNumber && findRow.docDate == row.docDate) {
                                     isFind = true
                                     if (!(findRow.ruble > row.ruble)) {
-                                        logger.warn('Операция, указанная в строке %s, в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-6 в %s отчетном периоде.', row.number.toString(), reportPeriod.name)
+                                        logger.warn("Операция, указанная в строке ${row.number}, в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-6 за ${reportPeriod.name} ${reportPeriod.getYear()} года.")
                                     }
                                 }
                             }
