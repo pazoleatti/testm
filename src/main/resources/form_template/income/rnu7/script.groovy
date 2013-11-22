@@ -13,10 +13,9 @@ import java.text.SimpleDateFormat
 @Field
 def boolean isBalancePeriod = null
 
-def getBalancePeriod(){
+def isBalancePeriod(){
     if (isBalancePeriod == null){
         isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-        logger.warn(''+isBalancePeriod)
     }
     return isBalancePeriod
 }
@@ -82,7 +81,7 @@ def addNewRow() {
     def data = getData(formData)
     def newRow = formData.createDataRow()
 
-    if (getBalancePeriod()) {
+    if (isBalancePeriod()) {
         columns = ['code', 'date', 'balance', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia',
                 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
     } else {
@@ -141,18 +140,7 @@ def calc() {
     /*
      * Проверка обязательных полей.
      */
-
     def data = getData(formData)
-
-    for (def row : getRows(data)) {
-        if (!isTotal(row)) {
-            // список проверяемых столбцов (графа ..)
-            def requiredColumns = ['code', 'balance', 'date', 'docNumber', 'docDate', 'currencyCode']
-            if (!checkRequiredColumns(row, requiredColumns)) {
-                return false
-            }
-        }
-    }
 
     /*
      * Расчеты.
@@ -185,7 +173,7 @@ def calc() {
 
     for (def row : getRows(data)) {
 
-        if (!getBalancePeriod()) {
+        if (!isBalancePeriod()) {
             // графа 1
             row.rateOfTheBankOfRussia = null
             def records = refDataProvider.getRecords(row.date, null, "CODE_NUMBER = " + row.currencyCode, null)
@@ -312,7 +300,7 @@ def logicalCheck() {
                         'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble',
                         'accountingCurrency', 'ruble'
                 ]
-                if (!checkRequiredColumns(row, requiredColumns)) {
+                if (!checkRequiredColumns(row, requiredColumns) && !isBalancePeriod()) {
                     return false
                 }
             }
@@ -338,7 +326,7 @@ def logicalCheck() {
             if (row.taxAccountingCurrency == 0 && row.taxAccountingRuble == 0 &&
                     row.accountingCurrency == 0 && row.ruble == 0) {
                 loggerError(errorMsg + 'все суммы по операции нулевые!')
-                if (!getBalancePeriod()) {
+                if (!isBalancePeriod()) {
                     return false
                 }
             }
@@ -354,15 +342,15 @@ def logicalCheck() {
             }
 
             // 4. Проверка даты совершения операции и границ отчётного периода (графа 3)
-            if (row.date < a || b < row.date) {
+            if (row.date != null && (row.date < a || b < row.date)) {
                 loggerError(errorMsg + 'дата совершения операции вне границ отчётного периода!')
-                if (!getBalancePeriod()) {
+                if (!isBalancePeriod()) {
                     return false
                 }
             }
 
             // 6. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода
-            if (row.taxAccountingRuble > row.ruble) {
+            if (row.taxAccountingRuble != null && row.ruble != null && row.taxAccountingRuble > row.ruble) {
                 logger.warn(errorMsg + 'сумма данных бухгалтерского учёта превышает сумму начисленных платежей для документа ' + row.docNumber + ' от ' + row.docDate)
             }
 
@@ -370,7 +358,7 @@ def logicalCheck() {
             for (def rowB : getRows(data)) {
                 if (!row.equals(rowB) && row.rowNumber == rowB.rowNumber) {
                     loggerError('Нарушена уникальность номера по порядку!')
-                    if (!getBalancePeriod()) {
+                    if (!isBalancePeriod()) {
                         return false
                     }
                 }
@@ -378,22 +366,26 @@ def logicalCheck() {
 
             if (row.code != row.balance) {
                 loggerError(errorMsg + 'балансовый счет не соответствует коду налогового учета!')
-                if (!getBalancePeriod()) {
+                if (!isBalancePeriod()) {
                     return false
                 }
             }
 
             // 11. Арифметические проверки расчета неитоговых строк
-            if (row.taxAccountingRuble != round(row.taxAccountingCurrency * row.rateOfTheBankOfRussia, 2)) {
-                loggerError(errorMsg + 'неверно рассчитана графа "Сумма расхода в налоговом учёте - Рубли"')
-                if (!getBalancePeriod()) {
-                    return false
+            if (row.taxAccountingCurrency != null && row.rateOfTheBankOfRussia != null) {
+                if (row.taxAccountingRuble != round(row.taxAccountingCurrency * row.rateOfTheBankOfRussia, 2)) {
+                    loggerError(errorMsg + 'неверно рассчитана графа "Сумма расхода в налоговом учёте - Рубли"')
+                    if (!isBalancePeriod()) {
+                        return false
+                    }
                 }
             }
-            if (row.ruble != round(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)) {
-                loggerError(errorMsg + 'неверно рассчитана графа "Сумма расхода в бухгалтерском учёте - Рубли"')
-                if (!getBalancePeriod()) {
-                    return false
+            if (row.accountingCurrency != null && row.rateOfTheBankOfRussia != null) {
+                if (row.ruble != round(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)) {
+                    loggerError(errorMsg + 'неверно рассчитана графа "Сумма расхода в бухгалтерском учёте - Рубли"')
+                    if (!isBalancePeriod()) {
+                        return false
+                    }
                 }
             }
             // 14,15. Проверка наличия суммы расхода в налоговом учете, для первичного документа, указанного для суммы расхода в бухгалтерском учёте
@@ -426,10 +418,13 @@ def logicalCheck() {
 
             // 12. Арифметические проверки расчета итоговых строк «Итого по КНУ»
             for (def codeName : totalGroupsName) {
+                if (codeName == null) {
+                    continue
+                }
                 def totalRowAlias = 'total' + codeName
                 if (!checkAlias(getRows(data), totalRowAlias)) {
                     loggerError("Итоговые значения по КНУ" + getCodeAttribute(codeName) + " не рассчитаны! Необходимо расчитать данные формы.")
-                    if (!getBalancePeriod()) {
+                    if (!isBalancePeriod()) {
                         return false
                     }
                 }
@@ -442,7 +437,7 @@ def logicalCheck() {
                         else {
                             loggerError("Неверное итоговое значение " + getCodeAttribute(codeName) + " для графы \"Рубли\" (Сумма расхода в бухгалтерском учёте)!")
                         }
-                        if (!getBalancePeriod()) {
+                        if (!isBalancePeriod()) {
                             return false
                         }
                     }
@@ -451,19 +446,27 @@ def logicalCheck() {
 
             // 13. Арифметические проверки расчета строки общих итогов
             for (def alias : totalColumns) {
-                if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
+
+                def totalSum = totalSums[alias]
+                if (totalSum == null) {
+                    totalSum = 0
+                }
+                def val = totalRow.getCell(alias).getValue()
+                if (val == null) {
+                    val = 0
+                }
+                if (totalSum != val) {
                     if (alias == 'taxAccountingRuble') {
                         loggerError("Неверное итоговое значение для графы \"Рубли\" (Сумма расхода в налоговом учёте)!")
                     }
                     else {
                         loggerError("Неверное итоговое значение  для графы \"Рубли\" (Сумма расхода в бухгалтерском учёте)!")
                     }
-                    if (!getBalancePeriod()) {
+                    if (!isBalancePeriod()) {
                         return false
                     }
                 }
             }
-
         }
     }
     return true
@@ -531,24 +534,27 @@ def checkNSI() {
             }
 
             // 1. Проверка графа «Код налогового учета» (графа 2)
-            if (refBookService.getRecordData(expensesClassifierRefBookId, row.code) == null) {
+            if (row.code != null && refBookService.getRecordData(expensesClassifierRefBookId, row.code) == null) {
                 logger.warn(errorMsg + 'код налогового учёта в справочнике отсутствует!')
             }
 
             // 2. Проверка графы «Номер балансового счета» (графа 3)
-            if (refBookService.getRecordData(expensesClassifierRefBookId, row.balance) == null) {
+            if (row.balance != null && refBookService.getRecordData(expensesClassifierRefBookId, row.balance) == null) {
                 loggerError(errorMsg + 'номер балансового счета в справочнике отсутствует!')
-                if (!getBalancePeriod()) {
+                if (!isBalancePeriod()) {
                     return false
                 }
             }
 
             // Код валюты
-            def currCode = refBookService.getRecordData(currencyRefBookId, row.currencyCode)
+            def currCode = null
+            if (row.currencyCode != null) {
+                currCode = refBookService.getRecordData(currencyRefBookId, row.currencyCode)
+            }
             if (row.date != null) {
                 if (currCode == null) {
                     loggerError(errorMsg + 'код валюты в справочнике отсутствует!')
-                    if (!getBalancePeriod()) {
+                    if (!isBalancePeriod()) {
                         return false
                     }
                 } else {
@@ -607,8 +613,11 @@ def checkUniq456(def data) {
                     }
                     numberList.append(rNum)
                 }
-                loggerError("Несколько строк $numberList содержат записи в налоговом учете для балансового счета=%s, документа № %s от %s", getNumberAttribute(item.getKey().get(4)).toString(), item.getKey().get(5).toString(), dateFormat.format(item.getKey().get(6)))
-                if (!getBalancePeriod()) {
+                if (item.getKey().get(4) != null && item.getKey().get(5) != null && item.getKey().get(4) != null) {
+                    loggerError("Несколько строк $numberList содержат записи в налоговом учете для балансового счета=%s, документа № %s от %s",
+                            getNumberAttribute(item.getKey().get(4)).toString(), item.getKey().get(5).toString(), dateFormat.format(item.getKey().get(6)))
+                }
+                if (!isBalancePeriod()) {
                     result = false
                 }
 
@@ -692,9 +701,6 @@ void acceptance() {
  * Проверка при создании формы.
  */
 void checkCreation() {
-    // отчётный период
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-
     def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
@@ -723,7 +729,8 @@ def getNewRow(def alias, def totalColumns, def sums) {
     totalColumns.each {
         newRow.getCell(it).setValue(sums[it])
     }
-    newRow.fix = 'Итого по коду ' + (getCodeAttribute(alias))
+    def code = getCodeAttribute(alias)
+    newRow.fix = 'Итого по коду ' + (code == null ? '' : code)
     newRow.getCell('fix').colSpan = 2
     setTotalStyle(newRow)
     return newRow
@@ -750,9 +757,15 @@ void setTotalStyle(def row) {
 def calcSumByCode(def code, def alias) {
     def sum = 0
     def data = getData(formData)
-    getRows(data).each { row ->
-        if (!isTotal(row) && row.code == code) {
-            sum += row.getCell(alias).getValue()
+    if (data != null) {
+        def rows = getRows(data)
+        for (def row : rows) {
+            if (!isTotal(row) && row.code == code) {
+                def val = row.getCell(alias)
+                if (val != null && val.getValue()) {
+                    sum += val.getValue()
+                }
+            }
         }
     }
     return sum
@@ -919,7 +932,7 @@ def checkAlias(def list, def rowAlias) {
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
 void loggerError(def msg, Object...args) {
-    if (getBalancePeriod()) {
+    if (isBalancePeriod()) {
         logger.warn(msg, args)
     } else {
         logger.error(msg, args)
