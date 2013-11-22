@@ -17,6 +17,7 @@ import groovy.transform.Field
  * TODO:
  * 	- графа 19 опущена в регламенте
  * 	- консолидация http://jira.aplana.com/browse/SBRFACCTAX-4455
+ * 	- http://conf.aplana.com/pages/viewpage.action?pageId=8790975 период ввода остатков
  *
  * @author rtimerbaev
  *
@@ -124,6 +125,9 @@ void logicCheck() {
     // РНУ-22 за предыдущий отчетный период
     def formDataOld = formDataService.getFormDataPrev(formData, formDataDepartment.id)
     formDataOld = formDataOld?.state == WorkflowState.ACCEPTED ? formDataOld : null
+    if(formDataOld==null){
+        logger.error("Не найдены экземпляры РНУ-22 за прошлый отчетный период!")
+    }
     def dataRowsOld = formDataOld ? formDataService.getDataRowHelper(formDataOld)?.allCached : null
 
     def tmp
@@ -198,6 +202,12 @@ void logicCheck() {
             logger.error(errorMsg + 'Поля в графах 9, 10, 11, 12 заполены неверно!')
         }
 
+        def date1 = row.calcPeriodBeginDate
+        def date2 = row.calcPeriodEndDate
+        if (date1 != null && date2 != null && row.basisForCalc != null && row.basisForCalc * (date2 - date1 + 1) == 0) {
+            logger.error(errorMsg + "Деление на ноль. Возможно неправильно выбраны даты.")
+        }
+
         // 9. Проверка на уникальность поля «№ пп» (графа 1)
         if (++i != row.rowNumber) {
             logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
@@ -211,9 +221,6 @@ void logicCheck() {
             }
         }
         def values = [:]
-        allColumns.each {
-            values[it] = row[it]
-        }
 
         tmp = getGraph13_15(row)
         values.accruedCommisCurrency = tmp
@@ -236,6 +243,11 @@ void calc() {
     // РНУ-22 за предыдущий отчетный период
     def formDataOld = formDataService.getFormDataPrev(formData, formDataDepartment.id)
     formDataOld = formDataOld?.state == WorkflowState.ACCEPTED ? formDataOld : null
+    if(formDataOld==null){
+        //Прерываем расчет, при проверке сообщение выведется
+        //logger.error("Не найдены экземпляры РНУ-22 за прошлый отчетный период!")
+        return
+    }
     def dataRowsOld = formDataOld ? formDataService.getDataRowHelper(formDataOld)?.allCached : null
 
     // удалить строку "итого"
@@ -366,15 +378,18 @@ BigDecimal getGraph13_15(def DataRow row) {
         date1 = row.calcPeriodBeginDate
         date2 = row.calcPeriodEndDate
     }
+    def tmp
     if (date1 == null || date2 == null) {
-        return 0
+        tmp = BigDecimal.ZERO
+    } else {
+        def division = row.basisForCalc * (date2 - date1 + 1)
+        if (division == 0) {
+            tmp = BigDecimal.ZERO
+        } else if (row.base != null && row.interestRate != null) {
+            tmp = ((row.base * row.interestRate) / (division))
+        }
     }
-    def division = row.basisForCalc * (date2 - date1 + 1)
-    if (division == 0) {
-        logger.error("Строка ${row.getIndex()}: Деление на ноль. Возможно неправильно выбраны даты.")
-        return 0
-    }
-    return ((row.base * row.interestRate) / (division)).setScale(2, RoundingMode.HALF_UP)
+    return tmp?.setScale(2, RoundingMode.HALF_UP)
 }
 
 BigDecimal getGraph14(def DataRow row) {
@@ -392,15 +407,18 @@ BigDecimal getGraph16(def DataRow row) {
 BigDecimal getGraph19(def DataRow row) {
     def date1 = row.calcPeriodBeginDate
     def date2 = row.calcPeriodEndDate
+    def tmp
     if (date1 == null || date2 == null) {
-        return 0
+        tmp = BigDecimal.ZERO
+    } else {
+        def division = (row.basisForCalc != null) ? row.basisForCalc * (date2 - date1 + 1) : null
+        if (division == 0) {
+            tmp = BigDecimal.ZERO
+        } else if (row.base != null && row.interestRate != null) {
+            tmp = ((row.base * row.interestRate) / (division))
+        }
     }
-    def division = row.basisForCalc * (date2 - date1 + 1)
-    if (division == 0) {
-        logger.error("Строка ${row.getIndex()}: Деление на ноль. Возможно неправильно выбраны даты.")
-        return 0
-    }
-    return ((row.base * row.interestRate) / (division)).setScale(2, RoundingMode.HALF_UP)
+    return tmp?.setScale(2, RoundingMode.HALF_UP)
 }
 
 BigDecimal getGraph20(def DataRow row) {
