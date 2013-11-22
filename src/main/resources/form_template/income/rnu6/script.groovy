@@ -340,13 +340,6 @@ def logicalCheck(DataRowHelper form) {
                 errorMsg = "В строке $index "
             }
 
-            //logger.info('Проверка на заполнение поля «<Наименование поля>»')
-            // LC Проверка на заполнение поля «<Наименование поля>»
-            columns = ['number', 'kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
-            if (!checkRequiredColumns(row,columns)){
-                return false
-            }
-
             //logger.info('Проверка на нулевые значения')
             // 2. Проверка на нулевые значения
             if (row.taxAccountingCurrency == row.taxAccountingRuble && row.taxAccountingRuble == row.accountingCurrency
@@ -366,6 +359,7 @@ def logicalCheck(DataRowHelper form) {
 
             //logger.info('Проверка даты совершения операции и границ отчётного периода')
             // Проверка даты совершения операции и границ отчётного периода
+            if(row.date!=null)
             if (reportPeriodService.getStartDate(formData.reportPeriodId).time.time > row.date.time
                     || row.date.time > reportPeriodService.getEndDate(formData.reportPeriodId).time.time) {
                 loggerError(errorMsg + 'дата совершения операции вне границ отчётного периода!')
@@ -375,6 +369,7 @@ def logicalCheck(DataRowHelper form) {
             }
 
             // @todo LC Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода
+            if(!getBalancePeriod()){
             Map<Integer, Object> map = new HashMap<>()
             map.put(5, row.docNumber)
             map.put(6, row.docDate)
@@ -394,6 +389,7 @@ def logicalCheck(DataRowHelper form) {
                         return false
                     }
                 }
+            }
             }
 
             //logger.info('Проверка на уникальность поля «№ пп»')
@@ -415,13 +411,13 @@ def logicalCheck(DataRowHelper form) {
                 }
             }
             // Арифметические проверки расчета неитоговых граф
-            if (row.docNumber != '0000' && !(row.taxAccountingRuble == calc10(row))) {
+            if (!getBalancePeriod() && row.docNumber != '0000' && !(row.taxAccountingRuble == calc10(row))) {
                 loggerError(errorMsg + 'неверно рассчитана графа %s!', row.getCell('taxAccountingRuble').column.name)
                 if (!getBalancePeriod()) {
                     return false
                 }
             }
-            if (row.docNumber != '0000' && !(row.ruble == calc12(row))) {
+            if (!getBalancePeriod() && row.docNumber != '0000' && !(row.ruble == calc12(row))) {
                 loggerError(errorMsg + 'неверно рассчитана графа %s!', row.getCell('ruble').column.name)
                 if (!getBalancePeriod()) {
                     return false
