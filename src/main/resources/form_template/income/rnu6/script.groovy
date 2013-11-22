@@ -16,7 +16,9 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 import java.text.SimpleDateFormat
 
 /**
- * 6.3	(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения метода начисления
+ * 6.3	(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4,
+ *                              учёт которых требует применения метода начисления
+ *  formTemplateId=318
  */
 
 // графа 1  Число/15/                       number
@@ -50,8 +52,8 @@ switch (formDataEvent) {
         logicCheckBefore(form)
         if (!logger.containsLevel(LogLevel.ERROR)) {
             deleteAllStatic(form)
-            calc(form)
             sort(form)
+            calc(form)
             addAllStatic(form)
             logicalCheck(form)
             NSICheck(form)
@@ -293,11 +295,12 @@ void consolidation(DataRowHelper form) {
 }
 
 def logicalCheck(DataRowHelper form) {
-
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
     List<BigDecimal> uniq = new ArrayList<>(form.allCached.size())
     List<Map<Integer, Object>> docs = new ArrayList<>()
     List<Map<Integer, Object>> uniq456 = new ArrayList<>(form.allCached.size())
-    for (row in form.allCached) {
+    for (def row : dataRows){
         if (row.getAlias() == null) {
             // LC Проверка на уникальность записи по налоговому учету
             Map<Integer, Object> m = new HashMap<>();
@@ -329,18 +332,18 @@ def logicalCheck(DataRowHelper form) {
             }
 
             //logger.info('Проверка на нулевые значения')
-            // Проверка на нулевые значения
+            // 2. Проверка на нулевые значения
             if (row.taxAccountingCurrency == row.taxAccountingRuble && row.taxAccountingRuble == row.accountingCurrency
                     && row.accountingCurrency == row.ruble && row.ruble == 0) {
                 logger.error(errorMsg + 'все суммы по операции нулевые!')
                 return false
             }
 
-            //logger.info('Проверка, что не  отображаются данные одновременно по бухгалтерскому и по налоговому учету')
-            if (row.taxAccountingCurrency == null && row.accountingCurrency == null
-                    || row.taxAccountingCurrency == 0 && row.accountingCurrency == 0) {
-                logger.error(errorMsg + 'не заполнены оба поля «%s» и «%s>»', row.getCell('taxAccountingCurrency').column.name, row.getCell('taxAccountingCurrency').column.name)
-                return false
+            // 3. Проверка, что не отображаются данные одновременно по бухгалтерскому и по налоговому учету
+            if (row.taxAccountingRuble != null && row.ruble != null
+                    && row.taxAccountingRuble != 0 && row.ruble != 0) {
+                logger.warn(errorMsg + 'одновременно указаны данные по налоговому  «%s» и бухгалтерскому «%s» учету.',
+                        row.getCell('taxAccountingRuble').column.name, row.getCell('ruble').column.name)
             }
 
             //logger.info('Проверка даты совершения операции и границ отчётного периода')
@@ -643,11 +646,11 @@ BigDecimal calc8(DataRow row) {
  * @return
  */
 BigDecimal getCurrency(Date date, Long code) {
-    records = providerCurrency.getRecords(date, null, 'CODE_NUMBER = ' + code, null).getRecords() // отфильтровать по валюте SBRFACCTAX-3482
-    if (records.size() > 0 && records.get(0).containsKey('RATE')) {
-        return records.get(0).get('RATE').getNumberValue();
+    def records = providerCurrency.getRecords(date, null, "CODE_NUMBER = " + code, null)
+    if (records != null && records.getRecords() != null && records.getRecords().size() > 0) {
+        return records.getRecords().getAt(0).RATE.numberValue
     } else {
-        throw new javax.script.ScriptException('Не могу получить recordId курс')
+        throw new javax.script.ScriptException("В справочнике \"Курсы валют\" не найдено значение поля \"Курс Банка России\".")
     }
 }
 

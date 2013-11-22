@@ -54,11 +54,4 @@ public class Rnu64Row extends AbstractRnuRow {
     public void setCost(BigDecimal cost) {
         this.cost = cost;
     }
-
-    @Override
-    public String toRow() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(getString(getNum())).append(SEP);
-        return sb.toString();
-    }
 }

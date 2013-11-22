@@ -91,7 +91,7 @@ void checkUniq() {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
     if (formData.kind != FormDataKind.ADDITIONAL) {
-        logger.error('Нельзя создавать форму с типом ${formData.kind?.name}')
+        logger.error("Нельзя создавать форму с типом ${formData.kind?.name}")
     }
 }
 
