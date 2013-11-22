@@ -153,8 +153,11 @@ public class Rnu26Row extends AbstractRnuRow {
     }
 
     @Override
-    public String toRow() {
+    public String toRow(Integer i) {
         final StringBuilder sb = new StringBuilder();
+
+        addTechNumeration(sb, i);
+
         sb.append(getString(getNum())).append(SEP);
         sb.append(getString(emitter)).append(SEP);
         sb.append(getString(typeshares)).append(SEP);
