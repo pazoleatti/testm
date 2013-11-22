@@ -91,14 +91,14 @@ void calc() {
         def rowA = getTotalRowFromRNU(col[getIndex(row)])
         if (rowA!=null) {
             // 3 - графа 8 строки А + (графа 5 строки А – графа 6 строки А)
-            row.sum = rowA.rnu5Field5Accepted?:0 + rowA.rnu7Field10Sum?:0  - rowA.rnu7Field12Accepted?:0
+            row.sum = (rowA.rnu5Field5Accepted?:0) + (rowA.rnu7Field10Sum?:0)  - (rowA.rnu7Field12Accepted?:0)
             // 4 - сумма по всем (графа 8 строки B + (графа 5 строки B – графа 6 строки B)),
             // КНУ которых совпадает со значениями в colBase (или colTax если налоговый период)
             if (getRows(data).indexOf(row)!=4 && getRows(data).indexOf(row)!=1) {//не 5-я и 2-я строка
                 def normBase = 0
                 def rowB = getRowPeriodAddNormBase()
                 if (rowB!=null){
-                    normBase += rowB.rnu5Field5Accepted?:0 + rowB.rnu7Field10Sum?:0  - rowB.rnu7Field12Accepted?:0
+                    normBase += (rowB.rnu5Field5Accepted?:0) + (rowB.rnu7Field10Sum?:0)  - (rowB.rnu7Field12Accepted?:0)
                 }
                 row.normBase = normBase
             } else if (getRows(data).indexOf(row)==1){//2-я строка(сложнее)
