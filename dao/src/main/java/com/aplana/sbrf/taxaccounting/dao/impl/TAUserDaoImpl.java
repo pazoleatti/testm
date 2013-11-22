@@ -76,7 +76,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	@Override
 	public int getUserIdByLogin(String login) {
 		try {
-			return getJdbcTemplate().queryForInt("select id from sec_user where login = ?", login);
+			return getJdbcTemplate().queryForInt("select id from sec_user where lower(login) = ?", login);
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Пользователь с login = " + login + " не найден. " + e.toString());
 		}
@@ -115,7 +115,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 									"insert into sec_user (id, name, login, department_id, is_active, email) values (seq_sec_user.nextval,?,?,?,?,?)",
 									new String[]{"ID"});
 					ps.setString(1, user.getName());
-					ps.setString(2, user.getLogin());
+					ps.setString(2, user.getLogin().toLowerCase());
 					ps.setInt(3, user.getDepartmentId());
 					ps.setBoolean(4, user.isActive());
 					ps.setString(5, user.getEmail());
@@ -195,7 +195,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 				array.add(user.getName());
 			}
 			sb.deleteCharAt(sb.toString().trim().length() - 1); //delete separator
-			sb.append(" where login = ?");
+			sb.append(" where lower(login) = ?");
 			array.add(user.getLogin());
 			int rows = getJdbcTemplate().update(sb.toString(),	array.toArray());
 			if(rows == 0)
@@ -219,7 +219,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 					"(select id from sec_user where login=?)", user.getLogin()
 				);*/
             getJdbcTemplate().update("delete from sec_user_role where user_id=" +
-                    "(select id from sec_user where login=?)",user.getLogin());
+                    "(select id from sec_user where lower(login)=?)",user.getLogin());
 
 			getJdbcTemplate().batchUpdate("insert into sec_user_role (user_id, role_id) " +
 					"select ?, id from sec_role where alias = ?",
@@ -260,7 +260,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 
 	@Override
 	public int checkUserLogin(String login) {
-		 List<Integer> list = getJdbcTemplate().query("select id from sec_user where login = ?",
+		 List<Integer> list = getJdbcTemplate().query("select id from sec_user where lower(login) = ?",
 				new Object[]{login},
 				new int[]{Types.CHAR},
 				new RowMapper<Integer>() {

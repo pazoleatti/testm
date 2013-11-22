@@ -17,7 +17,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.annotation.Resource;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.ejb.TransactionAttribute;
@@ -39,10 +38,9 @@ import java.util.Map;
  */
 @MessageDriven(activationConfig = {
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/transportQueueMQ")})
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/rateQueue")})
 @Interceptors(TransportInterceptor.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-@Resource(name = "jdbc/TaxAccDS", type = javax.sql.DataSource.class, authenticationType = Resource.AuthenticationType.CONTAINER)
 public class RateMDB implements MessageListener {
 
     private static final Log logger = LogFactory.getLog(RateMDB.class);
@@ -55,7 +53,7 @@ public class RateMDB implements MessageListener {
     private static String ERROR_VALUE = "Сообщение не содержит значений";
     private static String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
     private static String ERROR_IMPORT = "Произошли ошибки в скрипте импорта справочника id = %d";
-    private static String SUCCESS_IMPORT = "Импорт сообщения из КСШ успешно произведен";
+    private static String SUCCESS_IMPORT = "Импорт файла из КСШ успешно произведен";
     private static String ERROR_AUDIT = "Ошибка записи в журнал аудита";
 
     @Autowired
@@ -129,6 +127,8 @@ public class RateMDB implements MessageListener {
             boolean bCcy = false;
             boolean bCode = false;
 
+            String operName = null;
+
             @Override
             public void startElement(String uri, String localName, String qName, Attributes attributes)
                     throws SAXException {
@@ -156,7 +156,7 @@ public class RateMDB implements MessageListener {
                 if (bSendRateRq) {
                     if (bOperName) {
                         bOperName = false;
-                        String operName = new String(ch, start, length);
+                        operName = new String(ch, start, length);
                         refBookId[0] = rateMapping.get(operName);
                     } else if (bExRateBlock) {
                         bExRateBlock = false;
@@ -169,6 +169,13 @@ public class RateMDB implements MessageListener {
                         String exRateType = new String(ch, start, length);
                         if (!"PUBLIC-1".equalsIgnoreCase(exRateType) && !"PUBLIC-5".equalsIgnoreCase(exRateType)) {
                             throw new ServiceException(ERROR_RATE);
+                        }
+                        if (operName != null && (
+                                operName.equalsIgnoreCase("Currency")
+                                        && !exRateType.equalsIgnoreCase("PUBLIC-1")
+                                        || operName.equalsIgnoreCase("Metal")
+                                        && !exRateType.equalsIgnoreCase("PUBLIC-5"))) {
+                            throw new ServiceException(ERROR_FORMAT);
                         }
                     } else if (bExRateDetails && bRateParamType) {
                         bRateParamType = false;
@@ -192,7 +199,7 @@ public class RateMDB implements MessageListener {
         try {
             saxParser.parse(new ByteArrayInputStream(fileText.getBytes(RATE_ENCODING)), handler);
             if (refBookId[0] == null) {
-                throw new ServiceException(ERROR_FORMAT);
+                throw new ServiceException(ERROR_RATE);
             }
             runScript(refBookId[0], fileText, userInfo);
         } catch (ServiceException ex) {
@@ -216,7 +223,12 @@ public class RateMDB implements MessageListener {
         try {
             additionalParameters.put("inputStream", new ByteArrayInputStream(fileText.getBytes(RATE_ENCODING)));
             refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
-        } catch (Exception e) {
+        }
+        catch (ServiceException e) {
+            addLog(userInfo, e.getMessage());
+            return;
+        }
+        catch (Exception e) {
             logger.error(e);
         }
         if (logger.containsLevel(LogLevel.ERROR)) {

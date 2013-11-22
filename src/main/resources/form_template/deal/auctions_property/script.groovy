@@ -199,19 +199,20 @@ void calc() {
  */
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
-
-    int index = 1;
+    def rows = new LinkedList<DataRow<Cell>>()
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (source != null && source.state == WorkflowState.ACCEPTED) {
-            formDataService.getDataRowHelper(source).getAllCached().each { row ->
+        if (source != null
+                && source.state == WorkflowState.ACCEPTED
+                && source.getFormType().getId() == formData.getFormType().getId()) {
+            formDataService.getDataRowHelper(source).getAll().each { row ->
                 if (row.getAlias() == null) {
-                    dataRowHelper.insert(row, index++)
+                    rows.add(row)
                 }
             }
         }
     }
+    dataRowHelper.save(rows)
 }
 
 /**

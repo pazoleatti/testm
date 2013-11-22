@@ -20,12 +20,13 @@ public class RnuMigrationGenerator {
         StringBuilder bu = new StringBuilder();
         bu.append(getRnuFirstRow(ex)).append(CR);
         bu.append(CR);
-
+        int i = 1;
         for (AbstractRnuRow row : rnuRows) {
             if (TOTAL_ROW.equals(row.getTypeRow())) {
                 bu.append(CR);                          //итоговая строка отделается пустой строкой
             }
-            bu.append(row.toRow()).append(CR);
+            bu.append(row.toRow(i)).append(CR);
+            i++;
         }
         return bu.toString();
     }

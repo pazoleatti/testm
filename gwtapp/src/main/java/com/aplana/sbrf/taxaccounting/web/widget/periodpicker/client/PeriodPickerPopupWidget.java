@@ -1,11 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.IsEditor;
@@ -18,13 +12,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
+
+import java.util.*;
 
 public class PeriodPickerPopupWidget extends Composite implements
 		PeriodPickerPopup, IsEditor<TakesValueEditor<List<Integer>>>  {
@@ -32,7 +22,10 @@ public class PeriodPickerPopupWidget extends Composite implements
 	interface Binder extends UiBinder<Widget, PeriodPickerPopupWidget> {
 	}
 	private static Binder binder = GWT.create(Binder.class);
-	
+
+    @UiField
+    FlowPanel wrappingPanel;
+
 	@UiField(provided = true)
 	PeriodPickerWidget periodPicker;
 	
@@ -178,4 +171,7 @@ public class PeriodPickerPopupWidget extends Composite implements
 	    return editor;
 	}
 
+    public void setWidth(String width){
+        wrappingPanel.setWidth(width);
+    }
 }

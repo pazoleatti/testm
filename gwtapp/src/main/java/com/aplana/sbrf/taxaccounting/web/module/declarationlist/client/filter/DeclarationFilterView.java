@@ -49,7 +49,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	    	final PeriodPicker periodPiker = new PeriodPickerPopupWidget(true);
 		    taxTypeReportPeriodPickerMap.put(taxType, periodPiker);
 
-		    DepartmentPickerPopupWidget depPiker = new DepartmentPickerPopupWidget("Выберите подразделение", true);
+		    DepartmentPickerPopupWidget depPiker = new DepartmentPickerPopupWidget("Выберите подразделение", true, true);
 		    taxTypeDepartmentSelectionTree.put(taxType, depPiker);
 	    }
 

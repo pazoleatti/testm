@@ -87,7 +87,7 @@ public class DeclarationDataAccessServiceImpl implements
 		// Нельзя работать с декларациями в отчетном периоде вида
 		// "ввод остатков"
 		if (reportPeriodService.isBalancePeriod(reportPeriodId, Long.valueOf(declarationDepartment.getId()))) {
-			throw new AccessDeniedException("Декларациями в отчетном периоде вида 'ввод остатков'");
+			throw new AccessDeniedException("Декларация в отчетном периоде вида для ввода остатков");
 		}
 
 		// Контролёр УНП может просматривать все декларации

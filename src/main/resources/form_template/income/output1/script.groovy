@@ -7,7 +7,9 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 /**
- * 6.3.1    Сведения для расчёта налога с доходов в виде дивидендов (доходов от долевого участия в других организациях, созданных на территории Российской Федерации)
+ * 6.3.1    Сведения для расчёта налога с доходов в виде дивидендов (доходов от долевого участия в других организациях,
+ *                                                                      созданных на территории Российской Федерации)
+ * formTemplateId=306
  */
 
 DataRowHelper getDataRowsHelper() {
@@ -89,7 +91,7 @@ void checkUniq() {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
     if (formData.kind != FormDataKind.ADDITIONAL) {
-        logger.error('Нельзя создавать форму с типом ${formData.kind?.name}')
+        logger.error("Нельзя создавать форму с типом ${formData.kind?.name}")
     }
 }
 
@@ -127,7 +129,7 @@ void logicCheck() {
                 'dividendMembersNotRussianTax', 'dividendAgentAll', 'dividendAgentWithStavka0', 'taxSum', 'taxSumFromPeriodAll'
         ]) {
             if (row.getCell(alias).value == null) {
-                logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '') + ' не заполнено')
+                logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '%%') + ' не заполнено')
             }
         }
     }
@@ -150,8 +152,8 @@ void calc() {
             if (period != null) {
                 formPrev = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, period.id)
                 if (formPrev != null) {
-                    for (rowPrev in formPrev.dataRows) {
-                        if (rowPrev.financialYear == row.financialYear) {
+                    for (rowPrev in formDataService.getDataRowHelper(formPrev).getAll()) {
+                        if (rowPrev.financialYear.format('yyyy') == row.financialYear.format('yyyy')) {
                             result += rowPrev.taxSumFromPeriod + rowPrev.taxSumFromPeriodAll
                         }
                     }

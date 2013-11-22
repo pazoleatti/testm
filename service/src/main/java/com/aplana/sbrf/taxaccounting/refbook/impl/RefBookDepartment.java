@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -29,6 +31,9 @@ public class RefBookDepartment implements RefBookDataProvider {
     public static final Long REF_BOOK_ID = RefBookDepartmentDao.REF_BOOK_ID;
 
     @Autowired
+    RefBookDao refBookDao;
+
+    @Autowired
     private RefBookDepartmentDao refBookDepartmentDao;
 
     @Override
@@ -38,7 +43,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-		throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -56,26 +61,28 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public void insertRecords(Date version, List<Map<String, RefBookValue>> records) {
-		throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void updateRecords(Date version, List<Map<String, RefBookValue>> records) {
-		throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void deleteRecords(Date version, List<Long> recordIds) {
-		throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void deleteAllRecords(Date version) {
-		throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
-		throw new UnsupportedOperationException();
+        RefBook refBook = refBookDao.get(REF_BOOK_ID);
+        RefBookAttribute attribute = refBook.getAttribute(attributeId);
+        return refBookDepartmentDao.getRecordData(recordId).get(attribute.getAlias());
     }
 }

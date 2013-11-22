@@ -45,9 +45,7 @@
 			</g:HorizontalPanel>
 		</g:north>
 		<g:center>
-			<g:ScrollPanel width="100%" ui:field="logPanel" height="100%">
-				<log:LogEntriesWidget ui:field="logEntries" tableElementId="logCellTable"/>
-			</g:ScrollPanel>
+			<log:LogEntriesWidget ui:field="logEntries" tableElementId="logCellTable"/>
 		</g:center>
 
 	</g:DockLayoutPanel>

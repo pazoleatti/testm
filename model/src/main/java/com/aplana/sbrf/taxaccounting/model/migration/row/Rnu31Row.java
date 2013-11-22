@@ -118,10 +118,13 @@ public class Rnu31Row extends AbstractRnuRow {
     }
 
     @Override
-    public String toRow() {
+    public String toRow(Integer i) {
         final StringBuilder sb = new StringBuilder();
+
+        addTechNumeration(sb, i);
+
         sb.append(getString(getNum())).append(SEP);
-        sb.append(getString(codeTypePaper)).append(SEP);
+        //sb.append(getString(codeTypePaper)).append(SEP);  // в архиве с примерами 13 полей
         sb.append(getString(typePaper)).append(SEP);
         sb.append(getString(percCashOfz)).append(SEP);
         sb.append(getString(percCashFed)).append(SEP);

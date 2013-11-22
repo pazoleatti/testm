@@ -4,6 +4,7 @@
 package refbook.currency_rate
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
@@ -111,11 +112,13 @@ void importFromXML() {
         reader?.close()
     }
 
-    println("insert records = " + insertList)
-    println("update records = " + updateList)
+    if (updateList.empty && insertList.empty) {
+        throw new ServiceException("Сообщение не содержит значений, соответствующих загружаемым данным")
+    }
 
     if (!updateList.empty)
         dataProvider.updateRecords(version, updateList)
     if (!insertList.empty)
         dataProvider.insertRecords(version, insertList)
+
 }

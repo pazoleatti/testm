@@ -127,7 +127,7 @@
                         </g:SimplePanel>
                         <g:HorizontalPanel ui:field="saveCancelPanel" height="100%" spacing="5">
                             <g:Button ui:field="saveButton" text="Сохранить" />
-                            <g:Button ui:field="cancelButton" text="Отмена" />
+                            <g:Button ui:field="cancelButton" text="Выход" />
                             <fileuplod:FileUploadWidget ui:field="fileUploader"/>
                         </g:HorizontalPanel>
                         <g:CheckBox ui:field="showCheckedColumns" value="true"

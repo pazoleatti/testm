@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.departmentpicker;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.web.widget.closabledialog.ClosableDialogBox;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -14,23 +11,24 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasEnabled;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Виджет для выбора подразделений
  * @author Eugene Stetsenko
  */
-public class DepartmentPickerPopupWidget extends Composite implements HasEnabled, DepartmentPicker{
+public class DepartmentPickerPopupWidget extends Composite implements HasEnabled, DepartmentPicker {
 
 	private PopupPanel popup;
 
 	private DepartmentPicker departmentPiker;
+
+    @UiField
+    SimplePanel wrappingPanel;
 
 	@UiField
 	HasText selected;
@@ -43,6 +41,9 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 	
 	@UiField
 	Panel panel;
+
+    /** Признак модальности окна */
+    private boolean modal;
 
 	@Override
 	public boolean isEnabled() {
@@ -61,10 +62,16 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 	private static Binder uiBinder = GWT.create(Binder.class);
 
 	@UiConstructor
-	public DepartmentPickerPopupWidget(String header, boolean multiselection) {
+	public DepartmentPickerPopupWidget(String header, boolean multiselection, boolean modal) {
 		initWidget(uiBinder.createAndBindUi(this));
 		// TODO move to ui.xml
-		this.popup = new PopupPanel(true, true);
+        this.modal = modal;
+        if (modal) {
+            popup = new ClosableDialogBox(false, true);
+            ((ClosableDialogBox) popup).setText(header);
+        } else {
+            popup = new PopupPanel(true, true);
+        }
 		popup.setPixelSize(300, 370);
 		departmentPiker = new DepartmentPickerWidget(header, multiselection);
 
@@ -83,9 +90,13 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 
 	@UiHandler("selectButton")
 	void onSelectButtonClicked(ClickEvent event){
-		popup.setPopupPosition(panel.getAbsoluteLeft(),
-				panel.getAbsoluteTop() + panel.getOffsetHeight());
-		popup.show();
+        if (!modal) {
+            popup.setPopupPosition(panel.getAbsoluteLeft(),
+                    panel.getAbsoluteTop() + panel.getOffsetHeight());
+            popup.show();
+        } else {
+            popup.center();
+        }
 	}
 	
 	@UiHandler("clearButton")
@@ -144,5 +155,16 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 	public void setHeader(String header) {
 		departmentPiker.setHeader(header);
 	}
+
+    @Override
+    public void setTitle(String title) {
+        if (popup instanceof ClosableDialogBox) {
+            ((ClosableDialogBox) popup).setText(title);
+        }
+    }
+
+    public void setWidth(String width){
+        wrappingPanel.setWidth(width);
+    }
 
 }

@@ -17,7 +17,7 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 import java.text.SimpleDateFormat
 
 /**
- * Форма "Расшифровка видов расходов, учитываемых в простых РНУ (расходы простые)".
+ * Форма "Расходы, учитываемые в простых РНУ (расходы простые)".
  *
  * @version 46
  */
@@ -321,6 +321,11 @@ void consolidationSummary() {
     // очистить форму
     getRows(data).each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
+            if (row.getCell(alias).isEditable() || row.getAlias() in ['R107', 'R212']) {
+                row.getCell(alias).setValue(0)
+            }
+        }
+        ['logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference'].each { alias ->
             row.getCell(alias).setValue(null)
         }
     }

@@ -59,13 +59,10 @@ def checkAndbildXml(){
         logger.error("Ошибка определения даты конца отчетного периода")
     }
 
-    // получаем подразделение так как в настройках хранится record_id а не значение
-    department = getModRefBookValue(30, "ID = "+declarationData.departmentId)
-    departmentParamTransport = getModRefBookValue(31, "DEPARTMENT_ID = "+department.record_id, reportDate)
-
+    departmentParamTransport = getModRefBookValue(31, "DEPARTMENT_ID = "+declarationData.departmentId, reportDate)
 
     if (checkTransportParams(departmentParamTransport)){
-        bildXml(departmentParamTransport, formDataCollection, department)
+        bildXml(departmentParamTransport, formDataCollection, declarationData.departmentId)
     }
 }
 
@@ -74,12 +71,13 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
 
     def builder = new MarkupBuilder(xml)
     if (!declarationData.isAccepted()) {
+        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
         builder.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId, declarationData.getReportPeriodId()), ВерсПрог: departmentParamTransport.APP_VERSION, ВерсФорм:departmentParamTransport.FORMAT_VERSION) {
             Документ(
                     КНД:"1152004",
                     ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"), //new Date().format("dd.MM.yyyy"),
                     Период: 34,
-                    ОтчетГод: reportPeriodService.get(declarationData.reportPeriodId).taxPeriod.startDate.format('yyyy'),
+                    ОтчетГод: reportPeriod.taxPeriod.startDate.format('yyyy'),
                     КодНО: departmentParamTransport.TAX_ORGAN_CODE,
                     // TODO учесть что потом будут корректирующие периоды
                     НомКорр: "0",
@@ -167,14 +165,15 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                 resultMap[row.okato].taxSumToPay += row.taxSumToPay ?:0;
                                 // вспомогательный taxBase
                                 resultMap[row.okato].taxBase += row.taxBase ?: 0
+                                def taxRate = getRefBookValue(41, row.taxRate, 'VALUE').value
                                 // вспомогательный taxRate
-                                resultMap[row.okato].taxRate += row.taxRate ?: 0
+                                resultMap[row.okato].taxRate += taxRate ?: 0
                                 // АвПУКв1 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за первый квартал //// Заполняется в 1, 2, 3, 4 отчетном периоде.
-                                resultMap[row.okato].amountOfTheAdvancePayment1  += 0.25*resultMap[row.okato].taxBase*resultMap[row.okato].taxRate
+                                resultMap[row.okato].amountOfTheAdvancePayment1  += 0.25 * row.taxBase * taxRate
                                 // АвПУКв2 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за второй квартал //// Заполняется во 2, 3, 4 отчетном периоде.
-                                resultMap[row.okato].amountOfTheAdvancePayment2  += 0.25*resultMap[row.okato].taxBase*resultMap[row.okato].taxRate
+                                resultMap[row.okato].amountOfTheAdvancePayment2  += (reportPeriod.order > 1 ? 0.25 * row.taxBase * taxRate : 0)
                                 // АвПУКв3 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за третий квартал //// Заполняется во 3, 4 отчетном периоде.
-                                resultMap[row.okato].amountOfTheAdvancePayment3  += 0.25*resultMap[row.okato].taxBase*resultMap[row.okato].taxRate
+                                resultMap[row.okato].amountOfTheAdvancePayment3  += (reportPeriod.order > 2 ? 0.25 * row.taxBase * taxRate : 0)
                                 // НалПУ = НалИсчисл – (АвПУКв1+ АвПУКв2+ АвПУКв3)
                                 resultMap[row.okato].amountOfTaxPayable = resultMap[row.okato].calculationOfTaxes - (
                                 resultMap[row.okato].amountOfTheAdvancePayment1 + resultMap[row.okato].amountOfTheAdvancePayment2 + resultMap[row.okato].amountOfTheAdvancePayment3
@@ -215,7 +214,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                                             ВыпускТС: tRow.years, //
                                                             ВладенТС: tRow.ownMonths,
                                                             КоэфКв: tRow.coef362,
-                                                            НалСтавка: getRefBookValue(41, tRow.taxRate, "VALUE"),
+                                                            НалСтавка: tRow.taxRate,
                                                             СумИсчисл: tRow.calculatedTaxSum,
                                                     ]
                                                     +   (tRow.benefitEndDate && tRow.benefitStartDate? [ЛьготМесТС: (tRow.benefitEndDate.year*12 + tRow.benefitEndDate.month) - (tRow.benefitStartDate.year*12 + tRow.benefitStartDate.month)]: [])+
@@ -226,28 +225,28 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                     ){
 
                                         // генерация КодОсвНал
-                                        if ((!(taxBenefitCode.equals("20220")) && !(taxBenefitCode.equals("20230")) && taxBenefitCode != null)){
-                                            def l = taxBenefitCode;
-                                            def x = "";
-                                            if (l.equals("30200")){
-                                                x = 30200
-                                            } else{
+                                        if (taxBenefitCode != null){
+                                            def l = taxBenefitCode.toString()
+                                            def x = ' ' * 12 // TODO (Ramil Timerbaev) уточнить что присваивать при незаполнении
+                                            if (l == '20220' || l =='20230') {
+                                                l = ' ' * 5 // TODO (Ramil Timerbaev) уточнить что присваивать при незаполнении
+                                            }
+                                            if (l != '30200') {
                                                 def param = getParam(tRow.taxBenefitCode, tRow.okato);
-
                                                 if (param != null) {
-                                                    x = ((param.SECTION.toString().size() < 4 ? "0"*(4 - param.SECTION.toString().size()) : param.SECTION.toString())
-                                                            + (param.ITEM.toString().size() < 4 ? "0"*(4 - param.ITEM.toString().size()) : param.ITEM.toString())
-                                                            + (param.SUBITEM.toString().size() < 4 ? "0"*(4 - param.SUBITEM.toString().size()) : param.SUBITEM.toString()))
-
-
-                                                    def kodOsnNal = (l != "" ? l.toString():"0000") +"/"+ x
-
-                                                    ЛьготОсвНал(
-                                                            КодОсвНал: kodOsnNal,
-                                                            СумОсвНал: tRow.benefitSum
-                                                    )
+                                                    def section = param.SECTION.toString()
+                                                    def item = param.ITEM.toString()
+                                                    def subitem = param.SUBITEM.toString()
+                                                    x = ((section.size() < 4 ? '0' * (4 - section.size()) + section : section)
+                                                            + (item.size() < 4 ? '0' * (4 - item.size()) + item: item)
+                                                            + (subitem.size() < 4 ? '0' * (4 - subitem.size()) + subitem : subitem))
                                                 }
                                             }
+                                            def kodOsnNal = l + '/' + x
+                                            ЛьготОсвНал(
+                                                    КодОсвНал: kodOsnNal,
+                                                    СумОсвНал: tRow.benefitSum
+                                            )
                                         }
 
                                         // вычисление ЛьготУменСум
@@ -371,8 +370,8 @@ def getModRefBookValue(refBookId, filter, date = new Date()){
     def refBookProvider = refBookFactory.getDataProvider(refBookId)
     // записи
     def records = refBookProvider.getRecords(date, null, filter, null).getRecords();
-    if (records.size() != 1){
-        throw new Exception("Ошибка получения значения из справочника refBookId = "+refBookId)
+    if (records == null || records.size() == 0) {
+        throw new Exception("Ошибка при получении настроек обособленного подразделения")
     }
     // значение справочника в виде мапы
     def record = records[0]

@@ -133,7 +133,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         } catch (Exception e) {
             // Журнал аудита
             auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
-                    null, "Не удалось выполнить импорт справочников" + refBookDirectory);
+                    null, "Не удалось выполнить импорт справочников из " + refBookDirectory);
             throw new ServiceException("Не удалось выполнить импорт справочников", e);
         } finally {
             IOUtils.closeQuietly(reader);
