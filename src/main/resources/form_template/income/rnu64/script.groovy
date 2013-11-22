@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
+import groovy.transform.Field
 
 import java.text.SimpleDateFormat
 
@@ -28,6 +29,16 @@ import java.text.SimpleDateFormat
  * Выполнение действий по событиям
  *
  */
+@Field
+def boolean isBalancePeriod = null
+
+def isBalancePeriod(){
+    if (isBalancePeriod == null){
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    }
+    return isBalancePeriod
+}
+
 switch (formDataEvent) {
     // Инициирование Пользователем проверки данных формы в статусе «Создана», «Подготовлена», «Утверждена», «Принята»
     case FormDataEvent.CHECK:
@@ -226,7 +237,7 @@ def logicalCheck() {
         // Обязательность заполнения поля графы (с 1 по 6); фатальная; Поле ”Наименование поля” не заполнено!
         if (!isTotalRow(row)) {
             def requiredColumns = ['number', 'date', 'part', 'dealingNumber', 'bondKind', 'costs']
-            if(!checkRequiredColumns(row, requiredColumns)){
+            if(!checkRequiredColumns(row, requiredColumns) && !isBalancePeriod()){
                 return false
             }
 
@@ -235,21 +246,27 @@ def logicalCheck() {
             (reportPeriodStartDate.getTime().equals(row.date) || row.date.after(reportPeriodStartDate.getTime())) &&
                     (reportPeriodEndDate.getTime().equals(row.date) || row.date.before(reportPeriodEndDate.getTime()))
             )) {
-                logger.error("В строке " + row.number + " дата совершения операции вне границ отчетного периода!")
-                return false
+                loggerError("В строке " + row.number + " дата совершения операции вне границ отчетного периода!")
+                if (!isBalancePeriod()) {
+                    return false
+                }
             }
 
             getRows(data).each { rowItem ->
                 if (!isTotalRow(row) && row.number == rowItem.number && !row.equals(rowItem)) {
-                    logger.error("В строке " + row.number + " нарушена уникальность номера по порядку!")
-                    return false
+                    loggerError("В строке " + row.number + " нарушена уникальность номера по порядку!")
+                    if (!isBalancePeriod()) {
+                        return false
+                    }
                 }
             }
 
             // Проверка на нулевые значения; фатальная; Все суммы по операции нулевые!
             if (row.costs == 0) {
-                logger.error("В строке " + row.number + " все суммы по операции нулевые!")
-                return false
+                loggerError("В строке " + row.number + " все суммы по операции нулевые!")
+                if (!isBalancePeriod()) {
+                    return false
+                }
             }
             // Проверка актуальности поля «Часть сделки»; не фатальная;
             if (row.part != null && getPart(row.part) == null) {
@@ -266,14 +283,18 @@ def logicalCheck() {
     if (totalQuarterRow != null || totalRow != null) {
         // Проверка итоговых значений за текущий квартал; фатальная; Итоговые значения за текущий квартал рассчитаны неверно!
         if (totalQuarterRow != null && totalQuarterRow.costs != getQuarterTotal()) {
-            logger.error('Итоговые значения за текущий квартал рассчитаны неверно!')
-            return false
+            loggerError('Итоговые значения за текущий квартал рассчитаны неверно!')
+            if (!isBalancePeriod()) {
+                return false
+            }
         }
 
         // Проверка итоговых значений за текущий отчётный (налоговый) период; фатальная; Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!
         if (totalRow != null && totalRow.costs != getTotalValue()) {
-            logger.error('Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!')
-            return false
+            loggerError('Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!')
+            if (!isBalancePeriod()) {
+                return false
+            }
         }
     }
     return true
@@ -300,8 +321,10 @@ def checkRequiredColumns(def row, def columns) {
     if (!colNames.isEmpty()) {
         def index = getRows(data).indexOf(row) + 1
         def errorMsg = colNames.join(', ')
-        logger.error("В строке $index не заполнены колонки : $errorMsg.")
-        return false
+        loggerError("В строке $index не заполнены колонки : $errorMsg.")
+        if (!isBalancePeriod()) {
+            return false
+        }
     }
     return true
 }
@@ -324,20 +347,11 @@ def getColumnName(def row, def alias) {
  */
 void checkBeforeCreate() {
     // отчётный период
-    //def reportPeriod = reportPeriodService.get()
-
-    //проверка периода ввода остатков
-    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
-        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
-        return
-    }
-
     def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
-
 }
 
 /**
@@ -805,4 +819,13 @@ def getSum(def columnAlias) {
         return 0
     }
     return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
+}
+
+/** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
+void loggerError(def msg, Object...args) {
+    if (isBalancePeriod()) {
+        logger.warn(msg, args)
+    } else {
+        logger.error(msg, args)
+    }
 }
