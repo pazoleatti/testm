@@ -158,8 +158,9 @@ public class ImportServiceImpl implements ImportService {
         }
         sb.append(TAB).append("<").append(rowName).append(">").append(ENTER);
         for (String cell : rowCells) {
+            String value = cell.trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("&", "&amp;");
             sb.append(TAB).append(TAB).append("<cell>");
-            sb.append(cell.trim());
+            sb.append(value);
             sb.append("</cell>").append(ENTER);
         }
         sb.append(TAB).append("</").append(rowName).append(">").append(ENTER);

@@ -11,40 +11,40 @@ package form_template.income.rnu14
  */
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         checkCreation()
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         logicalCheck(true)
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         calc()
         logicalCheck(false)
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         // addNewRow()
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         // deleteRow()
         break
 // проверка при "подготовить"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:
         checkOnPrepareOrAcceptance('Подготовка')
         break
 // проверка при "принять"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
         checkOnPrepareOrAcceptance('Принятие')
         break
 // проверка при "вернуть из принята в подготовлена"
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
+    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
         checkOnCancelAcceptance()
         break
 // после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
         acceptance()
         break
 // обобщить
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
 //        consolidation()
         calc()
         logicalCheck(false)
@@ -59,7 +59,6 @@ switch (formDataEvent) {
 // графа 6  - limitSum
 // графа 7  - inApprovedNprms
 // графа 8  - overApprovedNprms
-
 
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
@@ -80,7 +79,7 @@ void calc() {
     }
 
     def col = getCol()
-    def koeffNormBase = [4/100, 1/100, 6/100, 12/100, 15000]
+    def koeffNormBase = [4 / 100, 1 / 100, 6 / 100, 12 / 100, 15000]
 
     def formDataComplex = getFormDataComplex()
     def formDataSimple = getFormDataSimple()
@@ -89,7 +88,7 @@ void calc() {
     def knuSimpleRNU6 = getKnuSimpleRNU6()
     for (def row : getRows(data)) {
         def rowA = getTotalRowFromRNU(col[getIndex(row)])
-        if (rowA!=null) {
+        if (rowA != null) {
             // 3 - графа 8 строки А + (графа 5 строки А – графа 6 строки А)
             row.sum = rowA.rnu5Field5Accepted?:0 + rowA.rnu7Field10Sum?:0  - rowA.rnu7Field12Accepted?:0
             // 4 - сумма по всем (графа 8 строки B + (графа 5 строки B – графа 6 строки B)),
@@ -225,15 +224,6 @@ void acceptance() {
  * Проверка при создании формы.
  */
 void checkCreation() {
-    // отчётный период
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-
-    //проверка периода ввода остатков
-    if (reportPeriod != null && reportPeriodService.isBalancePeriod(reportPeriod.id, formData.departmentId)) {
-        logger.error('Налоговая форма не может быть в периоде ввода остатков.')
-        return
-    }
-
     def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
@@ -252,7 +242,6 @@ void checkCreation() {
 def isEmpty(def value) {
     return value == null || value == ''
 }
-
 
 /**
  * Получить номер строки в таблице.
@@ -373,13 +362,13 @@ def getKnuTax() {
     return ['20480', '20485', '20490', '20500', '20505', '20530', '20510', '20520']
 }
 
-def getKnuComplex(){
+def getKnuComplex() {
     return ['10633', '10634', '10650', '10670', '10855', '10880', '10900', '10850',
             '11180', '11190', '11200', '11210', '11220', '11230', '11240', '11250',
             '11260', '10840', '10860', '10870', '10890']
 }
 
-def getKnuSimpleRNU4(){
+def getKnuSimpleRNU4() {
     return ['10001', '10006', '10041', '10300', '10310', '10320', '10330', '10340',
             '10350', '10360', '10370', '10380', '10390', '10450', '10460', '10470',
             '10480', '10490', '10571', '10580', '10590', '10600', '10610', '10630',
@@ -389,7 +378,7 @@ def getKnuSimpleRNU4(){
             '11360', '11370', '11375']
 }
 
-def getKnuSimpleRNU6(){
+def getKnuSimpleRNU6() {
     return ['10001', '10006', '10300', '10310', '10320', '10330', '10340', '10350',
             '10360', '10470', '10480', '10490', '10571', '10590', '10610', '10640',
             '10680', '10690', '11340', '11350', '11370', '11375']
@@ -400,7 +389,7 @@ def getRowPeriodAddNormBase() {
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     /** Признак налоговый ли это период. */
     def isTaxPeriod = (reportPeriod != null && reportPeriod.order == 4)
-    for(def knu:(isTaxPeriod?knuTax:knuBase)){
+    for (def knu : (isTaxPeriod ? knuTax : knuBase)) {
         def rowB = getTotalRowFromRNU(knu)
         return rowB
     }
