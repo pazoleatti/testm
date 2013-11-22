@@ -437,7 +437,7 @@ def logicalCheck(DataRowHelper form) {
                     reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.id)
                     for (reportPeriod in reportPeriods) {
                         findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriod.id)
-                        if (findFormData != null) {
+                        if (findFormData != null && findFormData.id != formData.id) {
                             findForm = formDataService.getDataRowHelper(findFormData)
                             for (findRow in findForm.getAllCached()) {
                                 // SBRFACCTAX-3531 исключать строку из той же самой формы не надо
