@@ -158,7 +158,7 @@ def getNewRow() {
         columns = ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
     } else {
         // графа 2..7, 9..13
-        ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'cost', 'signSecurity', 'marketQuotation', 'rubCourse']
+        columns = ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'cost', 'signSecurity', 'marketQuotation', 'rubCourse']
     }
     columns.each {
         newRow.getCell(it).editable = true
@@ -898,7 +898,7 @@ def calc16(def row) {
 
 def calc17(def row) {
     def tmp = row.reserveCalcValue - row.reserveCalcValuePrev
-    return roundValue((tmp < 0 ? Math.abs(tmp) : 0), 2)
+    return roundValue((tmp < 0 ? tmp.abs() : 0), 2)
 }
 
 /**
