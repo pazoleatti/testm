@@ -250,7 +250,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         Filter.getFilterQuery(filter, new UniversalFilterTreeListener(refBook, filterPS));
         if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" and\n ");
+            ps.appendQuery("(");
             ps.appendQuery(filterPS.getQuery().toString());
+            ps.appendQuery(")");
             ps.appendQuery("\n");
             ps.addParam(filterPS.getParams());
         }
