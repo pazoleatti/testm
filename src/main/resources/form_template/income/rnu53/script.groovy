@@ -526,7 +526,7 @@ void importData() {
         }
     } else {
         if (!fileName.contains('.r')) {
-            logger.error('Формат файла должен быть *.r??')
+            logger.error('Формат файла должен быть *.rnu')
             return
         }
         charset = 'cp866'
