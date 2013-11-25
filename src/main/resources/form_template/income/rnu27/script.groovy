@@ -505,7 +505,7 @@ void importData() {
     }
 
     if (!fileName.contains('.r')) {
-        logger.error('Формат файла должен быть *.r??')
+        logger.error('Формат файла должен быть *.rnu')
         return
     }
 

@@ -2,9 +2,9 @@ package com.aplana.sbrf.taxaccounting.service.impl.print.logentry;
 
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractXlsxReportBuilder;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -37,8 +37,8 @@ public class LogEntryReportBuilder extends AbstractXlsxReportBuilder {
 		cs.setBorderTop(CellStyle.BORDER_THICK);
 		cs.setBorderRight(CellStyle.BORDER_THICK);
 		cs.setBorderLeft(CellStyle.BORDER_THICK);
-		cs.setFillForegroundColor(HSSFColor.BRIGHT_GREEN.index);
-		cs.setFillBackgroundColor(HSSFColor.BRIGHT_GREEN.index);
+		cs.setFillForegroundColor(IndexedColors.GREEN.index);
+		cs.setFillBackgroundColor(IndexedColors.GREEN.index);
 		cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
 		
 		Row row = sheet.createRow(rowNumber);
