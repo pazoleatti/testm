@@ -207,9 +207,6 @@ void calc() {
     delRow.each { row ->
         data.delete(row)
     }
-    if (getRows(data).isEmpty()) {
-        return
-    }
 
     // отсортировать/группировать
     if (formDataEvent != FormDataEvent.IMPORT) {
@@ -919,9 +916,8 @@ def getColumnName(def row, def alias) {
  */
 def checkPrevPeriod() {
     def formDataOld = getFormDataOld()
-    def dataOld = getData(formDataOld)
 
-    if (formDataOld != null && !getRows(dataOld).isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
+    if (formDataOld != null && formDataOld.state == WorkflowState.ACCEPTED) {
         return true
     }
     return false
