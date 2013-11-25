@@ -163,11 +163,11 @@ void calc() {
     def a, b, c
 
     getRows(data).each { row ->
+        //def currency = getCurrency(row.currencyCode)
+        course = getCourse(row.currencyCode, reportDate)
 
         // графа 9, 10 - при импорте не рассчитывать эти графы
         if (formDataEvent != FormDataEvent.IMPORT) {
-            //def currency = getCurrency(row.currencyCode)
-            course = getCourse(row.currencyCode, reportDate)
 
             a = calcAForColumn9or10(row, reportDate, course)
             b = 0; c = 0
@@ -183,7 +183,7 @@ void calc() {
         // графа 11
         row.rateBR = roundTo2(calc11Value(row, reportDate))
         // графа 12
-        row.outcome269st = calc12(row,daysInYear)
+        row.outcome269st = calc12(row,daysInYear, course)
         // графа 13
         row.outcomeTax = calc13(row)
     }
@@ -194,7 +194,7 @@ void calc() {
     insert(data, totalRow)
 }
 
-def BigDecimal calc12(def row, def daysInYear) {
+def BigDecimal calc12(def row, def daysInYear, def course) {
     def tmp = 0
     if (row.outcome > 0 && row.currencyCode == '810') {
         if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
@@ -346,7 +346,7 @@ def logicalCheck() {
             }
 
             // графа 12
-            if (row.outcome269st != calc12(row, daysInYear)) {
+            if (row.outcome269st != calc12(row, daysInYear, course)) {
                 name = getColumnName(row, 'outcome269st')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
@@ -603,6 +603,8 @@ def calc11Value(DataRow row, def rateDate) {
  * @paam days количество дней в году
  */
 def calc12Value(def row, def coef, def reportDate, def days) {
+    if(row.salePrice==null ||row.rateBR==null ||coef==null ||reportDate==null ||row.part1REPODate==null || days==null)
+        return 0
     def tmp = (row.salePrice * row.rateBR * coef) * ((reportDate - row.part1REPODate) / days) / 100
     return roundTo2(tmp)
 }
