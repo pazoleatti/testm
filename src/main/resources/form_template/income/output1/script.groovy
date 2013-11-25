@@ -122,14 +122,17 @@ void logicalCheck() {
  * Проверка полей которые обязательно надо заполнить пользователю
  */
 void logicCheck() {
+    def int index = 0
     for (row in dataRowsHelper.getAllCached()) {
+        index++
         for (alias in ['financialYear', 'dividendSumRaspredPeriod', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll',
                 'dividendStavka0', 'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10',
                 'dividendRussianOrgStavka9', 'dividendRussianOrgStavka0', 'dividendPersonRussia',
                 'dividendMembersNotRussianTax', 'dividendAgentAll', 'dividendAgentWithStavka0', 'taxSum', 'taxSumFromPeriodAll'
         ]) {
             if (row.getCell(alias).value == null) {
-                logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '%%') + ' не заполнено')
+                def msg = row.getCell(alias).column.name.replace('%', '%%')
+                logger.error("Строка $index: поле «$msg» не заполнено!")
             }
         }
     }

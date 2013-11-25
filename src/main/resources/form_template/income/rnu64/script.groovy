@@ -29,14 +29,14 @@ import java.text.SimpleDateFormat
  *
  */
 switch (formDataEvent) {
-    // Инициирование Пользователем проверки данных формы в статусе «Создана», «Подготовлена», «Утверждена», «Принята»
+// Инициирование Пользователем проверки данных формы в статусе «Создана», «Подготовлена», «Утверждена», «Принята»
     case FormDataEvent.CHECK:
         //1. Логические проверки значений налоговой формы
         logicalCheck()
         //2. Проверки соответствия НСИ
         //NCICheck()
         break
-    // Инициирование Пользователем создания формы
+// Инициирование Пользователем создания формы
     case FormDataEvent.CREATE:
         checkBeforeCreate()
         //1.    Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при создании формы.
@@ -56,27 +56,27 @@ switch (formDataEvent) {
         //3.    Проверки соответствия НСИ.
         break
 
-    // проверка при "вернуть из принята в подготовлена"
+// проверка при "вернуть из принята в подготовлена"
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
         // 1.   Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
         break
 
-    // после вернуть из принята в подготовлена
+// после вернуть из принята в подготовлена
     case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_PREPARED:
         break
 
-    // отменить принятие
+// отменить принятие
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
         // 1.   Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
         break
 
-    // Событие добавить строку
+// Событие добавить строку
     case FormDataEvent.ADD_ROW:
         addNewRow()
         setRowIndex()
         break
 
-    // событие удалить строку
+// событие удалить строку
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         setRowIndex()
@@ -92,11 +92,11 @@ switch (formDataEvent) {
         calc()
         !hasError() && logicalCheck()
         break
-    // после принятия из подготовлена
+// после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
         logicalCheck()
         break
-    // загрузка xml
+// загрузка xml
     case FormDataEvent.IMPORT :
         importData()
         if (!hasError()) {
@@ -232,8 +232,8 @@ def logicalCheck() {
 
             // Проверка даты совершения операции и границ отчетного периода; фатальная; Дата совершения операции вне границ отчетного периода!
             if (!isTotalRow(row) && row.date != null && !(
-            (reportPeriodStartDate.getTime().equals(row.date) || row.date.after(reportPeriodStartDate.getTime())) &&
-                    (reportPeriodEndDate.getTime().equals(row.date) || row.date.before(reportPeriodEndDate.getTime()))
+                    (reportPeriodStartDate.getTime().equals(row.date) || row.date.after(reportPeriodStartDate.getTime())) &&
+                            (reportPeriodEndDate.getTime().equals(row.date) || row.date.before(reportPeriodEndDate.getTime()))
             )) {
                 logger.error("В строке " + row.number + " дата совершения операции вне границ отчетного периода!")
                 return false
@@ -325,12 +325,6 @@ def getColumnName(def row, def alias) {
 void checkBeforeCreate() {
     // отчётный период
     //def reportPeriod = reportPeriodService.get()
-
-    //проверка периода ввода остатков
-    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
-        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
-        return
-    }
 
     def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
@@ -508,9 +502,21 @@ void importData() {
         logger.error('Имя файла не должно быть пустым')
         return
     }
-    if (!fileName.contains('.xml')) {
-        logger.error('Формат файла должен быть *.xml')
-        return
+
+    String charset = ""
+    // TODO в дальнейшем убрать возможность загружать RNU для импорта!
+    if (formDataEvent == FormDataEvent.IMPORT && fileName.contains('.xml') ||
+            formDataEvent == FormDataEvent.MIGRATION && fileName.contains('.xml')) {
+        if (!fileName.contains('.xml')) {
+            logger.error('Формат файла должен быть *.xml')
+            return
+        }
+    } else {
+        if (!fileName.contains('.r')) {
+            logger.error('Формат файла должен быть *.rnu')
+            return
+        }
+        charset = 'cp866'
     }
 
     def is = ImportInputStream
@@ -519,7 +525,7 @@ void importData() {
         return
     }
 
-    def xmlString = importService.getData(is, fileName)
+    def xmlString = importService.getData(is, fileName, charset)
     if (xmlString == null || xmlString == '') {
         logger.error('Отсутствие значении после обработки потока данных')
         return
@@ -533,7 +539,7 @@ void importData() {
 
     try {
         // добавить данные в форму
-        def totalLoad = addData(xml)
+        def totalLoad = addData(xml, fileName)
 
         // рассчитать, проверить и сравнить итоги
         if (totalLoad != null) {
@@ -551,7 +557,7 @@ void importData() {
  *
  * @param xml данные
  */
-def addData(def xml) {
+def addData(def xml, def fileName) {
     def index
     def date = new Date()
     def cache = [:]
@@ -561,53 +567,79 @@ def addData(def xml) {
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def newRows = []
 
-    for (def row : xml.exemplar.table.detail.record) {
+    def records
+    def totalRecords
+    def type
+    if (formDataEvent == FormDataEvent.MIGRATION ||
+            formDataEvent == FormDataEvent.IMPORT && fileName.contains('.xml')) {
+        records = xml.exemplar.table.detail.record
+        totalRecords = xml.exemplar.table.total.record
+        type = 1 // XML
+    } else {
+        records = xml.row
+        totalRecords = xml.rowTotal
+        type = 2 // RNU
+    }
+
+    for (def row : records) {
         index = 0
         def newRow = getNewRow()
 
         // графа 1
-        newRow.number = getNumber(row.field[index].@value.text())
+        newRow.number = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 2
-        newRow.date = getDate(row.field[index].@value.text(), format)
+        newRow.date = getDate(getCellValue(row, index, type), format)
         index++
 
         // графа 3 - справочник 60 "Части сделок"
         tmp = null
-        if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
-            tmp = getRecordId(60, 'CODE', row.field[index].@value.text(), date, cache)
+        if (row.field[index].@value.text() != null && getCellValue(row, index, type).trim() != '') {
+            tmp = getRecordId(60, 'CODE', getCellValue(row, index, type), date, cache)
         }
         newRow.part = tmp
         index++
 
         // графа 4
-        newRow.dealingNumber = row.field[index].text()
+        newRow.dealingNumber = getCellValue(row, index, type, true)
         index++
 
         // графа 5
-        newRow.bondKind = row.field[index].text()
+        newRow.bondKind = getCellValue(row, index, type, true)
         index++
 
         // графа 6
-        newRow.costs = getNumber(row.field[index].@value.text())
+        newRow.costs = getNumber(getCellValue(row, index, type))
 
         newRows.add(newRow)
     }
     data.insert(newRows, 1)
 
     // итоговая строка
-    if (xml.exemplar.table.total.record.field.size() > 0) {
-        def row = xml.exemplar.table.total.record[0]
+    if (totalRecords.size() >= 1) {
+        def row = totalRecords[0]
         def totalRow = formData.createDataRow()
 
         // графа 6
-        totalRow.costs = getNumber(row.field[5].@value.text())
+        totalRow.costs = getNumber(getCellValue(row, 5, type))
 
         return totalRow
     } else {
         return null
     }
+}
+
+// для получения данных из RNU или XML
+String getCellValue(def row, int index, def type, boolean isTextXml = false){
+    if (type==1) {
+        if (isTextXml) {
+            return row.field[index].text()
+        } else {
+            return row.field[index].@value.text()
+        }
+    }
+    return row.cell[index+1].text()
 }
 
 /**

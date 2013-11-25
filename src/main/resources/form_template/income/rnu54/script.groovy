@@ -163,11 +163,11 @@ void calc() {
     def a, b, c
 
     getRows(data).each { row ->
+        //def currency = getCurrency(row.currencyCode)
+        course = getCourse(row.currencyCode, reportDate)
 
         // графа 9, 10 - при импорте не рассчитывать эти графы
         if (formDataEvent != FormDataEvent.IMPORT) {
-            //def currency = getCurrency(row.currencyCode)
-            course = getCourse(row.currencyCode, reportDate)
 
             a = calcAForColumn9or10(row, reportDate, course)
             b = 0; c = 0
@@ -183,7 +183,7 @@ void calc() {
         // графа 11
         row.rateBR = roundTo2(calc11Value(row, reportDate))
         // графа 12
-        row.outcome269st = calc12(row)
+        row.outcome269st = calc12(row,daysInYear, course)
         // графа 13
         row.outcomeTax = calc13(row)
     }
@@ -194,9 +194,9 @@ void calc() {
     insert(data, totalRow)
 }
 
-def BigDecimal calc12(def row) {
+def BigDecimal calc12(def row, def daysInYear, def course) {
     def tmp = 0
-    if (row.outcome > 0 && currency == '810') {
+    if (row.outcome > 0 && row.currencyCode == '810') {
         if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
             tmp = calc12Value(row, 1.5, reportDate, daysInYear)
         } else if (inPeriod(reportDate, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
@@ -206,7 +206,7 @@ def BigDecimal calc12(def row) {
         } else {
             tmp = calc12Value(row, 1.1, reportDate, daysInYear)
         }
-    } else if (row.outcome > 0 && currency != '810') {
+    } else if (row.outcome > 0 && row.currencyCode != '810') {
         if (inPeriod(reportDate, '01.01.20011', '31.12.2012')) {
             tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
         } else {
@@ -346,7 +346,7 @@ def logicalCheck() {
             }
 
             // графа 12
-            if (row.outcome269st != calc12(row)) {
+            if (row.outcome269st != calc12(row, daysInYear, course)) {
                 name = getColumnName(row, 'outcome269st')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
@@ -366,7 +366,8 @@ def logicalCheck() {
                     'outcome', 'outcome269st', 'outcomeTax']
             for (def alias : totalSumColumns) {
                 if (totalRow.getCell(alias).getValue() != getSum(alias)) {
-                    logger.error('Итоговые значения формы рассчитаны неверно!')
+                    name = getColumnName(getRows(data).get(0), alias)
+                    logger.error("Итоговые значения формы по графе «$name» рассчитаны неверно!")
                     return false
                 }
             }
@@ -449,12 +450,6 @@ void consolidation() {
  * Проверка при создании формы.
  */
 void checkCreation() {
-    //проверка периода ввода остатков
-    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
-        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
-        return
-    }
-
     def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
@@ -473,9 +468,21 @@ void importData() {
         logger.error('Имя файла не должно быть пустым')
         return
     }
-    if (!fileName.contains('.xml')) {
-        logger.error('Формат файла должен быть *.xml')
-        return
+
+    String charset = ""
+    // TODO в дальнейшем убрать возможность загружать RNU для импорта!
+    if (formDataEvent == FormDataEvent.IMPORT && fileName.contains('.xml') ||
+            formDataEvent == FormDataEvent.MIGRATION && fileName.contains('.xml')) {
+        if (!fileName.contains('.xml')) {
+            logger.error('Формат файла должен быть *.xml')
+            return
+        }
+    } else {
+        if (!fileName.contains('.r')) {
+            logger.error('Формат файла должен быть *.rnu')
+            return
+        }
+        charset = 'cp866'
     }
 
     def is = ImportInputStream
@@ -484,7 +491,7 @@ void importData() {
         return
     }
 
-    def xmlString = importService.getData(is, fileName)
+    def xmlString = importService.getData(is, fileName, charset)
     if (xmlString == null || xmlString == '') {
         logger.error('Отсутствие значении после обработки потока данных')
         return
@@ -498,7 +505,7 @@ void importData() {
 
     try {
         // добавить данные в форму
-        def totalLoad = addData(xml)
+        def totalLoad = addData(xml, fileName)
 
         // рассчитать, проверить и сравнить итоги
         if (totalLoad != null) {
@@ -596,6 +603,8 @@ def calc11Value(DataRow row, def rateDate) {
  * @paam days количество дней в году
  */
 def calc12Value(def row, def coef, def reportDate, def days) {
+    if(row.salePrice==null ||row.rateBR==null ||coef==null ||reportDate==null ||row.part1REPODate==null || days==null)
+        return 0
     def tmp = (row.salePrice * row.rateBR * coef) * ((reportDate - row.part1REPODate) / days) / 100
     return roundTo2(tmp)
 }
@@ -848,7 +857,7 @@ def getCourse(def currency, def date) {
  *
  * @param xml данные
  */
-def addData(def xml) {
+def addData(def xml, def fileName) {
     def tmp
     def index
     def date = new Date()
@@ -858,101 +867,144 @@ def addData(def xml) {
     def cache = [:]
     def newRows = []
 
-    for (def row : xml.exemplar.table.detail.record) {
+    def records
+    def totalRecords
+    def type
+    if (formDataEvent == FormDataEvent.MIGRATION ||
+            formDataEvent == FormDataEvent.IMPORT && fileName.contains('.xml')) {
+        records = xml.exemplar.table.detail.record
+        totalRecords = xml.exemplar.table.total.record
+        type = 1 // XML
+    } else {
+        records = xml.row
+        totalRecords = xml.rowTotal
+        type = 2 // RNU
+    }
+
+    for (def row : records) {
         index = 0
         def newRow = getNewRow()
 
         // графа 1
-        newRow.tadeNumber = row.field[index].text()
+        newRow.tadeNumber =  getCellValue(row, index, type, true)
         index++
 
         // графа 2
-        newRow.securityName = row.field[index].text()
+        newRow.securityName =  getCellValue(row, index, type, true)
         index++
 
         // графа 3 - справочник 15 "Общероссийский классификатор валют"
         tmp = null
-        if (row.field[index].text() != null && row.field[index].text().trim() != '') {
-            tmp = getRecordId(15, 'CODE', row.field[index].text(), date, cache)
+        if (getCellValue(row, index, type, true) != null &&  getCellValue(row, index, type, true).trim() != '') {
+            tmp = getRecordId(15, 'CODE',  getCellValue(row, index, type, true), date, cache)
         }
         newRow.currencyCode = tmp
         index++
 
         // графа 4
-        newRow.nominalPriceSecurities = getNumber(row.field[index].@value.text())
+        newRow.nominalPriceSecurities = getNumber(getCellValue(row, index, type))
         index++
 
-        // графа 5 - 6 поменяты местами, потому что в тф и в настройках у них места перепутаны
-        // графа 6
-        newRow.acquisitionPrice = getNumber(row.field[index].@value.text())
-        index++
+        // графа 5 - 6 поменяты местами, потому что в тф(XML) и в настройках у них места перепутаны
+        if (type==1) {
+            // графа 6
+            newRow.acquisitionPrice = getNumber(getCellValue(row, index, type))
+            index++
 
-        // графа 5
-        newRow.salePrice = getNumber(row.field[index].@value.text())
-        index++
+            // графа 5
+            newRow.salePrice = getNumber(getCellValue(row, index, type))
+            index++
+        } else {
+            // графа 5
+            newRow.salePrice = getNumber(getCellValue(row, index, type))
+            index++
 
+            // графа 6
+            newRow.acquisitionPrice = getNumber(getCellValue(row, index, type))
+            index++
+        }
         // графа 7
-        newRow.part1REPODate = getDate(row.field[index].@value.text(), format)
+        newRow.part1REPODate = getDate(getCellValue(row, index, type), format)
         index++
 
         // графа 8
-        newRow.part2REPODate = getDate(row.field[index].@value.text(), format)
+        newRow.part2REPODate = getDate(getCellValue(row, index, type), format)
         index++
 
         // графа 9
-        newRow.income = getNumber(row.field[index].@value.text())
+        newRow.income = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 10
-        newRow.outcome = getNumber(row.field[index].@value.text())
+        newRow.outcome = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 11
-        newRow.rateBR = getNumber(row.field[index].@value.text())
+        newRow.rateBR = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 12
-        newRow.outcome269st = getNumber(row.field[index].@value.text())
+        newRow.outcome269st = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 13
-        newRow.outcomeTax = getNumber(row.field[index].@value.text())
+        newRow.outcomeTax = getNumber(getCellValue(row, index, type))
 
         newRows.add(newRow)
     }
     data.insert(newRows, 1)
 
     // итоговая строка
-    if (xml.exemplar.table.total.record.field.size() > 0) {
-        def row = xml.exemplar.table.total.record[0]
+    if (totalRecords.size() >= 1) {
+        def row = totalRecords[0]
         def totalRow = formData.createDataRow()
 
         // графа 4
-        totalRow.nominalPriceSecurities = getNumber(row.field[3].@value.text())
+        totalRow.nominalPriceSecurities = getNumber(getCellValue(row, 3, type))
 
         // графа 5 - 6 поменяты местами, потому что в тф и в настройках у них места перепутаны
-        // графа 6
-        totalRow.acquisitionPrice = getNumber(row.field[4].@value.text())
+        if (type==1) {
+            // графа 6
+            totalRow.acquisitionPrice = getNumber(getCellValue(row, 4, type))
 
-        // графа 5
-        totalRow.salePrice = getNumber(row.field[5].@value.text())
+            // графа 5
+            totalRow.salePrice = getNumber(getCellValue(row, 5, type))
+        } else {
+            // графа 6
+            totalRow.acquisitionPrice = getNumber(getCellValue(row, 5, type))
+
+            // графа 5
+            totalRow.salePrice = getNumber(getCellValue(row, 4, type))
+        }
 
         // графа 9
-        totalRow.income = getNumber(row.field[8].@value.text())
+        totalRow.income = getNumber(getCellValue(row, 8, type))
 
         // графа 10
-        totalRow.outcome = getNumber(row.field[9].@value.text())
+        totalRow.outcome = getNumber(getCellValue(row, 9, type))
 
         // графа 12
-        totalRow.outcome269st = getNumber(row.field[11].@value.text())
+        totalRow.outcome269st = getNumber(getCellValue(row, 11, type))
 
         // графа 13
-        totalRow.outcomeTax = getNumber(row.field[12].@value.text())
+        totalRow.outcomeTax = getNumber(getCellValue(row, 12, type))
 
         return totalRow
     } else {
         return null
     }
+}
+
+// для получения данных из RNU или XML
+String getCellValue(def row, int index, def type, boolean isTextXml = false){
+    if (type==1) {
+        if (isTextXml) {
+            return row.field[index].text()
+        } else {
+            return row.field[index].@value.text()
+        }
+    }
+    return row.cell[index+1].text()
 }
 
 /**
