@@ -497,15 +497,6 @@ void consolidation() {
  * Проверка при создании формы.
  */
 void checkCreation() {
-    // отчётный период
-    //def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-
-    //проверка периода ввода остатков
-    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
-        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
-        return
-    }
-
     def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 

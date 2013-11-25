@@ -196,7 +196,7 @@ void calc() {
 
 def BigDecimal calc12(def row) {
     def tmp = 0
-    if (row.outcome > 0 && currency == '810') {
+    if (row.outcome > 0 && row.currency == '810') {
         if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
             tmp = calc12Value(row, 1.5, reportDate, daysInYear)
         } else if (inPeriod(reportDate, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
@@ -206,7 +206,7 @@ def BigDecimal calc12(def row) {
         } else {
             tmp = calc12Value(row, 1.1, reportDate, daysInYear)
         }
-    } else if (row.outcome > 0 && currency != '810') {
+    } else if (row.outcome > 0 && row.currency != '810') {
         if (inPeriod(reportDate, '01.01.20011', '31.12.2012')) {
             tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
         } else {
@@ -449,12 +449,6 @@ void consolidation() {
  * Проверка при создании формы.
  */
 void checkCreation() {
-    //проверка периода ввода остатков
-    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
-        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
-        return
-    }
-
     def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
