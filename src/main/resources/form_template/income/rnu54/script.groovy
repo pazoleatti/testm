@@ -183,7 +183,7 @@ void calc() {
         // графа 11
         row.rateBR = roundTo2(calc11Value(row, reportDate))
         // графа 12
-        row.outcome269st = calc12(row)
+        row.outcome269st = calc12(row,daysInYear)
         // графа 13
         row.outcomeTax = calc13(row)
     }
@@ -194,9 +194,9 @@ void calc() {
     insert(data, totalRow)
 }
 
-def BigDecimal calc12(def row) {
+def BigDecimal calc12(def row, def daysInYear) {
     def tmp = 0
-    if (row.outcome > 0 && row.currency == '810') {
+    if (row.outcome > 0 && row.currencyCode == '810') {
         if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
             tmp = calc12Value(row, 1.5, reportDate, daysInYear)
         } else if (inPeriod(reportDate, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
@@ -206,7 +206,7 @@ def BigDecimal calc12(def row) {
         } else {
             tmp = calc12Value(row, 1.1, reportDate, daysInYear)
         }
-    } else if (row.outcome > 0 && row.currency != '810') {
+    } else if (row.outcome > 0 && row.currencyCode != '810') {
         if (inPeriod(reportDate, '01.01.20011', '31.12.2012')) {
             tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
         } else {
@@ -346,7 +346,7 @@ def logicalCheck() {
             }
 
             // графа 12
-            if (row.outcome269st != calc12(row)) {
+            if (row.outcome269st != calc12(row, daysInYear)) {
                 name = getColumnName(row, 'outcome269st')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
@@ -366,7 +366,8 @@ def logicalCheck() {
                     'outcome', 'outcome269st', 'outcomeTax']
             for (def alias : totalSumColumns) {
                 if (totalRow.getCell(alias).getValue() != getSum(alias)) {
-                    logger.error('Итоговые значения формы рассчитаны неверно!')
+                    name = getColumnName(getRows(data).get(0), alias)
+                    logger.error("Итоговые значения формы по графе «$name» рассчитаны неверно!")
                     return false
                 }
             }
