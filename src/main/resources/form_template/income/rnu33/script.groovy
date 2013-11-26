@@ -160,11 +160,12 @@ void calc() {
     // отсортировать/группировать
     sort(dataRows)
 
-    dataRows.eachWithIndex { row, index ->
+    def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    dataRows.each { row
         def record61 = (row.code != null? getRefBookValue(61, row.code) : null)
         def code = record61?.CODE?.value
         // графа 1
-        row.rowNumber = index + 1
+        row.rowNumber = ++rowNumber
         // графа 12
         row.taxPrice = calc12(row)
         // графа 16
@@ -203,7 +204,7 @@ void logicCheck() {
         return
     }
 
-    // 6. Проверка наличия данных предыдущих месяцев
+    // 7. Проверка наличия данных предыдущих месяцев
     // TODO (Ramil Timerbaev) про предыдущие месяцы пока не прояснилось
     def monthPeriods = [] // reportPeriodService.listByTaxPeriod(formData.reportPeriodId)
     def monthDates = []
@@ -226,7 +227,7 @@ void logicCheck() {
     def arithmeticCheckAlias = ['taxPrice', 'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement', 'allCost', 'tenureSkvitovannymiBonds', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
-    def rowNumber = 0
+    def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
     def rowsRnu64 = getRnuRowsById(355)
     def codesFromRnu54 = []
     rowsRnu64.each { row ->
@@ -256,27 +257,27 @@ void logicCheck() {
             logger.error("Строка $index учитывается в РНУ-64!")
         }
 
-        // 2. Проверка даты приобретения и даты реализации (графа 2, 5, 6)
+        // 3. Проверка даты приобретения и даты реализации (графа 2, 5, 6)
         if (code == 5 && row.purchaseDate <= row.implementationDate) {
             logger.error(errorMsg + 'неверно указаны даты приобретения и реализации')
         }
 
-        // 3. Проверка рыночной цены в рублях к номиналу (графа 14)
+        // 4. Проверка рыночной цены в рублях к номиналу (графа 14)
         if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.marketPriceOnDateAcquisitionInPerc != row.exercisePrice) {
             logger.error(errorMsg + 'неверно указана цена в рублях при погашении!')
         }
 
-        // 4. Проверка определения срока короткой позиции (графа 2, 21)
+        // 5. Проверка определения срока короткой позиции (графа 2, 21)
         if (code == 5 && row.parPaper >= 0) {
             logger.error(errorMsg + 'неверно определен срок короткой позиции!')
         }
 
-        // 5. Проверка определения процентного дохода по короткой позиции (графа 2, 22)
+        // 6. Проверка определения процентного дохода по короткой позиции (графа 2, 22)
         if (code == 5 && row.averageWeightedPricePaper >= 0) {
             logger.error(errorMsg + 'неверно определен процентный доход по короткой позиции!')
         }
 
-        // 7. Арифметическая проверка графы 12, 16, 17, 18, 20, 24, 25, 26, 27
+        // 8. Арифметическая проверка графы 12, 16, 17, 18, 20, 24, 25, 26, 27
         needValue['taxPrice'] = calc12(row)
         needValue['marketPricePercent'] = calc16(row)
         needValue['marketPriceRuble'] = calc17(row)
@@ -288,7 +289,7 @@ void logicCheck() {
         needValue['excessOfTheSellingPrice'] = calc27(row, code)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
-        // 10. Проверка на уникальность поля «№ пп» (графа 1)
+        // 11. Проверка на уникальность поля «№ пп» (графа 1)
         if (++rowNumber != row.rowNumber) {
             logger.error(errorMsg + 'нарушена уникальность номера по порядку!')
         }
@@ -306,14 +307,14 @@ void logicCheck() {
         }
     }
 
-    // 8. Проверка итоговых значений за текущий месяц
+    // 9. Проверка итоговых значений за текущий месяц
     def monthRow = getDataRow(dataRows, 'month')
     def tmpMonthRow = getTotalMonthRow(dataRows)
     if (isDiffRow(monthRow, tmpMonthRow, totalSumColumns)) {
         logger.error("Итоговые значения за текущий месяц рассчитаны неверно!")
     }
 
-    // 9. Проверка итоговых значений за текущий отчётный (налоговый) период - подсчет сумм для общих итогов
+    // 10. Проверка итоговых значений за текущий отчётный (налоговый) период - подсчет сумм для общих итогов
     def totalRow = getDataRow(dataRows, 'total')
     def tmpTotalRow = getTotalRow(monthRow)
     if (isDiffRow(totalRow, tmpTotalRow, totalSumColumns)) {
