@@ -507,10 +507,9 @@ public class FormDataServiceImpl implements FormDataService {
 		if (!availableMoves.contains(workflowMove)) {
 			throw new ServiceException(
 					"Переход \""
-							+ workflowMove
-							+ "\" из текущего состояния невозможен, или пользователя с id = "
-							+ userInfo.getUser().getId()
-							+ " не хватает полномочий для его осуществления");
+                            + workflowMove.getRoute()
+                            + "\" из текущего состояния невозможен, или у пользователя " +
+                            "не хватает полномочий для его осуществления");
 		}
 
 		FormData formData = formDataDao.get(formDataId);
