@@ -11,7 +11,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -45,9 +44,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
     @UiField
     FileUploadWidget fileUploader;
-
-    @UiField
-    DockLayoutPanel dockPanel;
 
     @Inject
     @UiConstructor
