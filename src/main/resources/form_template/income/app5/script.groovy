@@ -122,18 +122,19 @@ void logicalCheckBeforeCalc() {
         fieldNumber++
 
         def departmentRecords
+        def departmentParam
         if (row.regionBankDivision!=null) departmentRecords = departmentRefDataProvider.getRecords(currentDate, null, "ID = '" + row.regionBankDivision + "'", null)?.getRecords()
         if (departmentRecords == null || departmentRecords.isEmpty()) {
-            logger.error("Строка $fieldNumber: Не найдено родительское подразделение!")
+            return
         } else {
-            def departmentParam = departmentRecords.getAt(0)
+            departmentParam = departmentRecords.getAt(0)
 
             long centralId = 113 // ID Центрального аппарата.
             // У Центрального аппарата родительским подразделением должен быть он сам
             if (centralId != row.regionBankDivision) {
                 // графа 2 - название подразделения
                 if (departmentParam.get('PARENT_ID')?.getReferenceValue()==null) {
-                    logger.error("Строка $fieldNumber: Для подразделения территориального банка  «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение наименования родительского подразделения!")
+                    logger.error("Строка $fieldNumber: Для подразделения территориального банка «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение наименования родительского подразделения!")
                 }
             }
         }
