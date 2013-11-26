@@ -14,7 +14,6 @@ import java.text.SimpleDateFormat
  *
  * TODO:
  *      - расчет графы 15.1 и 15.2: непонтяности с ручным вводом в чтз, а также используется какая то 2.7
- *      - доделать расчет графы 5.2: пока недоделан потому что расчет графы 5.2 невозможен из за отсутствия валюты
  *
  * @author rtimerbaev
  */
@@ -181,9 +180,6 @@ void calc() {
         // графа 1
         row.number = ++rowNumber
 
-        // графа 5.2
-        row.course = calc5_2(row)
-
         // графа 14.1
         row.income = calc14_1(row)
 
@@ -213,8 +209,8 @@ void logicCheck() {
     def nonEmptyColumns2 = ['interestRateValue', 'interestSpreadValue', 'interestRateSize',
             'requestAmount', 'liabilityInterestRateValue', 'liabilityInterestSpreadValue',
             'liabilityInterestRateSize', 'liabilityAmount']
-    // алиасы графов для арифметической проверки (графа 5.2. 14.11 .. 15.2)
-    def arithmeticCheckAlias = ['course', 'income', 'outcome', 'deviationMinPrice', 'deviationMaxPrice']
+    // алиасы графов для арифметической проверки (графа 14.11 .. 15.2)
+    def arithmeticCheckAlias = ['income', 'outcome', 'deviationMinPrice', 'deviationMaxPrice']
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
 
@@ -248,7 +244,6 @@ void logicCheck() {
 
         // 4. Арифметические проверки расчета неитоговых граф
         def values = calc15(row)
-        needValue['course'] = calc5_2(row)
         needValue['income'] = calc14_1(row)
         needValue['outcome'] = calc14_2(row)
         needValue['deviationMinPrice'] = values[0]
@@ -363,20 +358,6 @@ def getTotalRow(def dataRows) {
     }
     calcTotalSum(dataRows, newRow, totalSumColumns)
     return newRow
-}
-
-// TODO (Ramil Timerbaev) этот метод пока недоделан потому что расчет графы 5.2 невозможен
-def calc5_2(def row) {
-    if (row.transactionDate == null || row.course == null) {
-        return null
-    }
-    def tmp = row.course
-    def kind = getRefBookValue(91, row.transactionKind)?.KIND?.value
-    if (kind == 'CCS') {
-        // TODO (Ramil Timerbaev) getRecord(22, "RATE = $row.course", row.transactionDate)
-        tmp = row.course
-    }
-    return roundValue(tmp, 2)
 }
 
 def calc14_1(def row) {
