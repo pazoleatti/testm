@@ -353,7 +353,7 @@ void logicalCheckBeforeCalc() {
         if (centralId != row.regionBankDivision) {
         // графа 2 - название подразделения
             if (departmentParam.get('PARENT_ID')?.getReferenceValue()==null) {
-                logger.error("Строка $fieldNumber: Для подразделения «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение атрибута «Наименование подразделения»!")
+                logger.error("Строка $fieldNumber:  Для подразделения территориального банка «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение наименования родительского подразделения!")
             }
         }
 

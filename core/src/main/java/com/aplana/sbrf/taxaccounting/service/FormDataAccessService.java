@@ -15,17 +15,15 @@ public interface FormDataAccessService {
 	 * Проверка прав на чтение данных
 	 * @param userInfo информация о пользователе, для которого проверяются права
 	 * @param formDataId идентификатор карточки данных по налоговой форме
-	 * @return true - если права на чтение есть, false - в противном случае
 	 */
-	boolean canRead(TAUserInfo userInfo, long formDataId);
-	
+	void canRead(TAUserInfo userInfo, long formDataId);
+
 	/**
 	 * Проверка прав на редактирование данных
 	 * @param userInfo идентификатор пользователя, для которого проверяются права
 	 * @param formDataId идентификатор карточки данных по налоговой форме
-	 * @return true - если права на редактирование есть, false - в противном случае
 	 */	
-	boolean canEdit(TAUserInfo userInfo, long formDataId);
+	void canEdit(TAUserInfo userInfo, long formDataId);
 	
 	/**
 	 * Проверка того, что у пользователя есть права на создание карточек налоговых форм
@@ -45,9 +43,8 @@ public interface FormDataAccessService {
 	 * Проверка того, что у пользователя есть права на удаление карточки с данными налоговой формы
 	 * @param userInfo информация о пользователе
 	 * @param formDataId идентификатор карточки с данными формы
-	 * @return true - если у пользователя есть права на удаление, false - в противном случае
 	 */
-	boolean canDelete(TAUserInfo userInfo, long formDataId);
+	void canDelete(TAUserInfo userInfo, long formDataId);
 	
 	/**
 	 * Получить список переходов, которые данный пользователь может выполнить над данным объектом {@link FormData}
