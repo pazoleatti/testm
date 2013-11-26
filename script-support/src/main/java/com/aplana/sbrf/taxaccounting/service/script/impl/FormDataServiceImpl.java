@@ -75,6 +75,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     private static ApplicationContext applicationContext;
 
+    // Объект-маркер для ускрорения работы кэша с отсутствующими значениями
+    private static final Long NULL_VALUE_MARKER = -1L;
+
     @Override
     public FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId) {
         return dao.find(formTypeId, kind, departmentId, reportPeriodId);
@@ -210,10 +213,12 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
                                                        Map<Long, RefBookDataProvider> providerCache,
                                                        Map<Long, Map<String, RefBookValue>> refBookCache,
                                                        String alias, String value, Date date) {
+        // Не указали справочник
         if (refBookId == null) {
             return null;
         }
 
+        // Ключ кэша
         String filter = value == null || value.isEmpty() ? alias + " is null" :
                 "LOWER(" + alias + ") = LOWER('" + value + "')";
 
@@ -221,7 +226,15 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
         if (recordCache.containsKey(refBookId)) {
             Long recordId = recordCache.get(refBookId).get(dateStr + filter);
+
+            // Сравнение объектов
+            if (recordId == NULL_VALUE_MARKER) {
+                // Нашли маркер
+                return null;
+            }
+
             if (recordId != null) {
+                // Нашли в кэше
                 if (refBookCache != null) {
                     return refBookCache.get(recordId);
                 } else {
@@ -234,16 +247,21 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             recordCache.put(refBookId, new HashMap<String, Long>());
         }
 
+        // Поиск в БД
         RefBookDataProvider provider = getRefBookProvider(refBookFactory, refBookId, providerCache);
         PagingResult<Map<String, RefBookValue>> records = provider.getRecords(date, null, filter, null);
         if (records.size() == 1) {
             Map<String, RefBookValue> retVal = records.get(0);
             Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
             recordCache.get(refBookId).put(dateStr + filter, recordId);
-            if (refBookCache != null)
+            if (refBookCache != null) {
                 refBookCache.put(recordId, retVal);
+            }
             return retVal;
         }
+
+        // Не нашли в кэше и не нашли в БД, добавляем маркер
+        recordCache.get(refBookId).put(dateStr + filter, NULL_VALUE_MARKER);
         return null;
     }
 
