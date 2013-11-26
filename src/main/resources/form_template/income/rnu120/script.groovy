@@ -64,6 +64,11 @@ switch (formDataEvent) {
         prevPeriodCheck()
         logicCheck()
         break
+    case FormDataEvent.COMPOSE :
+        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        calc()
+        logicCheck()
+        break
 }
 
 //// Кэши и константы
