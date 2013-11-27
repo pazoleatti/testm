@@ -349,7 +349,4 @@ alter table TRD_60
 alter table TRD_64
    add constraint TR_FK1_64 foreign key (FIDEXEMPLAR)
       references EXEMPLAR (IDEXEMPLAR)
-      not deferrable;	
-
---RUNSTATS
-exec dbms_stats.gather_schema_stats('MIGRATION', DBMS_STATS.AUTO_SAMPLE_SIZE);	  
+      not deferrable;
