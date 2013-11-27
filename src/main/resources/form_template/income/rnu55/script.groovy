@@ -304,8 +304,8 @@ void logicCheck() {
                                 isFind = true
                                 // лп 8
                                 if (findRow.buyDate != row.buyDate) {
-                                    logger.error(errorMsg + "Неверное указана Дата приобретения в РНУ-56 " +
-                                            "за " + reportPeriod.name)
+                                    logger.error(errorMsg + "Неверное указана Дата приобретения в РНУ-55 за "
+                                            + reportPeriod.name)
                                 }
                                 break
                             }
@@ -349,12 +349,9 @@ def isRubleCurrency(def currencyCode) {
 }
 
 /**
- * Cумма ранее начисленного процентного дохода по векселю до отчётного периода
- * (сумма граф 10 из РНУ-55 предыдущих отчётных (налоговых) периодов)
- * выбирается по графе 2 с даты приобретения (графа3) по дату начала отчетного периода.
- *
- * @param bill вексель
- * @param sumColumnName название графы, по которой суммировать данные
+ * Сумма по графе sumColumnName всех предыдущих форм начиная с row.buyDate в строках где bill = row.bill
+ * @param row
+ * @param sumColumnName алиас графы для суммирования
  */
 def getCalcPrevColumn10(def row, def sumColumnName) {
     def sum = 0
