@@ -231,7 +231,7 @@ def calc() {
  * Логические проверки
  * @return
  */
-def logicalCheck() {
+def logicCheck() {
     def tmp
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()

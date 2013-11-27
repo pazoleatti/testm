@@ -127,6 +127,7 @@ void calc() {
         def reportDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
         def reportDateStart = reportPeriodService.getStartDate(formData.reportPeriodId).time
 
+        // TODO сделать получение нф за предыдущий месяц
         def formDataOld = formDataService.getFormDataPrev(formData, formDataDepartment.id)
         def dataOld = formDataOld != null ? formDataService.getDataRowHelper(formDataOld) : null
         def index = 0
@@ -215,6 +216,7 @@ def logicCheck() {
     if (!dataRows.isEmpty()) {
         // Инвентарные номера
         def List<String> invList = new ArrayList<String>()
+        // TODO сделать получение нф за предыдущий месяц
         def formDataOld = formDataService.getFormDataPrev(formData, formDataDepartment.id)
         def dataOld = formDataOld != null ? formDataService.getDataRowHelper(formDataOld) : null
         // Отчетная дата

@@ -1,5 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,15 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
 // TODO: (sgoryachkin) Пришлось вычистить тесты, т.к. они тестировали в основном только работу со строками, что теперь не актуально
 // Нужно написать нормальные тесты на получение сохранение FormData и проверить поля
@@ -169,10 +164,29 @@ public class FormDataDaoTest {
 		Assert.assertEquals(11l, fd.getId().longValue());
 	}
 
-	@Test(expected=DaoException.class)
-	public void testFindTooManyResult() {
-		formDataDao.find(1, FormDataKind.SUMMARY, 1, 12);
-	}
+    @Test
+    public void findMonth1Test() {
+        FormData fdJanuary = formDataDao.findMonth(2, FormDataKind.PRIMARY, 1, 12, 1);
+        Assert.assertEquals(fdJanuary.getId().longValue(), 14L);
+
+        FormData fdMarth = formDataDao.findMonth(2, FormDataKind.PRIMARY, 1, 12, 3);
+        Assert.assertEquals(fdMarth.getId().longValue(), 16L);
+
+        FormData fdJune = formDataDao.findMonth(2, FormDataKind.PRIMARY, 1, 12, 6);
+        Assert.assertEquals(fdJune.getId().longValue(), 20L);
+
+        Assert.assertNull(formDataDao.findMonth(2, FormDataKind.PRIMARY, 1, 12, 60));
+    }
+
+    @Test(expected = DaoException.class)
+    public void findMonth2Test() {
+        formDataDao.findMonth(2, FormDataKind.PRIMARY, 1, 12, 5);
+    }
+
+    @Test(expected = DaoException.class)
+    public void testFindTooManyResult() {
+        formDataDao.find(1, FormDataKind.SUMMARY, 1, 12);
+    }
 	
 	@Test
 	public void testFindEmptyResult() {
