@@ -10,10 +10,10 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 import java.text.SimpleDateFormat
 
 /**
- * РНУ-64
- * @author auldanov
+ * РНУ-64 "Регистр налогового учёта затрат, связанных с проведением сделок РЕПО"
+ * formTemplateId=355
  *
- * @version 55
+ * @author auldanov
  *
  * Описание столбцов
  * 1. number - № пп
