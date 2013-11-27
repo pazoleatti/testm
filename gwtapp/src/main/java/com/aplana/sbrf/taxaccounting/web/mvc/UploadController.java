@@ -38,6 +38,7 @@ public class UploadController {
     @RequestMapping(value = "/pattern", method = RequestMethod.POST)
     public void processUploadXls(HttpServletRequest request, HttpServletResponse response)
             throws FileUploadException, IOException {
+        request.setCharacterEncoding("UTF-8");
 
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
