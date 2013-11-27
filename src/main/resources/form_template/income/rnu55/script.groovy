@@ -228,9 +228,9 @@ void logicCheck() {
 
     def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
 
-    // алиасы графов для арифметической проверки
+    // Алиасы граф для арифметической проверки
     def arithmeticCheckAlias = ['percentInCurrency', 'sumIncomeinCurrency', 'sumIncomeinRuble']
-    // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
+    // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
 
     // Количество дней в году

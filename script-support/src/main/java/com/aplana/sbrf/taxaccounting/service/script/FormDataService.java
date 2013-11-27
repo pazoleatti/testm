@@ -36,6 +36,17 @@ public interface FormDataService {
 	FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
 
     /**
+     * Поиск ежемесячной налоговой формы
+     * @param formTypeId Тип формы
+     * @param kind Вид формы
+     * @param departmentId Подразделение
+     * @param taxPeriodId Налоговый период
+     * @param periodOrder Порядковый номер (равен номеру месяца, при нумерации с 1)
+     * @return
+     */
+    FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder);
+
+    /**
      * Посредник для работы со строками налоговой формы во временном и постоянном срезах
      * @param fd
      * @return
@@ -156,7 +167,8 @@ public interface FormDataService {
     boolean checksBalancePeriod(FormData formData, Logger logger);
 
     /**
-     * Получение формы за предыдущий отчетный период
+     * Получение формы за предыдущий отчетный период. Если форма ежемесячная, то предыдущая форма - это форма за
+     * предыдущий месяц.
      *
      * @param formData
      * @param departmentId

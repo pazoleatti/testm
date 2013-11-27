@@ -3,8 +3,12 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -22,10 +26,6 @@ import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
 /**
  * Реализация DAO для работы с данными налоговых форм
@@ -49,6 +49,11 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     private DepartmentDao departmentDao;
     @Autowired
     private ReportPeriodDao reportPeriodDao;
+    @Autowired
+    private TaxPeriodDao taxPeriodDao;
+
+    private static final String[] months = {"Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август",
+            "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"};
 
     private static class RowMapperResult {
 		FormData formData;
@@ -167,7 +172,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		}
 		return formDataId;
 	}
-
 	
 	@Override
 	public List<Long> listFormDataIdByType(int typeId) {
@@ -222,7 +226,46 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		}
 	}
 
-	@Override
+    @Override
+    public FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder) {
+        try {
+            Long formDataId = getJdbcTemplate().queryForLong(
+                    "select fd.id from form_data fd where exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?)"
+                            + " and fd.kind = ? and fd.department_id = ? and fd.report_period_id in (select id from report_period where tax_period_id = ?) and fd.period_order = ?",
+                    new Object[] {
+                            formTypeId,
+                            kind.getId(),
+                            departmentId,
+                            taxPeriodId,
+                            periodOrder
+                    },
+                    new int[] {
+                            Types.NUMERIC,
+                            Types.NUMERIC,
+                            Types.NUMERIC,
+                            Types.NUMERIC,
+                            Types.NUMERIC
+                    }
+            );
+            return get(formDataId);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        } catch (IncorrectResultSizeDataAccessException e) {
+            TaxPeriod taxPeriod = taxPeriodDao.get(taxPeriodId);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(taxPeriod.getStartDate());
+            throw new DaoException(
+                    "Для заданного сочетания параметров найдено несколько налоговых форм: вид \"%s\", тип \"%s\", подразделение \"%s\", налоговый период \"%s\", месяц \"%s\"",
+                    formTypeDao.get(formTypeId).getName(),
+                    kind.getName(),
+                    departmentDao.getDepartment(departmentId).getName(),
+                    cal.get(Calendar.YEAR),
+                    periodOrder <= 12 && periodOrder >= 1 ? months[periodOrder] : periodOrder
+            );
+        }
+    }
+
+    @Override
 	public FormData getWithoutRows(long id){
 		JdbcTemplate jt = getJdbcTemplate();
 		try{
