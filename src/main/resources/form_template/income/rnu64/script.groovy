@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
@@ -83,6 +84,7 @@ switch (formDataEvent) {
         break
 
     case FormDataEvent.CALCULATE:
+        prevPeriodCheck()
         calc()
         logicalCheck()
         break
@@ -111,6 +113,19 @@ switch (formDataEvent) {
             insert(data, total)
         }
         break
+}
+
+// Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
+void prevPeriodCheck() {
+    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    if (!isBalancePeriod) {
+        reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+        formPrev = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriodPrev.id)
+        if (formPrev == null) {
+            def formName = formData.getFormType().getName()
+            throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+        }
+    }
 }
 
 /**
