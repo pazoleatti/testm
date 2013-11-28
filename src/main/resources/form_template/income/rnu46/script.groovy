@@ -3,6 +3,11 @@ package form_template.income.rnu46
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import groovy.transform.Field
+
+import java.math.RoundingMode
+import java.text.SimpleDateFormat
 
 /**
  * Скрипт для РНУ-46 (rnu46.groovy).
@@ -13,12 +18,6 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
  * @author Stanislav Yasinskiy
  * @author Dmitriy Levykin
  */
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import groovy.transform.Field
-
-import java.math.RoundingMode
-import java.text.SimpleDateFormat
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         // TODO убрать когда появится механизм назначения periodOrder при создании формы

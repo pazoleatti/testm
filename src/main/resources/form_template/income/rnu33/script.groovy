@@ -2,8 +2,9 @@ package form_template.income.rnu33
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
+
 import java.text.SimpleDateFormat
-import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
+
 
 /**
  * Форма "(РНУ-33) Регистр налогового учёта процентного дохода и финансового результата от реализации (выбытия) ГКО".
@@ -41,6 +42,9 @@ import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
+        // TODO убрать когда появится механизм назначения periodOrder при создании формы
+        if (formData.periodOrder == null)
+            return
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
@@ -195,11 +199,6 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    // если нет строк то проверять не надо
-    if (dataRows.isEmpty()) {
-        return
-    }
-
     // 7. Проверка наличия данных предыдущих месяцев
     if (formData.periodOrder > 1) {
         def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
@@ -231,7 +230,8 @@ void logicCheck() {
     }
 
     // алиасы графов для арифметической проверки (12, 16, 17, 18, 20, 24, 25, 26, 27)
-    def arithmeticCheckAlias = ['taxPrice', 'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement', 'allCost', 'tenureSkvitovannymiBonds', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
+    def arithmeticCheckAlias = ['taxPrice', 'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement',
+            'allCost', 'tenureSkvitovannymiBonds', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
     def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
@@ -248,7 +248,7 @@ void logicCheck() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
-        // . Обязательность заполнения полей
+        // Обязательность заполнения полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         def record61 = (row.code ? getRefBookValue(61, row.code) : null)
@@ -306,12 +306,6 @@ void logicCheck() {
         checkNSI(61, row, 'code')
         // 2. Проверка актуальности поля «Признак ценной бумаги» (графа 3)
         checkNSI(62, row, 'valuablePaper')
-
-        // проверка делеления не ноль
-        if (row.issueDays == 0) {
-            def name = row.getCell('issueDays').column.name
-            logger.error(errorMsg + "деление на ноль: \"$name\" имеет нулевое значение.")
-        }
     }
 
     // 9. Проверка итоговых значений за текущий месяц
@@ -329,7 +323,7 @@ void logicCheck() {
     }
 }
 
-/** Получить новую стролу с заданными стилями. */
+// Получить новую строку с заданными стилями
 def getNewRow() {
     def newRow = formData.createDataRow()
     editableColumns.each {
@@ -342,7 +336,7 @@ def getNewRow() {
     return newRow
 }
 
-/** Отсорировать данные (по графе 3, 4, 2). */
+// Отсорировать данные (по графе 3, 4, 2)
 void sort(def dataRows) {
     dataRows.sort { def a, def b ->
         // графа 3  - valuablePaper (справочник)
@@ -362,7 +356,7 @@ void sort(def dataRows) {
     }
 }
 
-/** Получить модуль числа. Вместо Math.abs() потому что возможна потеря точности. */
+// Получить модуль числа. Вместо Math.abs() потому что возможна потеря точности.
 def abs(def value) {
     return value < 0 ? -value : value
 }
@@ -375,7 +369,7 @@ def roundValue(def value, int precision) {
     }
 }
 
-/** Получить итоговую строку с суммами за месяц. */
+// Получить итоговую строку с суммами за месяц
 def getTotalMonthRow(def dataRows) {
     def newRow = formData.createDataRow()
     newRow.setAlias('month')
@@ -388,11 +382,7 @@ def getTotalMonthRow(def dataRows) {
     return newRow
 }
 
-/**
- * Получить строку с итогами за текущий отчетный период.
- *
- * @param currentMonthRow строка с итогами за текущий месяц
- */
+// Получить строку с итогами за текущий отчетный период
 def getTotalRow(def currentMonthRow) {
     def newRow = formData.createDataRow()
     newRow.setAlias('total')
@@ -434,12 +424,6 @@ def calc17(def row) {
     return roundValue((row.redemptionVal > 0 ? row.redemptionVal : null), 2)
 }
 
-/**
- * Посчитать значение для графы 18.
- *
- * @param row строка нф
- * @param code значение атрибута 611 - CODE - "Код сделки" справочника 61 "Коды сделок"
- */
 def calc18(def row, def code) {
     if (row.marketPriceOnDateAcquisitionInRub == null || row.redemptionVal == null || row.taxPrice == null ||
             row.exercisePrice == null || row.marketPricePercent == null || row.exerciseRuble == null ||
@@ -493,12 +477,6 @@ def calc26(def row) {
     return roundValue(tmp, 2)
 }
 
-/**
- * Посчитать значение для графы 27.
- *
- * @param row строка нф
- * @param code значение атрибута 611 - CODE - "Код сделки" справочника 61 "Коды сделок"
- */
 def calc27(def row, def code) {
     if (row.exercisePriceRetirement == null || row.exerciseRuble == null) {
         return null
@@ -507,7 +485,7 @@ def calc27(def row, def code) {
     return roundValue(tmp, 2)
 }
 
-/** Получить нф за предыдущий месяц. */
+// Получить нф за предыдущий месяц
 def getPrevTotalRow() {
     if (formData.periodOrder == 1) {
         return null
@@ -520,7 +498,7 @@ def getPrevTotalRow() {
     return null
 }
 
-/** Получить строки из нф по заданному идентификатору нф. */
+// Получить строки из нф по заданному идентификатору нф
 def getRnuRowsById(def id) {
     def formDataRNU = formDataService.find(id, formData.kind, formDataDepartment.id, formData.reportPeriodId)
     if (formDataRNU != null) {
