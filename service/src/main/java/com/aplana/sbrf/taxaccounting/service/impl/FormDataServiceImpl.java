@@ -142,12 +142,15 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     private void loadFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
-        // Поскольку импорт используется как часть редактирования НФ, т.е. иморт только строк (форма уже существует) то все проверки должны
-        // соответствовать редактированию (добавление, удаление, пересчет)
-        // Форма должна быть заблокирована текущим пользователем для редактирования
-        lockCoreService.checkLockedMe(FormData.class, formDataId, userInfo);
-
-        formDataAccessService.canEdit(userInfo, formDataId);
+		// Поскольку импорт используется как часть редактирования НФ, т.е. иморт только строк (форма уже существует) то все проверки должны 
+    	// соответствовать редактированию (добавление, удаление, пересчет)
+    	// Форма должна быть заблокирована текущим пользователем для редактирования
+		lockCoreService.checkLockedMe(FormData.class, formDataId, userInfo);
+		
+        if (!formDataAccessService.canEdit(userInfo, formDataId)) {
+            throw new AccessDeniedException(
+                    "Недостаточно прав для импорта данных в налоговую форму");
+        }
 
         File dataFile = null;
         File pKeyFile = null;

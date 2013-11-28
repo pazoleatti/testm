@@ -1,15 +1,16 @@
 package form_template.income.rnu26
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
 /**
- * Форма "(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций, РДР, ADR, GDR и опционов эмитента в целях налогообложения".
- *
- * @version 65
+ * Форма "(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций,
+ *                                                  РДР, ADR, GDR и опционов эмитента в целях налогообложения".
+ * formTemplateId=325
  *
  * @author rtimerbaev
  */
@@ -19,19 +20,23 @@ import groovy.transform.Field
 def isBalancePeriod
 isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
 
+@Field
+def isConsolidated
+isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
         checkCreation()
         break
     case FormDataEvent.CHECK :
-        if (!isBalancePeriod && !checkPrevPeriod()) {
+        if (!isBalancePeriod && !isConsolidated && !checkPrevPeriod()) {
             logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
             return
         }
         logicalCheck() && checkNSI()
         break
     case FormDataEvent.CALCULATE :
-        if (!isBalancePeriod && !checkPrevPeriod()) {
+        if (!isBalancePeriod && !isConsolidated && !checkPrevPeriod()) {
             logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
             return
         }
@@ -66,7 +71,7 @@ switch (formDataEvent) {
         !hasError() && logicalCheck() && checkNSI()
         break
     case FormDataEvent.IMPORT :
-        if (!isBalancePeriod && !checkPrevPeriod()) {
+        if (!isBalancePeriod && !isConsolidated && !checkPrevPeriod()) {
             logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
             return
         }
@@ -76,7 +81,7 @@ switch (formDataEvent) {
         }
         break
     case FormDataEvent.MIGRATION :
-        if (!isBalancePeriod && !checkPrevPeriod()) {
+        if (!isBalancePeriod && !isConsolidated && !checkPrevPeriod()) {
             logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
             return
         }
@@ -206,9 +211,6 @@ void calc() {
     }
     delRow.each { row ->
         data.delete(row)
-    }
-    if (getRows(data).isEmpty()) {
-        return
     }
 
     // отсортировать/группировать
@@ -422,7 +424,7 @@ def logicalCheck() {
             }
 
             // 11. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 6, 7 (за предыдущий период) )
-            if (!isBalancePeriod && checkOld(row, 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', formDataOld)) {
+            if (!isBalancePeriod && !isConsolidated && checkOld(row, 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', formDataOld)) {
                 def curCol = 4
                 def curCol2 = 6
                 def prevCol = 4
@@ -431,7 +433,7 @@ def logicalCheck() {
             }
 
             // 12. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 8, 15 (за предыдущий период) )
-            if (!isBalancePeriod && checkOld(row, 'tradeNumber', 'reserveCalcValuePrev', 'reserveCalcValue', formDataOld)) {
+            if (!isBalancePeriod && !isConsolidated && checkOld(row, 'tradeNumber', 'reserveCalcValuePrev', 'reserveCalcValue', formDataOld)) {
                 def curCol = 4
                 def curCol2 = 4
                 def prevCol = 8
@@ -654,7 +656,7 @@ void importData() {
     }
 
     if (!fileName.contains('.r')) {
-        logger.error('Формат файла должен быть *.r??')
+        logger.error('Формат файла должен быть *.rnu')
         return
     }
 
@@ -758,7 +760,7 @@ def checkOld(def row, def likeColumnName, def curColumnName, def prevColumnName,
  * Получить данные за предыдущий отчетный период
  */
 def getFormDataOld() {
-    if (isBalancePeriod) {
+    if (isBalancePeriod || isConsolidated) {
         return null
     }
     // предыдущий отчётный период
@@ -854,7 +856,7 @@ def checkRequiredColumns(def row, def columns) {
  * @return возвращает найденое значение, иначе возвратит 0
  */
 def calc8(def row, def needColumnName, def searchColumnName, def searchValue, def dataOld) {
-    if (isBalancePeriod) {
+    if (isBalancePeriod || isConsolidated) {
         return row.reserveCalcValuePrev
     }
     def dataRowsOld = getRows(dataOld)
@@ -870,7 +872,7 @@ def calc8(def row, def needColumnName, def searchColumnName, def searchValue, de
 
 def calc13(def row) {
     if (row.marketQuotation != null && row.rubCourse != null) {
-        return roundValue(row.marketQuotation * row.rubCourse, 2)
+        return row.marketQuotation * row.rubCourse
     }
     return null
 }
@@ -919,9 +921,8 @@ def getColumnName(def row, def alias) {
  */
 def checkPrevPeriod() {
     def formDataOld = getFormDataOld()
-    def dataOld = getData(formDataOld)
 
-    if (formDataOld != null && !getRows(dataOld).isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
+    if (formDataOld != null && formDataOld.state == WorkflowState.ACCEPTED) {
         return true
     }
     return false

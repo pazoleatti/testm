@@ -633,13 +633,14 @@ def getRows(def data) {
  * @param date
  */
 def getRate(def date) {
-    if (date!=null) {
+    if (date != null) {
         def refDataProvider = refBookFactory.getDataProvider(23)
-        def res = refDataProvider.getRecords(date, null, null, null);
-        return res.getRecords().get(0).RATE.getNumberValue()
-    } else {
-        return null;
+        def records = refDataProvider.getRecords(date, null, null, null);
+        if (records != null && records.getRecords() != null && records.getRecords().size() > 0) {
+            return records.getRecords().getAt(0).RATE.numberValue
+        }
     }
+    return null;
 }
 
 /**
@@ -690,7 +691,7 @@ void importData() {
         }
     } else {
         if (!fileName.contains('.r')) {
-            logger.error('Формат файла должен быть *.r??')
+            logger.error('Формат файла должен быть *.rnu')
             return
         }
         charset = 'cp866'

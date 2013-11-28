@@ -12,8 +12,8 @@ import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.RefBookExternalService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
-import jcifs.smb.SmbFile;
-import jcifs.smb.SmbFileInputStream;
+import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
+import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,6 +59,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
      */
     @Override
     public void importRefBook(TAUserInfo userInfo, Logger logger) {
+        System.out.println("importRefBook started");
 
         // регулярка файла/архива  - true/false  - id
         Map<String, Pair<Boolean, Long>> map = new HashMap<String, Pair<Boolean, Long>>();
@@ -86,9 +87,10 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         // Признак наличия ошибок при импорте
         boolean withError = false;
         try {
-            SmbFile folder = new SmbFile(refBookDirectory);
+            //SmbFile folder = new SmbFile(refBookDirectory);
+            FileWrapper folder = ResourceUtils.getSharedResource(refBookDirectory);
             for (String fileName : folder.list()) {
-                SmbFile file = new SmbFile(refBookDirectory + fileName);
+                FileWrapper file = ResourceUtils.getSharedResource(refBookDirectory + fileName);
                 // Из директории считываем только файлы
                 if (!file.isFile()) {
                     continue;
@@ -98,7 +100,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                         InputStream is = null;
                         Long refBookId = map.get(key).getSecond();
                         try {
-                            is = new BufferedInputStream(new SmbFileInputStream(file));
+                            is = new BufferedInputStream(file.getStream());
                             if (!map.get(key).getFirst()) {  // Если это не сам файл, а архив
                                 ZipInputStream zis = new ZipInputStream(is);
                                 ZipEntry zipFileName = zis.getNextEntry();

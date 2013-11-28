@@ -12,9 +12,11 @@ import java.text.SimpleDateFormat
 
 /**
  * 6.5	(РНУ-51) Регистр налогового учёта финансового результата от реализации (выбытия) ОФЗ
+ * formTemplateId=345
  *
  * TODO:
  *      - неясности как рассчитывать графу 16 и 17
+ *      http://jira.aplana.com/browse/SBRFACCTAX-5117
  */
 
 switch (formDataEvent) {
@@ -450,6 +452,7 @@ BigDecimal calc17(DataRow row) {
  Если «графа 2» = 1 или 2 или 5, И («графа 14» > «графа 16» И «графа 15» > «графа 17»), то «графа 18» = «графа 15»
  Если «графа 2» = 4, то «графа 18» = «графа 13»
  Если «графа 2» = 2 или 5, И  («графа 14» < «графа 16» И «графа 15» < «графа 17»), то «графа 18» = «графа 17»
+ TODO http://jira.aplana.com/browse/SBRFACCTAX-5117
  * @param row
  * @return
  */
@@ -464,6 +467,9 @@ BigDecimal calc18(DataRow row) {
     }
     if ((code == 2 || code == 5) && (row.priceInFactPerc < row.marketPriceInPerc1 && row.priceInFactRub < row.marketPriceInRub1)) {
         result = row.marketPriceInRub1
+    }
+    if ((code == 1 || code == 2 || code == 5) && row.priceInFactPerc == row.marketPriceInPerc1){
+        result = row.priceInFactRub
     }
     if (result != null) result = roundTo2(result, 2)
     return result
@@ -588,9 +594,6 @@ void sort() {
 
 void addAllStatic() {
     def data = getData(formData)
-    if (getRows(data).isEmpty()) {
-        return
-    }
     def itogoKvartal = getItogoKvartal()
     def prevItogoKvartal = getPrevItogoKvartal()
     data.insert(itogoKvartal, data.getAllCached().size() + 1)
