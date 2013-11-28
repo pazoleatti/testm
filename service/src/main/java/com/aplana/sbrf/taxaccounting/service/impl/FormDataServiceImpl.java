@@ -541,15 +541,30 @@ public class FormDataServiceImpl implements FormDataService {
     void compose(WorkflowMove workflowMove, FormData formData, TAUserInfo userInfo, Logger logger){
         // Проверка перехода ЖЦ. Принятие либо отмена принятия
         if (workflowMove.getToState() == WorkflowState.ACCEPTED || workflowMove.getFromState() == WorkflowState.ACCEPTED) {
+            // периодичность приёмника "ежемесячно"
+            boolean isFormDataMonthly = formData.getPeriodOrder() != null;
+            Integer taxPeriodId = isFormDataMonthly ? reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getTaxPeriod().getId() : null;
             // признак периода ввода остатков
-            if (!reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
+            boolean isBalancePeriod = reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId());
+            // дополнительная проверка для ежемесячных форм
+            // для таких форм в периоде ввода остатков считаются только те что находятся в первом месяце
+            if (isBalancePeriod && isFormDataMonthly && (formData.getPeriodOrder() - 1) % 3 != 0) {
+                isBalancePeriod = false;
+            }
+            if (!isBalancePeriod) {
                 // получение списка типов приемников для текущей формы
                 List<DepartmentFormType> departmentFormTypes = departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
                 // Если найдены приемники то обработаем их
                 if (departmentFormTypes != null && !departmentFormTypes.isEmpty()) {
                     for (DepartmentFormType i: departmentFormTypes) {
                         // получим созданные формы с бд
-                        FormData destinationForm = formDataDao.find(i.getFormTypeId(), i.getKind(), i.getDepartmentId(), formData.getReportPeriodId());
+                        FormData destinationForm;
+                        if (!isFormDataMonthly) {
+                            destinationForm = formDataDao.find(i.getFormTypeId(), i.getKind(), i.getDepartmentId(), formData.getReportPeriodId());
+                        } else {
+                            destinationForm = formDataDao.findMonth(i.getFormTypeId(), i.getKind(), i.getDepartmentId(),
+                                    taxPeriodId, formData.getPeriodOrder());
+                        }
                         //В связи с http://jira.aplana.com/browse/SBRFACCTAX-4723
                         // Только для распринятия
                         if (destinationForm == null && workflowMove.getFromState() == WorkflowState.ACCEPTED)
@@ -559,7 +574,13 @@ public class FormDataServiceImpl implements FormDataService {
                         // количество источников в статусе принята
                         boolean existAcceptedSources = false;
                         for (DepartmentFormType s: sourceFormTypes){
-                            FormData sourceForm = formDataDao.find(s.getFormTypeId(), s.getKind(), s.getDepartmentId(), formData.getReportPeriodId());
+                            FormData sourceForm;
+                            if (!isFormDataMonthly) {
+                                sourceForm = formDataDao.find(s.getFormTypeId(), s.getKind(), s.getDepartmentId(), formData.getReportPeriodId());
+                            } else {
+                                sourceForm = formDataDao.findMonth(s.getFormTypeId(), s.getKind(), s.getDepartmentId(),
+                                        taxPeriodId, formData.getPeriodOrder());
+                            }
                             if (sourceForm !=null && sourceForm.getState().equals(WorkflowState.ACCEPTED)){
                                 existAcceptedSources = true;
                                 break;
@@ -622,10 +643,20 @@ public class FormDataServiceImpl implements FormDataService {
         List<DepartmentFormType> departmentFormTypes =
                 departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
                         formData.getFormType().getId(), formData.getKind());
+
+        boolean isFormDataMonthly = formData.getPeriodOrder() != null;
+        Integer taxPeriodId = isFormDataMonthly ? reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getTaxPeriod().getId() : null;
+
         if (departmentFormTypes != null) {
             for (DepartmentFormType department: departmentFormTypes) {
-                FormData form = formDataDao.find(department.getFormTypeId(), department.getKind(),
-                        department.getDepartmentId(), formData.getReportPeriodId());
+                FormData form;
+                if (!isFormDataMonthly) {
+                    form = formDataDao.find(department.getFormTypeId(), department.getKind(),
+                            department.getDepartmentId(), formData.getReportPeriodId());
+                } else {
+                    form = formDataDao.findMonth(department.getFormTypeId(), department.getKind(), department.getDepartmentId(),
+                            taxPeriodId, formData.getPeriodOrder());
+                }
 
                 /*
                 Несли форма приемника существует и ее статус отличен от "создана" и переход не является:
