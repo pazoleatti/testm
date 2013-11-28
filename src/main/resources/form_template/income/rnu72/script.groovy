@@ -181,7 +181,6 @@ void logicCheck() {
         }
 
         // 3. Проверка на нулевые значения
-        // TODO (Ramil Timerbaev) в аналитике: Не (графа 5 → графа 9 = 0). Неясности со стрелкой (это перечисление графов или импликация), пока оставить, но сказали что уточнят
         def hasError = true
         for (def alias : ['income', 'cost279', 'costReserve', 'loss', 'profit']) {
             if (row.getCell(alias).value != 0) {

@@ -38,6 +38,11 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
+    case FormDataEvent.COMPOSE :
+        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        calc()
+        logicCheck()
+        break
 }
 
 //// Кэши и константы
@@ -117,18 +122,19 @@ void logicalCheckBeforeCalc() {
         fieldNumber++
 
         def departmentRecords
+        def departmentParam
         if (row.regionBankDivision!=null) departmentRecords = departmentRefDataProvider.getRecords(currentDate, null, "ID = '" + row.regionBankDivision + "'", null)?.getRecords()
         if (departmentRecords == null || departmentRecords.isEmpty()) {
-            logger.error("Строка $fieldNumber: Не найдено родительское подразделение!")
+            return
         } else {
-            def departmentParam = departmentRecords.getAt(0)
+            departmentParam = departmentRecords.getAt(0)
 
             long centralId = 113 // ID Центрального аппарата.
             // У Центрального аппарата родительским подразделением должен быть он сам
             if (centralId != row.regionBankDivision) {
                 // графа 2 - название подразделения
                 if (departmentParam.get('PARENT_ID')?.getReferenceValue()==null) {
-                    logger.error("Строка $fieldNumber: Для подразделения «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение атрибута «Наименование подразделения»!")
+                    logger.error("Строка $fieldNumber: Для подразделения территориального банка «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение наименования родительского подразделения!")
                 }
             }
         }
@@ -269,14 +275,4 @@ def getTotalRow(def dataRows) {
     }
     calcTotalSum(dataRows, totalRow, totalColumns)
     return totalRow
-}
-
-/**
- * Получить номер строки в таблице.
- *
- * @param data данные нф (helper)
- * @param row строка
- */
-def getIndex(def dataRows, def row) {
-    dataRows.indexOf(row)
 }

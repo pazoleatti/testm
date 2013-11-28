@@ -8,44 +8,53 @@
             font-size: 26px;
             margin: 10px;
         }
+        .tablePadding{
+            margin: 1px;
+        }
     </ui:style>
     <!--<ui:with field="bookerStatements"-->
     <!--type="com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.BookerStatementsView"/>-->
-    <g:DockLayoutPanel ui:field="dockPanel">
-        <g:north size="110">
+    <g:HorizontalPanel width="100%">
+        <g:cell>
             <g:VerticalPanel>
-                <g:Label styleName="{style.titleLabel}" text="Загрузка бухгалтерской отчётности"/>
-                <g:HorizontalPanel>
-                    <g:cell width="220px">
-                        <g:Label text="Подразделение"/>
-                    </g:cell>
-                    <g:cell width="220px">
-                        <g:Label text="Период"/>
-                    </g:cell>
-                    <g:cell width="220px">
-                        <g:Label text="Вид бухгалтерской отчётности"/>
-                    </g:cell>
-                </g:HorizontalPanel>
-                <g:HorizontalPanel verticalAlignment="MIDDLE">
-                    <g:cell width="220px">
-                        <d:DepartmentPickerPopupWidget width="200px" ui:field="departmentPicker" multiselection="false"
-                                                       header="Выберите подразделение"/>
-                    </g:cell>
-                    <g:cell width="220px">
-                        <g:FlowPanel>
-                            <rep:PeriodPickerPopupWidget ui:field="periodPickerPopup" multiselect="false"/>
-                        </g:FlowPanel>
-                    </g:cell>
-                    <g:cell width="220px">
-                        <g:ListBox ui:field="bookerReportType" width="200px"/>
-                    </g:cell>
-                    <g:cell>
-                        <fileuplod:FileUploadWidget ui:field="fileUploader"/>
-                        <!--Инициализируем параметры внутри View uploadHandler actionUrl смотри объевление (магия Дмитрия Л.)-->
-                    </g:cell>
-                </g:HorizontalPanel>
+                <g:cell>
+                    <g:Label styleName="{style.titleLabel}" text="Загрузка бухгалтерской отчётности"/>
+                </g:cell>
+                <g:cell>
+                    <g:HorizontalPanel>
+                        <g:cell width="220px">
+                            <g:Label text="Подразделение"/>
+                        </g:cell>
+                        <g:cell width="220px">
+                            <g:Label text="Период"/>
+                        </g:cell>
+                        <g:cell width="220px">
+                            <g:Label text="Вид бухгалтерской отчётности"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
+                </g:cell>
+                <g:cell>
+                    <g:HorizontalPanel verticalAlignment="MIDDLE" styleName="{style.tablePadding}">
+                        <g:cell width="220px" >
+                            <d:DepartmentPickerPopupWidget width="200px" ui:field="departmentPicker" multiselection="false"
+                                                           header="Выберите подразделение"/>
+                        </g:cell>
+                        <g:cell width="220px">
+                            <g:FlowPanel>
+                                <rep:PeriodPickerPopupWidget ui:field="periodPickerPopup" multiselect="false"/>
+                            </g:FlowPanel>
+                        </g:cell>
+                        <g:cell width="220px">
+                            <g:ListBox ui:field="bookerReportType" width="200px"/>
+                        </g:cell>
+                        <g:cell>
+                            <fileuplod:FileUploadWidget ui:field="fileUploader"/>
+                            <!--Инициализируем параметры внутри View uploadHandler actionUrl смотри объевление (магия Дмитрия Л.)-->
+                        </g:cell>
+                    </g:HorizontalPanel>
+                </g:cell>
             </g:VerticalPanel>
-        </g:north>
+        </g:cell>
 
-    </g:DockLayoutPanel>
+    </g:HorizontalPanel>
 </ui:UiBinder>

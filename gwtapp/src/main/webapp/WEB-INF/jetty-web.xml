@@ -47,7 +47,7 @@
 
 	<Call name="getConfiguration" class="bitronix.tm.TransactionManagerServices">
 		<Set name="journal">null</Set>
-		<Set name="defaultTransactionTimeout">360</Set>
+		<Set name="defaultTransactionTimeout">3600</Set>
 	</Call>
 
 	<New id="tx" class="org.mortbay.jetty.plus.naming.Resource">
