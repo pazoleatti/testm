@@ -98,17 +98,17 @@ insert into form_style (id, alias, form_template_id, font_color, back_color, ita
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (1, 1, 1, 1, 3, 1, 0);
 
 -- FormColumn
-insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, group_name, max_length, checking)
-	values (1, 'Строковый столбец', 1, 1, 'stringColumn', 'S', 10, null, null, 500, 1);
+insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking)
+	values (1, 'Строковый столбец', 1, 1, 'stringColumn', 'S', 10, null, 500, 1);
 
-insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, group_name, max_length, checking)
-	values (2, 'Числовой столбец', 1, 2, 'numericColumn', 'N', 10, 2, null, 15, 0);
+insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking)
+	values (2, 'Числовой столбец', 1, 2, 'numericColumn', 'N', 10, 2, 15, 0);
 
-insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, group_name, max_length, checking, attribute_id)
-	values (3, 'Справочный столбец 1', 1, 2, 'referenceColumn1', 'R', 10, null, null, null, 0, 1);
+insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id)
+	values (3, 'Справочный столбец 1', 1, 2, 'referenceColumn1', 'R', 10, null, null, 0, 1);
 
-insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, group_name, max_length, checking, attribute_id)
-	values (4, 'Справочный столбец 2', 1, 2, 'referenceColumn2', 'R', 10, null, null, null, 0, 2);
+insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id)
+	values (4, 'Справочный столбец 2', 1, 2, 'referenceColumn2', 'R', 10, null, null, 0, 2);
 
 -- Строки
 insert into data_row(id, form_data_id, alias, ord, type) values (1, 1, 'testAlias', 1, 0);
