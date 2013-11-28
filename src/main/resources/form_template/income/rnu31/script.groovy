@@ -4,14 +4,27 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import groovy.transform.Field
 
 /**
  * Форма "(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям".
+ * formTemplateId=328
  *
  * @version 59
  *
  * @author rtimerbaev
  */
+
+// Признак периода ввода остатков
+@Field
+def boolean isBalancePeriod = null
+
+def getBalancePeriod(){
+    if (isBalancePeriod == null){
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    }
+    return isBalancePeriod
+}
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
@@ -21,14 +34,13 @@ switch (formDataEvent) {
         logicalCheck()
         break
     case FormDataEvent.CALCULATE :
-        //calc()
-        //!hasError() && logicalCheck()
+        logicalCheck()
         break
     case FormDataEvent.ADD_ROW :
-        // addNewRow()
+        // Всего форма должна содержать одну строку
         break
     case FormDataEvent.DELETE_ROW :
-        // deleteRow()
+        // Всего форма должна содержать одну строку
         break
     // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
@@ -44,6 +56,7 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
+        calc()
         !hasError() && logicalCheck()
         break
     case FormDataEvent.IMPORT :
@@ -64,6 +77,12 @@ switch (formDataEvent) {
 // графа 10 - eurobondsRF
 // графа 11 - itherEurobonds
 // графа 12 - corporateBonds
+
+/**
+ * Расчеты. Алгоритмы заполнения полей формы.
+ */
+void calc() {
+}
 
 /**
  * Логические проверки.
@@ -89,7 +108,7 @@ def logicalCheck() {
             'itherEurobonds', 'corporateBonds']
 
     // 22. Обязательность заполнения полей графы 1..12
-    if (!checkRequiredColumns(row, requiredColumns)) {
+    if (!checkRequiredColumns(row, requiredColumns) && !getBalancePeriod()) {
         return false
     }
 
@@ -99,12 +118,13 @@ def logicalCheck() {
     // TODO (Ramil Timerbaev) протестировать проверку "начиная с отчета за февраль"
     if (!isFirstMonth()) {
         // 1. Проверка наличия предыдущего экземпляра отчета
-        if (rowOld == null) {
-            logger.error('Отсутствует предыдущий экземпляр отчета')
+        if (rowOld == null && !getBalancePeriod() && formDataEvent!=FormDataEvent.COMPOSE) {
+            logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
             return false
         }
 
         // 2..11 Проверка процентного (купонного) дохода по видам валютных ценных бумаг (графы 3..12)
+        if(rowOld != null)
         for (def column : requiredColumns) {
             if (row.getCell(column).getValue() < rowOld.getCell(column).getValue()) {
                 def securitiesType = row.securitiesType
@@ -112,24 +132,29 @@ def logicalCheck() {
                 if (column in warnColumns) {
                     logger.warn(message)
                 } else {
-                    logger.error(message)
+                    loggerError(message)
                 }
-                return false
+                if (!getBalancePeriod()) {
+                    return false
+                }
             }
         }
     }
 
     // 12..21. Проверка на неотрицательные значения (графы 3..12)
     for (def column : requiredColumns) {
-        if (row.getCell(column).getValue() < 0) {
+        def value = row.getCell(column).getValue()
+        if (value != null && value < 0) {
             def columnName = getColumnName(row, column)
             def message = "Значения графы \"$columnName\" по строке 1 отрицательное!"
             if (column in warnColumns) {
                 logger.warn(message)
             } else {
-                logger.error(message)
+                loggerError(message)
             }
-            return false
+            if (!getBalancePeriod()) {
+                return false
+            }
         }
     }
     return true
@@ -159,7 +184,7 @@ void consolidation() {
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 sourceRow = getData(source).getDataRow(getRows(getData(source)),'total')
                 columns.each { alias ->
-                    row.getCell(alias).value += sourceRow.getCell(alias).getValue()
+                    row.getCell(alias).setValue(sourceRow.getCell(alias).getValue())
                 }
             }
         }
@@ -172,12 +197,6 @@ void consolidation() {
  * Проверка при создании формы.
  */
 void checkCreation() {
-    //проверка периода ввода остатков
-    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
-        logger.error('Налоговая форма не может быть в периоде ввода остатков.')
-        return
-    }
-
     def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
@@ -309,11 +328,12 @@ def checkRequiredColumns(def row, def columns) {
         def index = row.number
         def errorMsg = colNames.join(', ')
         if (!isEmpty(index)) {
-            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+            errorMsg = "В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg."
         } else {
             index = getIndex(row) + 1
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+            errorMsg = "В строке $index не заполнены колонки : $errorMsg."
         }
+        loggerError(errorMsg)
         return false
     }
     return true
@@ -598,4 +618,13 @@ void checkTotalRow(def totalRow) {
  */
 def hasError() {
     return logger.containsLevel(LogLevel.ERROR)
+}
+
+/** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
+void loggerError(def msg) {
+    if (getBalancePeriod()) {
+        logger.warn(msg)
+    } else {
+        logger.error(msg)
+    }
 }
