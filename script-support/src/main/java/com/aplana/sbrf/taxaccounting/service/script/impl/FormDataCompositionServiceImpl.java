@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
+import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
@@ -52,6 +53,9 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 	@Autowired
 	private AuditService auditService;
 
+    @Autowired
+    private ReportPeriodService reportPeriodService;
+
 	/**
 	 * Интеграция формы (источника данных) в другую форму (потребителя) происходит в несколько этапов:
 	 * <ol>
@@ -73,16 +77,23 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 	 */
 	@Override
 	public void compose(FormData sformData, int departmentId, int formTypeId, FormDataKind kind) {
-		// Find form data.
-		FormData dformData = formDataDao.find(formTypeId, kind, departmentId, sformData.getReportPeriodId());
+        // Find form data.
+        FormData dformData;
+        if (sformData.getPeriodOrder() == null) {
+            dformData = formDataDao.find(formTypeId, kind, departmentId, sformData.getReportPeriodId());
+        } else {
+            Integer taxPeriodId = reportPeriodService.get(sformData.getReportPeriodId()).getTaxPeriod().getId();
+            dformData = formDataDao.findMonth(formTypeId, kind, departmentId, taxPeriodId, sformData.getPeriodOrder());
+        }
 
-		// Create form data if doesn't exist.
+        // Create form data if doesn't exist.
 		if (dformData == null) {
 			// TODO: Надо подумать, что делать с пользователем.
 			int formTemplateId = formTemplateDao.getActiveFormTemplateId(formTypeId);
+            // TODO передавать в метод createFormDataWithoutCheck новый параметр periodOrder = sformData.getPeriodOrder()
 			long dFormDataId = formDataService.createFormDataWithoutCheck(scriptComponentContext.getLogger(), scriptComponentContext.getUserInfo(), formTemplateId, departmentId, kind, sformData.getReportPeriodId(), false);
 			dformData = formDataDao.get(dFormDataId);
-		}
+        }
 
 		if(dformData.getState() != WorkflowState.ACCEPTED){
 			auditService.add(FormDataEvent.COMPOSE, scriptComponentContext.getUserInfo(),

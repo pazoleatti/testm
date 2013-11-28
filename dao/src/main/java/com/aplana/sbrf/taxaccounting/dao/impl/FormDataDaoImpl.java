@@ -146,11 +146,11 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		if (formData.getId() == null) {
 			formDataId = generateId("seq_form_data", Long.class);
 			jt.update(
-					"insert into form_data (id, form_template_id, department_id, kind, state, report_period_id, return_sign)" +
-							" values (?, ?, ?, ?, ?, ?, ?)", 
+					"insert into form_data (id, form_template_id, department_id, kind, state, report_period_id, return_sign, period_order)" +
+							" values (?, ?, ?, ?, ?, ?, ?, ?)",
 					formDataId, formData.getFormTemplateId(),
 					formData.getDepartmentId(), formData.getKind().getId(),
-					formData.getState().getId(), formData.getReportPeriodId(), 0);
+					formData.getState().getId(), formData.getReportPeriodId(), 0, formData.getPeriodOrder());
 			formData.setId(formDataId);
 		} else {
 			formDataId = formData.getId();

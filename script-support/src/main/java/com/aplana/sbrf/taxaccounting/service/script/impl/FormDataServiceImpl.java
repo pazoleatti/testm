@@ -134,17 +134,35 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         // НФ назначения
         List<DepartmentFormType> typeList = departmentFormTypeService.getFormSources(departmentId,
                 formData.getFormType().getId(), formData.getKind());
+        // периодичность приёмника "ежемесячно"
+        boolean isFormDataMonthly = formData.getPeriodOrder() != null;
 
         for (DepartmentFormType type : typeList) {
-            FormData sourceFormData = find(type.getFormTypeId(), type.getKind(), type.getDepartmentId(),
-                    formData.getReportPeriodId());
+            // поиск источника с учетом периодичности
+            FormData sourceFormData;
+            if (!isFormDataMonthly) {
+                sourceFormData = find(type.getFormTypeId(), type.getKind(), type.getDepartmentId(),
+                        formData.getReportPeriodId());
+            } else {
+                Integer taxPeriodId = reportPeriodService.get(formData.getReportPeriodId()).getTaxPeriod().getId();
+                sourceFormData = findMonth(type.getFormTypeId(), type.getKind(), type.getDepartmentId(),
+                        taxPeriodId, formData.getPeriodOrder());
+            }
 
-            if (sourceFormData != null && sourceFormData.getState() == WorkflowState.ACCEPTED) {
-                for (DataRow<Cell> row : getDataRowHelper(sourceFormData).getAll()) {
-                    if (row.getAlias() == null) {
-                        // Добавление строк из источников
-                        rows.add(row);
-                    }
+            // источник не нашелся или не в статусе "Принята"
+            if (sourceFormData == null || sourceFormData.getState() != WorkflowState.ACCEPTED) {
+                continue;
+            }
+            // приёмник ежемесячный, а источник нет или наоборот
+            boolean isSourceFormDataMonthly = sourceFormData.getPeriodOrder() != null;
+            if ((isFormDataMonthly && !isSourceFormDataMonthly) || (!isFormDataMonthly && isSourceFormDataMonthly)) {
+                continue;
+            }
+
+            // Добавление строк из источников
+            for (DataRow<Cell> row : getDataRowHelper(sourceFormData).getAll()) {
+                if (row.getAlias() == null) {
+                    rows.add(row);
                 }
             }
         }
@@ -383,8 +401,18 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Override
     public boolean checkUnique(FormData formData, Logger logger) {
-        if (find(formData.getFormType().getId(), formData.getKind(), formData.getDepartmentId(),
-                formData.getReportPeriodId()) != null) {
+        // поиск формы с учетом периодичности
+        FormData existingFormData;
+        if (formData.getPeriodOrder() == null) {
+            existingFormData = find(formData.getFormType().getId(), formData.getKind(), formData.getDepartmentId(),
+                    formData.getReportPeriodId());
+        } else {
+            Integer taxPeriodId = reportPeriodService.get(formData.getReportPeriodId()).getTaxPeriod().getId();
+            existingFormData = findMonth(formData.getFormType().getId(), formData.getKind(), formData.getDepartmentId(),
+                    taxPeriodId, formData.getPeriodOrder());
+        }
+        // форма найдена
+        if (existingFormData != null) {
             logger.error(CHECK_UNIQ_ERROR);
             return false;
         }
@@ -423,8 +451,14 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
                 // Переход через год
                 month = 12;
                 List<TaxPeriod> taxPeriodList = taxPeriodService.listByTaxType(currentPeriod.getTaxType());
-                int currentIndex = taxPeriodList.indexOf(taxPeriod);
-                if (currentIndex == 0) {
+                int currentIndex = -1;
+                for (int i = 0; i < taxPeriodList.size(); i++) {
+                    if (taxPeriodList.get(i).getId().equals(taxPeriod.getId())) {
+                        currentIndex = i;
+                        break;
+                    }
+                }
+                if (currentIndex == 0 || currentIndex == -1) {
                     return null;
                 }
                 taxPeriod = taxPeriodList.get(currentIndex - 1);

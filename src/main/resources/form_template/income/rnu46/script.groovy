@@ -1,5 +1,9 @@
 package form_template.income.rnu46
 
+import com.aplana.sbrf.taxaccounting.model.FormData
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+
 /**
  * Скрипт для РНУ-46 (rnu46.groovy).
  * Форма "(РНУ-46) Регистр налогового учёта «карточка по учёту основных средств и капитальных вложений в неотделимые улучшения арендованного и полученного по договору безвозмездного пользования имущества»".
@@ -9,7 +13,7 @@ package form_template.income.rnu46
  * @author Stanislav Yasinskiy
  * @author Dmitriy Levykin
  */
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -17,7 +21,11 @@ import java.text.SimpleDateFormat
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        // TODO Уникальность для ежемесячных форм
+        // TODO убрать когда появится механизм назначения periodOrder при создании формы
+        if (formData.periodOrder == null)
+            return
+
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -27,7 +35,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, null)
+        formDataService.addRow(formData, currentDataRow, isMonthBalace() ? balanceColumns : editableColumns, null)
         break
     case FormDataEvent.DELETE_ROW:
         formDataService.getDataRowHelper(formData).delete(currentDataRow)
@@ -56,6 +64,11 @@ def refBookCache = [:]
 def editableColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed', 'usefulLifeWithUsed',
         'specCoef', 'exploitationStart', 'usefullLifeEnd', 'rentEnd']
 
+@Field
+def balanceColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed', 'usefulLifeWithUsed',
+        'specCoef', 'cost10perMonth', 'cost10perTaxPeriod', 'cost10perExploitation', 'amortNorm', 'amortMonth',
+        'amortTaxPeriod', 'amortExploitation', 'exploitationStart', 'usefullLifeEnd', 'rentEnd']
+
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['rowNumber', 'invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed',
@@ -79,25 +92,47 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 @Field
 def formDataPrev = null // Форма предыдущего месяца
 @Field
-def dataRowsPrev = null // Строки формы предыдущего месяца
+def dataRowHelperPrev = null // DataRowHelper формы предыдущего месяца
+@Field
+def isBalace = null
+@Field
+def format = new SimpleDateFormat('dd.MM.yyyy')
+@Field
+def check17 = format.parse('01.01.2006')
+@Field
+def lastDay2001 = format.parse('31.12.2001')
 
 // Получение формы предыдущего месяца
-def getFormDataPrev() {
+FormData getFormDataPrev() {
     if (formDataPrev == null) {
         formDataPrev = formDataService.getFormDataPrev(formData, formDataDepartment.id)
     }
     return formDataPrev
 }
 
-// Получение данных формы предыдущего месяца
-def getDataRowsPrev() {
-    if (dataRowsPrev == null) {
+// Получение DataRowHelper формы предыдущего месяца
+def getDataRowHelperPrev() {
+    if (dataRowHelperPrev == null) {
         def formDataPrev = getFormDataPrev()
         if (formDataPrev != null) {
-            dataRowsPrev = formDataService.getDataRowHelper(formDataPrev)
+            dataRowHelperPrev = formDataService.getDataRowHelper(formDataPrev)
         }
     }
-    return dataRowsPrev
+    return dataRowHelperPrev
+}
+
+// Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
+def isMonthBalace() {
+    if (isBalace == null) {
+        // Отчётный период
+        def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+        if (!reportPeriodService.isBalancePeriod(reportPeriod.id, formData.departmentId) || formData.periodOrder == null) {
+            isBalace = false
+        } else {
+            isBalace = formData.periodOrder - 1 % 3 == 0
+        }
+    }
+    return isBalace
 }
 
 // Алгоритмы заполнения полей формы
@@ -108,10 +143,6 @@ void calc() {
     if (dataRows.isEmpty()) {
         return
     }
-
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    def lastDay2001 = format.parse('31.12.2001')
-    def check17 = format.parse('01.01.2006')
     // Дата начала отчетного периода
     def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     // Дата окончания отчетного периода
@@ -123,75 +154,73 @@ void calc() {
     reportDateC.setTime(reportDate)
     def reportMounth = reportDateC.get(Calendar.MONTH)
 
-    // Отчет за предыдущий месяц
+    // Принятый отчет за предыдущий месяц
     def dataPrev = null
-    if (getFormDataPrev() == null) {
-        logger.error("Не найдены экземпляры ${formTemplateService.get(formData.formTemplateId).fullName} за прошлый отчетный период!")
-    } else {
-        dataPrev = getDataRowsPrev()
+    if (!isMonthBalace()) {
+        if (getFormDataPrev() == null || getFormDataPrev().state != WorkflowState.ACCEPTED) {
+            logger.error("Не найдены экземпляры ${formTemplateService.get(formData.formTemplateId).fullName} за прошлый отчетный период!")
+        } else {
+            dataPrev = getDataRowHelperPrev()
+        }
     }
 
-    // Индекс
-    def index = 0
+    // Сквозная нумерация с начала года
+    def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
 
     for (def row in dataRows) {
-        def map = null
-        if (row.amortGroup != null) {
-            map = getRefBookValue(71, row.amortGroup)
+        // Графа 1
+        row.rowNumber = ++rowNumber
+
+        if (isMonthBalace()) {
+            // Для периода ввода остатков расчитывается только порядковый номер
+            continue;
         }
 
+        def map = row.amortGroup == null ? null : getRefBookValue(71, row.amortGroup)
+
+        // Строка из предыдущей формы с тем же инвентарным номером
         prevRow = getPrevRow(dataPrev, row)
 
-        // графа 1
-        row.rowNumber = ++index
-
-        // графа 6
+        // Графа 6
         row.usefulLife = calc6(map)
 
-        // графа 8
+        // Графа 8
         row.usefulLifeWithUsed = calc8(row)
 
-        // графа 10
-        row.cost10perMonth = calc10(row, map, check17)
-        calc11and15and16 = calc11and15and16(reportMounth, row, prevRow)
-
-        // графа 11
-        row.cost10perExploitation = calc11and15and16[0]
-
-        // графа 15
-        row.amortTaxPeriod = calc11and15and16[1]
-
-        // графа 16
-        row.amortExploitation = calc11and15and16[2]
+        // Графа 10
+        row.cost10perMonth = calc10(row, map)
 
         // графа 12
         row.cost10perExploitation = calc12(row, prevRow, startDate, endDate)
 
+        // графа 14
+        row.amortMonth = calc14(row, prevRow, endDate)
+
+        // Графа 11, 15, 16
+        def calc11and15and16 = calc11and15and16(reportMounth, row, prevRow)
+        row.cost10perTaxPeriod = calc11and15and16[0]
+        row.amortTaxPeriod = calc11and15and16[1]
+        row.amortExploitation = calc11and15and16[2]
+
         // графа 13
         row.amortNorm = calc13(row)
-
-        // графа 14
-        row.amortMonth = calc14(row, prevRow, lastDay2001, endDate)
 
         // графа 18
         row.usefullLifeEnd = calc18(row)
     }
-
     dataRowHelper.update(dataRows);
 }
 
 // Ресчет графы 6
-def calc6(def map) {
-    if (map != null) {
-        return map.TERM.numberValue
-    }
-    return null
+BigDecimal calc6(def map) {
+    return map?.TERM?.numberValue
 }
 
 // Ресчет графы 8
-def calc8(def row) {
-    if (row.monthsUsed == null || row.usefulLife == null || row.specCoef == null)
+BigDecimal calc8(def row) {
+    if (row.monthsUsed == null || row.usefulLife == null || row.specCoef == null) {
         return null
+    }
     if (row.monthsUsed < row.usefulLife) {
         if (row.specCoef > 0) {
             return round((row.usefulLife - row.monthsUsed) / row.specCoef, 0)
@@ -203,94 +232,100 @@ def calc8(def row) {
 }
 
 // Ресчет графы 10
-def calc10(def row, def map, def check17) {
-    def BigDecimal tmp = null
-    if (map != null) {
-        if (map.GROUP.numberValue in [1, 2, 8..10] && row.cost != null) {
-            tmp = row.cost * 10
-        } else if (row.amortGroup in (3..7) && row.cost != null) {
-            tmp = row.cost * 30
-        } else if (row.exploitationStart != null && row.exploitationStart < check17) {
-            tmp = 0
-        }
+BigDecimal calc10(def row, def map) {
+    def Integer group = map?.GROUP?.numberValue
+    def Integer amortGroup = row.amortGroup
+    if ([1, 2, 8..10].contains(group) && row.cost != null) {
+        return round(row.cost * 10)
+    } else if ([3..7].contains(row.amortGroup) && row.cost != null) {
+        return round(row.cost * 30)
+    } else if (row.exploitationStart != null && row.exploitationStart < check17) {
+            return 0
     }
-    return round(tmp)
+    return null
 }
 
 // Ресчет граф 11, 15, 16
-def calc11and15and16(def reportMonth, def row, def prevRow) {
-    def values = [null, null, null]
+BigDecimal[] calc11and15and16(def reportMonth, def row, def prevRow) {
+    def BigDecimal[] values = new BigDecimal[3]
     if (reportMonth == Calendar.JANUARY) {
         values[0] = row.cost10perMonth
         values[1] = row.amortMonth
         values[2] = row.amortMonth
     } else if (prevRow != null) {
-        if (prevRow.cost10perTaxPeriod != null)
+        if (row.cost10perMonth != null && prevRow.cost10perTaxPeriod != null) {
             values[0] = row.cost10perMonth + prevRow.cost10perTaxPeriod
-        if (prevRow.amortTaxPeriod != null)
+        }
+        if (row.amortMonth != null && prevRow.amortTaxPeriod != null) {
             values[1] = row.amortMonth + prevRow.amortTaxPeriod
-        if (prevRow.amortExploitation != null)
+        }
+        if (row.amortMonth != null && prevRow.amortExploitation != null) {
             values[2] = row.amortMonth + prevRow.amortExploitation
+        }
     }
     return values
 }
 
 // Ресчет графы 12
-def calc12(def row, def prevRow, def rpStartDate, def rpEndDate) {
-    def BigDecimal val = null
+BigDecimal calc12(def row, def prevRow, def startDate, def endDate) {
     if (row.exploitationStart == null) {
-        val = null
-    } else if (rpStartDate < row.exploitationStart && row.exploitationStart < rpEndDate) {
-        val = row.cost10perMonth
-    } else if (prevRow != null && prevRow.cost10perExploitation != null) {
-        val = row.cost10perMonth + prevRow.cost10perExploitation
+        return null
+    } else if (startDate < row.exploitationStart && row.exploitationStart < endDate) {
+        return row.cost10perMonth
+    } else if (prevRow != null && row.cost10perMonth != null && prevRow.cost10perExploitation != null) {
+        return row.cost10perMonth + prevRow.cost10perExploitation
     }
-    return val
 }
 
 // Ресчет графы 13
-def calc13(def row) {
-    if (row == null || row.usefulLifeWithUsed == null || row.usefulLifeWithUsed == 0)
+BigDecimal calc13(def row) {
+    if (row == null || row.usefulLifeWithUsed == null || row.usefulLifeWithUsed == 0) {
         return null
+    }
     return round(100 / row.usefulLifeWithUsed, 0)
 }
 
 // Ресчет графы 14
-def calc14(def row, def prevRow, def lastDay2001, def endDate) {
-    def BigDecimal val
+BigDecimal calc14(def row, def prevRow, def endDate) {
     if (row.usefullLifeEnd == null || row.cost10perExploitation == null || row.cost == null
-            || prevRow.cost == null || prevRow.amortExploitation == null || (row.usefullLifeEnd - endDate) == 0)
-        val = null
-    else if (row.usefullLifeEnd > lastDay2001) {
-        val = (prevRow.cost - row.cost10perExploitation - prevRow.amortExploitation) / (row.usefullLifeEnd - endDate)
+            || prevRow.cost == null || prevRow.amortExploitation == null || (row.usefullLifeEnd - endDate) == 0) {
+        return null
+    } else if (row.usefullLifeEnd > lastDay2001) {
+        return round((prevRow.cost - row.cost10perExploitation - prevRow.amortExploitation) / (row.usefullLifeEnd - endDate))
     } else {
-        val = row.cost / 84
+        return round(row.cost / 84)
     }
-    return round(val)
+    return null
 }
 
 // Ресчет графы 18
-def calc18(def row) {
-    if (row.exploitationStart == null || row.usefulLifeWithUsed == null)
+Date calc18(def row) {
+    if (row.exploitationStart == null || row.usefulLifeWithUsed == null) {
         return null
+    }
     def Calendar tmpCal = Calendar.getInstance()
     tmpCal.setTime(row.exploitationStart)
-    tmpCal.add(Calendar.MONTH, Integer.valueOf(row.usefulLifeWithUsed.toString()))
+    tmpCal.add(Calendar.MONTH, row.usefulLifeWithUsed.intValue())
     tmpCal.set(Calendar.DAY_OF_MONTH, tmpCal.getMaximum(Calendar.DAY_OF_MONTH))
     return tmpCal.getTime()
 }
 
 // Логические проверки
 void logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
+    if (formData.periodOrder == null) {
+        throw new ServiceException("Месячная форма создана как квартальная!")
+    }
 
-    if (dataRows.isEmpty()) {
+    if (isMonthBalace()) {
+        // В периоде ввода остатков нет лог. проверок
         return
     }
 
+    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
+
     // Алиасы граф для арифметической проверки
-    def arithmeticCheckAlias = ['usefulLifeWithUsed', 'cost10perMonth', /*'cost10perExploitation',*/ 'amortTaxPeriod',
-            'amortExploitation', 'cost10perExploitation', 'amortNorm', 'amortMonth', 'usefullLifeEnd']
+    def arithmeticCheckAlias = ['usefulLifeWithUsed', 'cost10perMonth', 'cost10perTaxPeriod', 'amortTaxPeriod',
+            'amortExploitation', 'cost10perExploitation', 'amortNorm', 'amortMonth']
 
     // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
@@ -303,26 +338,10 @@ void logicCheck() {
     // Инвентарные номера
     def Set<String> invSet = new HashSet<String>()
 
-    // TODO Левыкин: Уникальность номера с начала года
-    for (def row in dataRows) {
-        // 1. Проверка на заполнение (графа 1..18)
-        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
-        // Проверка на уникальность поля «инвентарный номер»
-        if (invSet.contains(row.invNumber)) {
-            logger.error("Инвентарный номер не уникальный!")
-        } else {
-            invSet.add(row.invNumber)
-        }
-    }
-
     // Отчет за предыдущий месяц
-    if (getDataRowsPrev() == null) {
+    if (getDataRowHelperPrev() == null || getFormDataPrev().state != WorkflowState.ACCEPTED) {
         logger.error('Отсутствуют данные за прошлые отчетные периоды!')
     }
-
-    def SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    def check17 = format.parse('01.01.2006')
-    def lastDay2001 = format.parse('31.12.2001')
 
     // Отчетная дата
     def reportDate = getReportDate()
@@ -336,7 +355,17 @@ void logicCheck() {
             map = getRefBookValue(71, row.amortGroup)
         }
 
-        prevRow = getPrevRow(getDataRowsPrev(), row)
+        prevRow = getPrevRow(getDataRowHelperPrev(), row)
+
+        // 1. Проверка на заполнение (графа 1..18)
+        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
+
+        // 2. Проверка на уникальность поля «инвентарный номер»
+        if (invSet.contains(row.invNumber)) {
+            logger.error("Инвентарный номер не уникальный!")
+        } else {
+            invSet.add(row.invNumber)
+        }
 
         // 5. Проверка на нулевые значения (графа 9, 10, 11, 13, 14, 15)
         if (row.specCoef == 0 &&
@@ -348,19 +377,26 @@ void logicCheck() {
             logger.error('Все суммы по операции нулевые!')
         }
 
+        def prevSum = getYearSum(['cost10perMonth','amortMonth'])
+
         // 6. Проверка суммы расходов в виде капитальных вложений с начала года
-        if (prevRow != null &&
-                row.cost10perTaxPeriod >= row.cost10perMonth &&
-                row.cost10perTaxPeriod == row.cost10perTaxPeriod + prevRow.cost10perTaxPeriod &&
-                row.cost10perTaxPeriod == prevRow.cost10perTaxPeriod) {
+        if (prevRow == null ||
+                row.cost10perTaxPeriod == null ||
+                row.cost10perMonth == null ||
+                prevRow.cost10perTaxPeriod == null ||
+                row.cost10perTaxPeriod < row.cost10perMonth ||
+                row.cost10perTaxPeriod != row.cost10perMonth + prevRow.cost10perTaxPeriod ||
+                row.cost10perTaxPeriod != prevSum.cost10perMonth) {
             logger.error('Неверная сумма расходов в виде капитальных вложений с начала года!')
         }
 
         // 7. Проверка суммы начисленной амортизации с начала года
-        if (prevRow != null &&
-                row.amortTaxPeriod < row.amortMonth &&
-                row.amortTaxPeriod == row.cost10perTaxPeriod + prevRow.amortTaxPeriod &&
-                row.amortTaxPeriod == prevRow.amortTaxPeriod) {
+        if (prevRow == null ||
+                row.amortTaxPeriod == null ||
+                row.amortMonth == null ||
+                row.amortTaxPeriod < row.amortMonth ||
+                row.amortTaxPeriod != row.amortMonth + prevRow.amortTaxPeriod ||
+                row.amortTaxPeriod != prevSum.amortMonth) {
             logger.error('Неверная сумма начисленной амортизации с начала года!')
         }
 
@@ -368,26 +404,26 @@ void logicCheck() {
         def calc11and15and16 = calc11and15and16(reportMounth, row, prevRow)
 
         needValue['usefulLifeWithUsed'] = calc8(row)
-        needValue['cost10perMonth'] = calc10(row, map, check17)
-        // needValue['cost10perExploitation'] = calc11and15and16(row, reportDate)
+        needValue['cost10perMonth'] = calc10(row, map)
+        needValue['cost10perTaxPeriod'] = calc11and15and16[0]
         needValue['amortTaxPeriod'] = calc11and15and16[1]
         needValue['amortExploitation'] = calc11and15and16[2]
         needValue['cost10perExploitation'] = calc12(row, prevRow, startDate, endDate)
         needValue['amortNorm'] = calc13(row)
-        needValue['amortMonth'] = calc14(row, prevRow, lastDay2001, endDate)
-        needValue['usefullLifeEnd'] = calc18(row)
+        needValue['amortMonth'] = calc14(row, prevRow, endDate)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+
+        if (row.usefullLifeEnd !=  calc18(row)) {
+            logger.error("Cтрока ${row.getIndex()}: Неверное значение графы: ${getColumnName(row, 'usefullLifeEnd')}!")
+        }
 
         // Проверки НСИ
         checkNSI(71, row, 'amortGroup')
     }
 }
 // Округление
-def round(def value, def int precision = 2) {
-    if (value == null) {
-        return null
-    }
-    return value.setScale(precision, RoundingMode.HALF_UP)
+def BigDecimal round(def value, def int precision = 2) {
+    return value == null ? null : value.setScale(precision, RoundingMode.HALF_UP)
 }
 
 // Получить отчетную дату
@@ -396,13 +432,49 @@ def getReportDate() {
     return tmp ? tmp.getTime() + 1 : null
 }
 
-// Получить значение за предыдущий отчетный период для графы 11, 12, 14, 15, 16
+// Поиск строки из предыдущей формы с тем же инвентарным номером
 def getPrevRow(def dataPrev, def row) {
     if (dataPrev != null)
-        for (def rowPrev : dataPrev.getAllCached()) {
+        for (def rowPrev : dataPrev.getAll()) {
             if (rowPrev.invNumber == row.invNumber) {
                 return rowPrev
             }
         }
     return null
+}
+
+// Получение суммы по графе всех предыдущих принятых форм и по графе текущей формы
+def getYearSum(def aliases) {
+    def retVal = [:]
+
+    for (def alias : aliases) {
+        retVal[alias] = 0
+    }
+
+    // Налоговый период
+    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+
+    // Сумма в текущей форме
+    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
+    for (def row : dataRows) {
+        for (def alias : aliases) {
+            def val = row.get(alias)
+            retVal[alias] += val == null ? 0 : val
+        }
+    }
+    // Сумма в предыдущих формах
+    for (def month = formData.periodOrder - 1; month >= 1; month--) {
+        def prevFormData = formDataService.findMonth(formData.formType.id, formData.kind, formData.departmentId,
+                taxPeriod.id, month)
+        if (prevFormData != null && prevFormData.state == WorkflowState.ACCEPTED) {
+            def prevDataRows = formDataService.getDataRowHelper(prevFormData).getAll()
+            for (def row : prevDataRows) {
+                for (def alias : aliases) {
+                    def val = row.get(alias)
+                    retVal[alias] += val == null ? 0 : val
+                }
+            }
+        }
+    }
+    return retVal
 }

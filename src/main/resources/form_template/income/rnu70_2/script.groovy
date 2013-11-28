@@ -13,6 +13,7 @@ import groovy.transform.Field
  * formTemplateId=357
  *
  * @author Stanislav Yasinskiy
+ * @author Lenar Haziev
  *
  * Графы:
  * 1    rowNumber                -      № пп
@@ -65,6 +66,11 @@ switch (formDataEvent) {
         break
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED: // после принятия из подготовлена
         logicalCheck()
+        break
+    case FormDataEvent.COMPOSE :
+        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        calc()
+        logicCheck()
         break
 }
 

@@ -103,6 +103,11 @@ public class ForeignKeyResolver {
         ps.appendQuery("_value");
     }
 
+
+    public RefBookAttribute getLastRefBookAttribute(){
+        return lastRefBookAttribute;
+    }
+
     /**
      * Вход в узел содержащий алиас поля внешней таблицы
      */

@@ -10,6 +10,8 @@ import java.text.SimpleDateFormat
 
 /**
  * 6.41 (РНУ-60) Регистр налогового учёта закрытых сделок РЕПО с обязательством покупки по 2-й части
+ * formTemplateId=351
+ *
  * ЧТЗ http://conf.aplana.com/pages/viewpage.action?pageId=8588102 ЧТЗ_сводные_НФ_Ф2_Э1_т2.doc
  * @author ekuvshinov
  */
@@ -320,34 +322,24 @@ BigDecimal calc9(DataRow row) {
     BigDecimal result
     BigDecimal a = (row.acquisitionPrice ?: 0) - (row.salePrice ?: 0)
     BigDecimal c = a.abs().setScale(2, BigDecimal.ROUND_HALF_UP)
-
-    /**
-     * Если  .A>0, то
-     «графа 9» = 0
-     «графа 10» = B
-     Иначе Если  A<0
-     «графа 9» = C
-     «графа 10» = 0
-     Иначе
-     «графа 9»= «графа 10» = 0
-
-     где
-     A=«графа8» - «графа7»
-     B=ОКРУГЛ(A;2),
-     C= ОКРУГЛ(ABS(A);2),
-
-     ABS() – операция получения модуля(абсолютного значения)  числа.
-
-     Реализация немного проще и логичней чем в аналитике, но она даёт теже самые результаты
-     вообщем оптимизированный вариант
-
-     */
     if (a < 0) {
         result = c
     } else {
         result = 0
     }
-    return roundTo2(result)
+    return result
+}
+
+BigDecimal calc10(DataRow row) {
+    BigDecimal result
+    BigDecimal a = (row.acquisitionPrice ?: 0) - (row.salePrice ?: 0)
+    BigDecimal b = a.setScale(2, BigDecimal.ROUND_HALF_UP)
+    if (a > 0) {
+        result = b
+    } else {
+        result = 0
+    }
+    return result
 }
 
 /**
@@ -362,41 +354,6 @@ BigDecimal roundTo2(BigDecimal value) {
     } else {
         return value
     }
-}
-
-BigDecimal calc10(DataRow row) {
-    BigDecimal result
-    BigDecimal a = (row.acquisitionPrice ?: 0) - (row.salePrice ?: 0)
-    BigDecimal b = a.setScale(2, BigDecimal.ROUND_HALF_UP)
-
-    /**
-     * Если  .A>0, то
-     «графа 9» = 0
-     «графа 10» = B
-     Иначе Если  A<0
-     «графа 9» = C
-     «графа 10» = 0
-     Иначе
-     «графа 9»= «графа 10» = 0
-
-     где
-     A=«графа8» - «графа7»
-     B=ОКРУГЛ(A;2),
-     C= ОКРУГЛ(ABS(A);2),
-
-     ABS() – операция получения модуля(абсолютного значения)  числа.
-
-     Реализация немного проще и логичней чем в аналитике, но она даёт теже самые результаты
-     вообщем оптимизированный вариант
-
-     */
-
-    if (a > 0) {
-        result = b
-    } else {
-        result = 0
-    }
-    return roundTo2(result)
 }
 
 /**
@@ -676,13 +633,14 @@ def getRows(def data) {
  * @param date
  */
 def getRate(def date) {
-    if (date!=null) {
+    if (date != null) {
         def refDataProvider = refBookFactory.getDataProvider(23)
-        def res = refDataProvider.getRecords(date, null, null, null);
-        return res.getRecords().get(0).RATE.getNumberValue()
-    } else {
-        return null;
+        def records = refDataProvider.getRecords(date, null, null, null);
+        if (records != null && records.getRecords() != null && records.getRecords().size() > 0) {
+            return records.getRecords().getAt(0).RATE.numberValue
+        }
     }
+    return null;
 }
 
 /**
@@ -722,9 +680,21 @@ void importData() {
         logger.error('Имя файла не должно быть пустым')
         return
     }
-    if (!fileName.contains('.xml')) {
-        logger.error('Формат файла должен быть *.xml')
-        return
+
+    String charset = ""
+    // TODO в дальнейшем убрать возможность загружать RNU для импорта!
+    if (formDataEvent == FormDataEvent.IMPORT && fileName.contains('.xml') ||
+            formDataEvent == FormDataEvent.MIGRATION && fileName.contains('.xml')) {
+        if (!fileName.contains('.xml')) {
+            logger.error('Формат файла должен быть *.xml')
+            return
+        }
+    } else {
+        if (!fileName.contains('.r')) {
+            logger.error('Формат файла должен быть *.rnu')
+            return
+        }
+        charset = 'cp866'
     }
 
     def is = ImportInputStream
@@ -733,7 +703,7 @@ void importData() {
         return
     }
 
-    def xmlString = importService.getData(is, fileName)
+    def xmlString = importService.getData(is, fileName, charset)
     if (xmlString == null || xmlString == '') {
         logger.error('Отсутствие значении после обработки потока данных')
         return
@@ -747,7 +717,7 @@ void importData() {
 
     try {
         // добавить данные в форму
-        def totalLoad = addData(xml)
+        def totalLoad = addData(xml, fileName)
 
         // рассчитать, проверить и сравнить итоги
         if (totalLoad != null) {
@@ -765,7 +735,7 @@ void importData() {
  *
  * @param xml данные
  */
-def addData(def xml) {
+def addData(def xml, def fileName) {
     def date = new Date()
     def cache = [:]
     def data = getData(formData)
@@ -774,100 +744,152 @@ def addData(def xml) {
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def newRows = []
 
-    for (def row : xml.exemplar.table.detail.record) {
+    def records
+    def totalRecords
+    def type
+    if (formDataEvent == FormDataEvent.MIGRATION ||
+            formDataEvent == FormDataEvent.IMPORT && fileName.contains('.xml')) {
+        records = xml.exemplar.table.detail.record
+        totalRecords = xml.exemplar.table.total.record
+        type = 1 // XML
+    } else {
+        records = xml.row
+        totalRecords = xml.rowTotal
+        type = 2 // RNU
+    }
+
+    for (def row : records) {
         index = 0
         def newRow = getNewRow()
 
         // графа 1
-        newRow.tradeNumber = row.field[index].text()
+        newRow.tradeNumber = getCellValue(row, index, type, true)
         index++
 
         // графа 2
-        newRow.securityName = row.field[index].text()
+        newRow.securityName = getCellValue(row, index, type, true)
         index++
 
         // графа 3 - справочник 15, атрибут 64
         tmp = null
-        if (row.field[index].text() != null && row.field[index].text().trim() != '') {
-            tmp = getRecordId(15, 'CODE', row.field[index].text(), date, cache)
+        if (row.field[index].text() != null && getCellValue(row, index, type, true).trim() != '') {
+            tmp = getRecordId(15, 'CODE', getCellValue(row, index, type, true), date, cache)
         }
         newRow.currencyCode = tmp
         index++
 
         // графа 4
-        newRow.nominalPrice = getNumber(row.field[index].@value.text())
+        newRow.nominalPrice = getNumber(getCellValue(row, index, type))
         index++
 
-        // в транспортном файле порядок колонок по другому (графа 1, 2, 3, 4, 7, 8, 5, 6, 9, 10, 11, 12, 13)
-        // графа 7
-        newRow.salePrice = getNumber(row.field[index].@value.text())
-        index++
+        // в транспортном файле(XML) порядок колонок по другому (графа 1, 2, 3, 4, 7, 8, 5, 6, 9, 10, 11, 12, 13)
+        if (type==1) {
+            // графа 7
+            newRow.salePrice = getNumber(getCellValue(row, index, type))
+            index++
 
-        // графа 8
-        newRow.acquisitionPrice = getNumber(row.field[index].@value.text())
-        index++
+            // графа 8
+            newRow.acquisitionPrice = getNumber(getCellValue(row, index, type))
+            index++
 
-        // графа 5
-        newRow.part1REPODate = getDate(row.field[index].@value.text(), format)
-        index++
+            // графа 5
+            newRow.part1REPODate = getDate(getCellValue(row, index, type), format)
+            index++
 
-        // графа 6
-        newRow.part2REPODate = getDate(row.field[index].@value.text(), format)
-        index++
+            // графа 6
+            newRow.part2REPODate = getDate(getCellValue(row, index, type), format)
+            index++
+        } else {  //если формат файла RNU порядок не меняется
+            // графа 5
+            newRow.part1REPODate = getDate(getCellValue(row, index, type), format)
+            index++
 
+            // графа 6
+            newRow.part2REPODate = getDate(getCellValue(row, index, type), format)
+            index++
+
+            // графа 7
+            newRow.salePrice = getNumber(getCellValue(row, index, type))
+            index++
+
+            // графа 8
+            newRow.acquisitionPrice = getNumber(getCellValue(row, index, type))
+            index++
+        }
         // графа 9
-        newRow.income = getNumber(row.field[index].@value.text())
+        newRow.income = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 10
-        newRow.outcome = getNumber(row.field[index].@value.text())
+        newRow.outcome = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 11
-        newRow.rateBR = getNumber(row.field[index].@value.text())
+        newRow.rateBR = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 12
-        newRow.outcome269st = getNumber(row.field[index].@value.text())
+        newRow.outcome269st = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 13
-        newRow.outcomeTax = getNumber(row.field[index].@value.text())
+        newRow.outcomeTax = getNumber(getCellValue(row, index, type))
 
         newRows.add(newRow)
     }
     data.insert(newRows, 1)
 
     // итоговая строка
-    if (xml.exemplar.table.total.record.field.size() > 0) {
-        def row = xml.exemplar.table.total.record[0]
+    if (totalRecords.size() >= 1) {
+        def row = totalRecords[0]
         def totalRow = formData.createDataRow()
 
         // графа 4
-        totalRow.nominalPrice = getNumber(row.field[3].@value.text())
+        totalRow.nominalPrice = getNumber(getCellValue(row, 3, type))
 
-        // графа 7
-        totalRow.salePrice = getNumber(row.field[4].@value.text())
+        // в транспортном файле(XML) порядок колонок по другому (графа 1, 2, 3, 4, 7, 8, 5, 6, 9, 10, 11, 12, 13)
+        if (type==1) {
+            // графа 7
+            totalRow.salePrice = getNumber(getCellValue(row, 4, type))
 
-        // графа 8
-        totalRow.acquisitionPrice = getNumber(row.field[5].@value.text())
+            // графа 8
+            totalRow.acquisitionPrice = getNumber(getCellValue(row, 5, type))
+        } else {
+            // графа 7
+            totalRow.salePrice = getNumber(getCellValue(row, 6, type))
+
+            // графа 8
+            totalRow.acquisitionPrice = getNumber(getCellValue(row, 7, type))
+        }
 
         // графа 9
-        totalRow.income = getNumber(row.field[8].@value.text())
+        totalRow.income = getNumber(getCellValue(row, 8, type))
 
         // графа 10
-        totalRow.outcome = getNumber(row.field[9].@value.text())
+        totalRow.outcome = getNumber(getCellValue(row, 9, type))
 
         // графа 12
-        totalRow.outcome269st = getNumber(row.field[11].@value.text())
+        totalRow.outcome269st = getNumber(getCellValue(row, 11, type))
 
         // графа 13
-        totalRow.outcomeTax = getNumber(row.field[12].@value.text())
+        totalRow.outcomeTax = getNumber(getCellValue(row, 12, type))
 
         return totalRow
     } else {
         return null
     }
+}
+
+// для получения данных из RNU или XML
+String getCellValue(def row, int index, def type, boolean isTextXml = false){
+    if (type==1) {
+        if (isTextXml) {
+            return row.field[index].text()
+        } else {
+            return row.field[index].@value.text()
+        }
+    }
+    return row.cell[index+1].text()
 }
 
 /**

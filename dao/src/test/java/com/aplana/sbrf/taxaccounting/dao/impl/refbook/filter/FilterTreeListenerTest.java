@@ -34,9 +34,13 @@ public class FilterTreeListenerTest {
     @Before
     public void init(){
         refBook =  mock(RefBook.class);
-        RefBookAttribute attribute = new RefBookAttribute();
-        attribute.setAttributeType(RefBookAttributeType.STRING);
-        when(refBook.getAttribute("Alias123")).thenReturn(attribute);
+        RefBookAttribute attributeNumber = new RefBookAttribute();
+        attributeNumber.setAttributeType(RefBookAttributeType.NUMBER);
+
+        RefBookAttribute attributeString = new RefBookAttribute();
+        attributeString.setAttributeType(RefBookAttributeType.STRING);
+        when(refBook.getAttribute("Alias123")).thenReturn(attributeNumber);
+        when(refBook.getAttribute("AliasStringType11")).thenReturn(attributeString);
     }
 
     @Test
@@ -49,50 +53,50 @@ public class FilterTreeListenerTest {
         PreparedStatementData result1 = new PreparedStatementData();
         universalFilterTreeListener.setPs(result1);
         Filter.getFilterQuery("Alias123 = 123", universalFilterTreeListener);
-        assertTrue(result1.getQuery().toString().equals("aAlias123.STRING_value = 123"));
+        assertTrue(result1.getQuery().toString().equals("aAlias123.NUMBER_value = 123"));
 
         PreparedStatementData result2 = new PreparedStatementData();
         universalFilterTreeListener.setPs(result2);
         Filter.getFilterQuery("Alias123 = 123 and (Alias123 > 10 or Alias123 = 15)", universalFilterTreeListener);
-        assertTrue(result2.getQuery().toString().equals("aAlias123.STRING_value = 123 and(aAlias123.STRING_value > 10 or aAlias123.STRING_value = 15)"));
+        assertTrue(result2.getQuery().toString().equals("aAlias123.NUMBER_value = 123 and(aAlias123.NUMBER_value > 10 or aAlias123.NUMBER_value = 15)"));
 
         PreparedStatementData result3 = new PreparedStatementData();
         universalFilterTreeListener.setPs(result3);
         Filter.getFilterQuery("Alias123 is null", universalFilterTreeListener);
-        assertTrue(result3.getQuery().toString().equals("aAlias123.STRING_value is null"));
+        assertTrue(result3.getQuery().toString().equals("aAlias123.NUMBER_value is null"));
 
         PreparedStatementData result4 = new PreparedStatementData();
         universalFilterTreeListener.setPs(result4);
-        Filter.getFilterQuery("LOWER(Alias123) like 'any key'", universalFilterTreeListener);
-        assertTrue(result4.getQuery().toString().equals("LOWER(aAlias123.STRING_value) like ?"));
+        Filter.getFilterQuery("LOWER(AliasStringType11) like 'any key'", universalFilterTreeListener);
+        assertTrue(result4.getQuery().toString().equals("LOWER(aAliasStringType11.STRING_value) like ?"));
         assertTrue(result4.getParams().size() == 1);
         assertTrue(result4.getParams().get(0).equals(new String("any key")));
 
         PreparedStatementData result5 = new PreparedStatementData();
         universalFilterTreeListener.setPs(result5);
-        Filter.getFilterQuery("Alias123 like 'any key' and (1=1 OR 1=1)", universalFilterTreeListener);
-        assertTrue(result5.getQuery().toString().equals("aAlias123.STRING_value like ? and(1 = 1 OR 1 = 1)"));
+        Filter.getFilterQuery("AliasStringType11 like 'any key' and (1=1 OR 1=1)", universalFilterTreeListener);
+        assertTrue(result5.getQuery().toString().equals("aAliasStringType11.STRING_value like ? and(1 = 1 OR 1 = 1)"));
         assertTrue(result5.getParams().size() == 1);
         assertTrue(result5.getParams().get(0).equals(new String("any key")));
 
         PreparedStatementData result6 = new PreparedStatementData();
         universalFilterTreeListener.setPs(result6);
-        Filter.getFilterQuery("Alias123 like 'any \\\'key' and (1=1 OR 1=1)", universalFilterTreeListener);
-        assertTrue(result6.getQuery().toString().equals("aAlias123.STRING_value like ? and(1 = 1 OR 1 = 1)"));
+        Filter.getFilterQuery("AliasStringType11 like 'any \\\'key' and (1=1 OR 1=1)", universalFilterTreeListener);
+        assertTrue(result6.getQuery().toString().equals("aAliasStringType11.STRING_value like ? and(1 = 1 OR 1 = 1)"));
         assertTrue(result6.getParams().size() == 1);
         assertTrue(result6.getParams().get(0).equals(new String("any \\\'key")));
 
         PreparedStatementData result7 = new PreparedStatementData();
         universalFilterTreeListener.setPs(result7);
-        Filter.getFilterQuery("LOWER(Alias123) = LOWER('Организация')", universalFilterTreeListener);
-        assertTrue(result7.getQuery().toString().equals("LOWER(aAlias123.STRING_value) = LOWER(?)"));
+        Filter.getFilterQuery("LOWER(AliasStringType11) = LOWER('Организация')", universalFilterTreeListener);
+        assertTrue(result7.getQuery().toString().equals("LOWER(aAliasStringType11.STRING_value) = LOWER(?)"));
         assertTrue(result7.getParams().size() == 1);
         assertTrue(result7.getParams().get(0).equals(new String("Организация")));
 
         PreparedStatementData result8 = new PreparedStatementData();
         universalFilterTreeListener.setPs(result8);
-        Filter.getFilterQuery("Alias123 like 'any \\\'key1' and Alias123 like 'any key2' and Alias123 like 'any key3'", universalFilterTreeListener);
-        assertTrue(result8.getQuery().toString().equals("aAlias123.STRING_value like ? and aAlias123.STRING_value like ? and aAlias123.STRING_value like ?"));
+        Filter.getFilterQuery("AliasStringType11 like 'any \\\'key1' and AliasStringType11 like 'any key2' and AliasStringType11 like 'any key3'", universalFilterTreeListener);
+        assertTrue(result8.getQuery().toString().equals("aAliasStringType11.STRING_value like ? and aAliasStringType11.STRING_value like ? and aAliasStringType11.STRING_value like ?"));
         assertTrue(result8.getParams().size() == 3);
         assertTrue(result8.getParams().get(0).equals(new String("any \\\'key1")));
         assertTrue(result8.getParams().get(1).equals(new String("any key2")));
@@ -122,39 +126,101 @@ public class FilterTreeListenerTest {
 
         PreparedStatementData result4 = new PreparedStatementData();
         simpleFilterTreeListener.setPs(result4);
-        Filter.getFilterQuery("LOWER(Alias123) like 'any key'", simpleFilterTreeListener);
-        assertTrue(result4.getQuery().toString().equals("LOWER(Alias123) like ?"));
+        Filter.getFilterQuery("LOWER(AliasStringType11) like 'any key'", simpleFilterTreeListener);
+        assertTrue(result4.getQuery().toString().equals("LOWER(AliasStringType11) like ?"));
         assertTrue(result4.getParams().size() == 1);
         assertTrue(result4.getParams().get(0).equals(new String("any key")));
 
         PreparedStatementData result5 = new PreparedStatementData();
         simpleFilterTreeListener.setPs(result5);
-        Filter.getFilterQuery("Alias123 like 'any key' and (1=1 OR 1=1)", simpleFilterTreeListener);
-        assertTrue(result5.getQuery().toString().equals("Alias123 like ? and(1 = 1 OR 1 = 1)"));
+        Filter.getFilterQuery("AliasStringType11 like 'any key' and (1=1 OR 1=1)", simpleFilterTreeListener);
+        assertTrue(result5.getQuery().toString().equals("AliasStringType11 like ? and(1 = 1 OR 1 = 1)"));
         assertTrue(result5.getParams().size() == 1);
         assertTrue(result5.getParams().get(0).equals(new String("any key")));
 
         PreparedStatementData result6 = new PreparedStatementData();
         simpleFilterTreeListener.setPs(result6);
-        Filter.getFilterQuery("Alias123 like 'any \\\'key' and (1=1 OR 1=1)", simpleFilterTreeListener);
-        assertTrue(result6.getQuery().toString().equals("Alias123 like ? and(1 = 1 OR 1 = 1)"));
+        Filter.getFilterQuery("AliasStringType11 like 'any \\\'key' and (1=1 OR 1=1)", simpleFilterTreeListener);
+        assertTrue(result6.getQuery().toString().equals("AliasStringType11 like ? and(1 = 1 OR 1 = 1)"));
         assertTrue(result6.getParams().size() == 1);
         assertTrue(result6.getParams().get(0).equals(new String("any \\\'key")));
 
         PreparedStatementData result7 = new PreparedStatementData();
         simpleFilterTreeListener.setPs(result7);
-        Filter.getFilterQuery("LOWER(Alias123) = LOWER('Организация')", simpleFilterTreeListener);
-        assertTrue(result7.getQuery().toString().equals("LOWER(Alias123) = LOWER(?)"));
+        Filter.getFilterQuery("LOWER(AliasStringType11) = LOWER('Организация')", simpleFilterTreeListener);
+        assertTrue(result7.getQuery().toString().equals("LOWER(AliasStringType11) = LOWER(?)"));
         assertTrue(result7.getParams().size() == 1);
         assertTrue(result7.getParams().get(0).equals(new String("Организация")));
 
         PreparedStatementData result8 = new PreparedStatementData();
         simpleFilterTreeListener.setPs(result8);
-        Filter.getFilterQuery("Alias123 like 'any \\\'key1' and Alias123 like 'any key2' and Alias123 like 'any key3'", simpleFilterTreeListener);
-        assertTrue(result8.getQuery().toString().equals("Alias123 like ? and Alias123 like ? and Alias123 like ?"));
+        Filter.getFilterQuery("AliasStringType11 like 'any \\\'key1' and AliasStringType11 like 'any key2' and AliasStringType11 like 'any key3'", simpleFilterTreeListener);
+        assertTrue(result8.getQuery().toString().equals("AliasStringType11 like ? and AliasStringType11 like ? and AliasStringType11 like ?"));
         assertTrue(result8.getParams().size() == 3);
         assertTrue(result8.getParams().get(0).equals(new String("any \\\'key1")));
         assertTrue(result8.getParams().get(1).equals(new String("any key2")));
         assertTrue(result8.getParams().get(2).equals(new String("any key3")));
     }
+
+    /**
+     * Проверка исплючения если в
+     * функцию оберуть не строковый параметр
+     */
+    @Test(expected = RuntimeException.class)
+    public void mustThrowException(){
+        SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+        simpleFilterTreeListener.setRefBook(refBook);
+
+        PreparedStatementData result = new PreparedStatementData();
+        simpleFilterTreeListener.setPs(result);
+        Filter.getFilterQuery("LOWER(Alias123) like 'xx' ", simpleFilterTreeListener);
+
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void mustThrowException2(){
+        SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+        simpleFilterTreeListener.setRefBook(refBook);
+
+        PreparedStatementData result2 = new PreparedStatementData();
+        simpleFilterTreeListener.setPs(result2);
+        Filter.getFilterQuery("LENGTH(Alias123) like 'xx' ", simpleFilterTreeListener);
+    }
+
+    /**
+     * Проверка типов в простых выражениях
+     */
+    @Test(expected = RuntimeException.class)
+    public void simpleExpr(){
+        SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+        simpleFilterTreeListener.setRefBook(refBook);
+
+        PreparedStatementData result = new PreparedStatementData();
+        simpleFilterTreeListener.setPs(result);
+        Filter.getFilterQuery("Alias123 like 'any key1'", simpleFilterTreeListener);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void simpleExpr2(){
+        SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+        simpleFilterTreeListener.setRefBook(refBook);
+
+        PreparedStatementData result = new PreparedStatementData();
+        simpleFilterTreeListener.setPs(result);
+        Filter.getFilterQuery("AliasStringType11 > 5", simpleFilterTreeListener);
+    }
+
+    /**
+     * Проверка типов в сложных выражениях
+     */
+    @Test(expected = RuntimeException.class)
+    public void complexExpr(){
+        SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+        simpleFilterTreeListener.setRefBook(refBook);
+
+        PreparedStatementData result = new PreparedStatementData();
+        simpleFilterTreeListener.setPs(result);
+        Filter.getFilterQuery("LOWER(AliasStringType11) > 5", simpleFilterTreeListener);
+    }
 }
+
