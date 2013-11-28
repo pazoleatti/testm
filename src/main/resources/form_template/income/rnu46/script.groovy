@@ -2,6 +2,7 @@ package form_template.income.rnu46
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 
 /**
  * Скрипт для РНУ-46 (rnu46.groovy).
@@ -12,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
  * @author Stanislav Yasinskiy
  * @author Dmitriy Levykin
  */
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -374,22 +374,26 @@ void logicCheck() {
             logger.error('Все суммы по операции нулевые!')
         }
 
+        def prevSum = getYearSum(['cost10perMonth','amortMonth'])
+
         // 6. Проверка суммы расходов в виде капитальных вложений с начала года
-        if (prevRow != null &&
-                row.cost10perTaxPeriod != null &&
-                row.cost10perMonth != null &&
-                prevRow.cost10perTaxPeriod != null &&
-                row.cost10perTaxPeriod >= row.cost10perMonth &&
-                row.cost10perTaxPeriod == row.cost10perTaxPeriod + prevRow.cost10perTaxPeriod/* &&
-                row.cost10perTaxPeriod == prevRow.cost10perTaxPeriod*/) { // TODO Левыкин: Графа 11 = ∑графа 10, за все месяцы текущего года
+        if (prevRow == null ||
+                row.cost10perTaxPeriod == null ||
+                row.cost10perMonth == null ||
+                prevRow.cost10perTaxPeriod == null ||
+                row.cost10perTaxPeriod < row.cost10perMonth ||
+                row.cost10perTaxPeriod != row.cost10perMonth + prevRow.cost10perTaxPeriod ||
+                row.cost10perTaxPeriod != prevSum.cost10perMonth) {
             logger.error('Неверная сумма расходов в виде капитальных вложений с начала года!')
         }
 
         // 7. Проверка суммы начисленной амортизации с начала года
-        if (prevRow != null &&
-                row.amortTaxPeriod < row.amortMonth &&
-                row.amortTaxPeriod == row.cost10perTaxPeriod + prevRow.amortTaxPeriod/* &&
-                row.amortTaxPeriod == prevRow.amortTaxPeriod*/) { // TODO Левыкин: Графа 15 = ∑графа 14, за все месяцы текущего года
+        if (prevRow == null ||
+                row.amortTaxPeriod == null ||
+                row.amortMonth == null ||
+                row.amortTaxPeriod < row.amortMonth ||
+                row.amortTaxPeriod != row.amortMonth + prevRow.amortTaxPeriod ||
+                row.amortTaxPeriod != prevSum.amortMonth) {
             logger.error('Неверная сумма начисленной амортизации с начала года!')
         }
 
@@ -434,4 +438,41 @@ def getPrevRow(def dataPrev, def row) {
             }
         }
     return null
+}
+
+// Получение суммы по графе всех предыдущих принятых форм и по графе текущей формы
+def getYearSum(def aliases) {
+    def retVal = [:]
+
+    for (def alias : aliases) {
+        retVal[alias] = 0
+    }
+
+    // Налоговый период
+    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+
+    // Сумма в текущей форме
+    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
+    for (def row : dataRows) {
+        for (def alias : aliases) {
+            def val = row.get(alias)
+            retVal[alias] += val == null ? 0 : val
+        }
+    }
+    // Сумма в предыдущих формах
+    def BigDecimal prevSum = 0
+    for (def month = formData.periodOrder - 1; month >= 1; month--) {
+        def prevFormData = formDataService.findMonth(formData.formType.id, formData.kind, formData.departmentId,
+                taxPeriod.id, month)
+        if (prevFormData != null && prevFormData.state == WorkflowState.ACCEPTED) {
+            def prevDataRows = formDataService.getDataRowHelper(prevFormData).getAll()
+            for (def row : prevDataRows) {
+                for (def alias : aliases) {
+                    def val = row.get(alias)
+                    retVal[alias] += val == null ? 0 : val
+                }
+            }
+        }
+    }
+    return retVal
 }
