@@ -21,11 +21,11 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
     private int rowNumber = 3;
     private int cellNumber = 0;
 
-    private static final String FIRST_COLUMN = "Логин";
-    private static final String SECOND_COLUMN = "Имя";
-    private static final String THIRD_COLUMN = "Департамент";
-    private static final String FOURTH_COLUMN = "Активность";
-    private static final String FIFTH_COLUMN = "Почта";
+    private static final String FIRST_COLUMN = "Полное имя пользователя";
+    private static final String SECOND_COLUMN = "Логин";
+    private static final String THIRD_COLUMN = "Электронная почта";
+    private static final String FOURTH_COLUMN = "Признак активности";
+    private static final String FIFTH_COLUMN = "Подразделение";
     private static final String SIXTH_COLUMN = "Роль";
 
 
@@ -104,33 +104,35 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
 
         for (TAUserFull user : taUserList){
             Row row = sheet.createRow(sheet.getLastRowNum() + 1);
-            Cell cell = row.createCell(cellNumber);
+
+	        Cell cell = row.createCell(cellNumber);
+
+	        cell.setCellStyle(cs);
+	        cell.setCellValue(user.getUser().getName());
+	        fillWidth(cellNumber, cell.getStringCellValue().length());
+	        cellNumber++;
+
+	        cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(user.getUser().getLogin());
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
-            cell = row.createCell(cellNumber);
-            cell.setCellStyle(cs);
-            cell.setCellValue(user.getUser().getName());
-            fillWidth(cellNumber, cell.getStringCellValue().length());
-            cellNumber++;
+	        cell = row.createCell(cellNumber);
+	        cell.setCellStyle(cs);
+	        cell.setCellValue(user.getUser().getEmail());
+	        fillWidth(cellNumber, cell.getStringCellValue().length());
+	        cellNumber++;
+
+	        cell = row.createCell(cellNumber);
+	        cell.setCellStyle(cs);
+	        cell.setCellValue(user.getUser().isActive()?"активный":"отключеный");
+	        fillWidth(cellNumber, cell.getStringCellValue().length());
+	        cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(user.getDepartment().getName());
-            fillWidth(cellNumber, cell.getStringCellValue().length());
-            cellNumber++;
-
-            cell = row.createCell(cellNumber);
-            cell.setCellStyle(cs);
-            cell.setCellValue(user.getUser().isActive()?"активный":"отключеный");
-            fillWidth(cellNumber, cell.getStringCellValue().length());
-            cellNumber++;
-
-            cell = row.createCell(cellNumber);
-            cell.setCellStyle(cs);
-            cell.setCellValue(user.getUser().getEmail());
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 

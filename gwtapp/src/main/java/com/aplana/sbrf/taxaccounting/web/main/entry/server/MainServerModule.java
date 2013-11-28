@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.server.FormDataServerMo
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.server.FormDataListServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.server.AdminServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.server.HistoryBusinessServerModule;
+import com.aplana.sbrf.taxaccounting.web.module.members.server.MembersServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.migration.server.MigrationServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.periods.server.PeriodsServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.RefBookDataServerModule;
@@ -36,7 +37,7 @@ import org.springframework.context.annotation.Import;
         FormDataServerModule.class, SigninControlServerModule.class, MainMenuServerModule.class,
         AdminServerModule.class, DeclarationTemplateServerModule.class, DeclarationDataServerModule.class,
         TaxFormNominationServerModule.class, DeclarationServerModule.class, ProjectVersionControlServerModule.class,
-        HistoryServerModule.class, UserListServerModule.class, ConfigurationServerModule.class,
+        HistoryServerModule.class, UserListServerModule.class, MembersServerModule.class, ConfigurationServerModule.class,
         AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class, SourcesServerModule.class,
         DepartmentConfigServerModule.class, BookerStatementsServerModule.class, RefBookPickerServerModule.class,
         RefBookListServerModule.class, RefBookDataServerModule.class, MigrationServerModule.class, SchedulerServerModule.class,
