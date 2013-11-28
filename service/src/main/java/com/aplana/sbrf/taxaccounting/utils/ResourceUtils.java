@@ -25,7 +25,12 @@ public class ResourceUtils {
                     uri = "file:" + uri ;
                 }
                 URL url = new URL(uri);
-                return new FileWrapper(new File(URLDecoder.decode(url.getFile(), "UTF-8")));
+                File file = new File(URLDecoder.decode(url.getFile(), "UTF-8"));
+                if (file.exists()) {
+                    return new FileWrapper(file);
+                } else {
+                    throw new ServiceException("Запрашиваемый ресурс не найден либо отсутствуют необходимые права");
+                }
             }
         } catch (MalformedURLException e) {
             throw new ServiceException("Неправильный формат URL до ресурса", e);
