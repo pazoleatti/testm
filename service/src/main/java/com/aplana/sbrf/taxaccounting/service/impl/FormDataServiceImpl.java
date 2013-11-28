@@ -16,7 +16,7 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
-import jcifs.smb.SmbFileInputStream;
+import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -167,8 +167,8 @@ public class FormDataServiceImpl implements FormDataService {
 	        	
 		        pKeyFile = File.createTempFile("signature", ".sign");
 				pKeyFileOutputStream = new BufferedOutputStream(new FileOutputStream(pKeyFile));
-				try{
-					pKeyFileInputStream = new BufferedInputStream(new SmbFileInputStream(pKeyFileUrl));
+				try {
+					pKeyFileInputStream = new BufferedInputStream(ResourceUtils.getSharedResourceAsStream(pKeyFileUrl));
 				} catch (Exception e){
 					throw new ServiceException("Ошибка доступа к файлу базы открытых ключей.", e);
 				}
