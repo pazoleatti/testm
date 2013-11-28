@@ -45,6 +45,9 @@ public class ResourceUtils {
                 SmbFile file = new SmbFile(uri);
                 return file.getInputStream();
             } else {
+                if (!uri.startsWith("file:")) {
+                    uri = "file:" + uri ;
+                }
                 URL url = new URL(uri);
                 return url.openStream();
             }
