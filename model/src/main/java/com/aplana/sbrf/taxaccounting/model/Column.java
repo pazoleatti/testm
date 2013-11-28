@@ -30,8 +30,7 @@ public abstract class Column implements Ordered, Serializable {
 	private int width;
 	private boolean checking;
 	private int order;
-	private String groupName;
-	
+
 	/**
 	 * Идентификатор столбца в БД
 	 * Если значение == null, то считается, что столбец новый и при его сохранении будет сгенерирован новый идентификатор
@@ -115,24 +114,6 @@ public abstract class Column implements Ordered, Serializable {
 	@Override
 	public void setOrder(int order) {
 		this.order = order;
-	}
-
-	/**
-	 * Возвращает имя группы столбцов, к которой относится данный столбец
-	 * Если в списке столбцов у нескольких столбцов стоящих рядом задано одинаковое значение названия группы столбцов, то эти
-	 * столбцы будут объекдинены в таблице под общей шапкой верхнего уровня. 
-	 * @return имя группы столбцов
-	 */
-	public String getGroupName() {
-		return groupName;
-	}
-
-	/**
-	 * Задать имя группы столбцов, к которой относится данный столбец
-	 * @param groupName имя группы столбцов
-	 */
-	public void setGroupName(String groupName) {
-		this.groupName = groupName;
 	}
 
 	/**

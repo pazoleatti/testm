@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
@@ -11,16 +8,17 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Реализация сервиса для работы с шаблонами налоговых форм
@@ -180,11 +178,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 				logger.error("значение для алиаса столбца \"" + column.getAlias() +
 						"\" слишком велико (фактическое: " + column.getAlias().getBytes().length
 						+ ", максимальное: " + FORM_COLUMN_ALIAS_MAX_VALUE + ")");
-			}
-			if (column.getGroupName() != null && column.getGroupName().getBytes().length > FORM_COLUMN_GROUP_NAME_MAX_VALUE) {
-				logger.error("значение для имени группы столбца \"" + column.getGroupName() +
-						"\" слишком велико (фактическое: " + column.getGroupName().getBytes().length +
-						", максимальное: " + FORM_COLUMN_GROUP_NAME_MAX_VALUE + ")");
 			}
 		}
 	}
