@@ -1,4 +1,8 @@
 package form_template.income.rnu110
+
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import groovy.transform.Field
+
 /**
  * Скрипт для РНУ-110
  * Форма "(РНУ-110) Регистр налогового учёта доходов, возникающих в связи с применением в сделках по предоставлению имущества в аренду Взаимозависимым лицам и резидентам оффшорных зон цен, не соответствующих рыночному уровню"
@@ -10,20 +14,23 @@ package form_template.income.rnu110
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        checkCreation()
-        break
-    case FormDataEvent.CHECK:
-        logicalCheck()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
+        prevPeriodCheck()
         calc()
-        logicalCheck()
+        logicCheck()
+        break
+    case FormDataEvent.CHECK:
+        logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        addNewRow()
+        formDataService.addRow(formData, currentDataRow, editableColumns, null)
         break
     case FormDataEvent.DELETE_ROW:
-        deleteRow()
+        if (currentDataRow != null && currentDataRow.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
+        }
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
@@ -31,16 +38,12 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
-        logicalCheck()
+        logicCheck()
         break
-// после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
-        break
-// обобщить
-    case FormDataEvent.COMPOSE:
-        consolidation()
+    case FormDataEvent.COMPOSE: // Консолидация
+        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
-        logicalCheck()
+        logicCheck()
         break
 }
 
@@ -56,71 +59,111 @@ switch (formDataEvent) {
 // графа 10 - marketRentSum
 // графа 11 - addRentSum
 
-/**
- * Расчеты
- * @return
- */
+//// Кэши и константы
+@Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+@Field
+def refBookCache = [:]
+
+// Редактируемые атрибуты
+@Field
+def editableColumns = []
+
+// Проверяемые на пустые значения атрибуты
+@Field
+def nonEmptyColumns = []
+
+// Сумируемые колонки в фиксированной с троке
+@Field
+def totalColumns = ['rent', 'rentMarket', 'factRentSum', 'marketRentSum', 'addRentSum']
+
+// Текущая дата
+@Field
+def currentDate = new Date()
+
+//// Обертки методов
+
+// Проверка НСИ
+boolean checkNSI(def refBookId, def row, def alias) {
+    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
+}
+
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
+                def Date date, boolean required = true) {
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, date, rowIndex,
+            cellName, logger, required)
+}
+
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
+// Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
+void prevPeriodCheck() {
+    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+        def formName = formData.getFormType().getName()
+        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+    }
+    if (getRNU(316) == null) {
+        throw new ServiceException(" Не найдены экземпляры «РНУ-4» за текущий отчетный период!")
+    }
+    if (getRNU(318) == null) {
+        throw new ServiceException(" Не найдены экземпляры «РНУ-6» за текущий отчетный период!")
+    }
+}
+
+def getRNU(def id) {
+    def rnu = formDataService.find(id, formData.kind, formData.departmentId, formData.reportPeriodId)
+    def data = rnu != null ? formDataService.getDataRowHelper(rnu) : null
+    if (data != null) {
+        def Map<String, Long> map = new HashMap<String, Long>()
+        for (def rowOld : data.getAllCached()) {
+            if (isTotal(rowOld)) {
+                map.put(rowOld.fix.replace('Итого по КНУ ', ''), rowOld.sum)
+            }
+        }
+        return map
+    }
+    return null
+}
+
+//// Кастомные методы
+
+// Алгоритмы заполнения полей формы
 def calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    // удалить строку "итого"
-    for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
-        row = (DataRow) iter.next()
-        if (isTotal(row)) {
-            iter.remove()
-            dataRowHelper.delete(row)
+    if (!dataRows.isEmpty()) {
+
+        // Удаление подитогов
+        deleteAllAliased(dataRows)
+
+        // номер последний строки предыдущей формы
+        def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+
+        for (row in dataRows) {
+            // графа 1
+            row.rowNumber = ++index
+            // графа 4
+            // TODO КНУ из Приложения №4 , соответствующий операции, по которой производится начисление в налоговом учёте дохода.
+            // row.code =
+            // графа 9
+            // TODO фактическая сумма дохода, подлежащая начислению исходя из ставки по договору, соответствующая сумме, отражённой в РНУ-4 (РНУ-6).
+            row.factRentSum = 0
+            // графа 11
+            if (row.marketRentSum != null && row.factRentSum != null)
+                row.addRentSum = row.marketRentSum - row.factRentSum
+            else
+                row.addRentSum = null
         }
+        dataRowHelper.save(dataRows)
     }
-
-    if (dataRows.isEmpty()) {
-        return
-    }
-
-    // отсортировать/группировать
-    dataRowHelper.save(dataRows.sort { (it.personName) })
-
-    // графа 7-11 для последней строки "итого"
-    def total7 = 0
-    def total8 = 0
-    def total9 = 0
-    def total10 = 0
-    def total11 = 0
-
-    // рассчитываем графы 9-11
-    dataRows.eachWithIndex { row, index ->
-        // графа 1
-        row.rowNumber = index + 1
-
-        // графа 4
-        // TODO КНУ из Приложения №4 , соответствующий операции, по которой производится начисление в налоговом учёте дохода.
-        // row.code =
-
-        // графа 9
-        // TODO фактическая сумма дохода, подлежащая начислению исходя из ставки по договору, соответствующая сумме, отражённой в РНУ-4 (РНУ-6).
-        row.factRentSum = 0
-
-        // графа 11
-        if (row.marketRentSum != null && row.factRentSum != null)
-            row.addRentSum = row.marketRentSum - row.factRentSum
-        else
-            row.addRentSum = null
-
-        // графа 7-11 для последней строки "итого"
-        if (row.rent != null)
-            total7 += row.rent
-        if (row.rentMarket != null)
-            total8 += row.rentMarket
-        if (row.factRentSum != null)
-            total9 += row.factRentSum
-        if (row.marketRentSum != null)
-            total10 += row.marketRentSum
-        if (row.addRentSum != null)
-            total11 += row.addRentSum
-    }
-
-    dataRowHelper.save(dataRows)
-
     /** Столбцы для которых надо вычислять итого и итого по коду. Графа 10, 11, 12. */
     def totalColumns = ['rent', 'rentMarket', 'factRentSum', 'marketRentSum', 'addRentSum']
 
@@ -188,7 +231,7 @@ def calc() {
  * Логические проверки
  * @return
  */
-def logicalCheck() {
+def logicCheck() {
     def tmp
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
@@ -509,22 +552,3 @@ def getRowByAlias(def dataRowHelper, def alias) {
     return dataRowHelper.getDataRow(dataRowHelper.getAllCached(), alias)
 }
 
-// Консолидация
-void consolidation() {
-    // удалить все строки и собрать из источников их строки
-    def rows = new LinkedList<DataRow<Cell>>()
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                formDataService.getDataRowHelper(source).getAllCached().each { row ->
-                    if (row.getAlias() == null || row.getAlias() == '') {
-                        rows.add(row)
-                    }
-                }
-            }
-        }
-    }
-    formDataService.getDataRowHelper(formData).save(rows)
-    logger.info('Формирование консолидированной формы прошло успешно.')
-}

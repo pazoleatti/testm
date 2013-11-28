@@ -81,9 +81,6 @@ void logicCheck() {
     }
 }
 
-/**
- * Консолидация.
- */
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -101,15 +98,16 @@ void consolidation() {
         if (source != null && source.state == WorkflowState.ACCEPTED) {
             def sourceData = formDataService.getDataRowHelper(source)
             def sourceRows = sourceData.allCached
-            if (it.formTypeId == formData.getFormType().getId()) {
-                def totalRowASource = sourceData.getDataRow(sourceRows, 'totalA')
-                totalRowA.amount += totalRowASource.amount
-                totalRowA.percIncome += totalRowASource.percIncome
-                def totalRowBSource = sourceData.getDataRow(sourceRows, 'totalB')
-                totalRowB.amount += totalRowBSource.amount
-                totalRowB.percIncome += totalRowBSource.percIncome
-                totalRow.percIncome += (totalRowA.percIncome - totalRowB.percIncome)
-            }
+
+            def totalRowASource = sourceData.getDataRow(sourceRows, 'totalA')
+            totalRowA.amount += totalRowASource.amount
+            totalRowA.percIncome += totalRowASource.percIncome
+
+            def totalRowBSource = sourceData.getDataRow(sourceRows, 'totalB')
+            totalRowB.amount += totalRowBSource.amount
+            totalRowB.percIncome += totalRowBSource.percIncome
+
+            totalRow.percIncome += (totalRowA.percIncome - totalRowB.percIncome)
         }
     }
     dataRowHelper.save(dataRows)
@@ -121,4 +119,3 @@ void consolidation() {
         logger.info('Формирование первичной формы РНУ-36.2 прошло успешно.')
     }
 }
-

@@ -144,11 +144,16 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 						//TODO (Marat Fayzullin) забыли выкинуть исключение?
 					}
 				}
-
+				// Добавляем стили. Они должны идти друг за другом
 				if (isStriped && currentCell != null
 						&& (currentCell instanceof com.aplana.sbrf.taxaccounting.model.Cell)
 						&& ((com.aplana.sbrf.taxaccounting.model.Cell)currentCell).isEditable()) {
 					td.style().trustedBackgroundImage(STRIPE_ICON_PROPERTY);
+				}
+
+				String colWidth = cellTable.getColumnWidth(column);
+				if (colWidth.equals("0em") || colWidth.equals("0px")) {
+					td.style().borderStyle(Style.BorderStyle.NONE);
 				}
 
 				if ((currentCell != null) && (currentCell instanceof com.aplana.sbrf.taxaccounting.model.Cell)) {
@@ -158,10 +163,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 					}
 				}
 
-				String colWidth = cellTable.getColumnWidth(column);
-				if (colWidth.equals("0em") || colWidth.equals("0px")) {
-					td.style().borderStyle(Style.BorderStyle.NONE);
-				}
+
 
 				// Add the inner div.
 				DivBuilder div = td.startDiv();

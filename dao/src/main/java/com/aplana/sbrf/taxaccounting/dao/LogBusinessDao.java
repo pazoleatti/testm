@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.LogBusiness;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.Date;
 import java.util.List;
@@ -24,6 +24,14 @@ public interface LogBusinessDao {
 	 */
 	List<LogBusiness> getFormLogsBusiness(long formId);
 
+    /**
+     * Получить информацию об историии событий НФ и деклараций.
+     * @param formDataIds
+     * @param declarationDataIds
+     * @return
+     */
+    PagingResult<LogSearchResultItem> getLogsBusiness(List<Long> formDataIds, List<Long> declarationDataIds, LogBusinessFilterValuesDao filter);
+
 	/**
 	 * Получить дату последнего принятия налоговой формы
 	 * @param formId идентификатор пользователя
@@ -43,4 +51,11 @@ public interface LogBusinessDao {
 	 * @param logBusiness информация для хранения истории
 	 */
 	void add(LogBusiness logBusiness);
+
+    /**
+     * Удаление записей истории событий.
+     * Используется при архивации.
+     * @param listIds
+     */
+    void removeRecords(List<Long> listIds);
 }

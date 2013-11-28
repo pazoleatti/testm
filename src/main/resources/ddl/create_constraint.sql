@@ -209,9 +209,6 @@ alter table department_report_period add constraint dep_rep_per_fk_rep_period_id
 alter table task_context add constraint task_context_uniq_task_id unique (task_id);
 alter table task_context add constraint task_context_uniq_task_name unique (task_name);
 
-alter table user_session add constraint user_session_uniq_session_id unique (session_id);
-alter table user_session add constraint user_session_uniq_user_login unique (user_login);
-
 alter table notification add constraint notification_fk_report_period foreign key (report_period_id) references report_period (id);
 alter table notification add constraint notification_fk_sender foreign key (sender_department_id) references department (id);
 alter table notification add constraint notification_fk_receiver foreign key (receiver_department_id) references department (id);

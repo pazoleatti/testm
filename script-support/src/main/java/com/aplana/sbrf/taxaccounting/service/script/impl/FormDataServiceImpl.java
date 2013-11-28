@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentFormTypeService;
 import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.script.TaxPeriodService;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.script.refbook.RefBookService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
@@ -34,6 +35,7 @@ import java.util.*;
 /*
  * Реализация FormDataService
  * @author auldanov
+ * @author Dmitriy Levykin
  */
 @Transactional(readOnly = true)
 @Component("formDataService")
@@ -71,13 +73,24 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Autowired
     private ReportPeriodService reportPeriodService;
 
+    @Autowired
+    private TaxPeriodService taxPeriodService;
+
     private Map<Number, DataRowHelper> helperHashMap = new HashMap<Number, DataRowHelper>();
 
     private static ApplicationContext applicationContext;
 
+    // Объект-маркер для ускорения работы кэша с отсутствующими значениями
+    private static final Long NULL_VALUE_MARKER = -1L;
+
     @Override
     public FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId) {
         return dao.find(formTypeId, kind, departmentId, reportPeriodId);
+    }
+
+    @Override
+    public FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder) {
+        return dao.findMonth(formTypeId, kind, departmentId, taxPeriodId, periodOrder);
     }
 
     @Override
@@ -210,10 +223,12 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
                                                        Map<Long, RefBookDataProvider> providerCache,
                                                        Map<Long, Map<String, RefBookValue>> refBookCache,
                                                        String alias, String value, Date date) {
+        // Не указали справочник
         if (refBookId == null) {
             return null;
         }
 
+        // Ключ кэша
         String filter = value == null || value.isEmpty() ? alias + " is null" :
                 "LOWER(" + alias + ") = LOWER('" + value + "')";
 
@@ -221,7 +236,15 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
         if (recordCache.containsKey(refBookId)) {
             Long recordId = recordCache.get(refBookId).get(dateStr + filter);
+
+            // Сравнение объектов
+            if (recordId == NULL_VALUE_MARKER) {
+                // Нашли маркер
+                return null;
+            }
+
             if (recordId != null) {
+                // Нашли в кэше
                 if (refBookCache != null) {
                     return refBookCache.get(recordId);
                 } else {
@@ -234,16 +257,21 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             recordCache.put(refBookId, new HashMap<String, Long>());
         }
 
+        // Поиск в БД
         RefBookDataProvider provider = getRefBookProvider(refBookFactory, refBookId, providerCache);
         PagingResult<Map<String, RefBookValue>> records = provider.getRecords(date, null, filter, null);
         if (records.size() == 1) {
             Map<String, RefBookValue> retVal = records.get(0);
             Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
             recordCache.get(refBookId).put(dateStr + filter, recordId);
-            if (refBookCache != null)
+            if (refBookCache != null) {
                 refBookCache.put(recordId, retVal);
+            }
             return retVal;
         }
+
+        // Не нашли в кэше и не нашли в БД, добавляем маркер
+        recordCache.get(refBookId).put(dateStr + filter, NULL_VALUE_MARKER);
         return null;
     }
 
@@ -376,9 +404,40 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Override
     public FormData getFormDataPrev(FormData formData, int departmentId) {
-        ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.getReportPeriodId());
-        if (prevReportPeriod != null) {
-            return find(formData.getFormType().getId(), formData.getKind(), departmentId, prevReportPeriod.getId());
+        if (formData == null) {
+            return null;
+        }
+        if (formData.getPeriodOrder() == null) {
+            // Квартальная форма
+            ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.getReportPeriodId());
+            if (prevReportPeriod != null) {
+                return find(formData.getFormType().getId(), formData.getKind(), departmentId, prevReportPeriod.getId());
+            }
+        } else {
+            // Ежемесячная форма
+            int month;
+            ReportPeriod currentPeriod = reportPeriodService.get(formData.getReportPeriodId());
+            TaxPeriod taxPeriod = currentPeriod.getTaxPeriod();
+
+            if (formData.getPeriodOrder() == 1) {
+                // Переход через год
+                month = 12;
+                List<TaxPeriod> taxPeriodList = taxPeriodService.listByTaxType(currentPeriod.getTaxType());
+                int currentIndex = -1;
+                for (int i = 0; i < taxPeriodList.size(); i++) {
+                    if (taxPeriodList.get(i).getId().equals(taxPeriod.getId())) {
+                        currentIndex = i;
+                        break;
+                    }
+                }
+                if (currentIndex == 0 || currentIndex == -1) {
+                    return null;
+                }
+                taxPeriod = taxPeriodList.get(currentIndex - 1);
+            } else {
+                month = formData.getPeriodOrder() - 1;
+            }
+            return findMonth(formData.getFormType().getId(), formData.getKind(), departmentId, taxPeriod.getId(), month);
         }
         return null;
     }

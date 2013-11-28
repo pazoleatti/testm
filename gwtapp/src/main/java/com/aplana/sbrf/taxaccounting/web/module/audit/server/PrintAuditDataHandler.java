@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.server;
 
-import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -42,7 +42,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
     @Override
     public PrintAuditDataResult execute(PrintAuditDataAction printAuditDataAction, ExecutionContext executionContext) throws ActionException {
         try {
-            PagingResult<LogSystemSearchResultItem> records = auditService.getLogsByFilter(printAuditDataAction.getLogSystemFilter());
+            PagingResult<LogSearchResultItem> records = auditService.getLogsByFilter(printAuditDataAction.getLogSystemFilter());
             String filePath = printingService.generateExcelLogSystem(records);
             InputStream fileInputStream = new FileInputStream(filePath);
 

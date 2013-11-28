@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 
-import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.core.client.GWT;
@@ -35,14 +35,14 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     Panel filterContentPanel;
 
     @UiField
-    GenericDataGrid<LogSystemSearchResultItem> auditTable;
+    GenericDataGrid<LogSearchResultItem> auditTable;
 
     @UiField
     FlexiblePager pager;
 
-    private final AsyncDataProvider<LogSystemSearchResultItem> dataProvider = new AsyncDataProvider<LogSystemSearchResultItem>() {
+    private final AsyncDataProvider<LogSearchResultItem> dataProvider = new AsyncDataProvider<LogSearchResultItem>() {
         @Override
-        protected void onRangeChanged(HasData<LogSystemSearchResultItem> display) {
+        protected void onRangeChanged(HasData<LogSearchResultItem> display) {
             if (getUiHandlers() != null){
                 final Range range = display.getVisibleRange();
                 getUiHandlers().onRangeChange(range.getStart(), range.getLength());
@@ -73,45 +73,45 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         initWidget(uiBinder.createAndBindUi(this));
 
         //Инициализация колонок
-        TextColumn<LogSystemSearchResultItem> dateColumn = new TextColumn<LogSystemSearchResultItem>() {
+        TextColumn<LogSearchResultItem> dateColumn = new TextColumn<LogSearchResultItem>() {
             @Override
-            public String getValue(LogSystemSearchResultItem object) {
+            public String getValue(LogSearchResultItem object) {
                 return format.format(object.getLogDate());
             }
         };
 
-        TextColumn<LogSystemSearchResultItem> eventColumn = new TextColumn<LogSystemSearchResultItem>() {
+        TextColumn<LogSearchResultItem> eventColumn = new TextColumn<LogSearchResultItem>() {
             @Override
-            public String getValue(LogSystemSearchResultItem object) {
+            public String getValue(LogSearchResultItem object) {
                 return object.getEvent().getTitle();
             }
         };
 
-        TextColumn<LogSystemSearchResultItem> noteColumn = new TextColumn<LogSystemSearchResultItem>() {
+        TextColumn<LogSearchResultItem> noteColumn = new TextColumn<LogSearchResultItem>() {
             @Override
-            public String getValue(LogSystemSearchResultItem object) {
+            public String getValue(LogSearchResultItem object) {
                 return object.getNote();
             }
         };
 
-        TextColumn<LogSystemSearchResultItem> reportPeriodColumn = new TextColumn<LogSystemSearchResultItem>() {
+        TextColumn<LogSearchResultItem> reportPeriodColumn = new TextColumn<LogSearchResultItem>() {
             @Override
-            public String getValue(LogSystemSearchResultItem object) {
+            public String getValue(LogSearchResultItem object) {
                 return object.getReportPeriod()!=null?object.getReportPeriod().getName() + " " + object.getReportPeriod().getYear()
                         : "";
             }
         };
 
-        TextColumn<LogSystemSearchResultItem> departmentColumn = new TextColumn<LogSystemSearchResultItem>() {
+        TextColumn<LogSearchResultItem> departmentColumn = new TextColumn<LogSearchResultItem>() {
             @Override
-            public String getValue(LogSystemSearchResultItem object) {
+            public String getValue(LogSearchResultItem object) {
                 return object.getDepartment().getName();
             }
         };
 
-        TextColumn<LogSystemSearchResultItem> typeColumn = new TextColumn<LogSystemSearchResultItem>() {
+        TextColumn<LogSearchResultItem> typeColumn = new TextColumn<LogSearchResultItem>() {
             @Override
-            public String getValue(LogSystemSearchResultItem object) {
+            public String getValue(LogSearchResultItem object) {
                 if (object.getFormType() != null) {
                     return "Налоговые формы";
                 }
@@ -122,9 +122,9 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
             }
         };
 
-        TextColumn<LogSystemSearchResultItem> formDataKindColumn = new TextColumn<LogSystemSearchResultItem>() {
+        TextColumn<LogSearchResultItem> formDataKindColumn = new TextColumn<LogSearchResultItem>() {
             @Override
-            public String getValue(LogSystemSearchResultItem object) {
+            public String getValue(LogSearchResultItem object) {
 				if (object.getFormKind() != null) {
 					return object.getFormKind().getName();
 				} else {
@@ -133,9 +133,9 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
             }
         };
 
-        TextColumn<LogSystemSearchResultItem> formDeclTypeColumn = new TextColumn<LogSystemSearchResultItem>() {
+        TextColumn<LogSearchResultItem> formDeclTypeColumn = new TextColumn<LogSearchResultItem>() {
             @Override
-            public String getValue(LogSystemSearchResultItem object) {
+            public String getValue(LogSearchResultItem object) {
                 if(object.getFormType() != null)
                     return object.getFormType().getName();
                 else
@@ -143,23 +143,23 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
             }
         };
 
-        TextColumn<LogSystemSearchResultItem> userLoginColumn = new TextColumn<LogSystemSearchResultItem>() {
+        TextColumn<LogSearchResultItem> userLoginColumn = new TextColumn<LogSearchResultItem>() {
             @Override
-            public String getValue(LogSystemSearchResultItem object) {
+            public String getValue(LogSearchResultItem object) {
                 return object.getUser().getLogin();
             }
         };
 
-        TextColumn<LogSystemSearchResultItem> userRolesColumn = new TextColumn<LogSystemSearchResultItem>() {
+        TextColumn<LogSearchResultItem> userRolesColumn = new TextColumn<LogSearchResultItem>() {
             @Override
-            public String getValue(LogSystemSearchResultItem object) {
+            public String getValue(LogSearchResultItem object) {
                 return object.getRoles();
             }
         };
 
-        TextColumn<LogSystemSearchResultItem> userIpColumn = new TextColumn<LogSystemSearchResultItem>() {
+        TextColumn<LogSearchResultItem> userIpColumn = new TextColumn<LogSearchResultItem>() {
             @Override
-            public String getValue(LogSystemSearchResultItem object) {
+            public String getValue(LogSearchResultItem object) {
                 return object.getIp();
             }
         };
@@ -178,9 +178,9 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         auditTable.addColumn(userLoginColumn, userLoginColumnHeader);
         auditTable.addColumn(userRolesColumn, userRolesColumnHeader);
         auditTable.addColumn(userIpColumn, userIpColumnHeader);
-	    auditTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSystemSearchResultItem>() {
+	    auditTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSearchResultItem>() {
 		    @Override
-		    public void onCellPreview(CellPreviewEvent<LogSystemSearchResultItem> event) {
+		    public void onCellPreview(CellPreviewEvent<LogSearchResultItem> event) {
 			    if ("mouseover".equals(event.getNativeEvent().getType())) {
 				    long index = (event.getIndex() - (pager.getPage() * auditTable.getPageSize()));
 				    TableCellElement cellElement = auditTable.getRowElement((int) index).getCells().getItem(event.getColumn());
@@ -210,7 +210,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     }
 
     @Override
-    public void setAuditTableData(int startIndex, long count, List<LogSystemSearchResultItem> itemList) {
+    public void setAuditTableData(int startIndex, long count, List<LogSearchResultItem> itemList) {
         auditTable.setRowCount((int)count);
         auditTable.setRowData(startIndex, itemList);
     }

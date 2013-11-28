@@ -125,4 +125,19 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
     public boolean isBalancePeriod(int reportPeriodId, long departmentId) {
         return reportPeriodService.isBalancePeriod(reportPeriodId, departmentId);
     }
+
+    @Override
+    public Calendar getMonthStartDate(int reportPeriodId, int periodOrder) {
+        return reportPeriodService.getMonthStartDate(reportPeriodId, periodOrder);
+    }
+
+    @Override
+    public Calendar getMonthEndDate(int reportPeriodId, int periodOrder) {
+        return reportPeriodService.getMonthEndDate(reportPeriodId, periodOrder);
+    }
+
+    @Override
+    public Calendar getMonthReportDate(int reportPeriodId, int periodOrder) {
+        return reportPeriodService.getMonthReportDate(reportPeriodId, periodOrder);
+    }
 }

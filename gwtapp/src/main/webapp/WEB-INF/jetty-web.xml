@@ -47,7 +47,7 @@
 
 	<Call name="getConfiguration" class="bitronix.tm.TransactionManagerServices">
 		<Set name="journal">null</Set>
-		<Set name="defaultTransactionTimeout">360</Set>
+		<Set name="defaultTransactionTimeout">3600</Set>
 	</Call>
 
 	<New id="tx" class="org.mortbay.jetty.plus.naming.Resource">
@@ -126,7 +126,7 @@
 
     <!-- Подмена EJB-модуля MigrationBean на maven-зависимость для dev-mode -->
     <New class="org.mortbay.jetty.plus.naming.Resource">
-        <Arg>ejblocal:taxaccounting/migration-ejb.jar/MigrationBean#com.aplana.sbrf.taxaccounting.service.MessageServiceLocal</Arg>
+        <Arg>ejblocal:taxaccounting-0.3.5/migration-ejb.jar/MigrationBean#com.aplana.sbrf.taxaccounting.service.MessageServiceLocal</Arg>
         <Arg>
             <New class="com.aplana.sbrf.taxaccounting.service.MigrationBean"/>
         </Arg>
@@ -134,7 +134,7 @@
 
     <!-- Подмена EJB-модуля TaskManager на maven-зависимость для dev-mode -->
     <New class="org.mortbay.jetty.plus.naming.Resource">
-        <Arg>ejblocal:taxaccounting/scheduler-core.jar/TaskManagerBean#com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal</Arg>
+        <Arg>ejblocal:taxaccounting-0.3.5/scheduler-core.jar/TaskManagerBean#com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal</Arg>
         <Arg>
             <New class="com.aplana.sbrf.taxaccounting.scheduler.core.manager.TaskManagerMock"/>
         </Arg>

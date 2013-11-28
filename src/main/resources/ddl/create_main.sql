@@ -653,16 +653,14 @@ user_task_jndi varchar2(500) not null,
 custom_params_exist number(9,0) not null,
 serialized_params blob null
 );
+comment on table task_context is 'Контекст пользовательских задач планировщика';
+comment on column task_context.task_id is 'идентификатор задачи планировщика websphere';
+comment on column task_context.task_name is 'название задачи';
+comment on column task_context.user_task_jndi is 'jndi-имя класса-обработчика задачи';
+comment on column task_context.custom_params_exist is 'признак наличия пользовательских параметров';
+comment on column task_context.serialized_params is 'сериализованные пользователькие параметры';
+
 create sequence seq_task_context start with 100;
-------------------------------------------------------------------------------------------------------
-create table user_session(
-id  number(18,0) primary key,
-session_id varchar2(100) not null,
-user_login varchar2(500) not null,
-user_ip varchar2(100) not null,
-create_time date not null
-);
-create sequence seq_user_session start with 100;
 ------------------------------------------------------------------------------------------------------
 create table notification(
 id number(9) primary key,

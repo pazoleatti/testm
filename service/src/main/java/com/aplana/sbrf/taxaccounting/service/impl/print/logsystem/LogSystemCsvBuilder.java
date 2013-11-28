@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.logsystem;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.io.IOUtils;
 
@@ -28,9 +28,9 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
             "Тип формы", "Тип налоговой формы", "Вид налоговой формы/декларации",
             "Пользователь", "Роль пользователя", "IP пользователя"};
 
-    private List<LogSystemSearchResultItem> items;
+    private List<LogSearchResultItem> items;
 
-    public LogSystemCsvBuilder(List<LogSystemSearchResultItem> items) throws IOException {
+    public LogSystemCsvBuilder(List<LogSearchResultItem> items) throws IOException {
         super("", "");
         this.items = items;
     }
@@ -64,7 +64,7 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
         CSVWriter csvWriter = new CSVWriter(new FileWriter(file), ';');
 
         csvWriter.writeNext(headers);
-        for (LogSystemSearchResultItem resultItem : items) {
+        for (LogSearchResultItem resultItem : items) {
             csvWriter.writeNext(assemble(resultItem));
         }
         csvWriter.close();
@@ -80,7 +80,7 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
         return zipFile.getAbsolutePath();
     }
 
-    private String[] assemble(LogSystemSearchResultItem item){
+    private String[] assemble(LogSearchResultItem item){
         List<String> entries = new ArrayList<String>();
         entries.add(SDF.format(item.getLogDate()));
         entries.add(item.getEvent().getTitle());

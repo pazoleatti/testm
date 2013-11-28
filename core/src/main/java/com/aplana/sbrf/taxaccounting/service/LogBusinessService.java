@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.LogBusiness;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.List;
 
@@ -24,6 +22,15 @@ public interface LogBusinessService {
 	 */
 	List<LogBusiness> getFormLogsBusiness(long formId);
 
+    /**
+     * Получает историю изменений для набора НФ и деклараций.
+     * Необходимо для ЖА контролеров.
+     * @param userInfo
+     * @param filter
+     * @return
+     */
+    PagingResult<LogSearchResultItem> getLogsBusiness(TAUserInfo userInfo, LogBusinessFilterValues filter);
+
 	/**
 	 * Добавить информацию об логировании
 	 * @param formDataId идентификатор формы
@@ -33,4 +40,11 @@ public interface LogBusinessService {
 	 * @param note текст
 	 */
 	void add(Long formDataId, Long declarationId, TAUserInfo userInfo, FormDataEvent event, String note);
+
+    /**
+     * Удаляем набор записей из истории и сразу создаем запись в ЖА об архивировании.
+     * @param items
+     * @param userInfo
+     */
+    void removeRecords(List<LogSearchResultItem> items, TAUserInfo userInfo);
 }

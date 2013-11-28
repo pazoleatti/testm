@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.logsystem;
 
-import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,7 +27,7 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
     private static final String fileName = "Журнал_аудита_";
     private static final String postfix = ".xlsx";
 
-    private List<LogSystemSearchResultItem> items;
+    private List<LogSearchResultItem> items;
 
     private static String[] headers = new String[]{"Дата-время", "Событие", "Текст события", "Период", "Подразделение",
             "Тип формы", "Тип налоговой формы", "Вид налоговой формы/декларации",
@@ -35,7 +35,7 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
     private final Log logger = LogFactory.getLog(getClass());
 
-    public LogSystemXlsxReportBuilder(List<LogSystemSearchResultItem> items) {
+    public LogSystemXlsxReportBuilder(List<LogSearchResultItem> items) {
         super(fileName, postfix);
         this.workBook = new SXSSFWorkbook();
         this.sheet = workBook.createSheet("Журнал аудита");
@@ -126,7 +126,7 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_DATA_FORMAT);
 
-        for(LogSystemSearchResultItem item : items){
+        for(LogSearchResultItem item : items){
             if (logger.isDebugEnabled())
                 logger.debug("Data table " + item);
             Row row = sheet.createRow(rowNumber++);

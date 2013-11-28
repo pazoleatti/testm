@@ -77,4 +77,31 @@ public interface ReportPeriodService {
      *
      */
     boolean isBalancePeriod(int reportPeriodId, long departmentId);
+
+    /**
+     * Получить дату начала месяца.
+     *
+     * @param reportPeriodId идентификатор отчетного период
+     * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
+     * @return
+     */
+    public Calendar getMonthStartDate(int reportPeriodId, int periodOrder);
+
+    /**
+     * Получить дату окончания месяца.
+     *
+     * @param reportPeriodId идентификатор отчетного период
+     * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
+     * @return
+     */
+    public Calendar getMonthEndDate(int reportPeriodId, int periodOrder);
+
+    /**
+     * Получить отчетную дату месяцы месяца.
+     *
+     * @param reportPeriodId идентификатор отчетного период
+     * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
+     * @return
+     */
+    public Calendar getMonthReportDate(int reportPeriodId, int periodOrder);
 }

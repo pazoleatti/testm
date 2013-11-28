@@ -1,7 +1,7 @@
 package form_template.income.rnu55
 
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -190,7 +190,7 @@ def BigDecimal calc10(def row, def startDate, def endDate, def daysInYear) {
             tmp = row.nominal * (row.percent / 100) * (countsDays / daysInYear)
         }
     } else {
-        tmp = row.percentInCurrency - getCalcPrevColumn10(row.bill, 'sumIncomeinCurrency')
+        tmp = row.percentInCurrency - getCalcPrevColumn10(row, 'sumIncomeinCurrency')
     }
     return tmp.setScale(2, RoundingMode.HALF_UP)
 }
@@ -213,7 +213,7 @@ def BigDecimal calc11(def row, def endDate) {
             tmp = row.sumIncomeinCurrency * getRate(endDate, row.currency)
         }
     } else {
-        tmp = row.percentInRuble - getCalcPrevColumn10(row.bill, 'sumIncomeinRuble')
+        tmp = row.percentInRuble - getCalcPrevColumn10(row, 'sumIncomeinRuble')
     }
     return tmp.setScale(2, RoundingMode.HALF_UP)
 }
@@ -228,9 +228,9 @@ void logicCheck() {
 
     def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
 
-    // алиасы графов для арифметической проверки
+    // Алиасы граф для арифметической проверки
     def arithmeticCheckAlias = ['percentInCurrency', 'sumIncomeinCurrency', 'sumIncomeinRuble']
-    // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
+    // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
 
     // Количество дней в году
@@ -254,38 +254,70 @@ void logicCheck() {
             continue
         }
 
+        index = row.getIndex()
+        errorMsg = "Строка $index: "
+
         // 1. Проверка на заполнение поля 1..11
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 2. Проверка даты приобретения и границ отчетного периода (графа 3)
         if (row.buyDate > endDate) {
-            logger.error('Дата приобретения вне границ отчетного периода!')
+            logger.error(errorMsg + 'Дата приобретения вне границ отчетного периода!')
         }
 
         // 3. Проверка даты реализации (погашения)  и границ отчетного периода (графа 7)
         if (row.implementationDate < startDate || endDate < row.implementationDate) {
-            logger.error('Дата реализации (погашения) вне границ отчетного периода!')
+            logger.error(errorMsg + 'Дата реализации (погашения) вне границ отчетного периода!')
         }
 
         // 4. Проверка на уникальность поля «№ пп» (графа 1) (в рамках текущего года)
         if (++i != row.number) {
-            logger.error('Нарушена уникальность номера по порядку!')
+            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         // 5. Проверка на уникальность векселя
         if (billsList.contains(row.bill)) {
-            logger.error("Повторяющееся значения в графе «Вексель»")
+            logger.error(errorMsg + "Повторяющееся значения в графе «Вексель»")
         } else {
             billsList.add(row.bill)
         }
 
         // 6. Проверка корректности значения в «Графе 3»
-        // TODO
-
+        // во всех принятых формах начиная с периода к которому принадлежит дата из графы3 проверяемой строки,
+        // заканчивая текущей формой, во всех этих формах ищем графу2 равную графе2 проверяемой строки и смотрим что
+        // у них совпадает графа3, если не совпала - ошибка
         // 7. Проверка на наличие данных предыдущих отчетных периодов для заполнения графы 10 и графы 11
-        // TODO (Ramil Timerbaev)
-        if (false) {
-            logger.error("Экземпляр за период(ы) <Дата начала отчетного периода1> - <Дата окончания отчетного периода1>, <Дата начала отчетного периода N> - <Дата окончания отчетного периода N> не существует (отсутствуют первичные данные для расчёта)!")
+        // берем все формы начиная с периода к которому отпосится дата графы3 проверяемой строки и заканчивая
+        // текущей фомрой. Если а этом промежутке есть периоды за которые нет формы - ошибка. Если среди найденых
+        // форм есть форма в которой нет строки где графа2 = графе2 проверяемоф формы - ошибка.
+        if (row.buyDate != null) {
+            taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, row.buyDate, startDate - 1)
+            for (taxPeriod in taxPeriods) {
+                reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.id)
+                for (reportPeriod in reportPeriods) {
+                    findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
+                            reportPeriod.id)
+                    if (findFormData != null) {
+                        isFind = false
+                        for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
+                            if (findRow.bill == row.bill) {
+                                isFind = true
+                                // лп 8
+                                if (findRow.buyDate != row.buyDate) {
+                                    logger.error(errorMsg + "Неверное указана Дата приобретения в РНУ-55 за "
+                                            + reportPeriod.name)
+                                }
+                                break
+                            }
+                        }
+                        // лп 7
+                        if (!isFind) {
+                            logger.warn(errorMsg + "Экземпляр за период " + reportPeriod.name +
+                                    " не существует (отсутствуют первичные данные для расчёта)!")
+                        }
+                    }
+                }
+            }
         }
 
         // 8. Проверка на неотрицательные значения
@@ -293,7 +325,7 @@ void logicCheck() {
             cell = row.getCell(it)
             if (cell.getValue() != null && cell.getValue() < 0) {
                 def name = cell.getColumn().getName()
-                logger.error("Значение графы \"$name\"  отрицательное!")
+                logger.error(errorMsg + "Значение графы \"$name\" отрицательное!")
             }
         }
 
@@ -316,24 +348,29 @@ def isRubleCurrency(def currencyCode) {
     return refBookService.getStringValue(15, currencyCode, 'CODE') == '810'
 }
 
-// TODO (Ramil Timerbaev) учесть графу 3 при суммировании
 /**
- * Cумма ранее начисленного процентного дохода по векселю до отчётного периода
- * (сумма граф 10 из РНУ-55 предыдущих отчётных (налоговых) периодов)
- * выбирается по графе 2 с даты приобретения (графа3) по дату начала отчетного периода.
- *
- * @param bill вексель
- * @param sumColumnName название графы, по которой суммировать данные
+ * Сумма по графе sumColumnName всех предыдущих форм начиная с row.buyDate в строках где bill = row.bill
+ * @param row
+ * @param sumColumnName алиас графы для суммирования
  */
-def getCalcPrevColumn10(def bill, def sumColumnName) {
-    def formDataOld = getFormDataOld()
+def getCalcPrevColumn10(def row, def sumColumnName) {
     def sum = 0
-    if (formDataOld == null) {
-        return 0
-    }
-    formDataOld.dataRows.each {
-        if (bill == row.bill) {
-            sum += row.getCell(sumColumnName).getValue() != null ? row.getCell(sumColumnName).getValue() : 0
+    if (row.buyDate != null && row.bill !=null) {
+        taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, row.buyDate, startDate - 1)
+        for (taxPeriod in taxPeriods) {
+            reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.id)
+            for (reportPeriod in reportPeriods) {
+                findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
+                        reportPeriod.id)
+                if (findFormData != null) {
+                    isFind = false
+                    for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
+                        if (findRow.bill == row.bill && findRow.buyDate == row.buyDate) {
+                            sum += findRow.getCell(sumColumnName).getValue() != null ? findRow.getCell(sumColumnName).getValue() : 0
+                        }
+                    }
+                }
+            }
         }
     }
     return sum
