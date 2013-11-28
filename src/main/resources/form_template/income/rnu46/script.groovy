@@ -21,6 +21,10 @@ import java.text.SimpleDateFormat
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
+        // TODO убрать когда появится механизм назначения periodOrder при создании формы
+        if (formData.periodOrder == null)
+            return
+
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK:
@@ -164,7 +168,6 @@ void calc() {
     def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
 
     for (def row in dataRows) {
-
         // Графа 1
         row.rowNumber = ++rowNumber
 
@@ -460,7 +463,6 @@ def getYearSum(def aliases) {
         }
     }
     // Сумма в предыдущих формах
-    def BigDecimal prevSum = 0
     for (def month = formData.periodOrder - 1; month >= 1; month--) {
         def prevFormData = formDataService.findMonth(formData.formType.id, formData.kind, formData.departmentId,
                 taxPeriod.id, month)
