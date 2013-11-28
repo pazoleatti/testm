@@ -27,9 +27,6 @@ public class ColumnAttributeEditor extends Composite implements Editor<Column>, 
 	TextBox alias;
 
 	@UiField
-	TextBox groupName;
-
-	@UiField
 	IntegerBox width;
 
 	@UiField
