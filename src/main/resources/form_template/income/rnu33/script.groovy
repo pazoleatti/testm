@@ -2,15 +2,11 @@ package form_template.income.rnu33
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
-
 import java.text.SimpleDateFormat
+import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 
 /**
  * Форма "(РНУ-33) Регистр налогового учёта процентного дохода и финансового результата от реализации (выбытия) ГКО".
- *
- * TODO:
- *		- проверка 7 не доделана, потому что про предыдущие месяцы пока не прояснилось
- *		- доделать получение нф за предыдущий месяц в методе getDataRowsOld() после того как будет готово: http://jira.aplana.com/browse/SBRFACCTAX-4515
  *
  * @author rtimerbaev
  */
@@ -161,7 +157,7 @@ void calc() {
     sort(dataRows)
 
     def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
-    dataRows.each { row
+    dataRows.each { row ->
         def record61 = (row.code != null? getRefBookValue(61, row.code) : null)
         def code = record61?.CODE?.value
         // графа 1
@@ -205,22 +201,33 @@ void logicCheck() {
     }
 
     // 7. Проверка наличия данных предыдущих месяцев
-    // TODO (Ramil Timerbaev) про предыдущие месяцы пока не прояснилось
-    def monthPeriods = [] // reportPeriodService.listByTaxPeriod(formData.reportPeriodId)
-    def monthDates = []
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    for (def monthPeriod : monthPeriods) {
-        def form = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, monthPeriod.id)
-        // если нет формы за какой то месяц, то получить даты начала и окончания месяца
-        if (form == null) {
-            def from = format.format(reportPeriodService.getStartDate(monthPeriod.id).time)
-            def to = format.format(reportPeriodService.getEndDate(monthPeriod.id).time)
-            monthDates.add("$from - $to")
+    if (formData.periodOrder > 1) {
+        def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
+        def monthDates = []
+        SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+        Calendar monthDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder)
+
+        (1..formData.periodOrder - 1).each { monthNumber ->
+            def form = formDataService.findMonth(formData.formType.id, formData.kind, formDataDepartment.id, taxPeriodId, monthNumber)
+            // если нет формы за какой то месяц, то получить даты начала и окончания месяца
+            if (form == null) {
+                // дата начала месяца
+                monthDate.set(Calendar.MONTH, monthNumber - 1)
+                monthDate.set(Calendar.DAY_OF_MONTH, 1)
+                def from = format.format(monthDate.time)
+
+                // дата окончания месяца
+                monthDate.set(Calendar.MONTH, monthNumber)
+                monthDate.set(Calendar.DAY_OF_MONTH, monthDate.get(Calendar.DAY_OF_MONTH) - 1)
+                def to = format.format(monthDate.time)
+
+                monthDates.add("$from - $to")
+            }
         }
-    }
-    if (!monthDates.isEmpty()) {
-        def periods = monthDates.join(', ')
-        logger.error("Экземпляр за период(ы) $periods не существует (отсутствуют первичные данные для расчёта)")
+        if (!monthDates.isEmpty()) {
+            def periods = monthDates.join(', ')
+            logger.error("Экземпляр за период(ы) $periods не существует (отсутствуют первичные данные для расчёта)")
+        }
     }
 
     // алиасы графов для арифметической проверки (12, 16, 17, 18, 20, 24, 25, 26, 27)
@@ -243,7 +250,7 @@ void logicCheck() {
 
         // . Обязательность заполнения полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
-        
+
         def record61 = (row.code ? getRefBookValue(61, row.code) : null)
         def code = record61?.CODE?.value
 
@@ -322,10 +329,6 @@ void logicCheck() {
     }
 }
 
-/*
- * Вспомогательные методы.
- */
-
 /** Получить новую стролу с заданными стилями. */
 def getNewRow() {
     def newRow = formData.createDataRow()
@@ -364,13 +367,6 @@ def abs(def value) {
     return value < 0 ? -value : value
 }
 
-/**
- * Округляет число до требуемой точности.
- *
- * @param value округляемое число
- * @param precision точность округления, знаки после запятой
- * @return округленное число
- */
 def roundValue(def value, int precision) {
     if (value != null) {
         return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
@@ -395,9 +391,9 @@ def getTotalMonthRow(def dataRows) {
 /**
  * Получить строку с итогами за текущий отчетный период.
  *
- * @param currentMonth строка с итогами за текущий месяц
+ * @param currentMonthRow строка с итогами за текущий месяц
  */
-def getTotalRow(def currentMonth) {
+def getTotalRow(def currentMonthRow) {
     def newRow = formData.createDataRow()
     newRow.setAlias('total')
     newRow.getCell('fix').setColSpan(4)
@@ -405,16 +401,13 @@ def getTotalRow(def currentMonth) {
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
-
     // получить итоги за предыдущие месяцы текущего налогового периода
-    def dataRowsOld = getDataRowsOld()
-    def prevTotal = (dataRowsOld ? getDataRow(dataRowsOld, 'total') : null)
-
+    def prevTotal = getPrevTotalRow()
     // сложить текущие суммы и за предыдущие месяцы
     totalSumColumns.each { alias ->
-        def tmp = currentMonth.getCell(alias).getValue() +
-                (prevTotal != null ? prevTotal.getCell(alias).getValue() : 0)
-        newRow.getCell(alias).setValue(tmp)
+        def tmp1 = (currentMonthRow.getCell(alias).value ?: 0)
+        def tmp2 = (prevTotal != null ? (prevTotal.getCell(alias).value ?: 0) : 0)
+        newRow.getCell(alias).setValue(tmp1 + tmp2)
     }
     return newRow
 }
@@ -515,15 +508,14 @@ def calc27(def row, def code) {
 }
 
 /** Получить нф за предыдущий месяц. */
-def getDataRowsOld() {
-    // TODO (Ramil Timerbaev) сделать получение нф за предыдущий месяц
-    // предыдущий отчётный период
-    def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-    if (reportPeriodOld != null) {
-        def formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
-        if (formDataOld != null) {
-            return formDataService.getDataRowHelper(formDataOld)?.allCached
-        }
+def getPrevTotalRow() {
+    if (formData.periodOrder == 1) {
+        return null
+    }
+    def formDataOld = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    if (formDataOld != null) {
+        def dataRowsOld = formDataService.getDataRowHelper(formDataOld)?.allCached
+        return (dataRowsOld ? getDataRow(dataRowsOld, 'total') : null)
     }
     return null
 }
