@@ -733,7 +733,8 @@ def getColumnName(def row, def alias) {
  * @param course курс
  */
 def calcAForColumn9or10(def row, def reportDate, def course) {
-    if (row.acquisitionPrice != null && row.salePrice != null && reportDate != null && row.part1REPODate != null && row.part2REPODate != null && course != null) {
+    if (row.acquisitionPrice != null && row.salePrice != null && reportDate != null && course != null
+            && row.part1REPODate != null && row.part2REPODate != null && row.part2REPODate != row.part1REPODate) {
         // ((«графа 6» - «графа 5») х (отчетная дата – «графа 7») / («графа 8» - «графа 7»)) х курс ЦБ РФ
         def tmp = ((row.acquisitionPrice - row.salePrice) *
                 (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
