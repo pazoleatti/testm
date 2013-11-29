@@ -421,8 +421,8 @@ void logicCheck() {
     }
 }
 // Округление
-def BigDecimal round(def value, def int precision = 2) {
-    return value == null ? null : value.setScale(precision, RoundingMode.HALF_UP)
+def BigDecimal round(BigDecimal value, def int precision = 2) {
+    return value?.setScale(precision, RoundingMode.HALF_UP)
 }
 
 // Получить отчетную дату
