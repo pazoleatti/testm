@@ -307,6 +307,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * @param isErrorFatal признак того, что операция не может быть продолжена с невалидным xml
      */
     private void validateDeclaration(DeclarationData declarationData, final Logger logger, final boolean isErrorFatal) {
+        Locale oldLocale = Locale.getDefault();
+        Locale.setDefault(new Locale("ru", "RU"));
         String xmlUuid = declarationData.getXmlDataUuid();
         String xml = new String(getBytesFromInputstream(xmlUuid));
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
@@ -353,12 +355,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 validator.validate(new StreamSource(xmlStream));
             } catch (Exception e) {
                 logger.error(e);
+                Locale.setDefault(oldLocale);
                 throw new ServiceException(VALIDATION_ERR_MSG, logger.getEntries());
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
+                Locale.setDefault(oldLocale);
                 throw new ServiceLoggerException(VALIDATION_ERR_MSG, logger.getEntries());
             }
+
+            Locale.setDefault(oldLocale);
         }
     }
 
