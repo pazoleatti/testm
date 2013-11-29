@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
@@ -87,8 +88,11 @@ public class FormDataServiceTest {
         }).when(formDataDao).delete(formData1.getId());
         ReflectionTestUtils.setField(formDataService, "formDataDao", formDataDao);
 
-        FormDataCompositionService formDataCompositionService = mock(FormDataCompositionService.class);
-        ReflectionTestUtils.setField(formDataService, "formDataCompositionService", formDataCompositionService);
+		FormDataCompositionService formDataCompositionService = mock(FormDataCompositionService.class);
+
+		ApplicationContext applicationContext = mock(ApplicationContext.class);
+		when(applicationContext.getBean(FormDataCompositionService.class)).thenReturn(formDataCompositionService);
+		ReflectionTestUtils.setField(formDataService, "applicationContext", applicationContext);
 
         LockCoreService lockCoreService = mock(LockCoreService.class);
         ReflectionTestUtils.setField(formDataService, "lockCoreService", lockCoreService);

@@ -47,16 +47,16 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	@UiConstructor
     public DeclarationFilterView(final MyBinder binder, MyDriver driver) {
 
-        declarationTypeId = new ListBoxWithTooltip<Integer>(new AbstractRenderer<Integer>() {
-		    @Override
-		    public String render(Integer object) {
-			    if (object == null) {
-				    return "";
-			    }
-			    return declarationTypeMap.get(object);
-		    }
-	    });
-
+		declarationTypeId = new ListBoxWithTooltip<Integer>(new AbstractRenderer<Integer>() {
+			@Override
+			public String render(Integer object) {
+				if (object == null) {
+					return "";
+				}
+				return declarationTypeMap.get(object);
+			}
+		});
+		
 	    initWidget(binder.createAndBindUi(this));
         this.driver = driver;
         this.driver.initialize(this);
@@ -66,23 +66,22 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
         reportPeriodIds.setPeriods(reportPeriods);
 	}
+	@Override
+	public void setDataFilter(DeclarationDataFilter formDataFilter) {
+		driver.edit(formDataFilter);
+		departmentPicker.setValue(formDataFilter.getDepartmentIds());
+	}
 
-    @Override
-    public void setDataFilter(DeclarationDataFilter formDataFilter) {
-        driver.edit(formDataFilter);
-        departmentPicker.setValue(formDataFilter.getDepartmentIds());
-    }
+	@Override
+	public DeclarationDataFilter getFilterData() {
+		DeclarationDataFilter dataFilter = driver.flush();
+		dataFilter.setDepartmentIds(departmentPicker.getValue());
+		return dataFilter;
+	}
 
-    @Override
-    public DeclarationDataFilter getFilterData() {
-        DeclarationDataFilter dataFilter = driver.flush();
-        dataFilter.setDepartmentIds(departmentPicker.getValue());
-        return dataFilter;
-    }
-
-    @Override
+	@Override
 	public void setDepartmentsList(List<Department> list, Set<Integer> availableDepartments){
-        departmentPicker.setAvalibleValues(list, availableDepartments);
+		departmentPicker.setAvalibleValues(list, availableDepartments);
 	}
 
 	@Override
@@ -90,22 +89,22 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 		this.declarationTypeMap = declarationTypeMap;
 		/** .setValue(null) see
 		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
-        declarationTypeId.setValue(null);
-        declarationTypeId.setAcceptableValues(declarationTypeMap.keySet());
+		declarationTypeId.setValue(null);
+		declarationTypeId.setAcceptableValues(declarationTypeMap.keySet());
 	}
 
-    @UiHandler("apply")
-    void onApplyButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onApplyFilter();
-        }
-    }
+	@UiHandler("apply")
+	void onApplyButtonClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			getUiHandlers().onApplyFilter();
+		}
+	}
 
-    @UiHandler("create")
-    void onCreateButtonClicked(ClickEvent event){
-        if (getUiHandlers() != null) {
-            getUiHandlers().onCreateClicked();
-        }
-    }
+	@UiHandler("create")
+	void onCreateButtonClicked(ClickEvent event){
+		if (getUiHandlers() != null) {
+			getUiHandlers().onCreateClicked();
+		}
+	}
 
 }

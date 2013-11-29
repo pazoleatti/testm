@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat
  *
  * TODO:
  *      - неясности как рассчитывать графу 16 и 17
+ *      http://jira.aplana.com/browse/SBRFACCTAX-5117
  */
 
 switch (formDataEvent) {
@@ -437,6 +438,7 @@ BigDecimal calc17(DataRow row) {
  Если «графа 2» = 1 или 2 или 5, И («графа 14» > «графа 16» И «графа 15» > «графа 17»), то «графа 18» = «графа 15»
  Если «графа 2» = 4, то «графа 18» = «графа 13»
  Если «графа 2» = 2 или 5, И  («графа 14» < «графа 16» И «графа 15» < «графа 17»), то «графа 18» = «графа 17»
+ TODO http://jira.aplana.com/browse/SBRFACCTAX-5117
  * @param row
  * @return
  */
@@ -451,6 +453,9 @@ BigDecimal calc18(DataRow row) {
     }
     if ((code == 2 || code == 5) && (row.priceInFactPerc < row.marketPriceInPerc1 && row.priceInFactRub < row.marketPriceInRub1)) {
         result = row.marketPriceInRub1
+    }
+    if ((code == 1 || code == 2 || code == 5) && row.priceInFactPerc == row.marketPriceInPerc1){
+        result = row.priceInFactRub
     }
     if (result != null) result = roundTo2(result, 2)
     return result
@@ -575,9 +580,6 @@ void sort() {
 
 void addAllStatic() {
     def data = getData(formData)
-    if (getRows(data).isEmpty()) {
-        return
-    }
     def itogoKvartal = getItogoKvartal()
     def prevItogoKvartal = getPrevItogoKvartal()
     data.insert(itogoKvartal, data.getAllCached().size() + 1)
@@ -787,9 +789,21 @@ void importData() {
         logger.error('Имя файла не должно быть пустым')
         return
     }
-    if (!fileName.contains('.xml')) {
-        logger.error('Формат файла должен быть *.xml')
-        return
+
+    String charset = ""
+    // TODO в дальнейшем убрать возможность загружать RNU для импорта!
+    if (formDataEvent == FormDataEvent.IMPORT && fileName.contains('.xml') ||
+       formDataEvent == FormDataEvent.MIGRATION && fileName.contains('.xml')) {
+        if (!fileName.contains('.xml')) {
+            logger.error('Формат файла должен быть *.xml')
+            return
+        }
+    } else {
+        if (!fileName.contains('.r')) {
+            logger.error('Формат файла должен быть *.rnu')
+            return
+        }
+        charset = 'cp866'
     }
 
     def is = ImportInputStream
@@ -798,7 +812,7 @@ void importData() {
         return
     }
 
-    def xmlString = importService.getData(is, fileName)
+    def xmlString = importService.getData(is, fileName, charset)
     if (xmlString == null || xmlString == '') {
         logger.error('Отсутствие значении после обработки потока данных')
         return
@@ -812,7 +826,7 @@ void importData() {
 
     try {
         // добавить данные в форму
-        def totalLoad = addData(xml)
+        def totalLoad = addData(xml, fileName)
 
         // расчетать, проверить и сравнить итоги
         if (totalLoad != null) {
@@ -830,7 +844,7 @@ void importData() {
  *
  * @param xml данные
  */
-def addData(def xml) {
+def addData(def xml, def fileName) {
     def tmp
     def index
     def data = getData(formData)
@@ -840,158 +854,184 @@ def addData(def xml) {
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def newRows = []
 
-    for (def row : xml.exemplar.table.detail.record) {
+    def records
+    def totalRecords
+    def type
+    if (formDataEvent == FormDataEvent.MIGRATION ||
+        formDataEvent == FormDataEvent.IMPORT && fileName.contains('.xml')) {
+        records = xml.exemplar.table.detail.record
+        totalRecords = xml.exemplar.table.total.record
+        type = 1 // XML
+    } else {
+        records = xml.row
+        totalRecords = xml.rowTotal
+        type = 2 // RNU
+    }
+
+    for (def row : records) {
         index = 0
 
         def newRow = getNewRow()
 
         // графа 1
-        newRow.rowNumber = getNumber(row.field[index].@value.text())
+        newRow.rowNumber = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 2 - справочник 61 "Коды сделок"
         tmp = null
-        if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
-            tmp = getRecordId(61, 'CODE', getNumber(row.field[index].@value.text()), new Date(), cache)
+        if (getCellValue(row, index, type) != null && getCellValue(row, index, type).trim() != '') {
+            tmp = getRecordId(61, 'CODE', getNumber(getCellValue(row, index, type)), new Date(), cache)
         }
         newRow.tradeNumber = tmp
         index++
 
         // графа 3 - справочник 62 "Признаки ценных бумаг"
         tmp = null
-        if (row.field[index].text() != null && row.field[index].text().trim() != '') {
-            tmp = getRecordId(62, 'CODE', row.field[index].text(), date, cache)
+        if (getCellValue(row, index, type) != null && getCellValue(row, index, type, true).trim() != '') {
+            tmp = getRecordId(62, 'CODE', getCellValue(row, index, type, true), date, cache)
         }
         newRow.singSecurirty = tmp
         index++
 
         // графа 4
-        newRow.issue = row.field[index].text()
+        newRow.issue = getCellValue(row, index, type, true)
         index++
 
         // графа 5
-        newRow.acquisitionDate = getDate(row.field[index].@value.text(), format)
+        newRow.acquisitionDate = getDate(getCellValue(row, index, type), format)
         index++
 
         // графа 6
-        newRow.saleDate = getDate(row.field[index].@value.text(), format)
+        newRow.saleDate = getDate(getCellValue(row, index, type), format)
         index++
 
         // графа 7
-        newRow.amountBonds = getNumber(row.field[index].@value.text())
+        newRow.amountBonds = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 8
-        newRow.acquisitionPrice = getNumber(row.field[index].@value.text())
+        newRow.acquisitionPrice = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 9
-        newRow.costOfAcquisition = getNumber(row.field[index].@value.text())
+        newRow.costOfAcquisition = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 10
-        newRow.marketPriceInPerc = getNumber(row.field[index].@value.text())
+        newRow.marketPriceInPerc = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 11
-        newRow.marketPriceInRub = getNumber(row.field[index].@value.text())
+        newRow.marketPriceInRub = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 12
-        newRow.acquisitionPriceTax = getNumber(row.field[index].@value.text())
+        newRow.acquisitionPriceTax = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 13
-        newRow.redemptionValue = getNumber(row.field[index].@value.text())
+        newRow.redemptionValue = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 14
-        newRow.priceInFactPerc = getNumber(row.field[index].@value.text())
+        newRow.priceInFactPerc = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 15
-        newRow.priceInFactRub = getNumber(row.field[index].@value.text())
+        newRow.priceInFactRub = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 16
-        newRow.marketPriceInPerc1 = getNumber(row.field[index].@value.text())
+        newRow.marketPriceInPerc1 = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 17
-        newRow.marketPriceInRub1 = getNumber(row.field[index].@value.text())
+        newRow.marketPriceInRub1 = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 18
-        newRow.salePriceTax = getNumber(row.field[index].@value.text())
+        newRow.salePriceTax = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 19
-        newRow.expensesOnSale = getNumber(row.field[index].@value.text())
+        newRow.expensesOnSale = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 20
-        newRow.expensesTotal = getNumber(row.field[index].@value.text())
+        newRow.expensesTotal = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 21
-        newRow.profit = getNumber(row.field[index].@value.text())
+        newRow.profit = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 22
-        newRow.excessSalePriceTax = getNumber(row.field[index].@value.text())
+        newRow.excessSalePriceTax = getNumber(getCellValue(row, index, type))
 
         newRows.add(newRow)
     }
     data.insert(newRows, 1)
 
     // итоговая строка
-    if (xml.exemplar.table.total.record.size() > 1) {
-        def row = xml.exemplar.table.total.record[0]
+    if (totalRecords.size() >= 1) {
+        def row = totalRecords[0]
         def total = formData.createDataRow()
 
         // графа 7
-        total.amountBonds = getNumber(row.field[6].@value.text())
+        total.amountBonds = getNumber(getCellValue(row, 6, type))
 
         // графа 8
-        total.acquisitionPrice = getNumber(row.field[7].@value.text())
+        total.acquisitionPrice = getNumber(getCellValue(row, 7, type))
 
         // графа 9
-        total.costOfAcquisition = getNumber(row.field[8].@value.text())
+        total.costOfAcquisition = getNumber(getCellValue(row, 8, type))
 
         // графа 11
-        total.marketPriceInRub = getNumber(row.field[10].@value.text())
+        total.marketPriceInRub = getNumber(getCellValue(row, 10, type))
 
         // графа 12
-        total.acquisitionPriceTax = getNumber(row.field[11].@value.text())
+        total.acquisitionPriceTax = getNumber(getCellValue(row, 11, type))
 
         // графа 13
-        total.redemptionValue = getNumber(row.field[12].@value.text())
+        total.redemptionValue = getNumber(getCellValue(row, 12, type))
 
         // графа 15
-        total.priceInFactRub = getNumber(row.field[14].@value.text())
+        total.priceInFactRub = getNumber(getCellValue(row, 14, type))
 
         // графа 17
-        total.marketPriceInRub1 = getNumber(row.field[16].@value.text())
+        total.marketPriceInRub1 = getNumber(getCellValue(row, 16, type))
 
         // графа 18
-        total.salePriceTax = getNumber(row.field[17].@value.text())
+        total.salePriceTax = getNumber(getCellValue(row, 17, type))
 
         // графа 19
-        total.expensesOnSale = getNumber(row.field[18].@value.text())
+        total.expensesOnSale = getNumber(getCellValue(row, 18, type))
 
         // графа 20
-        total.expensesTotal = getNumber(row.field[19].@value.text())
+        total.expensesTotal = getNumber(getCellValue(row, 19, type))
 
         // графа 21
-        total.profit = getNumber(row.field[20].@value.text())
+        total.profit = getNumber(getCellValue(row, 20, type))
 
         // графа 22
-        total.excessSalePriceTax = getNumber(row.field[21].@value.text())
+        total.excessSalePriceTax = getNumber(getCellValue(row, 21, type))
 
         return total
     } else {
         return null
     }
+}
+
+// для получения данных из RNU или XML
+String getCellValue(def row, int index, def type, boolean isTextXml = false){
+    if (type==1) {
+        if (isTextXml) {
+            return row.field[index].text()
+        } else {
+            return row.field[index].@value.text()
+        }
+    }
+    return row.cell[index+1].text()
 }
 
 /**

@@ -100,7 +100,7 @@
                             <g:Label width="200px" text="Подразделение" />
                         </g:cell>
                         <g:cell height="25px">
-                            <n:DepartmentPickerPopupWidget ui:field="departmentSelectionTree" header="Выберите подразделение" multiselection="false"/>
+                            <n:DepartmentPickerPopupWidget ui:field="departmentSelectionTree" header="Выберите подразделение" multiselection="false" modal="true"/>
                         </g:cell>
                     </g:VerticalPanel>
                 </g:cell>

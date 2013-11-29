@@ -2,7 +2,7 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'
 	xmlns:p="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
 
-	<g:FlowPanel width="200px">
+	<g:FlowPanel width="200px" ui:field="wrappingPanel">
 		<g:HorizontalPanel verticalAlignment="middle"
 			width="100%" ui:field="panel">
 			<g:cell width="100%">

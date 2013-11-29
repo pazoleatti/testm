@@ -17,7 +17,7 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 import java.text.SimpleDateFormat
 
 /**
- * Форма "Расшифровка видов расходов, учитываемых в простых РНУ (расходы простые)".
+ * Форма "Расходы, учитываемые в простых РНУ (расходы простые)".
  *
  * @version 46
  */
@@ -132,9 +132,9 @@ void calculationBasicSum() {
             //Строки 213-217 расчет 8-й графы (при консолидации из сводных)
             def formDataRNU14 = getFormDataRNU14()
             if (formDataRNU14 != null) {
-                for (def rowRNU14 : getData(formDataRNU14).getAllCached()) {
-                    if (row.consumptionTypeId == rowRNU14.knu) {
-                        row.rnu5Field5Accepted = rowRNU14.overApprovedNprms
+                for (def rowRNU14 : getData(formDataRNU14).allCached) {
+                    if (rowRNU14.inApprovedNprms != rowRNU14.sum && row.consumptionTypeId == rowRNU14.knu) {
+                        row.rnu5Field5Accepted = rowRNU14.inApprovedNprms
                     }
                 }
             }
@@ -321,6 +321,11 @@ void consolidationSummary() {
     // очистить форму
     getRows(data).each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
+            if (row.getCell(alias).isEditable() || row.getAlias() in ['R107', 'R212']) {
+                row.getCell(alias).setValue(0)
+            }
+        }
+        ['logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference'].each { alias ->
             row.getCell(alias).setValue(null)
         }
     }
@@ -556,7 +561,7 @@ def getFormDataComplex() {
  * Получить данные формы РНУ-14 (id = 321)
  */
 def getFormDataRNU14() {
-    return formDataService.find(321, FormDataKind.PRIMARY, formDataDepartment.id, formData.reportPeriodId)
+    return formDataService.find(321, FormDataKind.UNP, formDataDepartment.id, formData.reportPeriodId)
 }
 
 /**

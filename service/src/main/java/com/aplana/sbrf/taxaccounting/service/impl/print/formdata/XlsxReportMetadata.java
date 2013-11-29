@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.formdata;
 
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public final class XlsxReportMetadata {
 
@@ -27,7 +28,7 @@ public final class XlsxReportMetadata {
 	public static final int CELL_POS = 0; //cell for naming position of signer
 
 	public static final SimpleDateFormat sdf_y = new SimpleDateFormat("yy");
-	public static final SimpleDateFormat sdf_m = new SimpleDateFormat("MMMMMM");
+	public static final SimpleDateFormat sdf_m = new SimpleDateFormat("MMMMMM", new Locale("ru"));
 	public static final SimpleDateFormat sdf_d = new SimpleDateFormat("dd");
 	public static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 	

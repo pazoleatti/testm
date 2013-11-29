@@ -265,7 +265,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         // обработка параметров фильтра
         if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" and\n ");
+            ps.appendQuery("(");
             ps.appendQuery(filterPS.getQuery().toString());
+            ps.appendQuery(")");
             ps.appendQuery("\n");
             ps.addParam(filterPS.getParams());
         }

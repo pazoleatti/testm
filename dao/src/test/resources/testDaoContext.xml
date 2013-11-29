@@ -28,6 +28,17 @@
         <property name="connectionCachingEnabled" value="true"/> 
     </bean>-->
 
+    <!--Запуск и работа с лакальной базой запущенной в режиме сервера-->
+<!--
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+        <property name="url" value="jdbc:hsqldb:hsql://localhost/xdb" />
+        <property name="connectionInitSqls" value="set database sql syntax ora true;" />
+        <property name="username" value="sa" />
+        <property name="password" value="" />
+    </bean>
+-->
+
     <jdbc:initialize-database ignore-failures="DROPS">
 		<jdbc:script location="file:../src/main/resources/ddl/drop_main.sql" encoding="UTF-8"/>
 		<jdbc:script location="file:../src/main/resources/ddl/create_main.sql" encoding="UTF-8"/>

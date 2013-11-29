@@ -8,6 +8,8 @@ import java.util.List;
  * @author Dmitriy Levykin
  */
 public class MigrationSendResult implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private int sendFilesCount = 0;
     private List<Exemplar> exemplarList;
 

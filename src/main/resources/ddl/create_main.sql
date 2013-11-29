@@ -6,18 +6,6 @@ comment on table configuration is 'Настройки приложения, ко
 comment on column configuration.code is 'Код параметра';
 comment on column configuration.value is 'Значение параметра';
 -------------------------------------------------------------------------------------------------------------------------------------------
-create table dict_region (
-  code varchar2(2) not null,
-  name varchar2(510) not null,
-  okato varchar2(11),
-  okato_definition varchar2(11)
-);
-comment on table dict_region is 'Коды субъектов Российской Федерации';
-comment on column dict_region.code is 'Код';
-comment on column dict_region.name is 'Наименование';
-comment on column dict_region.okato is 'Код ОКАТО';
-comment on column dict_region.okato_definition is 'Определяющая часть кода ОКАТО';
--------------------------------------------------------------------------------------------------------------------------------------------
 create table form_type (
   id       number(9) not null,
   name     varchar2(600) not null,

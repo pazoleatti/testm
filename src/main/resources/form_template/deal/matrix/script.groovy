@@ -303,7 +303,6 @@ void deleteAllStatic() {
  */
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
 
     def rows = new LinkedList<DataRow<Cell>>()
 
@@ -319,7 +318,7 @@ void consolidation() {
         }
     }
 
-    dataRowHelper.insert(rows, 1)
+    dataRowHelper.save(rows)
 }
 
 /**
@@ -554,6 +553,9 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
     // Графа 20
     switch (type.id) {
+        case 376:
+            row.outcome = srcRow.outcomeBankSum
+            break
         case 377:
             row.outcome = srcRow.bankSum
             break
@@ -644,7 +646,31 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
 
-    // Графа 26 Не заполняется
+    // Графа 26
+    def val26 = null
+    switch (type.id) {
+        case 393:
+            val26 = srcRow.innerCode
+            break
+        case 394:
+            val26 = srcRow.metalName
+            break
+    }
+    if (val26 != null) {
+        def String innerCode = getRefBookValue(17, val26).INNER_CODE.stringValue
+        def String code = null;
+        if ("А33".equals(innerCode)) {
+            code = '17 5140 2'
+        } else if ("А76".equals(innerCode)) {
+            code = '17 5120 0'
+        } else if ("А98".equals(innerCode)) {
+            code = '17 5340 7'
+        } else if ("А99".equals(innerCode)) {
+           code = '17 5220 4'
+        }
+        if(code !=null)
+            row.dealSubjectCode2 = getRecordId(68, 'CODE', code, date)
+    }
 
     // Графа 27
     def String val27 = null
@@ -668,8 +694,6 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 388:
         case 391:
         case 392:
-        case 393:
-        case 394:
             val27 = '65.23'
             break
         case 382:

@@ -1,18 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.jws.WebService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.context.support.SpringBeanAutowiringSupport;
-
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.WSException;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler.GenericAccountInfoAssembler;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.validation.ValidationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import javax.jws.WebService;
+import java.util.ArrayList;
+import java.util.List;
 
 @WebService(endpointInterface="com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAccountManagement",
 			targetNamespace="http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0",
@@ -71,13 +69,13 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			gam.setDetails(WSException.SudirErrorCodes.SUDIR_001.detailCode());
 			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		}
-		
+
 	}
 
 	public void createAccount(GenericAccountInfo accountInfo)
 			throws GenericAccountManagementException_Exception {
 		validationService.validate(accountInfo);
-		
+
 		try {
 			TAUser user = gais.assembleUser(accountInfo);
 			userService.createUser(user);
@@ -92,13 +90,13 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			gam.setDetails(WSException.SudirErrorCodes.SUDIR_001.detailCode());
 			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		}
-		
+
 	}
 
 	public void modifyAccount(GenericAccountInfo accountInfo)
 			throws GenericAccountManagementException_Exception {
 		validationService.validate(accountInfo);
-		
+
 		try {
 			TAUser user = gais.assembleUser(accountInfo);
 			userService.updateUser(user);
@@ -113,7 +111,7 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			gam.setDetails(WSException.SudirErrorCodes.SUDIR_001.detailCode());
 			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		}
-		
+
 	}
 
 	public void restoreAccount(String accountId)
@@ -160,7 +158,7 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 		List<GenericAccountInfo> listUsersByLogin = new ArrayList<GenericAccountInfo>();
 		try {
 			List<TAUser> listTAUsersByLogin = new ArrayList<TAUser>();
-			listTAUsersByLogin.add(userService.getUser(accountId));
+			listTAUsersByLogin.add(userService.getUser(accountId.toLowerCase()));
 			listUsersByLogin.addAll(gais.desassembleUsers(listTAUsersByLogin));
 		} catch (WSException e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();

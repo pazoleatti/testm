@@ -1,58 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="total">
-        <cell alias="zeroStartColumn" colSpan="3" rowSpan="1" stringValue="Итог"/>
-        <cell alias="number" colSpan="1" numericValue="1" rowSpan="1"/>
-        <cell alias="securitiesType" colSpan="3" rowSpan="1" stringValue="Процентный (купонный) доход по облигациям"/>
-        <cell alias="ofz" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="municipalBonds" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="governmentBonds" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="mortgageBonds" colSpan="1" editable="true" rowSpan="1" numericValue="14507990614"
-              styleAlias="Редактируемая"/>
-        <cell alias="municipalBondsBefore" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="rtgageBondsBefore" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="ovgvz" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="eurobondsRF" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="dateInfo" colSpan="1" editable="true" rowSpan="1" dateValue="2013-08-05" styleAlias="Редактируемая"/>
-        <cell alias="itherEurobonds" colSpan="1" editable="true" rowSpan="1" numericValue="3274699826"
-              styleAlias="Редактируемая"/>
-        <cell alias="corporateBonds" colSpan="1" editable="true" rowSpan="1" numericValue="1151112228"
-              styleAlias="Редактируемая"/>
-    </row>
-    <row alias="total">
-        <cell alias="number" colSpan="1" numericValue="1" rowSpan="1"/>
-        <cell alias="securitiesType" colSpan="3" rowSpan="1" stringValue="Процентный (купонный) доход по облигациям"/>
-        <cell alias="ofz" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="municipalBonds" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="governmentBonds" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="mortgageBonds" colSpan="1" editable="true" rowSpan="1" numericValue="14507990614"
-              styleAlias="Редактируемая"/>
-        <cell alias="municipalBondsBefore" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="rtgageBondsBefore" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="ovgvz" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="eurobondsRF" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="dateInfo" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="itherEurobonds" colSpan="1" editable="true" rowSpan="1" numericValue="3274699826"
-              styleAlias="Редактируемая"/>
-        <cell alias="corporateBonds" colSpan="1" editable="true" rowSpan="1" numericValue="1151112228"
-              styleAlias="Редактируемая"/>
-    </row>
-    <row alias="total">
-        <cell alias="number" colSpan="1" numericValue="1" rowSpan="1"/>
-        <cell alias="securitiesType" colSpan="3" rowSpan="1" stringValue="Процентный (купонный) доход по облигациям"/>
-        <cell alias="ofz" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="municipalBonds" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="governmentBonds" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="mortgageBonds" colSpan="1" editable="true" rowSpan="1" numericValue="14507990614"
-              styleAlias="Редактируемая"/>
-        <cell alias="municipalBondsBefore" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="rtgageBondsBefore" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="ovgvz" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="eurobondsRF" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="dateInfo" colSpan="1" editable="true" rowSpan="1" dateValue="2013-08-05" styleAlias="Редактируемая"/>
-        <cell alias="itherEurobonds" colSpan="1" editable="true" rowSpan="1" numericValue="3274699826"
-              styleAlias="Редактируемая"/>
-        <cell alias="corporateBonds" colSpan="1" editable="true" rowSpan="1" numericValue="1151112228"
-              styleAlias="Редактируемая"/>
+        <cell alias="number" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="contract" colSpan="2" rowSpan="1" value="Номер договора"/>
+        <cell alias="contractDate" colSpan="1" rowSpan="1" value="Дата договора"/>
+        <cell alias="amountOfTheGuarantee" colSpan="1" rowSpan="1" value="Сумма гарантии"/>
+        <cell alias="dateOfTransaction" colSpan="1" rowSpan="1" value="Дата совершения операции"/>
+        <cell alias="rateOfTheBankOfRussia" colSpan="1" rowSpan="1" value="Курс Банка России"/>
+        <cell alias="interestRate" colSpan="1" rowSpan="1" value="Процентная ставка"/>
+        <cell alias="baseForCalculation" colSpan="1" rowSpan="1" value="База для расчёта (дни)"/>
+        <cell alias="accrualAccountingStartDate" colSpan="1" rowSpan="1" value="Расчётный период"/>
+        <cell alias="accrualAccountingEndDate" colSpan="1" rowSpan="1"
+              value="Расчётный период. Начисление/факт. Дата окончания"/>
+        <cell alias="preAccrualsStartDate" colSpan="1" rowSpan="1" value="Расчётный период. Доначисление. Дата начала"/>
+        <cell alias="preAccrualsEndDate" colSpan="1" rowSpan="1"
+              value="Расчётный период. Доначисление. Дата окончания"/>
+        <cell alias="incomeCurrency" colSpan="2" rowSpan="1" value="Сумма в налоговом учёте"/>
+        <cell alias="incomeRuble" colSpan="1" rowSpan="1" value="Сумма в налоговом учёте. Рубли "/>
+        <cell alias="accountingCurrency" colSpan="2" rowSpan="1" value="Сумма в бухгалтерском учёте"/>
+        <cell alias="accountingRuble" colSpan="1" rowSpan="1" value="Сумма в бухгалтерском учёте. Рубли"/>
+        <cell alias="preChargeCurrency" colSpan="1" rowSpan="1" value="Сумма доначисления"/>
+        <cell alias="preChargeRuble" colSpan="1" rowSpan="1" value="Сумма доначисления. Предыдущий период. Рубли"/>
+        <cell alias="taxPeriodCurrency" colSpan="1" rowSpan="1" value="Сумма доначисления. Отчётный период. Валюта"/>
+        <cell alias="taxPeriodRuble" colSpan="1" rowSpan="1" value="Сумма доначисления. Отчётный период. Рубли"/>
     </row>
 </rows>

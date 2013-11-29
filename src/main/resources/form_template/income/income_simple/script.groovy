@@ -16,8 +16,7 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 import java.text.SimpleDateFormat
 
 /**
- * Сводная форма " Доходы, учитываемые в простых РНУ" уровня обособленного подразделения
- * "Расшифровка видов доходов, учитываемых в простых РНУ (доходы простые)"
+ * Сводная форма "Доходы, учитываемые в простых РНУ (доходы простые)"
  * TODO:
  *      - не сделан подсчет графы 13 (контрольные графы) потому что справочники "Отчет о прибылях и убытках" и "Оборотная ведомость" еще не реализованы
  *
@@ -487,6 +486,7 @@ def consolidationSummary() {
     }
     if (dataPrev != null && reportPeriodService.get(formData.reportPeriodId).order != 1) {
         getRows567().each { rowNum ->
+            DataRow row = data.getDataRow(getRows(data), 'R' + rowNum)
             //«графа 5» +=«графа 5» формы предыдущего отчётного периода (не учитывается при расчете в первом отчётном периоде)
             def rowPrev = dataPrev.getDataRow(getRows(dataPrev), 'R' + rowNum)
             row.rnu6Field10Sum += rowPrev.rnu6Field10Sum
@@ -496,6 +496,7 @@ def consolidationSummary() {
             row.rnu6Field12PrevTaxPeriod += rowPrev.rnu6Field12PrevTaxPeriod
         }
         getRows8().each { rowNum ->
+            DataRow row = data.getDataRow(getRows(data), 'R' + rowNum)
             //«графа 8» +=«графа 8» формы предыдущего отчётного периода (не учитывается при расчете в первом отчётном периоде)
             def rowPrev = dataPrev.getDataRow(getRows(dataPrev), 'R' + rowNum)
             row.rnu4Field5Accepted += rowPrev.rnu4Field5Accepted

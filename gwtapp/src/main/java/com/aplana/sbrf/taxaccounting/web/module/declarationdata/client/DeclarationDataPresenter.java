@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
-import java.util.Date;
-
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -30,6 +28,8 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+
+import java.util.Date;
 
 public class DeclarationDataPresenter
 		extends
@@ -161,6 +161,7 @@ public class DeclarationDataPresenter
 									@Override
 									public void onSuccess(
 											RefreshDeclarationDataResult result) {
+                                        LogAddEvent.fire(DeclarationDataPresenter.this, result.getLogEntries());
 										MessageEvent.fire(
 												DeclarationDataPresenter.this,
 												"Декларация обновлена");
@@ -230,7 +231,7 @@ public class DeclarationDataPresenter
 				.defaultCallback(new AbstractCallback<CheckDeclarationDataResult>() {
 					@Override
 					public void onSuccess(CheckDeclarationDataResult result) {
-						MessageEvent.fire(DeclarationDataPresenter.this, "Ошибок не обнаружено");
+                        LogAddEvent.fire(DeclarationDataPresenter.this, result.getLogEntries());
 					}
 				}, this));
 	}
