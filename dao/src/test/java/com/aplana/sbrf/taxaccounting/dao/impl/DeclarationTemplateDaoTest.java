@@ -57,7 +57,6 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate.setCreateScript("MyScript");
 		DeclarationType declarationType = declarationTypeDao.get(1);
 		declarationTemplate.setDeclarationType(declarationType);
-        declarationTemplate.setJasperBlobId("1");
         declarationTemplate.setJrxmlBlobId("1");
 
 		int id = declarationTemplateDao.save(declarationTemplate);
@@ -80,7 +79,6 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate.setActive(true);
 		declarationTemplate.setVersion("0.01");
 		declarationTemplate.setCreateScript("MyScript");
-        declarationTemplate.setJasperBlobId("1");
         declarationTemplate.setJrxmlBlobId("1");
 		DeclarationType declarationType = declarationTypeDao.get(1);
 		declarationTemplate.setDeclarationType(declarationType);

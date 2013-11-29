@@ -135,7 +135,7 @@ void logicCheck() {
     def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
     def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
     // Номер последний строки предыдущей формы
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     for (def DataRow row : dataRows) {
         if (row.getAlias() != null) {
@@ -259,7 +259,7 @@ void calc() {
     }
 
     // Номер последний строки предыдущей формы
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     // графа 1, 13..20
     dataRows.each { DataRow row ->

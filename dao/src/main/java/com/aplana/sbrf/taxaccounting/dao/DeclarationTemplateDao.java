@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+
+import java.util.List;
 
 /**
  * Dao для работы с {@link DeclarationTemplate шаблонами деклараций}
@@ -40,12 +40,10 @@ public interface DeclarationTemplateDao {
 	 */
 	int save(DeclarationTemplate declarationTemplate);
 	/**
-	 * Задать Jrxml-файла и jasper-файл
-	 * Предполагается, что jasper-файл - это откомпилированная версия jrxml-файла
+	 * Задать Jrxml-файла
 	 * @param declarationTemplateId идентификатор шаблона декларации
 	 * @param jrxmlBlobId идентификатор бинарного представления шаблона
-	 * @param jasperBlobId идентификатор бинарного представления jasper-файла
 	 * @throws DaoException если не существует шаблона декларации с таким id
 	 */
-	void setJrxmlAndJasper(int declarationTemplateId, String jrxmlBlobId, String jasperBlobId);
+	void setJrxml(int declarationTemplateId, String jrxmlBlobId);
 }

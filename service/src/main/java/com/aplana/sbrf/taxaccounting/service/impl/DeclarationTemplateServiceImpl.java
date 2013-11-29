@@ -66,28 +66,13 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
 	@Override
 	public void setJrxml(int declarationTemplateId, String jrxml) {
-		ByteArrayOutputStream  compiledReport = new ByteArrayOutputStream();
-		try {
-			JasperDesign jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(jrxml.getBytes(ENCODING)));
-			JasperCompileManager.compileReportToStream(jasperDesign, compiledReport);
-		} catch (JRException e) {
-			logger.error(e.getMessage(), e);
-			throw new ServiceException("Произошли ошибки во время формирования отчета");
-		} catch (UnsupportedEncodingException e2) {
-			logger.error(e2.getMessage(), e2);
-			throw new ServiceException("Шаблон отчета имеет неправильную кодировку");
-		}
-
         DeclarationTemplate declarationTemplate = this.get(declarationTemplateId);
 
         String jrxmBlobId = blobDataService.create(
                 new ByteArrayInputStream(jrxml.getBytes()),
                 declarationTemplate.getDeclarationType().getName() +"_jrxml");
-        String jasperBlobId = blobDataService.create(
-                new ByteArrayInputStream(compiledReport.toByteArray()),
-                declarationTemplate.getDeclarationType().getName() + "_jasper");
 
-        declarationTemplateDao.setJrxmlAndJasper(declarationTemplateId, jrxmBlobId, jasperBlobId);
+        declarationTemplateDao.setJrxml(declarationTemplateId, jrxmBlobId);
 	}
 
 	@Override
@@ -105,8 +90,20 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
 	@Override
 	public InputStream getJasper(int declarationTemplateId) {
-        BlobData jasperBlobData = blobDataService.get(this.get(declarationTemplateId).getJasperBlobId());
-        return jasperBlobData.getInputStream();
+        ByteArrayOutputStream  compiledReport = new ByteArrayOutputStream();
+        String jrxml = getJrxml(declarationTemplateId);
+        try {
+            JasperDesign jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(jrxml.getBytes(ENCODING)));
+            JasperCompileManager.compileReportToStream(jasperDesign, compiledReport);
+        } catch (JRException e) {
+            logger.error(e.getMessage(), e);
+            throw new ServiceException("Произошли ошибки во время формирования отчета");
+        } catch (UnsupportedEncodingException e2) {
+            logger.error(e2.getMessage(), e2);
+            throw new ServiceException("Шаблон отчета имеет неправильную кодировку");
+        }
+
+        return new ByteArrayInputStream(compiledReport.toByteArray());
 	}
 
 	@Override

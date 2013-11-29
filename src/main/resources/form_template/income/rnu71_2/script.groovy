@@ -155,7 +155,7 @@ void logicCheck(){
     def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
     formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
     // Номер последний строки предыдущей формы
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def DataRow row : dataRows){
         //проверка и пропуск итогов
         if (row?.getAlias()?.contains('itg')) {
@@ -264,7 +264,7 @@ void calc(){
     def dTo = reportPeriodService.getEndDate(formData.getReportPeriodId())?.time
 
     // Номер последний строки предыдущей формы
-    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     // Расчет ячеек
     for(def row : dataRows) {

@@ -137,7 +137,7 @@ void calc() {
     // сортировка
     sortRows(dataRows, groupColums)
 
-    def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def row : dataRows) {
         row.rowNumber = ++rowNumber
         row.financialResult1 = getFinancialResult1(row)
@@ -172,7 +172,7 @@ void logicalCheck() {
     def dataRows = dataRowHelper.getAllCached()
 
     def calcValues = [:]
-    def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def row : dataRows) {
         if (row?.getAlias() != null) continue
         rowNumber++
