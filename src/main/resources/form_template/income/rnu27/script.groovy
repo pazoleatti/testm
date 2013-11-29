@@ -52,9 +52,11 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW:
         addNewRow()
+        recalculateNumbers()
         break
     case FormDataEvent.DELETE_ROW:
         deleteRow()
+        recalculateNumbers()
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
@@ -223,7 +225,7 @@ def logicalCheck() {
             if (formPrev != null) {
                 for (DataRow rowPrev in dataPrev.getAllCached()) {
                     if (!isFixedRow(rowPrev) && row.tradeNumber == rowPrev.tradeNumber && row.prev != rowPrev.current) {
-                        logger.warn(errorMsg + "РНУ сформирован некорректно! Не выполняется условие: Если  «графа  4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то «графа 6»  = «графа 7» формы РНУ-27 за предыдущий отчётный период")
+                        logger.warn(errorMsg + "РНУ сформирован некорректно! Не выполняется условие: Если  «графа 4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то «графа 6» = «графа 7» формы РНУ-27 за предыдущий отчётный период")
                     }
                 }
             }
@@ -231,7 +233,7 @@ def logicalCheck() {
             if (formPrev != null) {
                 for (DataRow rowPrev in dataPrev.getAllCached()) {
                     if (!isFixedRow(rowPrev) && row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
-                        loggerError(errorMsg + "РНУ сформирован некорректно! Не выполняется условие: Если  «графа  4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то графа 8  = графа 15 формы РНУ-27 за предыдущий отчётный период")
+                        loggerError(errorMsg + "РНУ сформирован некорректно! Не выполняется условие: Если  «графа 4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то графа 8 = графа 15 формы РНУ-27 за предыдущий отчётный период")
                         if (!isBalancePeriod) {
                             return false
                         }
@@ -756,7 +758,6 @@ void calcAfterImport() {
     }
     if (!hasError()) {
         def formPrev = getFormPrev()
-        BigDecimal i = 0
         for (DataRow row in data.getAllCached()) {
             row.reserveCalcValuePrev = calc8(row, formPrev)
             row.costOnMarketQuotation = calc14(row)
@@ -991,6 +992,17 @@ void addNewRow() {
         }
     }
     data.insert(getNewRow(), index + 1)
+}
+
+def recalculateNumbers(){
+    def index = 1
+    def data = getData(formData)
+    getRows(data).each{row->
+        if(row.getAlias()==null){
+            row.number = index++
+        }
+    }
+    data.save(getRows(data))
 }
 
 FormData getFormPrev() {

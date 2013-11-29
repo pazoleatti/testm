@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,17 @@ public interface FormDataService {
      * @return
      */
 	FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
+
+    /**
+     * Поиск ежемесячной налоговой формы
+     * @param formTypeId Тип формы
+     * @param kind Вид формы
+     * @param departmentId Подразделение
+     * @param taxPeriodId Налоговый период
+     * @param periodOrder Порядковый номер (равен номеру месяца, при нумерации с 1)
+     * @return
+     */
+    FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder);
 
     /**
      * Посредник для работы со строками налоговой формы во временном и постоянном срезах
@@ -156,7 +168,8 @@ public interface FormDataService {
     boolean checksBalancePeriod(FormData formData, Logger logger);
 
     /**
-     * Получение формы за предыдущий отчетный период
+     * Получение формы за предыдущий отчетный период. Если форма ежемесячная, то предыдущая форма - это форма за
+     * предыдущий месяц.
      *
      * @param formData
      * @param departmentId
@@ -165,14 +178,15 @@ public interface FormDataService {
     FormData getFormDataPrev(FormData formData, int departmentId);
 
     /**
-     * Получение числа неитоговых строк в форме за предыдущий отчетный период
+     * Получение номера последней строки в форме за предыдущий отчетный период
      * Если указанная форма первая в году или предыдущих форм нет, то результат будет 0
      *
      * @param formData
      * @param departmentId
+     * @param alias
      * @return
      */
-    int getFormDataPrevRowCount(FormData formData, int departmentId);
+    BigDecimal getPrevRowNumber(FormData formData, int departmentId, String alias);
 
     /**
      * Проверка наличия принятой формы за предыдущий период.

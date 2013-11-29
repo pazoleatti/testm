@@ -17,6 +17,7 @@
 	<inherits name="com.aplana.sbrf.taxaccounting.web.module.error.ErrorModule" />
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationlist.DeclarationList"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.userlist.UserList"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.members.Members"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.configuration.Configuration"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.audit.Audit"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.periods.Periods"/>

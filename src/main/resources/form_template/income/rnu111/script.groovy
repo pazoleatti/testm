@@ -119,7 +119,7 @@ void calc() {
     deleteAllAliased(dataRows)
 
     // Номер последней строки формы из предыдущего периода
-    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     for (row in dataRows) {
         // графа 1
@@ -160,7 +160,7 @@ void logicCheck() {
     // Дата окончания отчетного периода
     def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {

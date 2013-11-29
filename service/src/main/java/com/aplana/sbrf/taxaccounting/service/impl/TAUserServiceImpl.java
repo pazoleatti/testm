@@ -3,9 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserFull;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.WSException;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.apache.commons.logging.Log;
@@ -139,5 +137,20 @@ public class TAUserServiceImpl implements TAUserService {
 
         return taUserFullList;
     }
+
+	@Override
+	public PagingResult<TAUserFull> getByFilter(MembersFilterData filter) {
+		PagingResult<TAUserFull> taUserFullList = new PagingResult<TAUserFull>();
+		for(Integer userId : userDao.getByFilter(filter)) {
+			TAUserFull userFull = new TAUserFull();
+			TAUser user = userDao.getUser(userId);
+			userFull.setUser(user);
+			userFull.setDepartment(departmentDao.getDepartment(user.getDepartmentId()));
+			taUserFullList.add(userFull);
+		}
+		taUserFullList.setTotalCount(userDao.count(filter));
+
+		return taUserFullList;
+	}
 
 }

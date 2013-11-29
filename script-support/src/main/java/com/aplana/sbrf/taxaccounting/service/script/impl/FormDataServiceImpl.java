@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentFormTypeService;
 import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.script.TaxPeriodService;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.script.refbook.RefBookService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
@@ -34,6 +35,7 @@ import java.util.*;
 /*
  * Реализация FormDataService
  * @author auldanov
+ * @author Dmitriy Levykin
  */
 @Transactional(readOnly = true)
 @Component("formDataService")
@@ -71,16 +73,24 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Autowired
     private ReportPeriodService reportPeriodService;
 
+    @Autowired
+    private TaxPeriodService taxPeriodService;
+
     private Map<Number, DataRowHelper> helperHashMap = new HashMap<Number, DataRowHelper>();
 
     private static ApplicationContext applicationContext;
 
-    // Объект-маркер для ускрорения работы кэша с отсутствующими значениями
+    // Объект-маркер для ускорения работы кэша с отсутствующими значениями
     private static final Long NULL_VALUE_MARKER = -1L;
 
     @Override
     public FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId) {
         return dao.find(formTypeId, kind, departmentId, reportPeriodId);
+    }
+
+    @Override
+    public FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder) {
+        return dao.findMonth(formTypeId, kind, departmentId, taxPeriodId, periodOrder);
     }
 
     @Override
@@ -124,17 +134,35 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         // НФ назначения
         List<DepartmentFormType> typeList = departmentFormTypeService.getFormSources(departmentId,
                 formData.getFormType().getId(), formData.getKind());
+        // периодичность приёмника "ежемесячно"
+        boolean isFormDataMonthly = formData.getPeriodOrder() != null;
 
         for (DepartmentFormType type : typeList) {
-            FormData sourceFormData = find(type.getFormTypeId(), type.getKind(), type.getDepartmentId(),
-                    formData.getReportPeriodId());
+            // поиск источника с учетом периодичности
+            FormData sourceFormData;
+            if (!isFormDataMonthly) {
+                sourceFormData = find(type.getFormTypeId(), type.getKind(), type.getDepartmentId(),
+                        formData.getReportPeriodId());
+            } else {
+                Integer taxPeriodId = reportPeriodService.get(formData.getReportPeriodId()).getTaxPeriod().getId();
+                sourceFormData = findMonth(type.getFormTypeId(), type.getKind(), type.getDepartmentId(),
+                        taxPeriodId, formData.getPeriodOrder());
+            }
 
-            if (sourceFormData != null && sourceFormData.getState() == WorkflowState.ACCEPTED) {
-                for (DataRow<Cell> row : getDataRowHelper(sourceFormData).getAll()) {
-                    if (row.getAlias() == null) {
-                        // Добавление строк из источников
-                        rows.add(row);
-                    }
+            // источник не нашелся или не в статусе "Принята"
+            if (sourceFormData == null || sourceFormData.getState() != WorkflowState.ACCEPTED) {
+                continue;
+            }
+            // приёмник ежемесячный, а источник нет или наоборот
+            boolean isSourceFormDataMonthly = sourceFormData.getPeriodOrder() != null;
+            if ((isFormDataMonthly && !isSourceFormDataMonthly) || (!isFormDataMonthly && isSourceFormDataMonthly)) {
+                continue;
+            }
+
+            // Добавление строк из источников
+            for (DataRow<Cell> row : getDataRowHelper(sourceFormData).getAll()) {
+                if (row.getAlias() == null) {
+                    rows.add(row);
                 }
             }
         }
@@ -218,9 +246,23 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             return null;
         }
 
-        // Ключ кэша
-        String filter = value == null || value.isEmpty() ? alias + " is null" :
-                "LOWER(" + alias + ") = LOWER('" + value + "')";
+        RefBook rb = refBookFactory.get(refBookId);
+
+        String filter;
+
+        if (value == null || value.isEmpty()) {
+            filter = alias + " is null";
+        } else {
+            RefBookAttributeType type = rb.getAttribute(alias).getAttributeType();
+            String template;
+            // TODO: поиск по выражениям с датами не реализован
+            if (type == RefBookAttributeType.REFERENCE || type == RefBookAttributeType.NUMBER) {
+                template = "%s = %s";
+            } else {
+                template = "LOWER(%s) = LOWER('%s')";
+            }
+            filter = String.format(template, alias, value);
+        }
 
         String dateStr = sdf.format(date);
 
@@ -373,8 +415,18 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Override
     public boolean checkUnique(FormData formData, Logger logger) {
-        if (find(formData.getFormType().getId(), formData.getKind(), formData.getDepartmentId(),
-                formData.getReportPeriodId()) != null) {
+        // поиск формы с учетом периодичности
+        FormData existingFormData;
+        if (formData.getPeriodOrder() == null) {
+            existingFormData = find(formData.getFormType().getId(), formData.getKind(), formData.getDepartmentId(),
+                    formData.getReportPeriodId());
+        } else {
+            Integer taxPeriodId = reportPeriodService.get(formData.getReportPeriodId()).getTaxPeriod().getId();
+            existingFormData = findMonth(formData.getFormType().getId(), formData.getKind(), formData.getDepartmentId(),
+                    taxPeriodId, formData.getPeriodOrder());
+        }
+        // форма найдена
+        if (existingFormData != null) {
             logger.error(CHECK_UNIQ_ERROR);
             return false;
         }
@@ -394,30 +446,66 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Override
     public FormData getFormDataPrev(FormData formData, int departmentId) {
-        ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.getReportPeriodId());
-        if (prevReportPeriod != null) {
-            return find(formData.getFormType().getId(), formData.getKind(), departmentId, prevReportPeriod.getId());
+        if (formData == null) {
+            return null;
+        }
+        if (formData.getPeriodOrder() == null) {
+            // Квартальная форма
+            ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.getReportPeriodId());
+            if (prevReportPeriod != null) {
+                return find(formData.getFormType().getId(), formData.getKind(), departmentId, prevReportPeriod.getId());
+            }
+        } else {
+            // Ежемесячная форма
+            int month;
+            ReportPeriod currentPeriod = reportPeriodService.get(formData.getReportPeriodId());
+            TaxPeriod taxPeriod = currentPeriod.getTaxPeriod();
+
+            if (formData.getPeriodOrder() == 1) {
+                // Переход через год
+                month = 12;
+                List<TaxPeriod> taxPeriodList = taxPeriodService.listByTaxType(currentPeriod.getTaxType());
+                int currentIndex = -1;
+                for (int i = 0; i < taxPeriodList.size(); i++) {
+                    if (taxPeriodList.get(i).getId().equals(taxPeriod.getId())) {
+                        currentIndex = i;
+                        break;
+                    }
+                }
+                if (currentIndex == 0 || currentIndex == -1) {
+                    return null;
+                }
+                taxPeriod = taxPeriodList.get(currentIndex - 1);
+            } else {
+                month = formData.getPeriodOrder() - 1;
+            }
+            return findMonth(formData.getFormType().getId(), formData.getKind(), departmentId, taxPeriod.getId(), month);
         }
         return null;
     }
 
     @Override
-    public int getFormDataPrevRowCount(FormData formData, int departmentId) {
+    public BigDecimal getPrevRowNumber(FormData formData, int departmentId, String alias) {
         ReportPeriod reportPeriod = reportPeriodService.get(formData.getReportPeriodId());
         if (reportPeriod != null && reportPeriod.getOrder() == 1) {
-            return 0;
+            return BigDecimal.ZERO;
         }
+        BigDecimal rowNumber = BigDecimal.ZERO;
         FormData prevFormData = getFormDataPrev(formData, departmentId);
         List<DataRow<Cell>> prevDataRows = (prevFormData != null ? getDataRowHelper(prevFormData).getAllCached() : null);
-        int counter = 0;
         if (prevDataRows != null && !prevDataRows.isEmpty()) {
-            for (DataRow<Cell> row : prevDataRows) {
+            for (int i = prevDataRows.size() - 1; i >= 0; i--) {
+                DataRow<Cell> row = prevDataRows.get(i);
                 if (row.getAlias() == null) {
-                    counter++;
+                    Object value = row.getCell(alias).getValue();
+                    if (value instanceof BigDecimal) {
+                        rowNumber = (BigDecimal) value;
+                    }
+                    break;
                 }
             }
         }
-        return counter;
+        return rowNumber == null ? BigDecimal.ZERO : rowNumber;
     }
 
     @Override

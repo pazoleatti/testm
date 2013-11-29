@@ -1,11 +1,8 @@
+// Generated from FilterTree.g4 by ANTLR 4.1
 package com.aplana.sbrf.taxaccounting.dao.refbook.filter;
-
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.FilterTreeParser;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 /**
  * This interface defines a complete listener for a parse tree produced by
@@ -79,6 +76,17 @@ public interface FilterTreeListener extends ParseTreeListener {
 	void exitNumber(@NotNull FilterTreeParser.NumberContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link FilterTreeParser#roperand}.
+	 * @param ctx the parse tree
+	 */
+	void enterRoperand(@NotNull FilterTreeParser.RoperandContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FilterTreeParser#roperand}.
+	 * @param ctx the parse tree
+	 */
+	void exitRoperand(@NotNull FilterTreeParser.RoperandContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link FilterTreeParser#operand}.
 	 * @param ctx the parse tree
 	 */
@@ -88,6 +96,17 @@ public interface FilterTreeListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitOperand(@NotNull FilterTreeParser.OperandContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link FilterTreeParser#loperand}.
+	 * @param ctx the parse tree
+	 */
+	void enterLoperand(@NotNull FilterTreeParser.LoperandContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FilterTreeParser#loperand}.
+	 * @param ctx the parse tree
+	 */
+	void exitLoperand(@NotNull FilterTreeParser.LoperandContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link FilterTreeParser#externalAlias}.

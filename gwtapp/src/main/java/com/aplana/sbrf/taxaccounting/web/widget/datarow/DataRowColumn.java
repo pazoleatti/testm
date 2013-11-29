@@ -13,14 +13,12 @@ import com.google.gwt.user.cellview.client.Column;
 /** @author Vitalii Samolovskikh */
 public abstract class DataRowColumn<T> extends Column<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>, T> implements HasHandlers {
     protected String alias;
-    protected String rowGroup;
 	private HandlerManager handlerManager;
     
     protected DataRowColumn(Cell<T> cell, com.aplana.sbrf.taxaccounting.model.Column col) {
         super(cell);
 	    handlerManager = new HandlerManager(this);
         this.alias = col.getAlias();
-        this.rowGroup = col.getGroupName();
     }
 
 	@Override
@@ -35,9 +33,5 @@ public abstract class DataRowColumn<T> extends Column<DataRow<com.aplana.sbrf.ta
 
     public String getAlias() {
         return alias;
-    }
-    
-    public String getRowGroup() {
-    	return rowGroup;
     }
 }

@@ -656,47 +656,47 @@ void addData(def xml, int headRowCount) {
         }
         xmlIndexCol++
 
-        // столбец 6
+        // графа 5
         newRow.contractNum = row.cell[xmlIndexCol].text()
         xmlIndexCol++
 
-        // столбец 7.1
+        // графа 6
         newRow.contractDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
+		
+		// графа 7.1
+        newRow.transactionNum = row.cell[indexCell].text()
+        indexCell++
 
         // графа 7.2 Вид срочной сделки
         newRow.dealType = getRecordIdImport(85, 'CONTRACT_TYPE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
-        // столбец 8
-        newRow.transactionNum = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // столбец 9
+        // графа 8
         newRow.transactionDeliveryDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
 
-        // столбец 10
+        // графа 9.1
         newRow.innerCode = getRecordIdImport(17, 'INNER_CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
-        // столбец 12
+        // графа 9.2
         newRow.unitCountryCode = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
-        // столбец 13
+        // графа 10
         newRow.signPhis = getRecordIdImport(18, 'SIGN', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
-        // столбец 14
+        // графа 11
         newRow.signTransaction =  getRecordIdImport(38, 'VALUE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
-        // столбец 15
+        // графа 12.1
         newRow.countryCode2 = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
-        // столбец 16
+        // графа 12.2
         String code = row.cell[xmlIndexCol].text()
         if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
@@ -704,19 +704,19 @@ void addData(def xml, int headRowCount) {
         newRow.region1 = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
-        // столбец 17
+        // графа 12.3
         newRow.city1 = row.cell[xmlIndexCol].text()
         xmlIndexCol++
 
-        // столбец 18
+        // графа 12.4
         newRow.settlement1 = row.cell[xmlIndexCol].text()
         xmlIndexCol++
 
-        // столбец 19
+        // графа 13.1
         newRow.countryCode3 = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
-        // столбец 20
+        // графа 13.2
         code = row.cell[xmlIndexCol].text()
         if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
@@ -724,39 +724,39 @@ void addData(def xml, int headRowCount) {
         newRow.region2 = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
-        // столбец 21
+        // графа 13.3
         newRow.city2 = row.cell[xmlIndexCol].text()
         xmlIndexCol++
 
-        // столбец 22
+        // графа 13.4
         newRow.settlement2 = row.cell[xmlIndexCol].text()
         xmlIndexCol++
 
-        // столбец 23
+        // графа 14
         newRow.conditionCode = getRecordIdImport(63, 'STRCODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
-        // столбец 24
+        // графа 15
         newRow.count = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
 
-        // столбец 25
+        // графа 16
         newRow.incomeSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
 
-        // столбец 26
+        // графа 17
         newRow.consumptionSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
 
-        // столбец 27
+        // графа 18
         newRow.priceOne = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
 
-        // столбец 28
+        // графа 19
         newRow.totalNds = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
 
-        // столбец 29
+        // графа 20
         newRow.transactionDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         rows.add(newRow)

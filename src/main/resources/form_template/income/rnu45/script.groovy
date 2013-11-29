@@ -8,6 +8,7 @@ import java.math.RoundingMode
 /**
  * Скрипт для РНУ-45
  * Форма "(РНУ-45) Регистр налогового учёта «ведомость начисленной амортизации по нематериальным активам»"  (341)
+ * formTemplateId=341
  *
  * графа 1	- rowNumber
  * графа 2	- inventoryNumber
@@ -24,8 +25,15 @@ import java.math.RoundingMode
  * @author akadyrgulov
  * @author Stanislav Yasinskiy
  */
+
+println(formDataEvent)
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
+
+        // TODO убрать когда появится механизм назначения periodOrder при создании формы
+        if (formData.periodOrder == null)
+            return
+
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
@@ -114,6 +122,30 @@ void prevPeriodCheck() {
 
 //// Кастомные методы
 
+@Field
+def formDataPrev = null // Форма предыдущего месяца
+@Field
+def dataRowHelperPrev = null // DataRowHelper формы предыдущего месяца
+
+// Получение формы предыдущего месяца
+def getFormDataPrev() {
+    if (formDataPrev == null) {
+        formDataPrev = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    }
+    return formDataPrev
+}
+
+// Получение DataRowHelper формы предыдущего месяца
+def getDataRowHelperPrev() {
+    if (dataRowHelperPrev == null) {
+        def formDataPrev = getFormDataPrev()
+        if (formDataPrev != null) {
+            dataRowHelperPrev = formDataService.getDataRowHelper(formDataPrev)
+        }
+    }
+    return dataRowHelperPrev
+}
+
 // Алгоритмы заполнения полей формы
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -127,9 +159,8 @@ void calc() {
         def reportDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
         def reportDateStart = reportPeriodService.getStartDate(formData.reportPeriodId).time
 
-        // TODO сделать получение нф за предыдущий месяц
-        def formDataOld = formDataService.getFormDataPrev(formData, formDataDepartment.id)
-        def dataOld = formDataOld != null ? formDataService.getDataRowHelper(formDataOld) : null
+        def formDataOld = getFormDataPrev()
+        def dataOld = formDataOld != null ? getDataRowHelperPrev() : null
         def index = 0
 
         for (def row in dataRows) {
@@ -194,7 +225,7 @@ def BigDecimal calc10(def row, def reportDateStart, def reportDate, def oldRow10
 // Ресчет графы 11
 def BigDecimal calc11(def row, def reportDateStart, def reportDate, def oldRow11) {
     Calendar buyDate = calc10and11(row)
-    if (buyDate != null && reportDateStart != null && reportDate != null)
+    if (buyDate != null && reportDateStart != null && reportDate != null && row.amortizationMonth != null)
         return row.amortizationMonth + ((buyDate.after(reportDateStart) && buyDate.before(reportDate)) ? 0 : ((oldRow11 == null) ? 0 : oldRow11))
     return null
 }
@@ -210,15 +241,18 @@ Calendar calc10and11(def row) {
 }
 
 def logicCheck() {
+    if (formData.periodOrder == null) {
+        throw new ServiceException("Месячная форма создана как квартальная!")
+    }
+
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
     if (!dataRows.isEmpty()) {
         // Инвентарные номера
-        def List<String> invList = new ArrayList<String>()
-        // TODO сделать получение нф за предыдущий месяц
-        def formDataOld = formDataService.getFormDataPrev(formData, formDataDepartment.id)
-        def dataOld = formDataOld != null ? formDataService.getDataRowHelper(formDataOld) : null
+        def Set<String> invSet = new HashSet<String>()
+        def formDataOld = getFormDataPrev()
+        def dataOld = formDataOld != null ? getDataRowHelperPrev() : null
         // Отчетная дата
         def reportDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
         //Начальная дата отчетного периода
@@ -244,10 +278,10 @@ def logicCheck() {
             checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
             // 2. Проверка на уникальность поля «инвентарный номер»
-            if (invList.contains(row.inventoryNumber)) {
+            if (invSet.contains(row.inventoryNumber)) {
                 logger.error(errorMsg + "Инвентарный номер не уникальный!")
             } else {
-                invList.add(row.inventoryNumber)
+                invSet.add(row.inventoryNumber)
             }
 
             // 3. Проверка на нулевые значения

@@ -60,7 +60,7 @@ if (reportDate != null) {
 // справочник "Параметры подразделения по налогу на прибыль" - начало
 def departmentParamIncomeRefDataProvider = refBookFactory.getDataProvider(33)
 def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(reportDate, null,
-        "DEPARTMENT_ID = '" + departmentId + "'", null);
+        "DEPARTMENT_ID = $departmentId", null);
 if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.getRecords().isEmpty()) {
    throw new Exception("Не удалось получить настройки обособленного подразделения.")
 }
@@ -95,13 +95,18 @@ def sumDividends = getValue(incomeParams, 'SUM_DIVIDENDS')
 // Проверки значений справочника "Параметры подразделения по налогу на прибыль"
 def hasError = false
 if (taxRate == null) {
+    // TODO (Ramil Timerbaev) Саша Маламут говорил убрать это (закомментированное оставить)
     logger.error("Для подразделения $name не задан параметр \"Ставка налога\"")
     hasError = true
+    // taxRate = 0
 }
 if (sumTax == null) {
+    // TODO (Ramil Timerbaev) Саша Маламут говорил убрать это (закомментированное оставить)
     logger.error("Для подразделения $name не задан параметр \"Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде\"")
     hasError = true
+    // sumTax = 0
 }
+// TODO (Ramil Timerbaev) Саша Маламут говорил убрать это
 if (hasError) {
     return
 }
@@ -437,7 +442,8 @@ if (dataRowsHelperComplexConsumption != null) {
 // Приложение к налоговой декларации - конец
 
 /*
- * Логические проверки. Выполняются только при нажатии на кнопку "Принять".
+ * // TODO (Ramil Timerbaev) уточнить у аналитика, пересчитывать ли значения перед проверками или взять из xml.
+ * Логические проверки.
  */
 if (needLogicalCheck) {
     // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (всего)

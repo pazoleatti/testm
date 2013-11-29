@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import org.apache.commons.logging.Log;
@@ -274,5 +276,61 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		 return list.size()!=0 ? list.get(0).intValue() : 0;
 	}
 
-	
+	@Override
+	public List<Integer> getByFilter(MembersFilterData filter) {
+		if (filter == null) {
+			return getUserIds();
+		}
+		StringBuilder sql = new StringBuilder("select id from (select  u.*, rownum r from sec_user u where 1=1 ");
+		if (filter.getActive() != null) {
+			sql.append(" and is_active = " + (filter.getActive() ? "1" : "0")) ;
+		}
+		if (filter.getUserName() != null && !filter.getUserName().isEmpty()) {
+			sql.append(" and lower(name) like " + "\'%" + filter.getUserName().toLowerCase() +"%\'") ;
+		}
+		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
+			sql.append(" and department_id in " + SqlUtils.transformToSqlInStatement(new ArrayList<Integer>(filter.getDepartmentIds()))) ;
+		}
+		if (filter.getRoleIds() != null && !filter.getRoleIds().isEmpty() && filter.getRoleIds().get(0) != null) {
+			sql.append(" and exists (select 1 from sec_user_role ur where u.id = ur.user_id and ur.role_id = " + filter.getRoleIds().get(0) +")") ;
+		}
+		if (filter.getStartIndex() != null && filter.getCountOfRecords() != null) {
+			sql.append(") where r between " + (filter.getStartIndex()+1) + " and " + (filter.getStartIndex()+1 + filter.getCountOfRecords()) );
+		} else {
+			sql.append(")");
+		}
+		try {
+			return getJdbcTemplate().queryForList(sql.toString(), Integer.class);
+		} catch (DataAccessException e) {
+			throw new DaoException("Ошибка при получении пользователей. " + e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public int count(MembersFilterData filter) {
+		if (filter == null) {
+			return 0;
+		}
+		StringBuilder sql = new StringBuilder("select count(*) from (select  u.*, rownum r from sec_user u where 1=1 ");
+		if (filter.getActive() != null) {
+			sql.append(" and is_active = " + (filter.getActive() ? "1" : "0")) ;
+		}
+		if (filter.getUserName() != null && !filter.getUserName().isEmpty()) {
+			sql.append(" and name like " + "\'%" + filter.getUserName() +"%\'") ;
+		}
+		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
+			sql.append(" and department_id in " + SqlUtils.transformToSqlInStatement(new ArrayList<Integer>(filter.getDepartmentIds()))) ;
+		}
+		if (filter.getRoleIds() != null && !filter.getRoleIds().isEmpty() && filter.getRoleIds().get(0) != null) {
+			sql.append(" and exists (select 1 from sec_user_role ur where u.id = ur.user_id and ur.role_id = " + filter.getRoleIds().get(0) +")") ;
+		}
+		sql.append(")");
+		try {
+			return getJdbcTemplate().queryForInt(sql.toString());
+		} catch (DataAccessException e) {
+			throw new DaoException("Ошибка при получении кол-ва пользователей. " + e.getLocalizedMessage());
+		}
+	}
+
+
 }

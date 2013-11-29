@@ -43,7 +43,7 @@ void checkDeparmentParams(LogLevel logLevel) {
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    def departmentParam = getProvider(37).getRecords(date, null, "DEPARTMENT_ID = '$departmentId'", null).get(0)
+    def departmentParam = getProvider(37).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null).get(0)
 
     if (departmentParam == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
@@ -69,7 +69,7 @@ void generateXML() {
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    def departmentParam = getProvider(37).getRecords(date, null, "DEPARTMENT_ID = '$departmentId'", null).get(0)
+    def departmentParam = getProvider(37).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null).get(0)
 
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
 
@@ -177,7 +177,7 @@ void generateXML() {
                         if (row.getAlias() != null) {
                             continue
                         }
-
+						
                         // Раздел 1А. Сведения о контролируемой сделке (группе однородных сделок)
                         СвКонтрСд(
                                 НомПорСд: row.dealNum1
@@ -220,7 +220,7 @@ void generateXML() {
                                             (row.outcomeIncludingRegulation != null ? [СумРасхСдРег: row.outcomeIncludingRegulation] : [:])
                             )
                             def String dealType = row.dealType != null ? getRefBookValue(64, row.dealType).CODE.numberValue : null
-
+							
                             // Раздел 1Б. Сведения о предмете сделки (группы однородных сделок)
                             СвПредмСд(
                                     ТипПредСд: dealType
@@ -275,8 +275,8 @@ void generateXML() {
                                 taxpayerCode = map.TAXPAYER_CODE.stringValue
                                 address = map.ADDRESS.stringValue
                             }
-
-                            // Раздел 2.Сведения об организации – участнике контролируемой сделки (группы однородных сделок)
+							
+							// Раздел 2.Сведения об организации – участнике контролируемой сделки (группы однородных сделок)
                             СвОргУчаст(
                                     [НомПорСд: row.dealMemberNum] +
                                             [ПрОрг: organInfo] +
@@ -290,8 +290,6 @@ void generateXML() {
                             )
                         }
                     }
-                }  else{
-                    СвКонтрСд()
                 }
             }
         }

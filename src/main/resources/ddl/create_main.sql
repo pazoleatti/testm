@@ -181,7 +181,6 @@ create table form_column (
   type char(1) not null,
   width number(9) not null,
   precision number(9),
-  group_name varchar2(1000),
   max_length number(4),
   checking  number(1) default 0 not null,
   attribute_id number(18),
@@ -191,7 +190,6 @@ create table form_column (
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
 comment on column form_column.form_template_id is 'Идентификатор шаблона налоговой формы';
-comment on column form_column.group_name is 'Название группы столбцов';
 comment on column form_column.id is 'Первичный ключ';
 comment on column form_column.name is 'Название столбца';
 comment on column form_column.ord is 'Порядковый номер';

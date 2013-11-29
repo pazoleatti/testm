@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat
 
 /**
  * 6.5	(РНУ-51) Регистр налогового учёта финансового результата от реализации (выбытия) ОФЗ
+ * formTemplateId=345
  *
  * TODO:
  *      - неясности как рассчитывать графу 16 и 17
@@ -34,9 +35,11 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW:
         addNewRow()
+        recalculateNumbers()
         break
     case FormDataEvent.DELETE_ROW:
         deleteRow()
+        recalculateNumbers()
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"

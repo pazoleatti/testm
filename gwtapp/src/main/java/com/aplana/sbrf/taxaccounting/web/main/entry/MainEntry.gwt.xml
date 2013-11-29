@@ -28,6 +28,7 @@
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.configuration.Configuration"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.HistoryBusinessList"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.scheduler.Scheduler"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.members.Members"/>
 
     <set-configuration-property name="gin.ginjector.modules"
                                 value="com.aplana.sbrf.taxaccounting.web.main.entry.client"/>
@@ -39,6 +40,6 @@
 	 -->
 	 <set-configuration-property name="gin.ginjector.modules"
                                 value="com.aplana.sbrf.taxaccounting.web.main.entry.client.ClientModule"/>
-	
-	 
+
+
 </module>

@@ -553,7 +553,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
     // Графа 20
     switch (type.id) {
-        case 376:
+	    case 376:
             row.outcome = srcRow.outcomeBankSum
             break
         case 377:

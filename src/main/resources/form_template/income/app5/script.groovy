@@ -140,7 +140,7 @@ void logicalCheckBeforeCalc() {
         }
 
         def departmentParamIncomeRecords
-        if (row.regionBankDivision!=null) departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = '" + row.regionBankDivision + "'", null)?.getRecords();
+        if (row.regionBankDivision!=null) departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = " + row.regionBankDivision, null)?.getRecords();
         if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.isEmpty()) {
             logger.error("Строка $fieldNumber: Не найдены настройки подразделения!")
         } else {
@@ -255,7 +255,7 @@ def calc2(def row, def departmentRefDataProvider) {
 // графа 4 - кпп
 def calc4(def row, def departmentParamIncomeRefDataProvider){
     def departmentParamIncomeRecords
-    if (row.regionBankDivision!=null) departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = '" + row.regionBankDivision + "'", null)?.getRecords();
+    if (row.regionBankDivision!=null) departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = " + row.regionBankDivision, null)?.getRecords();
     if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.isEmpty()) {
         return null
     }

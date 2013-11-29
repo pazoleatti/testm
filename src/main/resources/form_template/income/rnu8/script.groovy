@@ -109,7 +109,7 @@ void calc() {
         dataRowHelper.save(dataRows.sort { getKnu(it.code) })
 
         // номер последний строки предыдущей формы
-        def number = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+        def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
         for (row in dataRows) {
             row.number = ++number
@@ -188,7 +188,7 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     //две карты: одна с реальными значениями итого по кодам, а вторая - с рассчитанными
     def totalRows = [:]
     def sum1 = [:]
