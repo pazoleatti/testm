@@ -2,13 +2,11 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.ConfigurationProvider;
 import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -18,7 +16,6 @@ import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
-import jcifs.smb.SmbFileInputStream;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -72,8 +69,6 @@ public class FormDataServiceImpl implements FormDataService {
 	private ConfigurationProvider configurationProvider;
 	@Autowired
 	private ApplicationContext applicationContext;
-    @Autowired
-    private DepartmentDao departmentDao;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -282,11 +277,8 @@ public class FormDataServiceImpl implements FormDataService {
 		if (formTemplate.isFixedRows()) {
 			throw new ServiceException("Нельзя добавить строку в НФ с фиксированным количеством строк");
 		}
-		
-		if (!formDataAccessService.canEdit(userInfo, formData.getId())) {
-			throw new AccessDeniedException(
-					"Недостаточно прав для добавления строки к налоговой форме");
-		}
+
+		formDataAccessService.canEdit(userInfo, formData.getId());
 
 		Map<String, Object> additionalParameters = new HashMap<String, Object>();
 		additionalParameters.put("currentDataRow", currentDataRow);
@@ -310,11 +302,8 @@ public class FormDataServiceImpl implements FormDataService {
 		if (formTemplate.isFixedRows()) {
 			throw new ServiceException("Нельзя удалить строку в НФ с фиксированным количеством строк");
 		}
-		
-		if (!formDataAccessService.canEdit(userInfo, formData.getId())) {
-			throw new AccessDeniedException(
-					"Недостаточно прав для удаления строки из налоговой формы");
-		}
+
+		formDataAccessService.canEdit(userInfo, formData.getId());
 		
 		Map<String, Object> additionalParameters = new HashMap<String, Object>();
 		additionalParameters.put("currentDataRow", currentDataRow);
@@ -342,11 +331,8 @@ public class FormDataServiceImpl implements FormDataService {
 	public void doCalc(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
 		lockCoreService.checkLockedMe(FormData.class, formData.getId(), userInfo);
-		
-		if (!formDataAccessService.canEdit(userInfo, formData.getId())) {
-			throw new AccessDeniedException(
-					"Недостаточно прав для выполенения расчёта по налоговой форме");
-		}
+
+		formDataAccessService.canEdit(userInfo, formData.getId());
 
 		formDataScriptingService.executeScript(userInfo, formData,
 				FormDataEvent.CALCULATE, logger, null);
@@ -370,12 +356,9 @@ public class FormDataServiceImpl implements FormDataService {
 		if (getObjectLock(formData.getId(), userInfo)==null){
 			dataRowDao.rollback(formData.getId());
 		}
-		
-		if (!formDataAccessService.canRead(userInfo, formData.getId())) {
-			throw new AccessDeniedException(
-					"Недостаточно прав чтения формы");
-		}
-		
+
+		formDataAccessService.canRead(userInfo, formData.getId());
+
 		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CHECK, logger, null);
 
 		if (logger.containsLevel(LogLevel.ERROR)) {
@@ -407,11 +390,8 @@ public class FormDataServiceImpl implements FormDataService {
 	public long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
 		lockCoreService.checkLockedMe(FormData.class, formData.getId(), userInfo);
-		
-		if (!formDataAccessService.canEdit(userInfo, formData.getId())) {
-			throw new AccessDeniedException(
-					"Недостаточно прав для изменения налоговой формы");
-		}
+
+		formDataAccessService.canEdit(userInfo, formData.getId());
 
 		formDataScriptingService.executeScript(userInfo, formData,
 				FormDataEvent.SAVE, logger, null);
@@ -445,11 +425,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	@Transactional
 	public FormData getFormData(TAUserInfo userInfo, long formDataId, Logger logger) {
-		if (!formDataAccessService.canRead(userInfo, formDataId)) {
-			throw new AccessDeniedException(
-					"Недостаточно прав на просмотр данных налоговой формы",
-					userInfo.getUser().getId(), formDataId);
-		}
+		formDataAccessService.canRead(userInfo, formDataId);
 
 		FormData formData = formDataDao.get(formDataId);
 
@@ -481,11 +457,8 @@ public class FormDataServiceImpl implements FormDataService {
 	public void deleteFormData(TAUserInfo userInfo, long formDataId) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
 		lockCoreService.checkNoLockedAnother(FormData.class, formDataId, userInfo);
-		
-		if (!formDataAccessService.canDelete(userInfo, formDataId)) {
-			throw new AccessDeniedException(
-					"Недостаточно прав для удаления налоговой формы");
-		}
+
+		formDataAccessService.canDelete(userInfo, formDataId);
 
 		FormData formData = formDataDao.get(formDataId);
 		auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
