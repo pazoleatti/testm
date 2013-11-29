@@ -225,7 +225,7 @@ void logicCheck(){
     def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def countDaysInYear = getCountDaysInYear(dFrom)
     // Номер последний строки предыдущей формы
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def DataRow row : dataRows){
         if (row?.getAlias()?.contains('itg')) {
             totalRow = row
@@ -305,7 +305,7 @@ void calc(){
     sortRows(dataRows, sortColumns)
 
     // Номер последний строки предыдущей формы
-    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
     def countDaysInYear = getCountDaysInYear(dFrom)
 

@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -177,14 +178,15 @@ public interface FormDataService {
     FormData getFormDataPrev(FormData formData, int departmentId);
 
     /**
-     * Получение числа неитоговых строк в форме за предыдущий отчетный период
+     * Получение номера последней строки в форме за предыдущий отчетный период
      * Если указанная форма первая в году или предыдущих форм нет, то результат будет 0
      *
      * @param formData
      * @param departmentId
+     * @param alias
      * @return
      */
-    int getFormDataPrevRowCount(FormData formData, int departmentId);
+    BigDecimal getPrevRowNumber(FormData formData, int departmentId, String alias);
 
     /**
      * Проверка наличия принятой формы за предыдущий период.

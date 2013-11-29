@@ -160,7 +160,7 @@ void calc() {
     // отсортировать/группировать
     sort(dataRows)
 
-    def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     dataRows.each { row ->
         def record61 = (row.code != null? getRefBookValue(61, row.code) : null)
         def code = record61?.CODE?.value
@@ -234,7 +234,7 @@ void logicCheck() {
             'allCost', 'tenureSkvitovannymiBonds', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
-    def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     def rowsRnu64 = getRnuRowsById(355)
     def codesFromRnu54 = []
     rowsRnu64.each { row ->

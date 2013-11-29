@@ -167,7 +167,7 @@ def calc() {
     // удалить строку "итого"
     deleteAllAliased(dataRows)
 
-    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     if (rnu49FormData!=null) {
         for (def dataRow : dataRows) {
             def rnu49Row = getRnu49Row(rnu49Rows, dataRow)
@@ -256,7 +256,7 @@ boolean logicalCheck(){
     def rnu49Rows = rnu49FormData.getAllCached()
 
     def calcValues = [:]
-    def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue

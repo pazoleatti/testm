@@ -159,7 +159,7 @@ void logicCheck() {
     def dataRows = dataRowHelper.allCached
     def totalRow = null
     // Номер последний строки предыдущей формы
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def DataRow row : dataRows){
         if (row?.getAlias()?.contains('itg')) {
             totalRow = row
@@ -212,7 +212,7 @@ void calc() {
     deleteAllAliased(dataRows)
 
     // Номер последний строки предыдущей формы
-    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     // Расчет ячеек
     dataRows.each{row->
