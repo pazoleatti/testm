@@ -192,7 +192,7 @@ void calc() {
 
     /** Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде. */
     def sumNal = 0
-    def sumTaxRecords = departmentParamIncomeRefDataProvider.getRecords(new Date(), null, "DEPARTMENT_ID = '1'", null);
+    def sumTaxRecords = departmentParamIncomeRefDataProvider.getRecords(new Date(), null, "DEPARTMENT_ID = 1", null);
     if (sumTaxRecords != null && !sumTaxRecords.getRecords().isEmpty()) {
         sumNal = new BigDecimal(getValue(sumTaxRecords.getRecords().getAt(0), 'SUM_TAX').doubleValue())
     }
@@ -206,7 +206,7 @@ void calc() {
         }
         def departmentParam = departmentRecords.getRecords().getAt(0)
 
-        def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = '" + row.regionBankDivision + "'", null);
+        def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = " + row.regionBankDivision, null);
         if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.getRecords().isEmpty()) {
             logger.error('Не найдены настройки подразделения для строки ' + (i+1))
             return
@@ -322,7 +322,7 @@ void logicalCheckBeforeCalc() {
 
     def fieldNumber = 0
 
-    def sumTaxRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = '1'", null);
+    def sumTaxRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = 1", null);
     if (sumTaxRecords == null || sumTaxRecords.getRecords().isEmpty() || getValue(sumTaxRecords.getRecords().getAt(0), 'SUM_TAX')==null) {
         logger.error("В форме настроек подразделений (подразделение «УНП») не задано значение атрибута «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
     }
@@ -339,7 +339,7 @@ void logicalCheckBeforeCalc() {
             return
         }
 
-        def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = '" + row.regionBankDivision + "'", null);
+        def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = " + row.regionBankDivision, null);
         if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.getRecords().isEmpty()) {
             logger.error('Не найдены настройки подразделения для строки ' + (row.number ?: getIndex(data, row)))
             return

@@ -48,7 +48,7 @@ if (reportDate != null) {
 // справочник "Параметры подразделения по налогу на прибыль" - начало
 def departmentParamIncomeRefDataProvider = refBookFactory.getDataProvider(33)
 def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(reportDate, null,
-        "DEPARTMENT_ID = '" + declarationData.departmentId + "'", null);
+        "DEPARTMENT_ID = " + declarationData.departmentId, null);
 if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.getRecords().isEmpty()) {
     throw new Exception("Не удалось получить настройки обособленного подразделения.")
 }
