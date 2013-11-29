@@ -114,7 +114,7 @@ void calc() {
         def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
 
         // номер последний строки предыдущей формы
-        def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+        def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
         for (row in dataRows) {
             // графа 1

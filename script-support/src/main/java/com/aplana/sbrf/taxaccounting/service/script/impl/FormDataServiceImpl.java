@@ -471,22 +471,27 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
-    public int getFormDataPrevRowCount(FormData formData, int departmentId) {
+    public BigDecimal getPrevRowNumber(FormData formData, int departmentId, String alias) {
         ReportPeriod reportPeriod = reportPeriodService.get(formData.getReportPeriodId());
         if (reportPeriod != null && reportPeriod.getOrder() == 1) {
-            return 0;
+            return BigDecimal.ZERO;
         }
+        BigDecimal rowNumber = BigDecimal.ZERO;
         FormData prevFormData = getFormDataPrev(formData, departmentId);
         List<DataRow<Cell>> prevDataRows = (prevFormData != null ? getDataRowHelper(prevFormData).getAllCached() : null);
-        int counter = 0;
         if (prevDataRows != null && !prevDataRows.isEmpty()) {
-            for (DataRow<Cell> row : prevDataRows) {
+            for (int i = prevDataRows.size() - 1; i >= 0; i--) {
+                DataRow<Cell> row = prevDataRows.get(i);
                 if (row.getAlias() == null) {
-                    counter++;
+                    Object value = row.getCell(alias).getValue();
+                    if (value instanceof BigDecimal) {
+                        rowNumber = (BigDecimal) value;
+                    }
+                    break;
                 }
             }
         }
-        return counter;
+        return rowNumber == null ? BigDecimal.ZERO : rowNumber;
     }
 
     @Override

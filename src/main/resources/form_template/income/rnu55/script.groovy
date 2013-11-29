@@ -129,7 +129,7 @@ void calc() {
         def reportDate = getReportDate()
         //Начальная дата отчетного периода
         def reportDateStart = reportPeriodService.getStartDate(formData.reportPeriodId).time
-        def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+        def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
         for (def row in dataRows) {
             // графа 1
@@ -226,7 +226,7 @@ void logicCheck() {
         return
     }
 
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     // Алиасы граф для арифметической проверки
     def arithmeticCheckAlias = ['percentInCurrency', 'sumIncomeinCurrency', 'sumIncomeinRuble']

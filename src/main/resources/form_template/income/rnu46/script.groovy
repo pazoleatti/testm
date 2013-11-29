@@ -164,7 +164,7 @@ void calc() {
     }
 
     // Сквозная нумерация с начала года
-    def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     for (def row in dataRows) {
         // Графа 1

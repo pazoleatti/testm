@@ -142,7 +142,7 @@ void calc() {
     def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
     // Номер последний строки предыдущей формы
-    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     for (row in dataRows) {
         // графа 1
@@ -274,7 +274,7 @@ void logicCheck() {
         return
     }
 
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     // алиасы графов для арифметической проверки (графа 8, 9, 12-15)
     def arithmeticCheckAlias = ['termDealBill', 'percIncome', 'discountInCurrency', 'discountInRub',

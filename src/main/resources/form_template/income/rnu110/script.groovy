@@ -145,7 +145,7 @@ def calc() {
         deleteAllAliased(dataRows)
 
         // номер последний строки предыдущей формы
-        def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+        def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
         for (row in dataRows) {
             // графа 1
