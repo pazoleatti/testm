@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.text.SimpleDateFormat
@@ -20,9 +20,6 @@ import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
  * Версия ЧТЗ: 57
  * Вопросы аналитикам по ЧТЗ: http://jira.aplana.com/browse/SBRFACCTAX-2383
  *
- * TODO:
- *      -   не доделаны проверки 2, 3
- *
  * @author vsergeev
  *
  * Графы:  *
@@ -31,7 +28,6 @@ import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
  * 4    sumTaxPeriodTotal        -   С начала налогового периода
  * 5    amortPeriod              -   За отчётный месяц
  * 6    amortTaxPeriod           -   С начала налогового периода
- *
  */
 
 switch (formDataEvent) {
@@ -39,23 +35,27 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE :
-        def rnu46FormData = getRnu46FormData()
-        if (rnu46FormData==null) {
-            logger.error("Не найдены экземпляры РНУ-46 за текущий отчетный период!")
-            return
-        }
-        if (!formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id) && !isFirstPeriod()) {
-            logger.error("Не найдены экземпляры РНУ-47 за прошлый отчетный период!!")
-            return
+        if (!isMonthBalance()) {
+            def rnu46FormData = getRnu46DataRowHelper()
+            if (rnu46FormData==null) {
+                logger.error("Не найдены экземпляры РНУ-46 за текущий отчетный период!")
+                return
+            }
+            if (!formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id) && !isFirstPeriod()) {
+                logger.error("Не найдены экземпляры РНУ-47 за прошлый отчетный период!!")
+                return
+            }
         }
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK :
-        def rnu46FormData = getRnu46FormData()
-        if (rnu46FormData==null) {
-            logger.error("Не найдены экземпляры РНУ-46 за текущий отчетный период!")
-            return
+        if (!isMonthBalance()) {
+            def rnu46FormData = getRnu46DataRowHelper()
+            if (rnu46FormData==null) {
+                logger.error("Не найдены экземпляры РНУ-46 за текущий отчетный период!")
+                return
+            }
         }
         logicCheck()
         break
@@ -72,7 +72,6 @@ switch (formDataEvent) {
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
         logicCheck()
         break
-// обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
@@ -99,17 +98,25 @@ def arithmeticCheckAlias = ["sumCurrentPeriodTotal", "sumTaxPeriodTotal", "amort
 @Field
 def dateFormat = new SimpleDateFormat("dd.MM.yyyy")
 
+@Field
+def isBalance = null
+
 /* Получить данные за формы "(РНУ-46) Регистр налогового учёта «карточка по учёту основных средств и капитальных вложений в неотделимые улучшения арендованного и полученного по договору безвозмездного пользования имущества»" */
-def getRnu46FormData(){
-    def formData46 = formDataService.find(342, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+def getRnu46DataRowHelper(){
+    def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
+    def formData46 = formDataService.findMonth(342, formData.kind, formDataDepartment.id, taxPeriodId, formData.periodOrder)
     if (formData46!=null) {
         return formDataService.getDataRowHelper(formData46)
     }
     return null
 }
 
-/** расчет значений ячеек, заполняющихся автоматически */
+/** Расчет значений ячеек, заполняющихся автоматически */
 void calc(){
+    if (isMonthBalance()) {
+        // Для периода ввода остатков расчет не производится
+        return
+    }
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -124,21 +131,19 @@ void calc(){
         }
     }
     // расчет для строк 12-13
-    def totalValues = getTotalValues()
+    def totalValues = getTotalValues(dataRows)
     dataRows.eachWithIndex{row, index->
         if (index==11 || index==12) {
             row.sumCurrentPeriodTotal = totalValues[index].sumCurrentPeriodTotal
             row.sumTaxPeriodTotal = totalValues[index].sumTaxPeriodTotal
         }
     }
-
     dataRowHelper.save(dataRows)
 }
 
-/** расчет строк 1-11 */
+/** Расчет строк 1-11 */
 def calcRows1_11(){
-    def rnu46FormData = getRnu46FormData()
-    def rnu46Rows = rnu46FormData.allCached
+    def rnu46Rows = getRnu46DataRowHelper()?.allCached
     def groupList = 0..10
     def value = [:]
     groupList.each{group ->
@@ -147,10 +152,8 @@ def calcRows1_11(){
     return value
 }
 
-/** расчет строк 12-13 */
-def getTotalValues(){
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+/** Расчет строк 12-13 */
+def getTotalValues(def dataRows){
     def group12 = ['R1', 'R2', 'R8', 'R9', 'R10']
     def group13 = ['R3', 'R4', 'R5', 'R6', 'R7']
     def value = [11: [:], 12: [:]]
@@ -176,7 +179,8 @@ def calc3_6(def rows, def group) {
                     amortTaxPeriod: BigDecimal.ZERO
                 ]
     rows.each{row ->
-        if (refBookService.getNumberValue(71,row.amortGroup,'GROUP').intValue()==group) {
+        def amortGroup = refBookService.getNumberValue(71, row.amortGroup, 'GROUP')
+        if (amortGroup != null && amortGroup==group) {
             value.sumCurrentPeriodTotal += roundTo(row.cost10perMonth?:BigDecimal.ZERO, 2)
             value.sumTaxPeriodTotal += roundTo(row.cost10perTaxPeriod?:BigDecimal.ZERO, 2)
             value.amortPeriod += roundTo(row.amortMonth?:BigDecimal.ZERO, 2)
@@ -188,11 +192,19 @@ def calc3_6(def rows, def group) {
 
 /** Логические проверки (таблица 149) */
 void logicCheck(){
+    if (formData.periodOrder == null) {
+        throw new ServiceException("Месячная форма создана как квартальная!")
+    }
+
+    if (isMonthBalance()) {
+        // В периоде ввода остатков нет лог. проверок
+        return
+    }
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def hasData = false
     def groupList = 0..10
-    for (def row :rnu46FormData.allCached) {
+    for (def row :rnu46DataRowHelper.allCached) {
         if (refBookService.getNumberValue(71,row.amortGroup,'GROUP').intValue() in groupList) {
             hasData = true
             break
@@ -203,11 +215,18 @@ void logicCheck(){
     }
 
     def groupRowsAliases = ['R0', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10']
-    def formDataOld = formDataService.getFormDataPrev(formData, formDataDepartment.id)
-    def dataOld = formDataOld != null ? formDataService.getDataRowHelper(formDataOld) : null
+    //вынес сюда проверку на первый месяц
+    def formDataOld = !isFirstPeriod() ? formDataService.getFormDataPrev(formData, formDataDepartment.id) : null
+    def dataRowsOld = formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null
     // значения для первых 11 строк
     def row1_11 = calcRows1_11()
 
+    def startOld
+    def endOld
+    if (formDataOld?.periodOrder != null) {
+        startOld = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formDataOld.periodOrder).time
+        endOld = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formDataOld.periodOrder).time
+    }
     for (def row : dataRows) {
         if (row.getAlias() in groupRowsAliases) {
             // Проверка на заполнение поля
@@ -217,69 +236,66 @@ void logicCheck(){
             continue
         }
         //2.		Проверка суммы расходов в виде капитальных вложений с начала года
-
         //2.1	графа 4 ? графа 3;
-        def invalidCapitalForm = 'Неверная сумма расходов в виде капитальных вложений с начала года!'
-        if (! (row.sumTaxPeriodTotal >= row.sumCurrentPeriodTotal)) {
-            logger.error(invalidCapitalForm)
-        } else
-        //2.2	графа 4 = графа 3 + графа 4 за предыдущий месяц;
-        // TODO (если текущий отчетный период – январь, то слагаемое «по графе 4 за предыдущий месяц» в формуле считается равным «0.00»)
-        if (row.sumCurrentPeriodTotal != null && !(row.sumTaxPeriodTotal == (row.sumCurrentPeriodTotal + getSumTaxPeriodTotalFromPreviousMonth(dataOld, row.getAlias())))) {
-            def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-            def start = reportPeriodService.getStartDate(reportPeriodOld.id).getTime()
-            def end = reportPeriodService.getEndDate(reportPeriodOld.id).getTime()
-            invalidCapitalForm += " Экземпляр за период ${getDateString(start)} - ${getDateString(end)} не существует (отсутствуют первичные данные для расчёта)"
-            logger.error(invalidCapitalForm)
-        } else
-        //2.3	графа 4 = ?графа 3 за все месяцы текущего года, начиная с января и включая текущий отчетный период.
-        if (! (row.sumTaxPeriodTotal == getSumCurrentQuarterTotalForAllPeriods(row.getAlias())) )  {
-            def reportPeriodList = getSumCurrentQuarterInvalidPeriods(row.getAlias())
-            if (!reportPeriodList.isEmpty()) {
-                invalidCapitalForm += " Экземпляр за периоды "
-                reportPeriodList.eachWithIndex{ reportPeriodOld, index ->
-                    if(index != 0){
-                        invalidCapitalForm += ", "
-                    }
-                    def start = reportPeriodService.getStartDate(reportPeriodOld.id).getTime()
-                    def end = reportPeriodService.getEndDate(reportPeriodOld.id).getTime()
-                    invalidCapitalForm += "${getDateString(start)} - ${getDateString(end)}"
-                }
-                invalidCapitalForm += " не существует (отсутствуют первичные данные для расчёта)"
+        def invalidCapitalForm = "Строка ${row.getIndex()}: Неверная сумма расходов в виде капитальных вложений с начала года!"
+        if (row.sumTaxPeriodTotal != null && row.sumCurrentPeriodTotal != null) {
+            if (row.sumTaxPeriodTotal < row.sumCurrentPeriodTotal) {
                 logger.error(invalidCapitalForm)
+            } else
+            //2.2	графа 4 = графа 3 + графа 4 за предыдущий месяц;
+            // (если текущий отчетный период – январь, то слагаемое «по графе 4 за предыдущий месяц» в формуле считается равным «0.00»)
+            if (row.sumTaxPeriodTotal != (row.sumCurrentPeriodTotal + getSumTaxPeriodTotalFromPreviousMonth(dataRowsOld, row.getAlias()))) {
+                invalidCapitalForm += " Экземпляр за период ${getDateString(startOld)} - ${getDateString(endOld)} не существует (отсутствуют первичные данные для расчёта)"
+                logger.error(invalidCapitalForm)
+            } else
+            //2.3	графа 4 = (сумма)графа 3 за все месяцы текущего года, начиная с января и включая текущий отчетный период.
+            if (row.sumTaxPeriodTotal != getSumCurrentQuarterTotalForAllPeriods(row.getAlias()))  {
+                def periodOrderList = getSumCurrentQuarterInvalidPeriods(row.getAlias())
+                if (!periodOrderList.isEmpty()) {
+                    invalidCapitalForm += " Экземпляр за периоды "
+                    periodOrderList.eachWithIndex{ periodOrder, index ->
+                        if(index != 0){
+                            invalidCapitalForm += ", "
+                        }
+                        def start = reportPeriodService.getMonthStartDate(formData.reportPeriodId, periodOrder).time
+                        def end = reportPeriodService.getMonthEndDate(formData.reportPeriodId, periodOrder).time
+                        invalidCapitalForm += "${getDateString(start)} - ${getDateString(end)}"
+                    }
+                    invalidCapitalForm += " не существует (отсутствуют первичные данные для расчёта)"
+                    logger.error(invalidCapitalForm)
+                }
             }
         }
 
         //3.    Проверка суммы начисленной амортизации с начала года
-        final invalidAmortSumms = 'Неверная сумма начисленной амортизации с начала года!'
+        def invalidAmortSumms = "Строка ${row.getIndex()}: Неверная сумма начисленной амортизации с начала года!"
         //3.1.	графа 6 ? графа 5
-        if (! (row.amortTaxPeriod >= row.amortPeriod)) {
-            logger.error(invalidAmortSumms)
-        } else
-        //3.2   графа 6 = графа 5 + графа 6 за предыдущий месяц;
-        //  (если текущий отчетный период – январь, то слагаемое «по графе 6 за предыдущий месяц» в формуле считается равным «0.00»)
-        if (row.amortPeriod != null && !(row.amortTaxPeriod == (row.amortPeriod + getAmortTaxPeriodFromPreviousMonth(dataOld, row.getAlias()))) ) {
-            def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-            def start = reportPeriodService.getStartDate(reportPeriodOld.id).getTime()
-            def end = reportPeriodService.getEndDate(reportPeriodOld.id).getTime()
-            invalidAmortSumms += " Экземпляр за период ${getDateString(start)} - ${getDateString(end)} не существует (отсутствуют первичные данные для расчёта)"
-            logger.error(invalidAmortSumms)
-        }
-        //3.3   графа 6 = ?графа 5 за все месяцы текущего года, начиная с января и включая текущий отчетный период.
-        if (! (row.amortTaxPeriod == getAmortQuarterForAllPeriods(row.getAlias())) ) {
-            def reportPeriodList = getAmortQuarterInvalidPeriods(row.getAlias())
-            if (!reportPeriodList.isEmpty()) {
-                invalidAmortSumms += " Экземпляр за периоды "
-                reportPeriodList.eachWithIndex{ reportPeriodOld, index ->
-                    if(index != 0){
-                        invalidAmortSumms += ", "
-                    }
-                    def start = reportPeriodService.getStartDate(reportPeriodOld.id).getTime()
-                    def end = reportPeriodService.getEndDate(reportPeriodOld.id).getTime()
-                    invalidAmortSumms += "${getDateString(start)} - ${getDateString(end)}"
-                }
-                invalidAmortSumms += " не существует (отсутствуют первичные данные для расчёта)"
+        if (row.amortTaxPeriod != null && row.amortPeriod != null) {
+            if (row.amortTaxPeriod < row.amortPeriod) {
                 logger.error(invalidAmortSumms)
+            } else
+            //3.2   графа 6 = графа 5 + графа 6 за предыдущий месяц;
+            //  (если текущий отчетный период – январь, то слагаемое «по графе 6 за предыдущий месяц» в формуле считается равным «0.00»)
+            if (row.amortTaxPeriod != (row.amortPeriod + getAmortTaxPeriodFromPreviousMonth(dataRowsOld, row.getAlias()))) {
+                invalidAmortSumms += " Экземпляр за период ${getDateString(startOld)} - ${getDateString(endOld)} не существует (отсутствуют первичные данные для расчёта)"
+                logger.error(invalidAmortSumms)
+            } else
+            //3.3   графа 6 = (сумма)графа 5 за все месяцы текущего года, начиная с января и включая текущий отчетный период.
+            if (row.amortTaxPeriod != getAmortQuarterForAllPeriods(row.getAlias())) {
+                def periodOrderList = getAmortQuarterInvalidPeriods(row.getAlias())
+                if (!periodOrderList.isEmpty()) {
+                    invalidAmortSumms += " Экземпляр за периоды "
+                    periodOrderList.eachWithIndex{ periodOrder, index ->
+                        if(index != 0){
+                            invalidAmortSumms += ", "
+                        }
+                        def start = reportPeriodService.getMonthStartDate(formData.reportPeriodId, periodOrder).time
+                        def end = reportPeriodService.getMonthEndDate(formData.reportPeriodId, periodOrder).time
+                        invalidAmortSumms += "${getDateString(start)} - ${getDateString(end)}"
+                    }
+                    invalidAmortSumms += " не существует (отсутствуют первичные данные для расчёта)"
+                    logger.error(invalidAmortSumms)
+                }
             }
         }
 
@@ -294,30 +310,30 @@ void logicCheck(){
 
     boolean isValid = true
 
-    def totalValues = getTotalValues()
+    def totalValues = getTotalValues(dataRows)
     dataRows.eachWithIndex{row, index->
         if ( (index==11 || index==12) &&
                 !(row.sumCurrentPeriodTotal==totalValues[index].sumCurrentPeriodTotal &&
-                        row.sumTaxPeriodTotal==totalValues[index].sumTaxPeriodTotal) ) isValid = false
+                        row.sumTaxPeriodTotal==totalValues[index].sumTaxPeriodTotal) ) {
+            isValid = false
+        }
     }
     if (!isValid) {
         logger.error('Итоговые значения рассчитаны неверно!')
     }
 }
 
-/** Получить данные за определенный период */
-def FormData getFormDataPeriod(def reportPeriod) {
-    def formDataPeriod = null
-    if (reportPeriod != null) {
-        formDataPeriod = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id)
+/** Получить данные за определенный месяц */
+def FormData getFormDataPeriod(def taxPeriod, def periodOrder) {
+    if (taxPeriod != null) {
+        return formDataService.findMonth(formData.formType.id, formData.kind, formDataDepartment.id, taxPeriod.id, periodOrder)
     }
-    return formDataPeriod
 }
 
 /** Возвращает значение графы 4 за предыдущий месяц */
-def getSumTaxPeriodTotalFromPreviousMonth(def DataRowHelper dataRowHelper, def alias) {
-    if (dataRowHelper != null) {
-        def row = getDataRow(dataRowHelper.allCached, alias)
+def getSumTaxPeriodTotalFromPreviousMonth(def dataRows, def alias) {
+    if (dataRows != null) {
+        def row = getDataRow(dataRows, alias)
         if(row != null){
             return row.sumTaxPeriodTotal
         }
@@ -326,9 +342,9 @@ def getSumTaxPeriodTotalFromPreviousMonth(def DataRowHelper dataRowHelper, def a
 }
 
 /** Возвращает значение графы 6 за предыдущий месяц */
-def getAmortTaxPeriodFromPreviousMonth(def DataRowHelper dataRowHelper, def alias) {
-    if (dataRowHelper != null) {
-        def row = getDataRow(dataRowHelper.allCached, alias)
+def getAmortTaxPeriodFromPreviousMonth(def dataRows, def alias) {
+    if (dataRows != null) {
+        def row = getDataRow(dataRows, alias)
         if(row != null){
             return row.amortTaxPeriod
         }
@@ -336,102 +352,96 @@ def getAmortTaxPeriodFromPreviousMonth(def DataRowHelper dataRowHelper, def alia
     return BigDecimal.ZERO
 }
 
-/**
- * возвращает значение графы 3 за все месяцы текущего года, включая текущий отчетный период
- * TODO актуализировать / добавить выдачу ошибок при отсутствии значений
- */
+/** Возвращает значение графы 3 за все месяцы текущего года, включая текущий отчетный период */
 def getSumCurrentQuarterTotalForAllPeriods(def alias) {
     def ReportPeriod reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def TaxPeriod taxPeriod = reportPeriod.taxPeriod
-    def List<ReportPeriod> periodList = reportPeriodService.listByTaxPeriod(taxPeriod.id)
-    return periodList.sum{ period ->
-        if (period.order < reportPeriod.order) {
-            def formDataPeriod = getFormDataPeriod(period)
-            def DataRowHelper dataRowHelper = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod) : null
-            def row = dataRowHelper != null ? getDataRow(dataRowHelper.allCached, alias) : null
-            return row!=null ? row.sumCurrentPeriodTotal : BigDecimal.ZERO
+    def sum = 0
+    for (def periodOrder = 1; periodOrder<=formData.periodOrder; periodOrder++){
+        def formDataPeriod = getFormDataPeriod(taxPeriod, periodOrder)
+        def dataRows = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod)?.allCached : null
+        def row = dataRows != null ? getDataRow(dataRows, alias) : null
+        if (row?.sumCurrentPeriodTotal != null){
+            sum += row?.sumCurrentPeriodTotal
         }
-        return BigDecimal.ZERO
     }
+    return sum
 }
 
 /** Возвращает периоды с некорректными данными для расчета графы 3 */
 def getSumCurrentQuarterInvalidPeriods(def alias) {
     def ReportPeriod reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def TaxPeriod taxPeriod = reportPeriod.taxPeriod
-    def List<ReportPeriod> periodList = reportPeriodService.listByTaxPeriod(taxPeriod.id)
-    return periodList.findAll{ period ->
-        if (period.order < reportPeriod.order) {
-            def formDataPeriod = getFormDataPeriod(period)
-            def DataRowHelper dataRowHelper = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod) : null
-            def row = dataRowHelper != null ? getDataRow(dataRowHelper.allCached, alias) : null
-            return row==null
+    def periods = []
+    for (def periodOrder = 1; periodOrder<=formData.periodOrder; periodOrder++){
+        def formDataPeriod = getFormDataPeriod(taxPeriod, periodOrder)
+        def dataRows = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod)?.allCached : null
+        def row = dataRows != null ? getDataRow(dataRows, alias) : null
+        if (row?.sumCurrentPeriodTotal == null){
+            periods += periodOrder
         }
-        return false
     }
+    return periods
 }
 
-/**
- * возвращает значение графы 6 за все месяцы текущего года, включая текущий отчетный период
- * TODO актуализировать / добавить выдачу ошибок при отсутствии значений
- */
+/** Возвращает значение графы 6 за все месяцы текущего года, включая текущий отчетный период */
 def getAmortQuarterForAllPeriods(def alias) {
     def ReportPeriod reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def TaxPeriod taxPeriod = reportPeriod.taxPeriod
-    def List<ReportPeriod> periodList = reportPeriodService.listByTaxPeriod(taxPeriod.id)
-    return periodList.sum{ period ->
-        if (period.order < reportPeriod.order) {
-            def formDataPeriod = getFormDataPeriod(period)
-            def DataRowHelper dataRowHelper = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod) : null
-            def row = dataRowHelper != null ? getDataRow(dataRowHelper.allCached, alias) : null
-            return row!=null ? row.amortTaxPeriod : BigDecimal.ZERO
+    def sum = 0
+    for (def periodOrder = 1; periodOrder<=formData.periodOrder; periodOrder++){
+        def formDataPeriod = getFormDataPeriod(taxPeriod, periodOrder)
+        def dataRows = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod)?.allCached : null
+        def row = dataRows != null ? getDataRow(dataRows, alias) : null
+        if (row?.amortTaxPeriod != null){
+            sum += row?.amortTaxPeriod
         }
-        return BigDecimal.ZERO
     }
+    return sum
 }
 
 /** Возвращает периоды с некорректными данными для расчета графы 6 */
 def getAmortQuarterInvalidPeriods(def alias) {
     def ReportPeriod reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def TaxPeriod taxPeriod = reportPeriod.taxPeriod
-    def List<ReportPeriod> periodList = reportPeriodService.listByTaxPeriod(taxPeriod.id)
-    return periodList.findAll{ period ->
-        if (period.order < reportPeriod.order) {
-            def formDataPeriod = getFormDataPeriod(period)
-            def DataRowHelper dataRowHelper = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod) : null
-            def row = dataRowHelper != null ? getDataRow(dataRowHelper.allCached, alias) : null
-            return row==null
+    def periods = []
+    for (def periodOrder = 1; periodOrder<=formData.periodOrder; periodOrder++){
+        def formDataPeriod = getFormDataPeriod(taxPeriod, periodOrder)
+        def dataRows = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod)?.allCached : null
+        def row = dataRows != null ? getDataRow(dataRows, alias) : null
+        if (row?.amortTaxPeriod == null){
+            periods += periodOrder
         }
-        return false
     }
+    return periods
 }
 
-// TODO Проверка на первый месяц
 boolean isFirstPeriod(){
     def ReportPeriod reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    return reportPeriod.order == 1
+    return reportPeriod.order == 1 && formData.periodOrder == 1
 }
 
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     // удалить все строки и собрать из источников их строки
-    def rows = dataRowHelper.allCached
-    rows.each{ row ->
+    def dataRows = dataRowHelper.allCached
+    dataRows.each{ row ->
         arithmeticCheckAlias.each{ column ->
             row[column] = null
         }
     }
-
+    def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
     for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())) {
         if (formDataSource.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId)
+            def source = formDataService.findMonth(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, taxPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 sourceForm = formDataService.getDataRowHelper(source)
-                addRowsToRows(rows, sourceForm.allCached)
+                addRowsToRows(dataRows, sourceForm.allCached)
             }
         }
     }
-    dataRowHelper.save(rows)
+    dataRowHelper.save(dataRows)
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 void addRowsToRows(def rows, def addRows){
@@ -459,3 +469,19 @@ def String getDateString(Date date){
 BigDecimal roundTo(BigDecimal value, int newScale) {
     return value?.setScale(newScale, BigDecimal.ROUND_HALF_UP)
 }
+
+// Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
+def isMonthBalance() {
+    if (isBalance == null) {
+        // Отчётный период
+        def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+        if (!reportPeriodService.isBalancePeriod(reportPeriod.id, formData.departmentId) || formData.periodOrder == null) {
+            isBalance = false
+        } else {
+            isBalance = formData.periodOrder - 1 % 3 == 0
+        }
+    }
+    return isBalance
+}
+
+
