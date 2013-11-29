@@ -286,7 +286,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			sql.append(" and is_active = " + (filter.getActive() ? "1" : "0")) ;
 		}
 		if (filter.getUserName() != null && !filter.getUserName().isEmpty()) {
-			sql.append(" and name like " + "\'%" + filter.getUserName() +"%\'") ;
+			sql.append(" and lower(name) like " + "\'%" + filter.getUserName().toLowerCase() +"%\'") ;
 		}
 		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
 			sql.append(" and department_id in " + SqlUtils.transformToSqlInStatement(new ArrayList<Integer>(filter.getDepartmentIds()))) ;
@@ -294,8 +294,11 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		if (filter.getRoleIds() != null && !filter.getRoleIds().isEmpty() && filter.getRoleIds().get(0) != null) {
 			sql.append(" and exists (select 1 from sec_user_role ur where u.id = ur.user_id and ur.role_id = " + filter.getRoleIds().get(0) +")") ;
 		}
-
-		sql.append(") where r between " + (filter.getStartIndex()+1) + " and " + (filter.getStartIndex()+1 + filter.getCountOfRecords()) );
+		if (filter.getStartIndex() != null && filter.getCountOfRecords() != null) {
+			sql.append(") where r between " + (filter.getStartIndex()+1) + " and " + (filter.getStartIndex()+1 + filter.getCountOfRecords()) );
+		} else {
+			sql.append(")");
+		}
 		try {
 			return getJdbcTemplate().queryForList(sql.toString(), Integer.class);
 		} catch (DataAccessException e) {
