@@ -246,9 +246,23 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             return null;
         }
 
-        // Ключ кэша
-        String filter = value == null || value.isEmpty() ? alias + " is null" :
-                "LOWER(" + alias + ") = LOWER('" + value + "')";
+        RefBook rb = refBookFactory.get(refBookId);
+
+        String filter;
+
+        if (value == null || value.isEmpty()) {
+            filter = alias + " is null";
+        } else {
+            RefBookAttributeType type = rb.getAttribute(alias).getAttributeType();
+            String template;
+            // TODO: поиск по выражениям с датами не реализован
+            if (type == RefBookAttributeType.REFERENCE || type == RefBookAttributeType.NUMBER) {
+                template = "%s = %s";
+            } else {
+                template = "LOWER(%s) = LOWER('%s')";
+            }
+            filter = String.format(template, alias, value);
+        }
 
         String dateStr = sdf.format(date);
 
