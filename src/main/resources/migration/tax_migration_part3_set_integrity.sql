@@ -1,9 +1,9 @@
 --Set Integrity
 --PK constraints
 alter table DEPARTMENT add constraint SYS_C003404 primary key (ID);
-
 alter table NSI_CURRENCY add constraint ID_CURRENCY_PK primary key (ID);
 alter table NSI_DEPARTAX add constraint PRKEY_IDDEPARTAX primary key (IDDEPARTAX);
+alter table NSI_OKATO add constraint ID_NSI_OKATO_PK primary key (ID_OKATO);
 alter table NSI_RATES add constraint ID_NSI_RATES_PK primary key (ID_RATES);
 alter table NSI_SECURITY add constraint ID_NSI_SECURITY_PK primary key (ID);
 
@@ -59,12 +59,17 @@ alter table DEPARTMENT add CONSTRAINT unq_depart_code UNIQUE (code);
 --Check constraints
 
 --Indexes
+create index IDX_DEPARTMENT_DEFINITION on DEPARTMENT (DEFINITION);
+create index IDX_DEPARTMENT_PAR_FIELD on DEPARTMENT (PAR_FIELD);
 create index IDX_EVENTS_FIDACSLEVEL on EVENTS (FIDACSLEVEL ASC);
 create index IDX_NSI_BANK_RATE_FIDEXEMPLAR on NSI_BANK_RATE (FIDEXEMPLAR ASC);
 create index IDX_NSI_CURRENCY_FIDEXEMPLAR on NSI_CURRENCY (FIDEXEMPLAR ASC);
 create index IDX_NSI_CURRENCY_6 on NSI_CURRENCY (CODE ASC, FIDEXEMPLAR ASC);
+create index IDX_NSI_SECURITY_FIDEXEMPLAR on NSI_SECURITY (FIDEXEMPLAR);
+create index EXEMP_INDX_NSI_RATES on NSI_RATES (FIDEXEMPLAR);
 create index IDX_DOP_TRAN_FIDEVENT on DOP_TRAN (FIDEVENT ASC);
 create index IDX_DOP_TRAN_FIDTRAN on DOP_TRAN (FIDTRAN ASC);
+create index IDX_ENTRANCEDIR_RECEIVEDIR on ENTRANCEDIR (RECEIVEDIR);
 create index IDX_EXEMPLAR_FIDOBJ on EXEMPLAR (FIDOBJ ASC);
 create index IDX_EXEMPLAR_FIDPERIODLIST on EXEMPLAR (FIDPERIODLIST ASC);
 create index IDX_EXEMPLAR_FIDTRANSACTION on EXEMPLAR (FIDTRANSACTION ASC);
@@ -75,6 +80,7 @@ create index IDX_IN_FILE_FIDPROCESS on IN_FILE (FIDPROCESS ASC);
 create index IDX_IN_FILE_FIDSUBDICT on IN_FILE (FIDSUBDICT ASC);
 create index IDX_IN_FILE_FIDVERLOAD on IN_FILE (FIDVERLOAD ASC);
 create index IDX_OBJ_66 on OBJ (FIDOBJDICT ASC,FIDPERIODITY ASC,FIDPROVIDER ASC,FIDSUBDICT ASC,FIDVEROBJ ASC);
+create index FCODEPERIODITY on PERIODLIST (FCODEPERIODITY);
 create index IDX_PERIODLIST_FIDPERIODITY on PERIODLIST (FIDPERIODITY ASC);
 create index IDX_PRELIMPROC_FIDCONVERSE on PRELIMPROC (FIDCONVERSE ASC);
 create index IDX_PRELIMPROC_FIDENTRANCEDIR on PRELIMPROC (FIDENTRANCEDIR ASC);
@@ -131,7 +137,6 @@ alter table ROLES add constraint ROLES_RL_NAME_UK unique (RL_NAME);
 alter table ROLES add constraint ROLE_UNQ unique (RL_APP_ID, RL_UNICODE);
 alter table ASYSTEM add constraint UNQ_ASYSTEM_CODE unique (CODEASYSTEM);
 alter table ASYSTEM add constraint UNQ_ASYSTEM_DEF unique (DEFINITION);
-alter table ENTRANCEDIR add constraint UNQ_ENTRANCEDIR unique (RECEIVEDIR);
 alter table GENPARAM add constraint SECTION_IDPARAM_UNQ unique (IDGENPARAM, FIDSECTION);
 alter table OBJ add constraint UNQ_OBJ unique (FIDOBJDICT, FIDVEROBJ, FIDPROVIDER, FIDSUBDICT, FIDPERIODITY);
 alter table OBJDICT  add constraint OBJDICT_CODE_UQ unique (CODEOBJDICT);
@@ -142,6 +147,12 @@ alter table SUBDICT add constraint SUBDICT_CODESUBDICT_UQ unique (CODESUBDICT);
 alter table VEROBJ add constraint UNQ_VEROBJ unique (CODE) using index;
 
 --FK constraints
+alter table NSI_CURRENCY
+   add constraint NSI_CURRENCY_EXEMPLAR foreign key (FIDEXEMPLAR)
+      references EXEMPLAR (IDEXEMPLAR)
+      on delete cascade
+      not deferrable;
+	  
 alter table NSI_DEPARTAX
    add constraint FIDDEPARTMENT_FK foreign key (FIDDEPARTMENT)
       references DEPARTMENT (ID)
@@ -181,6 +192,7 @@ alter table DOP_TRAN
 alter table DOP_TRAN
    add constraint FK_DOPTRAN_OBJ foreign key (FIDOBJ)
       references OBJ (IDOBJ)
+	  on delete cascade
       not deferrable;
 
 alter table DOP_TRAN
@@ -209,8 +221,14 @@ alter table EXEMPLAR
       not deferrable;
 
 alter table EXEMPLAR
+   add constraint EXEMPLAR_TRANSACTION foreign key (FIDTRANSACTION)
+      references TRANSACTION (IDTRANSACTION)
+      not deferrable;	  
+	  
+alter table EXEMPLAR
    add constraint FK_EXEMPLAR_OBJ foreign key (FIDOBJ)
       references OBJ (IDOBJ)
+	  on delete cascade
       not deferrable;
 
 alter table EXEMPLAR
@@ -218,6 +236,11 @@ alter table EXEMPLAR
       references PERIODLIST (IDPERIODLIST)
       not deferrable;
 
+alter table IN_FILE
+   add constraint INFILE_SUBDICT foreign key (FIDSUBDICT)
+      references  SUBDICT(IDSUBDICT)
+      not deferrable;
+	  
 alter table OBJ
    add constraint OBJ_OBJDICT_FK foreign key (FIDOBJDICT)
       references OBJDICT (IDOBJDICT)
@@ -254,6 +277,11 @@ alter table PRELIMPROC
       not deferrable;
 
 alter table PRELIMPROC
+   add constraint PRELIMPROC_SUBDICT foreign key (FIDSUBDICT)
+      references SUBDICT (IDSUBDICT)
+      not deferrable;
+	  
+alter table PRELIMPROC
    add constraint PRELIMPROC_WAY foreign key (FIDWAY)
       references WAY (IDWAY)
       not deferrable;
@@ -263,14 +291,14 @@ alter table PROVIDER
       references ASYSTEM (IDASYSTEM)
       not deferrable;
 	  
+alter table ROLES
+   add constraint FK_ROLES_APP foreign key (RL_APP_ID)
+      references APP (IDAPP)
+      not deferrable;
+	  
 alter table SUBDICT
    add constraint FK_SUBDICT_OBJDICT foreign key (FIDOBJDICT)
       references OBJDICT (IDOBJDICT)
-      not deferrable;
-
-alter table TRANSACTION
-   add constraint FK_TRANSACTION_PRELIMPROC foreign key (FIDPRELIMPROC)
-      references PRELIMPROC (IDPRELIMPROC)
       not deferrable;
 
 alter table TRD_25
@@ -321,7 +349,4 @@ alter table TRD_60
 alter table TRD_64
    add constraint TR_FK1_64 foreign key (FIDEXEMPLAR)
       references EXEMPLAR (IDEXEMPLAR)
-      not deferrable;	
-
---RUNSTATS
-exec dbms_stats.gather_schema_stats('MIGRATION', DBMS_STATS.AUTO_SAMPLE_SIZE);	  
+      not deferrable;

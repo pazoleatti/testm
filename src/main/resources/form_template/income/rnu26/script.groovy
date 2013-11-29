@@ -8,9 +8,9 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
 /**
- * Форма "(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций, РДР, ADR, GDR и опционов эмитента в целях налогообложения".
- *
- * @version 65
+ * Форма "(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций,
+ *                                                  РДР, ADR, GDR и опционов эмитента в целях налогообложения".
+ * formTemplateId=325
  *
  * @author rtimerbaev
  */
@@ -872,7 +872,7 @@ def calc8(def row, def needColumnName, def searchColumnName, def searchValue, de
 
 def calc13(def row) {
     if (row.marketQuotation != null && row.rubCourse != null) {
-        return roundValue(row.marketQuotation * row.rubCourse, 2)
+        return row.marketQuotation * row.rubCourse
     }
     return null
 }
