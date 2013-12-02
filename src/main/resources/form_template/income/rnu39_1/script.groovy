@@ -1,8 +1,9 @@
 package form_template.income.rnu39_1
 
-import com.aplana.sbrf.taxaccounting.model.*
-import com.aplana.sbrf.taxaccounting.model.log.Logger
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
@@ -117,19 +118,14 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
-// Поиск записи в справочнике по значению (для расчетов) + по дате
-//def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
-//                     boolean required = true) {
-//    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
-//            day, rowIndex, cellName, logger, required)
-//}
-
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def reportDateNextDay = reportPeriodService.getEndDate(formData.reportPeriodId).time + 1
-    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
+
+    def dFrom = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
+    def dTo = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+
+    def reportDateNextDay = dTo + 1
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -195,9 +191,7 @@ void calc() {
 
     sortRows.each {
         it.sort { DataRow a, DataRow b ->
-            if (a.getAlias() != null || b.getAlias() != null) {
-                return 0
-            }
+
             def aD = getRefBookValue(15, a.currencyCode)?.CODE?.stringValue
             def bD = getRefBookValue(15, b.currencyCode)?.CODE?.stringValue
             if (aD != bD) {
@@ -210,8 +204,8 @@ void calc() {
         }
     }
 
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dFrom = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
+    def dTo = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
 
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
@@ -277,10 +271,13 @@ void consolidation() {
         row.setIndex(i + 1)
     }
 
+    // Налоговый период
+    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def FormData source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, taxPeriod.id, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceRows = formDataService.getDataRowHelper(source).getAll()
                 // подразделы

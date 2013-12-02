@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 import groovy.transform.Field
 
 /**
@@ -63,7 +64,7 @@ void logicCheck() {
         if (formData.kind == FormDataKind.CONSOLIDATED) {
             return
         }
-        def row36_1 = dataRowHelper36_1.getDataRow(dataRows36_1, row.getAlias())
+        def row36_1 = getDataRow(dataRows36_1, row.getAlias())
         def rowStart = "Строка ${row.getIndex()}: "
         if ('total' != row?.getAlias()) {
             allColumns.each { alias ->
@@ -72,8 +73,8 @@ void logicCheck() {
                 }
             }
         } else {
-            def totalRowA = dataRowHelper.getDataRow(dataRows, 'totalA')
-            def totalRowB = dataRowHelper.getDataRow(dataRows, 'totalB')
+            def totalRowA = getDataRow(dataRows, 'totalA')
+            def totalRowB = getDataRow(dataRows, 'totalB')
             if (row.percIncome != totalRowA.percIncome - totalRowB.percIncome) {
                 logger.error("${rowStart}Неверно рассчитано итоговое значение графы \"${getColumnName(row,alias)}\"")
             }
@@ -84,9 +85,9 @@ void logicCheck() {
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def totalRowA = dataRowHelper.getDataRow(dataRows, 'totalA')
-    def totalRowB = dataRowHelper.getDataRow(dataRows, 'totalB')
-    def totalRow = dataRowHelper.getDataRow(dataRows, 'total')
+    def totalRowA = getDataRow(dataRows, 'totalA')
+    def totalRowB = getDataRow(dataRows, 'totalB')
+    def totalRow = getDataRow(dataRows, 'total')
     //очистка значений
     allColumns.each{
         totalRowA[it] = 0
@@ -99,11 +100,11 @@ void consolidation() {
             def sourceData = formDataService.getDataRowHelper(source)
             def sourceRows = sourceData.allCached
 
-            def totalRowASource = sourceData.getDataRow(sourceRows, 'totalA')
+            def totalRowASource = getDataRow(sourceRows, 'totalA')
             totalRowA.amount += totalRowASource.amount
             totalRowA.percIncome += totalRowASource.percIncome
 
-            def totalRowBSource = sourceData.getDataRow(sourceRows, 'totalB')
+            def totalRowBSource = getDataRow(sourceRows, 'totalB')
             totalRowB.amount += totalRowBSource.amount
             totalRowB.percIncome += totalRowBSource.percIncome
 

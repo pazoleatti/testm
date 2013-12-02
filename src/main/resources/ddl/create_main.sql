@@ -315,7 +315,6 @@ create table declaration_template (
   is_active   number(1) not null,
   create_script       clob,
   jrxml               varchar2(36),
-  jasper              varchar2(36),
   declaration_type_id number(9) not null,
   XSD varchar2(36) 
 );
@@ -326,7 +325,6 @@ comment on column declaration_template.version is 'Версия';
 comment on column declaration_template.is_active is 'Признак активности';
 comment on column declaration_template.create_script is 'Скрипт формирования декларации';
 comment on column declaration_template.jrxml is 'Макет JasperReports для формирования печатного представления формы';
-comment on column declaration_template.jasper is 'Скомпилированный макет JasperReports для формирования печатного представления формы';
 comment on column declaration_template.declaration_type_id is 'Вид деклараций';
 comment on column declaration_template.XSD is 'XSD-схема';
 
