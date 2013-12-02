@@ -24,25 +24,14 @@ public interface FormDataService {
 	 *		налоговых форм в одном и том же подразделении могут существовать в нескольких вариантах (например один и тот же РНУ  на уровне ТБ
 	 *		- в виде первичной и консолидированной)
 	 * @param reportPeriod отчетный период в котором создается форма
+     * @param periodOrder номер месяца для ежемесячных форм (для остальных параметр отсутствует)
 	 * @return созданный и проинициализированный объект данных.
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав создавать налоговую форму с такими параметрами
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если при создании формы произошли ошибки, вызванные несоблюдением каких-то бизнес-требований, например отсутствием
 	 *		обязательных параметров
 	 */
-	long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod);
-
-
-    /**
-     * Тестовый метод, для создания формы РНУ с большим колличеством данных. Только для тестирования!
-     * @param logger
-     * @param userInfo
-     * @param formTemplateId
-     * @param departmentId
-     * @param kind
-     * @param reportPeriodId
-     */
-	@Deprecated
-	void importFormDataTest(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId);
+	long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind,
+                        ReportPeriod reportPeriod, Integer periodOrder);
 
     /**
      * Метод для импорта данных из xls-файлов
@@ -123,19 +112,21 @@ public interface FormDataService {
 	 */
 	void doMove(long formDataId, TAUserInfo userInfo, WorkflowMove move, String note, Logger logger);
 
-	/**
-	 * Создаёт налоговую форму без проверок прав доступа
-	 * Метод предназначен для использования при реализации механизма консолидации, когда требуется создавать формы в чужих подразделениях
-	 * @param logger объект журнала
-	 * @param userInfo информация о пользователе, выполняющего операцию
-	 * @param formTemplateId идентификатор шаблона формы
-	 * @param departmentId идентификатор подразделения
-	 * @param kind тип налоговой формы
-	 * @param reportPeriodId идентифиуатор отчетного периода
-	 * @return созданный объект FormData (еще не сохранённый в БД)
-	 */
-	long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId,
-	                                    int departmentId, FormDataKind kind, int reportPeriodId, boolean importFormData);
+    /**
+     * Создаёт налоговую форму без проверок прав доступа
+     * Метод предназначен для использования при реализации механизма консолидации, когда требуется создавать формы в чужих подразделениях
+     * @param logger объект журнала
+     * @param userInfo информация о пользователе, выполняющего операцию
+     * @param formTemplateId идентификатор шаблона формы
+     * @param departmentId идентификатор подразделения
+     * @param kind тип налоговой формы
+     * @param reportPeriodId идентифиуатор отчетного периода
+     * @param periodOrder номер месяца для ежемесячных форм (для остальных параметр отсутствует)
+     * @param importFormData признак импорта
+     * @return созданный объект FormData (еще не сохранённый в БД)
+     */
+	long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId,
+                                    FormDataKind kind, int reportPeriodId, Integer periodOrder, boolean importFormData);
 
 	/**
 	 * Добавляет строку в форму и выполняет соответствующие скрипты.

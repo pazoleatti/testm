@@ -106,7 +106,7 @@ public class MappingServiceImpl implements MappingService {
                     formTemplateId,
                     departmentId,
                     FormDataKind.PRIMARY,
-                    reportPeriod);
+                    reportPeriod, null); // TODO Левыкин: если миграция будет выполняться для ежемесячных форм, то требуется получать periodOrder при маппинге
 
             // Добавляем месяц, если форма ежемесячная
             if (restoreExemplar.getPeriodOrder() != null) {

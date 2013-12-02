@@ -90,8 +90,10 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 		if (dformData == null) {
 			// TODO: Надо подумать, что делать с пользователем.
 			int formTemplateId = formTemplateDao.getActiveFormTemplateId(formTypeId);
-            // TODO передавать в метод createFormDataWithoutCheck новый параметр periodOrder = sformData.getPeriodOrder()
-			long dFormDataId = formDataService.createFormDataWithoutCheck(scriptComponentContext.getLogger(), scriptComponentContext.getUserInfo(), formTemplateId, departmentId, kind, sformData.getReportPeriodId(), false);
+            // Создание формы в том же периоде
+			long dFormDataId = formDataService.createFormDataWithoutCheck(scriptComponentContext.getLogger(),
+                    scriptComponentContext.getUserInfo(), formTemplateId, departmentId, kind,
+                    sformData.getReportPeriodId(), sformData.getPeriodOrder(), false);
 			dformData = formDataDao.get(dFormDataId);
         }
 
@@ -101,7 +103,8 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 					null, dformData.getFormType().getId(), dformData.getKind().getId(), "Событие инициировано Системой");
 			
 			// Execute composition scripts
-			formDataScriptingService.executeScript(scriptComponentContext.getUserInfo(), dformData, FormDataEvent.COMPOSE, scriptComponentContext.getLogger(), null);
+			formDataScriptingService.executeScript(scriptComponentContext.getUserInfo(), dformData,
+                    FormDataEvent.COMPOSE, scriptComponentContext.getLogger(), null);
 
             if (scriptComponentContext.getLogger().containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException(
@@ -117,7 +120,6 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
                     "Событие инициировано Системой");
 		}
 	}
-
 
 	@Override
 	public void setScriptComponentContext(ScriptComponentContext context) {

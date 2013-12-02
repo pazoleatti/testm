@@ -95,6 +95,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 *            (например один и тот же РНУ на уровне ТБ - в виде первичной и
 	 *            консолидированной)
 	 * @param reportPeriod отчетный период в котором создается форма
+     * @param periodOrder номер месяца для ежемесячных форм (для остальных параметр отсутствует)
 	 * @return созданный и проинициализированный объект данных.
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException
 	 *             если у пользователя нет прав создавать налоговую форму с
@@ -106,27 +107,11 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	public long createFormData(Logger logger, TAUserInfo userInfo,
-			int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod) {
+			int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod, Integer periodOrder) {
         formDataAccessService.canCreate(userInfo, formTemplateId, kind,
                 departmentId, reportPeriod.getId());
-        return createFormDataWithoutCheck(logger, userInfo,
-                formTemplateId, departmentId, kind, reportPeriod.getId(), false);
-	}
-	
-	
-	@Override
-	@Deprecated
-	public void importFormDataTest(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId) {
-		Date serviceStart = new Date();
-		long formDataId =  createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentId, kind, reportPeriodId, true);
-		Date getDate = new Date();
-		FormData fd = formDataDao.get(formDataId);
-		logger.info("Старт сервиса: " + serviceStart);
-		logger.info("Получение: " + getDate);
-		logger.info("Текущая: " + new Date());
-		logBusinessService.add(formDataId, null, userInfo, FormDataEvent.IMPORT, null);
-		auditService.add(FormDataEvent.IMPORT, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
-				null, fd.getFormType().getId(), fd.getKind().getId(), null);
+        return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentId, kind, reportPeriod.getId(),
+                periodOrder, false);
 	}
 
     @Override
@@ -224,8 +209,8 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-	public long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo,
-			int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId, boolean importFormData) {
+	public long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId,
+                                           FormDataKind kind, int reportPeriodId, Integer periodOrder, boolean importFormData) {
 		FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 		FormData formData = new FormData(formTemplate);
 		
@@ -233,10 +218,11 @@ public class FormDataServiceImpl implements FormDataService {
 		formData.setDepartmentId(departmentId);
 		formData.setKind(kind);
 		formData.setReportPeriodId(reportPeriodId);
+        formData.setPeriodOrder(periodOrder);
 		
 		// Execute scripts for the form event CREATE
 		formDataScriptingService.executeScript(userInfo, formData,
-				importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger,null);
+				importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger, null);
 
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
