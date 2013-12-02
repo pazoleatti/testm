@@ -37,7 +37,7 @@
                     <g:HorizontalPanel verticalAlignment="MIDDLE" styleName="{style.tablePadding}">
                         <g:cell width="220px" >
                             <d:DepartmentPickerPopupWidget width="200px" ui:field="departmentPicker" multiselection="false"
-                                                           header="Выберите подразделение"/>
+                                                           header="Выберите подразделение" modal="true"/>
                         </g:cell>
                         <g:cell width="220px">
                             <g:FlowPanel>
