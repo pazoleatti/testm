@@ -1,11 +1,10 @@
 package form_template.income.rnu14
+
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+
 /**
- * Скрипт для УНП (unp.groovy).
  * Форма "УНП"("РНУ-14 - Регистр налогового учёта нормируемых расходов").
  * formTemplateId=321
- *
- * @version 1
- *
  *
  * @author lhaziev
  */
@@ -18,6 +17,7 @@ switch (formDataEvent) {
         logicalCheck(true)
         break
     case FormDataEvent.CALCULATE:
+        prevPeriodCheck()
         calc()
         logicalCheck(false)
         break
@@ -55,6 +55,18 @@ switch (formDataEvent) {
 // графа 6  - limitSum
 // графа 7  - inApprovedNprms
 // графа 8  - overApprovedNprms
+
+void prevPeriodCheck() {
+    if (getFormDataOutcomeSimple() == null) {
+        throw new ServiceException("Не найден экземпляр Сводной формы «Расходы, учитываемые в простых РНУ» за текущий отчетный период!")
+    }
+    if (getFormDataSimple() == null) {
+        throw new ServiceException("Не найден экземпляр Сводной формы «Доходы, учитываемые в простых РНУ»!")
+    }
+    if (getFormDataComplex() == null) {
+        throw new ServiceException("Не найден экземпляр Сводной формы «Сводная форма начисленных доходов»!")
+    }
+}
 
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
@@ -291,7 +303,7 @@ def getColumnName(def row, def alias) {
  * @params knu КНУ
  */
 def getTotalRowFromRNU(def knu) {
-    def formDataRNU = formDataService.find(304, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId)
+    def formDataRNU = getFormDataOutcomeSimple()
     if (formDataRNU != null) {
         def dataRNU = getData(formDataRNU)
         for (def row : getRows(dataRNU)) {
@@ -303,16 +315,17 @@ def getTotalRowFromRNU(def knu) {
     return null
 }
 
-/**
- * Получить данные формы "доходы сложные" (id = 302)
- */
+// Получить данные формы "расходы простые" (id = 304)
+def getFormDataOutcomeSimple() {
+    return formDataService.find(304, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId)
+}
+
+// Получить данные формы "доходы сложные" (id = 302)
 def getFormDataComplex() {
     return formDataService.find(302, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId)
 }
 
-/**
- * Получить данные формы "доходы простые" (id = 301)
- */
+// Получить данные формы "доходы простые" (id = 301)
 def getFormDataSimple() {
     return formDataService.find(301, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId)
 }
