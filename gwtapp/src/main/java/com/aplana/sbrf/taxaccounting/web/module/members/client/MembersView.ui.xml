@@ -16,11 +16,11 @@
             <g:VerticalPanel>
                 <g:HorizontalPanel height="35px">
                     <g:Label styleName="{style.title}">Пользователи</g:Label>
-                    <g:cell>
-                        <style:LinkAnchor ui:field="printButton" text="Печать" img="resources/img/printer-16.png" title="Отобразить печатное представление документа"/>
+                    <g:cell verticalAlignment="middle">
+                        <style:LinkAnchor  ui:field="printButton" text="Печать" img="resources/img/printer-16.png" title="Отобразить печатное представление документа"/>
                     </g:cell>
                 </g:HorizontalPanel>
-                <g:HorizontalPanel height="35px">
+                <g:HorizontalPanel height="35px" spacing="10">
                     <g:VerticalPanel>
                         <g:Label>Подразделение:</g:Label>
                         <picker:DepartmentPickerModalWidget header="Подразделение"  ui:field="departmentPicker"  multiSelection="true"/>
@@ -33,11 +33,15 @@
                         <g:Label text="Роль:"/>
                         <g:ValueListBox width="200px" ui:field="roleBox"/>
                     </g:VerticalPanel>
-                    <g:VerticalPanel>
-                        <g:Label text="Имя пользователя:"/>
-                        <g:TextBox width="200px" ui:field="userName"/>
-                    </g:VerticalPanel>
-                    <g:Button title="Применить" text="Применить" ui:field="applyButton"/>
+                    <g:cell>
+                        <g:VerticalPanel>
+                            <g:Label text="Имя пользователя:"/>
+                            <g:TextBox width="200px" ui:field="userName"/>
+                        </g:VerticalPanel>
+                    </g:cell>
+                    <g:cell verticalAlignment="bottom">
+                        <g:Button title="Применить" text="Применить" ui:field="applyButton"/>
+                    </g:cell>
                 </g:HorizontalPanel>
             </g:VerticalPanel>
         </g:north>
@@ -51,38 +55,11 @@
         </g:center>
         <g:south size="30">
             <g:VerticalPanel width="100%">
-                <pager:FlexiblePager ui:field="pager" location="CENTER"
-                                     showFastForwardButton="false" fastForwardRows="0" showLastPageButton="true" />
+                <g:cell horizontalAlignment="right">
+                    <pager:FlexiblePager ui:field="pager" location="CENTER"
+                                         showFastForwardButton="false" fastForwardRows="0" showLastPageButton="true" />
+                </g:cell>
             </g:VerticalPanel>
         </g:south>
     </g:DockLayoutPanel>
-    <!--<g:ScrollPanel>-->
-        <!--<g:FlowPanel>-->
-            <!--<g:HorizontalPanel height="35px">-->
-                <!--<g:Label styleName="{style.title}">Пользователи</g:Label>-->
-                <!--<g:cell verticalAlignment="middle">-->
-                    <!--<style:LinkAnchor ui:field="printButton" text="Печать" img="resources/img/printer-16.png" title="Отобразить печатное представление документа"/>-->
-                <!--</g:cell>-->
-            <!--</g:HorizontalPanel>-->
-            <!--<g:HorizontalPanel height="35px">-->
-                <!--<g:Label text="Признак активности:"/>-->
-                <!--<g:ValueListBox width="200px" ui:field="isActiveBox"/>-->
-                <!--<g:Label>Подразделение:</g:Label>-->
-                <!--<picker:DepartmentPickerModalWidget header="Подразделение"  ui:field="departmentPicker"  multiSelection="true"/>-->
-                <!--<g:Label text="Роль:"/>-->
-                <!--<g:ValueListBox width="200px" ui:field="roleBox"/>-->
-                <!--<g:Label text="Имя пользователя:"/>-->
-                <!--<g:TextBox width="200px" ui:field="userName"/>-->
-                <!--<g:Button title="Применить" text="Применить" ui:field="applyButton"/>-->
-            <!--</g:HorizontalPanel>-->
-
-            <!--<g:VerticalPanel width="100%">-->
-                <!--<style:GenericCellTable ui:field="taUserFullCellTable" width="100%" />-->
-            <!--</g:VerticalPanel>-->
-            <!--<g:VerticalPanel width="100%">-->
-                <!--<pager:FlexiblePager ui:field="pager" location="CENTER"-->
-                                     <!--showFastForwardButton="false" fastForwardRows="0" showLastPageButton="true" />-->
-            <!--</g:VerticalPanel>-->
-        <!--</g:FlowPanel>-->
-    <!--</g:ScrollPanel>-->
 </ui:UiBinder>
