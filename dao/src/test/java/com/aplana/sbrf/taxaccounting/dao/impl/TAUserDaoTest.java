@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import org.junit.Assert;
@@ -13,8 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"TAUserDaoTest.xml"})
@@ -134,5 +134,35 @@ public class TAUserDaoTest {
 	@Test
 	public void testCheckUserRole(){
 		Assert.assertEquals(1, userDao.checkUserRole("ROLE_OPER"));
+	}
+
+	@Test
+	public void testGetByFilter() {
+		MembersFilterData filter = new MembersFilterData();
+		filter.setUserName("Контролёр Банка");
+		Assert.assertEquals(1, userDao.getByFilter(filter).size());
+		Assert.assertEquals("Контролёр Банка", userDao.getUser(userDao.getByFilter(filter).get(0)).getName());
+
+		filter.setActive(false);
+		filter.setUserName(null);
+		Assert.assertEquals(1, userDao.getByFilter(filter).size());
+		Assert.assertEquals(3L, (long)userDao.getByFilter(filter).get(0));
+
+		Set<Integer> depIds = new HashSet<Integer>();
+		depIds.add(2);
+		depIds.add(3);
+		filter.setDepartmentIds(depIds);
+		filter.setActive(null);
+		Assert.assertEquals(2, userDao.getByFilter(filter).size());
+		filter.setActive(false);
+		Assert.assertEquals(1, userDao.getByFilter(filter).size());
+
+		filter.setRoleIds(Arrays.asList(new Integer[]{1}));
+		filter.setDepartmentIds(null);
+		filter.setActive(null);
+		Assert.assertEquals(3, userDao.getByFilter(filter).size());
+		filter.setActive(true);
+		Assert.assertEquals(2, userDao.getByFilter(filter).size());
+
 	}
 }

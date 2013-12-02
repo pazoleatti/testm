@@ -3,7 +3,7 @@ insert into sec_user (id, name, login, department_id, is_active, email) values
 insert into sec_user (id, name, login, department_id, is_active, email) values
   (2, 'Контролёр ТБ1', 'controlTB1', 2, 1, 'controlTB1@bank.ru');
 insert into sec_user (id, name, login, department_id, is_active, email) values
-  (3, 'Контролёр ТБ2', 'controlTB2', 3, 1, 'controlTB2@bank.ru');
+  (3, 'Контролёр ТБ2', 'controlTB2', 3, 0, 'controlTB2@bank.ru');
 
 insert into sec_role (id, alias, name) values (1, 'ROLE_CONTROL', 'Контролёр');
 insert into sec_role (id, alias, name) values (2, 'ROLE_OPER', 'Оператор');
