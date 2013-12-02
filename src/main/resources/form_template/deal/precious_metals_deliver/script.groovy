@@ -153,12 +153,11 @@ void logicCheck() {
     def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
     def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
 
-    def rowNum = 0
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
-        rowNum++
+        def rowNum = row.getIndex()
 
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
 

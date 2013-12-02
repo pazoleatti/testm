@@ -143,12 +143,11 @@ void logicCheck() {
     def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
     def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    def rowNum = 0
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
-        rowNum++
+        def rowNum = row.getIndex()
 
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
 
