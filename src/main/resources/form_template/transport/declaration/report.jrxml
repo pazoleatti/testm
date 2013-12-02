@@ -12661,7 +12661,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				</graphicElement>
 			</line>
 			<componentElement>
-				<reportElement uuid="6961bcd6-79fa-470a-8b92-2a1df4e58c09" mode="Opaque" x="0" y="157" width="595" height="214"/>
+				<reportElement uuid="6961bcd6-79fa-470a-8b92-2a1df4e58c09" mode="Opaque" x="0" y="157" width="595" height="642"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="Detali" uuid="e7f5eb5d-d29e-48b4-983f-76d657aee8a1">
 						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/ТрНалНД/СумНалПУ/СумПУ")]]></dataSourceExpression>
