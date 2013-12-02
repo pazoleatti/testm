@@ -282,7 +282,7 @@ void consolidation() {
         if (it.formTypeId == formData.getFormType().getId()) {
             def FormData source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceRows = formDataService.getDataRowHelper(sourceForm).allCached
+                def sourceRows = formDataService.getDataRowHelper(source).getAll()
                 // подразделы
                 groups.each { section ->
                     copyRows(sourceRows, dataRows, section, 'total' + section)
@@ -294,17 +294,8 @@ void consolidation() {
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
-/**
- * Копировать заданный диапозон строк из источника в приемник.
- *
- * @param sourceForm форма источник
- * @param destinationForm форма приемник
- * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно),
- *      если = null, то копировать с 0 строки
- * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно),
- *      в приемник строки вставляются перед строкой с этим псевдонимом
- */
-void copyRows(def FormData sourceRows, def FormData destinationRows, def fromAlias, def toAlias) {
+// Копировать заданный диапозон строк из источника в приемник
+void copyRows(def sourceRows, def destinationRows, def fromAlias, def toAlias) {
     def from = getDataRow(sourceRows, fromAlias).getIndex()
     def to = getDataRow(sourceRows, toAlias).getIndex() - 1
     if (from > to) {
