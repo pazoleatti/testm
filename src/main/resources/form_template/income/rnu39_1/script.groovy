@@ -127,9 +127,10 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def reportDate = reportPeriodService.getEndDate(formData.reportPeriodId).time + 1
+    def reportDateNextDay = reportPeriodService.getEndDate(formData.reportPeriodId).time + 1
     def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
+
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -140,10 +141,10 @@ void logicCheck() {
 
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        if (row.shortPositionOpen > reportDate) {
+        if (row.shortPositionOpen > reportDateNextDay) {
             logger.error(errorMsg + "Неверно указана дата первой части сделки!")
         }
-        if ((isInASector(dataRows, row) && row.shortPositionClose == null) || (!isInASector(dataRows, row) && row.shortPositionClose > reportDate)) {
+        if ((isInASector(dataRows, row) && row.shortPositionClose == null) || (!isInASector(dataRows, row) && row.shortPositionClose > reportDateNextDay)) {
             logger.error(errorMsg + "Неверно указана дата второй части сделки!")
         }
 
@@ -156,13 +157,14 @@ void logicCheck() {
         checkNSI(15, row, 'currencyCode')
         // checkNSI(84, row, 'regNumber') // TODO Левыкин: Раскомментировать после появления значений в справочнике
     }
+
     // Проверка итоговых значений формы
     for (def section : groups) {
         firstRow = getDataRow(dataRows, section)
         lastRow = getDataRow(dataRows, 'total' + section)
         def columnNames = ""
         for (def column : totalColumns) {
-            if (lastRow[column] == getSum(dataRows, column, firstRow, lastRow)) {
+            if (lastRow[column] != getSum(dataRows, column, firstRow, lastRow)) {
                 if (columnNames != "") {
                     columnNames += ", "
                 }
