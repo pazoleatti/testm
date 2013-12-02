@@ -29,6 +29,18 @@ import java.text.SimpleDateFormat
  *
  * @author Stanislav Yasinskiy
  */
+
+// Признак периода ввода остатков
+@Field
+def boolean isBalancePeriod = null
+
+def getBalancePeriod(){
+    if (isBalancePeriod == null){
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    }
+    return isBalancePeriod
+}
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -42,7 +54,10 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, null)
+        def cols = (getBalancePeriod() ?
+            ['kny', 'date', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
+            : editableColumns)
+        formDataService.addRow(formData, currentDataRow, cols, null)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
@@ -110,8 +125,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
-    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-    if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+    if (!getBalancePeriod() && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         def formName = formData.getFormType().getName()
         throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
     }
@@ -137,10 +151,11 @@ void calc() {
 
         for (row in dataRows) {
             row.number = ++number
-            row.rateOfTheBankOfRussia = calc8(row)
-            row.taxAccountingRuble = calc10(row)
-            row.ruble = calc12(row)
-
+            if (!getBalancePeriod()) {
+                row.rateOfTheBankOfRussia = calc8(row)
+                row.taxAccountingRuble = calc10(row)
+                row.ruble = calc12(row)
+            }
             row.code = row.kny
         }
 
@@ -186,6 +201,9 @@ void calc() {
 }
 
 def BigDecimal calc8(DataRow row) {
+    if(row.currencyCode==null || row.date == null) {
+        return null
+    }
     if (isRubleCurrency(row.currencyCode)) {
         return 1
     }
@@ -280,74 +298,79 @@ void logicCheck() {
         errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !getBalancePeriod())
 
         // 2. Проверка на нулевые значения
         if (row.taxAccountingCurrency == 0 &&
                 row.taxAccountingRuble == 0 &&
                 row.accountingCurrency == 0 &&
                 row.ruble == 0) {
-            logger.error(errorMsg + 'Все суммы по операции нулевые!')
+            loggerError(errorMsg + 'Все суммы по операции нулевые!')
         }
 
-        // 3. Проверка, что не  отображаются данные одновременно по бухгалтерскому и по налоговому учету
-        if ((row.taxAccountingRuble > 0 && row.ruble == 0) || (row.taxAccountingRuble == 0 && row.ruble > 0)) {
-            logger.error(errorMsg + 'Одновременно указаны данные по налоговому (графа 10) и бухгалтерскому (графа 12) учету.')
+        // 3. Проверка, что не отображаются данные одновременно по бухгалтерскому и по налоговому учету
+        if (row.taxAccountingRuble != null && row.ruble != null && row.taxAccountingRuble != 0 && row.ruble != 0) {
+            logger.warn(errorMsg + 'одновременно указаны данные по налоговому  «%s» и бухгалтерскому «%s» учету.',
+                    row.getCell('taxAccountingRuble').column.name, row.getCell('ruble').column.name)
         }
 
         // 4. Проверка даты совершения операции и границ отчётного периода
         if (row.date != null && (row.date.after(endDate) || row.date.before(startDate))) {
-            logger.error(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
+            loggerError(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
         }
 
         // 5. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода
-        def Map<Integer, Object> map = new HashMap<>()
-        if (row.docDate != null && row.docNumber != null) {
-            map.put(5, row.docNumber)
-            map.put(6, row.docDate)
-            if (!docs.indexOf(map)) {
-                docs.add(map)
-                def c12 = 0
-                def c10 = 0
-                for (rowSum in dataRows) {
-                    if (rowSum.docNumber == row.docNumber && rowSum.docDate == row.docDate) {
-                        c12 += rowSum.ruble
-                        c10 += rowSum.taxAccountingRuble
+        if (!getBalancePeriod()) {
+            def Map<Integer, Object> map = new HashMap<>()
+            if (row.docDate != null && row.docNumber != null) {
+                map.put(5, row.docNumber)
+                map.put(6, row.docDate)
+                if (!docs.indexOf(map)) {
+                    docs.add(map)
+                    def c12 = 0
+                    def c10 = 0
+                    for (rowSum in dataRows) {
+                        if (rowSum.docNumber == row.docNumber && rowSum.docDate == row.docDate) {
+                            c12 += rowSum.ruble
+                            c10 += rowSum.taxAccountingRuble
+                        }
+                    }
+                    if (!(c10 > c12)) {
+                        loggerError(errorMsg + 'Сумма данных бухгалтерского учёта превышает сумму начисленных платежей ' +
+                                'для документа %s от %s!', row.docNumber as String, rowSum.docDate as String)
                     }
                 }
-                if (!(c10 > c12)) {
-                    logger.error(errorMsg + 'Сумма данных бухгалтерского учёта превышает сумму начисленных платежей ' +
-                            'для документа %s от %s!', row.docNumber as String, rowSum.docDate as String)
-                }
-            }
-            if (row.code != null) {
-                // 7. Проверка на уникальность записи по налоговому учету
-                map.put(4, row.code);
-                if (uniq456.contains(map)) {
-                    logger.error(errorMsg + "Имеется другая запись в налоговом учете с аналогичными значениями балансового " +
-                            "счета=%s, документа № %s от %s.", refBookService.getStringValue(28, row.code, 'NUMBER').toString(),
-                            row.docNumber.toString(), dateFormat.format(row.docDate))
-                } else {
-                    uniq456.add(map)
+                if (row.code != null) {
+                    // 7. Проверка на уникальность записи по налоговому учету
+                    map.put(4, row.code);
+                    if (uniq456.contains(map)) {
+                        loggerError(errorMsg + "Имеется другая запись в налоговом учете с аналогичными значениями балансового " +
+                                "счета=%s, документа № %s от %s.", refBookService.getStringValue(28, row.code, 'NUMBER').toString(),
+                                row.docNumber.toString(), dateFormat.format(row.docDate))
+                    } else {
+                        uniq456.add(map)
+                    }
                 }
             }
         }
 
         // 6. Проверка на уникальность поля «№ пп»
         if (++i != row.number) {
-            logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
+            loggerError(errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
         // 8. Проверка соответствия балансового счета коду налогового учета
         if (row.kny != row.code) {
-            logger.error(errorMsg + "Балансовый счет не соответствует коду налогового учета!")
+            loggerError(errorMsg + "Балансовый счет не соответствует коду налогового учета!")
         }
 
         // 9. Арифметические проверки расчета неитоговых строк
-        needValue['rateOfTheBankOfRussia'] = calc8(row)
-        needValue['taxAccountingRuble'] = calc10(row)
-        needValue['ruble'] = calc12(row)
-        checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+        if (!getBalancePeriod()) {
+            needValue['rateOfTheBankOfRussia'] = calc8(row)
+            needValue['taxAccountingRuble'] = calc10(row)
+            needValue['ruble'] = calc12(row)
+            checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+        }
 
         // 12. Проверка наличия суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
         // 13. Проверка значения суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
@@ -361,17 +384,15 @@ void logicCheck() {
             for (taxPeriod in taxPeriods) {
                 reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.id)
                 for (reportPeriod in reportPeriods) {
-                    findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
-                            reportPeriod.id)
-                    if (findFormData != null) {
+                    findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriod.id)
+                    if (findFormData != null && findFormData.id != formData.id) {
                         for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
                             // SBRFACCTAX-3531 исключать строку из той же самой формы не надо
                             if (findRow.code == row.code && findRow.docNumber == row.docNumber
                                     && findRow.docDate == row.docDate) {
                                 isFind = true
                                 if (!(findRow.ruble > row.ruble)) {
-                                    logger.warn(errorMsg + 'Операция в налоговом учете имеет сумму, меньше чем указано ' +
-                                            'в бухгалтерском учете! См. РНУ-6 в %s отчетном периоде.', reportPeriod.name)
+                                    logger.warn(errorMsg + "Операция, указанная в строке ${row.number}, в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-6 за ${reportPeriod.name} ${reportPeriod.getYear()} года.")
                                 }
                             }
                         }
@@ -388,16 +409,25 @@ void logicCheck() {
         checkNSI(28, row, 'kny')
         checkNSI(28, row, 'code')
         checkNSI(15, row, 'currencyCode')
-
+        // TODO (Ramil Timerbaev) 4. курс банка России - rateOfTheBankOfRussia
     }
 
     // 10. Арифметические проверки расчета итоговых строк «Итого по КНУ»
-    checkSubTotalSum(dataRows, totalColumns, logger, true)
+    checkSubTotalSum(dataRows, totalColumns, logger, !getBalancePeriod())
 
     // 11. Арифметические проверки расчета строки общих итогов
-    checkTotalSum(dataRows, totalColumns, logger, true)
+    checkTotalSum(dataRows, totalColumns, logger, !getBalancePeriod())
 }
 
 def String getKnu(def code) {
     return getRefBookValue(28, code)?.CODE?.stringValue
+}
+
+/** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
+void loggerError(def msg, Object...args) {
+    if (getBalancePeriod()) {
+        logger.warn(msg, args)
+    } else {
+        logger.error(msg, args)
+    }
 }
