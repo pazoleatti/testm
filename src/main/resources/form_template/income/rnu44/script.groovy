@@ -122,9 +122,9 @@ def totalSumColumns = ['summ']
 
 // алиасы графов для арифметической проверки
 @Field
-def arithmeticCheckAlias = ['summ']//['operationDate', 'baseNumber', 'baseDate', 'summ']
+def arithmeticCheckAlias = ['summ']
 
-// алиасы графов для арифметической проверки
+// алиасы графов для не арифметической проверки
 @Field
 def otherCheckAlias = ['operationDate', 'baseNumber', 'baseDate']
 
@@ -144,7 +144,7 @@ def otherCheckAlias = ['operationDate', 'baseNumber', 'baseDate']
 
 // Проверка НСИ
 boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
+    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, true)
 }
 
 /**
@@ -256,10 +256,11 @@ boolean logicCheck(){
             continue
         }
         rowNumber++
-        errorMsg = "Строка $rowNumber: "
+        def index = row.getIndex()
+        def errorMsg = "Строка ${index}: "
 
         // 0.
-        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 1. Проверка уникальности значий в графе «Номер ссудного счета»
         def find = dataRows.find{it->

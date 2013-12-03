@@ -227,7 +227,8 @@ void logicCheck() {
             continue
         }
         rowNumber++
-        errorMsg = "Строка $rowNumber: "
+        def index = row.getIndex()
+        def errorMsg = "Строка ${index}: "
 
         def rowPrev = getRowPrev(row, dataRowsPrev)
 
@@ -240,7 +241,7 @@ void logicCheck() {
         }
 
         // 1. Проверка на заполнение поля «<Наименование поля>» (1 .. 17)
-        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 2. Проверка на уникальность поля «№ пп»
         if (rowNumber != row.number) {
@@ -266,38 +267,8 @@ void logicCheck() {
                 RefBook rb = refBookFactory.get(22);
                 def rbName = rb.getName()
                 def attrName = rb.getAttribute('RATE').getName()
-                logger.error("В справочнике «$rbName» не найдено значение «${row.course}», соответствующее атрибуту «$attrName»!")
+                logger.error(errorMsg + "В справочнике «$rbName» не найдено значение «${row.course}», соответствующее атрибуту «$attrName»!")
             }
-        }
-
-        // 5. Проверки деления на 0
-        if (row.baseForCalculation == 0) {
-            def name = row.getCell('baseForCalculation').column.name
-            logger.error(errorMsg + "Деление на ноль: «$name» имеет нулевое значение.")
-        }
-
-        //для расчета графы 12
-        if (row.calcPeriodAccountingEndDate != null && rowPrev.calcPeriodBeginDate != null &&
-                (row.calcPeriodAccountingEndDate - rowPrev.calcPeriodBeginDate + 1) == 0) {
-            def name1 = row.getCell('calcPeriodAccountingEndDate').column.name+"(${row.getCell('calcPeriodAccountingEndDate').column.groupName})"
-            def name2 = row.getCell('calcPeriodBeginDate').column.name+"(${row.getCell('calcPeriodBeginDate').column.groupName})"
-            logger.error(errorMsg + "Деление на ноль: количество дней между «$name1» и «$name2»(за предыдущий период) равно 0.")
-        }
-
-        //для расчета графы 13
-        if (row.calcPeriodAccountingEndDate != null && row.calcPeriodAccountingBeginDate != null &&
-                (row.calcPeriodAccountingEndDate - row.calcPeriodAccountingBeginDate + 1)==0) {
-            def name1 = row.getCell('calcPeriodAccountingEndDate').column.name+"(${row.getCell('calcPeriodAccountingEndDate').column.groupName})"
-            def name2 = row.getCell('calcPeriodAccountingBeginDate').column.name+"(${row.getCell('calcPeriodAccountingBeginDate').column.groupName})"
-            logger.error(errorMsg + "Деление на ноль: количество дней между «$name1» и «$name2» равно 0.")
-        }
-
-        //для расчета графы 15, 17
-        if (row.calcPeriodEndDate != null && row.calcPeriodBeginDate != null &&
-                (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1) == 0) {
-            def name1 = row.getCell('calcPeriodEndDate').column.name+"(${row.getCell('calcPeriodEndDate').column.groupName})"
-            def name2 = row.getCell('calcPeriodBeginDate').column.name+"(${row.getCell('calcPeriodBeginDate').column.groupName})"
-            logger.error(errorMsg + "Деление на ноль: количество дней между «$name1» и «$name2» равно 0.")
         }
     }
 
