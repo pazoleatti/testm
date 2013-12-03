@@ -3,12 +3,10 @@ package com.aplana.sbrf.taxaccounting.service.impl.print.tausers;
 import com.aplana.sbrf.taxaccounting.model.TAUserFull;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -83,11 +81,23 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
         Font font = workBook.createFont();
         font.setBoldweight(Font.BOLDWEIGHT_BOLD);
         cs.setFont(font);
+	    cs.setAlignment(CellStyle.ALIGN_CENTER);
 
-        Row row = sheet.createRow(0);
-        Cell cell = row.createCell(3);
-        cell.setCellValue("Пользователи АС Учет налогов");
+        Row header = sheet.createRow(0);
+        Cell cell = header.createCell(3);
+        cell.setCellValue("Список пользователей");
         cell.setCellStyle(cs);
+
+
+	    DataFormat dateFormat = workBook.createDataFormat();
+	    CellStyle ds = workBook.createCellStyle();
+	    ds.setDataFormat(dateFormat.getFormat("dd.mm.yyyy"));
+	    ds.setAlignment(CellStyle.ALIGN_CENTER);
+	    Row date = sheet.createRow(1);
+	    Cell dateCell = date.createCell(3);
+	    dateCell.setCellValue(new Date());
+	    dateCell.setCellStyle(ds);
+
 
         rowNumber = sheet.getLastRowNum() + 2;
     }
