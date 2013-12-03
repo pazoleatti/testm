@@ -82,13 +82,15 @@ public class FormDataPresenter extends
 					.wrongStateCallback(new AbstractCallback<GetRowsDataResult>() {
 						@Override
 						public void onSuccess(GetRowsDataResult result) {
-							if(result==null || result.getDataRows().getTotalCount() == 0)
+							if(result==null || result.getDataRows().getTotalCount() == 0) {
 								getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
-							else {
+                                getView().setPagingVisible(false);
+                            } else {
 								getView().setRowsData(start, result.getDataRows().getTotalCount(), result.getDataRows());
-								if (result.getDataRows().size() > PAGE_SIZE) {
+                                if (result.getDataRows().size() > PAGE_SIZE) {
 									getView().assignDataProvider(result.getDataRows().size());
 								}
+                                getView().setPagingVisible(result.getDataRows().getTotalCount() > PAGE_SIZE);
 							}
 							modifiedRows.clear();
 						}
@@ -351,13 +353,7 @@ public class FormDataPresenter extends
                                         result.getFormData().getState()
                                                 .getName(),
 		                                result.getTaxPeriodStartDate(), result.getTaxPeriodEndDate());
-                                // Если период для ввода остатков, то делаем все ячейки редактируемыми
-                                
 
-                                // В периоде ввода остатков форма должна быть в режиме супер редактирования
-                                // Он должен включаться в фабрике колонок если readOnly = false;
-                                forceEditMode = result.isBalancePeriod();
-                                
                                 getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
                                         + result.getFormData().getFormType().getTaxType());
                                 getView().setColumnsData(

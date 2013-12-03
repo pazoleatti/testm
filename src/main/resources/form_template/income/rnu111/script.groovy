@@ -2,8 +2,10 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
+
 /**
  * (РНУ-111) Регистр налогового учёта доходов, возникающих в связи с применением в сделках по предоставлению Межбанковских кредитов Взаимозависимым лицам и резидентам оффшорных зон Процентных ставок, не соответствующих рыночному уровню
+ * formTemplateId=367
  */
 // 1 - number
 // 2 - name
@@ -119,7 +121,7 @@ void calc() {
     deleteAllAliased(dataRows)
 
     // Номер последней строки формы из предыдущего периода
-    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     for (row in dataRows) {
         // графа 1
@@ -160,7 +162,7 @@ void logicCheck() {
     // Дата окончания отчетного периода
     def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {

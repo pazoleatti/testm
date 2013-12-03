@@ -6,6 +6,10 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.Matchers;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static com.aplana.sbrf.taxaccounting.test.DeclarationTypeMockUtils.mockDeclarationType;
 import static com.aplana.sbrf.taxaccounting.test.DepartmentDeclarationTypeMockUtils.mockDepartmentDeclarationType;
@@ -17,6 +21,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.aplana.sbrf.taxaccounting.test.DeclarationTypeMockUtils.mockDeclarationType;
+import static com.aplana.sbrf.taxaccounting.test.DepartmentDeclarationTypeMockUtils.mockDepartmentDeclarationType;
+import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -57,6 +64,8 @@ public class DeclarationDataSearchServiceImplTest {
 		incomeDepartmentIds.add(3);
 		when(departmentDeclarationTypeDao.getDepartmentIdsByTaxType(TaxType.INCOME)).thenReturn(incomeDepartmentIds);
 		ReflectionTestUtils.setField(service, "departmentDeclarationTypeDao", departmentDeclarationTypeDao);
+
+		// В подразделении 1 есть только декларация INCOME_DECLARATION_TYPE_ID_1
 		
 		DeclarationTypeDao declarationTypeDao = mock(DeclarationTypeDao.class);
 		DeclarationType incomeDeclarationType1 = mockDeclarationType(INCOME_DECLARATION_TYPE_ID_1, TaxType.INCOME);

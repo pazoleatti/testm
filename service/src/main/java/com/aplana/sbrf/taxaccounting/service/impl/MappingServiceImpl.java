@@ -101,17 +101,12 @@ public class MappingServiceImpl implements MappingService {
 
             Logger logger = new Logger();
 
-            // TODO Debug
-            System.out.println(">> CreateFormData from file = " + filename + " departmentId = "
-                    + departmentId + " reportPeriodId = " + reportPeriodId + " formTypeId = " + formTypeId
-                    + " formTemplateId = " + formTemplateId);
-
             long formDataId = formDataService.createFormData(logger,
                     userInfo,
                     formTemplateId,
                     departmentId,
                     FormDataKind.PRIMARY,
-                    reportPeriod);
+                    reportPeriod, null); // TODO Левыкин: если миграция будет выполняться для ежемесячных форм, то требуется получать periodOrder при маппинге
 
             // Добавляем месяц, если форма ежемесячная
             if (restoreExemplar.getPeriodOrder() != null) {

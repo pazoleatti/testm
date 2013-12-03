@@ -9,9 +9,9 @@ import groovy.transform.Field
 import java.math.RoundingMode
 
 /**
- * Скрипт для РНУ-61
  * Форма "(РНУ-61) Регистр налогового учёта расходов по процентным векселям ОАО «Сбербанк России»,
- * учёт которых требует применения метода начисления"  (352)
+ * учёт которых требует применения метода начисления"
+ * formTemplateId=352
  *
  * графа 1  - rowNumber
  * графа 2  - billNumber
@@ -136,7 +136,7 @@ def calc() {
         def daysOfYear = getCountDays(reportPeriodService.getStartDate(formData.reportPeriodId).time)
 
         // номер последний строки предыдущей формы
-        def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+        def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
         for (def row in dataRows) {
             // графа 1
@@ -237,7 +237,7 @@ void logicCheck() {
         return
     }
 
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     // алиасы графов для арифметической проверки (графа 8, 9, 12-15)
     def arithmeticCheckAlias = ['rateBRBill', 'rateBROperation', 'sum70606', 'sumLimit', 'percAdjustment']

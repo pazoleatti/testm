@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserFull;
 
@@ -57,5 +59,12 @@ public interface TAUserService {
 	 * @return
 	 */
     List<TAUserFull> listAllFullActiveUsers();
+
+	/**
+	 *
+	 * @param filter фильтер
+	 * @return возвращает страницу со списком пользователей
+	 */
+	PagingResult<TAUserFull> getByFilter(MembersFilterData filter);
 
 }

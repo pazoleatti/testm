@@ -16,12 +16,15 @@ import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListClientModule;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.gin.AdminModule;
+import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.HistoryBusinesstModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersModule;
 import com.aplana.sbrf.taxaccounting.web.module.migration.client.MigrationModule;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListModule;
+import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerModule;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesModule;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationModule;
 import com.aplana.sbrf.taxaccounting.web.module.testpage.client.TestPageModule;
@@ -31,7 +34,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaClientModu
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.version.client.ProjectVersionModule;
-import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerModule;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
@@ -83,6 +85,7 @@ public class ClientModule extends AbstractPresenterModule {
 		install(new HistoryClientModule());
 		install(new ProjectVersionModule());
         install(new UserListModule());
+		install(new MembersModule());
         install(new ConfigurationModule());
         install(new AuditClientUIModule());
 		install(new PeriodsModule());
@@ -94,6 +97,7 @@ public class ClientModule extends AbstractPresenterModule {
 		install(new RefBookDataModule());
         install(new MigrationModule());
         install(new SchedulerModule());
+        install(new HistoryBusinesstModule());
         install(new TestPageModule());
 	}
 }

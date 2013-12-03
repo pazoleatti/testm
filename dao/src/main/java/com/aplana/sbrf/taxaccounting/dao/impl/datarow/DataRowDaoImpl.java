@@ -1,18 +1,14 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
+import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -22,19 +18,12 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
-import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
-import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * Реализация ДАО для работы со строками НФ
@@ -326,7 +315,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		Pair<String, Map<String, Object>> sql = dataRowMapper.createSql();
 
         if(!isSupportOver()){
-            sql.first = sql.getFirst().replaceFirst("over \\(order by R.ORD\\)", "over ()");
+            sql.first = sql.getFirst().replaceFirst("over \\(order by sub.ORD\\)", "over ()");
         }
 
 		List<DataRow<Cell>> dataRows = getNamedParameterJdbcTemplate().query(

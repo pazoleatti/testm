@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import org.apache.commons.logging.Log;
@@ -76,7 +78,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	@Override
 	public int getUserIdByLogin(String login) {
 		try {
-			return getJdbcTemplate().queryForInt("select id from sec_user where login = ?", login);
+			return getJdbcTemplate().queryForInt("select id from sec_user where lower(login) = ?", login);
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Пользователь с login = " + login + " не найден. " + e.toString());
 		}
@@ -115,7 +117,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 									"insert into sec_user (id, name, login, department_id, is_active, email) values (seq_sec_user.nextval,?,?,?,?,?)",
 									new String[]{"ID"});
 					ps.setString(1, user.getName());
-					ps.setString(2, user.getLogin());
+					ps.setString(2, user.getLogin().toLowerCase());
 					ps.setInt(3, user.getDepartmentId());
 					ps.setBoolean(4, user.isActive());
 					ps.setString(5, user.getEmail());
@@ -195,7 +197,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 				array.add(user.getName());
 			}
 			sb.deleteCharAt(sb.toString().trim().length() - 1); //delete separator
-			sb.append(" where login = ?");
+			sb.append(" where lower(login) = ?");
 			array.add(user.getLogin());
 			int rows = getJdbcTemplate().update(sb.toString(),	array.toArray());
 			if(rows == 0)
@@ -219,7 +221,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 					"(select id from sec_user where login=?)", user.getLogin()
 				);*/
             getJdbcTemplate().update("delete from sec_user_role where user_id=" +
-                    "(select id from sec_user where login=?)",user.getLogin());
+                    "(select id from sec_user where lower(login)=?)",user.getLogin());
 
 			getJdbcTemplate().batchUpdate("insert into sec_user_role (user_id, role_id) " +
 					"select ?, id from sec_role where alias = ?",
@@ -260,7 +262,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 
 	@Override
 	public int checkUserLogin(String login) {
-		 List<Integer> list = getJdbcTemplate().query("select id from sec_user where login = ?",
+		 List<Integer> list = getJdbcTemplate().query("select id from sec_user where lower(login) = ?",
 				new Object[]{login},
 				new int[]{Types.CHAR},
 				new RowMapper<Integer>() {
@@ -274,5 +276,62 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		 return list.size()!=0 ? list.get(0).intValue() : 0;
 	}
 
-	
+	@Override
+	public List<Integer> getByFilter(MembersFilterData filter) {
+		if (filter == null) {
+			return getUserIds();
+		}
+		StringBuilder sql = new StringBuilder("select id from (select u.id, u.is_active, u.name, u.department_id, rownum r " +
+				"from sec_user u where 1=1 ");
+		if (filter.getActive() != null) {
+			sql.append(" and is_active = " + (filter.getActive() ? "1" : "0")) ;
+		}
+		if (filter.getUserName() != null && !filter.getUserName().isEmpty()) {
+			sql.append(" and lower(name) like " + "\'%" + filter.getUserName().toLowerCase() +"%\'") ;
+		}
+		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
+			sql.append(" and department_id in " + SqlUtils.transformToSqlInStatement(new ArrayList<Integer>(filter.getDepartmentIds()))) ;
+		}
+		if (filter.getRoleIds() != null && !filter.getRoleIds().isEmpty() && filter.getRoleIds().get(0) != null) {
+			sql.append(" and exists (select 1 from sec_user_role ur where u.id = ur.user_id and ur.role_id = " + filter.getRoleIds().get(0) +")") ;
+		}
+		if (filter.getStartIndex() != null && filter.getCountOfRecords() != null) {
+			sql.append(") where r between " + (filter.getStartIndex()+1) + " and " + (filter.getStartIndex()+1 + filter.getCountOfRecords()) );
+		} else {
+			sql.append(")");
+		}
+		try {
+			return getJdbcTemplate().queryForList(sql.toString(), Integer.class);
+		} catch (DataAccessException e) {
+			throw new DaoException("Ошибка при получении пользователей. " + e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public int count(MembersFilterData filter) {
+		if (filter == null) {
+			return 0;
+		}
+		StringBuilder sql = new StringBuilder("select count(*) from (select  u.*, rownum r from sec_user u where 1=1 ");
+		if (filter.getActive() != null) {
+			sql.append(" and is_active = " + (filter.getActive() ? "1" : "0")) ;
+		}
+		if (filter.getUserName() != null && !filter.getUserName().isEmpty()) {
+			sql.append(" and name like " + "\'%" + filter.getUserName() +"%\'") ;
+		}
+		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
+			sql.append(" and department_id in " + SqlUtils.transformToSqlInStatement(new ArrayList<Integer>(filter.getDepartmentIds()))) ;
+		}
+		if (filter.getRoleIds() != null && !filter.getRoleIds().isEmpty() && filter.getRoleIds().get(0) != null) {
+			sql.append(" and exists (select 1 from sec_user_role ur where u.id = ur.user_id and ur.role_id = " + filter.getRoleIds().get(0) +")") ;
+		}
+		sql.append(")");
+		try {
+			return getJdbcTemplate().queryForInt(sql.toString());
+		} catch (DataAccessException e) {
+			throw new DaoException("Ошибка при получении кол-ва пользователей. " + e.getLocalizedMessage());
+		}
+	}
+
+
 }

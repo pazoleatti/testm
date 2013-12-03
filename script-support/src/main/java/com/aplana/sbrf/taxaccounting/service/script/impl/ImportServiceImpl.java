@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import au.com.bytecode.opencsv.CSVReader;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.script.Point;
 import com.aplana.sbrf.taxaccounting.service.script.ImportService;
 import org.apache.poi.hssf.usermodel.*;
@@ -42,13 +43,10 @@ public class ImportServiceImpl implements ImportService {
     @Override
     public String getData(InputStream inputStream, String fileName, String charset) throws IOException {
         if (inputStream == null) {
-            throw new NullPointerException("inputStream cannot be null");
+            throw new ServiceException("Поток данных не должен быть пустым");
         }
-        if (fileName == null) {
-            throw new NullPointerException("file name cannot be null");
-        }
-        if ("".equals(fileName.trim())) {
-            throw new IllegalArgumentException("file name cannot be empty");
+        if (fileName == null || "".equals(fileName.trim())) {
+            throw new ServiceException("Имя файла не может быть пустым");
         }
         if (charset == null || "".equals(charset.trim())) {
             charset = DEFAULT_CHARSET;
@@ -64,7 +62,7 @@ public class ImportServiceImpl implements ImportService {
         } else if (RNU.equals(format) || (format != null && format.matches("r[\\d]{2}"))) {
             return getXMLStringFromCSV(inputStream, charset);
         }
-        throw new IllegalArgumentException("format cannot be " + format + ". Only xls or rnu");
+        throw new ServiceException("Формат файла не может быть " + format + ".");
     }
 
     @Override
@@ -81,13 +79,10 @@ public class ImportServiceImpl implements ImportService {
     public String getData(InputStream inputStream, String fileName, String charset, String startStr,
                           String endStr, Integer columnsCount) throws IOException {
         if (inputStream == null) {
-            throw new NullPointerException("inputStream cannot be null");
+            throw new ServiceException("Поток данных не должен быть пустым");
         }
-        if (fileName == null) {
-            throw new NullPointerException("format cannot be null");
-        }
-        if ("".equals(fileName.trim())) {
-            throw new IllegalArgumentException("file name cannot be empty");
+        if (fileName == null || "".equals(fileName.trim())) {
+            throw new ServiceException("Имя файла не может быть пустым");
         }
         if (charset == null || "".equals(charset.trim())) {
             charset = DEFAULT_CHARSET;
@@ -107,7 +102,7 @@ public class ImportServiceImpl implements ImportService {
         } else if (RNU.equals(format) || (format != null && format.matches("r[\\d]{2}"))) {
             return getXMLStringFromCSV(inputStream, charset);
         }
-        throw new IllegalArgumentException("format cannot be " + format + ". Only xls or csv");
+        throw new IllegalArgumentException("Формат файла не может быть " + format + ".");
     }
 
     /**
@@ -158,8 +153,9 @@ public class ImportServiceImpl implements ImportService {
         }
         sb.append(TAB).append("<").append(rowName).append(">").append(ENTER);
         for (String cell : rowCells) {
+            String value = cell.trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("&", "&amp;");
             sb.append(TAB).append(TAB).append("<cell>");
-            sb.append(cell);
+            sb.append(value);
             sb.append("</cell>").append(ENTER);
         }
         sb.append(TAB).append("</").append(rowName).append(">").append(ENTER);

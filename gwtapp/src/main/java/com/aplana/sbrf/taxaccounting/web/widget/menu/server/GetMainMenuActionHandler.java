@@ -12,12 +12,14 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.Decla
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
+import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.HistoryBusinessToken;
+import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersTokens;
 import com.aplana.sbrf.taxaccounting.web.module.migration.client.MigrationTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
+import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerTokens;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesTokens;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationToken;
-import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerTokens;
 import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuAction;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuResult;
@@ -25,7 +27,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -98,19 +99,27 @@ public class GetMainMenuActionHandler extends
 		
 		
         if (currentUser.hasRole(TARole.ROLE_CONTROL)
-                || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)
+		        || currentUser.hasRole(TARole.ROLE_OPER)) {
         	MenuItem settingMenuItem = new MenuItem("Настройки");
-            settingMenuItem.getSubMenu().add(new MenuItem("Настройка подразделений", NUMBER_SIGN + DepartmentConfigTokens.departamentConfig));
+	        settingMenuItem.getSubMenu().add(new MenuItem("Список пользователей Системы", NUMBER_SIGN + MembersTokens.MEMBERS));
 
-            MenuItem nsiMenuItem = new MenuItem("НСИ");
-            settingMenuItem.getSubMenu().add(nsiMenuItem);
 
-            nsiMenuItem.getSubMenu().add(new MenuItem("Бухгалтерская отчётность", NUMBER_SIGN + BookerStatementsTokens.bookerStatements));
-            if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
-            }
-            
-            menuItems.add(settingMenuItem);
+	        if (currentUser.hasRole(TARole.ROLE_CONTROL)
+			        || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+
+		        settingMenuItem.getSubMenu().add(new MenuItem("Настройка подразделений", NUMBER_SIGN + DepartmentConfigTokens.departamentConfig));
+		        MenuItem nsiMenuItem = new MenuItem("НСИ");
+	            settingMenuItem.getSubMenu().add(nsiMenuItem);
+
+	            nsiMenuItem.getSubMenu().add(new MenuItem("Бухгалтерская отчётность", NUMBER_SIGN + BookerStatementsTokens.bookerStatements));
+	            if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+	                nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
+	            }
+
+
+	        }
+	        menuItems.add(settingMenuItem);
         }
 		
 		if (currentUser.hasRole(TARole.ROLE_CONF)) {
@@ -140,6 +149,7 @@ public class GetMainMenuActionHandler extends
             
             if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
             	settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
+	            settingMenuItem.getSubMenu().add(new MenuItem("Список пользователей Системы", NUMBER_SIGN + MembersTokens.MEMBERS));
             }
 
             if (currentUser.hasRole(TARole.ROLE_CONTROL) || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
@@ -150,6 +160,7 @@ public class GetMainMenuActionHandler extends
                 settingMenuItem.getSubMenu().add(
                         new MenuItem("Указание форм-источников",
                                 NUMBER_SIGN + SourcesTokens.SOURCES + ";" + SourcesTokens.FORM_FLAG + "=" + true));
+                settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + HistoryBusinessToken.HISTORY_BUSINESS));
             }
             
             menuItems.add(settingMenuItem);

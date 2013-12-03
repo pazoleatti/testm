@@ -28,6 +28,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	public static final String LOG_EVENT_EDIT = "EDIT";
 	public static final String LOG_EVENT_CREATE = "CREATE";
 
+    public static final String LOG_EVENT_READ_RU = "чтение";
+    public static final String LOG_EVENT_EDIT_RU = "редактирование";
+
 	private static final Log logger = LogFactory.getLog(FormDataAccessServiceImpl.class);
 
 	private static final String FORMDATA_KIND_STATE_ERROR_LOG = "Event type: \"%s\". Unsuppotable case for formData with \"%s\" kind and \"%s\" state!";
@@ -37,6 +40,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	private static final String INCORRECT_DEPARTMENT_FORM_TYPE = "Форма не назначена подразделению!";
 	private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL = "Только контролер имеет право создавать формы с перидом ввода остатков.";
 	private static final String CREATE_FORM_DATA_ERROR_ACCESS_DENIED = "Недостаточно прав для создания налоговой формы с указанными параметрами";
+    private static final String FORM_DATA_ERROR_ACCESS_DENIED = "Недостаточно прав на %s формы с типом \"%s\" в статусе \"%s\" и %s передаваемой на вышестоящий уровень";
 
     // id формы "Согласование организаций"
     private static final int ORGANIZATION_FORM_TYPE = 410;
@@ -59,18 +63,14 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	private FormTypeDao formTypeDao;
 
 	@Override
-	public boolean canRead(TAUserInfo userInfo, long formDataId) {
+	public void canRead(TAUserInfo userInfo, long formDataId) {
 		FormData formData = formDataDao.getWithoutRows(formDataId);
 		FormDataAccessRoles formDataAccess = getFormDataUserAccess(userInfo.getUser(), formData.getDepartmentId(),
 				formData.getFormType().getId(), formData.getKind());
-		boolean result = canRead(formDataAccess, formData);
-		if (logger.isDebugEnabled()) {
-			logger.debug("canRead: " + result);
-		}
-		return result;
+		canRead(formDataAccess, formData);
 	}
 
-	private boolean canRead(FormDataAccessRoles formDataAccess, FormData formData) {
+	private void canRead(FormDataAccessRoles formDataAccess, FormData formData) {
 		if((formData.getKind() == FormDataKind.ADDITIONAL || formData.getKind() == FormDataKind.PRIMARY) &&
 				formDataAccess.isFormDataHasDestinations()){
 			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
@@ -92,7 +92,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              | Принята      |   +    |     +      |      +      |      +      |
              ---------------|--------------------------------------------------
 			 */
-			return true;
+            return;
+
 		}
 		if((formData.getKind() == FormDataKind.ADDITIONAL || formData.getKind() == FormDataKind.PRIMARY ||
 				formData.getKind() == FormDataKind.UNP) && !formDataAccess.isFormDataHasDestinations()){
@@ -116,9 +117,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              | Принята      |   +    |     +      |      +      |      +      |
              ---------------|--------------------------------------------------
 			 */
-			return true;
+            return;
+
 		} else if ((formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED)
-				&& !formDataAccess.isFormDataHasDestinations()){
+                && !formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
 			 и НЕ передаваемых на вышестоящий уровень
 
@@ -137,10 +139,14 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              | Принята      |   -    |     +      |      +      |      +      |
              ---------------|--------------------------------------------------
 			 */
-			return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
-					formDataAccess.isControllerOfUNP();
-		} else if ((formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED)
-				&& formDataAccess.isFormDataHasDestinations()){
+			if (!(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+					formDataAccess.isControllerOfUNP())){
+                throw new AccessDeniedException(
+                        String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_READ_RU, formData.getKind().getName(), formData.getState().getName(), "НЕ") +
+                                " Чтение формы возможно только пользователями контролерами текущего или вышестоящего уровня.");
+            }
+            return;
+		} else if (formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень
 
@@ -160,29 +166,31 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              | Принята      |   -    |     +      |      +      |      +      |
              ---------------|--------------------------------------------------
 			*/
-			return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
-					formDataAccess.isControllerOfUNP();
+            if (!(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+                    formDataAccess.isControllerOfUNP())){
+                throw new AccessDeniedException(
+                        String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_READ_RU, formData.getKind().getName(), formData.getState().getName(), "") +
+                                " Чтение формы возможно только пользователями контролерами текущего или вышестоящего уровня.");
+            }
+			return;
 		}
 		logger.warn(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_READ, formData.getKind().getName(), formData.getState().getName()));
-		return false;
+        throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_READ_RU, formData.getKind().getName(), formData.getState().getName(),formDataAccess.isFormDataHasDestinations()?"":"НЕ"));
 	}
 
 	@Override
-	public boolean canEdit(TAUserInfo userInfo, long formDataId) {
+	public void canEdit(TAUserInfo userInfo, long formDataId) {
 		FormData formData = formDataDao.getWithoutRows(formDataId);
 		FormDataAccessRoles formDataAccess = getFormDataUserAccess(userInfo.getUser(), formData.getDepartmentId(),
 				formData.getFormType().getId(), formData.getKind());
-		boolean result = canEdit(formDataAccess, formData, reportPeriodDao.get(formData.getReportPeriodId()));
-		if (logger.isDebugEnabled()) {
-			logger.debug("canEdit: " + result);
-		}
-		return result;
+		canEdit(formDataAccess, formData, reportPeriodDao.get(formData.getReportPeriodId()));
 	}
 
-	private boolean canEdit(FormDataAccessRoles formDataAccess, FormData formData, ReportPeriod formDataReportPeriod) {
+	private void canEdit(FormDataAccessRoles formDataAccess, FormData formData, ReportPeriod formDataReportPeriod) {
 		WorkflowState state = formData.getState();
 		if (!reportPeriodService.isActivePeriod(formDataReportPeriod.getId(), formData.getDepartmentId())){
-			return false;
+			throw new AccessDeniedException( String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU, formData.getKind().getName(), formData.getState().getName(), formDataAccess.isFormDataHasDestinations()?"":"НЕ") +
+                    " Период неактивен.");
 		}
         if(formData.getFormType().getId() == ORGANIZATION_FORM_TYPE){
 			/* Жизненный цикл формы "Согласование организации"
@@ -204,14 +212,25 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			 */
             switch (formData.getState()){
                 case CREATED:
-                    return true;
+                    return;
                 case PREPARED:
-                    return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
-                            formDataAccess.isControllerOfUNP();
+                    if (!(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+                            formDataAccess.isControllerOfUNP())){
+                        throw new AccessDeniedException(
+                                String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU, formData.getKind().getName(), formData.getState().getName(), formDataAccess.isFormDataHasDestinations()?"":"НЕ") +
+                                        " Чтение формы возможно только пользователями контролерами текущего или вышестоящего уровня.");
+                    }
+                    return;
                 case APPROVED:
-                    return formDataAccess.isControllerOfUNP();
+                    if (!formDataAccess.isControllerOfUNP()) {
+                        throw new AccessDeniedException(
+                                String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU, formData.getKind().getName(), formData.getState().getName(), formDataAccess.isFormDataHasDestinations()?"":"НЕ") +
+                                        " Чтение формы возможно только пользователем \"Контролер УНП.\"");
+                    }
+                    return;
                 case ACCEPTED:
-                    return false; //Нельзя редактировать в состоянии "Принята"
+                    throw new AccessDeniedException("Нельзя редактировать НФ в состоянии \"Принята\"");
+                    //Нельзя редактировать в состоянии "Принята"
             }
             logger.warn(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_EDIT, formData.getKind().getName(), state.getName()));
         } else if (reportPeriodService.isBalancePeriod(formDataReportPeriod.getId(), formData.getDepartmentId())) {
@@ -219,10 +238,16 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			 НФ в статусе "Создана" */
 			switch (state){
 				case CREATED:
-					return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
-							formDataAccess.isControllerOfUNP();
+                    if (!(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+                            formDataAccess.isControllerOfUNP())){
+                        throw new AccessDeniedException(
+                                String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU, formData.getKind().getName(), formData.getState().getName(), formDataAccess.isFormDataHasDestinations()?"":"НЕ") +
+                                        " Чтение формы возможно только пользователями контролерами текущего или вышестоящего уровня.");
+                    }
+					return;
 				case ACCEPTED:
-					return false; //Нельзя редактировать НФ в состоянии "Принята"
+                    throw new AccessDeniedException("Нельзя редактировать НФ в состоянии \"Принята\"");
+					//Нельзя редактировать НФ в состоянии "Принята"
 			}
 			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_EDIT, formData.getKind().getName(), state.getName()));
 		} else if((formData.getKind() == FormDataKind.ADDITIONAL || formData.getKind() == FormDataKind.PRIMARY) &&
@@ -251,14 +276,25 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			 */
 			switch (formData.getState()){
 				case CREATED:
-					return true;
+					return;
 				case PREPARED:
-					return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
-							formDataAccess.isControllerOfUNP();
+                    if (!(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+                            formDataAccess.isControllerOfUNP())){
+                        throw new AccessDeniedException(
+                                String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU, formData.getKind().getName(), formData.getState().getName(), "") +
+                                        " Чтение формы возможно только пользователями контролерами текущего или вышестоящего уровня.");
+                    }
+					return;
                 case APPROVED:
-                    return formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
+                    if (!(formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP())){
+                        throw new AccessDeniedException(
+                                String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU, formData.getKind().getName(), formData.getState().getName(), "") +
+                                        " Чтение формы возможно только пользователями вышестоящего уровня или котролером УНП.");
+                    }
+                    return;
 				case ACCEPTED:
-					return false; //Нельзя редактировать НФ в состоянии "Принята"
+                    throw new AccessDeniedException("Нельзя редактировать НФ в состоянии \"Принята\"");
+					//Нельзя редактировать НФ в состоянии "Принята"
 			}
 			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_EDIT, formData.getKind().getName(), state.getName()));
 		}else if((formData.getKind() == FormDataKind.ADDITIONAL || formData.getKind() == FormDataKind.PRIMARY ||
@@ -286,12 +322,18 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			 */
 			switch (formData.getState()){
 				case CREATED:
-					return true;
+					return;
 				case PREPARED:
-					return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
-							formDataAccess.isControllerOfUNP();
+                    if (!(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+                            formDataAccess.isControllerOfUNP())){
+                        throw new AccessDeniedException(
+                                String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU, formData.getKind().getName(), formData.getState().getName(), "НЕ") +
+                                        " Чтение формы возможно только пользователями контролерами текущего или вышестоящего уровня.");
+                    }
+					return;
 				case ACCEPTED:
-					return false; //Нельзя редактировать НФ в состоянии "Принята"
+                    throw new AccessDeniedException("Нельзя редактировать НФ в состоянии \"Принята\"");
+					//Нельзя редактировать НФ в состоянии "Принята"
 			}
 			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_EDIT, formData.getKind().getName(), state.getName()));
 		} else if ((formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED) &&
@@ -315,14 +357,18 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			 */
 			switch (state){
 				case CREATED:
-					return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
-							formDataAccess.isControllerOfUNP(); //TODO (Marat Fayzullin 20.03.2013) временно до появления первичных форм
+                    if (!(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+                            formDataAccess.isControllerOfUNP())){
+                        throw new AccessDeniedException(
+                                String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU, formData.getKind().getName(), formData.getState().getName(), formDataAccess.isFormDataHasDestinations()?"":"НЕ") +
+                                        " Чтение формы возможно только пользователями контролерами текущего или вышестоящего уровня.");
+                    }
+					return; //TODO (Marat Fayzullin 20.03.2013) временно до появления первичных форм
 				case ACCEPTED:
-					return false; //Нельзя редактировать НФ в состоянии "Принята"
+                    throw new AccessDeniedException("Нельзя редактировать НФ в состоянии \"Принята\"");//Нельзя редактировать НФ в состоянии "Принята"
 			}
 			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_EDIT, formData.getKind().getName(), state.getName()));
-		} else if ((formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED) &&
-				formDataAccess.isFormDataHasDestinations()){
+		} else if (formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень
 
@@ -343,17 +389,26 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			*/
 			switch (state){
 				case CREATED:
-					return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
-							formDataAccess.isControllerOfUNP();
+                    if (!(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+                            formDataAccess.isControllerOfUNP())){
+                        throw new AccessDeniedException(
+                                String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU, formData.getKind().getName(), formData.getState().getName(), "") +
+                                        " Чтение формы возможно только пользователями контролерами текущего или вышестоящего уровня.");
+                    }
+					return;
 				case APPROVED:
-					return false;
+                    throw new AccessDeniedException(
+                            String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU, formData.getKind().getName(), formData.getState().getName(), "")
+                    );
 				case ACCEPTED:
-					return false; //Нельзя редактировать НФ в состоянии "Принята"
+                    //Нельзя редактировать НФ в состоянии "Принята"
+                    throw new AccessDeniedException("Нельзя редактировать НФ в состоянии \"Принята\"");
 			}
 			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_EDIT, formData.getKind().getName(), state.getName()));
 		}
 		logger.warn(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_EDIT, formData.getKind().getName(), state.getName()));
-		return false;
+		throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU, formData.getKind().getName(), formData.getState().getName(), formDataAccess.isFormDataHasDestinations()?"":"НЕ"));
+		/*return false;*/
 	}
 
 	@Override
@@ -371,7 +426,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			logger.warn(String.format(REPORT_PERIOD_IS_CLOSED_LOG, reportPeriod.getId()));
 			throw new ServiceException(REPORT_PERIOD_IS_CLOSED);
 		}
-		
+
 		FormType formType = formTypeDao.get(formTypeId);
 
 		// Проверяем, что в подразделении вообще можно работать с формами такого вида и типа
@@ -384,7 +439,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		}
 		if (!found) {
 			logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(), formDataDepartment.getId()));
-			throw new ServiceException(INCORRECT_DEPARTMENT_FORM_TYPE);
+			throw new AccessDeniedException(INCORRECT_DEPARTMENT_FORM_TYPE);
 		}
 
 		if (reportPeriodService.isBalancePeriod(reportPeriod.getId(), formDataDepartment.getId())){
@@ -448,19 +503,18 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 
 	@Override
-	public boolean canDelete(TAUserInfo userInfo, long formDataId) {
+	public void canDelete(TAUserInfo userInfo, long formDataId) {
 		FormData formData = formDataDao.getWithoutRows(formDataId);
 		FormDataAccessRoles formDataAccess = getFormDataUserAccess(userInfo.getUser(), formData.getDepartmentId(),
 				formData.getFormType().getId(), formData.getKind());
-		boolean result = canDelete(formDataAccess, formData, reportPeriodDao.get(formData.getReportPeriodId()));
-		if (logger.isDebugEnabled()) {
-			logger.debug("canDelete: " + result);
-		}
-		return result;
+		canDelete(formDataAccess, formData, reportPeriodDao.get(formData.getReportPeriodId()));
 	}
 
-	private boolean canDelete(FormDataAccessRoles formDataAccess, FormData formData, ReportPeriod formDataReportPeriod) {
-        return formData.getState() == WorkflowState.CREATED && canEdit(formDataAccess, formData, formDataReportPeriod);
+	private void canDelete(FormDataAccessRoles formDataAccess, FormData formData, ReportPeriod formDataReportPeriod) {
+        canEdit(formDataAccess, formData, formDataReportPeriod);
+        if (formData.getState() == WorkflowState.CREATED)
+            return;
+        throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, "удаление",formData.getKind().getName(), formData.getState().getName(), formDataAccess.isFormDataHasDestinations()?"":"НЕ") );
     }
 
 	@Override
@@ -483,7 +537,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
 		// Для того, чтобы иметь возможность изменить статус, у пользователя должны быть права
 		// на чтение соответствующей карточки данных и отчетный период должен быть активным
-		if (!canRead(formDataAccess, formData) || !activePeriod) {
+        canRead(formDataAccess, formData);
+		if (!activePeriod) {
 			logger.warn(String.format(REPORT_PERIOD_IS_CLOSED_LOG, formDataReportPeriod.getId()));
 			return result;
 		}
@@ -595,8 +650,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				default:
 					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getName(), state.getName()));
 			}
-		} else if ((formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED) &&
-				formDataAccess.isFormDataHasDestinations()){
+		} else if (formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень
 
@@ -641,9 +695,24 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			formData.getFormType().getId(), formData.getKind());
 
 		FormDataAccessParams result = new FormDataAccessParams();
-		result.setCanRead(canRead(formDataAccess, formData));
-		result.setCanEdit(canEdit(formDataAccess, formData, reportPeriod));
-		result.setCanDelete(canDelete(formDataAccess, formData, reportPeriod));
+        try {
+            canRead(formDataAccess, formData);
+            result.setCanRead(true);
+        }catch (AccessDeniedException e){
+            result.setCanRead(false);
+        }
+        try {
+            canEdit(formDataAccess, formData, reportPeriod);
+            result.setCanEdit(true);
+        }catch (AccessDeniedException e){
+            result.setCanEdit(false);
+        }
+        try {
+            canDelete(formDataAccess, formData, reportPeriod);
+            result.setCanDelete(true);
+        }catch (AccessDeniedException e){
+            result.setCanDelete(false);
+        }
 		result.setAvailableWorkflowMoves(getAvailableMoves(formDataAccess, formData, reportPeriod));
 		if (logger.isDebugEnabled()) {
 			logger.debug("FormDataAccessParams: " + result.toString());

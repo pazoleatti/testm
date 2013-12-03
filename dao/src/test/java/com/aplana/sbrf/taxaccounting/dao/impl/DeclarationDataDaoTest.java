@@ -164,6 +164,13 @@ public class DeclarationDataDaoTest {
 		}
 	}
 
+    @Test
+    public void findPageByFilterTest() {
+        DeclarationDataFilter filter = new DeclarationDataFilter();
+        assertArrayEquals(new Long[]{7l, 5l, 4l, 3l, 2l, 1l}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, false).toArray());
+        assertArrayEquals(new Long[]{1l, 2l, 3l, 4l, 5l, 7l}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, true).toArray());
+    }
+
 	@Test
 	public void findPageSortingTest() {
 		DeclarationDataFilter filter = new DeclarationDataFilter();

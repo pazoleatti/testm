@@ -42,8 +42,8 @@ public class PeriodServiceImplTest {
 
         TaxPeriod taxPeriod3 = new TaxPeriod();
         taxPeriod3.setId(3);
-        taxPeriod3.setStartDate(new GregorianCalendar(2012, 1, 1).getTime());
-        taxPeriod3.setEndDate(new GregorianCalendar(2012, 12, 31).getTime());
+        taxPeriod3.setStartDate(new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime());
+        taxPeriod3.setEndDate(new GregorianCalendar(2012, Calendar.DECEMBER, 31).getTime());
         taxPeriod3.setTaxType(TaxType.INCOME);
 
         // список налоговых периодов по ТН
@@ -195,7 +195,7 @@ public class PeriodServiceImplTest {
     public void getStartDateIncome(){
         Calendar cl = Calendar.getInstance();
         cl.clear();
-        cl.set(2012, 1, 1);
+        cl.set(2012, 0, 1);
 
         assertEquals("Wait ", service.getStartDate(8).get(Calendar.MONTH), cl.get(Calendar.MONTH));
     }
@@ -215,5 +215,32 @@ public class PeriodServiceImplTest {
         cl.set(2012, 1, 1);
 
         assertEquals(service.getStartDate(4).get(Calendar.MONTH), cl.get(Calendar.MONTH));
+    }
+
+    @Test
+    public void getMonthFirstDate() {
+        Calendar cl = Calendar.getInstance();
+        cl.clear();
+        cl.set(2012, Calendar.FEBRUARY, 1);
+
+        assertEquals(service.getMonthStartDate(8, 2), cl);
+    }
+
+    @Test
+    public void getMonthEndDate() {
+        Calendar cl = Calendar.getInstance();
+        cl.clear();
+        cl.set(2012, Calendar.FEBRUARY, 29);
+
+        assertEquals(service.getMonthEndDate(8, 2), cl);
+    }
+
+    @Test
+    public void getMonthReportDate() {
+        Calendar cl = Calendar.getInstance();
+        cl.clear();
+        cl.set(2012, Calendar.MARCH, 1);
+
+        assertEquals(service.getMonthReportDate(8, 2), cl);
     }
 }

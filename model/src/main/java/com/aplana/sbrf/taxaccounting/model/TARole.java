@@ -50,13 +50,23 @@ public class TARole implements Serializable {
 	public void setAlias(String alias) {
 		this.alias = alias;
 	}
+
 	@Override
-	public boolean equals(Object obj) {
-		TARole role = (TARole)obj;
-		return role.id == id;
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		TARole taRole = (TARole) o;
+
+		if (id != taRole.id) return false;
+		if (!alias.equals(taRole.alias)) return false;
+		if (!name.equals(taRole.name)) return false;
+
+		return true;
 	}
+
 	@Override
 	public int hashCode() {
-		return id;
+		return 0;
 	}
 }

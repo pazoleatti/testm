@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -15,11 +15,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
 
 /**
  * Реализация Dao для работы с шаблонами деклараций
@@ -44,7 +43,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			d.setDeclarationType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
             d.setXsdId(rs.getString("XSD"));
             d.setJrxmlBlobId(rs.getString("JRXML"));
-            d.setJasperBlobId(rs.getString("JASPER"));
 			return d;
 		}
 	}
@@ -103,7 +101,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		if (declarationTemplate.getId() == null) {
 			declarationTemplateId = generateId("seq_declaration_template", Integer.class);
 			count = getJdbcTemplate().update(
-					"insert into declaration_template (id, edition, version, is_active, create_script, declaration_type_id, xsd, jrxml, jasper) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+					"insert into declaration_template (id, edition, version, is_active, create_script, declaration_type_id, xsd, jrxml) values (?, ?, ?, ?, ?, ?, ?, ?)",
 					new Object[] {
 							declarationTemplateId,
 							1,
@@ -113,7 +111,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							declarationTemplate.getDeclarationType().getId(),
                             declarationTemplate.getXsdId(),
                             declarationTemplate.getJrxmlBlobId(),
-                            declarationTemplate.getJasperBlobId()
 					},
 					new int[] {
 							Types.NUMERIC,
@@ -124,7 +121,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							Types.NUMERIC,
                             Types.VARCHAR,
                             Types.VARCHAR,
-                            Types.VARCHAR
 					}
 			);
 
@@ -137,7 +133,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 						" было изменено после того, как данные по ней были считаны");
 			}
 			count = getJdbcTemplate().update(
-					"update declaration_template set edition = ?, version = ?, is_active = ?, create_script = ?, declaration_type_id = ?, xsd = ?, jrxml = ?, jasper = ? where id = ?",
+					"update declaration_template set edition = ?, version = ?, is_active = ?, create_script = ?, declaration_type_id = ?, xsd = ?, jrxml = ? where id = ?",
 					new Object[] {
 							storedEdition + 1,
 							declarationTemplate.getVersion(),
@@ -146,7 +142,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							declarationTemplate.getDeclarationType().getId(),
                             declarationTemplate.getXsdId(),
                             declarationTemplate.getJrxmlBlobId(),
-                            declarationTemplate.getJasperBlobId(),
 							declarationTemplateId
 					},
 					new int[] {
@@ -158,7 +153,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                             Types.VARCHAR,
                             Types.VARCHAR,
                             Types.VARCHAR,
-							Types.NUMERIC
 					}
 			);
 		}
@@ -170,16 +164,14 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	}
 
     @Override
-    public void setJrxmlAndJasper(int declarationTemplateId, String jrxmlBlobId, String jasperBlobId) {
+    public void setJrxml(int declarationTemplateId, String jrxmlBlobId) {
         int count = getJdbcTemplate().update(
-                "update declaration_template set jrxml = ?, jasper = ? where id = ?",
+                "update declaration_template set jrxml = ? where id = ?",
                 new Object[] {
                         jrxmlBlobId,
-                        jasperBlobId,
                         declarationTemplateId
                 },
                 new int[] {
-                        Types.VARCHAR,
                         Types.VARCHAR,
                         Types.NUMERIC
                 }

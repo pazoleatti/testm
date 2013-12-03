@@ -55,6 +55,7 @@ public enum FormDataEvent implements Serializable {
 
     LOGIN(501, "Вход пользователя в Систему"),
     LOGOUT(502, "Выход пользователя из Системы"),
+    EXTERNAL_INTERACTION(503, "Взаимодействие с внешней АС"),
 
 	LOG_SYSTEM_BACKUP(601, "Архивирование журнала событий");
 

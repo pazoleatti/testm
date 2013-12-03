@@ -28,14 +28,13 @@
         <filter-name>filterChainProxy</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
-	<filter-mapping>
+    <filter-mapping>
         <!--<filter-name>springSecurityFilterChain</filter-name>-->
         <filter-name>filterChainProxy</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-
-	<servlet>
+    <servlet>
   		<servlet-name>mvc-dispatcher</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
@@ -141,22 +140,6 @@
 		<res-auth>Container</res-auth>
 		<res-sharing-scope>Shareable</res-sharing-scope>
 	</resource-ref>
-
-    <resource-ref>
-        <description>Transport Connection Factory</description>
-        <res-ref-name>jms/transportConnectionFactory</res-ref-name>
-        <res-type>javax.jms.ConnectionFactory</res-type>
-        <res-auth>Container</res-auth>
-        <res-sharing-scope>Shareable</res-sharing-scope>
-    </resource-ref>
-
-    <resource-ref>
-        <description>Transport Message Queue</description>
-        <res-ref-name>jms/transportQueue</res-ref-name>
-        <res-type>javax.jms.Queue</res-type>
-        <res-auth>Container</res-auth>
-        <res-sharing-scope>Shareable</res-sharing-scope>
-    </resource-ref>
 
 	<security-role>
 		<description>Все аутентифицированные пользователи</description>	

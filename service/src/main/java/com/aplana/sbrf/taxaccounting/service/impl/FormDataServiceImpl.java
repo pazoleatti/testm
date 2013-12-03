@@ -2,13 +2,11 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.ConfigurationProvider;
 import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -17,10 +15,10 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
-
-import jcifs.smb.SmbFileInputStream;
+import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +38,10 @@ import java.util.Map;
 @Transactional
 public class FormDataServiceImpl implements FormDataService {
 
-	@Autowired
+    private static String XLSX_EXT = "xlsx";
+    private static String XLS_EXT = "xls";
+
+    @Autowired
 	private FormDataDao formDataDao;
 	@Autowired
 	private FormTemplateDao formTemplateDao;
@@ -59,8 +60,6 @@ public class FormDataServiceImpl implements FormDataService {
     @Autowired
     private DepartmentFormTypeDao departmentFormTypeDao;
     @Autowired
-    private FormDataCompositionService formDataCompositionService;
-    @Autowired
     private PeriodService reportPeriodService;
     @Autowired
     private EventLauncher eventHandlerLauncher;
@@ -68,8 +67,8 @@ public class FormDataServiceImpl implements FormDataService {
 	private SignService signService;
 	@Autowired
 	private ConfigurationProvider configurationProvider;
-    @Autowired
-    private DepartmentDao departmentDao;
+	@Autowired
+	private ApplicationContext applicationContext;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -96,6 +95,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 *            (например один и тот же РНУ на уровне ТБ - в виде первичной и
 	 *            консолидированной)
 	 * @param reportPeriod отчетный период в котором создается форма
+     * @param periodOrder номер месяца для ежемесячных форм (для остальных параметр отсутствует)
 	 * @return созданный и проинициализированный объект данных.
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException
 	 *             если у пользователя нет прав создавать налоговую форму с
@@ -107,27 +107,11 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	public long createFormData(Logger logger, TAUserInfo userInfo,
-			int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod) {
+			int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod, Integer periodOrder) {
         formDataAccessService.canCreate(userInfo, formTemplateId, kind,
                 departmentId, reportPeriod.getId());
-			return createFormDataWithoutCheck(logger, userInfo,
-					formTemplateId, departmentId, kind, reportPeriod.getId(), false);
-	}
-	
-	
-	@Override
-	@Deprecated
-	public void importFormDataTest(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId) {
-		Date serviceStart = new Date();
-		long formDataId =  createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentId, kind, reportPeriodId, true);
-		Date getDate = new Date();
-		FormData fd = formDataDao.get(formDataId);
-		logger.info("Старт сервиса: " + serviceStart);
-		logger.info("Получение: " + getDate);
-		logger.info("Текущая: " + new Date());
-		logBusinessService.add(formDataId, null, userInfo, FormDataEvent.IMPORT, null);
-		auditService.add(FormDataEvent.IMPORT, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
-				null, fd.getFormType().getId(), fd.getKind().getId(), null);
+        return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentId, kind, reportPeriod.getId(),
+                periodOrder, false);
 	}
 
     @Override
@@ -136,7 +120,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    @Transactional(timeout = 900) // 15 min // TODO Вынести в глобальные настройки
+    @Transactional
     public void migrationFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName) {
         loadFormData(logger, userInfo, formDataId, inputStream, fileName, FormDataEvent.MIGRATION);
     }
@@ -146,83 +130,87 @@ public class FormDataServiceImpl implements FormDataService {
     	// соответствовать редактированию (добавление, удаление, пересчет)
     	// Форма должна быть заблокирована текущим пользователем для редактирования
 		lockCoreService.checkLockedMe(FormData.class, formDataId, userInfo);
-		
-        if (!formDataAccessService.canEdit(userInfo, formDataId)) {
-            throw new AccessDeniedException(
-                    "Недостаточно прав для импорта данных в налоговую форму");
-        }
+
+        formDataAccessService.canEdit(userInfo, formDataId);
 
         File dataFile = null;
         File pKeyFile = null;
         OutputStream dataFileOutputStream = null;
-        InputStream  dataFileInputStream = null;
-    	OutputStream pKeyFileOutputStream = null;
-    	InputStream pKeyFileInputStream = null;
-	        try {
-        	
-                dataFile = File.createTempFile("dataFile", ".original");
-	        dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
-	        IOUtils.copy(inputStream, dataFileOutputStream);
-	        IOUtils.closeQuietly(dataFileOutputStream);
-	        
-	        String pKeyFileUrl = configurationProvider.getString(ConfigurationParam.FORM_DATA_KEY_FILE);
-	        if (pKeyFileUrl != null) { // Необходимо проверить подпись
-	        	
-		        pKeyFile = File.createTempFile("signature", ".sign");
-				pKeyFileOutputStream = new BufferedOutputStream(new FileOutputStream(pKeyFile));
-				try{
-					pKeyFileInputStream = new BufferedInputStream(new SmbFileInputStream(pKeyFileUrl));
-	        } catch (Exception e) {
-					throw new ServiceException("Ошибка доступа к файлу базы открытых ключей.", e);
-                }
-		        IOUtils.copy(pKeyFileInputStream, pKeyFileOutputStream);
-	        	IOUtils.closeQuietly(pKeyFileOutputStream);
-	        	IOUtils.closeQuietly(pKeyFileInputStream);
-			              
-			    if (!signService.checkSign(dataFile.getAbsolutePath(), pKeyFile.getAbsolutePath(), 0)){
-			      	throw new ServiceException("Ошибка проверки цифровой подписи.");
-            }
-        }
-        
-        FormData fd = formDataDao.get(formDataId);
+        InputStream dataFileInputStream = null;
 
-        dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
-        Map<String, Object> additionalParameters = new HashMap<String, Object>();
-        additionalParameters.put("ImportInputStream", dataFileInputStream);
-        additionalParameters.put("UploadFileName", fileName);
-        formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
-        IOUtils.closeQuietly(dataFileInputStream);
-        
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException(
-	                    "Есть критические ошибки при выполнения скрипта.",
-                    logger.getEntries());
-        }  else {
-            logger.info("Данные загружены");
-        }
-        
-        logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
-        auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
-                null, fd.getFormType().getId(), fd.getKind().getId(), fileName);
-        } catch (IOException e){
-        	throw new ServiceException(e.getLocalizedMessage(), e);
-        } finally {   
-        	IOUtils.closeQuietly(dataFileOutputStream);
-        	IOUtils.closeQuietly(dataFileInputStream);
-        	IOUtils.closeQuietly(pKeyFileOutputStream);
-        	IOUtils.closeQuietly(pKeyFileInputStream);
-        	if (dataFile != null){
-            	dataFile.delete();
-        	}
-	        if (pKeyFile != null){
-	        	pKeyFile.delete();
-    		}
+        try {
+
+            dataFile = File.createTempFile("dataFile", ".original");
+            dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
+            IOUtils.copy(inputStream, dataFileOutputStream);
+            IOUtils.closeQuietly(dataFileOutputStream);
+
+            String ext = getFileExtention(fileName);
+            if(!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT)){
+
+                String pKeyFileUrl = configurationProvider.getString(ConfigurationParam.FORM_DATA_KEY_FILE);
+                if (pKeyFileUrl != null) { // Необходимо проверить подпись
+                    InputStream pKeyFileInputStream = null;
+
+                    pKeyFile = File.createTempFile("signature", ".sign");
+                    OutputStream pKeyFileOutputStream = new BufferedOutputStream(new FileOutputStream(pKeyFile));
+                    try {
+                        pKeyFileInputStream = new BufferedInputStream(ResourceUtils.getSharedResourceAsStream(pKeyFileUrl));
+                        IOUtils.copy(pKeyFileInputStream, pKeyFileOutputStream);
+                    } catch (Exception e) {
+                        throw new ServiceException("Ошибка доступа к файлу базы открытых ключей.", e);
+                    } finally {
+                        IOUtils.closeQuietly(pKeyFileOutputStream);
+                        IOUtils.closeQuietly(pKeyFileInputStream);
+                    }
+                    if (!signService.checkSign(dataFile.getAbsolutePath(), pKeyFile.getAbsolutePath(), 0)) {
+                        throw new ServiceException("Ошибка проверки цифровой подписи.");
+                    }
+                }
+            }
+
+            FormData fd = formDataDao.get(formDataId);
+
+            dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+            Map<String, Object> additionalParameters = new HashMap<String, Object>();
+            additionalParameters.put("ImportInputStream", dataFileInputStream);
+            additionalParameters.put("UploadFileName", fileName);
+            formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
+            IOUtils.closeQuietly(dataFileInputStream);
+
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException(
+                        "Есть критические ошибки при выполнения скрипта.",
+                        logger.getEntries());
+            } else {
+                logger.info("Данные загружены");
+            }
+
+            logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
+            auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
+                    null, fd.getFormType().getId(), fd.getKind().getId(), fileName);
+        } catch (IOException e) {
+            throw new ServiceException(e.getLocalizedMessage(), e);
+        } finally {
+            IOUtils.closeQuietly(dataFileOutputStream);
+            IOUtils.closeQuietly(dataFileInputStream);
+            if (dataFile != null) {
+                dataFile.delete();
+            }
+            if (pKeyFile != null) {
+                pKeyFile.delete();
+            }
         }
     }
 
+    private static String getFileExtention(String filename){
+        int dotPos = filename.lastIndexOf(".") + 1;
+        return filename.substring(dotPos);
+    }
+
     @Override
-	public long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo,
-			int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId, boolean importFormData) {
+	public long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId,
+                                           FormDataKind kind, int reportPeriodId, Integer periodOrder, boolean importFormData) {
 		FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 		FormData formData = new FormData(formTemplate);
 		
@@ -230,10 +218,11 @@ public class FormDataServiceImpl implements FormDataService {
 		formData.setDepartmentId(departmentId);
 		formData.setKind(kind);
 		formData.setReportPeriodId(reportPeriodId);
+        formData.setPeriodOrder(periodOrder);
 		
 		// Execute scripts for the form event CREATE
 		formDataScriptingService.executeScript(userInfo, formData,
-				importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger,null);
+				importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger, null);
 
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
@@ -249,7 +238,7 @@ public class FormDataServiceImpl implements FormDataService {
 		
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getId(), formData.getKind().getId(), null);
+                null, formData.getFormType().getId(), formData.getKind().getId(), null);
 
 		return formData.getId();
 	}
@@ -274,11 +263,8 @@ public class FormDataServiceImpl implements FormDataService {
 		if (formTemplate.isFixedRows()) {
 			throw new ServiceException("Нельзя добавить строку в НФ с фиксированным количеством строк");
 		}
-		
-		if (!formDataAccessService.canEdit(userInfo, formData.getId())) {
-			throw new AccessDeniedException(
-					"Недостаточно прав для добавления строки к налоговой форме");
-		}
+
+		formDataAccessService.canEdit(userInfo, formData.getId());
 
 		Map<String, Object> additionalParameters = new HashMap<String, Object>();
 		additionalParameters.put("currentDataRow", currentDataRow);
@@ -302,11 +288,8 @@ public class FormDataServiceImpl implements FormDataService {
 		if (formTemplate.isFixedRows()) {
 			throw new ServiceException("Нельзя удалить строку в НФ с фиксированным количеством строк");
 		}
-		
-		if (!formDataAccessService.canEdit(userInfo, formData.getId())) {
-			throw new AccessDeniedException(
-					"Недостаточно прав для удаления строки из налоговой формы");
-		}
+
+		formDataAccessService.canEdit(userInfo, formData.getId());
 		
 		Map<String, Object> additionalParameters = new HashMap<String, Object>();
 		additionalParameters.put("currentDataRow", currentDataRow);
@@ -334,11 +317,8 @@ public class FormDataServiceImpl implements FormDataService {
 	public void doCalc(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
 		lockCoreService.checkLockedMe(FormData.class, formData.getId(), userInfo);
-		
-		if (!formDataAccessService.canEdit(userInfo, formData.getId())) {
-			throw new AccessDeniedException(
-					"Недостаточно прав для выполенения расчёта по налоговой форме");
-		}
+
+		formDataAccessService.canEdit(userInfo, formData.getId());
 
 		formDataScriptingService.executeScript(userInfo, formData,
 				FormDataEvent.CALCULATE, logger, null);
@@ -362,12 +342,9 @@ public class FormDataServiceImpl implements FormDataService {
 		if (getObjectLock(formData.getId(), userInfo)==null){
 			dataRowDao.rollback(formData.getId());
 		}
-		
-		if (!formDataAccessService.canRead(userInfo, formData.getId())) {
-			throw new AccessDeniedException(
-					"Недостаточно прав чтения формы");
-		}
-		
+
+		formDataAccessService.canRead(userInfo, formData.getId());
+
 		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CHECK, logger, null);
 
 		if (logger.containsLevel(LogLevel.ERROR)) {
@@ -399,11 +376,8 @@ public class FormDataServiceImpl implements FormDataService {
 	public long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
 		lockCoreService.checkLockedMe(FormData.class, formData.getId(), userInfo);
-		
-		if (!formDataAccessService.canEdit(userInfo, formData.getId())) {
-			throw new AccessDeniedException(
-					"Недостаточно прав для изменения налоговой формы");
-		}
+
+		formDataAccessService.canEdit(userInfo, formData.getId());
 
 		formDataScriptingService.executeScript(userInfo, formData,
 				FormDataEvent.SAVE, logger, null);
@@ -437,11 +411,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	@Transactional
 	public FormData getFormData(TAUserInfo userInfo, long formDataId, Logger logger) {
-		if (!formDataAccessService.canRead(userInfo, formDataId)) {
-			throw new AccessDeniedException(
-					"Недостаточно прав на просмотр данных налоговой формы",
-					userInfo.getUser().getId(), formDataId);
-		}
+		formDataAccessService.canRead(userInfo, formDataId);
 
 		FormData formData = formDataDao.get(formDataId);
 
@@ -473,11 +443,8 @@ public class FormDataServiceImpl implements FormDataService {
 	public void deleteFormData(TAUserInfo userInfo, long formDataId) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
 		lockCoreService.checkNoLockedAnother(FormData.class, formDataId, userInfo);
-		
-		if (!formDataAccessService.canDelete(userInfo, formDataId)) {
-			throw new AccessDeniedException(
-					"Недостаточно прав для удаления налоговой формы");
-		}
+
+		formDataAccessService.canDelete(userInfo, formDataId);
 
 		FormData formData = formDataDao.get(formDataId);
 		auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
@@ -514,8 +481,8 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		FormData formData = formDataDao.get(formDataId);
-
-        checkDestinations(formData, workflowMove);
+				
+        checkDestinations(formData);
 
 		formDataScriptingService.executeScript(userInfo,formData, workflowMove.getEvent(), logger, null);
 		
@@ -599,8 +566,9 @@ public class FormDataServiceImpl implements FormDataService {
                             ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
                             scriptComponentContext.setUserInfo(userInfo);
                             scriptComponentContext.setLogger(logger);
-                            ((ScriptComponentContextHolder)formDataCompositionService).setScriptComponentContext(scriptComponentContext);
 
+							FormDataCompositionService formDataCompositionService = applicationContext.getBean(FormDataCompositionService.class);
+                            ((ScriptComponentContextHolder)formDataCompositionService).setScriptComponentContext(scriptComponentContext);
                             formDataCompositionService.compose(formData, i.getDepartmentId(),
                                     i.getFormTypeId(), i.getKind());
                         } else if (destinationForm != null){
@@ -643,11 +611,8 @@ public class FormDataServiceImpl implements FormDataService {
     /**
      * Проверка наличия и статуса приемника при осуществлении перевода формы
      * в статус "Подготовлена"/"Утверждена"/"Принята".
-     *
-     * @param formData нф источника
-     * @param workflowMove переход
      */
-    private void checkDestinations(FormData formData, WorkflowMove workflowMove) {
+    private void checkDestinations(FormData formData) {
         List<DepartmentFormType> departmentFormTypes =
                 departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
                         formData.getFormType().getId(), formData.getKind());
@@ -655,18 +620,9 @@ public class FormDataServiceImpl implements FormDataService {
             for (DepartmentFormType department: departmentFormTypes) {
                 FormData form = formDataDao.find(department.getFormTypeId(), department.getKind(),
                         department.getDepartmentId(), formData.getReportPeriodId());
-
-                /*
-                Несли форма приемника существует и ее статус отличен от "создана" и переход не является:
-                    - Вернуть из "Утверждена" в "Создана"
-                    - Вернуть из "Подготовлена" в "Создана"
-                    - Вернуть из "Утверждена" в "Подготовлена"
-                 */
-                if (form != null && form.getState() != WorkflowState.CREATED &&
-                        (workflowMove != WorkflowMove.APPROVED_TO_CREATED && workflowMove != WorkflowMove.PREPARED_TO_CREATED && workflowMove != WorkflowMove.APPROVED_TO_PREPARED)) {
-                    Department sformDepartment =  departmentDao.getDepartment(form.getDepartmentId());
-                    throw new ServiceException("Переход невозможен, поскольку уже принята форма: "
-                            + form.getKind().getName() + " \"" + form.getFormType().getName() + "\" (" + sformDepartment.getName() + ").");
+                // если форма существует и статус отличен от "создана"
+                if (form != null && form.getState() != WorkflowState.CREATED) {
+                    throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
                 }
                 if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), department.getDepartmentId())){
                 	throw new ServiceException("Переход невозможен, т.к. у одного из приемников период не отрыт.");

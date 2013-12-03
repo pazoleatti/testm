@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.server;
 
-import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -46,7 +46,7 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
     @Override
     public AuditArchiveResult execute(AuditArchiveAction action, ExecutionContext context) throws ActionException {
         AuditArchiveResult result = new AuditArchiveResult();
-        PagingResult<LogSystemSearchResultItem> records = auditService.getLogsByFilter(action.getLogSystemFilter());
+        PagingResult<LogSearchResultItem> records = auditService.getLogsByFilter(action.getLogSystemFilter());
         if (records.isEmpty())
             throw new ServiceException("Нет записей за указанную дату.");
         File filePath = new File(printingService.generateAuditCsv(records));

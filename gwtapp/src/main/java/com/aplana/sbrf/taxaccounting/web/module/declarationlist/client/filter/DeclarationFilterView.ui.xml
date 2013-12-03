@@ -11,7 +11,7 @@
                 <g:cell width="250px">
                     <g:FlowPanel>
                         <g:Label width="200px" text="Подразделение" />
-                        <dep:DepartmentPickerPopupWidget width="200px" header="Выберите подразделение" multiselection="true" ui:field="departmentPicker" />
+                        <dep:DepartmentPickerPopupWidget width="200px" header="Выберите подразделение" multiselection="true" ui:field="departmentPicker" modal="true"/>
                     </g:FlowPanel>
 
                 </g:cell>

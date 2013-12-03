@@ -1,0 +1,163 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
+             xmlns:n="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client'
+             xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
+
+    <ui:style>
+
+        .titleText{
+            font-size: 16px;
+        }
+
+        .titlePanel{
+            padding-left: 10px
+        }
+        .lable{
+            margin-bottom: 2px
+        }
+    </ui:style>
+
+    <g:HorizontalPanel spacing="3">
+        <g:cell width="25%">
+            <g:VerticalPanel width="200px" addStyleNames="{style.titlePanel}">
+                <g:cell height="30px">
+                    <g:Label styleName="{style.titleText}">Журнал аудита</g:Label>
+                </g:cell>
+                <g:cell>
+                    <g:HorizontalPanel>
+                        <g:Label width="30px" text="С" />
+                        <d:CustomDateBox ui:field="fromSearchDate"/>
+                    </g:HorizontalPanel>
+                </g:cell>
+                <g:cell>
+                    <g:HorizontalPanel>
+                        <g:Label width="30px" text="По" />
+                        <d:CustomDateBox ui:field="toSearchDate" />
+                    </g:HorizontalPanel>
+                </g:cell>
+            </g:VerticalPanel>
+        </g:cell>
+
+
+        <g:cell width="15%" verticalAlignment="top">
+            <g:VerticalPanel>
+                <g:cell>
+                    <g:VerticalPanel>
+                        <g:cell height="19px">
+                            <g:Label width="200px" text="Вид налога"/>
+                        </g:cell>
+                        <g:cell height="25px">
+                            <g:ValueListBox width="200px" ui:field="taxType" />
+                        </g:cell>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell verticalAlignment="bottom">
+                    <g:VerticalPanel>
+                        <g:cell height="19px">
+                            <g:Label width="200px" text="Тип формы"/>
+                        </g:cell>
+                        <g:cell height="25px">
+                            <g:ValueListBox width="200px" ui:field="auditFormTypeId" />
+                        </g:cell>
+                    </g:VerticalPanel>
+                </g:cell>
+            </g:VerticalPanel>
+        </g:cell>
+        <g:cell width="15%" verticalAlignment="top">
+            <g:VerticalPanel>
+                <g:cell>
+                    <g:VerticalPanel ui:field="reportPeriodPanel">
+                        <g:cell height="19px">
+                            <g:Label width="200px" text="Период" />
+                        </g:cell>
+                        <g:cell height="25px">
+                            <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="true"/>
+                        </g:cell>
+                    </g:VerticalPanel>
+                </g:cell>
+
+                <g:cell>
+                    <g:VerticalPanel ui:field="formKindPanel" visible="false">
+                        <g:cell height="19px">
+                            <g:Label width="200px" text="Тип налоговой формы"/>
+                        </g:cell>
+                        <g:cell height="25px">
+                            <g:ValueListBox width="200px" ui:field="formDataKind" />
+                        </g:cell>
+                    </g:VerticalPanel>
+                </g:cell>
+            </g:VerticalPanel>
+        </g:cell>
+        <g:cell width="15%" verticalAlignment="top">
+            <g:VerticalPanel>
+                <g:cell>
+                    <g:VerticalPanel>
+                        <g:cell height="19px">
+                            <g:Label width="200px" text="Подразделение" />
+                        </g:cell>
+                        <g:cell height="25px">
+                            <n:DepartmentPickerPopupWidget ui:field="departmentSelectionTree" header="Выберите подразделение" multiselection="false" modal="true"/>
+                        </g:cell>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell>
+                    <g:VerticalPanel ui:field="formTypePanel" visible="false">
+                        <g:cell height="19px">
+                            <g:Label text="Вид налоговой формы" styleName="{style.lable}"/>
+                        </g:cell>
+                        <g:cell height="25px">
+                            <style:ListBoxWithTooltip width="200px" ui:field="formTypeId" showTooltip="true"/>
+                        </g:cell>
+                    </g:VerticalPanel>
+                </g:cell>
+            </g:VerticalPanel>
+        </g:cell>
+        <g:cell width="15%" verticalAlignment="top">
+            <g:VerticalPanel>
+                <g:cell>
+                    <g:VerticalPanel>
+                        <g:cell height="19px">
+                            <g:Label width="200px" text="Пользователь" styleName="{style.lable}"/>
+                        </g:cell>
+                        <g:cell height="25px">
+                            <r:RefBookPickerPopupWidget ui:field="user" width="100%" attributeIdInt="652" modal="true"/>
+                        </g:cell>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell>
+                    <g:VerticalPanel ui:field="declarationTypePanel" visible="false">
+                        <g:cell height="19px">
+                            <g:Label text="Вид декларации" styleName="{style.lable}"/>
+                        </g:cell>
+                        <g:cell height="25px">
+                            <style:ListBoxWithTooltip width="200px" ui:field="declarationTypeIds" showTooltip="true"/>
+                        </g:cell>
+                    </g:VerticalPanel>
+                </g:cell>
+            </g:VerticalPanel>
+        </g:cell>
+        <g:cell width="15%">
+            <g:VerticalPanel>
+                <g:Label height="20px" text="Дата архивации: " />
+                <style:LinkAnchor  text="Выгрузить в xlsx" ui:field="printButton" img="resources/img/printer-16.png"
+                                   title="Выгрузка отчета в excel"/>
+                <g:cell height="30px"  verticalAlignment="bottom">
+                    <g:HorizontalPanel>
+                        <g:cell>
+                            <style:Bar>
+                                <style:LeftBar>
+                                    <g:Button ui:field="search">Поиск</g:Button>
+                                </style:LeftBar>
+                            </style:Bar>
+                        </g:cell>
+                    </g:HorizontalPanel>
+                </g:cell>
+            </g:VerticalPanel>
+        </g:cell>
+    </g:HorizontalPanel>
+
+</ui:UiBinder>

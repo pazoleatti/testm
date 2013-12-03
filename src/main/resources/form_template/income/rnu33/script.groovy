@@ -5,12 +5,10 @@ import groovy.transform.Field
 
 import java.text.SimpleDateFormat
 
+
 /**
- * Форма "(РНУ-33) Регистр налогового учёта процентного дохода и финансового результата от реализации (выбытия) ГКО".
- *
- * TODO:
- *		- проверка 7 не доделана, потому что про предыдущие месяцы пока не прояснилось
- *		- доделать получение нф за предыдущий месяц в методе getDataRowsOld() после того как будет готово: http://jira.aplana.com/browse/SBRFACCTAX-4515
+ * Форма "(РНУ-33) Регистр налогового учёта процентного дохода и финансового результата от реализации (выбытия) ГКО"
+ * formTemplateId=332
  *
  * @author rtimerbaev
  */
@@ -45,6 +43,9 @@ import java.text.SimpleDateFormat
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
+        // TODO убрать когда появится механизм назначения periodOrder при создании формы
+        if (formData.periodOrder == null)
+            return
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
@@ -160,11 +161,12 @@ void calc() {
     // отсортировать/группировать
     sort(dataRows)
 
-    dataRows.eachWithIndex { row, index ->
+    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
+    dataRows.each { row ->
         def record61 = (row.code != null? getRefBookValue(61, row.code) : null)
         def code = record61?.CODE?.value
         // графа 1
-        row.rowNumber = index + 1
+        row.rowNumber = ++rowNumber
         // графа 12
         row.taxPrice = calc12(row)
         // графа 16
@@ -198,35 +200,42 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    // если нет строк то проверять не надо
-    if (dataRows.isEmpty()) {
-        return
-    }
+    // 7. Проверка наличия данных предыдущих месяцев
+    if (formData.periodOrder > 1) {
+        def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
+        def monthDates = []
+        SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+        Calendar monthDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder)
 
-    // 6. Проверка наличия данных предыдущих месяцев
-    // TODO (Ramil Timerbaev) про предыдущие месяцы пока не прояснилось
-    def monthPeriods = [] // reportPeriodService.listByTaxPeriod(formData.reportPeriodId)
-    def monthDates = []
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    for (def monthPeriod : monthPeriods) {
-        def form = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, monthPeriod.id)
-        // если нет формы за какой то месяц, то получить даты начала и окончания месяца
-        if (form == null) {
-            def from = format.format(reportPeriodService.getStartDate(monthPeriod.id).time)
-            def to = format.format(reportPeriodService.getEndDate(monthPeriod.id).time)
-            monthDates.add("$from - $to")
+        (1..formData.periodOrder - 1).each { monthNumber ->
+            def form = formDataService.findMonth(formData.formType.id, formData.kind, formDataDepartment.id, taxPeriodId, monthNumber)
+            // если нет формы за какой то месяц, то получить даты начала и окончания месяца
+            if (form == null) {
+                // дата начала месяца
+                monthDate.set(Calendar.MONTH, monthNumber - 1)
+                monthDate.set(Calendar.DAY_OF_MONTH, 1)
+                def from = format.format(monthDate.time)
+
+                // дата окончания месяца
+                monthDate.set(Calendar.MONTH, monthNumber)
+                monthDate.set(Calendar.DAY_OF_MONTH, monthDate.get(Calendar.DAY_OF_MONTH) - 1)
+                def to = format.format(monthDate.time)
+
+                monthDates.add("$from - $to")
+            }
         }
-    }
-    if (!monthDates.isEmpty()) {
-        def periods = monthDates.join(', ')
-        logger.error("Экземпляр за период(ы) $periods не существует (отсутствуют первичные данные для расчёта)")
+        if (!monthDates.isEmpty()) {
+            def periods = monthDates.join(', ')
+            logger.error("Экземпляр за период(ы) $periods не существует (отсутствуют первичные данные для расчёта)")
+        }
     }
 
     // алиасы графов для арифметической проверки (12, 16, 17, 18, 20, 24, 25, 26, 27)
-    def arithmeticCheckAlias = ['taxPrice', 'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement', 'allCost', 'tenureSkvitovannymiBonds', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
+    def arithmeticCheckAlias = ['taxPrice', 'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement',
+            'allCost', 'tenureSkvitovannymiBonds', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
-    def rowNumber = 0
+    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     def rowsRnu64 = getRnuRowsById(355)
     def codesFromRnu54 = []
     rowsRnu64.each { row ->
@@ -240,9 +249,9 @@ void logicCheck() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
-        // . Обязательность заполнения полей
+        // Обязательность заполнения полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
-        
+
         def record61 = (row.code ? getRefBookValue(61, row.code) : null)
         def code = record61?.CODE?.value
 
@@ -256,27 +265,27 @@ void logicCheck() {
             logger.error("Строка $index учитывается в РНУ-64!")
         }
 
-        // 2. Проверка даты приобретения и даты реализации (графа 2, 5, 6)
+        // 3. Проверка даты приобретения и даты реализации (графа 2, 5, 6)
         if (code == 5 && row.purchaseDate <= row.implementationDate) {
             logger.error(errorMsg + 'неверно указаны даты приобретения и реализации')
         }
 
-        // 3. Проверка рыночной цены в рублях к номиналу (графа 14)
+        // 4. Проверка рыночной цены в рублях к номиналу (графа 14)
         if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.marketPriceOnDateAcquisitionInPerc != row.exercisePrice) {
             logger.error(errorMsg + 'неверно указана цена в рублях при погашении!')
         }
 
-        // 4. Проверка определения срока короткой позиции (графа 2, 21)
+        // 5. Проверка определения срока короткой позиции (графа 2, 21)
         if (code == 5 && row.parPaper >= 0) {
             logger.error(errorMsg + 'неверно определен срок короткой позиции!')
         }
 
-        // 5. Проверка определения процентного дохода по короткой позиции (графа 2, 22)
+        // 6. Проверка определения процентного дохода по короткой позиции (графа 2, 22)
         if (code == 5 && row.averageWeightedPricePaper >= 0) {
             logger.error(errorMsg + 'неверно определен процентный доход по короткой позиции!')
         }
 
-        // 7. Арифметическая проверка графы 12, 16, 17, 18, 20, 24, 25, 26, 27
+        // 8. Арифметическая проверка графы 12, 16, 17, 18, 20, 24, 25, 26, 27
         needValue['taxPrice'] = calc12(row)
         needValue['marketPricePercent'] = calc16(row)
         needValue['marketPriceRuble'] = calc17(row)
@@ -288,7 +297,7 @@ void logicCheck() {
         needValue['excessOfTheSellingPrice'] = calc27(row, code)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
-        // 10. Проверка на уникальность поля «№ пп» (графа 1)
+        // 11. Проверка на уникальность поля «№ пп» (графа 1)
         if (++rowNumber != row.rowNumber) {
             logger.error(errorMsg + 'нарушена уникальность номера по порядку!')
         }
@@ -298,22 +307,16 @@ void logicCheck() {
         checkNSI(61, row, 'code')
         // 2. Проверка актуальности поля «Признак ценной бумаги» (графа 3)
         checkNSI(62, row, 'valuablePaper')
-
-        // проверка делеления не ноль
-        if (row.issueDays == 0) {
-            def name = row.getCell('issueDays').column.name
-            logger.error(errorMsg + "деление на ноль: \"$name\" имеет нулевое значение.")
-        }
     }
 
-    // 8. Проверка итоговых значений за текущий месяц
+    // 9. Проверка итоговых значений за текущий месяц
     def monthRow = getDataRow(dataRows, 'month')
     def tmpMonthRow = getTotalMonthRow(dataRows)
     if (isDiffRow(monthRow, tmpMonthRow, totalSumColumns)) {
         logger.error("Итоговые значения за текущий месяц рассчитаны неверно!")
     }
 
-    // 9. Проверка итоговых значений за текущий отчётный (налоговый) период - подсчет сумм для общих итогов
+    // 10. Проверка итоговых значений за текущий отчётный (налоговый) период - подсчет сумм для общих итогов
     def totalRow = getDataRow(dataRows, 'total')
     def tmpTotalRow = getTotalRow(monthRow)
     if (isDiffRow(totalRow, tmpTotalRow, totalSumColumns)) {
@@ -321,11 +324,7 @@ void logicCheck() {
     }
 }
 
-/*
- * Вспомогательные методы.
- */
-
-/** Получить новую стролу с заданными стилями. */
+// Получить новую строку с заданными стилями
 def getNewRow() {
     def newRow = formData.createDataRow()
     editableColumns.each {
@@ -338,7 +337,7 @@ def getNewRow() {
     return newRow
 }
 
-/** Отсорировать данные (по графе 3, 4, 2). */
+// Отсорировать данные (по графе 3, 4, 2)
 void sort(def dataRows) {
     dataRows.sort { def a, def b ->
         // графа 3  - valuablePaper (справочник)
@@ -358,18 +357,11 @@ void sort(def dataRows) {
     }
 }
 
-/** Получить модуль числа. Вместо Math.abs() потому что возможна потеря точности. */
+// Получить модуль числа. Вместо Math.abs() потому что возможна потеря точности.
 def abs(def value) {
     return value < 0 ? -value : value
 }
 
-/**
- * Округляет число до требуемой точности.
- *
- * @param value округляемое число
- * @param precision точность округления, знаки после запятой
- * @return округленное число
- */
 def roundValue(def value, int precision) {
     if (value != null) {
         return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
@@ -378,9 +370,7 @@ def roundValue(def value, int precision) {
     }
 }
 
-/**
- * Получить итоговую строку с суммами за месяц.
- */
+// Получить итоговую строку с суммами за месяц
 def getTotalMonthRow(def dataRows) {
     def newRow = formData.createDataRow()
     newRow.setAlias('month')
@@ -393,12 +383,8 @@ def getTotalMonthRow(def dataRows) {
     return newRow
 }
 
-/**
- * Получить строку с итогами за текущий отчетный период.
- *
- * @param currentMonth строка с итогами за текущий месяц
- */
-def getTotalRow(def currentMonth) {
+// Получить строку с итогами за текущий отчетный период
+def getTotalRow(def currentMonthRow) {
     def newRow = formData.createDataRow()
     newRow.setAlias('total')
     newRow.getCell('fix').setColSpan(4)
@@ -406,16 +392,13 @@ def getTotalRow(def currentMonth) {
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
-
     // получить итоги за предыдущие месяцы текущего налогового периода
-    def dataRowsOld = getDataRowsOld()
-    def prevTotal = (dataRowsOld ? getDataRow(dataRowsOld, 'total') : null)
-
+    def prevTotal = getPrevTotalRow()
     // сложить текущие суммы и за предыдущие месяцы
     totalSumColumns.each { alias ->
-        def tmp = currentMonth.getCell(alias).getValue() +
-                (prevTotal != null ? prevTotal.getCell(alias).getValue() : 0)
-        newRow.getCell(alias).setValue(tmp)
+        def tmp1 = (currentMonthRow.getCell(alias).value ?: 0)
+        def tmp2 = (prevTotal != null ? (prevTotal.getCell(alias).value ?: 0) : 0)
+        newRow.getCell(alias).setValue(tmp1 + tmp2)
     }
     return newRow
 }
@@ -442,12 +425,6 @@ def calc17(def row) {
     return roundValue((row.redemptionVal > 0 ? row.redemptionVal : null), 2)
 }
 
-/**
- * Посчитать значение для графы 18.
- *
- * @param row строка нф
- * @param code значение атрибута 611 - CODE - "Код сделки" справочника 61 "Коды сделок"
- */
 def calc18(def row, def code) {
     if (row.marketPriceOnDateAcquisitionInRub == null || row.redemptionVal == null || row.taxPrice == null ||
             row.exercisePrice == null || row.marketPricePercent == null || row.exerciseRuble == null ||
@@ -501,12 +478,6 @@ def calc26(def row) {
     return roundValue(tmp, 2)
 }
 
-/**
- * Посчитать значение для графы 27.
- *
- * @param row строка нф
- * @param code значение атрибута 611 - CODE - "Код сделки" справочника 61 "Коды сделок"
- */
 def calc27(def row, def code) {
     if (row.exercisePriceRetirement == null || row.exerciseRuble == null) {
         return null
@@ -515,25 +486,20 @@ def calc27(def row, def code) {
     return roundValue(tmp, 2)
 }
 
-/**
- * Получить нф за предыдущий месяц
- */
-def getDataRowsOld() {
-    // TODO (Ramil Timerbaev) сделать получение нф за предыдущий месяц
-    // предыдущий отчётный период
-    def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-    if (reportPeriodOld != null) {
-        def formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
-        if (formDataOld != null) {
-            return formDataService.getDataRowHelper(formDataOld)?.allCached
-        }
+// Получить нф за предыдущий месяц
+def getPrevTotalRow() {
+    if (formData.periodOrder == 1) {
+        return null
+    }
+    def formDataOld = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    if (formDataOld != null) {
+        def dataRowsOld = formDataService.getDataRowHelper(formDataOld)?.allCached
+        return (dataRowsOld ? getDataRow(dataRowsOld, 'total') : null)
     }
     return null
 }
 
-/**
- * Получить строки из нф по заданному идентификатору нф.
- */
+// Получить строки из нф по заданному идентификатору нф
 def getRnuRowsById(def id) {
     def formDataRNU = formDataService.find(id, formData.kind, formDataDepartment.id, formData.reportPeriodId)
     if (formDataRNU != null) {

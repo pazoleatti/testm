@@ -7,7 +7,8 @@ import groovy.transform.Field
 /**
  * (РНУ-115) Регистр налогового учёта доходов, возникающих в связи с применением в сделках по предоставлению
  * Межбанковских кредитов Взаимозависимым лицам и резидентам оффшорных зон Процентных ставок,
- * не соответствующих рыночному уровню (369)
+ * не соответствующих рыночному уровню
+ * formTemplateId=369
  *
  * @author Stanislav Yasinskiy
  */
@@ -64,7 +65,7 @@ def editableColumns = ['transactionKind', 'transactionNumber', 'transactionDate'
 @Field
 def nonEmptyColumns = ['number', 'transactionKind', 'transactionNumber', 'transactionDate', 'transactionDateEnd', 'inn',
         'country', 'contractor', 'transactionType', 'currencyCode', 'currencyVolume', 'currencyCodeLiabilities',
-        'currencyVolumeSale', 'price', 'priceRequest', 'priceLiability', 'request', 'liability']
+        'currencyVolumeSale', 'price', 'priceRequest', 'priceLiability']
 
 // Сумируемые колонки в фиксированной с троке
 @Field
@@ -115,7 +116,15 @@ void calc() {
         deleteAllAliased(dataRows)
 
         // номер последний строки предыдущей формы
-        def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+        def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
+
+        def Long recOptionPremiumId = getRecordId(92, 'NAME', 'Премия по опциону', -1, null, currentDate)
+        def Long recCashId = getRecordId(92, 'NAME', 'Кассовая сделка', -1, null, currentDate)
+        def Long recFuturesId = getRecordId(92, 'NAME', 'Срочная сделка', -1, null, currentDate)
+
+        def Long recSellId = getRecordId(16, 'TYPE', 'продажа', -1, null, currentDate)
+        def Long recBuyId = getRecordId(16, 'TYPE', 'покупка', -1, null, currentDate)
+
 
         for (row in dataRows) {
             // графа 1
@@ -126,23 +135,23 @@ void calc() {
             row.contractor = map?.NAME?.stringValue
             row.country = map?.COUNTRY?.referenceValue
 
-            // TODO пока нет справочника
-            transactionKind = 'премия по опциону' //getRefBookValue(-1, row.transactionKind).ATTRIBUTE.stringValue
+            def boolean isOptionPremium = recOptionPremiumId == row.transactionKind
+            def boolean isCashOrFutures = recOptionPremiumId == recCashId || recOptionPremiumId == recFuturesId
+            def boolean isSell = recSellId == row.transactionType
+            def boolean isBuy = recBuyId == row.transactionType
 
             row.priceRequest = calcPrice(row, 'currencyCode')
             row.priceLiability = calcPrice(row, 'currencyCodeLiabilities')
-
-            row.request = calcRequest(row, transactionKind)
-            row.liability = calcLiability(row, transactionKind)
+            row.request = calcRequest(row, isOptionPremium)
+            row.liability = calcLiability(row, isOptionPremium)
             row.income = calcIncomeOutcome(row, 1)
             row.outcome = calcIncomeOutcome(row, -1)
-            row.incomeDeviation = calcIncomeOutcomeDeviation(row, 1, transactionKind)
-            row.outcomeDeviation = calcIncomeOutcomeDeviation(row, -1, transactionKind)
+            row.incomeDeviation = calcIncomeOutcomeDeviation(row, 1, isOptionPremium, isCashOrFutures, isSell, isBuy)
+            row.outcomeDeviation = calcIncomeOutcomeDeviation(row, -1, isOptionPremium, isCashOrFutures, isSell, isBuy)
         }
     }
 
-    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size + 1)
-
+    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
     dataRowHelper.save(dataRows)
 }
 
@@ -157,21 +166,19 @@ def BigDecimal calcPrice(def row, def currency) {
 }
 
 // Расчет графы 17
-def BigDecimal calcRequest(def row, def transactionKind) {
-    if (transactionKind == null || row.currencyVolume == null || row.priceRequest == null
-            || transactionKind != 'премия по опциону') {
+def BigDecimal calcRequest(def row, def isOptionPremium) {
+    if (row.currencyVolume == null || row.priceRequest == null || !isOptionPremium) {
         return null
     }
     return row.currencyVolume * row.priceRequest
 }
 
 // Расчет графы 18
-def BigDecimal calcLiability(def row, def transactionKind) {
-    if (row.transactionKind == null || row.currencyVolumeSale == null || row.priceLiability == null
-            || transactionKind != 'премия по опциону') {
+def BigDecimal calcLiability(def row, def isOptionPremium) {
+    if (row.currencyVolumeSale == null || row.priceLiability == null || !isOptionPremium) {
         return null
     }
-    return -1 * row.currencyVolumeSale * row.priceLiability
+    return -1 * (row.currencyVolumeSale * row.priceLiability).abs()
 }
 
 // Расчет графы 19, 20
@@ -184,31 +191,28 @@ def BigDecimal calcIncomeOutcome(def row, def income) {
 }
 
 // Расчет графы 22, 23
-def BigDecimal calcIncomeOutcomeDeviation(def row, def incomeMode, def transactionKind) {
+def BigDecimal calcIncomeOutcomeDeviation(def row, def incomeMode, def isOptionPremium, def isCashOrFutures, def isSell, def isBuy) {
     def inoutcome = incomeMode == 1 ? row.income : row.outcome
 
-    if (inoutcome == null || row.transactionKind == null || row.transactionType == null || row.price == null
-            || row.marketPrice == null || row.currencyVolumeSale == null || row.priceRequest == null ||
-            row.priceLiability == null || row.currencyVolume == null) {
+    if (inoutcome == null || row.transactionType == null || row.price == null || row.marketPrice == null) {
         return null
     }
 
     if (inoutcome == 0) {
         return 0
     } else {
-        if (transactionKind == 'кассовая сделка' || transactionKind == 'кассовая сделка') {
-            def transactionType = getRefBookValue(16, row.transactionType).TYPE.stringValue
-            if (transactionType == 'продажа' && row.price >= row.marketPrice) {
+        if (isCashOrFutures) {
+            if (isSell && row.currencyVolumeSale != null && row.priceRequest != null) {
                 return row.price >= row.marketPrice ? 0 : row.currencyVolumeSale * (row.marketPrice - row.price) * row.priceRequest
             }
-            if (transactionType == 'покупка' && row.price <= row.marketPrice) {
+            if (isBuy && row.currencyVolume != null && row.priceLiability != null) {
                 return row.price <= row.marketPrice ? 0 : row.currencyVolume * (row.price - row.marketPrice) * row.priceLiability
             }
-        } else if (transactionKind != 'премия по опциону') {
+        } else if (isOptionPremium) {
             if (inoutcome > 0 && row.price * incomeMode > row.marketPrice) {
                 return 0
             }
-            if (row.price * incomeMode < row.marketPrice) {
+            if (row.price * incomeMode < row.marketPrice && row.priceRequest != null && row.priceLiability != null) {
                 return (row.marketPrice - row.price) * (incomeMode == 1 ? row.priceRequest : row.priceLiability)
             }
         }
@@ -223,7 +227,14 @@ void logicCheck() {
         return
     }
 
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
+
+    def Long recOptionPremiumId = getRecordId(92, 'NAME', 'Премия по опциону', -1, null, currentDate)
+    def Long recCashId = getRecordId(92, 'NAME', 'Кассовая сделка', -1, null, currentDate)
+    def Long recFuturesId = getRecordId(92, 'NAME', 'Срочная сделка', -1, null, currentDate)
+
+    def Long recSellId = getRecordId(16, 'TYPE', 'продажа', -1, null, currentDate)
+    def Long recBuyId = getRecordId(16, 'TYPE', 'покупка', -1, null, currentDate)
 
     // алиасы графов для арифметической проверки (графа 8, 9, 12-15)
     def arithmeticCheckAlias = ['request', 'liability', 'income', 'outcome', 'incomeDeviation', 'outcomeDeviation'
@@ -250,21 +261,23 @@ void logicCheck() {
         }
 
         // 3 Арифметические проверки расчета неитоговых граф
-        // TODO пока нет справочника
-        transactionKind = 'премия по опциону' //getRefBookValue(-1, row.transactionKind).ATTRIBUTE.stringValue
+        def boolean isOptionPremium = (recOptionPremiumId == row.transactionKind)
+        def boolean isCashOrFutures = recOptionPremiumId == recCashId || recOptionPremiumId == recFuturesId
+        def boolean isSell = recSellId == row.transactionType
+        def boolean isBuy = recBuyId == row.transactionType
+
         needValue['priceRequest'] = calcPrice(row, 'currencyCode')
         needValue['priceLiability'] = calcPrice(row, 'currencyCodeLiabilities')
-        needValue['request'] = calcRequest(row, transactionKind)
-        needValue['liability'] = calcLiability(row, transactionKind)
+        needValue['request'] = calcRequest(row, isOptionPremium)
+        needValue['liability'] = calcLiability(row, isOptionPremium)
         needValue['income'] = calcIncomeOutcome(row, 1)
         needValue['outcome'] = calcIncomeOutcome(row, -1)
-        needValue['incomeDeviation'] = calcIncomeOutcomeDeviation(row, 1, transactionKind)
-        needValue['outcomeDeviation'] = calcIncomeOutcomeDeviation(row, -1, transactionKind)
+        needValue['incomeDeviation'] = calcIncomeOutcomeDeviation(row, 1, isOptionPremium, isCashOrFutures, isSell, isBuy)
+        needValue['outcomeDeviation'] = calcIncomeOutcomeDeviation(row, -1, isOptionPremium, isCashOrFutures, isSell, isBuy)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
         // Проверки соответствия НСИ
-        // TODO пока нет справочника
-        // checkNSI(-1, row, 'transactionKind')
+        checkNSI(92, row, 'transactionKind')
         checkNSI(10, row, 'country')
         checkNSI(9, row, 'contractor')
         checkNSI(15, row, 'currencyCode')

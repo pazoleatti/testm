@@ -156,7 +156,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             rbTextValues.put(3L, getStringValue(rbFactory.getDataProvider(2L).getValue(depCombined.getTaxPlaceTypeCode(), 3L)));
         }
         if (depCombined.getObligation() != null) {
-            rbTextValues.put(110L, getStringValue(rbFactory.getDataProvider(25L).getValue(depCombined.getObligation(), 110L)));
+            rbTextValues.put(110L, getNumberValue(rbFactory.getDataProvider(25L).getValue(depCombined.getObligation(), 110L)));
         }
         if (depCombined.getType() != null) {
             rbTextValues.put(120L, getNumberValue(rbFactory.getDataProvider(26L).getValue(depCombined.getType(), 120L)));

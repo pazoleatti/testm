@@ -2,11 +2,11 @@ package form_template.income.rnu117
 
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
  * Форма "(РНУ-117) Регистр налогового учёта доходов и расходов, по операциям со сделками форвард, квалифицированным в качестве операций с ФИСС для целей налогообложения"
+ * formTemplateId=370
  *
  * @author bkinzyabulatov
  * TODO заполнение граф 7.1, 7.2 - вручную или автоматом
@@ -68,13 +68,9 @@ switch (formDataEvent) {
 
 //// Кэши и константы
 @Field
-def providerCache = [:]
-@Field
-def recordCache = [:]
-@Field
 def refBookCache = [:]
 
-//Все аттрибуты
+// Все аттрибуты
 @Field
 def allColumns = ["rowNumber", "transactionNumber", "transactionKind", "contractor", "transactionDate",
         "transactionEndDate", "resolveDate", "transactionType", "courseFix", "course", "minPrice", "maxPrice",
@@ -91,7 +87,7 @@ def editableColumns = ["transactionNumber", "transactionKind", "contractor", "tr
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ["rowNumber", "income", "outcome", "deviationMinPrice", "deviationMaxPrice"]
+def arithmeticCheckAlias = ["income", "outcome", "deviationMinPrice", "deviationMaxPrice"]
 
 // Обязательно заполняемые атрибуты
 @Field
@@ -100,24 +96,9 @@ def nonEmptyColumns = ["rowNumber", "transactionNumber", "transactionKind", "con
         "request", "liability", "income", "outcome", "deviationMinPrice", "deviationMaxPrice"]
 
 //// Обертки методов
-
 // Проверка НСИ
 boolean checkNSI(def refBookId, def row, def alias) {
     return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
 }
 
 // Разыменование записи справочника
@@ -125,76 +106,36 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xls')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
-    }
-    return xml
-}
-
 //// Кастомные методы
 
-/**
- * Логические проверки
- */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def numbers = []
     def totalRow = null
-    def rowNum = 0
+    def i = 0
     for (def DataRow row : dataRows){
         if (row?.getAlias()?.contains('itg')) {
             totalRow = row
             continue
         }
 
-        rowNum++
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
 
-        def rowStart
-        def index = row.rowNumber
-        if (index != null) {
-            rowStart = "В строке \"№ пп\" равной $index "
-        } else {
-            index = dataRows.indexOf(row) + 1
-            rowStart = "В строке $index "
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+
+
+        if (++i != row.rowNumber) {
+            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
-        if (row.rowNumber in numbers){
-            logger.error("${rowStart}нарушена уникальность номера по порядку ${row.rowNumber}!")
-        }else {
-            numbers += row.rowNumber
-        }
         def values = [:]
 
-        setGraph1(dataRows, row, values)
-        setGraph10(row, values)
-        setGraph11(row, values)
+        calc10(row, values)
+        calc11(row, values)
 
-        for (def colName : autoFillColumns) {
-            if (row[colName] != values[colName]){
-                isValid = false
-                logger.error("${rowStart}неверно рассчитана графа \"${getColumnName(row,colName)}\"!")
-            }
-        }
+        checkCalc(row, arithmeticCheckAlias, values, logger, true)
+
         // Проверки соответствия НСИ
         checkNSI(16, row, "transactionType")
     }
@@ -212,9 +153,6 @@ void logicCheck() {
     }
 }
 
-/**
- * Алгоритмы заполнения полей формы
- */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -222,11 +160,12 @@ void calc() {
     // Удаление итогов
     deleteAllAliased(dataRows)
 
+    def index = 0
     // Расчет ячеек
     dataRows.each{row->
-        setGraph1(dataRows, row, row)
-        setGraph10(row, row)
-        setGraph11(row, row)
+        row.rowNumber=++index
+        calc10(row, row)
+        calc11(row, row)
     }
 
     // Добавление строки итогов
@@ -236,36 +175,26 @@ void calc() {
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
-    totalColumns.each {
-        totalRow[it] = 0
-    }
-    for(def row : dataRows) {
-        if(row?.getAlias()?.contains('itg')){
-            continue
-        }
-        totalColumns.each {
-            totalRow[it] += row[it] != null ? row[it] : 0
-        }
-    }
-    dataRows.add(dataRows.size(), totalRow)
+    calcTotalSum(dataRows, totalRow, totalColumns)
+    dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
 }
 
-void setGraph1(def dataRows, def row, def result) {
-    result.rowNumber = dataRows.indexOf(row) + 1
-}
-
-void setGraph10(def row, def result) {
-    switch (getRefBookValue(91,row.transactionKind).KIND.stringValue){
+void calc10(def row, def result) {
+    def kind = getRefBookValue(91, row.transactionKind)?.KIND?.stringValue
+    if(kind == null){
+        return
+    }
+    switch (kind){
         case "DF FX":
         case "DF PM":
         case "NDF PM":
             def sum9 = row.request + row.liability
             if (sum9 > 0){
                 result.income = sum9
-                result.outcome = 0
+                result.outcome = BigDecimal.ZERO
             } else {
-                result.income = 0
+                result.income = BigDecimal.ZERO
                 result.outcome = sum9
             }
             break
@@ -273,9 +202,9 @@ void setGraph10(def row, def result) {
         case "FRA":
             if (row.request != null){
                 result.income = row.request
-                result.outcome = 0
+                result.outcome = BigDecimal.ZERO
             } else if (row.liability != null) {
-                result.income = 0
+                result.income = BigDecimal.ZERO
                 result.outcome = row.liability
             }
             break
@@ -285,46 +214,50 @@ void setGraph10(def row, def result) {
     }
 }
 
-void setGraph11(def row, def result) {
+void calc11(def row, def result) {
     def graph6 = getRefBookValue(16, row.transactionType)?.TYPE?.stringValue
-    switch (getRefBookValue(91,row.transactionKind).KIND.stringValue){
+    def kind = getRefBookValue(91, row.transactionKind)?.KIND?.stringValue
+    if (kind == null){
+        return
+    }
+    switch (kind){
         case "DF FX":
         case "NDF FX":
             if (row.minPrice <= row.courseFix && row.courseFix <= row.maxPrice ||
                     "Покупка".equals(graph6) && row.courseFix <= row.maxPrice ||
                     "Продажа".equals(graph6) && row.courseFix >= row.maxPrice){
-                result.deviationMinPrice = 0
-                result.deviationMaxPrice = 0
+                result.deviationMinPrice = BigDecimal.ZERO
+                result.deviationMaxPrice = BigDecimal.ZERO
             }
             def sum10 = row.income + row.outcome
             if ("Покупка".equals(graph6) && row.courseFix > row.maxPrice){
-                result.deviationMinPrice = 0
+                result.deviationMinPrice = BigDecimal.ZERO
                 //«Графа 11.2» = («Графа.10.1» + «Графа 10.2») х («Графа 7.2» -«Графа 8.2») / («Графа 7.2» -«Графа 7.1») – («Графа 10.1» + «Графа 10.2»)
                 result.deviationMaxPrice = sum10 * (row.course - row.maxPrice) / (row.course - row.courseFix) - sum10
             }
             if ("Продажа".equals(graph6) && row.courseFix < row.maxPrice){
                 //«Графа 11.1» = («Графа.10.1» + «Графа 10.2») х («Графа 8.1» -»Графа 7.2») / («Графа 7.1» - «Графа 7.2») - («Графа.10.1» + «Графа 10.2»)
                 result.deviationMinPrice = sum10 * (row.minPrice - row.course) / (row.courseFix - row.course) - sum10
-                result.deviationMaxPrice = 0
+                result.deviationMaxPrice = BigDecimal.ZERO
             }
             break
         case "FRA":
             if (row.minPrice <= row.courseFix && row.courseFix <= row.maxPrice ||
                     "Покупка".equals(graph6) && row.courseFix <= row.minPrice ||//различие от пред
                     "Продажа".equals(graph6) && row.courseFix >= row.maxPrice){
-                result.deviationMinPrice = 0
-                result.deviationMaxPrice = 0
+                result.deviationMinPrice = BigDecimal.ZERO
+                result.deviationMaxPrice = BigDecimal.ZERO
             }
             def sum10 = row.income + row.outcome
             if ("Покупка".equals(graph6) && row.courseFix > row.maxPrice){
-                result.deviationMinPrice = 0
+                result.deviationMinPrice = BigDecimal.ZERO
                 //«Графа 11.2» = («Графа.10.1» + «Графа 10.2») х («Графа 7.2» -«Графа 8.2») / («Графа 7.2» -«Графа 7.1») – («Графа 10.1» + «Графа 10.2»)
                 result.deviationMaxPrice = sum10 * (row.course - row.maxPrice) / (row.course - row.courseFix) - sum10
             }
             if ("Продажа".equals(graph6) && row.courseFix < row.minPrice){//различие от пред
                 //«Графа 11.1» = («Графа.10.1» + «Графа 10.2») х («Графа 8.1» -»Графа 7.2») / («Графа 7.1» - «Графа 7.2») - («Графа.10.1» + «Графа 10.2»)
                 result.deviationMinPrice = sum10 * (row.minPrice - row.course) / (row.courseFix - row.course) - sum10
-                result.deviationMaxPrice = 0
+                result.deviationMaxPrice = BigDecimal.ZERO
             }
             break
         case "DF PM":
@@ -332,19 +265,19 @@ void setGraph11(def row, def result) {
             if (row.minPrice <= row.courseFix && row.courseFix <= row.maxPrice ||
                     "Покупка".equals(graph6) && row.courseFix <= row.minPrice ||//различие от пред
                     "Продажа".equals(graph6) && row.courseFix >= row.maxPrice){
-                result.deviationMinPrice = 0
-                result.deviationMaxPrice = 0
+                result.deviationMinPrice = BigDecimal.ZERO
+                result.deviationMaxPrice = BigDecimal.ZERO
             }
             def sum10 = row.income + row.outcome
             if ("Покупка".equals(graph6) && row.courseFix > row.maxPrice){
-                result.deviationMinPrice = 0
+                result.deviationMinPrice = BigDecimal.ZERO
                 //«Графа 11.2» = («Графа.10.1» + «Графа 10.2») х («Графа 7.2» -«Графа 8.2») / («Графа 7.2» -«Графа 7.1») – («Графа 10.1» + «Графа 10.2»)
                 result.deviationMaxPrice = sum10 * (row.course - row.maxPrice) / (row.course - row.courseFix) - sum10
             }
             if ("Продажа".equals(graph6) && row.courseFix < row.minPrice){//различие от пред
                 //«Графа 11.1» = («Графа.10.1» + «Графа 10.2») х («Графа 8.1» -»Графа 7.2») / («Графа 7.1» - «Графа 7.2») - («Графа.10.1» + «Графа 10.2»)
                 result.deviationMinPrice = sum10 * (row.minPrice - row.course) / (row.courseFix - row.course) - sum10
-                result.deviationMaxPrice = 0
+                result.deviationMaxPrice = BigDecimal.ZERO
             }
             break
         default:

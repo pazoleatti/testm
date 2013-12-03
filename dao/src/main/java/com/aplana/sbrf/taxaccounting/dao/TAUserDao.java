@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 import java.util.List;
@@ -63,4 +64,8 @@ public interface TAUserDao {
 	 * @return
 	 */
 	int checkUserLogin(String login);
+
+	public List<Integer> getByFilter(MembersFilterData filter);
+
+	public int count(MembersFilterData filter);
 }

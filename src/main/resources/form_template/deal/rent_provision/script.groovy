@@ -61,7 +61,7 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['jurName', 'incomeBankSum', 'contractNum', 'contractDate', 'country',
+def editableColumns = ['jurName', 'incomeBankSum', 'outcomeBankSum', 'contractNum', 'contractDate', 'country',
         'region', 'city', 'settlement', 'count', 'transactionDate']
 
 // Автозаполняемые атрибуты
@@ -70,8 +70,8 @@ def autoFillColumns = ['rowNum', 'innKio', 'countryCode', 'price', 'cost']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'jurName', 'innKio', 'countryCode', 'incomeBankSum', 'contractNum', 'contractDate',
-        'country', 'count', 'price', 'cost', 'transactionDate']
+def nonEmptyColumns = ['rowNum', 'jurName', 'innKio', 'countryCode', 'incomeBankSum', 'outcomeBankSum', 'contractNum',
+		'contractDate', 'country', 'count', 'price', 'cost', 'transactionDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -144,12 +144,11 @@ void logicCheck() {
     def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
     def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    def rowNum = 0
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
-        rowNum++
+        def rowNum = row.getIndex()
 
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
 
@@ -157,14 +156,24 @@ void logicCheck() {
         def price = row.price
         def cost = row.cost
         def incomeBankSum = row.incomeBankSum
+        def outcomeBankSum = row.outcomeBankSum
         def transactionDate = row.transactionDate
         def contractDate = row.contractDate
+		
+		def bankSum = null
+        def msgBankSum = row.getCell('incomeBankSum').column.name
+        if (incomeBankSum !=null && outcomeBankSum ==null){
+            bankSum = incomeBankSum
+        }
+        if (outcomeBankSum !=null && incomeBankSum ==null) {
+            bankSum = outcomeBankSum
+            msgBankSum = row.getCell('outcomeBankSum').column.name
+        }
 
         //Наименования колонок
         def contractDateName = row.getCell('contractDate').column.name
         def transactionDateName = row.getCell('transactionDate').column.name
         def priceName = row.getCell('price').column.name
-        def incomeBankSumName = row.getCell('incomeBankSum').column.name
         def countName = row.getCell('count').column.name
         def costName = row.getCell('cost').column.name
 
@@ -177,17 +186,29 @@ void logicCheck() {
         // Проверка цены
         def res = null
 
-        if (incomeBankSum != null && count != null && count != 0) {
-            res = (incomeBankSum / count).setScale(0, RoundingMode.HALF_UP)
+        if (bankSum != null && count != null && count != 0) {
+            res = (bankSum / count).setScale(0, RoundingMode.HALF_UP)
         }
 
-        if (incomeBankSum == null || count == null || price != res) {
-            logger.warn("Строка $rowNum: «$priceName» не равно отношению «$incomeBankSumName» и «$countName»!")
+        if (bankSum == null || count == null || price != res) {
+            logger.warn("Строка $rowNum: «$priceName» не равно отношению «$msgBankSum» и «$countName»!")
         }
 
         // Проверка доходности
-        if (cost != incomeBankSum) {
-            logger.warn("Строка $rowNum: «$costName» не может отличаться от «$incomeBankSumName»!")
+        if (cost != bankSum) {
+            logger.warn("Строка $rowNum: «$costName» не может отличаться от «$msgBankSum»!")
+        }
+		
+		// Заполнение граф 5.1 и 5.2
+        if (incomeBankSum == null && outcomeBankSum == null) {
+            def msg1 = row.getCell('incomeBankSum').column.name
+            def msg2 = row.getCell('outcomeBankSum').column.name
+            logger.warn("Строка $rowNum: Должна быть заполнена графа «$msg1» или графа «$msg2»!")
+        }
+        if (incomeBankSum != null && outcomeBankSum != null) {
+            def msg1 = row.getCell('incomeBankSum').column.name
+            def msg2 = row.getCell('outcomeBankSum').column.name
+            logger.warn("Строка $rowNum: Графа «$msg1» и графа «$msg2» не могут быть заполнены одновременно!")
         }
 
         // Корректность даты совершения сделки
@@ -240,14 +261,20 @@ void calc() {
         // Порядковый номер строки
         row.rowNum = index++
 
-        incomeBankSum = row.incomeBankSum
+		def bankSum = null
+        if (row.incomeBankSum !=null && row.outcomeBankSum ==null)
+            bankSum = row.incomeBankSum
+        if (row.outcomeBankSum !=null && row.incomeBankSum ==null)
+            bankSum = row.outcomeBankSum
+			
         count = row.count
+		
         // Расчет поля "Цена"
-        if (incomeBankSum != null && count != null && count != 0) {
-            row.price = incomeBankSum / count
+        if (bankSum != null && count != null && count != 0) {
+            row.price = bankSum / count
         }
         // Расчет поля "Стоимость"
-        row.cost = row.incomeBankSum
+        row.cost = bankSum
 
         // Расчет полей зависимых от справочников
         def map = getRefBookValue(9, row.jurName)
@@ -267,31 +294,33 @@ void importData() {
             (xml.row[0].cell[1]): 'ИНН/ КИО',
             (xml.row[0].cell[2]): 'Код страны по классификатору ОКСМ',
             (xml.row[0].cell[3]): 'Сумма доходов Банка, руб.',
-            (xml.row[0].cell[4]): 'Номер договора',
-            (xml.row[0].cell[5]): 'Дата договора',
-            (xml.row[0].cell[6]): 'Адрес местонахождения объекта недвижимости ',
-            (xml.row[0].cell[10]): 'Количество',
-            (xml.row[0].cell[11]): 'Цена',
-            (xml.row[0].cell[12]): 'Стоимость',
-            (xml.row[0].cell[13]): 'Дата совершения сделки',
-            (xml.row[1].cell[6]): 'Страна (код)',
-            (xml.row[1].cell[7]): 'Регион (код)',
-            (xml.row[1].cell[8]): 'Город',
-            (xml.row[1].cell[9]): 'Населенный пункт',
+            (xml.row[0].cell[4]): 'Сумма расходов Банка, руб.',
+            (xml.row[0].cell[5]): 'Номер договора',
+            (xml.row[0].cell[6]): 'Дата договора',
+            (xml.row[0].cell[7]): 'Адрес местонахождения объекта недвижимости ',
+            (xml.row[0].cell[11]): 'Количество',
+            (xml.row[0].cell[12]): 'Цена',
+            (xml.row[0].cell[13]): 'Стоимость',
+            (xml.row[0].cell[14]): 'Дата совершения сделки',
+            (xml.row[1].cell[7]): 'Страна (код)',
+            (xml.row[1].cell[8]): 'Регион (код)',
+            (xml.row[1].cell[9]): 'Город',
+            (xml.row[1].cell[10]): 'Населенный пункт',
             (xml.row[2].cell[0]): 'гр. 2',
             (xml.row[2].cell[1]): 'гр. 3',
             (xml.row[2].cell[2]): 'гр. 4',
-            (xml.row[2].cell[3]): 'гр. 5',
-            (xml.row[2].cell[4]): 'гр. 6',
-            (xml.row[2].cell[5]): 'гр. 7',
-            (xml.row[2].cell[6]): 'гр. 8',
-            (xml.row[2].cell[7]): 'гр. 9',
-            (xml.row[2].cell[8]): 'гр. 10',
-            (xml.row[2].cell[9]): 'гр. 11',
-            (xml.row[2].cell[10]): 'гр. 12',
-            (xml.row[2].cell[11]): 'гр. 13',
-            (xml.row[2].cell[12]): 'гр. 14',
-            (xml.row[2].cell[13]): 'гр. 15'
+            (xml.row[2].cell[3]): 'гр. 5.1',
+            (xml.row[2].cell[4]): 'гр. 5.2',
+            (xml.row[2].cell[5]): 'гр. 6',
+            (xml.row[2].cell[6]): 'гр. 7',
+            (xml.row[2].cell[7]): 'гр. 8',
+            (xml.row[2].cell[8]): 'гр. 9',
+            (xml.row[2].cell[9]): 'гр. 10',
+            (xml.row[2].cell[10]): 'гр. 11',
+            (xml.row[2].cell[11]): 'гр. 12',
+            (xml.row[2].cell[12]): 'гр. 13',
+            (xml.row[2].cell[13]): 'гр. 14',
+            (xml.row[2].cell[14]): 'гр. 15'
     ]
 
     checkHeaderEquals(headerMapping)
@@ -362,9 +391,13 @@ void addData(def xml, int headRowCount) {
         }
         xmlIndexCol++
 
-        // графа 5
+        // графа 5.1
         newRow.incomeBankSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
+		
+		// графа 5.2
+        newRow.outcomeBankSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        indexCell++
 
         // графа 6
         newRow.contractNum = row.cell[xmlIndexCol].text()

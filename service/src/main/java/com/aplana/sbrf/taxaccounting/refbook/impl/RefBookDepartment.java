@@ -45,7 +45,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-		throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -63,22 +63,22 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public void insertRecords(Date version, List<Map<String, RefBookValue>> records) {
-		throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void updateRecords(Date version, List<Map<String, RefBookValue>> records) {
-		throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void deleteRecords(Date version, List<Long> recordIds) {
-		throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void deleteAllRecords(Date version) {
-		throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override

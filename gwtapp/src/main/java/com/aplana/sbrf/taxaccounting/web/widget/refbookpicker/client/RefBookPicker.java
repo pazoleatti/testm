@@ -60,5 +60,4 @@ public interface RefBookPicker extends HasValue<Long>, IsWidget {
 	 * @return
 	 */
 	public String getDereferenceValue();
-
 }

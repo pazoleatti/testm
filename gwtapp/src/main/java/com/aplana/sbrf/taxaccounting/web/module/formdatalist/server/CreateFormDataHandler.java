@@ -48,12 +48,13 @@ public class CreateFormDataHandler extends
 		CreateFormDataResult result = new CreateFormDataResult();
 		Logger logger = new Logger();
 
+        // TODO Левыкин: для ежемесячных форм передавать periodOrder для ежемесячных форм
 		result.setFormDataId(formDataService.createFormData(logger, userInfo,
 				formTemplateService.getActiveFormTemplateId(action
 						.getFormDataTypeId().intValue()), action
 						.getDepartmentId(), FormDataKind.fromId(action
 						.getFormDataKindId().intValue()),
-						reportPeriodService.getReportPeriod(action.getReportPeriodId().intValue())));
+						reportPeriodService.getReportPeriod(action.getReportPeriodId().intValue()), null));
 
 		return result;
 

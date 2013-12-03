@@ -69,7 +69,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					widget = new CustomDateBox();
 					break;
 				case REFERENCE:
-					RefBookPickerPopupWidget refbookWidget = new RefBookPickerPopupWidget();
+					RefBookPickerPopupWidget refbookWidget = new RefBookPickerPopupWidget(true);
 					refbookWidget.setAttributeId(col.getRefBookAttributeId());
 					widget = refbookWidget;
 					break;

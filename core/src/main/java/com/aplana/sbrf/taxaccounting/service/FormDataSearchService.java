@@ -22,6 +22,17 @@ public interface FormDataSearchService {
 	 */
 	PagingResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter);
 
+    /**
+     * Данный метод, основываясь на текущем пользователе и formDataFilter, формирует параметры фильтра и возвращает
+     * все id НФ подходящич под фильтр.
+     * {@link FormDataDaoFilter}, а затем сформированный FormDataDaoFilter передает в функцию
+     * @param userInfo информация о текущем пользователе
+     * @param formDataFilter фильтр, по параметрам которого происходит поиск данных по отчетной форме
+     * @return список идентификаторов данных по отчётным формам, соответствующие критериям поиска.
+     * @throws AccessDeniedException если у пользователя нет роли, разрешающей поиск по налоговым формам
+     */
+    List<Long> findDataIdsByUserAndFilter(TAUserInfo userInfo,  FormDataFilter formDataFilter);
+
 	/**
 	 * Получить список, включающий в себя департамент и его дочернии департаменты
 	 * @param parentDepartmentId - идентификатор департамента, по которому выбираются дочернии департаменты

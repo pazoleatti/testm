@@ -105,6 +105,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiField
     FileUploadWidget fileUploader;
 
+    private final static int DEPARTMENT_NAME_MAX_LENGTH = 80;
+
     @Inject
 	public FormDataView(final Binder binder) {
 		initWidget(binder.createAndBindUi(this));
@@ -342,7 +344,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		title.setText(taxFormType);
 		title.setTitle(taxFormType);
 		formKindLabel.setText(formKind);
-		departmentIdLabel.setText(departmentId);
+        if (departmentId.length() > DEPARTMENT_NAME_MAX_LENGTH) {
+            departmentIdLabel.setText(departmentId.substring(0, DEPARTMENT_NAME_MAX_LENGTH) + "...");
+            departmentIdLabel.setTitle(departmentId);
+        } else {
+            departmentIdLabel.setText(departmentId);
+        }
 		reportPeriodLabel.setText(reportPeriod);
 		stateLabel.setText(state);
 		factory.setDateRange(startDate, endDate);
@@ -478,4 +485,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         fileUploader.addValueChangeHandler(changeHandler);
     }
 
+    @Override
+    public void setPagingVisible(boolean visible) {
+        pager.setVisible(visible);
+        dockPanel.setWidgetSize(pager, visible ? 30 : 0);
+    }
 }

@@ -140,7 +140,9 @@ public class DepartmentPickerModalWidget extends Composite implements
 
     @UiHandler("okButton")
     public void onOkButtonClick(ClickEvent event){
-        this.selected.setValue(departmentTree.getValue().get(0).getDepartmentName());
+	    if (!departmentTree.getValue().isEmpty()) {
+	        this.selected.setValue(departmentTree.getValue().get(0).getDepartmentName());
+	    }
         this.value.clear();
         this.value.addAll(departmentTree.getValue());
         popupPanel.hide();

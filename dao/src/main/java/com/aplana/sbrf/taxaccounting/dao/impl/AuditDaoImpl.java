@@ -38,7 +38,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
 
 	@Override
-	public PagingResult<LogSystemSearchResultItem> getLogs(LogSystemFilter filter) {
+	public PagingResult<LogSearchResultItem> getLogs(LogSystemFilter filter) {
 		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from ( select ");
         sql.append("ls.id, ");
         sql.append("ls.log_date, ");
@@ -75,7 +75,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		sql.append(" su.name asc ");
 
 		sql.append(") dat) ordDat");
-        List<LogSystemSearchResultItem> records;
+        List<LogSearchResultItem> records;
         if(filter.getCountOfRecords() != 0){
             sql.append(" where ordDat.rn between ? and ?")
                     .append(" order by ordDat.rn");
@@ -97,7 +97,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     new AuditRowMapper());
         }
 
-		return new PagingResult<LogSystemSearchResultItem>(records, getCount(filter));
+		return new PagingResult<LogSearchResultItem>(records, getCount(filter));
 	}
 
 	@Override
@@ -194,10 +194,10 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		}
 	}
 
-	private final class AuditRowMapper implements RowMapper<LogSystemSearchResultItem> {
+	private final class AuditRowMapper implements RowMapper<LogSearchResultItem> {
 		@Override
-		public LogSystemSearchResultItem mapRow(ResultSet rs, int index) throws SQLException {
-			LogSystemSearchResultItem log = new LogSystemSearchResultItem();
+		public LogSearchResultItem mapRow(ResultSet rs, int index) throws SQLException {
+			LogSearchResultItem log = new LogSearchResultItem();
 			log.setId(rs.getLong("id"));
 			log.setLogDate(new Date(rs.getTimestamp("log_date").getTime()));
 			log.setIp(rs.getString("ip"));

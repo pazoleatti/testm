@@ -37,8 +37,8 @@ public class AuditDaoTest {
         filter.setToSearchDate(new Date(1369911365000l));
         filter.setTaxType(TaxType.TRANSPORT);
 
-        PagingResult<LogSystemSearchResultItem> records = auditDao.getLogs(filter);
-        LogSystemSearchResultItem logSystem = records.get(0);
+        PagingResult<LogSearchResultItem> records = auditDao.getLogs(filter);
+        LogSearchResultItem logSystem = records.get(0);
         assertEquals(Long.valueOf(1), logSystem.getId());
         assertEquals("192.168.72.16", logSystem.getIp());
         assertEquals(FormDataEvent.getByCode(1), logSystem.getEvent());
@@ -82,21 +82,21 @@ public class AuditDaoTest {
         filter.setFromSearchDate(new Date(1304247365000l));
         filter.setToSearchDate(new Date());
 
-        PagingResult<LogSystemSearchResultItem> records = auditDao.getLogs(filter);
-        LogSystemSearchResultItem logSystemSearchResultItem = records.get(0);
-        assertEquals(Long.valueOf(3), logSystemSearchResultItem.getId());
-        assertEquals(formatter.format(date), formatter.format(logSystemSearchResultItem.getLogDate()));
-        assertEquals("192.168.72.16", logSystemSearchResultItem.getIp());
-        assertEquals(3, logSystemSearchResultItem.getEvent().getCode());
-        assertEquals(1, logSystemSearchResultItem.getUser().getId());
-        assertEquals("operator", logSystemSearchResultItem.getRoles());
-        assertEquals(1, logSystemSearchResultItem.getDepartment().getId());
-        assertEquals(1, logSystemSearchResultItem.getReportPeriod().getId().intValue());
-        assertEquals(1, logSystemSearchResultItem.getDeclarationType().getId());
-        assertEquals(1, logSystemSearchResultItem.getFormType().getId());
-        assertEquals(2, logSystemSearchResultItem.getFormKind().getId());
-        assertEquals("the best note", logSystemSearchResultItem.getNote());
-        assertEquals(1, logSystemSearchResultItem.getUserDepartment().getId());
+        PagingResult<LogSearchResultItem> records = auditDao.getLogs(filter);
+        LogSearchResultItem logSearchResultItem = records.get(0);
+        assertEquals(Long.valueOf(3), logSearchResultItem.getId());
+        assertEquals(formatter.format(date), formatter.format(logSearchResultItem.getLogDate()));
+        assertEquals("192.168.72.16", logSearchResultItem.getIp());
+        assertEquals(3, logSearchResultItem.getEvent().getCode());
+        assertEquals(1, logSearchResultItem.getUser().getId());
+        assertEquals("operator", logSearchResultItem.getRoles());
+        assertEquals(1, logSearchResultItem.getDepartment().getId());
+        assertEquals(1, logSearchResultItem.getReportPeriod().getId().intValue());
+        assertEquals(1, logSearchResultItem.getDeclarationType().getId());
+        assertEquals(1, logSearchResultItem.getFormType().getId());
+        assertEquals(2, logSearchResultItem.getFormKind().getId());
+        assertEquals("the best note", logSearchResultItem.getNote());
+        assertEquals(1, logSearchResultItem.getUserDepartment().getId());
         assertEquals(2, records.getTotalCount());
     }
 

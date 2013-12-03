@@ -1,19 +1,18 @@
 package form_template.income.rnu56
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.TaxType
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.math.RoundingMode
+
 /**
  * Форма "(РНУ-56) Регистр налогового учёта процентного дохода по дисконтным векселям сторонних эмитентов"
- *
- * TODO:
- *      - http://jira.aplana.com/browse/SBRFACCTAX-4845 - РНУ-56. Алгоритм заполнения графы 14 и 15.
- *      - http://jira.aplana.com/browse/SBRFACCTAX-4853 - РНУ-56. Обязательные поля.
- *      - после SBRFACCTAX-4845 сделать логическую проверку 6 и 7
+ * formTemplateId=349
  *
  * @author rtimerbaev
+ * @author Stanislav Yasinskiy
  */
 
 // графа 1  - number
@@ -121,8 +120,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 void prevPeriodCheck() {
     def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        // TODO потом поменять после проверки
-        // throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
         def formName = formData.getFormType().getName()
         logger.error("Не найдены экземпляры «$formName» за прошлый отчетный период!")
     }
@@ -145,7 +143,7 @@ void calc() {
     def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
     // Номер последний строки предыдущей формы
-    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     for (row in dataRows) {
         // графа 1
@@ -231,7 +229,7 @@ BigDecimal calcSumIncomeinCurrency(def row, def startDate, def endDate) {
         }
         tmp = (row.percIncome / row.termDealBill * countsDays).setScale(2, RoundingMode.HALF_UP)
     } else {
-        def sum = getCalcPrevColumn(row.bill, 'sumIncomeinCurrency', formData.reportPeriodId)
+        def sum = getCalcPrevColumn(row, 'sumIncomeinCurrency')
         if (row.sum != null) {
             if (row.discountInCurrency == null) {
                 return null
@@ -250,7 +248,7 @@ BigDecimal calcSumIncomeinCurrency(def row, def startDate, def endDate) {
 // Расчет графы 15
 BigDecimal calcSumIncomeinRuble(def row, def endDate) {
     def tmp
-    if (row.sum != null) {
+    if (row.sum == null) {
         if (!isRubleCurrency(row.currency)) {
             if (row.sumIncomeinCurrency == null) {
                 return null
@@ -263,7 +261,7 @@ BigDecimal calcSumIncomeinRuble(def row, def endDate) {
         if (row.discountInRub == null) {
             return null
         }
-        tmp = row.discountInRub - getCalcPrevColumn(row.bill, 'sumIncomeinRuble', formData.reportPeriodId)
+        tmp = row.discountInRub - getCalcPrevColumn(row, 'sumIncomeinRuble')
     }
 
     return tmp
@@ -277,7 +275,7 @@ void logicCheck() {
         return
     }
 
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     // алиасы графов для арифметической проверки (графа 8, 9, 12-15)
     def arithmeticCheckAlias = ['termDealBill', 'percIncome', 'discountInCurrency', 'discountInRub',
@@ -329,11 +327,38 @@ void logicCheck() {
             logger.error(errorMsg + 'Все суммы по операции нулевые!')
         }
 
-        // 6. Проверка на наличие данных предыдущих отчетных периодов для заполнения графы 14 и графы 15
-        // TODO Получить РНУ-56 за прошлые отчетные периоды (вопрос к аналитикам)
 
-        // 7. Проверка корректности значения в «Графе 3»
-        // TODO Получить РНУ-56 за прошлые отчетные периоды (вопрос к аналитикам)
+       // 6. Проверка на наличие данных предыдущих отчетных периодов для заполнения графы 14 и графы 15
+       // 7. Проверка корректности значения в «Графе 3»
+       if (row.buyDate != null) {
+           taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, row.buyDate, startDate - 1)
+           for (taxPeriod in taxPeriods) {
+               reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.id)
+               for (reportPeriod in reportPeriods) {
+                   findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
+                           reportPeriod.id)
+                   if (findFormData != null) {
+                       isFind = false
+                       for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
+                           if (findRow.bill == row.bill) {
+                               isFind = true
+                               // лп 7
+                               if (findRow.buyDate != row.buyDate) {
+                                   logger.error(errorMsg + "Неверное указана Дата приобретения в РНУ-56 за "
+                                           + reportPeriod.name)
+                               }
+                               break
+                           }
+                       }
+                       // лп 6
+                       if (!isFind) {
+                           logger.warn(errorMsg + "Экземпляр за период " + reportPeriod.name +
+                                   " не существует (отсутствуют первичные данные для расчёта)!")
+                       }
+                   }
+               }
+           }
+       }
 
         // 8. Проверка корректности расчёта дисконта
         if (row.sum != null && row.price != null && row.sum - row.price <= 0 && (row.discountInCurrency != 0
@@ -378,41 +403,32 @@ def getRate(def Date date, def value) {
     return getRecord(22, 'CODE_NUMBER', "$value", -1, null, date ?: new Date(), true)?.RATE?.numberValue
 }
 
-// TODO (Ramil Timerbaev) http://jira.aplana.com/browse/SBRFACCTAX-4845 - РНУ-56. Алгоритм заполнения графы 14 и 15.
 /**
- * Получить сумму граф 14 или 15 из РНУ-56 предыдущих отчетных периодов...
- * <ol>
- * <li> получить рну предыдущего отчетного периода
- * <li> отобрать строки, для которых значение графы 2 (вексель) равно <b>bill</b> и графа 3 (дата приобретения) входит в [предыдущий] отчетный период
- * <li> просуммировать значения графы <b>sumColumnName</b> отобранных строк по п.2, потом выход
- * <li> если строки не найдены, то получить рну предпредыдущего отчетного периода и (перейти в п.1) и т.д. пока есть предыдущие периоды.
- * </ol>
- *
- * @param bill значение векселя
+ * Сумма по графе sumColumnName всех предыдущих форм начиная с row.buyDate в строках где bill = row.bill
+ * @param row
  * @param sumColumnName алиас графы для суммирования
  */
-def getCalcPrevColumn(def bill, def sumColumnName, def reportPeriodId) {
-    def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+def getCalcPrevColumn(def row, def sumColumnName) {
     def sum = 0
-    if (prevFormData != null && prevFormData.state == WorkflowState.ACCEPTED) {
-        def prevDataRowHelper = formDataService.getDataRowHelper(prevFormData)
-        def prevDataRows = prevDataRowHelper.getAllCached()
-        def startDate = reportPeriodService.getStartDate(prevFormData.reportPeriodId).time
-        def endDate = reportPeriodService.getEndDate(prevFormData.reportPeriodId).time
-        def find = false
-        for (def row : prevDataRows) {
-            if (row.bill == bill && row.buyDate >= startDate && row.buyDate <= endDate) {
-                sum += row.getCell(sumColumnName).value ?: 0
-                find = true
+    if (row.buyDate != null && row.bill !=null) {
+        taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, row.buyDate, startDate - 1)
+        for (taxPeriod in taxPeriods) {
+            reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.id)
+            for (reportPeriod in reportPeriods) {
+                findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
+                        reportPeriod.id)
+                if (findFormData != null) {
+                    isFind = false
+                    for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
+                        if (findRow.bill == row.bill && findRow.buyDate == row.buyDate) {
+                            sum += findRow.getCell(sumColumnName).getValue() != null ? findRow.getCell(sumColumnName).getValue() : 0
+                        }
+                    }
+                }
             }
         }
-        if (find) {
-            return sum
-        } else {
-            return getCalcPrevColumn(bill, sumColumnName, prevFormData.reportPeriodId)
-        }
     }
-    return 0
+    return sum
 }
 
 // Расчет итоговой строки

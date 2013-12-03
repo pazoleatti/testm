@@ -10,8 +10,8 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 /**
- * Скрипт для РНУ-50 (rnu50.groovy).
- * Форма "(РНУ-50) Регистр налогового учёта «ведомость понесённых убытков от реализации амортизируемого имущества»".
+ * Форма "(РНУ-50) Регистр налогового учёта «ведомость понесённых убытков от реализации амортизируемого имущества»"
+ * formTemplateId=365
  *
  * @version 59
  * @author rtimerbaev
@@ -29,10 +29,8 @@ switch (formDataEvent) {
         allCheck()
         break
     case FormDataEvent.ADD_ROW :
-        //addNewRow()
         break
     case FormDataEvent.DELETE_ROW :
-        //deleteRow()
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
@@ -40,7 +38,6 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
         allCheck()
         break
     // обобщить

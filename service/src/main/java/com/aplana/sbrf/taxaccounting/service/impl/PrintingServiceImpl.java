@@ -65,36 +65,31 @@ public class PrintingServiceImpl implements PrintingService {
 
 	@Override
 	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean isShowChecked) {
-		if (formDataAccessService.canRead(userInfo, formDataId)) {
-			FormDataReport data = new FormDataReport();
-			FormData formData = formDataDao.get(formDataId);
-			FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
-			Department department =  departmentDao.getDepartment(formData.getDepartmentId());
-			ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
+        formDataAccessService.canRead(userInfo, formDataId);
+        FormDataReport data = new FormDataReport();
+        FormData formData = formDataDao.get(formDataId);
+        FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
+        Department department =  departmentDao.getDepartment(formData.getDepartmentId());
+        ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
 
-			data.setData(formData);
-			data.setDepartment(department);
-			data.setFormTemplate(formTemplate);
-			data.setReportPeriod(reportPeriod);
-			data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
-			data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
-            List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null, null);
-            refBookHelper.dataRowsDereference(dataRows, formTemplate.getColumns());
+        data.setData(formData);
+        data.setDepartment(department);
+        data.setFormTemplate(formTemplate);
+        data.setReportPeriod(reportPeriod);
+        data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
+        data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
+        List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null, null);
+        refBookHelper.dataRowsDereference(dataRows, formTemplate.getColumns());
 
-            RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
-                    getRecordData((long) reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
-			try {
-				FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data,isShowChecked, dataRows, refBookValue);
-				return builder.createReport();
-			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
-				throw new ServiceException("Ошибка при создании печатной формы.");
-			}
-		}else{
-			throw new AccessDeniedException("Недостаточно прав на просмотр данных налоговой формы",
-					userInfo.getUser().getId(), formDataId
-				);
-		}
+        RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
+                getRecordData((long) reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
+        try {
+            FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data,isShowChecked, dataRows, refBookValue);
+            return builder.createReport();
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            throw new ServiceException("Ошибка при создании печатной формы.");
+        }
 
 	}
 
@@ -122,7 +117,7 @@ public class PrintingServiceImpl implements PrintingService {
     }
 
     @Override
-    public String generateExcelLogSystem(List<LogSystemSearchResultItem> resultItems) {
+    public String generateExcelLogSystem(List<LogSearchResultItem> resultItems) {
         try {
             LogSystemXlsxReportBuilder builder = new LogSystemXlsxReportBuilder(resultItems);
             return builder.createReport();
@@ -133,7 +128,7 @@ public class PrintingServiceImpl implements PrintingService {
     }
 
     @Override
-    public String generateAuditCsv(List<LogSystemSearchResultItem> resultItems) {
+    public String generateAuditCsv(List<LogSearchResultItem> resultItems) {
         try {
             LogSystemCsvBuilder logSystemCsvBuilder = new LogSystemCsvBuilder(resultItems);
             return logSystemCsvBuilder.createReport();

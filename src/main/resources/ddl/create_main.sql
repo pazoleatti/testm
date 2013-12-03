@@ -6,18 +6,6 @@ comment on table configuration is 'Настройки приложения, ко
 comment on column configuration.code is 'Код параметра';
 comment on column configuration.value is 'Значение параметра';
 -------------------------------------------------------------------------------------------------------------------------------------------
-create table dict_region (
-  code varchar2(2) not null,
-  name varchar2(510) not null,
-  okato varchar2(11),
-  okato_definition varchar2(11)
-);
-comment on table dict_region is 'Коды субъектов Российской Федерации';
-comment on column dict_region.code is 'Код';
-comment on column dict_region.name is 'Наименование';
-comment on column dict_region.okato is 'Код ОКАТО';
-comment on column dict_region.okato_definition is 'Определяющая часть кода ОКАТО';
--------------------------------------------------------------------------------------------------------------------------------------------
 create table form_type (
   id       number(9) not null,
   name     varchar2(600) not null,
@@ -193,7 +181,6 @@ create table form_column (
   type char(1) not null,
   width number(9) not null,
   precision number(9),
-  group_name varchar2(1000),
   max_length number(4),
   checking  number(1) default 0 not null,
   attribute_id number(18),
@@ -203,7 +190,6 @@ create table form_column (
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
 comment on column form_column.form_template_id is 'Идентификатор шаблона налоговой формы';
-comment on column form_column.group_name is 'Название группы столбцов';
 comment on column form_column.id is 'Первичный ключ';
 comment on column form_column.name is 'Название столбца';
 comment on column form_column.ord is 'Порядковый номер';
@@ -329,7 +315,6 @@ create table declaration_template (
   is_active   number(1) not null,
   create_script       clob,
   jrxml               varchar2(36),
-  jasper              varchar2(36),
   declaration_type_id number(9) not null,
   XSD varchar2(36) 
 );
@@ -340,7 +325,6 @@ comment on column declaration_template.version is 'Версия';
 comment on column declaration_template.is_active is 'Признак активности';
 comment on column declaration_template.create_script is 'Скрипт формирования декларации';
 comment on column declaration_template.jrxml is 'Макет JasperReports для формирования печатного представления формы';
-comment on column declaration_template.jasper is 'Скомпилированный макет JasperReports для формирования печатного представления формы';
 comment on column declaration_template.declaration_type_id is 'Вид деклараций';
 comment on column declaration_template.XSD is 'XSD-схема';
 
@@ -653,16 +637,14 @@ user_task_jndi varchar2(500) not null,
 custom_params_exist number(9,0) not null,
 serialized_params blob null
 );
+comment on table task_context is 'Контекст пользовательских задач планировщика';
+comment on column task_context.task_id is 'идентификатор задачи планировщика websphere';
+comment on column task_context.task_name is 'название задачи';
+comment on column task_context.user_task_jndi is 'jndi-имя класса-обработчика задачи';
+comment on column task_context.custom_params_exist is 'признак наличия пользовательских параметров';
+comment on column task_context.serialized_params is 'сериализованные пользователькие параметры';
+
 create sequence seq_task_context start with 100;
-------------------------------------------------------------------------------------------------------
-create table user_session(
-id  number(18,0) primary key,
-session_id varchar2(100) not null,
-user_login varchar2(500) not null,
-user_ip varchar2(100) not null,
-create_time date not null
-);
-create sequence seq_user_session start with 100;
 ------------------------------------------------------------------------------------------------------
 create table notification(
 id number(9) primary key,

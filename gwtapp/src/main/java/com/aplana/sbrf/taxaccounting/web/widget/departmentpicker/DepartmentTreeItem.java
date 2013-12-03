@@ -50,7 +50,7 @@ public class DepartmentTreeItem extends TreeItem implements HasValue<Boolean> {
 
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Boolean> handler) {
-        return ((CheckBox) getWidget()).addHandler(handler, ValueChangeEvent.getType());
+        return ((CheckBox) getWidget()).addValueChangeHandler(handler);
     }
 
     @Override

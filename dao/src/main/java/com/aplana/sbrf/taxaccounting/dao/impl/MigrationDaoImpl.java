@@ -56,14 +56,14 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "\"sys\".codesubsystem as \"subsystemid\",\n" +
                             "\"depter\".code as \"tercode\"\n" +
                             "from\n" +
-                            "exemplar \"ex\"\n" +
-                            "inner join obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
-                            "inner join objdict \"objdict\" on \"obj\".fidobjdict = \"objdict\".idobjdict\n" +
-                            "inner join periodlist \"per\" on \"ex\".fidperiodlist = \"per\".idperiodlist\n" +
-                            "inner join provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
-                            "inner join asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
-                            "inner join department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
-                            "inner join department \"depter\" on \"depter\".id = \"dep\".par_field\n" +
+                            "migration.exemplar \"ex\"\n" +
+                            "inner join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "inner join migration.objdict \"objdict\" on \"obj\".fidobjdict = \"objdict\".idobjdict\n" +
+                            "inner join migration.periodlist \"per\" on \"ex\".fidperiodlist = \"per\".idperiodlist\n" +
+                            "inner join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "inner join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.department \"depter\" on \"depter\".id = \"dep\".par_field\n" +
                             "where\n" +
                             "\"ex\".typeexemplar like 'ACTUAL' and\n" +
                             "\"objdict\".idobjdict = ?",
@@ -118,13 +118,13 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "\"r25\".reserverest as \"reserverest\",\n" +
                             "\"r25\".typerow as \"typerow\"\n" +
                             "from\n" +
-                            "trd_25 \"r25\" \n" +
-                            "inner join exemplar \"ex\"  on \"r25\".fidexemplar = \"ex\".idexemplar\n" +
-                            "left outer join periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
-                            "left outer join obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
-                            "left outer join provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
-                            "left outer join department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
-                            "inner join asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "migration.trd_25 \"r25\" \n" +
+                            "inner join migration.exemplar \"ex\"  on \"r25\".fidexemplar = \"ex\".idexemplar\n" +
+                            "left outer join migration.periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
+                            "left outer join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "left outer join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "left outer join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
                             "where \"ex\".idexemplar=? " +
                             "order by \"num\" asc,\n" +
                             "\"typerow\" desc",
@@ -186,13 +186,13 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "\"r26\".reservecreate,\n" +
                             "\"r26\".reserverest,\n" +
                             "\"r26\".typerow\n" +
-                            "from trd_26 \"r26\" \n" +
-                            "inner join exemplar \"ex\"  on \"r26\".fidexemplar = \"ex\".idexemplar\n" +
-                            "left outer join periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
-                            "left outer join obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
-                            "left outer join provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
-                            "left outer join department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
-                            "inner join asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "from migration.trd_26 \"r26\" \n" +
+                            "inner join migration.exemplar \"ex\"  on \"r26\".fidexemplar = \"ex\".idexemplar\n" +
+                            "left outer join migration.periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
+                            "left outer join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "left outer join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "left outer join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
                             "where \"ex\".idexemplar=?\n" +
                             "order by \"r26\".num asc, \"r26\".typerow desc",
                     new Object[]{ex.getExemplarId()},
@@ -253,13 +253,13 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "\"r27\".reservecreate,\n" +
                             "\"r27\".reserverest,\n" +
                             "\"r27\".typerow\n" +
-                            "from trd_27 \"r27\" \n" +
-                            "inner join exemplar \"ex\"  on \"r27\".fidexemplar = \"ex\".idexemplar\n" +
-                            "left outer join periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
-                            "left outer join obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
-                            "left outer join provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
-                            "left outer join department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
-                            "inner join asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "from migration.trd_27 \"r27\" \n" +
+                            "inner join migration.exemplar \"ex\"  on \"r27\".fidexemplar = \"ex\".idexemplar\n" +
+                            "left outer join migration.periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
+                            "left outer join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "left outer join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "left outer join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
                             "where \"ex\".idexemplar=?\n" +
                             "order by \"r27\".num asc, \"r27\".typerow desc",
                     new Object[]{ex.getExemplarId()},
@@ -313,13 +313,13 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "\"r31\".perccashother,\n" +
                             "\"r31\".perccashcorp,\n" +
                             "\"r31\".typerow\n" +
-                            "from trd_31 \"r31\" \n" +
-                            "inner join exemplar \"ex\"  on \"r31\".fidexemplar = \"ex\".idexemplar\n" +
-                            "left outer join periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
-                            "left outer join obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
-                            "left outer join provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
-                            "left outer join department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
-                            "inner join asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "from migration.trd_31 \"r31\" \n" +
+                            "inner join migration.exemplar \"ex\"  on \"r31\".fidexemplar = \"ex\".idexemplar\n" +
+                            "left outer join migration.periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
+                            "left outer join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "left outer join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "left outer join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
                             "where \"ex\".idexemplar=?\n" +
                             "order by \"r31\".num asc, \"r31\".typerow desc",
                     new Object[]{ex.getExemplarId()},
@@ -359,13 +359,13 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "\"r64\".defpaper,\n" +
                             "\"r64\".rcost,\n" +
                             "\"r64\".typerow\n" +
-                            "from trd_64 \"r64\" \n" +
-                            "inner join exemplar \"ex\"  on \"r64\".fidexemplar = \"ex\".idexemplar\n" +
-                            "left outer join periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
-                            "left outer join obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
-                            "left outer join provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
-                            "left outer join department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
-                            "inner join asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "from migration.trd_64 \"r64\" \n" +
+                            "inner join migration.exemplar \"ex\"  on \"r64\".fidexemplar = \"ex\".idexemplar\n" +
+                            "left outer join migration.periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
+                            "left outer join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "left outer join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "left outer join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
                             "where \"ex\".idexemplar=?\n" +
                             "order by \"r64\".num asc, \"r64\".typerow desc",
                     new Object[]{ex.getExemplarId()},
@@ -422,13 +422,13 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "\"r60\".costrepo269,\n" +
                             "\"r60\".costrepotax,\n" +
                             "\"r60\".typerow\n" +
-                            "from trd_60 \"r60\" \n" +
-                            "inner join exemplar \"ex\"  on \"r60\".fidexemplar = \"ex\".idexemplar\n" +
-                            "left outer join periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
-                            "left outer join obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
-                            "left outer join provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
-                            "left outer join department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
-                            "inner join asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "from migration.trd_60 \"r60\" \n" +
+                            "inner join migration.exemplar \"ex\"  on \"r60\".fidexemplar = \"ex\".idexemplar\n" +
+                            "left outer join migration.periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
+                            "left outer join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "left outer join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "left outer join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
                             "where \"ex\".idexemplar=?\n" +
                             "order by \"r60\".num asc, \"r60\".typerow desc",
                     new Object[]{ex.getExemplarId()},
@@ -460,13 +460,13 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "\"r59\".costrepo269,\n" +
                             "\"r59\".costrepotax,\n" +
                             "\"r59\".typerow\n" +
-                            "from trd_59 \"r59\" \n" +
-                            "inner join exemplar \"ex\"  on \"r59\".fidexemplar = \"ex\".idexemplar\n" +
-                            "left outer join periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
-                            "left outer join obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
-                            "left outer join provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
-                            "left outer join department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
-                            "inner join asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "from migration.trd_59 \"r59\" \n" +
+                            "inner join migration.exemplar \"ex\"  on \"r59\".fidexemplar = \"ex\".idexemplar\n" +
+                            "left outer join migration.periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
+                            "left outer join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "left outer join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "left outer join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
                             "where \"ex\".idexemplar=?\n" +
                             "order by \"r59\".num asc, \"r59\".typerow desc",
                     new Object[]{ex.getExemplarId()},
@@ -498,13 +498,13 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "\"r54\".costrepo269,\n" +
                             "\"r54\".costrepotax,\n" +
                             "\"r54\".typerow\n" +
-                            "from trd_54 \"r54\" \n" +
-                            "inner join exemplar \"ex\"  on \"r54\".fidexemplar = \"ex\".idexemplar\n" +
-                            "left outer join periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
-                            "left outer join obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
-                            "left outer join provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
-                            "left outer join department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
-                            "inner join asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "from migration.trd_54 \"r54\" \n" +
+                            "inner join migration.exemplar \"ex\"  on \"r54\".fidexemplar = \"ex\".idexemplar\n" +
+                            "left outer join migration.periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
+                            "left outer join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "left outer join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "left outer join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
                             "where \"ex\".idexemplar=?\n" +
                             "order by \"r54\".num asc, \"r54\".typerow desc",
                     new Object[]{ex.getExemplarId()},
@@ -537,13 +537,13 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "\"r53\".costrepo269,\n" +
                             "\"r53\".costrepotax,\n" +
                             "\"r53\".typerow\n" +
-                            "from trd_53 \"r53\" \n" +
-                            "inner join exemplar \"ex\"  on \"r53\".fidexemplar = \"ex\".idexemplar\n" +
-                            "left outer join periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
-                            "left outer join obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
-                            "left outer join provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
-                            "left outer join department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
-                            "inner join asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "from migration.trd_53 \"r53\" \n" +
+                            "inner join migration.exemplar \"ex\"  on \"r53\".fidexemplar = \"ex\".idexemplar\n" +
+                            "left outer join migration.periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
+                            "left outer join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "left outer join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "left outer join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
                             "where \"ex\".idexemplar=?\n" +
                             "order by \"r53\".num asc, \"r53\".typerow desc",
                     new Object[]{ex.getExemplarId()},
@@ -616,13 +616,13 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "\"r51\".rsalepricetax,\n" +
                             "\"r51\".rovwrprice\n," +
                             "\"r51\".typerow\n" +
-                            "from trd_51 \"r51\" \n" +
-                            "inner join exemplar \"ex\"  on \"r51\".fidexemplar = \"ex\".idexemplar\n" +
-                            "left outer join periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
-                            "left outer join obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
-                            "left outer join provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
-                            "left outer join department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
-                            "inner join asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
+                            "from migration.trd_51 \"r51\" \n" +
+                            "inner join migration.exemplar \"ex\"  on \"r51\".fidexemplar = \"ex\".idexemplar\n" +
+                            "left outer join migration.periodlist \"per\" on \"per\".idperiodlist = \"ex\".fidperiodlist\n" +
+                            "left outer join migration.obj \"obj\" on \"ex\".fidobj = \"obj\".idobj\n" +
+                            "left outer join migration.provider \"prov\" on \"obj\".fidprovider = \"prov\".idprovider\n" +
+                            "left outer join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
+                            "inner join migration.asystem \"sys\" on \"prov\".fidasystem = \"sys\".idasystem\n" +
                             "where \"ex\".idexemplar=?\n" +
                             "order by \"r51\".num asc, \"r51\".typerow desc",
                     new Object[]{ex.getExemplarId()},

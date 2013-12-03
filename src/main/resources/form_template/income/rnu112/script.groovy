@@ -5,7 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * (РНУ-112) Регистр налогового учета сделок РЕПО и сделок займа ценными бумагами (374)
+ * (РНУ-112) Регистр налогового учета сделок РЕПО и сделок займа ценными бумагами
+ * formTemplateId=374
  *
  * @author Stanislav Yasinskiy
  */
@@ -114,7 +115,7 @@ void calc() {
         def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
 
         // номер последний строки предыдущей формы
-        def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+        def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
         for (row in dataRows) {
             // графа 1

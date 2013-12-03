@@ -73,8 +73,19 @@ public interface FormDataDao {
 	 * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
 	 */
 	FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
-	
-	
+
+    /**
+     * Поиск ежемесячной налоговой формы
+     * @param formTypeId Вид формы
+     * @param kind Тип формы
+     * @param departmentId Подразделение
+     * @param taxPeriodId Налоговый период
+     * @param periodOrder Порядковый номер (равен номеру месяца, при нумерации с 1)
+     * @return Форма или null, если такой формы не найдено
+     * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
+     */
+    FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder);
+
 	/**
 	 * Обновление признака возврата
 	 * 

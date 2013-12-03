@@ -1,15 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
+import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.OrderUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -17,15 +11,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DateColumn;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.OrderUtils;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.*;
 
 @Repository
 @Transactional(readOnly=true)
@@ -57,7 +47,6 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			result.setName(rs.getString("name"));
 			result.setWidth(rs.getInt("width"));
 			result.setOrder(rs.getInt("ord"));
-			result.setGroupName(rs.getString("group_name"));
 			result.setChecking(rs.getBoolean("checking"));
 			return result;
 		}
@@ -125,8 +114,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		}
 		if (!newColumns.isEmpty()) {
 			jt.batchUpdate(
-				"insert into form_column (id, name, form_template_id, alias, type, width, precision, ord, group_name, max_length, checking, format, ATTRIBUTE_ID, filter) " +
-				"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				"insert into form_column (id, name, form_template_id, alias, type, width, precision, ord, max_length, checking, format, ATTRIBUTE_ID, filter) " +
+				"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				new BatchPreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -148,33 +137,32 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 							if (((StringColumn) col).getMaxLength() > StringColumn.MAX_LENGTH){
 								log.warn("Превышена максимально допустимая длина строки в столбце " + col.getName());
 							}
-							ps.setInt(8, ((StringColumn) col).getMaxLength());
-							ps.setNull(10, Types.INTEGER);
+							ps.setInt(7, ((StringColumn) col).getMaxLength());
+							ps.setNull(9, Types.INTEGER);
 						} else if (col instanceof NumericColumn) {
 
 							if (((NumericColumn) col).getMaxLength() > NumericColumn.MAX_LENGTH){
 								log.warn("Превышена максимально допустимая длина строки в столбце " + col.getName());
 							}
-							ps.setInt(8, ((NumericColumn) col).getMaxLength());
-							ps.setNull(10, Types.INTEGER);
+							ps.setInt(7, ((NumericColumn) col).getMaxLength());
+							ps.setNull(9, Types.INTEGER);
 						} else if (col instanceof DateColumn) {
-							ps.setInt(10, ((DateColumn)col).getFormatId());
-							ps.setNull(8, Types.INTEGER);
+							ps.setInt(9, ((DateColumn)col).getFormatId());
+							ps.setNull(7, Types.INTEGER);
 						} else {
-							ps.setNull(8, Types.INTEGER);
-							ps.setNull(10, Types.INTEGER);
+							ps.setNull(7, Types.INTEGER);
+							ps.setNull(9, Types.INTEGER);
 						}
 
 						ps.setInt(6, col.getOrder());
-						ps.setString(7, col.getGroupName());
-						ps.setBoolean(9, col.isChecking());
+						ps.setBoolean(8, col.isChecking());
 						
 						if (col instanceof RefBookColumn) {
-							ps.setLong(11, ((RefBookColumn)col).getRefBookAttributeId());
-                            ps.setString(12, ((RefBookColumn)col).getFilter());
+							ps.setLong(10, ((RefBookColumn)col).getRefBookAttributeId());
+                            ps.setString(11, ((RefBookColumn)col).getFilter());
 						} else {
-							ps.setNull(11, Types.NUMERIC);
-                            ps.setNull(12, Types.CHAR);
+							ps.setNull(10, Types.NUMERIC);
+                            ps.setNull(11, Types.CHAR);
 						}
 						
 					}
@@ -190,7 +178,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		if(!oldColumns.isEmpty()){
 			jt.batchUpdate(
 					"update form_column set name = ?, alias = ?, type = ?, width = ?, " +
-							"precision = ?, ord = ?, group_name = ?, max_length = ?, checking = ?, format = ?, ATTRIBUTE_ID = ?, FILTER = ? " +
+							"precision = ?, ord = ?, max_length = ?, checking = ?, format = ?, ATTRIBUTE_ID = ?, FILTER = ? " +
 							"where id = ?",
 					new BatchPreparedStatementSetter() {
 						@Override
@@ -209,40 +197,39 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
 							if (col instanceof StringColumn) {
 
-								ps.setInt(8, ((StringColumn) col).getMaxLength());
-								ps.setNull(10, Types.INTEGER);
-								ps.setNull(11, Types.NUMERIC);
-                                ps.setNull(12, Types.CHAR);
+								ps.setInt(7, ((StringColumn) col).getMaxLength());
+								ps.setNull(9, Types.INTEGER);
+								ps.setNull(10, Types.NUMERIC);
+                                ps.setNull(11, Types.CHAR);
 							} else if(col instanceof NumericColumn){
 
-								ps.setInt(8, ((NumericColumn) col).getMaxLength());
-								ps.setNull(10, Types.INTEGER);
-								ps.setNull(11, Types.NUMERIC);
-                                ps.setNull(12, Types.CHAR);
+								ps.setInt(7, ((NumericColumn) col).getMaxLength());
+								ps.setNull(9, Types.INTEGER);
+								ps.setNull(10, Types.NUMERIC);
+                                ps.setNull(11, Types.CHAR);
 							} else if (col instanceof DateColumn) {
-								ps.setInt(10, ((DateColumn)col).getFormatId());
+								ps.setInt(9, ((DateColumn)col).getFormatId());
 
-								ps.setNull(8, Types.INTEGER);
-								ps.setNull(11, Types.NUMERIC);
-                                ps.setNull(12, Types.CHAR);
+								ps.setNull(7, Types.INTEGER);
+								ps.setNull(10, Types.NUMERIC);
+                                ps.setNull(11, Types.CHAR);
 							} else if (col instanceof RefBookColumn) {
-								ps.setLong(11, ((RefBookColumn)col).getRefBookAttributeId());
-                                ps.setString(12, ((RefBookColumn)col).getFilter());
-								ps.setNull(10, Types.INTEGER);
+								ps.setLong(10, ((RefBookColumn)col).getRefBookAttributeId());
+                                ps.setString(11, ((RefBookColumn)col).getFilter());
+								ps.setNull(9, Types.INTEGER);
 
-								ps.setNull(8, Types.INTEGER);
+								ps.setNull(7, Types.INTEGER);
 							} else {
 
-								ps.setNull(8, Types.INTEGER);
-								ps.setNull(10, Types.INTEGER);
-								ps.setNull(11, Types.NUMERIC);
-                                ps.setNull(12, Types.CHAR);
+								ps.setNull(7, Types.INTEGER);
+								ps.setNull(9, Types.INTEGER);
+								ps.setNull(10, Types.NUMERIC);
+                                ps.setNull(11, Types.CHAR);
 							}
 
 							ps.setInt(6, col.getOrder());
-							ps.setString(7, col.getGroupName());
-							ps.setBoolean(9, col.isChecking());
-							ps.setInt(13, col.getId());
+							ps.setBoolean(8, col.isChecking());
+							ps.setInt(12, col.getId());
 						}
 
 						@Override

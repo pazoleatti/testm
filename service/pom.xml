@@ -73,8 +73,7 @@
             <version>2.3</version>
         </dependency>
 
-
-        <!-- Test -->
+		<!-- Test -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>test-utils</artifactId>

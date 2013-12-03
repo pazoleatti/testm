@@ -206,3 +206,10 @@ h3{
     padding: 2px 0px 2px 0px !important;
     text-align: center;
 }
+.dialogCaption {
+    width: 100%;
+}
+.closeDialogButton {
+    float: right;
+    margin-right: 3px;
+}

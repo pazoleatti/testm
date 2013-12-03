@@ -10,18 +10,19 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 import java.text.SimpleDateFormat
 
 /**
- * (РНУ-64) Регистр налогового учёта затрат, связанных с проведением сделок РЕПО
+ * РНУ-64 "Регистр налогового учёта затрат, связанных с проведением сделок РЕПО"
  * formTemplateId=355
  *
  * @author auldanov
- * @author Stanislav Yasinskiy
+ *
+ * Описание столбцов
+ * 1. number - № пп
+ * 2. date - Дата сделки
+ * 3. part - Часть сделки Справочник
+ * 4. dealingNumber - Номер сделки
+ * //5. bondKind - Вид ценных бумаг //графу удалили
+ * 5. costs - Затраты (руб.коп.)
  */
-
-// графа 1 - number
-// графа 2 - date
-// графа 3 - part
-// графа 4 - dealingNumber
-// графа 5 - costs
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -31,6 +32,7 @@ switch (formDataEvent) {
         logicalCheck()
         break
     case FormDataEvent.CALCULATE:
+        prevPeriodCheck()
         calc()
         logicalCheck()
         break
@@ -71,6 +73,30 @@ switch (formDataEvent) {
         }
         break
 }
+// все атрибуты
+@Field
+def allColumns = ['number', 'date', 'part', 'dealingNumber', 'costs']
+
+// Редактируемые атрибуты
+@Field
+def editableColumns = ['date', 'part', 'dealingNumber', 'costs']
+
+// Автозаполняемые атрибуты
+@Field
+def autoFillColumns = allColumns - editableColumns
+
+// Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
+void prevPeriodCheck() {
+    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    if (!isBalancePeriod) {
+        reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+        formPrev = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriodPrev.id)
+        if (formPrev == null) {
+            def formName = formData.getFormType().getName()
+            throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+        }
+    }
+}
 
 //Добавить новую строку
 void addNewRow() {
@@ -97,13 +123,7 @@ def calc() {
     def dataRows = dataRowHelper.getAllCached()
 
     // удалить строку "итого"
-    for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
-        row = (DataRow) iter.next()
-        if (isTotalRow(row)) {
-            iter.remove()
-            dataRowHelper.delete(row)
-        }
-    }
+    deleteAllAliased(dataRows)
 
     if (dataRows.isEmpty()) {
         return
@@ -269,13 +289,7 @@ def getColumnName(def row, def alias) {
 // Проверка при создании формы.
 void checkCreation() {
     // отчётный период
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-
-    //проверка периода ввода остатков
-    if (reportPeriod != null && reportPeriodService.isBalancePeriod(reportPeriod.id, formData.departmentId)) {
-        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
-        return
-    }
+    //def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
@@ -382,9 +396,21 @@ void importData() {
         logger.error('Имя файла не должно быть пустым')
         return
     }
-    if (!fileName.contains('.xml')) {
-        logger.error('Формат файла должен быть *.xml')
-        return
+
+    String charset = ""
+    // TODO в дальнейшем убрать возможность загружать RNU для импорта!
+    if (formDataEvent == FormDataEvent.IMPORT && fileName.contains('.xml') ||
+            formDataEvent == FormDataEvent.MIGRATION && fileName.contains('.xml')) {
+        if (!fileName.contains('.xml')) {
+            logger.error('Формат файла должен быть *.xml')
+            return
+        }
+    } else {
+        if (!fileName.contains('.r')) {
+            logger.error('Формат файла должен быть *.rnu')
+            return
+        }
+        charset = 'cp866'
     }
 
     def is = ImportInputStream
@@ -393,7 +419,7 @@ void importData() {
         return
     }
 
-    def xmlString = importService.getData(is, fileName)
+    def xmlString = importService.getData(is, fileName, charset)
     if (xmlString == null || xmlString == '') {
         logger.error('Отсутствие значении после обработки потока данных')
         return
@@ -407,7 +433,7 @@ void importData() {
 
     try {
         // добавить данные в форму
-        def totalLoad = addData(xml)
+        def totalLoad = addData(xml, fileName)
 
         // рассчитать, проверить и сравнить итоги
         if (totalLoad != null) {
@@ -425,7 +451,7 @@ void importData() {
  *
  * @param xml данные
  */
-def addData(def xml) {
+def addData(def xml, def fileName) {
     def index
     def date = new Date()
     def cache = [:]
@@ -435,28 +461,42 @@ def addData(def xml) {
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def newRows = []
 
-    for (def row : xml.exemplar.table.detail.record) {
+    def records
+    def totalRecords
+    def type
+    if (formDataEvent == FormDataEvent.MIGRATION ||
+            formDataEvent == FormDataEvent.IMPORT && fileName.contains('.xml')) {
+        records = xml.exemplar.table.detail.record
+        totalRecords = xml.exemplar.table.total.record
+        type = 1 // XML
+    } else {
+        records = xml.row
+        totalRecords = xml.rowTotal
+        type = 2 // RNU
+    }
+
+    for (def row : records) {
         index = 0
         def newRow = getNewRow()
 
         // графа 1
-        newRow.number = getNumber(row.field[index].@value.text())
+        newRow.number = getNumber(getCellValue(row, index, type))
         index++
 
         // графа 2
-        newRow.date = getDate(row.field[index].@value.text(), format)
+        newRow.date = getDate(getCellValue(row, index, type), format)
         index++
 
         // графа 3 - справочник 60 "Части сделок"
         tmp = null
-        if (row.field[index].@value.text() != null && row.field[index].@value.text().trim() != '') {
-            tmp = getRecordId(60, 'CODE', row.field[index].@value.text(), date, cache)
+        if (row.field[index].@value.text() != null && getCellValue(row, index, type).trim() != '') {
+            tmp = getRecordId(60, 'CODE', getCellValue(row, index, type), date, cache)
         }
         newRow.part = tmp
         index++
 
         // графа 4
-        newRow.dealingNumber = row.field[index].text()
+        newRow.dealingNumber = getCellValue(row, index, type, true)
         index++
 
         // графа 5
@@ -464,24 +504,36 @@ def addData(def xml) {
         // index++
 
         // графа 6
-        newRow.costs = getNumber(row.field[index].@value.text())
+        newRow.costs = getNumber(getCellValue(row, index, type))
 
         newRows.add(newRow)
     }
     data.insert(newRows, 1)
 
     // итоговая строка
-    if (xml.exemplar.table.total.record.field.size() > 0) {
-        def row = xml.exemplar.table.total.record[0]
+    if (totalRecords.size() >= 1) {
+        def row = totalRecords[0]
         def totalRow = formData.createDataRow()
 
         // графа 6
-        totalRow.costs = getNumber(row.field[5].@value.text())
+        totalRow.costs = getNumber(getCellValue(row, 5, type))
 
         return totalRow
     } else {
         return null
     }
+}
+
+// для получения данных из RNU или XML
+String getCellValue(def row, int index, def type, boolean isTextXml = false){
+    if (type==1) {
+        if (isTextXml) {
+            return row.field[index].text()
+        } else {
+            return row.field[index].@value.text()
+        }
+    }
+    return row.cell[index+1].text()
 }
 
 /**
