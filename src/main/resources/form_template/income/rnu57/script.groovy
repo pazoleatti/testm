@@ -7,10 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 /**
- * Скрипт для РНУ-57 (rnu57.groovy).
  * (РНУ-57) Регистр налогового учёта финансового результата от реализации (погашения) векселей сторонних эмитентов
- *
- * Версия ЧТЗ: 64
+ * formTemplateId=353
  *
  * @author vsergeev
  *

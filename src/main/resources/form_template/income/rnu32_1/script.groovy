@@ -8,6 +8,7 @@ import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 
 /**
  * Форма "(РНУ-32.1) Регистр налогового учёта начисленного процентного дохода по облигациям, по которым открыта короткая позиция. Отчёт 1".
+ * formTemplateId=330
  *
  * TODO:
  *      - логическая проверка 2 - проблемы с форматом TTBBBB - http://jira.aplana.com/browse/SBRFACCTAX-4780

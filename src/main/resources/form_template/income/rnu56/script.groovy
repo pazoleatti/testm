@@ -2,13 +2,14 @@ package form_template.income.rnu56
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.math.RoundingMode
+
 /**
  * Форма "(РНУ-56) Регистр налогового учёта процентного дохода по дисконтным векселям сторонних эмитентов"
+ * formTemplateId=349
  *
  * @author rtimerbaev
  * @author Stanislav Yasinskiy

@@ -8,8 +8,8 @@ import java.math.RoundingMode
 import groovy.transform.Field
 
 /**
- * Скрипт для РНУ-62
  * Форма "(РНУ-62) Регистр налогового учёта расходов по дисконтным векселям ОАО «Сбербанк России»"
+ * formTemplateId=354
  *
  * TODO походу расчеты еще изменят
  * @author bkinzyabulatov

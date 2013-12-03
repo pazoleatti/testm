@@ -11,7 +11,6 @@ import java.math.RoundingMode
 import groovy.transform.Field
 
 /**
- * Скрипт для РНУ-49 (rnu49.groovy).
  * Форма "(РНУ-49) Регистр налогового учёта «ведомость определения результатов от реализации (выбытия) имущества»".
  * @version 59
  *
@@ -39,7 +38,6 @@ import groovy.transform.Field
  * графа 20 - expensesSum
  * графа 21 - saledPropertyCode
  * графа 22 - saleCode
-
  */
 
 switch (formDataEvent) {
@@ -79,10 +77,6 @@ switch (formDataEvent) {
 }
 
 //// Кэши и константы
-@Field
-def providerCache = [:]
-@Field
-def recordCache = [:]
 @Field
 def refBookCache = [:]
 

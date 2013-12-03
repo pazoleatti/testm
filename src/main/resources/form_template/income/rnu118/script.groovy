@@ -6,7 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * Форма "(РНУ-117) Регистр налогового учёта доходов и расходов, по операциям со сделками форвард, квалифицированным в качестве операций с ФИСС для целей налогообложения"
+ * (РНУ-118) Регистр налогового учёта доходов и расходов, по операциям со сделками опцион, квалифицированным в качестве операций с ФИСС для целей налогообложения.
+ * formTemplateId=373
  *
  * @author bkinzyabulatov
  *
@@ -181,9 +182,6 @@ void logicCheck() {
     }
 }
 
-/**
- * Алгоритмы заполнения полей формы
- */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached

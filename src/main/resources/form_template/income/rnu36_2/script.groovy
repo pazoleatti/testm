@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 import groovy.transform.Field
 
 /**

@@ -7,8 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 /**
- * 6.3.1    Сведения для расчёта налога с доходов в виде дивидендов (доходов от долевого участия в других организациях,
- *                                                                      созданных на территории Российской Федерации)
+ * Сведения для расчёта налога с доходов в виде дивидендов (доходов от долевого участия в других организациях,
+ * созданных на территории Российской Федерации)
  * formTemplateId=306
  */
 
@@ -84,7 +84,6 @@ void addRow() {
  * Проверяет уникальность в отчётном периоде и вид
  */
 void checkUniq() {
-
     FormData findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {

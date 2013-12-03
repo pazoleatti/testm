@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 /**
- * 6.3.3    Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика
+ * Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика
  * formTemplateId=308
  */
 

@@ -3,7 +3,7 @@ package form_template.income.rnu14
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 
 /**
- * Форма "УНП"("РНУ-14 - Регистр налогового учёта нормируемых расходов").
+ * Форма "УНП" ("РНУ-14 - Регистр налогового учёта нормируемых расходов")
  * formTemplateId=321
  *
  * @author lhaziev
@@ -21,12 +21,6 @@ switch (formDataEvent) {
         calc()
         logicalCheck(false)
         break
-    case FormDataEvent.ADD_ROW:
-        // addNewRow()
-        break
-    case FormDataEvent.DELETE_ROW:
-        // deleteRow()
-        break
 // проверка при "подготовить"
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:
         checkOnPrepareOrAcceptance('Подготовка')
@@ -41,7 +35,6 @@ switch (formDataEvent) {
         break
 // обобщить
     case FormDataEvent.COMPOSE:
-//        consolidation()
         calc()
         logicalCheck(false)
         break

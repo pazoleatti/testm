@@ -4,17 +4,15 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import groovy.transform.Field
 
 import java.math.RoundingMode
 
-import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
-import groovy.transform.Field
-
 /**
- * Скрипт для РНУ-71.1
- * Форма "(РНУ-71.1) Регистр налогового учёта уступки права требования после предусмотренного кредитным договором срока погашения основного долга
- *  TODO графа 10
- *  @author bkinzyabulatov
+ * (РНУ-71.1) Регистр налогового учёта уступки права требования после предусмотренного кредитным договором срока погашения основного долга
+ * formTemplateId=356
+ * TODO графа 10
+ * @author bkinzyabulatov
  *
  * Графа 1  rowNumber               № пп
  * Графа 2  contragent              Наименование контрагента
@@ -77,6 +75,9 @@ def recordCache = [:]
 @Field
 def refBookCache = [:]
 
+@Field
+def isBalancePeriod
+
 // Все поля
 @Field
 def allColumns = ["rowNumber", "contragent", "inn", "assignContractNumber", "assignContractDate",
@@ -103,40 +104,11 @@ def groupColumns = ['contragent']
 @Field
 def sortColumns = ["contragent", "assignContractDate", "assignContractNumber"]
 
-// Проверяемые на пустые значения атрибуты
+// TODO Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ["rowNumber", "contragent", "inn", "assignContractNumber", "assignContractDate",
         "amount", "amountForReserve", "repaymentDate", "dateOfAssignment", "income",
         "result"]
-
-// Дата окончания отчетного периода
-@Field
-def reportPeriodEndDate = null
-
-// Текущая дата
-@Field
-def currentDate = new Date()
-
-//// Некастомные методы
-/**
- * Сравнивает по графам сумму строк и соответствующую им итоговую строку
- * @param rowsForSum список строк для определения сумм по графам
- * @param sumRow итоговая строка для проверки
- * @return
- */
-def checkSumWithRow(def rowsForSum, def sumRow){
-    def totalResults = formData.createDataRow()
-    def isValid = true
-    calcTotalSum(rowsForSum, totalResults, totalColumns)
-    //Оставил each если понадобится выдавать более сложные сообщения об ошибках
-    for (col in totalColumns) {
-        if (totalResults[col] != sumRow[col]) {
-            isValid = false
-            break
-        }
-    }
-    return isValid
-}
 
 //// Кастомные методы
 void logicCheck(){
@@ -145,8 +117,16 @@ void logicCheck(){
 
     def dFrom = reportPeriodService.getStartDate(formData.getReportPeriodId())?.time
     def dTo = reportPeriodService.getEndDate(formData.getReportPeriodId())?.time
-    def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
-    formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
+    def dataRowsPrev
+    if (!isBalancePeriod()) {
+        def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+        formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
+        if(formDataPrev==null){
+            logger.error("Не найдены экземпляры РНУ-71.1 за прошлый отчетный период!")
+        } else {
+            dataRowsPrev = formDataService.getDataRowHelper(formDataPrev)?.allCached
+        }
+    }
     // Номер последний строки предыдущей формы
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def DataRow row : dataRows){
@@ -158,43 +138,45 @@ void logicCheck(){
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger,  !isBalancePeriod())
 
-        def values = [:]
-        def rowPrev = getRowPrev(formDataPrev?.allCached, row)
-        values.with {
-            result = getGraph11(row)
-            part2Date = getGraph12(row)
-            lossThisQuarter = getGraph13(row, dTo)
-            lossNextQuarter = getGraph14(row, dTo)
-            lossThisTaxPeriod = getGraph15(row, rowPrev, dFrom, dTo)
-        }
-        checkCalc(row, autoFillColumns, values, logger, true)
+        if (!isBalancePeriod()) {
+            def values = [:]
+            def rowPrev = getRowPrev(dataRowsPrev, row)
+            values.with {
+                result = getGraph11(row)
+                part2Date = getGraph12(row)
+                lossThisQuarter = getGraph13(row, dTo)
+                lossNextQuarter = getGraph14(row, dTo)
+                lossThisTaxPeriod = getGraph15(row, rowPrev, dFrom, dTo)
+            }
+            checkCalc(row, autoFillColumns, values, logger, true)
 
-        if (row.part2Date != values.part2Date){
-            logger.error(errorMsg + "Неверное значение графы ${getColumnName(row, 'part2Date')}!")
+            if (row.part2Date != values.part2Date){
+                logger.error(errorMsg + "Неверное значение графы ${getColumnName(row, 'part2Date')}!")
+            }
         }
         if (!(row.repaymentDate in (dFrom..dTo))){
-            logger.error(errorMsg + "Дата совершения операции вне границ отчетного периода!")
+            loggerError(errorMsg + "Дата совершения операции вне границ отчетного периода!")
         }
         if (++i != row.rowNumber) {
-            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
+            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
         if (row.income == 0 && row.lossThisQuarter == 0 && row.lossNextQuarter == 0){
-            logger.error(errorMsg + "Все суммы по операции нулевые!")
+            loggerError(errorMsg + "Все суммы по операции нулевые!")
         }
         if (row.dateOfAssignment < row.repaymentDate){
-            logger.error(errorMsg + "Неверно указана дата погашения основного долга!")
+            loggerError(errorMsg + "Неверно указана дата погашения основного долга!")
         }
         if (row.amount > 0 && row.income > 0 && row.repaymentDate == null &&
                 row.dateOfAssignment == null && row.lossThisTaxPeriod != null){
-            logger.error(errorMsg + "В момент уступки права требования «Графа 15» не заполняется!")
+            loggerError(errorMsg + "В момент уступки права требования «Графа 15» не заполняется!")
         }
         if (row.lossThisTaxPeriod > 0 &&
                 ((row.amount == null && row.result != null) ||
                         row.lossThisQuarter != null ||
                         row.lossNextQuarter != null)){
-            logger.error(errorMsg + "В момент отнесения второй половины убытка на расходы графы кроме графы 15 и графы 12 не заполняются!")
+            loggerError(errorMsg + "В момент отнесения второй половины убытка на расходы графы кроме графы 15 и графы 12 не заполняются!")
         }
     }
     def testRows = dataRows.findAll{ it -> it.getAlias() == null }
@@ -224,23 +206,22 @@ void logicCheck(){
             return null
         }
     })
-    def totalRow = getDataRow(dataRows, 'itg')
-    def sumRowList = dataRows.findAll{ it -> it.getAlias() == null}
-    if(!checkSumWithRow(sumRowList, totalRow)){
-        logger.error("Итоговые значения рассчитаны неверно!")
-    }
+    def sumRowList = dataRows.findAll{ it -> it.getAlias() == null || it.getAlias() == 'itg'}
+    checkTotalSum(sumRowList, totalColumns, logger, !isBalancePeriod())
 }
 
 void calc(){
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-
-    def reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-    def formDataPrev = formDataService.getFormDataPrev(formData, formDataDepartment.id)
-    formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
-    if(formDataPrev==null && !reportPeriodService.isBalancePeriod(reportPeriodPrev.id, formData.departmentId)){
-        logger.error("Не найдены экземпляры РНУ-71.1 за прошлый отчетный период!")
-        return
+    def dataRowsPrev
+    if (!isBalancePeriod()) {
+        def formDataPrev = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+        formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
+        if(formDataPrev==null){
+            return
+        } else {
+            dataRowsPrev = formDataService.getDataRowHelper(formDataPrev)?.allCached
+        }
     }
 
     // Удаление подитогов
@@ -255,16 +236,22 @@ void calc(){
     // Номер последний строки предыдущей формы
     def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
-    // Расчет ячеек
-    for(def row : dataRows) {
-        def rowPrev = getRowPrev(formDataPrev?.allCached, row)
-        row.with {
-            rowNumber = ++index
-            result = getGraph11(row)
-            part2Date = getGraph12(row)
-            lossThisQuarter = getGraph13(row, dTo)
-            lossNextQuarter = getGraph14(row, dTo)
-            lossThisTaxPeriod = getGraph15(row, rowPrev, dFrom, dTo)
+    if (!isBalancePeriod()) {
+        // Расчет ячеек
+        for(def row : dataRows) {
+            def rowPrev = getRowPrev(dataRowsPrev, row)
+            row.with {
+                rowNumber = ++index
+                result = getGraph11(row)
+                part2Date = getGraph12(row)
+                lossThisQuarter = getGraph13(row, dTo)
+                lossNextQuarter = getGraph14(row, dTo)
+                lossThisTaxPeriod = getGraph15(row, rowPrev, dFrom, dTo)
+            }
+        }
+    } else {
+        for(def row : dataRows) {
+            row.rowNumber = ++index
         }
     }
 
@@ -281,17 +268,7 @@ void calc(){
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
-    totalColumns.each {
-        totalRow[it] = 0
-    }
-    for(def row : dataRows) {
-        if(row?.getAlias()?.contains('itg')){
-            continue
-        }
-        totalColumns.each {
-            totalRow[it] += row[it] != null ? row[it] : 0
-        }
-    }
+    calcTotalSum(dataRows,totalRow,totalColumns)
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
 }
@@ -301,7 +278,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     def newRow = formData.createDataRow()
 
     newRow.getCell('contragent').colSpan = 6
-    newRow.contragent = 'Итого по ' + dataRows.get(i).contragent
+    newRow.contragent = 'Итого по ' + (dataRows.get(i).contragent?:'')
     newRow.setAlias('itg#'.concat(i.toString()))
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
@@ -386,4 +363,22 @@ def getGraph15(def row, def rowPrev, def startDate, def endDate) {
         }
     }
     return tmp?.setScale(2, RoundingMode.HALF_UP)
+}
+
+// Признак периода ввода остатков. Отчетный период является периодом ввода остатков.
+def isBalancePeriod() {
+    if (isBalancePeriod == null) {
+        // Отчётный период
+        def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+        isBalancePeriod = reportPeriodService.isBalancePeriod(reportPeriod.id, formData.departmentId)
+    }
+    return isBalancePeriod
+}
+
+def loggerError(def msg) {
+    if (isBalancePeriod()) {
+        logger.warn(msg)
+    } else {
+        logger.error(msg)
+    }
 }

@@ -158,7 +158,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public String getXmlData(long declarationDataId) {
-        BlobData blobData = blobDataService.get(declarationDataDao.get(declarationDataId).getXlsxDataUuid());
+        BlobData blobData = blobDataService.get(declarationDataDao.get(declarationDataId).getXmlDataUuid());
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
             IOUtils.copy(blobData.getInputStream(), byteArrayOutputStream);

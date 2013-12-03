@@ -26,6 +26,8 @@
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.bookerstatements.BookerStatements"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.refbooklist.RefBookList"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.scheduler.Scheduler"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.testpage.TestPage"/>
+
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.HistoryBusinessList"/>
 
 
