@@ -85,7 +85,7 @@ def currentDate = new Date()
 
 // Проверка НСИ
 boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
+    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, true)
 }
 
 // Поиск записи в справочнике по значению (для расчетов)
@@ -100,18 +100,19 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
+// Поиск записи в справочнике по значению (для расчетов) + по дате
+def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
+                     boolean required) {
+    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            day, rowIndex, cellName, logger, required)
+}
+
 //// Кастомные методы
 
 // Логические проверки
 void logicalCheckBeforeCalc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-
-    // справочник "Подразделения"
-    def departmentRefDataProvider = refBookFactory.getDataProvider(30)
-
-    // справочник "Параметры подразделения по налогу на прибыль"
-    def departmentParamIncomeRefDataProvider = refBookFactory.getDataProvider(33)
 
     def fieldNumber = 0
     for (row in dataRows) {
@@ -120,13 +121,11 @@ void logicalCheckBeforeCalc() {
         }
         fieldNumber++
 
-        def departmentRecords
         def departmentParam
-        if (row.regionBankDivision!=null) departmentRecords = departmentRefDataProvider.getRecords(currentDate, null, "ID = '" + row.regionBankDivision + "'", null)?.getRecords()
-        if (departmentRecords == null || departmentRecords.isEmpty()) {
+        if (row.regionBankDivision!=null) departmentParam =  getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
+        if (departmentParam == null || departmentParam.isEmpty()) {
             return
         } else {
-            departmentParam = departmentRecords.getAt(0)
 
             long centralId = 113 // ID Центрального аппарата.
             // У Центрального аппарата родительским подразделением должен быть он сам
@@ -139,11 +138,10 @@ void logicalCheckBeforeCalc() {
         }
 
         def departmentParamIncomeRecords
-        if (row.regionBankDivision!=null) departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = " + row.regionBankDivision, null)?.getRecords();
-        if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.isEmpty()) {
+        if (row.regionBankDivision!=null) incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
+        if (incomeParam == null || incomeParam.isEmpty()) {
             logger.error("Строка $fieldNumber: Не найдены настройки подразделения!")
         } else {
-            def incomeParam = departmentParamIncomeRecords.getAt(0)
 
             // графа 4 - кпп
             if (incomeParam?.get('record_id')?.getNumberValue() == null) {
@@ -166,9 +164,10 @@ void logicCheck() {
             continue
         }
         rowNumber++
+        def errorMsg = "Строка ${rowNumber}: "
 
         // 1. Проверка на заполнение поля «<Наименование поля>»
-        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, true)
 
         // 2. Проверка на уникальность поля «№ пп»
         if (rowNumber != row.number) {
@@ -195,21 +194,15 @@ void calc() {
     // Удаление подитогов
     deleteAllAliased(dataRows)
 
-    // справочник "Подразделения"
-    def departmentRefDataProvider = refBookFactory.getDataProvider(30)
-
-    // справочник "Параметры подразделения по налогу на прибыль"
-    def departmentParamIncomeRefDataProvider = refBookFactory.getDataProvider(33)
-
     def index = 0
     for (row in dataRows) {
         index++
 
         // графа 2 - название подразделения
-        row.regionBank = calc2(row, departmentRefDataProvider)
+        row.regionBank = calc2(row)
 
         // графа 4 - кпп
-        row.kpp = calc4(row, departmentParamIncomeRefDataProvider)
+        row.kpp = calc4(row)
     }
     // Сортировка
     dataRows.sort { a, b ->
@@ -234,13 +227,12 @@ void calc() {
 
 
 // графа 2 - название подразделения
-def calc2(def row, def departmentRefDataProvider) {
-    def departmentRecords
-    if (row.regionBankDivision!=null) departmentRecords = departmentRefDataProvider.getRecords(currentDate, null, "ID = '" + row.regionBankDivision + "'", null)?.getRecords()
-    if (departmentRecords == null || departmentRecords.isEmpty()) {
+def calc2(def row) {
+    def departmentParam
+    if (row.regionBankDivision!=null) departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
+    if (departmentParam == null || departmentParam.isEmpty()) {
         return null
     }
-    def departmentParam = departmentRecords.getAt(0)
 
     long centralId = 113 // ID Центрального аппарата.
     // У Центрального аппарата родительским подразделением должен быть он сам
@@ -252,13 +244,12 @@ def calc2(def row, def departmentRefDataProvider) {
 }
 
 // графа 4 - кпп
-def calc4(def row, def departmentParamIncomeRefDataProvider){
-    def departmentParamIncomeRecords
-    if (row.regionBankDivision!=null) departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = " + row.regionBankDivision, null)?.getRecords();
-    if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.isEmpty()) {
+def calc4(def row){
+    def incomeParam
+    if (row.regionBankDivision!=null) incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
+    if (incomeParam == null || incomeParam.isEmpty()) {
         return null
     }
-    def incomeParam = departmentParamIncomeRecords.getAt(0)
 
     return incomeParam.get('record_id').getNumberValue()
 }

@@ -10,6 +10,7 @@
 	<inherits name="com.aplana.sbrf.taxaccounting.web.main.entry.MainEntry" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.main.api.MainApi" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.main.page.MainPage" />
+    <inherits name="com.aplana.gwt.GwtWidget" />
 
 	<!-- Control -->
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.Widget" />
@@ -19,7 +20,7 @@
 
 	<!-- Theme -->
 	<!--<inherits name='com.google.gwt.user.theme.standard.Standard' />-->
-    <inherits name="com.aplana.sbrf.taxaccounting.theme.sberbank.Sberbank"/>
+    <inherits name="com.aplana.gwt.theme.sberbank.Sberbank"/>
 
 	<!-- Browser -->
 	<set-property name="user.agent" value="gecko1_8,safari,ie8,ie9"/>
