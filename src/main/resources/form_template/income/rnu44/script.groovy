@@ -1,18 +1,14 @@
 package form_template.income.rnu44
 
-import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
-
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
 /**
- * Скрипт для РНУ-44 (rnu44.groovy).
  * (РНУ-44) Регистр налогового учёта доходов, в виде восстановленной амортизационной премии при реализации ранее,
  * чем по истечении 5 лет с даты ввода в эксплуатацию Взаимозависимым лицам и резидентам оффшорных зон основных средств
  * введённых в эксплуатацию после 01.01.2013
+ * formTemplateId=340
  *
  * Версия ЧТЗ: 64
  *
@@ -65,7 +61,7 @@ switch (formDataEvent) {
             logger.error("Отсутствуют данные РНУ-49!")
             return
         }
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.CALCULATE :
         def rnu49FormData = getRnu49FormData()
@@ -74,7 +70,7 @@ switch (formDataEvent) {
             return
         }
         calc()
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.ADD_ROW :
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
@@ -91,22 +87,21 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
         def rnu49FormData = getRnu49FormData()
-        if (rnu49FormData==null) {
+        if (rnu49FormData == null) {
             logger.error("Отсутствуют данные РНУ-49!")
             return
         }
-        logicalCheck()
+        logicCheck()
         break
 // обобщить
     case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
-        logicalCheck()
+        logicCheck()
         break
 }
 
 //// Кэши и константы
-@Field def providerCache = [:]
 
 // все атрибуты
 @Field
@@ -247,7 +242,7 @@ def getSumm(rnu49Row) {
 /**
  * проверяем все данные формы на обязательное и корректное заполнение
  */
-boolean logicalCheck(){
+boolean logicCheck(){
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -255,7 +250,6 @@ boolean logicalCheck(){
     if (rnu49FormData==null) return
     def rnu49Rows = rnu49FormData.getAllCached()
 
-    def calcValues = [:]
     def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -285,7 +279,7 @@ boolean logicalCheck(){
         if (rnu49Row==[:]) {
             logger.error(errorMsg + "Отсутствуют данные в РНУ-49!")
         }
-        calcValues = getValues(rnu49Row)
+        def calcValues = getValues(rnu49Row)
         checkCalc(row, arithmeticCheckAlias, calcValues, logger, true)
         for (def colName : otherCheckAlias) {
             if (row[colName] != calcValues[colName]) {

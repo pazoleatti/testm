@@ -13,16 +13,14 @@ import java.text.SimpleDateFormat
 import groovy.transform.Field
 
 /**
- * Скрипт для РНУ-47 (rnu47.groovy).
  * Форма "(РНУ-47) Регистр налогового учёта «ведомость начисленной амортизации по основным средствам,
- * а также расходов в виде капитальных вложений»".
+ * а также расходов в виде капитальных вложений»"
+ * formTemplateId=344
  *
- * Версия ЧТЗ: 57
- * Вопросы аналитикам по ЧТЗ: http://jira.aplana.com/browse/SBRFACCTAX-2383
  *
  * @author vsergeev
  *
- * Графы:  *
+ * Графы:
  * 2    amortGroup               -   Амортизационные группы
  * 3    sumCurrentPeriodTotal    -   За отчётный месяц
  * 4    sumTaxPeriodTotal        -   С начала налогового периода
@@ -69,7 +67,6 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
         logicCheck()
         break
     case FormDataEvent.COMPOSE :
@@ -80,14 +77,8 @@ switch (formDataEvent) {
 }
 
 //// Кэши и константы
-@Field
-def providerCache = [:]
-@Field
-def recordCache = [:]
-@Field
-def refBookCache = [:]
 
-//Все аттрибуты
+// Все аттрибуты
 @Field
 def allColumns = ["amortGroup", "sumCurrentPeriodTotal", "sumTaxPeriodTotal", "amortPeriod", "amortTaxPeriod"]
 

@@ -5,7 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * (РНУ-75) Регистр налогового учёта доходов по операциям депозитария (366)
+ * (РНУ-75) Регистр налогового учёта доходов по операциям депозитария
+ * formTemplateId=366
  *
  * 1  - number
  * 2  - date

@@ -10,8 +10,7 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 /**
  * Скрипт для
  * Форма "6.1.1	Сводная форма начисленных доходов (доходы сложные)".
- *
- * Версия ЧТЗ: 64
+ * formTemplateId=302
  *
  * @author vsergeev
  *
@@ -70,7 +69,7 @@ switch (formDataEvent) {
         checkAndCalc()
         break
     case FormDataEvent.COMPOSE:
-        DataRowHelper form = formDataService.getDataRowHelper(formData)
+        def DataRowHelper form = formDataService.getDataRowHelper(formData)
         consolidationBank(form)
         if (isTerBank()) {
             calcTotal()
@@ -105,18 +104,7 @@ switch (formDataEvent) {
         break
 }
 
-//def fill(){
-//    dataRowsHelper.getAllCached().each { row ->
-//        getRequiredColsAliases().each {
-//            def cell = row.getCell(it)
-//            if (cell.isEditable()) {
-//                cell.setValue(1)
-//            }
-//        }
-//    }
-//}
-
-def consolidationBank(DataRowHelper formTarget) {
+def consolidationBank(def DataRowHelper formTarget) {
     if (formTarget == null) {
         return
     }
@@ -170,8 +158,8 @@ def checkAndCalc() {
 }
 
 def calcValues() {
-    calc4to5()      //рассчет строк 4 и 5
-    calc35to40()    //рассчет строк 35-40
+    calc4to5()      // рассчет строк 4 и 5
+    calc35to40()    // рассчет строк 35-40
 }
 
 /**
@@ -181,8 +169,6 @@ def checkRequiredFields() {
     boolean isValid = true
 
     def requiredColsAliases = getRequiredColsAliases()
-
-    def rnd = new Random()
 
     dataRowsHelper.getAllCached().each { dataRow ->
         for (def colAlias : requiredColsAliases) {
@@ -209,17 +195,16 @@ def calc35to40() {
 
         final income101Data = getIncome101Data(dataRow)
 
-        if (income101Data == null || income101Data.isEmpty()) {     //Нет данных об оборотной ведомости
+        if (income101Data == null || income101Data.isEmpty()) { // Нет данных об оборотной ведомости
             return
         }
 
         dataRow.with{
-//          графа  14
+            // графа  14
             opuSumByTableD = getOpuSumByTableDFor35to40(dataRow, income101Data)
-
-//          графа  15
+            // графа  15
             opuSumTotal = getOpuSumTotalFor35to40(dataRow, income101Data)
-//          графа  16
+            // графа  16
             difference = getDifferenceFor35to40(dataRow)
         }
 
@@ -234,7 +219,7 @@ def calc35to40() {
  */
 def getDifferenceFor35to40(def dataRow) {
     dataRow.with {
-        return incomeTaxSumS - (opuSumTotal - opuSumByTableD)      //«графа 16» = «графа 9» - ( «графа 15» – «графа 14»)
+        return incomeTaxSumS - (opuSumTotal - opuSumByTableD)      // «графа 16» = «графа 9» - ( «графа 15» – «графа 14»)
     }
 }
 
@@ -252,9 +237,8 @@ def getOpuSumTotalFor35to40(def dataRow, def income101Data) {
                 return 0
             }
         }
-    } else {
-        return 0
     }
+    return 0
 }
 
 /**
@@ -271,9 +255,8 @@ def getOpuSumByTableDFor35to40(def dataRow, def income101Data){
                 return 0
             }
         }
-    } else {
-        return 0
     }
+    return 0
 }
 
 /**
@@ -281,8 +264,6 @@ def getOpuSumByTableDFor35to40(def dataRow, def income101Data){
  */
 def getIncome101Data(def dataRow) {
     def account = dataRow.accountingRecords
-    def reportPeriodId = formData.reportPeriodId
-
     // Справочник 50 - "Оборотная ведомость (Форма 0409101-СБ)"
     def refDataProvider = refBookFactory.getDataProvider(50)
     def records = refDataProvider.getRecords(reportPeriodService.getEndDate(formData.reportPeriodId).time, null,  "ACCOUNT = '" + account + "'", null)
@@ -295,24 +276,23 @@ def getIncome101Data(def dataRow) {
  */
 def calc4to5() {
     getRowsAliasesFor4to5().each { rowAlias ->
-        def dataRow = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(),rowAlias)
+        def dataRow = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), rowAlias)
 
         final summaryIncomeSimpleFormHelper = getSummaryIncomeSimpleFormHelper()
         final income102Data = getIncome102Data(dataRow)
 
         dataRow.with {
-//          графа  11
+            // графа  11
             logicalCheck = getLogicalCheckFor4to5(dataRow)
-//          графа  13
+            // графа  13
             opuSumByEnclosure2 = getOpuSumByEnclosure2For4to5(dataRow)
-//          графа  14
+            // графа  14
             opuSumByTableD = getOpuSumByTableDFor4to5(dataRow, summaryIncomeSimpleFormHelper)
-//          графа  15
+            // графа  15
             opuSumTotal = getOpuSumTotalFor4to5(dataRow, income102Data)
-//          графа  16
+            // графа  16
             difference = getDifferenceFor4to5(dataRow)
         }
-
     }
     dataRowsHelper.save(dataRowsHelper.getAllCached())
 }
@@ -324,7 +304,7 @@ def calc4to5() {
  */
 def getDifferenceFor4to5(def dataRow) {
     dataRow.with {
-        return (opuSumByEnclosure2 + opuSumByTableD) - opuSumTotal     //«графа 16» = («графа 13» + «графа 14») – «графа 15»
+        return (opuSumByEnclosure2 + opuSumByTableD) - opuSumTotal     // «графа 16» = («графа 13» + «графа 14») – «графа 15»
     }
 }
 
@@ -339,12 +319,10 @@ def getOpuSumTotalFor4to5(def dataRow, def income102Data) {
             if (income102DataRow.opuCode == dataRow.accountingRecords) {
                 return (! isBlankOrNull(income102DataRow.totalSum)) ? 0 : income102DataRow.totalSum
             }
-
             return 0
         }
-    } else {
-        return 0
     }
+    return 0
 }
 
 /**
@@ -353,7 +331,6 @@ def getOpuSumTotalFor4to5(def dataRow, def income102Data) {
 def getIncome102Data(def dataRow){
     def account = dataRow.accountingRecords
     def reportPeriodId = formData.reportPeriodId
-
     return income102Dao.getIncome102(reportPeriodId, account)
 }
 
@@ -371,9 +348,8 @@ def getOpuSumByTableDFor4to5(def dataRow, def summaryIncomeSimpleFormHelper) {
             }
         }
         return sum;
-    } else {
-        return 0
     }
+    return 0
 }
 
 /**

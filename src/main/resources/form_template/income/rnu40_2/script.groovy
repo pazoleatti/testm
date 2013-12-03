@@ -5,10 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
-import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 
 /**
- * Форма "(РНУ-40.2) Регистр налогового учёта начисленного процентного дохода по прочим дисконтным облигациям. Отчёт 2".
+ * Форма "(РНУ-40.2) Регистр налогового учёта начисленного процентного дохода по прочим дисконтным облигациям. Отчёт 2"
+ * formTemplateId=339
  *
  * @author rtimerbaev
  */
@@ -34,7 +34,7 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        logicalCheck()
+        logicCheck()
         break
 }
 
@@ -120,7 +120,7 @@ void calc() {
     dataRowHelper.save(dataRows)
 }
 
-void logicalCheck() {
+void logicCheck() {
     def dataRows40_1 = getRowsRNU40_1()
     if (dataRows40_1 == null) {
         return

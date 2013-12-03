@@ -7,9 +7,9 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 /**
- * Скрипт для РНУ-48-2 (rnu48_2.groovy).
  * "(РНУ-48.2) Регистр налогового учёта «Сводная ведомость ввода в эксплуатацию инвентаря
  * и принадлежностей до 40 000 руб.»
+ * formTemplateId=313
  *
  * Версия ЧТЗ: 64
  *

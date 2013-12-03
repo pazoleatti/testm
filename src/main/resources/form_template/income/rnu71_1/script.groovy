@@ -4,17 +4,15 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import groovy.transform.Field
 
 import java.math.RoundingMode
 
-import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
-import groovy.transform.Field
-
 /**
- * Скрипт для РНУ-71.1
- * Форма "(РНУ-71.1) Регистр налогового учёта уступки права требования после предусмотренного кредитным договором срока погашения основного долга
- *  TODO графа 10
- *  @author bkinzyabulatov
+ * (РНУ-71.1) Регистр налогового учёта уступки права требования после предусмотренного кредитным договором срока погашения основного долга
+ * formTemplateId=356
+ * TODO графа 10
+ * @author bkinzyabulatov
  *
  * Графа 1  rowNumber               № пп
  * Графа 2  contragent              Наименование контрагента

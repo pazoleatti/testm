@@ -5,7 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * (РНУ-112) Регистр налогового учета сделок РЕПО и сделок займа ценными бумагами (374)
+ * (РНУ-112) Регистр налогового учета сделок РЕПО и сделок займа ценными бумагами
+ * formTemplateId=374
  *
  * @author Stanislav Yasinskiy
  */

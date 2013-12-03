@@ -1,13 +1,12 @@
 package form_template.income.app5
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
-
 /**
  * 6.9	(Приложение 5) Сведения для расчета налога на прибыль
+ * formTemplateId=372
  *
  * @author Lenar Haziev
  */

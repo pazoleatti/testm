@@ -1,13 +1,12 @@
 package form_template.income.rnu120
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.*
 import groovy.transform.Field
-
 /**
- * 378 - Форма "(РНУ-120) Регистр налогового учёта доходов по кредитам, выданным физическим лицам, признаваемым Взаимозависимыми лицами, а также любым физическим независимым лицам, являющимся резидентами оффшорных зон".
+ * (РНУ-120) Регистр налогового учёта доходов по кредитам, выданным физическим лицам, признаваемым Взаимозависимыми лицами, а также любым физическим независимым лицам, являющимся резидентами оффшорных зон
+ * formTemplateId=378
  *
  * TODO:
  *      - для графы 11 нет описания расчета
@@ -126,7 +125,6 @@ def currentDate = new Date()
 
 //// Обертки методов
 
-
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
@@ -188,7 +186,7 @@ void calc() {
         row.taxAccount = calc12(row, rowPrev)
 
         // графа 14
-        row.accrualPrev = calc14(row, rowPrev)
+        row.accrualPrev = calc14(rowPrev)
 
         // графа 15
         row.accrualReportPeriod = calc15(row)
@@ -223,9 +221,6 @@ void logicCheck() {
     if (dataRowHelperPrev==null) return
     def dataRowsPrev = dataRowHelperPrev.getAllCached()
 
-    // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
-    def calcValues = [:]
-
     def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -253,7 +248,7 @@ void logicCheck() {
         }
 
         // 3. Арифметические проверки расчета неитоговых граф
-        calcValues = [
+        def calcValues = [
                 booAccount: calc13(row),
                 taxAccount: calc12(row, rowPrev),
                 accrualPrev: calc14(row, rowPrev),
@@ -351,7 +346,7 @@ def calc13(def row) {
     return null
 }
 
-def calc14(def row, def rowPrev) {
+def calc14(def rowPrev) {
     return rowPrev.accrualReportPeriod
 }
 

@@ -8,9 +8,9 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 /**
- * Скрипт для РНУ-48-1 (rnu48_1.groovy).
  * Форма "3.1	(РНУ-48.1) Регистр налогового учёта «ведомость ввода в эксплуатацию инвентаря и принадлежностей
  * до 40 000 руб.  ".
+ * formTemplateId=343
  *
  * Версия ЧТЗ: 64
  *
@@ -48,7 +48,6 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
         allCheck()
         break
     // обобщить

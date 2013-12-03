@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
- * Скрипт для РНУ-39.1
  * Форма "(РНУ-39.1) Регистр налогового учёта процентного дохода по коротким позициям. Отчёт 1(месячный)
  * formTemplateId=336
  *
