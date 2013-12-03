@@ -1,0 +1,41 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:my='urn:import:com.aplana.gwt.client'>
+
+    <ui:style >
+        .btnBase{
+            width: 4px;
+            height: 5px;
+        }
+
+        .lbl{
+            margin-right: 5px;
+            margin-top: 3px;
+
+        }
+
+        .tbx{
+            border: 1px solid #AFAEAB;
+        }
+
+    </ui:style>
+
+    <g:HorizontalPanel>
+        <g:cell>
+            <g:Label ui:field="lbl" addStyleNames="{style.lbl}" />
+        </g:cell>
+        <g:cell>
+            <g:TextBox ui:field="txt" addStyleNames="{style.tbx}" />
+        </g:cell>
+        <g:cell>
+            <g:VerticalPanel>
+                <g:PushButton ui:field="btnUp" addStyleNames="{style.btnBase}" />
+                <g:PushButton ui:field="btnDown" addStyleNames="{style.btnBase}" />
+            </g:VerticalPanel>
+        </g:cell>
+    </g:HorizontalPanel>
+
+
+
+</ui:UiBinder>

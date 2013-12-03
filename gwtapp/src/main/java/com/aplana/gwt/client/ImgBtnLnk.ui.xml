@@ -1,0 +1,28 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:my='urn:import:com.aplana.gwt.client'>
+    <ui:style>
+        .hlink{
+            text-decoration: underline;
+            color: #0000FF;
+            margin-left: 3px;
+            cursor: pointer;
+        }
+
+        /*.hImg {
+            cursor: pointer;
+        }*/
+
+    </ui:style>
+    <g:HorizontalPanel>
+        <g:cell>
+            <g:Image  ui:field="img" />
+        </g:cell>
+        <g:cell>
+            <g:Anchor addStyleNames="{style.hlink}" ui:field="anchor" />
+        </g:cell>
+        <!--<g:Hyperlink addStyleNames="{style.hlink}" ui:field="link" />-->
+    </g:HorizontalPanel>
+
+</ui:UiBinder>

@@ -1,0 +1,28 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:my="urn:import:com.aplana.gwt.client" >
+    <ui:style>
+        .RefbookTextBox{
+            margen-left:10px;
+        }
+        .ms{
+            margin-left: 10px;
+        }
+    </ui:style>
+
+
+    <g:VerticalPanel width="100%">
+       <my:LabelSeparator text="test" ui:field="sep"/>
+       <my:RefBookTextBox  styleName="{style.RefbookTextBox}" ui:field="refbookTextBox" enabled="true"  />
+      <!-- <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" text="my hyperlink" />-->
+        <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" text="my button hyperlink" ui:field="ibl" />
+        <my:ImgBtnLnk text="my anorch" imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" href="#" ui:field="ian" />
+        <my:SpinEdit labelText="Период, с:" />
+       <!-- <g:ValueListBox ui:field="vlist"/>-->
+        <g:ListBox ui:field="listBox" />
+        <g:HorizontalPanel addStyleNames="{style.ms}" width="600px">
+            <my:MultiListBox ui:field="mlistbox" multiselect="true" />
+        </g:HorizontalPanel>
+    </g:VerticalPanel>
+</ui:UiBinder>

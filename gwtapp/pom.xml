@@ -33,6 +33,17 @@
 			<artifactId>dynacache-spring</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>gwt-widget</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>gwt-widget</artifactId>
+            <version>${project.version}</version>
+            <classifier>sources</classifier>
+        </dependency>
 		 
 		<dependency>
 			<!-- Доступно только в рантайме!!!! -->

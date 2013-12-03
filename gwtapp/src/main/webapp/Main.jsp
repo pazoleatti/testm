@@ -8,8 +8,6 @@
 	<link rel="icon" href="resources/img/favicon.ico" type="image/vnd.microsoft.icon" />
 	<link rel="shortcut icon" href="resources/img/favicon.ico" type="image/vnd.microsoft.icon" />
 
-    <link type="text/css" rel="stylesheet" href="resources/css/WidgetCustomization.css">
-
     <link type="text/css" rel="stylesheet" href="resources/css/Main.css">
 
    

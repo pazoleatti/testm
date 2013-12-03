@@ -24,6 +24,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataMo
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListModule;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesModule;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationModule;
+import com.aplana.sbrf.taxaccounting.web.module.testpage.client.TestPageModule;
 import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListModule;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaClientModule;
@@ -93,5 +94,6 @@ public class ClientModule extends AbstractPresenterModule {
 		install(new RefBookDataModule());
         install(new MigrationModule());
         install(new SchedulerModule());
+        install(new TestPageModule());
 	}
 }
