@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
-import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 
 /**
  * Форма "(РНУ-32.2) Регистр налогового учёта начисленного процентного дохода по облигациям, по которым открыта короткая позиция. Отчёт 2".
@@ -26,14 +25,14 @@ import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
-        formDataService.checkUnique(formData, logger)
+        checkCreation()
         break
     case FormDataEvent.CHECK :
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
@@ -41,19 +40,16 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        logicCheck()
         break
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        logicalCheck()
+        logicCheck()
         break
 }
 
 //// Кэши и константы
-@Field
-def providerCache = [:]
-@Field
-def recordCache = [:]
 @Field
 def refBookCache = [:]
 
@@ -65,45 +61,11 @@ def nonEmptyColumns = ['number', 'name', 'code', 'cost', 'bondsCount', 'percent'
 @Field
 def sections = ['1', '2', '3', '4', '5', '6', '7', '8']
 
-// Дата окончания отчетного периода
-@Field
-def reportPeriodEndDate = null
-
-// Текущая дата
-@Field
-def currentDate = new Date()
-
 //// Обертки методов
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для расчетов) + по дате
-def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
-                     boolean required = true) {
-    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
-            day, rowIndex, cellName, logger, required)
-}
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
-}
-
-// Получение числа из строки при импорте
-def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, true)
 }
 
 void calc() {
@@ -113,13 +75,13 @@ void calc() {
     dataRowHelper.save(dataRows)
 }
 
-void logicalCheck() {
-    def dataRows32_1 = getFromRNU32_1()
+void logicCheck() {
+    def dataRows32_1 = getDataRowsRNU32_1()
     if (dataRows32_1 == null) {
+        logger.error("Не найдены экземпляры «${formTemplateService.get(330).fullName}» за прошлый отчетный период!")
         return
     }
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             return
@@ -153,6 +115,15 @@ void logicalCheck() {
             }
         }
     }
+}
+
+void checkCreation() {
+    // форма должна создаваться только при принятии рну 32.1
+    if (formData.kind == FormDataKind.PRIMARY && getFormDataRNU32_1() == null) {
+        logger.error("Отсутствует или не находится в статусе «принята» форма «${formTemplateService.get(330).fullName}» за текущий отчетный период!")
+        return
+    }
+    formDataService.checkUnique(formData, logger)
 }
 
 void consolidation() {
@@ -273,9 +244,14 @@ def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
     return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
 }
 
+def getFormDataRNU32_1() {
+    def form = formDataService.find(330, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+    return (form != null && form.state == WorkflowState.ACCEPTED ? form : null)
+}
+
 /** Получить строки из нф РНУ-32.1. */
-def getFromRNU32_1() {
-    def formDataRNU = formDataService.find(330, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+def getDataRowsRNU32_1() {
+    def formDataRNU = getFormDataRNU32_1()
     if (formDataRNU != null) {
         return formDataService.getDataRowHelper(formDataRNU)?.allCached
     }
@@ -367,7 +343,7 @@ def getCalcRowFromRNU_32_1(def number, def name, def code, def rows32_1) {
 }
 
 /**
- * Проверить посчитала ли уже для рну 32.2 строка с заданными параметрами (по номеру и названию тб и коду валюты).
+ * Проверить посчитана ли уже для рну 32.2 строка с заданными параметрами (по номеру и названию тб и коду валюты).
  *
  * @param number номер тб
  * @param name наименование тб
@@ -386,13 +362,7 @@ def hasCalcRow(def number, def name, def code, def rows32_2) {
     return false
 }
 
-/**
- * Округляет число до требуемой точности.
- *
- * @param value округляемое число
- * @param precision точность округления, знаки после запятой
- * @return округленное число
- */
+// Округляет число до требуемой точности.
 def roundValue(def value, int precision) {
     if (value != null) {
         return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
