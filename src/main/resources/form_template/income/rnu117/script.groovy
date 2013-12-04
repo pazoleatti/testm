@@ -96,11 +96,6 @@ def nonEmptyColumns = ["rowNumber", "transactionNumber", "transactionKind", "con
         "request", "liability", "income", "outcome", "deviationMinPrice", "deviationMaxPrice"]
 
 //// Обертки методов
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
@@ -137,7 +132,7 @@ void logicCheck() {
         checkCalc(row, arithmeticCheckAlias, values, logger, true)
 
         // Проверки соответствия НСИ
-        checkNSI(16, row, "transactionType")
+        formDataService.checkNSI(16, refBookCache, row, "transactionType", logger, true)
     }
     // Проверка итогов
     def totalCorrupt = false
@@ -215,11 +210,11 @@ void calc10(def row, def result) {
 }
 
 void calc11(def row, def result) {
-    def graph6 = getRefBookValue(16, row.transactionType)?.TYPE?.stringValue
     def kind = getRefBookValue(91, row.transactionKind)?.KIND?.stringValue
     if (kind == null){
         return
     }
+    def graph6 = getRefBookValue(16, row.transactionType)?.TYPE?.stringValue
     switch (kind){
         case "DF FX":
         case "NDF FX":
