@@ -23,12 +23,12 @@
                         <picker:DepartmentPickerModalWidget header="Подразделение"  ui:field="departmentPicker"  multiSelection="true"/>
                     </g:VerticalPanel>
                     <g:VerticalPanel>
-                        <g:Label text="Признак активности:"/>
-                        <g:ValueListBox width="200px" ui:field="isActiveBox"/>
-                    </g:VerticalPanel>
-                    <g:VerticalPanel>
                         <g:Label text="Роль:"/>
                         <g:ValueListBox width="200px" ui:field="roleBox"/>
+                    </g:VerticalPanel>
+                    <g:VerticalPanel>
+                        <g:Label text="Признак активности:"/>
+                        <g:ValueListBox width="200px" ui:field="isActiveBox"/>
                     </g:VerticalPanel>
                     <g:cell>
                         <g:VerticalPanel>
@@ -36,8 +36,8 @@
                             <g:TextBox width="200px" ui:field="userName"/>
                         </g:VerticalPanel>
                     </g:cell>
-                    <g:cell verticalAlignment="bottom">
-                        <g:Button title="Применить" text="Применить" ui:field="applyButton"/>
+                    <g:cell verticalAlignment="bottom" width="100px">
+                        <g:Button title="Поиск" text="Поиск" ui:field="applyButton"/>
                     </g:cell>
                     <g:cell verticalAlignment="bottom">
                         <style:LinkAnchor  ui:field="printButton" text="Выгрузить в xlsx" img="resources/img/printer-16.png" title="Отобразить печатное представление документа"/>
