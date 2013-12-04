@@ -5,7 +5,7 @@
 	<groupId>com.aplana.taxaccounting</groupId>
 	<artifactId>taxaccounting</artifactId>
 
-	<description>АС "Учёт налогов" - Родительский модуль</description>
+	<description>�� "���� �������" - ������������ ������</description>
 	<version>0.3.5</version>
 	<packaging>pom</packaging>
 
@@ -500,7 +500,7 @@
 		</repository>
 		<repository>
 			<id>taxaccounting-thirdparty</id>
-			<name>Сторонние библиотеки, используемые в проекте</name>
+			<name>��������� ����������, ������������ � �������</name>
 			<url>http://aplana.datateh.ru:8181/nexus/content/repositories/thirdparty/</url>
 		</repository>
 	</repositories>

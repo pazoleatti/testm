@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
-import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 
 /**
  * Форма "(РНУ-32.1) Регистр налогового учёта начисленного процентного дохода по облигациям, по которым открыта короткая позиция. Отчёт 1".
@@ -116,29 +115,11 @@ sections = ['1', '2', '3', '4', '5', '6', '7', '8']
 @Field
 def reportPeriodEndDate = null
 
-// Текущая дата
-@Field
-def currentDate = new Date()
-
 //// Обертки методов
 
 // Проверка НСИ
 boolean checkNSI(def refBookId, def row, def alias) {
     return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
 }
 
 // Поиск записи в справочнике по значению (для расчетов) + по дате
@@ -151,11 +132,6 @@ def getRefBookRecord(def Long refBookId, def String alias, def String value, def
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
-}
-
-// Получение числа из строки при импорте
-def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, true)
 }
 
 def addRow() {
@@ -181,7 +157,7 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def lastDay = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
+    def lastDay = getMonthEndDate()
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -220,8 +196,7 @@ void logicCheck() {
     def arithmeticCheckAlias = ['incomePrev', 'incomeShortPosition', 'percIncome', 'totalPercIncome']
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
-    def lastDay = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
-
+    def lastDay = getMonthEndDate()
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -256,14 +231,6 @@ void logicCheck() {
         checkNSI(30, row, 'number')     // 2. Проверка соответствия поля «Номер территориального банка»	(графа 1)
         checkNSI(30, row, 'name')       // 3. Проверка соответствия поля «Наименование территориального банка» (графа 2)
         checkNSI(84, row, 'regNumber')  // 4. Проверка соответствия поля «Номер государственной регистрации» (графа 5)
-
-        // проверка делителя на ноль
-        ['countsBonds', 'termBondsIssued', 'currentPeriod'].each { alias ->
-            if (row.getCell(alias).value == 0) {
-                def name = row.getCell(alias).column.name
-                logger.error(errorMsg + "деление на ноль: \"$name\" имеет нулевое значение.")
-            }
-        }
     }
 
     // 4. Арифметическая проверка итоговых значений по разделам (графа 8, 15..18)
@@ -298,8 +265,8 @@ void consolidation() {
     
 
     // собрать из источников строки и разместить соответствующим разделам
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+        if (it.formTypeId == formData.formType.id) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceDataRows = formDataService.getDataRowHelper(source).allCached
@@ -489,13 +456,7 @@ def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
     return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
 }
 
-/**
- * Округляет число до требуемой точности.
- *
- * @param value округляемое число
- * @param precision точность округления, знаки после запятой
- * @return округленное число
- */
+// Округляет число до требуемой точности
 def roundValue(def value, int precision) {
     if (value != null) {
         return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
@@ -509,4 +470,11 @@ void updateIndexes(def dataRows) {
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
+}
+
+def getMonthEndDate() {
+    if (reportPeriodEndDate == null) {
+        reportPeriodEndDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
+    }
+    return reportPeriodEndDate
 }
