@@ -42,8 +42,7 @@ import org.springframework.context.annotation.Import;
         AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class, SourcesServerModule.class,
         DepartmentConfigServerModule.class, BookerStatementsServerModule.class, RefBookPickerServerModule.class,
         RefBookListServerModule.class, RefBookDataServerModule.class, MigrationServerModule.class, SchedulerServerModule.class,
-        HistoryBusinessServerModule.class})
-        RefBookListServerModule.class, RefBookDataServerModule.class, MigrationServerModule.class, SchedulerServerModule.class, TestPageServerModule.class})
+        HistoryBusinessServerModule.class, TestPageServerModule.class})
 @ComponentScan(basePackageClasses = MainServerModule.class)
 @EnableAspectJAutoProxy
 public class MainServerModule {

@@ -7,9 +7,6 @@ import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -31,10 +28,6 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
     @UiField
     ImgBtnLnk ian;
-
-    @UiField
-    ListBox listBox;
-
 
     @UiField
     RefBookTextBox refbookTextBox;
@@ -72,9 +65,6 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
         }));
 
         refbookTextBox.addButtons(list);
-
-        listBox.addItem("Тест 1");
-        listBox.addItem("Тест 2");
 
         mlistbox.setRenderer(new Renderer() {
             @Override
