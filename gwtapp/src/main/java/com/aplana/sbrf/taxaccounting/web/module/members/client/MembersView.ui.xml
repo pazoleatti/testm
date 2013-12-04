@@ -16,6 +16,9 @@
             <g:VerticalPanel>
                 <g:HorizontalPanel height="35px">
                     <g:Label styleName="{style.title}">Пользователи</g:Label>
+                    <g:cell verticalAlignment="middle">
+                        <style:LinkAnchor  ui:field="printButton" text="Печать" img="resources/img/printer-16.png" title="Отобразить печатное представление документа"/>
+                    </g:cell>
                 </g:HorizontalPanel>
                 <g:HorizontalPanel height="35px" spacing="10">
                     <g:VerticalPanel>
@@ -38,9 +41,6 @@
                     </g:cell>
                     <g:cell verticalAlignment="bottom" width="100px">
                         <g:Button title="Поиск" text="Поиск" ui:field="applyButton"/>
-                    </g:cell>
-                    <g:cell verticalAlignment="bottom">
-                        <style:LinkAnchor  ui:field="printButton" text="Выгрузить в xlsx" img="resources/img/printer-16.png" title="Отобразить печатное представление документа"/>
                     </g:cell>
                 </g:HorizontalPanel>
             </g:VerticalPanel>
