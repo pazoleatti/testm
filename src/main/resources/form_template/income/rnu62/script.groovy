@@ -418,9 +418,7 @@ BigDecimal round(BigDecimal value, int newScale = 2) {
 // Признак периода ввода остатков. Отчетный период является периодом ввода остатков.
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        // Отчётный период
-        def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-        isBalancePeriod = reportPeriodService.isBalancePeriod(reportPeriod.id, formData.departmentId)
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     }
     return isBalancePeriod
 }

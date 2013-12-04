@@ -50,8 +50,6 @@ switch (formDataEvent) {
             formDataService.getDataRowHelper(formData).delete(currentDataRow)
         }
         break
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
-        calc()
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
@@ -59,7 +57,6 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
-    // обобщить
     case FormDataEvent.COMPOSE :
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
@@ -368,9 +365,7 @@ def getGraph15(def row, def rowPrev, def startDate, def endDate) {
 // Признак периода ввода остатков. Отчетный период является периодом ввода остатков.
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        // Отчётный период
-        def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-        isBalancePeriod = reportPeriodService.isBalancePeriod(reportPeriod.id, formData.departmentId)
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     }
     return isBalancePeriod
 }

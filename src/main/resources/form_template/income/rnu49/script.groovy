@@ -195,7 +195,7 @@ void calc(def dataRows) {
         }
     }
 
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     // графа 1, 15..17, 20
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -283,7 +283,7 @@ void logicCheck() {
         }
     }
     // Номер последний строки предыдущей формы
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     def List<ReportPeriod> reportPeriodList = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id)
     def numbers = []
     reportPeriodList.each { ReportPeriod period ->
@@ -639,9 +639,7 @@ def loggerError(def msg) {
 // Признак периода ввода остатков. Отчетный период является периодом ввода остатков.
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        // Отчётный период
-        def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-        isBalancePeriod = reportPeriodService.isBalancePeriod(reportPeriod.id, formData.departmentId)
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     }
     return isBalancePeriod
 }
