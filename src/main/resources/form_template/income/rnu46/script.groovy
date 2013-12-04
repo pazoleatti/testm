@@ -143,9 +143,9 @@ void calc() {
         return
     }
     // Дата начала отчетного периода
-    def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
     // Дата окончания отчетного периода
-    def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
 
     // Отчетная дата
     def reportDate = getReportDate()
@@ -330,9 +330,9 @@ void logicCheck() {
     def needValue = [:]
 
     // Дата начала отчетного периода
-    def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
     // Дата окончания отчетного периода
-    def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
 
     // Инвентарные номера
     def Set<String> invSet = new HashSet<String>()
