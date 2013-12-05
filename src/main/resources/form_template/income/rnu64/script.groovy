@@ -24,10 +24,6 @@ import java.text.SimpleDateFormat
  * 5. costs - Затраты (руб.коп.)
  */
 
-/**
- * Выполнение действий по событиям
- *
- */
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkCreation()

@@ -6,6 +6,7 @@ import groovy.transform.Field
 
 /**
  * Форма "(РНУ-117) Регистр налогового учёта доходов и расходов, по операциям со сделками форвард, квалифицированным в качестве операций с ФИСС для целей налогообложения"
+ * formTemplateId=370
  *
  * @author bkinzyabulatov
  * TODO заполнение граф 7.1, 7.2 - вручную или автоматом
@@ -67,13 +68,9 @@ switch (formDataEvent) {
 
 //// Кэши и константы
 @Field
-def providerCache = [:]
-@Field
-def recordCache = [:]
-@Field
 def refBookCache = [:]
 
-//Все аттрибуты
+// Все аттрибуты
 @Field
 def allColumns = ["rowNumber", "transactionNumber", "transactionKind", "contractor", "transactionDate",
         "transactionEndDate", "resolveDate", "transactionType", "courseFix", "course", "minPrice", "maxPrice",
@@ -99,11 +96,6 @@ def nonEmptyColumns = ["rowNumber", "transactionNumber", "transactionKind", "con
         "request", "liability", "income", "outcome", "deviationMinPrice", "deviationMaxPrice"]
 
 //// Обертки методов
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
@@ -140,7 +132,7 @@ void logicCheck() {
         checkCalc(row, arithmeticCheckAlias, values, logger, true)
 
         // Проверки соответствия НСИ
-        checkNSI(16, row, "transactionType")
+        formDataService.checkNSI(16, refBookCache, row, "transactionType", logger, true)
     }
     // Проверка итогов
     def totalCorrupt = false
@@ -218,11 +210,11 @@ void calc10(def row, def result) {
 }
 
 void calc11(def row, def result) {
-    def graph6 = getRefBookValue(16, row.transactionType)?.TYPE?.stringValue
     def kind = getRefBookValue(91, row.transactionKind)?.KIND?.stringValue
-    if(kind == null){
+    if (kind == null){
         return
     }
+    def graph6 = getRefBookValue(16, row.transactionType)?.TYPE?.stringValue
     switch (kind){
         case "DF FX":
         case "NDF FX":

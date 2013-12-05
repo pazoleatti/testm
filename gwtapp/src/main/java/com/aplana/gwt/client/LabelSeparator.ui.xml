@@ -1,0 +1,21 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:my='urn:import:com.aplana.gwt.client'>
+    <ui:style>
+        .sptext{
+            /*margin-left: 15px;*/
+            color: #277E55;
+        }
+        .sp{
+            /*margin-right: 15px;*/
+            border-bottom: #277E55 dashed 1px;
+        }
+    </ui:style>
+
+    <g:HorizontalPanel width="100%">
+        <g:cell><g:Label addStyleNames="{style.sptext}"  ui:field="separator" /></g:cell>
+        <g:cell width="100%"> <g:HTML ><div style="border-bottom: #277E55 dashed 1px; width: 100%;">&nbsp;</div></g:HTML></g:cell>
+    </g:HorizontalPanel>
+
+</ui:UiBinder>

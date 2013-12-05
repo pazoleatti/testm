@@ -276,7 +276,6 @@ public class FormDataPresenter extends
         if (wfMove.isReasonToMoveShouldBeSpecified()) {
             DestinationCheckAction action = new DestinationCheckAction();
             action.setFormDataId(formData.getId());
-            Window.confirm("Start!");
             dispatcher.execute(action, CallbackUtils.
                     defaultCallback(new AbstractCallback<DestinationCheckResult>() {
                         @Override
@@ -364,12 +363,12 @@ public class FormDataPresenter extends
                                                 .getName(),
 		                                result.getTaxPeriodStartDate(), result.getTaxPeriodEndDate());
                                 // Если период для ввода остатков, то делаем все ячейки редактируемыми
-
+                                
 
                                 // В периоде ввода остатков форма должна быть в режиме супер редактирования
                                 // Он должен включаться в фабрике колонок если readOnly = false;
                                 forceEditMode = result.isBalancePeriod();
-
+                                
                                 getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
                                         + result.getFormData().getFormType().getTaxType());
                                 getView().setColumnsData(

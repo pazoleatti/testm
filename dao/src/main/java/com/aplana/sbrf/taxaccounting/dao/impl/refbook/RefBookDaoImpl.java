@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -46,6 +47,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private ApplicationContext applicationContext;
 
     @Override
+    @Cacheable(value = "permanentData", key = "'RefBook_'+#refBookId.toString()")
     public RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
@@ -59,27 +61,35 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
 	 public List<RefBook> getAll(Integer typeId) {
-		return getJdbcTemplate().query(
-				"select id, name, script_id, visible from ref_book where (? is null or type = ?) order by name",
-                new Object[] {typeId, typeId},
-				new RefBookRowMapper());
-	}
+        return getAll(getJdbcTemplate().queryForList("select id from ref_book where (? is null or type = ?) order by name",
+                            new Object[] {typeId, typeId},
+                            Long.class));
+     }
+
+    private List<RefBook> getAll(List<Long> ids) {
+        List<RefBook> refBookList= new ArrayList();
+        for (Long id: ids){
+            refBookList.add(get(id));
+        }
+
+        return refBookList;
+    }
 
 	@Override
 	public List<RefBook> getAllVisible(Integer typeId) {
-		return getJdbcTemplate().query(
-				"select id, name, script_id, visible from ref_book where visible = 1 and (? is null or type = ?) order by name",
-                new Object[] {typeId, typeId},
-				new RefBookRowMapper());
+		return getAll(
+                    getJdbcTemplate().queryForList(
+				        "select id from ref_book where visible = 1 and (? is null or type = ?) order by name",
+                        new Object[] {typeId, typeId},
+                        Long.class));
 	}
 
     @Override
     public RefBook getByAttribute(long attributeId) {
         try {
-            return getJdbcTemplate().queryForObject(
-                    "select r.id, r.name, r.script_id, r.visible from ref_book r join ref_book_attribute a on a.ref_book_id = r.id where a.id = ?",
-                    new Object[]{attributeId}, new int[]{Types.NUMERIC},
-                    new RefBookRowMapper());
+            return get(getJdbcTemplate().queryForLong(
+                    "select r.id from ref_book r join ref_book_attribute a on a.ref_book_id = r.id where a.id = ?",
+                    new Object[]{attributeId}, new int[]{Types.NUMERIC}));
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException(String.format("Не найден атрибут справочника с id = %d", attributeId));
         }

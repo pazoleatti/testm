@@ -1,13 +1,12 @@
 package form_template.income.rnu120
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.*
 import groovy.transform.Field
-
 /**
- * 378 - Форма "(РНУ-120) Регистр налогового учёта доходов по кредитам, выданным физическим лицам, признаваемым Взаимозависимыми лицами, а также любым физическим независимым лицам, являющимся резидентами оффшорных зон".
+ * (РНУ-120) Регистр налогового учёта доходов по кредитам, выданным физическим лицам, признаваемым Взаимозависимыми лицами, а также любым физическим независимым лицам, являющимся резидентами оффшорных зон
+ * formTemplateId=378
  *
  * TODO:
  *      - для графы 11 нет описания расчета
@@ -126,7 +125,6 @@ def currentDate = new Date()
 
 //// Обертки методов
 
-
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
@@ -188,7 +186,7 @@ void calc() {
         row.taxAccount = calc12(row, rowPrev)
 
         // графа 14
-        row.accrualPrev = calc14(row, rowPrev)
+        row.accrualPrev = calc14(rowPrev)
 
         // графа 15
         row.accrualReportPeriod = calc15(row)
@@ -223,16 +221,14 @@ void logicCheck() {
     if (dataRowHelperPrev==null) return
     def dataRowsPrev = dataRowHelperPrev.getAllCached()
 
-    // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
-    def calcValues = [:]
-
     def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
         }
         rowNumber++
-        errorMsg = "Строка $rowNumber: "
+        def index = row.getIndex()
+        def errorMsg = "Строка ${index}: "
 
         def rowPrev = getRowPrev(row, dataRowsPrev)
 
@@ -245,7 +241,7 @@ void logicCheck() {
         }
 
         // 1. Проверка на заполнение поля «<Наименование поля>» (1 .. 17)
-        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 2. Проверка на уникальность поля «№ пп»
         if (rowNumber != row.number) {
@@ -253,7 +249,7 @@ void logicCheck() {
         }
 
         // 3. Арифметические проверки расчета неитоговых граф
-        calcValues = [
+        def calcValues = [
                 booAccount: calc13(row),
                 taxAccount: calc12(row, rowPrev),
                 accrualPrev: calc14(row, rowPrev),
@@ -271,38 +267,8 @@ void logicCheck() {
                 RefBook rb = refBookFactory.get(22);
                 def rbName = rb.getName()
                 def attrName = rb.getAttribute('RATE').getName()
-                logger.error("В справочнике «$rbName» не найдено значение «${row.course}», соответствующее атрибуту «$attrName»!")
+                logger.error(errorMsg + "В справочнике «$rbName» не найдено значение «${row.course}», соответствующее атрибуту «$attrName»!")
             }
-        }
-
-        // 5. Проверки деления на 0
-        if (row.baseForCalculation == 0) {
-            def name = row.getCell('baseForCalculation').column.name
-            logger.error(errorMsg + "Деление на ноль: «$name» имеет нулевое значение.")
-        }
-
-        //для расчета графы 12
-        if (row.calcPeriodAccountingEndDate != null && rowPrev.calcPeriodBeginDate != null &&
-                (row.calcPeriodAccountingEndDate - rowPrev.calcPeriodBeginDate + 1) == 0) {
-            def name1 = row.getCell('calcPeriodAccountingEndDate').column.name+"(${row.getCell('calcPeriodAccountingEndDate').column.groupName})"
-            def name2 = row.getCell('calcPeriodBeginDate').column.name+"(${row.getCell('calcPeriodBeginDate').column.groupName})"
-            logger.error(errorMsg + "Деление на ноль: количество дней между «$name1» и «$name2»(за предыдущий период) равно 0.")
-        }
-
-        //для расчета графы 13
-        if (row.calcPeriodAccountingEndDate != null && row.calcPeriodAccountingBeginDate != null &&
-                (row.calcPeriodAccountingEndDate - row.calcPeriodAccountingBeginDate + 1)==0) {
-            def name1 = row.getCell('calcPeriodAccountingEndDate').column.name+"(${row.getCell('calcPeriodAccountingEndDate').column.groupName})"
-            def name2 = row.getCell('calcPeriodAccountingBeginDate').column.name+"(${row.getCell('calcPeriodAccountingBeginDate').column.groupName})"
-            logger.error(errorMsg + "Деление на ноль: количество дней между «$name1» и «$name2» равно 0.")
-        }
-
-        //для расчета графы 15, 17
-        if (row.calcPeriodEndDate != null && row.calcPeriodBeginDate != null &&
-                (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1) == 0) {
-            def name1 = row.getCell('calcPeriodEndDate').column.name+"(${row.getCell('calcPeriodEndDate').column.groupName})"
-            def name2 = row.getCell('calcPeriodBeginDate').column.name+"(${row.getCell('calcPeriodBeginDate').column.groupName})"
-            logger.error(errorMsg + "Деление на ноль: количество дней между «$name1» и «$name2» равно 0.")
         }
     }
 
@@ -351,7 +317,7 @@ def calc13(def row) {
     return null
 }
 
-def calc14(def row, def rowPrev) {
+def calc14(def rowPrev) {
     return rowPrev.accrualReportPeriod
 }
 

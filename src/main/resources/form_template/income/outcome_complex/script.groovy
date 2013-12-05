@@ -6,11 +6,11 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
- * Форма "Сводная форма начисленных расходов (расходы сложные)".
+ * Форма "Сводная форма начисленных расходов (расходы сложные)"
+ * formTemplateId=303
  *
  * @version 46
  */
-
 
 if (formData.id != null) dataRowsHelper = formDataService.getDataRowHelper(formData)
 
@@ -103,14 +103,6 @@ void checkAndCalc() {
  * Расчет итоговых строк.
  */
 void calcTotal() {
-//    formData.dataRows.each { row ->
-//        ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each {
-//            def cell = row.getCell(it)
-//            if (cell.isEditable()) {
-//                cell.setValue(1)
-//            }
-//        }
-//    }
     def totalRow1 = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R67')
     def totalRow2 = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R93')
 
@@ -119,7 +111,6 @@ void calcTotal() {
         totalRow1.getCell(alias).setValue(getSum(alias, 'R2', 'R66'))
         totalRow2.getCell(alias).setValue(getSum(alias, 'R69', 'R92'))
     }
-
 }
 
 /**

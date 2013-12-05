@@ -11,7 +11,6 @@ import java.math.RoundingMode
 import groovy.transform.Field
 
 /**
- * Скрипт для РНУ-49 (rnu49.groovy).
  * Форма "(РНУ-49) Регистр налогового учёта «ведомость определения результатов от реализации (выбытия) имущества»".
  * @version 59
  *
@@ -39,7 +38,6 @@ import groovy.transform.Field
  * графа 20 - expensesSum
  * графа 21 - saledPropertyCode
  * графа 22 - saleCode
-
  */
 
 switch (formDataEvent) {
@@ -79,10 +77,6 @@ switch (formDataEvent) {
 }
 
 //// Кэши и константы
-@Field
-def providerCache = [:]
-@Field
-def recordCache = [:]
 @Field
 def refBookCache = [:]
 
@@ -201,7 +195,7 @@ void calc(def dataRows) {
         }
     }
 
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     // графа 1, 15..17, 20
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -289,7 +283,7 @@ void logicCheck() {
         }
     }
     // Номер последний строки предыдущей формы
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     def List<ReportPeriod> reportPeriodList = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id)
     def numbers = []
     reportPeriodList.each { ReportPeriod period ->
@@ -645,9 +639,7 @@ def loggerError(def msg) {
 // Признак периода ввода остатков. Отчетный период является периодом ввода остатков.
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        // Отчётный период
-        def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-        isBalancePeriod = reportPeriodService.isBalancePeriod(reportPeriod.id, formData.departmentId)
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     }
     return isBalancePeriod
 }

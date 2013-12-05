@@ -281,7 +281,8 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		if (filter == null) {
 			return getUserIds();
 		}
-		StringBuilder sql = new StringBuilder("select id from (select  u.*, rownum r from sec_user u where 1=1 ");
+		StringBuilder sql = new StringBuilder("select id from (select u.id, u.is_active, u.name, u.department_id, rownum r " +
+				"from sec_user u where 1=1 ");
 		if (filter.getActive() != null) {
 			sql.append(" and is_active = " + (filter.getActive() ? "1" : "0")) ;
 		}

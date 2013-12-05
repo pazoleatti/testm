@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.DataRow
 
 /**
- * Форма "Сведения о транспортных средствах, по которым уплачивается транспортный налог".
+ * Сведения о транспортных средствах, по которым уплачивается транспортный налог
  * formTemplateId=201
  *
  * @author ivildanov

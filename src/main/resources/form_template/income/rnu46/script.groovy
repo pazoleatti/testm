@@ -124,8 +124,7 @@ def getDataRowHelperPrev() {
 def isMonthBalace() {
     if (isBalace == null) {
         // Отчётный период
-        def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-        if (!reportPeriodService.isBalancePeriod(reportPeriod.id, formData.departmentId) || formData.periodOrder == null) {
+        if (!reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId) || formData.periodOrder == null) {
             isBalace = false
         } else {
             isBalace = formData.periodOrder - 1 % 3 == 0
@@ -143,9 +142,9 @@ void calc() {
         return
     }
     // Дата начала отчетного периода
-    def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
     // Дата окончания отчетного периода
-    def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
 
     // Отчетная дата
     def reportDate = getReportDate()
@@ -330,9 +329,9 @@ void logicCheck() {
     def needValue = [:]
 
     // Дата начала отчетного периода
-    def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
     // Дата окончания отчетного периода
-    def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
 
     // Инвентарные номера
     def Set<String> invSet = new HashSet<String>()

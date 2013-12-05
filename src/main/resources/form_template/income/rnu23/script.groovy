@@ -7,7 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
- * Форма "(РНУ-23) Регистр налогового учёта доходов по выданным гарантиям".
+ * Форма "(РНУ-23) Регистр налогового учёта доходов по выданным гарантиям"
+ * formTemplateId=323
  *
  * @version 59
  *

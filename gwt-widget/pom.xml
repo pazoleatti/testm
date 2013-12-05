@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>taxaccounting</artifactId>
+    <groupId>com.aplana.taxaccounting</groupId>
+    <version>0.3.5</version>
+  </parent>
+
+  <artifactId>gwt-widget</artifactId>
+  <description>GWT виджеты</description>
+  <packaging>jar</packaging>
+
+  <name>gwt-widget</name>
+
+  <properties>
+    <!-- GWT needs at least java 1.5 -->
+    <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-servlet</artifactId>
+        <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-user</artifactId>
+      <scope>provided</scope>
+    </dependency>
+      <!-- DI dependencies -->
+      <dependency>
+          <groupId>com.google.gwt.inject</groupId>
+          <artifactId>gin</artifactId>
+      </dependency>
+
+  </dependencies>
+
+  <build>
+      <resources>
+          <resource>
+              <directory>src/main/resources</directory>
+          </resource>
+      </resources>
+  </build>
+
+</project>

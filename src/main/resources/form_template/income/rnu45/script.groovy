@@ -203,7 +203,6 @@ def BigDecimal calc8(def row) {
         return null
     }
     return ((1 / row.usefulLife) * 100).setScale(4, RoundingMode.HALF_UP)
-
 }
 
 // Ресчет графы 9

@@ -11,7 +11,7 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 import java.text.SimpleDateFormat
 
 /**
- * 6.3.2    Расчет налога на прибыль с доходов, удерживаемого налоговым агентом
+ * Расчет налога на прибыль с доходов, удерживаемого налоговым агентом
  *
  * formTemplateId=307
  */

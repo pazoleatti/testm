@@ -1,15 +1,15 @@
 package form_template.income.rnu22
 
-import com.aplana.sbrf.taxaccounting.model.*
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import groovy.transform.Field
 
 import java.math.RoundingMode
 
-import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
-import groovy.transform.Field
-
 /**
- * Скрипт для РНУ-22.
- * Форма "(РНУ-22) Регистр налогового учёта периодически взимаемых комиссий по операциям кредитования".
+ * Форма "(РНУ-22) Регистр налогового учёта периодически взимаемых комиссий по операциям кредитования"
+ * formTemplateId=322
  *
  * @version 59
  *
@@ -79,14 +79,8 @@ switch (formDataEvent) {
 }
 
 //// Кэши и константы
-@Field
-def providerCache = [:]
-@Field
-def recordCache = [:]
-@Field
-def refBookCache = [:]
 
-//Все аттрибуты
+// Все аттрибуты
 @Field
 def allColumns = ['rowNumber', 'contractNumber', 'contractData', 'base', 'transactionDate',
         'course', 'interestRate', 'basisForCalc', 'calcPeriodAccountingBeginDate', 'calcPeriodAccountingEndDate',
