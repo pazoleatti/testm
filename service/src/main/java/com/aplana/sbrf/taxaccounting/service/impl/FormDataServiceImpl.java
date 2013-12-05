@@ -608,7 +608,7 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
     @Override
-    public boolean checkDestinations(long formDataId) {
+    public void checkDestinations(long formDataId) {
         FormData formData = formDataDao.get(formDataId);
         List<DepartmentFormType> departmentFormTypes =
                 departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
@@ -619,13 +619,12 @@ public class FormDataServiceImpl implements FormDataService {
                         department.getDepartmentId(), formData.getReportPeriodId());
                 // если форма существует и статус отличен от "создана"
                 if (form != null && form.getState() != WorkflowState.CREATED) {
-                    return false;
+                    throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
                 }
                 if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), department.getDepartmentId())){
-                    return false;
+                    throw new ServiceException("Переход невозможен, т.к. у одного из приемников период не отрыт.");
                 }
             }
         }
-        return true;
     }
 }

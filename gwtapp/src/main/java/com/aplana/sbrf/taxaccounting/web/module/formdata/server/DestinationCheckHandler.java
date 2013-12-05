@@ -28,7 +28,7 @@ public class DestinationCheckHandler extends AbstractActionHandler<DestinationCh
     @Override
     public DestinationCheckResult execute(DestinationCheckAction action, ExecutionContext context) throws ActionException {
         DestinationCheckResult result = new DestinationCheckResult();
-        result.setExist(formDataService.checkDestinations(action.getFormDataId()));
+        formDataService.checkDestinations(action.getFormDataId());
         return result;
     }
 

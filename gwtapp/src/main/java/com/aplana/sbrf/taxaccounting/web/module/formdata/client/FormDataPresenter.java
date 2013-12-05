@@ -276,17 +276,14 @@ public class FormDataPresenter extends
         if (wfMove.isReasonToMoveShouldBeSpecified()) {
             DestinationCheckAction action = new DestinationCheckAction();
             action.setFormDataId(formData.getId());
+            Window.confirm("Start!");
             dispatcher.execute(action, CallbackUtils.
                     defaultCallback(new AbstractCallback<DestinationCheckResult>() {
                         @Override
                         public void onSuccess(DestinationCheckResult result) {
-                            if (result.isExist()){
-                                dialogPresenter.setFormData(formData);
-                                dialogPresenter.setWorkFlow(wfMove);
-                                addToPopupSlot(dialogPresenter);
-                            }else {
-                                goMove(wfMove);
-                            }
+                            dialogPresenter.setFormData(formData);
+                            dialogPresenter.setWorkFlow(wfMove);
+                            addToPopupSlot(dialogPresenter);
                         }
                     }, this));
         } else {
