@@ -153,7 +153,7 @@ public interface FormDataService {
 	 * Заблокировать FormData.
 	 * @param formDataId - идентификатор налоговой формы
 	 * @param userInfo информация о пользователе
-	 * true - если удалось заблокировать налоговую форму, иначе - false
+	 * @return true - если удалось заблокировать налоговую форму, иначе - false
 	 * */
 	void lock(long formDataId, TAUserInfo userInfo);
 	
@@ -161,7 +161,7 @@ public interface FormDataService {
 	 * Снять блокировку с FormData.
 	 * @param formDataId - идентификатор налоговой формы
 	 * @param userInfo информация о пользователе
-	 * true - если удалось разблокировать налоговую форму, иначе - false
+	 * @return true - если удалось разблокировать налоговую форму, иначе - false
 	 * */
 	void unlock(long formDataId, TAUserInfo userInfo);
 
@@ -179,11 +179,4 @@ public interface FormDataService {
 	 * @return информацию о блокировке объекта
 	 */
 	ObjectLock<Long> getObjectLock(long formDataId, TAUserInfo userInfo);
-
-    /**
-     * Проверка наличия и статуса приемника при осуществлении перевода формы
-     * в статус "Подготовлена"/"Утверждена"/"Принята".
-     * @param formDataId
-     */
-    void checkDestinations(long formDataId);
 }
