@@ -115,9 +115,17 @@
 		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
 		<res-auth>Container</res-auth>
 		<res-sharing-scope>Shareable</res-sharing-scope>
-	</resource-ref>	
-		
-	<resource-ref>
+	</resource-ref>
+
+    <resource-ref>
+        <description>TaxAccounting User Dynacache Reference</description>
+        <res-ref-name>services/cache/aplana/taxaccounting/permanentData</res-ref-name>
+        <res-type>com.ibm.websphere.cache.DistributedMap</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+    </resource-ref>
+
+    <resource-ref>
 		<description>TaxAccounting DeclarationType Dynacache Reference</description>
 		<res-ref-name>services/cache/aplana/taxaccounting/DeclarationType</res-ref-name>
 		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
