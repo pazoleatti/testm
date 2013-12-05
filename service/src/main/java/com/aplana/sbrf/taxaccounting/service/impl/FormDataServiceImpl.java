@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -482,7 +481,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 		FormData formData = formDataDao.get(formDataId);
 				
-        checkDestinations(formData);
+        /*checkDestinations(formData);*/
 
 		formDataScriptingService.executeScript(userInfo,formData, workflowMove.getEvent(), logger, null);
 		
@@ -608,11 +607,9 @@ public class FormDataServiceImpl implements FormDataService {
 		return lockCoreService.getLock(FormData.class, formDataId, userInfo);
 	}
 
-    /**
-     * Проверка наличия и статуса приемника при осуществлении перевода формы
-     * в статус "Подготовлена"/"Утверждена"/"Принята".
-     */
-    private void checkDestinations(FormData formData) {
+    @Override
+    public boolean checkDestinations(long formDataId) {
+        FormData formData = formDataDao.get(formDataId);
         List<DepartmentFormType> departmentFormTypes =
                 departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
                         formData.getFormType().getId(), formData.getKind());
@@ -622,12 +619,13 @@ public class FormDataServiceImpl implements FormDataService {
                         department.getDepartmentId(), formData.getReportPeriodId());
                 // если форма существует и статус отличен от "создана"
                 if (form != null && form.getState() != WorkflowState.CREATED) {
-                    throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
+                    return false;
                 }
                 if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), department.getDepartmentId())){
-                	throw new ServiceException("Переход невозможен, т.к. у одного из приемников период не отрыт.");
+                    return false;
                 }
             }
         }
+        return true;
     }
 }

@@ -179,4 +179,12 @@ public interface FormDataService {
 	 * @return информацию о блокировке объекта
 	 */
 	ObjectLock<Long> getObjectLock(long formDataId, TAUserInfo userInfo);
+
+    /**
+     * Проверка наличия и статуса приемника при осуществлении перевода формы
+     * в статус "Подготовлена"/"Утверждена"/"Принята".
+     * @param formDataId
+     * @return
+     */
+    boolean checkDestinations(long formDataId);
 }
