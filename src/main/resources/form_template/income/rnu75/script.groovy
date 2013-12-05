@@ -5,7 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * (РНУ-75) Регистр налогового учёта доходов по операциям депозитария (366)
+ * (РНУ-75) Регистр налогового учёта доходов по операциям депозитария
+ * formTemplateId=366
  *
  * 1  - number
  * 2  - date
@@ -117,7 +118,7 @@ void calc() {
         deleteAllAliased(dataRows)
 
         // номер последний строки предыдущей формы
-        def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+        def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
         for (row in dataRows) {
             // графа 1
@@ -137,7 +138,7 @@ void logicCheck() {
         return
     }
 
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     // Дата начала отчетного периода
     def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time

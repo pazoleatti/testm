@@ -6,12 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserFull;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.members.shared.FilterValues;
-import com.aplana.sbrf.taxaccounting.web.module.members.shared.GetFilterValues;
-import com.aplana.sbrf.taxaccounting.web.module.members.shared.GetMembersAction;
-import com.aplana.sbrf.taxaccounting.web.module.members.shared.GetMembersResult;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Window;
+import com.aplana.sbrf.taxaccounting.web.module.members.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -47,9 +42,15 @@ public class MembersPresenter extends Presenter<MembersPresenter.MyView, Members
 
     @Override
     public void onPrintClicked() {
-        Window.open(
-		        GWT.getHostPageBaseURL() + "download/downloadController/processSecUserDownload/", "", ""
-        );
+	    PrintAction action = new PrintAction();
+		action.setMembersFilterData(getView().getFilter());
+	    dispatcher.execute(action,
+			    CallbackUtils.defaultCallback(new AbstractCallback<PrintResult>() {
+				    @Override
+				    public void onSuccess(PrintResult result) {
+					    getView().getBlobFromServer(result.getUuid());
+				    }
+			    }, this));
     }
 
     @Title("Пользователи")
@@ -64,14 +65,13 @@ public class MembersPresenter extends Presenter<MembersPresenter.MyView, Members
 	    void updateData();
 	    void updateData(int pageNumber);
 	    void setFilterData(FilterValues values);
-
+	    void getBlobFromServer(String uuid);
     }
 
     @Override
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
 	    GetFilterValues action = new GetFilterValues();
-
 	    dispatcher.execute(action,
 		    CallbackUtils.defaultCallback(new AbstractCallback<FilterValues>() {
 					    @Override

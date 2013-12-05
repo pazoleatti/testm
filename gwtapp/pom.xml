@@ -15,6 +15,7 @@
 
 	<properties>
 		<webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
+        <buildName>${parent.build.finalName}</buildName>
 	</properties>
 
 	<dependencies>
@@ -33,6 +34,17 @@
 			<artifactId>dynacache-spring</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>gwt-widget</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>gwt-widget</artifactId>
+            <version>${project.version}</version>
+            <classifier>sources</classifier>
+        </dependency>
 		 
 		<dependency>
 			<!-- Доступно только в рантайме!!!! -->
@@ -196,6 +208,22 @@
 				</dependencies>
 			</plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>${basedir}/src/main/webapp/WEB-INF</directory>
+                            <filtering>true</filtering>
+                            <targetPath>WEB-INF</targetPath>
+                            <includes>
+                                <include>**/*.xml</include>
+                            </includes>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 

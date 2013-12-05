@@ -1,23 +1,15 @@
 package form_template.income.income_simple
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.FormData
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.PagingResult
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod
-import com.aplana.sbrf.taxaccounting.model.TaxType
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 import java.text.SimpleDateFormat
 
 /**
- * Сводная форма " Доходы, учитываемые в простых РНУ" уровня обособленного подразделения
- * "Расшифровка видов доходов, учитываемых в простых РНУ (доходы простые)"
+ * Сводная форма "Доходы, учитываемые в простых РНУ (доходы простые)"
+ * formTemplateId=301
+ *
  * TODO:
  *      - не сделан подсчет графы 13 (контрольные графы) потому что справочники "Отчет о прибылях и убытках" и "Оборотная ведомость" еще не реализованы
  *
@@ -160,7 +152,7 @@ def logicalCheck() {
     refBookIncome102 = refBookFactory.getDataProvider(52L)
     refBookIncome101 = refBookFactory.getDataProvider(50L)
     def dateEnd = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    getRows(data).each {DataRow<Cell> row ->
+    getRows(data).each { DataRow<Cell> row ->
 
         /*
          * Проверка обязательных полей
@@ -179,7 +171,7 @@ def logicalCheck() {
          * Сумма= ОКРУГЛ( «графа5»-(«графа 6»-«графа 7»);2)
          */
         List calc9graph = ['R2', 'R3', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R17', 'R18', 'R19', 'R20', 'R22',
-                'R24', 'R28', 'R29', 'R30', 'R48', 'R49', 'R51', 'R52', 'R65', 'R66', 'R67','R68', 'R69', 'R70', 'R139',
+                'R24', 'R28', 'R29', 'R30', 'R48', 'R49', 'R51', 'R52', 'R65', 'R66', 'R67', 'R68', 'R69', 'R70', 'R139',
                 'R142', 'R143', 'R144', 'R145', 'R146', 'R147', 'R148', 'R149', 'R150', 'R151', 'R153', 'R154', 'R155'
         ]
 
@@ -377,8 +369,12 @@ def consolidationBank(DataRowHelper form) {
     for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())) {
         def child = formDataService.find(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == departmentFormType.formTypeId) {
-            getRows(getData(child)).eachWithIndex() { DataRow<Cell> row, i ->
-                DataRow<Cell> rowResult = form.getDataRow(form.allCached, row.getAlias())
+            DataRowHelper childData = getData(child)
+            for (DataRow<Cell> row : childData.allCached) {
+                if (row.getAlias() == null || row.getAlias().contains('total')) {
+                    continue
+                }
+                DataRow<Cell> rowResult = form.getDataRow(form.getAllCached(), row.getAlias())
                 for (alias in ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted']) {
                     if (row.getCell(alias).getValue() != null) {
                         rowResult.getCell(alias).setValue(summ(rowResult.getCell(alias), row.getCell(alias)))
@@ -445,7 +441,7 @@ def consolidationSummary() {
                                         List<ReportPeriod> reportPeriodList = reportPeriodService.listByTaxPeriod(taxPeriod.getId())
                                         reportPeriodList.each { ReportPeriod reportPeriod ->
                                             def primaryRNU6 = formDataService.find(source.formType.id, FormDataKind.PRIMARY, source.departmentId, reportPeriod.getId())//TODO подразделение
-                                            if (primaryRNU6!=null) {
+                                            if (primaryRNU6 != null) {
                                                 def dataPrimary = getData(primaryRNU6)
                                                 getRows(dataPrimary).each { DataRow rowPrimary ->
                                                     if (rowPrimary.code != null && rowPrimary.code == rowRNU6.code &&
@@ -487,6 +483,7 @@ def consolidationSummary() {
     }
     if (dataPrev != null && reportPeriodService.get(formData.reportPeriodId).order != 1) {
         getRows567().each { rowNum ->
+            DataRow row = data.getDataRow(getRows(data), 'R' + rowNum)
             //«графа 5» +=«графа 5» формы предыдущего отчётного периода (не учитывается при расчете в первом отчётном периоде)
             def rowPrev = dataPrev.getDataRow(getRows(dataPrev), 'R' + rowNum)
             row.rnu6Field10Sum += rowPrev.rnu6Field10Sum
@@ -496,6 +493,7 @@ def consolidationSummary() {
             row.rnu6Field12PrevTaxPeriod += rowPrev.rnu6Field12PrevTaxPeriod
         }
         getRows8().each { rowNum ->
+            DataRow row = data.getDataRow(getRows(data), 'R' + rowNum)
             //«графа 8» +=«графа 8» формы предыдущего отчётного периода (не учитывается при расчете в первом отчётном периоде)
             def rowPrev = dataPrev.getDataRow(getRows(dataPrev), 'R' + rowNum)
             row.rnu4Field5Accepted += rowPrev.rnu4Field5Accepted

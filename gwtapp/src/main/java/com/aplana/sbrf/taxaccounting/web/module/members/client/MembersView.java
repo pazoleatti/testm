@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.members.shared.FilterValues;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerModalWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -11,6 +12,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -197,5 +199,10 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 		isActiveBox.setAcceptableValues(Arrays.asList(new Boolean[]{Boolean.TRUE, Boolean.FALSE}));
 		roleBox.setAcceptableValues(values.getRoles());
 		departmentPicker.setAvailableValues(values.getDepartments());
+	}
+
+	@Override
+	public void getBlobFromServer(String uuid) {
+		Window.open(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid, "", "");
 	}
 }

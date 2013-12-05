@@ -8,7 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
- * Форма "Расчет суммы налога по каждому транспортному средству".
+ * Расчет суммы налога по каждому транспортному средству
+ * formTemplateId=200
  *
  * TODO:
  *      - при отсутствии строк форму можно принять

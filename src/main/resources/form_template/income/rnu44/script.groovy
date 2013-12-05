@@ -1,18 +1,14 @@
 package form_template.income.rnu44
 
-import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
-
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
 /**
- * Скрипт для РНУ-44 (rnu44.groovy).
  * (РНУ-44) Регистр налогового учёта доходов, в виде восстановленной амортизационной премии при реализации ранее,
  * чем по истечении 5 лет с даты ввода в эксплуатацию Взаимозависимым лицам и резидентам оффшорных зон основных средств
  * введённых в эксплуатацию после 01.01.2013
+ * formTemplateId=340
  *
  * Версия ЧТЗ: 64
  *
@@ -65,7 +61,7 @@ switch (formDataEvent) {
             logger.error("Отсутствуют данные РНУ-49!")
             return
         }
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.CALCULATE :
         def rnu49FormData = getRnu49FormData()
@@ -74,7 +70,7 @@ switch (formDataEvent) {
             return
         }
         calc()
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.ADD_ROW :
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
@@ -91,22 +87,21 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
         def rnu49FormData = getRnu49FormData()
-        if (rnu49FormData==null) {
+        if (rnu49FormData == null) {
             logger.error("Отсутствуют данные РНУ-49!")
             return
         }
-        logicalCheck()
+        logicCheck()
         break
 // обобщить
     case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
-        logicalCheck()
+        logicCheck()
         break
 }
 
 //// Кэши и константы
-@Field def providerCache = [:]
 
 // все атрибуты
 @Field
@@ -127,9 +122,9 @@ def totalSumColumns = ['summ']
 
 // алиасы графов для арифметической проверки
 @Field
-def arithmeticCheckAlias = ['summ']//['operationDate', 'baseNumber', 'baseDate', 'summ']
+def arithmeticCheckAlias = ['summ']
 
-// алиасы графов для арифметической проверки
+// алиасы графов для не арифметической проверки
 @Field
 def otherCheckAlias = ['operationDate', 'baseNumber', 'baseDate']
 
@@ -149,7 +144,7 @@ def otherCheckAlias = ['operationDate', 'baseNumber', 'baseDate']
 
 // Проверка НСИ
 boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
+    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, true)
 }
 
 /**
@@ -167,7 +162,7 @@ def calc() {
     // удалить строку "итого"
     deleteAllAliased(dataRows)
 
-    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     if (rnu49FormData!=null) {
         for (def dataRow : dataRows) {
             def rnu49Row = getRnu49Row(rnu49Rows, dataRow)
@@ -247,7 +242,7 @@ def getSumm(rnu49Row) {
 /**
  * проверяем все данные формы на обязательное и корректное заполнение
  */
-boolean logicalCheck(){
+boolean logicCheck(){
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -255,17 +250,17 @@ boolean logicalCheck(){
     if (rnu49FormData==null) return
     def rnu49Rows = rnu49FormData.getAllCached()
 
-    def calcValues = [:]
-    def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
         }
         rowNumber++
-        errorMsg = "Строка $rowNumber: "
+        def index = row.getIndex()
+        def errorMsg = "Строка ${index}: "
 
         // 0.
-        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 1. Проверка уникальности значий в графе «Номер ссудного счета»
         def find = dataRows.find{it->
@@ -285,7 +280,7 @@ boolean logicalCheck(){
         if (rnu49Row==[:]) {
             logger.error(errorMsg + "Отсутствуют данные в РНУ-49!")
         }
-        calcValues = getValues(rnu49Row)
+        def calcValues = getValues(rnu49Row)
         checkCalc(row, arithmeticCheckAlias, calcValues, logger, true)
         for (def colName : otherCheckAlias) {
             if (row[colName] != calcValues[colName]) {

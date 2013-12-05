@@ -111,6 +111,7 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
 				cell = row.createCell(cellNumber);
 				cell.setCellStyle(csType);
 				cell.setCellValue("");
+                fillWidth(cellNumber, cell.getStringCellValue().length());
                 cellNumber++;
 				break;
 			default:

@@ -2,12 +2,14 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client;
 
 import java.util.Date;
 
+import com.aplana.sbrf.taxaccounting.web.widget.closabledialog.ClosableDialogBox;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
@@ -40,9 +42,18 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
     @UiField
     Image selectButton;
 
-    public RefBookPickerPopupWidget() {
+    /** Признак модальности окна */
+    private boolean modal;
+
+    @UiConstructor
+    public RefBookPickerPopupWidget(boolean modal) {
         initWidget(binder.createAndBindUi(this));
-        popupPanel = new PopupPanel(true, true);
+        this.modal = modal;
+        if (modal) {
+            popupPanel = new ClosableDialogBox(false, true);
+        } else {
+            popupPanel = new PopupPanel(true, true);
+        }
         refBookPiker = new RefBookPickerWidget();
         popupPanel.add(refBookPiker);
         refBookPiker.addValueChangeHandler(new ValueChangeHandler<Long>() {
@@ -73,7 +84,11 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 			    if ((text.getAbsoluteTop() + popupPanel.getOffsetHeight()) > windowHeight) {
 				    exceedOffsetY -= popupPanel.getOffsetHeight() + text.getOffsetHeight();
 			    }
-			    popupPanel.setPopupPosition(exceedOffsetX, exceedOffsetY);
+                if (!modal) {
+                    popupPanel.setPopupPosition(exceedOffsetX, exceedOffsetY);
+                } else {
+                    popupPanel.center();
+                }
 		    }
 	    });
     }
@@ -169,5 +184,10 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 		this.filter = filter;
 	}
 
-
+    @Override
+    public void setTitle(String title) {
+        if (popupPanel instanceof ClosableDialogBox) {
+            ((ClosableDialogBox) popupPanel).setText(title);
+        }
+    }
 }

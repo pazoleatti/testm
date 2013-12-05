@@ -121,7 +121,7 @@ void calc() {
         dataRowHelper.save(dataRows.sort { getKnu(it.code) })
 
         // номер последний строки предыдущей формы
-        def number = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+        def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
         for (row in dataRows) {
             row.rowNumber = ++number
@@ -224,7 +224,7 @@ void logicCheck() {
         return
     }
 
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     // Дата начала отчетного периода
     def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time

@@ -7,6 +7,7 @@ import groovy.transform.Field
 
 /**
  * (РНУ-40.1) Регистр налогового учёта начисленного процентного дохода по прочим дисконтным облигациям. Отчёт 1
+ * formTemplateId=338
  *
  * @author auldanov
  *

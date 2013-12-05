@@ -583,9 +583,6 @@ void sort() {
 
 void addAllStatic() {
     def data = getData(formData)
-    if (getRows(data).isEmpty()) {
-        return
-    }
     def itogoKvartal = getItogoKvartal()
     def prevItogoKvartal = getPrevItogoKvartal()
     data.insert(itogoKvartal, data.getAllCached().size() + 1)

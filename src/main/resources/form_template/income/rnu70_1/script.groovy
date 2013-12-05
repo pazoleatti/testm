@@ -7,12 +7,10 @@ import java.text.SimpleDateFormat
 import groovy.transform.Field
 
 /**
- * Скрипт для РНУ-70.1.
  * (РНУ-70.1) Регистр налогового учёта уступки права требования до наступления предусмотренного кредитным договором
  * срока погашения основного долга
  * formTemplateId=504
  *
- * @author vsergeev
  * @author Stanislav Yasinskiy
  * @author Lenar Haziev
  *
@@ -110,6 +108,21 @@ def groupColums = ['name', 'number', 'date']
 @Field
 def totalColumns = ['income', 'financialResult1', 'perc', 'loss']
 
+// Дата начала отчетного периода
+@Field
+def startDate
+
+// Дата окончания отчетного периода
+@Field
+def reportDate
+
+// Поиск записи в справочнике по значению (для расчетов) + по дате
+def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
+                     boolean required = true) {
+    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            day, rowIndex, cellName, logger, required)
+}
+
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
@@ -117,7 +130,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Проверка НСИ
 boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
+    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, true)
 }
 
 /**
@@ -127,13 +140,17 @@ void calc() {
     //расчет
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
+
+    reportDate = getReportDate()
+    startDate = reportPeriodService.getStartDate(formData.reportPeriodId).getTime()
+
     // Удаление подитогов
     deleteAllAliased(dataRows)
 
     // сортировка
     sortRows(dataRows, groupColums)
 
-    def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def row : dataRows) {
         row.rowNumber = ++rowNumber
         row.financialResult1 = getFinancialResult1(row)
@@ -143,7 +160,7 @@ void calc() {
     }
 
     // посчитать "Итого по <Наименование контрагента>"
-    def totalRows = getCalcTotalName()
+    def totalRows = getCalcTotalName(dataRows)
     // добавить "Итого по <Наименование контрагента>" в таблицу
     def i = 1
     totalRows.each { index, row ->
@@ -164,14 +181,17 @@ void logicalCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    def calcValues = [:]
-    def rowNumber = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    reportDate = getReportDate()
+    startDate = reportPeriodService.getStartDate(formData.reportPeriodId).getTime()
+
+    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def row : dataRows) {
         if (row?.getAlias() != null) continue
         rowNumber++
-        def errorMsg = "Строка $rowNumber: "
+        def index = row.getIndex()
+        def errorMsg = "Строка ${index}: "
 
-        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 2. Проверка на уникальность поля «№ пп»
         if (rowNumber != row.rowNumber) {
@@ -188,7 +208,7 @@ void logicalCheck() {
             logger.error(errorMsg + 'Неверно указана дата погашения основного долга')
         }
 
-        calcValues = [
+        def calcValues = [
                 financialResult1: getFinancialResult1(row),
                 perc: getPerc(row),
                 loss: getLoss(row),
@@ -224,13 +244,14 @@ def getFinancialResult1(def dataRow) {
  * Получить курс валюты
  */
 def getRateBR(def dataRow, def date) {
-    if (dataRow.currencyDebtObligation != null) {
-        def refCourseDataProvider = refBookFactory.getDataProvider(22)
-        def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER=' + dataRow.currencyDebtObligation, null);
-        return (!res.getRecords().isEmpty()) ? res.getRecords().get(0).RATE.getNumberValue() : 0//Правильнее null, такой ситуации быть не должно, она должна отлавливаться проверками НСИ
-    } else {
-        return null;
-    }
+    def currency = dataRow.currencyDebtObligation
+    if (currency != null && date != null)
+        if (isRoublel(dataRow)) {
+            return 1
+        } else {
+            return getRefBookRecord(22, 'CODE_NUMBER', "${currency}", date, -1, null, true)?.RATE.getNumberValue()
+        }
+    return null
 }
 
 /**
@@ -350,9 +371,9 @@ BigDecimal getXByIncomeOnly(def dataRow, def repaymentDateDuration, BigDecimal i
 }
 
 boolean isInPeriod(Date date) {
-    if ( reportDate == null || date== null)
+    if (reportDate == null || date == null)
         return null
-    return reportDate.after(date) && reportPeriodService.getStartDate(formData.reportPeriodId).getTime().before(date)
+    return reportDate.after(date) && startDate.before(date)
 }
 
 /**
@@ -378,16 +399,13 @@ def getTotalRow(def dataRows) {
 /**
  * Посчитать все итоговые строки "Итого по <Наименование контрагента>"
  */
-def getCalcTotalName() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-
+def getCalcTotalName(def dataRows) {
     def totalRows = [:]
     dataRows.eachWithIndex { row, i ->
         DataRow<Cell> nextRow = getRow(i + 1, dataRows)
         // если код расходы поменялся то создать новую строку "Итого по <Наименование контрагента>"
         if (nextRow?.name != row.name || i == (dataRows.size()-1)) {
-            totalRows.put(i + 1, getCalcTotalNameRow(row))
+            totalRows.put(i + 1, getCalcTotalNameRow(row, dataRows))
         }
     }
     return totalRows
@@ -396,10 +414,7 @@ def getCalcTotalName() {
 /**
  * Посчитать строку "Итого по <Наименование контрагента>"
  */
-def getCalcTotalNameRow(def row) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-
+def getCalcTotalNameRow(def row, def dataRows) {
     def tRow = getPrevRowWithoutAlias(row, dataRows)
     def newRow = formData.createDataRow()
     newRow.setAlias('total' + getRowNumber(tRow.name, dataRows))

@@ -246,9 +246,23 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             return null;
         }
 
-        // Ключ кэша
-        String filter = value == null || value.isEmpty() ? alias + " is null" :
-                "LOWER(" + alias + ") = LOWER('" + value + "')";
+        RefBook rb = refBookFactory.get(refBookId);
+
+        String filter;
+
+        if (value == null || value.isEmpty()) {
+            filter = alias + " is null";
+        } else {
+            RefBookAttributeType type = rb.getAttribute(alias).getAttributeType();
+            String template;
+            // TODO: поиск по выражениям с датами не реализован
+            if (type == RefBookAttributeType.REFERENCE || type == RefBookAttributeType.NUMBER) {
+                template = "%s = %s";
+            } else {
+                template = "LOWER(%s) = LOWER('%s')";
+            }
+            filter = String.format(template, alias, value);
+        }
 
         String dateStr = sdf.format(date);
 
@@ -471,22 +485,27 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
-    public int getFormDataPrevRowCount(FormData formData, int departmentId) {
+    public BigDecimal getPrevRowNumber(FormData formData, int departmentId, String alias) {
         ReportPeriod reportPeriod = reportPeriodService.get(formData.getReportPeriodId());
         if (reportPeriod != null && reportPeriod.getOrder() == 1) {
-            return 0;
+            return BigDecimal.ZERO;
         }
+        BigDecimal rowNumber = BigDecimal.ZERO;
         FormData prevFormData = getFormDataPrev(formData, departmentId);
         List<DataRow<Cell>> prevDataRows = (prevFormData != null ? getDataRowHelper(prevFormData).getAllCached() : null);
-        int counter = 0;
         if (prevDataRows != null && !prevDataRows.isEmpty()) {
-            for (DataRow<Cell> row : prevDataRows) {
+            for (int i = prevDataRows.size() - 1; i >= 0; i--) {
+                DataRow<Cell> row = prevDataRows.get(i);
                 if (row.getAlias() == null) {
-                    counter++;
+                    Object value = row.getCell(alias).getValue();
+                    if (value instanceof BigDecimal) {
+                        rowNumber = (BigDecimal) value;
+                    }
+                    break;
                 }
             }
         }
-        return counter;
+        return rowNumber == null ? BigDecimal.ZERO : rowNumber;
     }
 
     @Override

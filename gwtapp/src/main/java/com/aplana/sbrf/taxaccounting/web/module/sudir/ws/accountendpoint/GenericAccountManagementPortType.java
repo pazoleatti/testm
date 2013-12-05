@@ -1,18 +1,19 @@
 package com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.jws.WebService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.context.support.SpringBeanAutowiringSupport;
-
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.WSException;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler.GenericAccountInfoAssembler;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.validation.ValidationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import javax.jws.WebService;
+import java.util.ArrayList;
+import java.util.List;
 
 @WebService(endpointInterface="com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAccountManagement",
 			targetNamespace="http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0",
@@ -20,9 +21,14 @@ import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.validation.ValidationSe
 			portName="GenericAccountManagement",
 			wsdlLocation="META-INF/wsdl/GenericAccountManagement.wsdl")
 public class GenericAccountManagementPortType extends SpringBeanAutowiringSupport{
+
+    private String LOGIN_FOR_ACTION = "controlUnp";
 	
 	@Autowired
 	private TAUserService userService;
+
+    @Autowired
+    private AuditService auditService;
 	
 	private ValidationService validationService = new ValidationService();
 	private GenericAccountInfoAssembler gais = new GenericAccountInfoAssembler();
@@ -60,6 +66,9 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			throws GenericAccountManagementException_Exception {
 		try {
 			userService.setUserIsActive(accountId, false);
+            TAUserInfo userInfo = getUserInfo();
+            auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
+                    "Успешный обмен данными с вебсервисом СУДИР.");
 		} catch (WSException e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
 			gam.setGenericSudirStatusCode(e.getErrorCode().toString());
@@ -81,6 +90,9 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 		try {
 			TAUser user = gais.assembleUser(accountInfo);
 			userService.createUser(user);
+            TAUserInfo userInfo = getUserInfo();
+            auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
+                    "Успешный обмен данными с вебсервисом СУДИР.");
 		} catch (WSException e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
 			gam.setGenericSudirStatusCode(e.getErrorCode().toString());
@@ -102,6 +114,9 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 		try {
 			TAUser user = gais.assembleUser(accountInfo);
 			userService.updateUser(user);
+            TAUserInfo userInfo = getUserInfo();
+            auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
+                    "Успешный обмен данными с вебсервисом СУДИР.");
 		} catch (WSException e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
 			gam.setGenericSudirStatusCode(e.getErrorCode().toString());
@@ -120,6 +135,9 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			throws GenericAccountManagementException_Exception {
 		try {
 			userService.setUserIsActive(accountId, true);
+            TAUserInfo userInfo = getUserInfo();
+            auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
+                    "Успешный обмен данными с вебсервисом СУДИР.");
 		} catch (WSException e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
 			gam.setGenericSudirStatusCode(e.getErrorCode().toString());
@@ -162,6 +180,9 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			List<TAUser> listTAUsersByLogin = new ArrayList<TAUser>();
 			listTAUsersByLogin.add(userService.getUser(accountId));
 			listUsersByLogin.addAll(gais.desassembleUsers(listTAUsersByLogin));
+            TAUserInfo userInfo = getUserInfo();
+            auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
+                    "Успешный обмен данными с вебсервисом СУДИР.");
 		} catch (WSException e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
 			gam.setGenericSudirStatusCode(e.getErrorCode().toString());
@@ -177,5 +198,12 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 		return listUsersByLogin;
 	}
 
+    private TAUserInfo getUserInfo(){
+        TAUser user = userService.getUser(LOGIN_FOR_ACTION);
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setIp("");
+        userInfo.setUser(user);
+        return userInfo;
+    }
 
 }

@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import java.util.List;
+
 /**
  * Реализация фабрики провайдеров данных для справочников
  *
@@ -28,9 +30,6 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
     @Autowired
     private ApplicationContext applicationContext;
-    
-    @Autowired
-    RefBookScriptingService refBookScriptingService;
 
     @Override
     public RefBook get(Long refBookId) {
@@ -66,6 +65,4 @@ public class RefBookFactoryImpl implements RefBookFactory {
 			return refBookDataProvider;
         }
     }
-
-
 }

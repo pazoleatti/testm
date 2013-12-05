@@ -23,25 +23,25 @@
             
                 <g:FlowPanel height="60px">
                     <g:Label text="Подразделение" />
-                    <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" header="Выбор подразделения"/>
+                    <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" width="400px" multiselection="false" header="Выбор подразделения" modal="true"/>
                 </g:FlowPanel>
                 
                 <g:FlowPanel height="60px">
                     <g:Label text="Отчетный период" />
-                     <rep:PeriodPickerPopupWidget ui:field="periodPicker" multiselect="false"/>
+                     <rep:PeriodPickerPopupWidget width="400px" ui:field="periodPicker" multiselect="false"/>
                 </g:FlowPanel>
 
                 <g:FlowPanel height="60px">
                     <g:Label text="Вид декларации" />
-                    <style:ListBoxWithTooltip width="205px" ui:field="declarationTypeBox" showTooltip="true"/>
+                    <style:ListBoxWithTooltip width="400px" ui:field="declarationTypeBox" showTooltip="true"/>
                 </g:FlowPanel>
             </g:FlowPanel>
 
             <style:Bar>
-                <style:LeftBar addStyleNames="{style.buttonBar}">
-                    <g:Button ui:field="continueButton" text="Далее"/>
-                    <g:Button ui:field="cancelButton" text="Отмена"/>
-                </style:LeftBar>
+                <style:RightBar addStyleNames="{style.buttonBar}">
+                    <g:Button ui:field="continueButton" text="Создать"/>
+                    <g:Button ui:field="cancelButton" text="Закрыть"/>
+                </style:RightBar>
             </style:Bar>
 
         </g:VerticalPanel>

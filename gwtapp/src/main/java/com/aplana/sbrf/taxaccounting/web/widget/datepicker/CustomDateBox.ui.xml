@@ -3,6 +3,7 @@
     <ui:style>
         .imageStyle {
             margin-top: 2px;
+            border: 1px solid green;
         }
     </ui:style>
 

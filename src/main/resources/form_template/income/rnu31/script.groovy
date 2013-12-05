@@ -2,68 +2,15 @@ package form_template.income.rnu31
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
  * Форма "(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям".
  * formTemplateId=328
  *
- * @version 59
- *
  * @author rtimerbaev
  */
-
-// Признак периода ввода остатков
-@Field
-def boolean isBalancePeriod = null
-
-def getBalancePeriod(){
-    if (isBalancePeriod == null){
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-    }
-    return isBalancePeriod
-}
-
-switch (formDataEvent) {
-    case FormDataEvent.CREATE :
-        checkCreation()
-        break
-    case FormDataEvent.CHECK :
-        logicalCheck()
-        break
-    case FormDataEvent.CALCULATE :
-        logicalCheck()
-        break
-    case FormDataEvent.ADD_ROW :
-        // Всего форма должна содержать одну строку
-        break
-    case FormDataEvent.DELETE_ROW :
-        // Всего форма должна содержать одну строку
-        break
-    // после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
-        break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        logicalCheck()
-        break
-    // обобщить
-    case FormDataEvent.COMPOSE :
-        consolidation()
-        calc()
-        !hasError() && logicalCheck()
-        break
-    case FormDataEvent.IMPORT :
-    case FormDataEvent.MIGRATION :
-        importData()
-        break
-}
 
 // графа 1  - number
 // графа 2  - securitiesType
@@ -78,171 +25,147 @@ switch (formDataEvent) {
 // графа 11 - itherEurobonds
 // графа 12 - corporateBonds
 
-/**
- * Расчеты. Алгоритмы заполнения полей формы.
- */
+switch (formDataEvent) {
+    case FormDataEvent.CREATE :
+        // TODO убрать когда появится механизм назначения periodOrder при создании формы
+        if (formData.periodOrder == null) {
+            return
+        }
+        formDataService.checkUnique(formData, logger)
+        break
+    case FormDataEvent.CHECK :
+        logicCheck()
+        break
+    case FormDataEvent.CALCULATE :
+        logicCheck()
+        break
+    case FormDataEvent.ADD_ROW :
+        // Всего форма должна содержать одну строку
+        break
+    case FormDataEvent.DELETE_ROW :
+        // Всего форма должна содержать одну строку
+        break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        logicCheck()
+        break
+    // обобщить
+    case FormDataEvent.COMPOSE :
+        consolidation()
+        calc()
+        logicCheck()
+        break
+    case FormDataEvent.IMPORT :
+    case FormDataEvent.MIGRATION :
+        importData()
+        break
+}
+
+// Редактируемые атрибуты (графа 1..12)
+@Field
+def editableColumns = ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds', 'municipalBondsBefore',
+        'rtgageBondsBefore', 'ovgvz', 'eurobondsRF', 'itherEurobonds', 'corporateBonds']
+
+// Проверяемые на пустые значения атрибуты (графа 1..12)
+@Field
+def nonEmptyColumns = editableColumns
+
+// Получение числа из строки при импорте
+def getNumber(def value, def indexRow, def indexCol) {
+    return parseNumber(value, indexRow, indexCol, logger, true)
+}
+
 void calc() {
 }
 
-/**
- * Логические проверки.
- */
-def logicalCheck() {
-    // данные предыдущего отчета
-    def formDataOld = getFormDataOld()
-    def data = getData(formData)
-    def dataOld = getData(formDataOld)
-
-    /** Строка из предыдущего отчета. */
-    def rowOld = getTotalRow(dataOld)
-
-    /** Строка из текущего отчета. */
-    def row = getTotalRow(data)
-    if (row == null) {
-        return true
+void logicCheck() {
+    if (formData.periodOrder == null) {
+        throw new ServiceException("Месячная форма создана как квартальная!")
     }
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    // строка из текущего отчета
+    def row = getDataRow(dataRows, 'total')
 
-    // список проверяемых столбцов (графа 1..12)
-    def requiredColumns = ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds',
-            'municipalBondsBefore', 'rtgageBondsBefore', 'ovgvz', 'eurobondsRF',
-            'itherEurobonds', 'corporateBonds']
+    // 22. Обязательность заполнения полей графы 3..12
+    checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
-    // 22. Обязательность заполнения полей графы 1..12
-    if (!checkRequiredColumns(row, requiredColumns) && !getBalancePeriod()) {
-        return false
-    }
+    if (formData.periodOrder > 1) {
+        // строка из предыдущего отчета
+        def rowOld = getPrevMonthTotalRow()
 
-    // графы для которых тип ошибки нефатальный (графа 5, 9, 10, 11)
-    def warnColumns = ['governmentBonds', 'ovgvz', 'eurobondsRF', 'itherEurobonds']
-
-    // TODO (Ramil Timerbaev) протестировать проверку "начиная с отчета за февраль"
-    if (!isFirstMonth()) {
         // 1. Проверка наличия предыдущего экземпляра отчета
-        if (rowOld == null && !getBalancePeriod() && formDataEvent!=FormDataEvent.COMPOSE) {
-            logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
-            return false
+        if (rowOld == null && formDataEvent != FormDataEvent.COMPOSE) {
+            logger.error("Не найдены экземпляры «${formTemplateService.get(formData.formTemplateId).fullName}» за прошлый отчетный период!")
         }
 
         // 2..11 Проверка процентного (купонного) дохода по видам валютных ценных бумаг (графы 3..12)
-        if(rowOld != null)
-        for (def column : requiredColumns) {
-            if (row.getCell(column).getValue() < rowOld.getCell(column).getValue()) {
-                def securitiesType = row.securitiesType
-                def message = "Процентный (купонный) доход по $securitiesType уменьшился!"
-                if (column in warnColumns) {
-                    logger.warn(message)
-                } else {
-                    loggerError(message)
-                }
-                if (!getBalancePeriod()) {
-                    return false
+        if (rowOld != null) {
+            // графы для которых тип ошибки нефатальный (графа 5, 9, 10, 11)
+            def warnColumns = ['governmentBonds', 'ovgvz', 'eurobondsRF', 'itherEurobonds']
+            for (def column : editableColumns) {
+                if (row.getCell(column).value < rowOld.getCell(column).value) {
+                    def securitiesType = row.securitiesType
+                    def message = "Процентный (купонный) доход по $securitiesType уменьшился!"
+                    if (column in warnColumns) {
+                        logger.warn(message)
+                    } else {
+                        logger.error(message)
+                    }
                 }
             }
         }
     }
 
     // 12..21. Проверка на неотрицательные значения (графы 3..12)
-    for (def column : requiredColumns) {
-        def value = row.getCell(column).getValue()
+    for (def column : editableColumns) {
+        def value = row.getCell(column).value
         if (value != null && value < 0) {
             def columnName = getColumnName(row, column)
             def message = "Значения графы \"$columnName\" по строке 1 отрицательное!"
             if (column in warnColumns) {
                 logger.warn(message)
             } else {
-                loggerError(message)
-            }
-            if (!getBalancePeriod()) {
-                return false
+                logger.error(message)
             }
         }
     }
-    return true
 }
 
-/**
- * Консолидация.
- */
 void consolidation() {
-    def data = getData(formData)
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
     // занулить данные и просуммировать из источников
-
-    def row = data.getDataRow(getRows(data),'total')
-
-    // графа 3..12
-    def columns = ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds',
-            'municipalBondsBefore', 'rtgageBondsBefore', 'ovgvz',
-            'eurobondsRF', 'itherEurobonds', 'corporateBonds']
-    columns.each { alias ->
-        row.getCell(alias).setValue(0)
+    def row = getDataRow(dataRows, 'total')
+    editableColumns.each { alias ->
+        row.getCell(alias).value = 0
     }
 
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            def sourceRow
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                sourceRow = getData(source).getDataRow(getRows(getData(source)),'total')
-                columns.each { alias ->
-                    row.getCell(alias).setValue(sourceRow.getCell(alias).getValue())
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+        if (it.formTypeId == formData.formType.id) {
+            def sourceFormData = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
+                def sourceDataRows = formDataService.getDataRowHelper(sourceFormData)?.allCached
+                def sourceRow = getDataRow(sourceDataRows, 'total')
+                editableColumns.each { alias ->
+                    row.getCell(alias).value = sourceRow.getCell(alias).value
                 }
             }
         }
     }
-    data.save(getRows(data))
+    dataRowHelper.save(dataRows)
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
-/**
- * Проверка при создании формы.
- */
-void checkCreation() {
-    def findForm = formDataService.find(formData.formType.id,
-            formData.kind, formData.departmentId, formData.reportPeriodId)
-
-    if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
-    }
-}
-
-/**
- * Получение импортируемых данных.
- */
 void importData() {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        logger.error('Имя файла не должно быть пустым')
-        return
-    }
-
-    def is = ImportInputStream
-    if (is == null) {
-        logger.error('Поток данных пуст')
-        return
-    }
-
-    if (!fileName.contains('.r')) {
-        logger.error('Формат файла должен быть *.rnu')
-        return
-    }
-
-    def xmlString = importService.getData(is, fileName, 'cp866')
-
-    if (xmlString == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
-    }
-
     try {
         // добавить данные в форму
-        def totalLoad = addData(xml)
-
-        // расчетать, проверить и сравнить итоги
+        def totalLoad = addData(getXML())
+        // рассчитать, проверить и сравнить итоги
         if (totalLoad != null) {
             checkTotalRow(totalLoad)
         } else {
@@ -253,217 +176,41 @@ void importData() {
     }
 }
 
-/*
- * Вспомогательные методы.
- */
-
-/**
- * Проверка является ли строка итоговой.
- */
-def isTotal(def row) {
-    return row != null && row.getAlias() != null && row.getAlias().contains('total')
-}
-
-/**
- * Проверка пустое ли значение.
- */
-def isEmpty(def value) {
-    return value == null || value == ''
-}
-
-/**
- * Получить данные за предыдущий отчетный период
- */
-def getFormDataOld() {
-    // предыдущий отчётный период
-    def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-
-    // РНУ-31 за предыдущий отчетный период
-    def formDataOld = null
-    if (reportPeriodOld != null) {
-        formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
-    }
-
-    return formDataOld
-}
-
-/**
- * Первый ли это месяц (январь)
- */
-def isFirstMonth() {
-    // отчётный период
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-
-    if (reportPeriod != null && reportPeriod.getOrder() == 1) {
-        return true
-    }
-    return false
-}
-
-/**
- * Получить номер строки в таблице.
- */
-def getIndex(def row) {
-    def data = getData(formData)
-    getRows(data).indexOf(row)
-}
-
-/**
- * Проверить заполненость обязательных полей.
- *
- * @param row строка
- * @param useLog нужно ли записывать сообщения в лог
- * @return true - все хорошо, false - есть незаполненные поля
- */
-def checkRequiredColumns(def row, def columns) {
-    def colNames = []
-
-    columns.each {
-        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-            def name = getColumnName(row, it)
-            colNames.add('"' + name + '"')
-        }
-    }
-    if (!colNames.isEmpty()) {
-        def index = row.number
-        def errorMsg = colNames.join(', ')
-        if (!isEmpty(index)) {
-            errorMsg = "В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg."
-        } else {
-            index = getIndex(row) + 1
-            errorMsg = "В строке $index не заполнены колонки : $errorMsg."
-        }
-        loggerError(errorMsg)
-        return false
-    }
-    return true
-}
-
-/**
- * Получить название графы по псевдониму.
- *
- * @param row строка
- * @param alias псевдоним графы
- */
-def getColumnName(def row, def alias) {
-    if (row != null && alias != null) {
-        return row.getCell(alias).getColumn().getName().replace('%', '%%')
-    }
-    return ''
-}
-
-/**
- * Получить данные формы.
- *
- * @param formData форма
- */
-def getData(def formData) {
-    if (formData != null && formData.id != null) {
-        return formDataService.getDataRowHelper(formData)
-    }
-    return null
-}
-
-/**
- * Получить строки формы.
- *
- * @param formData форма
- */
-def getRows(def data) {
-    def cached = data.getAllCached()
-    return cached
-}
-
-/**
- * Сохранить измененные значения нф.
- *
- * @param data данные нф (helper)
- */
-void save(def data) {
-    data.save(getRows(data))
-}
-
-/**
- * Получить новую стролу с заданными стилями.
- */
-def getNewRow() {
-    def row = formData.createDataRow()
-    row.setAlias('total')
-
-    // графа 3..12
-    ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds',
-            'municipalBondsBefore', 'rtgageBondsBefore', 'ovgvz',
-            'eurobondsRF', 'itherEurobonds', 'corporateBonds'].each {
-        row.getCell(it).editable = true
-        row.getCell(it).setStyleAlias('Редактируемая')
-    }
-
-    return row
-}
-
-/**
- * Заполнить форму данными.
- *
- * @param xml данные
- */
+// Заполнить форму данными
 def addData(def xml) {
-    def tmp
-
     if (xml.row.size() > 0) {
         def row = xml.row[0]
         def indexCell = 3
-        // def newRow = getNewRow()
-        def data = getData(formData)
-        def newRow = getRows(data).getAt(0)
+        def indexRow = 1
+        def dataRowHelper = formDataService.getDataRowHelper(formData)
+        def dataRows = dataRowHelper.allCached
+        def newRow = dataRows.get(0)
 
         // графа 1
         newRow.number = 1
-
         // графа 2
         newRow.securitiesType = 'Процентный (купонный) доход по облигациям'
-
         // графа 3
-        newRow.ofz = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        newRow.ofz = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 4
-        newRow.municipalBonds = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        newRow.municipalBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 5
-        newRow.governmentBonds = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        newRow.governmentBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 6
-        newRow.mortgageBonds = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        newRow.mortgageBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 7
-        newRow.municipalBondsBefore = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        newRow.municipalBondsBefore = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 8
-        newRow.rtgageBondsBefore = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        newRow.rtgageBondsBefore = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 9
-        newRow.ovgvz = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        newRow.ovgvz = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 10
-        newRow.eurobondsRF = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        newRow.eurobondsRF = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 11
-        newRow.itherEurobonds = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        newRow.itherEurobonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 12
-        newRow.corporateBonds = getNumber(row.cell[indexCell].text())
-
-        save(data)
-        // data.clear()
-        // data.insert(newRow, 1)
+        newRow.corporateBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
+        dataRowHelper.save(dataRows)
     }
 
     // итоговая строка
@@ -471,46 +218,28 @@ def addData(def xml) {
         def row = xml.rowTotal[0]
         def total = formData.createDataRow()
         def indexCell = 3
+        def indexRow = 1
 
         // графа 3
-        total.ofz = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        total.ofz = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 4
-        total.municipalBonds = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        total.municipalBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 5
-        total.governmentBonds = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        total.governmentBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 6
-        total.mortgageBonds = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        total.mortgageBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 7
-        total.municipalBondsBefore = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        total.municipalBondsBefore = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 8
-        total.rtgageBondsBefore = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        total.rtgageBondsBefore = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 9
-        total.ovgvz = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        total.ovgvz = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 10
-        total.eurobondsRF = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        total.eurobondsRF = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 11
-        total.itherEurobonds = getNumber(row.cell[indexCell].text())
-        indexCell++
-
+        total.itherEurobonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 12
-        total.corporateBonds = getNumber(row.cell[indexCell].text())
-
+        total.corporateBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
         return total
     } else {
         return null
@@ -519,86 +248,16 @@ def addData(def xml) {
 }
 
 /**
- * Получить числовое значение.
- *
- * @param value строка
- */
-def getNumber(def value) {
-    def tmp = value.trim()
-    if ("".equals(tmp)) {
-        return null
-    }
-    try {
-        return new BigDecimal(tmp)
-    } catch (Exception e) {
-        throw new Exception("Значение \"$value\" не может быть преобразовано в число. " + e.message)
-    }
-}
-
-/**
- * Получить значение атрибута строки справочника.
- *
- * @param record строка справочника
- * @param alias алиас
- */
-def getValue(def record, def alias) {
-    def value = record.get(alias)
-    switch (value.getAttributeType()) {
-        case RefBookAttributeType.DATE :
-            return value.getDateValue()
-        case RefBookAttributeType.NUMBER :
-            return value.getNumberValue()
-        case RefBookAttributeType.STRING :
-            return value.getStringValue()
-        case RefBookAttributeType.REFERENCE :
-            return value.getReferenceValue()
-    }
-    return null
-}
-
-/**
- * Проверить существования строки по алиасу.
- *
- * @param list строки нф
- * @param rowAlias алиас
- * @return <b>true</b> - строка с указанным алиасом есть, иначе <b>false</b>
- */
-def checkAlias(def list, def rowAlias) {
-    if (rowAlias == null || rowAlias == "" || list == null || list.isEmpty()) {
-        return false
-    }
-    for (def row : list) {
-        if (row.getAlias() == rowAlias) {
-            return true
-        }
-    }
-    return false
-}
-
-/**
- * Получить строку из формы.
- *
- * @param data форма
- */
-def getTotalRow(def data) {
-    if (data != null && !getRows(data).isEmpty() && checkAlias(getRows(data), 'total')) {
-        return data.getDataRow(getRows(data), 'total')
-    }
-    return null
-}
-
-
-/**
  * Расчетать, проверить и сравнить итоги.
  *
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    def data = getData(formData)
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
     def totalColumns = [3 : 'ofz', 4 : 'municipalBonds', 5 : 'governmentBonds',
             6 : 'mortgageBonds', 7 : 'municipalBondsBefore', 8 : 'rtgageBondsBefore',
             9 : 'ovgvz', 10 : 'eurobondsRF', 11 : 'itherEurobonds', 12 :'corporateBonds']
-    def totalCalc = getRows(data).getAt(0)
+    def totalCalc = dataRows.get(0)
     def errorColums = []
     if (totalCalc != null) {
         totalColumns.each { index, columnAlias ->
@@ -613,18 +272,40 @@ void checkTotalRow(def totalRow) {
     }
 }
 
-/**
- * Имеются ли фатальные ошибки.
- */
-def hasError() {
-    return logger.containsLevel(LogLevel.ERROR)
+// Получение xml с общими проверками
+def getXML() {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        throw new ServiceException('Имя файла не должно быть пустым')
+    }
+    def is = ImportInputStream
+    if (is == null) {
+        throw new ServiceException('Поток данных пуст')
+    }
+    if (!fileName.contains('.r')) {
+        throw new ServiceException('Формат файла должен быть *.rnu')
+    }
+    def xmlString = importService.getData(is, fileName, 'cp866')
+    if (xmlString == null) {
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
+    }
+    return xml
 }
 
-/** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
-void loggerError(def msg) {
-    if (getBalancePeriod()) {
-        logger.warn(msg)
-    } else {
-        logger.error(msg)
+// Получить строку за прошлый месяц
+def getPrevMonthTotalRow() {
+    // проверка на январь и если не задан месяц формы
+    if (formData.periodOrder == null || formData.periodOrder == 1) {
+        return null
     }
+    def prevFormData = formDataService.getFormDataPrev(formData, formData.departmentId)
+    if (prevFormData != null) {
+        def prevDataRows = formDataService.getDataRowHelper(prevFormData)?.allCached
+        return getDataRow(prevDataRows, 'total')
+    }
+    return null
 }

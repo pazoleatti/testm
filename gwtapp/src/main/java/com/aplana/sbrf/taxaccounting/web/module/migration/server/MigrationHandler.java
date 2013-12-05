@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.migration.server;
 
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.MessageService;
 import com.aplana.sbrf.taxaccounting.web.module.migration.shared.MigrationAction;
 import com.aplana.sbrf.taxaccounting.web.module.migration.shared.MigrationResult;
@@ -32,7 +33,14 @@ public class MigrationHandler extends AbstractActionHandler<MigrationAction, Mig
             throws ActionException {
         // Отправка файлов
         MigrationResult result = new MigrationResult();
-        result.setResult(messageService.sendFiles());
+        try {
+            result.setResult(messageService.sendFiles());
+        } catch (ServiceException ex) {
+            throw new ActionException(ex.getMessage(), ex);
+        } catch (Exception ex) {
+            String msg = "Ошибка отправки транспортных файлов JMS-сообщениями.";
+            throw new ActionException(msg, ex);
+        }
         return result;
     }
 

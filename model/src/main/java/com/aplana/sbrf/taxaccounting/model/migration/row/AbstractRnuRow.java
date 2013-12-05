@@ -37,7 +37,18 @@ public class AbstractRnuRow implements Serializable {
         this.num = num;
     }
 
-    public String toRow() {
+    public String toRow(Integer i){
         return "";
+    }
+
+    /**
+     * техническая нумерация
+     * если строка в БД не помечена флагом TOTAL_х, то выставляем нумерацию, иначе будет пустой
+     *
+     * @param sb билдер строки
+     * @param num номер по порядку
+     */
+    public void addTechNumeration(StringBuilder sb, Integer num) {
+        sb.append(getString(getTypeRow() == null ? num : null)).append(SEP);
     }
 }

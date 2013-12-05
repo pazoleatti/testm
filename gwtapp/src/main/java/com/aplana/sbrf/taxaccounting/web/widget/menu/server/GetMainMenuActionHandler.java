@@ -99,19 +99,27 @@ public class GetMainMenuActionHandler extends
 		
 		
         if (currentUser.hasRole(TARole.ROLE_CONTROL)
-                || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)
+		        || currentUser.hasRole(TARole.ROLE_OPER)) {
         	MenuItem settingMenuItem = new MenuItem("Настройки");
-            settingMenuItem.getSubMenu().add(new MenuItem("Настройка подразделений", NUMBER_SIGN + DepartmentConfigTokens.departamentConfig));
+	        settingMenuItem.getSubMenu().add(new MenuItem("Список пользователей Системы", NUMBER_SIGN + MembersTokens.MEMBERS));
 
-            MenuItem nsiMenuItem = new MenuItem("НСИ");
-            settingMenuItem.getSubMenu().add(nsiMenuItem);
 
-            nsiMenuItem.getSubMenu().add(new MenuItem("Бухгалтерская отчётность", NUMBER_SIGN + BookerStatementsTokens.bookerStatements));
-            if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
-            }
-            
-            menuItems.add(settingMenuItem);
+	        if (currentUser.hasRole(TARole.ROLE_CONTROL)
+			        || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+
+		        settingMenuItem.getSubMenu().add(new MenuItem("Настройка подразделений", NUMBER_SIGN + DepartmentConfigTokens.departamentConfig));
+		        MenuItem nsiMenuItem = new MenuItem("НСИ");
+	            settingMenuItem.getSubMenu().add(nsiMenuItem);
+
+	            nsiMenuItem.getSubMenu().add(new MenuItem("Бухгалтерская отчётность", NUMBER_SIGN + BookerStatementsTokens.bookerStatements));
+	            if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+	                nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
+	            }
+
+
+	        }
+	        menuItems.add(settingMenuItem);
         }
 		
 		if (currentUser.hasRole(TARole.ROLE_CONF)) {

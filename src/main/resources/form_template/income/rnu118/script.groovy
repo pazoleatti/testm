@@ -6,7 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * Форма "(РНУ-117) Регистр налогового учёта доходов и расходов, по операциям со сделками форвард, квалифицированным в качестве операций с ФИСС для целей налогообложения"
+ * (РНУ-118) Регистр налогового учёта доходов и расходов, по операциям со сделками опцион, квалифицированным в качестве операций с ФИСС для целей налогообложения.
+ * formTemplateId=373
  *
  * @author bkinzyabulatov
  *
@@ -104,29 +105,9 @@ def nonEmptyColumnsPt2 = ["bonusSize", "bonusCurrency", "bonusSum", "course", "m
         "deviationMinPrice", "deviationMaxPrice"]
 
 //// Обертки методов
-
 // Проверка НСИ
 boolean checkNSI(def refBookId, def row, def alias) {
     return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName, def date,
-                boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            date, rowIndex, cellName, logger, required)
-}
-
-// Разыменование записи справочника
-def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 // Получение xml с общими проверками
@@ -155,15 +136,11 @@ def getXML(def String startStr, def String endStr) {
 
 //// Кастомные методы
 
-/**
- * Логические проверки
- */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def totalRow = null
-    // Номер последний строки предыдущей формы
-    def i = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def i = 0
     for (def DataRow row : dataRows){
         if (row?.getAlias()?.contains('itg')) {
             totalRow = row
@@ -182,9 +159,9 @@ void logicCheck() {
         }
 
         def values = [:]
-        setGraph9(row, values)
-        setGraph11(row, values)
-        setGraph13(row, values)
+        calc9(row, values)
+        calc11(row, values)
+        calc13(row, values)
 
         checkCalc(row, arithmeticCheckAlias, values, logger, true)
 
@@ -205,9 +182,6 @@ void logicCheck() {
     }
 }
 
-/**
- * Алгоритмы заполнения полей формы
- */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -215,15 +189,14 @@ void calc() {
     // Удаление итогов
     deleteAllAliased(dataRows)
 
-    // Номер последний строки предыдущей формы
-    def index = formDataService.getFormDataPrevRowCount(formData, formDataDepartment.id)
+    def index = 0
 
     // Расчет ячеек
     dataRows.each{row->
         row.rowNumber=++index
-        setGraph9(row, row)
-        setGraph11(row, row)
-        setGraph13(row, row)
+        calc9(row, row)
+        calc11(row, row)
+        calc13(row, row)
     }
 
     // Добавление строки итогов
@@ -248,13 +221,15 @@ void calc() {
     dataRowHelper.save(dataRows)
 }
 
-void setGraph9(def row, def result) {
-    def recordId = row.bonusCurrency ? getRecordId(22, 'CODE_NUMBER', "${row.bonusCurrency}", row.rowNumber?.intValue(), getColumnName(row, 'bonusCurrency'),
-            row.transactionCalcDate) : null
-    result.course = getRefBookValue(22, recordId)?.RATE?.numberValue
+void calc9(def row, def result) {
+    if (row.bonusCurrency != null && row.transactionCalcDate != null) {
+        def record = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache, 'CODE_NUMBER', "${row.bonusCurrency}",
+                row.transactionCalcDate, row.getIndex(), getColumnName(row, 'bonusCurrency'), logger, true)
+        result.course = record?.RATE?.numberValue
+    }
 }
 
-void setGraph11(def row, def result) {
+void calc11(def row, def result) {
     if (row.bonusSize == null || row.minPrice == null || row.course == null) {
         result.deviationMinPrice = null
         result.deviationMaxPrice = null
@@ -282,7 +257,7 @@ void setGraph11(def row, def result) {
     }
 }
 
-void setGraph13(def row, def result) {
+void calc13(def row, def result) {
     if (row.bonusSum == null || row.request == null || row.liability == null){
         result.income = null
         result.outcome = null

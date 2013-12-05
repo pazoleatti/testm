@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
+import com.aplana.sbrf.taxaccounting.web.widget.closabledialog.ClosableDialogBox;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidget;
 import com.google.gwt.cell.client.AbstractEditableCell;
@@ -26,11 +27,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Event.NativePreviewEvent;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 
 /**
  * Ячейка для редактирования значений из справочника. 
@@ -47,7 +44,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	
 	protected static final SafeHtmlRenderer<String> renderer = SimpleSafeHtmlRenderer.getInstance();
 
-	private PopupPanel panel;
+	private ClosableDialogBox panel;
 	private RefBookPicker refBookPiker = new RefBookPickerWidget();
 	
 	private HandlerRegistration changeHandlerRegistration;
@@ -65,23 +62,16 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			template = GWT.create(Template.class);
 		}
 		// Create popup panel
-		this.panel = new PopupPanel(true, true) {
-			@Override
-			protected void onPreviewNativeEvent(NativePreviewEvent event) {
-				if (Event.ONKEYUP == event.getTypeInt() 
-						&& event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
-					panel.hide();
-				}
-			}
-		};
-		
+		this.panel = new ClosableDialogBox(true, true);
+        panel.setText(this.column.getName());
+
 		panel.addCloseHandler(new CloseHandler<PopupPanel>() {
 			public void onClose(CloseEvent<PopupPanel> event) {
 				changeHandlerRegistration.removeHandler();
 			}
 		});
 
-		panel.add(refBookPiker);
+        panel.add(refBookPiker);
 	}
 
 	@Override
@@ -136,26 +126,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			});
 			
 			// Устанавливаем позицию и отображаем справочник
-			panel.setPopupPositionAndShow(new PositionCallback() {
-				public void setPosition(int offsetWidth, int offsetHeight) {
-					int windowHeight = Window.getClientHeight();
-					int windowWidth = Window.getClientWidth();
-
-					int exceedOffsetX = parent.getParentElement().getAbsoluteLeft();
-					int exceedOffsetY = parent.getParentElement().getAbsoluteBottom();					
-
-					// Сдвигаем попап, если он не помещается в окно
-					if ((exceedOffsetX + panel.getOffsetWidth()) > windowWidth) {
-						exceedOffsetX = parent.getParentElement().getAbsoluteRight() - panel.getOffsetWidth();
-					}
-
-					if ((exceedOffsetY + panel.getOffsetHeight()) > windowHeight) {
-						exceedOffsetY = parent.getParentElement().getAbsoluteTop() - panel.getOffsetHeight();
-					}
-					panel.setPopupPosition(exceedOffsetX, exceedOffsetY);
-
-				}
-			});
+			panel.center();
 			
 		}
 	}

@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.IsWidget;
  * @author sgoryachkin
  * 
  */
-public interface RefBookPickerPopup extends HasValue<Long>, IsWidget, HasEnabled, LeafValueEditor<Long>{
+public interface RefBookPickerPopup extends HasValue<Long>, IsWidget, HasEnabled, LeafValueEditor<Long> {
 	
 	public void setDereferenceValue(String value);
 	public String getDereferenceValue();
