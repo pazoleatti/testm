@@ -124,8 +124,7 @@ def getDataRowHelperPrev() {
 def isMonthBalace() {
     if (isBalace == null) {
         // Отчётный период
-        def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-        if (!reportPeriodService.isBalancePeriod(reportPeriod.id, formData.departmentId) || formData.periodOrder == null) {
+        if (!reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId) || formData.periodOrder == null) {
             isBalace = false
         } else {
             isBalace = formData.periodOrder - 1 % 3 == 0
