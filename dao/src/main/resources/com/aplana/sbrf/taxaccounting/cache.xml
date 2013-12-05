@@ -25,10 +25,9 @@
 		jndi-name="services/cache/aplana/taxaccounting/Department"/>
 
 	<jee:jndi-lookup id="userCacheStore"
-		jndi-name="services/cache/aplana/taxaccounting/permanentData"/>
+		jndi-name="services/cache/aplana/taxaccounting/User"/>
 
-    <jee:jndi-lookup id="permanentDataCacheStore"
-                     jndi-name="services/cache/aplana/taxaccounting/permanentData"/>
+    <jee:jndi-lookup id="permanentDataCacheStore" jndi-name="services/cache/aplana/taxaccounting/permanentData"/>
 				
 
 	<bean id="cacheManager" class="com.aplana.sbrf.taxaccounting.cache.ExtendedSimpleCacheManager">
