@@ -66,10 +66,6 @@ switch (formDataEvent) {
 
 //// Кэши и константы
 @Field
-def providerCache = [:]
-@Field
-def recordCache = [:]
-@Field
 def refBookCache = [:]
 
 // Редактируемые атрибуты
@@ -86,22 +82,11 @@ def editableColumns = ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoCl
 def nonEmptyColumns = ['rowNumber', 'codeOKATO', 'regionName', 'tsTypeCode', 'tsType', 'identNumber', 'model',
         'regNumber', 'powerVal', 'baseUnit', 'year', 'regDate']
 
-// Атрибуты для итогов
-@Field
-def totalColumns = []
-
 //// Обертки методов
 
 // Проверка НСИ
 boolean checkNSI(def refBookId, def row, def alias) {
     return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecord(def Long refBookId, def String alias, def String value, def int rowIndex, def String columnName,
-              def Date date, boolean required = true) {
-    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, date,
-            rowIndex, columnName, logger, required)
 }
 
 // Разыменование записи справочника
@@ -117,6 +102,7 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
 
     if (!dataRows.isEmpty()) {
+        sort()
         def i = 1
         for (def row in dataRows) {
             row.rowNumber = i++
@@ -126,6 +112,22 @@ void calc() {
             row.tsType = row.tsTypeCode
         }
         dataRowHelper.update(dataRows);
+    }
+}
+
+// сортировка ОКАТО - Муниципальное образование - Код вида ТС
+void sort() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.getAllCached().sort { a, b ->
+        def valA = getRefBookValue(3, a.codeOKATO).OKATO.stringValue
+        def valB = getRefBookValue(3, b.codeOKATO).OKATO.stringValue
+        int val = valA.compareTo(valB)
+        if (val == 0) {
+            valA = getRefBookValue(42, a.tsTypeCode).CODE.stringValue
+            valB = getRefBookValue(42, b.tsTypeCode).CODE.stringValue
+            val = valA.compareTo(valB)
+        }
+        return val
     }
 }
 
@@ -161,7 +163,8 @@ def logicCheck() {
         if (!checkedRows.contains(row)) {
             def errorRows = ''
             for (def rowIn in dataRows) {
-                if (!checkedRows.contains(rowIn) && row != rowIn && row.codeOKATO.equals(rowIn.codeOKATO) && row.identNumber.equals(rowIn.identNumber) && row.regNumber.equals(rowIn.regNumber)) {
+                if (!checkedRows.contains(rowIn) && row != rowIn && row.codeOKATO.equals(rowIn.codeOKATO)
+                        && row.identNumber.equals(rowIn.identNumber) && row.regNumber.equals(rowIn.regNumber)) {
                     checkedRows.add(rowIn)
                     errorRows = ', ' + rowIn.getIndex()
                 }
@@ -204,7 +207,7 @@ def logicCheck() {
     }
     if (str.length() > 2) {
         logger.warn("Данные ТС из предыдущих отчётных периодов не были скопированы. В Системе " +
-                "не создавалась форма за период " + str.substring(0, str.size() - 2) + ".")
+                "не создавались формы за следующие периоды: " + str.substring(0, str.size() - 2) + ".")
     }
 }
 
@@ -215,22 +218,6 @@ def String checkPrevPeriod(def reportPeriod) {
         }
     }
     return ''
-}
-
-// сортировка ОКАТО - Муниципальное образование - Код вида ТС
-void sort() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.getAllCached().sort { a, b ->
-        def valA = getRefBookValue(3, a.codeOKATO).OKATO.stringValue
-        def valB = getRefBookValue(3, b.codeOKATO).OKATO.stringValue
-        int val = valA.compareTo(valB)
-        if (val == 0) {
-            valA = getRefBookValue(42, a.tsTypeCode).CODE.stringValue
-            valB = getRefBookValue(42, b.tsTypeCode).CODE.stringValue
-            val = valA.compareTo(valB)
-        }
-        return val
-    }
 }
 
 // Алгоритм копирования данных из форм предыдущего периода при создании формы
