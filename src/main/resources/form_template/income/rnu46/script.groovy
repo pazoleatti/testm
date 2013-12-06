@@ -18,6 +18,25 @@ import java.text.SimpleDateFormat
  * @author Stanislav Yasinskiy
  * @author Dmitriy Levykin
  */
+// графа 1  - rowNumber
+// графа 2  - invNumber
+// графа 3  - name
+// графа 4  - cost
+// графа 5  - amortGroup
+// графа 6  - usefulLife
+// графа 7  - monthsUsed
+// графа 8  - usefulLifeWithUsed
+// графа 9  - specCoef
+// графа 10 - cost10perMonth
+// графа 11 - cost10perTaxPeriod
+// графа 12 - cost10perExploitation
+// графа 13 - amortNorm
+// графа 14 - amortMonth
+// графа 15 - amortTaxPeriod
+// графа 16 - amortExploitation
+// графа 17 - exploitationStart
+// графа 18 - usefullLifeEnd
+// графа 19 - rentEnd
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         // TODO убрать когда появится механизм назначения periodOrder при создании формы
@@ -61,7 +80,7 @@ def refBookCache = [:]
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed', 'usefulLifeWithUsed',
-        'specCoef', 'exploitationStart', 'usefullLifeEnd', 'rentEnd']
+        'specCoef', 'exploitationStart', 'rentEnd']
 
 @Field
 def balanceColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed', 'usefulLifeWithUsed',
@@ -127,7 +146,7 @@ def isMonthBalace() {
         if (!reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId) || formData.periodOrder == null) {
             isBalace = false
         } else {
-            isBalace = formData.periodOrder - 1 % 3 == 0
+            isBalace = (formData.periodOrder - 1) % 3 == 0
         }
     }
     return isBalace
@@ -180,7 +199,7 @@ void calc() {
         prevRow = getPrevRow(dataPrev, row)
 
         // Графа 6
-        row.usefulLife = calc6(map)
+        row.usefulLife = row.amortGroup//calc6(map)
 
         // Графа 8
         row.usefulLifeWithUsed = calc8(row)
@@ -190,6 +209,9 @@ void calc() {
 
         // графа 12
         row.cost10perExploitation = calc12(row, prevRow, startDate, endDate)
+
+        // графа 18
+        row.usefullLifeEnd = calc18(row)
 
         // графа 14
         row.amortMonth = calc14(row, prevRow, endDate)
@@ -202,16 +224,8 @@ void calc() {
 
         // графа 13
         row.amortNorm = calc13(row)
-
-        // графа 18
-        row.usefullLifeEnd = calc18(row)
     }
     dataRowHelper.update(dataRows);
-}
-
-// Ресчет графы 6
-BigDecimal calc6(def map) {
-    return map?.TERM?.numberValue
 }
 
 // Ресчет графы 8
@@ -219,11 +233,13 @@ BigDecimal calc8(def row) {
     if (row.monthsUsed == null || row.usefulLife == null || row.specCoef == null) {
         return null
     }
-    if (row.monthsUsed < row.usefulLife) {
+    def map = getRefBookValue(71, row.usefulLife)
+    def term = map.TERM.numberValue
+    if (row.monthsUsed < term) {
         if (row.specCoef > 0) {
-            return round((row.usefulLife - row.monthsUsed) / row.specCoef, 0)
+            return round((term - row.monthsUsed) / row.specCoef, 0)
         } else {
-            return round(row.usefulLife - row.monthsUsed, 0)
+            return round(term - row.monthsUsed, 0)
         }
     }
     return row.usefulLifeWithUsed
@@ -232,7 +248,6 @@ BigDecimal calc8(def row) {
 // Ресчет графы 10
 BigDecimal calc10(def row, def map) {
     def Integer group = map?.GROUP?.numberValue
-    def Integer amortGroup = row.amortGroup
     if ([1, 2, 8..10].contains(group) && row.cost != null) {
         return round(row.cost * 10)
     } else if ([3..7].contains(row.amortGroup) && row.cost != null) {
@@ -266,13 +281,16 @@ BigDecimal[] calc11and15and16(def reportMonth, def row, def prevRow) {
 
 // Ресчет графы 12
 BigDecimal calc12(def row, def prevRow, def startDate, def endDate) {
-    if (row.exploitationStart == null) {
+    if (prevRow == null || row.exploitationStart == null) {
         return null
-    } else if (startDate < row.exploitationStart && row.exploitationStart < endDate) {
+    }
+    if (startDate < row.exploitationStart && row.exploitationStart < endDate) {
         return row.cost10perMonth
-    } else if (prevRow != null && row.cost10perMonth != null && prevRow.cost10perExploitation != null) {
+    }
+    if (prevRow != null && row.cost10perMonth != null && prevRow.cost10perExploitation != null) {
         return row.cost10perMonth + prevRow.cost10perExploitation
     }
+    return null
 }
 
 // Ресчет графы 13
@@ -285,15 +303,14 @@ BigDecimal calc13(def row) {
 
 // Ресчет графы 14
 BigDecimal calc14(def row, def prevRow, def endDate) {
-    if (row.usefullLifeEnd == null || row.cost10perExploitation == null || row.cost == null
+    if (prevRow == null || row.usefullLifeEnd == null || row.cost10perExploitation == null || row.cost == null
             || prevRow.cost == null || prevRow.amortExploitation == null || (row.usefullLifeEnd - endDate) == 0) {
         return null
-    } else if (row.usefullLifeEnd > lastDay2001) {
-        return round((prevRow.cost - row.cost10perExploitation - prevRow.amortExploitation) / (row.usefullLifeEnd - endDate))
-    } else {
-        return round(row.cost / 84)
     }
-    return null
+    if (row.usefullLifeEnd > lastDay2001) {
+        return round((prevRow.cost - row.cost10perExploitation - prevRow.amortExploitation) / (row.usefullLifeEnd - endDate))
+    }
+    return round(row.cost / 84)
 }
 
 // Ресчет графы 18
@@ -399,19 +416,19 @@ void logicCheck() {
         }
 
         // 8. Арифметические проверки расчета граф 8, 10-16, 18
-        def calc11and15and16 = calc11and15and16(reportMounth, row, prevRow)
-
         needValue['usefulLifeWithUsed'] = calc8(row)
         needValue['cost10perMonth'] = calc10(row, map)
-        needValue['cost10perTaxPeriod'] = calc11and15and16[0]
-        needValue['amortTaxPeriod'] = calc11and15and16[1]
-        needValue['amortExploitation'] = calc11and15and16[2]
         needValue['cost10perExploitation'] = calc12(row, prevRow, startDate, endDate)
         needValue['amortNorm'] = calc13(row)
         needValue['amortMonth'] = calc14(row, prevRow, endDate)
+        def calc11and15and16 = calc11and15and16(reportMounth, row, prevRow)
+        needValue['cost10perTaxPeriod'] = calc11and15and16[0]
+        needValue['amortTaxPeriod'] = calc11and15and16[1]
+        needValue['amortExploitation'] = calc11and15and16[2]
+
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
-        if (row.usefullLifeEnd !=  calc18(row)) {
+        if (row.usefullLifeEnd != calc18(row)) {
             logger.error("Cтрока ${row.getIndex()}: Неверное значение графы: ${getColumnName(row, 'usefullLifeEnd')}!")
         }
 
@@ -432,12 +449,13 @@ def getReportDate() {
 
 // Поиск строки из предыдущей формы с тем же инвентарным номером
 def getPrevRow(def dataPrev, def row) {
-    if (dataPrev != null)
+    if (dataPrev != null) {
         for (def rowPrev : dataPrev.getAll()) {
             if (rowPrev.invNumber == row.invNumber) {
                 return rowPrev
             }
         }
+    }
     return null
 }
 
