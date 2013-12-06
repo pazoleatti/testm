@@ -300,10 +300,10 @@ void logicCheck() {
         checkCalc(row, autoFillColumns, values, logger, false)
 
         if (row.usefullLifeEnd != values.usefullLifeEnd) {
-            logger.error(errorMsg + "Неверное значение графы ${getColumnName(row, 'part2Date')}!")
+            logger.error(errorMsg + "Неверное значение графы ${getColumnName(row, 'usefullLifeEnd')}!")
         }
         if (row.monthsLoss != values.monthsLoss) {
-            logger.error(errorMsg + "Неверное значение графы ${getColumnName(row, 'part2Date')}!")
+            logger.error(errorMsg + "Неверное значение графы ${getColumnName(row, 'monthsLoss')}!")
         }
 
         // 1. Проверка шифра при реализации амортизируемого имущества
@@ -444,15 +444,11 @@ BigDecimal getGraph9(def DataRow row49, def DataRow row46, def DataRow row45) {
         def saledPropertyCode = getSaledPropertyCode(row49.saledPropertyCode)
         if (row46 != null && saledPropertyCode == 1) {
             tmp = row46.cost10perExploitation + row46.amortExploitation
-        }
-
-        if (row45 != null && saledPropertyCode == 2) {
+        } else if (row45 != null && saledPropertyCode == 2) {
             tmp = row45.cost10perTaxPeriod
-        }
-        if (saledPropertyCode in [3,5,6,7]) {
+        } else if (saledPropertyCode in [3,5,6,7]) {
             tmp = BigDecimal.ZERO
-        }
-        if (saledPropertyCode == 4) {
+        } else if (saledPropertyCode == 4) {
             tmp = row49.amort
         }
     }
