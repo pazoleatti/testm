@@ -20,7 +20,6 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
-        copyData()
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -160,13 +159,6 @@ def logicCheck() {
             }
         }
         checkedRows.add(row)
-
-        // Проверка льготы
-        if (row.taxBenefitCode != null
-                && ['30200', '20210', '20220', '20230'].contains(getRefBookValue(6, row.taxBenefitCode).CODE.stringValue)) {
-            logger.error(errorMsg + 'Код налоговой льготы может содержать только следующие коды из справочника: ' +
-                    '30200, 20210, 20220, 20230.')
-        }
 
         // Проверки соответствия НСИ
         checkNSI(3, row, "codeOKATO")

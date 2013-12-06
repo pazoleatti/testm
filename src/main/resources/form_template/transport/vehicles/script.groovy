@@ -21,7 +21,6 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
-        copyData()
         break
     case FormDataEvent.CHECK:
         logicCheck()
