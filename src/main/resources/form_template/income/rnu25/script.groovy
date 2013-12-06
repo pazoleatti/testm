@@ -710,7 +710,7 @@ def calc13(def row) {
  * return итоговая строка
  */
 def addData(def xml) {
-    reportPeriodEndDate = reportPeriodService?.get(formData?.reportPeriodId)?.taxPeriod?.getEndDate()
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.clear()
     def newRows = []
