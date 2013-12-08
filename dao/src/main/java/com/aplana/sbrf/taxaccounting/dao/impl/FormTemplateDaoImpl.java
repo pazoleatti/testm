@@ -1,20 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
@@ -26,6 +11,20 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
 
 @Repository
 @Transactional(readOnly = true)
@@ -49,19 +48,19 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		public FormTemplate mapRow(ResultSet rs, int index) throws SQLException {
 			FormTemplate formTemplate = new FormTemplate();
 			formTemplate.setId(rs.getInt("id"));
-			formTemplate.setType(formTypeDao.get(rs.getInt("type_id")));
-			formTemplate.setEdition(rs.getInt("edition"));
 			formTemplate.setActive(rs.getBoolean("is_active"));
 			formTemplate.setVersion(rs.getString("version"));
-			formTemplate.setNumberedColumns(rs.getBoolean("numbered_columns"));
-			formTemplate.setFixedRows(rs.getBoolean("fixed_rows"));
 			formTemplate.setName(rs.getString("name"));
 			formTemplate.setFullName(rs.getString("fullname"));
-			formTemplate.setCode(rs.getString("code"));
-			formTemplate.setScript(rs.getString("script"));
-		    formTemplate.getStyles().addAll(formStyleDao.getFormStyles(formTemplate.getId()));
+            formTemplate.setType(formTypeDao.get(rs.getInt("type_id")));
 
 			if (deepFetch) {
+                formTemplate.setEdition(rs.getInt("edition"));
+                formTemplate.setNumberedColumns(rs.getBoolean("numbered_columns"));
+                formTemplate.setFixedRows(rs.getBoolean("fixed_rows"));
+                formTemplate.setCode(rs.getString("code"));
+                formTemplate.getStyles().addAll(formStyleDao.getFormStyles(formTemplate.getId()));
+                formTemplate.setScript(rs.getString("script"));
 				formTemplate.getColumns().addAll(columnDao.getFormColumns(formTemplate.getId()));
 				String stRowsData = rs.getString("data_rows");
 				if (stRowsData != null) {
@@ -86,7 +85,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		JdbcTemplate jt = getJdbcTemplate();
 		try {
 			return jt.queryForObject(
-					"select * from form_template where id = ?",
+					"select id, is_active, version, name, fullname, type_id, edition, numbered_columns, fixed_rows, code, script, data_rows, data_headers " +
+                            "from form_template where id = ?",
 					new Object[]{formId},
 					new int[]{Types.NUMERIC},
 					new FormTemplateMapper(true)
@@ -98,7 +98,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
 	/**
 	 * Кэш инфалидируется перед вызовом. Т.е. несмотря на результат выполнения, кэш будет сброшен.
-	 * Иначе, если версии ен совпадают кэш продолжает возвращать старую версию.
+	 * Иначе, если версии не совпадают кэш продолжает возвращать старую версию.
 	 */
 	@Transactional(readOnly = false)
 	@CacheEvict(value = "FormTemplate", key = "#formTemplate.id", beforeInvocation = true)
@@ -155,7 +155,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
 	@Override
 	public List<FormTemplate> listAll() {
-		return getJdbcTemplate().query("select * from form_template", new FormTemplateMapper(false));
+		return getJdbcTemplate().query("select id, is_active, version, name, fullname, type_id from form_template", new FormTemplateMapper(false));
 	}
 
 	@Override
