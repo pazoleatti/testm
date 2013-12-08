@@ -1,129 +1,96 @@
 package form_template.income.output3
 
-import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
+import groovy.transform.Field
 
 /**
  * Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика
  * formTemplateId=308
+ *
+ * http://conf.aplana.com/pages/viewpage.action?pageId=8783216
+ * http://conf.aplana.com/pages/viewpage.action?pageId=8784122
+ *
+ * @author Stanislav Yasinskiy
  */
-
-DataRowHelper getDataRowsHelper() {
-    dataRowsHelper = null
-    if (formData.id != null) dataRowsHelper = formDataService.getDataRowHelper(formData)
-    return dataRowsHelper
-}
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        checkUniq()
+        if (formData.kind != FormDataKind.ADDITIONAL) {
+            logger.error("Нельзя создавать форму с типом ${formData.kind?.name}")
+        }
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
-        dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
     case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED:
-        checkDecl()
-        logicCheck()
-        break
-    case FormDataEvent.MOVE_PREPARED_TO_CREATED:
-        break
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
-        checkDecl()
-        logicCheck()
-        break
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
-        checkDecl()
-        break
     case FormDataEvent.ADD_ROW:
-        addRow()
+        formDataService.addRow(formData, currentDataRow, editableColumns, null)
         break
     case FormDataEvent.DELETE_ROW:
-        deleteRow()
+        formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        break
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+        logicCheck()
         break
 }
-/**
- 1 paymentType	Вид платежа (код)	Строка /1/	—	Должно содержать значение поля «Код вида платежа» справочника «Коды видов платежей» Принимает значения: 1, 3, 4
- 2 okatoCode	Код по ОКАТО	Строка /11/	—	Принимает значение: 45293554000
- 3 budgetClassificationCode	Код бюджетной классификации	Строка /20/	Принимает значения:•	18210101040011000110•	18210101060 011000110•	18210101070 011000110
- 4 dateOfPayment	Срок уплаты	Дата	DD.MM.YYYY	—	—	—	Да	—
- 5 sumTax	Сумма налога, подлежащая уплате	Число /15/	0	—	—	—	Да	—
- */
-void calc() {
-    providerPaymentType = refBookFactory.getDataProvider(24L)
 
-    for(DataRow row in dataRowsHelper.getAllCached()) {
-        row.okatoCode = "45293554000"
-        if (row.paymentType != null) {
-            if (providerPaymentType.getValue((Long) row.paymentType, 100L).getStringValue() == '1') {
+//// Кэши и константы
+@Field
+def refBookCache = [:]
+
+@Field
+def editableColumns = ['paymentType', 'dateOfPayment', 'sumTax']
+
+// Проверяемые на пустые значения атрибуты
+@Field
+def nonEmptyColumns = ['paymentType', 'okatoCode', 'budgetClassificationCode', 'dateOfPayment', 'sumTax']
+
+//// Обертки методов
+
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
+//// Кастомные методы
+
+// Алгоритмы заполнения полей формы
+void calc() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    if (!dataRows.isEmpty()) {
+
+        for (def row in dataRows) {
+            // графа 2
+            row.okatoCode = "45293554000"
+            // графа 3
+            def paymentType = getRefBookValue(24, row.paymentType)?.CODE?.stringValue
+            if ('1'.equals(paymentType)) {
                 row.budgetClassificationCode = '18210101040011000110'
-            }
-            if (providerPaymentType.getValue((Long) row.paymentType, 100L).getStringValue() == '3') {
+            } else if ('3'.equals(paymentType)) {
                 row.budgetClassificationCode = '18210101070011000110'
-            }
-            if (providerPaymentType.getValue((Long) row.paymentType, 100L).getStringValue() == '4') {
+            } else if ('4'.equals(paymentType)) {
                 row.budgetClassificationCode = '18210101060011000110'
             }
         }
+        dataRowHelper.update(dataRows);
     }
 }
 
-void deleteRow() {
-    if (currentDataRow != null) {
-        dataRowsHelper.delete(currentDataRow)
-    }
-}
-
-void addRow() {
-    row = formData.createDataRow()
-    for (alias in ['paymentType', 'dateOfPayment', 'sumTax']) {
-        row.getCell(alias).editable = true
-        row.getCell(alias).setStyleAlias('Редактируемая')
-    }
-    dataRowsHelper.insert(row, dataRowsHelper.getAllCached().size() + 1)
-}
-/**
- * Проверяет уникальность в отчётном периоде и вид
- */
-void checkUniq() {
-
-    FormData findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
-
-    if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
-    }
-    if (formData.kind != FormDataKind.ADDITIONAL) {
-        logger.error('Нельзя создавать форму с типом ${formData.kind?.name}')
-    }
-}
-
-/**
- * Проверка наличия декларации для текущего department
- */
-void checkDecl() {
-    declarationType = 2;    // Тип декларации которую проверяем(Налог на прибыль)
-    declaration = declarationService.find(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
-    if (declaration != null && declaration.isAccepted()) {
-        logger.error("Декларация банка находиться в статусе принята")
-    }
-}
-
-/**
- * Логические проверки
- */
-void logicCheck() {
-    for (row in dataRowsHelper.getAllCached()) {
-        for (alias in ['paymentType', 'okatoCode', 'budgetClassificationCode', 'dateOfPayment', 'sumTax']) {
-            if (row.getCell(alias).value == null) {
-                logger.error('Поле «' + row.getCell(alias).column.name.replace('%', '%%') + '» не заполнено')
-            }
-        }
+def logicCheck() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    for (def row in dataRows) {
+        // 1. Проверка на заполнение поля
+        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
     }
 }

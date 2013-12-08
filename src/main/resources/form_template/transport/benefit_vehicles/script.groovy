@@ -1,42 +1,34 @@
 package form_template.transport.benefit_vehicles
 
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import groovy.transform.Field
 
 /**
  * Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог
  * formTemplateId=202
  *
- * @author gavanesov
  * @author Stanislav Yasinskiy
  */
-
-/**
- * Графы
- * 1 № пп  -  rowNumber
- * 2 Код ОКАТО  -  codeOKATO
- * 3 Идентификационный номер  -  identNumber
- * 4 Регистрационный знак  -  regNumber
- * 5 Код налоговой льготы - taxBenefitCode
- * 6 Дата начала Использование льготы - benefitStartDate
- * 7 Дата окончания Использование льготы - benefitEndDate
- *
- * ['rowNumber', 'codeOKATO', 'identNumber', 'regNumber', 'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
- */
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        checkUniq()
-        copyData()
+        formDataService.checkUnique(formData, logger)
+        // TODO пока нет возможности добавлять строки при создании: http://jira.aplana.com/browse/SBRFACCTAX-5219
+        // copyData()
+        break
+    case FormDataEvent.CALCULATE:
+        calc()
+        logicCheck()
         break
     case FormDataEvent.CHECK:
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        addRow()
+        formDataService.addRow(formData, currentDataRow, editableColumns, null)
         break
     case FormDataEvent.DELETE_ROW:
-        deleteRow()
+        formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
@@ -44,248 +36,212 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        consolidation()
-        logicalCheck()
+        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        calc()
+        logicCheck()
         break
 }
 
-// Проверяет уникальность в отчётном периоде и вид
-void checkUniq() {
-    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
-    if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
+// 1 № пп  -  rowNumber
+// 2 Код ОКАТО  -  codeOKATO
+// 3 Идентификационный номер  -  identNumber
+// 4 Регистрационный знак  -  regNumber
+// 5 Код налоговой льготы - taxBenefitCode
+// 6 Дата начала Использование льготы - benefitStartDate
+// 7 Дата окончания Использование льготы - benefitEndDate
+
+//// Кэши и константы
+@Field
+def refBookCache = [:]
+
+// Редактируемые атрибуты
+@Field
+def copyColumns = ['codeOKATO', 'identNumber', 'regNumber', 'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
+
+@Field
+def editableColumns = ['codeOKATO', 'identNumber', 'regNumber', 'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
+
+// Проверяемые на пустые значения атрибуты
+@Field
+def nonEmptyColumns = ['rowNumber', 'codeOKATO', 'identNumber', 'regNumber', 'taxBenefitCode', 'benefitStartDate',
+        'benefitEndDate']
+
+//// Обертки методов
+
+// Проверка НСИ
+boolean checkNSI(def refBookId, def row, def alias) {
+    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
+}
+
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
+//// Кастомные методы
+
+// Алгоритмы заполнения полей формы
+void calc() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    if (!dataRows.isEmpty()) {
+        sort()
+        def i = 1
+        for (def row in dataRows) {
+            row.rowNumber = i++
+        }
+        dataRowHelper.update(dataRows);
     }
 }
 
-// Алгоритм копирования данных из форм предыдущего периода при создании формы
-void copyData() {
-    // TODO
-}
-
-//Добавить новую строку
-void addRow() {
+// сортировка ОКАТО
+void sort() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def row = formData.createDataRow()
-    def dataRows = dataRowHelper.getAllCached()
-    def size = dataRows.size()
-    def index = currentDataRow != null ? (currentDataRow.getIndex() + 1) : (size == 0 ? 1 : (size + 1))
-    ['codeOKATO', 'identNumber', 'regNumber', 'taxBenefitCode', 'benefitStartDate', 'benefitEndDate'].each {
-        row.getCell(it).editable = true
-        row.getCell(it).setStyleAlias('Редактируемое поле')
+    dataRowHelper.getAllCached().sort { a, b ->
+        def valA = getRefBookValue(3, a.codeOKATO).OKATO.stringValue
+        def valB = getRefBookValue(3, b.codeOKATO).OKATO.stringValue
+        return valA.compareTo(valB)
     }
-    dataRowHelper.insert(row, index)
-    setRowIndex()
 }
 
-// Удалить строку
-void deleteRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.delete(currentDataRow)
-    setRowIndex()
-}
-
-// Установка номера строки
-void setRowIndex() {
+def logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
-    def index = 1
-    for (def row in dataRows) {
-        row.rowNumber = index++
-    }
-    dataRowHelper.update(dataRows);
-}
 
-def logicalCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    reportPeriodService.getEndDate(formData.reportPeriodId)
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).getTime()
-    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).getTime()
+    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def String dFormat = "dd.MM.yyyy"
 
-    // Проверенные строки (4-ая провека)
+    // Проверенные строки (3-я провека)
     def List<DataRow<Cell>> checkedRows = new ArrayList<DataRow<Cell>>()
     for (def row in dataRows) {
 
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
+
         // 1. Проверка на заполнение поля
-        def errorMsg = ''
-        ['rowNumber', 'codeOKATO', 'identNumber', 'regNumber', 'taxBenefitCode', 'benefitStartDate', 'benefitEndDate'].each { it ->
-            def cell = row.getCell(it)
-            if (cell.getValue() == null || ''.equals(cell.getValue())) {
-                errorMsg += (!''.equals(errorMsg) ? ', ' : '') + '"' + cell.getColumn().getName() + '"'
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+
+        if (row.benefitStartDate != null && row.benefitEndDate != null){
+            // 2. Поверка на соответствие дат использования льготы
+            if (row.benefitEndDate.compareTo(row.benefitStartDate) < 0) {
+                logger.error(errorMsg + 'Неверно указаны даты начала и окончания использования льготы!')
+            }
+
+            // 4. Проверка на наличие в списке ТС строк, период использования льготы которых не пересекается
+            // с отчётным / налоговым периодом, к которому относится налоговая форма
+            if(row.benefitStartDate > dTo || row.benefitEndDate < dFrom) {
+                logger.error(errorMsg + 'Период использования льготы ТС ('
+                        + row.benefitStartDate.format(dFormat) + ' - ' + row.benefitEndDate.format(dFormat) + ') ' +
+                        ' не пересекается с периодом (' + dFrom.format(dFormat) + " - " + dTo.format(dFormat) +
+                        '), за который сформирована налоговая форма!')
             }
         }
-        if (!''.equals(errorMsg)) {
-            logger.error("Строка $row.rowNumber :  Не заполнены поля : $errorMsg.")
-            return;
-        }
 
-        // 2. Поверка на соответствие дат использования льготы
-        if (!(row.benefitEndDate.compareTo(row.benefitStartDate) > 0)) {
-            logger.error("Строка $row.rowNumber :  Неверно указаны даты начала и окончания использования льготы!")
-        }
-
-        // 3. Проверка на наличие в списке ТС строк, для которых графы codeOKATO, identNumber, regNumber одинаковы
+        // 3. Проверка на наличие в списке ТС строк, для которых графы 2, 3, 4
+        // («Код ОКАТО», «Идентификационный номер», «Регистрационный знак») одинаковы
         if (!checkedRows.contains(row)) {
-            errorMsg = ''
+            def errorRows = ''
             for (def rowIn in dataRows) {
-                if (!checkedRows.contains(rowIn) && row != rowIn && row.codeOKATO.equals(rowIn.codeOKATO) && row.identNumber.equals(rowIn.identNumber) && row.regNumber.equals(rowIn.regNumber)) {
+                if (!checkedRows.contains(rowIn) && row != rowIn && row.codeOKATO.equals(rowIn.codeOKATO)
+                        && row.identNumber.equals(rowIn.identNumber) && row.regNumber.equals(rowIn.regNumber)) {
                     checkedRows.add(rowIn)
-                    errorMsg = ", $rowIn.rowNumber"
-
+                    errorRows = ', ' + rowIn.getIndex()
                 }
             }
-            if (!''.equals(errorMsg)) {
-                logger.error("Обнаружены строки $row.rowNumber $errorMsg, у которых Код ОКАТО = " + row.codeOKATO + ", " +
-                        "Идентификационный номер = " + row.identNumber + ", " +
-                        "Регистрационный знак = " + row.regNumber + " совпадают!")
+            if (!''.equals(errorRows)) {
+                logger.error("Обнаружены строки $index$errorRows, у которых Код ОКАТО = $row.codeOKATO, " +
+                        "Идентификационный номер = $row.identNumber, " +
+                        "Регистрационный знак = $row.regNumber совпадают!")
             }
         }
         checkedRows.add(row)
 
-        // 4. Проверка на наличие в списке ТС строк, период использования льготы которых не пересекается с отчётным
-        if (row.benefitStartDate > dTo || row.benefitEndDate < dFrom) {
-            logger.error("Строка $row.rowNumber : Период использования льготы ТС (" + row.benefitStartDate.format(dFormat) + " - " + row.benefitEndDate.format(dFormat) + ") " +
-                    " не пересекается с периодом (" + dFrom.format(dFormat) + " - " + dTo.format(dFormat) + "), за который сформирована налоговая форма!")
-        }
-
         // Проверки соответствия НСИ
-        checkNSI(row.getCell('codeOKATO'), "Строка $row.rowNumber : Неверный код ОКАТО!", 3)
+        checkNSI(3, row, "codeOKATO")
+        checkNSI(6, row, "taxBenefitCode")
+    }
 
-        // Проверка льготы
-        if (!checkBenefit(row.taxBenefitCode, row.codeOKATO)) {
-            logger.error("Строка $row.rowNumber : Выбранная льгота для текущего региона не предусмотрена.")
+    // 6. Проверка наличия формы предыдущего периода
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+    def str = ''
+    if (reportPeriod.order == 4) {
+        str += checkPrevPeriod(prevReportPeriod)
+        prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
+        str += checkPrevPeriod(prevReportPeriod)
+        prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
+        str += checkPrevPeriod(prevReportPeriod)
+    } else {
+        str = checkPrevPeriod(prevReportPeriod)
+    }
+    if (str.length() > 2) {
+        logger.warn("Данные ТС из предыдущих отчётных периодов не были скопированы. В Системе " +
+                "не создавались формы за следующие периоды: " + str.substring(0, str.size() - 2) + ".")
+    }
+}
+
+def String checkPrevPeriod(def reportPeriod) {
+    if (reportPeriod != null) {
+        if (formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id) == null) {
+            return reportPeriod.name + " " + reportPeriod.getYear() + ", "
         }
     }
+    return ''
 }
 
-// Проверка соответствия НСИ
-void checkNSI(Cell cell, String msg, Long id) {
-    if (cell.value != null && refBookService.getRecordData(id, cell.value) == null)
-        logger.error(msg)
-}
+// Алгоритм копирования данных из форм предыдущего периода при создании формы
+def copyData() {
+    def rows = new LinkedList<DataRow<Cell>>()
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+    if (reportPeriod.order == 4) {
+        rows += getPrevRowsForCopy(prevReportPeriod)
+        prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
+        rows += getPrevRowsForCopy(prevReportPeriod)
+        prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
+        rows += getPrevRowsForCopy(prevReportPeriod)
+    } else {
+        rows += getPrevRowsForCopy(prevReportPeriod)
+    }
 
-/**
- * Скрипт для сортировки.
- */
-void sort() {
-
-// НЕОБХОДИМО УДАЛИТЬ СОРТИРОВКУ ПО NAME И CODE  
-    // сортировка
-    // 1 - ОКАТО
-    getDataRows().sort { a, b ->
-        okatoA = getRefBookValue(3, a.codeOKATO, "OKATO")
-        okatoB = getRefBookValue(3, b.codeOKATO, "OKATO")
-        int val = okatoA.getStringValue().compareTo(okatoB.getStringValue())
-
-        /*
-          if (val == 0) {
-              def regionA = getRefBookValue(3, a.regionName, "NAME")
-              def regionB = getRefBookValue(3, b.regionName, "NAME")
-              val = regionA.getStringValue().compareTo(regionB.getStringValue())
-
-              if (val == 0) {
-                  def tsTypeCodeA = getRefBookValue(42, a.tsTypeCode, "CODE")
-                  def tsTypeCodeB = getRefBookValue(42, b.tsTypeCode, "CODE")
-                  val = tsTypeCodeA.getStringValue().compareTo(tsTypeCodeB.getStringValue())
-              }
-          }
-          */
-        return val
+    if (rows.size() > 0) {
+        def dataRowHelper = formDataService.getDataRowHelper(formData)
+        dataRowHelper.save(rows)
     }
 }
 
-// Консолидация
-void consolidation() {
-    // удалить все строки и собрать из источников их строки
+def copyRow(def row) {
+    def newRow = formData.createDataRow()
+    editableColumns.each { alias ->
+        newRow.getCell(alias).editable = true
+        newRow.getCell(alias).setStyleAlias("Редактируемая")
+    }
+    copyColumns.each { alias ->
+        newRow.getCell(alias).value = row.getCell(alias).value
+    }
+    return newRow
+}
+
+//Получить строки для копирования за предыдущий отчетный период
+def getPrevRowsForCopy(def reportPeriod) {
     def rows = new LinkedList<DataRow<Cell>>()
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                formDataService.getDataRowHelper(source).getAllCached().each { row ->
-                    if (row.getAlias() == null || row.getAlias() == '') {
-                        rows.add(row)
-                    }
+    if (reportPeriod != null) {
+        formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id)
+        def dataRowsOld = (formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null)
+        if (dataRowsOld != null && !dataRowsOld.isEmpty()) {
+            def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
+            def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
+            for (def row in dataRowsOld) {
+                if (row.regDate == null || row.regDateEnd == null || row.regDate > dTo || row.regDateEnd < dFrom) {
+                    continue
                 }
+                rows.add(copyRow(row))
             }
         }
     }
-    formDataService.getDataRowHelper(formData).save(rows)
-    logger.info('Формирование консолидированной формы прошло успешно.')
-}
-
-/**
- * 2. Проверка льготы
- * Для выбранного значения в «графе 5» (20210, 20220, 20230) в справочнике «Параметры налоговых льгот» существует запись по текущему региону:
- * атрибут «Код региона» справочника «Параметры налоговых льгот» соответствует значению «графы 2» («Код по ОКАТО»).
- */
-boolean checkBenefit(taxBenefitCode, okato) {
-    if (taxBenefitCode != null && getRefBookValue(6, taxBenefitCode, "CODE").stringValue in ['20210', '20220', '20230']) {
-        def refTaxBenefitParameters = refBookFactory.getDataProvider(7)
-        def region = getRegionByOkatoOrg(okato)
-        query = "TAX_BENEFIT_ID =" + taxBenefitCode + " AND DICT_REGION_ID = " + region.record_id
-        if (refTaxBenefitParameters.getRecords(new Date(), null, query, null).getRecords().size() == 0) {
-            return false;
-        }
-    }
-    return true;
-}
-
-// Получение значения (разменовываение)
-def getRefBookValue(refBookID, recordId, alias) {
-    def record = refBookFactory.getDataProvider(refBookID).getRecordData(recordId)
-    return record != null ? record.get(alias) : null;
-}
-
-/**
- * Получение региона по коду ОКАТО
- * @param okato
- */
-def getRegionByOkatoOrg(okatoCell) {
-    /*
-    * первые две цифры проверяемого кода ОКАТО
-    * совпадают со значением поля «Определяющая часть кода ОКАТО»
-    * справочника «Коды субъектов Российской Федерации»
-    */
-    // провайдер для справочника - Коды субъектов Российской Федерации
-    def okato = getRefBookValue(3, okatoCell, "OKATO")
-    def refDataProvider = refBookFactory.getDataProvider(4)
-    def records = refDataProvider.getRecords(new Date(), null, "OKATO_DEFINITION like '" + okato.toString().substring(0, 2) + "%'", null).getRecords()
-
-    if (records.size() == 1) {
-        return records.get(0);
-    } else if (records.size() == 0) {
-        logger.error("Не удалось определить регион по коду ОКАТО. Строка: " + row.getIndex())
-        return null;
-    } else {
-        /**
-         * Если первые пять цифр кода равны "71140" то код ОКАТО соответствует
-         * Ямало-ненецкому АО (код 89 в справочнике «Коды субъектов Российской Федерации»)
-         */
-        def reg89 = records.find { it.OKATO.toString().substring(0, 4).equals("71140") }
-        if (reg89 != null) return reg89;
-
-        /**
-         * Если первые пять цифр кода равны "71100" то
-         * код ОКАТО соответствует Ханты-мансийскому АО
-         * (код 86 в справочнике «Коды субъектов Российской Федерации»)
-         */
-        def reg86 = records.find { it.OKATO.toString().substring(0, 4).equals("71100") }
-        if (reg86 != null) return reg86;
-
-        /**
-         * Если первые четыре цифры кода равны "1110"
-         * то код ОКАТО соответствует Ненецкому АО
-         * (код 83 в справочнике «Коды субъектов Российской Федерации»)
-         */
-        def reg83 = records.find { it.OKATO.toString().substring(0, 4).equals("1110") }
-        if (reg83 != null) return reg83;
-
-        logger.error("Не удалось определить регион по коду ОКАТО. Строка: " + row.getIndex())
-        return null;
-    }
+    return rows
 }
