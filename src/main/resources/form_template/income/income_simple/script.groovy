@@ -429,6 +429,6 @@ def checkRequiredColumns(def row, def columns) {
     }
     if (!colNames.isEmpty()) {
         def errorMsg = colNames.join(', ')
-        logger.error("Строка ${row.index}: не заполнены графы : $errorMsg.")
+        logger.error("Строка ${row.getIndex()}: не заполнены графы : $errorMsg.")
     }
 }
