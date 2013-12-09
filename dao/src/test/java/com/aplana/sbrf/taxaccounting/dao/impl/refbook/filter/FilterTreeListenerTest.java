@@ -222,5 +222,17 @@ public class FilterTreeListenerTest {
         simpleFilterTreeListener.setPs(result);
         Filter.getFilterQuery("LOWER(AliasStringType11) > 5", simpleFilterTreeListener);
     }
+
+    public void complexExpr2(){
+        SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+        simpleFilterTreeListener.setRefBook(refBook);
+
+        PreparedStatementData result = new PreparedStatementData();
+        simpleFilterTreeListener.setPs(result);
+        Filter.getFilterQuery("LOWER(AliasStringType11) = LOWER('\"Сбербанк КИБ\" ЗАО ')", simpleFilterTreeListener);
+        assertTrue(result.getQuery().toString().equals("LOWER(AliasStringType11) = LOWER(?)"));
+        assertTrue(result.getParams().size() == 1);
+        assertTrue(result.getParams().get(0).equals(new String("\"Сбербанк КИБ\" ЗАО ")));
+    }
 }
 
