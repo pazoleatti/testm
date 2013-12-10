@@ -1,7 +1,5 @@
 package form_template.deal.rent_provision
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
@@ -71,7 +69,7 @@ def autoFillColumns = ['rowNum', 'innKio', 'countryCode', 'price', 'cost']
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['rowNum', 'jurName', 'innKio', 'countryCode', 'incomeBankSum', 'outcomeBankSum', 'contractNum',
-		'contractDate', 'country', 'count', 'price', 'cost', 'transactionDate']
+        'contractDate', 'country', 'count', 'price', 'cost', 'transactionDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -159,13 +157,13 @@ void logicCheck() {
         def outcomeBankSum = row.outcomeBankSum
         def transactionDate = row.transactionDate
         def contractDate = row.contractDate
-		
-		def bankSum = null
+
+        def bankSum = null
         def msgBankSum = row.getCell('incomeBankSum').column.name
-        if (incomeBankSum !=null && outcomeBankSum ==null){
+        if (incomeBankSum != null && outcomeBankSum == null) {
             bankSum = incomeBankSum
         }
-        if (outcomeBankSum !=null && incomeBankSum ==null) {
+        if (outcomeBankSum != null && incomeBankSum == null) {
             bankSum = outcomeBankSum
             msgBankSum = row.getCell('outcomeBankSum').column.name
         }
@@ -198,8 +196,8 @@ void logicCheck() {
         if (cost != bankSum) {
             logger.warn("Строка $rowNum: «$costName» не может отличаться от «$msgBankSum»!")
         }
-		
-		// Заполнение граф 5.1 и 5.2
+
+        // Заполнение граф 5.1 и 5.2
         if (incomeBankSum == null && outcomeBankSum == null) {
             def msg1 = row.getCell('incomeBankSum').column.name
             def msg2 = row.getCell('outcomeBankSum').column.name
@@ -261,14 +259,14 @@ void calc() {
         // Порядковый номер строки
         row.rowNum = index++
 
-		def bankSum = null
-        if (row.incomeBankSum !=null && row.outcomeBankSum ==null)
+        def bankSum = null
+        if (row.incomeBankSum != null && row.outcomeBankSum == null)
             bankSum = row.incomeBankSum
-        if (row.outcomeBankSum !=null && row.incomeBankSum ==null)
+        if (row.outcomeBankSum != null && row.incomeBankSum == null)
             bankSum = row.outcomeBankSum
-			
+
         count = row.count
-		
+
         // Расчет поля "Цена"
         if (bankSum != null && count != null && count != 0) {
             row.price = bankSum / count
@@ -334,15 +332,15 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
-    def int xlsIndexRow = 0
     def int rowOffset = 3
     def int colOffset = 2
 
-    def rows = new LinkedList<DataRow<Cell>>()
+    def rows = []
+    def int rowIndex = 1
 
     for (def row : xml.row) {
         xmlIndexRow++
-        xlsIndexRow = xmlIndexRow + rowOffset
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // пропустить шапку таблицы
         if (xmlIndexRow <= headRowCount) {
@@ -354,6 +352,7 @@ void addData(def xml, int headRowCount) {
         }
 
         def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -394,8 +393,8 @@ void addData(def xml, int headRowCount) {
         // графа 5.1
         newRow.incomeBankSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
-		
-		// графа 5.2
+
+        // графа 5.2
         newRow.outcomeBankSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         indexCell++
 

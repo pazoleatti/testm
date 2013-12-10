@@ -318,7 +318,6 @@ String getValuesByGroupColumn(DataRow row) {
     return retVal.substring(0, retVal.length() - 2)
 }
 
-
 // Получение импортируемых данных
 void importData() {
     def xml = getXML('Полное наименование с указанием ОПФ', 'Подитог')
@@ -360,15 +359,15 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
-    def int xlsIndexRow = 0
     def int rowOffset = 3
     def int colOffset = 2
 
-    def rows = new LinkedList<DataRow<Cell>>()
+    def rows = []
+    def int rowIndex = 1
 
     for (def row : xml.row) {
         xmlIndexRow++
-        xlsIndexRow = xmlIndexRow + rowOffset
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // пропустить шапку таблицы
         if (xmlIndexRow <= headRowCount) {
@@ -380,6 +379,7 @@ void addData(def xml, int headRowCount) {
         }
 
         def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -424,7 +424,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 6
-        newRow.docDate =  parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.docDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
 
         // графа 7
