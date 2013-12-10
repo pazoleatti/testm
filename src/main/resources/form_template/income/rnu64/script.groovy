@@ -17,7 +17,7 @@ import groovy.transform.Field
  * 2. date - Дата сделки
  * 3. part - Часть сделки Справочник
  * 4. dealingNumber - Номер сделки
- * //5. bondKind - Вид ценных бумаг //графу удалили
+ * -5. bondKind - Вид ценных бумаг //графу удалили
  * 5. costs - Затраты (руб.коп.)
  */
 
@@ -40,6 +40,7 @@ switch (formDataEvent) {
             formDataService.getDataRowHelper(formData).delete(currentDataRow)
         }
         break
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"

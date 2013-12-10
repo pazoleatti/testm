@@ -1,139 +1,148 @@
 package form_template.income.outcome_simple
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.FormData
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod
-import com.aplana.sbrf.taxaccounting.model.TaxType
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
-
+import groovy.transform.Field
 import java.text.SimpleDateFormat
 
 /**
  * Форма "Расходы, учитываемые в простых РНУ (расходы простые)"
  * formTemplateId=304
  *
- * @version 46
+ * графа  1 - consumptionTypeId
+ * графа  2 - consumptionGroup
+ * графа  3 - consumptionTypeByOperation
+ * графа  4 - consumptionAccountNumber
+ * графа  5 - rnu7Field10Sum
+ * графа  6 - rnu7Field12Accepted
+ * графа  7 - rnu7Field12PrevTaxPeriod
+ * графа  8 - rnu5Field5Accepted
+ * графа  9 - logicalCheck
+ * графа 10 - accountingRecords
+ * графа 11 - opuSumByEnclosure2
+ * графа 12 - opuSumByTableP
+ * графа 13 - opuSumTotal
+ * графа 14 - difference
  */
 
 switch (formDataEvent) {
-// создать
     case FormDataEvent.CREATE:
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
-// расчитать
-    case FormDataEvent.CALCULATE:
-        checkAndCalc()
-        save(getData(formData))
-        break
-// обобщить
-    case FormDataEvent.COMPOSE:
-        isBank() ? consolidationBank() : consolidationSummary()
-        calculationBasicSum()
-        break
-// проверить
     case FormDataEvent.CHECK:
-        checkAndCalc()
-        //testFillForm()
+        logicCheck()//изменения откатываются, поэтому расчеты перенесены в CALCULATE
         break
-// проверить при переводе в утверждена
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED:
-        checkAndCalc()
+    case FormDataEvent.CALCULATE:
+        calc()
+        logicCheck()
         break
-// принять из утверждена
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED:
-        checkAndCalc()
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+        logicCheck()
         break
-// принять из создана
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
-        checkAndCalc()
+        logicCheck()
         if (!logger.containsLevel(LogLevel.ERROR)) {
-            checkDeclarationBankOnAcceptance()
+            checkDeclarationBankOnCancelOrAcceptance('Принятие')
         }
         break
-// вернуть из принята в создана
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
-        checkDeclarationBankOnCancelAcceptance()
-        break
-// после вернуть из "Принята" в "Утверждена"
     case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED:
-        checkDeclarationBankOnCancelAcceptance()
+        checkDeclarationBankOnCancelOrAcceptance('Отмена принятия')
+        break
+    case FormDataEvent.COMPOSE:
+        def dataRowHelper = formDataService.getDataRowHelper(formData)
+        def dataRows = dataRowHelper?.allCached
+        isBank() ? consolidationBank(dataRows) : consolidationSummary(dataRows)
+        calculationBasicSum(dataRows)
+        dataRowHelper.save(dataRows)
         break
 }
 
-// графа  1 - consumptionTypeId
-// графа  2 - consumptionGroup
-// графа  3 - consumptionTypeByOperation
-// графа  4 - consumptionAccountNumber
-// графа  5 - rnu7Field10Sum
-// графа  6 - rnu7Field12Accepted
-// графа  7 - rnu7Field12PrevTaxPeriod
-// графа  8 - rnu5Field5Accepted
-// графа  9 - logicalCheck
-// графа 10 - accountingRecords
-// графа 11 - opuSumByEnclosure2
-// графа 12 - opuSumByTableP
-// графа 13 - opuSumTotal
-// графа 14 - difference
+// Кэш id записей справочника
+@Field
+def recordCache = [:]
 
-/**
- * Проверить и расчитать.
- */
-void checkAndCalc() {
-    def data = getData(formData)
-    if (data == null) {
-        return
-    }
+@Field
+def allColumns = ['consumptionTypeId', 'consumptionGroup', 'consumptionTypeByOperation', 'consumptionAccountNumber',
+        'rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted',
+        'logicalCheck', 'accountingRecords', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference']
 
-    /*
-     * Проверка обязательных полей
-     */
-    def requiredColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']
-    for (def row : getRows(data)) {
-        if (!checkRequiredColumns(row, requiredColumns, true)) {
-            return
+@Field
+def nonEmptyColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']
+
+@Field
+def formatY = new SimpleDateFormat('yyyy')
+
+@Field
+def format = new SimpleDateFormat('dd.MM.yyyy')
+
+@Field
+def isBank
+
+// Получение Id записи с использованием кэширования
+def getRecordId(def ref_id, String alias, String value, Date date) {
+    String filter = "LOWER($alias) = LOWER('$value')"
+    if (value == '') filter = "$alias is null"
+    if (recordCache[ref_id] != null) {
+        if (recordCache[ref_id][filter] != null) {
+            return recordCache[ref_id][filter]
         }
+    } else {
+        recordCache[ref_id] = [:]
     }
+    def records = getProvider(ref_id).getRecords(date, null, filter, null)
+    if (records.size() == 1) {
+        recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        return recordCache[ref_id][filter]
+    }
+    return null
+}
 
-    calculationBasicSum()
+void calc() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper?.allCached
+    calculationBasicSum(dataRows)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        calculationControlGraphs()
+        calculationControlGraphs(dataRows)
+    }
+    dataRowHelper.save(dataRows)
+}
+
+void logicCheck() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper?.allCached
+    dataRows.each {row ->
+         checkRequiredColumns(row, nonEmptyColumns)
     }
 }
 
-/**
- * Вычисление сумм.
- */
-void calculationBasicSum() {
-    def data = getData(formData)
-    /*
-     * Расчет сумм
-     */
-    def row50001 = getRowByAlias(data, 'R107')
-    def row50002 = getRowByAlias(data, 'R212')
+void calculationBasicSum(def dataRows) {
+    def row50001 = getDataRow(dataRows, 'R107')
+    def row50002 = getDataRow(dataRows, 'R212')
 
     // суммы для графы 5..8
     ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
-        row50001.getCell(alias).setValue(getSum(alias, 'R2', 'R106'))
-        row50002.getCell(alias).setValue(getSum(alias, 'R109', 'R211'))
+        row50001[alias] = getSum(dataRows, alias, 'R2', 'R106')
+        row50002[alias] = getSum(dataRows, alias, 'R109', 'R211')
     }
-    ['R213', 'R214', 'R215', 'R216', 'R217'].each{ alias ->
-        def row = getRowByAlias(data,alias)
+    def formDataRNU14 = getFormDataRNU14()
+    def dataRowsRNU14 = formDataService.getDataRowHelper(formDataRNU14)?.allCached
+    ['R213', 'R214', 'R215', 'R216', 'R217'].each { alias ->
+        def row = getDataRow(dataRows, alias)
         if (!isBank()) {
             //при консолидации из первичных
             row.rnu5Field5Accepted = 0
         } else {
             //Строки 213-217 расчет 8-й графы (при консолидации из сводных)
-            def formDataRNU14 = getFormDataRNU14()
             if (formDataRNU14 != null) {
-                for (def rowRNU14 : getData(formDataRNU14).allCached) {
+                for (def rowRNU14 : dataRowsRNU14) {
                     if (rowRNU14.inApprovedNprms != rowRNU14.sum && row.consumptionTypeId == rowRNU14.knu) {
                         row.rnu5Field5Accepted = rowRNU14.inApprovedNprms
                     }
@@ -141,49 +150,39 @@ void calculationBasicSum() {
             }
         }
     }
-    save(data)
 }
 
 /**
  * Скрипт для заполнения контрольных полей.
- *
- * В текущей таблице нет 10й графы, следственно
- * нужно учесть что графы > 10 считаются "-1"
- *
- * @author rtimerbaev
- * @since 21.03.2013 13:00
- * @version 14 05.03.2013
+ * В текущей таблице нет 10й графы, следственно нужно учесть что графы > 10 считаются "-1"
  */
-void calculationControlGraphs() {
-    def data = getData(formData)
+void calculationControlGraphs(def dataRows) {
     def message = 'ТРЕБУЕТСЯ ОБЪЯСНЕНИЕ'
     def tmp
     def value
-    def formDataComplex = getFormDataComplex()
+    def dataRowsComplex = formDataService.getDataRowHelper(getFormDataComplex())?.allCached
     def income102NotFound = []
-    for (def row : getRows(data)) {
+    for (def row : dataRows) {
         // исключить итоговые строки и пять конечных
         if (row.getAlias() in ['R107', 'R212', 'R1', 'R108', 'R213', 'R214', 'R215', 'R216', 'R217']) {
             continue
         }
-        if (!isEmpty(row.rnu7Field10Sum) && !isEmpty(row.rnu7Field12Accepted) &&
-                !isEmpty(row.rnu7Field12PrevTaxPeriod)) {
+        if (row.rnu7Field10Sum && row.rnu7Field12Accepted && row.rnu7Field12PrevTaxPeriod) {
             // графы 9 = ОКРУГЛ(«графа 5» - («графа 6» - «графа 7»); 2)
             tmp = round(row.rnu7Field10Sum - (row.rnu7Field12Accepted - row.rnu7Field12PrevTaxPeriod), 2)
             value = ((BigDecimal) tmp).setScale(2, BigDecimal.ROUND_HALF_UP)
             row.logicalCheck = (tmp < 0 ? message : value.toString())
         }
         // графа 11
-        row.opuSumByEnclosure2 = getSumFromComplex(formDataComplex,
+        row.opuSumByEnclosure2 = getSumFromComplex(dataRowsComplex,
                 'consumptionBuhSumAccountNumber', 'consumptionBuhSumAccepted', row.consumptionAccountNumber)
-        //logger.info("alias = %s graph11 = %s", row.getAlias(), row.opuSumByEnclosure2.toString())
         // графа 12
         if (row.getAlias() in ['R105', 'R209']) {
-            tmp = calcColumn6(['R105', 'R209'])
+            tmp = calcSum6(dataRows, ['R105', 'R209'])
         } else if (row.getAlias() in ['R106', 'R211']) {
-            tmp = calcColumn6(['R106', 'R211'])
+            tmp = calcSum6(dataRows, ['R106', 'R211'])
         } else if (row.getAlias() in ['R104', 'R208']) {
-            tmp = calcColumn6(['R104', 'R208'])
+            tmp = calcSum6(dataRows, ['R104', 'R208'])
         } else {
             tmp = row.rnu5Field5Accepted
         }
@@ -192,7 +191,7 @@ void calculationControlGraphs() {
         // графа 13
         def income102 = income102Dao.getIncome102(formData.reportPeriodId, row.accountingRecords)
         if (income102 == null || income102.isEmpty()) {
-            income102NotFound += getIndex(row) + 1
+            income102NotFound += row.getIndex() + 2
             tmp = 0
         } else {
             tmp = (income102[0] != null ? income102[0].getTotalSum() : 0)
@@ -200,134 +199,74 @@ void calculationControlGraphs() {
         row.opuSumTotal = tmp
 
         // графа 14
-        row.difference = (getValue(row.opuSumByEnclosure2) + getValue(row.opuSumByTableP)) - getValue(row.opuSumTotal)
+        row.difference = (row.opuSumByEnclosure2?:0) + (row.opuSumByTableP?:0) - (row.opuSumTotal?:0)
     }
 
     if (!income102NotFound.isEmpty()) {
         def rows = income102NotFound.join(', ')
         logger.warn("Не найдены соответствующие данные в отчете о прибылях и убытках для строк: $rows")
     }
-    save(data)
 }
 
-/**
- * Скрипт для проверки создания.
- *
- * @author rtimerbaev
- * @since 21.02.2013 13:40
- */
-void checkCreation() {
-    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
-
-    if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
-    }
-
-    if (formData.kind != FormDataKind.SUMMARY) {
-        logger.error("Нельзя создавать форму с типом ${formData.kind?.name}")
-    }
-}
-
-/**
- * Проверки наличия декларации Банка при принятии нф.
- *
- * @author rtimerbaev
- * @since 21.03.2013 11:00
- */
-void checkDeclarationBankOnAcceptance() {
+/** Проверки наличия декларации Банка при принятии и отмене принятия нф. */
+void checkDeclarationBankOnCancelOrAcceptance(def action) {
     if (!isBank()) {
         return
     }
     departmentFormTypeService.getDeclarationDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY).each { department ->
         def bank = declarationService.find(2, department.departmentId, formData.reportPeriodId)
         if (bank != null && bank.accepted) {
-            logger.error('Принятие налоговой формы невозможно, т.к. уже принята декларация Банка.')
+            logger.error("$action налоговой формы невозможно, т.к. уже принята декларация Банка.")
         }
     }
 }
 
-/**
- * Проверки наличия декларации Банка при отмене принятия нф.
- *
- * @author rtimerbaev
- * @since 21.03.2013 11:00
- */
-void checkDeclarationBankOnCancelAcceptance() {
-    if (!isBank()) {
-        return
-    }
-    departmentFormTypeService.getDeclarationDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY).each { department ->
-        def bank = declarationService.find(2, department.departmentId, formData.reportPeriodId)
-        if (bank != null && bank.accepted) {
-            logger.error('Отмена принятия налоговой формы невозможно, т.к. уже принята декларация Банка.')
-        }
-    }
-}
-
-/**
- * Скрипт для консолидации данных из сводных расходов простых уровня ОП в сводные уровня банка.
- *
- * @author rtimerbaev
- * @since 21.02.2013 13:50
- */
-def consolidationBank() {
-    DataRowHelper data = getData(formData)
-    if (data == null) {
-        return
-    }
-
+/** Скрипт для консолидации данных из сводных расходов простых уровня ОП в сводные уровня банка. */
+def consolidationBank(def dataRows) {
     // очистить форму
-    data.getAllCached().each { row ->
+    dataRows.each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
             if (row.getCell(alias).isEditable() || row.getAlias() in ['R107', 'R212']) {
                 row.getCell(alias).setValue(0)
             }
         }
         ['logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference'].each { alias ->
-            row.getCell(alias).setValue(null)
+            row[alias] = null
         }
     }
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
-    for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())){
+    for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())) {
         def child = formDataService.find(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
-            DataRowHelper childData = getData(child)
+            DataRowHelper childData = formDataService.getDataRowHelper(child)
             for (DataRow<Cell> row : childData.allCached) {
                 if (row.getAlias() == null) {
                     continue
                 }
-                DataRow<Cell> rowResult = data.getDataRow(data.getAllCached(), row.getAlias())
+                DataRow<Cell> rowResult = dataRowHelper.getDataRow(dataRows, row.getAlias())
                 for (alias in ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']) {
-                    if (row.getCell(alias).getValue() != null) {
-                        rowResult.getCell(alias).setValue(summ(rowResult.getCell(alias), row.getCell(alias)))
+                    if (row[alias] != null) {
+                        rowResult[alias] = summ(rowResult.getCell(alias), row.getCell(alias))
                     }
                 }
             }
         }
     }
-    data.save(data.allCached)
-    data.commit()
     logger.info('Формирование сводной формы уровня Банка прошло успешно.')
 }
 
-/**
- * Консолидация данных из рну-7 и рну-5 в сводные расходы простые уровня ОП.
- */
-void consolidationSummary() {
-    def data = getData(formData)
-    if (data == null) {
-        return
-    }
+/** Консолидация данных из рну-7 и рну-5 в сводные расходы простые уровня ОП. */
+void consolidationSummary(def dataRows) {
     // очистить форму
-    getRows(data).each { row ->
+    dataRows.each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
             if (row.getCell(alias).isEditable() || row.getAlias() in ['R107', 'R212']) {
-                row.getCell(alias).setValue(0)
+                row[alias] = 0
             }
         }
         ['logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference'].each { alias ->
-            row.getCell(alias).setValue(null)
+            row[alias] = null
         }
     }
 
@@ -335,33 +274,32 @@ void consolidationSummary() {
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     // Предыдущий отчётный период
-    def dataOld = null
+    def dataRowsOld = null
     if (reportPeriod != null && reportPeriod.order != 1) {
-        prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+        def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
         if (prevReportPeriod != null) {
             def formDataOld = formDataService.find(formData.getFormType().getId(), formData.getKind(), formDataDepartment.id, prevReportPeriod.getId())
-            dataOld = getData(formDataOld)
-            if (dataOld != null) {
+            dataRowsOld = formDataService.getDataRowHelper(formDataOld)?.allCached
+            if (dataRowsOld != null) {
                 // данные за предыдущий отчетный период рну-7
                 ([3, 12] + (15..35) + (38..49) + (51..54) + (56..58) + (62..78) + (91..95) + (98..101) +
                         (103..106) + (181..183) + (190..194) + [199, 204, 205] + (207..211)).each {
                     def alias = 'R' + it
-                    def row = getRowByAlias(data, alias)
-
+                    def row = getDataRow(dataRows, alias)
+                    def rowOld = getDataRow(dataRowsOld, alias)
                     // графа 5
-                    row.rnu7Field10Sum = getRowByAlias(dataOld, alias).rnu7Field10Sum
+                    row.rnu7Field10Sum = rowOld.rnu7Field10Sum
                     // графа 6
-                    row.rnu7Field12Accepted = getRowByAlias(dataOld, alias).rnu7Field12Accepted
+                    row.rnu7Field12Accepted = rowOld.rnu7Field12Accepted
                     // графа 7
-                    row.rnu7Field12PrevTaxPeriod = getRowByAlias(dataOld, alias).rnu7Field12PrevTaxPeriod
+                    row.rnu7Field12PrevTaxPeriod = rowOld.rnu7Field12PrevTaxPeriod
                 }
                 // данные за предыдущий отчетный период рну-5
                 ((2..106) + (109..211)).each {
                     def alias = 'R' + it
-                    def row = getRowByAlias(data, alias)
-
+                    def row = getDataRow(dataRows, alias)
                     // графа 8
-                    row.rnu5Field5Accepted = getRowByAlias(dataOld, alias).rnu5Field5Accepted
+                    row.rnu5Field5Accepted = getDataRow(dataRowsOld, alias).rnu5Field5Accepted
                 }
             }
         }
@@ -373,14 +311,15 @@ void consolidationSummary() {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
             def date = new Date()
+            def dataRowsChild = formDataService.getDataRowHelper(child)?.allCached
             switch (child.formType.id) {
-                // рну 7
+            // рну 7
                 case 311:
                     ([3, 12] + (15..35) + (38..49) + (51..54) + (56..58) + (62..78) + (91..95) + (98..101) +
                             (103..106) + (181..183) + (190..194) + [199, 204, 205] + (207..211)).each {
                         def alias = 'R' + it
-                        def row = getRowByAlias(data, alias)
-                        def recordId = getRecords(27, 'CODE', row.consumptionTypeId, date, cache)
+                        def row = getDataRow(dataRows, alias)
+                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, date)
 
                         // сумма графы 10 рну-7
                         def sum10 = 0
@@ -389,9 +328,9 @@ void consolidationSummary() {
                         // сумма графы 10 рну-7 для графы 7
                         def sum = 0
                         if (recordId != null) {
-                            sum10 = getSumForColumn5or6or8(child, recordId, 'code', 'balance', 'taxAccountingRuble')
-                            sum12 = getSumForColumn5or6or8(child, recordId, 'code', 'balance', 'ruble')
-                            sum = getSumForColumn7(child, recordId)
+                            sum10 = getSumForColumn5or6or8(dataRowsChild, recordId, 'code', 'balance', 'taxAccountingRuble')
+                            sum12 = getSumForColumn5or6or8(dataRowsChild, recordId, 'code', 'balance', 'ruble')
+                            sum = getSumForColumn7(child, dataRowsChild, recordId)
                         }
 
                         // графа 5
@@ -403,19 +342,17 @@ void consolidationSummary() {
                     }
                     break
 
-                // рну 5
+            // рну 5
                 case 317:
                     ((2..106) + (109..211)).each {
                         def alias = 'R' + it
-                        def row = getRowByAlias(data, alias)
-                        def recordId = getRecords(27, 'CODE', row.consumptionTypeId, date, cache)
-
+                        def row = getDataRow(dataRows, alias)
+                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, date)
                         // сумма графы 5 рну-5
                         def sum5 = 0
                         if (recordId != null) {
-                            sum5 = getSumForColumn5or6or8(child, recordId, 'code', 'number', 'sum')
+                            sum5 = getSumForColumn5or6or8(dataRowsChild, recordId, 'code', 'number', 'sum')
                         }
-
                         // графа 8
                         row.rnu5Field5Accepted = (row.rnu5Field5Accepted ?: 0) + sum5
                     }
@@ -423,114 +360,45 @@ void consolidationSummary() {
             }
         }
     }
-
-    save(data) // TODO (Ramil Timerbaev) возможно это надо убрать, но без этого при отладке данные не сохранялись
-    data.commit()
     logger.info('Формирование сводной формы уровня обособленного подразделения прошло успешно.')
 }
 
-/*
- * Вспомогательные методы.
- */
-
-/**
- * Проверка на банк.
- */
+/** Проверка на банк. */
 def isBank() {
-    boolean isBank = true
-    departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
-        if (it.departmentId != formData.departmentId) {
-            isBank = false
+    if (isBank == null) {
+        departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
+            if (it.departmentId != formData.departmentId) {
+                isBank = false
+            }
         }
+        isBank = true
     }
     return isBank
 }
 
-/**
- * Получить сумму диапазона строк определенного столбца.
- */
-def getSum(String columnAlias, String rowFromAlias, String rowToAlias) {
-    DataRowHelper data = getData(formData)
-    def from = data.getDataRowIndex(data.getAll(), rowFromAlias)
-    def to = data.getDataRowIndex(data.getAll(), rowToAlias)
+/** Получить сумму диапазона строк определенного столбца. */
+def getSum(def dataRows, String columnAlias, String rowFromAlias, String rowToAlias) {
+    def from = getDataRow(dataRows, rowFromAlias).getIndex()
+    def to = getDataRow(dataRows, rowToAlias).getIndex()
     if (from > to) {
         return 0
     }
-    return summ(formData, data.getAll(), new ColumnRange(columnAlias, from, to))
-}
-
-/**
- * Получить название графы по псевдониму.
- *
- * @param row строка
- * @param alias псевдоним графы
- */
-def getColumnName(def row, def alias) {
-    if (row != null && alias != null) {
-        return row.getCell(alias).getColumn().getName().replace('%', '%%')
-    }
-    return ''
-}
-
-/**
- * Проверить заполненость обязательных полей.
- *
- * @param row строка
- * @param columns список обязательных графов
- * @param useLog нужно ли записывать сообщения в лог
- * @return true - все хорошо, false - есть незаполненные поля
- */
-def checkRequiredColumns(def row, def columns, def useLog) {
-    def colNames = []
-
-    def cell
-    columns.each {
-        cell = row.getCell(it)
-        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
-            def name = getColumnName(row, it)
-            colNames.add('"' + name + '"')
-        }
-    }
-    if (!colNames.isEmpty()) {
-        if (!useLog) {
-            return false
-        }
-        def index = getIndex(row) + 1
-        def errorMsg = colNames.join(', ')
-        logger.error("В строке $index не заполнены колонки : $errorMsg.")
-        return false
-    }
-    return true
-}
-
-/**
- * Получить номер строки в таблице.
- */
-def getIndex(def row) {
-    getData(formData).getAllCached().indexOf(row)
-}
-
-/**
- * Проверка пустое ли значение.
- */
-def isEmpty(def value) {
-    return value == null || value == ''
+    return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
 }
 
 /**
  * Получить сумму значений из расходов сложных.
- *
- * @param data данные формы
+ * @param dataRowsComplex данные формы
  * @param columnAliasCheck алиас графы, по которой отбираются строки для суммирования
  * @param columnAliasSum алиас графы, значения которой суммируются
  * @param value значение, по которому отбираются строки для суммирования
  */
-def getSumFromComplex(data, columnAliasCheck, columnAliasSum, value) {
+def getSumFromComplex(dataRowsComplex, columnAliasCheck, columnAliasSum, value) {
     def sum = 0
-    if (data != null && (columnAliasCheck != null || columnAliasCheck != '') && value != null) {
-        for (def row : getData(data).getAllCached()) {
-            if (row.getCell(columnAliasCheck).getValue() == value) {
-                sum += (row.getCell(columnAliasSum).getValue() ?: 0)
+    if (dataRowsComplex != null && (columnAliasCheck != null || columnAliasCheck != '') && value != null) {
+        for (def row : dataRowsComplex) {
+            if (row[columnAliasCheck] == value) {
+                sum += (row[columnAliasSum] ?: 0)
             }
         }
     }
@@ -539,16 +407,13 @@ def getSumFromComplex(data, columnAliasCheck, columnAliasSum, value) {
 
 /**
  * Получить значение для графы 12. Сумма значении графы 6 указанных строк
- *
+ * @param dataRows строки НФ
  * @param aliasRows список алиасов значения которых надо просуммировать
  */
-def calcColumn6(def aliasRows) {
-    def sum = 0
-    def data = getData(formData)
-    aliasRows.each { alias ->
-        sum += data.getDataRow(data.getAllCached(), alias).rnu7Field12Accepted
+def calcSum6(def dataRows, def aliasRows) {
+    return aliasRows.sum { alias ->
+        getDataRow(dataRows, alias).rnu7Field12Accepted
     }
-    return sum
 }
 
 /**
@@ -566,163 +431,18 @@ def getFormDataRNU14() {
 }
 
 /**
- * Получить значение или ноль.
- *
- * @param value значение которое надо проверить
- */
-def getValue(def value) {
-    return value ?: 0
-}
-
-// TODO (Ramil Timerbaev) убрать если не надо
-/**
- * Функция заполнения тестовыми данными
- */
-def testFillForm() {
-    def data = getData(formData)
-    data.getAllCached().each { row ->
-        ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
-            cell = row.getCell(alias)
-            if (cell.isEditable() && (cell.getValue() == null || cell.getValue() == '')) {
-                cell.setValue(1);
-            }
-        }
-    }
-
-    data.save(data.getAllCached());
-}
-
-/**
- * Получить данные формы.
- *
- * @param formData форма
- */
-def getData(def formData) {
-    if (formData != null && formData.id != null) {
-        return formDataService.getDataRowHelper(formData)
-    }
-    return null
-}
-
-/**
- * Получить строку по алиасу.
- *
- * @param data данные нф (helper)
- */
-def getRows(def data) {
-    return data.getAllCached();
-}
-
-/**
- * Получить строку по алиасу.
- *
- * @param data данные нф (helper)
- * @param alias алиас
- */
-def getRowByAlias(def data, def alias) {
-    return data.getDataRow(getRows(data), alias)
-}
-
-/**
- * Сохранить измененные значения нф.
- *
- * @param data данные нф (helper)
- */
-void save(def data) {
-    data.save(getRows(data))
-}
-
-/**
- * Удалить строку из нф
- *
- * @param data данные нф (helper)
- * @param row строка для удаления
- */
-void deleteRow(def data, def row) {
-    data.delete(row)
-}
-
-/**
- * Проверить наличие итоговой строки.
- *
- * @param data данные нф (helper)
- */
-def hasTotal(def data) {
-    for (def row : getRows(data)) {
-        if (row.getAlias() == 'total') {
-            return true
-        }
-    }
-    return false
-}
-
-/**
- * Вставить новыую строку в конец нф.
- *
- * @param data данные нф
- * @param row строка
- */
-void insert(def data, def row) {
-    data.insert(row, getRows(data).size() + 1)
-}
-
-/**
- * Получить идентификатор записи справочника 27 "Классификатор расходов Сбербанка России для целей налогового учёта"
- * по значению атрибута "Код налогового учёта".
- *
- * @param refDataProvider справочник
- * @param value код налогового учёта
- */
-def getRecordId(def refDataProvider, def value) {
-    def records = refDataProvider.getRecords(new Date(), null, "CODE = '" + value + "'", null)
-    if (records != null && !records.getRecords().isEmpty()) {
-        def record = records.getRecords().getAt(0)
-        if (record != null) {
-            return getValue(record, 'record_id')
-        }
-    }
-    return null
-}
-
-/**
- * Получить значение атрибута строки справочника.
-
- * @param record строка справочника
- * @param alias алиас
- */
-def getValue(def record, def alias) {
-    def value = record.get(alias)
-    switch (value.getAttributeType()) {
-        case RefBookAttributeType.DATE:
-            return value.getDateValue()
-        case RefBookAttributeType.NUMBER:
-            return value.getNumberValue()
-        case RefBookAttributeType.STRING:
-            return value.getStringValue()
-        case RefBookAttributeType.REFERENCE:
-            return value.getReferenceValue()
-    }
-    return null
-}
-
-/**
  * Получить сумму строк графы нф соответствующих двум условиям.
- *
- * @param form нф источника (рну-7 или рну-5)
+ * @param dataRowsChild строки нф источника (рну-7 или рну-5)
  * @param value1 значение приемника для первого условия (id справочника)
  * @param alias1 алиас графы для первого условия
  * @param alias2 алиас графы для второго условия
  * @param resultAlias алиас графы суммирования
  */
-def getSumForColumn5or6or8(def form, def value1, def alias1, def alias2, def resultAlias) {
+def getSumForColumn5or6or8(def dataRowsChild, def value1, def alias1, def alias2, def resultAlias) {
     def sum = 0
-    def data = getData(form)
-    if (data == null) {
-        return sum
-    }
-    getRows(data).each { row ->
-        if (value1 == row.getCell(alias1).getValue() && value1 == row.getCell(alias2).getValue()) {
-            sum += (row.getCell(resultAlias).getValue() ?: 0)
+    for (row in dataRowsChild) {
+        if (value1 == row[alias1] && value1 == row[alias2]) {
+            sum += (row[resultAlias] ?: 0)
         }
     }
     return sum
@@ -730,20 +450,13 @@ def getSumForColumn5or6or8(def form, def value1, def alias1, def alias2, def res
 
 /**
  * Получить сумму строк графы нф соответствующих двум условиям.
- *
  * @param form нф источника (рну-7 или рну-5)
  * @param value1 значение приемника для первого условия (id справочника)
  */
-def getSumForColumn7(def form, def value1) {
+def getSumForColumn7(def form, def dataRows, def value1) {
     def sum = 0
-    def data = getData(form)
-    if (data == null) {
-        return sum
-    }
-    SimpleDateFormat formatY = new SimpleDateFormat('yyyy')
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    getRows(data).each { row ->
-        if (row.getAlias()==null) {
+    dataRows.each { row ->
+        if (row.getAlias() == null) {
             if (value1 == row.code && value1 == row.balance && row.ruble != null && row.ruble != 0) {
                 // получить (дату - 3 года)
                 def Date dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(row.docDate)) - 3))
@@ -754,10 +467,10 @@ def getSumForColumn7(def form, def value1) {
                     reportPeriods.each { reportPeriod ->
                         // в каждой форме относящейся к этим периодам ищем соответствующие строки и суммируем по 10 графе
                         def FormData f = formDataService.find(form.getFormType().getId(), FormDataKind.PRIMARY, form.getDepartmentId(), reportPeriod.getId())
-                        if (f!=null) {
-                            def DataRowHelper d = getData(f)
+                        if (f != null) {
+                            def DataRowHelper d = formDataService.getDataRowHelper(f)
                             if (d != null) {
-                                getRows(d).each { r ->
+                                d.allCached.each { r ->
                                     // графа  4 - balance
                                     // графа  5 - docNumber
                                     // графа  6 - docDate
@@ -776,31 +489,18 @@ def getSumForColumn7(def form, def value1) {
     return sum
 }
 
-/**
- * Получить id справочника.
- *
- * @param ref_id идентификатор справончика
- * @param code атрибут справочника
- * @param value значение для поиска
- * @param date дата актуальности
- * @param cache кеш
- * @return
- */
-def getRecords(def ref_id, String code, String value, Date date, def cache) {
-    String filter = code + "= '"+ value.replaceAll(' ', '')+"'"
-    if (cache[ref_id]!=null) {
-        if (cache[ref_id][filter] != null) {
-            return cache[ref_id][filter]
+/** Проверить заполненость обязательных полей. */
+void checkRequiredColumns(def row, def columns) {
+    def colNames = []
+    columns.each {
+        def cell = row.getCell(it)
+        if (cell.isEditable() && (cell.getValue() == null || row[it] == '')) {
+            colNames.add('"' + getColumnName(row, it) + '"')
         }
-    } else {
-        cache[ref_id] = [:]
     }
-    def refDataProvider = refBookFactory.getDataProvider(ref_id)
-    def records = refDataProvider.getRecords(date, null, filter, null)
-    if (records.size() == 1){
-        cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
-        return cache[ref_id][filter]
+    if (!colNames.isEmpty()) {
+        def index = row.getIndex() + 2
+        def errorMsg = colNames.join(', ')
+        logger.error("В строке $index не заполнены колонки : $errorMsg.")
     }
-    logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
-    return null
 }

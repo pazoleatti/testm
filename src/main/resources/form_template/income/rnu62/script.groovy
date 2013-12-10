@@ -54,7 +54,6 @@ switch (formDataEvent) {
         }
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
-        calc()
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
