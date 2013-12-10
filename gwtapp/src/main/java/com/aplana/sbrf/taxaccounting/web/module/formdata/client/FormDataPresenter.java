@@ -272,11 +272,18 @@ public class FormDataPresenter extends
 	}
 
 	@Override
-	public void onWorkflowMove(WorkflowMove wfMove) {
+	public void onWorkflowMove(final WorkflowMove wfMove) {
 		if (wfMove.isReasonToMoveShouldBeSpecified()){
-			dialogPresenter.setFormData(formData);
-			dialogPresenter.setWorkFlow(wfMove);
-			addToPopupSlot(dialogPresenter);
+            DestinationCheckAction action = new DestinationCheckAction();
+            action.setFormDataId(formData.getId());
+            dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DestinationCheckResult>() {
+                @Override
+                public void onSuccess(DestinationCheckResult result) {
+                    dialogPresenter.setFormData(formData);
+                    dialogPresenter.setWorkFlow(wfMove);
+                    addToPopupSlot(dialogPresenter);
+                }
+            }, this));
 		} else {
 			goMove(wfMove);
 		}
@@ -353,7 +360,7 @@ public class FormDataPresenter extends
                                         result.getFormData().getState()
                                                 .getName(),
 		                                result.getTaxPeriodStartDate(), result.getTaxPeriodEndDate());
-
+                                
                                 getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
                                         + result.getFormData().getFormType().getTaxType());
                                 getView().setColumnsData(

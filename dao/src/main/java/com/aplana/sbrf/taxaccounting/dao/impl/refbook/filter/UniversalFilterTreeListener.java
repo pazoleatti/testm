@@ -232,7 +232,10 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
     public void exitFunctype(@NotNull FilterTreeParser.FunctypeContext ctx) { }
 
     @Override
-    public void enterIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) { }
+    public void enterIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
+        // хотя это совсем не играет роли, чтоб исключить исплючение
+        typeVerifier.startCatchLeftType();
+    }
 
     @Override
     public void exitIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {

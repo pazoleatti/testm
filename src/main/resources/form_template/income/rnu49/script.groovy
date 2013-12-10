@@ -12,7 +12,7 @@ import groovy.transform.Field
 
 /**
  * Форма "(РНУ-49) Регистр налогового учёта «ведомость определения результатов от реализации (выбытия) имущества»".
- * @version 59
+ * formTemplateId = 312
  *
  * @author rtimerbaev
  *
@@ -48,7 +48,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.CALCULATE :
-        calculate()
+        calc()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW :
@@ -65,13 +65,11 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
         logicCheck()
         break
-    // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        calculate()
+        calc()
         logicCheck()
         break
 }
@@ -80,23 +78,12 @@ switch (formDataEvent) {
 @Field
 def refBookCache = [:]
 
-/** Признак периода ввода остатков. */
-@Field
-def isBalancePeriod
-
-//Все аттрибуты
-@Field
-def allColumns = ['rowNumber', 'firstRecordNumber', 'operationDate', 'reasonNumber',
-        'reasonDate', 'invNumber', 'name', 'price', 'amort', 'expensesOnSale',
-        'sum', 'sumInFact', 'costProperty', 'marketPrice', 'sumIncProfit',
-        'profit', 'loss', 'usefullLifeEnd', 'monthsLoss', 'expensesSum', 'saledPropertyCode', 'saleCode']
-
-// Поля, для которых подсчитываются итоговые значения
+// Поля, для которых подсчитываются итоговые значения (графа 9..13, 15..17, 20)
 @Field
 def totalColumns = ['amort', 'expensesOnSale', 'sum', 'sumInFact', 'costProperty', 'sumIncProfit',
         'profit', 'loss', 'expensesSum']
 
-// Редактируемые атрибуты
+// Редактируемые атрибуты (графа 2..14, 18, 19, 21..22)
 @Field
 def editableColumns = ['firstRecordNumber', 'operationDate', 'reasonNumber', 'reasonDate',
         'invNumber', 'name', 'price', 'amort', 'expensesOnSale', 'sum',
@@ -110,14 +97,24 @@ def nonEmptyColumns = ['firstRecordNumber', 'operationDate', 'reasonNumber',
         'profit', 'loss', 'saledPropertyCode', 'saleCode']
 
 @Field
-def sortColumns = ["operationDate"]
-
-@Field
 def autoFillColumns = ["price", "amort", "sumIncProfit", "profit", "loss",
         "expensesSum"]
 
+// подразделы
 @Field
 def groups = ['A', 'B', 'V', 'G', 'D', 'E']
+
+// Дата начала отчетного периода
+@Field
+def reportPeriodStartDate = null
+
+// Дата окончания отчетного периода
+@Field
+def reportPeriodEndDate = null
+
+// Отчетный период
+@Field
+def currentReportPeriod = null
 
 // Проверка НСИ
 boolean checkNSI(def refBookId, def row, def alias) {
@@ -136,7 +133,6 @@ def addNewRow() {
     newRow.keySet().each {
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
-    // графа 2..14, 18, 19, 21..22
     editableColumns.each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).styleAlias = 'Редактируемая'
@@ -144,22 +140,20 @@ def addNewRow() {
 
     def index
     if (currentDataRow == null || currentDataRow.getIndex() == -1) {
-        index = getDataRow(dataRows,'totalA').getIndex()
+        index = getDataRow(dataRows, 'totalA').getIndex()
     } else if (currentDataRow.getAlias() == null) {
-        index = currentDataRow.getIndex()+1
+        index = currentDataRow.getIndex() + 1
     } else {
         def alias = currentDataRow.getAlias()
         index = getDataRow(dataRows, alias.contains('total') ? alias : 'total' + alias).getIndex()
     }
-    dataRowHelper.insert(newRow,index)
+    dataRowHelper.insert(newRow, index)
 }
 
-void calculate(){
+void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    if(isBalancePeriod()){
-        calcTotal(dataRows)
-    } else if (formData.kind != FormDataKind.CONSOLIDATED){
+    if (formData.kind != FormDataKind.CONSOLIDATED) {
         sort(dataRows)
         calc(dataRows)
         calcTotal(dataRows)
@@ -171,38 +165,16 @@ void calculate(){
 }
 
 void calc(def dataRows) {
-    def Date start = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    def Date end = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    def ReportPeriod reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    def formData46List = getFormData46List(reportPeriod, start, end)
-    def dataRows46 = []
-    for (def formData46 in formData46List) {
-        if (formData46 != null && formData46.id != null) {
-            def cached = formDataService.getDataRowHelper(formData46)?.allCached
-            if (cached != null) {
-                dataRows46 += cached
-            }
-        }
-    }
-    def formData45List = getFormData45List(reportPeriod, start, end)
-    def dataRows45 = []
-    for (def formData45 in formData45List) {
-        if (formData45 != null && formData45.id != null) {
-            def cached = formDataService.getDataRowHelper(formData45)?.allCached
-            if (cached != null) {
-                dataRows45 += cached
-            }
-        }
-    }
+    def start = getStartDate()
+    def end = getEndDate()
+    def reportPeriod = getReportPeriod()
+    def dataRows46 = getDataRowsByFormTemplateId(342, reportPeriod, start, end)
+    def dataRows45 = getDataRowsByFormTemplateId(341, reportPeriod, start, end)
 
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     // графа 1, 15..17, 20
     for (row in dataRows) {
         if (row.getAlias() != null) {
-            continue
-        }
-        if(isBalancePeriod()){
-            rowNumber = ++i
             continue
         }
         def row45 = getRow45(row, dataRows45)
@@ -222,12 +194,10 @@ void calc(def dataRows) {
     }
 }
 
-void calcTotal(def dataRows){
-    // подразделы
+void calcTotal(def dataRows) {
     groups.each { section ->
-        def firstRow = getDataRow(dataRows,section)
-        def lastRow = getDataRow(dataRows,'total' + section)
-        // графы для которых считать итого (графа 9..13, 15..17, 20)
+        def firstRow = getDataRow(dataRows, section)
+        def lastRow = getDataRow(dataRows, 'total' + section)
         totalColumns.each {
             lastRow[it] = getSum(dataRows, it, firstRow, lastRow)
         }
@@ -236,52 +206,28 @@ void calcTotal(def dataRows){
 
 void sort(def dataRows) {
     def sortRows = []
-    def from
-    def to
-
     groups.each { section ->
-        from = getDataRow(dataRows, section).getIndex()
-        to = getDataRow(dataRows, 'total'+section).getIndex() - 2
-        if (from<=to) {
+        def from = getDataRow(dataRows, section).getIndex()
+        def to = getDataRow(dataRows, 'total'+section).getIndex() - 2
+        if (from <= to) {
             sortRows.add(dataRows[from..to])
         }
-
     }
-
     sortRows.each {
         it.sort { it.operationDate }
     }
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
+    updateIndexes(dataRows)
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    def Date start = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    def Date end = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    def ReportPeriod reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    def formData46List = getFormData46List(reportPeriod, start, end)
-    def dataRows46 = []
-    for (def formData46 in formData46List) {
-        if (formData46 != null && formData46.id != null) {
-            def cached = formDataService.getDataRowHelper(formData46)?.allCached
-            if (cached != null) {
-                dataRows46 += cached
-            }
-        }
-    }
-    def formData45List = getFormData45List(reportPeriod, start, end)
-    def dataRows45 = []
-    for (def formData45 in formData45List) {
-        if (formData45 != null && formData45.id != null) {
-            def cached = formDataService.getDataRowHelper(formData45)?.allCached
-            if (cached != null) {
-                dataRows45 += cached
-            }
-        }
-    }
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+
+    def start = getStartDate()
+    def end = getEndDate()
+    def reportPeriod = getReportPeriod()
+    def dataRows46 = getDataRowsByFormTemplateId(342, reportPeriod, start, end)
+    def dataRows45 = getDataRowsByFormTemplateId(341, reportPeriod, start, end)
+
     // Номер последний строки предыдущей формы
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     def List<ReportPeriod> reportPeriodList = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id)
@@ -304,19 +250,19 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Обязательность заполнения поля графы (графа 1..22)
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // для консолидированной формы пропускаем остальные проверки
-        if (formData.kind == FormDataKind.CONSOLIDATED){
+        if (formData.kind == FormDataKind.CONSOLIDATED) {
             return
         }
 
         if (++i != row.rowNumber) {
-            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
+            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         // 2. Проверка на уникальность поля «инвентарный номер» (графа 6)
-        if (!isBalancePeriod() && (row.invNumber in numbers)) {
+        if (row.invNumber in numbers) {
             logger.error(errorMsg + "Инвентарный номер ${row.invNumber} не уникальный!")
         } else {
             numbers += row.invNumber
@@ -325,88 +271,86 @@ void logicCheck() {
         // 3. Проверка на нулевые значения (графа 8, 13, 15, 17, 20)
         if (row.price == 0 && row.costProperty != 0 && row.sumIncProfit == 0 &&
                 row.loss != 0 && row.expensesSum == 0) {
-            loggerError(errorMsg + 'Все суммы по операции нулевые!')
+            logger.error(errorMsg + 'Все суммы по операции нулевые!')
         }
         // 4. Проверка формата номера первой записи	Формат графы 2: ГГ-НННН
         if (row.firstRecordNumber == null || !row.firstRecordNumber.matches('\\w{2}-\\w{6}')) {
-            loggerError(errorMsg + 'Неправильно указан номер предыдущей записи!')
+            logger.error(errorMsg + 'Неправильно указан номер предыдущей записи!')
         }
 
-        if (!isBalancePeriod()) {
-            // 6. Проверка существования необходимых экземпляров форм (РНУ-46)
-            if (dataRows46 == null || dataRows46.size()==0){
-                logger.error('Отсутствуют данные РНУ-46!!')
-            }
-
-            def row46 = getRow46(row, dataRows46)
-            def row45 = getRow45(row, dataRows45)
-
-            def values = [:]
-            values.with {
-                price = getGraph8(row, row46, row45)
-                amort = getGraph9(row, row46, row45)
-                sumIncProfit = getGraph15(row)
-                loss = getGraph16(row)
-                profit = getGraph17(row)
-                usefullLifeEnd = getGraph18(row, row46)
-                monthsLoss = getGraph19(row)
-                expensesSum = getGraph20(row)
-            }
-            checkCalc(row, autoFillColumns, values, logger, false)
-
-            if (row.usefullLifeEnd != values.usefullLifeEnd){
-                logger.error(errorMsg + "Неверное значение графы ${getColumnName(row, 'part2Date')}!")
-            }
-            if (row.monthsLoss != values.monthsLoss){
-                logger.error(errorMsg + "Неверное значение графы ${getColumnName(row, 'part2Date')}!")
-            }
+        // 6. Проверка существования необходимых экземпляров форм (РНУ-46)
+        if (dataRows46 == null || dataRows46.size()==0) {
+            logger.error('Отсутствуют данные РНУ-46!!')
         }
+
+        def row46 = getRow46(row, dataRows46)
+        def row45 = getRow45(row, dataRows45)
+
+        def values = [:]
+        values.with {
+            price = getGraph8(row, row46, row45)
+            amort = getGraph9(row, row46, row45)
+            sumIncProfit = getGraph15(row)
+            loss = getGraph16(row)
+            profit = getGraph17(row)
+            usefullLifeEnd = getGraph18(row, row46)
+            monthsLoss = getGraph19(row)
+            expensesSum = getGraph20(row)
+        }
+        checkCalc(row, autoFillColumns, values, logger, false)
+
+        if (row.usefullLifeEnd != values.usefullLifeEnd) {
+            logger.error(errorMsg + "Неверное значение графы ${getColumnName(row, 'usefullLifeEnd')}!")
+        }
+        if (row.monthsLoss != values.monthsLoss) {
+            logger.error(errorMsg + "Неверное значение графы ${getColumnName(row, 'monthsLoss')}!")
+        }
+
         // 1. Проверка шифра при реализации амортизируемого имущества
         // Графа 21 (группа «А») = 1 или 2, и графа 22 = 1
         def saledPropertyCode = getSaledPropertyCode(row.saledPropertyCode)
         def saleCode = getSaleCode(row.saleCode)
         if (isSection(dataRows, 'A', row) && ((saledPropertyCode != 1 && saledPropertyCode != 2) || saleCode != 1)) {
-            loggerError(errorMsg + 'Для реализованного амортизируемого имущества (группа «А») указан неверный шифр!')
+            logger.error(errorMsg + 'Для реализованного амортизируемого имущества (группа «А») указан неверный шифр!')
         }
 
         // 2. Проверка шифра при реализации прочего имущества
         // Графа 21 (группа «Б») = 3 или 4, и графа 22 = 1
         if (isSection(dataRows, 'B', row) && ((saledPropertyCode != 3 && saledPropertyCode != 4) || saleCode != 1)) {
-            loggerError(errorMsg + 'Для реализованного прочего имущества (группа «Б») указан неверный шифр!')
+            logger.error(errorMsg + 'Для реализованного прочего имущества (группа «Б») указан неверный шифр!')
         }
 
         // 3. Проверка шифра при списании (ликвидации) амортизируемого имущества
         // Графа 21 (группа «В») = 1 или 2, и графа 22 = 2
         if (isSection(dataRows, 'V', row) && ((saledPropertyCode != 1 && saledPropertyCode != 2) || saleCode != 2)) {
-            loggerError(errorMsg + 'Для списанного (ликвидированного) амортизируемого имущества (группа «В») указан неверный шифр!')
+            logger.error(errorMsg + 'Для списанного (ликвидированного) амортизируемого имущества (группа «В») указан неверный шифр!')
         }
 
         // 4. Проверка шифра при реализации имущественных прав (кроме прав требования, долей паёв)
         // Графа 21 (группа «Г») = 5, и графа 22 = 1
         if (isSection(dataRows, 'G', row) && (saledPropertyCode != 5 || saleCode != 1)) {
-            loggerError(errorMsg + 'Для реализованных имущественных прав (кроме прав требования, долей паёв) (группа «Г») указан неверный шифр!')
+            logger.error(errorMsg + 'Для реализованных имущественных прав (кроме прав требования, долей паёв) (группа «Г») указан неверный шифр!')
         }
 
         // 5. Проверка шифра при реализации прав на земельные участки
         // Графа 21 (группа «Д») = 6, и графа 22 = 1
         if (isSection(dataRows, 'D', row) && (saledPropertyCode != 6 || saleCode != 1)) {
-            loggerError(errorMsg + 'Для реализованных прав на земельные участки (группа «Д») указан неверный шифр!')
+            logger.error(errorMsg + 'Для реализованных прав на земельные участки (группа «Д») указан неверный шифр!')
         }
 
         // 6. Проверка шифра при реализации долей, паёв
         if (isSection(dataRows, 'E', row) && (saledPropertyCode != 7 || saleCode != 1)) {
-            loggerError(errorMsg + 'Для реализованных имущественных прав (кроме прав требования, долей паёв) (группа «Е») указан неверный шифр!')
+            logger.error(errorMsg + 'Для реализованных имущественных прав (кроме прав требования, долей паёв) (группа «Е») указан неверный шифр!')
         }
 
         // Проверки соответствия НСИ
-        checkNSI(82, row, "saledPropertyCode")
-        checkNSI(83, row, "saleCode")
+        checkNSI(82, row, 'saledPropertyCode')
+        checkNSI(83, row, 'saleCode')
     }
     // 9. Проверка итоговых значений формы
-    // графы для которых считать итого (графа 9-13,15-17, 20)
     for (def section : groups) {
-        def firstRow = getDataRow(dataRows,section)
-        def lastRow = getDataRow(dataRows,'total' + section)
+        def firstRow = getDataRow(dataRows, section)
+        def lastRow = getDataRow(dataRows, 'total' + section)
         for (def column : totalColumns) {
             if (lastRow[column] != getSum(dataRows, column, firstRow, lastRow)) {
                 def index = lastRow.getIndex()
@@ -428,18 +372,16 @@ void consolidation() {
         }
     }
     dataRows.removeAll(deleteRows)
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
+    updateIndexes(dataRows)
 
     // собрать из источников строки и разместить соответствующим разделам
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+        if (it.formTypeId == formData.formType.id) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                // подразделы
+                def sourceDataRows = formDataService.getDataRowHelper(source).allCached
                 groups.each { section ->
-                    copyRows(formDataService.getDataRowHelper(source).allCached, dataRows, section, 'total' + section)
+                    copyRows(sourceDataRows, dataRows, section, 'total' + section)
                 }
             }
         }
@@ -448,7 +390,6 @@ void consolidation() {
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
-/** Вспомогательные методы. */
 def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
     def from = rowStart.getIndex()
     def to = rowEnd.getIndex() - 2
@@ -473,25 +414,7 @@ void copyRows(def sourceRows, def destinationRows, def fromAlias, def toAlias) {
     def copyRows = sourceRows.subList(from, to)
     destinationRows.addAll(getDataRow(destinationRows, toAlias).getIndex() - 1, copyRows)
     // поправить индексы, потому что они после вставки не пересчитываются
-    destinationRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
-}
-
-def List<FormData> getFormData46List(def reportPeriod, def start, def end){
-    def formList = []
-    for (def periodOrder = start[Calendar.MONTH] + 1; periodOrder <= end[Calendar.MONTH]; periodOrder++){
-        formList += formDataService.findMonth(342, formData.kind, formDataDepartment.id, reportPeriod.taxPeriod.id, periodOrder)
-    }
-    return formList
-}
-
-def List<FormData> getFormData45List(def reportPeriod, def start, def end){
-    def formList = []
-    for (def periodOrder = start[Calendar.MONTH] + 1; periodOrder <= end[Calendar.MONTH]; periodOrder++){
-        formList += formDataService.findMonth(341, formData.kind, formDataDepartment.id, reportPeriod.taxPeriod.id, periodOrder)
-    }
-    return formList
+    updateIndexes(destinationRows)
 }
 
 BigDecimal getGraph8(def DataRow row49, def DataRow row46, def DataRow row45) {
@@ -501,12 +424,12 @@ BigDecimal getGraph8(def DataRow row49, def DataRow row46, def DataRow row45) {
     // Если «Графа 21» = 2, то
     // «Графа 8» =Значение «Графы 7» РНУ-45, где «Графа 2» = «Графа 6» РНУ-49
     // иначе ручной ввод
-    def tmp
+    def tmp = null
     if (row49.saledPropertyCode != null) {
         def saledPropertyCode = getSaledPropertyCode(row49.saledPropertyCode)
-        if(row46!=null && saledPropertyCode == 1){
+        if (row46 != null && saledPropertyCode == 1) {
             tmp = row46.cost
-        } else if(row45!=null && saledPropertyCode == 2){
+        } else if (row45 != null && saledPropertyCode == 2) {
             tmp = row45.startCost
         } else {
             tmp = row49.price
@@ -515,29 +438,25 @@ BigDecimal getGraph8(def DataRow row49, def DataRow row46, def DataRow row45) {
     return tmp?.setScale(2, RoundingMode.HALF_UP)
 }
 
-BigDecimal getGraph9(def DataRow row49, def DataRow row46, def DataRow row45){
-    def tmp
+BigDecimal getGraph9(def DataRow row49, def DataRow row46, def DataRow row45) {
+    def tmp = null
     if (row49.saledPropertyCode != null) {
         def saledPropertyCode = getSaledPropertyCode(row49.saledPropertyCode)
-        if(row46!=null && saledPropertyCode == 1){
+        if (row46 != null && saledPropertyCode == 1) {
             tmp = row46.cost10perExploitation + row46.amortExploitation
-        }
-
-        if(row45!=null && saledPropertyCode == 2){
+        } else if (row45 != null && saledPropertyCode == 2) {
             tmp = row45.cost10perTaxPeriod
-        }
-        if(saledPropertyCode in [3,5,6,7]){
+        } else if (saledPropertyCode in [3,5,6,7]) {
             tmp = BigDecimal.ZERO
-        }
-        if(saledPropertyCode == 4){
+        } else if (saledPropertyCode == 4) {
             tmp = row49.amort
         }
     }
     return tmp?.setScale(2, RoundingMode.HALF_UP)
 }
 
-BigDecimal getGraph15(def row){
-    def tmp
+BigDecimal getGraph15(def row) {
+    def tmp = null
     if (row.sum != null && row.marketPrice != null) {
         if (row.sum - row.marketPrice * 0.8 > 0) {
             tmp = BigDecimal.ZERO
@@ -548,42 +467,42 @@ BigDecimal getGraph15(def row){
     return tmp?.setScale(2, RoundingMode.HALF_UP)
 }
 
-BigDecimal getGraph16(def row){
-    def tmp
+BigDecimal getGraph16(def row) {
+    def tmp = null
     if (row.sum != null && row.price != null && row.amort != null && row.expensesOnSale != null && row.sumIncProfit != null) {
         tmp = row.sum - (row.price - row.amort) - row.expensesOnSale + row.sumIncProfit
     }
     return tmp?.setScale(2, RoundingMode.HALF_UP)
 }
 
-BigDecimal getGraph17(def row){
-    def tmp
+BigDecimal getGraph17(def row) {
+    def tmp = null
     if (row.sum != null && row.price != null && row.amort != null && row.expensesOnSale != null && row.sumIncProfit != null) {
         tmp = row.sum - (row.price - row.amort) - row.expensesOnSale + row.sumIncProfit
     }
     return tmp?.setScale(2, RoundingMode.HALF_UP)
 }
 
-def getGraph18(def DataRow row49, def DataRow row46){
-    def tmp
-    if(row46!=null && row49.loss>0 && getSaledPropertyCode(row49.saledPropertyCode) == 1 && getSaleCode(row49.saleCode) == 1){
+def getGraph18(def DataRow row49, def DataRow row46) {
+    def tmp = null
+    if (row46 != null && row49.loss > 0 && getSaledPropertyCode(row49.saledPropertyCode) == 1 && getSaleCode(row49.saleCode) == 1) {
         tmp = row46.usefullLifeEnd
     }
     return tmp
 }
 
-def getGraph19(def DataRow row49){
-    def tmp
-    if (row49.loss > 0 && row49.usefullLifeEnd!=null && row49.operationDate!=null){
+def getGraph19(def DataRow row49) {
+    def tmp = null
+    if (row49.loss > 0 && row49.usefullLifeEnd != null && row49.operationDate != null) {
         tmp = row49.usefullLifeEnd[Calendar.MONTH] - row49.operationDate[Calendar.MONTH]
     }
     return (tmp == 0) ? 1 : tmp
 }
 
-BigDecimal getGraph20(def DataRow row49){
-    def tmp
-    if (row49.monthsLoss != 0 && row49.monthsLoss!=null) {
-        if (row49.sum > 0 && row49.loss!=null) {
+BigDecimal getGraph20(def DataRow row49) {
+    def tmp = null
+    if (row49.monthsLoss != 0 && row49.monthsLoss != null) {
+        if (row49.sum > 0 && row49.loss != null) {
             tmp = (row49.loss / row49.monthsLoss)
         }
     }
@@ -607,9 +526,9 @@ def getSaleCode(def id) {
 }
 
 def DataRow getRow46(DataRow row49, def dataRows46) {
-    if(dataRows46!=null && getSaledPropertyCode(row49.saledPropertyCode) == 1){
-        for(def row46:dataRows46){
-            if(row46.invNumber == row49.invNumber){
+    if (dataRows46 != null && getSaledPropertyCode(row49.saledPropertyCode) == 1) {
+        for (def row46 : dataRows46) {
+            if (row46.invNumber == row49.invNumber) {
                 return row46
             }
         }
@@ -618,9 +537,9 @@ def DataRow getRow46(DataRow row49, def dataRows46) {
 }
 
 def DataRow getRow45(DataRow row49, def dataRows45) {
-    if(dataRows45!=null && getSaledPropertyCode(row49.saledPropertyCode) == 2){
-        for(def row45:dataRows45){
-            if(row45.inventoryNumber == row49.invNumber){
+    if (dataRows45 != null && getSaledPropertyCode(row49.saledPropertyCode) == 2) {
+        for (def row45 : dataRows45) {
+            if (row45.inventoryNumber == row49.invNumber) {
                 return row45
             }
         }
@@ -628,18 +547,53 @@ def DataRow getRow45(DataRow row49, def dataRows45) {
     return null
 }
 
-def loggerError(def msg) {
-    if (isBalancePeriod()) {
-        logger.warn(msg)
-    } else {
-        logger.error(msg)
+def getStartDate() {
+    if (reportPeriodStartDate == null) {
+        reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
     }
+    return reportPeriodStartDate
 }
 
-// Признак периода ввода остатков. Отчетный период является периодом ввода остатков.
-def isBalancePeriod() {
-    if (isBalancePeriod == null) {
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+def getEndDate() {
+    if (reportPeriodEndDate == null) {
+        reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
     }
-    return isBalancePeriod
+    return reportPeriodEndDate
+}
+
+def getReportPeriod() {
+    if (currentReportPeriod == null) {
+        currentReportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    }
+    return currentReportPeriod
+}
+
+// Получить строки форм за предыдущие месяцы
+def getDataRowsByFormTemplateId(def formTemplateId, def reportPeriod, def start, def end) {
+    def formDataList = getFormDataList(formTemplateId, reportPeriod, start, end)
+    def dataRows = []
+    for (def form in formDataList) {
+        if (form != null && form.id != null) {
+            def cached = formDataService.getDataRowHelper(form)?.allCached
+            if (cached != null) {
+                dataRows += cached
+            }
+        }
+    }
+    return dataRows
+}
+
+def List<FormData> getFormDataList(def formTemplateId, def reportPeriod, def start, def end){
+    def formList = []
+    for (def periodOrder = start[Calendar.MONTH] + 1; periodOrder <= end[Calendar.MONTH]; periodOrder++) {
+        formList += formDataService.findMonth(formTemplateId, formData.kind, formDataDepartment.id, reportPeriod.taxPeriod.id, periodOrder)
+    }
+    return formList
+}
+
+// поправить индексы
+void updateIndexes(def dataRows) {
+    dataRows.eachWithIndex { row, i ->
+        row.setIndex(i + 1)
+    }
 }

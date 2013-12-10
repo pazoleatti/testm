@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -481,8 +480,6 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		FormData formData = formDataDao.get(formDataId);
-				
-        checkDestinations(formData);
 
 		formDataScriptingService.executeScript(userInfo,formData, workflowMove.getEvent(), logger, null);
 		
@@ -608,11 +605,10 @@ public class FormDataServiceImpl implements FormDataService {
 		return lockCoreService.getLock(FormData.class, formDataId, userInfo);
 	}
 
-    /**
-     * Проверка наличия и статуса приемника при осуществлении перевода формы
-     * в статус "Подготовлена"/"Утверждена"/"Принята".
-     */
-    private void checkDestinations(FormData formData) {
+    @Override
+    @Transactional(readOnly = true)
+    public void checkDestinations(long formDataId) {
+        FormData formData = formDataDao.get(formDataId);
         List<DepartmentFormType> departmentFormTypes =
                 departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
                         formData.getFormType().getId(), formData.getKind());
