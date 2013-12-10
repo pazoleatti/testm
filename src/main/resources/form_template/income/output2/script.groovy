@@ -1,63 +1,14 @@
 package form_template.income.output2
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
-import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
-import java.text.SimpleDateFormat
+import groovy.transform.Field
 
 /**
  * Расчет налога на прибыль с доходов, удерживаемого налоговым агентом
  *
  * formTemplateId=307
  */
-
-DataRowHelper getData() {
-    DataRowHelper dataRowsHelper = null
-    if (formData.id != null) {
-        dataRowsHelper = formDataService.getDataRowHelper(formData)
-    }
-    return dataRowsHelper
-}
-
-switch (formDataEvent) {
-    case FormDataEvent.CREATE:
-        checkUniq()
-        break
-    case FormDataEvent.CALCULATE:
-        logicCheck()
-        break
-    case FormDataEvent.CHECK:
-        logicCheck()
-        break
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED:
-        checkDecl()
-        logicCheck()
-        break
-    case FormDataEvent.MOVE_PREPARED_TO_CREATED:
-        break
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
-        checkDecl()
-        logicCheck()
-        break
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
-        checkDecl()
-        break
-    case FormDataEvent.ADD_ROW:
-        addRow()
-        break
-    case FormDataEvent.DELETE_ROW:
-        deleteRow()
-        break
-    case FormDataEvent.IMPORT :
-        importData()
-        break
-}
-
 // графа 1  - title
 // графа 2  - zipCode
 // графа 3  - subdivisionRF
@@ -76,81 +27,96 @@ switch (formDataEvent) {
 // графа 16 - sumDividend
 // графа 17 - sumTax
 
-void deleteRow() {
-    if (currentDataRow != null) {
-        data.delete(currentDataRow)
-    }
+switch (formDataEvent) {
+    case FormDataEvent.CREATE:
+        checkCreation()
+        break
+    case FormDataEvent.CALCULATE:
+        logicCheck()
+        break
+    case FormDataEvent.CHECK:
+        logicCheck()
+        break
+    case FormDataEvent.ADD_ROW:
+        formDataService.addRow(formData, currentDataRow, editableColumns, null)
+        break
+    case FormDataEvent.DELETE_ROW:
+        formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+        logicCheck()
+        break
+    case FormDataEvent.IMPORT:
+        importData()
+        break
 }
 
-void addRow() {
-    data.insert(getNewRow(), getRows(data).size() + 1)
+//// Кэши и константы
+@Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+@Field
+def refBookCache = [:]
+
+// Редактируемые атрибуты
+@Field
+def editableColumns = ['title', 'zipCode', 'subdivisionRF', 'area', 'city', 'region', 'street', 'homeNumber',
+        'corpNumber', 'apartment', 'surname', 'name', 'patronymic', 'phone', 'dividendDate', 'sumDividend', 'sumTax']
+
+// Проверяемые на пустые значения атрибуты
+@Field
+def nonEmptyColumns = ['title', 'subdivisionRF', 'surname', 'name', 'dividendDate', 'sumDividend', 'sumTax']
+
+// Дата окончания отчетного периода
+@Field
+def reportPeriodEndDate = null
+
+//// Обертки методов
+
+// Проверка НСИ
+boolean checkNSI(def refBookId, def row, def alias) {
+    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
 }
 
-/**
- * Проверяет уникальность в отчётном периоде и вид
- */
-void checkUniq() {
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+}
 
-    FormData findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
-
-    if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
-    }
+void checkCreation() {
     if (formData.kind != FormDataKind.ADDITIONAL) {
         logger.error('Нельзя создавать форму с типом ${formData.kind?.name}')
     }
-}
-
-/**
- * Проверка наличия декларации для текущего department
- */
-void checkDecl() {
-    declarationType = 2;    // Тип декларации которую проверяем(Налог на прибыль)
-    declaration = declarationService.find(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
-    if (declaration != null && declaration.isAccepted()) {
-        logger.error("Декларация банка находиться в статусе принята")
-    }
+    formDataService.checkUnique(formData, logger)
 }
 
 void logicCheck() {
-    // справочник "Коды субъектов Российской Федерации"
-    def refDataProvider = refBookFactory.getDataProvider(4)
-    def rowNum = 0
-    for (row in getRows(data)) {
-        rowNum++
-        for (alias in ['title', 'subdivisionRF', 'surname', 'name', 'dividendDate', 'sumDividend', 'sumTax']) {
-            if (row.getCell(alias).value == null) {
-                logger.error("Строка $rowNum: Поле " + row.getCell(alias).column.name.replace('%', '%%') + " не заполнено")
-            }
-        }
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    for (row in dataRows) {
+        def rowNum = row.getIndex()
+
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         String zipCode = (String) row.zipCode;
         if (zipCode == null || zipCode.length() != 6 || !zipCode.matches('[0-9]*')) {
             logger.error("Строка $rowNum: Неправильно указан почтовый индекс!")
         }
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            // графа 3 - справочник "Коды субъектов Российской Федерации"
-            def record = refDataProvider.getRecordData(row.subdivisionRF)
-            if (record == null) {
-                logger.warn("Строка $rowNum: Неверное наименование субъекта РФ!")
-            }
-        }
+
+        // Проверки соответствия НСИ
+        checkNSI(4, row, "subdivisionRF")
     }
 }
 
-/**
- * Вставить новую строку в конец нф.
- *
- * @param data данные нф
- * @param row строка
- */
-void insert(def data, def row) {
-    data.insert(row, getRows(data).size() + 1)
-}
-
-/**
- * Получение импортируемых данных.
- */
 void importData() {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
     if (fileName == null || fileName == '') {
@@ -181,44 +147,52 @@ void importData() {
         return
     }
 
-    // количество строк в шапке
-    def headRowCount = 4
+    checkHeaderSize(xml.row.size(), xml.row[0].cell.size(), 4, 22)
 
-    // проверка заголовка таблицы
-    if (!checkTableHead(xml, headRowCount)) {
-        logger.error('Заголовок таблицы не соответствует требуемой структуре!')
-        return
-    }
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ стр.',
+            (xml.row[0].cell[1]): 'Код территориального банка',
+            (xml.row[0].cell[2]): 'Наименование территориального банка',
+            (xml.row[0].cell[3]): 'Наименование получателя',
+            (xml.row[0].cell[4]): 'ИНН',
+            (xml.row[0].cell[5]): 'КПП',
+            (xml.row[0].cell[6]): 'Юридический адрес ( место жительства )',
+            (xml.row[0].cell[7]): 'Юридический адрес ( место нахождения )',
+            (xml.row[1].cell[7]): 'Почтовый индекс',
+            (xml.row[1].cell[8]): 'Субъект Российской Федерации',
+            (xml.row[2].cell[8]): 'Код',
+            (xml.row[2].cell[9]): 'Наименование субъекта РФ',
+            (xml.row[1].cell[10]): 'Район',
+            (xml.row[1].cell[11]): 'Город',
+            (xml.row[1].cell[12]): 'Населенный пункт (село, поселок и т.п.)',
+            (xml.row[1].cell[13]): 'Улица (проспект, переулок и т.д.)',
+            (xml.row[1].cell[14]): 'Номер дома (владения)',
+            (xml.row[1].cell[15]): 'Номер корпуса (строения)',
+            (xml.row[1].cell[16]): 'Номер офиса (квартиры)',
+            (xml.row[0].cell[17]): 'Руководитель организации (Ф.И.О.)',
+            (xml.row[0].cell[18]): 'Контактный телефон',
+            (xml.row[0].cell[19]): 'Дата перечисления дивидентов',
+            (xml.row[0].cell[20]): 'Сумма дивидентов',
+            (xml.row[0].cell[21]): 'Сумма налога'
+    ]
 
-    try {
-        // добавить данные в форму
-        addData(xml, headRowCount)
-    } catch(Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
-    }
+    checkHeaderEquals(headerMapping)
+
+    // добавить данные в форму
+    addData(xml, 4)
 }
 
-/**
- * Заполнить форму данными.
- *
- * @param xml данные
- * @param headRowCount количество строк в шапке
- */
 void addData(def xml, headRowCount) {
-    def data = getData()
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     // количество графов в таблице
     def columnCount = 22
 
     def tmp
-    def newRows = []
-
-    // справочник "Коды субъектов Российской Федерации"
-    def refDataProvider = refBookFactory.getDataProvider(4)
+    def rows = []
 
     def indexRow = 0
-
-    SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
 
     for (def row : xml.row) {
         indexRow++
@@ -235,8 +209,11 @@ void addData(def xml, headRowCount) {
         }
 
         if (row.cell.size() >= columnCount) {
-            // проверить по номеру договора повторяющиеся записи
-            def newRow = getNewRow()
+            def newRow = formData.createDataRow()
+            editableColumns.each {
+                newRow.getCell(it).editable = true
+                newRow.getCell(it).setStyleAlias('Редактируемая')
+            }
 
             // графа 1
             newRow.title = row.cell[2].text()
@@ -245,16 +222,7 @@ void addData(def xml, headRowCount) {
             newRow.zipCode = row.cell[7].text()
 
             // графа 3 - справочник "Коды субъектов Российской Федерации"
-            def records = refDataProvider.getRecords(new Date(), null, "CODE = '" + row.cell[8].text() + "'", null)
-            if (records == null || records.getRecords().isEmpty()) {
-                logger.error("Строка $indexRow столбец 9 содержит неверный код субъекта РФ!")
-            } else {
-                def record = records.getRecords().getAt(0)
-                if (record == null) {
-                    logger.error("Строка $indexRow столбец 9 содержит неверный код субъекта РФ!")
-                }
-                newRow.subdivisionRF = getValue(record, 'record_id')
-            }
+            newRow.subdivisionRF = getRecordIdImport(4, 'CODE', row.cell[8].text(), indexRow, 8, true)
 
             // графа 4
             newRow.area = row.cell[10].text()
@@ -295,119 +263,16 @@ void addData(def xml, headRowCount) {
             newRow.phone = row.cell[18].text()
 
             // графа 15
-            newRow.dividendDate = (row.cell[19].text() ? dateFormat.parse(row.cell[19].text()) : null)
+            newRow.dividendDate = parseDate(row.cell[19].text(), "dd.MM.yyyy", indexRow, 19, logger, false)
 
             // графа 16
-            newRow.sumDividend = getNumber(row.cell[20].text())
+            newRow.sumDividend = parseNumber(row.cell[20].text(), indexRow, 20, logger, false)
 
             // графа 17
-            newRow.sumTax = getNumber(row.cell[21].text())
+            newRow.sumTax = parseNumber(row.cell[21].text(), indexRow, 21, logger, false)
 
-            newRows.add(newRow)
+            rows.add(newRow)
         }
     }
-    data.clear()
-    newRows.each { newRow ->
-        insert(data, newRow)
-    }
-}
-
-/**
- * Получить числовое значение.
- *
- * @param value строка
- */
-def getNumber(def value) {
-    if (value == null) {
-        return null
-    }
-    def tmp = value.trim()
-    if ("".equals(tmp)) {
-        return null
-    }
-    // поменять запятую на точку и убрать пробелы
-    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
-    try {
-        return new BigDecimal(tmp)
-    } catch (Exception e) {
-        throw new Exception("Значение \"$value\" не может быть преобразовано в число. " + e.message)
-    }
-}
-
-/**
- * Получить новую стролу с заданными стилями.
- */
-DataRow<Cell> getNewRow() {
-    DataRow<Cell> row = formData.createDataRow()
-
-    for (alias in ['title', 'zipCode', 'subdivisionRF', 'area', 'city', 'region', 'street', 'homeNumber', 'corpNumber', 'apartment',
-            'surname', 'name', 'patronymic', 'phone', 'dividendDate', 'sumDividend', 'sumTax']) {
-        row.getCell(alias).editable = true
-        row.getCell(alias).setStyleAlias('Редактируемая')
-    }
-    return row
-}
-
-/**
- * Проверить шапку таблицы.
- *
- * @param xml данные
- * @param headRowCount количество строк в шапке
- */
-def checkTableHead(def xml, def headRowCount) {
-    def colCount = 22
-    // проверить количество строк и голонок в шапке
-    if (xml.row.size() < headRowCount || xml.row[0].cell.size() < colCount) {
-        return false
-    }
-    def result = (xml.row[0].cell[0] == '№ стр.' &&
-            xml.row[0].cell[1] == 'Код территориального банка' &&
-            xml.row[0].cell[2] == 'Наименование территориального банка' &&
-            xml.row[0].cell[3] == 'Наименование получателя' &&
-            xml.row[0].cell[4] == 'ИНН' &&
-            xml.row[0].cell[5] == 'КПП' &&
-            xml.row[0].cell[6] == 'Юридический адрес ( место жительства )' &&
-            xml.row[0].cell[7] == 'Юридический адрес ( место нахождения )' &&
-            xml.row[1].cell[7] == 'Почтовый индекс' &&
-            xml.row[1].cell[8] == 'Субъект Российской Федерации' &&
-            xml.row[2].cell[8] == 'Код' &&
-            xml.row[2].cell[9] == 'Наименование субъекта РФ' &&
-            xml.row[1].cell[10] == 'Район' &&
-            xml.row[1].cell[11] == 'Город' &&
-            xml.row[1].cell[12] == 'Населенный пункт (село, поселок и т.п.)' &&
-            xml.row[1].cell[13] == 'Улица (проспект, переулок и т.д.)' &&
-            xml.row[1].cell[14] == 'Номер дома (владения)' &&
-            xml.row[1].cell[15] == 'Номер корпуса (строения)' &&
-            xml.row[1].cell[16] == 'Номер офиса (квартиры)' &&
-            xml.row[0].cell[17] == 'Руководитель организации (Ф.И.О.)' &&
-            xml.row[0].cell[18] == 'Контактный телефон' &&
-            xml.row[0].cell[19] == 'Дата перечисления дивидентов' &&
-            xml.row[0].cell[20] == 'Сумма дивидентов' &&
-            xml.row[0].cell[21] == 'Сумма налога')
-    return result
-}
-
-/**
- * Получить значение атрибута строки справочника.
-
- * @param record строка справочника
- * @param alias алиас
- */
-def getValue(def record, def alias) {
-    def value = record.get(alias)
-    switch (value.getAttributeType()) {
-        case RefBookAttributeType.DATE :
-            return value.getDateValue()
-        case RefBookAttributeType.NUMBER :
-            return value.getNumberValue()
-        case RefBookAttributeType.STRING :
-            return value.getStringValue()
-        case RefBookAttributeType.REFERENCE :
-            return value.getReferenceValue()
-    }
-    return null
-}
-
-def getRows(def data) {
-    return data.getAllCached();
+    dataRowHelper.save(rows)
 }
