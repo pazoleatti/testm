@@ -44,18 +44,10 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED: // Принять из "Создано"
         logicCheck()
-        break
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
-        logicCheck()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            checkDeclarationBankOnCancelOrAcceptance('Принятие')
-        }
         break
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
-    case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED:
-        checkDeclarationBankOnCancelOrAcceptance('Отмена принятия')
-        break
     case FormDataEvent.COMPOSE:
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper?.allCached
@@ -205,19 +197,6 @@ void calculationControlGraphs(def dataRows) {
     if (!income102NotFound.isEmpty()) {
         def rows = income102NotFound.join(', ')
         logger.warn("Не найдены соответствующие данные в отчете о прибылях и убытках для строк: $rows")
-    }
-}
-
-/** Проверки наличия декларации Банка при принятии и отмене принятия нф. */
-void checkDeclarationBankOnCancelOrAcceptance(def action) {
-    if (!isBank()) {
-        return
-    }
-    departmentFormTypeService.getDeclarationDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY).each { department ->
-        def bank = declarationService.find(2, department.departmentId, formData.reportPeriodId)
-        if (bank != null && bank.accepted) {
-            logger.error("$action налоговой формы невозможно, т.к. уже принята декларация Банка.")
-        }
     }
 }
 
