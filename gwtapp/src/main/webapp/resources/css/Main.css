@@ -44,55 +44,77 @@ h3{
 }
 
 .topNavigation {
-    background: url("../img/top_grad.png");
-    border-bottom: 3px solid #7E7F7F;
-    border-bottom: 3px solid #737474\0/; /* IE8 hack*/
+    background: url("../img/background/menu-grad.png");
+    border-bottom: 3px solid #807e7b;
+    /*border-bottom: 3px solid #737474\0/; *//* IE8 hack*/
     height: 41px;
-}
-
-.topNavigation .topHeader {
     vertical-align: top;
-    height: 41px;
 }
 
 .topNavigation .topLeftLogo {
+    background: url("../img/background/menu-logo.png");
+    width: 131px;
+    height: 41px;
     float: left;
-    background: none;
-    border: none;
-}
-
-.topNavigation .topLeftLogo img {
-    margin: 0;
-    padding: 0;
-    background: none;
-    border: none;
+    margin-right: 5px;
 }
 
 .topNavigation .topRightLogo {
-    right: 0;
+    background: url("../img/background/menu-right.png");
+    height: 41px;
+    width: 47px;
     float: right;
-    background: none;
-    border: none;
+    margin-left: -25px; /* смещение для кнопки Выход*/
 }
 
-.topNavigation .topRightLogo img {
-    float: right;
-    margin: 0;
-    padding: 0;
-    background: none;
-    border: none;
-}
-
+/* Боковые градиенты основной части страницы */
 .topGradient {
-    background: url("../img/body_top.png") repeat-x;
+    background: url("../img/background/top_bottom.png") repeat-x;
     top: 0;
     height: 32px;
     width: 100%;
     z-index: -1;
 }
 
+.rightGradient {
+    background: url("../img/background/right_left.png") repeat-y;
+    float: right;
+    width: 32px;
+    height: 100%;
+    z-index: -1;
+}
+
+.footerGradient {
+    background: #FFF url("../img/background/top_bottom.png") repeat-x;
+    bottom: 0;
+    height: 32px;
+    width: 100%;
+    z-index: -1;
+    -webkit-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
+    transform: rotate(180deg);
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
+}
+
+.leftGradient {
+    background: url("../img/background/right_left.png") repeat-y;
+    float: left;
+    width: 32px;
+    height: 100%;
+    z-index: -1;
+    -webkit-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
+    transform: rotate(180deg);
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
+}
+
+/* Угловые градиенты основной части страницы */
 .topGradient .bodyTopLeft {
-    background: url("../img/body_top_left.png") no-repeat;
+    background: url("../img/background/corner_left.png") no-repeat;
     height: 32px;
     float: left;
     width: 32px;
@@ -101,7 +123,7 @@ h3{
 }
 
 .topGradient .bodyTopRight {
-    background: url("../img/body_top_right.png") no-repeat;
+    background: url("../img/background/corner_right.png") no-repeat;
     float: right;
     width: 32px;
     height: 32px;
@@ -109,32 +131,8 @@ h3{
     z-index: -1;
 }
 
-.footerGradient {
-    background: url("../img/body_bottom.png") repeat-x;
-    bottom: 0px;
-    height: 32px;
-    width: 100%;
-    z-index: -1;
-}
-
-.leftGradient {
-    background: url("../img/body_left.png") repeat-y;
-    float: left;
-    width: 32px;
-    height: 100%;
-    z-index: -1;
-}
-
-.rightGradient {
-    background: url("../img/body_right.png") repeat-y;
-    float: right;
-    width: 32px;
-    height: 100%;
-    z-index: -1;
-}
-
 .footerLeft {
-    background: url("../img/body_bottom_left.png") no-repeat;
+    background: url("../img/background/corner_left.png") no-repeat;    /* используем теже картинки тк повернули .footerGradient */
     height: 32px;
     float: left;
     width: 32px;
@@ -143,7 +141,7 @@ h3{
 }
 
 .footerRight {
-    background: url("../img/body_bottom_right.png") no-repeat;
+    background: url("../img/background/corner_right.png") no-repeat;   /* используем теже картинки тк повернули .footerGradient */
     height: 32px;
     float: right;
     width: 32px;
@@ -152,8 +150,8 @@ h3{
 }
 
 .bodyContent {
-    right: 10px;
-    left: 10px;
+    right: 5px;
+    left: 5px;
     bottom: 30px;
     position: fixed;
     top: 45px;
