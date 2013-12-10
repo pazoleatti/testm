@@ -175,7 +175,7 @@ def logicalCheck() {
                     logger.warn(errorMsg + "графы 8 и 17 неравны!")
                 }
                 // 3. LC • Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7 = 0)
-                if (row.cost != row.costOnMarketQuotation || row.cost != row.reserveCalcValue || row.cost == 0) {
+                if (row.cost != 0 || row.costOnMarketQuotation != 0 || row.reserveCalcValue != 0) {
                     logger.warn(errorMsg + "графы 9, 14 и 15 ненулевые!")
                 }
             }
