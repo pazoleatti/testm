@@ -161,9 +161,8 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    def dataRowHelperPrev = getFormDataPrev()
-    if (dataRowHelperPrev==null) return
-    def dataRowsPrev = dataRowHelperPrev.getAllCached()
+    def dataRowsPrev = getFormDataPrev()?.getAllCached()
+    if (dataRowsPrev == null) return
 
     // удалить строку "итого"
     deleteAllAliased(dataRows)
@@ -206,8 +205,6 @@ void calc() {
 void prevPeriodCheck() {
     def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        // TODO потом поменять после проверки
-        // throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
         logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
     }
 }
@@ -217,9 +214,8 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    def dataRowHelperPrev = getFormDataPrev()
-    if (dataRowHelperPrev==null) return
-    def dataRowsPrev = dataRowHelperPrev.getAllCached()
+    def dataRowsPrev = getFormDataPrev()?.getAllCached()
+    if (dataRowsPrev == null) return
 
     def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (def row : dataRows) {
@@ -236,7 +232,7 @@ void logicCheck() {
         def find = dataRows.find{it->
             (row!=it && row.numberAccount==it.numberAccount)
         }
-        if (find!=null) {
+        if (find != null) {
             logger.error(errorMsg + "Номер ссудного счета не уникальный!")
         }
 
@@ -252,7 +248,7 @@ void logicCheck() {
         def calcValues = [
                 booAccount: calc13(row),
                 taxAccount: calc12(row, rowPrev),
-                accrualPrev: calc14(row, rowPrev),
+                accrualPrev: calc14(rowPrev),
                 accrualReportPeriod: calc15(row),
                 sumRate: calc17(row, rowPrev)
         ]
@@ -260,7 +256,7 @@ void logicCheck() {
 
         // 4. Проверка курса валюты
         if (row.operationDate != null && row.course != null) {
-            def name = row.getCell('course').column.name
+//            def name = row.getCell('course').column.name
             def dataProvider = refBookFactory.getDataProvider(22)
             def record = dataProvider.getRecords(row.operationDate, null, "RATE = $row.course", null);
             if (record.size() == 0) {
@@ -293,11 +289,11 @@ def getTotalRow(def dataRows) {
 }
 
 def calc12(def row, def rowPrev) {
-    if (row.booAccount!=null) {
-        if (row.debtBalance==null || row.course==null || row.interestRate==null ||
-            row.baseForCalculation==null || row.baseForCalculation==0 || row.calcPeriodAccountingEndDate==null ||
-            rowPrev.calcPeriodBeginDate==null || (row.calcPeriodAccountingEndDate - rowPrev.calcPeriodBeginDate + 1)==0 ||
-            rowPrev.accrualPrev==null) return null
+    if (row.booAccount != null) {
+        if (row.debtBalance == null || row.course == null || row.interestRate == null ||
+            row.baseForCalculation == null || row.baseForCalculation == 0 || row.calcPeriodAccountingEndDate == null ||
+            rowPrev.calcPeriodBeginDate == null || (row.calcPeriodAccountingEndDate - rowPrev.calcPeriodBeginDate + 1) == 0 ||
+            rowPrev.accrualPrev == null) return null
         BigDecimal x = row.debtBalance * row.course * row.interestRate / row.baseForCalculation *
                 (row.calcPeriodAccountingEndDate - rowPrev.calcPeriodBeginDate + 1) - rowPrev.accrualPrev
         return roundValue(x, 2)
@@ -307,9 +303,9 @@ def calc12(def row, def rowPrev) {
 
 def calc13(def row) {
     if (true) {
-        if (row.debtBalance==null || row.interestRate==null || row.baseForCalculation==null ||
-            row.baseForCalculation==0 || row.calcPeriodAccountingEndDate==null || row.calcPeriodAccountingBeginDate==null ||
-            (row.calcPeriodAccountingEndDate - row.calcPeriodAccountingBeginDate + 1)==0) return null
+        if (row.debtBalance == null || row.interestRate == null || row.baseForCalculation == null ||
+            row.baseForCalculation == 0 || row.calcPeriodAccountingEndDate == null || row.calcPeriodAccountingBeginDate == null ||
+            (row.calcPeriodAccountingEndDate - row.calcPeriodAccountingBeginDate + 1) == 0) return null
         BigDecimal x = row.debtBalance * row.interestRate / row.baseForCalculation *
                 (row.calcPeriodAccountingBeginDate - row.calcPeriodAccountingBeginDate + 1)
         return roundValue(x, 2)
@@ -322,9 +318,9 @@ def calc14(def rowPrev) {
 }
 
 def calc15(def row) {
-    if (row.debtBalance==null || row.interestRate==null || row.baseForCalculation==null ||
-        row.baseForCalculation==0 || row.calcPeriodEndDate==null || row.calcPeriodBeginDate==null ||
-        (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1)==0) return null
+    if (row.debtBalance == null || row.interestRate == null || row.baseForCalculation == null ||
+        row.baseForCalculation == 0 || row.calcPeriodEndDate == null || row.calcPeriodBeginDate == null ||
+        (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1) == 0) return null
     BigDecimal x = row.debtBalance * row.interestRate / row.baseForCalculation *
             (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1)
     return roundValue(x, 2)
@@ -333,17 +329,17 @@ def calc15(def row) {
 def calc17(def row, def rowPrev) {
     BigDecimal x
     if (true) {
-        if (row.debtBalance==null || row.marketInterestRate==null || row.baseForCalculation==null ||
-                row.baseForCalculation==0 || row.calcPeriodAccountingEndDate==null || rowPrev.calcPeriodBeginDate==null ||
-                (row.calcPeriodAccountingEndDate - rowPrev.calcPeriodBeginDate + 1)==0 || rowPrev.accrualReportPeriod==null ||
-                rowPrev.sumRate==null) return null
+        if (row.debtBalance == null || row.marketInterestRate == null || row.baseForCalculation == null ||
+                row.baseForCalculation == 0 || row.calcPeriodAccountingEndDate == null || rowPrev.calcPeriodBeginDate == null ||
+                (row.calcPeriodAccountingEndDate - rowPrev.calcPeriodBeginDate + 1) == 0 || rowPrev.accrualReportPeriod == null ||
+                rowPrev.sumRate == null) return null
         x = row.debtBalance * row.marketInterestRate / row.baseForCalculation *
                 (row.calcPeriodAccountingBeginDate - rowPrev.calcPeriodBeginDate + 1) -
                 rowPrev.accrualReportPeriod - rowPrev.sumRate
     } else {
-        if (row.debtBalance==null || row.marketInterestRate==null || row.baseForCalculation==null ||
-                row.baseForCalculation==0 || row.calcPeriodEndDate==null || row.calcPeriodBeginDate==null ||
-                (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1)==0 || row.accrualPrev==null) return null
+        if (row.debtBalance == null || row.marketInterestRate == null || row.baseForCalculation == null ||
+                row.baseForCalculation == 0 || row.calcPeriodEndDate == null || row.calcPeriodBeginDate == null ||
+                (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1) == 0 || row.accrualPrev == null) return null
         x = row.debtBalance * row.marketInterestRate / row.baseForCalculation *
                 (row.calcPeriodEndDate - rowPrev.calcPeriodBeginDate + 1) - row.accrualPrev
     }
@@ -356,7 +352,7 @@ def getFormDataPrev() {
     def formPrev = null
     if (reportPeriodPrev != null) {
         formPrev = formDataService.find(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id)
-        if (formPrev!=null && formPrev.id != null) {
+        if (formPrev != null && formPrev.id != null) {
             return formDataService.getDataRowHelper(formPrev)
         }
     }
@@ -365,7 +361,7 @@ def getFormDataPrev() {
 
 // Получить данные за предыдущий период
 def getRowPrev(def row, def dataRowsPrev) {
-    if (dataRowsPrev!=null) {
+    if (dataRowsPrev != null) {
         for (def rowPrev in dataRowsPrev) {
             if (row.numberAccount == rowPrev.numberAccount) {
                 return rowPrev

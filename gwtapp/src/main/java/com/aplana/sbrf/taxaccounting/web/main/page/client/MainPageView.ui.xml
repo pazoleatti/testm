@@ -22,40 +22,46 @@
             <g:north size="44">
                 <g:HTMLPanel>
                     <div class="topNavigation">
-                        <div class="topHeader">
-                            <div class="topLeftLogo">
-                                <img style="height: 41x; width:126px;" height="41px" width="126px"
-                                    src="resources/img/header_left.png" />
-                            </div>
-                            <div class="topRightLogo">
-                                <img style="height: 41px; width:27px;" height="41px" width="27px"
-                                    src="resources/img/header_right.png" />
-                            </div>
-                            <g:HTMLPanel ui:field="signInContentPanel" />
-                            <div style="float: right">
-                                <g:MenuBar  ui:field="helpMenu">
-                                    <g:MenuItem >
-                                        <a href="mailto:sbrf_tax_test@aplana.com?subject=Сообщить о проблеме" title="Сообщить о проблеме">
-                                            <img src="resources/img/email.png" style="border: none"/>
-                                        </a>
-                                    </g:MenuItem>
+                        <div class="topLeftLogo"/>
+                        <div class="topRightLogo"/>
 
-                                    <g:MenuItem>
-                                        <a href="#!about"  target="_blank" title="О программе">
-                                            <img src="resources/img/exclamation_mark.png" style="border: none"/>
-                                        </a>
-                                    </g:MenuItem>
+                        <!--TODO Размещение у signInContentPanel должно настраиваться не в нем самом а выше по дереву, либо в главном стиле-->
+                        <g:HTMLPanel ui:field="signInContentPanel"/>
 
-                                    <g:MenuItem><img src="resources/img/question_mark.png" title="Руководство пользователя"/>
-                                        <g:MenuBar vertical="true">
-                                            <g:MenuItem><a href="resources/help_un.pdf" target="_blank" title="Руководство пользователя" style="color:#000000; text-decoration:none;">Учет налогов</a></g:MenuItem>
-                                            <g:MenuItem><a href="resources/help_uks.pdf" target="_blank" style="color:#000000; text-decoration:none;">Учет КС</a></g:MenuItem>
-                                        </g:MenuBar>
-                                    </g:MenuItem>
-                                </g:MenuBar>
-                            </div>
-                            <g:HTMLPanel ui:field="mainMenuContentPanel" />
+                        <div style="float: right">
+                            <g:MenuBar ui:field="helpMenu">
+                                <g:MenuItem>
+                                    <a href="mailto:sbrf_tax_test@aplana.com?subject=Сообщить о проблеме"
+                                       title="Сообщить о проблеме">
+                                        <img src="resources/img/email.png" style="border: none" alt="email"/>
+                                    </a>
+                                </g:MenuItem>
+
+                                <g:MenuItem>
+                                    <a href="#!about" target="_blank" title="О программе">
+                                        <img src="resources/img/exclamation_mark.png" style="border: none" alt="!"/>
+                                    </a>
+                                </g:MenuItem>
+
+                                <g:MenuItem>
+                                    <img src="resources/img/question_mark.png" title="Руководство пользователя" alt="?"/>
+                                    <g:MenuBar vertical="true">
+                                        <g:MenuItem>
+                                            <a href="resources/help_un.pdf" target="_blank"
+                                               title="Руководство пользователя"
+                                               style="color:#000000; text-decoration:none;">Учет налогов
+                                            </a>
+                                        </g:MenuItem>
+                                        <g:MenuItem>
+                                            <a href="resources/help_uks.pdf" target="_blank"
+                                               style="color:#000000; text-decoration:none;">Учет КС
+                                            </a>
+                                        </g:MenuItem>
+                                    </g:MenuBar>
+                                </g:MenuItem>
+                            </g:MenuBar>
                         </div>
+                        <g:HTMLPanel ui:field="mainMenuContentPanel"/>
                     </div>
                 </g:HTMLPanel>
             </g:north>
@@ -84,10 +90,12 @@
             </g:center>
 
             <g:south size="32">
-                <g:HTMLPanel ui:field="footerPanel" styleName="footerGradient">
-                    <div class="footerLeft" />
-                    <div class="footerRight" />
-                    <g:FlowPanel ui:field="projectVersion" styleName="versionProjectStyle" />
+                <g:HTMLPanel>
+                    <g:HTMLPanel ui:field="footerPanel" styleName="footerGradient">
+                        <div class="footerLeft"/>
+                        <div class="footerRight"/>
+                    </g:HTMLPanel>
+                    <g:FlowPanel ui:field="projectVersion" styleName="versionProjectStyle"/>
                 </g:HTMLPanel>
             </g:south>
         </g:DockLayoutPanel>
