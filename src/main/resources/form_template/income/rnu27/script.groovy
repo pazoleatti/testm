@@ -39,13 +39,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         prevPeriodCheck()
-        try {
-            calc()
-            logicCheck()
-        } catch (Exception e) {
-            logger.warn(""+e.toString())
-            logger.warn(""+e.getStackTrace())
-        }
+        calc()
+        logicCheck()
         break
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)

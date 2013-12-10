@@ -39,11 +39,11 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK:
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.CALCULATE:
         calc()
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
@@ -57,10 +57,10 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED: // после принятия из подготовлена
-        logicalCheck()
+        logicCheck()
         break
     case FormDataEvent.COMPOSE :
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
@@ -162,9 +162,9 @@ void calc() {
     // посчитать "Итого по <Наименование контрагента>"
     def totalRows = getCalcTotalName(dataRows)
     // добавить "Итого по <Наименование контрагента>" в таблицу
-    def i = 1
+    def i = 0
     totalRows.each { index, row ->
-        dataRowHelper.insert(row, index + i++)
+        dataRows.add(index + i++, row)
     }
 
     // добавить строку "итого"
@@ -177,7 +177,7 @@ void calc() {
 /**
  * Логические проверки
  */
-void logicalCheck() {
+void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
@@ -211,7 +211,7 @@ void logicalCheck() {
         def calcValues = [
                 financialResult1: getFinancialResult1(row),
                 perc: getPerc(row),
-                loss: getLoss(row),
+                loss: getLoss(row)
         ]
         //  Арифметическая проверка граф 10, 14, 15
         //  Графы 10, 14, 15 должны содержать значение, полученное согласно алгоритмам, описанным в разделе «Алгоритмы заполнения полей формы».
@@ -320,7 +320,7 @@ def getLoss(def dataRow) {
  * Проверка валюты на рубли
  */
 def isRoublel(def dataRow) {
-    return getRefBookValue(15, dataRow.currencyDebtObligation)?.CODE?.stringValue == '643'
+    return getRefBookValue(15, dataRow.currencyDebtObligation)?.CODE?.stringValue == '810'
 }
 
 def getRepaymentDateDuration(dataRow) {

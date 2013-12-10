@@ -15,7 +15,7 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        logicalCheckBeforeCalc()
+        logicCheckBeforeCalc()
         calc()
         logicCheck()
         break
@@ -28,13 +28,12 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow.getAlias() == null) formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
-        calc()
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
     case FormDataEvent.COMPOSE :
@@ -110,9 +109,9 @@ def getRefBookRecord(def Long refBookId, def String alias, def String value, def
 //// Кастомные методы
 
 // Логические проверки
-void logicalCheckBeforeCalc() {
+void logicCheckBeforeCalc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = dataRowHelper.getAllCached()
 
     def fieldNumber = 0
     for (row in dataRows) {
@@ -122,7 +121,7 @@ void logicalCheckBeforeCalc() {
         fieldNumber++
 
         def departmentParam
-        if (row.regionBankDivision!=null) departmentParam =  getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
+        if (row.regionBankDivision != null) departmentParam =  getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
         if (departmentParam == null || departmentParam.isEmpty()) {
             return
         } else {
@@ -138,7 +137,7 @@ void logicalCheckBeforeCalc() {
         }
 
         def departmentParamIncomeRecords
-        if (row.regionBankDivision!=null) incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
+        if (row.regionBankDivision != null) incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
         if (incomeParam == null || incomeParam.isEmpty()) {
             logger.error("Строка $fieldNumber: Не найдены настройки подразделения!")
         } else {
@@ -186,7 +185,7 @@ void logicCheck() {
 // Алгоритмы заполнения полей формы
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = dataRowHelper.getAllCached()
     if (dataRows.isEmpty()) {
         return
     }
@@ -229,7 +228,7 @@ void calc() {
 // графа 2 - название подразделения
 def calc2(def row) {
     def departmentParam
-    if (row.regionBankDivision!=null) departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
+    if (row.regionBankDivision != null) departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
     if (departmentParam == null || departmentParam.isEmpty()) {
         return null
     }
@@ -246,7 +245,7 @@ def calc2(def row) {
 // графа 4 - кпп
 def calc4(def row){
     def incomeParam
-    if (row.regionBankDivision!=null) incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
+    if (row.regionBankDivision != null) incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
     if (incomeParam == null || incomeParam.isEmpty()) {
         return null
     }
