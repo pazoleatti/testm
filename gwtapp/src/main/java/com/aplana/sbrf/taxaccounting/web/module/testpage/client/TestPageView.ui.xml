@@ -1,51 +1,16 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
-             xmlns:my="urn:import:com.aplana.gwt.client">
+             xmlns:my="urn:import:com.aplana.gwt.client" >
     <ui:style>
-        .RefbookTextBox {
-            padding-left: 10px;
+        .RefbookTextBox{
+            margin-left: 10px;
         }
-
-        .ms {
-            padding-left: 10px;
+        .ms{
+            margin-left: 10px;
         }
-
-        .mainContainer {
-            /*border: solid 1px black;*/
-        }
-
-        .formHeader {
-            height: 35px;
-            margin-left: 15px;
-            overflow: hidden;
-        }
-
-        .formBody {
-            border: solid 1px #aeaeac;
-            position: absolute;
-            top: 35px;
-            bottom: 0;
-            padding: 2px;
-            background-color: #f4f1eb;
-            -webkit-border-radius: 4px;
-            -moz-border-radius: 4px;
-            border-radius: 4px;
-            behavior: url(/resources/pie/PIE.htc);
-        }
-
     </ui:style>
 
-    <g:HTMLPanel addStyleNames="{style.mainContainer}">
-        <g:HTMLPanel addStyleNames="{style.formHeader}">
-            ff
-            g
-            g
-            <br/>
-            g
-            <br/>
-            gff
-        </g:HTMLPanel>
 
     <g:VerticalPanel width="100%">
        <my:LabelSeparator text="test" ui:field="sep"/>
@@ -57,6 +22,7 @@
         <g:HorizontalPanel addStyleNames="{style.ms}" width="400px">
             <!--<my:MultiListBox ui:field="mlistbox" enable="true" multiselect="false" />-->
             <my:MultiListBox ui:field="mlistbox"/>
+
         </g:HorizontalPanel>
         <g:Label ui:field="showResult" />
     </g:VerticalPanel>
