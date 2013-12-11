@@ -22,9 +22,8 @@
 		<module>fonts</module>
 		<module>migration-ejb</module>
 		<module>mdb</module>
-        <module>scheduler</module>
-        <module>gwt-widget</module>
-  </modules>
+		<module>scheduler</module>
+	</modules>
 
 	<properties>
 		<maven.build.timestamp.format>yyyy.MM.dd-HH:mm</maven.build.timestamp.format>

@@ -34,11 +34,11 @@
 			<artifactId>dynacache-spring</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>gwt-widget</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>gwt-widget</artifactId>
+			<version>0.3.5</version>
+		</dependency>
 
 		<dependency>
 			<!-- Доступно только в рантайме!!!! -->
