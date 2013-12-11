@@ -2,9 +2,8 @@ package form_template.income.declaration_op
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import groovy.transform.Field
-import groovy.xml.MarkupBuilder;
+import groovy.xml.MarkupBuilder
 
 /**
  * Формирование XML для декларации налога на прибыль уровня обособленного подразделения.
@@ -34,13 +33,27 @@ def providerCache = [:]
 @Field
 def refBookCache = [:]
 
-void checkDeparmentParams(LogLevel logLevel) {
-    def date = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
+// Дата окончания отчетного периода
+@Field
+def reportPeriodEndDate = null
 
+def getEndDate() {
+    if (reportPeriodEndDate == null) {
+        reportPeriodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
+    }
+    return reportPeriodEndDate
+}
+
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
+void checkDeparmentParams(LogLevel logLevel) {
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    def departmentParam = getProvider(33).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null)?.get(0)
+    def departmentParam = getProvider(33).getRecords(getEndDate(), null, "DEPARTMENT_ID = $departmentId", null)?.get(0)
 
     if (departmentParam == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
@@ -57,46 +70,42 @@ void checkDeparmentParams(LogLevel logLevel) {
     }
 }
 
-/**
- * Запуск генерации XML
- */
+/** Запуск генерации XML. */
 void generateXML() {
     /*
      * Константы.
      */
+
     def empty = 0
     def knd = '1151006'
     def kbk = '18210101011011000110'
     def kbk2 = '18210101012021000110'
     def typeNP = '1'
 
-    /** Предпослденяя дата отчетного периода на которую нужно получить настройки подразделения из справочника. */
-    def date = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
-
     // справочник "Параметры подразделения по налогу на прибыль" - начало
-    def incomeParams = getProvider(33).getRecords(date, null, "DEPARTMENT_ID = ${declarationData.departmentId}", null)?.get(0)
+    def incomeParams = getProvider(33).getRecords(getEndDate(), null, "DEPARTMENT_ID = ${declarationData.departmentId}", null)?.get(0)
     if (incomeParams == null) {
         throw new Exception('Ошибка при получении настроек обособленного подразделения')
     }
-    def reorgFormCode = refBookService.getStringValue(5, getValue(incomeParams, 'REORG_FORM_CODE'), 'CODE')
-    def taxOrganCode = getValue(incomeParams, 'TAX_ORGAN_CODE')
-    def okvedCode = refBookService.getStringValue(34, getValue(incomeParams, 'OKVED_CODE'), 'CODE')
-    def phone = getValue(incomeParams, 'PHONE')
-    def name = getValue(incomeParams, 'NAME')
-    def inn = getValue(incomeParams, 'INN')
-    def kpp = getValue(incomeParams, 'KPP')
-    def reorgInn = getValue(incomeParams, 'REORG_INN')
-    def reorgKpp = getValue(incomeParams, 'REORG_KPP')
-    def okato = refBookService.getStringValue(3, getValue(incomeParams, 'OKATO'), 'OKATO')
-    def signatoryId = refBookService.getNumberValue(35, getValue(incomeParams, 'SIGNATORY_ID'), 'CODE')
-    def appVersion = getValue(incomeParams, 'APP_VERSION')
-    def formatVersion = getValue(incomeParams, 'FORMAT_VERSION')
-    def taxPlaceTypeCode = refBookService.getStringValue(2, getValue(incomeParams, 'TAX_PLACE_TYPE_CODE'), 'CODE')
-    def signatorySurname = getValue(incomeParams, 'SIGNATORY_SURNAME')
-    def signatoryFirstName = getValue(incomeParams, 'SIGNATORY_FIRSTNAME')
-    def signatoryLastName = getValue(incomeParams, 'SIGNATORY_LASTNAME')
-    def approveDocName = getValue(incomeParams, 'APPROVE_DOC_NAME')
-    def approveOrgName = getValue(incomeParams, 'APPROVE_ORG_NAME')
+    def reorgFormCode = getRefBookValue(5, incomeParams?.REORG_FORM_CODE?.value)?.CODE?.value
+    def taxOrganCode = incomeParams?.TAX_ORGAN_CODE?.value
+    def okvedCode = getRefBookValue(34, incomeParams?.OKVED_CODE?.value)?.CODE?.value
+    def phone = incomeParams?.PHONE?.value
+    def name = incomeParams?.NAME?.value
+    def inn = incomeParams?.INN?.value
+    def kpp = incomeParams?.KPP?.value
+    def reorgInn = incomeParams?.REORG_INN?.value
+    def reorgKpp = incomeParams?.REORG_KPP?.value
+    def okato = getRefBookValue(3, incomeParams?.OKATO?.value)?.OKATO?.value
+    def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
+    def appVersion = incomeParams?.APP_VERSION?.value
+    def formatVersion = incomeParams?.FORMAT_VERSION?.value
+    def taxPlaceTypeCode = getRefBookValue(2, incomeParams?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
+    def signatorySurname = incomeParams?.SIGNATORY_SURNAME?.value
+    def signatoryFirstName = incomeParams?.SIGNATORY_FIRSTNAME?.value
+    def signatoryLastName = incomeParams?.SIGNATORY_LASTNAME?.value
+    def approveDocName = incomeParams?.APPROVE_DOC_NAME?.value
+    def approveOrgName = incomeParams?.APPROVE_ORG_NAME?.value
     // справочник "Параметры подразделения по налогу на прибыль" - конец
 
     /** Отчётный период. */
@@ -340,51 +349,12 @@ void generateXML() {
     }
 }
 
-/**
- * Получить округленное, целочисленное значение.
- */
+/** Получить округленное, целочисленное значение. */
 def getLong(def value) {
     if (value == null) {
         return 0
     }
     return roundValue(value, 0)
-}
-
-/**
- * Получить значение или ноль, если значения нет.
- */
-def getValue(def value) {
-    return (value != null ? value : 0)
-}
-
-/**
- * Получить данные нф.
- *
- * @param form нф
- */
-def getDataRowHelper(def form) {
-    return (form != null ? formDataService.getDataRowHelper(form) : null)
-}
-
-/**
- * Получить значение атрибута строки справочника.
-
- * @param record строка справочника
- * @param alias алиас
- */
-def getValue(def record, def alias) {
-    def value = record.get(alias)
-    switch (value.getAttributeType()) {
-        case RefBookAttributeType.DATE :
-            return value.getDateValue()
-        case RefBookAttributeType.NUMBER :
-            return value.getNumberValue()
-        case RefBookAttributeType.STRING :
-            return value.getStringValue()
-        case RefBookAttributeType.REFERENCE :
-            return value.getReferenceValue()
-    }
-    return null
 }
 
 /**
@@ -463,17 +433,4 @@ def getProvider(def long providerId) {
         providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
     }
     return providerCache.get(providerId)
-}
-
-/**
- * Разыменование с использованием кеширования
- * @param refBookId
- * @param recordId
- * @return
- */
-def getRefBookValue(def long refBookId, def long recordId) {
-    if (!refBookCache.containsKey(recordId)) {
-        refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
-    }
-    return refBookCache.get(recordId)
 }

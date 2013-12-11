@@ -2,7 +2,6 @@ package form_template.income.rnu14
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -12,6 +11,16 @@ import groovy.transform.Field
  *
  * @author lhaziev
  * @author bkinzyabulatov
+ *
+ * графа 1  - knu
+ * графа 2  - mode
+ * графа 3  - sum
+ * графа 4  - normBase
+ * графа 5  - normCoef
+ * графа 6  - limitSum
+ * графа 7  - inApprovedNprms
+ * графа 8  - overApprovedNprms
+ *
  */
 
 switch (formDataEvent) {
@@ -26,33 +35,19 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
-// проверка при "подготовить"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED:
-        checkOnPrepareOrAcceptance('Подготовка')
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+        logicCheck()
         break
-// проверка при "принять"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
-        checkOnPrepareOrAcceptance('Принятие')
-        break
-// проверка при "вернуть из принята в подготовлена"
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
-        checkOnCancelAcceptance()
-        break
-// обобщить
     case FormDataEvent.COMPOSE:
         calc()
         logicCheck()
         break
 }
-
-// графа 1  - knu
-// графа 2  - mode
-// графа 3  - sum
-// графа 4  - normBase
-// графа 5  - normCoef
-// графа 6  - limitSum
-// графа 7  - inApprovedNprms
-// графа 8  - overApprovedNprms
 
 // все атрибуты
 @Field
@@ -150,7 +145,7 @@ void calc() {
                 if (dataRowsComplex != null) {
                     for (def rowComplex : dataRowsComplex) {
                         if (rowComplex.incomeTypeId in knuComplex) {
-                            normBase += rowComplex.incomeTaxSumS
+                            normBase += (rowComplex.incomeTaxSumS?:0)
                         }
                     }
                 }
@@ -159,13 +154,13 @@ void calc() {
                     for (def rowSimple : dataRowsSimple) {
                         //+ Сумма значений по графе 8 (столбец «РНУ-4 (графа 5) сумма») в простых доходах
                         if (rowSimple.incomeTypeId in knuSimpleRNU4) {
-                            normBase += rowSimple.rnu4Field5Accepted
+                            normBase += (rowSimple.rnu4Field5Accepted?:0)
                         }
                         //+ Сумма значений по графе 5 (столбец «РНУ-6 (графа 10) сумма»)
                         //- Сумма значений по графе 6 (столбец «РНУ-6 (графа 12). Сумма»)
                         // КНУ одни, поэтому объединил
                         if (rowSimple.incomeTypeId in knuSimpleRNU6) {
-                            normBase += (rowSimple.rnu6Field10Sum - rowSimple.rnu6Field12Accepted)
+                            normBase += ((rowSimple.rnu6Field10Sum?:0) - (rowSimple.rnu6Field12Accepted?:0))
                         }
                     }
                 }
@@ -197,40 +192,10 @@ void calc() {
     dataRowHelper.save(dataRows);
 }
 
-def logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (def row : dataRowHelper.allCached) {
+void logicCheck() {
+    for (def row : formDataService.getDataRowHelper(formData).allCached) {
         // 1. Обязательность заполнения полей графы 4
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
-    }
-    return true
-}
-
-/** Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята". */
-void checkOnPrepareOrAcceptance(def value) {
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() { department ->
-        if (department.formTypeId == formData.getFormType().getId()) {
-            def form = formDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-            // если форма существует и статус "принята"
-            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
-                logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
-            }
-        }
-    }
-}
-
-/** Проверки при переходе "Отменить принятие". */
-void checkOnCancelAcceptance() {
-    def departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
-            formData.getFormType().getId(), formData.getKind());
-    def department = departments.getAt(0);
-    if (department != null) {
-        def form = formDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-
-        if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
-            logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
-        }
     }
 }
 

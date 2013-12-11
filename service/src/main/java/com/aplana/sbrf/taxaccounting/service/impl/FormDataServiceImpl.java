@@ -2,9 +2,11 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.ConfigurationProvider;
 import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -39,9 +41,12 @@ public class FormDataServiceImpl implements FormDataService {
 
     private static String XLSX_EXT = "xlsx";
     private static String XLS_EXT = "xls";
+    private static String ERROR_PERIOD = "Переход невозможен, т.к. у одного из приемников период не отрыт.";
 
     @Autowired
 	private FormDataDao formDataDao;
+    @Autowired
+    private DeclarationDataDao declarationDataDao;
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 	@Autowired
@@ -58,6 +63,8 @@ public class FormDataServiceImpl implements FormDataService {
 	private DataRowDao dataRowDao;
     @Autowired
     private DepartmentFormTypeDao departmentFormTypeDao;
+    @Autowired
+    private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
     @Autowired
     private PeriodService reportPeriodService;
     @Autowired
@@ -609,19 +616,39 @@ public class FormDataServiceImpl implements FormDataService {
     @Transactional(readOnly = true)
     public void checkDestinations(long formDataId) {
         FormData formData = formDataDao.get(formDataId);
+        // Проверка вышестоящих налоговых форм
         List<DepartmentFormType> departmentFormTypes =
                 departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
                         formData.getFormType().getId(), formData.getKind());
         if (departmentFormTypes != null) {
-            for (DepartmentFormType department: departmentFormTypes) {
-                FormData form = formDataDao.find(department.getFormTypeId(), department.getKind(),
-                        department.getDepartmentId(), formData.getReportPeriodId());
-                // если форма существует и статус отличен от "создана"
+            for (DepartmentFormType departmentFormType : departmentFormTypes) {
+                FormData form = formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
+                        departmentFormType.getDepartmentId(), formData.getReportPeriodId());
+                // Если форма существует и статус отличен от "Создана"
                 if (form != null && form.getState() != WorkflowState.CREATED) {
                     throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
                 }
-                if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), department.getDepartmentId())){
-                	throw new ServiceException("Переход невозможен, т.к. у одного из приемников период не отрыт.");
+                if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), departmentFormType.getDepartmentId())) {
+                    throw new ServiceException(ERROR_PERIOD);
+                }
+            }
+        }
+
+        // Проверка вышестоящих деклараций
+        List<DepartmentDeclarationType> departmentDeclarationTypes = departmentDeclarationTypeDao.getDestinations(
+                formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
+        if (departmentDeclarationTypes != null) {
+            for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypes) {
+                DeclarationData declaration = declarationDataDao.find(departmentDeclarationType.getDeclarationTypeId(),
+                        departmentDeclarationType.getDepartmentId(), formData.getReportPeriodId());
+                // Если декларация существует и статус "Принята"
+                if (declaration != null && declaration.isAccepted()) {
+                    String str = formData.getFormType().getTaxType() == TaxType.DEAL ? "принято уведомление" :
+                            "принята декларация";
+                    throw new ServiceException("Переход невозможен, т.к. уже " + str + ".");
+                }
+                if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), declaration.getDepartmentId())) {
+                    throw new ServiceException(ERROR_PERIOD);
                 }
             }
         }

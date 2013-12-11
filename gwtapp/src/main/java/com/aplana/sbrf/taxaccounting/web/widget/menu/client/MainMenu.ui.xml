@@ -40,7 +40,7 @@
             height: 32px;
             padding-top: 3px;
             padding-bottom: 5px;
-            padding-left: 135px;
+            /*padding-left: 135px; убрал чтобы при уменьшении ширины меню не сразу схлапывалось*/
         }
 
         @external gwt-MenuBar-horizontal .gwt-MenuItem-selected;

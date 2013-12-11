@@ -505,7 +505,7 @@ String getValuesByGroupColumn(DataRow row) {
     if (signPhis != null)
         builder.append(signPhis).append(sep)
 
-    signTransaction =  getRefBookValue(38, row.signTransaction)?.VALUE?.stringValue
+    signTransaction = getRefBookValue(38, row.signTransaction)?.VALUE?.stringValue
     if (signTransaction != null)
         builder.append(signTransaction).append(sep)
 
@@ -585,15 +585,15 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def int xmlIndexRow = -1
-    def int xlsIndexRow = 0
     def int rowOffset = 3
     def int colOffset = 2
 
-    def rows = new LinkedList<DataRow<Cell>>()
+    def rows = []
+    def int rowIndex = 1
 
     for (def row : xml.row) {
         xmlIndexRow++
-        xlsIndexRow = xmlIndexRow + rowOffset
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // пропустить шапку таблицы
         if (xmlIndexRow <= headRowCount) {
@@ -605,6 +605,7 @@ void addData(def xml, int headRowCount) {
         }
 
         def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -616,7 +617,7 @@ void addData(def xml, int headRowCount) {
         def xmlIndexCol = 0
 
         // столбец 1
-        newRow.rowNum =  xmlIndexRow - headRowCount
+        newRow.rowNum = xmlIndexRow - headRowCount
 
         // столбец 2.1
         newRow.name = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -662,8 +663,8 @@ void addData(def xml, int headRowCount) {
         // графа 6
         newRow.contractDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
-		
-		// графа 7.1
+
+        // графа 7.1
         newRow.transactionNum = row.cell[indexCell].text()
         indexCell++
 
@@ -688,7 +689,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 11
-        newRow.signTransaction =  getRecordIdImport(38, 'VALUE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        newRow.signTransaction = getRecordIdImport(38, 'VALUE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
         // графа 12.1

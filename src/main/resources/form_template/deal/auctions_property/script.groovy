@@ -1,7 +1,5 @@
 package form_template.deal.auctions_property
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
@@ -250,15 +248,14 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
-    def int xlsIndexRow = 0
     def int rowOffset = 3
     def int colOffset = 2
 
-    def rows = new LinkedList<DataRow<Cell>>()
-
+    def rows = []
+    def int rowIndex = 1
     for (def row : xml.row) {
         xmlIndexRow++
-        xlsIndexRow = xmlIndexRow + rowOffset
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // пропустить шапку таблицы
         if (xmlIndexRow <= headRowCount) {
@@ -270,6 +267,7 @@ void addData(def xml, int headRowCount) {
         }
 
         def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')

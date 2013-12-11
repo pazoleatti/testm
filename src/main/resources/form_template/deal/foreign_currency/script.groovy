@@ -254,8 +254,8 @@ void calc() {
     for (row in dataRows) {
         // Порядковый номер строки
         row.rowNumber = index++
-	
-		// Расчет поля "Цена"
+
+        // Расчет поля "Цена"
         if (row.incomeSum != null && row.outcomeSum != null) {
             row.price = (row.incomeSum - row.outcomeSum).abs()
         } else {
@@ -318,7 +318,7 @@ String getValuesByGroupColumn(DataRow row) {
     if (row.docNum != null)
         builder.append(row.docNum).append(sep)
     if (row.docDate != null)
-        builder.append(formatDate(row.docDate,'dd.MM.yyyy')).append(sep)
+        builder.append(formatDate(row.docDate, 'dd.MM.yyyy')).append(sep)
     map = getRefBookValue(15, row.currencyCode)
     if (map != null)
         builder.append(map.CODE_2.stringValue).append(sep)
@@ -381,15 +381,15 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
-    def int xlsIndexRow = 0
     def int rowOffset = 3
     def int colOffset = 2
 
-    def rows = new LinkedList<DataRow<Cell>>()
+    def rows = []
+    def int rowIndex = 1
 
     for (def row : xml.row) {
         xmlIndexRow++
-        xlsIndexRow = xmlIndexRow + rowOffset
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // пропустить шапку таблицы
         if (xmlIndexRow <= headRowCount) {
@@ -401,6 +401,7 @@ void addData(def xml, int headRowCount) {
         }
 
         def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')

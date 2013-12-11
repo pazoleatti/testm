@@ -57,7 +57,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CHECK :
         def rnu49FormData = getRnu49FormData()
-        if (rnu49FormData==null) {
+        if (rnu49FormData == null) {
             logger.error("Отсутствуют данные РНУ-49!")
             return
         }
@@ -65,7 +65,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE :
         def rnu49FormData = getRnu49FormData()
-        if (rnu49FormData==null) {
+        if (rnu49FormData == null) {
             logger.error("Отсутствуют данные РНУ-49!")
             return
         }
@@ -155,15 +155,14 @@ def calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    def rnu49FormData = getRnu49FormData()
-    if (rnu49FormData==null) return
-    def rnu49Rows = rnu49FormData.getAllCached()
+    def rnu49Rows = getRnu49FormData()?.getAllCached()
+    if (rnu49Rows == null) return
 
     // удалить строку "итого"
     deleteAllAliased(dataRows)
 
     def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
-    if (rnu49FormData!=null) {
+    if (rnu49FormData != null) {
         for (def dataRow : dataRows) {
             def rnu49Row = getRnu49Row(rnu49Rows, dataRow)
 
@@ -187,7 +186,7 @@ def calc() {
  */
 def getRnu49FormData() {
     def formData49 = formDataService.find(312, formData.kind, formDataDepartment.id, formData.reportPeriodId)
-    if (formData49!=null && formData49.id != null) {
+    if (formData49 != null && formData49.id != null) {
         return formDataService.getDataRowHelper(formData49)
     }
     return null
@@ -244,11 +243,10 @@ def getSumm(rnu49Row) {
  */
 boolean logicCheck(){
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = dataRowHelper.getAllCached()
 
-    def rnu49FormData = getRnu49FormData()
-    if (rnu49FormData==null) return
-    def rnu49Rows = rnu49FormData.getAllCached()
+    def rnu49Rows = getRnu49FormData()?.getAllCached()
+    if (rnu49Rows == null) return
 
     def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def row : dataRows) {
@@ -264,9 +262,9 @@ boolean logicCheck(){
 
         // 1. Проверка уникальности значий в графе «Номер ссудного счета»
         def find = dataRows.find{it->
-            (row!=it && row.inventoryNumber==it.inventoryNumber)
+            (row != it && row.inventoryNumber == it.inventoryNumber)
         }
-        if (find!=null) {
+        if (find != null) {
             logger.error(errorMsg + "Инвентарный номер не уникальный!")
         }
 
@@ -277,7 +275,7 @@ boolean logicCheck(){
 
         // 3. Арифметические проверки расчета неитоговых граф
         def rnu49Row = getRnu49Row(rnu49Rows, row)
-        if (rnu49Row==[:]) {
+        if (rnu49Row == [:]) {
             logger.error(errorMsg + "Отсутствуют данные в РНУ-49!")
         }
         def calcValues = getValues(rnu49Row)
