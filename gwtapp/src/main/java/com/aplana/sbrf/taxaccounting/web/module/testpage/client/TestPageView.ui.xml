@@ -19,8 +19,11 @@
         <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" text="my button hyperlink" ui:field="ibl" />
         <my:ImgBtnLnk text="my anorch" imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" href="#" ui:field="ian" />
         <my:SpinEdit labelText="Период, с:" />
-        <g:HorizontalPanel addStyleNames="{style.ms}" width="600px">
-            <my:MultiListBox ui:field="mlistbox" multiselect="false" />
+        <g:HorizontalPanel addStyleNames="{style.ms}" width="400px">
+            <!--<my:MultiListBox ui:field="mlistbox" enable="true" multiselect="false" />-->
+            <my:MultiListBox ui:field="mlistbox"/>
+
         </g:HorizontalPanel>
+        <g:Label ui:field="showResult" />
     </g:VerticalPanel>
 </ui:UiBinder>
