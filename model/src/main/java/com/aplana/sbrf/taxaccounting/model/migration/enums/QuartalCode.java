@@ -22,10 +22,10 @@ public enum QuartalCode implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final int num;
-    private final String codeIfMonth;
-    private final String codeIfQuartal;
-    private final String codeString;
+    private final int num;              // номер месяца
+    private final String codeIfMonth;   // символ обозначения месяца для RNU
+    private final String codeIfQuartal; // симмвол обозначения квартала для RNU
+    private final String codeString;    // обозначения квартала в XML
 
     private QuartalCode(int num, String codeIfMonth, String codeIfQuartal, String codeString) {
         this.num = num;

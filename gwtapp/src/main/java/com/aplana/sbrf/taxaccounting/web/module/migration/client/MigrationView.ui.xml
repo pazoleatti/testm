@@ -5,6 +5,10 @@
             font-size: 26px;
             margin: 10px;
         }
+
+        .fix {
+            padding: 2px !important;    /*у TextArea сдвиг влево по маргину идет и поэтому полностью не влазит, применил этот фикс*/
+        }
     </ui:style>
     <g:DockLayoutPanel ui:field="dockPanel">
         <g:north size="90">
@@ -14,7 +18,7 @@
             </g:VerticalPanel>
         </g:north>
         <g:center>
-            <g:ScrollPanel>
+            <g:ScrollPanel styleName="{style.fix}">
                 <g:TextArea ui:field="textArea" readOnly="true" width="1000px" height="400px" />
             </g:ScrollPanel>
         </g:center>
