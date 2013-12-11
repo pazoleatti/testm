@@ -82,10 +82,6 @@ switch (formDataEvent) {
         }
         break
     case FormDataEvent.MIGRATION :
-        if (!isBalancePeriod && !isConsolidated && !checkPrevPeriod()) {
-            logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
-            return
-        }
         importData()
         if (!hasError()) {
             def total = getCalcTotalRow()
