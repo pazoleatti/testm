@@ -169,10 +169,10 @@ void logicCheck() {
             continue
         }
         index++
-        def errorMsg = "Строка $index: "
+        def errorMsg = "Строка ${row.getIndex()}: "
 
         // 1. Проверка на заполнение поля
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
         // 2. Проверка на уникальность поля «№ пп» (в рамках текущего года)
         if (index != row.number) {

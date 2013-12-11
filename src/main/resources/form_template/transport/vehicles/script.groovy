@@ -169,7 +169,7 @@ def logicCheck() {
                 }
             }
             if (!''.equals(errorRows)) {
-                logger.error("Обнаружены строки $index$errorRows, у которых Код ОКАТО = $row.codeOKATO, " +
+                logger.error("Обнаружены строки $index$errorRows, у которых Код ОКАТО = ${getRefBookValue(3, row.codeOKATO).OKATO.stringValue}, " +
                         "Идентификационный номер = $row.identNumber, " +
                         "Регистрационный знак = $row.regNumber совпадают!")
             }

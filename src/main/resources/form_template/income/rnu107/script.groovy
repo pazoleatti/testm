@@ -254,17 +254,20 @@ def logicalCheck() {
             continue
         }
 
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
+
         // 2. Проверка на уникальность поля «№ пп»
         for (def rowB : dataRows) {
             if (!row.equals(rowB) && row.number == rowB.number) {
-                logger.error("В строке $row.number нарушена уникальность номера по порядку!")
+                logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
                 return false
             }
         }
 
         // 3. Проверка даты совершения операции и границ отчетного периода
         if (row.operationDate < a || b < row.operationDate) {
-            logger.error("В строке $row.number дата совершения операции вне границ отчётного периода!")
+            logger.error(errorMsg + "Дата совершения операции вне границ отчётного периода!")
             return false
         }
 

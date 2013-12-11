@@ -478,7 +478,7 @@ void checkRequiredColumns(def row, def columns) {
         }
     }
     if (!colNames.isEmpty()) {
-        def index = row.getIndex() + 2
+        def index = row.getIndex()
         def errorMsg = colNames.join(', ')
         logger.error("В строке $index не заполнены колонки : $errorMsg.")
     }

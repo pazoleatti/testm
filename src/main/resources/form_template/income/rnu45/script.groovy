@@ -26,7 +26,6 @@ import java.math.RoundingMode
  * @author Stanislav Yasinskiy
  */
 
-println(formDataEvent)
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
 
@@ -262,16 +261,13 @@ def logicCheck() {
         // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
         def needValue = [:]
 
-        def index
-        def errorMsg
-
         for (def row in dataRows) {
             if (row.getAlias() != null) {
                 continue
             }
 
-            index = row.getIndex()
-            errorMsg = "Строка $index: "
+            def index = row.getIndex()
+            def errorMsg = "Строка $index: "
 
             // 1. Проверка на заполнение поля
             checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)

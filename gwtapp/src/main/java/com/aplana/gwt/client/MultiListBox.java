@@ -4,9 +4,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
@@ -21,71 +21,11 @@ import java.util.List;
  * Date: 27.11.13
  */
 
-public class MultiListBox<T> extends Composite {
+public class MultiListBox<T> extends Composite implements HasValue<List<T>>, HasEnabled {
+
     private static Binder uiBinder = GWT.create(Binder.class);
 
-    public int getCountSelect() {
-        return countSelect;
-    }
-
-    private void setCountSelect(int countSelect) {
-        this.countSelect = countSelect;
-        cnt.setText(Integer.toString(this.countSelect));
-    }
-
-    public boolean isMultiselect() {
-        return multiselect;
-    }
-
-
     interface Binder extends UiBinder<Widget, MultiListBox> {
-    }
-
-    private Renderer<T> renderer;
-
-    private int countSelect = 0;
-
-    private final boolean multiselect;
-
-    private List<SavedData> dataList;
-
-    // Сохраненые данные
-    private class SavedData {
-        private boolean chk;
-        private String name;
-        private CheckBox linkedElement;
-
-        public SavedData(String name, boolean chk, CheckBox linkedElement){
-            this.setLinkedElement(linkedElement);
-            setName(name);
-            setChk(chk);
-        }
-
-        public boolean isChk() {
-            return chk;
-        }
-
-        public void setChk(boolean chk) {
-            this.chk = chk;
-            getLinkedElement().setValue(chk);
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-            getLinkedElement().setText(name);
-        }
-
-        public CheckBox getLinkedElement() {
-            return linkedElement;
-        }
-
-        public void setLinkedElement(CheckBox linkedElement) {
-            this.linkedElement = linkedElement;
-        }
     }
 
     @UiField
@@ -115,19 +55,45 @@ public class MultiListBox<T> extends Composite {
     @UiField
     TextBox txt;
 
+    /**
+     * Renderer для отображаемого поля
+     */
+    private Renderer<T> renderer;
+
+    /**
+     * Количество выделенных элементов
+     */
+    private int countSelect = 0;
+
+    private boolean enabled;
+
+    /**
+     * Признак возьможности выбора нескольких элементов
+     */
+    private final boolean multiselect;
+
+    public static final String CHECKBOX_GROUP = "MAIN_GROUP";
+
+    private List<SavedData> dataList;
+
+    private List<T> value = new ArrayList<T>();
+
     @Inject
     public MultiListBox(){
         initWidget(uiBinder.createAndBindUi(this));
         addStyleName("AplanaMultiListBox");
         this.multiselect = true;
+        setEnabled(true);
     }
 
-    @UiConstructor
-    public MultiListBox(boolean multiselect){
+   // @UiConstructor
+    public MultiListBox(Renderer<T> renderer, boolean multiselect, boolean enable){
         initWidget(uiBinder.createAndBindUi(this));
         addStyleName("AplanaMultiListBox");
         this.multiselect = multiselect;
         footerPanel.setVisible(isMultiselect());
+        setEnabled(enable);
+        this.renderer = renderer;
     }
 
     public void setRenderer(Renderer<T> renderer){
@@ -142,9 +108,16 @@ public class MultiListBox<T> extends Composite {
         checkBoxPanel.clear();
         setCountSelect(0);
         dataList = new ArrayList<SavedData>();
+
+
         for (T temp : valueList) {
-            CheckBox chk = new CheckBox();
-            dataList.add(new SavedData(renderer.render(temp),false,chk));
+            CheckBox chk;
+            if (isMultiselect())
+                chk = new CheckBox();
+            else
+                chk = new RadioButton(CHECKBOX_GROUP);
+
+            dataList.add(new SavedData(temp, false, chk));
             chk.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -167,33 +140,9 @@ public class MultiListBox<T> extends Composite {
             else
                 setCountSelect(getCountSelect() - 1);
         } else {
-            for(SavedData temp : dataList)
-                temp.getLinkedElement().setValue(false);
-            ((CheckBox)event.getSource()).setValue(true);
+            save();
             popupPanel.hide();
-            for(SavedData temp : dataList){
-                temp.setChk(temp.getLinkedElement().getValue());
-            }
-            updateTxtValue();
-
         }
-
-
-    }
-
-    /**
-     *  Устанавливает значения у элеметов выпадающего списка
-     * @param selectedList - значения элеметов
-     */
-    public void setSelectedValues(List<Boolean> selectedList){
-        int i = 0;
-        for(SavedData temp : dataList){
-            temp.setChk(selectedList.get(i));
-
-            i++;
-        }
-        updateTxtValue();
-        countSelectedElements();
     }
 
     /**
@@ -212,9 +161,34 @@ public class MultiListBox<T> extends Composite {
         popupPanel.show();
     }
 
+    @UiHandler("selectButton")
+    public void onOkButtonClick(ClickEvent event){
+        popupPanel.hide();
+        save();
+    }
+
     @UiHandler("cancelButton")
     public void onCancelButtonClick(ClickEvent event){
         popupPanel.hide();
+    }
+
+    /**
+     * Сохранение значений всех элементов
+     */
+    private void save(){
+        List<T> tmpList =  new ArrayList<T>();
+        for(SavedData dataItem : dataList){
+            dataItem.save();  // Сохраняем состояние конкретного элемента
+            if (dataItem.isChk())
+                tmpList.add(dataItem.getValue()); // Добавляем выбранные
+        }
+        updateTxtValue();
+        // если значение изменилось
+        if ((tmpList.size() != this.value.size())||(!tmpList.containsAll(this.value)))  {
+            this.value.clear();                             // очищаем список значений
+            this.value.addAll(tmpList);                     // копируем новые значения в наш список
+            ValueChangeEvent.fire(this, this.value);        // Генерируем событие изменения
+        }
     }
 
     /**
@@ -231,7 +205,7 @@ public class MultiListBox<T> extends Composite {
     }
 
     /**
-     * Подсчитывает колличество выбранных элементов
+     * Подсчитывает количество выбранных элементов
      */
     private void countSelectedElements(){
         int i = 0;
@@ -243,13 +217,100 @@ public class MultiListBox<T> extends Composite {
         setCountSelect(i);
     }
 
-    @UiHandler("selectButton")
-    public void onOkButtonClick(ClickEvent event){
-        popupPanel.hide();
-        for(SavedData temp : dataList){
-            temp.setChk(temp.getLinkedElement().getValue());
-        }
+    public int getCountSelect() {
+        return countSelect;
+    }
+
+    private void setCountSelect(int countSelect) {
+        this.countSelect = countSelect;
+        cnt.setText(Integer.toString(this.countSelect));
+    }
+
+    public boolean isMultiselect() {
+        return multiselect;
+    }
+
+    @Override
+    public List<T> getValue() {
+        return value;
+    }
+
+    @Override
+    public void setValue(List<T> value) {
+        for (SavedData itemData : dataList)
+            itemData.setChk(value.contains(itemData.getValue()));
+        this.value = value;
         updateTxtValue();
+    }
+
+    @Override
+    public void setValue(List<T> value, boolean fireEvents) {
+        setValue(value);
+    }
+
+    @Override
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<T>> handler) {
+
+        return addHandler(handler, ValueChangeEvent.getType());
+
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        selectButton.setEnabled(enabled);
+    }
+
+    // Сохраненые данные
+    private class SavedData {
+        private boolean chk;
+        private T value;
+        private CheckBox linkedElement;
+
+        public SavedData(T value, boolean chk, CheckBox linkedElement){
+            this.setValue(value);
+            this.setLinkedElement(linkedElement);
+            setChk(chk);
+            getLinkedElement().setText(getName());
+        }
+
+        public void save(){
+            setChk(getLinkedElement().getValue());
+        }
+
+        public boolean isChk() {
+            return chk;
+        }
+
+        public void setChk(boolean chk) {
+            this.chk = chk;
+            getLinkedElement().setValue(chk);
+        }
+
+        public String getName() {
+            return renderer.render(value);
+        }
+
+        public CheckBox getLinkedElement() {
+            return linkedElement;
+        }
+
+        public void setLinkedElement(CheckBox linkedElement) {
+            this.linkedElement = linkedElement;
+        }
+
+        public T getValue() {
+            return value;
+        }
+
+        public void setValue(T value) {
+            this.value = value;
+        }
     }
 
 }

@@ -531,6 +531,7 @@ def addData(def xml) {
         indexRow++
 
         def newRow = getNewRow()
+        newRow.setIndex(indexRow)
         def indexCell = 0
 
         // TODO (Ramil Timerbaev) доделать

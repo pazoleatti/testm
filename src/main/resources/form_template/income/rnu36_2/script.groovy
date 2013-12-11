@@ -64,18 +64,18 @@ void logicCheck() {
             return
         }
         def row36_1 = getDataRow(dataRows36_1, row.getAlias())
-        def rowStart = "Строка ${row.getIndex()}: "
+        def errorMsg = "Строка ${row.getIndex()}: "
         if ('total' != row?.getAlias()) {
             allColumns.each { alias ->
                 if (row[alias] != row36_1[alias]){
-                    logger.error("${rowStart}Неверно рассчитано значение графы \"${getColumnName(row,alias)}\"")
+                    logger.error("${errorMsg}Неверно рассчитано значение графы \"${getColumnName(row,alias)}\"")
                 }
             }
         } else {
             def totalRowA = getDataRow(dataRows, 'totalA')
             def totalRowB = getDataRow(dataRows, 'totalB')
             if (row.percIncome != totalRowA.percIncome - totalRowB.percIncome) {
-                logger.error("${rowStart}Неверно рассчитано итоговое значение графы \"${getColumnName(row,alias)}\"")
+                logger.error("${errorMsg}Неверно рассчитано итоговое значение графы \"${getColumnName(row,alias)}\"")
             }
         }
     }

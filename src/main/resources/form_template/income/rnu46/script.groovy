@@ -253,7 +253,7 @@ BigDecimal calc10(def row, def map) {
     } else if ([3..7].contains(row.amortGroup) && row.cost != null) {
         return round(row.cost * 30)
     } else if (row.exploitationStart != null && row.exploitationStart < check17) {
-            return 0
+        return 0
     }
     return null
 }
@@ -370,14 +370,17 @@ void logicCheck() {
             map = getRefBookValue(71, row.amortGroup)
         }
 
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
+
         prevRow = getPrevRow(getDataRowHelperPrev(), row)
 
         // 1. Проверка на заполнение (графа 1..18)
-        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 2. Проверка на уникальность поля «инвентарный номер»
         if (invSet.contains(row.invNumber)) {
-            logger.error("Инвентарный номер не уникальный!")
+            logger.error(errorMsg + "Инвентарный номер не уникальный!")
         } else {
             invSet.add(row.invNumber)
         }
@@ -389,10 +392,10 @@ void logicCheck() {
                 row.amortNorm &&
                 row.amortMonth == 0 &&
                 row.amortTaxPeriod) {
-            logger.error('Все суммы по операции нулевые!')
+            logger.error(errorMsg + 'Все суммы по операции нулевые!')
         }
 
-        def prevSum = getYearSum(['cost10perMonth','amortMonth'])
+        def prevSum = getYearSum(['cost10perMonth', 'amortMonth'])
 
         // 6. Проверка суммы расходов в виде капитальных вложений с начала года
         if (prevRow == null ||
@@ -402,7 +405,7 @@ void logicCheck() {
                 row.cost10perTaxPeriod < row.cost10perMonth ||
                 row.cost10perTaxPeriod != row.cost10perMonth + prevRow.cost10perTaxPeriod ||
                 row.cost10perTaxPeriod != prevSum.cost10perMonth) {
-            logger.error('Неверная сумма расходов в виде капитальных вложений с начала года!')
+            logger.error(errorMsg + 'Неверная сумма расходов в виде капитальных вложений с начала года!')
         }
 
         // 7. Проверка суммы начисленной амортизации с начала года
@@ -412,7 +415,7 @@ void logicCheck() {
                 row.amortTaxPeriod < row.amortMonth ||
                 row.amortTaxPeriod != row.amortMonth + prevRow.amortTaxPeriod ||
                 row.amortTaxPeriod != prevSum.amortMonth) {
-            logger.error('Неверная сумма начисленной амортизации с начала года!')
+            logger.error(errorMsg + 'Неверная сумма начисленной амортизации с начала года!')
         }
 
         // 8. Арифметические проверки расчета граф 8, 10-16, 18
@@ -429,7 +432,7 @@ void logicCheck() {
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
         if (row.usefullLifeEnd != calc18(row)) {
-            logger.error("Cтрока ${row.getIndex()}: Неверное значение графы: ${getColumnName(row, 'usefullLifeEnd')}!")
+            logger.error(errorMsg + "Неверное значение графы: ${getColumnName(row, 'usefullLifeEnd')}!")
         }
 
         // Проверки НСИ

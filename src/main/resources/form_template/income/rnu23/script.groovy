@@ -223,16 +223,14 @@ void logicCheck() {
     def b = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
     def rowNumber = 0
-    def index
-    def errorMsg
     def tmp
 
     for (def row : dataRows) {
         if (row.getAlias() == 'total') {
             continue
         }
-        index = row.getIndex()
-        errorMsg = "Строка $index: "
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
 
         // 1. Проверка даты совершения операции и границ отчётного периода (графа 5, 10, 12)
         if (a != null && b != null &&
@@ -562,12 +560,15 @@ def addData(def xml) {
     def cache = [:]
     def newRows = []
     def index = 0
+    def int rowIndex = 1
 
     // TODO (Ramil Timerbaev) поправить получение строк если загружать из *.rnu или *.xml
     for (def row : xml.row) {
         index++
 
         def newRow = getNewRow()
+        newRow.setIndex(rowIndex++)
+
         def indexCell = 0
 
         // графа 1

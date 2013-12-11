@@ -534,6 +534,7 @@ def addData(def xml) {
         index++
 
         def newRow = formData.createDataRow()
+        newRow.setIndex(index)
         setEdit(newRow, null) // TODO (Ramil Timerbaev) задать раздел
         def indexCell = 0
 
