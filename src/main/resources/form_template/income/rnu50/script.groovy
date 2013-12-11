@@ -21,13 +21,13 @@ import java.math.RoundingMode
 // графа 5  - lossTaxPeriod
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         checkCreation()
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         if (formData.kind == FormDataKind.CONSOLIDATED) {
             // если форма консолидированная то не надо брать данные из рну 49
             consolidationFrom49()
@@ -35,15 +35,15 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         consolidation()
         break
 }
@@ -94,7 +94,7 @@ void calc() {
 
 void logicCheck() {
     // 4. Проверки существования необходимых экземпляров форм
-    if (getDataRowsRNU49() == null){
+    if (getDataRowsRNU49() == null) {
         logger.error('Отсутствуют данные РНУ-49!')
         return
     }
@@ -107,17 +107,19 @@ void logicCheck() {
             continue
         }
         def index = row.getIndex()
+        def errorMsg = "Строка $index: "
+
         // 1. Обязательность заполнения полей (графа 1..5)
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 2. Проверка на нулевые значения
         if (row.lossReportPeriod == 0 && row.lossTaxPeriod == 0) {
-            logger.error("Строка $index: Все суммы по операции нулевые!")
+            logger.error(errorMsg + "Все суммы по операции нулевые!")
         }
 
         // 3. Проверка формата номера записи в РНУ-49 (графа 2)
         if (!row.rnu49rowNumber.matches('\\w{2}-\\w{6}')) {
-            logger.error("Строка $index: Неправильно указан номер записи в РНУ-49 (формат: ГГ-НННННН, см. №852-р в актуальной редакции)!")
+            logger.error(errorMsg + "Неправильно указан номер записи в РНУ-49 (формат: ГГ-НННННН, см. №852-р в актуальной редакции)!")
         }
     }
 
@@ -125,7 +127,7 @@ void logicCheck() {
     checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
-void consolidation () {
+void consolidation() {
     if (formData.kind == FormDataKind.CONSOLIDATED) {
         // если форма консолидированная то брать данные из рну 50 (обычная консолидация)
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)

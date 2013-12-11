@@ -113,12 +113,12 @@ void logicCheckBeforeCalc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    def fieldNumber = 0
     for (row in dataRows) {
         if (row != null && row.getAlias() != null) {
             continue
         }
-        fieldNumber++
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
 
         def departmentParam
         if (row.regionBankDivision != null) departmentParam =  getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
@@ -131,7 +131,7 @@ void logicCheckBeforeCalc() {
             if (centralId != row.regionBankDivision) {
                 // графа 2 - название подразделения
                 if (departmentParam.get('PARENT_ID')?.getReferenceValue()==null) {
-                    logger.error("Строка $fieldNumber: Для подразделения территориального банка «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение наименования родительского подразделения!")
+                    logger.error(errorMsg+"Для подразделения территориального банка «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение наименования родительского подразделения!")
                 }
             }
         }
@@ -139,12 +139,12 @@ void logicCheckBeforeCalc() {
         def departmentParamIncomeRecords
         if (row.regionBankDivision != null) incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
         if (incomeParam == null || incomeParam.isEmpty()) {
-            logger.error("Строка $fieldNumber: Не найдены настройки подразделения!")
+            logger.error(errorMsg+"Не найдены настройки подразделения!")
         } else {
 
             // графа 4 - кпп
             if (incomeParam?.get('record_id')?.getNumberValue() == null) {
-                logger.error("Строка $fieldNumber: Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «КПП»!")
+                logger.error(errorMsg+"Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «КПП»!")
             }
         }
     }
@@ -163,10 +163,11 @@ void logicCheck() {
             continue
         }
         rowNumber++
-        def errorMsg = "Строка ${rowNumber}: "
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля «<Наименование поля>»
-        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 2. Проверка на уникальность поля «№ пп»
         if (rowNumber != row.number) {

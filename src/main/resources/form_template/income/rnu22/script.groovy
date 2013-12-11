@@ -239,7 +239,6 @@ void calc() {
     formDataOld = formDataOld?.state == WorkflowState.ACCEPTED ? formDataOld : null
     if(formDataOld==null){
         //Прерываем расчет, при проверке сообщение выведется
-        //logger.error("Не найдены экземпляры РНУ-22 за прошлый отчетный период!")
         return
     }
     def dataRowsOld = formDataOld ? formDataService.getDataRowHelper(formDataOld)?.allCached : null

@@ -251,15 +251,12 @@ void logicCheck() {
     def reportDateStart = reportPeriodService.getStartDate(formData.reportPeriodId).time
     def daysOfYear = getCountDays(reportDateStart)
 
-    def index
-    def errorMsg
-
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
         }
-        index = row.getIndex()
-        errorMsg = "Строка $index: "
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)

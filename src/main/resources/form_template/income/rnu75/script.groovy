@@ -145,15 +145,12 @@ void logicCheck() {
     // Дата окончания отчетного периода
     def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    def index
-    def errorMsg
-
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
         }
-        index = row.getIndex()
-        errorMsg = "Строка $index: "
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
 
         // 3. Проверка на заполнение поля
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)

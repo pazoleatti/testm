@@ -76,7 +76,6 @@ switch (formDataEvent) {
         }
         break
     case FormDataEvent.MIGRATION :
-        prevPeriodCheck()
         importData()
         if (!hasError()) {
             def data = formDataService.getDataRowHelper(formData)
@@ -844,10 +843,12 @@ def addData(def xml) {
 
     def cache = [:]
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def rows = new LinkedList<DataRow<Cell>>()
+    def rows = []
+    def int rowIndex = 1
 
     for (def row : xml.row) {
         def newRow = getNewRow()
+        newRow.setIndex(rowIndex++)
 
         def indexCell = 1
 
