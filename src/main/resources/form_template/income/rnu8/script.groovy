@@ -205,8 +205,8 @@ void logicCheck() {
         if (row.getAlias() != null) {
             continue
         }
-        index = row.getIndex()
-        errorMsg = "Строка $index: "
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)

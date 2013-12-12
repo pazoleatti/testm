@@ -318,6 +318,7 @@ def addData(def xml, def fileName) {
         indexRow++
         def indexCol = 0
         def newRow = formData.createDataRow()
+        newRow.setIndex(indexRow)
 
         // графа 2..5
         editableColumns.each {

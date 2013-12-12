@@ -680,11 +680,10 @@ def addData(def xml) {
     def newRows = []
     def indexRow = 0
 
-
     for (def row : xml.row) {
         def newRow = getNewRow()
+        newRow.setIndex(++indexRow)
 
-        indexRow++
         def indexCell = 1
 
         newRow.rowNumber = getNumber(row.cell[indexCell].text(), indexRow, indexCell)

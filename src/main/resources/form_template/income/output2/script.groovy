@@ -194,6 +194,8 @@ void addData(def xml, headRowCount) {
 
     def indexRow = 0
 
+    def int rowIndex = 1
+
     for (def row : xml.row) {
         indexRow++
 
@@ -210,6 +212,7 @@ void addData(def xml, headRowCount) {
 
         if (row.cell.size() >= columnCount) {
             def newRow = formData.createDataRow()
+            newRow.setIndex(rowIndex++)
             editableColumns.each {
                 newRow.getCell(it).editable = true
                 newRow.getCell(it).setStyleAlias('Редактируемая')

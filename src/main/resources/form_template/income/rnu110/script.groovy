@@ -274,24 +274,27 @@ def logicCheck() {
                 return false
             }
 
+            def index = row.getIndex()
+            def errorMsg = "Строка $index: "
+
             // 2. Проверка на уникальность поля «№ пп»
             for (def rowB : dataRows) {
                 if (!row.equals(rowB) && row.rowNumber == rowB.rowNumber) {
-                    logger.error("В строке $row.rowNumber нарушена уникальность номера по порядку!")
+                    logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
                     return false
                 }
             }
 
             // 3. Проверка даты совершения операции и границ отчётного периода
             if (row.date < a || b < row.date) {
-                logger.error("В строке $row.rowNumber дата совершения операции вне границ отчётного периода!")
+                logger.error(errorMsg + "Дата совершения операции вне границ отчётного периода!")
                 return false
             }
 
             // 4. Арифметические проверки графы 11
             // графа 11
             if (row.addRentSum != row.marketRentSum - row.factRentSum) {
-                logger.error("В строке $row.rowNumber неверно рассчитана графа \"Сумма доначисления арендной платы до рыночного уровня арендной ставки\"!")
+                logger.error(errorMsg + "Неверно рассчитана графа \"Сумма доначисления арендной платы до рыночного уровня арендной ставки\"!")
                 return false
             }
 

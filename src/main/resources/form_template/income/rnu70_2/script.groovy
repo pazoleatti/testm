@@ -63,9 +63,6 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED: // после принятия из подготовлена
-        logicCheck()
-        break
     case FormDataEvent.COMPOSE :
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()

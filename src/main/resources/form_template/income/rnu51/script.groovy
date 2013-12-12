@@ -593,6 +593,7 @@ def addData(def xml, def fileName) {
         fileRowIndex++
 
         def newRow = formData.createDataRow()
+        newRow.setIndex(fileRowIndex)
 
         editableColumns.each {
             newRow.getCell(it).editable = true
