@@ -96,21 +96,19 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
         this.renderer = renderer;
     }
 
-    public void setRenderer(Renderer<T> renderer){
-        this.renderer = renderer;
-    }
-
     /**
      * Добавляет элементы выпадающего списка
      * @param valueList - список элеметов
      */
     public void setAvailableValues(List<T> valueList){
         checkBoxPanel.clear();
+
         setCountSelect(0);
         dataList = new ArrayList<SavedData>();
 
-
-        for (T temp : valueList) {
+        //for (T temp : valueList) {
+        for (int i = 0; i < valueList.size(); i++){
+            T temp = valueList.get(i);
             CheckBox chk;
             if (isMultiselect())
                 chk = new CheckBox();
@@ -124,6 +122,15 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
                    chkValueChange(event);
                 }
             });
+
+            chk.addStyleName("AplanaMultiListBoxItem");
+            if (i == 0){
+                chk.addStyleName("AplanaMultiListBoxItem-first");
+            }
+            if ((i+1) == valueList.size()){
+                chk.addStyleName("AplanaMultiListBoxItem-last");
+            }
+
             checkBoxPanel.add(chk);
         }
         updateTxtValue();
@@ -131,7 +138,6 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
 
     /**
      * Обработчик изменений значения у элеметов списка
-     * @param event
      */
     private void chkValueChange(ValueChangeEvent<Boolean> event){
         if(isMultiselect()){
@@ -147,7 +153,6 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
 
     /**
      * Обработчик нажатия на кнопку отображения списка
-     * @param event
      */
     @UiHandler("showButton")
     public void onClick(ClickEvent event){

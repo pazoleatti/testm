@@ -10,11 +10,10 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-//import com.sun.java.swing.plaf.windows.resources.windows;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -73,14 +72,18 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
             @Override
             public void render(Object object, Appendable appendable) throws IOException {
                 object.toString();
-            }}, false, true);
+            }}, true, true);
 
          mlistbox.setAvailableValues(itemList);
          mlistbox.setValue(valueList);
          mlistbox.addValueChangeHandler( new ValueChangeHandler<List>() {
              @Override
              public void onValueChange(ValueChangeEvent<List> event) {
-                 Window.alert("Значение поменялось!");
+                 List<String> getM = (List<String>)mlistbox.getValue();
+                 String strCont = "";
+                 for (String str : getM)
+                     strCont = strCont + str + "; ";
+                 showResult.setText(strCont);
              }
          });
 
@@ -131,7 +134,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
         List<String> getM = (List<String>)mlistbox.getValue();
         String strCont = "";
         for (String str : getM)
-            strCont = strCont + " | " + str;
+            strCont = strCont + str + "; ";
 
             showResult.setText(strCont);
 
