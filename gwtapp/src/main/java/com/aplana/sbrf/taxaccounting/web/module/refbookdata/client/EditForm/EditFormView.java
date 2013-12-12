@@ -193,7 +193,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 							throw badValueException;
 						}
 						value.setAttributeType(RefBookAttributeType.STRING);
-						value.setStringValue(string);
+						value.setStringValue(cleanString(string));
 						break;
 					case DATE:
 						Date date = field.getValue().getValue() == null ? null : (Date)field.getValue().getValue();
@@ -233,6 +233,15 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			throw badValueException;
 		}
 	}
+
+    private String cleanString(String uncleanString) {
+        String cleanString = uncleanString.replaceAll("\\s+ {2,}", " ");
+        cleanString = cleanString.replaceAll("['`]", "\"");
+        cleanString = cleanString.replaceAll("^\\s+|\\s+$", "");
+        cleanString = cleanString.replaceAll("\"\\s+|\\s+\"", "\"");
+
+        return cleanString;
+    }
 
 	@Override
 	public void setSaveButtonEnabled(boolean enabled) {
