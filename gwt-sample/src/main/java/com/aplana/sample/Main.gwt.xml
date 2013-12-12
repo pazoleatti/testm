@@ -4,6 +4,7 @@
 
 	<inherits name='com.google.gwt.user.User'/>
 	<inherits name="com.gwtplatform.mvp.Mvp"/>
+	<inherits name="com.aplana.gwt.GwtWidget"/>
 
 	<entry-point class='com.aplana.sample.client.MainEntryPoint'/>
 

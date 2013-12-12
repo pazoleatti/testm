@@ -31,12 +31,25 @@
 			<version>${gwt.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-dev</artifactId>
+			<version>${gwt.version}</version>
+			<scope>provided</scope>
+		</dependency>
 		<!-- DI dependencies -->
 		<dependency>
 			<groupId>com.google.gwt.inject</groupId>
 			<artifactId>gin</artifactId>
 			<version>2.0.0</version>
 			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -46,5 +59,47 @@
 				<directory>src/main/resources</directory>
 			</resource>
 		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+				<version>2.5.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>i18n</goal>
+							<goal>resources</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<modules>
+						<module>com.aplana.gwt.GwtWidget</module>
+					</modules>
+					<generateDirectory>${basedir}/src/main/java</generateDirectory>
+					<i18nMessagesBundles>
+						<i18nMessagesBundle>com.aplana.gwt.client.Messages</i18nMessagesBundle>
+					</i18nMessagesBundles>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<additionalClasspathElements>
+						<additionalClasspathElement>${project.build.sourceDirectory}</additionalClasspathElement>
+						<additionalClasspathElement>${project.build.testSourceDirectory}</additionalClasspathElement>
+					</additionalClasspathElements>
+					<useManifestOnlyJar>false</useManifestOnlyJar>
+					<forkMode>always</forkMode>
+					<systemProperties>
+						<property>
+							<name>gwt.args</name>
+							<value>-out \${webAppDirectory}</value>
+						</property>
+					</systemProperties>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 </project>
