@@ -1,29 +1,51 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
-             xmlns:my="urn:import:com.aplana.gwt.client" >
+             xmlns:my="urn:import:com.aplana.gwt.client"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
     <ui:style>
-        .RefbookTextBox{
-            margin-left: 10px;
+        .RefbookTextBox {
+            padding-left: 10px;
         }
-        .ms{
-            margin-left: 10px;
+
+        .ms {
+            padding-left: 10px;
         }
+
+        .mskk {
+            width: 75%;
+            text-overflow: ellipsis;
+            -ms-text-overflow: ellipsis;
+            overflow:hidden;
+            margin-right: 40px;
+        }
+
+
     </ui:style>
 
 
-    <g:VerticalPanel width="100%">
-       <my:LabelSeparator text="test" ui:field="sep"/>
-       <my:RefBookTextBox  styleName="{style.RefbookTextBox}" ui:field="refbookTextBox" enabled="true"  />
-      <!-- <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" text="my hyperlink" />-->
-        <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" text="my button hyperlink" ui:field="ibl" />
-        <my:ImgBtnLnk text="my anorch" imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" href="#" ui:field="ian" />
-        <my:SpinEdit labelText="Период, с:" />
-        <g:HorizontalPanel addStyleNames="{style.ms}" width="400px">
-            <!--<my:MultiListBox ui:field="mlistbox" enable="true" multiselect="false" />-->
-            <my:MultiListBox ui:field="mlistbox"/>
-
+    <g:HTMLPanel>
+        <g:HorizontalPanel spacing="3" styleName="typicalFormHeader" width="500">
+            <g:Label ui:field="title" text="Список налоговых форм пример"/>
+            <g:Label text="–"/>
+            <g:Label text="Сводная форма начисленных доходов (доходы сложные) Очень длинный заголовок бла бла бал ба лаб ла бал аб лалалалалалал ла ла" addStyleNames="{style.mskk}"/>
         </g:HorizontalPanel>
-        <g:Label ui:field="showResult" />
-    </g:VerticalPanel>
+
+        <g:HTMLPanel styleName="typicalFormBody">
+            <my:LabelSeparator text="test" ui:field="sep"/>
+            <my:RefBookTextBox styleName="{style.RefbookTextBox}" ui:field="refbookTextBox" enabled="true"/>
+            <!-- <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" text="my hyperlink" />-->
+            <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png"
+                                text="my button hyperlink" ui:field="ibl"/>
+            <my:ImgBtnLnk text="my anorch" imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" href="#"
+                          ui:field="ian"/>
+            <my:SpinEdit labelText="Период, с:"/>
+            <g:HorizontalPanel addStyleNames="{style.ms}" width="400px">
+                <!--<my:MultiListBox ui:field="mlistbox" enable="true" multiselect="false" />-->
+                <my:MultiListBox ui:field="mlistbox"/>
+
+            </g:HorizontalPanel>
+            <g:Label ui:field="showResult"/>
+        </g:HTMLPanel>
+    </g:HTMLPanel>
 </ui:UiBinder>
