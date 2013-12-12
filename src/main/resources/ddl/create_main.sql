@@ -620,14 +620,16 @@ create table department_report_period (
   report_period_id    number(9) not null,
   is_active           number(1) not null,
   is_balance_period   number(1) default 0 not null,
-  report_date         date
+  is_correct_period   number(1) default 0 not null,
+  correction_date     date
 );
 comment on table department_report_period is  'Привязка отчетных периодов к подразделениям';
 comment on column department_report_period.department_id is 'Код подразделения';
 comment on column department_report_period.report_period_id is 'Код отчетного периода';
 comment on column department_report_period.is_active is 'Признак активности (0 - период закрыт, 1 - период открыт)';
 comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
-comment on column department_report_period.report_date is 'Срок подачи отчётности';
+comment on column department_report_period.is_correct_period is 'Признак корректирующего периода (0 - обычный период, 1 - корректирующий период)';
+comment on column department_report_period.correction_date is 'Период сдачи корректировки';
 ------------------------------------------------------------------------------------------------------
 create table task_context(
 id  number(18,0) primary key,
@@ -638,11 +640,11 @@ custom_params_exist number(9,0) not null,
 serialized_params blob null
 );
 comment on table task_context is 'Контекст пользовательских задач планировщика';
-comment on column task_context.task_id is 'идентификатор задачи планировщика websphere';
-comment on column task_context.task_name is 'название задачи';
-comment on column task_context.user_task_jndi is 'jndi-имя класса-обработчика задачи';
-comment on column task_context.custom_params_exist is 'признак наличия пользовательских параметров';
-comment on column task_context.serialized_params is 'сериализованные пользователькие параметры';
+comment on column task_context.task_id is 'Идентификатор задачи планировщика websphere';
+comment on column task_context.task_name is 'Название задачи';
+comment on column task_context.user_task_jndi is 'JNDI-имя класса-обработчика задачи';
+comment on column task_context.custom_params_exist is 'Признак наличия пользовательских параметров';
+comment on column task_context.serialized_params is 'Сериализованные пользователькие параметры';
 
 create sequence seq_task_context start with 100;
 ------------------------------------------------------------------------------------------------------
