@@ -32,7 +32,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     FormPanel uploadFormDataXls;
 
     @UiField
-    TextBox textBox;
+    Label label;
 
     private String value;
     private static String actionUrl = "upload/uploadController/pattern/";
@@ -85,25 +85,24 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
             }
         });
         uploader.getElement().setId("uploaderWidget");
-        textBox.getElement().setId("fakeInput");
-        textBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                uploader.getElement().<InputElement>cast().click();
-            }
-        });
+        label.getElement().setId("fakeInput");
         uploader.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 //В IE в случае скрытия поля <input type='file'/> к имени файла дополнительно добавляется fakepath
-                textBox.setValue(uploader.getFilename().replaceAll(uploadPatternIE, ""));
+                String filename = uploader.getFilename().replaceAll(uploadPatternIE, "");
+                label.setWidth("200");
+                label.setText(filename);
+                label.setTitle(filename);
+                uploadFormDataXls.submit();
             }
         });
+
     }
 
     @UiHandler("uploadButton")
     void onUploadButtonClicked(ClickEvent event){
-        uploadFormDataXls.submit();
+        uploader.getElement().<InputElement>cast().click();
     }
 
 }
