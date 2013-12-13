@@ -1,6 +1,7 @@
 package form_template.income.rnu27
 
 import com.aplana.sbrf.taxaccounting.model.*
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
@@ -11,10 +12,6 @@ import groovy.transform.Field
  * formTemplateId=326
  *
  * ЧТЗ http://conf.aplana.com/pages/viewpage.action?pageId=8588102 ЧТЗ_сводные_НФ_Ф2_Э1_т2.doc
- *
- * TODO:
- *      - костыль! в ТФ в столбце для графы 2 могут быть строки содержащие "<" и ">", в ImportServiceImpl
- *      они заменяются на &lt и &gt, при записи в форму надо поменять назад, в 0.3.6 это будет вынесено в ScriptUtils
  *
  * графа 1  - число  number                 № пп
  * графа 2  - строка issuer                 эмитит
@@ -639,10 +636,14 @@ void calcAfterImport() {
     for (row in dataRows) {
         // Проверим чтобы человек рукамми ввёл всё что необходимо
         def requiredColumns = ['issuer', 'regNumber', 'tradeNumber', 'currency']
-        checkNonEmptyColumns(row, index.getIndex(), requiredColumns, logger, true)
+        checkNonEmptyColumns(row, row.getIndex(), requiredColumns, logger, true)
     }
     if (!hasError()) {
-        def dataPrevRows = formDataService.getDataRowHelper(getFormPrev())?.getAllCached()
+        def formPrev = getFormPrev()
+        def dataPrevRows
+        if (formPrev) {
+            dataPrevRows = formDataService.getDataRowHelper(formPrev)?.getAllCached()
+        }
         for (DataRow row in dataRows) {
             row.reserveCalcValuePrev = calc8(row, dataPrevRows)
             row.costOnMarketQuotation = calc14(row)
@@ -844,10 +845,7 @@ def addData(def xml) {
         indexCell++
 
         // графа 2
-        // TODO (Ramil Timerbaev) костыль! в ТФ в столбце для графы 2 могут быть строки содержащие "<" и ">",
-        // в ImportServiceImpl они заменяются на &lt и &gt, при записи в форму надо поменять назад, в 0.3.6 это будет вынесено в ScriptUtils
-        def tmp = row.cell[indexCell].text()
-        newRow.issuer = tmp.replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&amp;', '&')
+        newRow.issuer = row.cell[indexCell].text()
         indexCell++
 
         // графа 3
