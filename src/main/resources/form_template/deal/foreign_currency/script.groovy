@@ -588,7 +588,7 @@ def checkTableHead(def xml, def headRowCount) {
             xml.row[2].cell[5] == 'гр. 6' &&
             xml.row[0].cell[6] == 'Номер сделки' &&
             xml.row[2].cell[6] == 'гр. 7' &&
-            xml.row[0].cell[7] == 'Дата  заключения сделки' &&
+            xml.row[0].cell[7] == 'Дата заключения сделки' &&
             xml.row[2].cell[7] == 'гр. 8' &&
             xml.row[0].cell[8] == 'Код валюты по сделке' &&
             xml.row[2].cell[8] == 'гр. 9' &&
@@ -753,7 +753,17 @@ def getNumber(def value, int indexRow, int indexCell) {
 def getRecordId(def ref_id, String alias, String value, Date date, def cache, int indexRow, int indexCell, boolean mandatory = true) {
     String filter = "LOWER($alias) like LOWER('$value%')"
     if (cache[ref_id] != null) {
-        if (cache[ref_id][filter] != null) return cache[ref_id][filter]
+        if (cache[ref_id][filter] != null && cache[ref_id][filter] != []) {
+            return cache[ref_id][filter]
+        } else if (cache[ref_id][filter] == []) {
+            def msg = "Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(ref_id).getName()+"»!"
+            if (mandatory) {
+                throw new Exception(msg)
+            } else {
+                logger.warn(msg)
+            }
+            return null
+        }
     } else {
         cache[ref_id] = [:]
     }
@@ -763,6 +773,7 @@ def getRecordId(def ref_id, String alias, String value, Date date, def cache, in
         cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
     } else {
+        cache[ref_id][filter] = []
         def msg = "Строка ${indexRow + 2} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(ref_id).getName()+"»!"
         if (mandatory) {
             throw new Exception(msg)
