@@ -412,7 +412,7 @@ def addData(def xml) {
         if (map != null) {
             def text = row.cell[indexCell].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO.stringValue != null)) {
-                logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
+                logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName()+"»!")
             }
         }
         indexCell++
@@ -422,7 +422,7 @@ def addData(def xml) {
             def text = row.cell[indexCell].text()
             map = refBookService.getRecordData(10, map.COUNTRY.referenceValue)
             if ((text != null && !text.isEmpty() && !text.equals(map.CODE.stringValue)) || ((text == null || text.isEmpty()) && map.CODE.stringValue != null)) {
-                logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!")
+                logger.warn("Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
             }
         }
         indexCell++
@@ -516,7 +516,7 @@ def getRecordId(def ref_id, String alias, String value, Date date, def cache, in
         cache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return cache[ref_id][filter]
     }
-    def msg = "Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике!"
+    def msg = "Строка ${indexRow + 3} столбец ${indexCell + 2} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(ref_id).getName()+"»!"
     if (mandatory) {
         throw new Exception(msg)
     } else {

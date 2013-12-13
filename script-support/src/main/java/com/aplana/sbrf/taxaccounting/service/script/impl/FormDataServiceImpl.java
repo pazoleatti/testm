@@ -223,7 +223,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         if (retVal != null) {
             return retVal;
         }
-        String msg = "Строка " + rowIndex + ", колонка " + colIndex + " содержит значение, отсутствующее в справочнике!";
+        String msg = "Строка " + rowIndex + ", колонка " + colIndex + " содержит значение, отсутствующее в справочнике «" + refBookFactory.get(refBookId).getName()+"»!";
         if (required) {
             throw new ServiceException(msg);
         } else {
@@ -240,7 +240,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         if (retVal != null) {
             return retVal;
         }
-        String msg = "Строка " + rowIndex + "Графа «" + columnName + "» содержит значение, отсутствующее в справочнике!";
+        String msg = "Строка " + rowIndex + "Графа «" + columnName + "» содержит значение, отсутствующее в справочнике «" + refBookFactory.get(refBookId).getName()+"»!";
         if (required) {
             throw new ServiceException(msg);
         } else {

@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 
 /**
  * Форма "(РНУ-30) Расчёт резерва по сомнительным долгам на основании результатов инвентаризации сомнительной задолженности и безнадежных долгов.".
+ * formTemplateId=329
  *
  * @version 59
  *
@@ -917,7 +918,7 @@ def getRecordId(def ref_id, String code, def value, Date date, def cache) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
-    logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
+    logger.error("Не удалось найти запись в справочнике «" + refBookFactory.get(ref_id).getName() + "» с атрибутом $code равным $value!")
     return null
 }
 
@@ -1055,8 +1056,8 @@ void sort() {
 
     sortRows.each {
         it.sort {
-            // графа 2  - debtor
-            // графа 3  - provision
+                // графа 2  - debtor
+                // графа 3  - provision
             def a, def b ->
                 if (a.provision == b.provision) {
                     return a.debtor <=> b.debtor
@@ -1073,5 +1074,4 @@ void sort() {
 void log(def message) {
     def s = '===== ' + message
     logger.info(s)
-    // System.out.println(s)
 }
