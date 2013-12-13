@@ -91,7 +91,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
             public void onChange(ChangeEvent event) {
                 //В IE в случае скрытия поля <input type='file'/> к имени файла дополнительно добавляется fakepath
                 String filename = uploader.getFilename().replaceAll(uploadPatternIE, "");
-                label.setWidth("200");
+                label.setWidth("200px");
                 label.setText(filename);
                 label.setTitle(filename);
                 uploadFormDataXls.submit();
