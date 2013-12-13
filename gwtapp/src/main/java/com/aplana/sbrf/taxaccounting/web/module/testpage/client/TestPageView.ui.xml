@@ -12,25 +12,11 @@
             padding-left: 10px;
         }
 
-        .mskk {
-            width: 75%;
-            text-overflow: ellipsis;
-            -ms-text-overflow: ellipsis;
-            overflow:hidden;
-            margin-right: 40px;
-        }
-
 
     </ui:style>
 
-
-    <g:HTMLPanel>
-        <g:HorizontalPanel spacing="3" styleName="typicalFormHeader" width="500">
-            <g:Label ui:field="title" text="Список налоговых форм пример"/>
-            <g:Label text="–"/>
-            <g:Label text="Сводная форма начисленных доходов (доходы сложные) Очень длинный заголовок бла бла бал ба лаб ла бал аб лалалалалалал ла ла" addStyleNames="{style.mskk}"/>
-        </g:HorizontalPanel>
-
+    <g:HTMLPanel width="100%" height="100%">
+        <my:TypicalFormHeader ui:field="formHeader"/>
         <g:HTMLPanel styleName="typicalFormBody">
             <my:LabelSeparator text="test" ui:field="sep"/>
             <my:RefBookTextBox styleName="{style.RefbookTextBox}" ui:field="refbookTextBox" enabled="true"/>
@@ -43,7 +29,6 @@
             <g:HorizontalPanel addStyleNames="{style.ms}" width="400px">
                 <!--<my:MultiListBox ui:field="mlistbox" enable="true" multiselect="false" />-->
                 <my:MultiListBox ui:field="mlistbox"/>
-
             </g:HorizontalPanel>
             <g:Label ui:field="showResult"/>
         </g:HTMLPanel>

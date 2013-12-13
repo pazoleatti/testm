@@ -219,21 +219,6 @@ h3{
 }
 
 /* Стили для типовой формы */
-/* Заголовок */
-.typicalFormHeader {
-    height: 35px;
-    padding-left: 20px;
-    overflow: hidden;
-    display: table-cell;
-    vertical-align: middle;
-}
-.typicalFormHeader h2 {
-    margin: 0;
-}
-
-.typicalFormHeader h3 {
-    margin: 0;
-}
 
 /* Остальная часть */
 .typicalFormBody {
