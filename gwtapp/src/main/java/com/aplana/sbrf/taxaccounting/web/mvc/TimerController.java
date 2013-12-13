@@ -18,6 +18,7 @@ public class TimerController {
 
     @RequestMapping(value = "/ping", method = RequestMethod.GET)
     public void ping(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.addHeader("Cache-Control", "no-cache");
         response.getWriter().print(String.valueOf(new Date().getTime()));
         response.getWriter().close();
     }
