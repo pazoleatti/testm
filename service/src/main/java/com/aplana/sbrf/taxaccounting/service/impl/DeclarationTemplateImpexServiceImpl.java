@@ -1,5 +1,20 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplateContent;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -9,21 +24,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
-import com.aplana.sbrf.taxaccounting.model.*;
-import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 
 @Service
 @Transactional
@@ -120,7 +120,7 @@ public class DeclarationTemplateImpexServiceImpl implements
 				}
             	declarationTemplateDao.save(dt);
 				if (files.get("report.jrxml").length != 0) {
-					declarationTemplateService.setJrxml(id, new String(files.get("report.jrxml")));
+					declarationTemplateService.setJrxml(id, new ByteArrayInputStream(files.get("report.jrxml")));
 				}
             } else {
             	throw new ServiceException("Версия файла для импорта не поддерживается: " + version);

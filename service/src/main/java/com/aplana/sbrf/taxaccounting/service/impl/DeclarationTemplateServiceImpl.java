@@ -65,11 +65,11 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	}
 
 	@Override
-	public void setJrxml(int declarationTemplateId, String jrxml) {
+	public void setJrxml(int declarationTemplateId, InputStream jrxmlIO) {
         DeclarationTemplate declarationTemplate = this.get(declarationTemplateId);
 
         String jrxmBlobId = blobDataService.create(
-                new ByteArrayInputStream(jrxml.getBytes()),
+                jrxmlIO,
                 declarationTemplate.getDeclarationType().getName() +"_jrxml");
 
         declarationTemplateDao.setJrxml(declarationTemplateId, jrxmBlobId);

@@ -49,7 +49,7 @@ public interface DeclarationTemplateService {
 	 * @throws AccessDeniedException если у пользователя нет прав на изменение шаблона декларации
 	 * @throws ServiceException если при компиляции jrxml произошла ошибка
 	 */
-	void setJrxml(int declarationTemplateId, String jrxml);
+	void setJrxml(int declarationTemplateId, InputStream jrxml);
 	/**
 	 * Получить шаблон Jrxml-файла
 	 * @param declarationTemplateId

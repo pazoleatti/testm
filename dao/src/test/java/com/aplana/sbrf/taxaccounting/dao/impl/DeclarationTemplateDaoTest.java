@@ -12,6 +12,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -92,6 +94,29 @@ public class DeclarationTemplateDaoTest {
 		assertEquals(declarationType.getId(), savedDeclarationTemplate.getDeclarationType().getId());
         assertEquals(null, savedDeclarationTemplate.getXsdId());
 	}
+
+    @Test
+    public void testSetJrxml() {
+        DeclarationTemplate declarationTemplate = new DeclarationTemplate();
+        declarationTemplate.setId(1);
+        declarationTemplate.setEdition(1);
+        declarationTemplate.setActive(true);
+        declarationTemplate.setVersion("0.01");
+        declarationTemplate.setCreateScript("MyScript");
+        String uuid1 = UUID.randomUUID().toString();
+        declarationTemplate.setJrxmlBlobId(uuid1);
+        DeclarationType declarationType = declarationTypeDao.get(1);
+        declarationTemplate.setDeclarationType(declarationType);
+
+        declarationTemplateDao.save(declarationTemplate);
+
+        DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(1);
+        assertEquals(1, savedDeclarationTemplate.getId().intValue());
+
+        String uuid2 = UUID.randomUUID().toString();
+        declarationTemplateDao.setJrxml(savedDeclarationTemplate.getId(), uuid2);
+        assertEquals(uuid2, declarationTemplateDao.get(savedDeclarationTemplate.getId()).getJrxmlBlobId());
+    }
 
 	@Test(expected = DaoException.class)
 	public void testSaveExistWithBadEdition() {
