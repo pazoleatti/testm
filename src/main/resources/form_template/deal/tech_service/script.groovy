@@ -480,7 +480,7 @@ def checkTableHead(def xml, def headRowCount) {
             xml.row[0].cell[5] == 'Дата договора' &&
             xml.row[2].cell[5] == 'гр. 7' &&
 
-            xml.row[0].cell[6] == 'Адрес нахождения объекта недвижимости ' &&
+            xml.row[0].cell[6] == 'Адрес нахождения объекта недвижимости' &&
             xml.row[1].cell[6] == 'Страна (код)' &&
             xml.row[2].cell[6] == 'гр. 8' &&
 
