@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.testpage.client;
 
 import com.aplana.gwt.client.*;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -15,6 +16,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,8 +44,11 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     @UiField
     Label showResult;
 
+    @UiField(provided = true)
+    TypicalFormHeader formHeader;
     @UiField
     Label lbl;
+
 
     @UiField
     CheckBox chk;
@@ -79,6 +85,28 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
             }
         });
 
+         mlistbox.setAvailableValues(itemList);
+         mlistbox.setValue(valueList);
+         mlistbox.addValueChangeHandler( new ValueChangeHandler<List>() {
+             @Override
+             public void onValueChange(ValueChangeEvent<List> event) {
+                 List<String> getM = (List<String>)mlistbox.getValue();
+                 String strCont = "";
+                 for (String str : getM)
+                     strCont = strCont + str + "; ";
+                 showResult.setText(strCont);
+             }
+         });
+
+        formHeader = new TypicalFormHeader();
+        formHeader.addLeftWidget(new Label("Список налоговых форм пример"));
+        formHeader.addLeftWidget(new Label("-"));
+
+        Label label = new Label("Например кнопка");
+        label.getElement().getStyle().setProperty("fontSize", 20, Style.Unit.PX);
+        formHeader.addRightWidget(label);
+        formHeader.addRightWidget(new Label("Режим редактирования"));
+        formHeader.addMiddleWidget(new Label("Сводная форма начисленных доходов (доходы сложные) Очень длинный заголовок бла бла бал ба лаб ла бал аб лалалалалалал ла ла"));
 
         initWidget(uiBinder.createAndBindUi(this));
 

@@ -48,7 +48,7 @@ switch (formDataEvent) {
         addRow()
         break
     case FormDataEvent.DELETE_ROW :
-        if (currentDataRow != null && currentDataRow.getAlias() == null) {
+        if (currentDataRow?.getAlias() == null) {
             formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         }
         break

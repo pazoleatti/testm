@@ -16,6 +16,24 @@ import groovy.transform.Field
  *      - костыль! в ТФ в столбце для графы 2 могут быть строки содержащие "<" и ">", в ImportServiceImpl
  *      они заменяются на &lt и &gt, при записи в форму надо поменять назад, в 0.3.6 это будет вынесено в ScriptUtils
  *
+ * графа 1  - число  number                 № пп
+ * графа 2  - строка issuer                 эмитит
+ * графа 3  - строка regNumber              гос номер
+ * графа 4  - строка tradeNumber            Номер сделки
+ * графа 5  - строка currency               Валюта выпуска облигации (справочник)
+ * графа 6  - число  prev                   Размер лота на отчётную дату по депозитарному учёту (шт.). Предыдущую
+ * графа 7  - число  current                Размер лота на отчётную дату по депозитарному учёту (шт.). Текущую
+ * графа 8  - число  reserveCalcValuePrev   Расчётная величина резерва на предыдущую отчётную дату (руб.коп.)
+ * графа 9  - число  cost                   Стоимость по цене приобретения (руб.коп.)
+ * графа 10 - строка signSecurity           Признак ценной бумаги на текущую отчётную дату (справочник)
+ * графа 11 - число  marketQuotation        Quotation Рыночная котировка одной ценной бумаги в иностранной валюте
+ * графа 12 - число  rubCourse              Курс рубля к валюте рыночной котировки
+ * графа 13 - число  marketQuotationInRub   Рыночная котировка одной ценной бумаги в рублях
+ * графа 14 - число  costOnMarketQuotation  costOnMarketQuotation
+ * графа 15 - число  reserveCalcValue       Расчетная величина резерва на текущую отчётную дату (руб.коп.)
+ * графа 16 - число  reserveCreation        Создание резерва (руб.коп.)
+ * графа 17 - число  recovery               Восстановление резерва (руб.коп.)
+ *
  * @author ekuvshinov
  * @author lhaziev
  */
@@ -46,7 +64,9 @@ switch (formDataEvent) {
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
-        if (currentDataRow.getAlias() == null) formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow?.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
+        }
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
@@ -86,25 +106,6 @@ switch (formDataEvent) {
         break
 }
 
-// графа 1  - число  number                 № пп
-// графа 2  - строка issuer                 эмитит
-// графа 3  - строка regNumber              гос номер
-// графа 4  - строка tradeNumber            Номер сделки
-// графа 5  - строка currency               Валюта выпуска облигации (справочник)
-// графа 6  - число  prev                   Размер лота на отчётную дату по депозитарному учёту (шт.). Предыдущую
-// графа 7  - число  current                Размер лота на отчётную дату по депозитарному учёту (шт.). Текущую
-// графа 8  - число  reserveCalcValuePrev   Расчётная величина резерва на предыдущую отчётную дату (руб.коп.)
-// графа 9  - число  cost                   Стоимость по цене приобретения (руб.коп.)
-// графа 10 - строка signSecurity           Признак ценной бумаги на текущую отчётную дату (справочник)
-// графа 11 - число  marketQuotation        Quotation Рыночная котировка одной ценной бумаги в иностранной валюте
-// графа 12 - число  rubCourse              Курс рубля к валюте рыночной котировки
-// графа 13 - число  marketQuotationInRub   Рыночная котировка одной ценной бумаги в рублях
-// графа 14 - число  costOnMarketQuotation  costOnMarketQuotation
-// графа 15 - число  reserveCalcValue       Расчетная величина резерва на текущую отчётную дату (руб.коп.)
-// графа 16 - число  reserveCreation        Создание резерва (руб.коп.)
-// графа 17 - число  recovery               Восстановление резерва (руб.коп.)
-
-
 //// Кэши и константы
 @Field
 def providerCache = [:]
@@ -121,9 +122,9 @@ def allColumns = ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'p
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current',
-        'reserveCalcValuePrev', 'cost', 'signSecurity', 'marketQuotation', 'rubCourse',
-        'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
+def editableColumns = ['issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current', 'reserveCalcValuePrev',
+        'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'marketQuotationInRub',
+        'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery'] - isBalancePeriod?[]:['issuer']
 
 // Автозаполняемые атрибуты
 @Field
@@ -188,18 +189,14 @@ def getNumber(def value, def indexRow, def indexCol) {
     return parseNumber(value, indexRow, indexCol, logger, true)
 }
 
-
-
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
     if (!isBalancePeriod && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
+        def formName = formData.getFormType().getName()
+        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
     }
 }
 
-/**
- * Логические проверки
- */
 def logicCheck() {
     def data = formDataService.getDataRowHelper(formData)
     def dataRows = data.getAllCached()
@@ -565,7 +562,7 @@ def calcItogRegNumber(int i) {
         srow = getRow(j)
 
         if (srow.getAlias() == null) {
-            if (((getRow(j).regNumber != tRegNumber))) {
+            if (getRow(j).regNumber != tRegNumber) {
                 break
             }
 
@@ -593,12 +590,6 @@ DataRow<Cell> getRow(int i) {
     }
 }
 
-/**
- * Алгоритмы заполнения полей формы
- * Алгоритмы заполнения полей формы «Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения»
- */
-
-// Алгоритмы заполнения полей формы
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
@@ -611,8 +602,7 @@ void calc() {
     def reportDate = reportPeriodService.getReportDate(formData.reportPeriodId).time
 
     // данные предыдущего отчетного периода
-    def formDataOld = getFormPrev()
-    def dataPrevRows = formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.getAllCached() : null
+    def dataPrevRows = formDataService.getDataRowHelper(getFormPrev())?.getAllCached()
 
     // номер последний строки предыдущей формы
     def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
@@ -649,20 +639,18 @@ void calcAfterImport() {
     for (row in dataRows) {
         // Проверим чтобы человек рукамми ввёл всё что необходимо
         def requiredColumns = ['issuer', 'regNumber', 'tradeNumber', 'currency']
-        if(!checkRequiredColumns(row,requiredColumns)){
-            return
-        }
+        checkNonEmptyColumns(row, index.getIndex(), requiredColumns, logger, true)
     }
     if (!hasError()) {
-        def formPrev = getFormPrev()
+        def dataPrevRows = formDataService.getDataRowHelper(getFormPrev())?.getAllCached()
         for (DataRow row in dataRows) {
-            row.reserveCalcValuePrev = calc8(row, formPrev)
+            row.reserveCalcValuePrev = calc8(row, dataPrevRows)
             row.costOnMarketQuotation = calc14(row)
             row.reserveCalcValue = calc15(row)
             row.reserveCreation = calc16(row)
             row.recovery = calc17(row)
         }
-        dataRowHelper.save(dataRows);
+        dataRowHelper.save(dataRows)
     }
 }
 
@@ -677,7 +665,7 @@ BigDecimal calc8(DataRow row, def dataPrevRows) {
     temp = new BigDecimal(0)
     tempCount = 0
 
-    if (formPrev != null) {
+    if (dataPrevRows != null) {
         for (DataRow rowPrev in dataPrevRows) {
             if (row.tradeNumber == rowPrev.tradeNumber) {
                 temp = rowPrev.reserveCalcValue
@@ -734,7 +722,7 @@ BigDecimal calc14(DataRow row) {
     if (row.marketQuotationInRub == null) {
         return (BigDecimal) 0
     } else {
-        return roundValue((BigDecimal) (row.current * row.marketQuotationInRub), 2)
+        return roundValue(row.current * row.marketQuotationInRub, 2)
     }
 }
 
@@ -816,7 +804,7 @@ FormData getFormPrev() {
     if (isBalancePeriod || isConsolidated) {
         return null
     }
-    reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+    def reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     FormData formPrev = null
     if (reportPeriodPrev != null) {
         formPrev = formDataService.find(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id)
@@ -1040,18 +1028,7 @@ def getCourse(def currency, def date) {
 
 def getNewRow() {
     def newRow = formData.createDataRow()
-    def columns
-    if (isBalancePeriod) {
-        // все строки, кроме графы 1
-        columns = ['issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current', 'reserveCalcValuePrev',
-                'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'marketQuotationInRub',
-                'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
-    } else {
-        columns = ['currency', 'issuer', 'regNumber', 'tradeNumber', 'prev', 'current', 'reserveCalcValuePrev',
-                'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'costOnMarketQuotation',
-                'reserveCalcValue', 'reserveCreation', 'recovery']
-    }
-    columns.each {
+    editableColumns.each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
@@ -1078,14 +1055,14 @@ def checkAlias(def list, def rowAlias) {
 }
 
 /**
- * Расчетать, проверить и сравнить итоги.
- * // TODO посмотреть проверку
+ * Рассчитать, проверить и сравнить итоги.
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    def totalColumns = [6:'prev', 7:'current', 8: 'reserveCalcValuePrev', 9:'cost', 14:'costOnMarketQuotation', 15:'reserveCalcValue',
-            16 : 'reserveCreation', 17 : 'recovery']
-    def totalCalc
+    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
+    def totalColumns = [6 : 'prev', 7 : 'current', 8 : 'reserveCalcValuePrev', 9 : 'cost', 14 : 'costOnMarketQuotation',
+            15 : 'reserveCalcValue', 16 : 'reserveCreation', 17 : 'recovery']
+    def totalCalc = getCalcTotalRow(dataRows)
     def errorColums = []
     if (totalCalc != null) {
         totalColumns.each { index, columnAlias ->

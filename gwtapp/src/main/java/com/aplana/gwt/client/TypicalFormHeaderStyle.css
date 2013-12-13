@@ -1,0 +1,43 @@
+/* Стили для типовой формы */
+
+/* Заголовок */
+.typicalFormHeader {
+    min-width: 1px;
+    height: 35px;
+    padding-left: 20px;
+    padding-right: 20px;
+    overflow: hidden;
+    line-height: 35px;
+}
+
+/* Компоненты слева*/
+.left {
+    float: left;
+    height: 100%;
+    display: block;
+    min-width: 1px;
+}
+/* Компоненты справа */
+.right {
+    float: right;
+    height: 100%;
+    display: block;
+    min-width: 1px;
+}
+
+.child-inherit {
+    display: inherit;
+    float: inherit;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+/* Элемент которые может скрываться за многоточием */
+.resize-overflow {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -ms-text-overflow: ellipsis;
+    font-size: 22px;
+}
+
