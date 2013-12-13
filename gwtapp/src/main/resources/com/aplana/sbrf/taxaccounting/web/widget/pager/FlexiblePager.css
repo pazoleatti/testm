@@ -1,14 +1,37 @@
 .pageDetails {
-  padding: 4px 8px;
-  text-align: center;
+    padding: 0 8px 2px;
+    vertical-align: middle;
+    text-align: center;
 }
 
 .button {
-  padding: 4px;
-  cursor: pointer;
-  cursor: hand;
+    padding-bottom: 1px;
+    vertical-align: middle;
+    text-align: center;
+    cursor: pointer;
+    cursor: hand;
+}
+
+.buttonLastPage {
+    padding-right: 4px;
+    padding-bottom: 1px;
+    vertical-align: middle;
+    text-align: center;
+    cursor: pointer;
+    cursor: hand;
 }
 
 .disabledButton {
-  cursor: default;   
+    padding-bottom: 2px;
+    cursor: default;
+}
+
+.pageNumber {
+    padding: 2px 0;
+}
+
+.panel {
+    float: right;
+    padding-right: 2px;
+    padding-left: 2px;
 }
