@@ -35,5 +35,6 @@
                 <g:Label ui:field="lbl">TheLabelasfasdfasdfasdfkjaskfdjsadkfjasldfjalskdjflasdjflasdjfalsfjlsakdjflskjdflaskdjflksadjflk</g:Label>
             </g:HorizontalPanel>
         </g:ScrollPanel>
+       </g:HTMLPanel>
     </g:HTMLPanel>
 </ui:UiBinder>
