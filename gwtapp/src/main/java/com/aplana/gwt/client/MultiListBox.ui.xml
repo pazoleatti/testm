@@ -15,7 +15,7 @@
         }
 
         .footerPanel {
-            margin: 15px 0px 0px 0px;
+            margin: 0px;
             background-color: #E8E1CF;
             border: solid 1px #D0CECA;
             vertical-align: middle;
@@ -62,7 +62,9 @@
             <g:PopupPanel addStyleNames="{style.popupPanel}" ui:field="popupPanel" autoHideEnabled="true" modal="true">
                 <g:VerticalPanel>
                     <g:cell>
-                        <g:VerticalPanel ui:field="checkBoxPanel"/>
+                        <g:ScrollPanel ui:field="scrollPanel">
+                            <g:VerticalPanel ui:field="checkBoxPanel"/>
+                        </g:ScrollPanel>
                     </g:cell>
                     <g:cell>
                         <g:HorizontalPanel width="100%" height="50px" spacing="1" ui:field="footerPanel" addStyleNames="{style.footerPanel}" >

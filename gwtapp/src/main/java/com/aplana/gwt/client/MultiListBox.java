@@ -2,6 +2,7 @@ package com.aplana.gwt.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -55,6 +56,9 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
     @UiField
     TextBox txt;
 
+    @UiField
+    ScrollPanel scrollPanel;
+
     /**
      * Renderer для отображаемого поля
      */
@@ -79,15 +83,14 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
     private List<T> value = new ArrayList<T>();
 
     @Inject
-    public MultiListBox(){
+    public MultiListBox() {
         initWidget(uiBinder.createAndBindUi(this));
         addStyleName("AplanaMultiListBox");
         this.multiselect = true;
         setEnabled(true);
     }
 
-   // @UiConstructor
-    public MultiListBox(Renderer<T> renderer, boolean multiselect, boolean enable){
+    public MultiListBox(Renderer<T> renderer, boolean multiselect, boolean enable) {
         initWidget(uiBinder.createAndBindUi(this));
         addStyleName("AplanaMultiListBox");
         this.multiselect = multiselect;
@@ -98,40 +101,46 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
 
     /**
      * Добавляет элементы выпадающего списка
+     *
      * @param valueList - список элеметов
      */
-    public void setAvailableValues(List<T> valueList){
+    public void setAvailableValues(List<T> valueList) {
         checkBoxPanel.clear();
-
         setCountSelect(0);
         dataList = new ArrayList<SavedData>();
 
-        //for (T temp : valueList) {
-        for (int i = 0; i < valueList.size(); i++){
-            T temp = valueList.get(i);
+        for (T temp : valueList) {
+            HorizontalPanel itemChkPanel = new HorizontalPanel();
             CheckBox chk;
+            MyLabel lbl = new MyLabel();
+
             if (isMultiselect())
                 chk = new CheckBox();
             else
                 chk = new RadioButton(CHECKBOX_GROUP);
 
-            dataList.add(new SavedData(temp, false, chk));
+            itemChkPanel.add(chk);
+            itemChkPanel.add(lbl);
+
+            dataList.add(new SavedData(temp, false, chk, lbl));
             chk.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
-                   chkValueChange(event);
+                    chkValueChange(event);
+
                 }
             });
 
-            chk.addStyleName("AplanaMultiListBoxItem");
-            if (i == 0){
-                chk.addStyleName("AplanaMultiListBoxItem-first");
-            }
-            if ((i+1) == valueList.size()){
-                chk.addStyleName("AplanaMultiListBoxItem-last");
-            }
+            lbl.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    CheckBox chk = ((MyLabel) event.getSource()).getLinkToData().getLinkedElement();
+                    chk.setValue(!chk.getValue(), true);
+                }
+            });
 
-            checkBoxPanel.add(chk);
+            itemChkPanel.addStyleName("AplanaMultiListBoxItem");
+            checkBoxPanel.add(itemChkPanel);
         }
         updateTxtValue();
     }
@@ -139,8 +148,8 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
     /**
      * Обработчик изменений значения у элеметов списка
      */
-    private void chkValueChange(ValueChangeEvent<Boolean> event){
-        if(isMultiselect()){
+    private void chkValueChange(ValueChangeEvent<Boolean> event) {
+        if (isMultiselect()) {
             if (event.getValue())
                 setCountSelect(getCountSelect() + 1);
             else
@@ -155,45 +164,44 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
      * Обработчик нажатия на кнопку отображения списка
      */
     @UiHandler("showButton")
-    public void onClick(ClickEvent event){
-        for(SavedData temp : dataList){
+    public void onClick(ClickEvent event) {
+        for (SavedData temp : dataList) {
             temp.getLinkedElement().setValue(temp.isChk());
         }
         countSelectedElements();
         popupPanel.setPopupPosition(panel.getAbsoluteLeft(),
                 panel.getAbsoluteTop() + panel.getOffsetHeight());
-        popupPanel.setWidth(String.valueOf(panel.getOffsetWidth()) + "px");
+        popupPanel.setWidth(String.valueOf(panel.getOffsetWidth() - 1) + "px");
+        scrollPanel.setSize(String.valueOf(panel.getOffsetWidth() - 1) + "px", "100%");
+
         popupPanel.show();
     }
 
     @UiHandler("selectButton")
-    public void onOkButtonClick(ClickEvent event){
+    public void onOkButtonClick(ClickEvent event) {
         popupPanel.hide();
         save();
     }
 
     @UiHandler("cancelButton")
-    public void onCancelButtonClick(ClickEvent event){
+    public void onCancelButtonClick(ClickEvent event) {
         popupPanel.hide();
     }
 
     /**
      * Сохранение значений всех элементов
      */
-    private void save(){
-        List<T> tmpList =  new ArrayList<T>();
-        for(SavedData dataItem : dataList){
+    private void save() {
+        List<T> tmpList = new ArrayList<T>();
+        for (SavedData dataItem : dataList) {
             dataItem.save();  // Сохраняем состояние конкретного элемента
             if (dataItem.isChk())
                 tmpList.add(dataItem.getValue()); // Добавляем выбранные
         }
         updateTxtValue();
-        // если значение изменилось
-        if ((tmpList.size() != this.value.size())||(!tmpList.containsAll(this.value)))  {
-            this.value.clear();                             // очищаем список значений
-            this.value.addAll(tmpList);                     // копируем новые значения в наш список
-            ValueChangeEvent.fire(this, this.value);        // Генерируем событие изменения
-        }
+        this.value.clear();                             // очищаем список значений
+        this.value.addAll(tmpList);                     // копируем новые значения в наш список
+        ValueChangeEvent.fire(this, this.value);        // Генерируем событие изменения
     }
 
     /**
@@ -201,8 +209,8 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
      */
     private void updateTxtValue() {
         String showInTxt = "";
-        for(SavedData temp : dataList){
-            if (temp.isChk()){
+        for (SavedData temp : dataList) {
+            if (temp.isChk()) {
                 showInTxt = showInTxt + temp.getName() + "; ";
             }
         }
@@ -212,11 +220,11 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
     /**
      * Подсчитывает количество выбранных элементов
      */
-    private void countSelectedElements(){
+    private void countSelectedElements() {
         int i = 0;
-        for(SavedData temp : dataList){
-            if (temp.isChk()){
-                i ++;
+        for (SavedData temp : dataList) {
+            if (temp.isChk()) {
+                i++;
             }
         }
         setCountSelect(i);
@@ -255,9 +263,7 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
 
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<T>> handler) {
-
         return addHandler(handler, ValueChangeEvent.getType());
-
     }
 
     @Override
@@ -271,20 +277,25 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
         selectButton.setEnabled(enabled);
     }
 
-    // Сохраненые данные
+    /**
+     * Данные виджета, здесь храняться ссылки на элементы и сохранное значение
+     */
     private class SavedData {
         private boolean chk;
         private T value;
         private CheckBox linkedElement;
+        private MyLabel linkedLabel;
 
-        public SavedData(T value, boolean chk, CheckBox linkedElement){
+        public SavedData(T value, boolean chk, CheckBox linkedElement, MyLabel linkedLabel) {
             this.setValue(value);
             this.setLinkedElement(linkedElement);
             setChk(chk);
-            getLinkedElement().setText(getName());
+            this.setLinkedLabel(linkedLabel);
+            getLinkedLabel().setLinkToData(this);
+            getLinkedLabel().setText(getName());
         }
 
-        public void save(){
+        public void save() {
             setChk(getLinkedElement().getValue());
         }
 
@@ -315,6 +326,30 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
 
         public void setValue(T value) {
             this.value = value;
+        }
+
+        public MyLabel getLinkedLabel() {
+            return linkedLabel;
+        }
+
+        public void setLinkedLabel(MyLabel linkedLabel) {
+            this.linkedLabel = linkedLabel;
+        }
+
+    }
+
+    /**
+     * Label с ссылкой на объект данных виджета
+     */
+    class MyLabel extends Label {
+        private SavedData linkToData;
+
+        public SavedData getLinkToData() {
+            return linkToData;
+        }
+
+        public void setLinkToData(SavedData linkToChk) {
+            this.linkToData = linkToChk;
         }
     }
 

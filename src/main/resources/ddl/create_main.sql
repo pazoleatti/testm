@@ -185,7 +185,8 @@ create table form_column (
   checking  number(1) default 0 not null,
   attribute_id number(18),
   format number(2),
-  filter varchar2(1000)
+  filter varchar2(1000),
+  parent_column_id number(9)
 );
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
@@ -201,6 +202,7 @@ comment on column form_column.attribute_id is 'Код отображаемого
 comment on column form_column.format is 'Формат';
 comment on column form_column.filter is 'Условие фильтрации элементов справочника';
 comment on column form_column.max_length IS 'Максимальная длина строки';
+comment on column form_column.parent_column_id is 'Ссылка на родительскую графу';
 
 create sequence seq_form_column start with 10000;
 ---------------------------------------------------------------------------------------------------
