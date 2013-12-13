@@ -3,7 +3,9 @@ package com.aplana.sbrf.taxaccounting.service;
 /**
  * Сервис для маппинга атрибутов рну сторонних систем на атрибуты новой системы
  *
- * @author Alexande Ivanov
+ * Используется только при миграции
+ *
+ * @author Alexander Ivanov
  */
 public interface MappingService {
     /**

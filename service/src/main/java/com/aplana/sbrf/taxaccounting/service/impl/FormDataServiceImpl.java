@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import jcifs.smb.SmbFileInputStream;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,9 @@ import java.util.Map;
 @Service("unlockFormData")
 @Transactional
 public class FormDataServiceImpl implements FormDataService {
+
+    private static String XLSX_EXT = "xlsx";
+    private static String XLS_EXT = "xls";
 
     @Autowired
 	private FormDataDao formDataDao;
@@ -152,70 +156,76 @@ public class FormDataServiceImpl implements FormDataService {
         File dataFile = null;
         File pKeyFile = null;
         OutputStream dataFileOutputStream = null;
-        InputStream  dataFileInputStream = null;
-    	OutputStream pKeyFileOutputStream = null;
-    	InputStream pKeyFileInputStream = null;
-        try{
-        	
-	        dataFile = File.createTempFile("dataFile", ".original");
-	        dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
-	        IOUtils.copy(inputStream, dataFileOutputStream);
-	        IOUtils.closeQuietly(dataFileOutputStream);
-	        
-	        String pKeyFileUrl = configurationProvider.getString(ConfigurationParam.FORM_DATA_KEY_FILE);
-	        if (pKeyFileUrl != null) { // Необходимо проверить подпись
-	        	
-		        pKeyFile = File.createTempFile("signature", ".sign");
-				pKeyFileOutputStream = new BufferedOutputStream(new FileOutputStream(pKeyFile));
-				try{
-					pKeyFileInputStream = new BufferedInputStream(new SmbFileInputStream(pKeyFileUrl));
-				} catch (Exception e){
-					throw new ServiceException("Ошибка доступа к файлу базы открытых ключей.", e);
-				}
-		        IOUtils.copy(pKeyFileInputStream, pKeyFileOutputStream);
-	        	IOUtils.closeQuietly(pKeyFileOutputStream);
-	        	IOUtils.closeQuietly(pKeyFileInputStream);
-			              
-			    if (!signService.checkSign(dataFile.getAbsolutePath(), pKeyFile.getAbsolutePath(), 0)){
-			      	throw new ServiceException("Ошибка проверки цифровой подписи.");
-			    }
-			    
-	        }
-	        
-	        FormData fd = formDataDao.get(formDataId);
-	        
-        	dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
-        	Map<String, Object> additionalParameters = new HashMap<String, Object>();
-        	additionalParameters.put("ImportInputStream", dataFileInputStream);
-        	additionalParameters.put("UploadFileName", fileName);
-        	formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
-        	IOUtils.closeQuietly(dataFileInputStream);
-        
-	        if (logger.containsLevel(LogLevel.ERROR)) {
-	            throw new ServiceLoggerException(
-	                    "Есть критические ошибки при выполнения скрипта.",
-	                    logger.getEntries());
-	        }  else {
-	            logger.info("Данные загружены");
-	        }
-	        
-	        logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
-	        auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
-	                null, fd.getFormType().getId(), fd.getKind().getId(), fileName);
-        } catch (IOException e){
-        	throw new ServiceException(e.getLocalizedMessage(), e);
-        } finally {   
-        	IOUtils.closeQuietly(dataFileOutputStream);
-        	IOUtils.closeQuietly(dataFileInputStream);
-        	IOUtils.closeQuietly(pKeyFileOutputStream);
-        	IOUtils.closeQuietly(pKeyFileInputStream);
-	        if (dataFile != null){
-	            dataFile.delete();
-	        }
-	        if (pKeyFile != null){
-	        	pKeyFile.delete();
-	        }
+        InputStream dataFileInputStream = null;
+
+        try {
+
+            dataFile = File.createTempFile("dataFile", ".original");
+            dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
+            IOUtils.copy(inputStream, dataFileOutputStream);
+            IOUtils.closeQuietly(dataFileOutputStream);
+
+            String ext = getFileExtention(fileName);
+            if(!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT)){
+
+                String pKeyFileUrl = configurationProvider.getString(ConfigurationParam.FORM_DATA_KEY_FILE);
+                if (pKeyFileUrl != null) { // Необходимо проверить подпись
+                    InputStream pKeyFileInputStream = null;
+
+                    pKeyFile = File.createTempFile("signature", ".sign");
+                    OutputStream pKeyFileOutputStream = new BufferedOutputStream(new FileOutputStream(pKeyFile));
+                    try {
+                        pKeyFileInputStream = new BufferedInputStream(ResourceUtils.getSharedResourceAsStream(pKeyFileUrl));
+                        IOUtils.copy(pKeyFileInputStream, pKeyFileOutputStream);
+                    } catch (Exception e) {
+                        throw new ServiceException("Ошибка доступа к файлу базы открытых ключей.", e);
+                    } finally {
+                        IOUtils.closeQuietly(pKeyFileOutputStream);
+                        IOUtils.closeQuietly(pKeyFileInputStream);
+                    }
+                    if (!signService.checkSign(dataFile.getAbsolutePath(), pKeyFile.getAbsolutePath(), 0)) {
+                        throw new ServiceException("Ошибка проверки цифровой подписи.");
+                    }
+                }
+            }
+
+            FormData fd = formDataDao.get(formDataId);
+
+            dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+            Map<String, Object> additionalParameters = new HashMap<String, Object>();
+            additionalParameters.put("ImportInputStream", dataFileInputStream);
+            additionalParameters.put("UploadFileName", fileName);
+            formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
+            IOUtils.closeQuietly(dataFileInputStream);
+
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException(
+                        "Есть критические ошибки при выполнения скрипта.",
+                        logger.getEntries());
+            } else {
+                logger.info("Данные загружены");
+            }
+
+            logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
+            auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
+                    null, fd.getFormType().getId(), fd.getKind().getId(), fileName);
+        } catch (IOException e) {
+            throw new ServiceException(e.getLocalizedMessage(), e);
+        } finally {
+            IOUtils.closeQuietly(dataFileOutputStream);
+            IOUtils.closeQuietly(dataFileInputStream);
+            if (dataFile != null) {
+                dataFile.delete();
+            }
+            if (pKeyFile != null) {
+                pKeyFile.delete();
+            }
         }
+    }
+
+    private static String getFileExtention(String filename){
+        int dotPos = filename.lastIndexOf(".") + 1;
+        return filename.substring(dotPos);
     }
 
     @Override

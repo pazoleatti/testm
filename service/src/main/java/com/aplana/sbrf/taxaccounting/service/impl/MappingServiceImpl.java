@@ -52,10 +52,12 @@ public class MappingServiceImpl implements MappingService {
     private static String RNU_EXT = ".rnu";
     private static String XML_EXT = ".xml";
     private static String USER_APPENDER = "controlUnp";
+    private static String DATE_APPENDER_XML = "01.01.20";
+    private static String DATE_APPENDER_RNU = "01.01.";
 
     @Override
     public void addFormData(String filename, byte[] fileContent) {
-        log.info("Принят файл " + filename + ", размер = " + fileContent == null ? null : fileContent.length);
+        log.info("Принят файл " + filename + ", размер = " + (fileContent == null ? null : fileContent.length));
 
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(taUserService.getUser(USER_APPENDER));
@@ -71,6 +73,8 @@ public class MappingServiceImpl implements MappingService {
         ReportPeriod reportPeriod = null;
         Integer reportPeriodId = null;
         Integer formTemplateId = null;
+
+        Boolean isAllreadyCreated = false;
 
         try {
             InputStream inputStream = new ByteArrayInputStream(fileContent);
@@ -101,23 +105,28 @@ public class MappingServiceImpl implements MappingService {
 
             Logger logger = new Logger();
 
-            long formDataId = formDataService.createFormData(logger,
-                    userInfo,
-                    formTemplateId,
-                    departmentId,
-                    FormDataKind.PRIMARY,
-                    reportPeriod);
+            FormData formData = formDataDao.find(formTemplateId, FormDataKind.PRIMARY, departmentId ,reportPeriod.getId());
+            if (formData == null) {
+                long formDataId = formDataService.createFormData(logger,
+                        userInfo,
+                        formTemplateId,
+                        departmentId,
+                        FormDataKind.PRIMARY,
+                        reportPeriod);
 
-            // Добавляем месяц, если форма ежемесячная
-            if (restoreExemplar.getPeriodOrder() != null) {
-                formDataDao.updatePeriodOrder(formDataId, restoreExemplar.getPeriodOrder());
+                // Добавляем месяц, если форма ежемесячная
+                if (restoreExemplar.getPeriodOrder() != null) {
+                    formDataDao.updatePeriodOrder(formDataId, restoreExemplar.getPeriodOrder());
+                }
+
+                // Вызов скрипта
+                formDataService.lock(formDataId, userInfo);
+                formDataService.migrationFormData(logger, userInfo, formDataId, inputStream, filename);
+                formDataService.saveFormData(logger, userInfo, formDataDao.get(formDataId));
+                formDataService.unlock(formDataId, userInfo);
+            } else {
+                isAllreadyCreated = true;
             }
-
-            // Вызов скрипта
-            formDataService.lock(formDataId, userInfo);
-            formDataService.migrationFormData(logger, userInfo, formDataId, inputStream, filename);
-            formDataService.saveFormData(logger, userInfo, formDataDao.get(formDataId));
-            formDataService.unlock(formDataId, userInfo);
         } catch (Exception e) {
             if (e instanceof ServiceLoggerException) {
                 log.error(((ServiceLoggerException) e).getLogEntriesString());
@@ -130,11 +139,20 @@ public class MappingServiceImpl implements MappingService {
 
             return;
         }
-        // Успешный импорт
-        log.info("Успешно импортирован файл " + filename + " departmentId = " + departmentId + " reportPeriodId = "
-                + reportPeriodId + " formTypeId = " + formTypeId);
 
-        addLog(userInfo, departmentId, reportPeriodId, formTypeId, "Успешно импортирован файл " + filename);
+        if(isAllreadyCreated){
+            // Форма уже была создана
+            log.info("Уже был создан экземпляр формы с такими параметрами как в " + filename + " departmentId = " + departmentId + " reportPeriodId = "
+                    + reportPeriodId );
+            addLog(userInfo, departmentId, reportPeriodId, formTypeId, "Экзмепляр формы для файла " + filename + " уже существует. Импорт файла был пропущен.");
+
+        } else {
+            // Успешный импорт
+            log.info("Успешно импортирован файл " + filename + " departmentId = " + departmentId + " reportPeriodId = "
+                    + reportPeriodId + " formTypeId = " + formTypeId);
+            addLog(userInfo, departmentId, reportPeriodId, formTypeId, "Успешно импортирован файл " + filename);
+        }
+
     }
 
     /**
@@ -197,8 +215,9 @@ public class MappingServiceImpl implements MappingService {
             }
 
             //по году определяем TAX_PERIOD
-            Integer year = Integer.valueOf(yearFormat.format(exemplar.getBeginDate()));
-            exemplar.setTaxPeriod(YearCode.fromYear(year).getTaxPeriodId());
+            String year = yearFormat.format(exemplar.getBeginDate());
+            year = DATE_APPENDER_RNU + year;
+            exemplar.setTaxPeriod(reportPeriodMappingDao.getTaxPeriodByDate(dateFormat.parse(year)));
 
             // по коду отчетного периода 7 символа в назавании файла DICT_TAX_PERIOD
             String periodCode = rnuFilename.substring(7, 8);
@@ -226,20 +245,21 @@ public class MappingServiceImpl implements MappingService {
         RestoreExemplar exemplar = new RestoreExemplar();
 
         try {
-            String nalogForm = xmlFilename.substring(0, 10).replace("_", "");
+            String nalogForm = xmlFilename.substring(0, 10).replace("_", "");   // 852-64____ -> 852-64
             exemplar.setFormTemplateId(NalogFormType.fromCodeNewXml(nalogForm).getCodeNew());
 
-            String depCode = xmlFilename.substring(10, 19);
-            String systemCode = xmlFilename.substring(19, 24).replace("_", "");
-            String subSystemCode = xmlFilename.substring(24, 26);
+            String depCode = xmlFilename.substring(10, 19);                     // 996300020
+            String systemCode = xmlFilename.substring(19, 24).replace("_", ""); // __109 -> 109
+            String subSystemCode = xmlFilename.substring(24, 26);               // 00
 
             exemplar.setDepartmentId(DepartmentXmlMapping.getNewDepCode(depCode, Integer.valueOf(systemCode), subSystemCode));
 
             //по году определяем TAX_PERIOD
-            String yearCut = xmlFilename.substring(29, 31);
-            exemplar.setTaxPeriod(YearCode.fromYearCut(yearCut).getTaxPeriodId());
+            String yearCut = xmlFilename.substring(29, 31);                     // 13
+            yearCut = DATE_APPENDER_XML + yearCut;                                  // 01.01.20 + 13 - > 01.01.2013
+            exemplar.setTaxPeriod(reportPeriodMappingDao.getTaxPeriodByDate(dateFormat.parse(yearCut)));
 
-            String period = xmlFilename.substring(26, 29);
+            String period = xmlFilename.substring(26, 29);                      // q06
             exemplar.setDictTaxPeriodId(PeriodMapping.fromCodeXml(period).getDictTaxPeriodId());
 
             //Если форма ежемесячная, то заполняем месяц

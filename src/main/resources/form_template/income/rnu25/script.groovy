@@ -1,6 +1,7 @@
 package form_template.income.rnu25
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
@@ -18,18 +19,22 @@ import groovy.transform.Field
 def isBalancePeriod
 isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
 
+@Field
+def isConsolidated
+isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
         checkCreation()
         break
     case FormDataEvent.CHECK :
-        if (!isBalancePeriod && !checkPrevPeriod()) {
+        if (!isBalancePeriod && !isConsolidated && !checkPrevPeriod()) {
             logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
         }
         logicalCheck() && checkNSI()
         break
     case FormDataEvent.CALCULATE :
-        if (!isBalancePeriod && !checkPrevPeriod()) {
+        if (!isBalancePeriod && !isConsolidated && !checkPrevPeriod()) {
             logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
             return
         }
@@ -50,7 +55,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        if (!isBalancePeriod && !checkPrevPeriod()) {
+        if (!isBalancePeriod && !isConsolidated && !checkPrevPeriod()) {
             logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
             return
         }
@@ -67,7 +72,7 @@ switch (formDataEvent) {
         !hasError() && logicalCheck() && checkNSI()
         break
     case FormDataEvent.IMPORT :
-        if (!isBalancePeriod && !checkPrevPeriod()) {
+        if (!isBalancePeriod && !isConsolidated && !checkPrevPeriod()) {
             logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
             return
         }
@@ -77,10 +82,6 @@ switch (formDataEvent) {
         }
         break
     case FormDataEvent.MIGRATION :
-        if (!isBalancePeriod && !checkPrevPeriod()) {
-            logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
-            return
-        }
         importData()
         if (!hasError()) {
             def total = getCalcTotalRow()
@@ -449,7 +450,7 @@ def logicalCheck() {
             }
 
             // 11. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 4, 5 (за предыдущий период) )
-            if (!isBalancePeriod && checkOld(row, 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', dataOld)) {
+            if (!isBalancePeriod && !isConsolidated && checkOld(row, 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', dataOld)) {
                 def curCol = 3
                 def curCol2 = 4
                 def prevCol = 3
@@ -461,7 +462,7 @@ def logicalCheck() {
             }
 
             // 12. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 6, 11 (за предыдущий период) )
-            if (!isBalancePeriod && checkOld(row, 'tradeNumber', 'reserve', 'reserveCalcValue', dataOld)) {
+            if (!isBalancePeriod && !isConsolidated && checkOld(row, 'tradeNumber', 'reserve', 'reserveCalcValue', dataOld)) {
                 def curCol = 3
                 def curCol2 = 3
                 def prevCol = 6
@@ -795,7 +796,7 @@ void setTotalStyle(def row) {
  * Получить данные за предыдущий отчетный период
  */
 def getFormDataOld() {
-    if (isBalancePeriod) {
+    if (isBalancePeriod || isConsolidated) {
         return null
     }
     // предыдущий отчётный период
@@ -876,6 +877,9 @@ def checkRequiredColumns(def row, def columns) {
  * @return возвращает найденое значение, иначе возвратит 0
  */
 def getValueForColumn6(def dataOld, def row) {
+    if (isConsolidated) {
+        return row.reserve
+    }
     def value = 0
     def count = 0
     if (dataOld != null && !getRows(dataOld).isEmpty()) {

@@ -6,11 +6,15 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
 /**
- * 6.12 (РНУ-27) Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения
+ * 6.12 (РНУ-27) Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных
+ *              и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения
+ * formTemplateId=326
+ *
  * ЧТЗ http://conf.aplana.com/pages/viewpage.action?pageId=8588102 ЧТЗ_сводные_НФ_Ф2_Э1_т2.doc
  *
  * TODO:
- *      - костыль! в ТФ в столбце для графы 2 могут быть строки содержащие "<" и ">", в ImportServiceImpl они заменяются на &lt и &gt, при записи в форму надо поменять назад, в 0.3.6 это будет вынесено в ScriptUtils
+ *      - костыль! в ТФ в столбце для графы 2 могут быть строки содержащие "<" и ">", в ImportServiceImpl
+ *      они заменяются на &lt и &gt, при записи в форму надо поменять назад, в 0.3.6 это будет вынесено в ScriptUtils
  *
  * @author ekuvshinov
  */
@@ -20,6 +24,10 @@ import groovy.transform.Field
 def isBalancePeriod
 isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
 
+@Field
+def isConsolidated
+isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkCreation()
@@ -27,7 +35,7 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         def formPrev = getFormPrev()
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-        if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
+        if (!isBalancePeriod && !isConsolidated && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует или не находится в статусе «Принята»")
             return
         }
@@ -36,7 +44,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         def formPrev = getFormPrev()
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-        if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
+        if (!isBalancePeriod && !isConsolidated && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует или не находится в статусе «Принята»")
             return
         }
@@ -66,7 +74,7 @@ switch (formDataEvent) {
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
         def formPrev = getFormPrev()
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-        if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
+        if (!isBalancePeriod && !isConsolidated && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error("Форма предыдущего периода не существует или не находится в статусе «Принята»")
             return
         }
@@ -84,7 +92,7 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT :
         def formPrev = getFormPrev()
         // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-        if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
+        if (!isBalancePeriod && !isConsolidated && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
             logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
             return
         }
@@ -95,12 +103,6 @@ switch (formDataEvent) {
         }
         break
     case FormDataEvent.MIGRATION :
-        def formPrev = getFormPrev()
-        // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-        if (!isBalancePeriod && (formPrev == null || formPrev.state != WorkflowState.ACCEPTED)) {
-            logger.error("Форма предыдущего периода не существует или не находится в статусе «Принята»")
-            return
-        }
         importData()
         if (!hasError()) {
             def total = getCalcTotalRow()
@@ -167,7 +169,7 @@ def logicalCheck() {
                     logger.warn(errorMsg + "графы 8 и 17 неравны!")
                 }
                 // 3. LC • Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7 = 0)
-                if (row.cost != row.costOnMarketQuotation || row.cost != row.reserveCalcValue || row.cost == 0) {
+                if (row.cost != 0 || row.costOnMarketQuotation != 0 || row.reserveCalcValue != 0) {
                     logger.warn(errorMsg + "графы 9, 14 и 15 ненулевые!")
                 }
             }
@@ -552,15 +554,15 @@ void addAllStatic() {
             DataRow<Cell> nextRow = getRow(i + 1)
             int j = 0
 
-            if (row.getAlias() == null && nextRow == null || row.issuer != nextRow.issuer) {
-                def itogIssuerRow = calcItogIssuer(i)
-                data.insert(itogIssuerRow, i + 2)
-                j++
-            }
-
             if (row.getAlias() == null && nextRow == null || row.regNumber != nextRow.regNumber || row.issuer != nextRow.issuer) {
                 def itogRegNumberRow = calcItogRegNumber(i)
                 data.insert(itogRegNumberRow, i + 2)
+                j++
+            }
+
+            if (row.getAlias() == null && nextRow == null || row.issuer != nextRow.issuer) {
+                def itogIssuerRow = calcItogIssuer(i)
+                data.insert(itogIssuerRow, i + 2)
                 j++
             }
             i += j  // Обязательно чтобы избежать зацикливания в простановке
@@ -770,6 +772,9 @@ void calcAfterImport() {
  * Расчет графы 8
  */
 BigDecimal calc8(DataRow row, def formPrev) {
+    if (isConsolidated) {
+        return row.reserveCalcValuePrev
+    }
     // Расчет графы 8 в соответсвие коментарию Аванесова http://jira.aplana.com/browse/SBRFACCTAX-2562
     temp = new BigDecimal(0)
     tempCount = 0
@@ -1000,7 +1005,7 @@ def recalculateNumbers(){
 }
 
 FormData getFormPrev() {
-    if (isBalancePeriod) {
+    if (isBalancePeriod || isConsolidated) {
         return null
     }
     reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)

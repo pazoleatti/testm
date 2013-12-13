@@ -186,6 +186,7 @@ void calc() {
     def taxBase = roundValue(getTaxBase(), 0)
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    def lastDay = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
 
     // справочник "Подразделения"
     def departmentRefDataProvider = refBookFactory.getDataProvider(30)
@@ -195,21 +196,21 @@ void calc() {
 
     /** Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде. */
     def sumNal = 0
-    def sumTaxRecords = departmentParamIncomeRefDataProvider.getRecords(new Date(), null, "DEPARTMENT_ID = '1'", null);
+    def sumTaxRecords = departmentParamIncomeRefDataProvider.getRecords(lastDay, null, "DEPARTMENT_ID = '1'", null);
     if (sumTaxRecords != null && !sumTaxRecords.getRecords().isEmpty()) {
         sumNal = new BigDecimal(getValue(sumTaxRecords.getRecords().getAt(0), 'SUM_TAX').doubleValue())
     }
     // расчет графы 1..4, 8..21
     getRows(data).eachWithIndex { row, i ->
 
-        def departmentRecords = departmentRefDataProvider.getRecords(new Date(), null, "ID = '" + row.regionBankDivision + "'", null);
+        def departmentRecords = departmentRefDataProvider.getRecords(lastDay, null, "ID = '" + row.regionBankDivision + "'", null);
         if (departmentRecords == null || departmentRecords.getRecords().isEmpty()) {
             logger.error('Не найдено родительское подразделение для строки ' + (row.number ?: getIndex(data, row)))
             return
         }
         def departmentParam = departmentRecords.getRecords().getAt(0)
 
-        def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(new Date(), null, "DEPARTMENT_ID = '" + row.regionBankDivision + "'", null);
+        def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(lastDay, null, "DEPARTMENT_ID = '" + row.regionBankDivision + "'", null);
         if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.getRecords().isEmpty()) {
             logger.error('Не найдены настройки подразделения для строки ' + (row.number ?: getIndex(data, row)))
             return

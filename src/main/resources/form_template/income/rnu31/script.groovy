@@ -118,12 +118,13 @@ def logicalCheck() {
     // TODO (Ramil Timerbaev) протестировать проверку "начиная с отчета за февраль"
     if (!isFirstMonth()) {
         // 1. Проверка наличия предыдущего экземпляра отчета
-        if (rowOld == null && !getBalancePeriod()) {
+        if (rowOld == null && !getBalancePeriod() && formDataEvent!=FormDataEvent.COMPOSE) {
             logger.error('Форма предыдущего периода не существует или не находится в статусе «Принята»')
             return false
         }
 
         // 2..11 Проверка процентного (купонного) дохода по видам валютных ценных бумаг (графы 3..12)
+        if(rowOld != null)
         for (def column : requiredColumns) {
             if (row.getCell(column).getValue() < rowOld.getCell(column).getValue()) {
                 def securitiesType = row.securitiesType
