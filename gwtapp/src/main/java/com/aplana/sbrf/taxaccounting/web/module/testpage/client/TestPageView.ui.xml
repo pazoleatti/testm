@@ -25,5 +25,11 @@
 
         </g:HorizontalPanel>
         <g:Label ui:field="showResult" />
+        <g:ScrollPanel ui:field="scrollPanel" width="300px" height="300px">
+            <g:HorizontalPanel>
+                <g:CheckBox ui:field="chk" />
+                <g:Label ui:field="lbl">TheLabelasfasdfasdfasdfkjaskfdjsadkfjasldfjalskdjflasdjflasdjfalsfjlsakdjflskjdflaskdjflksadjflk</g:Label>
+            </g:HorizontalPanel>
+        </g:ScrollPanel>
     </g:VerticalPanel>
 </ui:UiBinder>
