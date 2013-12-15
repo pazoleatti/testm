@@ -66,7 +66,7 @@ public class DeclarationTemplateDaoTest {
 		DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(id);
 		assertEquals(id, savedDeclarationTemplate.getId().intValue());
 		assertEquals("0.01", savedDeclarationTemplate.getVersion());
-		assertEquals("MyScript", savedDeclarationTemplate.getCreateScript());
+		assertNull(savedDeclarationTemplate.getCreateScript());
 		assertEquals(declarationType.getId(), savedDeclarationTemplate.getDeclarationType().getId());
 		assertTrue(savedDeclarationTemplate.isActive());
         assertEquals(null, savedDeclarationTemplate.getXsdId());
@@ -90,7 +90,7 @@ public class DeclarationTemplateDaoTest {
 		DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(1);
 		assertEquals(1, savedDeclarationTemplate.getId().intValue());
 		assertEquals("0.01", savedDeclarationTemplate.getVersion());
-		assertEquals("MyScript", savedDeclarationTemplate.getCreateScript());
+		assertNull(savedDeclarationTemplate.getCreateScript());
 		assertEquals(declarationType.getId(), savedDeclarationTemplate.getDeclarationType().getId());
         assertEquals(null, savedDeclarationTemplate.getXsdId());
 	}
@@ -147,4 +147,23 @@ public class DeclarationTemplateDaoTest {
 	public void getActiveDeclarationTemplateIdEmptyTest() {
 		declarationTemplateDao.getActiveDeclarationTemplateId(3);
 	}
+
+    @Test
+    public void getDeclarationTemplateScriptTest(){
+        DeclarationTemplate declarationTemplate = new DeclarationTemplate();
+        declarationTemplate.setId(1);
+        declarationTemplate.setEdition(1);
+        declarationTemplate.setActive(true);
+        declarationTemplate.setVersion("0.01");
+        declarationTemplate.setCreateScript("MyScript");
+        declarationTemplate.setJrxmlBlobId("1");
+        DeclarationType declarationType = declarationTypeDao.get(1);
+        declarationTemplate.setDeclarationType(declarationType);
+
+        declarationTemplateDao.save(declarationTemplate);
+
+        DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(1);
+        assertEquals(1, savedDeclarationTemplate.getId().intValue());
+        assertEquals("MyScript", declarationTemplateDao.getDeclarationTemplateScript(1));
+    }
 }

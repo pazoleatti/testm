@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -37,7 +38,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			DeclarationTemplate d = new DeclarationTemplate();
 			d.setId(rs.getInt("id"));
 			d.setActive(rs.getBoolean("is_active"));
-			d.setCreateScript(rs.getString("create_script"));
 			d.setVersion(rs.getString("version"));
 			d.setEdition(rs.getInt("edition"));
 			d.setDeclarationType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
@@ -64,7 +64,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	public DeclarationTemplate get(int declarationTemplateId) {
 		try {
 			return getJdbcTemplate().queryForObject(
-					"select * from declaration_template where id = ?",
+					"select id, is_active, version, edition, declaration_type_id, xsd, jrxml from declaration_template where id = ?",
 					new Object[] { declarationTemplateId },
 					new DeclarationTemplateRowMapper()
 			);
@@ -94,7 +94,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 
 	@Override
 	@Transactional(readOnly = false)
-	@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id", beforeInvocation = true)
+    @Caching(evict = {@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplateId", beforeInvocation = true),
+            @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplateId + new String(\"_script\")", beforeInvocation = true)})
 	public int save(DeclarationTemplate declarationTemplate) {
 		int count = 0;
 		int declarationTemplateId;
@@ -177,5 +178,15 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         if (count == 0) {
             throw new DaoException("Не удалось сохранить данные с id = %d, так как она не существует.", declarationTemplateId);
         }
+    }
+
+    @Override
+    @Cacheable(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplateId + new String(\"_script\")")
+    public String getDeclarationTemplateScript(int declarationTemplateId) {
+        return getJdbcTemplate().queryForObject(
+                "select create_script from declaration_template where id = ?",
+                new Object[] { declarationTemplateId },
+                new int[]{Types.INTEGER},
+                String.class);
     }
 }

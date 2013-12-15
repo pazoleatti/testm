@@ -52,14 +52,14 @@ public interface DeclarationTemplateService {
 	void setJrxml(int declarationTemplateId, InputStream jrxml);
 	/**
 	 * Получить шаблон Jrxml-файла
-	 * @param declarationTemplateId
+	 * @param declarationTemplateId идентификатор вида декларации
 	 * @return jrxml-файл в виде строки
 	 */
 	String getJrxml(int declarationTemplateId);
 	
 	/**
 	 * Получить jasper-файл
-	 * @param declarationTemplateId
+	 * @param declarationTemplateId идентификатор вида декларации
 	 * @return поток jasper-файла
 	 */
     InputStream getJasper(int declarationTemplateId);
@@ -82,8 +82,16 @@ public interface DeclarationTemplateService {
 
 	/**
 	 * Проверяет, не заблокирован ли шаблон декларации другим пользователем
-	 * @param declarationTemplateId
-	 * @param userInfo
+	 * @param declarationTemplateId идентификатор вида декларации
+	 * @param userInfo - информация о пользователе
 	 */
 	void checkLockedByAnotherUser(Integer declarationTemplateId, TAUserInfo userInfo);
+
+    /**
+     * Получение тела скрипта.
+     * @param declarationTemplateId идентификатор вида декларации
+     * @return тело скрипта
+     */
+    String getDeclarationTemplateScript(int declarationTemplateId);
+
 }

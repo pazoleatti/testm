@@ -116,7 +116,12 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 		}
 	}
 
-	@Override
+    @Override
+    public String getDeclarationTemplateScript(int declarationTemplateId) {
+        return declarationTemplateDao.getDeclarationTemplateScript(declarationTemplateId);
+    }
+
+    @Override
 	public boolean lock(int declarationTemplateId, TAUserInfo userInfo){
 		ObjectLock<Integer> objectLock = lockDao.getObjectLock(declarationTemplateId, DeclarationTemplate.class);
 		if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){

@@ -57,7 +57,7 @@ public class DeclarationTemplateImpexServiceImpl implements
 			// Script
 			ze = new ZipEntry(SCRIPT_FILE);
 			zos.putNextEntry(ze);
-			zos.write(dt.getCreateScript().getBytes(ENCODING));
+			zos.write(declarationTemplateDao.getDeclarationTemplateScript(id).getBytes(ENCODING));
 			zos.closeEntry();
 			
 			// JasperTemplate

@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
 /**
  * Описание налоговой формы (шаблон налоговой формы)
@@ -150,7 +150,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 	/**
 	 * Получить определение столбца налоговой формы по алиасу
 	 * 
-	 * @param columnAlias
+	 * @param columnAlias - алиас колонки
 	 * @return определение столбца
 	 * @throws NullPointerException
 	 *             если <code>alias == null</code>
@@ -216,7 +216,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 	 * в БД, использовать этот объект далее нельзя, нужно перечитать объект из
 	 * БД и создать новый экзепляр.
 	 * 
-	 * @param edition
+	 * @param edition - номер редакции
 	 */
 	public void setEdition(int edition) {
 		if (this.edition != null) {
@@ -331,7 +331,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 	 * 
 	 * @param alias
 	 *            алиас стиля
-	 * @return объект, описывающий {@link стиль FormStyle}, заданный алиасом
+	 * @return объект, описывающий стиль {@link FormStyle}, заданный алиасом
 	 * @throws NullPointerException
 	 *             если в качеcтве аргумента передан null
 	 * @throws IllegalArgumentException

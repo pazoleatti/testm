@@ -58,7 +58,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
 	@Override
 	public List<FormTemplate> listAll() {
-		return formTemplateDao.listAll();
+        return formTemplateDao.listAll();
 	}
 
 	@Override
@@ -122,6 +122,11 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         }
         logger.info("Script has been executed successful.");
         throw new ServiceException("Скрипт выполнен успешно.");
+    }
+
+    @Override
+    public String getFormTemplateScript(int formTemplateId) {
+        return formTemplateDao.getFormTemplateScript(formTemplateId);
     }
 
     @Override
