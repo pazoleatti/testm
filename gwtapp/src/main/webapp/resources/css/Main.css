@@ -189,8 +189,8 @@ h3{
 .order {
     font-size: 11px !important;
     font-weight: bold !important;
-    height: 3em !important;
-    padding: 0 2px !important;
+    height: 1em !important;
+    padding: 0 1px !important;
     text-shadow: none !important;
     color: white !important;
     background-color: #959595 !important;
@@ -217,7 +217,7 @@ h3{
     margin-left: 7px;
     display: block;
     cursor: default;
-}}
+}
 
 /* Стили для типовой формы */
 
