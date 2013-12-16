@@ -8,7 +8,6 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.*;
 
-import static com.google.gwt.dom.client.Style.Unit.PCT;
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /**
@@ -25,19 +24,20 @@ public class Spinner extends Composite
 	public static final String STYLE_NAME = Constants.STYLE_PREFIX + "Spinner";
 
 	/**
+	 * Высота виджета по умолчанию в пикселях.
+	 */
+	public static final int DEFAULT_HEIGHT = 20;
+
+	/**
 	 * Ширина кнопок инкремента и декремента.
 	 */
-	public static final int BUTTON_WIDTH = 20;
+	public static final int BUTTON_SIZE = DEFAULT_HEIGHT/2;
 
 	/**
 	 * Ширина виджета по умолчанию в пикселях.
 	 */
-	public static final int DEFAULT_WIDTH = 100;
+	public static final int DEFAULT_WIDTH = 150;
 
-	/**
-	 * Высота виджета по умолчанию в пикселях.
-	 */
-	public static final int DEFAULT_HEIGHT = 20;
 
 	/**
 	 * Основная панель, на которой размещаются все остальные элементы.
@@ -99,25 +99,24 @@ public class Spinner extends Composite
 
 		// Устаналиваем текст слева.
 		panel.add(textBox);
-		panel.setWidgetLeftRight(textBox, 0, PX, BUTTON_WIDTH, PX);
+		panel.setWidgetLeftRight(textBox, 0, PX, BUTTON_SIZE, PX);
 		panel.setWidgetTopBottom(textBox, 0, PX, 0, PX);
 
 		// Кнопка инкремента справа вверху.
 		panel.add(incButton);
-		panel.setWidgetRightWidth(incButton, 0, PX, BUTTON_WIDTH, PX);
-		panel.setWidgetTopHeight(incButton, 0, PX, 50, PCT);
+		panel.setWidgetRightWidth(incButton, 0, PX, BUTTON_SIZE, PX);
+		panel.setWidgetTopHeight(incButton, 0, PX, BUTTON_SIZE, PX);
 
 		// Кнопка декремента справа внизу.
 		panel.add(decButton);
-		panel.setWidgetRightWidth(decButton, 0, PX, BUTTON_WIDTH, PX);
-		panel.setWidgetBottomHeight(decButton, 0, PX, 50, PCT);
+		panel.setWidgetRightWidth(decButton, 0, PX, BUTTON_SIZE, PX);
+		panel.setWidgetBottomHeight(decButton, 0, PX, BUTTON_SIZE, PX);
 	}
 
 	/**
 	 * Задает поведение виджета.
 	 */
 	private void initBehavior() {
-		textBox.setAlignment(ValueBoxBase.TextAlignment.RIGHT);
 		setValue(0);
 		textBox.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
@@ -151,7 +150,7 @@ public class Spinner extends Composite
 	 */
 	private void initStyles() {
 		setStyleName(STYLE_NAME);
-		panel.setStyleName(STYLE_NAME + "-panel");
+		panel.addStyleName(STYLE_NAME + "-panel");
 		textBox.setStyleName(STYLE_NAME + "-textBox");
 		incButton.setStyleName(STYLE_NAME + "-incButton");
 		decButton.setStyleName(STYLE_NAME + "-decButton");
