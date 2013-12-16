@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+
+import java.util.List;
 
 /**
  * DAO-Интерфейс для работы с макетами налоговых форм
@@ -13,11 +13,11 @@ public interface FormTemplateDao {
 	 * Получить полный список всех описаний налоговых форм
 	 * (Внимание, объекты в результирующей коллекции могут быть только частично инициализированы,
 	 * в них может остаться незаполненной информация по столбцам, скрипта и т.д.) 
-	 * @return
+	 * @return список шаблонов
 	 */
 	List<FormTemplate> listAll();
 	/**
-	 * Получить макет налоговой формы
+	 * Получить макет налоговой формы (без скрипта). Для получения тела скрипта {@link #getFormTemplateScript(int)}}
 	 * @param formTemplateId идентификатор макета
 	 * @return объект, представляющий описание налоговой формы
 	 */
@@ -34,8 +34,14 @@ public interface FormTemplateDao {
 	 * Такое описание для каждого вида формы в любой момент времени может быть только одно
 	 * @param formTypeId идентификатор вида налоговой формы
 	 * @return идентификатор описания налоговой формы
-	 * @throws DaoException если не удалось найти активное описание налоговой формы по заданному типу, 
+	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если не удалось найти активное описание налоговой формы по заданному типу,
 	 * 	или если обнаружено несколько действуюшие описаний по данному виду формы 
 	 */
 	int getActiveFormTemplateId(int formTypeId);
+
+    /**
+     * Получает тело скрипта. Необходим для lazy-инициализации.
+     * @return тело скрипта
+     */
+    String getFormTemplateScript(int formTemplateId);
 }

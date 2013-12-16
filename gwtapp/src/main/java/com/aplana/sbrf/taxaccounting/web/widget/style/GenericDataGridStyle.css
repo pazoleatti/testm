@@ -30,7 +30,7 @@
 .dataGridHeader {
 	font-size: 11px;
 	font-weight: normal;
-	height: 3em;
+	height: 2em;
 	padding: 0 2px;
 	text-shadow: none;
 	color: white;
@@ -111,11 +111,11 @@
 }
 
 .dataGridHoveredRow {
-	
+
 }
 
 .dataGridHoveredRowCell {
-	
+
 }
 
 .dataGridKeyboardSelectedRow {

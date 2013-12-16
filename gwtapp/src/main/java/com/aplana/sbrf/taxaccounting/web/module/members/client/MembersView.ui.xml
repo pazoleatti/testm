@@ -3,6 +3,7 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
+             xmlns:w="urn:import:com.aplana.gwt.client"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 
     <ui:style>
@@ -24,7 +25,7 @@
                     </g:VerticalPanel>
                     <g:VerticalPanel>
                         <g:Label text="Роль:"/>
-                        <g:ValueListBox width="200px" ui:field="roleBox"/>
+                        <w:MultiListBox width="200px" ui:field="roleBox"/>
                     </g:VerticalPanel>
                     <g:VerticalPanel>
                         <g:Label text="Признак активности:"/>

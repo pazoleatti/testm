@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.members.client;
 
+import com.aplana.gwt.client.MultiListBox;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.members.shared.FilterValues;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerModalWidget;
@@ -51,7 +52,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	DepartmentPickerModalWidget departmentPicker;
 
 	@UiField(provided = true)
-	ValueListBox<TARole> roleBox;
+    MultiListBox<TARole> roleBox;
 
     @UiField
     CellTable<TAUserFull> taUserFullCellTable;
@@ -76,12 +77,12 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 			    return object == true ? "Да" : "Нет";
 		    }
 	    });
-	    roleBox = new ValueListBox<TARole>(new AbstractRenderer<TARole>() {
+	    roleBox = new MultiListBox<TARole>(new AbstractRenderer<TARole>() {
 		    @Override
 		    public String render(TARole object) {
 			    return object == null ? "" : object.getName();
 		    }
-	    });
+	    }, true, true);
 
         widget = binder.createAndBindUi(this);
 	    taUserFullCellTable.addColumn(new TextColumn<TAUserFull>() {
@@ -158,7 +159,9 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 		membersFilterData.setActive(isActiveBox.getValue());
 		membersFilterData.setUserName(userName.getText());
 		List<Integer> selectedRoleIds = new ArrayList<Integer>();
-		selectedRoleIds.add(roleBox.getValue() == null ? null : roleBox.getValue().getId());
+        for (TARole selectedRole : roleBox.getValue()) {
+            selectedRoleIds.add(selectedRole.getId());
+        }
 		membersFilterData.setRoleIds(selectedRoleIds);
 		Set<Integer> depIds = new HashSet<Integer>();
 		for (DepartmentPair dep : departmentPicker.getValue()) {
@@ -197,7 +200,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	@Override
 	public void setFilterData(FilterValues values) {
 		isActiveBox.setAcceptableValues(Arrays.asList(new Boolean[]{Boolean.TRUE, Boolean.FALSE}));
-		roleBox.setAcceptableValues(values.getRoles());
+        roleBox.setAvailableValues(values.getRoles());
 		departmentPicker.setAvailableValues(values.getDepartments());
 	}
 

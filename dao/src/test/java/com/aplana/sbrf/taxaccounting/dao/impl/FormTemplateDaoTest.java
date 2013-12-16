@@ -1,5 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,13 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
-import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
+import javax.naming.NamingException;
 
 /**
  * @author Vitalii Samolovskikh
@@ -22,13 +23,14 @@ import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"FormTemplateDaoTest.xml"})
+@Transactional
 public class FormTemplateDaoTest {
+
 	// TODO: расширить тесты
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 
 	@Test
-	@Transactional
 	public void testGet(){
 		FormTemplate ft1 = formTemplateDao.get(1);
 		Assert.assertEquals(1, ft1.getId().intValue());
@@ -52,13 +54,11 @@ public class FormTemplateDaoTest {
 	}
 	
 	@Test(expected=DaoException.class)
-	@Transactional
 	public void testNotexistingGet() {
 		formTemplateDao.get(-1000);
 	}
 
 	@Test
-	@Transactional
 	public void testSave() {
 		FormTemplate formTemplate = formTemplateDao.get(1);		
 		formTemplate.setNumberedColumns(true);
@@ -78,13 +78,11 @@ public class FormTemplateDaoTest {
 		Assert.assertEquals("name_3", formTemplate.getName());
 		Assert.assertEquals("fullname_3", formTemplate.getFullName());
 		Assert.assertEquals("code_3", formTemplate.getCode());
-		Assert.assertEquals("test_script", formTemplate.getScript());
 		Assert.assertEquals(0, formTemplate.getRows().size());
 		Assert.assertEquals(0, formTemplate.getHeaders().size());
 	}
 	
 	@Test
-	@Transactional
 	public void testSaveDataRows() {
 		FormTemplate formTemplate = formTemplateDao.get(1);
 		
@@ -113,10 +111,26 @@ public class FormTemplateDaoTest {
 		Assert.assertEquals("name_3", formTemplate.getName());
 		Assert.assertEquals("fullname_3", formTemplate.getFullName());
 		Assert.assertEquals("code_3", formTemplate.getCode());
-		Assert.assertEquals("test_script", formTemplate.getScript());
+		/*Assert.assertEquals("test_script", formTemplate.getScript());*/
 		Assert.assertEquals(1, formTemplate.getRows().size());
 		Assert.assertEquals(2, formTemplate.getHeaders().size());
 		
 	}
+
+    @Test
+    public void testGetTextScript() throws NamingException {
+        FormTemplate formTemplate = formTemplateDao.get(1);
+        formTemplate.setNumberedColumns(true);
+        formTemplate.setFixedRows(false);
+        formTemplate.setVersion("321");
+        formTemplate.setActive(true);
+        formTemplate.setName("name_3");
+        formTemplate.setFullName("fullname_3");
+        formTemplate.setCode("code_3");
+        formTemplate.setScript("test_script");
+        formTemplateDao.save(formTemplate);
+        String scriptText = formTemplateDao.getFormTemplateScript(1);
+        Assert.assertEquals("test_script", scriptText);
+    }
 
 }
