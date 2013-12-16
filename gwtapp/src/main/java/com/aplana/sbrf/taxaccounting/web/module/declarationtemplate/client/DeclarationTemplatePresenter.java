@@ -53,7 +53,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-		setDeclarationTemplate();
+        setDeclarationTemplate();
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	@Override
 	public void onHide() {
 		super.onHide();
-		unlockForm(declarationTemplate.getId());
+        unlockForm(declarationTemplate.getId());
 		closeDeclarationTemplateHandlerRegistration.removeHandler();
 	}
 
@@ -88,7 +88,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 						MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация сохранена");
 						setDeclarationTemplate();
 					}
-				}, this));
+				}, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplatePresenter.this)));
 	}
 
 	/**
@@ -115,7 +115,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	private void setDeclarationTemplate() {
-		final int declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationTemplateId, "0"));
+        final int declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationTemplateId, "0"));
 		if (declarationId != 0) {
 			closeDeclarationTemplateHandlerRegistration = Window.addWindowClosingHandler(new Window.ClosingHandler() {
 				@Override
@@ -137,7 +137,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 							TitleUpdateEvent.fire(DeclarationTemplatePresenter.this, "Шаблон декларации", declarationTemplate.getDeclarationType().getName());
 						}
 					}, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplatePresenter.this)));
-		}
+        }
 	}
 
 	private void unlockForm(int declarationId){

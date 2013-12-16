@@ -4,8 +4,8 @@ import au.com.bytecode.opencsv.CSVReader;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.script.Point;
 import com.aplana.sbrf.taxaccounting.service.script.ImportService;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.poi.hssf.usermodel.*;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 @Service("importService")
@@ -153,9 +152,8 @@ public class ImportServiceImpl implements ImportService {
         }
         sb.append(TAB).append("<").append(rowName).append(">").append(ENTER);
         for (String cell : rowCells) {
-            String value = cell.trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("&", "&amp;");
             sb.append(TAB).append(TAB).append("<cell>");
-            sb.append(value);
+            sb.append(StringEscapeUtils.escapeXml(cell.trim()));
             sb.append("</cell>").append(ENTER);
         }
         sb.append(TAB).append("</").append(rowName).append(">").append(ENTER);
@@ -310,28 +308,6 @@ public class ImportServiceImpl implements ImportService {
     /**
      * Получить в строковом виде строку из таблицы экселя
      *
-     * @param row строка из таблицы
-     */
-    private String getRowString(HSSFRow row) {
-        if (row == null) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append(TAB).append("<row>").append(ENTER);
-        Iterator<Cell> iterator = row.cellIterator();
-        while (iterator.hasNext()) {
-            String cellValue = getCellValue((HSSFCell) iterator.next());
-            sb.append(TAB).append(TAB).append("<cell>");
-            sb.append(cellValue != null ? cellValue : "");
-            sb.append("</cell>").append(ENTER);
-        }
-        sb.append(TAB).append("</row>").append(ENTER);
-        return sb.toString();
-    }
-
-    /**
-     * Получить в строковом виде строку из таблицы экселя
-     *
      * @param row          строка из таблицы
      * @param colP         номер ячейки с которой брать данные
      * @param columnsCount количество столбцов в таблице
@@ -357,7 +333,7 @@ public class ImportServiceImpl implements ImportService {
                 break;
             }
             sb.append(TAB).append(TAB).append("<cell>");
-            sb.append(cellValue != null ? cellValue : "");
+            sb.append(cellValue != null ? StringEscapeUtils.escapeXml(cellValue) : "");
             sb.append("</cell>").append(ENTER);
         }
         sb.append(TAB).append("</row>").append(ENTER);

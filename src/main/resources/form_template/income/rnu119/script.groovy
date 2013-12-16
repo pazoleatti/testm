@@ -65,7 +65,7 @@ switch (formDataEvent) {
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW :
-        if (currentDataRow != null && currentDataRow.getAlias() == null) {
+        if (currentDataRow?.getAlias() == null) {
             formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         }
         break

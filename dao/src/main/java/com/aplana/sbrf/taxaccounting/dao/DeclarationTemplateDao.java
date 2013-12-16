@@ -17,7 +17,8 @@ public interface DeclarationTemplateDao {
 	 */
 	List<DeclarationTemplate> listAll();
 	/**
-	 * Получить шаблон декларации
+	 * Получить шаблон декларации (без тела скрипта).
+     * Скрипт получается с помощью метода {@link #getDeclarationTemplateScript(int)}
 	 * @param declarationTemplateId идентификатор шаблона декларации
 	 * @return объект шаблона декларации
 	 * @throws DaoException если декларации с таким id не существует
@@ -46,4 +47,11 @@ public interface DeclarationTemplateDao {
 	 * @throws DaoException если не существует шаблона декларации с таким id
 	 */
 	void setJrxml(int declarationTemplateId, String jrxmlBlobId);
+
+    /**
+     * Получение тела скрипта.
+     * @param declarationTemplateId
+     * @return тело скрипта
+     */
+    String getDeclarationTemplateScript(int declarationTemplateId);
 }

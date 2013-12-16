@@ -141,7 +141,13 @@ public class FlexiblePager extends AbstractPager {
 		 * Applied to the details text.
 		 */
 		String pageDetails();
-	}
+
+        String pageNumber();
+
+        String panel();
+
+        String buttonLastPage();
+    }
 
 	/**
 	 * The location of the text relative to the paging buttons.
@@ -366,6 +372,7 @@ public class FlexiblePager extends AbstractPager {
 		// Construct the widget.
 		HorizontalPanel layout = new HorizontalPanel();
 		layout.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        layout.getElement().setClassName(style.panel());
 		initWidget(layout);
 		layout.add(leftLabel);
 		if (location == TextLocation.LEFT) {
@@ -389,17 +396,26 @@ public class FlexiblePager extends AbstractPager {
 
 		// Add style names to the cells.
 		firstPage.getElement().getParentElement().addClassName(style.button());
+		firstPage.getElement().addClassName(style.button());
+
 		prevPage.getElement().getParentElement().addClassName(style.button());
+		prevPage.getElement().addClassName(style.button());
+
 		middleLeftLabel.getElement().getParentElement().addClassName(style.pageDetails());
 		pageNumber.getElement().getStyle().setWidth(3, com.google.gwt.dom.client.Style.Unit.EM);
+        pageNumber.getElement().getParentElement().addClassName(style.pageNumber());
 		middleRightLabel.getElement().getParentElement().addClassName(style.pageDetails());
 		leftLabel.getElement().getParentElement().addClassName(style.pageDetails());
 		nextPage.getElement().getParentElement().addClassName(style.button());
+		nextPage.getElement().addClassName(style.button());
+
 		if (showFastForwardButton) {
 			fastForward.getElement().getParentElement().addClassName(style.button());
+			fastForward.getElement().addClassName(style.button());
 		}
 		if (showLastPageButton) {
-			lastPage.getElement().getParentElement().addClassName(style.button());
+			lastPage.getElement().getParentElement().addClassName(style.buttonLastPage());
+			lastPage.getElement().addClassName(style.button());
 		}
 
 		pageNumber.addKeyUpHandler(new KeyUpHandler() {

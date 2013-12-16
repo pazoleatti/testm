@@ -1,16 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.script.Bindings;
-import javax.script.ScriptException;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -22,6 +11,15 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.stereotype.Service;
+
+import javax.script.Bindings;
+import javax.script.ScriptException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Реализация сервиса для выполнения скриптов над формой.
@@ -36,16 +34,13 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
     @Autowired
     private DepartmentService departmentService;
 
-    public FormDataScriptingServiceImpl() {
-    }
-
     @Override
     public void executeScript(TAUserInfo userInfo, FormData formData,
                               FormDataEvent event, Logger logger,
                               Map<String, Object> additionalParameters) {
 
         // Если скрипт отсутствует, то ничего не делаем
-        String script = formTemplateDao.get(formData.getFormTemplateId()).getScript();
+        String script = formTemplateDao.getFormTemplateScript(formData.getFormTemplateId());
         if (script == null || script.trim().isEmpty()) {
             return;
         }

@@ -65,11 +65,11 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	}
 
 	@Override
-	public void setJrxml(int declarationTemplateId, String jrxml) {
+	public void setJrxml(int declarationTemplateId, InputStream jrxmlIO) {
         DeclarationTemplate declarationTemplate = this.get(declarationTemplateId);
 
         String jrxmBlobId = blobDataService.create(
-                new ByteArrayInputStream(jrxml.getBytes()),
+                jrxmlIO,
                 declarationTemplate.getDeclarationType().getName() +"_jrxml");
 
         declarationTemplateDao.setJrxml(declarationTemplateId, jrxmBlobId);
@@ -116,7 +116,12 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 		}
 	}
 
-	@Override
+    @Override
+    public String getDeclarationTemplateScript(int declarationTemplateId) {
+        return declarationTemplateDao.getDeclarationTemplateScript(declarationTemplateId);
+    }
+
+    @Override
 	public boolean lock(int declarationTemplateId, TAUserInfo userInfo){
 		ObjectLock<Integer> objectLock = lockDao.getObjectLock(declarationTemplateId, DeclarationTemplate.class);
 		if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){

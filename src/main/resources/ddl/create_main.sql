@@ -101,7 +101,8 @@ create table ref_book (
   name varchar2(200) not null,
   script_id varchar2(36),
   visible number(1) default 1 not null,
-  type number(1) default 0 not null
+  type number(1) default 0 not null,
+  editable  number(1) default 1 not null
 );
 
 comment on table ref_book is 'Справочник';
@@ -109,7 +110,8 @@ comment on column ref_book.id is 'Уникальный идентификато�
 comment on column ref_book.name is 'Название справочника';
 comment on column ref_book.script_id is 'Идентификатор связанного скрипта';
 comment on column ref_book.visible is 'Признак видимости';
-comment on column ref_book.type is 'Тип справочника (0 - Внутренний, 1 - Внешний)';
+comment on column ref_book.type is 'Тип справочника (0 - Линейный, 1 - Иерархический)';
+comment on column ref_book.editable is 'Редактируемый (0 - редактирование недоступно пользователю, 1 - редактирование доступно пользователю)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
   id number(18) not null,
@@ -123,7 +125,8 @@ create table ref_book_attribute (
   visible number(1) default 1 not null,
   precision number(2),
   width number(9) default 15 not null,
-  required number(1) default 0 not null
+  required number(1) default 0 not null,
+  is_unique number(1) default 0 not null
 );
 comment on table ref_book_attribute is 'Атрибут справочника';
 comment on column ref_book_attribute.id is 'Уникальный идентификатор';
@@ -138,6 +141,7 @@ comment on column ref_book_attribute.visible is 'Признак видимост
 comment on column ref_book_attribute.precision is 'Точность, количество знаков после запятой. Только для атрибутов-чисел';
 comment on column ref_book_attribute.width is 'Ширина столбца. Используется при отображении справочника в виде таблицы';
 comment on column ref_book_attribute.required is 'Признак обязательности поля (1 - обязательно; 0 - нет)';
+comment on column ref_book_attribute.is_unique is 'Признак уникальности значения атрибута справочника (1 - должно быть уникальным; 0 - нет)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(18) not null,
@@ -185,7 +189,8 @@ create table form_column (
   checking  number(1) default 0 not null,
   attribute_id number(18),
   format number(2),
-  filter varchar2(1000)
+  filter varchar2(1000),
+  parent_column_id number(9)
 );
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
@@ -201,6 +206,7 @@ comment on column form_column.attribute_id is 'Код отображаемого
 comment on column form_column.format is 'Формат';
 comment on column form_column.filter is 'Условие фильтрации элементов справочника';
 comment on column form_column.max_length IS 'Максимальная длина строки';
+comment on column form_column.parent_column_id is 'Ссылка на родительскую графу';
 
 create sequence seq_form_column start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -620,14 +626,16 @@ create table department_report_period (
   report_period_id    number(9) not null,
   is_active           number(1) not null,
   is_balance_period   number(1) default 0 not null,
-  report_date         date
+  is_correct_period   number(1) default 0 not null,
+  correction_date     date
 );
 comment on table department_report_period is  'Привязка отчетных периодов к подразделениям';
 comment on column department_report_period.department_id is 'Код подразделения';
 comment on column department_report_period.report_period_id is 'Код отчетного периода';
 comment on column department_report_period.is_active is 'Признак активности (0 - период закрыт, 1 - период открыт)';
 comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
-comment on column department_report_period.report_date is 'Срок подачи отчётности';
+comment on column department_report_period.is_correct_period is 'Признак корректирующего периода (0 - обычный период, 1 - корректирующий период)';
+comment on column department_report_period.correction_date is 'Период сдачи корректировки';
 ------------------------------------------------------------------------------------------------------
 create table task_context(
 id  number(18,0) primary key,
@@ -638,11 +646,11 @@ custom_params_exist number(9,0) not null,
 serialized_params blob null
 );
 comment on table task_context is 'Контекст пользовательских задач планировщика';
-comment on column task_context.task_id is 'идентификатор задачи планировщика websphere';
-comment on column task_context.task_name is 'название задачи';
-comment on column task_context.user_task_jndi is 'jndi-имя класса-обработчика задачи';
-comment on column task_context.custom_params_exist is 'признак наличия пользовательских параметров';
-comment on column task_context.serialized_params is 'сериализованные пользователькие параметры';
+comment on column task_context.task_id is 'Идентификатор задачи планировщика websphere';
+comment on column task_context.task_name is 'Название задачи';
+comment on column task_context.user_task_jndi is 'JNDI-имя класса-обработчика задачи';
+comment on column task_context.custom_params_exist is 'Признак наличия пользовательских параметров';
+comment on column task_context.serialized_params is 'Сериализованные пользователькие параметры';
 
 create sequence seq_task_context start with 100;
 ------------------------------------------------------------------------------------------------------

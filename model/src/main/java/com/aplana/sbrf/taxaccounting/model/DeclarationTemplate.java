@@ -66,6 +66,7 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 
 	/**
 	 * Получить скрипт (groovy), использующийся для формирования декларации
+     * Нужно пользоваться отдельным методом дао для получения тела скрипта, иначе вернет null если не был получен
 	 * @return тело скрипта на groovy
 	 */
 	public String getCreateScript() {

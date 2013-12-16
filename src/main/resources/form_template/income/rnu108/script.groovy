@@ -144,7 +144,7 @@ void calc() {
     }, groupColumns)
     def totalRow = formData.createDataRow()
     totalRow.setAlias('total')
-    totalRow.fix = 'Итого'
+    totalRow.fix = 'Всего по контролируемым сделкам'
     totalRow.getCell('fix').colSpan = 14
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')

@@ -50,8 +50,8 @@ switch (formDataEvent) {
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW :
-        if (currentDataRow != null && currentDataRow.getAlias() == null) {
-            formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow?.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         }
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"

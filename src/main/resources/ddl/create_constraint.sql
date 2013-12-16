@@ -61,6 +61,7 @@ alter table form_column add constraint form_column_chk_checking check (checking 
 alter table form_column add constraint form_column_chk_attribute_id check ((type = 'R' and attribute_id is not null and precision >=0 and precision < 9) or (type <> 'R' and attribute_id is null));
 alter table form_column add constraint form_column_chk_width check (not width is null);
 alter table form_column add constraint form_column_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
+alter table form_column add constraint form_column_fk_parent_id foreign key (parent_column_id) references form_column (id);
 
 alter table department add constraint department_pk primary key (id);
 alter table department add constraint dept_fk_parent_id foreign key (parent_id) references department(id);
@@ -200,6 +201,7 @@ alter table log_system add constraint log_system_fk_user_dep_id foreign key (use
 alter table department_report_period add constraint department_report_period_pk primary key (department_id, report_period_id);
 alter table department_report_period add constraint dep_rep_per_chk_is_active check (is_active in (0, 1));
 alter table department_report_period add constraint dep_rep_per_chk_is_balance_per check (is_balance_period in (0, 1));
+alter table department_report_period add constraint dep_rep_per_chk_is_correct_per check (is_correct_period in (0, 1));
 alter table department_report_period add constraint dep_rep_per_fk_department_id foreign key (department_id) references department(id) on delete cascade;
 alter table department_report_period add constraint dep_rep_per_fk_rep_period_id foreign key (report_period_id) references report_period(id) on delete cascade;
 

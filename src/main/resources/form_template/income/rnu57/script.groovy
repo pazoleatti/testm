@@ -26,9 +26,12 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, null)
+
         break
     case FormDataEvent.DELETE_ROW:
-        formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow?.getAlias() != null) {
+            formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        }
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
@@ -267,12 +270,12 @@ def BigDecimal calc12(DataRow row) {
 }
 
 def BigDecimal calc13(def row) {
-    if (row.implementationpPriceTax != null && row.implementationPrice != null ) {
+    if (row.implementationpPriceTax != null && row.implementationPrice != null) {
         def tmpOne = row.implementationpPriceTax - row.implementationPrice
         if (row.percent == 0) {
             return tmpOne
         }
-        if (row.percent!=null && row.percent > 0 ) {
+        if (row.percent != null && row.percent > 0) {
             def tmpTwo = row.implementationpPriceTax + row.percent - row.implementationPrice
             if (tmpOne < 0 || tmpTwo < 0) {
                 return 0
@@ -285,7 +288,7 @@ def BigDecimal calc13(def row) {
 }
 
 def BigDecimal calc14(def row) {
-    if (row.implementationpPriceTax == null || row.allIncome == null ) {
+    if (row.implementationpPriceTax == null || row.allIncome == null) {
         return null
     }
     return row.implementationpPriceTax - row.allIncome

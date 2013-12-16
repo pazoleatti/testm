@@ -66,8 +66,10 @@ public class FormTemplateImpexServiceImpl implements
 			// Script
 			ze = new ZipEntry(SCRIPT_FILE);
 			zos.putNextEntry(ze);
-			if (ft.getScript() != null) {
-				zos.write(ft.getScript().getBytes(ENCODING));
+
+            String ftScript = formTemplateDao.getFormTemplateScript(id);
+			if (ftScript != null) {
+				zos.write(ftScript.getBytes(ENCODING));
             }
 			zos.closeEntry();
 			
