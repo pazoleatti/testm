@@ -60,7 +60,7 @@ public class CacheTest {
     private static String DECLARATION_TEMPLATE_JNDI = "services/cache/aplana/taxaccounting/DeclarationTemplate";
     private static String DEPARTMENT_JNDI = "services/cache/aplana/taxaccounting/Department";
     private static String USER_JNDI = "services/cache/aplana/taxaccounting/User";
-    private static String PERMANENT_DATA_JNDI = "services/cache/aplana/taxaccounting/permanentData";
+    private static String PERMANENT_DATA_JNDI = "services/cache/aplana/taxaccounting/PermanentData";
 
     @BeforeClass
     public static void initContext() throws NamingException {
