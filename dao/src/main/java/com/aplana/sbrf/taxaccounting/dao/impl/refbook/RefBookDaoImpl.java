@@ -47,7 +47,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private ApplicationContext applicationContext;
 
     @Override
-    @Cacheable(value = "permanentData", key = "'RefBook_'+#refBookId.toString()")
+    @Cacheable(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
     public RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(

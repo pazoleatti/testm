@@ -119,7 +119,7 @@
 
     <resource-ref>
         <description>Permanent Data Dynacache Reference</description>
-        <res-ref-name>services/cache/aplana/taxaccounting/permanentData</res-ref-name>
+        <res-ref-name>services/cache/aplana/taxaccounting/PermanentData</res-ref-name>
         <res-type>com.ibm.websphere.cache.DistributedMap</res-type>
         <res-auth>Container</res-auth>
         <res-sharing-scope>Shareable</res-sharing-scope>

@@ -101,7 +101,8 @@ create table ref_book (
   name varchar2(200) not null,
   script_id varchar2(36),
   visible number(1) default 1 not null,
-  type number(1) default 0 not null
+  type number(1) default 0 not null,
+  editable  number(1) default 1 not null
 );
 
 comment on table ref_book is 'Справочник';
@@ -109,7 +110,8 @@ comment on column ref_book.id is 'Уникальный идентификато�
 comment on column ref_book.name is 'Название справочника';
 comment on column ref_book.script_id is 'Идентификатор связанного скрипта';
 comment on column ref_book.visible is 'Признак видимости';
-comment on column ref_book.type is 'Тип справочника (0 - Внутренний, 1 - Внешний)';
+comment on column ref_book.type is 'Тип справочника (0 - Линейный, 1 - Иерархический)';
+comment on column ref_book.editable is 'Редактируемый (0 - редактирование недоступно пользователю, 1 - редактирование доступно пользователю)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
   id number(18) not null,
@@ -123,7 +125,8 @@ create table ref_book_attribute (
   visible number(1) default 1 not null,
   precision number(2),
   width number(9) default 15 not null,
-  required number(1) default 0 not null
+  required number(1) default 0 not null,
+  is_unique number(1) default 0 not null
 );
 comment on table ref_book_attribute is 'Атрибут справочника';
 comment on column ref_book_attribute.id is 'Уникальный идентификатор';
@@ -138,6 +141,7 @@ comment on column ref_book_attribute.visible is 'Признак видимост
 comment on column ref_book_attribute.precision is 'Точность, количество знаков после запятой. Только для атрибутов-чисел';
 comment on column ref_book_attribute.width is 'Ширина столбца. Используется при отображении справочника в виде таблицы';
 comment on column ref_book_attribute.required is 'Признак обязательности поля (1 - обязательно; 0 - нет)';
+comment on column ref_book_attribute.is_unique is 'Признак уникальности значения атрибута справочника (1 - должно быть уникальным; 0 - нет)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(18) not null,
