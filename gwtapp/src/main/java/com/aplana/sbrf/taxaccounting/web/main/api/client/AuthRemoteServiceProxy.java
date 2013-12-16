@@ -66,6 +66,7 @@ public class AuthRemoteServiceProxy extends RemoteServiceProxy {
 				// Если ответ 200 ОК и тип HTML, релоадим страницу, так чтобы попать на страницу авторизации.
 				if (status == Response.SC_OK && contentType != null && contentType.contains("html")) {
 					// Illegal content type. Redirect to auth page.
+					Window.alert("Ваша рабочая сессия истекла. Вы будете перенаправлены на форму авторизации.");
 					Window.Location.reload();
 				} else {
 					// Во всех остальных случаях, пусть разбирается стандартный обраблотчик.
