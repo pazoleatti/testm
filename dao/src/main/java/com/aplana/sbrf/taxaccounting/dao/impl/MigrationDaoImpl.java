@@ -65,7 +65,8 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "inner join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
                             "inner join migration.department \"depter\" on \"depter\".id = \"dep\".par_field\n" +
                             "where\n" +
-                            "\"ex\".typeexemplar like 'ACTUAL' and\n" +
+                            "\"ex\".typeexemplar like 'ACTUAL' and\n " +
+                            "\"per\".datebegin > to_date('12.12.2007', 'dd.mm.yyyy') and\n " +
                             "\"objdict\".idobjdict = ?",
                     new Object[]{rnuTypeId},
                     new ExemplarRowMapper()
