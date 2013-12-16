@@ -48,7 +48,7 @@ public class MappingServiceImpl implements MappingService {
 
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     private static SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
-    private static String charSet = "UTF-8";
+    private static String charSet = "cp866";
     private static String RNU_EXT = ".rnu";
     private static String XML_EXT = ".xml";
     private static String USER_APPENDER = "controlUnp";

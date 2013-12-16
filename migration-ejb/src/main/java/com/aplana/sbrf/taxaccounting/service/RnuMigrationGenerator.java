@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
 import com.aplana.sbrf.taxaccounting.model.migration.enums.*;
 import com.aplana.sbrf.taxaccounting.model.migration.row.AbstractRnuRow;
 
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class RnuMigrationGenerator {
 
     public byte[] generateRnuFileToBytes(Exemplar ex, List<? extends AbstractRnuRow> rnuRows) {
         String strFile = generateRnuFileToString(ex, rnuRows);
-        return strFile.getBytes();
+        return strFile.getBytes(Charset.forName("cp866"));
     }
 
     /**
