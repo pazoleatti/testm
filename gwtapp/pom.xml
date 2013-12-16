@@ -89,6 +89,14 @@
 			<artifactId>gwt-servlet</artifactId>
 		</dependency>
 
+		<!-- Зависимость на gwt-dev нужна для переопределения генератора прокси для удаленных сервисов. -->
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-dev</artifactId>
+			<version>${gwt.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- DI dependencies -->
 		<dependency>
 			<groupId>com.google.gwt.inject</groupId>
