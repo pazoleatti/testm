@@ -102,7 +102,7 @@ def addNewRow() {
     // проставление номеров строк
     i = 1;
     getRows(data).each{ row->
-        if (!isTotal(row)) {
+        if (!isTotal(row) && !isCa(row)) {
             row.number = i++
         }
     }
@@ -198,7 +198,9 @@ void calc() {
     def sumNal = 0
     def sumTaxRecords = departmentParamIncomeRefDataProvider.getRecords(lastDay, null, "DEPARTMENT_ID = '1'", null);
     if (sumTaxRecords != null && !sumTaxRecords.getRecords().isEmpty()) {
-        sumNal = new BigDecimal(getValue(sumTaxRecords.getRecords().getAt(0), 'SUM_TAX').doubleValue())
+        def sumTax = getValue(sumTaxRecords.getRecords().getAt(0), 'SUM_TAX')
+        //по ЧТЗ можно сделать вывод, что sumTax не может быть неопределен, но практика показывает иное
+        sumNal = new BigDecimal(sumTax != null ? sumTax.doubleValue() : 0)
     }
     // расчет графы 1..4, 8..21
     getRows(data).eachWithIndex { row, i ->
@@ -268,7 +270,7 @@ void calc() {
     def totalRow = formData.createDataRow()
     insert(data, totalRow)
     totalRow.setAlias('total')
-    totalRow.fix = 'Итого'
+    totalRow.fix = 'Сбербанк России'
     totalRow.getCell('fix').colSpan = 2
     setTotalStyle(totalRow)
 
