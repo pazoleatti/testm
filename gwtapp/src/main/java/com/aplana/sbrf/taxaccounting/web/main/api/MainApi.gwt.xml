@@ -1,12 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.4.0//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.4.0/distro-source/core/src/gwt-module.dtd">
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.4.0//EN"
+		"http://google-web-toolkit.googlecode.com/svn/tags/2.4.0/distro-source/core/src/gwt-module.dtd">
 
 <module>
-	<inherits name='com.google.gwt.user.User' />
-	<inherits name="com.google.gwt.logging.Logging" />
-    <inherits name="com.gwtplatform.dispatch.DispatchShared"/>
-    <inherits name="com.gwtplatform.mvp.Mvp"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.Model"/>
-    <source path='client' />
-	<source path='shared' />
+	<inherits name='com.google.gwt.user.User'/>
+	<inherits name="com.google.gwt.logging.Logging"/>
+	<inherits name="com.gwtplatform.dispatch.DispatchShared"/>
+	<inherits name="com.gwtplatform.mvp.Mvp"/>
+	<inherits name="com.aplana.sbrf.taxaccounting.Model"/>
+	<source path='client'/>
+	<source path='shared'/>
+
+	<!--
+	Указывем какой генератор исопльзовать для генерации прокси для сервисов. Вообще, сервисы у нас не используются,
+	вместо них, мы используем механизм диспетчеризации GWTP, а вот он уже использует сервисы. По сути, это генератор для
+	одного сервиса DispatchService.	Но если нам приспичит использовать дургие сервисы, то нужно иметь ввиду, что
+	для их генерации тоже будет зайдествован этот генератор.
+
+	На самом деле AuthServiceInterfaceProxyGenerator унаследован от стандартного. Все различие в том, что чуть-чуть
+	изменен обработчик ответо. Если статус ответа 200 ОК, и возвращаемый тип содержит HTML, то происходит
+	обновление страницы. Это сделано для того, чтобы в случае когда пользователь, по какой-то причине, теряет сессию,
+	он получал не непонятную ошибку, а перекидывался на страницу авторизации.
+	 -->
+	<generate-with class="com.aplana.sbrf.taxaccounting.web.main.api.rpc.AuthServiceInterfaceProxyGenerator">
+		<when-type-assignable class="com.google.gwt.user.client.rpc.RemoteService"/>
+	</generate-with>
 </module>
