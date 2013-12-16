@@ -182,7 +182,7 @@ void importData() {
     }
 
     // количество строк в шапке
-    def headRowCount = 4
+    def headRowCount = 3
 
     // проверка заголовка таблицы
     if (!checkTableHead(xml, headRowCount)) {
@@ -194,7 +194,7 @@ void importData() {
         // добавить данные в форму
         addData(xml, headRowCount)
     } catch(Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
+        logger.error('Проверка файла: ' + e.message)
     }
 }
 
@@ -217,8 +217,6 @@ void addData(def xml, headRowCount) {
     def refDataProvider = refBookFactory.getDataProvider(4)
 
     def indexRow = 0
-
-    SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
 
     for (def row : xml.row) {
         indexRow++
@@ -247,11 +245,11 @@ void addData(def xml, headRowCount) {
             // графа 3 - справочник "Коды субъектов Российской Федерации"
             def records = refDataProvider.getRecords(new Date(), null, "CODE = '" + row.cell[8].text() + "'", null)
             if (records == null || records.getRecords().isEmpty()) {
-                logger.error("Строка $indexRow столбец 9 содержит неверный код субъекта РФ!")
+                logger.error("Проверка файла: Строка $indexRow столбец 9 содержит неверный код субъекта РФ!")
             } else {
                 def record = records.getRecords().getAt(0)
                 if (record == null) {
-                    logger.error("Строка $indexRow столбец 9 содержит неверный код субъекта РФ!")
+                    logger.error("Проверка файла: Строка $indexRow столбец 9 содержит неверный код субъекта РФ!")
                 }
                 newRow.subdivisionRF = getValue(record, 'record_id')
             }
@@ -295,13 +293,13 @@ void addData(def xml, headRowCount) {
             newRow.phone = row.cell[18].text()
 
             // графа 15
-            newRow.dividendDate = (row.cell[19].text() ? dateFormat.parse(row.cell[19].text()) : null)
+            newRow.dividendDate = getDate(row.cell[19].text(), indexRow, 15)
 
             // графа 16
-            newRow.sumDividend = getNumber(row.cell[20].text())
+            newRow.sumDividend = getNumber(row.cell[20].text(), indexRow, 16)
 
             // графа 17
-            newRow.sumTax = getNumber(row.cell[21].text())
+            newRow.sumTax = getNumber(row.cell[21].text(), indexRow, 17)
 
             newRows.add(newRow)
         }
@@ -317,7 +315,7 @@ void addData(def xml, headRowCount) {
  *
  * @param value строка
  */
-def getNumber(def value) {
+def getNumber(def value, int indexRow, int indexCell) {
     if (value == null) {
         return null
     }
@@ -330,7 +328,22 @@ def getNumber(def value) {
     try {
         return new BigDecimal(tmp)
     } catch (Exception e) {
-        throw new Exception("Значение \"$value\" не может быть преобразовано в число. " + e.message)
+        throw new Exception("Проверка файла: Строка $indexRow столбец ${indexCell + 6} содержит недопустимый тип данных!")
+    }
+}
+
+/**
+ * Получить дату по строковому представлению (формата дд.ММ.гггг)
+ */
+def getDate(def value, int indexRow, int indexCell) {
+    if (value == null || value == '') {
+        return null
+    }
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    try {
+        return format.parse(value)
+    } catch (Exception e) {
+        throw new Exception("Проверка файла: Строка $indexRow столбец ${indexCell + 6} содержит недопустимый тип данных!")
     }
 }
 
