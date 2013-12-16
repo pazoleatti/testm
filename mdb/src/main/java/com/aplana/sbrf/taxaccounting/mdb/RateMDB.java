@@ -36,7 +36,6 @@ import java.util.Map;
  *
  * @author Dmitriy Levykin
  */
-// TODO: Levykin: закомментировал для поставки 0.3.3. После поставки раскомментировать.
 @MessageDriven(activationConfig = {
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
         @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/rateQueue")})
