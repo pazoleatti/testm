@@ -144,6 +144,6 @@ def getRecordId(def ref_id, String alias, String value, Date date, def cache, in
         return cache[ref_id][filter]
     }
     if (indexRow != 0 && alias!=null && "".equals(alias.trim()))
-        throw new Exception("Строка ${indexRow -1} столбец ${indexCell+1} содержит значение, отсутствующее в справочнике!")
+        throw new Exception("Строка ${indexRow -1} столбец ${indexCell+1} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(ref_id).getName()+"»!")
     return null
 }

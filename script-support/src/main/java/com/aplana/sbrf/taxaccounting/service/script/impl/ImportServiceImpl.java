@@ -4,6 +4,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.script.Point;
 import com.aplana.sbrf.taxaccounting.service.script.ImportService;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -153,7 +154,7 @@ public class ImportServiceImpl implements ImportService {
         }
         sb.append(TAB).append("<").append(rowName).append(">").append(ENTER);
         for (String cell : rowCells) {
-            String value = cell.trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("&", "&amp;");
+            String value = StringUtils.cleanString(cell.trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("&", "&amp;"));
             sb.append(TAB).append(TAB).append("<cell>");
             sb.append(value);
             sb.append("</cell>").append(ENTER);
@@ -369,7 +370,7 @@ public class ImportServiceImpl implements ImportService {
         String value = null;
         int type = cell.getCellType();
         if (type == HSSFCell.CELL_TYPE_STRING) {
-            value = cell.getRichStringCellValue().toString();
+            value = StringUtils.cleanString(cell.getRichStringCellValue().toString());
         } else if (type == HSSFCell.CELL_TYPE_NUMERIC) {
             if (DateUtil.isCellDateFormatted(cell)) {
                 // дата

@@ -2,8 +2,11 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <ui:style>
-        .mg5{
-            margin-left: 5px;
+        .max{
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            -ms-text-overflow: ellipsis;
         }
     </ui:style>
     <g:FormPanel ui:field="uploadFormDataXls" encoding="multipart/form-data" method="post">
@@ -11,11 +14,11 @@
         	<g:cell height="100%">
             	<g:FileUpload ui:field="uploader" name="uploader" visible="false"/>
             </g:cell>
-            <g:cell>
-                <g:TextBox ui:field="textBox" />
+            <g:cell verticalAlignment="middle">
+                <g:Label ui:field="label" addStyleNames="{style.max}"/>
             </g:cell>
             <g:cell>
-           		<g:Button ui:field="uploadButton" text="Загрузить" addStyleNames="{style.mg5}"/>
+           		<g:Button ui:field="uploadButton" text="Загрузить"/>
             </g:cell>
         </g:HorizontalPanel>
     </g:FormPanel>
