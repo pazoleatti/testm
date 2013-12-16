@@ -130,6 +130,14 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
+    public FormTemplate getFullFormTemplate(int formTemplateId) {
+        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+        formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
+        formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
+        return formTemplate;
+    }
+
+    @Override
 	public boolean lock(int formTemplateId, TAUserInfo userInfo){
 		ObjectLock<Integer> objectLock = lockDao.getObjectLock(formTemplateId, FormTemplate.class);
 		if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){

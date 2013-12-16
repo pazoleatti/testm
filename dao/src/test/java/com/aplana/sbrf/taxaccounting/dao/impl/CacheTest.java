@@ -6,9 +6,9 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.apache.commons.collections.MapUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -92,7 +93,21 @@ public class CacheTest {
         formTemplate.setFullName("fullname_3");
         formTemplate.setCode("code_3");
         formTemplate.setScript("test_script");
+        DataRow<Cell> rows = new DataRow<Cell>(FormDataUtils.createCells(formTemplate.getColumns(), formTemplate.getStyles()));
+        formTemplate.getRows().add(rows);
+        DataRow<HeaderCell> headers1 = new DataRow<HeaderCell>(FormDataUtils.createHeaderCells(formTemplate.getColumns()));
+        formTemplate.getHeaders().add(headers1);
         formTemplateDao.save(formTemplate);
+
+        //Проверяем кэширование dataRows
+        formTemplateDao.getDataCells(formTemplate);
+        checkExistInCache(CacheConstants.FORM_TEMPLATE, FORM_TEMPLATE_JNDI, String.valueOf(formTemplate.getId()) + "_data_rows", rows);
+
+        //Проверяем кэширование headers
+        formTemplateDao.getHeaderCells(formTemplate);
+        checkExistInCache(CacheConstants.FORM_TEMPLATE, FORM_TEMPLATE_JNDI, String.valueOf(formTemplate.getId()) + "_data_headers", headers1);
+
+        //Проверяем кэширование скрипта
         formTemplate = formTemplateDao.get(1);
         Assert.assertNull(formTemplate.getScript());//проверил что убрали из маппера.
         formTemplate.setScript(formTemplateDao.getFormTemplateScript(1));
@@ -108,6 +123,7 @@ public class CacheTest {
         //Кэш для FT должен очиститься
         Assert.assertEquals("fullname", formTemplate.getFullName());
         Assert.assertEquals("after_script", formTemplateDao.getFormTemplateScript(1));
+
         cacheManager.clearAll();
     }
 
@@ -137,6 +153,7 @@ public class CacheTest {
         //Проверка кэширования тела скрипта
         declarationTemplateDao.getDeclarationTemplateScript(1);
         checkExistInCache(CacheConstants.DECLARATION_TEMPLATE, DECLARATION_TEMPLATE_JNDI, String.valueOf(declarationTemplate.getId()) + "_script", "MyScript");
+        cacheManager.clearAll();
     }
 
     private void printJNDI(String name, String jndiName) throws NamingException {
@@ -144,8 +161,11 @@ public class CacheTest {
         MapUtils.debugPrint(System.out, name, map);
     }
 
-    private void checkExistInCache(String cacheName, String jndiName, String cacheId, String assertString) throws NamingException {
+    private <T> void checkExistInCache(String cacheName, String jndiName, String cacheId, T assertString) throws NamingException {
         HashMap map =((HashMap) ic.lookup(jndiName));
-        Assert.assertEquals(assertString, map.get(new KeyWrapper(cacheName, cacheId)));
+        if (assertString instanceof DataRow)
+            Assert.assertEquals(((DataRow)assertString).size(), ((List<DataRow>)map.get(new KeyWrapper(cacheName, cacheId))).get(0).size());
+        else
+            Assert.assertEquals(assertString, map.get(new KeyWrapper(cacheName, cacheId)));
     }
 }
