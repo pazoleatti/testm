@@ -34,8 +34,9 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 			reportPeriod.setReportPeriod(reportPeriodDao.get(rs
 					.getInt("REPORT_PERIOD_ID")));
 			reportPeriod.setActive(rs.getInt("IS_ACTIVE") == 0 ? false : true);
-			reportPeriod.setBalance(rs.getInt("IS_BALANCE_PERIOD") == 0 ? false
-					: true);
+			reportPeriod.setBalance(rs.getInt("IS_BALANCE_PERIOD") == 0 ? false : true);
+            reportPeriod.setCorrectPeriod(rs.getDate("CORRECTION_DATE"));
+            reportPeriod.setHasCorrectPeriod(rs.getInt("IS_CORRECT_PERIOD") == 0 ? false : true);
 			return reportPeriod;
 		}
 	};
@@ -53,12 +54,15 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 	@Transactional(readOnly=false)
 	public void save(DepartmentReportPeriod departmentReportPeriod) {
 		getJdbcTemplate()
-				.update("insert into DEPARTMENT_REPORT_PERIOD (DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, IS_BALANCE_PERIOD)"
-						+ " values (?, ?, ?, ?)",
+				.update("insert into DEPARTMENT_REPORT_PERIOD (DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, IS_BALANCE_PERIOD," +
+                        "CORRECTION_DATE, IS_CORRECT_PERIOD)"
+						+ " values (?, ?, ?, ?, ?, ?)",
 						departmentReportPeriod.getDepartmentId(),
 						departmentReportPeriod.getReportPeriod().getId(),
 						departmentReportPeriod.isActive(),
-						departmentReportPeriod.isBalance());
+						departmentReportPeriod.isBalance(),
+                        departmentReportPeriod.getCorrectPeriod(),
+                        departmentReportPeriod.hasCorrectPeriod());
 	}
 
     @Override

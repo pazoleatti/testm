@@ -9,7 +9,7 @@
 
 	<g:DialogBox width="400px" glassEnabled="true" text="Открыть период">
 		<g:VerticalPanel width="100%" spacing="3">
-			<g:DecoratorPanel>
+			<g:DecoratorPanel width="90%">
 				<g:VerticalPanel>
 					<g:VerticalPanel>
 						<g:HorizontalPanel verticalAlignment="middle" width="100%" spacing="3">
@@ -21,7 +21,7 @@
 							</g:cell>
 						</g:HorizontalPanel>
 
-						<g:HorizontalPanel verticalAlignment="middle"
+						<g:HorizontalPanel ui:field="yearPnl" verticalAlignment="middle"
 							width="100%" spacing="3">
 							<g:cell horizontalAlignment="right">
 								<g:Label text="Год: " width="150px" />
@@ -34,17 +34,17 @@
 						<g:HorizontalPanel verticalAlignment="middle"
 							width="100%" spacing="3">
 							<g:cell horizontalAlignment="right">
-								<g:Label text="Период: " width="150px" />
+								<g:Label ui:field="periodLbl" text="Период: " width="150px" />
 							</g:cell>
 							<g:cell width="100%" horizontalAlignment="left">
 								<r:RefBookPickerPopupWidget ui:field="period" modal="true" width="100%" attributeIdInt="26" />
 							</g:cell>
 						</g:HorizontalPanel>
 
-						<g:HorizontalPanel verticalAlignment="middle"
+						<g:HorizontalPanel ui:field="termPnl" verticalAlignment="middle" visible="false"
 							width="100%" spacing="3">
 							<g:cell horizontalAlignment="right">
-								<g:Label text="Срок сдачи отчетности: " width="150px" />
+								<g:Label text="Период сдачи корректировки: " width="150px" />
 							</g:cell>
 							<g:cell width="100%" horizontalAlignment="left">
 								<date:CustomDateBox width="60px" ui:field="term" />
@@ -59,7 +59,7 @@
 						</g:HorizontalPanel>
 
 						<g:HorizontalPanel spacing="3">
-							<g:CheckBox ui:field="correctPeriod" enabled="false" />
+							<g:CheckBox ui:field="correctPeriod" />
 							<g:Label text="Корректирующий" />
 						</g:HorizontalPanel>
 					</g:VerticalPanel>
