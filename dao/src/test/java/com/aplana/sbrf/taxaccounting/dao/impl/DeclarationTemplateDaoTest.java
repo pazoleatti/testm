@@ -12,6 +12,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -64,7 +66,7 @@ public class DeclarationTemplateDaoTest {
 		DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(id);
 		assertEquals(id, savedDeclarationTemplate.getId().intValue());
 		assertEquals("0.01", savedDeclarationTemplate.getVersion());
-		assertEquals("MyScript", savedDeclarationTemplate.getCreateScript());
+		assertNull(savedDeclarationTemplate.getCreateScript());
 		assertEquals(declarationType.getId(), savedDeclarationTemplate.getDeclarationType().getId());
 		assertTrue(savedDeclarationTemplate.isActive());
         assertEquals(null, savedDeclarationTemplate.getXsdId());
@@ -88,10 +90,33 @@ public class DeclarationTemplateDaoTest {
 		DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(1);
 		assertEquals(1, savedDeclarationTemplate.getId().intValue());
 		assertEquals("0.01", savedDeclarationTemplate.getVersion());
-		assertEquals("MyScript", savedDeclarationTemplate.getCreateScript());
+		assertNull(savedDeclarationTemplate.getCreateScript());
 		assertEquals(declarationType.getId(), savedDeclarationTemplate.getDeclarationType().getId());
         assertEquals(null, savedDeclarationTemplate.getXsdId());
 	}
+
+    @Test
+    public void testSetJrxml() {
+        DeclarationTemplate declarationTemplate = new DeclarationTemplate();
+        declarationTemplate.setId(1);
+        declarationTemplate.setEdition(1);
+        declarationTemplate.setActive(true);
+        declarationTemplate.setVersion("0.01");
+        declarationTemplate.setCreateScript("MyScript");
+        String uuid1 = UUID.randomUUID().toString();
+        declarationTemplate.setJrxmlBlobId(uuid1);
+        DeclarationType declarationType = declarationTypeDao.get(1);
+        declarationTemplate.setDeclarationType(declarationType);
+
+        declarationTemplateDao.save(declarationTemplate);
+
+        DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(1);
+        assertEquals(1, savedDeclarationTemplate.getId().intValue());
+
+        String uuid2 = UUID.randomUUID().toString();
+        declarationTemplateDao.setJrxml(savedDeclarationTemplate.getId(), uuid2);
+        assertEquals(uuid2, declarationTemplateDao.get(savedDeclarationTemplate.getId()).getJrxmlBlobId());
+    }
 
 	@Test(expected = DaoException.class)
 	public void testSaveExistWithBadEdition() {
@@ -122,4 +147,23 @@ public class DeclarationTemplateDaoTest {
 	public void getActiveDeclarationTemplateIdEmptyTest() {
 		declarationTemplateDao.getActiveDeclarationTemplateId(3);
 	}
+
+    @Test
+    public void getDeclarationTemplateScriptTest(){
+        DeclarationTemplate declarationTemplate = new DeclarationTemplate();
+        declarationTemplate.setId(1);
+        declarationTemplate.setEdition(1);
+        declarationTemplate.setActive(true);
+        declarationTemplate.setVersion("0.01");
+        declarationTemplate.setCreateScript("MyScript");
+        declarationTemplate.setJrxmlBlobId("1");
+        DeclarationType declarationType = declarationTypeDao.get(1);
+        declarationTemplate.setDeclarationType(declarationType);
+
+        declarationTemplateDao.save(declarationTemplate);
+
+        DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(1);
+        assertEquals(1, savedDeclarationTemplate.getId().intValue());
+        assertEquals("MyScript", declarationTemplateDao.getDeclarationTemplateScript(1));
+    }
 }

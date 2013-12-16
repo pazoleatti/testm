@@ -54,7 +54,7 @@ public class DeclarationTemplateController {
 	
 	@RequestMapping(value = "declarationTemplate/uploadDect/{declarationTemplateId}",method = RequestMethod.POST)
 	public void uploadDect(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
-			throws FileUploadException, UnsupportedEncodingException, IOException {
+			throws FileUploadException, IOException {
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 		List<FileItem> items = upload.parseRequest(req);
@@ -80,14 +80,21 @@ public class DeclarationTemplateController {
 		}
 	}
 
-	@RequestMapping(value = "/uploadJrxml/{declarationTemplateId}",method = RequestMethod.POST)
+	@RequestMapping(value = "uploadJrxml/{declarationTemplateId}",method = RequestMethod.POST)
 	public void processUpload(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws FileUploadException, UnsupportedEncodingException {
-		FileItemFactory factory = new DiskFileItemFactory();
+        System.out.println("processUpload");
+        FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 		List<FileItem> items = upload.parseRequest(req);
-		declarationTemplateService.setJrxml(declarationTemplateId, items.get(0).getString("UTF-8"));
-	}
+        try {
+            InputStream inputStream = items.get(0).getInputStream();
+            declarationTemplateService.setJrxml(declarationTemplateId, inputStream);
+            inputStream.close();
+        } catch (IOException e) {
+            exceptionHandler(e, resp);
+        }
+    }
 
 	@ExceptionHandler(Exception.class)
 	public void exceptionHandler(Exception e, final HttpServletResponse response) {

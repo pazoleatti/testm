@@ -10,12 +10,12 @@
             margin: 0px;
             font-size: 11px;
             font-weight: bold;
-            padding-left: 4px;
+            /*padding-left: 4px;*/
 
         }
 
         .footerPanel {
-            margin: 15px 0px 0px 0px;
+            margin: 0px;
             background-color: #E8E1CF;
             border: solid 1px #D0CECA;
             vertical-align: middle;
@@ -48,6 +48,10 @@
             margin-right: 17px;
         }
 
+        .showButton{
+            margin: 0px;
+        }
+
     </ui:style>
     <g:VerticalPanel width="100%" visible="true">
         <g:HorizontalPanel width="100%" ui:field="panel">
@@ -55,14 +59,16 @@
                 <g:TextBox width="100%" height="15px" ui:field="txt" enabled="false" addStyleNames="{style.txt}"/>
             </g:cell>
             <g:cell>
-                <g:Button ui:field="showButton" width="22px" height="21px"/>
+                <g:Button ui:field="showButton" addStyleNames="{style.showButton}" width="22px" >...</g:Button>
             </g:cell>
         </g:HorizontalPanel>
         <g:FlowPanel visible="false">
             <g:PopupPanel addStyleNames="{style.popupPanel}" ui:field="popupPanel" autoHideEnabled="true" modal="true">
                 <g:VerticalPanel>
                     <g:cell>
-                        <g:VerticalPanel ui:field="checkBoxPanel"/>
+                        <g:ScrollPanel ui:field="scrollPanel">
+                            <g:VerticalPanel ui:field="checkBoxPanel"/>
+                        </g:ScrollPanel>
                     </g:cell>
                     <g:cell>
                         <g:HorizontalPanel width="100%" height="50px" spacing="1" ui:field="footerPanel" addStyleNames="{style.footerPanel}" >

@@ -19,7 +19,7 @@ public interface FormTemplateService {
 	 */
 	List<FormTemplate> listAll();
 	/**
-	 * Получить макет налоговой формы
+	 * Получить макет налоговой формы (без скрипта). Для получения скрипта использовать {@link #getFormTemplateScript(int)}
 	 * @param formTemplateId идентификатор макета
 	 * @return объект, представляющий описание налоговой формы
 	 */
@@ -65,14 +65,21 @@ public interface FormTemplateService {
 
 	/**
 	 * Проверяет, не заблокирован ли шаблон формы другим пользователем
-	 * @param formTemplateId
-	 * @param userInfo
+	 * @param formTemplateId - идентификатор налоговой формы
+	 * @param userInfo - информация о пользователе
 	 */
 	void checkLockedByAnotherUser(Integer formTemplateId, TAUserInfo userInfo);
 
     /**
      * Исполяет для теста написанный скрипт от имени пользователя controlUnp
-     * @param formTemplate
+     * @param formTemplate - шаблон налоговой формы
      */
     void executeTestScript(FormTemplate formTemplate);
+
+    /**
+     * Получение скрипта для {@link FormTemplate}.
+     * @param formTemplateId - идентификатор налоговой формы
+     * @return тело скрипта
+     */
+    String getFormTemplateScript(int formTemplateId);
 }

@@ -9,7 +9,10 @@ import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.uibinder.client.*;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiConstructor;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -27,7 +30,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	@UiField
 	@Editor.Ignore
 	FileUpload uploadJrxml;
-	
+
 	@UiField
 	@Editor.Ignore
 	FormPanel uploadJrxmlForm;
@@ -86,7 +89,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 				}
 			}
 		});
-		
+
 		uploadJrxmlForm.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
 			@Override
 			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
