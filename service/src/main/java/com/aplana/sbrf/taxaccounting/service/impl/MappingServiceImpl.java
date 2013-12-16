@@ -124,7 +124,7 @@ public class MappingServiceImpl implements MappingService {
                 formDataService.migrationFormData(logger, userInfo, formDataId, inputStream, filename);
 
                 // Принудительно выставлен статус "Принята"
-                formDataDao.updateState(formData.getId(), WorkflowState.ACCEPTED);
+                formDataDao.updateState(formDataId, WorkflowState.ACCEPTED);
                 formDataService.saveFormData(logger, userInfo, formDataDao.get(formDataId));
                 formDataService.unlock(formDataId, userInfo);
             } else {
