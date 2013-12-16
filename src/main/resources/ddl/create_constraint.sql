@@ -63,7 +63,6 @@ alter table form_column add constraint form_column_fk_attribute_id foreign key (
 
 alter table department add constraint department_pk primary key (id);
 alter table department add constraint dept_fk_parent_id foreign key (parent_id) references department(id);
-alter table department add constraint department_chk_id check ((type= 1 and id = 1) or (type <> 1 and id <> 1));
 alter table department add constraint department_chk_parent_id check ((type = 1 and parent_id is null) or (type <> 1 and parent_id is not null));
 
 alter table report_period add constraint report_period_pk primary key(id);
