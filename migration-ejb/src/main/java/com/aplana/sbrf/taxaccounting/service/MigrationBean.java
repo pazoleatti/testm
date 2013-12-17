@@ -66,7 +66,7 @@ public class MigrationBean implements MessageService {
 
     private List<Exemplar> getExemplarsByRnuTypes(long[] rnuIds, long[] years) {
         List<Exemplar> rnuList = new ArrayList<Exemplar>();
-        String yearSeq = Arrays.toString(years);
+        String yearSeq = Arrays.toString(years).replace("[", "").replace("]", "");
         for (long rnu : rnuIds) {
             rnuList.addAll(getExemplarsByRnuType(rnu, yearSeq));
         }
