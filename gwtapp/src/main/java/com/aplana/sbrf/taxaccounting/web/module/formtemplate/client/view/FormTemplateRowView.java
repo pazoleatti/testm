@@ -39,6 +39,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 
 	private static final String SELECTED_CELL_BACKGROUND_COLOR = "#9A9CFF";
 	private static final int COLUMN_OFFSET = 2;
+    private static final int WIDTH_FOR_ZERO_COLUMN = 10;
 	private final StyleCellPopup styleCellPopup;
 	private final NoSelectionModel<DataRow> selectionModel;
 	private final DataRowColumnFactory factory = new DataRowColumnFactory();
@@ -252,10 +253,13 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		for (Column col : columns) {
 			com.google.gwt.user.cellview.client.Column<DataRow<Cell>, ?> tableCol = factory
 					.createTableColumn(col, formDataTable);
-			formDataTable.addColumn(tableCol, col.getName());
-			if (col.getWidth() >= 0) {
+
+			if (col.getWidth() > 0) {
 				formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
-			}
+			} else if (col.getWidth() == 0) {
+                formDataTable.setColumnWidth(tableCol, WIDTH_FOR_ZERO_COLUMN + "em");
+            }
+            formDataTable.addColumn(tableCol, col.getName());
 		}
 		//TODO КОСТЫЛИ! По возможности убрать.
 		float tableWidth = 0;
