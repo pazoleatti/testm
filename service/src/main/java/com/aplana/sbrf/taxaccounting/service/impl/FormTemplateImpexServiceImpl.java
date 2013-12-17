@@ -44,7 +44,7 @@ public class FormTemplateImpexServiceImpl implements
 	@Override
 	public void exportFormTemplate(Integer id, OutputStream os) {
 		try {
-			FormTemplate ft = formTemplateDao.get(id);
+			FormTemplate ft = formTemplateService.getFullFormTemplate(id);
 			ZipOutputStream zos = new ZipOutputStream(os);
 
 			// Version
@@ -112,7 +112,7 @@ public class FormTemplateImpexServiceImpl implements
 			}
 
             if ("1.0".equals(version)) {
-				FormTemplate ft = formTemplateDao.get(id);
+				FormTemplate ft = formTemplateService.getFullFormTemplate(id);
 				if (files.get(CONTENT_FILE).length != 0) {
 					FormTemplateContent ftc;
 					JAXBContext jaxbContext = JAXBContext.newInstance(FormTemplateContent.class);
