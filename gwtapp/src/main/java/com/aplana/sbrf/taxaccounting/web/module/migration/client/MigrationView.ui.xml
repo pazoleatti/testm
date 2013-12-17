@@ -7,20 +7,35 @@
         }
 
         .fix {
-            padding: 2px !important;    /*у TextArea сдвиг влево по маргину идет и поэтому полностью не влазит, применил этот фикс*/
+            padding: 2px !important; /*у TextArea сдвиг влево по маргину идет и поэтому полностью не влазит, применил этот фикс*/
         }
     </ui:style>
     <g:DockLayoutPanel ui:field="dockPanel">
-        <g:north size="90">
-            <g:VerticalPanel>
-                <g:Label styleName="{style.titleLabel}" text="Миграция исторических данных"/>
-                <g:Button ui:field="loadButton" text="Загрузить"/>
-            </g:VerticalPanel>
+        <g:north size="50">
+            <g:Label styleName="{style.titleLabel}" text="Миграция исторических данных"/>
         </g:north>
         <g:center>
-            <g:ScrollPanel styleName="{style.fix}">
-                <g:TextArea ui:field="textArea" readOnly="true" width="1000px" height="400px" />
-            </g:ScrollPanel>
+            <g:HorizontalPanel spacing="4">
+                <g:ScrollPanel styleName="{style.fix}">
+                    <g:TextArea ui:field="textArea" readOnly="true" width="700px" height="390px"/>
+                </g:ScrollPanel>
+                <g:VerticalPanel>
+                    <g:cell verticalAlignment="top" height="370px">
+                        <g:HorizontalPanel spacing="4">
+                            <g:VerticalPanel ui:field="years" spacing="2">
+                                <g:Label text="Год"/>
+                            </g:VerticalPanel>
+                            <g:VerticalPanel ui:field="rnus" spacing="2">
+                                <g:Label text="Вид РНУ"/>
+                            </g:VerticalPanel>
+                        </g:HorizontalPanel>
+                    </g:cell>
+                    <g:cell verticalAlignment="bottom" horizontalAlignment="right">
+                        <g:Button ui:field="loadButton" text="Загрузить"/>
+                    </g:cell>
+
+                </g:VerticalPanel>
+            </g:HorizontalPanel>
         </g:center>
     </g:DockLayoutPanel>
 </ui:UiBinder>

@@ -42,7 +42,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     }
 
     @Override
-    public List<Exemplar> getExemplarByRnuType(long rnuTypeId) {
+    public List<Exemplar> getExemplarByRnuType(long rnuTypeId, String yearSeq) {
         try {
             return getJdbcTemplate().query(
                     "select\n" +
@@ -66,7 +66,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "inner join migration.department \"depter\" on \"depter\".id = \"dep\".par_field\n" +
                             "where\n" +
                             "\"ex\".typeexemplar like 'ACTUAL' and\n " +
-                            "\"per\".datebegin > to_date('12.12.2007', 'dd.mm.yyyy') and\n " +
+                            "TO_CHAR(\"per\".datebegin, 'yyyy') in (" + yearSeq + ")  and\n " +
                             "\"objdict\".idobjdict = ?",
                     new Object[]{rnuTypeId},
                     new ExemplarRowMapper()

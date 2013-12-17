@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.migration.server;
 
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.MessageService;
+//import com.aplana.sbrf.taxaccounting.service.MigrationService;
 import com.aplana.sbrf.taxaccounting.web.module.migration.shared.MigrationAction;
 import com.aplana.sbrf.taxaccounting.web.module.migration.shared.MigrationResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -23,6 +24,9 @@ public class MigrationHandler extends AbstractActionHandler<MigrationAction, Mig
     @Autowired
     @Qualifier("messageService")
     private MessageService messageService;
+    // девелоперская отладка
+//    @Autowired
+//    private MigrationService migrationService;
 
     public MigrationHandler() {
         super(MigrationAction.class);
@@ -34,7 +38,8 @@ public class MigrationHandler extends AbstractActionHandler<MigrationAction, Mig
         // Отправка файлов
         MigrationResult result = new MigrationResult();
         try {
-            result.setResult(messageService.sendFiles());
+            result.setResult(messageService.sendFiles(action.getRnus(), action.getYears()));
+//            result.setResult(migrationService.sendFiles(action.getRnus(), action.getYears()));    // девелоперская отладка
         } catch (ServiceException ex) {
             throw new ActionException(ex.getMessage(), ex);
         } catch (Exception ex) {
@@ -49,4 +54,5 @@ public class MigrationHandler extends AbstractActionHandler<MigrationAction, Mig
                      ExecutionContext executionContext) throws ActionException {
         // Не требуется
     }
+
 }

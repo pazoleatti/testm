@@ -8,7 +8,10 @@ import com.aplana.sbrf.taxaccounting.model.migration.MigrationSendResult;
 public interface MessageService {
     /**
      * Отправка файлов JMS-сообщениями
+     *
+     * @param rnus список видов РНУ
+     * @param year список годов за которые РНУ сформированы
      * @return Результат миграции
      */
-    public MigrationSendResult sendFiles();
+    MigrationSendResult sendFiles(long[] rnus, long[] year);
 }

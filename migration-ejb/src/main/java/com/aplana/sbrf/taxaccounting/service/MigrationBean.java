@@ -22,6 +22,7 @@ import java.util.*;
 
 /**
  * EJB-модуль миграции
+ *
  * @author Dmitriy Levykin
  */
 @Stateless
@@ -34,14 +35,14 @@ public class MigrationBean implements MessageService {
     private static final String FILENAME_PROPERTY_NAME = "FILENAME";
     private static final String DATA_PROPERTY_NAME = "DATA";
 
-    @Resource(name="jms/transportConnectionFactory")
+    @Resource(name = "jms/transportConnectionFactory")
     private ConnectionFactory connectionFactory;
 
-    @Resource(name="jms/transportQueue")
+    @Resource(name = "jms/transportQueue")
     private Queue queue;
 
     // РНУ для миграции
-    private static long[] rnus = {25L, 26L, 27L, 31L, 51L, 53L, 54L, 59L, 60L, 64L};
+//    private static long[] rnus = {25L, 26L, 27L, 31L, 51L, 53L, 54L, 59L, 60L, 64L};
 
     // Формат РНУ
     private static Set<Integer> RNU_SET = new HashSet<Integer>(Arrays.asList(25, 26, 27, 31));
@@ -59,25 +60,29 @@ public class MigrationBean implements MessageService {
     private RnuMigrationGenerator rnuGenerator = new RnuMigrationGenerator();
     private XmlMigrationGenerator xmlGenerator = new XmlMigrationGenerator();
 
-    private List<Exemplar> getExemplarsByRnuType(long rnuTypeId) {
-        return migrationDao.getExemplarByRnuType(rnuTypeId);
+    private List<Exemplar> getExemplarsByRnuType(long rnuTypeId, String yearSeq) {
+        return migrationDao.getExemplarByRnuType(rnuTypeId, yearSeq);
     }
 
-    private List<Exemplar> getExemplarsByRnuTypes(long[] rnuIds) {
+    private List<Exemplar> getExemplarsByRnuTypes(long[] rnuIds, long[] years) {
         List<Exemplar> rnuList = new ArrayList<Exemplar>();
+        String yearSeq = Arrays.toString(years);
         for (long rnu : rnuIds) {
-            rnuList.addAll(getExemplarsByRnuType(rnu));
+            rnuList.addAll(getExemplarsByRnuType(rnu, yearSeq));
         }
         return rnuList;
     }
 
     /**
      * Отправка группы файлов
-     * @param rnuIds
+     *
+     * @param rnuIds список видов РНУ
+     * @param years  года
+     * @return количество отосланныхфайлов
      */
-    private int sendFiles(long[] rnuIds) {
+    private int startSendFiles(long[] rnuIds, long[] years) {
 
-        List<Exemplar> list = getExemplarsByRnuTypes(rnuIds);
+        List<Exemplar> list = getExemplarsByRnuTypes(rnuIds, years);
 
         logger.debug("Count of examples = " + list.size());
         int count = 0;
@@ -129,7 +134,8 @@ public class MigrationBean implements MessageService {
 
     /**
      * Список РНУ по экземпляру
-     * @param ex
+     *
+     * @param ex актуальный экземпляр формы РНУ
      * @return
      */
     private List<? extends AbstractRnuRow> getRnuList(Exemplar ex) {
@@ -170,9 +176,9 @@ public class MigrationBean implements MessageService {
     }
 
     @Override
-    public MigrationSendResult sendFiles() {
+    public MigrationSendResult sendFiles(long[] rnus, long[] year) {
         MigrationSendResult result = new MigrationSendResult();
-        if (migrationDao == null)  {
+        if (migrationDao == null) {
             // В dev-mode попадем сюда, это нормально
             throw new ServiceException("В Dev-mode не реализована отправка JMS-сообщений.");
         }
@@ -181,8 +187,8 @@ public class MigrationBean implements MessageService {
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             messageProducer = session.createProducer(queue);
 
-            result.setExemplarList(getExemplarsByRnuTypes(rnus));
-            result.setSendFilesCount(sendFiles(rnus));
+            result.setExemplarList(getExemplarsByRnuTypes(rnus, year));
+            result.setSendFilesCount(startSendFiles(rnus, year));
 
             messageProducer.close();
             session.close();

@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.migration.shared.MigrationAction;
 import com.aplana.sbrf.taxaccounting.web.module.migration.shared.MigrationResult;
+import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -17,6 +18,10 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
 /**
  * Presenter для формы "Миграция исторических данных"
  *
@@ -25,21 +30,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 public class MigrationPresenter extends Presenter<MigrationPresenter.MyView,
         MigrationPresenter.MyProxy> implements MigrationUiHandlers {
 
-    //вынес из хендрела в презентер для ускорения отладки
-    private static long[] rnus = {25L, 26L, 27L, 31L, 51L, 53L, 54L, 59L, 60L, 64L};
-
-    //private static long[] rnus = {
-            //25L
-            //26L
-            //27L
-            // 31L
-            // 51L
-             //53L
-             //54L
-            //59L
-             // 60L
-             //64L
-    //};
+    private static DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
 
     @ProxyCodeSplit
     @NameToken(MigrationTokens.migration)
@@ -49,7 +40,11 @@ public class MigrationPresenter extends Presenter<MigrationPresenter.MyView,
     private final DispatchAsync dispatcher;
 
     public interface MyView extends View, HasUiHandlers<MigrationUiHandlers> {
-        public void setResult(MigrationResult sesult);
+        void setResult(String result);
+
+        List<Long> getRnus();
+
+        List<Long> getYears();
     }
 
     @Inject
@@ -62,13 +57,42 @@ public class MigrationPresenter extends Presenter<MigrationPresenter.MyView,
 
     @Override
     public void runImport() {
+        final List<Long> rnus = getView().getRnus();
+        final List<Long> years = getView().getYears();
 
-        dispatcher.execute(new MigrationAction(rnus), CallbackUtils
-                .defaultCallback(new AbstractCallback<MigrationResult>() {
-                    @Override
-                    public void onSuccess(MigrationResult result) {
-                         getView().setResult(result);
-                    }
-                }, this));
+        final String start = dateTimeFormat.format(new Date());
+
+        if (rnus.size() > 0 && years.size() > 0) {
+            dispatcher.execute(new MigrationAction(toLongs(rnus), toLongs(years)), CallbackUtils
+                    .defaultCallback(new AbstractCallback<MigrationResult>() {
+                        @Override
+                        public void onSuccess(MigrationResult result) {
+                            String msg = start + " - время начала операции." + "\n";
+                            msg += "Выбранные годы РНУ: " + Arrays.toString(years.toArray()).replace("[", "").replace("]", "") + "\n";
+                            msg += "Выбранные виды РНУ: " + Arrays.toString(rnus.toArray()).replace("[", "").replace("]", "") + "\n";
+                            if (result.getExemplarList() != null) {
+                                msg += "Актуальных экземпляров найдено: " + result.getExemplarList().size() + "\n";
+                                msg += "Отправлено экземпляров: " + result.getSendFilesCount() + "\n";
+                            } else {
+                                msg += "Ошибка списка экземпляров\n";
+                            }
+                            msg += dateTimeFormat.format(new Date()) + " - время окончания операции.";
+                            getView().setResult(msg);
+                        }
+                    }, this));
+        } else {
+            getView().setResult("Должно быть выбрано хотя бы один год и один вид РНУ.");
+        }
+    }
+
+    private long[] toLongs(List<Long> longs) {
+        long[] longs1 = new long[longs.size()];
+        int i = 0;
+        for (Long aLong : longs) {
+            longs1[i] = aLong;
+            i++;
+        }
+        return longs1;
+
     }
 }
