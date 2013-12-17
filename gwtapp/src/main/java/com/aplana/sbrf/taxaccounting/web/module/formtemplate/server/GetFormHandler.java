@@ -36,7 +36,7 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
 
         GetFormResult result = new GetFormResult();
 		formTemplateService.checkLockedByAnotherUser(action.getId(), userInfo);
-		FormTemplate formTemplate = formTemplateService.get(action.getId());
+		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(action.getId());
         formTemplate.setScript(formTemplateService.getFormTemplateScript(action.getId()));
 		formTemplateService.lock(action.getId(), userInfo);
 		result.setForm(formTemplate);

@@ -49,6 +49,8 @@ public class FormDataServiceImpl implements FormDataService {
     private DeclarationDataDao declarationDataDao;
 	@Autowired
 	private FormTemplateDao formTemplateDao;
+    @Autowired
+    private FormTemplateService formTemplateService;
 	@Autowired
 	private FormDataAccessService formDataAccessService;
 	@Autowired
@@ -217,7 +219,7 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
 	public long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId,
                                            FormDataKind kind, int reportPeriodId, Integer periodOrder, boolean importFormData) {
-		FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formTemplateId);
 		FormData formData = new FormData(formTemplate);
 		
 		formData.setState(WorkflowState.CREATED);
