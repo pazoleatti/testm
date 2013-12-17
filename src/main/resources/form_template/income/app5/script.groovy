@@ -123,7 +123,8 @@ void logicCheckBeforeCalc() {
         def departmentParam
         if (row.regionBankDivision != null) departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
         if (departmentParam == null || departmentParam.isEmpty()) {
-            logger.error(errorMsg + "Не найдено родительское подразделение!")
+            logger.error(errorMsg + "Не найдено подразделение территориального банка!")
+            return
         } else {
             long centralId = 113 // ID Центрального аппарата.
             // У Центрального аппарата родительским подразделением должен быть он сам
