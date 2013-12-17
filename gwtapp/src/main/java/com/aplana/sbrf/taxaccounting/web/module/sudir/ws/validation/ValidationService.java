@@ -1,13 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.sudir.ws.validation;
 
-import java.util.Map;
-
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.WSException.SudirErrorCodes;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAccountInfo;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAccountManagementException;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAccountManagementException_Exception;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAttribute;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler.FieldNames;
+
+import java.util.Map;
 
 public class ValidationService {
 	
@@ -35,6 +36,12 @@ public static Map<String, Integer> fieldNames = FieldNames.getFieldNamesMap();
 				
 		}
 	}
+
+    public void validate(TAUser user) throws GenericAccountManagementException_Exception {
+        if (user.getId() < 1)
+            throw new GenericAccountManagementException_Exception("Ошибка при получении пользователя по логину " + user.getLogin(),
+                    errorCreator(SudirErrorCodes.SUDIR_004));
+    }
 	
 	private GenericAccountManagementException errorCreator(SudirErrorCodes codeErr){
 		GenericAccountManagementException gam = new GenericAccountManagementException();

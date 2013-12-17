@@ -64,6 +64,8 @@ public class GenericAccountInfoAssembler {
 		List<GenericAccountInfo> listGenericAccountInfo = new ArrayList<GenericAccountInfo>();
 		
 		for (TAUser taUser : users) {
+            if (taUser.getId() < 1)
+                continue;
 			GenericAccountInfo gai = new GenericAccountInfo();
 			ArrayOfGenericAttribute aOfga = new ArrayOfGenericAttribute();
 			GenericAttribute ga = new GenericAttribute();

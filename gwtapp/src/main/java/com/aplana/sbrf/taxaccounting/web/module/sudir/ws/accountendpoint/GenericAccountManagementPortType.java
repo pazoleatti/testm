@@ -57,6 +57,7 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 	public void suspendAccount(String accountId)
 			throws GenericAccountManagementException_Exception {
 		try {
+            validationService.validate(userService.getUser(accountId));
 			userService.setUserIsActive(accountId, false);
 		} catch (WSException e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
@@ -99,6 +100,7 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 
 		try {
 			TAUser user = gais.assembleUser(accountInfo);
+            validationService.validate(userService.getUser(user.getLogin()));
 			userService.updateUser(user);
 		} catch (WSException e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
@@ -116,7 +118,9 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 
 	public void restoreAccount(String accountId)
 			throws GenericAccountManagementException_Exception {
-		try {
+
+        try {
+            validationService.validate(userService.getUser(accountId));
 			userService.setUserIsActive(accountId, true);
 		} catch (WSException e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
@@ -158,7 +162,9 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 		List<GenericAccountInfo> listUsersByLogin = new ArrayList<GenericAccountInfo>();
 		try {
 			List<TAUser> listTAUsersByLogin = new ArrayList<TAUser>();
-			listTAUsersByLogin.add(userService.getUser(accountId.toLowerCase()));
+            TAUser user = userService.getUser(accountId.toLowerCase());
+            validationService.validate(user);
+			listTAUsersByLogin.add(user);
 			listUsersByLogin.addAll(gais.desassembleUsers(listTAUsersByLogin));
 		} catch (WSException e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
