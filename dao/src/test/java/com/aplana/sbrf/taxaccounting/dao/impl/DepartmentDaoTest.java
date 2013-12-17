@@ -36,7 +36,7 @@ public class DepartmentDaoTest {
 		
 		d = departmentDao.getDepartment(2);
 		Assert.assertEquals(2, d.getId());
-		Assert.assertEquals(DepartmentType.TERBANK, d.getType());
+		Assert.assertEquals(DepartmentType.TERR_BANK, d.getType());
 		Assert.assertEquals(new Integer(Department.ROOT_BANK_ID), d.getParentId());
 		Assert.assertEquals("ТБ1", d.getName());
 		//Assert.assertEquals(2, d.getFormTypeIds().size());
@@ -45,7 +45,7 @@ public class DepartmentDaoTest {
 
 		d = departmentDao.getDepartment(3);
 		Assert.assertEquals(3, d.getId());
-		Assert.assertEquals(DepartmentType.TERBANK, d.getType());
+		Assert.assertEquals(DepartmentType.TERR_BANK, d.getType());
 		Assert.assertEquals(new Integer(Department.ROOT_BANK_ID), d.getParentId());
 		Assert.assertEquals("ТБ2", d.getName());
 		//Assert.assertEquals(2, d.getFormTypeIds().size());

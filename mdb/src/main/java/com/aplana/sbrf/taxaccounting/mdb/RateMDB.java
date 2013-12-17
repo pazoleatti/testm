@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.mdb;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -45,7 +46,6 @@ public class RateMDB implements MessageListener {
 
     private static final Log logger = LogFactory.getLog(RateMDB.class);
     private static final String RATE_ENCODING = "UTF-8";
-    private static String USER_APPENDER = "controlUnp";
 
     private static String ERROR_FORMAT = "Сообщение не соответствует заданному формату";
     private static String ERROR_RATE = "Сообщение не соответствует передаче данных по курсам валют / драгоценным металлам";
@@ -94,7 +94,7 @@ public class RateMDB implements MessageListener {
     private TAUserInfo getUser() {
         TAUserInfo userInfo = new TAUserInfo();
         if (taUserService != null) {
-            userInfo.setUser(taUserService.getUser(USER_APPENDER));
+            userInfo.setUser(taUserService.getUser(TAUser.SYSTEM_USER_ID));
             //TODO (alivanov 3.09.13) подставить правильного пользователя
             // Пользователя брать с некого конфигурационного файла (его пока нет)
             // Это будет специальный пользователь для операции миграции (импорта "старых" данных)

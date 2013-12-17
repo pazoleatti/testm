@@ -51,7 +51,6 @@ public class MappingServiceImpl implements MappingService {
     private static String charSet = "cp866";
     private static String RNU_EXT = ".rnu";
     private static String XML_EXT = ".xml";
-    private static String USER_APPENDER = "controlUnp";
     private static String DATE_APPENDER_XML = "01.01.20";
     private static String DATE_APPENDER_RNU = "01.01.";
 
@@ -60,11 +59,7 @@ public class MappingServiceImpl implements MappingService {
         log.info("Принят файл " + filename + ", размер = " + (fileContent == null ? null : fileContent.length));
 
         TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(taUserService.getUser(USER_APPENDER));
-        //TODO (alivanov 3.09.13) подставить правильного пользователя для создания форм при операции импорта "старых" данных
-        // Пользователя брать с некого конфигурационного файла (его пока нет)
-        // Это будет специальный пользователь для операции миграции (импорта "старых" данных)
-        // Сейчас же пока подставлен controlUnp
+        userInfo.setUser(taUserService.getUser(TAUser.SYSTEM_USER_ID));
         userInfo.setIp("127.0.0.1");
 
         RestoreExemplar restoreExemplar;

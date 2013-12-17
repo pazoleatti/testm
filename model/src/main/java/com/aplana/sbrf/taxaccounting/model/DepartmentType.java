@@ -7,11 +7,10 @@ import java.io.Serializable;
  */
 public enum DepartmentType implements Serializable {
 	ROOT_BANK("Банк", 1),
-	TERBANK("Территориальный банк", 2),
-	GOSB("ГОСБ", 3),
-    OSB("ОСБ", 4),
-    VSP("ВСП", 5),
-    PVSP("ПВСП", 6);
+	TERR_BANK("Территориальный банк", 2),
+	CSKO_PCP("ЦСКО, ПЦП", 3),
+    MANAGEMENT("Управление", 4),
+    INTERNAL("", 5);
 
 	private static final long serialVersionUID = 1L;	
 

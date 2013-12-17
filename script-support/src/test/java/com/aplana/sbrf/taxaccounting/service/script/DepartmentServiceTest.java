@@ -38,7 +38,7 @@ public class DepartmentServiceTest {
         validTB.setId(2);
         validTB.setName("ТерБанк для Банк");
         validTB.setTbIndex("1");
-        validTB.setType(DepartmentType.TERBANK);
+        validTB.setType(DepartmentType.TERR_BANK);
 
         List<Department> temp = new ArrayList<Department>();
         temp.add(valid);

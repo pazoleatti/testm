@@ -130,10 +130,10 @@ public class DeclarationDataAccessServiceImplTest {
 		Department departmentBank = mockDepartment(Department.ROOT_BANK_ID, Department.ROOT_BANK_ID, DepartmentType.ROOT_BANK);
 
 		// В подразделении DEPARTMENT_TB1_ID разрешена работа с декларациями DECLARATION_TYPE_1_ID
-		Department departmentTB1 = mockDepartment(DEPARTMENT_TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
+		Department departmentTB1 = mockDepartment(DEPARTMENT_TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERR_BANK);
 
 		// В подразделении DEPARTMENT_TB2_ID разрешена работа с декларациями DECLARATION_TYPE_2_ID
-		Department departmentTB2 = mockDepartment(DEPARTMENT_TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
+		Department departmentTB2 = mockDepartment(DEPARTMENT_TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERR_BANK);
 
 
 		DepartmentDao departmentDao = mock(DepartmentDao.class);
