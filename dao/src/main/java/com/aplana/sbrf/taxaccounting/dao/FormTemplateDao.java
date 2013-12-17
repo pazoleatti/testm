@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
 import java.util.List;
 
@@ -17,7 +20,8 @@ public interface FormTemplateDao {
 	 */
 	List<FormTemplate> listAll();
 	/**
-	 * Получить макет налоговой формы (без скрипта). Для получения тела скрипта {@link #getFormTemplateScript(int)}}
+	 * Получить макет налоговой формы (без {@link DataRow}). Для получения строк {@link #getDataCells(com.aplana.sbrf.taxaccounting.model.FormTemplate)}
+     * {@link #getHeaderCells(com.aplana.sbrf.taxaccounting.model.FormTemplate)}
 	 * @param formTemplateId идентификатор макета
 	 * @return объект, представляющий описание налоговой формы
 	 */
@@ -44,4 +48,18 @@ public interface FormTemplateDao {
      * @return тело скрипта
      */
     String getFormTemplateScript(int formTemplateId);
+
+    /**
+     * Получаем набор начальных строк из шаблона.
+     * @param formTemplate - шаблон
+     * @return начальные строки
+     */
+    List<DataRow<Cell>> getDataCells(FormTemplate formTemplate);
+
+    /**
+     * Получаем заголовки для столбцов
+     * @param formTemplate - шаблон
+     * @return заголовки столбцов
+     */
+    List<DataRow<HeaderCell>> getHeaderCells(FormTemplate formTemplate);
 }

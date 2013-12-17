@@ -26,6 +26,8 @@ public class FormTemplate extends IdentityObject<Integer> {
     
     /**
      * Тело скрипта
+     * Оставлен для сохранения шаблона налоговой формы.
+     * Заполненяться поле должно отдельным вызовом функции dao.
      */
     private String script;
 
@@ -237,8 +239,6 @@ public class FormTemplate extends IdentityObject<Integer> {
 	public void setVersion(String version) {
 		this.version = version;
 	}
-
-
 
 	public List<DataRow<Cell>> getRows() {
 		return rows;

@@ -82,4 +82,11 @@ public interface FormTemplateService {
      * @return тело скрипта
      */
     String getFormTemplateScript(int formTemplateId);
+
+    /**
+     * Получить макет налоговой формы.
+     * @param formTemplateId идентификатор макета
+     * @return объект, представляющий полное описание налоговой формы
+     */
+    FormTemplate getFullFormTemplate(int formTemplateId);
 }
