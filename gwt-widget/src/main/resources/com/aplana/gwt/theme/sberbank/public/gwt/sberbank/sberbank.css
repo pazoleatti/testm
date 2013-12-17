@@ -1310,11 +1310,16 @@ td.datePickerMonth {
 	border: 1px solid #bbbbbb;
 }
 
+.aplana-Spinner-button {
+	background: url(images/spinner.png) no-repeat;
+}
+
 .aplana-Spinner-incButton {
 	border-top: none;
 	border-right: none;
 	border-bottom: 1px solid #bbbbbb;
 	border-left: 1px solid #bbbbbb;
+	background-position: 0 0;
 }
 
 .aplana-Spinner-decButton {
@@ -1322,4 +1327,13 @@ td.datePickerMonth {
 	border-right: none;
 	border-bottom: none;
 	border-left: 1px solid #bbbbbb;
+	background-position: 0 -9px;
+}
+
+.aplana-Spinner-incButton.disabled {
+	background-position: -9px 0 !important;
+}
+
+.aplana-Spinner-decButton.disabled {
+	background-position: -9px -9px !important;
 }

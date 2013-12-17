@@ -24,6 +24,11 @@ public class Spinner extends Composite
 	public static final String STYLE_NAME = Constants.STYLE_PREFIX + "Spinner";
 
 	/**
+	 * Название стиля для задисабленных элементов. Это нужно для поддержки IE8.
+	 */
+	public static final String STYLE_DISABLED = "disabled";
+
+	/**
 	 * Высота виджета по умолчанию в пикселях.
 	 */
 	public static final int DEFAULT_HEIGHT = 20;
@@ -36,7 +41,7 @@ public class Spinner extends Composite
 	/**
 	 * Ширина виджета по умолчанию в пикселях.
 	 */
-	public static final int DEFAULT_WIDTH = 150;
+	public static final int DEFAULT_WIDTH = 145;
 
 
 	/**
@@ -239,6 +244,16 @@ public class Spinner extends Composite
 		textBox.setEnabled(enabled);
 		incButton.setEnabled(enabled);
 		decButton.setEnabled(enabled);
+
+		if(enabled){
+			textBox.removeStyleName(STYLE_DISABLED);
+			incButton.removeStyleName(STYLE_DISABLED);
+			decButton.removeStyleName(STYLE_DISABLED);
+		} else {
+			textBox.addStyleName(STYLE_DISABLED);
+			incButton.addStyleName(STYLE_DISABLED);
+			decButton.addStyleName(STYLE_DISABLED);
+		}
 	}
 
 	/**
