@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.script.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.BDUtils;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.script.FormDataCacheDao;
@@ -9,14 +10,19 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static org.mockito.Mockito.*;
 
 /**
  * @author Dmitriy Levykin
@@ -32,6 +38,31 @@ public class FormDataCacheDaoTest {
 
     @Autowired
     DataRowDao dataRowDao;
+
+    static Long cnt = 5L;
+
+    @Before
+    public void init(){
+        /**
+         * Т.к. hsqldb не поддерживает запрос который мы используем в дао
+         * пришлось немного закостылять этот момент. Заапрувлено Ф.Маратом.
+         */
+        // мок утилитного сервиса
+        BDUtils dbUtilsMock = mock(BDUtils.class);
+        when(dbUtilsMock.getNextIds(anyLong())).thenAnswer(new org.mockito.stubbing.Answer<List<Long>>() {
+            @Override
+            public List<Long> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                List<Long> ids = new ArrayList<Long>();
+                Object[] args = invocationOnMock.getArguments();
+                int count = ((Long) args[0]).intValue();
+                for (int i = 0; i < count; i++) {
+                    ids.add(cnt++);
+                }
+                return ids;
+            }
+        });
+        dataRowDao.setDbUtils(dbUtilsMock);
+    }
 
     @Test
     public void getRefBookMapTest1() {

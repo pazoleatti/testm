@@ -14,6 +14,7 @@ public class TableRow implements Serializable {
 	private boolean isSubHeader;
     private Boolean balance;
     private Date deadline;
+    private Date correctPeriod;
 
 	public int getId() {
 		return id;
@@ -85,5 +86,13 @@ public class TableRow implements Serializable {
 
     public void setDeadline(Date deadline) {
         this.deadline = deadline;
+    }
+
+    public Date getCorrectPeriod() {
+        return correctPeriod;
+    }
+
+    public void setCorrectPeriod(Date correctPeriod) {
+        this.correctPeriod = correctPeriod;
     }
 }

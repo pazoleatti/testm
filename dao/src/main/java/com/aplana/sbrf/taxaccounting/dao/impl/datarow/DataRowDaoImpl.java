@@ -1,28 +1,22 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
+import com.aplana.sbrf.taxaccounting.dao.BDUtils;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
-import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 
 /**
@@ -34,6 +28,9 @@ import java.util.*;
 @Repository
 public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
+    @Autowired
+    BDUtils dbUtils;
+
 	public static final String ERROR_MSG_NO_ROWID = "Строка id=%s отсутствует во временном срезе формы formDataId=%s";
 	public static final String ERROR_MSG_INDEX = "Индекс %s не входит в допустимый диапазон 1..%s";
 
@@ -41,20 +38,20 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	public List<DataRow<Cell>> getSavedRows(FormData fd, DataRowFilter filter,
 			DataRowRange range) {
 		return phisicalGetRows(fd,
-				new TypeFlag[] { TypeFlag.DEL, TypeFlag.SAME }, filter, range);
+                new TypeFlag[]{TypeFlag.DEL, TypeFlag.SAME}, filter, range);
 	}
 
 	@Override
 	public int getSavedSize(FormData fd, DataRowFilter filter) {
 		return phisicalGetSize(fd,
-				new TypeFlag[] { TypeFlag.DEL, TypeFlag.SAME }, filter);
+                new TypeFlag[]{TypeFlag.DEL, TypeFlag.SAME}, filter);
 	}
 
 	@Override
 	public List<DataRow<Cell>> getRows(FormData fd, DataRowFilter filter,
 			DataRowRange range) {
 		return phisicalGetRows(fd,
-				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, filter, range);
+                new TypeFlag[]{TypeFlag.ADD, TypeFlag.SAME}, filter, range);
 	}
 
 	@Override
@@ -182,9 +179,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				"delete from DATA_ROW where FORM_DATA_ID=? and TYPE=?",
 				new Object[] { formData.getId(), TypeFlag.ADD.getKey() });
 		getJdbcTemplate().update(
-				"update DATA_ROW set TYPE=? where FORM_DATA_ID=? and TYPE=?",
-				new Object[] { TypeFlag.DEL.getKey(), formData.getId(),
-						TypeFlag.SAME.getKey() });
+                "update DATA_ROW set TYPE=? where FORM_DATA_ID=? and TYPE=?",
+                new Object[]{TypeFlag.DEL.getKey(), formData.getId(),
+                        TypeFlag.SAME.getKey()});
 	}
 
 	@Override
@@ -193,8 +190,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		removeRows(formData);
 		// Вставляем строки
 		phisicalInsertRows(formData, dataRows,
-				0l,
-				DataRowDaoImplUtils.DEFAULT_ORDER_STEP, null);
+                0l,
+                DataRowDaoImplUtils.DEFAULT_ORDER_STEP, null);
 	}
 
 	@Override
@@ -273,8 +270,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	private void phisicalRemoveRows(long formDataId, TypeFlag type) {
 		getJdbcTemplate().update(
-				"delete from DATA_ROW where FORM_DATA_ID = ? and TYPE = ?",
-				formDataId, type.getKey());
+                "delete from DATA_ROW where FORM_DATA_ID = ? and TYPE = ?",
+                formDataId, type.getKey());
 	}
 
 	private void phisicalUpdateRowsType(long formDataId, TypeFlag fromType,
@@ -336,78 +333,64 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 						params);
 	}
 
-	private void phisicalInsertRows(final FormData formData,
-			final List<DataRow<Cell>> dataRows, final Long ordBegin,
-			final Long ordStep, final List<Long> orders) {
+    @Override
+    public void setDbUtils(BDUtils dbUtils) {
+        this.dbUtils = dbUtils;
+    }
 
-		if (dataRows.isEmpty()) {
-			return;
-		}
-		
-		if (DataRowDaoImplUtils.hasDublicats(dataRows)){
-			throw new IllegalArgumentException("Дубликаты строк не допустимы в списке. Дубликаты - ссылки на один и тот же объект DataRow");
-		}
+    private void phisicalInsertRows(final FormData formData,
+                                    final List<DataRow<Cell>> dataRows, final Long ordBegin,
+                                    final Long ordStep, final List<Long> orders) {
 
-		// SBRFACCTAX-2201, SBRFACCTAX-2082
-		FormDataUtils.cleanValueOners(dataRows);
+        if (dataRows.isEmpty()) {
+            return;
+        }
 
-		// TODO: Необходимо оптимизировать insert. Oracle не поддерживает
-		// получение ключей при использовании батч операции
-		// http://stackoverflow.com/questions/9065894/jdbc-preparedstatement-batch-update-and-generated-keys
-		// Функция SqlUtils.batchUpdate работает как последовательный вызов
-		// executeUpdate, а не batchUpdate.
-		// Хотя с запросе на stackoverflow написано, что падение
-		// производительности не значительное.
+        if (DataRowDaoImplUtils.hasDublicats(dataRows)){
+            throw new IllegalArgumentException("Дубликаты строк не допустимы в списке. Дубликаты - ссылки на один и тот же объект DataRow");
+        }
 
-		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
-			@Override
-			public void setValues(PreparedStatement ps, int index)
-					throws SQLException {
-				DataRow<Cell> dr = dataRows.get(index);
-				String rowAlias = dr.getAlias();
-				ps.setLong(1, formData.getId());
-				ps.setString(2, rowAlias);
-				Long order = null;
-				if (orders != null) {
-					order = orders.get(index);
-				} else {
-					order = (index + 1) * ordStep + ordBegin;
-				}
-				ps.setLong(3, order);
-				ps.setInt(4, TypeFlag.ADD.getKey());
-			}
+        // получение id'шников для вставки строк батчем
+        final List<Long> ids = dbUtils.getNextIds(Integer.valueOf(dataRows.size()).longValue());
 
-			@Override
-			public int getBatchSize() {
-				return dataRows.size();
-			}
-		};
+        getJdbcTemplate().batchUpdate(
+                "insert into DATA_ROW (ID, FORM_DATA_ID, ALIAS, ORD, TYPE) values (?, ?, ?, ?, ?)",
+                new BatchPreparedStatementSetter() {
 
-		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
-		SqlUtils.batchUpdate(getJdbcTemplate(), new PreparedStatementCreator() {
-			@Override
-			public PreparedStatement createPreparedStatement(Connection con)
-					throws SQLException {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setLong(1, ids.get(i));
 
-				return con
-						.prepareStatement(
-								"insert into DATA_ROW (ID, FORM_DATA_ID, ALIAS, ORD, TYPE) values (SEQ_DATA_ROW.NEXTVAL, ?, ?, ?, ?)",
-								new String[] { "ID" });
-			}
-		}, bpss, generatedKeyHolder);
+                        ps.setLong(2, formData.getId());
 
-		List<Map<String, Object>> keysList = generatedKeyHolder.getKeyList();
-		if (keysList.size() != dataRows.size()) {
-			throw new IllegalStateException();
-		}
-		final Iterator<DataRow<Cell>> iterator = dataRows.iterator();
-		for (Map<String, Object> map : keysList) {
-			iterator.next().setId(((BigDecimal) map.get("ID")).longValue());
-		}
+                        DataRow<Cell> drow = dataRows.get(i);
+                        String rowAlias = drow.getAlias();
+                        ps.setString(3, rowAlias);
 
-		batchInsertCells(dataRows);
-		
-	}
+                        Long order = null;
+                        if (orders != null) {
+                            order = orders.get(i);
+                        } else {
+                            order = (i + 1) * ordStep + ordBegin;
+                        }
+                        ps.setLong(4, order);
+
+                        ps.setInt(5, TypeFlag.ADD.getKey());
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return ids.size();
+                    }
+                });
+
+        final Iterator<DataRow<Cell>> iterator = dataRows.iterator();
+        for (Long id : ids) {
+            iterator.next().setId(id);
+        }
+
+        batchInsertCells(dataRows);
+    }
 
 	/**
 	 * Метод получает значение ORD для строки по индексу. Метод работает со временным срезом формы

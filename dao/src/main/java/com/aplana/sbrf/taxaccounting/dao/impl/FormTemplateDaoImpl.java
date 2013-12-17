@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -64,7 +65,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			if (deepFetch) {
                 /*formTemplate.setScript(rs.getString("script"));*/
 				formTemplate.getColumns().addAll(columnDao.getFormColumns(formTemplate.getId()));
-				String stRowsData = rs.getString("data_rows");
+				/*String stRowsData = rs.getString("data_rows");
 				if (stRowsData != null) {
 					formTemplate.getRows().addAll(xmlSerializationUtils.deserialize(stRowsData, formTemplate.getColumns(), formTemplate.getStyles(), Cell.class));
 				}
@@ -72,7 +73,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 				if (stHeaderData != null) {
 					formTemplate.getHeaders().addAll(xmlSerializationUtils.deserialize(stHeaderData, formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class));
 					FormDataUtils.setValueOners(formTemplate.getHeaders());
-				}
+				}*/
 			}
 			return formTemplate;
 		}
@@ -104,7 +105,9 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	 */
 	@Transactional(readOnly = false)
     @Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id", beforeInvocation = true),
-            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true)})
+            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true),
+            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_data_rows\")", beforeInvocation = true),
+            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_data_headers\")", beforeInvocation = true)})
 	@Override
 	public int save(final FormTemplate formTemplate) {
 		final Integer formTemplateId = formTemplate.getId();
@@ -168,11 +171,11 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		FormTemplate form;
 		try {
 			form =jt.queryForObject(
-					"select * from form_template where type_id = ? and is_active = ?",
-					new Object[]{formTypeId,1},
-					new int[]{Types.NUMERIC,Types.NUMERIC},
-					new FormTemplateMapper(false)
-					);
+                    "select * from form_template where type_id = ? and is_active = ?",
+                    new Object[]{formTypeId, 1},
+                    new int[]{Types.NUMERIC, Types.NUMERIC},
+                    new FormTemplateMapper(false)
+            );
 			return form.getId();
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Для данного вида налоговой формы %d не найдено активного шаблона налоговой формы.",formTypeId);
@@ -189,5 +192,27 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                 new Object[]{formTemplateId},
                 new int[]{Types.INTEGER},
                 String.class);
+    }
+
+    @Cacheable(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_data_rows\")")
+    @Override
+    public List<DataRow<Cell>> getDataCells(FormTemplate formTemplate) {
+        String dataRowXml = getJdbcTemplate().queryForObject("select data_rows from form_template where id = ?",
+                new Object[]{formTemplate.getId()},
+                new int[]{Types.INTEGER},
+                String.class);
+        return dataRowXml != null ? xmlSerializationUtils.deserialize(dataRowXml, formTemplate.getColumns(), formTemplate.getStyles(), Cell.class):
+                new ArrayList<DataRow<Cell>>();
+    }
+
+    @Cacheable(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_data_headers\")")
+    @Override
+    public List<DataRow<HeaderCell>> getHeaderCells(FormTemplate formTemplate) {
+        String headerDataXml = getJdbcTemplate().queryForObject("select data_headers from form_template where id = ?",
+                new Object[]{formTemplate.getId()},
+                new int[]{Types.INTEGER},
+                String.class);
+        return headerDataXml != null ? xmlSerializationUtils.deserialize(headerDataXml, formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class):
+                new ArrayList<DataRow<HeaderCell>>();
     }
 }
