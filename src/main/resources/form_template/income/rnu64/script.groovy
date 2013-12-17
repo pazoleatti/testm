@@ -610,7 +610,7 @@ def addData(def xml, def fileName) {
 
         // графа 3 - справочник 60 "Части сделок"
         tmp = null
-        if (row.field[index].@value.text() != null && getCellValue(row, index, type).trim() != '') {
+        if (getCellValue(row, index, type, true) != null && getCellValue(row, index, type).trim() != '') {
             tmp = getRecordId(60, 'CODE', getCellValue(row, index, type), date, cache)
         }
         newRow.part = tmp
