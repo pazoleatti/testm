@@ -895,7 +895,7 @@ def addData(def xml, int headRowCount) {
         if (map != null) {
             def text = row.cell[xmlIndexCell].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO.stringValue != null)) {
-                logger.warn("Строка ${xmlIndexRow+2} столбец ${xmlIndexCell+2} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName()+"»!")
+                logger.warn("Проверка файла: Строка ${xmlIndexRow+2} столбец ${xmlIndexCell+2} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName()+"»!")
             }
         }
         xmlIndexCell++
@@ -905,7 +905,7 @@ def addData(def xml, int headRowCount) {
             def text = row.cell[xmlIndexCell].text()
             map = getRefBookValue(10, map.COUNTRY.referenceValue)
             if ((text != null && !text.isEmpty() && !text.equals(map.NAME.stringValue)) || ((text == null || text.isEmpty()) && map.NAME.stringValue != null)) {
-                logger.warn("Строка ${xmlIndexRow+3} столбец ${xmlIndexCell+2} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
+                logger.warn("Проверка файла: Строка ${xmlIndexRow+3} столбец ${xmlIndexCell+2} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
             }
         }
         xmlIndexCell++
@@ -914,7 +914,7 @@ def addData(def xml, int headRowCount) {
         if (map != null) {
             def text = row.cell[xmlIndexCell].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.CODE.stringValue)) || ((text == null || text.isEmpty()) && map.CODE.stringValue != null)) {
-                logger.warn("Строка ${xmlIndexRow+3} столбец ${xmlIndexCell+2} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
+                logger.warn("Проверка файла: Строка ${xmlIndexRow+3} столбец ${xmlIndexCell+2} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
             }
         }
         xmlIndexCell++
@@ -1037,7 +1037,7 @@ def getNumber(def value, int indexRow, String cellName) {
     try {
         return new BigDecimal(tmp)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow + 2}, графа «$cellName» содержит недопустимый тип данных!")
+        throw new Exception("Проверка файла: Строка ${indexRow + 2}, графа «$cellName» содержит недопустимый тип данных!")
     }
 }
 
@@ -1062,7 +1062,7 @@ def getRecordId(def ref_id, String alias, String value, Date date, int rowIndex,
         recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return recordCache[ref_id][filter]
     } else {
-        def msg = "Строка ${rowIndex-2}, графа «$cellName» содержит значение, отсутствующее в справочнике «" + refBookFactory.get(ref_id).getName()+"»!"
+        def msg = "Проверка файла: Строка ${rowIndex-2}, графа «$cellName» содержит значение, отсутствующее в справочнике «" + refBookFactory.get(ref_id).getName()+"»!"
         if (mandatory) {
             throw new Exception(msg)
         } else {
@@ -1083,7 +1083,7 @@ def getDate(def value, int indexRow, String cellName) {
     try {
         return format.parse(value)
     } catch (Exception e) {
-        throw new Exception("Строка ${indexRow + 2}, графа «$cellName» содержит недопустимый тип данных!")
+        throw new Exception("Проверка файла: Строка ${indexRow + 2}, графа «$cellName» содержит недопустимый тип данных!")
     }
 }
 
