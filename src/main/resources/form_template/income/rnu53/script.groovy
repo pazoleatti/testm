@@ -401,10 +401,10 @@ def logicalCheck() {
             // 7. Арифметическая проверка графы 9, 10, 11, 12, 13 ===============================Конец
         }
 
-        // 8. Проверка итоговых значений формы  Заполняется автоматически (графа 5, 6, 9, 10, 12, 13).
+        // 8. Проверка итоговых значений формы  Заполняется автоматически (графа 4, 5, 6, 9, 10, 12, 13).
         if (hasTotalRow) {
             def totalRow = data.getDataRow(getRows(data), 'total')
-            def totalSumColumns = ['acquisitionPrice', 'salePrice', 'income',
+            def totalSumColumns = ['nominalPriceSecurities', 'acquisitionPrice', 'salePrice', 'income',
                     'outcome', 'outcome269st', 'outcomeTax']
             for (def alias : totalSumColumns) {
                 if (totalRow.getCell(alias).getValue() != getSum(alias)) {
@@ -1055,7 +1055,7 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    def totalColumns = [5: 'acquisitionPrice', 6: 'salePrice', 9: 'income', 10: 'outcome', 12: 'outcome269st', 13: 'outcomeTax']
+    def totalColumns = [4: 'nominalPriceSecurities', 5: 'acquisitionPrice', 6: 'salePrice', 9: 'income', 10: 'outcome', 12: 'outcome269st', 13: 'outcomeTax']
 
     def totalCalc = getCalcTotalRow()
     def errorColums = []
@@ -1098,7 +1098,7 @@ def getCalcTotalRow() {
     totalRow.tadeNumber = 'Итого'
     totalRow.getCell('tadeNumber').colSpan = 2
     setTotalStyle(totalRow)
-    ['acquisitionPrice', 'salePrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each { alias ->
+    ['nominalPriceSecurities', 'acquisitionPrice', 'salePrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each { alias ->
         totalRow.getCell(alias).setValue(getSum(alias))
     }
     return totalRow
