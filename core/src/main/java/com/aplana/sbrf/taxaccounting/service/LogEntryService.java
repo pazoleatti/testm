@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис для хранения списков LogEntry в таблице BLOB_DATA
@@ -14,6 +16,7 @@ public interface LogEntryService {
 
     /**
      * Получить LogEntry постранично
+     *
      * @param uuid
      * @return
      */
@@ -21,6 +24,7 @@ public interface LogEntryService {
 
     /**
      * Получить LogEntry целиком
+     *
      * @param uuid
      * @return
      */
@@ -28,9 +32,17 @@ public interface LogEntryService {
 
     /**
      * Сохранить LogEntry
+     *
      * @param logEntry
-     * @return  uuid
+     * @return uuid
      */
     String save(List<LogEntry> logEntry);
 
+    /**
+     * Число ошибок каждой из групп ERROR, WARNING и INFO
+     *
+     * @param uuid
+     * @return
+     */
+    Map<LogLevel, Integer> getLogCount(String uuid);
 }

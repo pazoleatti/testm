@@ -3,12 +3,15 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.LogEntryDao;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -48,5 +51,35 @@ public class LogEntryServiceImpl implements LogEntryService {
         String uuid = UUID.randomUUID().toString().toLowerCase();
         logEntryDao.save(logEntry, uuid);
         return uuid;
+    }
+
+    @Override
+    public Map<LogLevel, Integer> getLogCount(String uuid) {
+        Map<LogLevel, Integer> retMap = new HashMap<LogLevel, Integer>();
+        int error = 0;
+        int warn = 0;
+        int info = 0;
+
+        List<LogEntry> logEntries = getAll(uuid);
+        if (logEntries != null) {
+            for (LogEntry logEntry : logEntries) {
+                switch (logEntry.getLevel()) {
+                    case ERROR:
+                        error++;
+                        break;
+                    case WARNING:
+                        warn++;
+                        break;
+                    case INFO:
+                        info++;
+                }
+            }
+        }
+
+        retMap.put(LogLevel.ERROR, error);
+        retMap.put(LogLevel.WARNING, warn);
+        retMap.put(LogLevel.INFO, info);
+
+        return retMap;
     }
 }
