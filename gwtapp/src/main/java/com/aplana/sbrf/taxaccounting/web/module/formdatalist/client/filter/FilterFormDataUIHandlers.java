@@ -4,7 +4,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface FilterFormDataUIHandlers extends UiHandlers {
 
-	void onCreateClicked();
-
 	void onApplyClicked();
 }

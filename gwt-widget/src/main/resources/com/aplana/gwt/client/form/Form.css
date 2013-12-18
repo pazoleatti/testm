@@ -3,11 +3,11 @@
 /* Заголовок */
 .typicalFormHeader {
     min-width: 1px;
-    height: 35px;
+    height: 25px;
     padding-left: 20px;
     padding-right: 20px;
     overflow: hidden;
-    line-height: 35px;
+    line-height: 25px;
 }
 
 /* Компоненты слева*/
@@ -39,14 +39,14 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     -ms-text-overflow: ellipsis;
-    font-size: 22px;
+    font-size: 20px;            /*размер шрифта скрывающегося заголовка*/
 }
 
 /* Тело формы */
 .typicalFormBody {
     border: solid 1px #aeaeac;
     position: absolute;
-    top: 35px;
+    top: 30px;
     bottom: 0;
     right: 0;
     left: 0;

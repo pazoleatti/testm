@@ -8,12 +8,9 @@
              xmlns:fm="urn:import:com.aplana.gwt.client.form">
 
     <ui:style>
-        .title {
-            font-size: 16px;
-        }
-
         .header {
             font-size: 14px;
+            color:  #636460;
         }
 
         .btnPanel {
@@ -39,7 +36,7 @@
                 <fm:left>
                     <fm:Left>
                         <g:Label text="Настройки" addStyleNames="{style.header}"/>
-                        <g:Label text="-" addStyleNames="{style.header}"/>
+                        <g:Label text="—" addStyleNames="{style.header}"/>
                     </fm:Left>
                 </fm:left>
                 <fm:right>
@@ -51,7 +48,7 @@
                 </fm:right>
                 <fm:resizable>
                     <fm:Resizable>
-                        <g:Label text="Пользователи системы" addStyleNames="{style.title}"/>
+                        <g:Label text="Пользователи системы"/>
                     </fm:Resizable>
                 </fm:resizable>
             </fm:HeaderContainer>
