@@ -1,16 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.client.event.log;
 
-import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
 
 /**
- * Добавляет сообщения в Очищает панель с сообщениями
+ * Добавляет сообщения в панель с сообщениями
  * 
  * @author sgoryachkin
+ * @author Dmitriy Levykin
  *
  */
 public class LogAddEvent extends
@@ -20,7 +18,7 @@ public class LogAddEvent extends
 		/**
 		 * @param event
 		 */
-		void onLogAdd(LogAddEvent event);
+		void onLogUpdate(LogAddEvent event);
 	}
 
 	private static final Type<MyHandler> TYPE = new Type<MyHandler>();
@@ -29,20 +27,23 @@ public class LogAddEvent extends
 		return TYPE;
 	}
 
-	public static void fire(HasHandlers source,	List<LogEntry> logEntries) {
+	public static void fire(HasHandlers source,	String uuid) {
 		LogAddEvent event = new LogAddEvent();
-		event.setLogEntries(logEntries);
+		event.setUuid(uuid);
 		source.fireEvent(event);
 	}
 
-	private List<LogEntry> logEntries;
+    /**
+     * UUID-идентификатор списка сообщений
+     */
+	private String uuid;
 
 	public LogAddEvent() {
 	}
 
 	@Override
 	protected void dispatch(MyHandler handler) {
-		handler.onLogAdd(this);
+		handler.onLogUpdate(this);
 	}
 
 	@Override
@@ -50,12 +51,11 @@ public class LogAddEvent extends
 		return getType();
 	}
 
-	public List<LogEntry> getLogEntries() {
-		return logEntries;
+	public String getUuid() {
+		return uuid;
 	}
 
-	public void setLogEntries(List<LogEntry> logEntries) {
-		this.logEntries = logEntries;
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
-
 }

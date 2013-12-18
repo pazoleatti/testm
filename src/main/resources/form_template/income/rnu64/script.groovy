@@ -336,7 +336,7 @@ def addData(def xml, def fileName) {
 
         // графа 3 - справочник 60 "Части сделок"
         tmp = null
-        if (row.field[indexCol].@value.text() != null && getCellValue(row, indexCol, type).trim() != '') {
+        if (getCellValue(row, indexCol, type, true) != null && getCellValue(row, indexCol, type).trim() != '') {
             tmp = formDataService.getRefBookRecordIdImport(60, recordCache, providerCache, 'CODE',
                     getCellValue(row, indexCol, type), getEndDate(), indexRow, indexCol, logger, false)
         }

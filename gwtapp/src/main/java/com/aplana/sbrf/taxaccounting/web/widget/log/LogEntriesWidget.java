@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryImageCell;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryIndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryMessageCell;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -14,15 +13,13 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.AsyncDataProvider;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class LogEntriesWidget extends Composite implements LogEntriesView {
 
-	private static LogEntryWidgetUiBinder uiBinder = GWT
-			.create(LogEntryWidgetUiBinder.class);
+	private static LogEntryWidgetUiBinder uiBinder = GWT.create(LogEntryWidgetUiBinder.class);
 
 	interface LogEntryWidgetUiBinder extends UiBinder<Widget, LogEntriesWidget> {
 	}
@@ -36,9 +33,9 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
     @UiField
     DockLayoutPanel dock;
 
-    private static final int PAGE_SIZE = 50;
+    public static final int PAGE_SIZE = 50;
 
-    private ListDataProvider<LogEntry> dataProvider;
+    private AsyncDataProvider<LogEntry> dataProvider;
 
 	public LogEntriesWidget() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -71,29 +68,47 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
 		logCellTable.setColumnWidth(indexColumn, "30px");
 		logCellTable.addColumn(imageColumn);
 		logCellTable.addColumn(messageColumn);
+	}
 
-        dataProvider = new ListDataProvider<LogEntry>();
+    @Override
+    protected void onLoad() {
+        super.onLoad();
+        if (dataProvider == null) {
+            return;
+        }
         dataProvider.addDataDisplay(logCellTable);
         pager.setDisplay(logCellTable);
         logCellTable.setPageSize(PAGE_SIZE);
+    }
 
-        setLogEntries(null);
-	}
+    @Override
+    public void clearLogEntries() {
+        logCellTable.setRowCount(0);
+        pager.setPage(0);
+        pager.setVisible(false);
+    }
 
-	@Override
-	public void setLogEntries(List<LogEntry> entries) {
-        if (entries != null) {
-            dataProvider.setList(entries);
-        } else {
-            dataProvider.setList(new ArrayList<LogEntry>());
+    @Override
+    public void setLogEntries(int start, int totalCount, List<LogEntry> logEntries) {
+        if (logEntries == null || logEntries.isEmpty()) {
+            clearLogEntries();
+            return;
         }
-        boolean isVisible= entries != null && entries.size() > PAGE_SIZE;
+
+        logCellTable.setRowCount(totalCount);
+        logCellTable.setRowData(start, logEntries);
+
+        boolean isVisible = totalCount > PAGE_SIZE;
         pager.setVisible(isVisible);
         dock.setWidgetSize(pager, isVisible ? 30 : 0);
-        pager.setPage(0);
-	}
+    }
 
-	@Override
+    @Override
+    public void setDataProvider(AsyncDataProvider<LogEntry> dataProvider) {
+        this.dataProvider = dataProvider;
+    }
+
+    @Override
 	public void setTableElementId(String id) {
 		this.getElement().setId(id);
 	}

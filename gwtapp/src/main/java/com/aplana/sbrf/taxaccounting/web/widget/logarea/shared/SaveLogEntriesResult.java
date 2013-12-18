@@ -1,9 +1,10 @@
-package com.aplana.sbrf.taxaccounting.web.module.periods.shared;
+package com.aplana.sbrf.taxaccounting.web.widget.logarea.shared;
 
 import com.gwtplatform.dispatch.shared.Result;
 
-public class ClosePeriodResult implements Result {
-	private String uuid;
+public class SaveLogEntriesResult implements Result {
+
+    private String uuid;
 
     public String getUuid() {
         return uuid;

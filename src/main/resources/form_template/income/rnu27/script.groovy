@@ -255,7 +255,7 @@ def logicCheck() {
                     logger.warn(errorMsg + "Графы 8 и 17 неравны!")
                 }
                 // 3. LC • Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7 = 0)
-                if (row.cost != row.costOnMarketQuotation || row.cost != row.reserveCalcValue || row.cost == 0) {
+                if (row.cost != 0 || row.costOnMarketQuotation != 0 || row.reserveCalcValue != 0) {
                     logger.warn(errorMsg + "Графы 9, 14 и 15 ненулевые!")
                 }
             }
@@ -985,7 +985,7 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
-    logger.error("Не удалось найти запись в справочнике (id=$ref_id) с атрибутом $code равным $value!")
+    logger.error("Не удалось найти запись в справочнике «" + refBookFactory.get(ref_id).getName() + "» с атрибутом $code равным $value!")
     return null
 }
 
