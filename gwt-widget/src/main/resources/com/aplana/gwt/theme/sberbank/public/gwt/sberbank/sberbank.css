@@ -31,6 +31,8 @@ a, a:visited, a:hover {
     border: solid 1px #00940C;
     margin-left: 0;
     height: 22px;
+    text-align: center;
+    line-height: 17px!important;
 
     background-color: #00940C;
     background-image: url("images/button/button-background.png");

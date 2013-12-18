@@ -16,21 +16,20 @@
             font-size: 14px;
         }
 
-        .center {
+        .btnPanel {
             line-height: 30px;
         }
 
-        .table {
-            padding-bottom: 50px;
-            width: 100%;
-            height: 100%;
+        .separator {
+            height: 22px;
+            margin: 0 9px;
+            border-right: 1px solid #e5e3dc;
         }
 
-        .separator{
-            height: 100%;
-            margin: 0 9px;
-            border-left: 1px solid #e5e3dc;
-            border-right: 1px solid #e5e3dc;
+        .pager {
+            position: absolute;
+            bottom: 0;
+            right: 0;
         }
     </ui:style>
 
@@ -59,7 +58,7 @@
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-                <g:HorizontalPanel height="30px" spacing="10" addStyleNames="{style.center}">
+                <g:HorizontalPanel height="30px" spacing="10" addStyleNames="{style.btnPanel}">
                     <g:Label text="Подразделение:"/>
                     <picker:DepartmentPickerModalWidget header="Подразделение"
                                                         ui:field="departmentPicker"
@@ -70,19 +69,19 @@
                     <g:ValueListBox width="50px" ui:field="isActiveBox"/>
                     <g:Label wordWrap="false" text="Имя пользователя:"/>
                     <g:TextBox width="150" ui:field="userName"/>
-                    <g:HTML addStyleNames="{style.separator}"/>
+                    <g:cell verticalAlignment="middle">
+                        <g:HTML addStyleNames="{style.separator}"/>
+                    </g:cell>
+
                     <g:Button title="Поиск" text="Поиск" ui:field="applyButton"/>
                 </g:HorizontalPanel>
-                <g:VerticalPanel addStyleNames="{style.table}">
-                    <g:cell>
-                        <style:GenericCellTable ui:field="taUserFullCellTable" width="100%"/>
-                    </g:cell>
-                    <g:cell horizontalAlignment="right" verticalAlignment="bottom">
-                        <pager:FlexiblePager ui:field="pager" location="CENTER"
-                                             showFastForwardButton="false" fastForwardRows="0"
-                                             showLastPageButton="true"/>
-                    </g:cell>
-                </g:VerticalPanel>
+                <g:SimplePanel height="100%">
+                    <style:GenericCellTable ui:field="taUserFullCellTable" width="100%"/>
+                </g:SimplePanel>
+
+                <pager:FlexiblePager ui:field="pager" location="CENTER" addStyleNames="{style.pager}"
+                                     showFastForwardButton="false" fastForwardRows="0"
+                                     showLastPageButton="true"/>
             </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>
