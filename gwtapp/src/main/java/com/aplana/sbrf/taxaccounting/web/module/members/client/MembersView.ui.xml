@@ -4,63 +4,88 @@
              xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
              xmlns:w="urn:import:com.aplana.gwt.client"
-             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:fm="urn:import:com.aplana.gwt.client.form">
 
     <ui:style>
         .title {
             font-size: 16px;
-            margin: 10px;
+        }
+
+        .header {
+            font-size: 14px;
+        }
+
+        .center {
+            line-height: 30px;
+        }
+
+        .table {
+            padding-bottom: 50px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .separator{
+            height: 100%;
+            margin: 0 9px;
+            border-left: 1px solid #e5e3dc;
+            border-right: 1px solid #e5e3dc;
         }
     </ui:style>
-    <g:DockLayoutPanel unit='PX' height="100%" width="100%">
-        <g:north size="100">
-            <g:VerticalPanel>
-                <g:HorizontalPanel height="35px">
-                    <g:Label styleName="{style.title}">Пользователи</g:Label>
+
+    <fm:MainContainer>
+        <fm:header>
+            <fm:HeaderContainer>
+                <fm:left>
+                    <fm:Left>
+                        <g:Label text="Настройки" addStyleNames="{style.header}"/>
+                        <g:Label text="-" addStyleNames="{style.header}"/>
+                    </fm:Left>
+                </fm:left>
+                <fm:right>
+                    <fm:Right>
+                        <style:LinkAnchor ui:field="printButton" text="Выгрузить в xlsx"
+                                          img="resources/img/printer-16.png"
+                                          title="Отобразить печатное представление документа"/>
+                    </fm:Right>
+                </fm:right>
+                <fm:resizable>
+                    <fm:Resizable>
+                        <g:Label text="Пользователи системы" addStyleNames="{style.title}"/>
+                    </fm:Resizable>
+                </fm:resizable>
+            </fm:HeaderContainer>
+        </fm:header>
+        <fm:body>
+            <fm:BodyContainer>
+                <g:HorizontalPanel height="30px" spacing="10" addStyleNames="{style.center}">
+                    <g:Label text="Подразделение:"/>
+                    <picker:DepartmentPickerModalWidget header="Подразделение"
+                                                        ui:field="departmentPicker"
+                                                        multiSelection="true"/>
+                    <g:Label text="Роль:"/>
+                    <w:MultiListBox width="180px" ui:field="roleBox"/>
+                    <g:Label wordWrap="false" text="Признак активности:"/>
+                    <g:ValueListBox width="50px" ui:field="isActiveBox"/>
+                    <g:Label wordWrap="false" text="Имя пользователя:"/>
+                    <g:TextBox width="150" ui:field="userName"/>
+                    <g:HTML addStyleNames="{style.separator}"/>
+                    <g:Button title="Поиск" text="Поиск" ui:field="applyButton"/>
                 </g:HorizontalPanel>
-                <g:HorizontalPanel height="35px" spacing="10">
-                    <g:VerticalPanel>
-                        <g:Label>Подразделение:</g:Label>
-                        <picker:DepartmentPickerModalWidget header="Подразделение"  ui:field="departmentPicker"  multiSelection="true"/>
-                    </g:VerticalPanel>
-                    <g:VerticalPanel>
-                        <g:Label text="Роль:"/>
-                        <w:MultiListBox width="200px" ui:field="roleBox"/>
-                    </g:VerticalPanel>
-                    <g:VerticalPanel>
-                        <g:Label text="Признак активности:"/>
-                        <g:ValueListBox width="200px" ui:field="isActiveBox"/>
-                    </g:VerticalPanel>
+                <g:VerticalPanel addStyleNames="{style.table}">
                     <g:cell>
-                        <g:VerticalPanel>
-                            <g:Label text="Имя пользователя:"/>
-                            <g:TextBox width="200px" ui:field="userName"/>
-                        </g:VerticalPanel>
+                        <style:GenericCellTable ui:field="taUserFullCellTable" width="100%"/>
                     </g:cell>
-                    <g:cell verticalAlignment="bottom" width="100px">
-                        <g:Button title="Поиск" text="Поиск" ui:field="applyButton"/>
+                    <g:cell horizontalAlignment="right" verticalAlignment="bottom">
+                        <pager:FlexiblePager ui:field="pager" location="CENTER"
+                                             showFastForwardButton="false" fastForwardRows="0"
+                                             showLastPageButton="true"/>
                     </g:cell>
-                    <g:cell verticalAlignment="bottom">
-                        <style:LinkAnchor  ui:field="printButton" text="Выгрузить в xlsx" img="resources/img/printer-16.png" title="Отобразить печатное представление документа"/>
-                    </g:cell>
-                </g:HorizontalPanel>
-            </g:VerticalPanel>
-        </g:north>
-        <g:center>
-
-
-
-                <g:VerticalPanel width="100%">
-                    <style:GenericCellTable ui:field="taUserFullCellTable" width="100%" />
                 </g:VerticalPanel>
-        </g:center>
-        <g:south size="30">
-            <g:VerticalPanel width="100%">
-                <g:cell horizontalAlignment="right">
-                    <pager:FlexiblePager ui:field="pager" location="CENTER"
-                                         showFastForwardButton="false" fastForwardRows="0" showLastPageButton="true" />
-                </g:cell>
-            </g:VerticalPanel>
-        </g:south>
-    </g:DockLayoutPanel>
+            </fm:BodyContainer>
+        </fm:body>
+    </fm:MainContainer>
+
+
 </ui:UiBinder>

@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class BodyContainer extends ComplexPanel {
 
-    private GlobalResources.Style style;
+    private FormResources.Style style;
 
     public BodyContainer() {
         setElement(DOM.createDiv());
@@ -19,7 +19,7 @@ public class BodyContainer extends ComplexPanel {
     }
 
     public void setupStyle() {
-        style = GlobalResources.INSTANCE.style();
+        style = FormResources.INSTANCE.style();
         style.ensureInjected();
 
         getElement().addClassName(style.typicalFormBody());

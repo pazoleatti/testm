@@ -11,11 +11,11 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class Resizable extends SimplePanel {
 
-    GlobalResources.Style style;
+    FormResources.Style style;
 
     public Resizable() {
         super();
-        style = GlobalResources.INSTANCE.style();
+        style = FormResources.INSTANCE.style();
         style.ensureInjected();
     }
 

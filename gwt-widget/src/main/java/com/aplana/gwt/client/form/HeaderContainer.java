@@ -37,12 +37,12 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class HeaderContainer extends ComplexPanel {
 
-    protected GlobalResources.Style style;
+    protected FormResources.Style style;
 
     public HeaderContainer() {
         setElement(DOM.createDiv());
 
-        GlobalResources.Style style = GlobalResources.INSTANCE.style();
+        FormResources.Style style = FormResources.INSTANCE.style();
         style.ensureInjected();
 
         //setStyle

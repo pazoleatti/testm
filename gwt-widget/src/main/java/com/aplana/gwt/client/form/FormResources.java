@@ -8,9 +8,9 @@ import com.google.gwt.resources.client.CssResource;
  * Зацепка для стилей
  * @author aivanov on 13.12.13.
  */
-public interface GlobalResources extends ClientBundle {
+public interface FormResources extends ClientBundle {
 
-    public static final GlobalResources INSTANCE = GWT.create(GlobalResources.class);
+    public static final FormResources INSTANCE = GWT.create(FormResources.class);
 
     public interface Style extends CssResource {
 

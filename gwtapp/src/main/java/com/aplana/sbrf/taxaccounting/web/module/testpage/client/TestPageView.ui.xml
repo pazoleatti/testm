@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:my="urn:import:com.aplana.gwt.client"
-             xmlns:f="urn:import:com.aplana.gwt.client.form"
+             xmlns:fm="urn:import:com.aplana.gwt.client.form"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
     <ui:style>
         .RefbookTextBox {
@@ -15,11 +15,11 @@
     </ui:style>
 
 
-    <f:MainContainer>
-        <f:header>
-            <f:HeaderContainer>
-                <f:right>
-                    <f:Right>
+    <fm:MainContainer>
+        <fm:header>
+            <fm:HeaderContainer>
+                <fm:right>
+                    <fm:Right>
                         <g:Label text="Режим редактирования"/>
                         <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png"
                                             text="my button hyperlink"/>
@@ -27,27 +27,27 @@
                                             text="my button hyperlink"/>
                         <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png"
                                             text="my button hyperlink"/>
-                    </f:Right>
-                </f:right>
-                <f:resizable>
-                    <f:Resizable>
+                    </fm:Right>
+                </fm:right>
+                <fm:resizable>
+                    <fm:Resizable>
                         <g:Label
                                 text="Сводная форма начисленных доходов (доходы сложные) Очень длинный заголовок бла бла бал ба лаб ла бал аб лалалалалалал ла ла"/>
-                    </f:Resizable>
-                </f:resizable>
-                <f:left>
-                    <f:Left>
+                    </fm:Resizable>
+                </fm:resizable>
+                <fm:left>
+                    <fm:Left>
                         <g:Label text="Список налоговых форм"/>
                         <g:Label text="-"/>
-                    </f:Left>
-                </f:left>
+                    </fm:Left>
+                </fm:left>
 
 
 
-            </f:HeaderContainer>
-        </f:header>
-        <f:body>
-            <f:BodyContainer>
+            </fm:HeaderContainer>
+        </fm:header>
+        <fm:body>
+            <fm:BodyContainer>
                 <my:LabelSeparator text="test" ui:field="sep"/>
                 <my:RefBookTextBox styleName="{style.RefbookTextBox}" ui:field="refbookTextBox" enabled="true"/>
                 <!-- <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" text="my hyperlink" />-->
@@ -70,7 +70,7 @@
                         </g:Label>
                     </g:HorizontalPanel>
                 </g:ScrollPanel>
-            </f:BodyContainer>
-        </f:body>
-    </f:MainContainer>
+            </fm:BodyContainer>
+        </fm:body>
+    </fm:MainContainer>
 </ui:UiBinder>

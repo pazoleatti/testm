@@ -11,11 +11,11 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class Left extends ComplexPanel {
 
-    GlobalResources.Style style;
+    FormResources.Style style;
 
     public Left() {
         setElement(DOM.createDiv());
-        style = GlobalResources.INSTANCE.style();
+        style = FormResources.INSTANCE.style();
         style.ensureInjected();
         getElement().addClassName(style.left());
     }
