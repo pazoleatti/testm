@@ -29,9 +29,14 @@ public class LogAreaPresenter extends
         PresenterWidget<LogAreaPresenter.MyView> implements
         LogAddEvent.MyHandler, LogCleanEvent.MyHandler, LogAreaUiHandlers {
 
+    private boolean rangeChangeHandle = true;
+
     private AsyncDataProvider<LogEntry> dataProvider = new AsyncDataProvider<LogEntry>() {
         @Override
         protected void onRangeChanged(HasData<LogEntry> display) {
+            if (!rangeChangeHandle) {
+                return;
+            }
             Range range = display.getVisibleRange();
             onRangeChange(range.getStart(), range.getLength());
         }
@@ -82,7 +87,10 @@ public class LogAreaPresenter extends
     @Override
     public void clean() {
         getView().setPrintLink(null);
+        // Сброс состояния пагинатора не должен провоцировать попытку подгрузки данных
+        rangeChangeHandle = false;
         getView().getLogEntriesView().clearLogEntries();
+        rangeChangeHandle = true;
         getView().setLogEntriesCount(null);
     }
 
