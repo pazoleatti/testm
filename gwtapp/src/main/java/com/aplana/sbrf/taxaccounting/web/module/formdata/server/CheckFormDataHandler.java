@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,9 @@ public class CheckFormDataHandler extends
 	@Autowired
 	private DataRowService dataRowService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
 	public CheckFormDataHandler() {
 		super(CheckFormDataAction.class);
 	}
@@ -50,8 +54,8 @@ public class CheckFormDataHandler extends
 		}
 		formDataService.doCheck(logger, securityService.currentUserInfo(), formData);
 		DataRowResult result = new DataRowResult();
-		result.setLogEntries(logger.getEntries());
-		return result;
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
 	}
 
 	@Override

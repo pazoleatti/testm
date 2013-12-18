@@ -77,7 +77,7 @@ public class RefBookListPresenter extends Presenter<RefBookListPresenter.MyView,
                 CallbackUtils.defaultCallback(new AbstractCallback<LoadRefBookResult>() {
 					@Override
 					public void onSuccess(LoadRefBookResult result) {
-						LogAddEvent.fire(RefBookListPresenter.this, result.getEntries());
+						LogAddEvent.fire(RefBookListPresenter.this, result.getUuid());
 					}
 				}, this));
     }
@@ -111,7 +111,4 @@ public class RefBookListPresenter extends Presenter<RefBookListPresenter.MyView,
     public boolean useManualReveal() {
         return true;
     }
-
-
-
 }

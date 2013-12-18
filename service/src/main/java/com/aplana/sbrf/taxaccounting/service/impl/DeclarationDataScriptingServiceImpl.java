@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 
 	@Autowired
 	private DeclarationTemplateDao declarationTemplateDao;
+
+    @Autowired
+    private LogEntryService logEntryService;
 	
 	/**
 	 * Возвращает спринг-бины доcтупные для использования в скрипте создания декларации.
@@ -99,11 +103,9 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 			
 		logger.setMessageDecorator(null);
 
-		
 		if (logger.containsLevel(LogLevel.ERROR)) {
-			throw new ServiceLoggerException(
-					"Есть критические ошибки при выполнении скрипта",
-					logger.getEntries());
+			throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта",
+                    logEntryService.save(logger.getEntries()));
 		}
 	}
 
@@ -119,8 +121,4 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 			return false;
 		}
 	}
-
-
-
-
 }

@@ -1,26 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared;
 
-import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.Result;
-
 
 public class LoadRefBookResult implements Result {
 	private static final long serialVersionUID = -8740180359930296291L;
 	
-	private List<LogEntry> entries;
+	private String uuid;
 
-	public List<LogEntry> getEntries() {
-		return entries;
-	}
+    public String getUuid() {
+        return uuid;
+    }
 
-	public void setEntries(List<LogEntry> entries) {
-		this.entries = entries;
-	}
-
-
-
-
-    
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 }
