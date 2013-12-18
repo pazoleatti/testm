@@ -1,23 +1,20 @@
 package com.aplana.gwt.client.form;
 
-import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.ComplexPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Контейнер для основной части типовой формы
  *
  * @author aivanov
  */
-public class BodyContainer extends HTMLPanel {
+public class BodyContainer extends ComplexPanel {
 
     private GlobalResources.Style style;
 
     public BodyContainer() {
-        super("");
-        setupStyle();
-    }
-
-    public BodyContainer(String html) {
-        super(html);
+        setElement(DOM.createDiv());
         setupStyle();
     }
 
@@ -26,6 +23,10 @@ public class BodyContainer extends HTMLPanel {
         style.ensureInjected();
 
         getElement().addClassName(style.typicalFormBody());
+    }
+
+    public void add(Widget widget) {
+        add(widget, getElement());
     }
 
 }
