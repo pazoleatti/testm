@@ -162,7 +162,7 @@ public class DeclarationDataPresenter
 									@Override
 									public void onSuccess(
 											RefreshDeclarationDataResult result) {
-                                        LogAddEvent.fire(DeclarationDataPresenter.this, result.getLogEntries());
+                                        LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
 										MessageEvent.fire(
 												DeclarationDataPresenter.this,
 												"Декларация обновлена");
@@ -232,7 +232,7 @@ public class DeclarationDataPresenter
 				.defaultCallback(new AbstractCallback<CheckDeclarationDataResult>() {
 					@Override
 					public void onSuccess(CheckDeclarationDataResult result) {
-                        LogAddEvent.fire(DeclarationDataPresenter.this, result.getLogEntries());
+                        LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
 					}
 				}, this));
 	}

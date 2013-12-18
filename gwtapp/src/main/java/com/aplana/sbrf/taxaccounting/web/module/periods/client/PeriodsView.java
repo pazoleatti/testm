@@ -28,7 +28,13 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
 	interface Binder extends UiBinder<Widget, PeriodsView> { }
 
-	private static final String[] COLUMN_NAMES = {"Период", "Состояние", "Ввод остатков", "Срок сдачи отчетности"};
+	private static final String[] COLUMN_NAMES = {
+            "Период",
+            "Состояние",
+            "Срок сдачи отчетности",
+            "Признак ввода остатков",
+            "Период сдачи корректировки"
+    };
 
 	@UiField
 	Label title;
@@ -102,12 +108,18 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
             }
         };
 
-
+        TextColumn<TableRow> correctDateColumn = new TextColumn<TableRow>() {
+            @Override
+            public String getValue(TableRow object) {
+                return (object.getCorrectPeriod() != null) ? DateTimeFormat.getFormat("dd.MM.yyyy").format(object.getCorrectPeriod()) : "";
+            }
+        };
 
 		periodsTable.addColumn(periodNameColumn, COLUMN_NAMES[0]);
 		periodsTable.addColumn(periodConditionColumn, COLUMN_NAMES[1]);
-        periodsTable.addColumn(periodBalanceColumn, COLUMN_NAMES[2]);
-        periodsTable.addColumn(deadlineColumn, COLUMN_NAMES[3]);
+        periodsTable.addColumn(deadlineColumn, COLUMN_NAMES[2]);
+        periodsTable.addColumn(periodBalanceColumn, COLUMN_NAMES[3]);
+        periodsTable.addColumn(correctDateColumn, COLUMN_NAMES[4]);
 
 		periodsTable.setSelectionModel(selectionModel);
 

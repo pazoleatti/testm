@@ -25,7 +25,6 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 /**
  * Диалог открытия периода
  */
-
 public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyView> implements OpenDialogUiHandlers {
 
 	public interface MyView extends PopupView, HasUiHandlers<OpenDialogUiHandlers> {
@@ -80,20 +79,20 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		action.setTaxType(this.taxType);
 		action.setDepartmentId(openFilterData.getDepartmentId());
 		action.setBalancePeriod(openFilterData.isBalancePeriod());
-		System.out.println(openFilterData.isBalancePeriod());
 		action.setDictionaryTaxPeriodId(openFilterData.getDictionaryTaxPeriod());
+        action.setHasCorrectPeriod(openFilterData.hasCorrectPeriod);
+        action.setCorrectPeriod(openFilterData.getCorrectPeriod());
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<OpenPeriodResult>() {
 					@Override
 					public void onSuccess(OpenPeriodResult result) {
 						PeriodCreated.fire(OpenDialogPresenter.this, true, openFilterData.getYear());
-						LogAddEvent.fire(OpenDialogPresenter.this, result.getLogEntries());
+						LogAddEvent.fire(OpenDialogPresenter.this, result.getUuid());
 						getView().hide();
 					}
 				}, OpenDialogPresenter.this)
 		);
 	}
-
 
 	public void setTaxType(TaxType taxType) {
 		this.taxType = taxType;

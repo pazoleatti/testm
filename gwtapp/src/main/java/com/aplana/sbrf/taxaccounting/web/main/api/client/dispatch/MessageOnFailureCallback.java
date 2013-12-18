@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch;
 
-import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
@@ -54,18 +51,15 @@ public final class MessageOnFailureCallback<T> implements AsyncCallback<T> {
 			callback.onFailure(caught);
 		}
 		if (caught instanceof TaActionException) {
-			List<LogEntry> logEntries = ((TaActionException) caught)
-					.getLogEntries();
-			if (logEntries != null && !logEntries.isEmpty()) {
-				LogAddEvent.fire(hasHandlers,
-						((TaActionException) caught).getLogEntries());
+			String uuid = ((TaActionException) caught).getUuid();
+			if (uuid != null) {
+				LogAddEvent.fire(hasHandlers, ((TaActionException) caught).getUuid());
 				// Флаг showLogOnly актуален только когда ошибка вызвана
 				// присутствием
 				// сообщений об ошибке в логе. В других случаях всё равно нужно
 				// отобразить диалог.
 				if (!showLogOnly) {
-					MessageEvent.fire(hasHandlers, caught.getLocalizedMessage(),
-							caught);
+					MessageEvent.fire(hasHandlers, caught.getLocalizedMessage(), caught);
 				}
 			} else {
 				MessageEvent.fire(hasHandlers, caught.getLocalizedMessage(), caught);

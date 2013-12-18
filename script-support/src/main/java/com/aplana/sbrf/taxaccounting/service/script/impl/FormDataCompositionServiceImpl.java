@@ -1,19 +1,19 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -55,6 +55,9 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 
     @Autowired
     private ReportPeriodService reportPeriodService;
+
+    @Autowired
+    private LogEntryService logEntryService;
 
 	/**
 	 * Интеграция формы (источника данных) в другую форму (потребителя) происходит в несколько этапов:
@@ -109,11 +112,11 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
             if (scriptComponentContext.getLogger().containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException(
                         "Произошли ошибки при консолидации данных в приемнике: " +
-                                dformData.getKind().getName()+" \"" + dformData.getFormType().getName() + "\".",
-                        scriptComponentContext.getLogger().getEntries());
+                                dformData.getKind().getName() + " \"" + dformData.getFormType().getName() + "\".",
+                        logEntryService.save(scriptComponentContext.getLogger().getEntries()));
             }
-			
-			formDataDao.save(dformData);
+
+            formDataDao.save(dformData);
 			// Коммитим строки после отработки скрипта. http://jira.aplana.com/browse/SBRFACCTAX-3637
 			dataRowDao.commit(dformData.getId());
             logBusinessService.add(dformData.getId(), null, scriptComponentContext.getUserInfo(), FormDataEvent.COMPOSE,

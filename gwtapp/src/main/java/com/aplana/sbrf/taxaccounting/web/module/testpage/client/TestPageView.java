@@ -11,6 +11,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -44,10 +45,15 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
     @UiField(provided = true)
     TypicalFormHeader formHeader;
+    @UiField
+    Label lbl;
 
     @UiField
     Button showDialog;
 
+    @UiField
+    CheckBox chk;
+    
     Label lbl1;
 
     @Inject
@@ -94,15 +100,6 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
              }
          });
 
-        formHeader = new TypicalFormHeader();
-        formHeader.addLeftWidget(new Label("Список налоговых форм пример"));
-        formHeader.addLeftWidget(new Label("-"));
-
-        Label label = new Label("Например кнопка");
-        label.getElement().getStyle().setProperty("fontSize", 20, Style.Unit.PX);
-        formHeader.addRightWidget(label);
-        formHeader.addRightWidget(new Label("Режим редактирования"));
-        formHeader.addMiddleWidget(new Label("Сводная форма начисленных доходов (доходы сложные) Очень длинный заголовок бла бла бал ба лаб ла бал аб лалалалалалал ла ла"));
 
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -141,6 +138,16 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
         showResult.setText(strCont);
 
+
+        //put this handler in the constructor
+        lbl.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                chk.setValue(!chk.getValue(), true);
+                //This will so it will manually operate the checkbox
+            }
+        });
+
         showDialog.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -148,7 +155,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                 lbl1 = new Label("Тест");
                 lbl1.setSize("400px","200px");
                 mw.add(lbl1);
-               // mw.addAdditionalButton(new ImageButtonLink("http://127.0.0.1:8888/resources/img/email.png", "Отправить письмо"));
+                // mw.addAdditionalButton(new ImageButtonLink("http://127.0.0.1:8888/resources/img/email.png", "Отправить письмо"));
                 mw.addSaveButtonClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {

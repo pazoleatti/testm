@@ -77,7 +77,7 @@ public class PeriodServiceImpl implements PeriodService{
 
 	@Override
 	public void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
-	                 long departmentId, List<LogEntry> logs, boolean isBalance) {
+	                 long departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate, boolean isCorrection) {
 		Calendar from = Calendar.getInstance();
 		from.set(Calendar.YEAR, year);
 		from.set(Calendar.MONTH, Calendar.JANUARY);
@@ -139,7 +139,7 @@ public class PeriodServiceImpl implements PeriodService{
 		} else {
 			newReportPeriod = reportPeriods.get(0);
 		}
-
+        // TODO Добавить создание корректирующего периода
 		if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT) || (taxType == TaxType.DEAL)) {
 			if ((user.getUser().hasRole("ROLE_CONTROL_UNP") || (user.getUser().hasRole("ROLE_CONTROL")))
 					&& (user.getUser().getDepartmentId() == Department.ROOT_BANK_ID)
