@@ -5,7 +5,7 @@ import groovy.transform.Field
 
 /**
  * (РНУ-72) Регистр налогового учёта уступки права требования как реализации финансовых услуг и операций с закладными
- * formTemplateId=503
+ * formTemplateId=358
  * TODO:
  *      - перед логическими проверками или расчетами проверка рну-71.1 - опечатка в чтз! надо будет проверять рну-4 для заполнения графы 6, а пока графа 6 заполняется в ручную
  *
@@ -24,33 +24,33 @@ import groovy.transform.Field
 // графа 9  - profit
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
             formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         }
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
         logicCheck()
@@ -138,7 +138,7 @@ void calc() {
     // отсортировать/группировать
     sortRows(dataRows, groupColumns)
 
-    def index = getPrevRowNumber()
+    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     dataRows.eachWithIndex { row, i ->
         // графа 1
         row.number = ++index
@@ -163,7 +163,7 @@ void logicCheck() {
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
     // номер последний строки предыдущей формы
-    def rowNumber = getPrevRowNumber()
+    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -261,7 +261,7 @@ def calcFor8or9(def row) {
     return row.income - (row.cost279 - row.costReserve)
 }
 
-def calc8(def row) {
+def BigDecimal calc8(def row) {
     def tmp = calcFor8or9(row)
     if (tmp == null) {
         return null
@@ -269,7 +269,7 @@ def calc8(def row) {
     return roundValue((tmp < 0 ? abs(tmp) : 0), 2)
 }
 
-def calc9(def row) {
+def BigDecimal calc9(def row) {
     def tmp = calcFor8or9(row)
     if (tmp == null) {
         return null
@@ -283,20 +283,4 @@ def roundValue(def value, int precision) {
     } else {
         return null
     }
-}
-
-/** Получить значение "Номер по порядку" из формы предыдущего периода. */
-def getPrevRowNumber() {
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    // получить номер последний строки предыдущей формы если текущая форма не первая в этом году
-    if (reportPeriod != null && reportPeriod.order == 1) {
-        return 0
-    }
-    def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
-    def prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
-    if (prevDataRows != null && !prevDataRows.isEmpty()) {
-        // пропустить последнюю итоговую строку
-        return prevDataRows[prevDataRows.size - 2].number
-    }
-    return 0
 }

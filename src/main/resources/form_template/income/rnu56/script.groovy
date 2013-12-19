@@ -1,6 +1,7 @@
 package form_template.income.rnu56
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
@@ -101,7 +102,7 @@ boolean checkNSI(def refBookId, def row, def alias) {
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecord(def Long refBookId, def String alias, def String value, def int rowIndex, def String columnName,
-                def Date date, boolean required = true) {
+              def Date date, boolean required = true) {
     return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, date,
             rowIndex, columnName, logger, required)
 }
@@ -120,6 +121,10 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
+    // Проверка только для первичных
+    if (formData.kind != FormDataKind.PRIMARY) {
+        return
+    }
     def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
@@ -140,16 +145,17 @@ void calc() {
 
     // Дата начала отчетного периода
     def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
-
     // Дата окончания отчетного периода
     def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
     // Номер последний строки предыдущей формы
     def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     for (row in dataRows) {
         // графа 1
         row.number = ++index
+        if (formData.kind != FormDataKind.PRIMARY) {
+            continue
+        }
         // графа 8
         row.termDealBill = calcTermDealBill(row)
         // графа 9
@@ -170,7 +176,7 @@ void calc() {
 }
 
 // Расчет графы 8
-BigDecimal calcTermDealBill(def row) {
+def BigDecimal calcTermDealBill(def row) {
     if (row.buyDate == null || row.maturity == null) {
         return null
     }
@@ -178,7 +184,7 @@ BigDecimal calcTermDealBill(def row) {
 }
 
 // Расчет графы 9
-BigDecimal calcPercIncome(def row) {
+def BigDecimal calcPercIncome(def row) {
     if (row.nominal == null || row.price == null) {
         return null
     }
@@ -186,7 +192,7 @@ BigDecimal calcPercIncome(def row) {
 }
 
 // Расчет графы 12
-BigDecimal calcDiscountInCurrency(def row) {
+def BigDecimal calcDiscountInCurrency(def row) {
     if (row.sum == null || row.price == null) {
         return null
     }
@@ -194,7 +200,7 @@ BigDecimal calcDiscountInCurrency(def row) {
 }
 
 // Расчет графы 13
-BigDecimal calcDiscountInRub(def row) {
+def BigDecimal calcDiscountInRub(def row) {
     if (row.discountInCurrency != null) {
         if (row.currency != null && !isRubleCurrency(row.currency)) {
             def map = null
@@ -215,7 +221,7 @@ BigDecimal calcDiscountInRub(def row) {
 }
 
 // Расчет графы 14
-BigDecimal calcSumIncomeinCurrency(def row, def startDate, def endDate) {
+def BigDecimal calcSumIncomeinCurrency(def row, def startDate, def endDate) {
     if (startDate == null || endDate == null || row.implementationDate == null) {
         return null
     }
@@ -248,7 +254,7 @@ BigDecimal calcSumIncomeinCurrency(def row, def startDate, def endDate) {
 }
 
 // Расчет графы 15
-BigDecimal calcSumIncomeinRuble(def row, def endDate) {
+def BigDecimal calcSumIncomeinRuble(def row, def endDate) {
     def tmp
     if (row.sum == null) {
         if (!isRubleCurrency(row.currency)) {
@@ -287,14 +293,12 @@ void logicCheck() {
 
     // Дата начала отчетного периода
     def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
-
     // Дата окончания отчетного периода
     def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
     // Векселя
     def List<String> billsList = new ArrayList<String>()
 
-   for (def row : dataRows) {
+    for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
         }
@@ -329,38 +333,37 @@ void logicCheck() {
             logger.error(errorMsg + 'Все суммы по операции нулевые!')
         }
 
-
-       // 6. Проверка на наличие данных предыдущих отчетных периодов для заполнения графы 14 и графы 15
-       // 7. Проверка корректности значения в «Графе 3»
-       if (row.buyDate != null) {
-           taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, row.buyDate, startDate - 1)
-           for (taxPeriod in taxPeriods) {
-               reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.id)
-               for (reportPeriod in reportPeriods) {
-                   findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
-                           reportPeriod.id)
-                   if (findFormData != null) {
-                       isFind = false
-                       for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
-                           if (findRow.bill == row.bill) {
-                               isFind = true
-                               // лп 7
-                               if (findRow.buyDate != row.buyDate) {
-                                   logger.error(errorMsg + "Неверное указана Дата приобретения в РНУ-56 за "
-                                           + reportPeriod.name)
-                               }
-                               break
-                           }
-                       }
-                       // лп 6
-                       if (!isFind) {
-                           logger.warn(errorMsg + "Экземпляр за период " + reportPeriod.name +
-                                   " не существует (отсутствуют первичные данные для расчёта)!")
-                       }
-                   }
-               }
-           }
-       }
+        // 6. Проверка на наличие данных предыдущих отчетных периодов для заполнения графы 14 и графы 15
+        // 7. Проверка корректности значения в «Графе 3»
+        if (row.buyDate != null) {
+            taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, row.buyDate, startDate - 1)
+            for (taxPeriod in taxPeriods) {
+                reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.id)
+                for (reportPeriod in reportPeriods) {
+                    findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
+                            reportPeriod.id)
+                    if (findFormData != null) {
+                        isFind = false
+                        for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
+                            if (findRow.bill == row.bill) {
+                                isFind = true
+                                // лп 7
+                                if (findRow.buyDate != row.buyDate) {
+                                    logger.error(errorMsg + "Неверное указана Дата приобретения в РНУ-56 за "
+                                            + reportPeriod.name)
+                                }
+                                break
+                            }
+                        }
+                        // лп 6
+                        if (!isFind) {
+                            logger.warn(errorMsg + "Экземпляр за период " + reportPeriod.name +
+                                    " не существует (отсутствуют первичные данные для расчёта)!")
+                        }
+                    }
+                }
+            }
+        }
 
         // 8. Проверка корректности расчёта дисконта
         if (row.sum != null && row.price != null && row.sum - row.price <= 0 && (row.discountInCurrency != 0
@@ -376,15 +379,16 @@ void logicCheck() {
             logger.error(errorMsg + "Значение графы «${row.getCell('discountInRub').column.name}» отрицательное!")
         }
 
-        // 10. Арифметические проверки граф 8, 9, 12-15
-        needValue['termDealBill'] = calcTermDealBill(row)
-        needValue['percIncome'] = calcPercIncome(row)
-        needValue['discountInCurrency'] = calcDiscountInCurrency(row)
-        needValue['discountInRub'] = calcDiscountInRub(row)
-        needValue['sumIncomeinCurrency'] = calcSumIncomeinCurrency(row, startDate, endDate)
-        needValue['sumIncomeinRuble'] = calcSumIncomeinRuble(row, endDate)
-
-        checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+        if (formData.kind == FormDataKind.PRIMARY) {
+            // 10. Арифметические проверки граф 8, 9, 12-15
+            needValue['termDealBill'] = calcTermDealBill(row)
+            needValue['percIncome'] = calcPercIncome(row)
+            needValue['discountInCurrency'] = calcDiscountInCurrency(row)
+            needValue['discountInRub'] = calcDiscountInRub(row)
+            needValue['sumIncomeinCurrency'] = calcSumIncomeinCurrency(row, startDate, endDate)
+            needValue['sumIncomeinRuble'] = calcSumIncomeinRuble(row, endDate)
+            checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+        }
 
         // Проверки соответствия НСИ
         checkNSI(15, row, 'currency') // Проверка кода валюты
@@ -410,9 +414,9 @@ def getRate(def Date date, def value) {
  * @param row
  * @param sumColumnName алиас графы для суммирования
  */
-def getCalcPrevColumn(def row, def sumColumnName) {
+def BigDecimal getCalcPrevColumn(def row, def sumColumnName) {
     def sum = 0
-    if (row.buyDate != null && row.bill !=null) {
+    if (row.buyDate != null && row.bill != null) {
         taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, row.buyDate, startDate - 1)
         for (taxPeriod in taxPeriods) {
             reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.id)
