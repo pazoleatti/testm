@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 
 import java.util.List;
 
@@ -54,4 +55,17 @@ public interface DeclarationTemplateDao {
      * @return тело скрипта
      */
     String getDeclarationTemplateScript(int declarationTemplateId);
+
+    /**
+    * Получить список идентификаторов макетов деклараций по фильтру
+    * @param filter фильтр
+    * @return список отфильтрованых идентификаторов
+    */
+    List<Integer> getByFilter(TemplateFilter filter);
+
+    /**
+     * получить все идентификаторы шаблонов деклараций
+     * @return список всех идентификаторов
+     */
+    List<Integer> listAllId();
 }

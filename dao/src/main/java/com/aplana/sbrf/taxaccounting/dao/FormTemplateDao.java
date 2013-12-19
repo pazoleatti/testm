@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
 import java.util.List;
@@ -62,4 +63,17 @@ public interface FormTemplateDao {
      * @return заголовки столбцов
      */
     List<DataRow<HeaderCell>> getHeaderCells(FormTemplate formTemplate);
+
+    /**
+     * Получить список идентификаторов макетов налоговых форм по фильтру
+     * @param filter фильтр
+     * @return список отфильтрованых идентификаторов
+     */
+    List<Integer> getByFilter(TemplateFilter filter);
+
+    /**
+     * получить все идентификаторы шаблонов налоговых форм
+     * @return список всех идентификаторов
+     */
+    List<Integer> listAllId();
 }
