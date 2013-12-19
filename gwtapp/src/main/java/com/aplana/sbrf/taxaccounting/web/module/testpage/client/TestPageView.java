@@ -42,9 +42,6 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     @UiField
     Label showResult;
 
-    @UiField(provided = true)
-    TypicalFormHeader formHeader;
-
     @UiField
     Button showDialog;
 
