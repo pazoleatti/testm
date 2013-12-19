@@ -8,6 +8,8 @@ public class OpenFilterData {
 	Long departmentId;
 	Long dictionaryTaxPeriodId;
 	Date endDate;
+    boolean hasCorrectPeriod;
+    Date correctPeriod;
 
 	public Integer getYear() {
 		return year;
@@ -48,4 +50,20 @@ public class OpenFilterData {
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
+
+    public boolean isHasCorrectPeriod() {
+        return hasCorrectPeriod;
+    }
+
+    public void setHasCorrectPeriod(boolean hasCorrectPeriod) {
+        this.hasCorrectPeriod = hasCorrectPeriod;
+    }
+
+    public Date getCorrectPeriod() {
+        return correctPeriod;
+    }
+
+    public void setCorrectPeriod(Date correctPeriod) {
+        this.correctPeriod = correctPeriod;
+    }
 }

@@ -49,8 +49,9 @@ public interface PeriodService {
 	 * @param dictionaryTaxPeriodId
 	 * @param taxType
 	 */
+    //TODO Слишком много параметров
 	void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
-	          long departmentId, List<LogEntry> logs, boolean isBalance);
+	          long departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate, boolean isCorrection);
 
 	void close(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs);
 

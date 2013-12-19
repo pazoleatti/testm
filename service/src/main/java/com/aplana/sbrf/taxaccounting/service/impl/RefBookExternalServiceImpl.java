@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.RefBookExternalService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
@@ -38,10 +39,13 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
     private ConfigurationService configurationService;
 
     @Autowired
-    RefBookScriptingService refBookScriptingService;
+    private RefBookScriptingService refBookScriptingService;
 
     @Autowired
-    AuditService auditService;
+    private AuditService auditService;
+
+    @Autowired
+    private LogEntryService logEntryService;
 
     @Override
     @Transactional
@@ -50,7 +54,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         additionalParameters.put("inputStream", is);
         refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
         if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException("Произошли ошибки в скрипте импорта справочника", logger.getEntries());
+            throw new ServiceLoggerException("Произошли ошибки в скрипте импорта справочника", logEntryService.save(logger.getEntries()));
         }
     }
 

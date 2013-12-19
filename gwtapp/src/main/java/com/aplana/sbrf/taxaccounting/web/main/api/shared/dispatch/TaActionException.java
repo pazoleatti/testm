@@ -1,14 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch;
 
-import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.ActionException;
 
 public class TaActionException extends ActionException {
 	private static final long serialVersionUID = 2378347325524891374L;
 	
-	private List<LogEntry> logEntries;
+	private String uuid;
 	
 	private String trace;
 	
@@ -27,18 +24,8 @@ public class TaActionException extends ActionException {
 	public TaActionException(Throwable e) {
 		super(e);
 	}
-	
-	public TaActionException(String msg, List<LogEntry> logEntries, Throwable e) {
-		super(msg, e);
-		this.logEntries = logEntries;
-	}
-	
-	public TaActionException(String msg, List<LogEntry> logEntries) {
-		super(msg);
-		this.logEntries = logEntries;
-	}
-	
-	public TaActionException(String msg,  String trace) {
+
+	public TaActionException(String msg, String trace) {
 		super(msg);
 		this.trace = trace;
 	}
@@ -48,16 +35,19 @@ public class TaActionException extends ActionException {
 		this.trace = trace;
 	}
 
-	public List<LogEntry> getLogEntries() {
-		return logEntries;
-	}
+    public String getUuid() {
+        return uuid;
+    }
 
-	public String getTrace() {
+    public String getTrace() {
 		return trace;
 	}
 
 	public void setTrace(String trace) {
 		this.trace = trace;
-	}	
+	}
 
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 }
