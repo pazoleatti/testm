@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.service.script.FormTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Autowired
-    private FormTemplateDao dao;
+    private com.aplana.sbrf.taxaccounting.service.FormTemplateService formTemplateService;
 
     @Override
     public FormTemplate get(int formTemplateId) {
-        return dao.get(formTemplateId);
+        return formTemplateService.getFullFormTemplate(formTemplateId);
     }
 }

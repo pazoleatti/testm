@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.RefreshDeclaration;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.RefreshDeclarationResult;
@@ -30,6 +31,9 @@ public class RefreshDeclarationHandler extends AbstractActionHandler<RefreshDecl
 	@Autowired
 	private SecurityService securityService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
 	@Override
 	public RefreshDeclarationResult execute(RefreshDeclaration command, ExecutionContext executionContext) throws ActionException {
 		Logger  logger = new Logger();
@@ -40,7 +44,7 @@ public class RefreshDeclarationHandler extends AbstractActionHandler<RefreshDecl
 		} else {
 			result.setSuccess(true);
 		}
-        result.setLogEntries(logger.getEntries());
+        result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}
 

@@ -14,9 +14,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
@@ -48,6 +46,18 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 
 	@UiField
 	RefBookPickerPopupWidget period;
+
+    @UiField
+    CheckBox correctPeriod;
+
+    @UiField
+    Label periodLbl;
+
+    @UiField
+    Panel yearPnl;
+
+    @UiField
+    Panel termPnl;
 
 	@Inject
 	public OpenDialogView(Binder uiBinder, EventBus eventBus) {
@@ -96,7 +106,13 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 		openFilterData.setBalancePeriod(balancePeriod.getValue());
 		openFilterData.setDepartmentId(Long.valueOf(departmentPicker.getValue().iterator().next()));
 	    openFilterData.setDictionaryTaxPeriodId(period.getValue());
-		openFilterData.setEndDate(term.getValue());
+        if (correctPeriod.getValue()) {
+            openFilterData.setHasCorrectPeriod(true);
+            openFilterData.setCorrectPeriod(term.getValue());
+        } else {
+            openFilterData.setHasCorrectPeriod(false);
+            openFilterData.setEndDate(term.getValue());
+        }
 
 		getUiHandlers().onContinue(openFilterData);
 	}
@@ -105,4 +121,19 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	public void onCancel(ClickEvent event){
 		hide();
 	}
+
+    @UiHandler("correctPeriod")
+    public void onCorrectPeriodButton(ClickEvent event) {
+        if (correctPeriod.getValue()) {
+            yearPnl.setVisible(false);
+            termPnl.setVisible(true);
+            period.setTitle("Период корректировки");
+            periodLbl.setText("Период корректировки");
+        } else {
+            yearPnl.setVisible(true);
+            termPnl.setVisible(false);
+            period.setTitle("Период");
+            periodLbl.setText("Период");
+        }
+    }
 }

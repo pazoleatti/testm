@@ -1,13 +1,14 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
-import java.util.Collection;
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.BDUtils;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * DAO для работы со строкам НФ. При редактировании состояние формы делится на 2
@@ -137,4 +138,5 @@ public interface DataRowDao {
 	 */
 	void rollback(long formDataId);
 
+    void setDbUtils(BDUtils dbUtils);
 }

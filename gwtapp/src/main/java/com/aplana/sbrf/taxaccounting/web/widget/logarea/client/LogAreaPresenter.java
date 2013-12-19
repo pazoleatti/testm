@@ -1,12 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.widget.logarea.client;
 
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
-import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.LogErrorAction;
-import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.LogErrorResult;
+import com.aplana.sbrf.taxaccounting.web.widget.log.LogEntriesView;
+import com.aplana.sbrf.taxaccounting.web.widget.log.LogEntriesWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.GetLogEntriesAction;
+import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.GetLogEntriesResult;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -14,110 +23,104 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 public class LogAreaPresenter extends
-		PresenterWidget<LogAreaPresenter.MyView> implements
-		LogAddEvent.MyHandler, LogCleanEvent.MyHandler, LogAreaUiHandlers {
+        PresenterWidget<LogAreaPresenter.MyView> implements
+        LogAddEvent.MyHandler, LogCleanEvent.MyHandler, LogAreaUiHandlers {
 
+    private boolean rangeChangeHandle = true;
 
-	public static interface MyView extends View, HasUiHandlers<LogAreaUiHandlers>{
+    private AsyncDataProvider<LogEntry> dataProvider = new AsyncDataProvider<LogEntry>() {
+        @Override
+        protected void onRangeChanged(HasData<LogEntry> display) {
+            if (!rangeChangeHandle) {
+                return;
+            }
+            Range range = display.getVisibleRange();
+            onRangeChange(range.getStart(), range.getLength());
+        }
+    };
 
-		void setLogEntries(List<LogEntry> entries);
-		void setLogSize(int full, int error, int warn, int info);
-        void getReport(String uuid);
-	}
+    public static interface MyView extends View, HasUiHandlers<LogAreaUiHandlers> {
+        LogEntriesView getLogEntriesView();
 
-	private List<LogEntry> logEntries = new ArrayList<LogEntry>();
+        void setLogEntriesCount(Map<LogLevel, Integer> map);
+
+        void setPrintLink(String link);
+    }
 
     protected final DispatchAsync dispatcher;
 
-	@Inject
-	public LogAreaPresenter(final EventBus eventBus, final MyView view, DispatchAsync dispatcher) {
-		super(eventBus, view);
+    private String uuid;
+
+    @Inject
+    public LogAreaPresenter(final EventBus eventBus, final MyView view, DispatchAsync dispatcher) {
+        super(eventBus, view);
         this.dispatcher = dispatcher;
         getView().setUiHandlers(this);
-	}
+        getView().getLogEntriesView().setDataProvider(dataProvider);
+    }
 
-	@Override
-	protected void onBind() {
-		super.onBind();
-		addRegisteredHandler(LogAddEvent.getType(), this);
-		addRegisteredHandler(LogCleanEvent.getType(), this);
-	}
+    @Override
+    protected void onBind() {
+        super.onBind();
+        addRegisteredHandler(LogAddEvent.getType(), this);
+        addRegisteredHandler(LogCleanEvent.getType(), this);
+    }
 
-	@Override
-	public void onLogAdd(LogAddEvent event) {
-		if (event.getLogEntries()!=null){
-			logEntries.addAll(event.getLogEntries());
-		}
-		updateView();
+    @Override
+    public void onLogUpdate(LogAddEvent event) {
+        uuid = event.getUuid();
+        if (uuid != null) {
+            getView().setPrintLink(GWT.getHostPageBaseURL() + "download/logEntry/" + uuid);
 
-		if (!logEntries.isEmpty()){
-			LogShowEvent.fire(this, true);
-		}
-	}
+        }
+        onRangeChange(0, LogEntriesWidget.PAGE_SIZE);
+    }
 
-	@Override
-	public void onLogClean(LogCleanEvent event) {
-		logEntries.clear();
-		updateView();
-	}
+    @Override
+    public void onLogClean(LogCleanEvent event) {
+        clean();
+    }
 
-	private void updateView(){
-		getView().setLogEntries(logEntries);
-		int error = 0, warn = 0, info = 0;
-		for (LogEntry logEntry : logEntries) {
-			switch (logEntry.getLevel()) {
-			case ERROR:
-				error++;
-				break;
-			case WARNING:
-				warn++;
-				break;
-			case INFO:
-				info++;
-			}
-		}
-		getView().setLogSize(error + warn, error, warn, info);
-	}
+    @Override
+    public void clean() {
+        getView().setPrintLink(null);
+        // Сброс состояния пагинатора не должен провоцировать попытку подгрузки данных
+        rangeChangeHandle = false;
+        getView().getLogEntriesView().clearLogEntries();
+        rangeChangeHandle = true;
+        getView().setLogEntriesCount(null);
+    }
 
-	@Override
-	public void print() {
-        LogErrorAction action = new LogErrorAction();
-        action.setLogEntries(logEntries);
-        dispatcher.execute(action, new AbstractCallback<LogErrorResult>() {
+    @Override
+    public void hide() {
+        LogShowEvent.fire(this, false);
+    }
+
+    public void onRangeChange(final int start, int length) {
+        if (uuid == null) {
+            clean();
+            return;
+        }
+        GetLogEntriesAction action = new GetLogEntriesAction();
+        action.setUuid(uuid);
+        action.setStart(start);
+        action.setLength(length);
+
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetLogEntriesResult>() {
             @Override
-            public void onSuccess(LogErrorResult result) {
-                getView().getReport(result.getUuid());
+            public void onSuccess(GetLogEntriesResult result) {
+                PagingResult<LogEntry> logEntries = result.getLogEntries();
+                if (logEntries.isEmpty()) {
+                    clean();
+                    return;
+                }
+                getView().getLogEntriesView().setLogEntries(start, logEntries.getTotalCount(), logEntries);
+                getView().setLogEntriesCount(result.getLogEntriesCount());
+                LogShowEvent.fire(LogAreaPresenter.this, true);
             }
-        });
-		/*JSONObject requestJSON = new JSONObject();
-		JSONArray jArr = new JSONArray();
-
-		for(int i = 0; i < logEntries.size() ; i++){
-			JSONObject jObj = new JSONObject();
-			jObj.put("errorCode", new JSONString(logEntries.get(i).getLevel().name().toString()));
-			jObj.put("message", new JSONString(logEntries.get(i).getMessage()));
-			jArr.set(i, jObj);
-		}
-		requestJSON.put("listLogEntries", jArr);
-
-        //additional screening because we have two daserialization, first when write a string, second on server side
-		return requestJSON.toString().replace("\\\"","\\\\\"");*/
-		// TODO: SBRFACCTAX-2494
-	}
-
-	@Override
-	public void clean() {
-		logEntries.clear();
-		updateView();
-	}
-
-	@Override
-	public void hide() {
-		LogShowEvent.fire(this, false);
-	}
-
+        }, this));
+    }
 }

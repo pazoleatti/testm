@@ -39,22 +39,21 @@ import groovy.transform.Field
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
-        logicalCheck(true)
-        checkNSI()
+        logicalCheck()
         break
     case FormDataEvent.CALCULATE :
+        logicalCheckBeforeCalc()
         calc()
-        logicalCheck(true)
-        checkNSI()
+        logicalCheckAfterCalc()
         break
     case FormDataEvent.ADD_ROW :
-        addNewRow()
+        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW :
-        deleteRow()
+        if (currentDataRow.getAlias() == null) formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
@@ -62,170 +61,135 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        logicalCheck(true)
-        checkNSI()
+        logicalCheck()
         checkDeclaration()
         break
 // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
-        logicalCheck(true)
-        checkNSI()
+        logicalCheck()
         // на стороне сервера будет выполнен compose
         break
 // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
-        logicalCheckAfterCalc(true)
-        checkNSI()
+        logicalCheckAfterCalc()
         // для сохранения изменении приемников
-        getData(formData).commit()
+//        getData(formData).commit()
         break
 }
+
+//// Кэши и константы
+@Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+@Field
+def refBookCache = [:]
+
+// Все атрибуты
+@Field
+def allColumns = ['number', 'regionBank', 'fix', 'regionBankDivision', 'kpp', 'propertyPrice',
+        'workersCount', 'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
+        'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka', 'taxSum',
+        'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
+        'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+        'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
+        'everyMonthForFourthKvartalNextPeriod']
+
+// Редактируемые атрибуты
+@Field
+def editableColumns = ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit']
+
+// Автозаполняемые атрибуты
+@Field
+def autoFillColumns = allColumns - editableColumns
+
+// Проверяемые на пустые значения атрибуты
+@Field
+def nonEmptyColumns = ['number', 'regionBank', 'regionBankDivision',
+        'kpp', 'propertyPrice', 'workersCount',
+        'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
+        'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
+        'taxSum', 'taxSumOutside', 'taxSumToPay',
+        'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+        'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod', 'everyMonthForFourthKvartalNextPeriod'
+]
+
+// Группируемые атрибуты
+@Field
+def groupColumns = ['regionBankDivision', 'regionBank']
+
+// Атрибуты для итогов
+@Field
+def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit', 'baseTaxOf',
+        'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
+        'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
+        'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
+        'everyMonthForThirdKvartalNextPeriod',
+        'everyMonthForFourthKvartalNextPeriod']
 
 // Текущая дата
 @Field
 def currentDate = new Date()
 
-/**
- * Добавить новую строку.
- */
-def addNewRow() {
-    def data = getData(formData)
-    def newRow = getNewRow()
-
-    // def index = (currentDataRow != null ? getIndex(data, currentDataRow) + 1 : 0)
-    int index = (currentDataRow != null ? currentDataRow.getIndex() :
-        (getRows(data).size() == 0 ? 1 : getRows(data).size()))
-
-    def i = getRows(data).size()
-    if (i>0)
-    while(i>0 && isTotal(getRows(data).get(i-1)) || i>0 && isCa(getRows(data).get(i-1))){i--}
-    data.insert(newRow, i+1)
-
-    // проставление номеров строк
-    i = 1;
-    getRows(data).each{ row->
-        if (!isTotal(row)) {
-            row.number = i++
-        }
-    }
-    save(data)
+// Проверка НСИ
+boolean checkNSI(def refBookId, def row, def alias) {
+    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, true)
 }
 
-/**
- * Получить новую стролу с заданными стилями.
- */
-def getNewRow() {
-    def newRow = formData.createDataRow()
-
-    // графа 3, 5..7 редактируемые
-    ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit'].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
-    return newRow
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
-/**
- * Удалить строку.
- */
-def deleteRow() {
-    def data = getData(formData)
-    data.delete(currentDataRow)
+// Поиск записи в справочнике по значению (для расчетов) + по дате
+def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
+                     boolean required) {
+    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            day, rowIndex, cellName, logger, required)
 }
 
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
-    def data = getData(formData)
-    /*
-     * Проверка обязательных полей.
-     */
-
-    // список проверяемых столбцов (графа 3, 5..7)
-    def requiredColumns = ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit']
-
-    for (def row : getRows(data)) {
-        if (!isFixedRow(row) && !checkRequiredColumns(row, requiredColumns, true)) {
-            return
-        }
-    }
-
-    /*
-     * Расчеты
-     */
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
 
     // удалить фиксированные строки
-    def delRow = []
-    getRows(data).each { row ->
-        if (isFixedRow(row)) {
-            delRow += row
-        }
-    }
-    delRow.each { row ->
-        deleteRow(data, row)
-    }
-    if (getRows(data).isEmpty()) {
-        return
-    }
+    deleteAllAliased(dataRows)
 
     logicalCheckBeforeCalc()
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
     }
 
-    def propertyPriceSumm = getSumAll(data, "propertyPrice")
-    def workersCountSumm = getSumAll(data, "workersCount")
-    def tmp = null
+    def propertyPriceSumm = getSumAll(dataRows, "propertyPrice")
+    def workersCountSumm = getSumAll(dataRows, "workersCount")
 
     /** Распределяемая налоговая база за отчетный период. */
     def taxBase = roundValue(getTaxBase(), 0)
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
-    // справочник "Подразделения"
-    def departmentRefDataProvider = refBookFactory.getDataProvider(30)
-
-    // справочник "Параметры подразделения по налогу на прибыль"
-    def departmentParamIncomeRefDataProvider = refBookFactory.getDataProvider(33)
-
     /** Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде. */
     def sumNal = 0
-    def sumTaxRecords = departmentParamIncomeRefDataProvider.getRecords(new Date(), null, "DEPARTMENT_ID = 1", null);
-    if (sumTaxRecords != null && !sumTaxRecords.getRecords().isEmpty()) {
-        sumNal = new BigDecimal(getValue(sumTaxRecords.getRecords().getAt(0), 'SUM_TAX').doubleValue())
+    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", currentDate, -1, null, false)
+    if (sumTaxRecords != null && !sumTaxRecords.isEmpty()) {
+        sumNal = new BigDecimal(getValue(sumTaxRecords, 'SUM_TAX').doubleValue())
     }
-    // расчет графы 1..4, 8..21
-    getRows(data).eachWithIndex { row, i ->
 
-        def departmentRecords = departmentRefDataProvider.getRecords(currentDate, null, "ID = '" + row.regionBankDivision + "'", null);
-        if (departmentRecords == null || departmentRecords.getRecords().isEmpty()) {
-            logger.error('Не найдено родительское подразделение для строки ' + (i+1))
-            return
-        }
-        def departmentParam = departmentRecords.getRecords().getAt(0)
-
-        def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = " + row.regionBankDivision, null);
-        if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.getRecords().isEmpty()) {
-            logger.error('Не найдены настройки подразделения для строки ' + (i+1))
-            return
-        }
-        def incomeParam = departmentParamIncomeRecords.getRecords().getAt(0)
-
-        def parentDepartmentId = null;
-        long centralId = 113 // ID Центрального аппарата.
-        // У Центрального аппарата родительским подразделением должен быть он сам
-        if (centralId == row.regionBankDivision) {
-            parentDepartmentId = centralId
-        } else {
-            parentDepartmentId = departmentParam.get('PARENT_ID').getReferenceValue()
-        }
-
+    // расчет графы 2..4, 8..21
+    for (row in dataRows) {
         // графа 2 - название подразделения
-        row.regionBank = parentDepartmentId
+        row.regionBank = calc2(row)
 
+        def incomeParam
+        if (row.regionBankDivision != null) incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
+        if (incomeParam == null || incomeParam.isEmpty()) {
+            continue
+        }
         // графа 4 - кпп
         row.kpp = incomeParam.get('record_id').getNumberValue()
 
@@ -236,11 +200,10 @@ void calc() {
         row.obligationPayTax = incomeParam.get('OBLIGATION').getReferenceValue()
 
         // графа 10
-        tmp = ((((row.propertyPrice / propertyPriceSumm) * 100) + ((row.workersCount / workersCountSumm) * 100)) / 2)
-        row.baseTaxOf = roundValue(tmp, 8)
+        row.baseTaxOf = calc10(row, propertyPriceSumm, workersCountSumm)
 
         // графа 11
-        row.baseTaxOfRub = roundValue(taxBase * row.baseTaxOf / 100, 0)
+        row.baseTaxOfRub = calc11(row, taxBase)
 
         // графа 12
         row.subjectTaxStavka = row.kpp
@@ -249,53 +212,46 @@ void calc() {
         calcColumnFrom13To21(row, sumNal, reportPeriod)
     }
 
+    // Сортировка
     // отсортировать можно только после расчета графы regionBank
-    getRows(data).sort { a, b ->
-        if (a.regionBank == b.regionBank && a.regionBankDivision == b.regionBankDivision) {
-            return b.kpp <=> a.kpp
+    dataRows.sort { a, b ->
+        def regionBankA = getRefBookValue(30, a.regionBank)?.NAME?.stringValue
+        def regionBankB = getRefBookValue(30, b.regionBank)?.NAME?.stringValue
+        if (regionBankA == regionBankB) {
+            def regionBankDivisionA = getRefBookValue(30, a.regionBankDivision)?.NAME?.stringValue
+            def regionBankDivisionB = getRefBookValue(30, b.regionBankDivision)?.NAME?.stringValue
+            return (regionBankDivisionA <=> regionBankDivisionB)
         }
-        if (a.regionBank == b.regionBank) {
-            return -(b.regionBankDivision <=> a.regionBankDivision)
-        }
-        return -(b.regionBank <=> a.regionBank)
+        return (regionBankA <=> regionBankB)
     }
 
-    //
-    getRows(data).eachWithIndex { row, i ->
-        // графа 1
-        row.number = i + 1
+    // расчет графы 1 после сортировки
+    def index = 0
+    for (row in dataRows) {
+        row.number = ++index
     }
 
     // добавить строку ЦА (скорректрированный) (графа 1..21)
     def caTotalRow = formData.createDataRow()
-    insert(data, caTotalRow)
     caTotalRow.setAlias('ca')
     caTotalRow.fix = 'Центральный аппарат (скорректированный)'
     caTotalRow.getCell('fix').colSpan = 2
     setTotalStyle(caTotalRow)
+    dataRows.add(caTotalRow)
 
     // добавить итого (графа 5..7, 10, 11, 13..21)
     def totalRow = formData.createDataRow()
-    insert(data, totalRow)
     totalRow.setAlias('total')
     totalRow.fix = 'Итого'
     totalRow.getCell('fix').colSpan = 2
     setTotalStyle(totalRow)
-
-    ['propertyPrice', 'workersCount', 'subjectTaxCredit', 'baseTaxOf',
-            'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
-            'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
-            'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
-            'everyMonthForThirdKvartalNextPeriod',
-            'everyMonthForFourthKvartalNextPeriod'].each { alias ->
-        totalRow.getCell(alias).setValue(getSum(data, alias))
-    }
+    calcTotalSum(dataRows, totalRow, totalColumns)
+    dataRows.add(totalRow)
 
     // найти строку ЦА
-    def caRow = findCA(data)
+    def caRow = findCA(dataRows)
     if (caRow != null) {
         // расчеты для строки ЦА (скорректированный) графы 1, 3..21
-
         // графа 1, 3..10, 12
         ['number', 'regionBankDivision', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit',
                 'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka'].each { alias ->
@@ -309,77 +265,38 @@ void calc() {
         calcColumnFrom13To21(caTotalRow, sumNal, reportPeriod)
     }
 
-    save(data)
+    dataRowHelper.save(dataRows)
 }
 
-void logicalCheckBeforeCalc() {
-    def data = getData(formData)
-
-    // справочник "Подразделения"
-    def departmentRefDataProvider = refBookFactory.getDataProvider(30)
-
-    // справочник "Параметры подразделения по налогу на прибыль"
-    def departmentParamIncomeRefDataProvider = refBookFactory.getDataProvider(33)
-
-    def fieldNumber = 0
-
-    def sumTaxRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = 1", null);
-    if (sumTaxRecords == null || sumTaxRecords.getRecords().isEmpty() || getValue(sumTaxRecords.getRecords().getAt(0), 'SUM_TAX')==null) {
-        logger.error("В форме настроек подразделений (подразделение «УНП») не задано значение атрибута «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
+// графа 2 - название подразделения
+def calc2(def row) {
+    def departmentParam
+    if (row.regionBankDivision != null) departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
+    if (departmentParam == null || departmentParam.isEmpty()) {
+        return null
     }
 
-    getRows(data).eachWithIndex { row, i ->
-        if (isFixedRow(row)) {
-            return
-        }
-        fieldNumber++
-
-        def departmentRecords = departmentRefDataProvider.getRecords(currentDate, null, "ID = '" + row.regionBankDivision + "'", null);
-        if (departmentRecords == null || departmentRecords.getRecords().isEmpty()) {
-            logger.error('Не найдено родительское подразделение для строки ' + (row.number ?: getIndex(data, row)))
-            return
-        }
-
-        def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(currentDate, null, "DEPARTMENT_ID = " + row.regionBankDivision, null);
-        if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.getRecords().isEmpty()) {
-            logger.error('Не найдены настройки подразделения для строки ' + (row.number ?: getIndex(data, row)))
-            return
-        }
-        def incomeParam = departmentParamIncomeRecords.getRecords().getAt(0)
-
-        def departmentParam = departmentRecords.getRecords().getAt(0)
-
-        long centralId = 113 // ID Центрального аппарата.
-        // У Центрального аппарата родительским подразделением должен быть он сам
-        if (centralId != row.regionBankDivision) {
-        // графа 2 - название подразделения
-            if (departmentParam.get('PARENT_ID')?.getReferenceValue()==null) {
-                logger.error("Строка $fieldNumber:  Для подразделения территориального банка «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение наименования родительского подразделения!")
-            }
-        }
-
-        // графа 4 - кпп
-        if (incomeParam?.get('record_id')?.getNumberValue() == null) {
-            logger.error("Строка $fieldNumber: Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «КПП»!")
-        }
-
-        // графа 8 - Признак расчёта
-        if (incomeParam?.get('TYPE')?.getReferenceValue() == null) {
-            logger.error("Строка $fieldNumber: Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «Признак расчёта»!")
-        }
-
-        // графа 9 - Обязанность по уплате налога
-        if (incomeParam?.get('OBLIGATION')?.getReferenceValue() == null) {
-            logger.error("Строка $fieldNumber: Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «Обязанность по уплате налога»!")
-        }
-
-        // графа 12
-        if (incomeParam?.get('record_id')?.getNumberValue() == null) {
-            logger.error("Строка $fieldNumber: Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «Ставка налога в бюджет субъекта (%%)»!")
-        }
-
+    long centralId = 113 // ID Центрального аппарата.
+    // У Центрального аппарата родительским подразделением должен быть он сам
+    if (centralId == row.regionBankDivision) {
+        return centralId
+    } else {
+        return departmentParam.get('PARENT_ID').getReferenceValue()
     }
+}
 
+def calc10(def row, def propertyPriceSumm, def workersCountSumm){
+    if (row.propertyPrice != null && row.workersCount != null && propertyPriceSumm > 0 && workersCountSumm > 0) {
+        return roundValue((row.propertyPrice / propertyPriceSumm * 100 + row.workersCount / workersCountSumm * 100) / 2, 8)
+    }
+    return null
+}
+
+def calc11(def row, def taxBase){
+    if (row.baseTaxOf != null && taxBase != null) {
+        return roundValue(taxBase * row.baseTaxOf / 100, 0)
+    }
+    return null
 }
 
 /**
@@ -387,75 +304,108 @@ void logicalCheckBeforeCalc() {
  *
  * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-def logicalCheck(def useLog) {
+def logicalCheck() {
     logicalCheckBeforeCalc()
-    logicalCheckAfterCalc(useLog)
+    logicalCheckAfterCalc()
 }
 
-def logicalCheckAfterCalc(def useLog) {
-    def data = getData(formData)
+void logicalCheckBeforeCalc() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
 
-    if (!getRows(data).isEmpty()) {
-        // список проверяемых столбцов (графа 1..21)
-        def requiredColumns = [
-                'number', 'regionBank', 'regionBankDivision',
-                'kpp', 'propertyPrice', 'workersCount',
-                'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
-                'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
-                'taxSum', 'taxSumOutside', 'taxSumToPay',
-                'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
-                'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod', 'everyMonthForFourthKvartalNextPeriod'
-                ]
+    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", currentDate, -1, null, false)
+    if (sumTaxRecords == null || sumTaxRecords.isEmpty() || getValue(sumTaxRecords, 'SUM_TAX') == null) {
+        logger.error("В форме настроек подразделений (подразделение «УНП») не задано значение атрибута «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
+    }
 
-        for (def row : getRows(data)) {
-            if (isFixedRow(row)) {
-                continue
+    def fieldNumber = 0
+
+    dataRows.eachWithIndex { row, i ->
+        if (isFixedRow(row)) {
+            return
+        }
+        fieldNumber++
+        def index = row.getIndex()
+        def errorMsg = "Строка ${index}: "
+
+        def departmentParam
+        if (row.regionBankDivision != null) departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
+        if (departmentParam == null || departmentParam.isEmpty()) {
+            logger.error(errorMsg + "Не найдено подразделение территориального банка!")
+            return
+        } else {
+            long centralId = 113 // ID Центрального аппарата.
+            // У Центрального аппарата родительским подразделением должен быть он сам
+            if (centralId != row.regionBankDivision) {
+                // графа 2 - название подразделения
+                if (departmentParam.get('PARENT_ID')?.getReferenceValue()==null) {
+                    logger.error(errorMsg + "Для подразделения территориального банка «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение наименования родительского подразделения!")
+                }
+            }
+        }
+
+        def incomeParam
+        if (row.regionBankDivision != null) incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
+        if (incomeParam == null || incomeParam.isEmpty()) {
+            logger.error(errorMsg + "Строка $fieldNumber: Не найдены настройки подразделения!")
+        } else {
+            // графа 4 - кпп
+            if (incomeParam?.get('record_id')?.getNumberValue() == null || incomeParam?.get('KPP')?.getStringValue() == null) {
+                logger.error(errorMsg + "Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «КПП»!")
             }
 
-            // 1. Обязательность заполнения поля графы 1..21
-            if (!checkRequiredColumns(row, requiredColumns, useLog)) {
-                return false
+            // графа 8 - Признак расчёта
+            if (incomeParam?.get('TYPE')?.getReferenceValue() == null) {
+                logger.error(errorMsg + "Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «Признак расчёта»!")
+            }
+
+            // графа 9 - Обязанность по уплате налога
+            if (incomeParam?.get('OBLIGATION')?.getReferenceValue() == null) {
+                logger.error(errorMsg + "Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «Обязанность по уплате налога»!")
+            }
+
+            // графа 12
+            if (incomeParam?.get('record_id')?.getNumberValue() == null || incomeParam?.get('TAX_RATE')?.getNumberValue() == null) {
+                logger.error(errorMsg + "Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «Ставка налога в бюджет субъекта (%%)»!")
             }
         }
     }
-    return true
 }
 
-/**
- * Проверки соответствия НСИ.
- */
-def checkNSI() {
-    def data = getData(formData)
-    if (!getRows(data).isEmpty()) {
+void logicalCheckAfterCalc() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
 
-        // справочник "Подразделения"
-        def departmentRefDataProvider = refBookFactory.getDataProvider(30)
+    def departmentRefDataProvider = refBookFactory.getDataProvider(30)
 
-        for (def row : getRows(data)) {
-            if (isFixedRow(row)) {
-                continue
-            }
+    for (def row : dataRows) {
+        if (isFixedRow(row)) {
+            continue
+        }
+        def index = row.getIndex()
+        def errorMsg = "Строка ${index}: "
 
-            def departmentRecord = departmentRefDataProvider.getRecordData(row.regionBankDivision);
+        // 1. Обязательность заполнения поля графы 1..21
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-            // 1. Проверка совпадения наименования подразделения со справочным
-            if (departmentRecord.isEmpty()) {
-                logger.error('Неверное наименование подразделения!')
-                return false
-            }
+        // Проверки соответствия НСИ
+        def departmentRecord = departmentRefDataProvider.getRecordData(row.regionBankDivision);
+        // 1. Проверка совпадения наименования подразделения со справочным
+        if (departmentRecord.isEmpty()) {
+            logger.error(errorMsg + 'Неверное наименование подразделения!')
         }
     }
-    return true
 }
 
 /**
  * Консолидация.
  */
 void consolidation() {
-    def data = getData(formData)
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
 
     // удалить все строки и собрать из источников их строки
-    data.clear()
+    dataRowHelper.clear()
 
     /** Идентификатор шаблона источников (Приложение 5). */
     def id = 372
@@ -465,20 +415,20 @@ void consolidation() {
         if (it.formTypeId == id) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceData = getData(source)
-                getRows(sourceData).each { row ->
+                def sourceDataRows = formDataService.getDataRowHelper(source).getAllCached()
+                sourceDataRows.each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
                         newRow = formData.createDataRow()
 
-                        // TODO (Ramil Timerbaev) уточнить к каким полям присваивать
-                        newRow.regionBank = null // row.code
-                        newRow.regionBankDivision = null // row.depName
-                        newRow.kpp = null // row.kpp
-                        newRow.propertyPrice = null // row.subName
-                        newRow.workersCount = null // row.averageCost
-                        newRow.subjectTaxCredit = null // row.averageNumber
+                        // TODO проверить консолидацию
+                        newRow.regionBank =row.regionBank
+                        newRow.regionBankDivision = row.regionBankDivision
+                        newRow.kpp = row.kpp
+                        newRow.propertyPrice = row.propertyPrice
+                        newRow.workersCount = row.workersCount
+                        newRow.subjectTaxCredit = row.subjectTaxCredit
 
-                        insert(data, newRow)
+                        dataRows.add(newRow)
                     }
                 }
             }
@@ -488,22 +438,10 @@ void consolidation() {
 }
 
 /**
- * Проверка при создании формы.
- */
-void checkCreation() {
-    def findForm = formDataService.find(formData.formType.id,
-            formData.kind, formData.departmentId, formData.reportPeriodId)
-
-    if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
-    }
-}
-
-/**
  * Проверка наличия декларации для текущего department
  */
 void checkDeclaration() {
-    declarationType = 2;    // Тип декларации которую проверяем (Налог на прибыль)
+    declarationType = 2    // Тип декларации которую проверяем (Налог на прибыль)
     declaration = declarationService.find(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
     if (declaration != null && declaration.isAccepted()) {
         logger.error("Декларация банка находиться в статусе принята")
@@ -513,20 +451,6 @@ void checkDeclaration() {
 /*
  * Вспомогательные методы.
  */
-
-/**
- * Проверка является ли строка итоговой.
- */
-def isTotal(def row) {
-    return row != null && row.getAlias() != null && row.getAlias().contains('total')
-}
-
-/**
- * Проверка является ли строка итоговой для ЦА (скорректированный).
- */
-def isCa(def row) {
-    return row != null && row.getAlias() != null && row.getAlias().contains('ca')
-}
 
 /**
  * Проверка является ли строка фиксированной.
@@ -546,25 +470,9 @@ def isEmpty(def value) {
  * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
-    ['number', 'regionBank', 'fix', 'regionBankDivision', 'kpp', 'propertyPrice',
-            'workersCount', 'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
-            'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka', 'taxSum',
-            'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
-            'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
-            'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
-            'everyMonthForFourthKvartalNextPeriod'].each {
+    allColumns.each {
         row.getCell(it).setStyleAlias('Итоговая')
     }
-}
-
-/**
- * Получить номер строки в таблице.
- *
- * @param data данные нф (helper)
- * @param row строка
- */
-def getIndex(def data, def row) {
-    getRows(data).indexOf(row)
 }
 
 /**
@@ -574,92 +482,25 @@ def getIndex(def data, def row) {
  * @param columnAlias алилас столбца по которому считать сумму
  * @return
  */
-def getSum(def data, def columnAlias) {
+def getSum(def dataRows, def columnAlias) {
     def from = 0
-    def to = getRows(data).size() - 2
+    def to = dataRows.size() - 2
     if (from > to) {
         return 0
     }
-    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
+    return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
 }
 
 /**
  * Получить сумму столбца (сумма значении всех строк).
  */
-def getSumAll(def data, def columnAlias) {
+def getSumAll(def dataRows, def columnAlias) {
     def from = 0
-    def to = getRows(data).size() - 1
+    def to = dataRows.size() - 1
     if (from > to) {
         return 0
     }
-    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
-}
-
-/**
- * Проверить заполненость обязательных полей.
- *
- * @param row строка
- * @param columns список обязательных графов
- * @param useLog нужно ли записывать сообщения в лог
- * @return true - все хорошо, false - есть незаполненные поля
- */
-def checkRequiredColumns(def row, def columns, def useLog) {
-    def colNames = []
-
-    columns.each {
-        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-            def name = getColumnName(row, it)
-            colNames.add('"' + name + '"')
-        }
-    }
-    if (!colNames.isEmpty()) {
-        if (!useLog) {
-            return false
-        }
-        def index = row.number
-        def errorMsg = colNames.join(', ')
-        if (!isEmpty(index)) {
-            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-        } else {
-            def data = getData(formData)
-            index = getIndex(data, row) + 1
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
-        }
-        return false
-    }
-    return true
-}
-
-/**
- * Получить название графы по псевдониму.
- *
- * @param row строка
- * @param alias псевдоним графы
- */
-def getColumnName(def row, def alias) {
-    if (row != null && alias != null) {
-        return row.getCell(alias).getColumn().getName().replace('%', '%%')
-    }
-    return ''
-}
-
-/**
- * Сохранить измененные значения нф.
- *
- * @param data данные нф (helper)
- */
-void save(def data) {
-    data.save(getRows(data))
-}
-
-/**
- * Удалить строку из нф
- *
- * @param data данные нф (helper)
- * @param row строка для удаления
- */
-void deleteRow(def data, def row) {
-    data.delete(row)
+    return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
 }
 
 /**
@@ -675,22 +516,13 @@ def getData(def formData) {
 }
 
 /**
- * Получить строку по алиасу.
- *
- * @param data данные нф (helper)
- */
-def getRows(def data) {
-    return data.getAllCached();
-}
-
-/**
  * Вставить новыую строку в конец нф.
  *
  * @param data данные нф
  * @param row строка
  */
 void insert(def data, def row) {
-    data.insert(row, getRows(data).size() + 1)
+    data.insert(row, data.getAllCached().size() + 1)
 }
 
 /**
@@ -1009,11 +841,11 @@ void calcColumnFrom13To21(def row, def sumNal, def reportPeriod) {
 /**
  * Найти строку ЦА
  */
-def findCA(def data) {
+def findCA(def dataRows) {
     def resultRow = null
     long centralId = 113 // ID Центрального аппарата
-    if (data != null) {
-        for (def row : getRows(data)) {
+    if (dataRows != null) {
+        for (def row : dataRows) {
             if (row.regionBank == centralId) {
                 resultRow = row
             }
@@ -1050,8 +882,8 @@ def getValue(def record, def alias) {
  * @param precision точность округления, знаки после запятой
  * @return округленное число
  */
-def roundValue(def value, def precision) {
-    ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
+def roundValue(BigDecimal value, def precision) {
+    value.setScale(precision, BigDecimal.ROUND_HALF_UP)
 }
 
 /**
@@ -1060,5 +892,5 @@ def roundValue(def value, def precision) {
  * @param id идентификатор записи справочника
  */
 def getTaxRateAttribute(def id) {
-    return refBookService.getNumberValue(33, id, 'TAX_RATE')
+    return getRefBookValue(33, id)?.TAX_RATE?.getNumberValue()
 }

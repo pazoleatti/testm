@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -17,13 +18,6 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
@@ -53,13 +47,16 @@ public class GetFormDataHandler extends
 	private DepartmentService departmentService;
 
 	@Autowired
-	FormTemplateService formTemplateService;
+	private FormTemplateService formTemplateService;
 
     @Autowired
-    BlobDataService blobDataService;
+    private BlobDataService blobDataService;
     
     @Autowired 
-    TAUserService taUserService;
+    private TAUserService taUserService;
+
+    @Autowired
+    private LogEntryService logEntryService;
 
 	public GetFormDataHandler() {
 		super(GetFormData.class);
@@ -97,7 +94,7 @@ public class GetFormDataHandler extends
 		fillFormAndTemplateData(action, userInfo, logger, result);
 		fillFormDataAccessParams(action, userInfo, result);
 
-		result.setLogEntries(logger.getEntries());
+        result.setUuid(logEntryService.save(logger.getEntries()));
 
 		return result;
 
