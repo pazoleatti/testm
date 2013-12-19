@@ -31,7 +31,7 @@ class Main {
             uploadPath: '/download/formTemplate/upload']
 
     // Шаблоны в файловой системе
-    // def static resourcesPath = '../src/main/resources/form_template'
+    //def static resourcesPath = '../src/main/resources/form_template'
     def static resourcesPath = 'C:/form_template'
 
     // Маппинг шаблонов
@@ -116,7 +116,7 @@ class Main {
                     353:'rnu57',
                     318:'rnu6',
                     352:'rnu61',
-                    352:'rnu62',
+                    354:'rnu62',
                     355:'rnu64',
                     311:'rnu7',
                     504:'rnu70_1',

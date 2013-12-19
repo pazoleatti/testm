@@ -69,18 +69,22 @@ public class SyncAPI {
      * @param folderPath Папка для сохранения
      */
     public void downloadTemplate(int id, String folderPath) {
-        httpBuilder.get(path: params.rootPath + params.downloadPath + '/' + id, contentType: BINARY) { resp, reader ->
-            println "Download template (id=$id) $resp.statusLine"
-            def zis = new ZipInputStream(reader)
-            def entry = zis.nextEntry
-            while (entry != null) {
-                def file = new File(folderPath + entry.name)
-                file.getParentFile().mkdirs()
-                file.createNewFile()
-                println "Application->FileSystem: ${file.canonicalPath}"
-                IOUtils.copy(zis, new FileOutputStream(file))
-                entry = zis.nextEntry
+        try {
+            httpBuilder.get(path: params.rootPath + params.downloadPath + '/' + id, contentType: BINARY) { resp, reader ->
+                println "Download template (id=$id) $resp.statusLine"
+                def zis = new ZipInputStream(reader)
+                def entry = zis.nextEntry
+                while (entry != null) {
+                    def file = new File(folderPath + entry.name)
+                    file.getParentFile().mkdirs()
+                    file.createNewFile()
+                    println "Application->FileSystem: ${file.canonicalPath}"
+                    IOUtils.copy(zis, new FileOutputStream(file))
+                    entry = zis.nextEntry
+                }
             }
+        } catch (HttpResponseException ex) {
+            println " Error for template = $id: ${ex.getMessage()}"
         }
     }
 
