@@ -27,6 +27,7 @@ alter table blob_data add constraint blob_data_chk_type check (type in (0, 1));
 alter table ref_book add constraint ref_book_pk primary key (id);
 alter table ref_book add constraint ref_book_fk_script_id foreign key (script_id) references blob_data(id);
 alter table ref_book add constraint ref_book_chk_type check (type in (0, 1));
+alter table ref_book add constraint ref_book_chk_editable  check (editable in (0, 1));
 
 alter table ref_book_attribute add constraint ref_book_attr_pk primary key (id);
 alter table ref_book_attribute add constraint ref_book_attr_chk_visible check (visible in (0, 1));
@@ -41,9 +42,11 @@ alter table ref_book_attribute add constraint ref_book_attribute_uniq_alias uniq
 alter table ref_book_attribute add constraint ref_book_attr_fk_ref_book_id foreign key (ref_book_id) references ref_book (id);
 alter table ref_book_attribute add constraint ref_book_attr_fk_reference_id foreign key (reference_id) references ref_book (id);
 alter table ref_book_attribute add constraint ref_book_attr_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
+alter table ref_book_attribute add constraint ref_book_attr_chk_is_unique check (is_unique in (0, 1));
 
 alter table ref_book_record add constraint ref_book_record_pk primary key (id);
 alter table ref_book_record add constraint ref_book_record_chk_status check (status in (0, -1));
+alter table ref_book_record add constraint ref_book_record_chk_is_deleted  check (is_deleted in (0, 1));
 alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreign key (ref_book_id) references ref_book (id);
 create unique index i_ref_book_record_refbookid on ref_book_record(ref_book_id, record_id, version);
 
