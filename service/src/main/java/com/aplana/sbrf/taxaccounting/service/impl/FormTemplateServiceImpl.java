@@ -135,10 +135,14 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
         if(formTemplate.getRows().isEmpty()){
             formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
+        }else {
+            System.out.println("formTemplate: " + formTemplate.getRows().size());
         }
         if (formTemplate.getHeaders().isEmpty()){
             formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
             FormDataUtils.setValueOners(formTemplate.getHeaders());
+        }else {
+            System.out.println("formTemplate: " + formTemplate.getHeaders().size());
         }
         return formTemplate;
     }

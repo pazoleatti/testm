@@ -105,9 +105,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	 */
 	@Transactional(readOnly = false)
     @Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id", beforeInvocation = true),
-            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true),
-            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_data_rows\")", beforeInvocation = true),
-            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_data_headers\")", beforeInvocation = true)})
+            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true)})
 	@Override
 	public int save(final FormTemplate formTemplate) {
 		final Integer formTemplateId = formTemplate.getId();
@@ -194,7 +192,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                 String.class);
     }
 
-    @Cacheable(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_data_rows\")")
     @Override
     public List<DataRow<Cell>> getDataCells(FormTemplate formTemplate) {
         String dataRowXml = getJdbcTemplate().queryForObject("select data_rows from form_template where id = ?",
@@ -205,7 +202,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                 new ArrayList<DataRow<Cell>>();
     }
 
-    @Cacheable(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_data_headers\")")
     @Override
     public List<DataRow<HeaderCell>> getHeaderCells(FormTemplate formTemplate) {
         String headerDataXml = getJdbcTemplate().queryForObject("select data_headers from form_template where id = ?",
