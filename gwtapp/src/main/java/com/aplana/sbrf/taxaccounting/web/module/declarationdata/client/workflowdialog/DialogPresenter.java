@@ -19,6 +19,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
 public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> implements DialogUiHandlers {
 
+    private static final int MAX_LENGTH = 255;
 	private final PlaceManager placeManager;
 	private final DispatchAsync dispatchAsync;
 	private long declarationId;
@@ -48,15 +49,14 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 		String comment = getView().getComment();
 		if("".equals(comment.trim())){
 			Window.alert("Необходимо указать причину возврата");
-		} else {
+        } else if (comment.length() > MAX_LENGTH) {
+            Window.alert("Необходимо уменьшить длину причины возврата до " + MAX_LENGTH + " символов");
+        } else {
 			hide();
 			LogCleanEvent.fire(this);
 			AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
 			action.setAccepted(false);
 			action.setDeclarationId(declarationId);
-			if (comment.length() > 255) {
-				comment = comment.substring(0, 255);
-			}
 			action.setReasonForReturn(comment);
 			dispatchAsync.execute(action, CallbackUtils
 					.defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
