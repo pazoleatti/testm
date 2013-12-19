@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -135,8 +136,10 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         if(formTemplate.getRows().isEmpty()){
             formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
         }
-        if (formTemplate.getHeaders().isEmpty())
+        if (formTemplate.getHeaders().isEmpty()){
             formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
+            FormDataUtils.setValueOners(formTemplate.getHeaders());
+        }
         return formTemplate;
     }
 
