@@ -39,13 +39,16 @@ public class GetFormDataHandler extends
 	private DepartmentService departmentService;
 
 	@Autowired
-	FormTemplateService formTemplateService;
+	private FormTemplateService formTemplateService;
 
     @Autowired
-    BlobDataService blobDataService;
+    private BlobDataService blobDataService;
     
     @Autowired 
-    TAUserService taUserService;
+    private TAUserService taUserService;
+
+    @Autowired
+    private LogEntryService logEntryService;
 
 	public GetFormDataHandler() {
 		super(GetFormData.class);
@@ -83,7 +86,7 @@ public class GetFormDataHandler extends
 		fillFormAndTemplateData(action, userInfo, logger, result);
 		fillFormDataAccessParams(action, userInfo, result);
 
-		result.setLogEntries(logger.getEntries());
+        result.setUuid(logEntryService.save(logger.getEntries()));
 
 		return result;
 

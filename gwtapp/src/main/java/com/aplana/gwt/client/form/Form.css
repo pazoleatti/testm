@@ -17,6 +17,7 @@
     display: block;
     min-width: 1px;
 }
+
 /* Компоненты справа */
 .right {
     float: right;
@@ -41,3 +42,16 @@
     font-size: 22px;
 }
 
+/* Тело формы */
+.typicalFormBody {
+    border: solid 1px #aeaeac;
+    position: absolute;
+    top: 35px;
+    bottom: 0;
+    padding: 1px;
+    background-color: #f4f1eb;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    /*behavior: url(/resources/pie/PIE.htc);*/
+}

@@ -32,7 +32,7 @@ public final class ErrorOnFailureCallback<T> implements AsyncCallback<T>{
 		}
 		if (caught instanceof TaActionException) {
 			LogAddEvent.fire(hasHandlers,
-					((TaActionException) caught).getLogEntries());
+					((TaActionException) caught).getUuid());
 
 		}
 		ErrorEvent.fire(hasHandlers, caught.getLocalizedMessage(), caught);
@@ -44,7 +44,4 @@ public final class ErrorOnFailureCallback<T> implements AsyncCallback<T>{
 			callback.onSuccess(result);
 		}
 	}
-
-
-
 }

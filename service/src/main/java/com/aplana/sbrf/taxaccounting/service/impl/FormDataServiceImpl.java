@@ -77,6 +77,8 @@ public class FormDataServiceImpl implements FormDataService {
 	private ConfigurationProvider configurationProvider;
 	@Autowired
 	private ApplicationContext applicationContext;
+    @Autowired
+    private LogEntryService logEntryService;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -188,8 +190,7 @@ public class FormDataServiceImpl implements FormDataService {
 
             if (logger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException(
-                        "Есть критические ошибки при выполнения скрипта.",
-                        logger.getEntries());
+                        "Есть критические ошибки при выполнения скрипта.", logEntryService.save(logger.getEntries()));
             } else {
                 logger.info("Данные загружены");
             }
@@ -235,7 +236,7 @@ public class FormDataServiceImpl implements FormDataService {
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте создания налоговой формы",
-					logger.getEntries());
+                    logEntryService.save(logger.getEntries()));
 		}
 
 		formDataDao.save(formData);
@@ -281,9 +282,8 @@ public class FormDataServiceImpl implements FormDataService {
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте добавления новой строки",
-					logger.getEntries());
+                    logEntryService.save(logger.getEntries()));
 		}
-
 	}
 	
 	@Override
@@ -305,10 +305,9 @@ public class FormDataServiceImpl implements FormDataService {
 				FormDataEvent.DELETE_ROW, logger, additionalParameters);
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
-					"Произошли ошибки в скрипте удаление строки",
-					logger.getEntries());
+					"Произошли ошибки в скрипте удаления строки",
+                    logEntryService.save(logger.getEntries()));
 		}
-
 	}
 
 	/**
@@ -332,16 +331,14 @@ public class FormDataServiceImpl implements FormDataService {
 				FormDataEvent.CALCULATE, logger, null);
 
 		if (logger.containsLevel(LogLevel.ERROR)) {
-			throw new ServiceLoggerException(
-					"Найдены ошибки при выполнении расчета формы",
-					logger.getEntries());
+			throw new ServiceLoggerException("Найдены ошибки при выполнении расчета формы", logEntryService.save(logger.getEntries()));
 		} else {
 			logger.info("Расчет завершен, фатальных ошибок не обнаружено");
 		}
-
 	}
 
 	@Override
+    @Transactional(noRollbackFor = ServiceLoggerException.class)
 	public void doCheck(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
 		lockCoreService.checkNoLockedAnother(FormData.class, formData.getId(), userInfo);
@@ -357,12 +354,11 @@ public class FormDataServiceImpl implements FormDataService {
 
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
-					"Найдены ошибки при выполнении проверки формы", logger.getEntries());
+					"Найдены ошибки при выполнении проверки формы", logEntryService.save(logger.getEntries()));
 		} else {
 			// Ошибка для отката транзакции
 			logger.info("Проверка завершена, фатальных ошибок не обнаружено");
-			throw new ServiceLoggerException(
-					"Ошибок не обнаружено", logger.getEntries());
+			throw new ServiceLoggerException("Ошибок не обнаружено", logEntryService.save(logger.getEntries()));
 		}
 	}
 
@@ -399,7 +395,6 @@ public class FormDataServiceImpl implements FormDataService {
 				null, formData.getFormType().getId(), formData.getKind().getId(), null);
 
 		return formData.getId();
-
 	}
 
 	/**
@@ -429,11 +424,10 @@ public class FormDataServiceImpl implements FormDataService {
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте, который выполняется после загрузки формы",
-					logger.getEntries());
+                    logEntryService.save(logger.getEntries()));
 		}
 
 		return formData;
-
 	}
 
 	/**
@@ -458,7 +452,6 @@ public class FormDataServiceImpl implements FormDataService {
 		auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 				null, formData.getFormType().getId(), formData.getKind().getId(), null);
 		formDataDao.delete(formDataId);
-
 	}
 
 	/**
@@ -495,7 +488,7 @@ public class FormDataServiceImpl implements FormDataService {
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте, который выполняется перед переходом",
-					logger.getEntries());
+                    logEntryService.save(logger.getEntries()));
 		}
 	
 		eventHandlerLauncher.process(userInfo, formData, workflowMove.getEvent(), logger, null);
@@ -507,7 +500,7 @@ public class FormDataServiceImpl implements FormDataService {
 			if (logger.containsLevel(LogLevel.ERROR)) {
 				throw new ServiceLoggerException(
 						"Произошли ошибки в скрипте, который выполняется после перехода",
-						logger.getEntries());
+                        logEntryService.save(logger.getEntries()));
 			} else {
                 compose(workflowMove, formData, userInfo, logger);
             }

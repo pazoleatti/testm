@@ -606,7 +606,8 @@ void addData(def xml, int headRowCount) {
         if (map != null) {
             def text = row.cell[xmlIndexCol].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO?.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO?.stringValue != null)) {
-                logger.warn("Строка ${xlsIndexRow} столбец ${xmlIndexCol + colOffset} содержит значение, отсутствующее в справочнике!")
+                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName()+"»!")
             }
         }
         xmlIndexCol++
@@ -617,7 +618,8 @@ void addData(def xml, int headRowCount) {
             map = getRefBookValue(10, map.COUNTRY?.referenceValue)
             if (map != null) {
                 if ((text != null && !text.isEmpty() && !text.equals(map.NAME?.stringValue)) || ((text == null || text.isEmpty()) && map.NAME?.stringValue != null)) {
-                    logger.warn("Строка ${xlsIndexRow} столбец ${xmlIndexCol + colOffset} содержит значение, отсутствующее в справочнике!")
+                    logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
+                            "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
                 }
             }
         }
@@ -627,7 +629,8 @@ void addData(def xml, int headRowCount) {
         if (map != null) {
             def text = row.cell[xmlIndexCol].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map.CODE?.stringValue != null)) {
-                logger.warn("Строка ${xlsIndexRow} столбец ${xmlIndexCol + colOffset} содержит значение, отсутствующее в справочнике!")
+                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
             }
         }
         xmlIndexCol++

@@ -62,6 +62,7 @@ public class CacheTest {
     private static String DEPARTMENT_JNDI = "services/cache/aplana/taxaccounting/Department";
     private static String USER_JNDI = "services/cache/aplana/taxaccounting/User";
     private static String PERMANENT_DATA_JNDI = "services/cache/aplana/taxaccounting/PermanentData";
+    private static String DATA_BLOBS_CACHE_JNDI = "services/cache/aplana/taxaccounting/DataBlobsCache";
 
     @BeforeClass
     public static void initContext() throws NamingException {
@@ -73,6 +74,7 @@ public class CacheTest {
         builder.bind(DEPARTMENT_JNDI, new HashMap<Object, Object>());
         builder.bind(USER_JNDI, new HashMap<Object, Object>());
         builder.bind(PERMANENT_DATA_JNDI, new HashMap<Object, Object>());
+        builder.bind(DATA_BLOBS_CACHE_JNDI, new HashMap<Object, Object>());
         builder.activate();
         ic = new InitialContext();
     }

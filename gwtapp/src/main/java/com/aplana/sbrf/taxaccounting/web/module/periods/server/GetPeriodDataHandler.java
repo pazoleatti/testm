@@ -1,11 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
@@ -80,6 +75,7 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 				row.setReportPeriodId(period.getReportPeriod().getId());
 				row.setSubHeader(false);
                 row.setBalance(period.isBalance());
+                row.setCorrectPeriod(period.getCorrectPeriod());
                 row.setDeadline(notifications.containsKey(period.getReportPeriod().getId()) ?
                         notifications.get(period.getReportPeriod().getId()).getDeadline() : null);
 				per.get(periodYear).add(row);
