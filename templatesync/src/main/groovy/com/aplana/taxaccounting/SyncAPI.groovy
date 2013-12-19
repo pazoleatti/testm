@@ -1,6 +1,7 @@
 package com.aplana.taxaccounting
 
 import groovyx.net.http.HTTPBuilder
+import groovyx.net.http.HttpResponseException
 import groovyx.net.http.Method
 import org.apache.commons.io.IOUtils
 import org.apache.http.entity.mime.MultipartEntity
@@ -109,16 +110,23 @@ public class SyncAPI {
             zos.closeEntry()
         }
         zos.close()
-        // println "file = "+zipFile.canonicalPath
-        println "FileSystem->Application: ${folder.canonicalPath} -> ${params.serverAddress + url}"
 
-        httpBuilder.request(Method.POST) { request ->
-            uri.path = url
-            requestContentType = 'multipart/form-data'
-            MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE)
-            entity.addPart("uploadFormFile", new FileBody(zipFile, 'application/zip'))
-            request.entity = entity
+        print "FileSystem->Application: ${folder.canonicalPath} -> ${params.serverAddress + url}"
+
+        try {
+            httpBuilder.request(Method.POST) { request ->
+                uri.path = url
+                requestContentType = 'multipart/form-data'
+                def entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE)
+                entity.addPart("uploadFormFile", new FileBody(zipFile, 'application/zip'))
+                request.entity = entity
+
+            }
+        } catch (HttpResponseException ex) {
+            print " Error: ${ex.getMessage()}"
         }
+
+        println()
         zipFile.delete()
     }
 }
