@@ -43,17 +43,11 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     @UiField
     Label showResult;
 
-    @UiField(provided = true)
-    TypicalFormHeader formHeader;
-    @UiField
-    Label lbl;
+
 
     @UiField
     Button showDialog;
 
-    @UiField
-    CheckBox chk;
-    
     Label lbl1;
 
     @Inject
@@ -138,16 +132,6 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
         showResult.setText(strCont);
 
-
-        //put this handler in the constructor
-        lbl.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                chk.setValue(!chk.getValue(), true);
-                //This will so it will manually operate the checkbox
-            }
-        });
-
         showDialog.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -155,7 +139,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                 lbl1 = new Label("Тест");
                 lbl1.setSize("400px","200px");
                 mw.add(lbl1);
-                // mw.addAdditionalButton(new ImageButtonLink("http://127.0.0.1:8888/resources/img/email.png", "Отправить письмо"));
+               // mw.addAdditionalButton(new ImageButtonLink("http://127.0.0.1:8888/resources/img/email.png", "Отправить письмо"));
                 mw.addSaveButtonClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
