@@ -1,13 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog;
 
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.TextArea;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
@@ -26,6 +23,8 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	@UiField
 	Button cancelButton;
 
+	@UiField
+    Label textLengthLabel;
 
 	private final PopupPanel widget;
 
@@ -34,9 +33,32 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 		super(eventBus);
 		widget = uiBinder.createAndBindUi(this);
 		widget.setAnimationEnabled(true);
+        data.addKeyPressHandler(new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent keyPressEvent) {
+                //при печати идет запаздывание на 1 символ
+                setDataLength(data.getText().length() + 1);
+            }
+        });
+        data.addFocusHandler(new FocusHandler() {
+            @Override
+            public void onFocus(FocusEvent focusEvent) {
+                setDataLength(data.getText().length());
+            }
+        });
+        data.addBlurHandler(new BlurHandler() {
+            @Override
+            public void onBlur(BlurEvent blurEvent) {
+                setDataLength(data.getText().length());
+            }
+        });
 	}
 
-	@Override
+    private void setDataLength(int value) {
+        textLengthLabel.setText("Длина " + String.valueOf(value) + " (макс. 255)");
+    }
+
+    @Override
 	public Widget asWidget() {
 		return widget;
 	}
