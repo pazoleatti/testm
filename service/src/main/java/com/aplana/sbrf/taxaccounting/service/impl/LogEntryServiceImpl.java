@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
@@ -47,7 +48,11 @@ public class LogEntryServiceImpl implements LogEntryService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public String save(List<LogEntry> logEntry) {
+        if (logEntry == null || logEntry.isEmpty()) {
+            return null;
+        }
         String uuid = UUID.randomUUID().toString().toLowerCase();
         logEntryDao.save(logEntry, uuid);
         return uuid;

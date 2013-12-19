@@ -46,7 +46,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     private static final String FIND_ERROR = "FormData не сохранена, id = null.";
     private static final String COMPOSE_SUCCESS = "Формирование консолидированной формы прошло успешно.";
-    private static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Строка %d, колонка %d содержит значение, отсутствующее в справочнике «%s»!";
+    private static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d содержит значение, отсутствующее в справочнике «%s»!";
     private static final String REF_BOOK_ROW_NOT_FOUND_ERROR = "Строка %d, графа «%s» содержит значение, отсутствующее в справочнике «%s»!";
     private static final String REF_BOOK_NOT_FOUND_ERROR = "В справочнике «%s» не найдено значение «%s», соответствующее атрибуту «%s»!";
     private static final String REF_BOOK_DEREFERENCE_ERROR = "Строка %d, графа «%s»: В справочнике «%s» не найден элемент с id = %d»!";

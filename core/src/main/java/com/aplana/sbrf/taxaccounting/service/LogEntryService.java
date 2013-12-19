@@ -34,7 +34,7 @@ public interface LogEntryService {
      * Сохранить LogEntry
      *
      * @param logEntry
-     * @return uuid
+     * @return uuid null, если ошибок нет
      */
     String save(List<LogEntry> logEntry);
 

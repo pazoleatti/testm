@@ -76,6 +76,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Autowired
 	private AuditService auditService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
 	public static final String ATTR_FILE_ID = "ИдФайл";
@@ -104,8 +107,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 				null, null, null);
 		return id;
 	}
-
-
 
 	@Override
 	@Transactional(readOnly = false)
@@ -142,7 +143,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 				declarationData.getReportPeriodId(),
 				declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId(),
 				null, null, null);
-
 	}
 
 	@Override
@@ -153,7 +153,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(
                     "Найдены ошибки при выполнении проверки декларации",
-                    logger.getEntries());
+                    logEntryService.save(logger.getEntries()));
         } else {
             logger.info("Проверка завершена, ошибок не обнаружено");
         }
@@ -216,7 +216,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 		}
 		declarationDataDao.setAccepted(id, accepted);
-
 	}
 
 	@Override
@@ -361,7 +360,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
             if (logger.containsLevel(LogLevel.ERROR)) {
                 Locale.setDefault(oldLocale);
-                throw new ServiceLoggerException(VALIDATION_ERR_MSG, logger.getEntries());
+                throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
             }
 
             Locale.setDefault(oldLocale);
@@ -461,7 +460,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return blobDataService.create(inputStream, "");
     }
 
-
 	@Override
 	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
 		return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
@@ -477,5 +475,4 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
         return arrayOutputStream.toByteArray();
     }
-
 }
