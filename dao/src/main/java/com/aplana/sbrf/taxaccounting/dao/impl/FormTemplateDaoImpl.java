@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -210,5 +211,33 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                 String.class);
         return headerDataXml != null ? xmlSerializationUtils.deserialize(headerDataXml, formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class):
                 new ArrayList<DataRow<HeaderCell>>();
+    }
+
+    @Override
+    public List<Integer> getByFilter(TemplateFilter filter) {
+        if (filter == null) {
+            return listAllId();
+        }
+        StringBuilder sb = new StringBuilder(
+                "select form_template.id " +
+                        "from form_template " +
+                        "left join form_type on form_template.type_id = form_type.id "
+        );
+        sb.append("where is_active = " + (filter.isActive() ? "1" : "0") );
+        if (filter.getTaxType() != null) {
+            sb.append(" and form_type.TAX_TYPE = '" + filter.getTaxType().getCode() + "\'");
+        }
+        return getJdbcTemplate().queryForList(
+                sb.toString(),
+                Integer.class
+        );
+    }
+
+    @Override
+    public List<Integer> listAllId() {
+        return getJdbcTemplate().queryForList(
+                "select form_template.id from form_template",
+                Integer.class
+        );
     }
 }

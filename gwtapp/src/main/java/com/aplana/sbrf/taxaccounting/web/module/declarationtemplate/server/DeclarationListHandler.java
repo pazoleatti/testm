@@ -23,7 +23,7 @@ public class DeclarationListHandler	extends AbstractActionHandler<DeclarationLis
 	@Override
 	public DeclarationListResult execute(DeclarationListAction action, ExecutionContext executionContext) throws ActionException {
 		DeclarationListResult result = new DeclarationListResult();
-		result.setDeclarations(declarationTemplateService.listAll());
+		result.setDeclarations(declarationTemplateService.getByFilter(action.getFilter()));
 		return result;
 	}
 

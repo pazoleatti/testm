@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -145,6 +146,15 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             System.out.println("formTemplate: " + formTemplate.getHeaders().size());
         }
         return formTemplate;
+    }
+
+    @Override
+    public List<FormTemplate> getByFilter(TemplateFilter filter) {
+        List<FormTemplate> formTemplates = new ArrayList<FormTemplate>();
+        for (Integer id : formTemplateDao.getByFilter(filter)) {
+            formTemplates.add(formTemplateDao.get(id));
+        }
+        return formTemplates;
     }
 
     @Override

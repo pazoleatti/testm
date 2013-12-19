@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -188,5 +189,33 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                 new Object[] { declarationTemplateId },
                 new int[]{Types.INTEGER},
                 String.class);
+    }
+
+    @Override
+    public List<Integer> getByFilter(TemplateFilter filter) {
+        if (filter == null) {
+            return listAllId();
+        }
+        StringBuilder sb = new StringBuilder(
+                "select declaration_template.id " +
+                        "from declaration_template " +
+                        "left join declaration_type on declaration_template.declaration_type_id = declaration_type.id "
+        );
+        sb.append("where is_active = " + (filter.isActive() ? "1" : "0") );
+        if (filter.getTaxType() != null) {
+            sb.append(" and declaration_type.TAX_TYPE = '" + filter.getTaxType().getCode() + "\'");
+        }
+        return getJdbcTemplate().queryForList(
+                sb.toString(),
+                Integer.class
+        );
+    }
+
+    @Override
+    public List<Integer> listAllId() {
+        return getJdbcTemplate().queryForList(
+                "select form_template.id from form_template",
+                Integer.class
+        );
     }
 }

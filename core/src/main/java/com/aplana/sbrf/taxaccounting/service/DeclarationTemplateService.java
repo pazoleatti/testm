@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 
@@ -93,5 +94,12 @@ public interface DeclarationTemplateService {
      * @return тело скрипта
      */
     String getDeclarationTemplateScript(int declarationTemplateId);
+
+    /**
+     * Получить список шаблонов деклараций по фильтру
+     * @param filter фильтр
+     * @return отфильтрованый список шаблонов
+     */
+    List<DeclarationTemplate> getByFilter(TemplateFilter filter);
 
 }
