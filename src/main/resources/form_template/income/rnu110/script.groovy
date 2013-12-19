@@ -1,5 +1,6 @@
 package form_template.income.rnu110
 
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -104,6 +105,10 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
+    // Проверка только для первичных
+    if (formData.kind != FormDataKind.PRIMARY) {
+        return
+    }
     def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         def formName = formData.getFormType().getName()
@@ -229,6 +234,9 @@ def logicCheck() {
         // список групп кодов классификации для которых надо будет посчитать суммы
         def totalGroupsName = []
 
+        // номер последний строки предыдущей формы
+        def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
+
         for (def row : dataRows) {
             if (row.getAlias() != null) {
                 hasTotal = true
@@ -241,10 +249,8 @@ def logicCheck() {
             checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
             // 2. Проверка на уникальность поля «№ пп»
-            for (def rowB : dataRows) {
-                if (!row.equals(rowB) && row.rowNumber == rowB.rowNumber) {
-                    logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
-                }
+            if (++i != row.number) {
+                logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
             }
 
             // 3. Проверка даты совершения операции и границ отчётного периода

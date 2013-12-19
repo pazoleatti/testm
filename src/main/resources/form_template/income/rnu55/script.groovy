@@ -1,6 +1,7 @@
 package form_template.income.rnu55
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
@@ -105,6 +106,10 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
+    // Проверка только для первичных
+    if (formData.kind != FormDataKind.PRIMARY) {
+        return
+    }
     def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
@@ -136,6 +141,9 @@ void calc() {
         for (def row in dataRows) {
             // графа 1
             row.number = ++index
+            if (formData.kind != FormDataKind.PRIMARY) {
+                continue
+            }
             // графа 9
             row.percentInRuble = calc9(row)
             // графа 10
@@ -331,11 +339,13 @@ void logicCheck() {
             }
         }
 
-        // 9. Арифметическая проверка графы 9-11
-        needValue['percentInCurrency'] = calc9(row)
-        needValue['sumIncomeinCurrency'] = calc10(row, startDate, reportDate, daysInYear)
-        needValue['sumIncomeinRuble'] = calc11(row, reportDate)
-        checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+        if (formData.kind == FormDataKind.PRIMARY) {
+            // 9. Арифметическая проверка графы 9-11
+            needValue['percentInCurrency'] = calc9(row)
+            needValue['sumIncomeinCurrency'] = calc10(row, startDate, reportDate, daysInYear)
+            needValue['sumIncomeinRuble'] = calc11(row, reportDate)
+            checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+        }
 
         // Проверки соответствия НСИ
         checkNSI(15, row, 'currency')
@@ -355,9 +365,9 @@ def isRubleCurrency(def currencyCode) {
  * @param row
  * @param sumColumnName алиас графы для суммирования
  */
-def getCalcPrevColumn10(def row, def sumColumnName) {
+def BigDecimal getCalcPrevColumn10(def row, def sumColumnName) {
     def sum = 0
-    if (row.buyDate != null && row.bill !=null) {
+    if (row.buyDate != null && row.bill != null) {
         taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, row.buyDate, startDate - 1)
         for (taxPeriod in taxPeriods) {
             reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.id)
@@ -376,22 +386,6 @@ def getCalcPrevColumn10(def row, def sumColumnName) {
         }
     }
     return sum
-}
-
-/**
- * Получить данные за предыдущий отчетный период
- */
-def getFormDataOld() {
-    // предыдущий отчётный период
-    def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-
-    // РНУ-55 за предыдущий отчетный период
-    def formDataOld = null
-    if (reportPeriodOld != null) {
-        formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
-    }
-
-    return formDataOld
 }
 
 // Получить курс банка России на указанную дату.
