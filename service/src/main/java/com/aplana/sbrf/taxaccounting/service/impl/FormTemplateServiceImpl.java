@@ -132,8 +132,11 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     @Override
     public FormTemplate getFullFormTemplate(int formTemplateId) {
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
-        formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
-        formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
+        if(formTemplate.getRows().isEmpty()){
+            formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
+        }
+        if (formTemplate.getHeaders().isEmpty())
+            formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
         return formTemplate;
     }
 

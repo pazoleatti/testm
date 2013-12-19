@@ -88,7 +88,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		JdbcTemplate jt = getJdbcTemplate();
 		try {
 			return jt.queryForObject(
-					"select id, is_active, version, name, fullname, type_id, edition, numbered_columns, fixed_rows, code, script, data_rows, data_headers " +
+					"select id, is_active, version, name, fullname, type_id, edition, numbered_columns, fixed_rows, code, script " +
                             "from form_template where id = ?",
 					new Object[]{formId},
 					new int[]{Types.NUMERIC},
