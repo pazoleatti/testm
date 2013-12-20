@@ -33,7 +33,7 @@ public class GetFormTemplateListHandler extends AbstractActionHandler<GetFormTem
     @Override
     public GetFormTemplateListResult execute(GetFormTemplateListAction formListAction, ExecutionContext executionContext) throws ActionException {
         GetFormTemplateListResult result = new GetFormTemplateListResult();
-        result.setForms(formTemplateService.listAll());
+        result.setForms(formTemplateService.getByFilter(formListAction.getFilter()));
         // Сортировка
         if (result.getForms() != null) {
             Collections.sort(result.getForms(), new Comparator<FormTemplate>() {

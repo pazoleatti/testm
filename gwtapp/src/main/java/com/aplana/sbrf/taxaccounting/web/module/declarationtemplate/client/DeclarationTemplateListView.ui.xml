@@ -9,7 +9,12 @@
         }
     </ui:style>
     <g:FlowPanel>
-        <g:Label styleName="{style.title}">Список шаблонов деклараций</g:Label>
-	    <style:GenericCellTable ui:field="declarationTemplateTable" width="100%" />
+        <g:HorizontalPanel>
+            <g:Label styleName="{style.title}">Список шаблонов деклараций</g:Label>
+            <g:FlowPanel width="100%" ui:field="filterContentPanel" />
+        </g:HorizontalPanel>
+        <g:VerticalPanel width="100%">
+            <style:GenericCellTable ui:field="declarationTemplateTable" width="100%" />
+        </g:VerticalPanel>
     </g:FlowPanel>
 </ui:UiBinder>
