@@ -64,6 +64,7 @@ public class FormTemplateController {
 
 	@ExceptionHandler(Exception.class)
 	public void exceptionHandler(Exception e, final HttpServletResponse response) {
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		response.setContentType("text/html");
 		response.setCharacterEncoding("UTF-8");
 		logger.warn(e.getLocalizedMessage(), e);

@@ -31,7 +31,7 @@ class Main {
             uploadPath: '/download/formTemplate/upload']
 
     // Шаблоны в файловой системе
-    //def static resourcesPath = '../src/main/resources/form_template'
+    // def static resourcesPath = '../src/main/resources/form_template'
     def static resourcesPath = 'C:/form_template'
 
     // Маппинг шаблонов
@@ -147,18 +147,28 @@ class Main {
     }
 
     private static void downloadAll(SyncAPI api) {
+        def succesCount = 0
+        def failCount = 0
         templates.each { taxType ->
             taxType.value.each { template ->
-                api.downloadTemplate(template.key, "$resourcesPath/${taxType.key}/${template.value}/")
+                def result = api.downloadTemplate(template.key, "$resourcesPath/${taxType.key}/${template.value}/")
+                result ? succesCount++ : failCount++
             }
         }
+        println()
+        println("Success: $succesCount Fail: $failCount")
     }
 
     private static void uploadAll(SyncAPI api) {
+        def succesCount = 0
+        def failCount = 0
         templates.each { taxType ->
             taxType.value.each { template ->
-                api.uploadTemplate(template.key, "$resourcesPath/${taxType.key}/${template.value}/")
+                def result = api.uploadTemplate(template.key, "$resourcesPath/${taxType.key}/${template.value}/")
+                result ? succesCount++ : failCount++
             }
         }
+        println()
+        println("Success: $succesCount Fail: $failCount")
     }
 }

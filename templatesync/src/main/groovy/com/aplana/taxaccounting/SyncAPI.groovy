@@ -68,10 +68,11 @@ public class SyncAPI {
      * @param id Идентификатор шаблона
      * @param folderPath Папка для сохранения
      */
-    public void downloadTemplate(int id, String folderPath) {
+    public boolean downloadTemplate(int id, String folderPath) {
+        print "Download template (id=$id)"
         try {
             httpBuilder.get(path: params.rootPath + params.downloadPath + '/' + id, contentType: BINARY) { resp, reader ->
-                println "Download template (id=$id) $resp.statusLine"
+                println " $resp.statusLine"
                 def zis = new ZipInputStream(reader)
                 def entry = zis.nextEntry
                 while (entry != null) {
@@ -83,8 +84,10 @@ public class SyncAPI {
                     entry = zis.nextEntry
                 }
             }
+            return true
         } catch (HttpResponseException ex) {
-            println " Error for template = $id: ${ex.getMessage()}"
+            println " Error: ${ex.getMessage()}"
+            return false
         }
     }
 
@@ -94,8 +97,9 @@ public class SyncAPI {
      * @param id Идентификатор шаблона
      * @param folderPath Папка для сохранения
      */
-    public void uploadTemplate(int id, String folderPath) {
+    public boolean uploadTemplate(int id, String folderPath) {
         def folder = new File(folderPath)
+        def retVal = true
         if (!folder.isDirectory() || !folder.exists()) {
             return
         }
@@ -105,6 +109,7 @@ public class SyncAPI {
         }
         def url =  params.rootPath + params.uploadPath + '/' + id
         def zipFile = File.createTempFile("formTemplate_${id}_", '.zip')
+        // def zipFile = new File("formTemplate_${id}.zip")
 
         def zos = new ZipOutputStream(new FileOutputStream(zipFile))
 
@@ -128,9 +133,11 @@ public class SyncAPI {
             }
         } catch (HttpResponseException ex) {
             print " Error: ${ex.getMessage()}"
+            retVal = false
         }
 
         println()
         zipFile.delete()
+        return retVal
     }
 }
