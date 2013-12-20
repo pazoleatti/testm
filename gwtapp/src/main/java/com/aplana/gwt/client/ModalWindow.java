@@ -49,7 +49,7 @@ public class ModalWindow extends DialogBox {
         ModalWindowResources closeImgRes = GWT.create(ModalWindowResources.class);
         close = new Image(closeImgRes.closeImage());
 
-        if (iconUrl.equals("")){
+        if (!iconUrl.equals("")){
             icon.setUrl(iconUrl);
             icon.setVisible(true);
         }
@@ -60,20 +60,23 @@ public class ModalWindow extends DialogBox {
         // Переделываем стиль DialogBox
         Element td = getCellElement(0, 1);
         Element r0c0 = getCellElement (0,0);
-        r0c0.getParentElement().addClassName("OverrideA");
         Element r0c2 = getCellElement (0,2);
-        r0c2.getParentElement().addClassName("OverrideA");
         Element r1c0 = getCellElement (1,0);
-        r1c0.getParentElement().addClassName("OverrideB");
         Element r1c2 = getCellElement (1,2);
-        r1c2.getParentElement().addClassName("OverrideB");
         Element r2c0 = getCellElement (2,0);
-        r2c0.getParentElement().addClassName("OverrideC");
         Element r2c2 = getCellElement (2,2);
-        r2c2.getParentElement().addClassName("OverrideC");
+
+        // Удаляем дивы у DialigBox что бы не было зазоров
+        DOM.removeChild(((Element)r0c0.getParentElement()), (Element) r0c0.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element)r0c2.getParentElement()), (Element) r0c2.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element)r1c0.getParentElement()), (Element) r1c0.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element)r1c2.getParentElement()), (Element) r1c2.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element)r2c0.getParentElement()), (Element) r2c0.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element)r2c2.getParentElement()), (Element) r2c2.getParentElement().getFirstChildElement());
 
         Element td1 = getCellElement(1, 1);
 
+        // Убираем паддинги у DialigBox
         td.getParentElement().addClassName("OverrideCenter");
         td1.getParentElement().addClassName("OverrideCenter");
 
@@ -115,7 +118,9 @@ public class ModalWindow extends DialogBox {
         footerPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         footerPanel.addStyleName("footerPanel");
 
-        rootPanel.addStyleName("body");
+        mainPanel.addStyleName("mainPanel");
+
+        rootPanel.addStyleName("rootPanel");
         rootPanel.add(mainPanel);
         rootPanel.add(footerPanel);
 
@@ -124,8 +129,9 @@ public class ModalWindow extends DialogBox {
 
         super.add(rootPanel);
 
+        //super.setGlassEnabled(true);
         super.setAnimationEnabled(true);
-        center();
+        //super.center();
     }
 
     /**

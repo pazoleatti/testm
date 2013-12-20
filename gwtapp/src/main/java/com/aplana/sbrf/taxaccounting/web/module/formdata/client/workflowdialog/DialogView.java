@@ -11,7 +11,9 @@ import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
 public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implements DialogPresenter.MyView {
 
-	public interface Binder extends UiBinder<PopupPanel, DialogView> {
+    private static final int MAX_LENGTH = 255;
+
+    public interface Binder extends UiBinder<PopupPanel, DialogView> {
 	}
 
 	@UiField
@@ -55,7 +57,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	}
 
     private void setDataLength(int value) {
-        textLengthLabel.setText("Длина " + String.valueOf(value) + " (макс. 255)");
+        textLengthLabel.setText("Длина " + value + " (макс. " + MAX_LENGTH + ")");
     }
 
     @Override

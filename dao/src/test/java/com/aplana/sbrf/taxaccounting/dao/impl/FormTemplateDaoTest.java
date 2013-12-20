@@ -2,9 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.junit.Assert;
@@ -167,6 +165,13 @@ public class FormTemplateDaoTest {
 
         formTemplateDao.save(formTemplate);
         Assert.assertEquals(2, formTemplate.getHeaders().size());
+    }
+
+    @Test
+    public void testGetByFilter() {
+        TemplateFilter filter = new TemplateFilter();
+        filter.setTaxType(TaxType.TRANSPORT);
+        Assert.assertEquals(1, formTemplateDao.getByFilter(filter).size());
     }
 
 }

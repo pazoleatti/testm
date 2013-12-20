@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
@@ -89,4 +90,11 @@ public interface FormTemplateService {
      * @return объект, представляющий полное описание налоговой формы
      */
     FormTemplate getFullFormTemplate(int formTemplateId);
+
+    /**
+     * Получить макеты налоговых форм по фильтру
+     * @param filter фильтр
+     * @return отфильтрованный список налоговых форм
+     */
+    List<FormTemplate> getByFilter(TemplateFilter filter);
 }

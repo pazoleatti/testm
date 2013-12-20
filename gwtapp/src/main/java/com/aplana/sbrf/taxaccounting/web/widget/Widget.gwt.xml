@@ -28,4 +28,5 @@
     <source path="incrementbutton"/>
     <source path="fileupload"/>
     <source path="closabledialog"/>
+    <source path="filter"/>
 </module>
