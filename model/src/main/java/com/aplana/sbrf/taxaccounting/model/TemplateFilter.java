@@ -6,7 +6,7 @@ public class TemplateFilter implements Serializable {
     private static final long serialVersionUID = 3549128515346222523L;
 
     TaxType taxType;
-    Boolean active;
+    boolean active;
 
     public TaxType getTaxType() {
         return taxType;
@@ -16,11 +16,11 @@ public class TemplateFilter implements Serializable {
         this.taxType = taxType;
     }
 
-    public Boolean isActive() {
+    public boolean isActive() {
         return active;
     }
 
-    public void setActive(Boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 }
