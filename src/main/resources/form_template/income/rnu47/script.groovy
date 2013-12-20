@@ -28,7 +28,7 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        if (!isMonthBalance()) {
+        if (!isMonthBalance() &&  formData.kind == FormDataKind.PRIMARY) {
             def rnu46FormData = getRnu46DataRowHelper()
             if (rnu46FormData == null) {
                 logger.error("Не найдены экземпляры РНУ-46 за текущий отчетный период!")
@@ -184,7 +184,7 @@ void logicCheck() {
 
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    if (!isMonthBalance()) {
+    if (!isMonthBalance() &&  formData.kind == FormDataKind.PRIMARY) {
         def hasData = false
         def groupList = 0..10
         for (def row : rnu46DataRowHelper.allCached) {

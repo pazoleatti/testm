@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.testpage.client;
 
 import com.aplana.gwt.client.*;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -11,7 +10,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -137,7 +135,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
             public void onClick(ClickEvent event) {
                 ModalWindow mw = new ModalWindow("тест", "http://127.0.0.1:8888/resources/img/question_mark.png");
                 lbl1 = new Label("Тест");
-                lbl1.setSize("400px","200px");
+                //lbl1.setSize("200px","200px");
                 mw.add(lbl1);
                // mw.addAdditionalButton(new ImageButtonLink("http://127.0.0.1:8888/resources/img/email.png", "Отправить письмо"));
                 mw.addSaveButtonClickHandler(new ClickHandler() {
@@ -147,6 +145,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                     }
                 });
                 mw.setWidth("300px");
+                mw.center();
                 mw.show();
             }
 

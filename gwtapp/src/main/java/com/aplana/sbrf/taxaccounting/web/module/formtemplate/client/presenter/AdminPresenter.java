@@ -1,12 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.FilterFormTemplatePresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.FilterFormTemplateReadyEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.FormTemplateApplyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormTemplateListAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormTemplateListResult;
 import com.google.inject.Inject;
@@ -28,10 +33,11 @@ import com.gwtplatform.mvp.client.proxy.*;
  * 
  * @author Vitalii Samolovskikh
  */
-public class AdminPresenter extends
-		Presenter<AdminPresenter.MyView, AdminPresenter.MyProxy> {
+public class AdminPresenter
+        extends Presenter<AdminPresenter.MyView, AdminPresenter.MyProxy>
+        implements FormTemplateApplyEvent.FormDataApplyHandler, FilterFormTemplateReadyEvent.MyHandler {
 
-	/**
+    /**
 	 * {@link AdminPresenter}'s proxy.
 	 */
 	@Title("Шаблоны налоговых форм")
@@ -49,11 +55,14 @@ public class AdminPresenter extends
 	}
 
 	private final DispatchAsync dispatcher;
+    protected final FilterFormTemplatePresenter filterPresenter;
+    public static final Object TYPE_filterPresenter = new Object();
 
 	@Inject
-	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
+	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher, FilterFormTemplatePresenter filterPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
+        this.filterPresenter = filterPresenter;
 	}
 
 	@Override
@@ -72,19 +81,60 @@ public class AdminPresenter extends
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-		dispatcher.execute(
-				new GetFormTemplateListAction(),
-				CallbackUtils.defaultCallback(
-						new AbstractCallback<GetFormTemplateListResult>() {
-							@Override
-							public void onSuccess(
-									GetFormTemplateListResult result) {
-								getView().setFormTemplateTable(
-										result.getForms());
-							}
-						}, this).addCallback(
-						new ManualRevealCallback<GetFormTemplateListResult>(
-								AdminPresenter.this)));
+        TemplateFilter defaultFilter = new TemplateFilter();
+        defaultFilter.setTaxType(null);
+        defaultFilter.setActive(true);
+        filterPresenter.initFilter(defaultFilter);
 	}
+
+    @Override
+    protected void onBind() {
+        super.onBind();
+        addRegisteredHandler(FilterFormTemplateReadyEvent.getType(), this);
+        addRegisteredHandler(FormTemplateApplyEvent.getType(), this);
+
+
+    }
+
+    @Override
+    protected void onReveal() {
+        super.onReveal();
+        setInSlot(TYPE_filterPresenter, filterPresenter);
+    }
+
+    @Override
+    protected void onHide() {
+        super.onHide();
+        clearSlot(TYPE_filterPresenter);
+    }
+
+    @Override
+    public void onClickFind(FormTemplateApplyEvent event) {
+        updateFormData();
+    }
+
+    @Override
+    public void onFilterReady(FilterFormTemplateReadyEvent event) {
+        updateFormData();
+
+    }
+
+    public void updateFormData() {
+        GetFormTemplateListAction action = new GetFormTemplateListAction();
+        action.setFilter(filterPresenter.getFilterData());
+        dispatcher.execute(
+                action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetFormTemplateListResult>() {
+                            @Override
+                            public void onSuccess(
+                                    GetFormTemplateListResult result) {
+                                getView().setFormTemplateTable(
+                                        result.getForms());
+                            }
+                        }, this).addCallback(
+                        new ManualRevealCallback<GetFormTemplateListResult>(
+                                AdminPresenter.this)));
+    }
 
 }
