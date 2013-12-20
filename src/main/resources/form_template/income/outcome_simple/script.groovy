@@ -218,7 +218,7 @@ def consolidationBank(def dataRows) {
     for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())) {
         def child = formDataService.find(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
-            DataRowHelper childData = formDataService.getDataRowHelper(child)
+            def childData = formDataService.getDataRowHelper(child)
             for (DataRow<Cell> row : childData.allCached) {
                 if (row.getAlias() == null) {
                     continue
@@ -284,7 +284,6 @@ void consolidationSummary(def dataRows) {
         }
     }
 
-    def cache = [:]
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
@@ -447,7 +446,7 @@ def getSumForColumn7(def form, def dataRows, def value1) {
                         // в каждой форме относящейся к этим периодам ищем соответствующие строки и суммируем по 10 графе
                         def FormData f = formDataService.find(form.getFormType().getId(), FormDataKind.PRIMARY, form.getDepartmentId(), reportPeriod.getId())
                         if (f != null) {
-                            def DataRowHelper d = formDataService.getDataRowHelper(f)
+                            def d = formDataService.getDataRowHelper(f)
                             if (d != null) {
                                 d.allCached.each { r ->
                                     // графа  4 - balance
