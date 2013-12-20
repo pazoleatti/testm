@@ -1,12 +1,10 @@
-package com.aplana.sbrf.taxaccounting.web.widget.multiselecttree;
+package com.aplana.sbrf.taxaccounting.web.widget.multiselecttreeold;
 
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Элемент дерева множественного выбора.
@@ -18,11 +16,11 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
 
     public MultiSelectTreeItem(Integer id, String name) {
         this.id = id;
-        CheckBox widget = new CheckBox(name);
-        FocusPanel focusPanel = new FocusPanel(widget);
-        focusPanel.setFocus(true);
-        setWidget(focusPanel);
-//        setWidget(widget);
+        Label label = new Label(name);
+//        FocusPanel focusPanel = new FocusPanel(label);
+//        focusPanel.setFocus(true);
+//        setWidget(focusPanel);
+        setWidget(label);
     }
 
     public Integer getId() {
@@ -34,11 +32,11 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
     }
 
     public void setValue(String value){
-        ((CheckBox) getWidget()).setText(value);
+        ((Label) getWidget()).setText(value);
     }
 
     public String getName() {
-        return ((CheckBox) getWidget()).getText();
+        return ((Label) getWidget()).getText();
     }
 
     @Override
@@ -48,21 +46,21 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
 
     @Override
     public HandlerRegistration addDoubleClickHandler(DoubleClickHandler handler) {
-        return ((CheckBox) getWidget()).addDoubleClickHandler(handler);
+        return ((Label) getWidget()).addDoubleClickHandler(handler);
     }
 
     @Override
     public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
-        return ((CheckBox) getWidget()).addMouseDownHandler(handler);
+        return ((Label) getWidget()).addMouseDownHandler(handler);
     }
 
     @Override
     public HandlerRegistration addClickHandler(ClickHandler handler) {
-        return ((CheckBox) getWidget()).addClickHandler(handler);
+        return ((Label) getWidget()).addClickHandler(handler);
     }
 
-    @Override
-    public Widget getWidget() {
-        return ((FocusPanel)super.getWidget()).getWidget();
-    }
+//    @Override
+//    public Widget getWidget() {
+//        return ((SimplePanel)super.getWidget()).getWidget();
+//    }
 }

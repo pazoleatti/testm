@@ -1,0 +1,30 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:p="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+             xmlns:tt="urn:import:com.aplana.sbrf.taxaccounting.web.widget.multiselecttreeold"
+             xmlns:t="urn:import:com.aplana.sbrf.taxaccounting.web.widget.multiselecttree"
+        >
+    <ui:style>
+        .treeStyle {
+            padding: 10px 0 10px 40px;
+        }
+    </ui:style>
+
+    <g:VerticalPanel>
+        <g:HorizontalPanel styleName="{style.treeStyle}">
+            <g:Button ui:field="ok" text="ok"/>
+            <g:CheckBox ui:field="selectChild" text="выбирать с дочерними узлами"/>
+        </g:HorizontalPanel>
+        <g:HorizontalPanel styleName="{style.treeStyle}">
+            <t:MultiSelectTree ui:field="mstree"/>
+        </g:HorizontalPanel>
+
+        <g:HorizontalPanel styleName="{style.treeStyle}" visible="false">
+            <tt:MultiSelectTree ui:field="mstreeOld" width="200px" height="250px"/>
+        </g:HorizontalPanel>
+        <g:HorizontalPanel visible="false">
+            <p:DepartmentTreeWidget ui:field="tree"/>
+        </g:HorizontalPanel>
+    </g:VerticalPanel>
+</ui:UiBinder>

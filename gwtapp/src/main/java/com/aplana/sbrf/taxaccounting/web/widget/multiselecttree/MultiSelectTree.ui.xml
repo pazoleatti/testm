@@ -4,17 +4,14 @@
     <ui:style src="MultiSelectTree.css"/>
 
     <g:VerticalPanel styleName="{style.msiPanel}">
-        <g:cell width="100%">
+        <g:cell height="100%" width="100%">
             <g:Label ui:field="label" styleName="{style.msiHeader}"/>
         </g:cell>
-        <g:HorizontalPanel styleName="{style.msiCbAndTreePanel}">
-            <g:cell height="100%">
-                <g:VerticalPanel ui:field="cbPanel" styleName="{style.msiCheckBoxPanel}"/>
-            </g:cell>
-            <g:cell height="100%" width="100%">
+        <g:ScrollPanel ui:field="scrollPanel" styleName="{style.msiTreePanel}">
+            <!--<g:HorizontalPanel styleName="{style.msiTreePanel}">-->
                 <g:Tree ui:field="tree" styleName="{style.tree}"/>
-            </g:cell>
-        </g:HorizontalPanel>
+            <!--</g:HorizontalPanel>-->
+        </g:ScrollPanel>
     </g:VerticalPanel>
 
 </ui:UiBinder>

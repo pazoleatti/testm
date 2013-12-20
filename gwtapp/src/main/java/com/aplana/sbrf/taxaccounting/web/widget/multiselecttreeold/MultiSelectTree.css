@@ -20,7 +20,7 @@
 }
 
 .tree {
-
+    /*background-color: yellow;*/
 }
 
 .msiPanel {
@@ -30,8 +30,6 @@
     border-style: solid;
 }
 
-.msiTreePanel {
+.msiCbAndTreePanel {
     background-color: #FFFFFF;
-    /*width: 100%;*/
-    /*height: 100%;*/
 }

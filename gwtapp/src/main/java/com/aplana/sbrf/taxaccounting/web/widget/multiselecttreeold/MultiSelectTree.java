@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.widget.multiselecttree;
+package com.aplana.sbrf.taxaccounting.web.widget.multiselecttreeold;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,36 +30,44 @@ public class MultiSelectTree extends Composite implements HasConstrainedValue<Li
     @UiField
     ScrollPanel scrollPanel;
 
+    /* Панель с чекбоксами. */
+    @UiField
+    VerticalPanel cbPanel;
+
     /** Дерево. */
     @UiField
     Tree tree;
 
-    /** Мапа для получения узлов дерева по чекбоксу. */
-    private HashMap<Widget, MultiSelectTreeItem> treeItemsHash = new HashMap<Widget, MultiSelectTreeItem>();
+    /** Мапа для чекбоксов. */
+    private HashMap<Integer, CheckBox> cbHash = new HashMap<Integer, CheckBox>();
 
-    /** Выбирать ли дочерние элементы при выборе узла. */
-    private boolean selectChild;
+    private HashMap<Label, MultiSelectTreeItem> treeItemsHash = new HashMap<Label, MultiSelectTreeItem>();
 
     /** Дерево с колонкой множественного выбора. */
-    public MultiSelectTree() {
-        this("");
-    }
-
     public MultiSelectTree(String text) {
-        this(text, false);
-    }
-
-    public MultiSelectTree(String text, boolean selectChild) {
         initWidget(binder.createAndBindUi(this));
+
         setText(text);
-        this.selectChild = selectChild;
+        tree.addOpenHandler(new OpenHandler<TreeItem>() {
+            @Override
+            public void onOpen(OpenEvent<TreeItem> event) {
+                updateCheckBoxPanel();
+            }
+        });
+
+        tree.addCloseHandler(new CloseHandler<TreeItem>() {
+            @Override
+            public void onClose(CloseEvent<TreeItem> event) {
+                updateCheckBoxPanel();
+            }
+        });
     }
 
     @Override
     public List<Integer> getValue() {
         List<Integer> result = new ArrayList<Integer>();
         for (MultiSelectTreeItem item : getItems()) {
-            CheckBox cb = (CheckBox) item.getWidget();
+            CheckBox cb = cbHash.get(item.getId());
             if (cb.getValue()) {
                 result.add(item.getId());
             }
@@ -87,7 +95,7 @@ public class MultiSelectTree extends Composite implements HasConstrainedValue<Li
                     parent = parent.getParentItem();
                 }
             }
-            CheckBox cb = (CheckBox) item.getWidget();
+            CheckBox cb = cbHash.get(item.getId());
             cb.setValue(isContain);
         }
         if (fireEvents) {
@@ -119,7 +127,8 @@ public class MultiSelectTree extends Composite implements HasConstrainedValue<Li
      *
      * @param items список данных
      */
-    public void setTreeItems(List<MultiSelectTreeItem> items) {
+    public void setTreeValues(List<MultiSelectTreeItem> items) {
+        cbHash.clear();
         treeItemsHash.clear();
         // заполнение дерева и для каждого узла создание чекбоксов
         for (MultiSelectTreeItem item : items) {
@@ -129,34 +138,19 @@ public class MultiSelectTree extends Composite implements HasConstrainedValue<Li
             // получить все дочерние элементы узла и выделить для них checkBox'ы
             List<MultiSelectTreeItem> allChild = new ArrayList<MultiSelectTreeItem>();
             findAllChild(allChild, item);
-            for (MultiSelectTreeItem child : allChild) {
-                CheckBox widget = (CheckBox) child.getWidget();
-                treeItemsHash.put(child.getWidget(), child);
-                // двойной клик по узлу с чекбоксом
-                widget.addDoubleClickHandler(new DoubleClickHandler() {
+            for (MultiSelectTreeItem i : allChild) {
+                CheckBox cb = new CheckBox();
+                cb.setTitle(i.getText());
+                cbHash.put(i.getId(), cb);
+                treeItemsHash.put((Label) i.getWidget(), i);
+
+                i.addDoubleClickHandler(new DoubleClickHandler() {
                     @Override
                     public void onDoubleClick(DoubleClickEvent event) {
-                        Widget widget = (Widget) event.getSource();
-                        MultiSelectTreeItem item = treeItemsHash.get(widget);
+                        Label label = (Label) event.getSource();
+                        MultiSelectTreeItem item = treeItemsHash.get(label);
                         if (item.getChildCount() > 0) {
                             item.setState(!item.getState());
-                        }
-                    }
-                });
-                // изменение значения чекбокса
-                widget.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-                    @Override
-                    public void onValueChange(ValueChangeEvent<Boolean> event) {
-                        if (!selectChild) {
-                            return;
-                        }
-                        // обновить значения у всех дочерних элементов
-                        CheckBox widget = (CheckBox) event.getSource();
-                        MultiSelectTreeItem item = treeItemsHash.get(widget);
-                        List<MultiSelectTreeItem> list = new ArrayList<MultiSelectTreeItem>();
-                        findAllChild(list, item);
-                        for (MultiSelectTreeItem i : list) {
-                            ((CheckBox) i.getWidget()).setValue(widget.getValue());
                         }
                     }
                 });
@@ -169,6 +163,7 @@ public class MultiSelectTree extends Composite implements HasConstrainedValue<Li
 //                });
             }
         }
+        updateCheckBoxPanel();
     }
 
     /**
@@ -202,17 +197,37 @@ public class MultiSelectTree extends Composite implements HasConstrainedValue<Li
         return list;
     }
 
-//    /** Добавить чекбоксы для дочерних элементов указанного узла. */
-//    private void addCb(MultiSelectTreeItem item) {
-//        addCb(cbHash.get(item.getId()));
-//        // если узел раскрыт, то добавить еще и дочерние элементы
-//        if (item.getState()) {
-//            List<MultiSelectTreeItem> list = getItemChild(item);
-//            for (MultiSelectTreeItem i : list) {
-//                addCb(i);
-//            }
-//        }
-//    }
+    /** Добавить checkBox в левую панель. */
+    private void addCb(CheckBox cb) {
+        cbPanel.add(cb);
+        cb.getElement().getParentElement().getStyle().setPaddingTop(2, com.google.gwt.dom.client.Style.Unit.PX);
+        cb.getElement().getParentElement().getStyle().setPaddingBottom(2, com.google.gwt.dom.client.Style.Unit.PX);
+        // TODO (Ramil Timerbaev) почему то в коде стили не применяются
+        // cb.addStyleName(style.msiCheckBox());
+        // cb.getElement().getParentElement().addClassName(style.msiCheckBox());
+    }
+
+    /** Обновить левую панель (с чекбоксами). */
+    private void updateCheckBoxPanel() {
+        int count = tree.getItemCount();
+        cbPanel.clear();
+        for (int i = 0; i < count; i++) {
+            MultiSelectTreeItem item = (MultiSelectTreeItem)tree.getItem(i);
+            addCb(item);
+        }
+    }
+
+    /** Добавить чекбоксы для дочерних элементов указанного узла. */
+    private void addCb(MultiSelectTreeItem item) {
+        addCb(cbHash.get(item.getId()));
+        // если узел раскрыт, то добавить еще и дочерние элементы
+        if (item.getState()) {
+            List<MultiSelectTreeItem> list = getItemChild(item);
+            for (MultiSelectTreeItem i : list) {
+                addCb(i);
+            }
+        }
+    }
 
     public String getText() {
         return label.getText();
@@ -232,13 +247,5 @@ public class MultiSelectTree extends Composite implements HasConstrainedValue<Li
     public void setHeight(String height) {
         super.setHeight(height);
         scrollPanel.setHeight(height);
-    }
-
-    public boolean isSelectChild() {
-        return selectChild;
-    }
-
-    public void setSelectChild(boolean selectChild) {
-        this.selectChild = selectChild;
     }
 }
