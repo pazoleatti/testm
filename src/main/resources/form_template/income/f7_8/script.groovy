@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
@@ -180,12 +181,26 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 @Field
 def formDataPrev = null // Форма предыдущего месяца
 
+@Field
+def dataRowHelperPrev = null // DataRowHelper формы предыдущего месяца
+
 // Получение формы предыдущего месяца
 FormData getFormDataPrev() {
     if (formDataPrev == null) {
         formDataPrev = formDataService.getFormDataPrev(formData, formDataDepartment.id)
     }
     return formDataPrev
+}
+
+// Получение DataRowHelper формы предыдущего месяца
+def getDataRowHelperPrev() {
+    if (dataRowHelperPrev == null) {
+        def formDataPrev = getFormDataPrev()
+        if (formDataPrev != null) {
+            dataRowHelperPrev = formDataService.getDataRowHelper(formDataPrev)
+        }
+    }
+    return dataRowHelperPrev
 }
 
 void calc() {
@@ -425,17 +440,11 @@ void calcOrCheckTotalForMonth(def dataRows, def check) {
 
 // рассчитываем значения для строки "Всего за текущий налоговый период" или проверяем значения
 void calcOrCheckTotalForTaxPeriod(def dataRows, def check) {
-    def reportPeriodId = formData.getReportPeriodId()
-    def reportPeriod = reportPeriodService.get(reportPeriodId)
-    def prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriod.getId())
-
-    def formDataPrev
-    if (prevReportPeriod != null || prevReportPeriod.taxPeriod.id == reportPeriod.taxPeriod.id)
-        formDataPrev = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, prevReportPeriod.id)
+    def prevDataRowHelper = getDataRowHelperPrev()
+    def prevDataRows = prevDataRowHelper?.allCached
     def rowPrev
-    if (formDataPrev != null) {
-        def dataPrev = formDataService.getDataRowHelper(formDataPrev)
-        rowPrev = getDataRow(dataPrev.allCached, 'R10')
+    if (prevDataRows != null) {
+        rowPrev = getDataRow(prevDataRows, 'R10')
     }
 
     def totalForMonthRows = []
@@ -592,7 +601,6 @@ BigDecimal getGraph36(def row) {
         return row.interestIncomeCurrency * rate ?: 0
     }
     return null
-
 }
 
 BigDecimal getGraph37(def row) {

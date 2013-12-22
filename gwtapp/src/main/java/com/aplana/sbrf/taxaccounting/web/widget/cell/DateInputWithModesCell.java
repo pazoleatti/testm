@@ -13,7 +13,6 @@ import java.util.*;
 
 public class DateInputWithModesCell extends DateInputCell {
 
-	ColumnContext columnContext;
 	public static final String STORE_DATE_FORMAT = "dd.MM.yyyy";
 
 	public DateInputWithModesCell(final ColumnContext columnContext) {
@@ -38,8 +37,7 @@ public class DateInputWithModesCell extends DateInputCell {
 				String formattedDate = DateTimeFormat.getFormat(format).format(date);
 				safeHtmlBuilder.appendEscaped(columnContext.getColumn().getFormatter().format(formattedDate));
 			}
-		});
-		this.columnContext = columnContext;
+		}, columnContext);
 	}
 
 	@Override

@@ -330,7 +330,7 @@ def BigDecimal calc11(def row) {
     }
 }
 
-def BigDecimal calc12(def row) {
+def Date calc12(def row) {
     return row.dateOfAssignment ? (row.dateOfAssignment + 45) : null //не заполняется
 }
 
