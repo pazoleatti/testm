@@ -74,7 +74,6 @@ public class GetDeclarationDataHandler
 		
 		result.setCanAccept(permittedEvents.contains(FormDataEvent.MOVE_CREATED_TO_ACCEPTED));
 		result.setCanReject(permittedEvents.contains(FormDataEvent.MOVE_ACCEPTED_TO_CREATED));
-		result.setCanDownload(permittedEvents.contains(FormDataEvent.GET_LEVEL1));
 		result.setCanDelete(permittedEvents.contains(FormDataEvent.DELETE));
 		
 		result.setTaxType(declarationTemplateService
