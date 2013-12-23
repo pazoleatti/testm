@@ -106,7 +106,7 @@
 	</New>
 
     <New class="org.mortbay.jetty.plus.naming.Resource">
-		<Arg>java:comp/env/services/cache/aplana/taxaccounting/permanentData</Arg>
+		<Arg>java:comp/env/services/cache/aplana/taxaccounting/PermanentData</Arg>
 		<Arg>
 			<New class="java.util.concurrent.ConcurrentHashMap" />
 		</Arg>

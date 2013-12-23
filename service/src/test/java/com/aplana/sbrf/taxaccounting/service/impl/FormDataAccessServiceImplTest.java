@@ -101,11 +101,11 @@ public class FormDataAccessServiceImplTest {
 
 		// В тербанках есть формы 1 (консолидированная и сводная) и 3 (выходная)
 
-		d = mockDepartment(TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
+		d = mockDepartment(TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERR_BANK);
 		when(departmentService.getDepartment(TB1_ID)).thenReturn(d);
 		
 
-		d = mockDepartment(TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
+		d = mockDepartment(TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERR_BANK);
 		when(departmentService.getDepartment(TB2_ID)).thenReturn(d);
 
 		// В банке есть форма 1 (сводная), 2 (сводная) и 3 (выходная)

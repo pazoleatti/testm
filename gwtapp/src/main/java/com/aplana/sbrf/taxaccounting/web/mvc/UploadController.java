@@ -35,26 +35,32 @@ public class UploadController {
     @Autowired
     private SignService signService;
 
+    @RequestMapping(value = "/patterntemp", method = RequestMethod.POST)
+    public void processUploadXlsTemp(HttpServletRequest request, HttpServletResponse response)
+            throws FileUploadException, IOException {
+        processUpload(request, response, true);
+    }
+
     @RequestMapping(value = "/pattern", method = RequestMethod.POST)
     public void processUploadXls(HttpServletRequest request, HttpServletResponse response)
             throws FileUploadException, IOException {
+        processUpload(request, response, false);
+    }
+
+    private void processUpload(HttpServletRequest request, HttpServletResponse response, boolean uploadAsTemporal) throws IOException, FileUploadException {
+        System.out.println("processUpload: "+uploadAsTemporal);
         request.setCharacterEncoding("UTF-8");
 
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
         List<FileItem> items = upload.parseRequest(request);
         FileItem fileItem = items.get(0);
-        /*JSONTokener jt = new JSONTokener(items.get(1).getString());
-        JSONObject jo = new JSONObject(jt);*/
-
-        //checkSign(fileItem);
-
-        /*Logger logger = new Logger();
-        formDataService.importFormData(logger, securityService.currentUserInfo(),
-                jo.getInt(JSON_ATTR1), jo.getInt(JSON_ATTR2), jo.getInt(JSON_ATTR3),
-                FormDataKind.fromId(jo.getInt(JSON_ATTR4)), jo.getInt(JSON_ATTR5), fileItem.getInputStream(), fileItem.getName());
-        IOUtils.closeQuietly(fileItem.getInputStream());*/
-        String uuid = blobDataService.createTemporary(fileItem.getInputStream(), fileItem.getName());
+        String uuid;
+        if (uploadAsTemporal) {
+            uuid = blobDataService.createTemporary(fileItem.getInputStream(), fileItem.getName());
+        } else {
+            uuid = blobDataService.create(fileItem.getInputStream(), fileItem.getName());
+        }
         response.getWriter().printf("{uuid : \"%s\"}", uuid);
     }
 

@@ -35,6 +35,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     Label label;
 
     private String value;
+    private static String actionUrlTemp = "upload/uploadController/patterntemp/";
     private static String actionUrl = "upload/uploadController/pattern/";
     private static String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
     private static String uploadPatternIE = "C:.+fakepath?."; //паттерн для IE
@@ -68,9 +69,9 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     private static Binder uiBinder = GWT.create(Binder.class);
 
     @UiConstructor
-    public FileUploadWidget() {
+    public FileUploadWidget(boolean uploadAsTemporal) {
         initWidget(uiBinder.createAndBindUi(this));
-        uploadFormDataXls.setAction(actionUrl);
+        uploadFormDataXls.setAction(uploadAsTemporal ? actionUrlTemp : actionUrl);
         uploadFormDataXls.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {

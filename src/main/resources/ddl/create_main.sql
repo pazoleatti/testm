@@ -216,7 +216,7 @@ comment on table department is 'Подразделения банка';
 comment on column department.id is 'Идентификатор записи';
 comment on column department.name is 'Наименование подразделения';
 comment on column department.parent_id is 'Идентификатор родительского подразделения';
-comment on column department.type is 'Тип подразделения (1 - Банк, 2- ТБ, 3- ГОСБ, 4- ОСБ, 5- ВСП, 6-ПВСП)';
+comment on column department.type is 'Тип подразделения (1 - Банк, 2- ТБ, 3- ЦСКО, ПЦП, 4- Управление, 5- Не передается в СУДИР)';
 comment on column department.shortname is 'Сокращенное наименование подразделения';
 comment on column department.tb_index is 'Индекс территориального банка';
 comment on column department.sbrf_code is 'Код подразделения в нотации Сбербанка';

@@ -388,7 +388,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
             row.setCodecurrency(MapperUtils.getString(rs, 4));
             row.setNompaper(MapperUtils.getBD(rs, 5));
             row.setDrepo1(MapperUtils.getDate(rs, 6));
-            row.setDrepo1(MapperUtils.getDate(rs, 7));
+            row.setDrepo2(MapperUtils.getDate(rs, 7));
             row.setGetpricenkd(MapperUtils.getBD(rs, 8));
             row.setSalepricenkd(MapperUtils.getBD(rs, 9));
             row.setCostrepo(MapperUtils.getBD(rs, 10));

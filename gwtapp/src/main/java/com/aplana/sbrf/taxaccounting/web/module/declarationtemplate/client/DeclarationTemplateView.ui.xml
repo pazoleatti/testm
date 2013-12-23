@@ -65,7 +65,7 @@
 
                         <g:HorizontalPanel height="30px">
                             <g:Label width="150px">Загрузить файл xsd</g:Label>
-                            <fileuplod:FileUploadWidget ui:field="fileUploader"/>
+                            <fileuplod:FileUploadWidget ui:field="fileUploader" uploadAsTemporal="false"/>
                         </g:HorizontalPanel>
 
 

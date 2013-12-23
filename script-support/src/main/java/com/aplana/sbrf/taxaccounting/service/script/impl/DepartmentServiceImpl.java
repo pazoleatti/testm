@@ -51,7 +51,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public Department getTB(String tbIndex) throws IllegalArgumentException {
         List<Department> departments = departmentDao.listDepartments();
         for(Department department : departments) {
-            if (department != null && tbIndex.equals(department.getTbIndex()) && department.getType() == DepartmentType.TERBANK) {
+            if (department != null && tbIndex.equals(department.getTbIndex()) && department.getType() == DepartmentType.TERR_BANK) {
                 return department;
             }
         }

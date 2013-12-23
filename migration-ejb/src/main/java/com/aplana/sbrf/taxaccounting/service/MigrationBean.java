@@ -66,7 +66,7 @@ public class MigrationBean implements MessageService {
 
     private List<Exemplar> getExemplarsByRnuTypes(long[] rnuIds, long[] years) {
         List<Exemplar> rnuList = new ArrayList<Exemplar>();
-        String yearSeq = Arrays.toString(years);
+        String yearSeq = Arrays.toString(years).replace("[", "").replace("]", "");
         for (long rnu : rnuIds) {
             rnuList.addAll(getExemplarsByRnuType(rnu, yearSeq));
         }
@@ -118,13 +118,11 @@ public class MigrationBean implements MessageService {
      */
     private boolean sendFile(String name, byte[] fileBytes) {
         try {
-            for (int i = 0; i < 60; i++) {
-                MapMessage map = session.createMapMessage();
-                map.setString(FILENAME_PROPERTY_NAME, name);
-                map.setBytes(DATA_PROPERTY_NAME, fileBytes);
-                messageProducer.send(map);
-                logger.debug("File [name=" + name + ", size=" + fileBytes.length + "] is sended.");
-            }
+            MapMessage map = session.createMapMessage();
+            map.setString(FILENAME_PROPERTY_NAME, name);
+            map.setBytes(DATA_PROPERTY_NAME, fileBytes);
+            messageProducer.send(map);
+            logger.debug("File [name=" + name + ", size=" + fileBytes.length + "] is sended.");
             return true;
         } catch (JMSException e) {
             logger.error("Ошибка отправки файла JMS-сообщением. " + e.getMessage(), e);

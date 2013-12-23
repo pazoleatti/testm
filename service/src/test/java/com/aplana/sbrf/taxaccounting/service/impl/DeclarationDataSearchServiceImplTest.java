@@ -13,7 +13,6 @@ import static com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils.mockDepartm
 import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,7 +62,7 @@ public class DeclarationDataSearchServiceImplTest {
 		DepartmentDao departmentDao = mock(DepartmentDao.class);
 		// В подразделении 1 есть только декларация INCOME_DECLARATION_TYPE_ID_1
 
-		Department department1 = mockDepartment(1, null, DepartmentType.TERBANK);
+		Department department1 = mockDepartment(1, null, DepartmentType.TERR_BANK);
 		when(departmentDao.getDepartment(1)).thenReturn(department1);
 		ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
 		
