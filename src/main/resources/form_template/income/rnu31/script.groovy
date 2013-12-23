@@ -197,12 +197,13 @@ void consolidation() {
  * Проверка при создании формы.
  */
 void checkCreation() {
-    def findForm = formDataService.find(formData.formType.id,
-            formData.kind, formData.departmentId, formData.reportPeriodId)
-
-    if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
-    }
+// Форма ежемесячная, потому проверка выключена
+//    def findForm = formDataService.find(formData.formType.id,
+//            formData.kind, formData.departmentId, formData.reportPeriodId)
+//
+//    if (findForm != null) {
+//        logger.error('Налоговая форма с заданными параметрами уже существует.')
+//    }
 }
 
 /**
