@@ -218,17 +218,19 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         if (filter == null) {
             return listAllId();
         }
-        StringBuilder sb = new StringBuilder(
-                "select form_template.id " +
-                        "from form_template " +
-                        "left join form_type on form_template.type_id = form_type.id "
+        StringBuilder query = new StringBuilder("select form_template.id " +
+                       "from form_template " +
+                       "left join form_type on form_template.type_id = form_type.id " +
+                       "where is_active = ? "
         );
-        sb.append("where is_active = " + (filter.isActive() ? "1" : "0") );
+
         if (filter.getTaxType() != null) {
-            sb.append(" and form_type.TAX_TYPE = '" + filter.getTaxType().getCode() + "\'");
+            query.append(" and form_type.TAX_TYPE = \'" + filter.getTaxType().getCode() + "\'");
         }
         return getJdbcTemplate().queryForList(
-                sb.toString(),
+                query.toString(),
+                new Object[] { filter.isActive()},
+                new int[]{Types.NUMERIC},
                 Integer.class
         );
     }

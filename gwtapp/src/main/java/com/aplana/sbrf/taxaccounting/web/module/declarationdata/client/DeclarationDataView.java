@@ -88,11 +88,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	}
 
 	@Override
-	public void showDownloadXml(boolean show) {
-		downloadXml.setVisible(show);
-	}
-
-	@Override
 	public void showDelete(boolean show) {
 		deleteButton.setVisible(show);
 	}

@@ -1,22 +1,19 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Реализация сервиса для проверки прав на доступ к декларациям
@@ -184,19 +181,6 @@ public class DeclarationDataAccessServiceImpl implements
 				declaration.getReportPeriodId());
 	}
 
-	private void canDownloadXml(TAUserInfo userInfo, long declarationDataId) {
-		DeclarationData declaration = declarationDataDao.get(declarationDataId);
-		// Скачивать файл в формате законодателя можно только для принятых
-		// деклараций
-		if (!declaration.isAccepted()) {
-			throw new AccessDeniedException("Декларация должна быть принята");
-		}
-		// Скачивать файл в формате законодателя могут только контолёр текущего
-		// уровня и контролёр УНП
-		checkRolesForReading(userInfo, declaration.getDepartmentId(),
-				declaration.getReportPeriodId());
-	}
-
 	@Override
 	public void checkEvents(TAUserInfo userInfo, Long declarationDataId,
 			FormDataEvent... scriptEvents) {
@@ -209,10 +193,8 @@ public class DeclarationDataAccessServiceImpl implements
 				canReject(userInfo, declarationDataId);
 				break;
 			case GET_LEVEL0:
+            case GET_LEVEL1:
 				canRead(userInfo, declarationDataId);
-				break;
-			case GET_LEVEL1:
-				canDownloadXml(userInfo, declarationDataId);
 				break;
 			case DELETE:
 				canDelete(userInfo, declarationDataId);
