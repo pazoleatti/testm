@@ -196,17 +196,19 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         if (filter == null) {
             return listAllId();
         }
-        StringBuilder sb = new StringBuilder(
-                "select declaration_template.id " +
-                        "from declaration_template " +
-                        "left join declaration_type on declaration_template.declaration_type_id = declaration_type.id "
+        StringBuilder query = new StringBuilder("select declaration_template.id " +
+                       "from declaration_template " +
+                       "left join declaration_type on declaration_template.declaration_type_id = declaration_type.id " +
+                       "where is_active = ?"
         );
-        sb.append("where is_active = " + (filter.isActive() ? "1" : "0") );
+
         if (filter.getTaxType() != null) {
-            sb.append(" and declaration_type.TAX_TYPE = '" + filter.getTaxType().getCode() + "\'");
+            query.append(" and declaration_type.TAX_TYPE = \'" + filter.getTaxType().getCode() + "\'");
         }
         return getJdbcTemplate().queryForList(
-                sb.toString(),
+                query.toString(),
+                new Object[] { filter.isActive()},
+                new int[]{Types.NUMERIC},
                 Integer.class
         );
     }
