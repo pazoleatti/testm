@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -89,7 +90,8 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 		}
 		Date version = getView().getVersion();
 		if (version == null){
-			return;
+            getView().setRowData(0, new ArrayList<RefBookItem>(), 0);
+            return;
 		}
 		final int offset = startIndex;
 		int max = maxRows;
