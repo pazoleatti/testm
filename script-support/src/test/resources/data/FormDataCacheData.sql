@@ -86,7 +86,8 @@ insert into ref_book_record(id, record_id, ref_book_id, version, status) values 
 insert into report_period (id, name, months, tax_period_id, ord, dict_tax_period_id) values (1, 'Transport report period 1', 3,  1, 1, 21);
 
 -- FormTemplate
-insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code) values (1, 1, null, '0.1', 1, 1, 0, 1, 'name_1', 'fullname_1', 'code_1');
+insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code)
+  values (1, 1, null, date '2013-01-01', 1, 1, 0, 1, 'name_1', 'fullname_1', 'code_1');
 
 insert into form_style (id, alias, form_template_id, font_color, back_color, italic, bold) values (1, 'alias1', 1, 3, 2, 1, 0);
 

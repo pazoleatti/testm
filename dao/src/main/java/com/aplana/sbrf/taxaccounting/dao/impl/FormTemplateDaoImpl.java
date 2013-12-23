@@ -53,7 +53,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			FormTemplate formTemplate = new FormTemplate();
 			formTemplate.setId(rs.getInt("id"));
 			formTemplate.setActive(rs.getBoolean("is_active"));
-			formTemplate.setVersion(rs.getString("version"));
+			formTemplate.setVersion(rs.getDate("version"));
 			formTemplate.setName(rs.getString("name"));
 			formTemplate.setFullName(rs.getString("fullname"));
             formTemplate.setType(formTypeDao.get(rs.getInt("type_id")));

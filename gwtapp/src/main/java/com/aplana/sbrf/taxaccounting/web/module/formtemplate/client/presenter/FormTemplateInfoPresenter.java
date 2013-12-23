@@ -5,11 +5,14 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.*;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.*;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.*;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.inject.*;
 import com.google.web.bindery.event.shared.*;
 import com.gwtplatform.mvp.client.*;
 import com.gwtplatform.mvp.client.annotations.*;
 import com.gwtplatform.mvp.client.proxy.*;
+
+import java.util.Date;
 
 public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresenter.MyView, FormTemplateInfoPresenter.MyProxy>
 		implements FormTemplateInfoUiHandlers, FormTemplateSetEvent.MyHandler, FormTemplateFlushEvent.MyHandler{
@@ -48,7 +51,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
 		formTemplate = event.getFormTemplate();
-		getView().setViewData(formTemplate.getVersion(), formTemplate.isNumberedColumns(), formTemplate.isFixedRows(),formTemplate.getName(),
+		getView().setViewData(DateTimeFormat.getFormat("dd.MM.yyyy").format(formTemplate.getVersion()), formTemplate.isNumberedColumns(), formTemplate.isFixedRows(),formTemplate.getName(),
 				formTemplate.getFullName(), formTemplate.getCode());
 	}
 
@@ -63,7 +66,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	}
 
 	@Override
-	public void setVersion(String version) {
+	public void setVersion(Date version) {
 		formTemplate.setVersion(version);
 	}
 

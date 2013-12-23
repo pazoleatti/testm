@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -89,7 +90,7 @@ public class CacheTest {
         FormTemplate formTemplate = formTemplateDao.get(1);
         formTemplate.setNumberedColumns(true);
         formTemplate.setFixedRows(false);
-        formTemplate.setVersion("321");
+        formTemplate.setVersion(new Date());
         formTemplate.setActive(true);
         formTemplate.setName("name_3");
         formTemplate.setFullName("fullname_3");

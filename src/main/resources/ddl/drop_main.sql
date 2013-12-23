@@ -9,6 +9,7 @@ drop index i_department_parent_id;
 drop sequence seq_task_context;
 drop sequence seq_log_system;
 drop sequence seq_log_business;
+drop table template_changes;
 drop table task_context;
 drop table department_report_period;
 drop table log_system;

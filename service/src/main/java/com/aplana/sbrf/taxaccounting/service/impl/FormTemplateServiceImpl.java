@@ -183,9 +183,9 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	public void validateFormTemplate(FormTemplate formTemplate, Logger logger) {
 		//TODO: подумать над обработкой уникальности версии, на данный момент версия не меняется
 
-		if (formTemplate.getVersion().getBytes().length > FORM_VERSION_MAX_VALUE) {
+		if (formTemplate.getEdition() > FORM_VERSION_MAX_VALUE) {
 			logger.error("значение для версии шаблона формы слишком велико (фактическое: " +
-					formTemplate.getVersion().getBytes().length + ", максимальное: "+ FORM_VERSION_MAX_VALUE + ")");
+					formTemplate.getEdition() + ", максимальное: "+ FORM_VERSION_MAX_VALUE + ")");
 		}
 
 		validateFormColumns(formTemplate.getColumns(), logger);
