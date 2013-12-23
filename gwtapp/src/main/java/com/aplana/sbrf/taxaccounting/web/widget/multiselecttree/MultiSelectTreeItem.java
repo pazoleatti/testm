@@ -15,14 +15,14 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
         HasDoubleClickHandlers, HasMouseDownHandlers {
 
     private Integer id;
+    private FocusPanel focusPanel;
 
     public MultiSelectTreeItem(Integer id, String name) {
         this.id = id;
         CheckBox widget = new CheckBox(name);
-        FocusPanel focusPanel = new FocusPanel(widget);
-        focusPanel.setFocus(true);
+        focusPanel = new FocusPanel(widget);
         setWidget(focusPanel);
-//        setWidget(widget);
+        // setWidget(widget);
     }
 
     public Integer getId() {
@@ -64,5 +64,9 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
     @Override
     public Widget getWidget() {
         return ((FocusPanel)super.getWidget()).getWidget();
+    }
+
+    public FocusPanel getPanel() {
+        return focusPanel;
     }
 }

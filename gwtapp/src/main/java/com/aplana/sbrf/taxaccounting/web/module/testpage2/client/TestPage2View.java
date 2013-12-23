@@ -10,6 +10,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -37,7 +38,17 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
     Button ok;
 
     @UiField
+    Button add;
+
+    @UiField
+    Button del;
+
+    @UiField
     CheckBox selectChild;
+
+    private MultiSelectTreeItem itemTmp;
+
+    private int tmpId = 1000;
 
     @Inject
     public TestPage2View(final Binder uiBinder) {
@@ -87,7 +98,7 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
     }
 
     void initMultiSelectTree() {
-        mstree = new MultiSelectTree("Наименование подразделения");
+        mstree = new MultiSelectTree("Наименование подразделения", true);
 
         List<MultiSelectTreeItem> items = new ArrayList<MultiSelectTreeItem>();
         MultiSelectTreeItem item1 = new MultiSelectTreeItem(1, "Открытое акционерное общестро «Сбербанк России»");
@@ -142,6 +153,8 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
         values.add(555);
         values.add(7);
         mstree.setValue(values);
+
+        itemTmp = item3;
     }
 
     void initMultiSelectTreeOld() {
@@ -205,18 +218,31 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
 
     @UiHandler("ok")
     void okButtonClicked(ClickEvent event) {
-        // mstree.setText("".equals(mstree.getText()) ? "Наименование подразделения" : "");
-        System.out.println("test! " + mstree.getValue());
-        String w, h;
-        if (mstree.getOffsetWidth() > 500) {
-            w = "150px";
-            h = "250px";
-        } else {
-            w = (mstree.getOffsetWidth() + 50) + "px";
-            h = (mstree.getOffsetHeight() + 50) + "px";
+        String s = ("test! " + mstree.getValue());
+        System.out.println(s);
+        Window.alert(s);
+    }
+
+    @UiHandler("add")
+    void addButtonClicked(ClickEvent event) {
+        MultiSelectTreeItem tmp = mstree.getSelectedItem();
+        System.out.println("tmp " + tmp);
+        if (tmp != null) {
+            System.out.println("tmp " + tmp.getClass().getName());
         }
-        mstree.setWidth(w);
-        mstree.setHeight(h);
+        MultiSelectTreeItem i = new MultiSelectTreeItem(tmpId++, "+++++" + tmpId);
+        mstree.addTreeItem(tmp, i);
+        mstree.addTreeItem(tmp, i);
+    }
+
+    @UiHandler("del")
+    void delButtonClicked(ClickEvent event) {
+        MultiSelectTreeItem tmp = mstree.getSelectedItem();
+        System.out.println("tmp " + tmp);
+        if (tmp != null) {
+            System.out.println("tmp " + tmp.getClass().getName());
+            mstree.removeItem(tmp);
+        }
     }
 
     @UiHandler("selectChild")

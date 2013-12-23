@@ -3,14 +3,12 @@
 
     <ui:style src="MultiSelectTree.css"/>
 
-    <g:VerticalPanel styleName="{style.msiPanel}">
-        <g:cell height="100%" width="100%">
-            <g:Label ui:field="label" styleName="{style.msiHeader}"/>
-        </g:cell>
+    <g:VerticalPanel styleName="{style.msiMainPanel}">
+        <g:VerticalPanel height="100%" width="100%" styleName="{style.msiHeader}">
+            <g:Label ui:field="label"/>
+        </g:VerticalPanel>
         <g:ScrollPanel ui:field="scrollPanel" styleName="{style.msiTreePanel}">
-            <!--<g:HorizontalPanel styleName="{style.msiTreePanel}">-->
-                <g:Tree ui:field="tree" styleName="{style.tree}"/>
-            <!--</g:HorizontalPanel>-->
+            <g:Tree ui:field="tree" styleName="{style.msiTree}"/>
         </g:ScrollPanel>
     </g:VerticalPanel>
 

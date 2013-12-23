@@ -14,7 +14,9 @@
     <g:VerticalPanel>
         <g:HorizontalPanel styleName="{style.treeStyle}">
             <g:Button ui:field="ok" text="ok"/>
-            <g:CheckBox ui:field="selectChild" text="выбирать с дочерними узлами"/>
+            <g:Button ui:field="add" text="add"/>
+            <g:Button ui:field="del" text="del"/>
+            <g:CheckBox ui:field="selectChild" text="выбирать с дочерними узлами" checked="true"/>
         </g:HorizontalPanel>
         <g:HorizontalPanel styleName="{style.treeStyle}">
             <t:MultiSelectTree ui:field="mstree"/>
