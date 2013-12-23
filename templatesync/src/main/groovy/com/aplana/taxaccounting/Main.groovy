@@ -116,7 +116,7 @@ class Main {
                     353:'rnu57',
                     318:'rnu6',
                     352:'rnu61',
-                    352:'rnu62',
+                    354:'rnu62',
                     355:'rnu64',
                     311:'rnu7',
                     504:'rnu70_1',
@@ -147,18 +147,28 @@ class Main {
     }
 
     private static void downloadAll(SyncAPI api) {
+        def succesCount = 0
+        def failCount = 0
         templates.each { taxType ->
             taxType.value.each { template ->
-                api.downloadTemplate(template.key, "$resourcesPath/${taxType.key}/${template.value}/")
+                def result = api.downloadTemplate(template.key, "$resourcesPath/${taxType.key}/${template.value}/")
+                result ? succesCount++ : failCount++
             }
         }
+        println()
+        println("Success: $succesCount Fail: $failCount")
     }
 
     private static void uploadAll(SyncAPI api) {
+        def succesCount = 0
+        def failCount = 0
         templates.each { taxType ->
             taxType.value.each { template ->
-                api.uploadTemplate(template.key, "$resourcesPath/${taxType.key}/${template.value}/")
+                def result = api.uploadTemplate(template.key, "$resourcesPath/${taxType.key}/${template.value}/")
+                result ? succesCount++ : failCount++
             }
         }
+        println()
+        println("Success: $succesCount Fail: $failCount")
     }
 }

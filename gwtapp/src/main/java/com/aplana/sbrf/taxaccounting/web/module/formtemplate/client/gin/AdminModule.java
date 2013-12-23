@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.gin;
 
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.FilterFormTemplatePresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.FilterFormTemplateView;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.*;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.UiModule;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.*;
@@ -23,6 +25,7 @@ public class AdminModule extends AbstractPresenterModule {
 		bindPresenter(FormTemplateStylePresenter.class, FormTemplateStylePresenter.MyView.class, FormTemplateStyleView.class, FormTemplateStylePresenter.MyProxy.class);
 	    bindPresenter(FormTemplateHeaderPresenter.class, FormTemplateHeaderPresenter.MyView.class, FormTemplateHeaderView.class, FormTemplateHeaderPresenter.MyProxy.class);
 	    bindPresenter(FormTemplateImpexPresenter.class, FormTemplateImpexPresenter.MyView.class, FormTemplateImpexView.class, FormTemplateImpexPresenter.MyProxy.class);
+        bindPresenterWidget(FilterFormTemplatePresenter.class, FilterFormTemplatePresenter.MyView.class, FilterFormTemplateView.class);
 		install(new UiModule());
     }
 

@@ -142,6 +142,8 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			rendValue = "";
 		}
 		sb.append(renderer.render(rendValue));
-		sb.append(template.referenceIcon());
-	}
+        if (cell.isEditable()) {
+            sb.append(template.referenceIcon());
+        }
+    }
 }

@@ -70,6 +70,7 @@
                         </g:Label>
                     </g:HorizontalPanel>
                 </g:ScrollPanel>
+                <g:Button ui:field="showDialog">Показать окно</g:Button>
             </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>

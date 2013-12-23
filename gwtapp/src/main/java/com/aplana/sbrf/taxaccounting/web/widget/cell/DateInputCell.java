@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
 
+import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DatePickerWithYearSelector;
 import com.google.gwt.cell.client.*;
 import com.google.gwt.core.client.*;
@@ -12,9 +13,9 @@ import com.google.gwt.safehtml.client.*;
 import com.google.gwt.safehtml.shared.*;
 import com.google.gwt.text.shared.*;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.PopupPanel;
 
-import java.util.*;
+import java.util.Date;
 
 import static com.google.gwt.dom.client.BrowserEvents.*;
 
@@ -29,6 +30,8 @@ public class DateInputCell extends
 	private Context context;
 	private Element parent;
 	private ViewData viewData;
+
+    protected ColumnContext columnContext;
 
 	interface Template extends SafeHtmlTemplates {
 		@Template("<input type=\"text\" value=\"{0}\" tabindex=\"-1\"></input>")
@@ -137,17 +140,18 @@ public class DateInputCell extends
 	 * {@link SimpleSafeHtmlRenderer}.
 	 */
 	public DateInputCell() {
-		this(SimpleSafeHtmlRenderer.getInstance());
+		this(SimpleSafeHtmlRenderer.getInstance(), new ColumnContext());
 	}
 
 	/**
 	 * Construct a new EditTextCell that will use a given {@link SafeHtmlRenderer}
 	 * to render the value when not in edit mode.
 	 *
-	 * @param renderer a {@link SafeHtmlRenderer SafeHtmlRenderer<String>}
-	 *          instance
-	 */
-	public DateInputCell(SafeHtmlRenderer<String> renderer) {
+     * @param renderer a {@link com.google.gwt.text.shared.SafeHtmlRenderer SafeHtmlRenderer<String>}
+     *          instance
+     * @param columnContext
+     */
+	public DateInputCell(SafeHtmlRenderer<String> renderer, ColumnContext columnContext) {
 		super(CLICK, KEYUP, KEYDOWN, BLUR, KEYPRESS);
 		if (template == null) {
 			template = GWT.create(Template.class);
@@ -156,6 +160,7 @@ public class DateInputCell extends
 			throw new IllegalArgumentException("renderer == null");
 		}
 		this.renderer = renderer;
+        this.columnContext = columnContext;
 
 		setupUI();
 		addDatePickerHandlers();
@@ -245,8 +250,17 @@ public class DateInputCell extends
 		if (toRender != null && toRender.toString().trim().length() > 0) {
 			sb.append(renderer.render(getFormattedDate(toRender)));
 		}
-		sb.append(template.calendarIcon());
-	}
+        Object cell = ((DataRow<?>) context.getKey()).getCell(columnContext.getColumn().getAlias());
+        boolean editableCell;
+        if (cell instanceof com.aplana.sbrf.taxaccounting.model.Cell) {
+            editableCell = ((com.aplana.sbrf.taxaccounting.model.Cell) cell).isEditable();
+        } else {
+            editableCell = true;
+        }
+        if (editableCell) {
+            sb.append(template.calendarIcon());
+        }
+    }
 
 	@Override
 	public boolean resetFocus(Context context, Element parent, Date value) {

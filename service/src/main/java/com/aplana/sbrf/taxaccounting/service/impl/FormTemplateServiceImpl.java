@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -132,9 +134,23 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     @Override
     public FormTemplate getFullFormTemplate(int formTemplateId) {
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
-        formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
-        formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
+        if(formTemplate.getRows().isEmpty()){
+            formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
+        }
+        if (formTemplate.getHeaders().isEmpty()){
+            formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
+            FormDataUtils.setValueOners(formTemplate.getHeaders());
+        }
         return formTemplate;
+    }
+
+    @Override
+    public List<FormTemplate> getByFilter(TemplateFilter filter) {
+        List<FormTemplate> formTemplates = new ArrayList<FormTemplate>();
+        for (Integer id : formTemplateDao.getByFilter(filter)) {
+            formTemplates.add(formTemplateDao.get(id));
+        }
+        return formTemplates;
     }
 
     @Override

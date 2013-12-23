@@ -3,6 +3,7 @@ package form_template.income.rnu71_1
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
@@ -115,18 +116,15 @@ void logicCheck(){
 
     def dFrom = reportPeriodService.getStartDate(formData.getReportPeriodId())?.time
     def dTo = reportPeriodService.getEndDate(formData.getReportPeriodId())?.time
+
     def dataRowsPrev
-    if (!isBalancePeriod()) {
-        def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
-        formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
-        if(formDataPrev==null){
-            logger.error("Не найдены экземпляры РНУ-71.1 за прошлый отчетный период!")
-        } else {
-            dataRowsPrev = formDataService.getDataRowHelper(formDataPrev)?.allCached
-        }
+    if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
+        dataRowsPrev = getDataRowsPrev()
     }
+
     // Номер последний строки предыдущей формы
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
+
     for (def DataRow row : dataRows){
         //проверка и пропуск итогов
         if (row?.getAlias()?.contains('itg')) {
@@ -138,15 +136,15 @@ void logicCheck(){
 
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger,  !isBalancePeriod())
 
-        if (!isBalancePeriod()) {
+        if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
             def values = [:]
             def rowPrev = getRowPrev(dataRowsPrev, row)
             values.with {
-                result = getGraph11(row)
-                part2Date = getGraph12(row)
-                lossThisQuarter = getGraph13(row, dTo)
-                lossNextQuarter = getGraph14(row, dTo)
-                lossThisTaxPeriod = getGraph15(row, rowPrev, dFrom, dTo)
+                result = calc11(row)
+                part2Date = calc12(row)
+                lossThisQuarter = calc13(row, dTo)
+                lossNextQuarter = calc14(row, dTo)
+                lossThisTaxPeriod = calc15(row, rowPrev, dFrom, dTo)
             }
             checkCalc(row, autoFillColumns, values, logger, true)
 
@@ -208,43 +206,34 @@ void logicCheck(){
     checkTotalSum(sumRowList, totalColumns, logger, !isBalancePeriod())
 }
 
+
 void calc(){
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def dataRowsPrev
-    if (!isBalancePeriod()) {
-        def formDataPrev = formDataService.getFormDataPrev(formData, formDataDepartment.id)
-        formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
-        if(formDataPrev==null){
-            return
-        } else {
-            dataRowsPrev = formDataService.getDataRowHelper(formDataPrev)?.allCached
-        }
-    }
 
     // Удаление подитогов
     deleteAllAliased(dataRows)
-
     // Сортировка
     sortRows(dataRows, sortColumns)
-
-    def dFrom = reportPeriodService.getStartDate(formData.getReportPeriodId())?.time
-    def dTo = reportPeriodService.getEndDate(formData.getReportPeriodId())?.time
 
     // Номер последний строки предыдущей формы
     def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
-    if (!isBalancePeriod()) {
+    if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
+        def dataRowsPrev = getDataRowsPrev()
+        def dFrom = reportPeriodService.getStartDate(formData.getReportPeriodId())?.time
+        def dTo = reportPeriodService.getEndDate(formData.getReportPeriodId())?.time
+
         // Расчет ячеек
         for(def row : dataRows) {
             def rowPrev = getRowPrev(dataRowsPrev, row)
             row.with {
                 rowNumber = ++index
-                result = getGraph11(row)
-                part2Date = getGraph12(row)
-                lossThisQuarter = getGraph13(row, dTo)
-                lossNextQuarter = getGraph14(row, dTo)
-                lossThisTaxPeriod = getGraph15(row, rowPrev, dFrom, dTo)
+                result = calc11(row)
+                part2Date = calc12(row)
+                lossThisQuarter = calc13(row, dTo)
+                lossNextQuarter = calc14(row, dTo)
+                lossThisTaxPeriod = calc15(row, rowPrev, dFrom, dTo)
             }
         }
     } else {
@@ -314,17 +303,28 @@ def getRowPrev(def dataRowsPrev, def row){
     }
 }
 
-def getGraph11(def row) {
+def getDataRowsPrev(){
+    def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+    formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
+    if (formDataPrev == null) {
+        logger.error("Не найдены экземпляры РНУ-71.1 за прошлый отчетный период!")
+    } else {
+        return formDataService.getDataRowHelper(formDataPrev)?.allCached
+    }
+    return null
+}
+
+def BigDecimal calc11(def row) {
     if (row.income != null && row.amount != null && row.amountForReserve != null) {
         return (row.income - (row.amount - row.amountForReserve)).setScale(2, RoundingMode.HALF_UP)
     }
 }
 
-def getGraph12(def row) {
+def Date calc12(def row) {
     return row.dateOfAssignment ? (row.dateOfAssignment + 45) : null //не заполняется
 }
 
-def getGraph13(def row, def endDate) {
+def BigDecimal calc13(def row, def endDate) {
     def tmp
     if(row.result != null && row.result < 0){
         if (row.part2Date != null && endDate != null) {
@@ -338,7 +338,7 @@ def getGraph13(def row, def endDate) {
     return tmp?.setScale(2, RoundingMode.HALF_UP)
 }
 
-def getGraph14(def row, def endDate) {
+def BigDecimal calc14(def row, def endDate) {
     def tmp
     if(row.result != null && row.result < 0){
         if (row.part2Date != null && endDate != null) {
@@ -352,7 +352,7 @@ def getGraph14(def row, def endDate) {
     return tmp?.setScale(2, RoundingMode.HALF_UP)
 }
 
-def getGraph15(def row, def rowPrev, def startDate, def endDate) {
+def BigDecimal calc15(def row, def rowPrev, def startDate, def endDate) {
     def tmp
     if (startDate != null && endDate != null) {
         def period = (startDate..endDate)

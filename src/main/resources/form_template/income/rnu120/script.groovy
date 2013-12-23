@@ -156,7 +156,6 @@ def getNumber(def value, def indexRow, def indexCol) {
     return parseNumber(value, indexRow, indexCol, logger, true)
 }
 
-/** Расчеты. Алгоритмы заполнения полей формы. */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
@@ -172,11 +171,15 @@ void calc() {
 
     // расчет
     def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
-    dataRows.each { row ->
+    for (def row : dataRows) {
         def rowPrev = getRowPrev(row, dataRowsPrev)
 
         // графа 1
         row.number = ++rowNumber
+
+        if (formData.kind != FormDataKind.PRIMARY) {
+            continue
+        }
 
         // графа 13
         row.booAccount = calc13(row)
@@ -203,13 +206,16 @@ void calc() {
 
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
+    // Проверка только для первичных
+    if (formData.kind != FormDataKind.PRIMARY) {
+        return
+    }
     def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
     }
 }
 
-/** Логические проверки. */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
@@ -244,19 +250,20 @@ void logicCheck() {
             logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
-        // 3. Арифметические проверки расчета неитоговых граф
-        def calcValues = [
-                booAccount: calc13(row),
-                taxAccount: calc12(row, rowPrev),
-                accrualPrev: calc14(rowPrev),
-                accrualReportPeriod: calc15(row),
-                sumRate: calc17(row, rowPrev)
-        ]
-        checkCalc(row, arithmeticCheckAlias, calcValues, logger, true)
+        if (formData.kind == FormDataKind.PRIMARY) {
+            // 3. Арифметические проверки расчета неитоговых граф
+            def calcValues = [
+                    booAccount: calc13(row),
+                    taxAccount: calc12(row, rowPrev),
+                    accrualPrev: calc14(rowPrev),
+                    accrualReportPeriod: calc15(row),
+                    sumRate: calc17(row, rowPrev)
+            ]
+            checkCalc(row, arithmeticCheckAlias, calcValues, logger, true)
+        }
 
         // 4. Проверка курса валюты
         if (row.operationDate != null && row.course != null) {
-//            def name = row.getCell('course').column.name
             def dataProvider = refBookFactory.getDataProvider(22)
             def record = dataProvider.getRecords(row.operationDate, null, "RATE = $row.course", null);
             if (record.size() == 0) {
