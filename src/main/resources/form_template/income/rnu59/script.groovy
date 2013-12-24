@@ -95,9 +95,11 @@ switch (formDataEvent){
         break
     case FormDataEvent.MIGRATION :
         importData()
-        def total = getCalcTotalRow()
-        def data = getData(formData)
-        insert(data, total)
+        if (!hasError()) {
+            def total = getCalcTotalRow()
+            def data = getData(formData)
+            insert(data, total)
+        }
         break
 }
 
@@ -687,14 +689,20 @@ void importData() {
         return
     }
 
-    // добавить данные в форму
-    def totalLoad = addData(xml, fileName)
+    try {
+        // добавить данные в форму
+        def totalLoad = addData(xml, fileName)
 
-    // рассчитать, проверить и сравнить итоги
-    if (totalLoad != null) {
-        checkTotalRow(totalLoad)
-    } else {
-        logger.error("Нет итоговой строки.")
+        // рассчитать, проверить и сравнить итоги
+        if (formDataEvent == FormDataEvent.IMPORT) {
+            if (totalLoad != null) {
+                checkTotalRow(totalLoad)
+            } else {
+                logger.error("Нет итоговой строки.")
+            }
+        }
+    } catch (Exception e) {
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
 }
 

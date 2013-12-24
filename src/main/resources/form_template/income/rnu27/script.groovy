@@ -527,10 +527,12 @@ void importData() {
         def totalLoad = addData(xml)
 
         // расчетать, проверить и сравнить итоги
-        if (totalLoad != null) {
-            checkTotalRow(totalLoad)
-        } else {
-            logger.error("Нет итоговой строки.")
+        if (formDataEvent == FormDataEvent.IMPORT) {
+            if (totalLoad != null) {
+                checkTotalRow(totalLoad)
+            } else {
+                logger.error("Нет итоговой строки.")
+            }
         }
     } catch(Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
