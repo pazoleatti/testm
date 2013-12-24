@@ -138,20 +138,23 @@
             </g:HorizontalPanel>
         </g:north>
 
-        <g:north size="30">
-            <g:Label ui:field="lockInformation" visible="false" addStyleNames="{style.lockInformation}" />
-        </g:north>
-
         <g:center>
-            <g:ResizeLayoutPanel>
-                <style:GenericDataGrid height="100%" ui:field="formDataTable" />
-            </g:ResizeLayoutPanel>
+            <g:DockLayoutPanel ui:field="formDockPanel" unit='PX' height="100%" width="100%">
+                <g:north size="30">
+                    <g:Label ui:field="lockInformation" visible="false" addStyleNames="{style.lockInformation}" />
+                </g:north>
+                <g:center>
+                    <g:ResizeLayoutPanel>
+                        <style:GenericDataGrid height="100%" ui:field="formDataTable" />
+                    </g:ResizeLayoutPanel>
+                </g:center>
+                <g:south size="30">
+                    <pager:FlexiblePager ui:field="pager" location="CENTER"
+                                         showFastForwardButton="false" fastForwardRows="0"
+                                         showLastPageButton="true" styleName="{style.pager}" />
+                </g:south>
+            </g:DockLayoutPanel>
         </g:center>
-        <g:south size="30">
-            <pager:FlexiblePager ui:field="pager" location="CENTER"
-                                 showFastForwardButton="false" fastForwardRows="0"
-                                 showLastPageButton="true" styleName="{style.pager}" />
-        </g:south>
 	</g:DockLayoutPanel>
 
 
