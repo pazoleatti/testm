@@ -84,11 +84,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.MIGRATION :
         importData()
-        if (!hasError()) {
-            def total = getCalcTotalRow()
-            def data = getData(formData)
-            insert(data, total)
-        }
+        def total = getCalcTotalRow()
+        def data = getData(formData)
+        insert(data, total)
         break
 }
 
@@ -693,19 +691,14 @@ void importData() {
         logger.error('Отсутствие значении после обработки потока данных')
         return
     }
+    // добавить данные в форму
+    def totalLoad = addData(xml)
 
-    try {
-        // добавить данные в форму
-        def totalLoad = addData(xml)
-
-        // рассчитать, проверить и сравнить итоги
-        if (totalLoad != null) {
-            checkTotalRow(totalLoad)
-        } else {
-            logger.error("Нет итоговой строки.")
-        }
-    } catch(Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
+    // рассчитать, проверить и сравнить итоги
+    if (totalLoad != null) {
+        checkTotalRow(totalLoad)
+    } else {
+        logger.error("Нет итоговой строки.")
     }
 }
 
