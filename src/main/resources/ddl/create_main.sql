@@ -9,7 +9,8 @@ comment on column configuration.value is 'Значение параметра';
 create table form_type (
   id       number(9) not null,
   name     varchar2(600) not null,
-  tax_type char(1) not null
+  tax_type char(1) not null,
+  status number(1) default 1 not null
 );
 comment on table form_type is 'Типы налоговых форм (названия)';
 comment on column form_type.id is 'Идентификатор';
@@ -34,7 +35,7 @@ create table form_template (
   id number(9) not null,
   type_id number(9) not null,
   data_rows clob,
-  version varchar2(20) not null,
+  version date not null,
   is_active number(1) default 1 not null,
   edition number(9) not null,
   numbered_columns NUMBER(1) not null,
@@ -43,7 +44,8 @@ create table form_template (
   fullname varchar2(600) not null,
   code varchar2(600) not null,
   script clob,
-  data_headers clob
+  data_headers clob,
+  status number(1) default 0 not null
 );
 comment on table form_template IS 'Описания шаблонов налоговых форм';
 comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
@@ -675,6 +677,22 @@ comment on column notification.first_reader_id is 'идентификатор п
 comment on column notification.text is 'текст оповещения';
 comment on column notification.create_date is 'дата создания оповещения';
 comment on column notification.deadline is 'дата сдачи отчетности';
+
+create table template_changes (
+ id number(9) not null,
+ form_template_id number(9) not null,
+ declaration_template_id number(9) not null,
+ event number(1),
+ author number(9) not null,
+ date_event date
+);
+
+comment on table template_changes is 'Изменение версий налоговых шаблонов';
+comment on column template_changes.form_template_id is 'Идентификатор налогового шаблона';
+comment on column template_changes.declaration_template_id is 'Идентификатор шаблона декларации';
+comment on column template_changes.event is 'Событие версии';
+comment on column template_changes.author is 'Автор изменения';
+comment on column template_changes.date_event is 'Дата изменения';
 
 create sequence seq_notification start with 10000;
 --------------------------------------------------------------------------------------------------------

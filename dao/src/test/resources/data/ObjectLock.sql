@@ -4,7 +4,8 @@ insert into ref_book_record(id, record_id, ref_book_id, version, status) values 
 
 insert into department (id, name, parent_id, type) values (1, 'А - департамент', null, 1);
 insert into form_type (id, name, tax_type) values (1, 'А - тип', 'T');
-insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code) values (1, 1, null, '0.1', 1, 1, 1, 1, 'name', 'fullname', 'code');
+insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code)
+  values (1, 1, null, date '2013-01-01', 1, 1, 1, 1, 'name', 'fullname', 'code');
 insert into report_period (id, name, months, tax_period_id, ord, dict_tax_period_id) values (1, '1 - период', 3, 1, 1, 21);
 
 insert into sec_user (id, name, login, department_id, is_active, email) values (1, 'user1', 'user1', 1, 1, 'user1@bank.ru');

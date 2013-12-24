@@ -51,8 +51,6 @@ public class DeclarationDataPresenter
 
 		void showRefresh(boolean show);
 
-		void showDownloadXml(boolean show);
-
 		void showDelete(boolean show);
 
 		void setType(String type);
@@ -131,8 +129,6 @@ public class DeclarationDataPresenter
 
 								getView().showAccept(result.isCanAccept());
 								getView().showReject(result.isCanReject());
-								getView().showDownloadXml(
-										result.isCanDownload());
 								getView().showDelete(result.isCanDelete());
 								getView().showRefresh(result.isCanDelete());
 								getView().setPdf(result.getPdf());

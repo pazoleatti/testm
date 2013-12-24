@@ -86,7 +86,7 @@ public class RefBookValue implements Serializable {
 				(attributeType == RefBookAttributeType.REFERENCE && (value instanceof Long || value instanceof Map))) {
 			this.value = value;
 		} else {
-			throw new IllegalArgumentException(String.format("Illegal argument type. Must be \"%s\" instead of \"%s\"",  attributeType.name(), value.getClass().getName()));
+			throw new IllegalArgumentException(new StringBuilder("Illegal argument type. Must be \"").append(attributeType.name()).append("\" instead of \"").append(value.getClass().getName()).append("\"").toString());
 		}
 	}
 

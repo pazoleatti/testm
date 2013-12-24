@@ -1,32 +1,30 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import static com.aplana.sbrf.taxaccounting.test.DeclarationDataMockUtils.mockDeclarationData;
-import static com.aplana.sbrf.taxaccounting.test.DeclarationTemplateMockUtils.mockDeclarationTemplate;
-import static com.aplana.sbrf.taxaccounting.test.DepartmentDeclarationTypeMockUtils.mockDepartmentDeclarationType;
-import static com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils.mockDepartment;
-import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
-import static com.aplana.sbrf.taxaccounting.test.ReportPeriodMockUtils.mockReportPeriod;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import java.util.Collections;
+import java.util.List;
+
+import static com.aplana.sbrf.taxaccounting.test.DeclarationDataMockUtils.mockDeclarationData;
+import static com.aplana.sbrf.taxaccounting.test.DeclarationTemplateMockUtils.mockDeclarationTemplate;
+import static com.aplana.sbrf.taxaccounting.test.DepartmentDeclarationTypeMockUtils.mockDepartmentDeclarationType;
+import static com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils.mockDepartment;
+import static com.aplana.sbrf.taxaccounting.test.ReportPeriodMockUtils.mockReportPeriod;
+import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class DeclarationDataAccessServiceImplTest {
 	private static DeclarationDataAccessServiceImpl service;
@@ -85,17 +83,7 @@ public class DeclarationDataAccessServiceImplTest {
 		}
 		return true;
 	}
-	
-	private boolean canGetXml(TAUserInfo userInfo, int declarationDataId){
-		try{
-		    service.checkEvents(userInfo, Long.valueOf(declarationDataId),
-				    FormDataEvent.GET_LEVEL1);
-		} catch (AccessDeniedException e){
-			return false;
-		}
-		return true;
-	}
-	
+
 	private boolean canDelete(TAUserInfo userInfo, int declarationDataId){
 		try{
 		    service.checkEvents(userInfo, Long.valueOf(declarationDataId),
@@ -334,41 +322,7 @@ public class DeclarationDataAccessServiceImplTest {
 		assertFalse(canReject(userInfo, DECLARATION_CREATED_TB2_ID));
 		assertFalse(canReject(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 	}
-	
-	@Test
-	public void testCanDownloadXml() {
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
 
-		// Контролёр УНП может скачивать файл в формате законодателя у принятых деклараций в любом подразделении
-		userInfo.setUser(mockUser(USER_CONTROL_UNP_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL_UNP));
-		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_BANK_ID));
-		assertTrue(canGetXml(userInfo, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(!service.getPermittedEvents(userInfo, Long.valueOf(DECLARATION_ACCEPTED_TB1_ID)).contains(FormDataEvent.GET_LEVEL1));
-		assertTrue(service.getPermittedEvents(userInfo, Long.valueOf(DECLARATION_ACCEPTED_TB1_ID)).contains(FormDataEvent.GET_LEVEL1));
-		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_TB2_ID));
-		assertTrue(canGetXml(userInfo, DECLARATION_ACCEPTED_TB2_ID));
-		
-		// Контролёр может скачивать файл в формате законодателя у принятых деклараций только в своём обособленном подразделении
-		userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_BANK_ID));
-        assertTrue(canGetXml(userInfo, DECLARATION_ACCEPTED_BANK_ID));
-		userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
-		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_TB1_ID));
-		assertTrue(canGetXml(userInfo, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canGetXml(userInfo, DECLARATION_ACCEPTED_TB2_ID));
-
-		// Оператор не скачивать файл в формате законодателя ни у каких деклараций
-		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPER));
-		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canGetXml(userInfo, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_TB1_ID));
-		assertFalse(canGetXml(userInfo, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canGetXml(userInfo, DECLARATION_ACCEPTED_TB2_ID));
-	}
-	
 	@Test
 	public void testCanDelete() {
 		TAUserInfo userInfo = new TAUserInfo();
@@ -432,7 +386,5 @@ public class DeclarationDataAccessServiceImplTest {
 		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB1_ID, 1));
 		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB2_ID, 1));
 		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB2_ID, 1));
-
 	}
-
 }
