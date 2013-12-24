@@ -445,9 +445,8 @@ def fillForm() {
             // Провайдер для справочника «Ставки транспортного налога»
             def  refDataProvideTransportRate = refBookFactory.getDataProvider(41)
             // запрос по выборке данных из справочника
-            def query = " and ((MIN_POWER is null or MIN_POWER < "+row.taxBase+") and (MAX_POWER is null or MAX_POWER > "+row.taxBase+"))"+
+            def query = " and ((MIN_POWER is null or MIN_POWER < "+row.taxBase+") and (MAX_POWER is null or MAX_POWER > "+row.taxBase+" or MAX_POWER = "+row.taxBase+"))"+
                     "and ((MIN_AGE is null or MIN_AGE < "+row.years+") and (MAX_AGE is null or MAX_AGE > "+row.years+"))";
-
             /**
              * Переберем варианты
              * 1. код = коду ТС && регион указан
