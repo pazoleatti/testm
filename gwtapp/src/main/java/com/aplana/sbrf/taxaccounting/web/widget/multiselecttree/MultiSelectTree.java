@@ -10,6 +10,7 @@ import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.*;
@@ -32,7 +33,7 @@ public class MultiSelectTree extends Composite implements HasValue<List<Integer>
     ScrollPanel scrollPanel;
 
     /** Дерево. */
-    @UiField
+    @UiField(provided = true)
     Tree tree;
 
     /** Мапа для получения узлов дерева по чекбоксу. */
@@ -55,6 +56,16 @@ public class MultiSelectTree extends Composite implements HasValue<List<Integer>
     }
     private final Resources.Style style;
 
+    public interface MultiSelectTreeResources extends Tree.Resources {
+
+        @ImageResource.ImageOptions
+        ImageResource treeClosed();
+
+        @ImageResource.ImageOptions
+        ImageResource treeOpen();
+    }
+    MultiSelectTreeResources resources = GWT.create(MultiSelectTreeResources.class);
+
     /** Дерево с колонкой множественного выбора. */
     public MultiSelectTree() {
         this("");
@@ -70,6 +81,8 @@ public class MultiSelectTree extends Composite implements HasValue<List<Integer>
         this.style = Resources.INSTANCE.style();
         style.ensureInjected();
 
+        tree = new Tree(resources);
+        // tree = new Tree();
         initWidget(binder.createAndBindUi(this));
         setText(text);
         this.selectChild = selectChild;

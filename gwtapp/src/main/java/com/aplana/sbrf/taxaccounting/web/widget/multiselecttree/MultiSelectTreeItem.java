@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.multiselecttree;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -68,5 +69,19 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
 
     public FocusPanel getPanel() {
         return focusPanel;
+    }
+
+    @Override
+    public void addItem(TreeItem item) {
+        super.addItem(item);
+        // выравнивание смещения узлов дерева
+        String lm = item.getElement().getStyle().getMarginLeft();
+        if (lm != null && !"".equals(lm)) {
+            lm = lm.replaceAll("px", "");
+            double tmp = Double.valueOf(lm);
+            if (tmp > 0.0) {
+                item.getElement().getStyle().setMarginLeft(tmp + 5.0, Style.Unit.PX);
+            }
+        }
     }
 }
