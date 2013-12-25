@@ -151,16 +151,14 @@ create table ref_book_record (
   record_id number(9) not null,
   ref_book_id number(18) not null,
   version date not null,
-  status number(1) default 0 not null,
-  is_deleted  number(1) default 0 not null
+  status number(1) default 0 not null
 );
 comment on table ref_book_record is 'Запись справочника';
 comment on column ref_book_record.id is 'Уникальный идентификатор';
 comment on column ref_book_record.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
 comment on column ref_book_record.ref_book_id is 'Ссылка на справочник, к которому относится запись';
 comment on column ref_book_record.version is 'Версия. Дата актуальности записи';
-comment on column ref_book_record.status is 'Статус записи (0-обычная запись; -1-помеченная на удаление)';
-comment on column ref_book_record.is_deleted is 'Признак удаления версии (1 - да; 0 - нет)';
+comment on column ref_book_record.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 
 create sequence seq_ref_book_record start with 100000 increment by 100;
 create sequence seq_ref_book_record_row_id start with 100000;

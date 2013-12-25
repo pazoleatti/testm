@@ -47,8 +47,7 @@ alter table ref_book_attribute add constraint ref_book_attr_fk_attribute_id fore
 alter table ref_book_attribute add constraint ref_book_attr_chk_is_unique check (is_unique in (0, 1));
 
 alter table ref_book_record add constraint ref_book_record_pk primary key (id);
-alter table ref_book_record add constraint ref_book_record_chk_status check (status in (0, -1));
-alter table ref_book_record add constraint ref_book_record_chk_is_deleted  check (is_deleted in (0, 1));
+alter table ref_book_record add constraint ref_book_record_chk_status check (status in (0, -1, 1 , 2));
 alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreign key (ref_book_id) references ref_book (id);
 create unique index i_ref_book_record_refbookid on ref_book_record(ref_book_id, record_id, version);
 
