@@ -10,7 +10,7 @@ create table form_type (
   id       number(9) not null,
   name     varchar2(600) not null,
   tax_type char(1) not null,
-  status number(1) default 1 not null
+  status number(1) default 0 not null
 );
 comment on table form_type is 'Типы налоговых форм (названия)';
 comment on column form_type.id is 'Идентификатор';
@@ -61,6 +61,7 @@ comment on column form_template.fullname is 'Полное наименовани
 comment on column form_template.code is 'Номер формы';
 comment on column form_template.script is 'Скрипт, реализующий бизнес-логику налоговой формы';
 comment on column form_template.data_headers is 'Описание заголовка таблицы';
+comment on column form_template.status is 'Статус версии (0 - действующая версия; 1 - удаленная версия, 2 - черновик версии, 3 - фиктивная версия)';
 ---------------------------------------------------------------------------------------------------
 create table form_style (
   id					     number(9) not null,
