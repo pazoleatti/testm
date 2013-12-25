@@ -4,10 +4,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.FocusPanel;
-import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 /**
  * Элемент дерева множественного выбора.
@@ -15,15 +12,24 @@ import com.google.gwt.user.client.ui.Widget;
 public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
         HasDoubleClickHandlers, HasMouseDownHandlers {
 
-    private Integer id;
-    private FocusPanel focusPanel;
+    protected Integer id;
+    protected boolean multiSelection;
+    protected FocusPanel focusPanel;
+    protected CheckBox checkBox;
+    protected RadioButton radioButton;
+    protected static final String RADIO_BUTTON_GROUP  = "MSI_GROUP";
 
     public MultiSelectTreeItem(Integer id, String name) {
+        this(id, name, true);
+    }
+
+    public MultiSelectTreeItem(Integer id, String name, boolean multiSelection) {
         this.id = id;
-        CheckBox widget = new CheckBox(name);
-        focusPanel = new FocusPanel(widget);
+        checkBox = new CheckBox(name);
+        radioButton = new RadioButton(RADIO_BUTTON_GROUP, name);
+        focusPanel = new FocusPanel();
+        setMultiSelection(multiSelection);
         setWidget(focusPanel);
-        // setWidget(widget);
     }
 
     public Integer getId() {
@@ -34,8 +40,8 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
         this.id = id;
     }
 
-    public void setValue(String value){
-        ((CheckBox) getWidget()).setText(value);
+    public void setName(String name){
+        ((CheckBox) getWidget()).setText(name);
     }
 
     public String getName() {
@@ -80,8 +86,36 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
             lm = lm.replaceAll("px", "");
             double tmp = Double.valueOf(lm);
             if (tmp > 0.0) {
-                item.getElement().getStyle().setMarginLeft(tmp + 5.0, Style.Unit.PX);
+                item.getElement().getStyle().setMarginLeft(tmp + 4.0, Style.Unit.PX);
             }
         }
+    }
+
+    /** Установить чекбокс или радиоконопку. */
+    public void setMultiSelection(boolean multiSelection) {
+        this.multiSelection = multiSelection;
+        focusPanel.clear();
+        if (multiSelection) {
+            focusPanel.add(checkBox);
+        } else {
+            focusPanel.add(radioButton);
+        }
+    }
+
+    public boolean isMultiSelection() {
+        return multiSelection;
+    }
+
+    public boolean getValue() {
+        return ((CheckBox) getWidget()).getValue();
+    }
+
+    public void setValue(boolean value) {
+        checkBox.setValue(value);
+        radioButton.setValue(value);
+    }
+
+    public void setGroup(String name) {
+        radioButton.setName(name);
     }
 }

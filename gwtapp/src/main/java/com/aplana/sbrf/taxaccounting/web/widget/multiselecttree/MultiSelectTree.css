@@ -42,3 +42,11 @@
     background-color: #FFFFFF;
     vertical-align: top;
 }
+
+.msiTableTag {
+    width: 100%;
+}
+
+.msiImg {
+    width: 16px;
+}
