@@ -416,6 +416,16 @@ public final class ScriptUtils {
         Collections.sort(dataRows, new Comparator<DataRow<Cell>>() {
             @Override
             public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+                if (o1.getAlias() != null && o2.getAlias() == null) {
+                    return 1;
+                }
+                if (o1.getAlias() == null && o2.getAlias() != null) {
+                    return -1;
+                }
+                if (o1.getAlias() != null && o2.getAlias() != null) {
+                    return 0;
+                }
+
                 for (String alias : groupColums) {
                     Object v1 = o1.getCell(alias).getValue();
                     Object v2 = o2.getCell(alias).getValue();
