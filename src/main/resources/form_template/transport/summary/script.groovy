@@ -221,7 +221,7 @@ def calc() {
         if (row.tsTypeCode != null && row.years != null && row.taxBase != null) {
             tsTypeCode = getRefBookValue(42, row.tsTypeCode)?.CODE?.stringValue
             // запрос по выборке данных из справочника
-            def query = " and ((MIN_POWER is null or MIN_POWER < " + row.taxBase + ") and (MAX_POWER is null or MAX_POWER > " + row.taxBase + "))" +
+            def query = " and ((MIN_POWER is null or MIN_POWER < " + row.taxBase + ") and (MAX_POWER is null or MAX_POWER > " + row.taxBase + " or MAX_POWER = "+row.taxBase+"))" +
                     "and (UNIT_OF_POWER is null or UNIT_OF_POWER = " + row.taxBaseOkeiUnit + ")" +
                     "and ((MIN_AGE is null or MIN_AGE < " + row.years + ") and (MAX_AGE is null or MAX_AGE > " + row.years + "))";
 
