@@ -54,11 +54,6 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-        }
-        break
     case FormDataEvent.MIGRATION:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
@@ -283,10 +278,12 @@ void importData() {
         // добавить данные в форму
         def totalLoad = addData(xml, fileName)
         // рассчитать, проверить и сравнить итоги
-        if (totalLoad != null) {
-            checkTotalRow(totalLoad)
-        } else {
-            logger.error("Нет итоговой строки.")
+        if (formDataEvent == FormDataEvent.IMPORT) {
+            if (totalLoad != null) {
+                checkTotalRow(totalLoad)
+            } else {
+                logger.error("Нет итоговой строки.")
+            }
         }
     } catch (Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.message)

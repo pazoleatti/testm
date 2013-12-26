@@ -727,10 +727,12 @@ def addData(def xml, def fileName) {
         // графа 22
         total.excessSalePriceTax = parseNumber(getCellValue(row, 21, type), fileRowIndex + rowOffset, 21 + colOffset, logger, true)
 
-        // Проверка итогов
-        for (def alias : totalColumns) {
-            if (total[alias] != totalOneSum[alias]) {
-                logger.error("Итоговые значения за текущий квартал рассчитаны неверно!")
+        if (formDataEvent == FormDataEvent.IMPORT) {
+            // Проверка итогов
+            for (def alias : totalColumns) {
+                if (total[alias] != totalOneSum[alias]) {
+                    logger.error("Итоговые значения за текущий квартал рассчитаны неверно!")
+                }
             }
         }
     }
