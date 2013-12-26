@@ -12,7 +12,12 @@ import java.util.List;
 @Repository
 class BDUtilsImpl extends AbstractDao implements BDUtils {
     @Override
-    public List<Long> getNextIds(Long count) {
-        return getJdbcTemplate().queryForList("select seq_data_row.nextval from dual connect by level<= ?", new Object[]{count}, java.lang.Long.class);
+    public List<Long> getNextDataRowIds(Long count) {
+        return getNextIds("seq_data_row", count);
+    }
+
+    @Override
+    public List<Long> getNextIds(String seqName, Long count) {
+        return getJdbcTemplate().queryForList("select "+seqName+".nextval from dual connect by level<= ?", new Object[]{count}, java.lang.Long.class);
     }
 }

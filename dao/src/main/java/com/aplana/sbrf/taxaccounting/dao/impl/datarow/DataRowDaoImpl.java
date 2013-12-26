@@ -350,7 +350,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         }
 
         // получение id'шников для вставки строк батчем
-        final List<Long> ids = dbUtils.getNextIds(Integer.valueOf(dataRows.size()).longValue());
+        final List<Long> ids = dbUtils.getNextDataRowIds(Integer.valueOf(dataRows.size()).longValue());
 
         getJdbcTemplate().batchUpdate(
                 "insert into DATA_ROW (ID, FORM_DATA_ID, ALIAS, ORD, TYPE) values (?, ?, ?, ?, ?)",

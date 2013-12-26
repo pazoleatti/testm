@@ -10,6 +10,11 @@ import java.util.List;
  */
 public interface BDUtils {
     /**
+     * Метод возвращает список зарезервированных id для таблицы data_row
+     */
+    public List<Long> getNextDataRowIds(Long count);
+
+    /**
      * Метод возвращает список зарезервированных id
      * по которым можно осуществлять вставку в таблицу data_row
      *
@@ -19,5 +24,5 @@ public interface BDUtils {
      * @param count
      * @return
      */
-    List<Long> getNextIds(Long count);
+    List<Long> getNextIds(String seqName, Long count);
 }
