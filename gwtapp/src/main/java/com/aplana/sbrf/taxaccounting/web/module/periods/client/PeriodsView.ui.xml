@@ -47,7 +47,7 @@
                             <g:Button ui:field="setDeadlineButton">Назначить срок сдачи</g:Button>
 
                         </g:HorizontalPanel>
-                        <g:HorizontalPanel>
+                        <g:HorizontalPanel height="30px">
                             <g:Label>Подразделение:</g:Label>
                             <picker:DepartmentPickerModalWidget header="Подразделение" multiSelection="false" ui:field="departmentPicker"/>
                             <style:LinkAnchor img="resources/img/starfish-16.png" text="Открыть период" ui:field="openPeriod"/>

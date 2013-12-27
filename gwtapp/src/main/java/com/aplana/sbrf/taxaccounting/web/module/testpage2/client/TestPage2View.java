@@ -37,6 +37,12 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
     Button ok;
 
     @UiField
+    Button h;
+
+    @UiField
+    Button w;
+
+    @UiField
     Button add;
 
     @UiField
@@ -199,5 +205,19 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
     @UiHandler("multiSelection")
     void onValueChangeMultiSelection(ValueChangeEvent<Boolean> event) {
         simpleTree.setMultiSelection(event.getValue());
+    }
+
+    @UiHandler("h")
+    void hButtonClicked(ClickEvent event) {
+        int x = simpleTree.getOffsetHeight();
+        x = (x > 700 ? 200 : x + 50);
+        simpleTree.setHeight(x + "px");
+    }
+
+    @UiHandler("w")
+    void wButtonClicked(ClickEvent event) {
+        int x = simpleTree.getOffsetWidth();
+        x = (x > 700 ? 200 : x + 50);
+        simpleTree.setWidth(x + "px");
     }
 }

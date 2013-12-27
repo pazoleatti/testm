@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.multiselecttree;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.*;
@@ -10,7 +11,7 @@ import com.google.gwt.user.client.ui.*;
  * Элемент дерева множественного выбора.
  */
 public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
-        HasDoubleClickHandlers, HasMouseDownHandlers {
+        HasDoubleClickHandlers, HasMouseDownHandlers, HasValue<Boolean> {
 
     protected Integer id;
     protected boolean multiSelection;
@@ -28,6 +29,7 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
         checkBox = new CheckBox(name);
         radioButton = new RadioButton(RADIO_BUTTON_GROUP, name);
         focusPanel = new FocusPanel();
+        focusPanel.getElement().getStyle().setFontStyle(Style.FontStyle.NORMAL);
         setMultiSelection(multiSelection);
         setWidget(focusPanel);
     }
@@ -86,7 +88,7 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
             lm = lm.replaceAll("px", "");
             double tmp = Double.valueOf(lm);
             if (tmp > 0.0) {
-                item.getElement().getStyle().setMarginLeft(tmp + 4.0, Style.Unit.PX);
+                item.getElement().getStyle().setMarginLeft(tmp + 7.0, Style.Unit.PX);
             }
         }
     }
@@ -106,8 +108,20 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
         return multiSelection;
     }
 
-    public boolean getValue() {
+    @Override
+    public Boolean getValue() {
         return ((CheckBox) getWidget()).getValue();
+    }
+
+    @Override
+    public void setValue(Boolean value) {
+        setValue(value, false);
+    }
+
+    @Override
+    public void setValue(Boolean value, boolean fireEvents) {
+        checkBox.setValue(value, fireEvents);
+        radioButton.setValue(value, fireEvents);
     }
 
     public void setValue(boolean value) {
@@ -117,5 +131,10 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
 
     public void setGroup(String name) {
         radioButton.setName(name);
+    }
+
+    @Override
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Boolean> handler) {
+        return ((CheckBox) getWidget()).addValueChangeHandler(handler);
     }
 }

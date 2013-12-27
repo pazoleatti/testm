@@ -7,7 +7,6 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ClientBundle;
@@ -45,25 +44,22 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
     private boolean selectChild;
 
     /** Признак возможности выбора нескольких узлов дерева. */
-    private boolean multiSelection;
+    protected boolean multiSelection;
 
     private String GROUP_NAME = "treeGroup_" + this.hashCode();
 
-    public static interface Resources extends ClientBundle {
-        public static final Resources INSTANCE = GWT.create(Resources.class);
-        public static interface Style extends CssResource {
-            String msiHeader();
-            String msiMainPanel();
-            String msiTree();
-            String msiTreePanel();
-            String msiTreeItem();
-            String msiTableTag();
-            String msiImg();
-        }
-        @ClientBundle.Source("MultiSelectTree.css")
-        Style style();
+    public static interface Style extends CssResource {
+        String msiHeader();
+        String msiMainPanel();
+        String msiTree();
+        String msiTreePanel();
+        String msiTreeItem();
+        String msiTableTag();
+        String msiImg();
     }
-    private final Resources.Style style;
+
+    @UiField
+    Style style;
 
     public interface MultiSelectTreeResources extends Tree.Resources {
 
@@ -93,9 +89,6 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
      * @param multiSelection true - выбрать несколько элементов, false - выбрать один элемент
      */
     public MultiSelectTree(String text, boolean multiSelection) {
-        this.style = Resources.INSTANCE.style();
-        style.ensureInjected();
-
         tree = new Tree(resources);
         initWidget(binder.createAndBindUi(this));
         setHeader(text);
@@ -170,7 +163,6 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
             item.setState(true);
             addTreeItem(null, item);
         }
-        update();
     }
 
     public void addTreeItem(MultiSelectTreeItem item) {
@@ -189,7 +181,6 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         } else {
             tree.addItem(item);
         }
-
         // получить все дочерние элементы узла и выделить для них checkBox'ы
         List<MultiSelectTreeItem> allChild = new ArrayList<MultiSelectTreeItem>();
         findAllChild(allChild, item);
@@ -205,22 +196,6 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
             widget.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
-
-                    /////////////////////////////////////////////
-//                    CheckBox widget1 = (CheckBox) event.getSource();
-//                    MultiSelectTreeItem item1 = treeItemsHash.get(widget1);
-//
-//                    NodeList<Element> n = item1.getElement().getElementsByTagName("table");
-//                    for (int i = 0; i < n.getLength(); i++) {
-//                        Element e = n.getItem(i);
-//                        e.getStyle().setWidth(100, Style.Unit.PCT);
-//                        NodeList<Element> en = e.getElementsByTagName("td");
-//                        en.getItem(0).getStyle().setWidth(16, Style.Unit.PX);
-//                    }
-//                    System.out.println("=================" + n.getLength()); // TODO (Ramil Timerbaev)
-                    /////////////////////////////////////////////
-
-
                     if (!selectChild || !multiSelection) {
                         return;
                     }
@@ -235,6 +210,7 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
                 }
             });
         }
+        updateItems();
     }
 
     /**
@@ -278,13 +254,13 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
 
     @Override
     public void setWidth(String width) {
-        super.setWidth(width);
+//        super.setWidth(width);
         scrollPanel.setWidth(width);
     }
 
     @Override
     public void setHeight(String height) {
-        super.setHeight(height);
+//        super.setHeight(height);
         scrollPanel.setHeight(height);
     }
 
@@ -333,7 +309,7 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
     }
 
     /** Обновить верстку узлов дерева. */
-    public void update() {
+    public void updateItems() {
         for (int index = 0; index < tree.getItemCount(); index++) {
             MultiSelectTreeItem item = (MultiSelectTreeItem) tree.getItem(index);
             // найти все таблицы (узлы, у которых есть дочерние элементы, имеют ограниченную ширину)

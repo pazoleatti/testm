@@ -2,12 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.widget.departmentpicker;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
-import com.google.gwt.core.client.GWT;
+import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTree;
+import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTreeItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
@@ -17,42 +15,19 @@ import java.util.*;
  *
  * @author dloshkarev
  */
-public class DepartmentTreeWidget extends Composite implements PairDepartmentPicker {
-
-    interface Binder extends UiBinder<VerticalPanel, DepartmentTreeWidget> {
-    }
-
-    private static Binder uiBinder = GWT.create(Binder.class);
-
-    @UiField
-    public Label header;
-
-    @UiField
-    Tree tree;
-
-    /**
-     * Признак возможности выбора нескольких узлов дерева
-     */
-    private boolean multiSelection;
+public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> implements PairDepartmentPicker {
 
     /**
      * Выбранные подразделения
      */
-    private final List<DepartmentPair> value = new ArrayList<DepartmentPair>();
+    private List<DepartmentPair> value = new ArrayList<DepartmentPair>();
 
     public DepartmentTreeWidget(String header, boolean multiSelection) {
-        this();
-        setHeader(header);
-        this.multiSelection = multiSelection;
+        super(header, multiSelection);
     }
 
     public DepartmentTreeWidget() {
-        initWidget(uiBinder.createAndBindUi(this));
-    }
-
-    @Override
-    public void setHeader(String header) {
-        this.header.setText(header);
+        super();
     }
 
     @Override
@@ -61,20 +36,17 @@ public class DepartmentTreeWidget extends Composite implements PairDepartmentPic
         List<DepartmentTreeItem> itemsHierarchy = flatToHierarchy(departments);
         for (DepartmentTreeItem item : itemsHierarchy) {
             item.setState(true);
-            tree.addItem(item);
+            addTreeItem(item);
         }
+        updateItems();
     }
 
     @Override
     public boolean isSelectedItemHasChildren() {
         DepartmentTreeItem selectedItem = (DepartmentTreeItem) tree.getSelectedItem();
-        if (selectedItem != null) {
-            CheckBox checkBox = (CheckBox) selectedItem.getWidget();
-            if (checkBox.getValue() && selectedItem.getChildCount() > 0) {
-                return true;
-            }
-        }
-        return false;
+        return (selectedItem != null &&
+                selectedItem.getValue() &&
+                selectedItem.getChildCount() > 0);
     }
 
     @Override
@@ -100,23 +72,17 @@ public class DepartmentTreeWidget extends Composite implements PairDepartmentPic
     }
 
     @Override
-    public void setValue(List<DepartmentPair> value) {
-        this.setValue(value, false);
-    }
-
-    @Override
     public void setValue(List<DepartmentPair> value, boolean fireEvents) {
+        super.setValue(value, fireEvents);
+        if (value == null || value.isEmpty()) {
+            return;
+        }
         selectItems(value);
         this.value.clear();
         this.value.addAll(value);
         if (fireEvents) {
             ValueChangeEvent.fire(this, this.value);
         }
-    }
-
-    @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<DepartmentPair>> handler) {
-        return addHandler(handler, ValueChangeEvent.getType());
     }
 
     /**

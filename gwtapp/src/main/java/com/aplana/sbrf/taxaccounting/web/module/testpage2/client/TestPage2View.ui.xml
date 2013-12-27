@@ -8,6 +8,9 @@
         .treeStyle {
             padding: 10px 0 10px 40px;
         }
+        .msileft {
+            margin-left: 10px;
+        }
     </ui:style>
 
     <g:VerticalPanel>
@@ -17,10 +20,12 @@
             <g:Button ui:field="del" text="del"/>
             <g:CheckBox ui:field="selectChild" text="выбирать с дочерними узлами"/>
             <g:CheckBox ui:field="multiSelection" text="множественный выбор"/>
+            <g:Button ui:field="h" text="h+"/>
+            <g:Button ui:field="w" text="w+"/>
         </g:HorizontalPanel>
-        <g:HorizontalPanel styleName="{style.treeStyle}">
+        <g:HorizontalPanel styleName="{style.treeStyle}" height="200px">
             <t:SimpleTree ui:field="simpleTree"/>
-            <t:SimpleTree ui:field="simpleTree2"/>
+            <t:SimpleTree ui:field="simpleTree2" addStyleNames="{style.msileft}"/>
         </g:HorizontalPanel>
 
         <g:HorizontalPanel styleName="{style.treeStyle}">

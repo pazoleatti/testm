@@ -17,8 +17,8 @@
         <g:VerticalPanel>
             <g:cell>
                 <g:HorizontalPanel spacing="10">
-                    <g:cell horizontalAlignment="ALIGN_LEFT">
-                        <picker:DepartmentTreeWidget width="100%" header="Подразделение" ui:field="departmentPicker"/>
+                    <g:cell horizontalAlignment="ALIGN_LEFT" width="100%" height="100%">
+                        <picker:DepartmentTreeWidget header="Подразделение" ui:field="departmentPicker" height="270px" width="300px"/>
                     </g:cell>
                     <g:cell verticalAlignment="MIDDLE">
                         <g:HorizontalPanel width="300px">
