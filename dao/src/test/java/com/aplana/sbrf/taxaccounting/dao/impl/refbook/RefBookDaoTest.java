@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
+import com.aplana.sbrf.taxaccounting.dao.BDUtils;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
@@ -8,17 +9,22 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.mockito.stubbing.Answer;
 import java.util.*;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.*;
+
 
 //TODO: Необходимо добавить тесты для getRecords с фильтром (Marat Fayzullin 2013-08-31)
 
@@ -34,6 +40,32 @@ public class RefBookDaoTest {
 
 	@Autowired
     RefBookDao refBookDao;
+
+    static Long cnt = 8L;
+
+    @Before
+    public void init(){
+        /**
+         * Т.к. hsqldb не поддерживает запрос который мы используем в дао
+         * пришлось немного закостылять этот момент.
+         */
+        // мок утилитного сервиса
+        BDUtils dbUtilsMock = mock(BDUtils.class);
+        when(dbUtilsMock.getNextRefBookRecordIds(anyLong())).thenAnswer(new org.mockito.stubbing.Answer<List<Long>>() {
+            @Override
+            public List<Long> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                List<Long> ids = new ArrayList<Long>();
+                Object[] args = invocationOnMock.getArguments();
+                int count = ((Long) args[0]).intValue();
+                for (int i = 0; i < count; i++) {
+                    ids.add(cnt++);
+                }
+                return ids;
+            }
+        });
+
+        ReflectionTestUtils.setField(refBookDao, "dbUtils", dbUtilsMock);
+    }
 
 	@Test
 	public void testGet1() {

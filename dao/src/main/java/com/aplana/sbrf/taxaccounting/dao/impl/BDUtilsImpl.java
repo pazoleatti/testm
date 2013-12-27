@@ -17,6 +17,11 @@ class BDUtilsImpl extends AbstractDao implements BDUtils {
     }
 
     @Override
+    public List<Long> getNextRefBookRecordIds(Long count) {
+        return getNextIds("seq_ref_book_record", count);
+    }
+
+    @Override
     public List<Long> getNextIds(String seqName, Long count) {
         return getJdbcTemplate().queryForList("select "+seqName+".nextval from dual connect by level<= ?", new Object[]{count}, java.lang.Long.class);
     }

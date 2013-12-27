@@ -15,6 +15,11 @@ public interface BDUtils {
     public List<Long> getNextDataRowIds(Long count);
 
     /**
+     * Метод возвращает список зарезервированных id для таблицы ref_book_record
+     */
+    public List<Long> getNextRefBookRecordIds(Long count);
+
+    /**
      * Метод возвращает список зарезервированных id
      * по которым можно осуществлять вставку в таблицу data_row
      *
