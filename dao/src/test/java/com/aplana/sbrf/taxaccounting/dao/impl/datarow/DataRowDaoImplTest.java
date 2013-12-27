@@ -51,7 +51,7 @@ public class DataRowDaoImplTest {
          */
         // мок утилитного сервиса
         BDUtils dbUtilsMock = mock(BDUtils.class);
-        when(dbUtilsMock.getNextIds(anyLong())).thenAnswer(new Answer<List<Long>>() {
+        when(dbUtilsMock.getNextDataRowIds(anyLong())).thenAnswer(new Answer<List<Long>>() {
             @Override
             public List<Long> answer(InvocationOnMock invocationOnMock) throws Throwable {
                 List<Long> ids = new ArrayList<Long>();

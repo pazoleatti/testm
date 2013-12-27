@@ -82,17 +82,12 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 		period.setFilter(taxType.getCode() + "=1");
 	}
 
-	@Override
-	public void setBalance(boolean balance) {
-		balancePeriod.setValue(balance);
-	}
-
-	@Override
-	public void setSelectedDepartment(Department dep) {
-		List<Integer> depId = new ArrayList<Integer>();
-		depId.add(dep.getId());
-		departmentPicker.setValue(depId);
-	}
+    @Override
+    public void setSelectedDepartment(Integer departmentId){
+        List<Integer> depId = new ArrayList<Integer>();
+        depId.add(departmentId);
+        departmentPicker.setValue(depId);
+    }
 
 	@Override
 	public boolean isYearEmpty() {
@@ -124,16 +119,31 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 
     @UiHandler("correctPeriod")
     public void onCorrectPeriodButton(ClickEvent event) {
+        onCorrectPeriodButton();
+    }
+
+    private void onCorrectPeriodButton(){
         if (correctPeriod.getValue()) {
-            yearPnl.setVisible(false);
-            termPnl.setVisible(true);
-            period.setTitle("Период корректировки");
-            periodLbl.setText("Период корректировки");
+                yearPnl.setVisible(false);
+        termPnl.setVisible(true);
+        period.setTitle("Период корректировки");
+        periodLbl.setText("Период корректировки");
         } else {
-            yearPnl.setVisible(true);
-            termPnl.setVisible(false);
-            period.setTitle("Период");
-            periodLbl.setText("Период");
+                yearPnl.setVisible(true);
+        termPnl.setVisible(false);
+        period.setTitle("Период");
+        periodLbl.setText("Период");
         }
+    }
+
+    @Override
+    public void resetForm(){
+        departmentPicker.setValue(null);
+        period.setValue(null, true);
+        period.setDereferenceValue(null);
+        balancePeriod.setValue(false);
+        correctPeriod.setValue(false, true);
+        onCorrectPeriodButton();
+        term.setValue(null);
     }
 }

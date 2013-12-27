@@ -166,10 +166,12 @@ void importData() {
         // добавить данные в форму
         def totalLoad = addData(getXML())
         // рассчитать, проверить и сравнить итоги
-        if (totalLoad != null) {
-            checkTotalRow(totalLoad)
-        } else {
-            logger.error("Нет итоговой строки.")
+        if (formDataEvent == FormDataEvent.IMPORT) {
+            if (totalLoad != null) {
+                checkTotalRow(totalLoad)
+            } else {
+                logger.error("Нет итоговой строки.")
+            }
         }
     } catch(Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
