@@ -16,6 +16,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -61,7 +62,7 @@ public class FormDataCacheDaoTest {
                 return ids;
             }
         });
-        dataRowDao.setDbUtils(dbUtilsMock);
+        ReflectionTestUtils.setField(dataRowDao, "dbUtils", dbUtilsMock);
     }
 
     @Test

@@ -332,11 +332,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 						params);
 	}
 
-    @Override
-    public void setDbUtils(BDUtils dbUtils) {
-        this.dbUtils = dbUtils;
-    }
-
     private void physicalInsertRows(final FormData formData,
                                     final List<DataRow<Cell>> dataRows, final Long ordBegin,
                                     final Long ordStep, final List<Long> orders) {
