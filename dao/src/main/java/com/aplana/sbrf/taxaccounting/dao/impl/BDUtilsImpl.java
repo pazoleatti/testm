@@ -13,7 +13,7 @@ import java.util.List;
 class BDUtilsImpl extends AbstractDao implements BDUtils {
     @Override
     public List<Long> getNextDataRowIds(Long count) {
-        return getNextIds("seq_data_row", count);
+        return getNextIds(Sequence.DATA_ROW, count);
     }
 
     @Override

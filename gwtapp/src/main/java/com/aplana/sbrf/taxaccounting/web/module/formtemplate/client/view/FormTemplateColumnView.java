@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateColumnPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.ColumnAttributeEditor;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -17,44 +19,42 @@ import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColumnUiHandlers>
 		implements FormTemplateColumnPresenter.MyView {
 
-	public interface Binder extends UiBinder<Widget, FormTemplateColumnView> { }
+
+    public interface Binder extends UiBinder<Widget, FormTemplateColumnView> { }
+
+    // Типы графы
+    private static final String STRING_TYPE = "Строка";
+    private static final String NUMERIC_TYPE = "Число";
+    private static final String DATE_TYPE = "Дата";
+    private static final String REFBOOK_TYPE = "Справочник";
+    private static final String REFERENCE_TYPE = "Зависимая графа";
 
 	private List<Column> columns;
-	private static final List<String> columnTypeNameList = new ArrayList<String>();
+
+	private static final List<String> columnTypeNameList = Arrays.asList(STRING_TYPE, NUMERIC_TYPE, DATE_TYPE,
+            REFBOOK_TYPE, REFERENCE_TYPE);
 	private static final List<Integer> precisionList = new ArrayList<Integer>();
 	private static final List<Formats> dateFormatList = new ArrayList<Formats>();
-	private static final Map<String, String> stringDictionaryCodeMap = new HashMap<String, String>();
-	private static final Map<String, String> numericDictionaryCodeMap = new HashMap<String, String>();
-	private static final String STRING_TYPE = "Строка";
-	private static final String NUMERIC_TYPE = "Число";
-	private static final String DATE_TYPE = "Дата";
-	private static final String REFBOOK_TYPE = "Справочник";
+    private static final Map<String, String> stringDictionaryCodeMap = new HashMap<String, String>() {{
+        put("transportTypeCode", "ТН - Коды видов ТС");
+        put("transportOkato", "ТН - Коды ОКАТО");
+        put("transportTaxBenefitCode", "ТН - Коды налоговых льгот");
+        put("departmentNameList", "Подразделения");
+        put("dictionaryRegionCode", "Коды субъектов Российской Федерации");
+    }};
+    private static final Map<String, String> numericDictionaryCodeMap = new HashMap<String, String>() {{
+        put("transportTaxBaseUnitCode", "ТН - Коды единиц измерения");
+        put("transportEcoClass", "ТН - Коды классов экологических стандартов");
+        put("transportTaxRate", "ТН - Ставки транспортного налога");
+    }};
 
 	static {
-		columnTypeNameList.add(STRING_TYPE);
-		columnTypeNameList.add(NUMERIC_TYPE);
-		columnTypeNameList.add(DATE_TYPE);
-		columnTypeNameList.add(REFBOOK_TYPE);
-
-		stringDictionaryCodeMap.put("transportTypeCode", "ТН - Коды видов ТС");
-		stringDictionaryCodeMap.put("transportOkato", "ТН - Коды ОКАТО");
-		stringDictionaryCodeMap.put("transportTaxBenefitCode", "ТН - Коды налоговых льгот");
-		stringDictionaryCodeMap.put("departmentNameList", "Подразделения");
-		stringDictionaryCodeMap.put("dictionaryRegionCode", "Коды субъектов Российской Федерации");
-
-		numericDictionaryCodeMap.put("transportTaxBaseUnitCode", "ТН - Коды единиц измерения");
-		numericDictionaryCodeMap.put("transportEcoClass", "ТН - Коды классов экологических стандартов");
-		numericDictionaryCodeMap.put("transportTaxRate", "ТН - Ставки транспортного налога");
-
 		for(int i = 0; i <= NumericColumn.MAX_PRECISION; i++) {
 			precisionList.add(i);
 		}
@@ -65,9 +65,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			}
 		}
 	}
-
-	@UiField
-	ListBox columnListBox;
 
 	@UiField
 	Button upColumn;
@@ -84,9 +81,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	@UiField
 	ColumnAttributeEditor columnAttributeEditor;
 
-	@UiField(provided = true)
-	ValueListBox<String> typeColumnDropBox;
-
 	@UiField
 	IntegerBox stringMaxLengthBox;
 
@@ -95,9 +89,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	@UiField
 	TextBox nameBox;
-
-	@UiField(provided = true)
-	ValueListBox<Integer> precisionBox;
 
 	@UiField
 	Panel precisionPanel;
@@ -114,21 +105,41 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	@UiField
 	Panel dateFormatPanel;
 
-	@UiField(provided = true)
-	ValueListBox<Formats> dateFormat;
-	
-	@UiField
-	Panel refBookAttrIdPanel;
+    @UiField
+    Panel refBookPanel;
+
+    @UiField
+    Panel refBookAttrPanel;
 
     @UiField
     Panel refBookAttrFilterPanel;
-	
-	@UiField
-	LongBox refBookAttrIdBox;
 
     @UiField
-    TextBox refBookAttrFilterBox;
+    Panel refBooktAttrParentPanel;
 
+    @UiField
+    ListBox columnListBox;
+
+	@UiField(provided = true)
+	ValueListBox<Formats> dateFormat;
+
+    @UiField(provided = true)
+    ValueListBox<String> typeColumnDropBox;
+
+    @UiField(provided = true)
+    ValueListBox<Integer> precisionBox;
+
+    @UiField(provided = true)
+    ValueListBox<RefBook> refBookBox;
+
+    @UiField(provided = true)
+    ValueListBox<RefBookAttribute> refBookAttrBox;
+
+    @UiField(provided = true)
+    ValueListBox<Column> refBooktAttrParentBox;
+
+    @UiField
+    TextArea refBookAttrFilterArea;
 
 	@Inject
 	@UiConstructor
@@ -177,13 +188,37 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			}
 		});
 
-		dateFormat.addValueChangeHandler(new ValueChangeHandler<Formats>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Formats> event) {
-				((DateColumn)columns.get(columnListBox.getSelectedIndex())).setFormatId(dateFormat.getValue().getId());
-			}
-		});
-	}
+        dateFormat.addValueChangeHandler(new ValueChangeHandler<Formats>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Formats> event) {
+                ((DateColumn) columns.get(columnListBox.getSelectedIndex())).setFormatId(dateFormat.getValue().getId());
+            }
+        });
+
+        // Справочники
+        refBookBox = new ValueListBox<RefBook>(new AbstractRenderer<RefBook>() {
+            @Override
+            public String render(RefBook refBook) {
+                return refBook == null ? "" : refBook.getName();
+            }
+        });
+
+        // Атрибуты справочника
+        refBookAttrBox = new ValueListBox<RefBookAttribute>(new AbstractRenderer<RefBookAttribute>() {
+            @Override
+            public String render(RefBookAttribute refBookAttribute) {
+                return refBookAttribute == null ? "" : refBookAttribute.getName();
+            }
+        });
+
+        // Родительская графа
+        refBooktAttrParentBox = new ValueListBox<Column>(new AbstractRenderer<Column>() {
+            @Override
+            public String render(Column column) {
+                return column == null ? "" : column.getName();
+            }
+        });
+    }
 
 	@UiHandler("columnListBox")
 	public void onSelectColumn(ChangeEvent event){
@@ -282,15 +317,41 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	public void onNumericMaxLengthBox(KeyUpEvent event) {
 		((NumericColumn) columns.get(columnListBox.getSelectedIndex())).setMaxLength(numericMaxLengthBox.getValue());
 	}
-	
-	@UiHandler("refBookAttrIdBox")
-	public void onRefBookAttrIdBox(KeyUpEvent event) {
-		((RefBookColumn) columns.get(columnListBox.getSelectedIndex())).setRefBookAttributeId(refBookAttrIdBox.getValue());
+
+    @UiHandler("refBookBox")
+	public void onRefBookBox(ValueChangeEvent<RefBook> event) {
+        refBookAttrBox.setValue(event.getValue().getAttributes().get(0));
+        refBookAttrBox.setAcceptableValues(event.getValue().getAttributes());
 	}
 
-    @UiHandler("refBookAttrFilterBox")
-    public void onRefBookAttrFilterBox(KeyUpEvent event) {
-        ((RefBookColumn) columns.get(columnListBox.getSelectedIndex())).setFilter(refBookAttrFilterBox.getValue());
+    @UiHandler("refBookAttrBox")
+    public void onRefBookAttrBox(ValueChangeEvent<RefBookAttribute> event) {
+        Column currentColumn = columns.get(columnListBox.getSelectedIndex());
+        if (currentColumn instanceof RefBookColumn) {
+            ((RefBookColumn) currentColumn).setRefBookAttributeId(event.getValue().getId());
+        } else if (currentColumn instanceof ReferenceColumn) {
+            ((ReferenceColumn) currentColumn).setRefBookAttributeId(event.getValue().getId());
+        }
+    }
+
+    @UiHandler("refBookAttrFilterArea")
+    public void onRefBookAttrFilterArea(KeyUpEvent event) {
+        ((RefBookColumn) columns.get(columnListBox.getSelectedIndex())).setFilter(refBookAttrFilterArea.getValue());
+    }
+
+    @UiHandler("refBooktAttrParentBox")
+    public void onRefBooktAttrParentBox(ValueChangeEvent<Column> event) {
+        ReferenceColumn currentColumn = ((ReferenceColumn) columns.get(columnListBox.getSelectedIndex()));
+        RefBookColumn parentColumn = (RefBookColumn)event.getValue();
+        // Обновление списка отобр. атрибутов
+        RefBook parentRefBook = getUiHandlers().getRefBook(getUiHandlers().getRefBookByAttributeId(
+                parentColumn.getRefBookAttributeId()));
+        List<RefBookAttribute> refBookAttributeList = parentRefBook.getAttributes();
+        RefBookAttribute refBookAttribute = refBookAttributeList.get(0);
+        currentColumn.setRefBookAttributeId(refBookAttribute.getId());
+        currentColumn.setParentId(event.getValue().getId());
+        refBookAttrBox.setValue(refBookAttribute, false);
+        refBookAttrBox.setAcceptableValues(refBookAttributeList);
     }
 
 	@Override
@@ -324,16 +385,11 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	}
 
 	private void setAttributesPanel() {
-		if (columns != null && !columns.isEmpty()) {
-			attrPanel.setVisible(true);
-		} else {
-			attrPanel.setVisible(false);
-		}
+        attrPanel.setVisible(columns != null && !columns.isEmpty());
 	}
 
 	private void setUniqueParameters() {
 		Column column = columns.get(columnListBox.getSelectedIndex());
-
 		if (column instanceof StringColumn) {
 			typeColumnDropBox.setValue(STRING_TYPE);
 		} else if (column instanceof NumericColumn) {
@@ -342,29 +398,36 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			typeColumnDropBox.setValue(DATE_TYPE);
 		} else if (column instanceof RefBookColumn) {
 			typeColumnDropBox.setValue(REFBOOK_TYPE);
-		} else {
+		} else if (column instanceof ReferenceColumn) {
+            typeColumnDropBox.setValue(REFERENCE_TYPE);
+        } else {
 			throw new IllegalStateException();
 		}
-
 		populateUniqueParameters();
 		typeColumnDropBox.setAcceptableValues(columnTypeNameList);
 	}
 
 	private void populateUniqueParameters() {
 		Column column = columns.get(columnListBox.getSelectedIndex());
+
 		precisionPanel.setVisible(false);
 		stringMaxLengthPanel.setVisible(false);
 		numericMaxLengthPanel.setVisible(false);
 		nameBox.setValue(column.getName());
 		dateFormatPanel.setVisible(false);
-		refBookAttrIdPanel.setVisible(false);
+        refBookPanel.setVisible(false);
+        refBookAttrPanel.setVisible(false);
         refBookAttrFilterPanel.setVisible(false);
+        refBooktAttrParentPanel.setVisible(false);
+
 		if (STRING_TYPE.equals(typeColumnDropBox.getValue())) {
+            // Строка
 			int maxLength = ((StringColumn) column).getMaxLength();
 
 			stringMaxLengthBox.setValue(maxLength);
 			stringMaxLengthPanel.setVisible(true);
 		} else if (typeColumnDropBox.getValue().equals(NUMERIC_TYPE)) {
+            // Число
 			int maxLength = ((NumericColumn) column).getMaxLength();
 
 			numericMaxLengthPanel.setVisible(true);
@@ -374,6 +437,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			precisionBox.setValue(((NumericColumn) column).getPrecision());
 			precisionBox.setAcceptableValues(precisionList);
 		} else if (typeColumnDropBox.getValue().equals(DATE_TYPE)) {
+            // Дата
 			dateFormat.setAcceptableValues(dateFormatList);
 			// Если формата нет, то выставляем по умолчанию DD_MM_YYYY
 			dateFormat.setValue(Formats.getById(((DateColumn) column).getFormatId() == Formats.NONE.getId() ?
@@ -382,12 +446,62 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			dateFormatPanel.setVisible(true);
 
 		} else if (REFBOOK_TYPE.equals(typeColumnDropBox.getValue())) {
-			refBookAttrIdPanel.setVisible(true);
-			refBookAttrIdBox.setValue(((RefBookColumn)column).getRefBookAttributeId());
+            // Справочник
+            refBookPanel.setVisible(true);
+            refBookAttrPanel.setVisible(true);
             refBookAttrFilterPanel.setVisible(true);
-            refBookAttrFilterBox.setValue(((RefBookColumn)column).getFilter());
-		}
-	}
+            // Указанный атрибут
+            long attributeId = ((RefBookColumn)column).getRefBookAttributeId();
+            refBookAttrBox.setValue(getUiHandlers().getRefBookAttribute(attributeId), false);
+            refBookAttrBox.setAcceptableValues(getUiHandlers().getRefBook(
+                    getUiHandlers().getRefBookByAttributeId(attributeId)).getAttributes());
+            // Справочник
+            refBookBox.setValue(getUiHandlers().getRefBook(getUiHandlers().getRefBookByAttributeId(attributeId)), false);
+            // Фильтр
+            refBookAttrFilterArea.setValue(((RefBookColumn) column).getFilter(), false);
+        } else if (REFERENCE_TYPE.equals(typeColumnDropBox.getValue())) {
+            // Зависимая графа
+            refBooktAttrParentPanel.setVisible(true);
+            refBookAttrPanel.setVisible(true);
+            List<Column> availableList = getRefBookColumn(null);
+            if (!availableList.isEmpty()) {
+                RefBookColumn parentColumn = null;
+                for (Column col : availableList) {
+                    if (col.getId().longValue() == ((ReferenceColumn)column).getParentId()) {
+                        parentColumn = (RefBookColumn)col;
+                        break;
+                    }
+                }
+                refBooktAttrParentBox.setValue(parentColumn, false);
+                refBooktAttrParentBox.setAcceptableValues(availableList);
+                long attributeId = ((ReferenceColumn)column).getRefBookAttributeId();
+                refBookAttrBox.setValue(getUiHandlers().getRefBookAttribute(attributeId), false);
+                refBookAttrBox.setAcceptableValues(getUiHandlers().getRefBook(
+                        getUiHandlers().getRefBookByAttributeId(attributeId)).getAttributes());
+            } else {
+                refBooktAttrParentBox.setValue(null, false);
+                refBooktAttrParentBox.setAcceptableValues(new ArrayList<Column>());
+                refBookAttrBox.setValue(null, false);
+                refBookAttrBox.setAcceptableValues(new ArrayList<RefBookAttribute>());
+            }
+        }
+    }
+
+    /**
+     * Список справочных граф
+     */
+    private List<Column> getRefBookColumn(Column excludeColumn) {
+        List<Column> refBookList = new LinkedList<Column>();
+        for (Column col : columns) {
+            if (excludeColumn != null && excludeColumn == col) {
+                continue;
+            }
+            if (col instanceof RefBookColumn){
+                refBookList.add(col);
+            }
+        }
+        return refBookList;
+    }
 
 	private void setColumnList() {
 		if (columns != null) {
@@ -408,38 +522,57 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		columnAttributeEditor.setValue(columns.get(index));
 	}
 
+    /**
+     * Изменение типа графы
+     */
 	private void createNewColumnType() {
 		int index = columnListBox.getSelectedIndex();
 		Column column = columns.get(index);
+        Column newColumn = null;
 		flush();
 
 		if (typeColumnDropBox.getValue().equals(STRING_TYPE)) {
 			StringColumn stringColumn = new StringColumn();
 			copyMainColumnAttributes(column, stringColumn);
-
-			getUiHandlers().removeColumn(column);
-			getUiHandlers().addColumn(index, stringColumn);
+            newColumn = stringColumn;
 		}
 		else if (NUMERIC_TYPE.equals(typeColumnDropBox.getValue())) {
 			NumericColumn numericColumn = new NumericColumn();
 			copyMainColumnAttributes(column, numericColumn);
-
-			getUiHandlers().removeColumn(column);
-			getUiHandlers().addColumn(index, numericColumn);
+            newColumn = numericColumn;
 		}
 		else if (DATE_TYPE.equals(typeColumnDropBox.getValue())){
 			DateColumn dateColumn = new DateColumn();
 			copyMainColumnAttributes(column, dateColumn);
-
-			getUiHandlers().removeColumn(column);
-			getUiHandlers().addColumn(index, dateColumn);
+			newColumn = dateColumn;
 		} else if (REFBOOK_TYPE.equals(typeColumnDropBox.getValue())){
 			RefBookColumn refBookColumn = new RefBookColumn();
-			copyMainColumnAttributes(column, refBookColumn);
-			
-			getUiHandlers().removeColumn(column);
-			getUiHandlers().addColumn(index, refBookColumn);
-		}
+            copyMainColumnAttributes(column, refBookColumn);
+			newColumn = refBookColumn;
+		} else if (REFERENCE_TYPE.equals(typeColumnDropBox.getValue())){
+            ReferenceColumn referenceColumn = new ReferenceColumn();
+            // Список справочных граф
+            List<Column> availableList = getRefBookColumn(column);
+            if (!availableList.isEmpty()) {
+                // Берем первую из списка
+                RefBookColumn parentColumn = (RefBookColumn)availableList.get(0);
+                referenceColumn.setParentId(parentColumn.getId());
+                RefBook parentRefBook = getUiHandlers().getRefBook(
+                        getUiHandlers().getRefBookByAttributeId(parentColumn.getRefBookAttributeId()));
+                referenceColumn.setRefBookAttributeId(parentRefBook.getAttributes().get(0).getId());
+                copyMainColumnAttributes(column, referenceColumn);
+                newColumn = referenceColumn;
+            }
+        }
+
+        if (newColumn != null) {
+            getUiHandlers().removeColumn(column);
+            getUiHandlers().addColumn(index, newColumn);
+            if (newColumn.getId() == null) {
+                newColumn.setId(getUiHandlers().getNextGeneratedColumnId());
+            }
+        }
+
 		populateUniqueParameters();
 	}
 
@@ -456,4 +589,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		columnAttributeEditor.setValue(column);
 	}
 
+    @Override
+    public void setRefBookList(List<RefBook> refBookList) {
+        refBookBox.setValue(refBookList.get(0));
+        refBookBox.setAcceptableValues(refBookList);
+    }
 }

@@ -73,7 +73,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                         getView().setFormId(formTemplate.getId());
                         getView().setTitle(formTemplate.getType().getName());
                         RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
-                        FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplate);
+                        FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplate, null);
                         /*Window.alert(String.valueOf(formTemplate.getEdition()));*/
                         super.onFailure(caught);
                     }
@@ -177,7 +177,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 							getView().setTitle(formTemplate.getType().getName());
 							TitleUpdateEvent.fire(FormTemplateMainPresenter.this, "Шаблон налоговой формы", formTemplate.getType().getName());
 							RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
-							FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplate);
+							FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplate, result.getRefBookList());
 						}
 					}, this));
 		}

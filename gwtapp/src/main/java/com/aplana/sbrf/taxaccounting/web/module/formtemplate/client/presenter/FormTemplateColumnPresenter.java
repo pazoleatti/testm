@@ -1,9 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
@@ -26,6 +30,11 @@ public class FormTemplateColumnPresenter
 		implements FormTemplateColumnUiHandlers,
 		FormTemplateSetEvent.MyHandler, FormTemplateFlushEvent.MyHandler {
 
+    private Map<Long, RefBook> refBookMap = new HashMap<Long, RefBook>();
+    private Map<Long, RefBookAttribute> refBookAttributeMap = new HashMap<Long, RefBookAttribute>();
+    private Map<Long, Long> refBookAttributeToRefBookMap = new HashMap<Long, Long>();
+    private int generatedColumnId = -1;
+
 	@Title("Шаблоны налоговых форм")
 	@ProxyCodeSplit
 	@NameToken(AdminConstants.NameTokens.formTemplateColumnPage)
@@ -39,6 +48,8 @@ public class FormTemplateColumnPresenter
 		void setColumnList(List<Column> columnList, boolean isFormChanged);
 
 		void setColumn(Column column);
+
+        void setRefBookList(List<RefBook> refBookList);
 
 		void flush();
 	}
@@ -62,10 +73,26 @@ public class FormTemplateColumnPresenter
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
 		boolean isFormChanged = true;
-		if (formTemplate != null) {
-			isFormChanged = !formTemplate.getId().equals(event.getFormTemplate().getId());
-		}
-		formTemplate = event.getFormTemplate();
+        if (formTemplate != null) {
+            isFormChanged = !formTemplate.getId().equals(event.getFormTemplate().getId());
+        }
+        formTemplate = event.getFormTemplate();
+
+        refBookAttributeToRefBookMap.clear();
+        refBookAttributeMap.clear();
+        refBookMap.clear();
+
+        if (event.getRefBookList() != null) {
+            for (RefBook refBook : event.getRefBookList()) {
+                refBookMap.put(refBook.getId(), refBook);
+                for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
+                    refBookAttributeMap.put(refBookAttribute.getId(), refBookAttribute);
+                    refBookAttributeToRefBookMap.put(refBookAttribute.getId(), refBook.getId());
+                }
+            }
+        }
+
+        getView().setRefBookList(event.getRefBookList());
 		getView().setColumnList(formTemplate.getColumns(), isFormChanged);
 	}
 
@@ -120,4 +147,24 @@ public class FormTemplateColumnPresenter
 	public void flushColumn(Column column) {
 		fixAlias(column);
 	}
+
+    @Override
+    public RefBook getRefBook(Long refBookId) {
+        return refBookMap.get(refBookId);
+    }
+
+    @Override
+    public RefBookAttribute getRefBookAttribute(Long refBookAttributeId) {
+        return refBookAttributeMap.get(refBookAttributeId);
+    }
+
+    @Override
+    public Long getRefBookByAttributeId(Long refBookAttributeId) {
+        return refBookAttributeToRefBookMap.get(refBookAttributeId);
+    }
+
+    @Override
+    public int getNextGeneratedColumnId() {
+        return generatedColumnId--;
+    }
 }
