@@ -13,11 +13,11 @@ import java.util.List;
 class BDUtilsImpl extends AbstractDao implements BDUtils {
     @Override
     public List<Long> getNextDataRowIds(Long count) {
-        return getNextIds("seq_data_row", count);
+        return getNextIds(Sequence.DATA_ROW, count);
     }
 
     @Override
-    public List<Long> getNextIds(String seqName, Long count) {
-        return getJdbcTemplate().queryForList("select "+seqName+".nextval from dual connect by level<= ?", new Object[]{count}, java.lang.Long.class);
+    public List<Long> getNextIds(Sequence sequence, Long count) {
+        return getJdbcTemplate().queryForList("select " + sequence.getName() + ".nextval from dual connect by level<= ?", new Object[]{count}, java.lang.Long.class);
     }
 }

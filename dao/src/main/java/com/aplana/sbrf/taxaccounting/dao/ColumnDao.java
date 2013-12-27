@@ -10,7 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.FormTemplate;
  * В первую очередь предназначено для использования при реализации {@link FormTemplateDao} 
  */
 public interface ColumnDao {
-	/**
+    /**
 	 * Получить список столбцов, входящих в заданную форму
 	 * @param formId идентификатор формы
 	 * @return список столбцов формы
@@ -21,4 +21,6 @@ public interface ColumnDao {
 	 * @param form форма
 	 */
 	void saveFormColumns(FormTemplate form);
+
+    void setDbUtils(BDUtils bdUtils);
 }

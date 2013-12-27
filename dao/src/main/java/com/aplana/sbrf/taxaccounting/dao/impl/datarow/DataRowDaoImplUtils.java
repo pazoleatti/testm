@@ -5,11 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.ListIterator;
 
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DateColumn;
-import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 public class DataRowDaoImplUtils {
 
@@ -49,12 +45,10 @@ public class DataRowDaoImplUtils {
 	static <T> T getCellValueComponent(Column c, T[] objects) {
 		if (c instanceof StringColumn) {
 			return objects[1];
-		} else if (c instanceof NumericColumn) {
+		} else if (c instanceof NumericColumn || c instanceof RefBookColumn || c instanceof ReferenceColumn) {
 			return objects[0];
 		} else if (c instanceof DateColumn) {
 			return objects[2];
-		} else if (c instanceof RefBookColumn) {
-			return objects[0];
 		} else {
 			throw new IllegalArgumentException();
 		}
