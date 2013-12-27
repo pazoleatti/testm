@@ -48,9 +48,16 @@ public class ColumnDaoTest {
             }
 
             @Override
+            public List<Long> getNextRefBookRecordIds(Long count) {
+                return null; // // Не используется
+            }
+
+            @Override
             public List<Long> getNextIds(Sequence sequence, Long count) {
                  return ColumnDaoTest.this.getNextIds(count);
             }
+
+
         };
         columnDao.setDbUtils(bdUtils);
     }

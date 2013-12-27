@@ -12,7 +12,8 @@ public interface BDUtils {
 
     enum Sequence {
         DATA_ROW("seq_data_row"),
-        FORM_COLUMN("seq_form_column");
+        FORM_COLUMN("seq_form_column"),
+        REF_BOOK_RECORD("seq_ref_book_record");
 
         private Sequence(String name) {
             this.name = name;
