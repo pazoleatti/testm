@@ -453,9 +453,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
             // Указанный атрибут
             long attributeId = ((RefBookColumn)column).getRefBookAttributeId();
             refBookAttrBox.setValue(getUiHandlers().getRefBookAttribute(attributeId), false);
+            refBookAttrBox.setAcceptableValues(getUiHandlers().getRefBook(
+                    getUiHandlers().getRefBookByAttributeId(attributeId)).getAttributes());
             // Справочник
             refBookBox.setValue(getUiHandlers().getRefBook(getUiHandlers().getRefBookByAttributeId(attributeId)), false);
-
             // Фильтр
             refBookAttrFilterArea.setValue(((RefBookColumn) column).getFilter(), false);
         } else if (REFERENCE_TYPE.equals(typeColumnDropBox.getValue())) {
