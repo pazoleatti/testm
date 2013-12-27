@@ -940,13 +940,24 @@ def addData(def xml, def fileName) {
         newRow.part2REPODate = getDate(getCellValue(row, index, type), format)
         index++
 
-        // графа 9
-        newRow.income = getNumber(getCellValue(row, index, type))
-        index++
+        if (formDataEvent == FormDataEvent.MIGRATION){
+            //При миграции нужно поменять порядок зполнения этих полей
+            // графа 10
+            newRow.outcome = getNumber(getCellValue(row, index, type))
+            index++
 
-        // графа 10
-        newRow.outcome = getNumber(getCellValue(row, index, type))
-        index++
+            // графа 9
+            newRow.income = getNumber(getCellValue(row, index, type))
+            index++
+        } else {
+            // графа 9
+            newRow.income = getNumber(getCellValue(row, index, type))
+            index++
+
+            // графа 10
+            newRow.outcome = getNumber(getCellValue(row, index, type))
+            index++
+        }
 
         // графа 11
         newRow.rateBR = getNumber(getCellValue(row, index, type))
@@ -977,11 +988,19 @@ def addData(def xml, def fileName) {
         // графа 6
         totalRow.salePrice = getNumber(getCellValue(row, 5, type))
 
-        // графа 9
-        totalRow.income = getNumber(getCellValue(row, 8, type))
+        if (formDataEvent == FormDataEvent.MIGRATION) {
+            // графа 9
+            totalRow.income = getNumber(getCellValue(row, 9, type))
 
-        // графа 10
-        totalRow.outcome = getNumber(getCellValue(row, 9, type))
+            // графа 10
+            totalRow.outcome = getNumber(getCellValue(row, 8, type))
+        } else {
+            // графа 9
+            totalRow.income = getNumber(getCellValue(row, 8, type))
+
+            // графа 10
+            totalRow.outcome = getNumber(getCellValue(row, 9, type))
+        }
 
         // графа 12
         totalRow.outcome269st = getNumber(getCellValue(row, 11, type))
