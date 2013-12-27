@@ -39,6 +39,7 @@
             border-color: #949494;
             border-width: 1px;
             border-style: solid;
+            width: 100% !important;
         }
 
             /* для панели с деревом */
@@ -57,7 +58,7 @@
 
     <g:VerticalPanel styleName="{style.msiMainPanel}">
         <g:cell verticalAlignment="top">
-            <g:VerticalPanel width="100%" styleName="{style.msiHeader}">
+            <g:VerticalPanel ui:field="labelPanel" width="100%" styleName="{style.msiHeader}">
                 <g:Label ui:field="label"/>
             </g:VerticalPanel>
         </g:cell>

@@ -64,6 +64,7 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
         simpleTree = new SimpleTree("Наименование подразделения", true);
         initMultiSelectTree(simpleTree);
         simpleTree2 = new SimpleTree("Наименование подразделения 2", false);
+//        simpleTree2.setHeaderVisible();
         initMultiSelectTree(simpleTree2);
 
 //        initMultiSelectTree(simpleTree2);

@@ -10,6 +10,7 @@
         }
         .msileft {
             margin-left: 10px;
+            border-style: none;
         }
     </ui:style>
 
@@ -25,7 +26,7 @@
         </g:HorizontalPanel>
         <g:HorizontalPanel styleName="{style.treeStyle}" height="200px">
             <t:SimpleTree ui:field="simpleTree"/>
-            <t:SimpleTree ui:field="simpleTree2" addStyleNames="{style.msileft}"/>
+            <t:SimpleTree ui:field="simpleTree2" addStyleNames="{style.msileft}" headerVisible="false"/>
         </g:HorizontalPanel>
 
         <g:HorizontalPanel styleName="{style.treeStyle}">

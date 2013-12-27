@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.multiselecttree;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -9,7 +10,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -25,6 +25,9 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
     }
 
     private static Binder binder = GWT.create(Binder.class);
+
+    @UiField
+    VerticalPanel labelPanel;
 
     /** Заголовок. */
     @UiField
@@ -254,13 +257,13 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
 
     @Override
     public void setWidth(String width) {
-//        super.setWidth(width);
+        super.setWidth(width);
         scrollPanel.setWidth(width);
     }
 
     @Override
     public void setHeight(String height) {
-//        super.setHeight(height);
+        super.setHeight(height);
         scrollPanel.setHeight(height);
     }
 
@@ -322,5 +325,17 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
                 tdTags.getItem(0).addClassName(style.msiImg()); // tdTags.getItem(0).getStyle().setWidth(16, Style.Unit.PX);
             }
         }
+    }
+
+    public void setHeaderVisible(boolean value) {
+        labelPanel.setVisible(value);
+    }
+
+    public boolean getHeaderVisible() {
+        return labelPanel.isVisible();
+    }
+
+    public Iterator<TreeItem> treeItemIterator() {
+         return tree.treeItemIterator();
     }
 }
