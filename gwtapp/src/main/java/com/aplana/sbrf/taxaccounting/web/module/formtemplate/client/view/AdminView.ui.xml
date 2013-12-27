@@ -10,7 +10,10 @@
     </ui:style>
     <g:ScrollPanel>
     	<g:FlowPanel>
-        <g:Label styleName="{style.title}">Список шаблонов форм</g:Label>
+            <g:HorizontalPanel>
+                <g:Label styleName="{style.title}">Список шаблонов форм</g:Label>
+                <g:FlowPanel width="100%" ui:field="filterContentPanel" />
+            </g:HorizontalPanel>
 			<g:VerticalPanel width="100%">
         		<style:GenericCellTable ui:field="formTemplateTable" width="100%" />
         	</g:VerticalPanel>

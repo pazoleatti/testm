@@ -25,6 +25,8 @@ public class MappingServiceImpl implements MappingService {
 
     private final Log log = LogFactory.getLog(getClass());
 
+    private static final int LOG_ENTRIES_PRINT_LIMIT = 10;
+
     @Autowired
     private FormDataService formDataService;
 
@@ -45,6 +47,9 @@ public class MappingServiceImpl implements MappingService {
 
     @Autowired
     private TAUserService taUserService;
+
+    @Autowired
+    private LogEntryService logEntryService;
 
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     private static SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
@@ -120,7 +125,8 @@ public class MappingServiceImpl implements MappingService {
             formDataService.unlock(formDataId, userInfo);
         } catch (Exception e) {
             if (e instanceof ServiceLoggerException) {
-                log.error(((ServiceLoggerException) e).getLogEntriesString());
+                ServiceLoggerException sle = (ServiceLoggerException)e;
+                log.error(ServiceLoggerException.getLogEntriesString(logEntryService.getAll(sle.getUuid())));
             }
 
             // Ошибка импорта

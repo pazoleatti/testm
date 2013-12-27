@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,9 @@ public class GoMoveHandler extends
 	@Autowired
 	private FormDataService formDataService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
 	public GoMoveHandler() {
 		super(GoMoveAction.class);
 	}
@@ -41,7 +45,7 @@ public class GoMoveHandler extends
 			formDataService.doMove(action.getFormDataId(), securityService.currentUserInfo(),
 					action.getMove(), action.getReasonToWorkflowMove(), logger);
 			GoMoveResult result = new GoMoveResult();
-			result.setLogEntries(logger.getEntries());
+            result.setUuid(logEntryService.save(logger.getEntries()));
 			return result;
 
 	}

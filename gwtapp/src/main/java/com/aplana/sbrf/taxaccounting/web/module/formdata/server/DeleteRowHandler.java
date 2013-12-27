@@ -1,21 +1,20 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.service.DataRowService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DataRowResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteRowAction;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 
 /**
  * Хандлер обрабатывает событие удаления строки на форме. Вызывает
@@ -35,6 +34,9 @@ public class DeleteRowHandler extends AbstractActionHandler<DeleteRowAction, Dat
 
 	@Autowired
 	private DataRowService dataRowService;
+
+    @Autowired
+    private LogEntryService logEntryService;
 	
 	public DeleteRowHandler() {
 		super(DeleteRowAction.class);
@@ -52,7 +54,7 @@ public class DeleteRowHandler extends AbstractActionHandler<DeleteRowAction, Dat
 		formDataService.deleteRow(logger, securityService.currentUserInfo(), formData, action.getCurrentDataRow());
 		
 		DataRowResult result = new DataRowResult();
-		result.setLogEntries(logger.getEntries());
+        result.setUuid(logEntryService.save(logger.getEntries()));
 		
 		return result;
 	}
@@ -63,5 +65,4 @@ public class DeleteRowHandler extends AbstractActionHandler<DeleteRowAction, Dat
 		// Nothing!
 		
 	}
-
 }

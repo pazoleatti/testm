@@ -1,0 +1,35 @@
+@CHARSET "UTF-8";
+
+.msiHeader {
+    padding-left: 20px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    height: 1em;
+    background-color: #949494;
+    color: #ffffff;
+    vertical-align: middle;
+}
+
+.msiCheckBoxPanel {
+    /*width: 100px;*/
+}
+
+.msiCheckBox {
+    padding-bottom: 2px;
+    padding-top: 2px;
+}
+
+.tree {
+    /*background-color: yellow;*/
+}
+
+.msiPanel {
+    float: left;
+    border-color: #949494;
+    border-width: 1px;
+    border-style: solid;
+}
+
+.msiCbAndTreePanel {
+    background-color: #FFFFFF;
+}

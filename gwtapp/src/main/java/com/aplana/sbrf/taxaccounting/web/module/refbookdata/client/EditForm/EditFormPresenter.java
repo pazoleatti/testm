@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm;
 
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -10,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.even
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesAction;
+import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesResult;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.inject.Inject;
@@ -160,12 +161,22 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
 			}
 		} catch (BadValueException bve) {
-			isFormModified = false;
-			List<LogEntry> logEntries = new ArrayList<LogEntry>();
-			logEntries.add(new LogEntry(LogLevel.ERROR, "\" " + bve.getFieldName()  + "\" - " + bve.getDescription()));
-			LogAddEvent.fire(EditFormPresenter.this, logEntries);
-		}
-	}
+            isFormModified = false;
+            List<LogEntry> logEntries = new ArrayList<LogEntry>();
+            logEntries.add(new LogEntry(LogLevel.ERROR, "\" " + bve.getFieldName() + "\" - " + bve.getDescription()));
+            SaveLogEntriesAction action = new SaveLogEntriesAction();
+            action.setLogEntries(logEntries);
+
+            dispatchAsync.execute(action,
+                    CallbackUtils.defaultCallback(
+                            new AbstractCallback<SaveLogEntriesResult>() {
+                                @Override
+                                public void onSuccess(SaveLogEntriesResult result) {
+                                    LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
+                                }
+                            }, this));
+        }
+    }
 
 	@Override
 	public void onCancelClicked() {

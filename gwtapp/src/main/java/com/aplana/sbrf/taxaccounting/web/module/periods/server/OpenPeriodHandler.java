@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,9 @@ public class OpenPeriodHandler extends AbstractActionHandler<OpenPeriodAction, O
 	@Autowired
 	private SecurityService securityService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
 	public OpenPeriodHandler() {
 		super(OpenPeriodAction.class);
 	}
@@ -34,7 +38,7 @@ public class OpenPeriodHandler extends AbstractActionHandler<OpenPeriodAction, O
 		reportPeriodService.open(action.getYear(), (int) action.getDictionaryTaxPeriodId(),
 				action.getTaxType(), securityService.currentUserInfo(), action.getDepartmentId(), logs, action.isBalancePeriod(), action.getCorrectPeriod(), action.isHasCorrectPeriod());
 		OpenPeriodResult result = new OpenPeriodResult();
-		result.setLogEntries(logs);
+        result.setUuid(logEntryService.save(logs));
 		return result;
 	}
 

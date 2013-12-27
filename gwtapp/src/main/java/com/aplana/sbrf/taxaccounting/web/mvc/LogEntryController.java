@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
@@ -45,7 +44,7 @@ public class LogEntryController {
         List<LogEntry> logEntryList;
         try {
             logEntryList = logEntryService.getAll(uuid);
-        } catch (DaoException ex) {
+        } catch (Exception ex) {
             logger.error("Ошибка получения сообщений. " + ex.getMessage());
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;

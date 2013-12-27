@@ -6,14 +6,17 @@ import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -27,6 +30,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	@Autowired
 	private ConfigurationDao configDao;
+
+    @Autowired
+    private LogEntryService logEntryService;
 
 	@Override
 	public Map<ConfigurationParam, String> getAllConfig(TAUserInfo userInfo) {
@@ -49,11 +55,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 		validation(logger, configMap);
 		if (logger.containsLevel(LogLevel.ERROR)){
-			throw new ServiceLoggerException("Значения параметров не валидны", logger.getEntries());
+			throw new ServiceLoggerException("Значения параметров не валидны", logEntryService.save(logger.getEntries()));
 		}
 		configDao.saveParams(configMap);
 	}
-	
+
 	private void validation(Logger logger, Map<ConfigurationParam, String> configMap){
 		for (Entry<ConfigurationParam, String> entry : configMap.entrySet()) {
 			String value = entry.getValue();
@@ -62,5 +68,4 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			}
 		}
 	}
-
 }

@@ -1,0 +1,15 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:style src="MultiSelectTree.css"/>
+
+    <g:VerticalPanel styleName="{style.msiMainPanel}">
+        <g:VerticalPanel height="100%" width="100%" styleName="{style.msiHeader}">
+            <g:Label ui:field="label"/>
+        </g:VerticalPanel>
+        <g:ScrollPanel ui:field="scrollPanel" styleName="{style.msiTreePanel}">
+            <g:Tree ui:field="tree" styleName="{style.msiTree}"/>
+        </g:ScrollPanel>
+    </g:VerticalPanel>
+
+</ui:UiBinder>

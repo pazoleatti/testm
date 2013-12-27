@@ -1,15 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared;
 
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.Result;
-
-import java.util.List;
 
 public class CreateDeclarationResult implements Result {
 	private static final long serialVersionUID = -5166980391678790505L;
 	
 	long declarationId;
-    private List<LogEntry> logEntries;
+    private String uuid;
 
 	public long getDeclarationId() {
 		return declarationId;
@@ -19,11 +16,11 @@ public class CreateDeclarationResult implements Result {
 		this.declarationId = declarationId;
 	}
 
-    public List<LogEntry> getLogEntries() {
-        return logEntries;
+    public String getUuid() {
+        return uuid;
     }
 
-    public void setLogEntries(List<LogEntry> logEntries) {
-        this.logEntries = logEntries;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,8 @@ public class SaveFormDataHandler extends
 	private FormDataService formDataService;
 	@Autowired
 	private DataRowService dataRowService;
+    @Autowired
+    private LogEntryService logEntryService;
 
 	public SaveFormDataHandler() {
 		super(SaveFormDataAction.class);
@@ -44,7 +47,7 @@ public class SaveFormDataHandler extends
 
 		logger.info("Данные успешно записаны");
 		DataRowResult result = new DataRowResult();
-		result.setLogEntries(logger.getEntries());
+        result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}
 

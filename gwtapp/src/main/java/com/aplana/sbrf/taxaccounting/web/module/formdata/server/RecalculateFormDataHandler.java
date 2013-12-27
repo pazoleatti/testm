@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,9 @@ public class RecalculateFormDataHandler extends
 	@Autowired
 	private DataRowService dataRowService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
 	public RecalculateFormDataHandler() {
 		super(RecalculateDataRowsAction.class);
 	}
@@ -49,7 +53,7 @@ public class RecalculateFormDataHandler extends
 		}
 		formDataService.doCalc(logger, userInfo, formData);
 		DataRowResult result = new DataRowResult();
-		result.setLogEntries(logger.getEntries());
+		result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}
 

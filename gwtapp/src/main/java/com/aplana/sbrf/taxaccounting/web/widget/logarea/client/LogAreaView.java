@@ -1,7 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.logarea.client;
 
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.widget.log.LogEntriesView;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
@@ -9,14 +10,13 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.List;
+import java.util.Map;
 
 public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implements
 		LogAreaPresenter.MyView {
@@ -45,43 +45,33 @@ public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implement
     @UiField
     FormPanel formPanel;
 
-	@Override
-	public void setLogEntries(List<LogEntry> entries) {
-		logEntries.setLogEntries(entries);
-	}
-
-	@Override
-	public void setLogSize(int full, int error, int warn, int info) {
-		title.setHTML(templates.title(full, error));
-	}
+    @UiField
+    LinkAnchor printButton;
 
     @Override
-    public void getReport(String uuid) {
-        Window.open(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid, "", "");
+    public LogEntriesView getLogEntriesView() {
+        return logEntries;
     }
 
+    @Override
+    public void setLogEntriesCount(Map<LogLevel, Integer> map) {
+        if (map == null) {
+            title.setHTML(templates.title(0, 0));
+            return;
+        }
+        title.setHTML(templates.title(map.get(LogLevel.ERROR) + map.get(LogLevel.WARNING) + map.get(LogLevel.INFO),
+                map.get(LogLevel.ERROR)));
+    }
 
-    @UiHandler("printButton")
-	void print(ClickEvent event){
-        getUiHandlers().print();
-        //Формирование через JSON. Вариант без файлового хранилища
-        /*DOM.setElementProperty(formPanel.getElement(), "enctype", "text/plain");
-        DOM.setElementProperty(formPanel.getElement(), "encoding", "text/plain");//for IE8 encoding only
-        TextBox textBox = new TextBox();
-        textBox.setName("jsonobject");
-        textBox.setVisible(false);
+    @Override
+    public void setPrintLink(String link) {
+        printButton.setHref(link);
+        printButton.setVisible(link != null && !link.isEmpty());
+    }
 
-        textBox.setText(getUiHandlers().print());
-        formPanel.add(textBox);
-
-        formPanel.submit();
-        formPanel.clear();*/
-	}
-
-	@UiHandler("hideButton")
+    @UiHandler("hideButton")
 	void hide(ClickEvent event){
 		getUiHandlers().clean();
 		getUiHandlers().hide();
 	}
-	
 }

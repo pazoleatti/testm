@@ -1,36 +1,62 @@
 package com.aplana.sbrf.taxaccounting.model.exception;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 
+import java.util.List;
+
 /**
- * Класс-исключение, использующийся когда на сервисном слое происходит ошибка связанная с тем, 
- * что скрипт выполнился с ошибками. 
+ * Класс-исключение, использующийся когда на сервисном слое происходит ошибка связанная с тем,
+ * что скрипт выполнился с ошибками.
  *
  * @author sgoryachkin
- *
  */
-public class ServiceLoggerException extends ServiceException{
-	private static final long serialVersionUID = -6734031798154470925L;
-	
-	private List<LogEntry> logEntries;
+public class ServiceLoggerException extends ServiceException {
+    private static final long serialVersionUID = -6734031798154470925L;
 
-	public ServiceLoggerException(String message, List<LogEntry> logEntries, Object... params) {
-		super(message, params);
-		this.logEntries = logEntries;
-	}
+    private String uuid;
 
-	public List<LogEntry> getLogEntries() {
-		return logEntries;
-	}
+    public ServiceLoggerException(String message, String uuid, Object... params) {
+        super(message, params);
+        this.uuid = uuid;
+    }
 
-    public String getLogEntriesString(){
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    /**
+     * Вывод ошибок/сообщений ввиде строки
+     *
+     * @param logEntries Список сообщений
+     * @param limit      Лимит вывода
+     * @return
+     */
+    public static String getLogEntriesString(List<LogEntry> logEntries, int limit) {
+        if (logEntries == null || logEntries.isEmpty()) {
+            return null;
+        }
         StringBuilder builder = new StringBuilder();
-        for(LogEntry entry : logEntries){
+        int counter = 0;
+        for (LogEntry entry : logEntries) {
+            if (limit > 0 && ++counter > limit) {
+                break;
+            }
             builder.append(entry.getLevel()).append(" ").append(entry.getMessage());
         }
         return builder.toString();
     }
 
+    /**
+     * Вывод ошибок/сообщений ввиде строки
+     *
+     * @param logEntries Список сообщений
+     * @return
+     */
+    public static String getLogEntriesString(List<LogEntry> logEntries) {
+        return getLogEntriesString(logEntries, -1);
+    }
 }

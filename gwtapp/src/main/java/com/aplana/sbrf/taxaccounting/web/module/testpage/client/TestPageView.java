@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.testpage.client;
 
 import com.aplana.gwt.client.*;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -10,14 +9,12 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,15 +41,12 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     @UiField
     Label showResult;
 
-    @UiField(provided = true)
-    TypicalFormHeader formHeader;
-    @UiField
-    Label lbl;
 
 
     @UiField
-    CheckBox chk;
+    Button showDialog;
 
+    Label lbl1;
 
     @Inject
     public TestPageView(final Binder uiBinder) {
@@ -98,15 +92,6 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
              }
          });
 
-        formHeader = new TypicalFormHeader();
-        formHeader.addLeftWidget(new Label("Список налоговых форм пример"));
-        formHeader.addLeftWidget(new Label("-"));
-
-        Label label = new Label("Например кнопка");
-        label.getElement().getStyle().setProperty("fontSize", 20, Style.Unit.PX);
-        formHeader.addRightWidget(label);
-        formHeader.addRightWidget(new Label("Режим редактирования"));
-        formHeader.addMiddleWidget(new Label("Сводная форма начисленных доходов (доходы сложные) Очень длинный заголовок бла бла бал ба лаб ла бал аб лалалалалалал ла ла"));
 
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -145,16 +130,26 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
         showResult.setText(strCont);
 
-
-        //put this handler in the constructor
-        lbl.addClickHandler(new ClickHandler() {
+        showDialog.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                chk.setValue(!chk.getValue(), true);
-                //This will so it will manually operate the checkbox
+                ModalWindow mw = new ModalWindow("тест", "http://127.0.0.1:8888/resources/img/question_mark.png");
+                lbl1 = new Label("Тест");
+                //lbl1.setSize("200px","200px");
+                mw.add(lbl1);
+               // mw.addAdditionalButton(new ImageButtonLink("http://127.0.0.1:8888/resources/img/email.png", "Отправить письмо"));
+                mw.addSaveButtonClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        lbl1.setText("Нажали кнопку сохранить.");
+                    }
+                });
+                mw.setWidth("300px");
+                mw.center();
+                mw.show();
             }
-        });
 
+        });
     }
 
 }

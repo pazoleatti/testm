@@ -106,12 +106,12 @@ def reportPeriodEndDate = null
 
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol+1, logger, true)
+    return parseNumber(value, indexRow, indexCol + 1, logger, true)
 }
 
 /** Получить дату по строковому представлению (формата дд.ММ.гггг) */
 def getDate(def value, def indexRow, def indexCol) {
-    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol+1, logger, true)
+    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, true)
 }
 
 void calc() {
@@ -119,13 +119,7 @@ void calc() {
     def dataRows = dataRowHelper.allCached
     def dataRowsPrev
     if (!isBalancePeriod()) {
-        def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
-        formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
-        if(formDataPrev==null){
-            return
-        } else {
-            dataRowsPrev = formDataService.getDataRowHelper(formDataPrev)?.allCached
-        }
+        dataRowsPrev = getDataRowsPrev()
     }
 
     deleteAllAliased(dataRows)
@@ -164,6 +158,17 @@ void calc() {
     dataRowHelper.save(dataRows)
 }
 
+def getDataRowsPrev() {
+    def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+    formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
+    if (formDataPrev == null) {
+        logger.error("Не найдены экземпляры РНУ-64 за прошлый отчетный период!")
+    } else {
+        return formDataService.getDataRowHelper(formDataPrev)?.allCached
+    }
+    return null
+}
+
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -173,13 +178,7 @@ void logicCheck() {
     def dTo = getEndDate()
     def dataRowsPrev
     if (!isBalancePeriod()) {
-        def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
-        formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
-        if(formDataPrev==null){
-            logger.error("Не найдены экземпляры РНУ-64 за прошлый отчетный период!")
-        } else {
-            dataRowsPrev = formDataService.getDataRowHelper(formDataPrev)?.allCached
-        }
+        dataRowsPrev = getDataRowsPrev()
     }
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (def row : dataRows) {
@@ -213,7 +212,7 @@ void logicCheck() {
             totalQuarterRow = row
         }
     }
-    def testRows = dataRows.findAll{it -> it.getAlias() == null}
+    def testRows = dataRows.findAll { it -> it.getAlias() == null }
     // проверка на наличие итоговых строк, иначе будет ошибка
     if (totalQuarterRow == null || totalRow == null) {
         // 5. Проверка итоговых значений за текущий квартал
@@ -237,9 +236,9 @@ def getTotalValue(def dataRows, def dataRowsPrev) {
         prevQuarterTotalRow = getDataRow(dataRowsPrev, "total")
     }
     if (prevQuarterTotalRow != null) {
-        return (quarterRow.costs?:0) + prevQuarterTotalRow.costs?:0
+        return (quarterRow.costs ?: 0) + prevQuarterTotalRow.costs ?: 0
     } else {
-        return quarterRow.costs?:0
+        return quarterRow.costs ?: 0
     }
 }
 
@@ -336,7 +335,7 @@ def addData(def xml, def fileName) {
 
         // графа 3 - справочник 60 "Части сделок"
         tmp = null
-        if (row.field[indexCol].@value.text() != null && getCellValue(row, indexCol, type).trim() != '') {
+        if (getCellValue(row, indexCol, type, true) != null && getCellValue(row, indexCol, type).trim() != '') {
             tmp = formDataService.getRefBookRecordIdImport(60, recordCache, providerCache, 'CODE',
                     getCellValue(row, indexCol, type), getEndDate(), indexRow, indexCol, logger, false)
         }
@@ -370,15 +369,15 @@ def addData(def xml, def fileName) {
 }
 
 /** Для получения данных из RNU или XML */
-String getCellValue(def row, int index, def type, boolean isTextXml = false){
-    if (type==1) {
+String getCellValue(def row, int index, def type, boolean isTextXml = false) {
+    if (type == 1) {
         if (isTextXml) {
             return row.field[index].text()
         } else {
             return row.field[index].@value.text()
         }
     }
-    return row.cell[index+1].text()
+    return row.cell[index + 1].text()
 }
 
 /**

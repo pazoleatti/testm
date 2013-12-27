@@ -43,12 +43,11 @@ public class ExceptionHandlerAspect {
 		if (e instanceof TaActionException) {
 			throw (TaActionException)e;
 		} else if (e instanceof ServiceLoggerException) {
-			throw new TaActionException(
-					getErrorMessage(actionName)
-							+ (e.getLocalizedMessage() != null ? e.getLocalizedMessage()
-									: ""),
-					((ServiceLoggerException) e).getLogEntries());
-		} else if (e instanceof AccessDeniedException) {
+            TaActionException tae = new TaActionException(
+                    getErrorMessage(actionName) + (e.getLocalizedMessage() != null ? e.getLocalizedMessage() : ""));
+            tae.setUuid(((ServiceLoggerException) e).getUuid());
+            throw tae;
+        } else if (e instanceof AccessDeniedException) {
 			throw new TaActionException(
 					getErrorMessage(actionName)
 							+ (e.getLocalizedMessage() != null ? e
@@ -81,5 +80,4 @@ public class ExceptionHandlerAspect {
 			return null;
 		}
 	}
-
 }

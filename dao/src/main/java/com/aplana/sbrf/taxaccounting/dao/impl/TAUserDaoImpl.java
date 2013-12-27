@@ -57,7 +57,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	};
 
 	@Override
-	@Cacheable("User")
+	@Cacheable(value = "User", key = "'id_'+#userId")
 	public TAUser getUser(int userId) {
 		TAUser user;
 		try {
@@ -76,6 +76,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	}
 	
 	@Override
+    @Cacheable(value = "User", key = "'login_'+#login")
 	public int getUserIdByLogin(String login) {
 		try {
 			return getJdbcTemplate().queryForInt("select id from sec_user where lower(login) = ?", login);

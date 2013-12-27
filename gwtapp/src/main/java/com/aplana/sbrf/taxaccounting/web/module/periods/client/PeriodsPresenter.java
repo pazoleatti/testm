@@ -94,7 +94,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 						@Override
 						public void onSuccess(ClosePeriodResult result) {
 							find();
-							LogAddEvent.fire(PeriodsPresenter.this, result.getLogEntries());
+							LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
 						}
 					}, PeriodsPresenter.this));
 		}

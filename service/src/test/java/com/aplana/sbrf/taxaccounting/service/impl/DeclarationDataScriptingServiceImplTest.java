@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
@@ -88,6 +89,9 @@ public class DeclarationDataScriptingServiceImplTest {
 		formData.setState(WorkflowState.ACCEPTED);
 		when(formDataDao.find(1, FormDataKind.SUMMARY, DEPARTMENT_ID, REPORT_PERIOD_ID)).thenReturn(formData);
 		//ReflectionTestUtils.setField(service, "formDataDao", formDataDao, FormDataDao.class);
+
+        LogEntryService logEntryService = mock(LogEntryService.class);
+        ReflectionTestUtils.setField(service, "logEntryService", logEntryService);
 	}
 
 	@Test
@@ -123,8 +127,7 @@ public class DeclarationDataScriptingServiceImplTest {
 		exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, new Date());
 		StringWriter writer = new StringWriter();
 		exchangeParams.put(DeclarationDataScriptParams.XML, writer);
-		
+
 		service.executeScript(null, declarationData, FormDataEvent.CREATE, logger, exchangeParams);
 	}
-	
 }

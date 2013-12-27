@@ -6,10 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import com.aplana.sbrf.taxaccounting.service.TransportInterceptor;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +61,9 @@ public class RateMDB implements MessageListener {
 
     @Autowired
     private TAUserService taUserService;
+
+    @Autowired
+    private LogEntryService logEntryService;
 
     // Маппинг атрибута "OperName" из файла -> Id справочника
     private static Map<String, Long> rateMapping = new HashMap() {{
@@ -234,7 +234,7 @@ public class RateMDB implements MessageListener {
         if (logger.containsLevel(LogLevel.ERROR)) {
             String msg = String.format(ERROR_IMPORT, refBookId);
             addLog(userInfo, msg);
-            throw new ServiceLoggerException(msg, logger.getEntries());
+            throw new ServiceLoggerException(msg, logEntryService.save(logger.getEntries()));
         }
         addLog(userInfo, SUCCESS_IMPORT);
     }

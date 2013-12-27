@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -30,6 +31,9 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 	@Autowired
 	private SecurityService securityService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
 	@Override
 	public CreateDeclarationResult execute(CreateDeclaration command, ExecutionContext executionContext) throws ActionException {
 		CreateDeclarationResult result = new CreateDeclarationResult();
@@ -37,7 +41,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 		result.setDeclarationId(declarationDataService.create(logger, declarationTemplateService
 				.getActiveDeclarationTemplateId(command.getDeclarationTypeId()), command.getDepartmentId(),
 				securityService.currentUserInfo(), command.getReportPeriodId()));
-        result.setLogEntries(logger.getEntries());
+        result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}
 

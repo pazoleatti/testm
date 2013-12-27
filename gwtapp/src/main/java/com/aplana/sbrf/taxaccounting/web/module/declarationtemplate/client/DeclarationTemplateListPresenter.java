@@ -1,15 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.DeclarationTemplateApplyEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.FilterDeclarationTemplatePresenter;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.FilterDeclarationTemplateReadyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
@@ -25,7 +31,9 @@ import com.gwtplatform.mvp.client.proxy.*;
  *     <li>Переходит к редактированию выбранной декларации</li>
  * </ol>
  */
-public class DeclarationTemplateListPresenter extends Presenter<DeclarationTemplateListPresenter.MyView, DeclarationTemplateListPresenter.MyProxy> {
+public class DeclarationTemplateListPresenter
+        extends Presenter<DeclarationTemplateListPresenter.MyView, DeclarationTemplateListPresenter.MyProxy>
+        implements DeclarationTemplateApplyEvent.MyHandler, FilterDeclarationTemplateReadyEvent.MyHandler{
 
 	@Title("Шаблоны деклараций")
 	@ProxyCodeSplit
@@ -41,11 +49,15 @@ public class DeclarationTemplateListPresenter extends Presenter<DeclarationTempl
 	}
 
 	private final DispatchAsync dispatcher;
+    protected final FilterDeclarationTemplatePresenter filterPresenter;
+    public static final Object OBJECT = new Object();
+    List<HandlerRegistration> handlers = new ArrayList<HandlerRegistration>();
 
 	@Inject
-	public DeclarationTemplateListPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
+	public DeclarationTemplateListPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher, FilterDeclarationTemplatePresenter filterPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
+        this.filterPresenter = filterPresenter;
 	}
 
 	/**
@@ -58,22 +70,60 @@ public class DeclarationTemplateListPresenter extends Presenter<DeclarationTempl
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-		dispatcher.execute(new DeclarationListAction(),	CallbackUtils.defaultCallback(
-						new AbstractCallback<DeclarationListResult>() {
-							@Override
-							public void onSuccess(
-									DeclarationListResult result) {
-								if (result.getDeclarations() != null && !result.getDeclarations().isEmpty()) {
-									getView().setDeclarationTemplateRows(result.getDeclarations());
-								}
-							}
-						}, this).addCallback(
-						new ManualRevealCallback<DeclarationListResult>(
-								DeclarationTemplateListPresenter.this)));
+        TemplateFilter defaultFilter = new TemplateFilter();
+        defaultFilter.setTaxType(null);
+        defaultFilter.setActive(true);
+        filterPresenter.initFilter(defaultFilter);
+
 	}
 
 	@Override
 	public boolean useManualReveal() {
 		return true;
 	}
+
+
+    @Override
+    protected void onBind() {
+        addRegisteredHandler(FilterDeclarationTemplateReadyEvent.getType(), this);
+        addRegisteredHandler(DeclarationTemplateApplyEvent.getType(), this);
+        super.onBind();
+    }
+
+    @Override
+    protected void onReveal() {
+        super.onReveal();
+        setInSlot(OBJECT, filterPresenter);
+    }
+
+    @Override
+    protected void onHide() {
+        super.onHide();
+        clearSlot(OBJECT);
+    }
+
+    @Override
+    public void onClickFind(DeclarationTemplateApplyEvent event) {
+        updateDeclarationData();
+    }
+
+    @Override
+    public void onFilterReady(FilterDeclarationTemplateReadyEvent event) {
+        updateDeclarationData();
+    }
+
+    public void updateDeclarationData() {
+        DeclarationListAction action = new DeclarationListAction();
+        action.setFilter(filterPresenter.getFilterData());
+        dispatcher.execute(action,	CallbackUtils.defaultCallback(
+                new AbstractCallback<DeclarationListResult>() {
+            @Override
+            public void onSuccess(
+                    DeclarationListResult result) {
+                    getView().setDeclarationTemplateRows(result.getDeclarations());
+            }
+        }, this).addCallback(
+                new ManualRevealCallback<DeclarationListResult>(
+                DeclarationTemplateListPresenter.this)));
+    }
 }

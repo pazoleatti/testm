@@ -1,9 +1,6 @@
 package form_template.income.rnu51
 
-import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.FormData
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -67,7 +64,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE: // Консолидация
-        consolidation()
+        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
         logicCheck()
         break
@@ -184,11 +181,6 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    def isImport = (formDataEvent == FormDataEvent.IMPORT)
-
-    // Номер последний строки предыдущей формы
-    def index = isImport ? 0 : formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
     // Сортировка
     dataRows.sort({ DataRow a, DataRow b ->
         if (a.getAlias() != null && b.getAlias() == null) {
@@ -198,19 +190,21 @@ void calc() {
             return -1
         }
         if (a.getAlias() != null && b.getAlias() != null) {
-            return b.getAlias()<=>a.getAlias()
+            return b.getAlias() <=> a.getAlias()
         }
-
         def codeA = getCode(a.tradeNumber)
         def codeB = getCode(b.tradeNumber)
         if (codeA == codeB && a.singSecurirty == b.singSecurirty) {
-            return a.issue<=>b.issue
+            return a.issue <=> b.issue
         }
         if (codeA == codeB) {
-            return a.singSecurirty<=>b.singSecurirty
+            return a.singSecurirty <=> b.singSecurirty
         }
-        return codeA<=>codeB
+        return codeA <=> codeB
     })
+
+    // Номер последний строки предыдущей формы
+    def index = (formDataEvent == FormDataEvent.IMPORT) ? 0 : formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -218,8 +212,7 @@ void calc() {
         }
         // Графа 1
         row.rowNumber = ++index
-        // В периоде ввода остатков рассчитываются только итоги и порядковый номер
-        if (isBalancePeriod()) {
+        if (isBalancePeriod() || formData.kind != FormDataKind.PRIMARY) {
             continue;
         }
         // Графа 12
@@ -289,21 +282,21 @@ def calcTotalTwo(def totalOneSum) {
     return result
 }
 
-BigDecimal calc12(def row) {
+def BigDecimal calc12(def row) {
     return round(row.acquisitionPrice > row.marketPriceInRub ? row.marketPriceInRub : row.acquisitionPrice)
 }
 
-BigDecimal calc16(def row) {
+def BigDecimal calc16(def row) {
     // TODO Левыкин: Для всех остальных случаев значение графы не изменяется?
     return row.redemptionValue > 0 ? 100 : row.marketPriceInPerc1
 }
 
-BigDecimal calc17(def row) {
+def BigDecimal calc17(def row) {
     // TODO Левыкин: Для всех остальных случаев значение графы не изменяется?
     return row.redemptionValue > 0 ? 100 : row.marketPriceInRub1
 }
 
-BigDecimal calc18(def row) {
+def BigDecimal calc18(def row) {
     def code = getCode(row.tradeNumber)
     if ((code == 1 || code == 2 || code == 5)
             && (row.priceInFactPerc > row.marketPriceInPerc1 && row.priceInFactRub > row.marketPriceInRub1)) {
@@ -335,21 +328,21 @@ BigDecimal calc18(def row) {
     return row.salePriceTax
 }
 
-BigDecimal calc20(def row) {
+def BigDecimal calc20(def row) {
     if (row.costOfAcquisition == null || row.acquisitionPriceTax == null || row.expensesOnSale == null) {
         return null
     }
     return row.costOfAcquisition + row.acquisitionPriceTax + row.expensesOnSale
 }
 
-BigDecimal calc21(def row) {
+def BigDecimal calc21(def row) {
     if (row.salePriceTax == null || row.expensesTotal == null) {
         return null
     }
     return row.salePriceTax - row.expensesTotal
 }
 
-BigDecimal calc22(def row) {
+def BigDecimal calc22(def row) {
     if (getCode(row.tradeNumber) == 4) {
         return 0
     }
@@ -438,16 +431,17 @@ void logicCheck() {
                     "над фактической ценой реализации!")
         }
 
-        // 10. Арифметическая проверка
-        needValue['acquisitionPriceTax'] = calc12(row)
-        needValue['marketPriceInPerc1'] = calc16(row)
-        needValue['marketPriceInRub1'] = calc17(row)
-        needValue['salePriceTax'] = calc18(row)
-        needValue['expensesTotal'] = calc20(row)
-        needValue['profit'] = calc21(row)
-        needValue['excessSalePriceTax'] = calc22(row)
-
-        checkCalc(row, arithmeticCheckAlias, needValue, logger, false)
+        if (formData.kind == FormDataKind.PRIMARY) {
+            // 10. Арифметическая проверка
+            needValue['acquisitionPriceTax'] = calc12(row)
+            needValue['marketPriceInPerc1'] = calc16(row)
+            needValue['marketPriceInRub1'] = calc17(row)
+            needValue['salePriceTax'] = calc18(row)
+            needValue['expensesTotal'] = calc20(row)
+            needValue['profit'] = calc21(row)
+            needValue['excessSalePriceTax'] = calc22(row)
+            checkCalc(row, arithmeticCheckAlias, needValue, logger, false)
+        }
 
         // Проверки НСИ
         checkNSI(61, row, 'tradeNumber')
@@ -491,25 +485,6 @@ def getCode(def code) {
         return null
     }
     return getRefBookValue(61, code)?.CODE?.numberValue
-}
-
-void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                formDataService.getDataRowHelper(source).getAllCached().each { row ->
-                    if (row.getAlias() == null) {
-                        dataRows.add(row)
-                    }
-                }
-            }
-        }
-    }
-    dataRowHelper.save(dataRows)
-    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 void importData() {

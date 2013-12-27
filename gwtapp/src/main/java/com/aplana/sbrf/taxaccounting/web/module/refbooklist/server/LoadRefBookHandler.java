@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.server;
 
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
@@ -21,10 +22,13 @@ import com.gwtplatform.dispatch.shared.ActionException;
 public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction, LoadRefBookResult> {
 
     @Autowired
-    RefBookExternalService refBookExternalService;
+    private RefBookExternalService refBookExternalService;
     
     @Autowired
     private SecurityService securityService;
+
+    @Autowired
+    private LogEntryService logEntryService;
 
     public LoadRefBookHandler() {
         super(LoadRefBookAction.class);
@@ -36,7 +40,7 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
 		LoadRefBookResult result = new LoadRefBookResult();
 		Logger logger = new Logger();
 		refBookExternalService.importRefBook(securityService.currentUserInfo(), logger);
-		result.setEntries(logger.getEntries());
+        result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}
 
@@ -44,8 +48,5 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
 	public void undo(LoadRefBookAction arg0, LoadRefBookResult arg1,
 			ExecutionContext arg2) throws ActionException {
 		// Auto-generated method stub
-		
 	}
-
-
 }

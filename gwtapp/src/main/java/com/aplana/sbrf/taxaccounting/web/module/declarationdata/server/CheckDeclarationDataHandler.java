@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataResult;
@@ -21,6 +22,9 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
 	@Autowired
 	private SecurityService securityService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
     public CheckDeclarationDataHandler() {
         super(CheckDeclarationDataAction.class);
     }
@@ -30,7 +34,7 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
 		CheckDeclarationDataResult result = new CheckDeclarationDataResult();
         Logger logger = new Logger();
 		declarationDataService.check(logger, action.getDeclarationId(), securityService.currentUserInfo());
-        result.setLogEntries(logger.getEntries());
+        result.setUuid(logEntryService.save(logger.getEntries()));
 	    return result;
     }
 
@@ -39,5 +43,4 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
 			throws ActionException {
         // Nothing!
     }
-
 }

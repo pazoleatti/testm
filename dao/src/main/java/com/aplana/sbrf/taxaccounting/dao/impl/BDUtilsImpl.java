@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.BDUtils;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -11,7 +10,6 @@ import java.util.List;
  * @author auldanov
  */
 @Repository
-@Transactional(readOnly = true)
 class BDUtilsImpl extends AbstractDao implements BDUtils {
     @Override
     public List<Long> getNextIds(Long count) {

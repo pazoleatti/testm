@@ -14,6 +14,8 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
@@ -22,14 +24,15 @@ import com.gwtplatform.mvp.client.ViewImpl;
  * Представление для страницы администрирования.
  *
  * @author Vitalii Samolovskikh
+ * @author Eugene Stetsenko
  */
 public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 	interface Binder extends UiBinder<Widget, AdminView> {
 	}
 
-	/**
-	 * Список шаблонов форм. А больше здесь нифига нет.
-	 */
+    @UiField
+    Panel filterContentPanel;
+
 	@UiField
 	CellTable<FormTemplate> formTemplateTable;
 
@@ -76,6 +79,18 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 			}
 		}, "Версия");
 	}
+
+    @Override
+    public void setInSlot(Object slot, IsWidget content) {
+        if (slot == AdminPresenter.TYPE_filterPresenter) {
+            filterContentPanel.clear();
+            if (content != null) {
+                filterContentPanel.add(content);
+            }
+        } else {
+            super.setInSlot(slot, content);
+        }
+    }
 
 	@Override
 	public void setFormTemplateTable(List<FormTemplate> formTemplates) {

@@ -121,29 +121,28 @@ void logicCheckBeforeCalc() {
         def errorMsg = "Строка $index: "
 
         def departmentParam
-        if (row.regionBankDivision != null) departmentParam =  getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
+        if (row.regionBankDivision != null) departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
         if (departmentParam == null || departmentParam.isEmpty()) {
+            logger.error(errorMsg + "Не найдено подразделение территориального банка!")
             return
         } else {
-
             long centralId = 113 // ID Центрального аппарата.
             // У Центрального аппарата родительским подразделением должен быть он сам
             if (centralId != row.regionBankDivision) {
                 // графа 2 - название подразделения
                 if (departmentParam.get('PARENT_ID')?.getReferenceValue()==null) {
-                    logger.error(errorMsg+"Для подразделения территориального банка «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение наименования родительского подразделения!")
+                    logger.error(errorMsg + "Для подразделения территориального банка «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение наименования родительского подразделения!")
                 }
             }
         }
 
-        def departmentParamIncomeRecords
+        def incomeParam
         if (row.regionBankDivision != null) incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
         if (incomeParam == null || incomeParam.isEmpty()) {
-            logger.error(errorMsg+"Не найдены настройки подразделения!")
+            logger.error(errorMsg + "Не найдены настройки подразделения!")
         } else {
-
             // графа 4 - кпп
-            if (incomeParam?.get('record_id')?.getNumberValue() == null) {
+            if (incomeParam?.get('record_id')?.getNumberValue() == null || incomeParam?.get('KPP')?.getStringValue() == null) {
                 logger.error(errorMsg+"Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «КПП»!")
             }
         }
@@ -194,10 +193,7 @@ void calc() {
     // Удаление подитогов
     deleteAllAliased(dataRows)
 
-    def index = 0
     for (row in dataRows) {
-        index++
-
         // графа 2 - название подразделения
         row.regionBank = calc2(row)
 
@@ -216,7 +212,7 @@ void calc() {
         return (regionBankA <=> regionBankB)
     }
 
-    index = 0
+    def index = 0
     for (row in dataRows) {
         // графа 1
         row.number = ++index

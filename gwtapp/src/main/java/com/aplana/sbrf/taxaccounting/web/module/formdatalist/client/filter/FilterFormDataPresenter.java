@@ -115,11 +115,6 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 	}
 
 	@Override
-	public void onCreateClicked() {
-		FormDataListCreateEvent.fire(this);
-	}
-
-	@Override
 	public void onApplyClicked() {
 		FormDataListApplyEvent.fire(this);
 	}

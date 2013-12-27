@@ -29,7 +29,7 @@ public class GetFormDataResult implements Result {
 	
 	private String templateFormName;
 	
-	private List<LogEntry> logEntries;
+	private String uuid;
 	
 	private String departmenName;
 	
@@ -99,15 +99,15 @@ public class GetFormDataResult implements Result {
 		this.formDataAccessParams = formDataAccessParams;
 	}
 
-	public List<LogEntry> getLogEntries() {
-		return logEntries;
-	}
+    public String getUuid() {
+        return uuid;
+    }
 
-	public void setLogEntries(List<LogEntry> logEntries) {
-		this.logEntries = logEntries;
-	}
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
-	public boolean isNumberedHeader() {
+    public boolean isNumberedHeader() {
 		return numberedHeader;
 	}
 
@@ -188,43 +188,24 @@ public class GetFormDataResult implements Result {
     }
 
     @Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("GetFormDataResult [formData=");
-		builder.append(formData);
-		builder.append(", templateFormName=");
-		builder.append(templateFormName);
-		builder.append(", logEntries=");
-		builder.append(logEntries);
-		builder.append(", departmenName=");
-		builder.append(departmenName);
-		builder.append(", reportPeriod=");
-		builder.append(reportPeriod);
-		builder.append(", formDataAccessParams=");
-		builder.append(formDataAccessParams);
-		builder.append(", numberedHeader=");
-		builder.append(numberedHeader);
-		builder.append(", allStyles=");
-		builder.append(allStyles);
-		builder.append(", balancePeriod=");
-		builder.append(balancePeriod);
-		builder.append(", lockDate=");
-		builder.append(lockDate);
-		builder.append(", lockedByUser=");
-		builder.append(lockedByUser);
-		builder.append(", formMode=");
-		builder.append(formMode);
-		builder.append(", fixedRows=");
-		builder.append(fixedRows);
-		builder.append(", TaxPeriodStartDate=");
-		builder.append(TaxPeriodStartDate);
-		builder.append(", TaxPeriodEndDate=");
-		builder.append(TaxPeriodEndDate);
-        builder.append(", reportPeriodYear=");
-		builder.append(reportPeriodYear);
-		builder.append("]");
-		return builder.toString();
-	}
-	
-	
+    public String toString() {
+        return "GetFormDataResult{" +
+                "formData=" + formData +
+                ", templateFormName='" + templateFormName + '\'' +
+                ", uuid='" + uuid + '\'' +
+                ", departmenName='" + departmenName + '\'' +
+                ", reportPeriod=" + reportPeriod +
+                ", formDataAccessParams=" + formDataAccessParams +
+                ", numberedHeader=" + numberedHeader +
+                ", allStyles=" + allStyles +
+                ", balancePeriod=" + balancePeriod +
+                ", lockDate='" + lockDate + '\'' +
+                ", lockedByUser='" + lockedByUser + '\'' +
+                ", formMode=" + formMode +
+                ", fixedRows=" + fixedRows +
+                ", TaxPeriodStartDate=" + TaxPeriodStartDate +
+                ", TaxPeriodEndDate=" + TaxPeriodEndDate +
+                ", reportPeriodYear=" + reportPeriodYear +
+                '}';
+    }
 }

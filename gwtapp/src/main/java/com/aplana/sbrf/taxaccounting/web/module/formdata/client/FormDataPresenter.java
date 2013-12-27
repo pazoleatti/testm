@@ -33,9 +33,8 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.ArrayList;
 
-public class FormDataPresenter extends
-        FormDataPresenterBase<FormDataPresenter.MyProxy> implements
-        FormDataUiHandlers{
+public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.MyProxy> implements
+        FormDataUiHandlers {
 
 	public static final int PAGE_SIZE = 15;
 
@@ -141,9 +140,9 @@ public class FormDataPresenter extends
 	@Override
 	public void onPrintClicked() {
 		Window.open(
-				GWT.getHostPageBaseURL() + "download/downloadController/"
-						+ formData.getId() + "/"
-						+ getView().getCheckedColumnsClicked(), "", "");
+                GWT.getHostPageBaseURL() + "download/downloadController/"
+                        + formData.getId() + "/"
+                        + getView().getCheckedColumnsClicked(), "", "");
 	}
 
 	@Override
@@ -162,8 +161,6 @@ public class FormDataPresenter extends
 	public void onCancelClicked() {
 		revealFormData(true);
 	}
-
-
 	
 	private AsyncCallback<DataRowResult> createDataRowResultCallback(final boolean showMsg){ 
 			LogCleanEvent.fire(this);
@@ -172,7 +169,7 @@ public class FormDataPresenter extends
 				public void onSuccess(DataRowResult result) {
 					modifiedRows.clear();
 					getView().updateData();
-					LogAddEvent.fire(FormDataPresenter.this, result.getLogEntries());
+					LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
 					getView().setSelectedRow(result.getCurrentRow(), true);
 				}
 				
@@ -189,13 +186,12 @@ public class FormDataPresenter extends
 	
 	@Override
 	public void onCheckClicked() {
-		LogCleanEvent.fire(this);
-		CheckFormDataAction checkAction = new CheckFormDataAction();
-		checkAction.setFormData(formData);
-		checkAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
-		dispatcher.execute(checkAction, createDataRowResultCallback(false));
-	}
-	
+        LogCleanEvent.fire(this);
+        CheckFormDataAction checkAction = new CheckFormDataAction();
+        checkAction.setFormData(formData);
+        checkAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
+        dispatcher.execute(checkAction, createDataRowResultCallback(false));
+	}  	
 	
 	/* (non-Javadoc)
 	 * @see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataUiHandlers#onSaveClicked()
@@ -207,7 +203,6 @@ public class FormDataPresenter extends
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		dispatcher.execute(action, createDataRowResultCallback(true));
 	}
-	
 
 	/* (non-Javadoc)
 	 * @see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataUiHandlers#onAddRowClicked()
@@ -248,8 +243,6 @@ public class FormDataPresenter extends
 		dispatcher.execute(action, createDataRowResultCallback(true));
 	}
 
-
-
 	@Override
 	public void onDeleteFormClicked() {
 		boolean isOK = Window.confirm("Вы уверены, что хотите удалить налоговую форму?");
@@ -289,8 +282,6 @@ public class FormDataPresenter extends
 		}
 	}
 
-
-
 	private void goMove(final WorkflowMove wfMove){
 		LogCleanEvent.fire(this);
 		GoMoveAction action = new GoMoveAction();
@@ -300,7 +291,7 @@ public class FormDataPresenter extends
 				.defaultCallback(new AbstractCallback<GoMoveResult>() {
 					@Override
 					public void onSuccess(GoMoveResult result) {
-						LogAddEvent.fire(FormDataPresenter.this, result.getLogEntries());
+						LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
 						revealFormData(true);
 					}
 				}, this));
@@ -315,8 +306,7 @@ public class FormDataPresenter extends
                             public void onSuccess(GetFormDataResult result) {
 
                                 LogAddEvent.fire(FormDataPresenter.this,
-                                        result.getLogEntries());
-                               
+                                        result.getUuid());
                                 
                     			// Очищаем возможные изменения на форме перед открытием.
                     			modifiedRows.clear();
@@ -327,7 +317,6 @@ public class FormDataPresenter extends
                     			if (closeFormDataHandlerRegistration !=null ){
                     				closeFormDataHandlerRegistration.removeHandler();
                     			}
-                    			
                                 
                                 formDataAccessParams = result
                                         .getFormDataAccessParams();
@@ -379,11 +368,9 @@ public class FormDataPresenter extends
                                                 formData.getFormType()
                                                         .getName());
 	                            getView().updateData(0);
-
                             }
-
                         }, this).addCallback(
-                        		TaManualRevealCallback.create(this, placeManager)));
+                        TaManualRevealCallback.create(this, placeManager)));
     }
 
     private String buildPeriodName(GetFormDataResult retFormDataResult) {
@@ -413,5 +400,4 @@ public class FormDataPresenter extends
         };
         getView().addFileUploadValueChangeHandler(fileUploadValueChangeHandler);
     }
-
 }

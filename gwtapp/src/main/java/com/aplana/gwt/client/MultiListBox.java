@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * Выподающий список с возможностью выбора нескольких элементов
- * User: vpetrov
+ * @author : vpetrov
  * Date: 27.11.13
  */
 

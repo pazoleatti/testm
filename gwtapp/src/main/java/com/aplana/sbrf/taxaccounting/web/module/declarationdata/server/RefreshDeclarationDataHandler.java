@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RefreshDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RefreshDeclarationDataResult;
@@ -23,6 +24,9 @@ public class RefreshDeclarationDataHandler extends AbstractActionHandler<Refresh
 	@Autowired
 	private SecurityService securityService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
     public RefreshDeclarationDataHandler() {
         super(RefreshDeclarationDataAction.class);
     }
@@ -33,7 +37,7 @@ public class RefreshDeclarationDataHandler extends AbstractActionHandler<Refresh
         RefreshDeclarationDataResult result = new RefreshDeclarationDataResult();
         Logger logger = new Logger();
 		declarationDataService.reCreate(logger, action.getDeclarationId(), userInfo, action.getDocDate());
-        result.setLogEntries(logger.getEntries());
+        result.setUuid(logEntryService.save(logger.getEntries()));
 	    return result;
     }
 
@@ -41,5 +45,4 @@ public class RefreshDeclarationDataHandler extends AbstractActionHandler<Refresh
     public void undo(RefreshDeclarationDataAction action, RefreshDeclarationDataResult result, ExecutionContext context) throws ActionException {
         // Nothing!
     }
-
 }

@@ -106,7 +106,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
                                                             .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
                                                                     .with(DeclarationDataTokens.declarationId,
                                                                             String.valueOf(checkResult.getDeclarationDataId())).build());
-                                                    LogAddEvent.fire(DeclarationCreationPresenter.this, result.getLogEntries());
+                                                    LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
 												}
 											}, DeclarationCreationPresenter.this));
 								}
@@ -125,7 +125,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
                                                 placeManager
                                                         .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
                                                                 .with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId())).build());
-                                                LogAddEvent.fire(DeclarationCreationPresenter.this, result.getLogEntries());
+                                                LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
 											}
 										}, DeclarationCreationPresenter.this));
 							}
@@ -133,7 +133,6 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 					}, DeclarationCreationPresenter.this));
 		}
 	}
-
 
 	private boolean isFilterDataCorrect(DeclarationDataFilter filter){
 		if(filter.getDeclarationTypeId() == null){
@@ -171,5 +170,4 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
             }
         }, this) );
     }
-	
 }

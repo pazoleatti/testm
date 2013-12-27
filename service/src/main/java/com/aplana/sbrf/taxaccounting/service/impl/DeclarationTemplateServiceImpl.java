@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.ObjectLock;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -22,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -119,6 +117,15 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     public String getDeclarationTemplateScript(int declarationTemplateId) {
         return declarationTemplateDao.getDeclarationTemplateScript(declarationTemplateId);
+    }
+
+    @Override
+    public List<DeclarationTemplate> getByFilter(TemplateFilter filter) {
+        List<DeclarationTemplate> templates = new ArrayList<DeclarationTemplate>();
+        for (Integer id : declarationTemplateDao.getByFilter(filter)) {
+            templates.add(declarationTemplateDao.get(id));
+        }
+        return templates;
     }
 
     @Override
