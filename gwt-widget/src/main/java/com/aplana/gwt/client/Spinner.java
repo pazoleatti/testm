@@ -43,7 +43,6 @@ public class Spinner extends Composite
 	 */
 	public static final int DEFAULT_WIDTH = 145;
 
-
 	/**
 	 * Основная панель, на которой размещаются все остальные элементы.
 	 */
