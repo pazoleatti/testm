@@ -83,6 +83,20 @@ public class SimpleDatePicker extends Composite
 		date.addValueChangeHandler(subElementValueChangeHandler);
 	}
 
+	public void setPrecision(Precision precision) {
+		if (precision.compareTo(Precision.DATE) > 0) {
+			panel.remove(date);
+		} else {
+			panel.add(date);
+		}
+
+		if (precision.compareTo(Precision.MONTH) > 0) {
+			panel.remove(month);
+		} else {
+			panel.add(month);
+		}
+	}
+
 	@Override
 	public Date getValue() {
 		// Да, да, да. Deprecated. А что поделаешь? Календаря в GWT нет.
@@ -153,6 +167,13 @@ public class SimpleDatePicker extends Composite
 		month.setEnabled(enabled);
 		year.setEnabled(enabled);
 		this.enabled = enabled;
+	}
+
+	/**
+	 * Точность вводимого значения: день, месяц, год.
+	 */
+	public static enum Precision {
+		DATE, MONTH, YEAR
 	}
 
 	/**
