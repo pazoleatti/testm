@@ -1,18 +1,23 @@
 package com.aplana.sbrf.taxaccounting.web.module.testpage2.client;
 
 //import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentTreeWidget;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTree;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.SimpleTree;
+import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.NoSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -58,6 +63,14 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
 
     private int tmpId = 1000;
 
+    @UiField
+    DataGrid<DataRow<Cell>> formDataTable;
+
+    @UiField
+    FlexiblePager pager;
+
+    private NoSelectionModel<DataRow<Cell>> selectionModel;
+
     @Inject
     public TestPage2View(final Binder uiBinder) {
         initTree();
@@ -70,6 +83,7 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
 //        initMultiSelectTree(simpleTree2);
 
         initWidget(uiBinder.createAndBindUi(this));
+        initPager();
     }
 
     void initTree() {
@@ -220,5 +234,24 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
         int x = simpleTree.getOffsetWidth();
         x = (x > 700 ? 200 : x + 50);
         simpleTree.setWidth(x + "px");
+    }
+
+    private void initPager() {
+        selectionModel = new NoSelectionModel<DataRow<Cell>>();
+        formDataTable.setSelectionModel(selectionModel);
+        ArrayList<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+        int count = 20;
+        for (int i = 0; i < count; i++) {
+            dataRows.add(new DataRow<Cell>());
+        }
+
+        setRowsData(1, count, dataRows);
+        pager.setDisplay(formDataTable);
+    }
+
+    private void setRowsData(int start, int totalCount, List<DataRow<Cell>> rowsData) {
+        // Window.alert("182!");
+        formDataTable.setRowCount(totalCount);
+        formDataTable.setRowData(start, rowsData);
     }
 }

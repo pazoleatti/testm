@@ -30,6 +30,10 @@
     padding: 2px 0;
 }
 
+.rowsCountOnPage {
+    padding: 2px 2px 2px 2px;
+}
+
 .panel {
     float: right;
     padding-right: 2px;
