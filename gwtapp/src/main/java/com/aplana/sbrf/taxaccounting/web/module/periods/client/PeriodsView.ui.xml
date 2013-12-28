@@ -1,6 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:w='urn:import:com.aplana.sbrf.taxaccounting.web.widget.incrementbutton'
+             xmlns:w='urn:import:com.aplana.gwt.client'
              xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 <ui:style>
@@ -30,8 +30,6 @@
                             <g:Label ui:field="title" addStyleNames="{style.titleLabel}"/>
                             <g:SimplePanel styleName="{style.titleGradient}"/>
                         </g:HorizontalPanel>
-
-
                     </g:HorizontalPanel>
                     <g:VerticalPanel>
                         <g:HorizontalPanel>
@@ -39,9 +37,9 @@
                             <g:Label>Период: </g:Label>
 
                             <g:Label>От </g:Label>
-                            <w:IncrementButton minValue="1920" maxValue="2100" ui:field="fromBox"></w:IncrementButton>
+							<w:Spinner minValue="1920" maxValue="2100" width="80px" ui:field="fromBox"/>
                             <g:Label>До </g:Label>
-                            <w:IncrementButton minValue="1920" maxValue="2100" ui:field="toBox"></w:IncrementButton>
+							<w:Spinner minValue="1920" maxValue="2100" width="80px" ui:field="toBox"/>
                             <g:Button ui:field="find">Поиск</g:Button>
                             <g:Button ui:field="closePeriod">Закрыть период</g:Button>
                             <g:Button ui:field="setDeadlineButton">Назначить срок сдачи</g:Button>

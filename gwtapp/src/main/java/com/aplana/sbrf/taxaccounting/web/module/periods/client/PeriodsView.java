@@ -2,11 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 
 import java.util.List;
 
+import com.aplana.gwt.client.Spinner;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.TableRow;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerModalWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.incrementbutton.IncrementButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -40,10 +40,10 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	Label title;
 
 	@UiField
-	IncrementButton fromBox;
+	Spinner fromBox;
 
 	@UiField
-	IncrementButton toBox;
+	Spinner toBox;
 
 	@UiField
 	GenericCellTable<TableRow> periodsTable;
@@ -218,13 +218,4 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 		closePeriod.setVisible(!readOnly);
 	}
 
-	@Override
-	public boolean isFromYearEmpty() {
-		return fromBox.isEmpty();
-	}
-
-	@Override
-	public boolean isToYearEmpty() {
-		return toBox.isEmpty();
-	}
 }
