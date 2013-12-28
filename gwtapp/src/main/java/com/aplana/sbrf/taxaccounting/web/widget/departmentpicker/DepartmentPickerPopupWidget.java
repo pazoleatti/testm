@@ -73,7 +73,7 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
             popup = new PopupPanel(true, true);
         }
 		popup.setPixelSize(300, 370);
-		departmentPiker = new DepartmentPickerWidget(header, multiselection);
+		departmentPiker = new DepartmentPickerWidget("", multiselection);
 
 		popup.add((DepartmentPickerWidget)departmentPiker);
 		

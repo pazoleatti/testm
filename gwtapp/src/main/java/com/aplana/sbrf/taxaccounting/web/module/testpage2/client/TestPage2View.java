@@ -37,6 +37,12 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
     Button ok;
 
     @UiField
+    Button h;
+
+    @UiField
+    Button w;
+
+    @UiField
     Button add;
 
     @UiField
@@ -58,6 +64,7 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
         simpleTree = new SimpleTree("Наименование подразделения", true);
         initMultiSelectTree(simpleTree);
         simpleTree2 = new SimpleTree("Наименование подразделения 2", false);
+//        simpleTree2.setHeaderVisible();
         initMultiSelectTree(simpleTree2);
 
 //        initMultiSelectTree(simpleTree2);
@@ -107,7 +114,7 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
         List<MultiSelectTreeItem> items = new ArrayList<MultiSelectTreeItem>();
         MultiSelectTreeItem item1 = new MultiSelectTreeItem(1, "Открытое акционерное общестро «Сбербанк России»");
         MultiSelectTreeItem item2 = new MultiSelectTreeItem(2, "222222222222222222222222222222222222222222222222222");
-        MultiSelectTreeItem item3 = new MultiSelectTreeItem(3, "333");
+        MultiSelectTreeItem item3 = new MultiSelectTreeItem(3, "333", null);
         MultiSelectTreeItem item33 = new MultiSelectTreeItem(33, "333-333");
         MultiSelectTreeItem item4 = new MultiSelectTreeItem(4, "444");
         MultiSelectTreeItem item5 = new MultiSelectTreeItem(5, "Байкальский банк 555");
@@ -199,5 +206,19 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
     @UiHandler("multiSelection")
     void onValueChangeMultiSelection(ValueChangeEvent<Boolean> event) {
         simpleTree.setMultiSelection(event.getValue());
+    }
+
+    @UiHandler("h")
+    void hButtonClicked(ClickEvent event) {
+        int x = simpleTree.getOffsetHeight();
+        x = (x > 700 ? 200 : x + 50);
+        simpleTree.setHeight(x + "px");
+    }
+
+    @UiHandler("w")
+    void wButtonClicked(ClickEvent event) {
+        int x = simpleTree.getOffsetWidth();
+        x = (x > 700 ? 200 : x + 50);
+        simpleTree.setWidth(x + "px");
     }
 }
