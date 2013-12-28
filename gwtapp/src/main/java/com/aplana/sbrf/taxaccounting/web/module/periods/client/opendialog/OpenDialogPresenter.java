@@ -33,7 +33,6 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		void setTaxType(TaxType taxType);
 		void setBalance(boolean balance);
 		void setSelectedDepartment(Department dep);
-		boolean isYearEmpty();
 	}
 
 	private DispatchAsync dispatcher;
@@ -69,7 +68,7 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 
 	@Override
 	public void onContinue(final OpenFilterData openFilterData) {
-		if (getView().isYearEmpty() || (openFilterData.getDictionaryTaxPeriod() == null)) {
+		if (openFilterData.getDictionaryTaxPeriod() == null) {
 			Window.alert("Не заданы все обязательные параметры!");
 			return;
 		}

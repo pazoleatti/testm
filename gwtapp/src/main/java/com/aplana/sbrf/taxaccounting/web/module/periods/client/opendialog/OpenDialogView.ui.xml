@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
-	xmlns:w='urn:import:com.aplana.sbrf.taxaccounting.web.widget.incrementbutton'
+	xmlns:w='urn:import:com.aplana.gwt.client'
 	xmlns:date="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
 	xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client'
 	xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
@@ -27,7 +27,7 @@
 								<g:Label text="Год: " width="150px" />
 							</g:cell>
 							<g:cell width="100%" horizontalAlignment="left">
-								<w:IncrementButton ui:field="yearBox" minValue="1900" maxValue="2100" />
+								<w:Spinner ui:field="yearBox" minValue="1900" maxValue="2100" width="100%" />
 							</g:cell>
 						</g:HorizontalPanel>
 
