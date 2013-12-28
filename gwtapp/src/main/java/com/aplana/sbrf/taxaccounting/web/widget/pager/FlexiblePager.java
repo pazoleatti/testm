@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.widget.pager;
 import com.google.gwt.aria.client.Roles;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.Constants;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.resources.client.ClientBundle;
@@ -144,6 +146,8 @@ public class FlexiblePager extends AbstractPager {
 
         String pageNumber();
 
+        String rowsCountOnPage();
+
         String panel();
 
         String buttonLastPage();
@@ -229,10 +233,14 @@ public class FlexiblePager extends AbstractPager {
 	private final HTML middleLeftLabel = new HTML();
 	private final HTML middleRightLabel = new HTML();
 	private final IntegerBox pageNumber = new IntegerBox();
+    private final HTML rightLabel = new HTML();
+    private final IntegerBox rowsCountOnPage = new IntegerBox();
 
 	private final ImageButton lastPage;
 	private final ImageButton nextPage;
 	private final ImageButton prevPage;
+
+    private final int MAX_ROWS_COUNT_ON_PAGE = 100;
 
 	/**
 	 * The {@link Resources} used by this widget.
@@ -435,6 +443,27 @@ public class FlexiblePager extends AbstractPager {
 			}
 		});
 
+        rightLabel.setText("Строк на странице:");
+        layout.add(rightLabel);
+        layout.add(rowsCountOnPage);
+
+        rowsCountOnPage.getElement().getStyle().setWidth(3, com.google.gwt.dom.client.Style.Unit.EM);
+        rowsCountOnPage.getElement().getParentElement().addClassName(style.rowsCountOnPage());
+        rowsCountOnPage.addValueChangeHandler(new ValueChangeHandler<Integer>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Integer> event) {
+                setPageSize(rowsCountOnPage.getValue());
+            }
+        });
+        rowsCountOnPage.addKeyPressHandler(new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getUnicodeCharCode() == 13) {
+                    setPageSize(rowsCountOnPage.getValue());
+                }
+            }
+        });
+
 		// Disable the buttons by default.
 		setDisplay(null);
 	}
@@ -539,6 +568,11 @@ public class FlexiblePager extends AbstractPager {
 
 	@Override
 	public void setPageSize(int pageSize) {
+        if (pageSize < 1) {
+            pageSize = getPageSize();
+        } else if (pageSize > MAX_ROWS_COUNT_ON_PAGE) {
+            pageSize = MAX_ROWS_COUNT_ON_PAGE;
+        }
 		super.setPageSize(pageSize);
 	}
 
@@ -553,6 +587,7 @@ public class FlexiblePager extends AbstractPager {
 		pageNumber.setValue(1);
 		middleRightLabel.setHTML("");
 		leftLabel.setHTML("");
+        rowsCountOnPage.setValue(getPageSize());
 	}
 
 	@Override
@@ -571,6 +606,7 @@ public class FlexiblePager extends AbstractPager {
 		middleLeftLabel.setText("Страница ");
 		pageNumber.setValue(page);
 		middleRightLabel.setText((exact ? " из " : " более ") + pageCount);
+        rowsCountOnPage.setValue(getPageSize());
 
 		// Update the prev and first buttons.
 		setPrevPageButtonsDisabled(!hasPreviousPage());
