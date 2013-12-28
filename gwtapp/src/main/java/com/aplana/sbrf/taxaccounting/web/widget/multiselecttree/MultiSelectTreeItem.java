@@ -14,22 +14,34 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
         HasDoubleClickHandlers, HasMouseDownHandlers, HasValue<Boolean> {
 
     protected Integer id;
-    protected boolean multiSelection;
+    /** Тип узла дерева: true - с чекбоксом, false - с радиокнопкой, null - только с текстом*/
+    protected Boolean multiSelection;
     protected FocusPanel focusPanel;
+    protected Label label;
     protected CheckBox checkBox;
     protected RadioButton radioButton;
     protected static final String RADIO_BUTTON_GROUP  = "MSI_GROUP";
 
+    public MultiSelectTreeItem(String name) {
+        this(null, name, null);
+    }
+
+    /** Элемент дерева множественного выбора. По-умолчанию создается узел с чекбоксом. */
     public MultiSelectTreeItem(Integer id, String name) {
         this(id, name, true);
     }
 
-    public MultiSelectTreeItem(Integer id, String name, boolean multiSelection) {
+    public MultiSelectTreeItem(String name, Boolean multiSelection) {
+        this(null, name, multiSelection);
+    }
+
+    public MultiSelectTreeItem(Integer id, String name, Boolean multiSelection) {
         this.id = id;
+        label = new Label(name);
         checkBox = new CheckBox(name);
         radioButton = new RadioButton(RADIO_BUTTON_GROUP, name);
         focusPanel = new FocusPanel();
-        focusPanel.getElement().getStyle().setFontStyle(Style.FontStyle.NORMAL);
+//        focusPanel.getElement().getStyle().setFontStyle(Style.FontStyle.NORMAL); // TODO (Ramil Timerbaev)
         setMultiSelection(multiSelection);
         setWidget(focusPanel);
     }
@@ -43,11 +55,17 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
     }
 
     public void setName(String name){
-        ((CheckBox) getWidget()).setText(name);
+        label.setText(name);
+        checkBox.setText(name);
+        radioButton.setText(name);
     }
 
     public String getName() {
-        return ((CheckBox) getWidget()).getText();
+        if (multiSelection == null) {
+            return label.getText();
+        } else {
+            return ((CheckBox) getWidget()).getText();
+        }
     }
 
     @Override
@@ -57,17 +75,17 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
 
     @Override
     public HandlerRegistration addDoubleClickHandler(DoubleClickHandler handler) {
-        return ((CheckBox) getWidget()).addDoubleClickHandler(handler);
+        return ((HasDoubleClickHandlers) getWidget()).addDoubleClickHandler(handler);
     }
 
     @Override
     public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
-        return ((CheckBox) getWidget()).addMouseDownHandler(handler);
+        return ((HasMouseDownHandlers) getWidget()).addMouseDownHandler(handler);
     }
 
     @Override
     public HandlerRegistration addClickHandler(ClickHandler handler) {
-        return ((CheckBox) getWidget()).addClickHandler(handler);
+        return ((HasClickHandlers) getWidget()).addClickHandler(handler);
     }
 
     @Override
@@ -93,24 +111,26 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
         }
     }
 
-    /** Установить чекбокс или радиоконопку. */
-    public void setMultiSelection(boolean multiSelection) {
+    /** Установить чекбокс или радиокнопку. */
+    public void setMultiSelection(Boolean multiSelection) {
         this.multiSelection = multiSelection;
         focusPanel.clear();
-        if (multiSelection) {
+        if (multiSelection == null) {
+            focusPanel.add(label);
+        } else if (multiSelection) {
             focusPanel.add(checkBox);
         } else {
             focusPanel.add(radioButton);
         }
     }
 
-    public boolean isMultiSelection() {
+    public Boolean isMultiSelection() {
         return multiSelection;
     }
 
     @Override
     public Boolean getValue() {
-        return ((CheckBox) getWidget()).getValue();
+        return (multiSelection == null ? false : ((CheckBox) getWidget()).getValue());
     }
 
     @Override
@@ -120,13 +140,13 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
 
     @Override
     public void setValue(Boolean value, boolean fireEvents) {
-        checkBox.setValue(value, fireEvents);
-        radioButton.setValue(value, fireEvents);
-    }
-
-    public void setValue(boolean value) {
-        checkBox.setValue(value);
-        radioButton.setValue(value);
+        if (multiSelection == null) {
+            checkBox.setValue(false, fireEvents);
+            radioButton.setValue(false, fireEvents);
+        } else {
+            checkBox.setValue(value, fireEvents);
+            radioButton.setValue(value, fireEvents);
+        }
     }
 
     public void setGroup(String name) {
@@ -135,6 +155,9 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
 
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Boolean> handler) {
+        if (multiSelection == null) {
+            return null;
+        }
         return ((CheckBox) getWidget()).addValueChangeHandler(handler);
     }
 }

@@ -188,9 +188,11 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         List<MultiSelectTreeItem> allChild = new ArrayList<MultiSelectTreeItem>();
         findAllChild(allChild, item);
         for (MultiSelectTreeItem child : allChild) {
-            child.setMultiSelection(multiSelection);
             child.setGroup(GROUP_NAME);
-
+            if (child.isMultiSelection() == null) {
+                continue;
+            }
+            child.setMultiSelection(multiSelection);
             CheckBox widget = (CheckBox) child.getWidget();
             treeItemsHash.put(child.getWidget(), child);
             child.getPanel().getElement().addClassName(style.msiTreeItem());
@@ -306,7 +308,9 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
     public void setMultiSelection(boolean multiSelection) {
         this.multiSelection = multiSelection;
         for (MultiSelectTreeItem i : getItems()) {
-            i.setMultiSelection(multiSelection);
+            if (i.isMultiSelection() != null) {
+                i.setMultiSelection(multiSelection);
+            }
         }
         setValue(null);
     }

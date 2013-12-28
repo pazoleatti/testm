@@ -114,7 +114,7 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
         List<MultiSelectTreeItem> items = new ArrayList<MultiSelectTreeItem>();
         MultiSelectTreeItem item1 = new MultiSelectTreeItem(1, "Открытое акционерное общестро «Сбербанк России»");
         MultiSelectTreeItem item2 = new MultiSelectTreeItem(2, "222222222222222222222222222222222222222222222222222");
-        MultiSelectTreeItem item3 = new MultiSelectTreeItem(3, "333");
+        MultiSelectTreeItem item3 = new MultiSelectTreeItem(3, "333", null);
         MultiSelectTreeItem item33 = new MultiSelectTreeItem(33, "333-333");
         MultiSelectTreeItem item4 = new MultiSelectTreeItem(4, "444");
         MultiSelectTreeItem item5 = new MultiSelectTreeItem(5, "Байкальский банк 555");

@@ -38,7 +38,6 @@ public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> 
             item.setState(true);
             addTreeItem(item);
         }
-        updateItems();
     }
 
     @Override

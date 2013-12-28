@@ -12,6 +12,7 @@ import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.SimpleTree;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -45,7 +46,7 @@ public class DepartmentPickerWidget extends Composite implements
 	public Label header;
 
 	@UiField
-	public DepartmentTreeWidget tree;
+	public SimpleTree tree;
 
 	@UiField
 	public Button ok;
