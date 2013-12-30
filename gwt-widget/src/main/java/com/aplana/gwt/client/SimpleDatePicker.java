@@ -22,6 +22,7 @@ public class SimpleDatePicker extends Composite
 	 * Название класса стиял для компонента.
 	 */
 	public static final String STYLE_NAME = Constants.STYLE_PREFIX + "SimpleDatePicker";
+	public static final int XIX = 1900;
 
 	/**
 	 * Основная панель, на которой размещаются все остальные элементы.
@@ -51,8 +52,8 @@ public class SimpleDatePicker extends Composite
 
 	private void initStyles() {
 		panel.addStyleName(STYLE_NAME);
-		date.addStyleName(STYLE_NAME+"-date");
-		month.addStyleName(STYLE_NAME+"-month");
+		date.addStyleName(STYLE_NAME + "-date");
+		month.addStyleName(STYLE_NAME + "-month");
 		year.addStyleName(STYLE_NAME + "-year");
 	}
 
@@ -132,7 +133,7 @@ public class SimpleDatePicker extends Composite
 	 * @return дата
 	 */
 	private Date createValue() {
-		return new Date(year.getValue(), getMonthValue() - 1, date.getValue(), 12, 0);
+		return new Date(year.getValue() - XIX, getMonthValue() - 1, date.getValue(), 12, 0);
 	}
 
 	private int getMonthValue() {
@@ -151,7 +152,7 @@ public class SimpleDatePicker extends Composite
 		// TODO Надо б что-нибудь получше придумать.
 		date.setValue(value.getDate());
 		month.setSelectedIndex(value.getMonth());
-		year.setValue(value.getYear());
+		year.setValue(value.getYear() + 1900);
 	}
 
 	@Override
