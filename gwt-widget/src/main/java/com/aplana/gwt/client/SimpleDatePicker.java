@@ -1,5 +1,7 @@
 package com.aplana.gwt.client;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -86,8 +88,8 @@ public class SimpleDatePicker extends Composite
 		setValue(new Date());
 		SubElementValueChangeHandler subElementValueChangeHandler = new SubElementValueChangeHandler();
 		date.addValueChangeHandler(subElementValueChangeHandler);
-		date.addValueChangeHandler(subElementValueChangeHandler);
-		date.addValueChangeHandler(subElementValueChangeHandler);
+		month.addChangeHandler(subElementValueChangeHandler);
+		year.addValueChangeHandler(subElementValueChangeHandler);
 	}
 
 	/**
@@ -199,10 +201,36 @@ public class SimpleDatePicker extends Composite
 	/**
 	 * ValueChangeHandler для субэлементов. Обновляет значение в DatePicker'е.
 	 */
-	private class SubElementValueChangeHandler implements ValueChangeHandler {
+	private class SubElementValueChangeHandler implements ValueChangeHandler, ChangeHandler {
 		@Override
 		public void onValueChange(ValueChangeEvent event) {
 			setValue(createValue(), true);
 		}
+
+		@Override
+		public void onChange(ChangeEvent event) {
+			onValueChange(null);
+		}
+	}
+
+	/**
+	 * Don't use! For testing only.
+	 */
+	Spinner getDate() {
+		return date;
+	}
+
+	/**
+	 * Don't use! For testing only.
+	 */
+	ListBox getMonth() {
+		return month;
+	}
+
+	/**
+	 * Don't use! For testing only.
+	 */
+	Spinner getYear() {
+		return year;
 	}
 }

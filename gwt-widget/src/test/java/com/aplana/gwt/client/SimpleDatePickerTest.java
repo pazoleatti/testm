@@ -29,6 +29,15 @@ public class SimpleDatePickerTest extends GWTTestCase {
 		assertTrue(compareDates(date, datePicker.getValue()));
 	}
 
+	public void testEdit(){
+		SimpleDatePicker datePicker = new SimpleDatePicker();
+		Date date = createTestDate();
+		datePicker.getDate().setValue(date.getDate(), true);
+		datePicker.getMonth().setSelectedIndex(date.getMonth());
+		datePicker.getYear().setValue(date.getYear(), true);
+		assertTrue(compareDates(date, datePicker.getValue()));
+	}
+
 	private Date createTestDate() {
 		return new Date(2014, 0, 1);
 	}
@@ -50,7 +59,14 @@ public class SimpleDatePickerTest extends GWTTestCase {
 
 	private boolean compareDates(Date date1, Date date2){
 		DateTimeFormat format = DateTimeFormat.getFormat("d.m.y");
-		return format.format(date1).equals(format.format(date2));
+		String expected = format.format(date1);
+		String actual = format.format(date2);
+		if(expected.equals(actual)){
+			return true;
+		}else{
+			System.out.println("Expected: "+expected+"; actual: "+actual);
+			return false;
+		}
 	}
 
 	@Override
