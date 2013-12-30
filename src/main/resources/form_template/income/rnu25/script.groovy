@@ -84,11 +84,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.MIGRATION :
         importData()
-        if (!hasError()) {
-            def total = getCalcTotalRow()
-            def data = getData(formData)
-            insert(data, total)
-        }
         break
 }
 
@@ -704,6 +699,18 @@ void importData() {
                 checkTotalRow(totalLoad)
             } else {
                 logger.error("Нет итоговой строки.")
+            }
+        }
+
+        // добавляем итоговую строку из файла без проверки сумм
+        if (formDataEvent == FormDataEvent.MIGRATION) {
+            if (totalLoad != null) {
+                totalLoad.setAlias('total')
+                totalLoad.regNumber = 'Общий итог'
+                setTotalStyle(totalLoad)
+                if (!hasError()) {
+                    insert(getData(formData), totalLoad)
+                }
             }
         }
     } catch (Exception e) {
