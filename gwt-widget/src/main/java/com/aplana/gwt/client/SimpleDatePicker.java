@@ -22,14 +22,9 @@ public class SimpleDatePicker extends Composite
 	public static final String STYLE_NAME = Constants.STYLE_PREFIX + "SimpleDatePicker";
 
 	/**
-	 * Название стиля для задисабленных элементов. Это нужно для поддержки IE8.
-	 */
-	public static final String STYLE_DISABLED = "disabled";
-
-	/**
 	 * Основная панель, на которой размещаются все остальные элементы.
 	 */
-	private final LayoutPanel panel = new LayoutPanel();
+	private final HorizontalPanel panel = new HorizontalPanel();
 
 	private final Spinner date = new Spinner();
 	private final ListBox month = new ListBox();
@@ -48,6 +43,15 @@ public class SimpleDatePicker extends Composite
 		initLayout();
 
 		initBehavior();
+
+		initStyles();
+	}
+
+	private void initStyles() {
+		panel.addStyleName(STYLE_NAME);
+		date.addStyleName(STYLE_NAME+"-date");
+		month.addStyleName(STYLE_NAME+"-month");
+		year.addStyleName(STYLE_NAME + "-year");
 	}
 
 	/**
@@ -59,15 +63,18 @@ public class SimpleDatePicker extends Composite
 		date.setMinValue(1);
 		date.setMaxValue(31);
 		date.setValue(1);
+		date.setWidth("35px");
 		panel.add(date);
 
 		for (Month month1 : Month.values()) {
 			month.addItem(month1.getName(), month1.getStringOrder());
 		}
+		month.setWidth("85px");
 		panel.add(month);
 
 		year.setMinValue(1900);
 		year.setMaxValue(2100);
+		year.setWidth("50px");
 		panel.add(year);
 	}
 
@@ -83,17 +90,30 @@ public class SimpleDatePicker extends Composite
 		date.addValueChangeHandler(subElementValueChangeHandler);
 	}
 
+	/**
+	 * Устанавливает точность: день, месяц, год.
+	 *
+	 * @param precision точность
+	 * @see com.aplana.gwt.client.SimpleDatePicker.Precision
+	 */
 	public void setPrecision(Precision precision) {
+		// Remove date element if precision is MONTH or YEAR
 		if (precision.compareTo(Precision.DATE) > 0) {
 			panel.remove(date);
-		} else {
-			panel.add(date);
 		}
 
+		// Remove month element if precision id YEAR
 		if (precision.compareTo(Precision.MONTH) > 0) {
 			panel.remove(month);
-		} else {
-			panel.add(month);
+		}
+
+		// Add month element if precision is MONTH or DATE
+		if (precision.compareTo(Precision.YEAR) < 0 && panel.getWidgetIndex(month) == -1) {
+			panel.insert(month, panel.getWidgetIndex(year));
+		}
+
+		if (precision == Precision.DATE && panel.getWidgetIndex(date) == -1) {
+			panel.insert(date, panel.getWidgetIndex(month));
 		}
 	}
 

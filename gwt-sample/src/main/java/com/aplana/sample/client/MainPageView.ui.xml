@@ -9,5 +9,13 @@
 			<g:cell><aplana:Spinner/></g:cell>
 			<g:cell><aplana:Spinner enabled="false"/></g:cell>
 		</g:HorizontalPanel>
+		<g:VerticalPanel>
+			<g:cell><aplana:SimpleDatePicker precision="DATE"/></g:cell>
+			<g:cell><aplana:SimpleDatePicker precision="MONTH"/></g:cell>
+			<g:cell><aplana:SimpleDatePicker precision="YEAR"/></g:cell>
+			<g:cell><aplana:SimpleDatePicker precision="DATE" enabled="false"/></g:cell>
+			<g:cell><aplana:SimpleDatePicker precision="MONTH" enabled="false"/></g:cell>
+			<g:cell><aplana:SimpleDatePicker precision="YEAR" enabled="false"/></g:cell>
+		</g:VerticalPanel>
 	</g:HTMLPanel>
 </ui:UiBinder>
