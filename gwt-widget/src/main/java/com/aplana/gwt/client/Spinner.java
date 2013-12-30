@@ -1,6 +1,7 @@
 package com.aplana.gwt.client;
 
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -87,9 +88,9 @@ public class Spinner extends Composite
 	 * Создает спиннер со значение по умоляанию 0.
 	 */
 	public Spinner() {
-		initBehavior();
 		initLayout();
 		initStyles();
+		initBehavior();
 	}
 
 	/**
@@ -162,6 +163,14 @@ public class Spinner extends Composite
 			@Override
 			public void onClick(ClickEvent event) {
 				decrementValue();
+			}
+		});
+
+		this.addAttachHandler(new AttachEvent.Handler() {
+			@Override
+			public void onAttachOrDetach(AttachEvent event) {
+				incButton.setTabIndex(-1);
+				decButton.setTabIndex(-1);
 			}
 		});
 	}
