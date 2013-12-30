@@ -10,7 +10,7 @@
 			<g:cell><aplana:Spinner enabled="false"/></g:cell>
 		</g:HorizontalPanel>
 		<g:VerticalPanel>
-			<g:cell><aplana:SimpleDatePicker precision="DATE"/></g:cell>
+			<g:cell><aplana:SimpleDatePicker precision="DATE" ui:field="currentDate"/></g:cell>
 			<g:cell><aplana:SimpleDatePicker precision="MONTH"/></g:cell>
 			<g:cell><aplana:SimpleDatePicker precision="YEAR"/></g:cell>
 			<g:cell><aplana:SimpleDatePicker precision="DATE" enabled="false"/></g:cell>
