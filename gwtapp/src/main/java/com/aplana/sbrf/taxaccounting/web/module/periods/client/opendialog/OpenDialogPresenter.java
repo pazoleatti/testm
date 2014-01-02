@@ -1,9 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -12,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreated;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodResult;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -20,6 +17,10 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -31,14 +32,13 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, boolean enable);
 		void setYear(int year);
 		void setTaxType(TaxType taxType);
-		void setBalance(boolean balance);
-		void setSelectedDepartment(Department dep);
+        void setSelectedDepartment(Integer departmentId);
 		boolean isYearEmpty();
+        void resetForm();
 	}
 
 	private DispatchAsync dispatcher;
 	private TaxType taxType;
-	private Department defaultDep;
 
 	@Inject
 	public OpenDialogPresenter(final EventBus eventBus, final MyView view,
@@ -53,14 +53,8 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		getView().hide();
 	}
 
-	@Override
-	protected void onReveal() {
-		resetToDefault();
-	}
-
 	public void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, boolean enable) {
 		getView().setDepartments(departments, avalDepartments, selectedDepartments, enable);
-		defaultDep = departments.get(0);
 	}
 
 	public void setYear(int year) {
@@ -99,10 +93,12 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		getView().setTaxType(taxType);
 	}
 
+    public void setSelectedDepartment(Integer departmentId){
+        getView().setSelectedDepartment(departmentId);
+    }
+
 	public void resetToDefault() {
-		getView().setBalance(false);
-		getView().setSelectedDepartment(defaultDep);
-		Date current = new Date();
-		getView().setYear(current.getYear());
+        getView().resetForm();
+        getView().setYear(Integer.valueOf(DateTimeFormat.getFormat("yyyy").format(new Date())).intValue());
 	}
 }

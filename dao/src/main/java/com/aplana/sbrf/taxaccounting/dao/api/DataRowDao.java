@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
-import com.aplana.sbrf.taxaccounting.dao.BDUtils;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -137,6 +136,4 @@ public interface DataRowDao {
 	 * @param formDataId
 	 */
 	void rollback(long formDataId);
-
-    void setDbUtils(BDUtils dbUtils);
 }

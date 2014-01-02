@@ -129,7 +129,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                             "Отчество": departmentParamTransport.SIGNATORY_LASTNAME
                     )
                     // СвПред - Сведения о представителе налогоплательщика
-                    if (departmentParamTransport.NAME == 2)
+                    if (departmentParamTransport.SIGNATORY_ID.CODE.getNumberValue() == 2)
                     {
                         def svPred = ["НаимДок": departmentParamTransport.APPROVE_DOC_NAME]
                         if (departmentParamTransport.APPROVE_ORG_NAME)

@@ -97,7 +97,7 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
 	 * Задать информацию о столбцах, допустимых в строке Внимание: использование
 	 * данного метода сбрасывает значение всех столбцов в строке в null
 	 * 
-	 * @param formColumns
+	 * @param cells
 	 *            список столбцов
 	 */
 	public final void setFormColumns(List<C> cells) {
@@ -185,8 +185,25 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
 	public C getCell(String columnAlias) {
 		return getCell(columnAlias, true);
 	}
-	
-	private C getCell(String columnAlias, boolean throwIfNotFound) {
+
+    public C getCellByColumnId(Integer columnId) {
+        return getCellByColumnId(columnId, true);
+    }
+
+    private C getCellByColumnId(Integer columnId, boolean throwIfNotFound) {
+        for (C cell: data) {
+            if (cell.getColumn().getId().equals(columnId)) {
+                return cell;
+            }
+        }
+        if (throwIfNotFound) {
+            throw new IllegalArgumentException("Wrong column id: " + columnId);
+        } else {
+            return null;
+        }
+    }
+
+    private C getCell(String columnAlias, boolean throwIfNotFound) {
 		for (C cell: data) {
 			if (cell.getColumn().getAlias().equals(columnAlias)) {
 				return cell;

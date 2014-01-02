@@ -433,6 +433,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			exporter.setParameter(JRPdfExporterParameter.JASPER_PRINT,
 					jasperPrint);
 			exporter.setParameter(JRPdfExporterParameter.OUTPUT_STREAM, data);
+			exporter.getPropertiesUtil().setProperty(JRPdfExporterParameter.PROPERTY_SIZE_PAGE_TO_CONTENT, "true");
 
 			exporter.exportReport();
 			return data.toByteArray();

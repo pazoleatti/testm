@@ -332,11 +332,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 						params);
 	}
 
-    @Override
-    public void setDbUtils(BDUtils dbUtils) {
-        this.dbUtils = dbUtils;
-    }
-
     private void physicalInsertRows(final FormData formData,
                                     final List<DataRow<Cell>> dataRows, final Long ordBegin,
                                     final Long ordStep, final List<Long> orders) {
@@ -350,7 +345,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         }
 
         // получение id'шников для вставки строк батчем
-        final List<Long> ids = dbUtils.getNextIds(Integer.valueOf(dataRows.size()).longValue());
+        final List<Long> ids = dbUtils.getNextDataRowIds(Integer.valueOf(dataRows.size()).longValue());
 
         getJdbcTemplate().batchUpdate(
                 "insert into DATA_ROW (ID, FORM_DATA_ID, ALIAS, ORD, TYPE) values (?, ?, ?, ?, ?)",

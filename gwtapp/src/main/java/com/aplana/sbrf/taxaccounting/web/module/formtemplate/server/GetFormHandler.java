@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +28,9 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
 	@Autowired
 	private SecurityService securityService;
 
+    @Autowired
+    private RefBookFactory refBookFactory;
+
     public GetFormHandler() {
         super(GetFormAction.class);
     }
@@ -40,6 +45,7 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
         formTemplate.setScript(formTemplateService.getFormTemplateScript(action.getId()));
 		formTemplateService.lock(action.getId(), userInfo);
 		result.setForm(formTemplate);
+        result.setRefBookList(refBookFactory.getAll(false, null));
         return result;
     }
 

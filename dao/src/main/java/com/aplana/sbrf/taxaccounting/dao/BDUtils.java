@@ -9,15 +9,43 @@ import java.util.List;
  * @author auldanov
  */
 public interface BDUtils {
+
+    enum Sequence {
+        DATA_ROW("seq_data_row"),
+        FORM_COLUMN("seq_form_column"),
+        REF_BOOK_RECORD("seq_ref_book_record");
+
+        private Sequence(String name) {
+            this.name = name;
+        }
+
+        private final String name;
+
+        public String getName() {
+            return name;
+        }
+    }
+
+    /**
+     * Метод возвращает список зарезервированных id для таблицы data_row
+     */
+    public List<Long> getNextDataRowIds(Long count);
+
+    /**
+     * Метод возвращает список зарезервированных id для таблицы ref_book_record
+     */
+    public List<Long> getNextRefBookRecordIds(Long count);
+
     /**
      * Метод возвращает список зарезервированных id
-     * по которым можно осуществлять вставку в таблицу data_row
+     * по которым можно осуществлять вставку в таблицу
      *
      * Размещена здесь, так как использует вызов хранимки,
      * которая отказывается наботать в hsql
      *
-     * @param count
-     * @return
+     * @param sequence Последовательность
+     * @param count Необходимое количество
+     * @return Идентификаторы из последовательности
      */
-    List<Long> getNextIds(Long count);
+    List<Long> getNextIds(Sequence sequence, Long count);
 }

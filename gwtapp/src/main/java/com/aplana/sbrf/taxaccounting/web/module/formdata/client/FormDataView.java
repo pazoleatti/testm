@@ -52,6 +52,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	DockLayoutPanel dockPanel;
 	@UiField
+	DockLayoutPanel formDockPanel;
+	@UiField
 	DataGrid<DataRow<Cell>> formDataTable;
 	@UiField
 	FlexiblePager pager;
@@ -440,7 +442,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void setLockInformation(boolean isVisible, String lockDate, String lockedBy){
-		dockPanel.setWidgetHidden(lockInformation, !isVisible);
+		formDockPanel.setWidgetHidden(lockInformation, !isVisible);
 		lockInformation.setVisible(isVisible);
 		if(lockedBy != null && lockDate != null){
 			lockInformation.setText("Выбранная налоговая форма в текущий момент редактируется другим пользователем \"" + lockedBy
@@ -488,6 +490,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @Override
     public void setPagingVisible(boolean visible) {
         pager.setVisible(visible);
-        dockPanel.setWidgetSize(pager, visible ? 30 : 0);
+        formDockPanel.setWidgetSize(pager, visible ? 30 : 0);
     }
 }

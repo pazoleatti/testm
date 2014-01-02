@@ -16,6 +16,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -49,7 +50,7 @@ public class FormDataCacheDaoTest {
          */
         // мок утилитного сервиса
         BDUtils dbUtilsMock = mock(BDUtils.class);
-        when(dbUtilsMock.getNextIds(anyLong())).thenAnswer(new org.mockito.stubbing.Answer<List<Long>>() {
+        when(dbUtilsMock.getNextDataRowIds(anyLong())).thenAnswer(new org.mockito.stubbing.Answer<List<Long>>() {
             @Override
             public List<Long> answer(InvocationOnMock invocationOnMock) throws Throwable {
                 List<Long> ids = new ArrayList<Long>();
@@ -61,7 +62,7 @@ public class FormDataCacheDaoTest {
                 return ids;
             }
         });
-        dataRowDao.setDbUtils(dbUtilsMock);
+        ReflectionTestUtils.setField(dataRowDao, "dbUtils", dbUtilsMock);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
+import com.aplana.sbrf.taxaccounting.dao.BDUtils;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
@@ -19,12 +20,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -45,6 +48,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private BDUtils dbUtils;
 
     @Override
     @Cacheable(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
@@ -395,21 +401,23 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         RefBook refBook = get(refBookId);
 
-        int counter = 0;
-        // Шаг последовательности = 100
-        Long seq = generateId("seq_ref_book_record", Long.class);
+        final List<Long> refBookRecordIds  = dbUtils.getNextRefBookRecordIds(new Long(records.size()));
+        BatchPreparedStatementSetter batchRefBookRecordsPS = new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setLong(1, refBookRecordIds.get(i));
+            }
+
+            @Override
+            public int getBatchSize() {
+                return refBookRecordIds.size();
+            }
+        };
 
         for (int i = 0; i < records.size(); i++) {
             // создаем строки справочника
-            Long record_uniq_Id = seq + counter++;
 
-            if (counter >= 100) {
-                counter = 0;
-                seq = generateId("seq_ref_book_record", Long.class);
-            }
-
-            recordIds.add(new Object[]{record_uniq_Id});
-            // записываем значения ячеек
+           // записываем значения ячеек
             Map<String, RefBookValue> record = records.get(i);
 
             for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
@@ -420,7 +428,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 }
                 RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
                 Object[] values = new Object[6];
-                values[0] = record_uniq_Id;
+                values[0] = refBookRecordIds.get(i);
                 values[1] = attribute.getId();
                 values[2] = null;
                 values[3] = null;
@@ -455,10 +463,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
         JdbcTemplate jt = getJdbcTemplate();
         jt.batchUpdate(String.format(INSERT_REF_BOOK_RECORD_SQL,
-                refBookId, sdf.format(version),
+                refBookId,
+                sdf.format(version),
                 status.getId(),
                 recordId
-        ), recordIds);
+        ), batchRefBookRecordsPS);
         jt.batchUpdate(INSERT_REF_BOOK_VALUE, listValues);
         return recordId;
     }
@@ -478,6 +487,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
             RefBook refBook = get(refBookId);
             List<Object[]> listValues = new ArrayList<Object[]>();
+
             for (int i = 0; i < records.size(); i++) {
                 Map<String, RefBookValue> record = records.get(i);
 
@@ -530,6 +540,26 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     private static final String CHECK_REF_BOOK_RECORD_UNIQUE_SQL = "select id from ref_book_record " +
             "where ref_book_id = ? and version = trunc(?, 'DD') and record_id = ?";
+
+
+    private void checkFillRequiredFields(Map<String, RefBookValue> record, RefBook refBook){
+        List<RefBookAttribute> attributes = refBook.getAttributes();
+        List<String> errors = refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
+
+        if (errors.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Поля ");
+            for (int j = 0; j < errors.size(); j++) {
+                String field = errors.get(j);
+                sb.append("«").append(field).append("»");
+                if (j != errors.size() - 1) {
+                    sb.append(", ");
+                }
+            }
+            sb.append(" являются обязательными для заполнения.");
+            throw new DaoException(sb.toString());
+        }
+    }
 
     @Override
     public Long checkRecordUnique(Long refBookId, Date version, Long rowId) {
