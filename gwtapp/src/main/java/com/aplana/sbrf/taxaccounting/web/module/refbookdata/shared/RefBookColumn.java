@@ -79,4 +79,18 @@ public class RefBookColumn implements Serializable{
     public void setRequired(boolean required) {
         this.required = required;
     }
+
+    @Override
+    public String toString() {
+        return "RefBookColumn{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", alias='" + alias + '\'' +
+                ", width=" + width +
+                ", attributeType=" + attributeType +
+                ", refBookAttributeId=" + refBookAttributeId +
+                ", alignment=" + alignment +
+                ", required=" + required +
+                '}';
+    }
 }

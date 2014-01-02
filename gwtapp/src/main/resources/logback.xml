@@ -14,6 +14,7 @@
 
 	<!-- Spring слишком много пишет в лог на уровне info -->
 	<logger name="org.springframework" level="warn"/>
+    <!--<logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG"/>-->
 	
 	<!-- Логгеры проекта пишут с уровнем debug -->
 	<logger name="com.aplana.sbrf.taxaccounting" level="all"/>

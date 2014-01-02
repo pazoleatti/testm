@@ -63,4 +63,11 @@ public class Pair<F,S> {
 		return true;
 	}
 
+    @Override
+    public String toString() {
+        return "Pair{" +
+                "first=" + first +
+                ", second=" + second +
+                '}';
+    }
 }

@@ -6,6 +6,9 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class GetNameAction extends UnsecuredActionImpl<GetNameResult> implements ActionName {
 	Long refBookId;
 
+    /** Идентификатор выбранной записи справочника. Используется в режиме версионирования */
+    Long recordId;
+
 	public Long getRefBookId() {
 		return refBookId;
 	}
@@ -14,7 +17,15 @@ public class GetNameAction extends UnsecuredActionImpl<GetNameResult> implements
 		this.refBookId = refBookId;
 	}
 
-	@Override
+    public Long getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(Long recordId) {
+        this.recordId = recordId;
+    }
+
+    @Override
 	public String getName() {
 		return "Получить название справочника";
 	}

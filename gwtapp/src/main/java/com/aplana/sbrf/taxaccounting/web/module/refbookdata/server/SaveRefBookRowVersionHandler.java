@@ -6,8 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookRowAction;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookRowResult;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookRowVersionAction;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookRowVersionResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -19,17 +19,17 @@ import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP')")
-public class SaveRefBookRowHandler extends AbstractActionHandler<SaveRefBookRowAction, SaveRefBookRowResult> {
+public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefBookRowVersionAction, SaveRefBookRowVersionResult> {
 
-	public SaveRefBookRowHandler() {
-		super(SaveRefBookRowAction.class);
+	public SaveRefBookRowVersionHandler() {
+		super(SaveRefBookRowVersionAction.class);
 	}
 
 	@Autowired
 	RefBookFactory refBookFactory;
 
 	@Override
-	public SaveRefBookRowResult execute(SaveRefBookRowAction action, ExecutionContext executionContext) throws ActionException {
+	public SaveRefBookRowVersionResult execute(SaveRefBookRowVersionAction action, ExecutionContext executionContext) throws ActionException {
 		RefBookDataProvider refBookDataProvider = refBookFactory
 				.getDataProvider(action.getRefBookId());
 		Map<String, RefBookValue> valueToSave = new HashMap<String, RefBookValue>();
@@ -44,11 +44,11 @@ public class SaveRefBookRowHandler extends AbstractActionHandler<SaveRefBookRowA
 		valuesToSaveList.add(valueToSave);
 
 
-		refBookDataProvider.updateRecords(action.getRelevanceDate(), valuesToSaveList);
-		return new SaveRefBookRowResult();
+		refBookDataProvider.updateRecordVersion(action.getRecordId(), action.getVersionFrom(), action.getVersionTo(), action.isRelevancePeriodChanged(), valuesToSaveList);
+		return new SaveRefBookRowVersionResult();
 	}
 
 	@Override
-	public void undo(SaveRefBookRowAction saveRefBookRowAction, SaveRefBookRowResult saveRefBookRowResult, ExecutionContext executionContext) throws ActionException {
+	public void undo(SaveRefBookRowVersionAction saveRefBookRowAction, SaveRefBookRowVersionResult saveRefBookRowResult, ExecutionContext executionContext) throws ActionException {
 	}
 }

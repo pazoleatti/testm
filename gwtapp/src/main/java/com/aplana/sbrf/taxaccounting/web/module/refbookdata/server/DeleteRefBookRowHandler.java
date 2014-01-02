@@ -27,7 +27,11 @@ public class DeleteRefBookRowHandler extends AbstractActionHandler<DeleteRefBook
 		RefBookDataProvider refBookDataProvider = refBookFactory
 				.getDataProvider(action.getRefBookId());
 
-		refBookDataProvider.deleteRecords(action.getRelevanceDate(), action.getRecordsId());
+        if (action.isDeleteVersion()) {
+            refBookDataProvider.deleteRecordVersions(action.getRecordsId());
+        } else {
+            refBookDataProvider.deleteAllRecordVersions(action.getRecordsId());
+        }
 		return new DeleteRefBookRowResult();
 	}
 

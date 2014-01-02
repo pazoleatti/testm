@@ -52,6 +52,9 @@ public class RefBookAttribute implements Serializable {
 	 */
 	private int width;
 
+    /** Признак уникальности атрибута */
+    private boolean unique;
+
 	/**
 	 * Возвращает код атрибута
 	 * @return код атрибута
@@ -212,7 +215,15 @@ public class RefBookAttribute implements Serializable {
         this.required = required;
     }
 
-	@Override
+    public boolean isUnique() {
+        return unique;
+    }
+
+    public void setUnique(boolean unique) {
+        this.unique = unique;
+    }
+
+    @Override
 	public boolean equals(Object o) {
 		if (this == o) {
 			return true;
@@ -251,6 +262,9 @@ public class RefBookAttribute implements Serializable {
         if (required != that.required){
             return false;
         }
+        if (unique != that.unique){
+            return false;
+        }
 
 		return true;
 	}
@@ -273,6 +287,7 @@ public class RefBookAttribute implements Serializable {
 		sb.append(", precision=").append(precision);
 		sb.append(", width=").append(width);
 		sb.append(", required=").append(required);
+        sb.append(", unique=").append(unique);
 		sb.append('}');
 		return sb.toString();
 	}

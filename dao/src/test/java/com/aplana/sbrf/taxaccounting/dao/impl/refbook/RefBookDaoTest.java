@@ -4,8 +4,10 @@ import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 //TODO: Необходимо добавить тесты для getRecords с фильтром (Marat Fayzullin 2013-08-31)
@@ -157,30 +161,6 @@ public class RefBookDaoTest {
 		Assert.assertEquals(6, record.get(ATTRIBUTE_AUTHOR).getReferenceValue().intValue());
 	}
 
-	@Test
-	public void testGetVersions1() throws Exception {
-		List<Date> versions = refBookDao.getVersions(1L, getDate(1, 1, 2013), getDate(1, 1, 2014));
-		Assert.assertEquals(3, versions.size());
-	}
-
-	@Test
-	public void testGetVersions2() throws Exception {
-		List<Date> versions = refBookDao.getVersions(2L, getDate(1, 1, 2013), getDate(1, 1, 2014));
-		Assert.assertEquals(2, versions.size());
-	}
-
-	@Test
-	public void testGetVersions3() throws Exception {
-		List<Date> versions = refBookDao.getVersions(1L, getDate(1, 1, 2013), getDate(1, 2, 2013));
-		Assert.assertEquals(2, versions.size());
-	}
-
-	@Test
-	public void testGetVersions4() throws Exception {
-		List<Date> versions = refBookDao.getVersions(1L, getDate(1, 1, 2020), getDate(1, 1, 2030));
-		Assert.assertEquals(1, versions.size());
-	}
-
 	private Date getDate(int day, int month, int year) {
 		return new GregorianCalendar(year, month - 1, day, 15, 46, 57).getTime();
 	}
@@ -214,7 +194,7 @@ public class RefBookDaoTest {
             record.get(ATTRIBUTE_AUTHOR).setValue(6L);
             records.add(record);
         }
-        refBookDao.createRecords(refBook.getId(), version, records);
+        refBookDao.createRecordVersion(refBook.getId(), null, version, VersionedObjectStatus.NORMAL, records);
 
         PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(refBook.getId(), version, new PagingParams(), null, refBook.getAttribute(ATTRIBUTE_NAME));
         Assert.assertEquals(rowCount, data.size());
@@ -247,7 +227,7 @@ public class RefBookDaoTest {
         record.get(ATTRIBUTE_WEIGHT).setValue(2.1344);
         records.add(record);
 
-        refBookDao.createRecords(refBook.getId(), version, records);
+        refBookDao.createRecordVersion(refBook.getId(), null, version, VersionedObjectStatus.NORMAL, records);
 
         PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(refBook.getId(), version,
                 new PagingParams(), null, refBook.getAttribute(ATTRIBUTE_WEIGHT));
@@ -264,7 +244,7 @@ public class RefBookDaoTest {
 	public void testCreateRecordsEmpty() {
 		List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
 		Date version = getDate(1, 3, 2013);
-		refBookDao.createRecords(1L, version, records);
+		refBookDao.createRecordVersion(1L, null, version, VersionedObjectStatus.NORMAL, records);
     }
 
 	@Test
@@ -282,7 +262,7 @@ public class RefBookDaoTest {
 		// сохраняем изменения
 		List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
 		records.add(record);
-		refBookDao.updateRecords(refBook.getId(), version2, records);
+		//refBookDao.updateRecords(refBook.getId(), version2, records);
 		// проверяем изменения
 		data = refBookDao.getRecords(refBook.getId(), version2, new PagingParams(), null, refBook.getAttribute(ATTRIBUTE_NAME));
 		record = data.get(1);
@@ -309,7 +289,7 @@ public class RefBookDaoTest {
         record.get(RefBookDaoTest.ATTRIBUTE_NAME).setValue("Вий. Туда и обратно");
         record.get(ATTRIBUTE_PAGECOUNT).setValue(123);
         record.get(RefBookDaoTest.ATTRIBUTE_AUTHOR).setValue(7L);
-        refBookDao.updateRecords(refBookId, version, Arrays.asList(record));
+        //refBookDao.updateRecords(refBookId, version, Arrays.asList(record));
 
         data = refBookDao.getRecords(refBookId, version, new PagingParams(), null, null);
         record = data.get(1);
@@ -330,11 +310,11 @@ public class RefBookDaoTest {
 
         Map<String, RefBookValue> record = data.get(0);
         record.get(ATTRIBUTE_WEIGHT).setValue(0.123456789d);
-        refBookDao.updateRecords(refBookId, version, Arrays.asList(record));
+        //refBookDao.updateRecords(refBookId, version, Arrays.asList(record));
 
         record = data.get(1);
         record.get(ATTRIBUTE_WEIGHT).setValue(-345.9905);
-        refBookDao.updateRecords(refBookId, version, Arrays.asList(record));
+        //refBookDao.updateRecords(refBookId, version, Arrays.asList(record));
 
         data = refBookDao.getRecords(refBookId, version, new PagingParams(), null, null);
 
@@ -350,42 +330,6 @@ public class RefBookDaoTest {
        Assert.assertNull(refBookDao.checkRecordUnique(1L, getDate(2, 1, 2013), 1L));
     }
 
-	@Test
-	public void testDeleteRecords1() {
-		RefBook refBook = refBookDao.get(1L);
-		Date version = getDate(1, 2, 2013);
-		// проверяем текущее количество записей
-		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(refBook.getId(), version, new PagingParams(), null, refBook.getAttribute(ATTRIBUTE_NAME));
-		Assert.assertEquals(2, data.size());
-
-		Map<String, RefBookValue> record = data.get(1);
-		List<Long> recordIds = new ArrayList<Long>();
-		recordIds.add(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
-		refBookDao.deleteRecords(refBook.getId(), version, recordIds);
-		// проверяем, что запись была удалена
-		data = refBookDao.getRecords(refBook.getId(), version, new PagingParams(), null, refBook.getAttribute(ATTRIBUTE_NAME));
-		Assert.assertEquals(1, data.size());
-	}
-
-	@Test
-	public void testDeleteRecords2() {
-		String testName = "Незнайка на Луне";
-
-		RefBook refBook = refBookDao.get(1L);
-		Date version = getDate(1, 1, 2037);
-
-		List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
-		Map<String, RefBookValue> record = refBook.createRecord();
-		record.get(ATTRIBUTE_NAME).setValue(testName);
-		records.add(record);
-		refBookDao.createRecords(refBook.getId(), version, records);
-
-		PagingResult<Map<String, RefBookValue>> result = refBookDao.getRecords(1L, version, null, String.format("%s = '%s'", ATTRIBUTE_NAME, testName), null);
-		Assert.assertEquals(1, result.size());
-		final Long recordId = result.get(0).get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
-		refBookDao.deleteRecords(1L, version, new ArrayList<Long>(){{add(recordId);}});
-	}
-
     @Test
     public void testGetValue1() {
         // Cуществующие значения
@@ -399,39 +343,38 @@ public class RefBookDaoTest {
         refBookDao.getValue(-1L, 2L);
     }
 
-    @Test(expected = DuplicateKeyException.class)
-    public void testDeleteAllRecords1() {
-        // Удаление на дату совпадающую с какой-либо версией
-        Date delDate = getDate(1, 1, 2013);
-        Long rbId = 1L;
-
-        refBookDao.deleteAllRecords(1L, delDate);
-
-        PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(rbId, delDate, new PagingParams(), null,
-                null);
-
-        Assert.assertEquals(data.size(), 0);
-    }
-
-    @Test
-    public void testDeleteAllRecords2() {
-        Date delDate = getDate(15, 1, 2013);
-        Long rbId = 1L;
-        // До удаления
-        PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(rbId, delDate, new PagingParams(), null,
-                null);
-        assertTrue(data.size() == 2);
-        // Удаление
-        refBookDao.deleteAllRecords(rbId, delDate);
-        // После удаления
-        data = refBookDao.getRecords(rbId, delDate, new PagingParams(), null, null);
-        assertTrue(data.size() == 0);
-    }
-
     @Test
     public void testUseForignStatements(){
         Date version = getDate(1, 2, 2013);                                                                                 // order is null and
         PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, version, new PagingParams(), "author.name like 'Петренко%'", null);
         assertTrue(data.size() == 1);
+    }
+
+    @Test
+    public void getRecordVersion(){
+        RefBookRecordVersion recordVersion = refBookDao.getActiveRecordVersion(6L);
+        assertNotNull(recordVersion.getVersionStart());
+        assertNotNull(recordVersion.getVersionEnd());
+
+        recordVersion = refBookDao.getActiveRecordVersion(6L);
+        assertNotNull(recordVersion.getVersionStart());
+        assertNull(recordVersion.getVersionEnd());
+    }
+
+    @Test(expected = DaoException.class)
+    public void getEmptyRecordVersion(){
+        refBookDao.getActiveRecordVersion(1L);
+    }
+
+    @Test
+    public void getRecordVersionCount(){
+        int count = refBookDao.getRecordVersionsCount(2L, 6L);
+        assertTrue(count == 2);
+
+        count = refBookDao.getRecordVersionsCount(1L, 4L);
+        assertTrue(count == 1);
+
+        count = refBookDao.getRecordVersionsCount(5L, 1L);
+        assertTrue(count == 0);
     }
 }
