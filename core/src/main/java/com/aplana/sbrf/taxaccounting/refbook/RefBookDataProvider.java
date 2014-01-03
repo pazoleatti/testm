@@ -105,18 +105,17 @@ public interface RefBookDataProvider {
      * @param endDate конечная дата
      * @return
      */
-    @Deprecated
     List<Date> getVersions(Date startDate, Date endDate);
 
     /**
      * Возвращает все версии указанной записи справочника
-     * @param getRecordVersions уникальный идентификатор записи, все версии которой будут получены
+     * @param uniqueRecordId уникальный идентификатор записи, все версии которой будут получены
      * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
      * @param filter условие фильтрации строк. Может быть не задано
      * @param sortAttribute сортируемый столбец. Может быть не задан
      * @return
      */
-    PagingResult<Map<String, RefBookValue>> getRecordVersions(Long getRecordVersions, PagingParams pagingParams,
+    PagingResult<Map<String, RefBookValue>> getRecordVersions(Long uniqueRecordId, PagingParams pagingParams,
                                                               String filter, RefBookAttribute sortAttribute);
 
     /**
@@ -144,10 +143,10 @@ public interface RefBookDataProvider {
 
     /**
      * Возвращает значения уникальных атрибутов справочника
-     * @param getRecordVersions идентификатор записи
+     * @param uniqueRecordId идентификатор версии записи
      * @return
      */
-    List<RefBookValue> getUniqueAttributeValues(Long getRecordVersions);
+    List<RefBookValue> getUniqueAttributeValues(Long uniqueRecordId);
 
     /**
      * Обновляет данные версии записи справочника

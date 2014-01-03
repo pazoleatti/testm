@@ -662,6 +662,41 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 new Object[]{refBookId, uniqueRecordId});
     }
 
+    private static final String RECORD_VERSION =
+            "select\n" +
+                    "  max(version) as version\n" +
+                    "from\n" +
+                    "  ref_book_record\n" +
+                    "where\n" +
+                    "  ref_book_id = %d and\n" +
+                    "version <= to_date('%s', 'DD.MM.YYYY')\n" +
+                    "union\n" +
+                    "select\n" +
+                    "  version\n" +
+                    "from\n" +
+                    "  ref_book_record\n" +
+                    "where\n" +
+                    "  ref_book_id = %d and\n" +
+                    "  version >= to_date('%s', 'DD.MM.YYYY') and\n" +
+                    "  version <= to_date('%s', 'DD.MM.YYYY') and" +
+                    "  status = 0\n" +
+                    "group by\n" +
+                    "  version\n" +
+                    "order by\n" +
+                    "  version";
+
+    @Override
+    public List<Date> getVersions(Long refBookId, Date startDate, Date endDate) {
+        String sql = String.format(RECORD_VERSION, refBookId, sdf.format(startDate), refBookId, sdf.format(startDate), sdf.format(endDate));
+        return getJdbcTemplate().query(sql, new RowMapper<Date>() {
+
+            @Override
+            public Date mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return rs.getDate(1);
+            }
+        });
+    }
+
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersions(Long refBookId, Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         PreparedStatementData ps = getRefBookSql(refBookId, uniqueRecordId, null, sortAttribute, filter, pagingParams);

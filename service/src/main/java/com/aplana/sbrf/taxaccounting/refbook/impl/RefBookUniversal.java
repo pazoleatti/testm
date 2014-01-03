@@ -51,8 +51,7 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
-        //return refBookDao.getVersions(refBookId, startDate, endDate);
-        throw new UnsupportedOperationException();
+        return refBookDao.getVersions(refBookId, startDate, endDate);
     }
 
     @Override

@@ -272,4 +272,12 @@ public interface RefBookDao {
      * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
      */
     void deleteAllRecordVersions(Long refBookId, List<Long> uniqueRecordIds);
+
+    /**
+     * Возвращает список версий элементов справочника за указанный период времени
+     * @param startDate начальная дата
+     * @param endDate конечная дата
+     * @return
+     */
+    List<Date> getVersions(Long refBookId, Date startDate, Date endDate);
 }
