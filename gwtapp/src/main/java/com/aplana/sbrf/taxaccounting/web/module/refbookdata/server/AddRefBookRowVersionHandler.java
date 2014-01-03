@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRefBookRowVersionAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRefBookRowVersionResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
@@ -29,6 +31,9 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
     @Autowired
     RefBookFactory refBookFactory;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
     @Override
     public AddRefBookRowVersionResult execute(AddRefBookRowVersionAction action, ExecutionContext executionContext) throws ActionException {
         RefBookDataProvider refBookDataProvider = refBookFactory
@@ -45,9 +50,12 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
             valuesToSaveList.add(valueToSave);
         }
 
-        refBookDataProvider.createRecordVersion(action.getRecordId(), action.getVersionFrom(), action.getVersionTo(), valuesToSaveList);
+        AddRefBookRowVersionResult result = new AddRefBookRowVersionResult();
+        Logger logger = new Logger();
+        refBookDataProvider.createRecordVersion(logger, action.getRecordId(), action.getVersionFrom(), action.getVersionTo(), valuesToSaveList);
+        result.setUuid(logEntryService.save(logger.getEntries()));
 
-        return new AddRefBookRowVersionResult();
+        return result;
     }
 
     @Override

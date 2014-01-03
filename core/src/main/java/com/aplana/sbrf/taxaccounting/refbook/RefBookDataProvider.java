@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -139,7 +140,7 @@ public interface RefBookDataProvider {
      * @param versionTo дата конца актуальности новый версии
      * @param records список новых значений атрибутов записи справочника
      */
-    void createRecordVersion(Long uniqueRecordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records);
+    void createRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records);
 
     /**
      * Возвращает значения уникальных атрибутов справочника
@@ -157,15 +158,15 @@ public interface RefBookDataProvider {
      * @param isRelevancePeriodChanged признак того, что был изменен период актуальности
      * @param records список обновленных значений атрибутов записи справочника
      */
-    void updateRecordVersion(Long uniqueRecordId, Date versionFrom, Date versionTo, boolean isRelevancePeriodChanged, List<Map<String, RefBookValue>> records);
+    void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, boolean isRelevancePeriodChanged, List<Map<String, RefBookValue>> records);
     /**
      * Удаляет все версии записи из справочника
      * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
      */
-    void deleteAllRecordVersions(List<Long> uniqueRecordIds);
+    void deleteAllRecordVersions(Logger logger, List<Long> uniqueRecordIds);
     /**
      * Удаляет указанные версии записи из справочника
      * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
      */
-    void deleteRecordVersions(List<Long> uniqueRecordIds);
+    void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds);
 }

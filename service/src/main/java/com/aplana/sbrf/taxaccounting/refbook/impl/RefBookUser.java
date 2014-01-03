@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookUserDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
@@ -99,7 +100,7 @@ public class RefBookUser implements RefBookDataProvider {
     }
 
     @Override
-    public void createRecordVersion(Long recordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
+    public void createRecordVersion(Logger logger, Long recordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
         throw new UnsupportedOperationException();
     }
 
@@ -109,17 +110,17 @@ public class RefBookUser implements RefBookDataProvider {
     }
 
     @Override
-    public void updateRecordVersion(Long uniqueRecordId, Date versionFrom, Date versionTo, boolean isRelevancePeriodChanged, List<Map<String, RefBookValue>> records) {
+    public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, boolean isRelevancePeriodChanged, List<Map<String, RefBookValue>> records) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void deleteAllRecordVersions(List<Long> uniqueRecordIds) {
+    public void deleteAllRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void deleteRecordVersions(List<Long> uniqueRecordIds) {
+    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 }

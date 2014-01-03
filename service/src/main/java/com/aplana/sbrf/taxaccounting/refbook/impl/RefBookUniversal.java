@@ -6,9 +6,12 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -34,6 +37,9 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     @Autowired
     private RefBookUtils refBookUtils;
+
+    @Autowired
+    private LogEntryService logEntryService;
 
 	protected Long refBookId;
 
@@ -90,61 +96,63 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     @Override
     public RefBookRecordVersion getActiveRecordVersion(Long uniqueRecordId) {
-        System.out.println("getActiveRecordVersion: "+uniqueRecordId);
         return refBookDao.getActiveRecordVersion(uniqueRecordId);
     }
 
     @Override
     public int getRecordVersionsCount(Long uniqueRecordId) {
-        System.out.println("getRecordVersionsCount: "+refBookId+"; "+uniqueRecordId);
         return refBookDao.getRecordVersionsCount(refBookId, uniqueRecordId);
     }
 
     @Override
-    public void createRecordVersion(Long uniqueRecordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
-        System.out.println("createRecordVersion: "+uniqueRecordId+"; "+versionFrom + "; "+versionTo);
-        List<RefBookAttribute> attributes = refBookDao.getAttributes(refBookId);
-        //Получаем идентификатор записи справочника без учета версий
-        Long recordId = uniqueRecordId != null ? refBookDao.getRecordId(uniqueRecordId) : null;
-
-        //Проверка обязательности заполнения записей справочника
-        for (Map<String, RefBookValue> record : records) {
-            List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
-            if (errors.size() > 0){
-                throw new ServiceException("Поля " + errors.toString() + "являются обязательными для заполнения");
+    public void createRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
+        try {
+            List<RefBookAttribute> attributes = refBookDao.getAttributes(refBookId);
+            //Получаем идентификатор записи справочника без учета версий
+            Long recordId = uniqueRecordId != null ? refBookDao.getRecordId(uniqueRecordId) : null;
+            //Проверка обязательности заполнения записей справочника
+            for (Map<String, RefBookValue> record : records) {
+                List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
+                if (errors.size() > 0){
+                    throw new ServiceException("Поля " + errors.toString() + "являются обязательными для заполнения");
+                }
             }
+
+            //Проверка корректности
+            List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, attributes, records);
+            if (matchedRecords.size() == 0) {
+                //Проверка ссылочных значений
+                boolean isReferencesOk = refBookDao.checkReferenceValuesVersions(versionFrom, attributes, records);
+                if (!isReferencesOk) {
+                    throw new ServiceException("Период актуальности выбранного значения меньше периода актуальности версии");
+                }
+            } else {
+                //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
+                refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, versionTo);
+            }
+            //Проверка пересечения версий
+            if (recordId != null) {
+                crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, recordId, versionFrom, versionTo, null),
+                        versionFrom, versionTo, logger);
+            }
+            //Создание настоящей и фиктивной версии
+            createVersions(recordId, versionFrom, versionTo, records, logger);
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ServiceLoggerException("Версия не создана, обнаружены фатальные ошибки!",
+                    logEntryService.save(logger.getEntries()));
         }
 
-        //Проверка корректности
-        List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, attributes, records);
-        System.out.println("matchedRecords: "+matchedRecords);
-        if (matchedRecords.size() == 0) {
-            //Проверка ссылочных значений
-            refBookDao.checkReferenceValuesVersions(versionFrom, attributes, records);
-
-        } else {
-            //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
-            refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, versionTo);
-        }
-        //Проверка пересечения версий
-        if (recordId != null) {
-            crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, recordId, versionFrom, versionTo, null),
-                    versionFrom, versionTo);
-        }
-        //Создание настоящей и фиктивной версии
-        createVersions(recordId, versionFrom, versionTo, records);
     }
 
-    private void createVersions(Long recordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
+    private void createVersions(Long recordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records, Logger logger) {
         RefBookRecordVersion nextVersion = null;
         if (recordId != null) {
             nextVersion = refBookDao.getNextVersion(refBookId, recordId, versionFrom);
         }
-        System.out.println("nextVersion: "+nextVersion);
         if (versionTo == null) {
             if (nextVersion != null) {
-                //TODO сообщение в лог панель
-                System.out.println("Установлена дата окончания актуальности версии "+sdf.format(addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
+                logger.info("Установлена дата окончания актуальности версии "+sdf.format(addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
             }
         } else {
             if (nextVersion == null) {
@@ -152,32 +160,27 @@ public class RefBookUniversal implements RefBookDataProvider {
                 recordId = refBookDao.createRecordVersion(refBookId, recordId, addDayToDate(versionTo, 1), VersionedObjectStatus.FAKE, null);
             } else {
                 int days = daysBetween(versionTo, nextVersion.getVersionStart());
-                System.out.println("days: "+days);
                 if (days != 1) {
                     refBookDao.createRecordVersion(refBookId, recordId, addDayToDate(versionTo, 1), VersionedObjectStatus.FAKE, null);
                 }
             }
         }
-        System.out.println("recordId: "+recordId);
         refBookDao.createRecordVersion(refBookId, recordId, versionFrom, VersionedObjectStatus.NORMAL, records);
     }
 
     /**
      * Обработка пересечений версий
      */
-    private void crossVersionsProcessing(List<CheckCrossVersionsResult> results, Date versionFrom, Date versionTo) {
-        System.out.println("results: "+results);
+    private void crossVersionsProcessing(List<CheckCrossVersionsResult> results, Date versionFrom, Date versionTo, Logger logger) {
         boolean isFatalErrorExists = false;
 
         for (CheckCrossVersionsResult result : results) {
             if (result.getResult() == CrossResult.NEED_CHECK_USAGES) {
                 boolean isReferenceToVersionExists = refBookDao.checkVersionUsages(result.getRecordId(), versionFrom);
-                System.out.println("isReferenceToVersionExists: "+isReferenceToVersionExists);
                 if (isReferenceToVersionExists) {
                     throw new ServiceException("Обнаружено пересечение указанного срока актуальности с существующей версией!");
                 } else {
-                    //TODO сообщение в лог панель"
-                    System.out.println("Установлена дата окончания актуальности версии "+sdf.format(addDayToDate(versionFrom, -1))+"для предыдущей версии");
+                    logger.info("Установлена дата окончания актуальности версии "+sdf.format(addDayToDate(versionFrom, -1))+"для предыдущей версии");
                 }
             }
             if (result.getResult() == CrossResult.NEED_CHANGE) {
@@ -189,7 +192,6 @@ public class RefBookUniversal implements RefBookDataProvider {
                 updateResults(results, result);
             }
         }
-        System.out.println("results2: "+results);
 
         for (CheckCrossVersionsResult result : results) {
             if (result.getResult() == CrossResult.FATAL_ERROR) {
@@ -237,91 +239,104 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-    public void updateRecordVersion(Long uniqueRecordId, Date versionFrom, Date versionTo, boolean isRelevancePeriodChanged, List<Map<String, RefBookValue>> records) {
-        System.out.println("updateRecordVersion: "+uniqueRecordId+"; "+versionFrom + "; "+versionTo+"; "+isRelevancePeriodChanged);
-        List<RefBookAttribute> attributes = refBookDao.getAttributes(refBookId);
-        //Получаем идентификатор записи справочника без учета версий
-        Long recordId = refBookDao.getRecordId(uniqueRecordId);
+    public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, boolean isRelevancePeriodChanged, List<Map<String, RefBookValue>> records) {
+        try {
+            List<RefBookAttribute> attributes = refBookDao.getAttributes(refBookId);
+            //Получаем идентификатор записи справочника без учета версий
+            Long recordId = refBookDao.getRecordId(uniqueRecordId);
 
-        //Проверка обязательности заполнения записей справочника
-        for (Map<String, RefBookValue> record : records) {
-            List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
-            if (errors.size() > 0){
-                throw new ServiceException("Поля " + errors.toString() + "являются обязательными для заполнения");
+            //Проверка обязательности заполнения записей справочника
+            for (Map<String, RefBookValue> record : records) {
+                List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
+                if (errors.size() > 0){
+                    throw new ServiceException("Поля " + errors.toString() + "являются обязательными для заполнения");
+                }
             }
+
+            if (isRelevancePeriodChanged) {
+                //Проверка пересечения версий
+                crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, recordId, versionFrom, versionTo, uniqueRecordId),
+                        versionFrom, versionTo, logger);
+            }
+            //Проверка использования
+            boolean isReferenceToVersionExists = refBookDao.checkVersionUsages(uniqueRecordId, versionFrom);
+            if (isReferenceToVersionExists) {
+                throw new ServiceException("Обнаружено использование версии в других точках запроса");
+            }
+
+            //Обновление периода актуальности
+            if (isRelevancePeriodChanged) {
+                List<Long> uniqueIdAsList = Arrays.asList(uniqueRecordId);
+                //Обновляем дату начала актуальности
+                refBookDao.updateVersionRelevancePeriod(uniqueRecordId, versionFrom);
+                //Получаем запись - окончание версии. Если = null, то версия не имеет конца
+                List<Long> relatedVersions = refBookDao.getRelatedVersions(uniqueIdAsList);
+                if (!relatedVersions.isEmpty() && relatedVersions.size() > 1) {
+                    throw new ServiceException("Обнаружено несколько фиктивных версий");
+                }
+                if (relatedVersions.isEmpty() && versionTo != null) {
+                    //Создаем новую фиктивную версию - дату окончания
+                    refBookDao.createRecordVersion(refBookId, recordId, addDayToDate(versionTo, 1), VersionedObjectStatus.FAKE, null);
+                }
+
+                if (!relatedVersions.isEmpty() && versionTo == null) {
+                    //Удаляем фиктивную запись - теперь у версии нет конца
+                    refBookDao.deleteRecordVersions(relatedVersions);
+                }
+
+                if (!relatedVersions.isEmpty() && versionTo != null) {
+                    //Изменяем существующую фиктивную версию
+                    refBookDao.updateVersionRelevancePeriod(relatedVersions.get(0), versionTo);
+                }
+            }
+
+            //Обновление значений атрибутов версии
+            refBookDao.updateRecordVersion(refBookId, uniqueRecordId, records);
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ServiceLoggerException("Версия не сохранена, обнаружены фатальные ошибки!",
+                    logEntryService.save(logger.getEntries()));
         }
-
-        if (isRelevancePeriodChanged) {
-            //Проверка пересечения версий
-            crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, recordId, versionFrom, versionTo, uniqueRecordId),
-                    versionFrom, versionTo);
-        }
-        //Проверка использования
-        boolean isReferenceToVersionExists = refBookDao.checkVersionUsages(uniqueRecordId, versionFrom);
-        System.out.println("isReferenceToVersionExists: "+isReferenceToVersionExists);
-        if (isReferenceToVersionExists) {
-            throw new ServiceException("Версия не сохранена, обнаружены фатальные ошибки!");
-        }
-
-        //Обновление периода актуальности
-        if (isRelevancePeriodChanged) {
-            List<Long> uniqueIdAsList = Arrays.asList(uniqueRecordId);
-            //Обновляем дату начала актуальности
-            refBookDao.updateVersionRelevancePeriod(uniqueRecordId, versionFrom);
-            //Получаем запись - окончание версии. Если = null, то версия не имеет конца
-            List<Long> relatedVersions = refBookDao.getRelatedVersions(uniqueIdAsList);
-            if (!relatedVersions.isEmpty() && relatedVersions.size() > 1) {
-                throw new ServiceException("Обнаружено несколько фиктивных версий");
-            }
-            if (relatedVersions.isEmpty() && versionTo != null) {
-                //Создаем новую фиктивную версию - дату окончания
-                refBookDao.createRecordVersion(refBookId, recordId, addDayToDate(versionTo, 1), VersionedObjectStatus.FAKE, null);
-            }
-
-            if (!relatedVersions.isEmpty() && versionTo == null) {
-                //Удаляем фиктивную запись - теперь у версии нет конца
-                refBookDao.deleteRecordVersions(relatedVersions);
-            }
-
-            if (!relatedVersions.isEmpty() && versionTo != null) {
-                //Изменяем существующую фиктивную версию
-                refBookDao.updateVersionRelevancePeriod(relatedVersions.get(0), versionTo);
-            }
-        }
-
-        //Обновление значений атрибутов версии
-        refBookDao.updateRecordVersion(refBookId, uniqueRecordId, records);
     }
 
     @Override
-    public void deleteAllRecordVersions(List<Long> uniqueRecordIds) {
-        System.out.println("getAllVersionsByRecord: "+uniqueRecordIds);
-        boolean isReferenceToVersionExists = refBookDao.checkVersionUsages(uniqueRecordIds);
-        if (isReferenceToVersionExists) {
-            throw new ServiceException("Удаление невозможно, обнаружено использование элемента справочника!");
+    public void deleteAllRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
+        try {
+            boolean isReferenceToVersionExists = refBookDao.checkVersionUsages(uniqueRecordIds);
+            if (isReferenceToVersionExists) {
+                throw new ServiceException("Удаление невозможно, обнаружено использование элемента справочника!");
+            }
+            RefBook refBook = refBookDao.get(refBookId);
+            if (refBook.isHierarchic()) {
+                //TODO существует ли версия, период актуальности которой пересекается с периодом актуальности удаляемой версии и для которой удаляемая версия является родительским элементом.
+            }
+            refBookDao.deleteAllRecordVersions(refBookId, uniqueRecordIds);
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ServiceLoggerException("Элемент справочника не удален, обнаружены фатальные ошибки!",
+                    logEntryService.save(logger.getEntries()));
         }
-        RefBook refBook = refBookDao.get(refBookId);
-        if (refBook.isHierarchic()) {
-            //TODO существует ли версия, период актуальности которой пересекается с периодом актуальности удаляемой версии и для которой удаляемая версия является родительским элементом.
-        }
-        refBookDao.deleteAllRecordVersions(refBookId, uniqueRecordIds);
     }
 
     @Override
-    public void deleteRecordVersions(List<Long> uniqueRecordIds) {
-        System.out.println("deleteRecordVersions: "+uniqueRecordIds);
-        boolean isReferenceToVersionExists = refBookDao.checkVersionUsages(uniqueRecordIds);
-        if (isReferenceToVersionExists) {
-            throw new ServiceException("Удаление невозможно, обнаружено использование элемента справочника!");
+    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
+        try {
+            boolean isReferenceToVersionExists = refBookDao.checkVersionUsages(uniqueRecordIds);
+            if (isReferenceToVersionExists) {
+                throw new ServiceException("Удаление невозможно, обнаружено использование элемента справочника!");
+            }
+            RefBook refBook = refBookDao.get(refBookId);
+            if (refBook.isHierarchic()) {
+                //TODO существует ли версия, период актуальности которой пересекается с периодом актуальности удаляемой версии и для которой удаляемая версия является родительским элементом.
+            }
+            List<Long> fakeVersionIds = refBookDao.getRelatedVersions(uniqueRecordIds);
+            uniqueRecordIds.addAll(fakeVersionIds);
+            refBookDao.deleteRecordVersions(uniqueRecordIds);
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ServiceLoggerException("Версия элемента справочника не удалена, обнаружены фатальные ошибки!",
+                    logEntryService.save(logger.getEntries()));
         }
-        RefBook refBook = refBookDao.get(refBookId);
-        if (refBook.isHierarchic()) {
-            //TODO существует ли версия, период актуальности которой пересекается с периодом актуальности удаляемой версии и для которой удаляемая версия является родительским элементом.
-        }
-        List<Long> fakeVersionIds = refBookDao.getRelatedVersions(uniqueRecordIds);
-        System.out.println("fakeVersionIds: "+fakeVersionIds);
-        uniqueRecordIds.addAll(fakeVersionIds);
-        refBookDao.deleteRecordVersions(uniqueRecordIds);
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
@@ -163,6 +164,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 new AbstractCallback<AddRefBookRowVersionResult>() {
                                     @Override
                                     public void onSuccess(AddRefBookRowVersionResult result) {
+                                        LogCleanEvent.fire(EditFormPresenter.this);
+                                        LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                         isFormModified = false;
                                         getView().fillInputFields(null);
                                         setEnabled(false);
@@ -182,6 +185,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
                                     @Override
                                     public void onSuccess(SaveRefBookRowVersionResult result) {
+                                        LogCleanEvent.fire(EditFormPresenter.this);
+                                        LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                         isFormModified = false;
                                         getView().fillInputFields(null);
                                         setEnabled(false);

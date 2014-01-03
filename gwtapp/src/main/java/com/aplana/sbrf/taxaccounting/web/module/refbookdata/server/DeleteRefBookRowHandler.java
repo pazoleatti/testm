@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.DeleteRefBookRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.DeleteRefBookRowResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -22,17 +24,23 @@ public class DeleteRefBookRowHandler extends AbstractActionHandler<DeleteRefBook
 	@Autowired
 	RefBookFactory refBookFactory;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
 	@Override
 	public DeleteRefBookRowResult execute(DeleteRefBookRowAction action, ExecutionContext executionContext) throws ActionException {
 		RefBookDataProvider refBookDataProvider = refBookFactory
 				.getDataProvider(action.getRefBookId());
 
+        DeleteRefBookRowResult result = new DeleteRefBookRowResult();
+        Logger logger = new Logger();
         if (action.isDeleteVersion()) {
-            refBookDataProvider.deleteRecordVersions(action.getRecordsId());
+            refBookDataProvider.deleteRecordVersions(logger, action.getRecordsId());
         } else {
-            refBookDataProvider.deleteAllRecordVersions(action.getRecordsId());
+            refBookDataProvider.deleteAllRecordVersions(logger, action.getRecordsId());
         }
-		return new DeleteRefBookRowResult();
+        result.setUuid(logEntryService.save(logger.getEntries()));
+		return result;
 	}
 
 	@Override

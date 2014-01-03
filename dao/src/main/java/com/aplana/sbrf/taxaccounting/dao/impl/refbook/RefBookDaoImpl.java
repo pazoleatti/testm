@@ -384,7 +384,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public Long createRecordVersion(Long refBookId, Long recordId, Date version, VersionedObjectStatus status, List<Map<String, RefBookValue>> records) {
-        System.out.println("createRecordVersion: "+recordId+"; "+version+"; "+status);
         List<Object[]> recordIds = new ArrayList<Object[]>();
         List<Object[]> listValues = new ArrayList<Object[]>();
 
@@ -476,7 +475,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public void updateRecordVersion(Long refBookId, Long uniqueRecordId, List<Map<String, RefBookValue>> records) {
-        System.out.println("updateRecordVersion: "+uniqueRecordId);
         if (uniqueRecordId == null || records == null) {
             throw new IllegalArgumentException("uniqueRecordId: " + uniqueRecordId + "; records: " + records);
         }
@@ -719,7 +717,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public List<CheckCrossVersionsResult> checkCrossVersions(Long refBookId, Long recordId, Date versionFrom, Date versionTo, Long excludedRecordId) {
-        System.out.println("checkCrossVersions: "+recordId + "; "+versionFrom + "; "+versionTo);
         String sVersionFrom = sdf.format(versionFrom);
         String sVersionTo = versionTo != null ? "'"+sdf.format(versionTo)+"'" : null;
         String sql = String.format(CHECK_CROSS_VERSIONS,
@@ -798,7 +795,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private final static String CHECK_REFERENCE_VERSIONS = "select count(*) from ref_book_record where VERSION < to_date('%s', 'DD.MM.YYYY') and ID in (%s)";
 
     @Override
-    public void checkReferenceValuesVersions(Date versionFrom, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records) {
+    public boolean checkReferenceValuesVersions(Date versionFrom, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records) {
         if (attributes.size() > 0) {
             StringBuilder in = new StringBuilder();
             for (Map<String, RefBookValue> record : records) {
@@ -812,13 +809,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             if (in.length() != 0) {
                 in.deleteCharAt(in.length()-1);
                 String sql = String.format(CHECK_REFERENCE_VERSIONS, sdf.format(versionFrom), in);
-                boolean isReferencesOk = getJdbcTemplate().queryForInt(sql) == 0;
-                System.out.println("isReferencesOk: "+isReferencesOk);
-                if (!isReferencesOk) {
-                    throw new DaoException("Период актуальности выбранного значения меньше периода актуальности версии");
-                }
+                return getJdbcTemplate().queryForInt(sql) == 0;
             }
         }
+        return true;
     }
 
     private final static String CHECK_CONFLICT_VALUES_VERSIONS = "with conflictRecord as (select * from REF_BOOK_RECORD where ID in %s),\n" +
@@ -854,7 +848,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 sVersionFrom, sVersionTo, sVersionFrom, sVersionFrom,
                 sVersionTo, sVersionTo);
         List<Long> conflictedIds = getJdbcTemplate().queryForList(sql, Long.class);
-        System.out.println("conflictedIds: "+conflictedIds);
         if (conflictedIds.size() > 0) {
             StringBuilder attrNames = new StringBuilder();
             for (Long id : conflictedIds) {
@@ -871,20 +864,17 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public void updateVersionRelevancePeriod(Long uniqueRecordId, Date version){
-        System.out.println("updateVersionRelevancePeriod: "+uniqueRecordId+"; "+version);
         String sql = String.format("update ref_book_record set version=to_date('%s', 'DD.MM.YYYY') where id=?", sdf.format(version));
         getJdbcTemplate().update(sql, uniqueRecordId);
     }
 
     @Override
     public void deleteVersion(Long uniqueRecordId) {
-        System.out.println("deleteVersion: "+uniqueRecordId);
         getJdbcTemplate().update("delete from ref_book_record where id=?", uniqueRecordId);
     }
 
     @Override
     public boolean checkVersionUsages(Long uniqueRecordId, Date versionFrom) {
-        System.out.println("checkVersionUsages: "+uniqueRecordId+"; "+versionFrom);
         //TODO добавить проверки по другим точкам запросов
         //Проверка использования в справочниках и настройках подразделений
         String sql = String.format("select count(r.id) from ref_book_record r, ref_book_value v where r.id=v.record_id and r.version >= to_date('%s', 'DD.MM.YYYY') and v.REFERENCE_VALUE=?",
@@ -897,7 +887,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public boolean checkVersionUsages(List<Long> uniqueRecordIds) {
-        System.out.println("checkVersionUsages: "+uniqueRecordIds);
         //TODO добавить проверки по другим точкам запросов
         //Проверка использования в справочниках и настройках подразделений
         String sql = String.format(CHECK_USAGES, SqlUtils.transformToSqlInStatement(uniqueRecordIds));
@@ -910,7 +899,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public RefBookRecordVersion getNextVersion(Long refBookId, Long recordId, Date versionFrom) {
-        System.out.println("getNextVersion: "+refBookId+"; "+recordId+"; "+versionFrom);
         String sql = String.format(GET_NEXT_RECORD_VERSION,
                 sdf.format(versionFrom), RefBook.RECORD_ID_ALIAS);
         try {
@@ -944,7 +932,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public void deleteRecordVersions(List<Long> uniqueRecordIds) {
-        System.out.println("deleteRecordVersions: "+uniqueRecordIds);
         String sql = String.format(DELETE_VERSION, SqlUtils.transformToSqlInStatement(uniqueRecordIds));
         getJdbcTemplate().update(sql);
     }

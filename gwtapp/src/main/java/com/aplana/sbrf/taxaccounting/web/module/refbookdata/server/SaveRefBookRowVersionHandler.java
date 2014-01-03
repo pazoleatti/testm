@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookRowVersionAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookRowVersionResult;
@@ -28,6 +30,9 @@ public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefB
 	@Autowired
 	RefBookFactory refBookFactory;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
 	@Override
 	public SaveRefBookRowVersionResult execute(SaveRefBookRowVersionAction action, ExecutionContext executionContext) throws ActionException {
 		RefBookDataProvider refBookDataProvider = refBookFactory
@@ -43,9 +48,11 @@ public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefB
 		valueToSave.put(RefBook.RECORD_ID_ALIAS, id);
 		valuesToSaveList.add(valueToSave);
 
-
-		refBookDataProvider.updateRecordVersion(action.getRecordId(), action.getVersionFrom(), action.getVersionTo(), action.isRelevancePeriodChanged(), valuesToSaveList);
-		return new SaveRefBookRowVersionResult();
+        SaveRefBookRowVersionResult result = new SaveRefBookRowVersionResult();
+        Logger logger = new Logger();
+		refBookDataProvider.updateRecordVersion(logger, action.getRecordId(), action.getVersionFrom(), action.getVersionTo(), action.isRelevancePeriodChanged(), valuesToSaveList);
+        result.setUuid(logEntryService.save(logger.getEntries()));
+		return result;
 	}
 
 	@Override

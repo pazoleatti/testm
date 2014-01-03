@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
@@ -113,6 +115,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 						new AbstractCallback<DeleteRefBookRowResult>() {
 							@Override
 							public void onSuccess(DeleteRefBookRowResult result) {
+                                LogCleanEvent.fire(RefBookDataPresenter.this);
+                                LogAddEvent.fire(RefBookDataPresenter.this, result.getUuid());
 								editFormPresenter.show(null);
 								editFormPresenter.setEnabled(false);
 								getView().updateTable();

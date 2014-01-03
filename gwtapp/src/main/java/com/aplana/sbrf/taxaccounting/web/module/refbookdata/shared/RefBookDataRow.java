@@ -22,12 +22,4 @@ public class RefBookDataRow implements Serializable {
 	public void setValues(Map<String, String> values) {
 		this.values = values;
 	}
-
-    @Override
-    public String toString() {
-        return "RefBookDataRow{" +
-                "refBookRowId=" + refBookRowId +
-                ", values=" + values +
-                '}';
-    }
 }

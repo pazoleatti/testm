@@ -31,7 +31,6 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
 	@Override
 	public GetRefBookAttributesResult execute(GetRefBookAttributesAction action, ExecutionContext executionContext) throws ActionException {
 		List<RefBookAttribute> attributes = refBookFactory.get(action.getRefBookId()).getAttributes();
-        System.out.println("GetRefBookAttributesHandler attributes: "+attributes);
         GetRefBookAttributesResult result = new GetRefBookAttributesResult();
 		List<RefBookColumn> columns = new ArrayList<RefBookColumn>();
 		for (RefBookAttribute attribute : attributes) {

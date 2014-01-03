@@ -73,7 +73,6 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 
 	@Override
 	public void setTableColumns(final List<RefBookColumn> columns) {
-        System.out.println("setTableColumns: "+columns);
         TextColumn<RefBookDataRow> versionFromColumn = new TextColumn<RefBookDataRow>() {
             @Override
             public String getValue(RefBookDataRow object) {

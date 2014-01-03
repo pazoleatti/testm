@@ -185,8 +185,9 @@ public interface RefBookDao {
      * @param versionFrom дата актуальности новой версии
      * @param attributes атрибуты справочника
      * @param records новые значения полей элемента справочника
+     * @return ссылочные атрибуты в порядке?
      */
-    void checkReferenceValuesVersions(Date versionFrom, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records);
+    boolean checkReferenceValuesVersions(Date versionFrom, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records);
 
     /**
      * Поиск существующих версий, которые могут пересекаться с новой версией

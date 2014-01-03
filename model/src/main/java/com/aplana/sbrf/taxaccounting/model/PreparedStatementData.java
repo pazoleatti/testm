@@ -62,13 +62,4 @@ public class PreparedStatementData {
     public String getJoinPartsOfQuery(){
         return joinPartsOfQuery;
     }
-
-    @Override
-    public String toString() {
-        return "PreparedStatementData{" +
-                "query=" + query +
-                ", joinPartsOfQuery='" + joinPartsOfQuery + '\'' +
-                ", params=" + params +
-                '}';
-    }
 }
