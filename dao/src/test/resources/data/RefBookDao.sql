@@ -7,16 +7,16 @@ insert into ref_book(id, name) values
 insert into ref_book(id, name, script_id, visible) values
 (3, 'Библиотека', '24af57ef-ec1c-455f-a4fa-f0fb29483066', 0);
 
-insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width) values
-  (4, 2, 1, 'ФИО', 'name', 1, null, null, 1, null, 10);
-insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width) values
-  (1, 1, 1, 'Наименование', 'name', 1, null, null, 1, null, 10);
-insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width) values
-  (2, 1, 2, 'Количество страниц', 'order', 2, null, null, 1, 0, 10);
-insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width) values
-  (3, 1, 4, 'Автор', 'author', 4, 2, 4, 1, null, 10);
-insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width) values
-  (5, 1, 5, 'Вес', 'weight', 2, null, null, 1, 3, 10);
+insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique) values
+  (4, 2, 1, 'ФИО', 'name', 1, null, null, 1, null, 10, 0);
+insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique) values
+  (1, 1, 1, 'Наименование', 'name', 1, null, null, 1, null, 10, 1);
+insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique) values
+  (2, 1, 2, 'Количество страниц', 'order', 2, null, null, 1, 0, 10, 0);
+insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique) values
+  (3, 1, 4, 'Автор', 'author', 4, 2, 4, 1, null, 10, 0);
+insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique) values
+  (5, 1, 5, 'Вес', 'weight', 2, null, null, 1, 3, 10, 0);
 
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values
   (1, 1, 1, to_date('01.01.2013', 'DD.MM.YY'), 0);
@@ -57,6 +57,14 @@ insert into ref_book_value(record_id, attribute_id, string_value, number_value, 
   (4, 3, null, null, null, 6);
 insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
   (4, 5, null, 2.399, null, null);
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (6, 1, 'Алиса в стране чудес', null, null, null);
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (6, 2, null, 1113, null, null);
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (6, 3, null, null, null, 5);
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (6, 5, null, 0.25, null, null);
 
 insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
   (5, 4, 'Иванов И.И.', null, null, null);

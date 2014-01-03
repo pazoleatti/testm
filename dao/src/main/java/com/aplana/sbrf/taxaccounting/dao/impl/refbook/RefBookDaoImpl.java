@@ -378,7 +378,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     private static final String INSERT_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, ref_book_id, version," +
-            "status, record_id) values (?, %d, to_date('%s', 'DD.MM.YYYY'), %d, %d)";
+            "status, record_id) values (?, %d, to_date('%s', 'DD.MM.YYYY'), %d, %s)";
     private static final String INSERT_REF_BOOK_VALUE = "insert into ref_book_value (record_id, attribute_id," +
             "string_value, number_value, date_value, reference_value) values (?, ?, ?, ?, ?, ?)";
 
@@ -457,15 +457,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 listValues.add(values);
             }
         }
-        if (recordId == null) {
-            recordId = generateId("seq_ref_book_record_row_id", Long.class);
-        }
         JdbcTemplate jt = getJdbcTemplate();
         jt.batchUpdate(String.format(INSERT_REF_BOOK_RECORD_SQL,
                 refBookId,
                 sdf.format(version),
                 status.getId(),
-                recordId
+                recordId == null ? "seq_ref_book_record_row_id.nextval" : recordId
         ), batchRefBookRecordsPS);
         jt.batchUpdate(INSERT_REF_BOOK_VALUE, listValues);
         return recordId;

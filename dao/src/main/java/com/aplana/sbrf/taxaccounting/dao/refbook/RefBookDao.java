@@ -157,10 +157,10 @@ public interface RefBookDao {
     /**
      * Возвращает значения уникальных атрибутов справочника
      * @param refBookId идентификатор справочника
-     * @param getRecordVersions идентификатор записи
+     * @param recordId идентификатор записи
      * @return
      */
-    List<RefBookValue> getUniqueAttributeValues(Long refBookId, Long getRecordVersions);
+    List<RefBookValue> getUniqueAttributeValues(Long refBookId, Long recordId);
 
     /**
      * По коду справочника возвращает набор его атрибутов
