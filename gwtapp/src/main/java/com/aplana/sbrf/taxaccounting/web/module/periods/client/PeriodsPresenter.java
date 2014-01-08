@@ -46,7 +46,8 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	public interface MyView extends View,
 			HasUiHandlers<PeriodsUiHandlers> {
 		void setTitle(String title);
-		void setTableData(List<TableRow> data);
+        void setTaxTitle(String title);
+        void setTableData(List<TableRow> data);
 		void setFilterData(List<Department> departments, List<DepartmentPair> selectedDepartments, int yearFrom, int yearTo);
 		void setYear(int year);
 		Integer getFromYear();
@@ -80,24 +81,30 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
 	@Override
 	public void closePeriod() {
-		if (((taxType == TaxType.INCOME) || (taxType == TaxType.VAT)) && !getView().getSelectedRow().isOpen()) {
-			Window.alert("Период уже закрыт.");
-			return;
-		} else {
-			ClosePeriodAction requestData = new ClosePeriodAction();
-			requestData.setTaxType(taxType);
-			requestData.setReportPeriodId((int) getView().getSelectedRow().getReportPeriodId());
-			requestData.setDepartmentId(getView().getSelectedRow().getDepartmentId());
-			dispatcher.execute(requestData, CallbackUtils
-					.defaultCallback(new AbstractCallback<ClosePeriodResult>() {
-						@Override
-						public void onSuccess(ClosePeriodResult result) {
-							find();
-							LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
-						}
-					}, PeriodsPresenter.this));
-		}
-	}
+        if (getView().getSelectedRow() == null) {
+            MessageEvent.fire(this, "В списке не выбран отчетный период");
+            return;
+        }
+        if (!getView().getSelectedRow().isSubHeader()) {
+            if (((taxType == TaxType.INCOME) || (taxType == TaxType.VAT)) && !getView().getSelectedRow().isOpen()) {
+                Window.alert("Период уже закрыт.");
+                return;
+            } else {
+                ClosePeriodAction requestData = new ClosePeriodAction();
+                requestData.setTaxType(taxType);
+                requestData.setReportPeriodId((int) getView().getSelectedRow().getReportPeriodId());
+                requestData.setDepartmentId(getView().getSelectedRow().getDepartmentId());
+                dispatcher.execute(requestData, CallbackUtils
+                        .defaultCallback(new AbstractCallback<ClosePeriodResult>() {
+                            @Override
+                            public void onSuccess(ClosePeriodResult result) {
+                                find();
+                                LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
+                            }
+                        }, PeriodsPresenter.this));
+            }
+        }
+    }
 
 	@Override
 	public void openPeriod() {
@@ -170,7 +177,8 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 					@Override
 					public void onSuccess(PeriodsGetFilterDataResult result) {
 						PeriodsPresenter.this.taxType = result.getTaxType();
-						getView().setTitle(taxType.getName() + " / Ведение периодов");
+                        getView().setTaxTitle(taxType.getName());
+						getView().setTitle("Ведение периодов");
 						PeriodsPresenter.this.openDialogPresenter.setTaxType(result.getTaxType());
                         getView().setFilterData(result.getDepartments(), Arrays.asList(result.getSelectedDepartment()), result.getYearFrom(), result.getYearTo());
 						getView().setReadOnly(result.isReadOnly());

@@ -2,66 +2,138 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:w='urn:import:com.aplana.gwt.client'
              xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
-             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
-<ui:style>
-    .titleLabel {
-        font-size: 16px;
-        max-height: 28px;
-        overflow: hidden;
-        line-height: 28px;
-    }
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:fm="urn:import:com.aplana.gwt.client.form">
+    <ui:style>
 
-    .titleGradient {
-        position: absolute;
-        background: url("resources/img/form_title_gradient.png");
-        width: 64px;
-        height: 32px;
-        right: 790px;
-    }
-</ui:style>
+        .titleText {
+            font-size: 14px !important;
+            color: #636460;
+            white-space: nowrap;
+        }
 
-    <g:DockLayoutPanel unit='PX' height="100%" width="100%">
+        .titleText div {
+            font-size: 14px !important;
+        }
 
-        <g:north size="100">
-            <g:HorizontalPanel height="100%" width="100%">
-                <g:FlowPanel>
-                    <g:HorizontalPanel height="28px">
-                        <g:HorizontalPanel>
-                            <g:Label ui:field="title" addStyleNames="{style.titleLabel}"/>
-                            <g:SimplePanel styleName="{style.titleGradient}"/>
-                        </g:HorizontalPanel>
-                    </g:HorizontalPanel>
-                    <g:VerticalPanel>
-                        <g:HorizontalPanel>
+        .btnPanel {
+            padding-left: 7px;
+            height: 23px;
+        }
 
-                            <g:Label>Период: </g:Label>
+        .btnPanel td{
+            vertical-align: middle !important;
+        }
 
-                            <g:Label>От </g:Label>
-							<w:Spinner minValue="1920" maxValue="2100" width="80px" ui:field="fromBox"/>
-                            <g:Label>До </g:Label>
-							<w:Spinner minValue="1920" maxValue="2100" width="80px" ui:field="toBox"/>
-                            <g:Button ui:field="find">Поиск</g:Button>
-                            <g:Button ui:field="closePeriod">Закрыть период</g:Button>
-                            <g:Button ui:field="setDeadlineButton">Назначить срок сдачи</g:Button>
+        .table {
+            position: absolute !important;
+            bottom: 30px;
+            right: 0;
+            left: 0;
+            top: 70px;
+        }
 
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel height="30px">
-                            <g:Label>Подразделение:</g:Label>
-                            <picker:DepartmentPickerModalWidget header="Подразделение" multiSelection="false" ui:field="departmentPicker"/>
-                            <style:LinkAnchor img="resources/img/starfish-16.png" text="Открыть период" ui:field="openPeriod"/>
-                        </g:HorizontalPanel>
+        .horSep {
+            height: 1px;
+            margin: 4px 9px;
+            border-top: 1px solid #aeaeac;
+        }
 
-                    </g:VerticalPanel>
-                </g:FlowPanel>
-            </g:HorizontalPanel>
-        </g:north>
-        <g:center>
-            <g:ScrollPanel width="650px">
-                <style:GenericCellTable ui:field="periodsTable" width="630px"/>
-            </g:ScrollPanel>
-        </g:center>
+        .verSep {
+            height: 23px;
+            margin: 0 9px;
+            border-right: 1px solid #aeaeac;
+        }
 
-    </g:DockLayoutPanel>
+    </ui:style>
 
+    <ui:style field="margin">
+        .right5{
+            margin-right: 5px;
+        }
+        .left5{
+            margin-left: 5px;
+        }
+        .right10{
+            margin-right: 10px;
+        }
+    </ui:style>
+
+
+    <fm:MainContainer>
+        <fm:header>
+            <fm:HeaderContainer>
+                <fm:left>
+                    <fm:Left>
+                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
+                            <g:Label ui:field="nalogTypeLabel" addStyleNames="{style.titleText}"/>
+                            <g:Label text="—" addStyleNames="{style.titleText}"/>
+                        </style:LeftBar>
+                    </fm:Left>
+                </fm:left>
+                <fm:right>
+                    <fm:Right/>
+                </fm:right>
+                <fm:resizable>
+                    <fm:Resizable>
+                        <g:Label ui:field="title" text="Ведение периодов"/>
+                    </fm:Resizable>
+                </fm:resizable>
+            </fm:HeaderContainer>
+        </fm:header>
+
+        <fm:body>
+            <fm:BodyContainer>
+
+                <g:HorizontalPanel spacing="3" width="80%" addStyleNames="{style.btnPanel}">
+                    <g:cell horizontalAlignment="right">
+                        <g:Label width="100px" text="Подразделение:" addStyleNames="{margin.right5}"/>
+                    </g:cell>
+                    <g:cell width="100%">
+                        <picker:DepartmentPickerModalWidget header="Подразделение" ui:field="departmentPicker"
+                                                            multiSelection="false" width="100%" />
+                    </g:cell>
+
+                    <g:cell horizontalAlignment="right">
+                        <g:Label wordWrap="false" text="Период, c:" addStyleNames="{margin.right5}, {margin.left5}"/>
+                    </g:cell>
+                    <g:cell>
+                        <w:Spinner minValue="1920" maxValue="2100" width="80px" ui:field="fromBox" addStyleNames="{margin.right5}"/>
+                    </g:cell>
+                    <g:cell horizontalAlignment="right">
+                        <g:Label wordWrap="false" text="по" addStyleNames="{margin.right5}"/>
+                    </g:cell>
+                    <g:cell>
+                        <w:Spinner minValue="1920" maxValue="2100" width="80px" ui:field="toBox"/>
+                    </g:cell>
+
+                    <g:cell verticalAlignment="middle">
+                        <g:HTML addStyleNames="{style.verSep}"/>
+                    </g:cell>
+
+                    <g:Button title="Поиск" text="Поиск" ui:field="find"/>
+                </g:HorizontalPanel>
+
+                <g:Label addStyleNames="{style.horSep}"/>
+
+                <!--Панель кнопок-->
+
+                <g:HorizontalPanel addStyleNames="{style.btnPanel}">
+                    <style:LeftBar childValign="middle" marginRight="9">
+                        <style:LinkButton img="resources/img/unlock-16.png" text="Открыть период"
+                                          ui:field="openPeriod"/>
+                        <style:LinkButton img="resources/img/lock-16.png" text="Закрыть период"
+                                          ui:field="closePeriod"/>
+                        <g:Button ui:field="setDeadlineButton" text="Назначить срок сдачи"/>
+                    </style:LeftBar>
+                </g:HorizontalPanel>
+
+                <g:ScrollPanel width="70%" addStyleNames="{style.table}">
+                    <style:GenericCellTable ui:field="periodsTable" width="100%"/>
+                </g:ScrollPanel>
+
+            </fm:BodyContainer>
+        </fm:body>
+    </fm:MainContainer>
 
 </ui:UiBinder>
