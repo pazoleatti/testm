@@ -13,7 +13,7 @@ import java.util.Date;
  * @author Vitaliy Samolovskikh
  */
 public class SimpleDatePickerTest extends GWTTestCase {
-	public void testEnabled(){
+	public void testEnabled() {
 		SimpleDatePicker datePicker = new SimpleDatePicker();
 		assertTrue(datePicker.isEnabled());
 		datePicker.setEnabled(false);
@@ -22,18 +22,27 @@ public class SimpleDatePickerTest extends GWTTestCase {
 		assertTrue(datePicker.isEnabled());
 	}
 
-	public void testSetValue(){
+	public void testSetValue() {
 		SimpleDatePicker datePicker = new SimpleDatePicker();
 		Date date = createTestDate();
 		datePicker.setValue(date);
 		assertTrue(compareDates(date, datePicker.getValue()));
 	}
 
-	private Date createTestDate() {
-		return new Date(2014, 0, 1);
+	public void testEdit() {
+		SimpleDatePicker datePicker = new SimpleDatePicker();
+		Date date = createTestDate();
+		datePicker.getDate().setValue(date.getDate(), true);
+		datePicker.getMonth().setSelectedIndex(date.getMonth());
+		datePicker.getYear().setValue(date.getYear() + 1900, true);
+		assertTrue(compareDates(date, datePicker.getValue()));
 	}
 
-	public void testHandler(){
+	private Date createTestDate() {
+		return new Date(2014 - 1900, 0, 1);
+	}
+
+	public void testHandler() {
 		final boolean[] flag = {false};
 
 		SimpleDatePicker datePicker = new SimpleDatePicker();
@@ -48,9 +57,16 @@ public class SimpleDatePickerTest extends GWTTestCase {
 		assertTrue("Handler didn't work.", flag[0]);
 	}
 
-	private boolean compareDates(Date date1, Date date2){
+	private boolean compareDates(Date date1, Date date2) {
 		DateTimeFormat format = DateTimeFormat.getFormat("d.m.y");
-		return format.format(date1).equals(format.format(date2));
+		String expected = format.format(date1);
+		String actual = format.format(date2);
+		if (expected.equals(actual)) {
+			return true;
+		} else {
+			System.out.println("Expected: " + expected + "; actual: " + actual);
+			return false;
+		}
 	}
 
 	@Override

@@ -1352,3 +1352,8 @@ td.datePickerMonth {
 .aplana-Spinner-decButton.disabled {
 	background-position: -9px -9px !important;
 }
+
+/* DatePicker */
+.aplana-SimpleDatePicker-date, .aplana-SimpleDatePicker-month {
+	margin-right: 5px;
+}
