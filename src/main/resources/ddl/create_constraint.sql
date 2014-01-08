@@ -2,6 +2,7 @@ alter table configuration add constraint configuration_pk primary key (code);
 
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
+alter table form_type add constraint form_type_check_status check (status in (0, 1, 2, 3));
 
 alter table tax_period add constraint tax_period_pk primary key (id);
 alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
@@ -12,6 +13,7 @@ alter table form_template add constraint form_template_uniq_version unique(type_
 alter table form_template add constraint form_template_check_active check (is_active in (0, 1));
 alter table form_template add constraint form_template_chk_num_cols check (numbered_columns in (0, 1));
 alter table form_template add constraint form_template_chk_fixed_rows check(fixed_rows in (0, 1));
+alter table form_template add constraint form_template_check_status check (status in (0, 1, 2, 3));
 
 alter table form_style add constraint form_style_pk primary key (id);
 alter table form_style add constraint form_style_fk_form_template_id foreign key (form_template_id) references form_template (id);
@@ -45,8 +47,7 @@ alter table ref_book_attribute add constraint ref_book_attr_fk_attribute_id fore
 alter table ref_book_attribute add constraint ref_book_attr_chk_is_unique check (is_unique in (0, 1));
 
 alter table ref_book_record add constraint ref_book_record_pk primary key (id);
-alter table ref_book_record add constraint ref_book_record_chk_status check (status in (0, -1));
-alter table ref_book_record add constraint ref_book_record_chk_is_deleted  check (is_deleted in (0, 1));
+alter table ref_book_record add constraint ref_book_record_chk_status check (status in (0, -1, 1 , 2));
 alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreign key (ref_book_id) references ref_book (id);
 create unique index i_ref_book_record_refbookid on ref_book_record(ref_book_id, record_id, version);
 
@@ -65,10 +66,10 @@ alter table form_column add constraint form_column_chk_attribute_id check ((type
 alter table form_column add constraint form_column_chk_width check (not width is null);
 alter table form_column add constraint form_column_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
 alter table form_column add constraint form_column_fk_parent_id foreign key (parent_column_id) references form_column (id);
+alter table form_column add constraint form_column_chk_filt_parent check ((type='R' and ((parent_column_id is null) and (filter is not null)) or ((parent_column_id is not null) and (filter is null)) or ((parent_column_id is null) and (filter is null))) or (type<>'R'));
 
 alter table department add constraint department_pk primary key (id);
 alter table department add constraint dept_fk_parent_id foreign key (parent_id) references department(id);
-alter table department add constraint department_chk_id check ((type= 1 and id = 1) or (type <> 1 and id <> 1));
 alter table department add constraint department_chk_parent_id check ((type = 1 and parent_id is null) or (type <> 1 and parent_id is not null));
 
 alter table report_period add constraint report_period_pk primary key(id);
@@ -215,6 +216,12 @@ alter table notification add constraint notification_fk_report_period foreign ke
 alter table notification add constraint notification_fk_sender foreign key (sender_department_id) references department (id);
 alter table notification add constraint notification_fk_receiver foreign key (receiver_department_id) references department (id);
 alter table notification add constraint notification_fk_sec_user foreign key (first_reader_id) references sec_user (id);
+
+alter table template_changes add constraint template_changes_pk primary key (id);
+alter table template_changes add constraint template_changes_fk_user_id foreign key (author) references sec_user(id);
+alter table template_changes add constraint changes_fk_form_template_id foreign key (form_template_id) references form_template(id);
+alter table template_changes add constraint changes_fk_dec_template_id foreign key (declaration_template_id) references declaration_template(id);
+alter table template_changes add constraint changes_check_event check (event in (1,2,3,4,5));
 
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);

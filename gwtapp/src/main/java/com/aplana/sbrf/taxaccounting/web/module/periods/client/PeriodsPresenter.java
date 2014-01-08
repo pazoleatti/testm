@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -100,7 +101,9 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
 	@Override
 	public void openPeriod() {
-		addToPopupSlot(openDialogPresenter);
+        openDialogPresenter.resetToDefault();
+        openDialogPresenter.setSelectedDepartment(getView().getDepartmentId().getDepartmentId());
+        addToPopupSlot(openDialogPresenter);
 	}
 
 	@Override
@@ -172,7 +175,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
                         getView().setFilterData(result.getDepartments(), Arrays.asList(result.getSelectedDepartment()), result.getYearFrom(), result.getYearTo());
 						getView().setReadOnly(result.isReadOnly());
 						openDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment().getDepartmentId()), result.isEnableDepartmentPicker());
-						openDialogPresenter.setYear(result.getCurrentYear());
 						find();
 					}
 				}, PeriodsPresenter.this).addCallback(TaManualRevealCallback.create(this, this.placeManager))

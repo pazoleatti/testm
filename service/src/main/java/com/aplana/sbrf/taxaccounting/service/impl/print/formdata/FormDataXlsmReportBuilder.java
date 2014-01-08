@@ -316,40 +316,35 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 				Object obj = dataRow.get(column.getAlias());
 				Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, false);
                 widthCellsMap.put(cell.getColumnIndex(), column.getWidth());
-				if(column instanceof StringColumn){
-					String str = (String)obj;
-					CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, i , j);
-					cell.setCellStyle(cellStyle);
-					cell.setCellValue(str);
-				}
-				else if(column instanceof DateColumn){
-					Date date = (Date)obj;
-                    if (date!=null)
+                if (column instanceof StringColumn) {
+                    String str = (String) obj;
+                    CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, i, j);
+                    cell.setCellStyle(cellStyle);
+                    cell.setCellValue(str);
+                } else if (column instanceof DateColumn) {
+                    Date date = (Date) obj;
+                    if (date != null)
                         cell.setCellValue(date);
                     else
                         cell.setCellValue("");
-					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DATE, i , j));
-				}
-				else if(column instanceof NumericColumn){
-					BigDecimal bd = (BigDecimal)obj;
-					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.BIGDECIMAL, i , j));
+                    cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DATE, i, j));
+                } else if (column instanceof NumericColumn) {
+                    BigDecimal bd = (BigDecimal) obj;
+                    cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.BIGDECIMAL, i, j));
 
-					cell.setCellValue(bd!=null ? String.valueOf(bd) : "");
-				}else if(column instanceof RefBookColumn){
-                    CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, i , j);
+                    cell.setCellValue(bd != null ? String.valueOf(bd) : "");
+                } else if (column instanceof RefBookColumn || column instanceof ReferenceColumn) {
+                    CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, i, j);
                     cell.setCellStyle(cellStyle);
                     cell.setCellValue(dataRow.getCell(column.getAlias()).getRefBookDereference());
-                }
-                else if(obj == null){
-                    cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.EMPTY, i , j));
+                } else if (obj == null) {
+                    cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.EMPTY, i, j));
                     cell.setCellValue("");
                 }
                 if (dataRow.getCell(column.getAlias()).getColSpan() > 1)
                     i = i + dataRow.getCell(column.getAlias()).getColSpan() - 1;
             }
-
         }
-
     }
 
     @Override

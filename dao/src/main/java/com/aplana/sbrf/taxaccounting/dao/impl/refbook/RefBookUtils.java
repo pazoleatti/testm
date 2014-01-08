@@ -138,7 +138,7 @@ public class RefBookUtils extends AbstractDao {
      * @return
      */
     public List<String> checkFillRequiredRefBookAtributes(List<RefBookAttribute> attributes, Map<String, RefBookValue> record){
-        List<String> errors = new ArrayList();
+        List<String> errors = new ArrayList<String>();
         for (RefBookAttribute a :attributes){
             if (a.isRequired() && (!record.containsKey(a.getAlias()) || record.get(a.getAlias()).isEmpty())){
                 errors.add(a.getName());

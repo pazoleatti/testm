@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import javax.xml.bind.annotation.*;
+import java.util.Date;
 import java.util.List;
 
 @XmlRootElement
@@ -10,7 +11,7 @@ public class FormTemplateContent {
 	@XmlElement
 	private FormType type;
 	@XmlElement
-	private String version;
+	private Date version;
 	@XmlElement
 	private boolean active;
 	@XmlElement

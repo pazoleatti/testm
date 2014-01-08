@@ -2,11 +2,13 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookRecordAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookRecordResult;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookRecordVersionData;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
@@ -36,6 +38,18 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
 		RefBook refBook = refBookFactory.get(action.getRefBookId());
 		GetRefBookRecordResult result = new GetRefBookRecordResult();
 		result.setRecord(convert(refBook, record));
+
+        RefBookRecordVersion recordVersion;
+
+        //Получаем версию выбранной записи
+        recordVersion = refBookDataProvider.getActiveRecordVersion(action.getRefBookRecordId());
+        int versionCount = refBookDataProvider.getRecordVersionsCount(action.getRefBookRecordId());
+
+        RefBookRecordVersionData fullVersionData = new RefBookRecordVersionData();
+        fullVersionData.setVersionStart(recordVersion.getVersionStart());
+        fullVersionData.setVersionEnd(recordVersion.getVersionEnd());
+        fullVersionData.setVersionCount(versionCount);
+        result.setVersionData(fullVersionData);
 		return result;
 	}
 

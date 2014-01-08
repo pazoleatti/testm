@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.*;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.*;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.*;
@@ -45,7 +46,7 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 
 	@Override
 	public void onFlush() {
-		getUiHandlers().setVersion(versionBox.getValue());
+		getUiHandlers().setVersion(DateTimeFormat.getFormat("dd.MM.yyyy").parse(versionBox.getValue()));
 		getUiHandlers().setNumberedColumns(numberedColumnsBox.getValue());
 		getUiHandlers().setFixedRows(fixedRowsCheckBox.getValue());
 		getUiHandlers().setName(nameBox.getValue());

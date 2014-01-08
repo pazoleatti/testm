@@ -1,6 +1,7 @@
 package form_template.income.rnu64
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
@@ -46,19 +47,14 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
-        logicCheck()
+        // TODO logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        consolidation()
         calc()
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-        }
-        break
     case FormDataEvent.MIGRATION:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
@@ -118,11 +114,10 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def dataRowsPrev
-    if (!isBalancePeriod()) {
+    if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
         dataRowsPrev = getDataRowsPrev()
     }
 
-    deleteAllAliased(dataRows)
     if (formDataEvent != FormDataEvent.IMPORT && formDataEvent != FormDataEvent.MIGRATION) {
         sortRows(dataRows, sortColumns)
     }
@@ -134,38 +129,27 @@ void calc() {
         }
     }
 
-    // добавляем строки итого
-    def newRowQuarter = formData.createDataRow()
-    newRowQuarter.getCell("fix").setColSpan(4)
-    newRowQuarter.fix = "Итого за текущий квартал"
-    newRowQuarter.setAlias("totalQuarter")
-    allColumns.each {
-        newRowQuarter.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    calcTotalSum(dataRows, newRowQuarter, totalColumns)
-    dataRows.add(newRowQuarter)
+    // пересчитываем строки итого
+    calcTotalSum(dataRows, getDataRow(dataRows, 'totalQuarter'), totalColumns)
 
-    // строка Итого за текущий отчетный (налоговый) период
-    def newRowTotal = formData.createDataRow()
-    newRowTotal.getCell("fix").setColSpan(4)
-    newRowTotal.fix = "Итого за текущий отчетный (налоговый) период"
-    newRowTotal.costs = getTotalValue(dataRows, dataRowsPrev)
-    newRowTotal.setAlias("total")
-    allColumns.each {
-        newRowTotal.getCell(it).setStyleAlias('Контрольные суммы')
+    if (formData.kind == FormDataKind.PRIMARY) {
+        // строка Итого за текущий отчетный (налоговый) период
+        def total =  getDataRow(dataRows, 'total')
+        total.costs = getTotalValue(dataRows, dataRowsPrev)
     }
-    dataRows.add(newRowTotal)
-    dataRowHelper.save(dataRows)
+
+    dataRowHelper.update(dataRows)
 }
 
 def getDataRowsPrev() {
-    def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+    // TODO вернуть
+    /*def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
     formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
     if (formDataPrev == null) {
         logger.error("Не найдены экземпляры РНУ-64 за прошлый отчетный период!")
     } else {
         return formDataService.getDataRowHelper(formDataPrev)?.allCached
-    }
+    }*/
     return null
 }
 
@@ -177,7 +161,7 @@ void logicCheck() {
     def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
     def dTo = getEndDate()
     def dataRowsPrev
-    if (!isBalancePeriod()) {
+    if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
         dataRowsPrev = getDataRowsPrev()
     }
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
@@ -283,10 +267,12 @@ void importData() {
         // добавить данные в форму
         def totalLoad = addData(xml, fileName)
         // рассчитать, проверить и сравнить итоги
-        if (totalLoad != null) {
-            checkTotalRow(totalLoad)
-        } else {
-            logger.error("Нет итоговой строки.")
+        if (formDataEvent == FormDataEvent.IMPORT) {
+            if (totalLoad != null) {
+                checkTotalRow(totalLoad)
+            } else {
+                logger.error("Нет итоговой строки.")
+            }
         }
     } catch (Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
@@ -446,4 +432,33 @@ def getEndDate() {
         reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
     }
     return reportPeriodEndDate
+}
+
+
+void consolidation() {
+    def rows = []
+    def sum = 0
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                formDataService.getDataRowHelper(source).getAllCached().each { row ->
+                    if (row.getAlias() == null) {
+                        rows.add(row)
+                    } else if (row.getAlias() == 'total' && row.costs!=null) {
+                        sum += row.costs
+                    }
+                }
+            }
+        }
+    }
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    def totalRow = dataRowHelper.getDataRow(dataRows, 'total')
+    totalRow.costs = sum
+
+    rows.add(getDataRow(dataRows, 'totalQuarter'))
+    rows.add(totalRow)
+
+    formDataService.getDataRowHelper(formData).save(rows)
 }

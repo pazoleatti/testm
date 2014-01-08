@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -51,7 +52,7 @@ public class DataRowDaoImplTest {
          */
         // мок утилитного сервиса
         BDUtils dbUtilsMock = mock(BDUtils.class);
-        when(dbUtilsMock.getNextIds(anyLong())).thenAnswer(new Answer<List<Long>>() {
+        when(dbUtilsMock.getNextDataRowIds(anyLong())).thenAnswer(new Answer<List<Long>>() {
             @Override
             public List<Long> answer(InvocationOnMock invocationOnMock) throws Throwable {
                 List<Long> ids = new ArrayList<Long>();
@@ -63,7 +64,7 @@ public class DataRowDaoImplTest {
                 return ids;
             }
         });
-        dataRowDao.setDbUtils(dbUtilsMock);
+        ReflectionTestUtils.setField(dataRowDao, "dbUtils", dbUtilsMock);
 
 		FormData fd = formDataDao.get(1);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();

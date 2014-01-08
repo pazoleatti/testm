@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
-import java.util.List;
-
-
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.AdminPresenter;
@@ -19,6 +16,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
+
+import java.util.List;
 
 /**
  * Представление для страницы администрирования.
@@ -75,7 +74,7 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 		formTemplateTable.addColumn(new TextColumn<FormTemplate>() {
 			@Override
 			public String getValue(FormTemplate formTemplate) {
-				return formTemplate.getVersion();
+				return String.valueOf(formTemplate.getEdition());
 			}
 		}, "Версия");
 	}

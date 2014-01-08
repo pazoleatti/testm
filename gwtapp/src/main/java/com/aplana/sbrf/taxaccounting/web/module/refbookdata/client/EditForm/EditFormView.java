@@ -2,10 +2,13 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookRecordVersionData;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -26,7 +29,7 @@ import java.util.Map;
 
 public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> implements EditFormPresenter.MyView{
 
-	interface Binder extends UiBinder<Widget, EditFormView> { }
+    interface Binder extends UiBinder<Widget, EditFormView> { }
 
 	Map<RefBookColumn, HasValue> widgets;
 
@@ -36,6 +39,17 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	Button save;
 	@UiField
 	Button cancel;
+
+    @UiField
+    CustomDateBox versionStart;
+    @UiField
+    CustomDateBox versionEnd;
+    @UiField
+    LinkAnchor allVersion;
+
+    private boolean isVersionMode = false;
+    private Date savedVersionFrom;
+    private Date savedVersionTo;
 
 	@Inject
 	@UiConstructor
@@ -255,7 +269,58 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		cancel.setEnabled(enabled);
 	}
 
-	@UiHandler("save")
+    @Override
+    public void fillVersionData(RefBookRecordVersionData versionData, Long refBookId, Long refBookRecordId) {
+        this.savedVersionFrom = versionData.getVersionStart();
+        this.savedVersionTo = versionData.getVersionEnd();
+        versionStart.setValue(versionData.getVersionStart());
+        versionEnd.setValue(versionData.getVersionEnd());
+        allVersion.setVisible(!isVersionMode);
+        versionStart.setEnabled(isVersionMode);
+        versionEnd.setEnabled(isVersionMode);
+        allVersion.setText("Все версии ("+versionData.getVersionCount()+")");
+        allVersion.setHref("#"
+                + RefBookDataTokens.refBookVersion
+                + ";" + RefBookDataTokens.REFBOOK_DATA_ID  + "=" + refBookId
+                + ";" + RefBookDataTokens.REFBOOK_RECORD_ID + "=" + refBookRecordId);
+    }
+
+    @Override
+    public void setVersionMode(boolean versionMode) {
+        isVersionMode = versionMode;
+        allVersion.setVisible(false);
+        versionStart.setEnabled(true);
+        versionEnd.setEnabled(true);
+    }
+
+    @Override
+    public Date getVersionFrom() {
+        return versionStart.getValue();
+    }
+
+    @Override
+    public Date getVersionTo() {
+        return versionEnd.getValue();
+    }
+
+    @Override
+    public void setVersionFrom(Date value) {
+        versionStart.setValue(value);
+    }
+
+    @Override
+    public void setVersionTo(Date value) {
+        versionEnd.setValue(value);
+    }
+
+    @Override
+    public boolean isRelevancePeriodChanged() {
+        return !getVersionFrom().equals(savedVersionFrom) ||
+                (getVersionTo() != null && !getVersionTo().equals(savedVersionTo)) ||
+                (savedVersionTo != null && !savedVersionTo.equals(getVersionTo()));
+    }
+
+    @UiHandler("save")
 	void saveButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onSaveClicked();

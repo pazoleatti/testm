@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.model;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 	private static final long serialVersionUID = -8304772615983231523L;
 	
 	private FormType type;
-	private String version;
+	private Date version;
 	private boolean active;
 	private Integer edition;
 	private boolean numberedColumns;
@@ -23,7 +24,21 @@ public class FormTemplate extends IdentityObject<Integer> {
     private String name;
     private String fullName;
     private String code;
-    
+
+    private TemplateStatus status;
+
+    /**
+     * Признак статуса шаблона
+     * @return статус шаблона
+     */
+    public TemplateStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TemplateStatus status) {
+        this.status = status;
+    }
+
     /**
      * Тело скрипта
      * Оставлен для сохранения шаблона налоговой формы.
@@ -178,7 +193,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 	 * 
 	 * @return версия формы
 	 */
-	public String getVersion() {
+	public Date getVersion() {
 		return version;
 	}
 
@@ -231,12 +246,12 @@ public class FormTemplate extends IdentityObject<Integer> {
 	}
 
 	/**
-	 * Установить версию для формы
+	 * Установить дату актуальности шаблона
 	 * 
 	 * @param version
-	 *            номер версии
+	 *            дата актуальности
 	 */
-	public void setVersion(String version) {
+	public void setVersion(Date version) {
 		this.version = version;
 	}
 

@@ -9,7 +9,8 @@ comment on column configuration.value is 'Значение параметра';
 create table form_type (
   id       number(9) not null,
   name     varchar2(600) not null,
-  tax_type char(1) not null
+  tax_type char(1) not null,
+  status number(1) default 0 not null
 );
 comment on table form_type is 'Типы налоговых форм (названия)';
 comment on column form_type.id is 'Идентификатор';
@@ -34,7 +35,7 @@ create table form_template (
   id number(9) not null,
   type_id number(9) not null,
   data_rows clob,
-  version varchar2(20) not null,
+  version date not null,
   is_active number(1) default 1 not null,
   edition number(9) not null,
   numbered_columns NUMBER(1) not null,
@@ -43,7 +44,8 @@ create table form_template (
   fullname varchar2(600) not null,
   code varchar2(600) not null,
   script clob,
-  data_headers clob
+  data_headers clob,
+  status number(1) default 0 not null
 );
 comment on table form_template IS 'Описания шаблонов налоговых форм';
 comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
@@ -59,6 +61,7 @@ comment on column form_template.fullname is 'Полное наименовани
 comment on column form_template.code is 'Номер формы';
 comment on column form_template.script is 'Скрипт, реализующий бизнес-логику налоговой формы';
 comment on column form_template.data_headers is 'Описание заголовка таблицы';
+comment on column form_template.status is 'Статус версии (0 - действующая версия; 1 - удаленная версия, 2 - черновик версии, 3 - фиктивная версия)';
 ---------------------------------------------------------------------------------------------------
 create table form_style (
   id					     number(9) not null,
@@ -148,16 +151,14 @@ create table ref_book_record (
   record_id number(9) not null,
   ref_book_id number(18) not null,
   version date not null,
-  status number(1) default 0 not null,
-  is_deleted  number(1) default 0 not null
+  status number(1) default 0 not null
 );
 comment on table ref_book_record is 'Запись справочника';
 comment on column ref_book_record.id is 'Уникальный идентификатор';
 comment on column ref_book_record.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
 comment on column ref_book_record.ref_book_id is 'Ссылка на справочник, к которому относится запись';
 comment on column ref_book_record.version is 'Версия. Дата актуальности записи';
-comment on column ref_book_record.status is 'Статус записи (0-обычная запись; -1-помеченная на удаление)';
-comment on column ref_book_record.is_deleted is 'Признак удаления версии (1 - да; 0 - нет)';
+comment on column ref_book_record.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 
 create sequence seq_ref_book_record start with 100000 increment by 100;
 create sequence seq_ref_book_record_row_id start with 100000;
@@ -675,6 +676,22 @@ comment on column notification.first_reader_id is 'идентификатор п
 comment on column notification.text is 'текст оповещения';
 comment on column notification.create_date is 'дата создания оповещения';
 comment on column notification.deadline is 'дата сдачи отчетности';
+
+create table template_changes (
+ id number(9) not null,
+ form_template_id number(9) not null,
+ declaration_template_id number(9) not null,
+ event number(1),
+ author number(9) not null,
+ date_event date
+);
+
+comment on table template_changes is 'Изменение версий налоговых шаблонов';
+comment on column template_changes.form_template_id is 'Идентификатор налогового шаблона';
+comment on column template_changes.declaration_template_id is 'Идентификатор шаблона декларации';
+comment on column template_changes.event is 'Событие версии';
+comment on column template_changes.author is 'Автор изменения';
+comment on column template_changes.date_event is 'Дата изменения';
 
 create sequence seq_notification start with 10000;
 --------------------------------------------------------------------------------------------------------

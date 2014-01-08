@@ -53,7 +53,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			FormTemplate formTemplate = new FormTemplate();
 			formTemplate.setId(rs.getInt("id"));
 			formTemplate.setActive(rs.getBoolean("is_active"));
-			formTemplate.setVersion(rs.getString("version"));
+			formTemplate.setVersion(rs.getDate("version"));
 			formTemplate.setName(rs.getString("name"));
 			formTemplate.setFullName(rs.getString("fullname"));
             formTemplate.setType(formTypeDao.get(rs.getInt("type_id")));
@@ -106,9 +106,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	 */
 	@Transactional(readOnly = false)
     @Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id", beforeInvocation = true),
-            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true),
-            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_data_rows\")", beforeInvocation = true),
-            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_data_headers\")", beforeInvocation = true)})
+            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true)})
 	@Override
 	public int save(final FormTemplate formTemplate) {
 		final Integer formTemplateId = formTemplate.getId();
@@ -195,7 +193,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                 String.class);
     }
 
-    @Cacheable(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_data_rows\")")
     @Override
     public List<DataRow<Cell>> getDataCells(FormTemplate formTemplate) {
         String dataRowXml = getJdbcTemplate().queryForObject("select data_rows from form_template where id = ?",
@@ -206,7 +203,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                 new ArrayList<DataRow<Cell>>();
     }
 
-    @Cacheable(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_data_headers\")")
     @Override
     public List<DataRow<HeaderCell>> getHeaderCells(FormTemplate formTemplate) {
         String headerDataXml = getJdbcTemplate().queryForObject("select data_headers from form_template where id = ?",
@@ -222,17 +218,19 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         if (filter == null) {
             return listAllId();
         }
-        StringBuilder sb = new StringBuilder(
-                "select form_template.id " +
-                        "from form_template " +
-                        "left join form_type on form_template.type_id = form_type.id "
+        StringBuilder query = new StringBuilder("select form_template.id " +
+                       "from form_template " +
+                       "left join form_type on form_template.type_id = form_type.id " +
+                       "where is_active = ? "
         );
-        sb.append("where is_active = " + (filter.isActive() ? "1" : "0") );
+
         if (filter.getTaxType() != null) {
-            sb.append(" and form_type.TAX_TYPE = '" + filter.getTaxType().getCode() + "\'");
+            query.append(" and form_type.TAX_TYPE = \'" + filter.getTaxType().getCode() + "\'");
         }
         return getJdbcTemplate().queryForList(
-                sb.toString(),
+                query.toString(),
+                new Object[] { filter.isActive()},
+                new int[]{Types.NUMERIC},
                 Integer.class
         );
     }

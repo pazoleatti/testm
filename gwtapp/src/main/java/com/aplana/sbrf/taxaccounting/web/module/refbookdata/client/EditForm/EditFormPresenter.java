@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
@@ -35,14 +36,27 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	private Date relevanceDate;
 	private static final String DIALOG_MESSAGE = "Строка была изменена. Все не сохраненные данные будут потеряны.";
 
-	public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
+    /** Признак того, что форма используется для работы с версиями записей справочника */
+    private boolean isVersionMode = false;
+
+    /** Идентификатор записи справочника, версии которого отображаются в режиме версионирования */
+    private Long recordId;
+
+    public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
 		Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes);
 		void fillInputFields(Map<String, RefBookValueSerializable> record);
 		Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException;
 		void setSaveButtonEnabled(boolean enabled);
 		void setCancelButtonEnabled(boolean enabled);
 		void setEnabled(boolean enabled);
-	}
+        void fillVersionData(RefBookRecordVersionData versionData, Long currentRefBookId, Long refBookRecordId);
+        void setVersionMode(boolean versionMode);
+        Date getVersionFrom();
+        Date getVersionTo();
+        void setVersionFrom(Date value);
+        void setVersionTo(Date value);
+        boolean isRelevancePeriodChanged();
+    }
 
 	@Inject
 	public EditFormPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync, PlaceManager placeManager) {
@@ -103,16 +117,19 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 			currentRecordId = null;
 			getView().fillInputFields(null);
 			setEnabled(true);
+            getView().setVersionFrom(null);
+            getView().setVersionTo(null);
 			return;
 		}
 		GetRefBookRecordAction action = new GetRefBookRecordAction();
 		action.setRefBookId(currentRefBookId);
 		action.setRefBookRecordId(refBookRecordId);
-		dispatchAsync.execute(action,
+        dispatchAsync.execute(action,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<GetRefBookRecordResult>() {
 							@Override
 							public void onSuccess(GetRefBookRecordResult result) {
+                                getView().fillVersionData(result.getVersionData(), currentRefBookId, refBookRecordId);
 								getView().fillInputFields(result.getRecord());
 								currentRecordId = refBookRecordId;
 								setEnabled(true);
@@ -123,42 +140,59 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	@Override
 	public void onSaveClicked() {
 		try {
+            if (getView().getVersionFrom() == null) {
+                Window.alert("Не указана дата начала актуальности");
+                return;
+            }
+            if (getView().getVersionTo() != null && (getView().getVersionFrom().getTime() >= getView().getVersionTo().getTime())) {
+                Window.alert("Дата окончания должна быть больше даты начала актуальности");
+                return;
+            }
 			if (currentRecordId == null) {
-				AddRefBookRowAction action = new AddRefBookRowAction();
-				action.setRefBookId(currentRefBookId);
-				List<Map<String, RefBookValueSerializable>> valuesToAdd = new ArrayList<Map<String, RefBookValueSerializable>>();
-				valuesToAdd.add(getView().getFieldsValues());
-				action.setRecords(valuesToAdd);
-				action.setRelevanceDate(getRelevanceDate());
-				dispatchAsync.execute(action,
-						CallbackUtils.defaultCallback(
-								new AbstractCallback<AddRefBookRowResult>() {
-									@Override
-									public void onSuccess(AddRefBookRowResult result) {
-										isFormModified = false;
-										getView().fillInputFields(null);
-										setEnabled(false);
-										UpdateForm.fire(EditFormPresenter.this, true);
-									}
-							}, this));
-			} else {
-					SaveRefBookRowAction action = new SaveRefBookRowAction();
-					action.setRefBookId(currentRefBookId);
-					action.setRecordId(currentRecordId);
-					action.setValueToSave(getView().getFieldsValues());
-					action.setRelevanceDate(getRelevanceDate());
-					dispatchAsync.execute(action,
-							CallbackUtils.defaultCallback(
-									new AbstractCallback<SaveRefBookRowResult>() {
-										@Override
-										public void onSuccess(SaveRefBookRowResult result) {
-											isFormModified = false;
-											getView().fillInputFields(null);
-											setEnabled(false);
-											UpdateForm.fire(EditFormPresenter.this, true);
-										}
-								}, this));
+                AddRefBookRowVersionAction action = new AddRefBookRowVersionAction();
+                action.setRefBookId(currentRefBookId);
+                action.setRecordId(recordId);
+                List<Map<String, RefBookValueSerializable>> valuesToAdd = new ArrayList<Map<String, RefBookValueSerializable>>();
+                valuesToAdd.add(getView().getFieldsValues());
 
+                action.setRecords(valuesToAdd);
+                action.setVersionFrom(getView().getVersionFrom());
+                action.setVersionTo(getView().getVersionTo());
+
+                dispatchAsync.execute(action,
+                        CallbackUtils.defaultCallback(
+                                new AbstractCallback<AddRefBookRowVersionResult>() {
+                                    @Override
+                                    public void onSuccess(AddRefBookRowVersionResult result) {
+                                        LogCleanEvent.fire(EditFormPresenter.this);
+                                        LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
+                                        isFormModified = false;
+                                        getView().fillInputFields(null);
+                                        setEnabled(false);
+                                        UpdateForm.fire(EditFormPresenter.this, true);
+                                    }
+                                }, this));
+			} else {
+                SaveRefBookRowVersionAction action = new SaveRefBookRowVersionAction();
+                action.setRefBookId(currentRefBookId);
+                action.setRecordId(currentRecordId);
+                action.setValueToSave(getView().getFieldsValues());
+                action.setVersionFrom(getView().getVersionFrom());
+                action.setVersionTo(getView().getVersionTo());
+                action.setRelevancePeriodChanged(getView().isRelevancePeriodChanged());
+                dispatchAsync.execute(action,
+                        CallbackUtils.defaultCallback(
+                                new AbstractCallback<SaveRefBookRowVersionResult>() {
+                                    @Override
+                                    public void onSuccess(SaveRefBookRowVersionResult result) {
+                                        LogCleanEvent.fire(EditFormPresenter.this);
+                                        LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
+                                        isFormModified = false;
+                                        getView().fillInputFields(null);
+                                        setEnabled(false);
+                                        UpdateForm.fire(EditFormPresenter.this, true);
+                                    }
+                                }, this));
 			}
 		} catch (BadValueException bve) {
             isFormModified = false;
@@ -189,7 +223,24 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		isFormModified = true;
 	}
 
-	public void setEnabled(boolean enabled) {
+    public void setEnabled(boolean enabled) {
 		getView().setEnabled(enabled);
 	}
+
+    public boolean isVersionMode() {
+        return isVersionMode;
+    }
+
+    public void setVersionMode(boolean versionMode) {
+        isVersionMode = versionMode;
+        getView().setVersionMode(versionMode);
+    }
+
+    public void setCurrentRecordId(Long currentRecordId) {
+        this.currentRecordId = currentRecordId;
+    }
+
+    public void setRecordId(Long recordId) {
+        this.recordId = recordId;
+    }
 }

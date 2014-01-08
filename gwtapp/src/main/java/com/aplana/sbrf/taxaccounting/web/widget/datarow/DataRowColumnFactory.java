@@ -1,11 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.DateColumn;
-import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -47,7 +42,11 @@ public class DataRowColumnFactory {
 			RefBookColumn refBookColumn = (RefBookColumn) col;
 			columnContext.setColumn(refBookColumn);
 			uiColumn = new RefBookUiColumn(refBookColumn, columnContext);
-		} else {
+		} else if (col instanceof ReferenceColumn){
+            ReferenceColumn referenceColumn = (ReferenceColumn) col;
+            columnContext.setColumn(referenceColumn);
+            uiColumn = new ReferenceUiColumn(referenceColumn, columnContext);
+        } else {
 			throw new IllegalArgumentException();
 		}
 		return uiColumn;

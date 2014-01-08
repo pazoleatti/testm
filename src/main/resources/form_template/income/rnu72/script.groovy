@@ -57,14 +57,6 @@ switch (formDataEvent) {
         break
 }
 
-//// Кэши и константы
-@Field
-def providerCache = [:]
-@Field
-def recordCache = [:]
-@Field
-def refBookCache = [:]
-
 // все атрибуты
 @Field
 def allColumns = ['number', 'forLabel', 'date', 'nominal', 'price', 'income', 'cost279', 'costReserve', 'loss', 'profit']
@@ -89,45 +81,6 @@ def nonEmptyColumns = ['number', 'date', 'nominal', 'price', 'income', 'cost279'
 @Field
 def totalSumColumns = ['income', 'cost279', 'costReserve', 'loss', 'profit']
 
-// Дата окончания отчетного периода
-@Field
-def reportPeriodEndDate = null
-
-// Текущая дата
-@Field
-def currentDate = new Date()
-
-//// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
-}
-
-// Разыменование записи справочника
-def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
-}
-
-// Получение числа из строки при импорте
-def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, true)
-}
-
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -142,15 +95,23 @@ void calc() {
     dataRows.eachWithIndex { row, i ->
         // графа 1
         row.number = ++index
+        def tmp = calcFor8or9(row)
         // графа 8
-        row.loss = calc8(row)
+        row.loss = calc8(tmp)
         // графа 9
-        row.profit = calc9(row)
+        row.profit = calc9(tmp)
     }
 
     // добавить итого
-    def total = getTotalRow(dataRows)
-    dataRows.add(total)
+    def totalRow = formData.createDataRow()
+    totalRow.setAlias('total')
+    totalRow.forLabel = 'Итого'
+    totalRow.getCell('forLabel').setColSpan(2)
+    allColumns.each { alias ->
+        totalRow.getCell(alias).setStyleAlias('Контрольные суммы')
+    }
+    calcTotalSum(dataRows, totalRow, totalSumColumns)
+    dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
 }
 
@@ -158,10 +119,8 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    // алиасы графов для арифметической проверки (графа 8, 9)
     def arithmeticCheckAlias = ['loss', 'profit']
-    // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
-    def needValue = [:]
+    def values = [:]
     // номер последний строки предыдущей формы
     def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
@@ -189,69 +148,23 @@ void logicCheck() {
             }
         }
         if (hasError) {
-            logger.error(errorMsg + 'все суммы по операции нулевые!')
+            logger.error(errorMsg + 'Все суммы по операции нулевые!')
         }
 
         // 4. Арифметическая проверка графы 8, 9
-        needValue['loss'] = calc8(row)
-        needValue['profit'] = calc9(row)
-        checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+        def tmp = calcFor8or9(row)
+        values['loss'] = calc8(tmp)
+        values['profit'] = calc9(tmp)
+        checkCalc(row, arithmeticCheckAlias, values, logger, true)
     }
 
     // 5. Проверка итогового значений по всей форме (графа 5..9)
-    def totalRow = dataRowHelper.getDataRow(dataRows, 'total')
-    def tmpRow = getTotalRow(dataRows)
-    if (isDiffRow(totalRow, tmpRow, totalSumColumns)) {
-        logger.error('Итоговые значения рассчитаны неверно!')
-    }
+    checkTotalSum(dataRows, totalSumColumns, logger, true)
 }
 
 /*
  * Вспомогательные методы.
  */
-
-/** Получить сумму столбца. */
-def getSum(def dataRows, def columnAlias) {
-    def sum = 0
-    dataRows.each { row ->
-        if (row.getAlias() == null) {
-            sum += (row.getCell(columnAlias).value ?: 0)
-        }
-    }
-    return sum
-}
-
-def getNewRow() {
-    def newRow = formData.createDataRow()
-    editableColumns.each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
-    autoFillColumns.each {
-        newRow.getCell(it).setStyleAlias('Автозаполняемая')
-    }
-    return newRow
-}
-
-/** Получить модуль числа. Вместо Math.abs() потому что возможна потеря точности. */
-def abs(def value) {
-    return value < 0 ? -value : value
-}
-
-/** Получить итоговую строку с суммами. */
-def getTotalRow(def dataRows) {
-    def newRow = formData.createDataRow()
-    newRow.setAlias('total')
-    newRow.forLabel = 'Итого'
-    newRow.getCell('forLabel').setColSpan(2)
-    allColumns.each { alias ->
-        newRow.getCell(alias).setStyleAlias('Контрольные суммы')
-    }
-    totalSumColumns.each { alias ->
-        newRow.getCell(alias).setValue(getSum(dataRows, alias))
-    }
-    return newRow
-}
 
 /** Получить одинаковую часть расчетов для графы 8 или 9. */
 def calcFor8or9(def row) {
@@ -261,26 +174,16 @@ def calcFor8or9(def row) {
     return row.income - (row.cost279 - row.costReserve)
 }
 
-def BigDecimal calc8(def row) {
-    def tmp = calcFor8or9(row)
+def BigDecimal calc8(def tmp) {
     if (tmp == null) {
         return null
     }
-    return roundValue((tmp < 0 ? abs(tmp) : 0), 2)
+    return ((BigDecimal)(tmp < 0 ? -tmp : 0)).setScale(2, BigDecimal.ROUND_HALF_UP)
 }
 
-def BigDecimal calc9(def row) {
-    def tmp = calcFor8or9(row)
+def BigDecimal calc9(def tmp) {
     if (tmp == null) {
         return null
     }
-    return roundValue((tmp >= 0 ? tmp : 0), 2)
-}
-
-def roundValue(def value, int precision) {
-    if (value != null) {
-        return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
-    } else {
-        return null
-    }
+    return ((BigDecimal)(tmp >= 0 ? tmp : 0)).setScale(2, BigDecimal.ROUND_HALF_UP)
 }
