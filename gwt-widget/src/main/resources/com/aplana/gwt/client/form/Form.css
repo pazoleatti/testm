@@ -3,11 +3,11 @@
 /* Заголовок */
 .typicalFormHeader {
     min-width: 1px;
-    height: 25px;
+    height: 26px;
     padding-left: 20px;
     padding-right: 20px;
     overflow: hidden;
-    line-height: 25px;
+    /*line-height: 26px;*/
 }
 
 /* Компоненты слева*/
@@ -24,13 +24,13 @@
     height: 100%;
     display: block;
     min-width: 1px;
+    padding-left: 10px;
 }
 
 .child-inherit {
-    display: inherit;
     float: inherit;
-    padding-left: 2px;
-    padding-right: 2px;
+    padding-left: 3px;
+    padding-right: 3px;
 }
 
 /* Элемент которые может скрываться за многоточием */
@@ -46,7 +46,7 @@
 .typicalFormBody {
     border: solid 1px #aeaeac;
     position: absolute;
-    top: 30px;
+    top: 33px;
     bottom: 0;
     right: 0;
     left: 0;

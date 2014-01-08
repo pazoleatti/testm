@@ -1,56 +1,110 @@
 package com.aplana.sbrf.taxaccounting.web.widget.style;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.ui.*;
 
-public class LeftBar extends Composite implements HasWidgets{
+import static com.google.gwt.user.client.ui.HasVerticalAlignment.*;
 
-	private static Binder uiBinder = GWT.create(Binder.class);
+public class LeftBar extends Composite implements HasWidgets {
 
-	interface Binder extends UiBinder<Widget, LeftBar> {
-	}
+    private static Binder uiBinder = GWT.create(Binder.class);
 
-	interface ButtonStyle extends CssResource {
-		String buttonMarginLeft();
-	}
+    interface Binder extends UiBinder<Widget, LeftBar> {
+    }
 
-	@UiField
-	Panel placeHolder;
+    interface ButtonStyle extends CssResource {
+        String buttonMarginLeft();
+    }
 
-	@UiField
-	ButtonStyle style;
+    private int marginRight = 5;
 
-	public LeftBar() {
-		initWidget(uiBinder.createAndBindUi(this));
-	}
+    List<Widget> widgetList = new LinkedList<Widget>();
 
-	@Override
-	public void add(Widget w) {
-		w.setStyleName(style.buttonMarginLeft(), true);
-		placeHolder.add(w);
-	}
+    @UiField
+    Panel placeHolder;
 
-	@Override
-	public void clear() {
-		placeHolder.clear();
-	}
+    @UiField
+    ButtonStyle style;
 
-	@Override
-	public Iterator<Widget> iterator() {
-		return placeHolder.iterator();
-	}
+    public LeftBar() {
+        initWidget(uiBinder.createAndBindUi(this));
+    }
 
-	@Override
-	public boolean remove(Widget w) {
-		return placeHolder.remove(w);
-	}
+    public void setChildValign(String childVerticalAligment) {
+        VerticalAlignmentConstant childVerticalAligment1 = parseValignString(childVerticalAligment);
+        for (Widget widget : widgetList) {
+            setCellValign(widget, childVerticalAligment1);
+        }
+    }
+
+    /**
+     * Установка значения правого отступа
+     *
+     * @param marginRight в пикселях
+     */
+    public void setMarginRight(int marginRight) {
+        this.marginRight = marginRight;
+        // добавляем правый отступ у остальных виджетов кроме добавляемого, потому что он последний
+        for (int i = 0; i < widgetList.size() - 1; i++) {
+            Widget widget = widgetList.get(i);
+            setWidgetMagrinRight(widget);
+        }
+    }
+
+    @Override
+    public void add(Widget w) {
+        setWidgetMagrinRight(w);
+        placeHolder.add(w);
+        widgetList.add(w);
+
+    }
+
+    @Override
+    public void clear() {
+        placeHolder.clear();
+        widgetList.clear();
+    }
+
+    @Override
+    public Iterator<Widget> iterator() {
+        return placeHolder.iterator();
+    }
+
+    @Override
+    public boolean remove(Widget w) {
+        widgetList.remove(w);
+        return placeHolder.remove(w);
+    }
+
+    private void setWidgetMagrinRight(Widget widget) {
+        widget.getElement().getStyle().setPropertyPx("marginRight", marginRight);
+    }
+
+    private void setCellValign(Widget widget, VerticalAlignmentConstant constant) {
+        Element td = DOM.getParent(widget.getElement());
+        DOM.setStyleAttribute(td, "verticalAlign", constant.getVerticalAlignString());
+    }
+
+    private VerticalAlignmentConstant parseValignString(String valign) {
+        if (ALIGN_TOP.getVerticalAlignString().equals(valign)) return ALIGN_TOP;
+        else {
+            if (ALIGN_MIDDLE.getVerticalAlignString().equals(valign)) return ALIGN_MIDDLE;
+            else {
+                if (ALIGN_BOTTOM.getVerticalAlignString().equals(valign)) return ALIGN_BOTTOM;
+                else {
+                    throw new IllegalArgumentException("Для вертикального выравнивания не существует значения " + valign);
+                }
+            }
+        }
+    }
 
 }

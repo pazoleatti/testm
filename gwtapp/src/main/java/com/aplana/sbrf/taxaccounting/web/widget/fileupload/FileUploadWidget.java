@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.fileupload;
 
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -12,6 +13,8 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -32,7 +35,12 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     FormPanel uploadFormDataXls;
 
     @UiField
-    TextBox textBox;
+    LinkButton uploadButton;
+
+    public static interface IconResource extends ClientBundle{
+        @Source("importIcon.png")
+        ImageResource icon();
+    }
 
     private String value;
     private static String actionUrl = "upload/uploadController/pattern/";
@@ -85,25 +93,18 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
             }
         });
         uploader.getElement().setId("uploaderWidget");
-        textBox.getElement().setId("fakeInput");
-        textBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                uploader.getElement().<InputElement>cast().click();
-            }
-        });
         uploader.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                //В IE в случае скрытия поля <input type='file'/> к имени файла дополнительно добавляется fakepath
-                textBox.setValue(uploader.getFilename().replaceAll(uploadPatternIE, ""));
+                uploadFormDataXls.submit();
             }
         });
     }
 
     @UiHandler("uploadButton")
     void onUploadButtonClicked(ClickEvent event){
-        uploadFormDataXls.submit();
+        uploader.getElement().<InputElement>cast().click();
+
     }
 
 }

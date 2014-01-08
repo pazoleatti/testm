@@ -32,6 +32,10 @@
             top: 75px;
         }
 
+        .marginRight5{
+            margin-right: 5px;
+        }
+
     </ui:style>
 
     <fm:MainContainer>
@@ -39,14 +43,18 @@
             <fm:HeaderContainer>
                 <fm:left>
                     <fm:Left>
-                        <g:Label ui:field="formHeader" addStyleNames="{style.titleText}" text="Список налоговых форм" />
-                        <g:Label text="—" addStyleNames="{style.titleText}"/>
+                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
+                            <g:Label ui:field="formHeader" addStyleNames="{style.titleText}, {style.marginRight5}" text="Список налоговых форм" />
+                            <g:Label text="—" addStyleNames="{style.titleText}"/>
+                        </style:LeftBar>
                     </fm:Left>
                 </fm:left>
                 <fm:right>
                     <fm:Right>
-                        <style:LinkButton ui:field="create" text="Создать налоговую форму..."
-                                          img="resources/img/add.png" title="Создание налоговой формы"/>
+                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
+                                <style:LinkButton ui:field="create" text="Создать налоговую форму..."
+                                                  img="resources/img/add.png" title="Создание налоговой формы"/>
+                        </style:LeftBar>
                     </fm:Right>
                 </fm:right>
                 <fm:resizable>

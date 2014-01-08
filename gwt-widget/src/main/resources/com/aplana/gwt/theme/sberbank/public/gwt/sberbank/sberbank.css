@@ -27,12 +27,13 @@ a, a:visited, a:hover {
     text-decoration: none;
     font-size: small;
     cursor: pointer;
-    padding: 2px 4px;
+    padding: 2px 6px;
     border: solid 1px #00940C;
     margin-left: 0;
     height: 22px;
     text-align: center;
-    line-height: 17px!important;
+    line-height: 16px!important;
+    white-space: nowrap;
 
     background-color: #00940C;
     background-image: url("images/button/button-background.png");
@@ -101,6 +102,15 @@ a, a:visited, a:hover {
 }
 
 .gwt-CheckBox {
+}
+
+.gwt-CheckBox input[type="checkbox"]{
+    vertical-align: middle;
+}
+
+
+.gwt-CheckBox label{
+    vertical-align: middle;
 }
 
 .gwt-CheckBox-disabled {

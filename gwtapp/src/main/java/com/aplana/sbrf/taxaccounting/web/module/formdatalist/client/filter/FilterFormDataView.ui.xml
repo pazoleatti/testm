@@ -10,7 +10,7 @@
         .separator {
             height: 65px;
             margin: 0 9px;
-            border-right: 1px solid #e5e3dc;
+            border-right: 1px solid #aeaeac;
         }
 
         .btnFind {
@@ -27,7 +27,6 @@
 
     <g:HorizontalPanel width="100%">
         <g:VerticalPanel>
-            <g:cell>
                 <g:HorizontalPanel>
                     <g:cell>
                         <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
@@ -73,7 +72,6 @@
 
 
                 </g:HorizontalPanel>
-            </g:cell>
         </g:VerticalPanel>
 
 
