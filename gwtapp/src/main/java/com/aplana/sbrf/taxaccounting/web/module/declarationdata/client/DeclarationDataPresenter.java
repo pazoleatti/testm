@@ -122,9 +122,7 @@ public class DeclarationDataPresenter
 														+ DeclarationListNameTokens.DECLARATION_LIST
 														+ ";nType="
 														+ result.getTaxType());
-								getView().setTitle(
-										result.getTaxType().getName() + " / "
-												+ result.getDeclarationType());
+								getView().setTitle(result.getDeclarationType());
 								updateTitle(result.getDeclarationType());
 
 								getView().showAccept(result.isCanAccept());
