@@ -1,15 +1,13 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,14 +16,12 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataSignerDao;
-import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 /**
  * Реализация DAO для работы с данными налоговых форм
@@ -225,6 +221,22 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			);
 		}
 	}
+
+    @Override
+    public List<Long> findFormDataByFormTemplate(int formTemplateId) {
+        try {
+            return getJdbcTemplate().queryForList(
+                    "select fd.id from form_data fd where fd.form_template_id = ?",
+                    new Object[] {formTemplateId},
+                    new int[] {Types.NUMERIC},
+                    Long.class
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Long>();
+        } catch (DataAccessException e) {
+            throw new DaoException("Ошибка поиска НФ для заданного шаблона %d", formTemplateId);
+        }
+    }
 
     @Override
     public FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder) {

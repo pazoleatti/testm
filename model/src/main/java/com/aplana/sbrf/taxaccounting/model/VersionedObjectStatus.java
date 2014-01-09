@@ -8,11 +8,11 @@ public enum VersionedObjectStatus {
     /** Обычная версия */
     NORMAL(0),
     /** Версия помеченная на удаление */
-    DELETED(1),
+    DELETED(-1),
     /** Черновик версии */
-    DRAFT(2),
+    DRAFT(1),
     /** Фиктивная версия */
-    FAKE(3);
+    FAKE(2);
 
     private int id;
 
@@ -22,5 +22,14 @@ public enum VersionedObjectStatus {
 
     public int getId() {
         return id;
+    }
+
+    public static VersionedObjectStatus fromId(int statusId) {
+        for (VersionedObjectStatus status : values()) {
+            if (status.getId() == statusId) {
+                return status;
+            }
+        }
+        throw new IllegalArgumentException("Wrong VersionedObjectStatus id: " + statusId);
     }
 }

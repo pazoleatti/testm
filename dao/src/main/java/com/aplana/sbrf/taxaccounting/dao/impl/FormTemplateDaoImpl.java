@@ -7,31 +7,27 @@ import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Repository
-@Transactional(readOnly = true)
 public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao {
 	@Autowired
 	private FormTypeDao formTypeDao;
@@ -52,7 +48,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		public FormTemplate mapRow(ResultSet rs, int index) throws SQLException {
 			FormTemplate formTemplate = new FormTemplate();
 			formTemplate.setId(rs.getInt("id"));
-			formTemplate.setActive(rs.getBoolean("is_active"));
 			formTemplate.setVersion(rs.getDate("version"));
 			formTemplate.setName(rs.getString("name"));
 			formTemplate.setFullName(rs.getString("fullname"));
@@ -61,6 +56,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             formTemplate.setNumberedColumns(rs.getBoolean("numbered_columns"));
             formTemplate.setFixedRows(rs.getBoolean("fixed_rows"));
             formTemplate.setCode(rs.getString("code"));
+            formTemplate.setStatus(VersionedObjectStatus.fromId(rs.getInt("status")));
             formTemplate.getStyles().addAll(formStyleDao.getFormStyles(formTemplate.getId()));
 
 			if (deepFetch) {
@@ -89,7 +85,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		JdbcTemplate jt = getJdbcTemplate();
 		try {
 			return jt.queryForObject(
-					"select id, is_active, version, name, fullname, type_id, edition, numbered_columns, fixed_rows, code, script " +
+					"select id, version, name, fullname, type_id, edition, numbered_columns, fixed_rows, code, script, status " +
                             "from form_template where id = ?",
 					new Object[]{formId},
 					new int[]{Types.NUMERIC},
@@ -104,16 +100,15 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	 * Кэш инфалидируется перед вызовом. Т.е. несмотря на результат выполнения, кэш будет сброшен.
 	 * Иначе, если версии не совпадают кэш продолжает возвращать старую версию.
 	 */
-	@Transactional(readOnly = false)
     @Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id", beforeInvocation = true),
             @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true)})
 	@Override
 	public int save(final FormTemplate formTemplate) {
 		final Integer formTemplateId = formTemplate.getId();
 
-		if (formTemplateId == null) {
+		/*if (formTemplateId == null) {
 			throw new UnsupportedOperationException("Saving of new FormTemplate is not implemented");
-		}
+		}*/
 
 		JdbcTemplate jt = getJdbcTemplate();
 		int storedEdition = jt.queryForInt("select edition from form_template where id = ? for update", formTemplateId);
@@ -138,19 +133,19 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
         // TODO: создание новых версий формы потребует инсертов в form_template
 		getJdbcTemplate().update(
-			"update form_template set data_rows = ?, data_headers = ?, edition = ?, numbered_columns = ?, is_active = ?, version = ?, fixed_rows = ?, name = ?, " +
-			"fullname = ?, code = ?, script=? where id = ?",
+			"update form_template set data_rows = ?, data_headers = ?, edition = ?, numbered_columns = ?, version = ?, fixed_rows = ?, name = ?, " +
+			"fullname = ?, code = ?, script=?, status=? where id = ?",
 			dataRowsXml,
 			dataHeadersXml,
-			storedEdition + 1,
+			storedEdition,
 			formTemplate.isNumberedColumns(),
-			formTemplate.isActive(),
 			formTemplate.getVersion(),
 			formTemplate.isFixedRows(),
-			formTemplate.getName(),
-			formTemplate.getFullName(),
+            formTemplate.getName() != null ? formTemplate.getName() : " ",
+            formTemplate.getFullName() != null ? formTemplate.getFullName() : " ",
 			formTemplate.getCode(),
-			formTemplate.getScript(),
+            formTemplate.getScript() != null ? formTemplate.getScript() : " ",
+            formTemplate.getStatus().getId(),
 			formTemplateId
 		);
 		formStyleDao.saveFormStyles(formTemplate);
@@ -160,8 +155,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
 	@Override
 	public List<FormTemplate> listAll() {
-		return getJdbcTemplate().query("select id, is_active, version, name, fullname, type_id, edition, numbered_columns, fixed_rows, code" +
-                " from form_template", new FormTemplateMapper(false));
+		return getJdbcTemplate().query("select id, version, name, fullname, type_id, edition, numbered_columns, fixed_rows, code, status" +
+                " from form_template where status = 0", new FormTemplateMapper(false));
 	}
 
 	@Override
@@ -170,8 +165,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		FormTemplate form;
 		try {
 			form =jt.queryForObject(
-                    "select * from form_template where type_id = ? and is_active = ?",
-                    new Object[]{formTypeId, 1},
+                    "select * from form_template where type_id = ? and status = ?",
+                    new Object[]{formTypeId, 0},
                     new int[]{Types.NUMERIC, Types.NUMERIC},
                     new FormTemplateMapper(false)
             );
@@ -221,7 +216,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         StringBuilder query = new StringBuilder("select form_template.id " +
                        "from form_template " +
                        "left join form_type on form_template.type_id = form_type.id " +
-                       "where is_active = ? "
+                       "where form_template.status = 0 "
         );
 
         if (filter.getTaxType() != null) {
@@ -229,8 +224,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         }
         return getJdbcTemplate().queryForList(
                 query.toString(),
-                new Object[] { filter.isActive()},
-                new int[]{Types.NUMERIC},
                 Integer.class
         );
     }
@@ -241,5 +234,158 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                 "select form_template.id from form_template",
                 Integer.class
         );
+    }
+
+    @Override
+    public List<Integer> getFormTemplateVersions(int formTypeId, int formTemplateId, List<Integer> statusList, Date actualBeginVersion, Date actualEndVersion) {
+        Map<String, Object> valueMap =  new HashMap<String, Object>();
+        valueMap.put("typeId", formTypeId);
+        valueMap.put("statusList", statusList);
+        valueMap.put("actualStartVersion", actualBeginVersion);
+        valueMap.put("actualEndVersion", actualEndVersion);
+        valueMap.put("formTemplateId", formTemplateId);
+
+        StringBuilder builder = new StringBuilder("select id");
+        builder.append(" from form_template where type_id = :typeId");
+        if (!statusList.isEmpty())
+            builder.append(" and status in (:statusList)");
+
+        if (actualBeginVersion != null && actualEndVersion != null)
+            builder.append(" and version between :actualStartVersion and :actualEndVersion");
+        else if (actualBeginVersion != null)
+            builder.append(" and version > :actualStartVersion");
+
+        if (formTemplateId != 0)
+            builder.append(" and id <> :formTemplateId");
+
+
+        builder.append(" order by version, edition");
+        try {
+            return getNamedParameterJdbcTemplate().queryForList(builder.toString(), valueMap, Integer.class);
+        } catch (DataAccessException e){
+            throw new DaoException("Ошибка при получении списка версий макетов.", e);
+        }
+    }
+
+    @Override
+    public int getNearestFTVersionIdRight(int formTypeId, List<Integer> statusList, Date actualBeginVersion) {
+        try {
+            if (actualBeginVersion == null)
+                throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
+
+            Map<String, Object> valueMap =  new HashMap<String, Object>();
+            valueMap.put("typeId", formTypeId);
+            valueMap.put("statusList", statusList);
+            valueMap.put("actualBeginVersion", actualBeginVersion);
+
+            StringBuilder builder = new StringBuilder("select * from (select id");
+            builder.append(" from form_template where type_id = :typeId");
+            builder.append(" and version > :actualBeginVersion");
+            builder.append(" and status in (:statusList) order by version, edition) where rownum = 1");
+            return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
+        } catch(EmptyResultDataAccessException e){
+            return 0;
+        } catch (DataAccessException e){
+            throw new DaoException("Ошибки при получении ближайшей версии.", e);
+        }
+    }
+
+    @Override
+    public int getNearestFTVersionIdLeft(int formTypeId, List<Integer> statusList, Date actualBeginVersion) {
+        try {
+            if (actualBeginVersion == null)
+                throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
+
+            Map<String, Object> valueMap =  new HashMap<String, Object>();
+            valueMap.put("typeId", formTypeId);
+            valueMap.put("statusList", statusList);
+            valueMap.put("actualBeginVersion", actualBeginVersion);
+
+            StringBuilder builder = new StringBuilder("select * from (select id");
+            builder.append(" from form_template where type_id = :typeId");
+            builder.append(" and version < :actualBeginVersion");
+            builder.append(" and status in (:statusList) order by version, edition) where rownum = 1");
+            return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
+        } catch(EmptyResultDataAccessException e){
+            return 0;
+        } catch (DataAccessException e){
+            throw new DaoException("Ошибки при получении ближайшей версии.", e);
+        }
+    }
+
+    @Override
+    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true)
+    public int delete(int formTemplateId) {
+        try {
+            return getJdbcTemplate().update("delete from form_template where id = ?", new Object[]{formTemplateId}, new int[]{Types.INTEGER});
+        }catch (DataAccessException e){
+            logger.error("Ошибка во время удаления.", e);
+            throw new DaoException("Ошибка во время удаления.", e);
+        }
+    }
+
+    @Override
+    public int saveNew(FormTemplate formTemplate) {
+
+        String dataRowsXml = null;
+        List<DataRow<Cell>> rows = formTemplate.getRows();
+        if (rows != null && !rows.isEmpty()) {
+            dataRowsXml = xmlSerializationUtils.serialize(rows);
+        }
+
+        String dataHeadersXml = null;
+        List<DataRow<HeaderCell>> headers = formTemplate.getHeaders();
+        if (headers != null && !headers.isEmpty()) {
+            FormDataUtils.cleanValueOners(headers);
+            dataHeadersXml = xmlSerializationUtils.serialize(headers);
+        }
+
+        int formTemplateId = generateId("seq_form_template", Integer.class);
+
+        try {
+            formTemplate.setId(formTemplateId);
+            formStyleDao.saveFormStyles(formTemplate);
+            columnDao.saveFormColumns(formTemplate);
+            getJdbcTemplate().
+                    update("insert into form_template (id, data_rows, data_headers, edition, numbered_columns, version, fixed_rows, name, fullname, code, script, status, type_id) " +
+                    "values (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                            formTemplateId,
+                            dataRowsXml,
+                            dataHeadersXml,
+                            formTemplate.getEdition(),
+                            formTemplate.isNumberedColumns(),
+                            formTemplate.getVersion(),
+                            formTemplate.isFixedRows(),
+                            formTemplate.getName() != null ? formTemplate.getName() : " ",
+                            formTemplate.getFullName() != null ? formTemplate.getFullName() : " ",
+                            formTemplate.getCode(),
+                            formTemplate.getScript() != null ? formTemplate.getScript() : " ",
+                            formTemplate.getStatus().getId(),
+                            formTemplate.getType().getId()
+                            );
+
+            return formTemplateId;
+        }catch (DataAccessException e){
+            logger.error("Ошибка при сохранении новой версии макета.",e);
+            throw new DaoException("Ошибка при сохранении новой версии макета.", e);
+        }
+    }
+
+    @Override
+    public int versionTemplateCount(int formTypeId, List<Integer> statusList) {
+        Map<String, Object> valueMap =  new HashMap<String, Object>();
+        valueMap.put("typeId", formTypeId);
+        valueMap.put("statusList", statusList);
+
+        StringBuilder builder = new StringBuilder("select count(id)");
+        builder.append(" from form_template where type_id = :typeId");
+        if (!statusList.isEmpty())
+            builder.append(" and status in (:statusList)");
+        try {
+            return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
+        } catch (DataAccessException e){
+            logger.error("Ошибка при получении числа версий.", e);
+            throw new DaoException("Ошибка при получении числа версий.", e.getMessage());
+        }
     }
 }

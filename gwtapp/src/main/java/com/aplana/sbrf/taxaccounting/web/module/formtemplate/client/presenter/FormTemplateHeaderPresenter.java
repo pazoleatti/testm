@@ -53,7 +53,7 @@ public class FormTemplateHeaderPresenter
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
-		formTemplate = event.getFormTemplate();
+		formTemplate = event.getFormTemplateExt().getFormTemplate();
 		setViewData();
 	}
 

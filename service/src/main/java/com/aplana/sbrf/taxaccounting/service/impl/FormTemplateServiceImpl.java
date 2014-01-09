@@ -17,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Реализация сервиса для работы с шаблонами налоговых форм
@@ -46,6 +43,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     private final Log logger = LogFactory.getLog(getClass());
 
+    private Calendar calendar = Calendar.getInstance();
+
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 
@@ -68,9 +67,13 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 		return formTemplateDao.get(formTemplateId);
 	}
 
+    @Transactional(readOnly = false)
 	@Override
 	public int save(FormTemplate formTemplate) {
-		return formTemplateDao.save(formTemplate);
+        if (formTemplate.getId() != null)
+		    return formTemplateDao.save(formTemplate);
+        else
+            return formTemplateDao.saveNew(formTemplate);
 	}
 
 	@Override
@@ -136,14 +139,10 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
         if(formTemplate.getRows().isEmpty()){
             formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
-        }else {
-            System.out.println("formTemplate: " + formTemplate.getRows().size());
         }
         if (formTemplate.getHeaders().isEmpty()){
             formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
             FormDataUtils.setValueOners(formTemplate.getHeaders());
-        }else {
-            System.out.println("formTemplate: " + formTemplate.getHeaders().size());
         }
         return formTemplate;
     }
@@ -155,6 +154,62 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             formTemplates.add(formTemplateDao.get(id));
         }
         return formTemplates;
+    }
+
+    @Override
+    public List<FormTemplate> getFormTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status) {
+        List<Integer> statusList = createStatusList(status);
+
+        List<Integer> formTemplateIds =  formTemplateDao.getFormTemplateVersions(formTypeId, 0, statusList, null, null);
+        List<FormTemplate> formTemplates = new ArrayList<FormTemplate>();
+        for (Integer id : formTemplateIds)
+            formTemplates.add(formTemplateDao.get(id));
+        return formTemplates;
+    }
+
+    @Override
+    public List<Integer> findFTVersionIntersections(FormTemplate formTemplate, Date actualEndVersion, VersionedObjectStatus... status) {
+        List<Integer> statusList = createStatusList(status);
+
+        Date actualBeginVersion = addCalendar(Calendar.DAY_OF_YEAR, -1, formTemplate.getVersion());
+        List<Integer> formTemplateVersionIds = new ArrayList<Integer>();
+        formTemplateVersionIds.addAll(formTemplateDao.getFormTemplateVersions(formTemplate.getType().getId(), formTemplate.getId() != null ? formTemplate.getId() : 0,
+                statusList, actualBeginVersion, actualEndVersion));
+        System.out.println(formTemplate.getId() + " " + formTemplateVersionIds.isEmpty());
+        if (!formTemplateVersionIds.isEmpty() || formTemplate.getId() != null)
+            return formTemplateVersionIds;
+        //Поиск только "левее" даты актуализации версии, т.к. остальные пересечения попали в предыдущую выборку
+        int id = formTemplateDao.getNearestFTVersionIdLeft(formTemplate.getType().getId(), statusList, formTemplate.getVersion());
+        if (id != 0)
+            formTemplateVersionIds.add(id);
+        return formTemplateVersionIds;
+    }
+
+    @Override
+    public int delete(FormTemplate formTemplate) {
+        switch (formTemplate.getStatus()){
+            case FAKE:
+                return formTemplateDao.delete(formTemplate.getId());
+            default:
+                formTemplate.setStatus(VersionedObjectStatus.DELETED);
+                return formTemplateDao.save(formTemplate);
+        }
+    }
+
+    @Override
+    public FormTemplate getNearestFTRight(FormTemplate formTemplate, VersionedObjectStatus... status) {
+        List<Integer> statusList = createStatusList(status);
+
+        int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), statusList, formTemplate.getVersion());
+        if (id == 0)
+            return null;
+        return formTemplateDao.get(id);
+    }
+
+    @Override
+    public int versionTemplateCount(int formTypeId, VersionedObjectStatus... status) {
+        List<Integer> statusList = createStatusList(status);
+        return formTemplateDao.versionTemplateCount(formTypeId, statusList);
     }
 
     @Override
@@ -236,4 +291,26 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 			}
 		}
 	}
+
+    private Date addCalendar(int fieldNumber, int numberDays, Date actualDate){
+        calendar.setTime(actualDate);
+        calendar.add(fieldNumber, numberDays);
+        Date time = calendar.getTime();
+        calendar.clear();
+        return time;
+    }
+
+    private List<Integer> createStatusList(VersionedObjectStatus[] status){
+        List<Integer> statusList = new ArrayList<Integer>();
+        if (status.length == 0){
+            statusList.add(VersionedObjectStatus.NORMAL.getId());
+            statusList.add(VersionedObjectStatus.FAKE.getId());
+            statusList.add(VersionedObjectStatus.DRAFT.getId());
+        }else {
+            for (VersionedObjectStatus objectStatus : status)
+                statusList.add(objectStatus.getId());
+        }
+
+        return statusList;
+    }
 }

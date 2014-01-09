@@ -218,4 +218,10 @@ public class FormDataDaoTest {
 	public void updateReturnSignError() {
 		formDataDao.updateReturnSign(1000, true);
 	}
+
+    @Test
+    public void testFindFormDataByFormTemplate(){
+        Assert.assertEquals(4, formDataDao.findFormDataByFormTemplate(1).size());
+        Assert.assertTrue(formDataDao.findFormDataByFormTemplate(10000).isEmpty());
+    }
 }

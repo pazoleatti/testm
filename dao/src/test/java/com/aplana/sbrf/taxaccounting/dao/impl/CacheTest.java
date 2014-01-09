@@ -91,7 +91,7 @@ public class CacheTest {
         formTemplate.setNumberedColumns(true);
         formTemplate.setFixedRows(false);
         formTemplate.setVersion(new Date());
-        formTemplate.setActive(true);
+        formTemplate.setStatus(VersionedObjectStatus.NORMAL);
         formTemplate.setName("name_3");
         formTemplate.setFullName("fullname_3");
         formTemplate.setCode("code_3");

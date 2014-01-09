@@ -1,5 +1,6 @@
-insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code, status) values (1, 1, null, date '2013-01-01', 1, 1, 0, 1, 'name_1', 'fullname_1', 'code_1', 1);
-insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code, status) values (2, 2, null, date '2013-01-01', 0, 1, 1, 0, 'name_2', 'fullname_2', 'code_2', 1);
+insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code, status) values (1, 1, null, date '2013-01-01', 1, 1, 0, 1, 'name_1', 'fullname_1', 'code_1', 0);
+insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code, status) values (2, 2, null, date '2013-01-01', 0, 1, 1, 0, 'name_2', 'fullname_2', 'code_2', 0);
+insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code, status) values (3, 2, null, date '2013-02-01', 0, 1, 1, 0, 'name_3', 'fullname_3', 'code_2', 1);
 
 insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking)
 	values (1, 'Строковый столбец', 1, 1, 'stringColumn', 'S', 10, null, 500, 1);

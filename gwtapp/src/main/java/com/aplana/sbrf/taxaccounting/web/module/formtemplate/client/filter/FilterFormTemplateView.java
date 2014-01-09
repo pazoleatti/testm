@@ -76,9 +76,11 @@ public class FilterFormTemplateView extends ViewWithUiHandlers<FilterFormTemplat
         taxType.setAcceptableValues(taxTypes);
 	}
 
-
     @UiHandler("create")
 	void onCreateButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onCreateClicked();
+        }
 	}
 
 	@UiHandler("apply")
@@ -87,4 +89,10 @@ public class FilterFormTemplateView extends ViewWithUiHandlers<FilterFormTemplat
 			getUiHandlers().onApplyClicked();
 		}
 	}
+
+    @UiHandler("delete")
+    void onDeleteTemplate(ClickEvent event){
+        if (getUiHandlers() != null)
+            getUiHandlers().onDeleteClick();
+    }
 }

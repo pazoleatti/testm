@@ -75,4 +75,9 @@ public class FilterFormTemplatePresenter extends PresenterWidget<FilterFormTempl
 		FormTemplateApplyEvent.fire(this);
 	}
 
+    @Override
+    public void onDeleteClick() {
+        FormTemplateDeleteEvent.fire(this);
+    }
+
 }

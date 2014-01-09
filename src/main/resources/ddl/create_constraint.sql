@@ -2,7 +2,7 @@ alter table configuration add constraint configuration_pk primary key (code);
 
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
-alter table form_type add constraint form_type_check_status check (status in (0, 1, 2, 3));
+alter table form_type add constraint form_type_check_status check (status in (-1, 0, 1, 2));
 
 alter table tax_period add constraint tax_period_pk primary key (id);
 alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
@@ -13,7 +13,7 @@ alter table form_template add constraint form_template_uniq_version unique(type_
 alter table form_template add constraint form_template_check_active check (is_active in (0, 1));
 alter table form_template add constraint form_template_chk_num_cols check (numbered_columns in (0, 1));
 alter table form_template add constraint form_template_chk_fixed_rows check(fixed_rows in (0, 1));
-alter table form_template add constraint form_template_check_status check (status in (0, 1, 2, 3));
+alter table form_template add constraint form_template_check_status check (status in (-1, 0, 1, 2));
 
 alter table form_style add constraint form_style_pk primary key (id);
 alter table form_style add constraint form_style_fk_form_template_id foreign key (form_template_id) references form_template (id);

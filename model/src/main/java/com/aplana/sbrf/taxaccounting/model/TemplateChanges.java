@@ -1,22 +1,23 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * User: avanteev
  */
-public class TemplateChanges {
+public class TemplateChanges implements Serializable {
     private int id;
 
     /**
      * Идентификатор НФ
      */
-    private int formTemplateId;
+    private Integer formTemplateId;
 
     /**
      * Идентификатор декларации
      */
-    private int declarationTemplateId;
+    private Integer declarationTemplateId;
     private TemplateChangesEvent event;
 
     /**
@@ -37,19 +38,19 @@ public class TemplateChanges {
         this.id = id;
     }
 
-    public int getFormTemplateId() {
+    public Integer getFormTemplateId() {
         return formTemplateId;
     }
 
-    public void setFormTemplateId(int formTemplateId) {
+    public void setFormTemplateId(Integer formTemplateId) {
         this.formTemplateId = formTemplateId;
     }
 
-    public int getDeclarationTemplateId() {
+    public Integer getDeclarationTemplateId() {
         return declarationTemplateId;
     }
 
-    public void setDeclarationTemplateId(int declarationTemplateId) {
+    public void setDeclarationTemplateId(Integer declarationTemplateId) {
         this.declarationTemplateId = declarationTemplateId;
     }
 

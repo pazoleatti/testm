@@ -1,11 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * Сервис для работы с шаблонами налоговых форм. В первую очередь предназначен для использования в админке
@@ -97,4 +99,38 @@ public interface FormTemplateService {
      * @return отфильтрованный список налоговых форм
      */
     List<FormTemplate> getByFilter(TemplateFilter filter);
+
+    /**
+     * Получить версии макетов налоговых форм с определеннным статусом
+     * @param formTypeId тип налоговой формы
+     * @param status статус версии макета НФ
+     * @return список версий налоговых форм
+     */
+    List<FormTemplate> getFormTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status);
+
+    List<Integer> findFTVersionIntersections(FormTemplate formTemplate, Date actualEndVersion, VersionedObjectStatus... status);
+
+    /**
+     * Удаление макета.
+     * Макеты со статусом фиктивной версии удаляются, с остальными статусами помечаются как удаленные
+     * @param formTemplate
+     * @return
+     */
+    int delete(FormTemplate formTemplate);
+
+    /**
+     * Возвращает версию макета ближайшую к данной спрвва.
+     * @param formTemplate версия макета
+     * @param status статус
+     * @return ближайшая правее
+     */
+    FormTemplate getNearestFTRight(FormTemplate formTemplate, VersionedObjectStatus... status);
+
+    /**
+     * Возвращает количество версий для вида шаблона
+     * @param formTypeId вид шаблона
+     * @param status статусы
+     * @return количество
+     */
+    int versionTemplateCount(int formTypeId, VersionedObjectStatus... status);
 }

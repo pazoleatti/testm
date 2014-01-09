@@ -16,7 +16,6 @@ public class FormTemplate extends IdentityObject<Integer> {
 	
 	private FormType type;
 	private Date version;
-	private boolean active;
 	private Integer edition;
 	private boolean numberedColumns;
     private boolean fixedRows;
@@ -25,17 +24,17 @@ public class FormTemplate extends IdentityObject<Integer> {
     private String fullName;
     private String code;
 
-    private TemplateStatus status;
+    private VersionedObjectStatus status;
 
     /**
      * Признак статуса шаблона
      * @return статус шаблона
      */
-    public TemplateStatus getStatus() {
+    public VersionedObjectStatus getStatus() {
         return status;
     }
 
-    public void setStatus(TemplateStatus status) {
+    public void setStatus(VersionedObjectStatus status) {
         this.status = status;
     }
 
@@ -195,22 +194,6 @@ public class FormTemplate extends IdentityObject<Integer> {
 	 */
 	public Date getVersion() {
 		return version;
-	}
-
-	/**
-	 * Признак активности шаблона формы
-	 * @return true - шаблон активен, false - шаблон неактивен
-	 */
-	public boolean isActive() {
-		return active;
-	}
-
-	/**
-	 * Задать признак активности формы
-	 * @param active true - шаблон активен, false - шаблон неактивен
-	 */
-	public void setActive(boolean active) {
-		this.active = active;
 	}
 
 	/**
