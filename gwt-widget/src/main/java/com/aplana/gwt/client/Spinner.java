@@ -1,6 +1,7 @@
 package com.aplana.gwt.client;
 
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -36,13 +37,12 @@ public class Spinner extends Composite
 	/**
 	 * Ширина кнопок инкремента и декремента.
 	 */
-	public static final int BUTTON_SIZE = DEFAULT_HEIGHT/2;
+	public static final int BUTTON_SIZE = DEFAULT_HEIGHT / 2;
 
 	/**
 	 * Ширина виджета по умолчанию в пикселях.
 	 */
 	public static final int DEFAULT_WIDTH = 145;
-
 
 	/**
 	 * Основная панель, на которой размещаются все остальные элементы.
@@ -88,9 +88,9 @@ public class Spinner extends Composite
 	 * Создает спиннер со значение по умоляанию 0.
 	 */
 	public Spinner() {
-		initBehavior();
 		initLayout();
 		initStyles();
+		initBehavior();
 	}
 
 	/**
@@ -136,18 +136,51 @@ public class Spinner extends Composite
 				}
 			}
 		});
+		textBox.addFocusHandler(new FocusHandler() {
+			@Override
+			public void onFocus(FocusEvent event) {
+				textBox.setSelectionRange(0, textBox.getText().length());
+			}
+		});
+		textBox.addKeyPressHandler(new KeyPressHandler() {
+			@Override
+			public void onKeyPress(KeyPressEvent event) {
+				int key = event.getNativeEvent().getKeyCode();
+				if (key == KeyCodes.KEY_UP) {
+					incrementValue();
+				} else if (key == KeyCodes.KEY_DOWN) {
+					decrementValue();
+				}
+			}
+		});
 		incButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				setValue(getValue() + 1, true);
+				incrementValue();
 			}
 		});
 		decButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				setValue(getValue() - 1, true);
+				decrementValue();
 			}
 		});
+
+		this.addAttachHandler(new AttachEvent.Handler() {
+			@Override
+			public void onAttachOrDetach(AttachEvent event) {
+				incButton.setTabIndex(-1);
+				decButton.setTabIndex(-1);
+			}
+		});
+	}
+
+	private void decrementValue() {
+		setValue(getValue() - 1, true);
+	}
+
+	private void incrementValue() {
+		setValue(getValue() + 1, true);
 	}
 
 	/**
@@ -245,7 +278,7 @@ public class Spinner extends Composite
 		incButton.setEnabled(enabled);
 		decButton.setEnabled(enabled);
 
-		if(enabled){
+		if (enabled) {
 			textBox.removeStyleName(STYLE_DISABLED);
 			incButton.removeStyleName(STYLE_DISABLED);
 			decButton.removeStyleName(STYLE_DISABLED);

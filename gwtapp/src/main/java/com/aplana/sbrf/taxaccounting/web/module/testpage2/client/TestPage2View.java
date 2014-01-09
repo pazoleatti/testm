@@ -1,18 +1,23 @@
 package com.aplana.sbrf.taxaccounting.web.module.testpage2.client;
 
 //import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentTreeWidget;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTree;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.SimpleTree;
+import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.NoSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -37,6 +42,12 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
     Button ok;
 
     @UiField
+    Button h;
+
+    @UiField
+    Button w;
+
+    @UiField
     Button add;
 
     @UiField
@@ -52,17 +63,27 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
 
     private int tmpId = 1000;
 
+    @UiField
+    DataGrid<DataRow<Cell>> formDataTable;
+
+    @UiField
+    FlexiblePager pager;
+
+    private NoSelectionModel<DataRow<Cell>> selectionModel;
+
     @Inject
     public TestPage2View(final Binder uiBinder) {
         initTree();
         simpleTree = new SimpleTree("Наименование подразделения", true);
         initMultiSelectTree(simpleTree);
         simpleTree2 = new SimpleTree("Наименование подразделения 2", false);
+//        simpleTree2.setHeaderVisible();
         initMultiSelectTree(simpleTree2);
 
 //        initMultiSelectTree(simpleTree2);
 
         initWidget(uiBinder.createAndBindUi(this));
+        initPager();
     }
 
     void initTree() {
@@ -107,7 +128,7 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
         List<MultiSelectTreeItem> items = new ArrayList<MultiSelectTreeItem>();
         MultiSelectTreeItem item1 = new MultiSelectTreeItem(1, "Открытое акционерное общестро «Сбербанк России»");
         MultiSelectTreeItem item2 = new MultiSelectTreeItem(2, "222222222222222222222222222222222222222222222222222");
-        MultiSelectTreeItem item3 = new MultiSelectTreeItem(3, "333");
+        MultiSelectTreeItem item3 = new MultiSelectTreeItem(3, "333", null);
         MultiSelectTreeItem item33 = new MultiSelectTreeItem(33, "333-333");
         MultiSelectTreeItem item4 = new MultiSelectTreeItem(4, "444");
         MultiSelectTreeItem item5 = new MultiSelectTreeItem(5, "Байкальский банк 555");
@@ -199,5 +220,38 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
     @UiHandler("multiSelection")
     void onValueChangeMultiSelection(ValueChangeEvent<Boolean> event) {
         simpleTree.setMultiSelection(event.getValue());
+    }
+
+    @UiHandler("h")
+    void hButtonClicked(ClickEvent event) {
+        int x = simpleTree.getOffsetHeight();
+        x = (x > 700 ? 200 : x + 50);
+        simpleTree.setHeight(x + "px");
+    }
+
+    @UiHandler("w")
+    void wButtonClicked(ClickEvent event) {
+        int x = simpleTree.getOffsetWidth();
+        x = (x > 700 ? 200 : x + 50);
+        simpleTree.setWidth(x + "px");
+    }
+
+    private void initPager() {
+        selectionModel = new NoSelectionModel<DataRow<Cell>>();
+        formDataTable.setSelectionModel(selectionModel);
+        ArrayList<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+        int count = 20;
+        for (int i = 0; i < count; i++) {
+            dataRows.add(new DataRow<Cell>());
+        }
+
+        setRowsData(1, count, dataRows);
+        pager.setDisplay(formDataTable);
+    }
+
+    private void setRowsData(int start, int totalCount, List<DataRow<Cell>> rowsData) {
+        // Window.alert("182!");
+        formDataTable.setRowCount(totalCount);
+        formDataTable.setRowData(start, rowsData);
     }
 }

@@ -2,25 +2,51 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:t="urn:import:com.aplana.sbrf.taxaccounting.web.widget.multiselecttree"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
         >
     <!--xmlns:p="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"-->
     <ui:style>
         .treeStyle {
             padding: 10px 0 10px 40px;
         }
+        .msileft {
+            margin-left: 10px;
+            border-style: none;
+        }
+        .pager {
+            float: right;
+        }
+
+        .pagerBar {
+            background-color: #E8E1CF;
+            margin-left: 10px;
+        }
+
     </ui:style>
 
     <g:VerticalPanel>
+        <g:HorizontalPanel width="600px">
+            <style:GenericDataGrid height="200px" ui:field="formDataTable"/>
+        </g:HorizontalPanel>
+        <g:HorizontalPanel addStyleNames="{style.pagerBar}" width="600px">
+            <pager:FlexiblePager ui:field="pager" location="CENTER"
+                                 showFastForwardButton="false" fastForwardRows="0"
+                                 showLastPageButton="true" styleName="{style.pager}" />
+        </g:HorizontalPanel>
+
         <g:HorizontalPanel styleName="{style.treeStyle}">
             <g:Button ui:field="ok" text="ok"/>
             <g:Button ui:field="add" text="add"/>
             <g:Button ui:field="del" text="del"/>
             <g:CheckBox ui:field="selectChild" text="выбирать с дочерними узлами"/>
             <g:CheckBox ui:field="multiSelection" text="множественный выбор"/>
+            <g:Button ui:field="h" text="h+"/>
+            <g:Button ui:field="w" text="w+"/>
         </g:HorizontalPanel>
-        <g:HorizontalPanel styleName="{style.treeStyle}">
+        <g:HorizontalPanel styleName="{style.treeStyle}" height="200px">
             <t:SimpleTree ui:field="simpleTree"/>
-            <t:SimpleTree ui:field="simpleTree2"/>
+            <t:SimpleTree ui:field="simpleTree2" addStyleNames="{style.msileft}" headerVisible="false"/>
         </g:HorizontalPanel>
 
         <g:HorizontalPanel styleName="{style.treeStyle}">

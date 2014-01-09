@@ -1,11 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
@@ -108,12 +109,14 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		List<Long> rowsId = new ArrayList<Long>();
 		rowsId.add(getView().getSelectedRow().getRefBookRowId());
 		action.setRecordsId(rowsId);
-		action.setRelevanceDate(getView().getRelevanceDate());
+        action.setDeleteVersion(false);
 		dispatcher.execute(action,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<DeleteRefBookRowResult>() {
 							@Override
 							public void onSuccess(DeleteRefBookRowResult result) {
+                                LogCleanEvent.fire(RefBookDataPresenter.this);
+                                LogAddEvent.fire(RefBookDataPresenter.this, result.getUuid());
 								editFormPresenter.show(null);
 								editFormPresenter.setEnabled(false);
 								getView().updateTable();
@@ -139,6 +142,9 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
+        editFormPresenter.setVersionMode(false);
+        editFormPresenter.setCurrentRecordId(null);
+        editFormPresenter.setRecordId(null);
 		GetRefBookAttributesAction action = new GetRefBookAttributesAction();
 		refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
 		action.setRefBookId(refBookDataId);

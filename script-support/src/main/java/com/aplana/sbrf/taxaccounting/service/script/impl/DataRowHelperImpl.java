@@ -109,7 +109,9 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public void update(List<DataRow<Cell>> dataRows) {
-		dataRowDao.updateRows(fd, dataRows);
+        FormDataUtils.cleanValueOners(dataRows);
+        dataRowDao.updateRows(fd, dataRows);
+        FormDataUtils.setValueOners(dataRows);
 	}
 
 	@Override
@@ -138,9 +140,11 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public void save(List<DataRow<Cell>> dataRows) {
+        FormDataUtils.cleanValueOners(dataRows);
 		dataRowDao.saveRows(fd, dataRows);
+        FormDataUtils.setValueOners(dataRows);
         this.dataRows = dataRows;
-	}
+    }
 
     @Override
     public DataRow getDataRow(List<DataRow<Cell>> dataRows, String rowAlias) {

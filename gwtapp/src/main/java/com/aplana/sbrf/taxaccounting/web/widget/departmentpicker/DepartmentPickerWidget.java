@@ -12,6 +12,7 @@ import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.SimpleTree;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -25,8 +26,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -47,7 +46,7 @@ public class DepartmentPickerWidget extends Composite implements
 	public Label header;
 
 	@UiField
-	public Tree tree;
+	public SimpleTree tree;
 
 	@UiField
 	public Button ok;
@@ -64,13 +63,11 @@ public class DepartmentPickerWidget extends Composite implements
 
 	boolean multiselection;
 
-	public static final String CHECKBOX_GROUP = "MAIN_GROUP";
-
-	
 	public DepartmentPickerWidget(String header, boolean multiselection) {
 		this();
 		setHeader(header);
 		this.multiselection = multiselection;
+        tree.setMultiSelection(multiselection);
 	}
 	
 	public DepartmentPickerWidget() {
@@ -81,18 +78,18 @@ public class DepartmentPickerWidget extends Composite implements
 	public void setAvalibleValues(List<Department> departments,
 			Set<Integer> availableDepartments) {
 		tree.clear();
-		List<TreeItem> itemsHierarchy = flatToHierarchy(departments,
+		List<DepartmentTreeItem> itemsHierarchy = flatToHierarchy(departments,
 				availableDepartments);
-		Collections.sort(itemsHierarchy, new Comparator<TreeItem>() {
+		Collections.sort(itemsHierarchy, new Comparator<DepartmentTreeItem>() {
 			@Override
-			public int compare(TreeItem o1, TreeItem o2) {
+			public int compare(DepartmentTreeItem o1, DepartmentTreeItem o2) {
 				return ((CheckBox) o1.getWidget()).getText()
 						.compareToIgnoreCase(
 								((CheckBox) o2.getWidget()).getText());
 			}
 		});
-		for (TreeItem item : itemsHierarchy) {
-			tree.addItem(item);
+		for (DepartmentTreeItem item : itemsHierarchy) {
+			tree.addTreeItem(item);
 		}
 	}
 
@@ -167,10 +164,10 @@ public class DepartmentPickerWidget extends Composite implements
 		}
 	}
 
-	private List<TreeItem> flatToHierarchy(final List<Department> list,
+	private List<DepartmentTreeItem> flatToHierarchy(final List<Department> list,
 			final Set<Integer> availableDepartments) {
-		final Map<Integer, TreeItem> lookup = new LinkedHashMap<Integer, TreeItem>();
-		final List<TreeItem> nested = new ArrayList<TreeItem>();
+		final Map<Integer, DepartmentTreeItem> lookup = new LinkedHashMap<Integer, DepartmentTreeItem>();
+		final List<DepartmentTreeItem> nested = new ArrayList<DepartmentTreeItem>();
 		final Map<Integer, Department> idToDepMap = new HashMap<Integer, Department>();
 		for (Department dep : list) {
 			idToDepMap.put(dep.getId(), dep);
@@ -200,16 +197,11 @@ public class DepartmentPickerWidget extends Composite implements
 			}
 		});
 		for (Department department : list) {
-			CheckBox checkBox;
-			if (multiselection) {
-				checkBox = new CheckBox(department.getName());
-			} else {
-				checkBox = new RadioButton(CHECKBOX_GROUP, department.getName());
-			}
-			if (availableDepartments!=null && !availableDepartments.contains(department.getId())) {
-				checkBox.setEnabled(false);
-			}
-			TreeItem newItem = new TreeItem(checkBox);
+
+            DepartmentTreeItem newItem = new DepartmentTreeItem(department, multiselection);
+            if (availableDepartments!=null && !availableDepartments.contains(department.getId())) {
+                ((CheckBox) newItem.getWidget()).setEnabled(false);
+            }
 			newItem.setUserObject(new Pair<Integer, String>(department.getId(),
 					department.getName()));
 			if (department.getParentId() != null

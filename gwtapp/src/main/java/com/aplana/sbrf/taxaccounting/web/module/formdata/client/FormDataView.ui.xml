@@ -4,155 +4,275 @@
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
              xmlns:fileuplod="urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload"
+             xmlns:fm="urn:import:com.aplana.gwt.client.form"
         >
+
     <ui:style>
-        .lockInformation {
-            height: 30px;
-            background: #FFDC82;
-            padding-left: 15px;
-            margin-bottom: 5px;
-            padding-top: 10px;
-            font-size: 16px;
-            border: 1px solid #DBDBDB;
+
+        .titleText {
+            font-size: 14px !important;
+            color: #636460;
+            white-space: nowrap;
         }
 
-        .titleLabel {
-            font-size: 16px;
-            max-height: 28px;
-            overflow: hidden;
-            line-height: 28px;
+        .titleText div {
+            font-size: 14px !important;
         }
 
-        .titleGradient {
-            position: absolute;
-            background: url("resources/img/form_title_gradient.png");
-            width: 64px;
-            height: 32px;
-            right: 790px;
+        .infoPanel {
+            padding: 5px 25px 0 30px;
+        }
+
+        .editMode {
+            color: #aeaeac;
         }
 
         .headerAttr {
-            margin-left: 5px;
             font-size: 12px;
             font-weight: bold;
-            margin-right: 20px;
+            max-height: 54px;
+            overflow: hidden;
+        }
+
+        .depAttr{
+            line-height: 17px;
         }
 
         .headerAttrName {
             font-size: 12px;
-            text-align: right;
+            line-height: 17px;
         }
 
-        .manualInput {
-            margin-top: 5px;
+        .reportPeriodLabel {
+            font-size: 12px;
+            font-weight: bold;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            -ms-text-overflow: ellipsis;
+        }
+
+        .depatmentBlock {
+            max-width: 560px;
+            min-width: 350px;
+        }
+
+        .centerBlock {
+            padding-left: 5px;
+        }
+
+        .infoValuesBlock {
+            min-width: 100px;
+        }
+
+        .btnPanel {
+            padding-left: 7px;
+            height: 23px;
+        }
+
+        .btnPanel td{
+           vertical-align: middle !important;
         }
 
         .showCheckedColumns {
-            margin-top: 5px;
             font-size: 12px;
+            padding-right: 10px;
+            white-space: nowrap;
         }
 
-        .attrPanel {
-            float: right;
+        .table {
+            position: absolute !important;
+            bottom: 30px;
+            right: 0;
+            left: 0;
+            top: 104px;     /*@see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataView.DEFAULT_TABLE_TOP_POSITION"*/
         }
 
         .pager {
-            margin-right: auto;
-            margin-left: auto;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        .horSep {
+            height: 1px;
+            margin: 4px 9px;
+            border-top: 1px solid #aeaeac;
+        }
+
+        .verSep {
+            height: 22px;
+            margin: 0 9px;
+            border-right: 1px solid #aeaeac;
+        }
+
+        .btnMarginRight{
+            margin-right: 9px;
+        }
+
+        .marginRight5{
+            margin-right: 5px;
         }
 
     </ui:style>
 
+    <ui:style field="lockInformationStyle">
+        .lockInformation {
+            height: 25px;
+            line-height: 25px;
+            background: #FFDC82;
+            padding-left: 15px;
+            margin: 2px;
+            font-size: 14px;
+            border: 1px solid #DBDBDB;
+
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            -ms-text-overflow: ellipsis;
+        }
+    </ui:style>
+    
     <ui:with field="formDataProvider" type="com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataView"/>
-	<g:DockLayoutPanel ui:field="dockPanel" unit='PX' height="100%" width="100%">
-        <g:north size="100">
-            <g:HorizontalPanel height="100px" width="100%">
-                <g:FlowPanel>
-                    <g:HorizontalPanel height="28px">
-                        <g:cell width="25px">
-                            <style:LinkAnchor title="Перейти к списку налоговых форм" ui:field="returnAnchor" img="resources/img/arrow-left-24.png"/>
-                        </g:cell>
-                        <g:cell verticalAlignment="middle">
-                            <g:HorizontalPanel>
-                                <g:Label ui:field="title" addStyleNames="{style.titleLabel}"/>
-                                <g:SimplePanel styleName="{style.titleGradient}"/>
-                            </g:HorizontalPanel>
-                        </g:cell>
-                    </g:HorizontalPanel>
-                    <g:HorizontalPanel height="35px">
-                        <g:cell width="220px" verticalAlignment="middle">
-                            <style:LinkButton ui:field="signersAnchor" text="Исполнитель и подписанты"
-                                img="resources/img/businessperson-16.png" title="Указать исполнителя и список подписантов налоговой формы"/>
-                        </g:cell>
-                        <g:cell verticalAlignment="middle">
-                            <style:LinkButton ui:field="printAnchor" text="Печать" img="resources/img/printer-16.png" title="Отобразить печатное представление документа"/>
-                        </g:cell>
-                    </g:HorizontalPanel>
-                    <style:Bar height="30px">
-                        <style:LeftBar>
-                            <g:Button ui:field="checkButton">Проверить</g:Button>
-                            <g:Button ui:field="recalculateButton">Рассчитать</g:Button>
-                            <style:LinkButton ui:field="addRowButton" text="Добавить строку"/>
-                            <style:LinkButton ui:field="removeRowButton" text="Удалить строку"/>
-                            <g:Button ui:field="originalVersionButton">Исходная версия</g:Button>
-                            <g:Button ui:field="deleteFormButton">Удалить</g:Button>
+
+    <fm:MainContainer>
+        <fm:header>
+            <fm:HeaderContainer>
+                <fm:left>
+                    <fm:Left>
+                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
+                            <style:LinkAnchor title="Перейти к списку налоговых форм" ui:field="returnAnchor"
+                                              disableImage="true" addStyleNames="{style.titleText}"/>
+                            <g:Label text="—" addStyleNames="{style.titleText}"/>
                         </style:LeftBar>
-                        <style:LeftBar ui:field="workflowButtons" />
-                    </style:Bar>
-                </g:FlowPanel>
-                <g:FlowPanel width="790px" addStyleNames="{style.attrPanel}">
-                    <g:FlowPanel height="63px">
-                        <g:HorizontalPanel>
-                            <g:Label width="100px" text="Подразделение:" addStyleNames="{style.headerAttrName}" />
-                            <g:Label ui:field="departmentIdLabel" addStyleNames="{style.headerAttr}" />
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label width="100px" text="Тип:" addStyleNames="{style.headerAttrName}" />
-                            <g:Label ui:field="formKindLabel" addStyleNames="{style.headerAttr}" />
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label width="100px" text="Период:" addStyleNames="{style.headerAttrName}" />
-                            <g:Label ui:field="reportPeriodLabel" addStyleNames="{style.headerAttr}" />
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label width="100px" text="Состояние:" addStyleNames="{style.headerAttrName}" />
-                            <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}" />
-                            <style:LinkButton ui:field="infoAnchor" text="Информация" img="resources/img/exclamation_mark.png" title="Отобразить историю налоговой формы"/>
-                        </g:HorizontalPanel>
-                    </g:FlowPanel>
-                    <g:HorizontalPanel height="30px">
-                        <g:SimplePanel width="245px" ui:field="manualInputPanel" addStyleNames="{style.manualInput}">
-                            <style:LinkButton text="Ручной ввод" ui:field="manualInputAnchor" img="resources/img/pencil-16.png"
-                                 title="Перейти в режим редактирования"/>
-                        </g:SimplePanel>
-                        <g:HorizontalPanel ui:field="saveCancelPanel" height="100%" spacing="5">
-                            <g:Button ui:field="saveButton" text="Сохранить" />
-                            <g:Button ui:field="cancelButton" text="Выход" />
-                            <fileuplod:FileUploadWidget ui:field="fileUploader"/>
-                        </g:HorizontalPanel>
-                        <g:CheckBox ui:field="showCheckedColumns" value="true"
-                                    addStyleNames="{style.showCheckedColumns}"
-                                    text="Показывать контрольные поля"/>
-                    </g:HorizontalPanel>
-                </g:FlowPanel>
-            </g:HorizontalPanel>
-        </g:north>
+                    </fm:Left>
+                </fm:left>
+                <fm:right>
+                    <fm:Right>
+                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
+                            <g:Label ui:field="editModeLabel" text="Режим редактирования"
+                                     addStyleNames="{style.editMode}, {style.marginRight5}"/>
+                            <fileuplod:FileUploadWidget ui:field="fileUploader" width="185px"/>
+                        </style:LeftBar>
+                    </fm:Right>
+                </fm:right>
+                <fm:resizable>
+                    <fm:Resizable>
+                        <g:Label ui:field="title"/>
+                    </fm:Resizable>
+                </fm:resizable>
+            </fm:HeaderContainer>
+        </fm:header>
 
-        <g:north size="30">
-            <g:Label ui:field="lockInformation" visible="false" addStyleNames="{style.lockInformation}" />
-        </g:north>
+        <fm:body>
+            <fm:BodyContainer>
 
-        <g:center>
-            <g:ResizeLayoutPanel>
-                <style:GenericDataGrid height="100%" ui:field="formDataTable" />
-            </g:ResizeLayoutPanel>
-        </g:center>
-        <g:south size="30">
-            <pager:FlexiblePager ui:field="pager" location="CENTER"
-                                 showFastForwardButton="false" fastForwardRows="0"
-                                 showLastPageButton="true" styleName="{style.pager}" />
-        </g:south>
-	</g:DockLayoutPanel>
+                <g:HorizontalPanel width="100%" addStyleNames="{style.infoPanel}">
+                    <!--Подразделение. Левая часть-->
+                    <g:cell>
+                        <g:HorizontalPanel spacing="2" height="58px" addStyleNames="{style.depatmentBlock}">
+                            <g:cell width="95px">
+                                <g:Label text="Подразделение:" addStyleNames="{style.headerAttrName}"/>
+                            </g:cell>
+                            <g:cell horizontalAlignment="left">
+                                <g:Label ui:field="departmentIdLabel" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
+                            </g:cell>
+                        </g:HorizontalPanel>
+                    </g:cell>
+                    <!--Инфо по форме. Середина-->
+                    <g:cell horizontalAlignment="left" width="90%">
+                        <g:HorizontalPanel ui:field="centerBlock" height="58px" addStyleNames="{style.centerBlock}" >
+                            <g:cell width="145px" >
+                                <g:VerticalPanel spacing="2" horizontalAlignment="right" width="145px">
+                                    <g:Label text="Тип налоговой формы:" addStyleNames="{style.headerAttrName}"/>
+                                    <g:Label text="Период:" addStyleNames="{style.headerAttrName}"/>
+                                    <g:Label text="Состояние:" addStyleNames="{style.headerAttrName}"/>
+                                </g:VerticalPanel>
+                            </g:cell>
+                            <g:cell>
+                                <g:VerticalPanel spacing="2" addStyleNames="{style.infoValuesBlock}">
+                                    <g:Label ui:field="formKindLabel" addStyleNames="{style.headerAttr}, {style.depAttr} "/>
+                                    <g:Label ui:field="reportPeriodLabel" addStyleNames="{style.reportPeriodLabel}, {style.depAttr}"/>
+                                    <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
+                                </g:VerticalPanel>
+                            </g:cell>
+                        </g:HorizontalPanel>
+                    </g:cell>
+                    <g:cell width="10%">
+                        <g:Label width="100%"/>
+                    </g:cell>
+                    <!--Правые кнопки ссылки-->
+                    <g:cell horizontalAlignment="right">
+                        <g:VerticalPanel width="180px" spacing="2">
+                            <style:LinkButton ui:field="signersAnchor" text="Исполнитель и подписанты"
+                                              img="resources/img/businessperson-16.png"
+                                              title="Указать исполнителя и список подписантов налоговой формы"/>
+                            <style:LinkButton ui:field="infoAnchor" text="История изменений"
+                                              img="resources/img/exclamation_mark.png"
+                                              title="Отобразить историю налоговой формы"/>
+                            <style:LinkButton ui:field="printAnchor" text="Печать" img="resources/img/printer-16.png"
+                                              title="Отобразить печатное представление документа"/>
+                        </g:VerticalPanel>
+                    </g:cell>
 
+                </g:HorizontalPanel>
+
+                <g:Label addStyleNames="{style.horSep}"/>
+
+                <!--Панель кнопок-->
+
+                <g:HorizontalPanel addStyleNames="{style.btnPanel}">
+                    <g:cell>
+                        <g:HorizontalPanel ui:field="addRemoveRowsBlock">
+                            <style:LinkButton ui:field="addRowButton" text="Добавить строку" addStyleNames="{style.btnMarginRight}"
+                                              img="resources/img/row-add.png" />
+                            <style:LinkButton ui:field="removeRowButton" text="Удалить строку"
+                                              img="resources/img/row-delete.png"/>
+                            <g:Label addStyleNames="{style.verSep}"/>
+                        </g:HorizontalPanel>
+                    </g:cell>
+                    <g:cell>
+                        <g:HorizontalPanel>
+                            <g:Button ui:field="checkButton" text="Проверить" addStyleNames="{style.btnMarginRight}"/>
+                            <g:Button ui:field="recalculateButton" text="Рассчитать" addStyleNames="{style.btnMarginRight}"/>
+                            <style:LeftBar ui:field="workflowButtons" marginRight="9" addStyleNames="{style.btnMarginRight}"/>
+                            <g:Button ui:field="deleteFormButton" text="Удалить" addStyleNames="{style.btnMarginRight}"/>
+                            <g:Button ui:field="originalVersionButton" text="Исходная версия"/>
+
+                            <g:Label addStyleNames="{style.verSep}"/>
+                        </g:HorizontalPanel>
+                    </g:cell>
+                    <g:cell>
+                        <style:LinkButton ui:field="manualInputAnchor" text="Редактировать..."
+                                          img="resources/img/pencil-16.png"
+                                          title="Перейти в режим редактирования" addStyleNames="{style.btnMarginRight}"/>
+                    </g:cell>
+                    <g:cell>
+                        <g:HorizontalPanel ui:field="saveCancelPanel">
+                                <g:Button ui:field="saveButton" text="Сохранить" addStyleNames="{style.btnMarginRight}"/>
+                                <g:Button ui:field="cancelButton" text="Выход"/>
+                        </g:HorizontalPanel>
+                    </g:cell>
+                    <g:cell width="100%">
+                        <g:Label width="100%"/>
+                    </g:cell>
+                    <g:cell horizontalAlignment="right">
+                        <g:CheckBox ui:field="showCheckedColumns" addStyleNames="{style.showCheckedColumns}"
+                                    value="true" text="Показывать контрольные поля" width="225px" height="22px"/>
+                    </g:cell>
+                </g:HorizontalPanel>
+
+
+                <g:Label ui:field="lockInformation" visible="false"
+                         addStyleNames="{lockInformationStyle.lockInformation}"/>
+
+                <style:GenericDataGrid ui:field="formDataTable" addStyleNames="{style.table}"/>
+                <pager:FlexiblePager ui:field="pager" addStyleNames="{style.pager}"
+                                     location="CENTER" showFastForwardButton="false"
+                                     fastForwardRows="0" showLastPageButton="true"/>
+
+            </fm:BodyContainer>
+        </fm:body>
+    </fm:MainContainer>
 
 </ui:UiBinder>

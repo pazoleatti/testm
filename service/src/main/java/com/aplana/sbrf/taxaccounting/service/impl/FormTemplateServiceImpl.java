@@ -136,10 +136,14 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
         if(formTemplate.getRows().isEmpty()){
             formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
+        }else {
+            System.out.println("formTemplate: " + formTemplate.getRows().size());
         }
         if (formTemplate.getHeaders().isEmpty()){
             formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
             FormDataUtils.setValueOners(formTemplate.getHeaders());
+        }else {
+            System.out.println("formTemplate: " + formTemplate.getHeaders().size());
         }
         return formTemplate;
     }
@@ -178,11 +182,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	@Override
 	public void validateFormTemplate(FormTemplate formTemplate, Logger logger) {
 		//TODO: подумать над обработкой уникальности версии, на данный момент версия не меняется
-
-		if (formTemplate.getVersion().getBytes().length > FORM_VERSION_MAX_VALUE) {
-			logger.error("значение для версии шаблона формы слишком велико (фактическое: " +
-					formTemplate.getVersion().getBytes().length + ", максимальное: "+ FORM_VERSION_MAX_VALUE + ")");
-		}
 
 		validateFormColumns(formTemplate.getColumns(), logger);
 		validateFormStyles(formTemplate.getStyles(), logger);

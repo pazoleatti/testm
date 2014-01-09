@@ -60,17 +60,17 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void showSaveCancelPanel(boolean show);
 
-		void showRecalculateButton(boolean show);
+        void showAddRemoveRowsBlock(boolean show);
+
+        void showRecalculateButton(boolean show);
 
 		void showCheckButton(boolean show);
 
-		void showAddRowButton(boolean show);
-
-		void showRemoveRowButton(boolean show);
-
 		void showPrintAnchor(boolean show);
 
-		void showManualInputAnchor(boolean show);
+        void showEditModeLabel(boolean show);
+
+        void showManualInputAnchor(boolean show);
 
 		void showDeleteFormButton(boolean show);
 
@@ -157,9 +157,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		
 		MyView view = getView();
 		view.showSaveCancelPanel(false);
-		view.showRemoveRowButton(false);
+        view.showAddRemoveRowsBlock(false);
 		view.showRecalculateButton(false);
-		view.showAddRowButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
 		view.showManualInputAnchor(false);
@@ -168,7 +167,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		
 		view.setWorkflowButtons(null);
 		view.showCheckButton(false);
-
+        view.showEditModeLabel(false);
 	}
 
 	protected void setReadUnlockedMode() {
@@ -176,9 +175,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		
 		MyView view = getView();
 		view.showSaveCancelPanel(false);
-		view.showRemoveRowButton(false);
+        view.showEditModeLabel(false);
+        view.showAddRemoveRowsBlock(false);
 		view.showRecalculateButton(false);
-		view.showAddRowButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
 		view.showManualInputAnchor(formDataAccessParams.isCanEdit());
@@ -202,9 +201,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		}
 
 		view.showSaveCancelPanel(true);
+        view.showEditModeLabel(true);
 		view.showRecalculateButton(true);
-		view.showAddRowButton(!fixedRows);
-		view.showRemoveRowButton(!fixedRows);
+        view.showAddRemoveRowsBlock(!fixedRows);
 
 		view.showPrintAnchor(false);
 		view.showManualInputAnchor(false);

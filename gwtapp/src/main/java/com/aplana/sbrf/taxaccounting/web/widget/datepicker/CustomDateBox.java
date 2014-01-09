@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
@@ -17,12 +18,14 @@ import com.google.gwt.user.client.ui.*;
 import java.util.Date;
 
 public class CustomDateBox extends Composite implements HasEnabled, HasVisibility, HasValue<Date>{
-	interface DateBoxUiBinder extends UiBinder<Widget, CustomDateBox> {
+
+    interface DateBoxUiBinder extends UiBinder<Widget, CustomDateBox> {
 	}
 
 	private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy");
 	private final PopupPanel datePickerPanel = new PopupPanel(true, true);
 	private final DatePickerWithYearSelector datePicker = new DatePickerWithYearSelector();
+    private final Button clearButton = new Button();
 	private static DateBoxUiBinder ourUiBinder = GWT.create(DateBoxUiBinder.class);
 	private String lastValidDate;
 
@@ -33,13 +36,29 @@ public class CustomDateBox extends Composite implements HasEnabled, HasVisibilit
 	Image dateImage;
 
     private Date value;
+    private boolean canBeEmpty = false;
 
 	public CustomDateBox() {
 		initWidget(ourUiBinder.createAndBindUi(this));
+        VerticalPanel vPanel = new VerticalPanel();
 
-		datePickerPanel.setWidth("200");
-		datePickerPanel.setHeight("200");
-		datePickerPanel.add(datePicker);
+//      (aivanov) 8.1.14. Убрал потому как в ие размеры не уменьшались, если что то не то сделал - сообщите
+//		datePickerPanel.setWidth("200");
+//		datePickerPanel.setHeight("200");
+        vPanel.add(datePicker);
+
+        clearButton.setText("Очистить");
+        clearButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                value = null;
+                dateBox.setValue(null);
+                datePickerPanel.hide();
+            }
+        });
+        clearButton.setVisible(canBeEmpty);
+        vPanel.add(clearButton);
+        datePickerPanel.add(vPanel);
 		addDatePickerHandlers();
 		addDateBoxHandlers();
 	}
@@ -84,6 +103,11 @@ public class CustomDateBox extends Composite implements HasEnabled, HasVisibilit
 	public void setValue(Date value) {
         this.setValue(value, false);
 	}
+
+    public void setCanBeEmpty(boolean canBeEmpty) {
+        this.canBeEmpty = canBeEmpty;
+        clearButton.setVisible(canBeEmpty);
+    }
 
 	@Override
 	public void setValue(Date value, boolean fireEvents) {

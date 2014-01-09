@@ -348,7 +348,6 @@ public final class XmlSerializationUtils {
 		if (valueNode != null) {
 			cell.setValue(valueNode.getNodeValue());
 		}
-		
 	}
 	
 	
@@ -404,8 +403,6 @@ public final class XmlSerializationUtils {
 			cell.setEditable(false);
 		}
 	}
-	
-	
 
 	/**
 	 * Читает DOM-документ из XML-строки

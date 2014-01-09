@@ -16,7 +16,6 @@ public class GetDeclarationDataResult implements Result {
 
 	private boolean canAccept;
 	private boolean canReject;
-	private boolean canDownload;
 	private boolean canDelete;
 	
 	/**
@@ -70,14 +69,6 @@ public class GetDeclarationDataResult implements Result {
 
 	public void setDeclarationType(String declarationType) {
 		this.declarationType = declarationType;
-	}
-
-	public boolean isCanDownload() {
-		return canDownload;
-	}
-
-	public void setCanDownload(boolean canDownload) {
-		this.canDownload = canDownload;
 	}
 
 	public boolean isCanDelete() {

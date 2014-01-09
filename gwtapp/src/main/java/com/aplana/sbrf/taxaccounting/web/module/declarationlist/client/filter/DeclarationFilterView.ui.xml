@@ -5,39 +5,59 @@
     xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
     xmlns:per="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
 
-    <g:VerticalPanel>
-        <g:cell>
-            <g:HorizontalPanel>
-                <g:cell width="250px">
-                    <g:FlowPanel>
-                        <g:Label width="200px" text="Подразделение" />
-                        <dep:DepartmentPickerPopupWidget width="200px" header="Выберите подразделение" multiselection="true" ui:field="departmentPicker" modal="true"/>
-                    </g:FlowPanel>
+    <ui:style>
+        .separator {
+            height: 22px;
+            margin: 0 15px;
+            border-right: 1px solid #aeaeac;
+        }
 
-                </g:cell>
+        .btnPanel {
+            height: 30px;
+            width: 100%;
+        }
 
-                <g:cell width="250px">
-                    <g:FlowPanel>
-                        <g:Label width="200px" text="Отчетный период" />
-                        <per:PeriodPickerPopupWidget multiselect="true" width="200px" ui:field="reportPeriodIds"/>
-                    </g:FlowPanel>
-                </g:cell>
+        .btnPanel td {
+            vertical-align: middle !important;
+        }
+    </ui:style>
 
-                <g:VerticalPanel>
-                    <g:Label width="200px" text="Вид декларации" />
-                    <style:ListBoxWithTooltip width="200px"
-                                              ui:field="declarationTypeId" showTooltip="true" />
-                </g:VerticalPanel>
-            </g:HorizontalPanel>
+    <ui:style field="margin">
+        .left10{
+            margin-left: 10px;
+        }
+        .right5{
+            margin-right: 5px;
+        }
+        .right15{
+            margin-right: 15px;
+        }
+    </ui:style>
+
+    <g:HorizontalPanel addStyleNames="{style.btnPanel}">
+        <g:cell horizontalAlignment="right">
+            <g:Label text="Подразделение:" addStyleNames="{margin.right5}"/>
         </g:cell>
-        <g:cell height="50px" verticalAlignment="middle">
-            <style:Bar>
-                <style:LeftBar>
-                    <g:Button ui:field="create">Создать</g:Button>
-                    <g:Button ui:field="apply">Поиск</g:Button>
-                </style:LeftBar>
-            </style:Bar>
+        <g:cell width="33%">
+            <dep:DepartmentPickerPopupWidget width="100%" header="Выберите подразделение" multiselection="true" ui:field="departmentPicker" modal="true"/>
         </g:cell>
-    </g:VerticalPanel>
+        <g:cell horizontalAlignment="right">
+            <g:Label wordWrap="false" text="Отчетный период:" addStyleNames="{margin.left10}, {margin.right5}"/>
+        </g:cell>
+        <g:cell width="33%">
+            <per:PeriodPickerPopupWidget multiselect="true" width="100%" ui:field="reportPeriodIds"/>
+        </g:cell>
+        <g:cell horizontalAlignment="right">
+            <g:Label wordWrap="false" text="Вид декларации:" addStyleNames="{margin.left10}, {margin.right5}"/>
+        </g:cell>
+        <g:cell width="33%">
+            <style:ListBoxWithTooltip width="100%" ui:field="declarationTypeId" showTooltip="true" />
+        </g:cell>
+        <g:cell verticalAlignment="middle">
+            <g:HTML addStyleNames="{style.separator}"/>
+        </g:cell>
+
+        <g:Button title="Поиск" text="Поиск" ui:field="apply" addStyleNames="{margin.right15}"/>
+    </g:HorizontalPanel>
 
 </ui:UiBinder> 

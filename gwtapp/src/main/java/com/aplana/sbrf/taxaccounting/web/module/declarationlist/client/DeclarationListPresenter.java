@@ -31,8 +31,7 @@ import java.util.Map;
 
 public class DeclarationListPresenter extends
 		DeclarationListPresenterBase<DeclarationListPresenter.MyProxy> implements
-		DeclarationListUiHandlers, DeclarationFilterReadyEvent.MyHandler, DeclarationFilterCreateEvent.DeclarationFilterCreateHandler,
-        DeclarationFilterApplyEvent.DeclarationFilterApplyHandler {
+		DeclarationListUiHandlers, DeclarationFilterReadyEvent.MyHandler, DeclarationFilterApplyEvent.DeclarationFilterApplyHandler {
 
     /**
      * Текущее состояние фильтров для всех типов деклараций.
@@ -48,11 +47,11 @@ public class DeclarationListPresenter extends
         DeclarationDataFilter dataFilter = filterPresenter.getFilterData();
         saveFilterState(dataFilter.getTaxType(), dataFilter);
         updateTitle(dataFilter.getTaxType());
+        getView().updateData();
     }
 
-    @ProxyEvent
     @Override
-    public void onCreateClick(DeclarationFilterCreateEvent event) {
+    public void onCreateClicked() {
         creationPresenter.initAndShowDialog(filterPresenter.getFilterData(), this);
     }
 
@@ -86,7 +85,7 @@ public class DeclarationListPresenter extends
 	@ProxyEvent
 	@Override
 	public void onFilterReady(DeclarationFilterReadyEvent event) {
-		if (event.getSource() == filterPresenter) {
+        if (event.getSource() == filterPresenter) {
             DeclarationDataFilter dataFilter = filterPresenter.getFilterData();
             updateTitle(dataFilter.getTaxType());
             getView().updateData(0);

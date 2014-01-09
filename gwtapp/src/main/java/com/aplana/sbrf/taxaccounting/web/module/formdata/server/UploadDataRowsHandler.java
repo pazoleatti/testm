@@ -57,6 +57,7 @@ public class UploadDataRowsHandler extends
 		dataRowService.update(userInfo, formData.getId(), action.getModifiedRows());
 		
         BlobData blobData = blobDataService.get(action.getUuid());
+        logger.info("Загрузка данных из файла: \"" + blobData.getName() + "\"");
         //Парсит загруженный в фаловое хранилище xls-файл
         formDataService.importFormData(logger, userInfo,
                 formData.getId(), blobData.getInputStream(), blobData.getName());

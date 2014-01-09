@@ -19,7 +19,7 @@
 			<g:PopupPanel ui:field="popupPanel" autoHideEnabled="true" modal="true" width="300px" height="300px">
 				<g:VerticalPanel height="100%" width="100%">
 					<g:cell height="100%" width="100%">
-						<p:PeriodPickerWidget ui:field="periodPicker" height="100%" width="100%"/>
+						<p:PeriodPickerWidget ui:field="periodPicker" height="270px"/>
 					</g:cell>
 					<g:cell>
 						<g:Button ui:field="okButton" text="ОК" />

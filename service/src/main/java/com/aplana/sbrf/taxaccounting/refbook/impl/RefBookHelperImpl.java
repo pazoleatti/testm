@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -37,24 +34,38 @@ public class RefBookHelperImpl implements RefBookHelper {
 				Cell cell = ((DataRow.MapEntry<Cell>) entry).getCell();
 				Object value = cell.getValue();
 				if ((cell.getColumn() instanceof RefBookColumn) && value != null) {
-					RefBookColumn column = (RefBookColumn) cell.getColumn();
-					Long refAttributeId = column.getRefBookAttributeId();
-					Pair<RefBookDataProvider, RefBookAttribute> pair = providers.get(refAttributeId);
-					if (pair == null) {
-						RefBook refBook = refBookFactory.getByAttribute(refAttributeId);
-						RefBookAttribute attribute = refBook.getAttribute(refAttributeId);
-						RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
-						pair = new Pair<RefBookDataProvider, RefBookAttribute>(provider, attribute);
-						providers.put(refAttributeId, pair);
-					}
-					Map<String, RefBookValue> record = pair.getFirst().getRecordData((Long) value);
-					RefBookValue refBookValue = record.get(pair.getSecond().getAlias());
-					cell.setRefBookDereference(String.valueOf(refBookValue));
-				}
+                    // Разыменование справочных ячеек
+                    RefBookColumn column = (RefBookColumn) cell.getColumn();
+                    Long refAttributeId = column.getRefBookAttributeId();
+                    dereferenceRefBookValue(providers, refAttributeId, cell, value);
+                } else if ((cell.getColumn() instanceof ReferenceColumn)) {
+                    // Разыменование ссылочных ячеек
+                    ReferenceColumn column = (ReferenceColumn) cell.getColumn();
+                    Cell parentCell = dataRow.getCellByColumnId(column.getParentId());
+                    value = parentCell.getValue();
+                    if (value != null) {
+                        Long refAttributeId = column.getRefBookAttributeId();
+                        dereferenceRefBookValue(providers, refAttributeId, cell, value);
+                    }
+                }
 			}
-
 		}
 	}
+
+    private void dereferenceRefBookValue(Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers,
+                                         Long refAttributeId, Cell cell, Object value) {
+        Pair<RefBookDataProvider, RefBookAttribute> pair = providers.get(refAttributeId);
+        if (pair == null) {
+            RefBook refBook = refBookFactory.getByAttribute(refAttributeId);
+            RefBookAttribute attribute = refBook.getAttribute(refAttributeId);
+            RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
+            pair = new Pair<RefBookDataProvider, RefBookAttribute>(provider, attribute);
+            providers.put(refAttributeId, pair);
+        }
+        Map<String, RefBookValue> record = pair.getFirst().getRecordData((Long) value);
+        RefBookValue refBookValue = record.get(pair.getSecond().getAlias());
+        cell.setRefBookDereference(String.valueOf(refBookValue));
+    }
 
 	@Override
 	public Map<String, String> singleRecordDereference(RefBook refBook,

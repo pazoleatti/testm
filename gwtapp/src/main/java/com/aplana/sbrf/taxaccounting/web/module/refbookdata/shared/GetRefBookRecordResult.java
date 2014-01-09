@@ -13,6 +13,7 @@ import java.util.Map;
  */
 public class GetRefBookRecordResult implements Result {
 	Map<String, RefBookValueSerializable> record;
+    RefBookRecordVersionData versionData;
 
 	public Map<String, RefBookValueSerializable> getRecord() {
 		return record;
@@ -21,4 +22,12 @@ public class GetRefBookRecordResult implements Result {
 	public void setRecord(Map<String, RefBookValueSerializable> record) {
 		this.record = record;
 	}
+
+    public RefBookRecordVersionData getVersionData() {
+        return versionData;
+    }
+
+    public void setVersionData(RefBookRecordVersionData versionData) {
+        this.versionData = versionData;
+    }
 }
