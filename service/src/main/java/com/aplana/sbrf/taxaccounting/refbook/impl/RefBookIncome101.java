@@ -6,8 +6,10 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookIncome101DaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +76,11 @@ public class RefBookIncome101 implements RefBookDataProvider {
     }
 
     @Override
+    public PagingResult<Map<String, RefBookValue>> getRecordVersions(Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void insertRecords(Date version, List<Map<String, RefBookValue>> records) {
 		throw new UnsupportedOperationException();
     }
@@ -98,6 +105,41 @@ public class RefBookIncome101 implements RefBookDataProvider {
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         RefBookAttribute attribute = refBook.getAttribute(attributeId);
         return refBookIncome101Dao.getRecordData(recordId).get(attribute.getAlias());
+    }
+
+    @Override
+    public RefBookRecordVersion getActiveRecordVersion(Long uniqueRecordId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int getRecordVersionsCount(Long refBookRecordId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void createRecordVersion(Logger logger, Long recordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<RefBookValue> getUniqueAttributeValues(Long recordId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, boolean isRelevancePeriodChanged, List<Map<String, RefBookValue>> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deleteAllRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
     }
 
     private ReportPeriod getReportPeriod(Date version) {

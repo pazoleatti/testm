@@ -19,6 +19,32 @@ public class RefBook implements Serializable {
 
 	public final static String RECORD_PARENT_ID_ALIAS = "parent_id";
 
+    public final static String RECORD_VERSION_FROM_ALIAS = "record_version_from";
+    public static final String REF_BOOK_VERSION_FROM_TITLE = "Дата начала актуальности";
+    public static final int REF_BOOK_VERSION_FROM_WIDTH = 40;
+
+    public final static String RECORD_VERSION_TO_ALIAS = "record_version_to";
+    public static final String REF_BOOK_VERSION_TO_TITLE = "Дата окончания актуальности";
+    public static final int REF_BOOK_VERSION_TO_WIDTH = 40;
+
+    public static RefBookAttribute getVersionFromAttribute() {
+        RefBookAttribute attr = new RefBookAttribute();
+        attr.setWidth(REF_BOOK_VERSION_FROM_WIDTH);
+        attr.setName(REF_BOOK_VERSION_FROM_TITLE);
+        attr.setAttributeType(RefBookAttributeType.DATE);
+        attr.setAlias(RECORD_VERSION_FROM_ALIAS);
+        return attr;
+    }
+
+    public static RefBookAttribute getVersionToAttribute() {
+        RefBookAttribute attr = new RefBookAttribute();
+        attr.setWidth(REF_BOOK_VERSION_TO_WIDTH);
+        attr.setName(REF_BOOK_VERSION_TO_TITLE);
+        attr.setAttributeType(RefBookAttributeType.DATE);
+        attr.setAlias(RECORD_VERSION_TO_ALIAS);
+        return attr;
+    }
+
 	/** Код справочника */
 	private Long id;
 

@@ -24,12 +24,10 @@ public enum VersionedObjectStatus {
         return id;
     }
 
-    public static VersionedObjectStatus fromId(int statusId) {
-        for (VersionedObjectStatus status : values()) {
-            if (status.getId() == statusId) {
-                return status;
-            }
+    public static VersionedObjectStatus getStatusById(int id) {
+        for (VersionedObjectStatus item : VersionedObjectStatus.values()) {
+            if (item.getId() == id) return item;
         }
-        throw new IllegalArgumentException("Wrong VersionedObjectStatus id: " + statusId);
+        throw new RuntimeException("Статус с указанным идентификатором не найден");
     }
 }

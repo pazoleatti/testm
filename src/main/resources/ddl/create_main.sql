@@ -24,12 +24,14 @@ create sequence seq_form_type;
 create table tax_period (
   id number(9) not null,
   tax_type char(1) not null,
+  year number(4) not null,
   start_date date not null,
-  end_date date not null
+  end_date   date not null
 );
 comment on table tax_period is 'Налоговые периоды';
 comment on column tax_period.id is 'Идентификатор (первичный ключ)';
 comment on column tax_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
+comment on column tax_period.year is 'Год';
 comment on column tax_period.start_date is 'Дата начала (включительно)';
 comment on column tax_period.end_date is 'Дата окончания (включительно)';
 
@@ -240,18 +242,22 @@ comment on column department.sbrf_code is 'Код подразделения в 
 create table report_period (
   id number(9) not null,
   name varchar2(510) not null,
-  months  number(2) not null,
   tax_period_id number(9) not null,
   ord      number(2) not null,
-  dict_tax_period_id number(18) not null
+  dict_tax_period_id number(18) not null,
+  start_date date not null,
+  end_date date not null,
+  months number(2) not null
 );
 comment on table report_period is 'Отчетные периоды';
 comment on column report_period.id is 'Первичный ключ';
 comment on column report_period.name is 'Наименование периода';
-comment on column report_period.months is 'Количество месяцев в периоде';
 comment on column report_period.tax_period_id is 'Налоговый период';
 comment on column report_period.ord is 'Номер отчетного периода в налоговом';
 comment on column report_period.dict_tax_period_id is 'Ссылка на справочник отчетных периодов';
+comment on column report_period.start_date is 'Дата начала отчетного периода';
+comment on column report_period.end_date is 'Дата окончания отчетного периода';
+comment on column report_period.months is 'Количество месяцев в периоде';
 
 create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------

@@ -10,9 +10,17 @@ public class DeleteRefBookRowAction extends UnsecuredActionImpl<DeleteRefBookRow
 
 	Long refBookId;
 	List<Long> recordsId;
-	Date relevanceDate;
+    boolean deleteVersion;
 
-	public Long getRefBookId() {
+    public boolean isDeleteVersion() {
+        return deleteVersion;
+    }
+
+    public void setDeleteVersion(boolean deleteVersion) {
+        this.deleteVersion = deleteVersion;
+    }
+
+    public Long getRefBookId() {
 		return refBookId;
 	}
 
@@ -26,14 +34,6 @@ public class DeleteRefBookRowAction extends UnsecuredActionImpl<DeleteRefBookRow
 
 	public void setRecordsId(List<Long> recordsId) {
 		this.recordsId = recordsId;
-	}
-
-	public Date getRelevanceDate() {
-		return relevanceDate;
-	}
-
-	public void setRelevanceDate(Date relevanceDate) {
-		this.relevanceDate = relevanceDate;
 	}
 
 	@Override

@@ -83,7 +83,6 @@ public class DeclarationTemplateController {
 	@RequestMapping(value = "uploadJrxml/{declarationTemplateId}",method = RequestMethod.POST)
 	public void processUpload(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws FileUploadException, UnsupportedEncodingException {
-        System.out.println("processUpload");
         FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 		List<FileItem> items = upload.parseRequest(req);

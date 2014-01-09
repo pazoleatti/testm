@@ -31,14 +31,16 @@ public class LinkAnchor extends Anchor{
 	private static final LocalHtmlTemplates templates = GWT.create(LocalHtmlTemplates.class);
 	private static final String DEFAULT_URL = "resources/img/starfish-16.png";
 	private String text = "";
+    private String baseHtml;
 
 	public LinkAnchor() {
 		super(templates.img(DEFAULT_URL));
+        this.baseHtml = getHTML();
 	}
 
 	public void setText(String text){
 		this.text = text;
-		setHTML(getHTML() +	templates.text(text).asString());
+		setHTML(baseHtml +	templates.text(text).asString());
 	}
 
 	public void setImg(String url) {
