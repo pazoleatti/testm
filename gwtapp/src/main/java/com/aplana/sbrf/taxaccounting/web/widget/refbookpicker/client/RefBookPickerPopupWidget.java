@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client;
 
 import java.util.Date;
 
-import com.aplana.sbrf.taxaccounting.web.widget.closabledialog.ClosableDialogBox;
+import com.aplana.gwt.client.ModalWindow;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -50,7 +50,7 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
         initWidget(binder.createAndBindUi(this));
         this.modal = modal;
         if (modal) {
-            popupPanel = new ClosableDialogBox(false, true);
+            popupPanel = new ModalWindow();
         } else {
             popupPanel = new PopupPanel(true, true);
         }
@@ -186,8 +186,8 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 
     @Override
     public void setTitle(String title) {
-        if (popupPanel instanceof ClosableDialogBox) {
-            ((ClosableDialogBox) popupPanel).setText(title);
+        if (popupPanel instanceof ModalWindow) {
+            ((ModalWindow) popupPanel).setText(title);
         }
     }
 }

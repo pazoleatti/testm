@@ -23,6 +23,7 @@
 		<module>migration-ejb</module>
 		<module>mdb</module>
 		<module>scheduler</module>
+        <module>gwt-widget</module>
 	</modules>
 
 	<properties>

@@ -16,8 +16,9 @@
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.codemirror.CodeMirror" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.RefBookPicker" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.periodpicker.PeriodPicker" />
+    <inherits name="com.aplana.gwt.GwtWidgetLocal"/>
 
-	<source path="cell"/>
+    <source path="cell"/>
     <source path="datepicker"/>
     <source path="style"/>
     <source path="log"/>

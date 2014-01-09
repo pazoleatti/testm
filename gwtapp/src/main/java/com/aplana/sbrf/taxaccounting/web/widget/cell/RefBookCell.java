@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.cell;
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 
+import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
@@ -44,7 +45,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	
 	protected static final SafeHtmlRenderer<String> renderer = SimpleSafeHtmlRenderer.getInstance();
 
-	private ClosableDialogBox panel;
+    private ModalWindow panel;
 	private RefBookPicker refBookPiker = new RefBookPickerWidget();
 	
 	private HandlerRegistration changeHandlerRegistration;
@@ -62,8 +63,8 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			template = GWT.create(Template.class);
 		}
 		// Create popup panel
-		this.panel = new ClosableDialogBox(true, true);
-        panel.setText(this.column.getName());
+        this.panel = new ModalWindow(this.column.getName());
+
 
 		panel.addCloseHandler(new CloseHandler<PopupPanel>() {
 			public void onClose(CloseEvent<PopupPanel> event) {

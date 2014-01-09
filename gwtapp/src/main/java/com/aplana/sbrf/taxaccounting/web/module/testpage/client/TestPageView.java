@@ -138,12 +138,12 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                 //lbl1.setSize("200px","200px");
                 mw.add(lbl1);
                // mw.addAdditionalButton(new ImageButtonLink("http://127.0.0.1:8888/resources/img/email.png", "Отправить письмо"));
-                mw.addSaveButtonClickHandler(new ClickHandler() {
+            /*    mw.addSaveButtonClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
                         lbl1.setText("Нажали кнопку сохранить.");
                     }
-                });
+                });*/
                 mw.setWidth("300px");
                 mw.center();
                 mw.show();
