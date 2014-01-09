@@ -56,7 +56,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             formTemplate.setNumberedColumns(rs.getBoolean("numbered_columns"));
             formTemplate.setFixedRows(rs.getBoolean("fixed_rows"));
             formTemplate.setCode(rs.getString("code"));
-            formTemplate.setStatus(VersionedObjectStatus.fromId(rs.getInt("status")));
+            formTemplate.setStatus(VersionedObjectStatus.getStatusById(rs.getInt("status")));
             formTemplate.getStyles().addAll(formStyleDao.getFormStyles(formTemplate.getId()));
 
 			if (deepFetch) {

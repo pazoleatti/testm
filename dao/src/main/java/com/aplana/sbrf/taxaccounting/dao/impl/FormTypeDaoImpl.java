@@ -28,7 +28,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 			result.setName(rs.getString("name"));
 			String taxCode = rs.getString("tax_type");
 			result.setTaxType(TaxType.fromCode(taxCode.charAt(0)));
-            result.setStatus(VersionedObjectStatus.fromId(rs.getInt("status")));
+            result.setStatus(VersionedObjectStatus.getStatusById(rs.getInt("status")));
 			return result;
 		}
 	}
