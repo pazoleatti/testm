@@ -110,7 +110,10 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
                     @Override
                     public void onSuccess(GetFTVersionListResult result) {
                         getView().setFTVersionTable(result.getFormTemplateVersions());
-                        getView().setLabelName(result.getFormTemplateVersions().get(0).getTypeName());
+                        if (!result.getFormTemplateVersions().isEmpty())
+                            getView().setLabelName(result.getFormTemplateVersions().get(0).getTypeName());
+                        else
+                            getView().setLabelName("Нераспознаный шаблон. Нет связанных версий макетов.");
                     }
                 }, this)
         );

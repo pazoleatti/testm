@@ -58,7 +58,7 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 						sb.appendHtmlConstant("<a href=\"#"
 								+ AdminConstants.NameTokens.formTemplateVersionList + ";"
 								+ AdminConstants.NameTokens.formTypeId + "="
-								+ formTemplate.getId() + "\">"
+								+ formTemplate.getType().getId() + "\">"
 								+ formTemplate.getType().getName() + "</a>");
 					}
 				}) {
