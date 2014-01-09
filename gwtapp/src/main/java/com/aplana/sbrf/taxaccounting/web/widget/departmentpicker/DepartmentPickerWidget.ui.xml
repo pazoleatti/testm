@@ -10,6 +10,7 @@
             border-style: none !important;
             width: 100% !important;
         }
+
         .footerPanel {
             background-color: #E8E1CF;
             width: 100%;
