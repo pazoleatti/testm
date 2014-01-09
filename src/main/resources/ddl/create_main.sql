@@ -20,12 +20,16 @@ comment on column form_type.tax_type is 'Вид налога (I-на прибы�
 create table tax_period (
   id number(9) not null,
   tax_type char(1) not null,
-  year number(4) not null
+  year number(4) not null,
+  start_date date not null,
+  end_date   date not null
 );
 comment on table tax_period is 'Налоговые периоды';
 comment on column tax_period.id is 'Идентификатор (первичный ключ)';
 comment on column tax_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 comment on column tax_period.year is 'Год';
+comment on column tax_period.start_date is 'Дата начала (включительно)';
+comment on column tax_period.end_date is 'Дата окончания (включительно)';
 
 create sequence seq_tax_period start with 10000;
 ---------------------------------------------------------------------------------------------------
