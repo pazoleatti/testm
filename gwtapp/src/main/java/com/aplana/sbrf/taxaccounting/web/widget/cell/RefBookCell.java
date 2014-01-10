@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
-import com.aplana.sbrf.taxaccounting.web.widget.closabledialog.ClosableDialogBox;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidget;
 import com.google.gwt.cell.client.AbstractEditableCell;
