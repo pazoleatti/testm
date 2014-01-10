@@ -113,13 +113,13 @@ public class RefBookUniversal implements RefBookDataProvider {
             for (Map<String, RefBookValue> record : records) {
                 List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
                 if (errors.size() > 0){
-                    throw new ServiceException("Поля " + errors.toString() + "являются обязательными для заполнения");
+                    throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
                 }
             }
 
             //Проверка корректности
             List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, attributes, records);
-            if (matchedRecords.size() == 0) {
+            if (matchedRecords == null || matchedRecords.size() == 0) {
                 //Проверка ссылочных значений
                 boolean isReferencesOk = refBookDao.checkReferenceValuesVersions(versionFrom, attributes, records);
                 if (!isReferencesOk) {
@@ -179,7 +179,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 if (isReferenceToVersionExists) {
                     throw new ServiceException("Обнаружено пересечение указанного срока актуальности с существующей версией!");
                 } else {
-                    logger.info("Установлена дата окончания актуальности версии "+sdf.format(addDayToDate(versionFrom, -1))+"для предыдущей версии");
+                    logger.info("Установлена дата окончания актуальности версии "+sdf.format(addDayToDate(versionFrom, -1))+" для предыдущей версии");
                 }
             }
             if (result.getResult() == CrossResult.NEED_CHANGE) {
@@ -248,7 +248,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             for (Map<String, RefBookValue> record : records) {
                 List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
                 if (errors.size() > 0){
-                    throw new ServiceException("Поля " + errors.toString() + "являются обязательными для заполнения");
+                    throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
                 }
             }
 
