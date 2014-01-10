@@ -15,6 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -44,6 +45,7 @@ public class ReportPeriodDaoTest {
 		taxPeriod.setStartDate(new Date());
 		taxPeriod.setEndDate(new Date());
 		taxPeriod.setTaxType(TaxType.TRANSPORT);
+		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
 		taxPeriodDao.add(taxPeriod);
 	}
 	

@@ -73,7 +73,7 @@ public class DepartmentFormTypeDaoImplTest {
 	
 	@Test
 	public void saveSucsess(){
-		departmentFormTypeDao.save(1, 1, 2);
+		departmentFormTypeDao.save(1, 5, 2);
 	}
 	
 	@Test(expected = DaoException.class)
