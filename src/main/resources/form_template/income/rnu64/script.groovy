@@ -47,7 +47,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
-        // TODO logicCheck()
+        logicCheck()
         break
     case FormDataEvent.COMPOSE:
         consolidation()
@@ -142,14 +142,13 @@ void calc() {
 }
 
 def getDataRowsPrev() {
-    // TODO вернуть
-    /*def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+    def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
     formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
     if (formDataPrev == null) {
         logger.error("Не найдены экземпляры РНУ-64 за прошлый отчетный период!")
     } else {
         return formDataService.getDataRowHelper(formDataPrev)?.allCached
-    }*/
+    }
     return null
 }
 
@@ -433,7 +432,6 @@ def getEndDate() {
     }
     return reportPeriodEndDate
 }
-
 
 void consolidation() {
     def rows = []

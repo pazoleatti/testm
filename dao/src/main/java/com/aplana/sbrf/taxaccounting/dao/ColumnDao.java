@@ -21,6 +21,4 @@ public interface ColumnDao {
 	 * @param form форма
 	 */
 	void saveFormColumns(FormTemplate form);
-
-    void setDbUtils(BDUtils bdUtils);
 }

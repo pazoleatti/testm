@@ -60,8 +60,8 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-    case FormDataEvent.COMPOSE: // Консолидация
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+    case FormDataEvent.COMPOSE:
+        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['total'])
         calc()
         logicCheck()
         break
@@ -135,9 +135,6 @@ def calc() {
 
     if (!dataRows.isEmpty()) {
 
-        // Удаление подитогов
-        deleteAllAliased(dataRows)
-
         def daysOfYear = getCountDays(reportPeriodService.getStartDate(formData.reportPeriodId).time)
 
         // номер последний строки предыдущей формы
@@ -158,21 +155,10 @@ def calc() {
             row.percAdjustment = calc14(row)
         }
     }
-    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size + 1)
-    dataRowHelper.save(dataRows)
-}
 
-def calcTotalRow(def dataRows) {
-    def totalRow = formData.createDataRow()
-    totalRow.setAlias('total')
-    totalRow.billNumber = 'Итого'
-    totalRow.getCell('billNumber').colSpan = 12
-    ['rowNumber', 'billNumber', 'percAdjustment'].each {
-        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    calcTotalSum(dataRows, totalRow, totalColumns)
+    calcTotalSum(dataRows,  getDataRow(dataRows, 'total'), totalColumns)
 
-    return totalRow
+    dataRowHelper.update(dataRows)
 }
 
 // Ресчет графы 6 и 7

@@ -71,6 +71,15 @@ public interface FormDataService {
     void consolidationSimple(FormData formData, int departmentId, Logger logger);
 
     /**
+     * Консолидация формы с итоговыми строками
+     * @param formData
+     * @param departmentId
+     * @param logger
+     * @param totalAliases
+     */
+     void consolidationTotal(FormData formData, int departmentId, Logger logger, List<String> totalAliases);
+
+    /**
      * Добавление новой строки
      * Если строка выделена - то после нее
      * Иначе - в конец таблицы
