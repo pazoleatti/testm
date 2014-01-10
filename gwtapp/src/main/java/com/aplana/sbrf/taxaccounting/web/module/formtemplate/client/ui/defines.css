@@ -1,10 +1,10 @@
 @def whitePanelColor  white;
-@def darkTabColor #D0E4F6;
-@def lightPanelColor #92C1F0;
+@def darkTabColor #77C242;
+@def lightPanelColor #5D9713;
 @def messageBoxColor #D0E4F6;
 @def titleFontWeight  bold;
 @def titleFontSize    15px;
-@def titleColor #92C1F0;
+@def titleColor #5D9713;
 @def minAppWidth 700px;
 @def leftColWidth 200px;
 @def formLineSpacing 8px;
