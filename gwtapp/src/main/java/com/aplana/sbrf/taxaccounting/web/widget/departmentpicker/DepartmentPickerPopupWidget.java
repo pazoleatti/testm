@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.departmentpicker;
 
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.web.widget.closabledialog.ClosableDialogBox;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -68,9 +67,7 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 		// TODO move to ui.xml
         this.modal = modal;
         if (modal) {
-            //popup = new ClosableDialogBox(false, true);
             popup = new ModalWindow(header);
-            //((ModalWindow) popup).setText(header);
         } else {
             popup = new PopupPanel(true, true);
         }
@@ -160,8 +157,8 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 
     @Override
     public void setTitle(String title) {
-        if (popup instanceof ClosableDialogBox) {
-            ((ClosableDialogBox) popup).setText(title);
+        if (popup instanceof ModalWindow) {
+            ((ModalWindow) popup).setText(title);
         }
     }
 

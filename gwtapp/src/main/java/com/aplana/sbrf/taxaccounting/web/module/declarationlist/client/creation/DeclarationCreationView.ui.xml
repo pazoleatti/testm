@@ -22,7 +22,6 @@
     </ui:style>
 
     <dw:ModalWindow iconUrl="" title="Создание декларации">
-	<!--<g:DialogBox height="100%" width="250px" glassEnabled="true" text="Создание декларации">-->
         <g:VerticalPanel height="100%" width="250px">
             <g:FlowPanel styleName="{style.content}">
             
@@ -50,8 +49,6 @@
             </style:Bar>
 
         </g:VerticalPanel>
-
-	<!--</g:DialogBox>-->
     </dw:ModalWindow>
 
 </ui:UiBinder> 
