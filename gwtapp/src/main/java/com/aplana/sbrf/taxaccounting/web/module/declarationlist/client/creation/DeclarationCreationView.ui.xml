@@ -7,14 +7,7 @@
     xmlns:dw="urn:import:com.aplana.gwt.client">
     <ui:style>
         .content {
-            /*padding: 10px;
-            border: 1px solid #949494;
-            border-radius: 3px;*/
             margin: 10px;
-        }
-
-        .buttonBar {
-            margin-left: 25%;
         }
 
         .footerPanel {
