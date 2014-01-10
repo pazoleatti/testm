@@ -1,21 +1,29 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.BDUtils;
+
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
+
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"ColumnDaoTest.xml"})
+@Transactional
 public class ColumnDaoTest {
 
     @Autowired
@@ -26,40 +34,25 @@ public class ColumnDaoTest {
     private static final int FIRST_COLUMN = 0;
     private static final int SECOND_COLUMN = 1;
     private static final int THIRD_COLUMN = 2;
-
-    private long start;
-
-    private List<Long> getNextIds(long count) {
-        List<Long> retVal = new LinkedList<Long>();
-        for (int i = 1; i <= count; i++) {
-            retVal.add(start + i);
-        }
-        start += count;
-        return retVal;
-    }
+    // Иммитация Sequence
+    private static long cnt = 100;
 
     @Before
-    public void init() throws NoSuchFieldException, IllegalAccessException {
-
-        BDUtils bdUtils = new BDUtils(){
+    public void init() {
+        BDUtils bdUtils = mock(BDUtils.class);
+        when(bdUtils.getNextIds(any(BDUtils.Sequence.class), anyLong())).thenAnswer(new Answer<List<Long>>() {
             @Override
-            public List<Long> getNextDataRowIds(Long count) {
-                return null;  // Не используется
+            public List<Long> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                List<Long> ids = new ArrayList<Long>();
+                Object[] args = invocationOnMock.getArguments();
+                int count = ((Long) args[1]).intValue();
+                for (int i = 0; i < count; i++) {
+                    ids.add(cnt++);
+                }
+                return ids;
             }
-
-            @Override
-            public List<Long> getNextRefBookRecordIds(Long count) {
-                return null; // // Не используется
-            }
-
-            @Override
-            public List<Long> getNextIds(Sequence sequence, Long count) {
-                 return ColumnDaoTest.this.getNextIds(count);
-            }
-
-
-        };
-        columnDao.setDbUtils(bdUtils);
+        });
+        ReflectionTestUtils.setField(columnDao, "bdUtils", bdUtils);
     }
 
     @Test
@@ -96,7 +89,6 @@ public class ColumnDaoTest {
     public void saveFormColumns1Test() {
         //Given FORM_ID_FOR_TEST
         List<Column> columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
-        start = columnList.size();
         //Создадим column, которого нету в БД
         StringColumn newColumn = new StringColumn();
         newColumn.setAlias("newColumn");
@@ -128,8 +120,8 @@ public class ColumnDaoTest {
 
     @Test
     public void saveFormColumns2Test() {
+
         List<Column> columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
-        start = columnList.size();
 
         RefBookColumn refBookColumn = new RefBookColumn();
         refBookColumn.setRefBookAttributeId(4);
@@ -140,7 +132,7 @@ public class ColumnDaoTest {
         columnList.add(refBookColumn);
 
         ReferenceColumn referenceColumn = new ReferenceColumn();
-        referenceColumn.setParentId(4);
+        referenceColumn.setParentId((int) cnt);
         referenceColumn.setRefBookAttributeId(5);
         referenceColumn.setAlias("referenceColumn");
         referenceColumn.setName("Зависимая графа");
@@ -156,14 +148,14 @@ public class ColumnDaoTest {
 
         columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
 
-        referenceColumn = (ReferenceColumn) columnList.get(5);
+        referenceColumn = (ReferenceColumn) columnList.get(4);
 
-        Assert.assertEquals(6, columnList.size());
+        Assert.assertEquals(5, columnList.size());
         Assert.assertEquals("referenceColumn", referenceColumn.getAlias());
         Assert.assertEquals("Зависимая графа", referenceColumn.getName());
-        Assert.assertEquals(6, referenceColumn.getOrder());
+        Assert.assertEquals(5, referenceColumn.getOrder());
         Assert.assertEquals(false, referenceColumn.isChecking());
-        Assert.assertEquals(4, referenceColumn.getParentId());
+        Assert.assertEquals((int) cnt - 2, referenceColumn.getParentId());
         Assert.assertEquals(5, referenceColumn.getRefBookAttributeId());
     }
 }

@@ -1,13 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 
@@ -182,15 +176,29 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
 		return Collections.unmodifiableSet(entries);
 	}
 
+    /**
+     * Получение списка зависимых граф по id справочной графы
+     */
+    public List<C> getLinkedCells(int columnId) {
+        List<C> retVal = new LinkedList<C>();
+        for (C cell : data) {
+            if (cell.getColumn() instanceof ReferenceColumn
+                    && ((ReferenceColumn)cell.getColumn()).getParentId() == columnId) {
+                    retVal.add(cell);
+            }
+        }
+        return retVal;
+    }
+
 	public C getCell(String columnAlias) {
 		return getCell(columnAlias, true);
 	}
 
-    public C getCellByColumnId(Integer columnId) {
+    public C getCellByColumnId(int columnId) {
         return getCellByColumnId(columnId, true);
     }
 
-    private C getCellByColumnId(Integer columnId, boolean throwIfNotFound) {
+    private C getCellByColumnId(int columnId, boolean throwIfNotFound) {
         for (C cell: data) {
             if (cell.getColumn().getId().equals(columnId)) {
                 return cell;
@@ -288,6 +296,4 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
 		return "DataRow [data=" + data + ", alias=" + alias + ", index="
 				+ index + ", id " + id + "]";
 	}
-
-
 }
