@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -162,6 +163,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		FormDataSigner formDataSigner2 = new FormDataSigner();
 
         taxPeriod.setStartDate(new Date());
+		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
 		formData = new FormData();
 		formTemplate = new FormTemplate();
         formTemplate.setId(328);

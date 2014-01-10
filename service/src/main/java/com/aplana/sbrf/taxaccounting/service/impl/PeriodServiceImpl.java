@@ -100,6 +100,7 @@ public class PeriodServiceImpl implements PeriodService{
 			taxPeriod.setStartDate(from.getTime());
 			taxPeriod.setEndDate(to.getTime());
 			taxPeriod.setTaxType(taxType);
+			taxPeriod.setYear(year);
 			taxPeriodDao.add(taxPeriod);
 		} else {
 			taxPeriod = taxPeriodList.get(0);

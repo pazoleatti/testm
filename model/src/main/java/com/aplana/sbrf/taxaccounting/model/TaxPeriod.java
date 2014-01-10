@@ -14,6 +14,8 @@ public class TaxPeriod extends IdentityObject<Integer> {
 	private TaxType taxType;
 	private Date startDate;
 	private Date endDate;
+	/** Год налогового периода */
+	private int year;
 
 	
 	/**
@@ -74,4 +76,19 @@ public class TaxPeriod extends IdentityObject<Integer> {
 		this.endDate = endDate;
 	}
 
+	/**
+	 * Задать год налогового периода
+	 * @return
+	 */
+	public int getYear() {
+		return year;
+	}
+
+	/**
+	 * Вернуть год, к которому относится налоговый период
+	 * @param year
+	 */
+	public void setYear(int year) {
+		this.year = year;
+	}
 }

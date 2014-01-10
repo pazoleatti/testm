@@ -46,6 +46,7 @@ public class TaxPeriodDaoTest {
 		Date date = getDate(2013, 11, 12);
 		taxPeriod.setStartDate(date);
 		taxPeriod.setEndDate(date);
+		taxPeriod.setYear(2013);
 		int id = taxPeriodDao.add(taxPeriod);
 		assertEquals(TaxType.INCOME, taxPeriodDao.get(id).getTaxType());
 		assertEquals(date, taxPeriodDao.get(id).getStartDate());
