@@ -194,9 +194,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 				formDataTable.addColumn(tableCol, col.getName());
 				((DataRowColumn<?>)tableCol).addCellModifiedEventHandler(new CellModifiedEventHandler() {
 					@Override
-					public void onCellModified(CellModifiedEvent event) {
-						if(getUiHandlers()!=null){
-							getUiHandlers().onCellModified(event.getDataRow());
+					public void onCellModified(CellModifiedEvent event, boolean withReference) {
+                        if (getUiHandlers() != null) {
+                            getUiHandlers().onCellModified(event.getDataRow());
+                            // Зависимые ячейки
+                            if (withReference) {
+                                // TODO Возможно есть способ перерисовать только измененные ячейки
+                                formDataTable.redraw();
+                            }
 						}
 					}
 				});

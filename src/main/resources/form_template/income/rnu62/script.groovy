@@ -64,7 +64,7 @@ switch (formDataEvent) {
         break
 // обобщить
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['itg'])
         calc()
         logicCheck()
         break
@@ -241,10 +241,9 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    // Удаление подитогов
-    deleteAllAliased(dataRows)
-    // Сортировка
-    sortRows(dataRows, sortColumns)
+    if (formDataEvent != FormDataEvent.IMPORT && formDataEvent != FormDataEvent.MIGRATION) {
+        sortRows(dataRows, sortColumns)
+    }
 
     // Номер последний строки предыдущей формы
     def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
@@ -274,17 +273,10 @@ void calc() {
         }
     }
 
-    // Добавление строки итогов
-    def totalRow = formData.createDataRow()
-    totalRow.billNumber = "Итого"
-    totalRow.setAlias('itg')
-    allColumns.each {
-        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    calcTotalSum(dataRows, totalRow, totalColumns)
-    dataRows.add(dataRows.size(), totalRow)
+    // пересчитываем строки итого
+    calcTotalSum(dataRows,  getDataRow(dataRows, 'itg'), totalColumns)
 
-    dataRowHelper.save(dataRows)
+    dataRowHelper.update(dataRows)
 }
 
 def BigDecimal calc7(def row) {

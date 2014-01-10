@@ -772,16 +772,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     private final static String CHECK_UNIQUE_MATCHES = "select v.RECORD_ID as ID, a.NAME as NAME from REF_BOOK_VALUE v, REF_BOOK_RECORD r, REF_BOOK_ATTRIBUTE a \n" +
-            "where r.ID = v.RECORD_ID and r.STATUS=0 and a.ID=v.ATTRIBUTE_ID and r.ID in (select ID from ref_book_record where REF_BOOK_ID = ?)";
+            "where r.ID = v.RECORD_ID and r.STATUS=0 and a.ID=v.ATTRIBUTE_ID and r.REF_BOOK_ID = ?";
 
     @Override
     public List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long refBookId, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records) {
+        System.out.println("getMatchedRecordsByUniqueAttributes: "+refBookId+"; "+attributes+"; "+records);
+        boolean hasUniqueAttributes = false;
         List<RefBookValue> attributeValues = new ArrayList<RefBookValue>();
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery(CHECK_UNIQUE_MATCHES);
         ps.addParam(refBookId);
         for (RefBookAttribute attribute : attributes) {
             if (attribute.isUnique()) {
+                hasUniqueAttributes = true;
                 ps.appendQuery(" and ");
                 if (records.size() > 1) {
                     ps.appendQuery(" (");
@@ -814,14 +817,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
         }
 
-        String sql = String.format(ps.getQuery().toString(), attributeValues.toArray());
+        if (hasUniqueAttributes) {
+            String sql = String.format(ps.getQuery().toString(), attributeValues.toArray());
+            System.out.println("sql: "+sql);
 
-        return getJdbcTemplate().query(sql, ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
-            @Override
-            public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return new Pair<Long, String>(rs.getLong("ID"), rs.getString("NAME"));
-            }
-        });
+            return getJdbcTemplate().query(sql, ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
+                @Override
+                public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return new Pair<Long, String>(rs.getLong("ID"), rs.getString("NAME"));
+                }
+            });
+        } else {
+            return null;
+        }
     }
 
     private final static String CHECK_REFERENCE_VERSIONS = "select count(*) from ref_book_record where VERSION < to_date('%s', 'DD.MM.YYYY') and ID in (%s)";
@@ -914,15 +922,21 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return getJdbcTemplate().queryForInt(sql, uniqueRecordId) != 0;
     }
 
-    private static final String CHECK_USAGES = "with checkRecords as (select * from ref_book_record where id in %s)\n" +
+    private static final String CHECK_USAGES_IN_REFBOOK = "with checkRecords as (select * from ref_book_record where id in %s)\n" +
             "select count(r.id) from ref_book_record r, ref_book_value v, checkRecords cr where r.id=v.record_id and r.version >= cr.version and v.REFERENCE_VALUE=cr.id";
+
+    private static final String CHECK_USAGES_IN_FORMS = "select count(*) from numeric_value where column_id in (select id from form_column where attribute_id in (select attribute_id from ref_book_value where record_id in %s)) and value in %s";
 
     @Override
     public boolean checkVersionUsages(List<Long> uniqueRecordIds) {
-        //TODO добавить проверки по другим точкам запросов
         //Проверка использования в справочниках и настройках подразделений
-        String sql = String.format(CHECK_USAGES, SqlUtils.transformToSqlInStatement(uniqueRecordIds));
-        return getJdbcTemplate().queryForInt(sql) != 0;
+        String in = SqlUtils.transformToSqlInStatement(uniqueRecordIds);
+        String sql = String.format(CHECK_USAGES_IN_REFBOOK, in);
+        boolean hasReferences = getJdbcTemplate().queryForInt(sql) != 0;
+        if (!hasReferences) {
+            sql = String.format(CHECK_USAGES_IN_FORMS, in, in);
+            return getJdbcTemplate().queryForInt(sql) != 0;
+        } else return true;
     }
 
     private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id=? and r.record_id=? and r.status=0 and r.version > to_date('%s', 'DD.MM.YYYY')),\n" +

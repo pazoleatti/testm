@@ -128,6 +128,11 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Override
     public void consolidationSimple(FormData formData, int departmentId, Logger logger) {
+        consolidationTotal(formData, departmentId, logger, null);
+    }
+
+    @Override
+    public void consolidationTotal(FormData formData, int departmentId, Logger logger, List<String> totalAliases){
         DataRowHelper dataRowHelper = getDataRowHelper(formData);
         // Новый список строк
         List<DataRow<Cell>> rows = new LinkedList<DataRow<Cell>>();
@@ -166,6 +171,24 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
                 }
             }
         }
+
+        // Добавление итоговых строк
+        if (totalAliases != null) {
+            for (DataRow<Cell> row : dataRowHelper.getAllCached()) {
+                for (int i=0;i<totalAliases.size();i++) {
+                    String alias = totalAliases.get(i);
+                    if (alias.equals(row.getAlias())) {
+                        rows.add(row);
+                        totalAliases.remove(alias);
+                        i--;
+                    }
+                }
+            }
+            for (String alias : totalAliases) {
+                throw new IllegalArgumentException("Wrong row alias requested: " + alias);
+            }
+        }
+
         dataRowHelper.save(rows);
         if (logger != null) {
             logger.info(COMPOSE_SUCCESS);
