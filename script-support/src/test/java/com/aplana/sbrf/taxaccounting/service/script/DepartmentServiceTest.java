@@ -1,20 +1,19 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.service.script.impl.DepartmentServiceImpl;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Тест для сервиса работы с подразделениями
@@ -97,6 +96,36 @@ public class DepartmentServiceTest {
             exception = true;
         }
         assertTrue(exception);
+    }
+
+    // TODO
+
+    @Test
+    public void testGetBADepartments() {
+    }
+
+    @Test
+    public void testGetTBDepartments() {
+    }
+
+    @Test
+    public void testGetBankDepartment() {
+    }
+
+    @Test
+    public void testGetTaxFormDepartments() {
+    }
+
+    @Test
+    public void testGetDestinationDepartments() {
+    }
+
+    @Test
+    public void testGetPrintFormDepartments() {
+    }
+
+    @Test
+    public void testGetOpenPeriodDepartments() {
     }
 
 }

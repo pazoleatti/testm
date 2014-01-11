@@ -58,4 +58,12 @@ public interface DepartmentDao {
      * ««Наименование подразделения»» 
      */
     Department getDepartmentByName(String name);
+
+    /**
+     * Получение подразделений по типу
+     * @param type тип подразделения
+     * @return список подразделений
+     */
+    List<Department> getDepartmentsByType(int type);
+
 }

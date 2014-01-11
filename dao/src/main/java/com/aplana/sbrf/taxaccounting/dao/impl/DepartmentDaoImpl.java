@@ -133,6 +133,19 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 	}
 
     @Override
+    public List<Department> getDepartmentsByType(int type) {
+        try {
+            return getJdbcTemplate().query(
+                    "SELECT * FROM department dp WHERE dp.type = ?",
+                    new Object[] { type },
+                    new DepartmentJdbcMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Department>(0);
+        }
+    }
+
+    @Override
     public List<Department> getAllChildren(int parentDepartmentId) {
         try {
             return getJdbcTemplate().query(
