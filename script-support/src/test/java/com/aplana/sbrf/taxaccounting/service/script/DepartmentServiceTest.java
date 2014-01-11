@@ -97,35 +97,4 @@ public class DepartmentServiceTest {
         }
         assertTrue(exception);
     }
-
-    // TODO
-
-    @Test
-    public void testGetBADepartments() {
-    }
-
-    @Test
-    public void testGetTBDepartments() {
-    }
-
-    @Test
-    public void testGetBankDepartment() {
-    }
-
-    @Test
-    public void testGetTaxFormDepartments() {
-    }
-
-    @Test
-    public void testGetDestinationDepartments() {
-    }
-
-    @Test
-    public void testGetPrintFormDepartments() {
-    }
-
-    @Test
-    public void testGetOpenPeriodDepartments() {
-    }
-
 }

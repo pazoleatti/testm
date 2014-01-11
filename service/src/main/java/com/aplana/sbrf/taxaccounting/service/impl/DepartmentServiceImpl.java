@@ -112,20 +112,19 @@ public class DepartmentServiceImpl implements DepartmentService {
      * 10 - Выборка для бизнес-администрирования
      * http://conf.aplana.com/pages/viewpage.action?pageId=11380675
      *
-     * @param tAUserInfo
+     * @param tAUser
      * @return
      */
     @Override
-    public List<Department> getBADepartments(TAUserInfo tAUserInfo) {
+    public List<Department> getBADepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
-        TAUser user = tAUserInfo.getUser();
 
-        if (user.getRoles().contains(TARole.ROLE_CONTROL_UNP)) {
+        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartments());
 
-        } else if (user.getRoles().contains(TARole.ROLE_CONTROL_NS)) {
-            Department parentType2 = getDepartmentType2(user.getDepartmentId());
+        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+            Department parentType2 = getDepartmentType2(tAUser.getDepartmentId());
             if (parentType2 != null) {
                 retList.addAll(departmentDao.getAllChildren(parentType2.getId()));
             }
@@ -138,28 +137,27 @@ public class DepartmentServiceImpl implements DepartmentService {
      * 20 - Получение ТБ
      * http://conf.aplana.com/pages/viewpage.action?pageId=11380723
      *
-     * @param tAUserInfo
+     * @param tAUser
      * @return
      */
     @Override
-    public List<Department> getTBDepartments(TAUserInfo tAUserInfo) {
+    public List<Department> getTBDepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
-        TAUser user = tAUserInfo.getUser();
 
-        if (user.getRoles().contains(TARole.ROLE_CONTROL_UNP)) {
+        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // подразделение с типом 1
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode()));
             // подразделения с типом 2
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.TERBANK.getCode()));
 
-        } else if (user.getRoles().contains(TARole.ROLE_CONTROL_NS)) {
-            if (departmentDao.getDepartment(user.getDepartmentId()).getType() == DepartmentType.TERBANK) {
+        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+            if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.TERBANK) {
                 // поразделение пользователя
-                retList.add(departmentDao.getDepartment(user.getDepartmentId()));
+                retList.add(departmentDao.getDepartment(tAUser.getDepartmentId()));
 
             } else {
                 // подразделение с типом 2, являющееся родительским по отношению к подразделению пользователя
-                Department parentType2 = getDepartmentType2(user.getDepartmentId());
+                Department parentType2 = getDepartmentType2(tAUser.getDepartmentId());
                 if (parentType2 != null) {
                     retList.add(parentType2);
                 }
@@ -193,34 +191,33 @@ public class DepartmentServiceImpl implements DepartmentService {
      * 40 - Выборка для доступа к экземплярам НФ/деклараций
      * http://conf.aplana.com/pages/viewpage.action?pageId=11380670
      *
-     * @param tAUserInfo
+     * @param tAUser
      * @return
      */
     @Override
-    public List<Department> getTaxFormDepartments(TAUserInfo tAUserInfo) {
+    public List<Department> getTaxFormDepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
-        List<TARole> roles = tAUserInfo.getUser().getRoles();
-        if (roles.contains(TARole.ROLE_CONTROL_UNP)) {
+        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartments());
 
-        } else if (roles.contains(TARole.ROLE_CONTROL_NS)) {
-            Department parentType2 = getDepartmentType2(tAUserInfo.getUser().getDepartmentId());
+        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+            Department parentType2 = getDepartmentType2(tAUser.getDepartmentId());
             if (parentType2 != null) {
                 retList.addAll(departmentDao.getAllChildren(parentType2.getId()));
             }
             // TODO пп.2
             retList.addAll(getExecutorsDepartments(retList));
 
-        } else if (roles.contains(TARole.ROLE_CONTROL)) {
+        } else if (tAUser.hasRole(TARole.ROLE_CONTROL)) {
             // все дочерние подразделения для подразделения пользователя
-            retList.addAll(departmentDao.getAllChildren(tAUserInfo.getUser().getDepartmentId()));
+            retList.addAll(departmentDao.getAllChildren(tAUser.getDepartmentId()));
             // TODO пп.2 (тоже самое, что для ROLE_CONTROL_UNP)
             retList.addAll(getExecutorsDepartments(retList));
 
-        } else if (roles.contains(TARole.ROLE_OPER)) {
+        } else if (tAUser.hasRole(TARole.ROLE_OPER)) {
             // все дочерние подразделения для подразделения пользователя (включая его)
-            retList.addAll(departmentDao.getAllChildren(tAUserInfo.getUser().getDepartmentId()));
+            retList.addAll(departmentDao.getAllChildren(tAUser.getDepartmentId()));
             retList.addAll(getExecutorsDepartments(retList));
         }
 
@@ -236,25 +233,23 @@ public class DepartmentServiceImpl implements DepartmentService {
      * 50 - Выборка для назначения подразделений-исполнителей
      * http://conf.aplana.com/pages/viewpage.action?pageId=11380678
      *
-     * @param tAUserInfo пользователь
+     * @param tAUser пользователь
      * @return
      */
     @Override
-    public List<Department> getDestinationDepartments(TAUserInfo tAUserInfo) {
+    public List<Department> getDestinationDepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
-        List<TARole> roles = tAUserInfo.getUser().getRoles();
-        if (roles.contains(TARole.ROLE_CONTROL_UNP)) {
+        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartments());
 
-        } else if (roles.contains(TARole.ROLE_CONTROL_NS)) {
-            Department parentType2 = getDepartmentType2(tAUserInfo.getUser().getDepartmentId());
+        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+            Department parentType2 = getDepartmentType2(tAUser.getDepartmentId());
             if (parentType2 != null) {
                 retList.addAll(departmentDao.getAllChildren(parentType2.getId()));
             }
             // подразделения с типом 3
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.GOSB.getCode()));
-
         }
 
         // Результат выборки должен содержать только уникальные подразделения
@@ -290,10 +285,10 @@ public class DepartmentServiceImpl implements DepartmentService {
      * @return
      */
     @Override
-    public List<Department> getOpenPeriodDepartments(TAUserInfo tAUserInfo, ReportPeriod reportPeriod) {
+    public List<Department> getOpenPeriodDepartments(TAUser tAUser, ReportPeriod reportPeriod) {
         List<Department> retList = new ArrayList<Department>();
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
-        List<Department> list = getTaxFormDepartments(tAUserInfo);
+        List<Department> list = getTaxFormDepartments(tAUser);
         for (Department department : list) {
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriod.getId(), Long.valueOf(department.getId()));
             if (departmentReportPeriod != null && departmentReportPeriod.isActive()) {
@@ -301,6 +296,10 @@ public class DepartmentServiceImpl implements DepartmentService {
                 retList.add(department);
             }
         }
+
+        Set setItems = new HashSet(retList);
+        retList.clear();
+        retList.addAll(setItems);
 
         return retList;
     }
