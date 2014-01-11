@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 import java.util.List;
 import java.util.Map;
@@ -89,18 +92,18 @@ public interface DepartmentService {
     /**
      * Выборка для бизнес-администрирования
      *
-     * @param tAUserInfo пользователь
+     * @param tAUser пользователь
      * @return
      */
-    List<Department> getBADepartments(TAUserInfo tAUserInfo);
+    List<Department> getBADepartments(TAUser tAUser);
 
     /**
      * Получение ТБ
      *
-     * @param tAUserInfo пользователь
+     * @param tAUser пользователь
      * @return
      */
-    List<Department> getTBDepartments(TAUserInfo tAUserInfo);
+    List<Department> getTBDepartments(TAUser tAUser);
 
     /**
      * Получение Банка
@@ -112,18 +115,18 @@ public interface DepartmentService {
     /**
      * Выборка для доступа к экземплярам НФ/деклараций
      *
-     * @param tAUserInfo пользователь
+     * @param tAUser пользователь
      * @return
      */
-    List<Department> getTaxFormDepartments(TAUserInfo tAUserInfo);
+    List<Department> getTaxFormDepartments(TAUser tAUser);
 
     /**
      * Выборка для назначения подразделений-исполнителей
      *
-     * @param tAUserInfo пользователь
+     * @param tAUser пользователь
      * @return
      */
-    List<Department> getDestinationDepartments(TAUserInfo tAUserInfo);
+    List<Department> getDestinationDepartments(TAUser tAUser);
 
     /**
      * Выборка для параметров печатной формы
@@ -136,10 +139,10 @@ public interface DepartmentService {
     /**
      * Выборка подразделений по открытым периодам
      *
-     * @param tAUserInfo пользователь
-     * @param reportPeriod  открытый период
+     * @param tAUser       пользователь
+     * @param reportPeriod открытый период
      * @return
      */
-    List<Department> getOpenPeriodDepartments(TAUserInfo tAUserInfo, ReportPeriod reportPeriod);
+    List<Department> getOpenPeriodDepartments(TAUser tAUser, ReportPeriod reportPeriod);
 
 }
