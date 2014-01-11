@@ -32,18 +32,21 @@ public class PeriodServiceImplTest {
         taxPeriod1.setId(1);
         taxPeriod1.setStartDate(new GregorianCalendar(2012, 1, 1).getTime());
         taxPeriod1.setEndDate(new GregorianCalendar(2012, 12, 31).getTime());
+		taxPeriod1.setYear(2012);
         taxPeriod1.setTaxType(TaxType.TRANSPORT);
 
         TaxPeriod taxPeriod2 = new TaxPeriod();
         taxPeriod2.setId(2);
         taxPeriod2.setStartDate(new GregorianCalendar(2012, 1, 1).getTime());
         taxPeriod2.setEndDate(new GregorianCalendar(2012, 12, 31).getTime());
+		taxPeriod2.setYear(2012);
         taxPeriod2.setTaxType(TaxType.TRANSPORT);
 
         TaxPeriod taxPeriod3 = new TaxPeriod();
         taxPeriod3.setId(3);
         taxPeriod3.setStartDate(new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime());
         taxPeriod3.setEndDate(new GregorianCalendar(2012, Calendar.DECEMBER, 31).getTime());
+		taxPeriod3.setYear(2012);
         taxPeriod3.setTaxType(TaxType.INCOME);
 
         // список налоговых периодов по ТН

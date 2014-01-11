@@ -20,6 +20,7 @@ public class ReportPeriodTest {
         
 		TaxPeriod tp = new TaxPeriod();
 		tp.setStartDate(cl.getTime());
+		tp.setYear(year);
 		
 		ReportPeriod rp = new ReportPeriod();
 		rp.setTaxPeriod(tp);

@@ -36,6 +36,7 @@ public class ReportPeriodServiceTest {
         Calendar cl = Calendar.getInstance();
         cl.set(2012, 1, 1);
         taxPeriod1.setStartDate(cl.getTime());
+		taxPeriod1.setYear(2012);
 
         // 2 налоговый период
         TaxPeriod taxPeriod2 = new TaxPeriod();
@@ -48,7 +49,8 @@ public class ReportPeriodServiceTest {
         taxPeriod3.setTaxType(TaxType.INCOME);
         // set time
         taxPeriod3.setStartDate(cl.getTime());
-		
+		taxPeriod3.setYear(2012);
+
 		// Mock для reportPeriodDao
 		ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
 		

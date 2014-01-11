@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -78,14 +79,16 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
 		jt.update(
 				"insert into report_period (id, name, months, tax_period_id, ord," +
-						" dict_tax_period_id)" +
-						" values (?, ?, ?, ?, ?, ?)",
+						" dict_tax_period_id, start_date, end_date)" +
+						" values (?, ?, ?, ?, ?, ?, ?, ?)",
 				id,
 				reportPeriod.getName(),
 				reportPeriod.getMonths(),
 				reportPeriod.getTaxPeriod().getId(),
 				reportPeriod.getOrder(),
-				reportPeriod.getDictTaxPeriodId()
+				reportPeriod.getDictTaxPeriodId(),
+				new Date(), // заменить на значение из модели (Marat Fayzullin 2014-01-10)
+				new Date()  // заменить на значение из модели (Marat Fayzullin 2014-01-10)
 		);
 		reportPeriod.setId(id);
 		return id;
@@ -106,3 +109,4 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     }
 
 }
+

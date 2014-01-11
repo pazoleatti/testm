@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -50,6 +51,7 @@ public class DepartmentReportPeriodDaoImplTest {
 		taxPeriod.setStartDate(new Date());
 		taxPeriod.setEndDate(new Date());
 		taxPeriod.setTaxType(TaxType.TRANSPORT);
+		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
 		taxPeriodDao.add(taxPeriod);
 
 		reportPeriod1 = new ReportPeriod();

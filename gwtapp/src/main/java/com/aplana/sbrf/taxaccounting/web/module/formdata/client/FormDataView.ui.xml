@@ -60,6 +60,10 @@
             margin-right: auto;
             margin-left: auto;
         }
+        .test {
+            padding-top: auto;
+            padding-bottom: auto;
+        }
 
     </ui:style>
 
@@ -145,7 +149,7 @@
                 </g:north>
                 <g:center>
                     <g:ResizeLayoutPanel>
-                        <style:GenericDataGrid height="100%" ui:field="formDataTable" />
+                        <style:GenericDataGrid height="100%" addStyleNames="{style.test}" ui:field="formDataTable" />
                     </g:ResizeLayoutPanel>
                 </g:center>
                 <g:south size="30">
