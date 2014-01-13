@@ -15,6 +15,7 @@ public class SignInPresenter extends PresenterWidget<SignInView>{
 	public interface MyView extends View {
 		void setUserName(String userName);
 		void setRoleAndDepartment(String roleAndDepartment);
+        void setHint(String value);
 	}
 	
 	private final DispatchAsync dispatchAsync;
@@ -36,6 +37,7 @@ public class SignInPresenter extends PresenterWidget<SignInView>{
 					public void onSuccess(GetUserInfoResult result) {
 						getView().setUserName(result.getUserName());
 						getView().setRoleAndDepartment(result.getRoleAnddepartment());
+						getView().setHint(result.getHint());
 					}
 				}, this));
 

@@ -10,6 +10,8 @@
             font-weight: normal;
             height: 30px;
             vertical-align: middle;
+            padding: 0 5px;
+            white-space: nowrap;
         }
 
         @external .gwt-MenuBar .gwt-MenuItem-selected;
@@ -41,6 +43,7 @@
             padding-top: 3px;
             padding-bottom: 5px;
             /*padding-left: 135px; убрал чтобы при уменьшении ширины меню не сразу схлапывалось*/
+            overflow: hidden;
         }
 
         @external gwt-MenuBar-horizontal .gwt-MenuItem-selected;
