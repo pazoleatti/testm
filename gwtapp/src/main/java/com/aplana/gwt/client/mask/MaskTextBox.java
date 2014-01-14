@@ -16,7 +16,8 @@ import com.google.gwt.user.client.ui.ValueBoxBase;
  *
  * @author aivanov
  */
-public class MaskTextBox extends MaskBox<String> implements HasMask {
+public class MaskTextBox extends MaskBox<String> {
+
 
     public MaskTextBox() {
         super(Document.get().createTextInputElement(), PassthroughRenderer.instance(), PassthroughParser.instance());

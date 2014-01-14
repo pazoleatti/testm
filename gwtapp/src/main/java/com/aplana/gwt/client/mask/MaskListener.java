@@ -1,8 +1,6 @@
 package com.aplana.gwt.client.mask;
 
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.user.client.ui.ValueBoxBase;
-
 
 /**
  * Установщик обработчиков для текстового ввода с маской.
@@ -27,6 +25,7 @@ public class MaskListener {
         this.mask = msk;
         this.textbox = box;
 
+        // Рисуем пользовательскую маску
         StringBuffer pic = new StringBuffer();
 
         for (char mc : mask.toCharArray()) {
@@ -81,7 +80,10 @@ public class MaskListener {
                         }
 
                         applied.append(input.substring(selectEnd));     // Копируем в буфер часть что после конца позиции выделения
-                        input = applied.toString();
+
+                        // Если получивщийся текст пустой то вставляем маску для пользователя
+                        input = applied.length() != 0 ? applied.toString() : picture;
+
                         cursor = selectStart;
                     }
 
@@ -89,8 +91,12 @@ public class MaskListener {
                     if (nativeKeyCode == KeyCodes.KEY_BACKSPACE)
                         cursor--;
 
-                    if (cursor < 0)
+                    if (cursor < 0) {
+                        textbox.setText(picture);
+                        textbox.removeExceptionStyle();
+                        textbox.setCursorPos(0);
                         return;
+                    }
 
                     char mc = mask.charAt(cursor);  // символ в маске под текущей позицией курсора
                     applied = new StringBuffer();
@@ -103,7 +109,8 @@ public class MaskListener {
                     } else
                         applied.append(input);
 
-                    textbox.setText(applied.toString());
+                    System.out.println(applied.length());
+                    textbox.setText(applied.length() != 0 ? applied.toString() : picture);
                     textbox.setCursorPos(cursor);
 
                     textbox.removeExceptionStyle();

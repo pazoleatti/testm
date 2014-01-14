@@ -4,14 +4,18 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.Parser;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.ValueBox;
 import com.google.gwt.user.client.ui.ValueBoxBase;
 
+import java.text.ParseException;
+
 /**
  * Виджет для ввода текста с маской
+ * НЕ следует использовать не посредственно.
  *
  * @author aivanov
  */
@@ -23,11 +27,27 @@ public class MaskBox<T> extends ValueBox<T> {
     private String mask;
     private MaskListener maskListener;
 
+    private String textPicture;
+
     private MaskBox source = this;
 
     public MaskBox(Element element, Renderer<T> renderer, final Parser<T> parser) {
         super(element, renderer, parser);
         setStyleName("gwt-TextBox");
+
+        getSource().addValueChangeHandler(new ValueChangeHandler() {
+            @Override
+            public void onValueChange(ValueChangeEvent event) {
+                Object eventValue = event.getValue();
+                try {
+                    setValue(parser.parse((CharSequence) eventValue));
+                } catch (ParseException e) {
+                    if (textPicture == null || !textPicture.equals(eventValue)) {
+                        addExceptionStyle();
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -40,12 +60,13 @@ public class MaskBox<T> extends ValueBox<T> {
             maskListener = new MaskListener(this, mask);
             addBlurHandler(new BlurHandler() {
                 public void onBlur(BlurEvent event) {
-                    System.out.println("-ValueChangeEvent");
                     ValueChangeEvent.fire(source, getText());
                 }
             });
         } else
             maskListener.setMask(mask);
+
+        textPicture = getTextPicture();
     }
 
     public void setMask(String mask) {

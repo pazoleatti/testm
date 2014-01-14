@@ -6,6 +6,11 @@ import com.google.gwt.text.shared.Parser;
 import java.text.ParseException;
 import java.util.Date;
 
+/**
+ * Кастомный парсер для MaskBox
+ *
+ * @author aivanov
+ */
 public class DateParser implements Parser<Date> {
 
     private static DateParser INSTANCE;
@@ -28,7 +33,7 @@ public class DateParser implements Parser<Date> {
         }
 
         try {
-            return format.parse(object.toString());
+            return format.parseStrict(object.toString());
         } catch (IllegalArgumentException e) {
             throw new ParseException(e.getMessage(), 0);
         }

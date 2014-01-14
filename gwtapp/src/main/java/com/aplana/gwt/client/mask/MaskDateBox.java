@@ -28,30 +28,13 @@ public class MaskDateBox extends MaskBox<Date> {
         super(Document.get().createTextInputElement(), new DateTimeFormatRenderer(DateParser.format),
                 DateParser.instance());
         setMask("99.99.9999");
-        getSource().addValueChangeHandler(new ValueChangeHandler() {
-            @Override
-            public void onValueChange(ValueChangeEvent event) {
-                System.out.println("-MaskDateBox");
-                try {
-                    value = DateParser.format.parse((String) event.getValue());
-                } catch (IllegalArgumentException e) {
-                    addExceptionStyle();
-                }
-            }
-        });
     }
 
     @Override
     public Date getValue() {
-        String text = getText();
-
-        try {
-            deferredValue = DateParser.format.parse(text);
-        } catch (IllegalArgumentException e) {
-            addExceptionStyle();
-            value = deferredValue;
+        if (!checkValue(super.getValue())) {
+            return deferredValue;
         }
-        value = deferredValue;
         return value;
     }
 
@@ -59,7 +42,24 @@ public class MaskDateBox extends MaskBox<Date> {
     @Override
     public void setValue(Date value) {
         this.value = value;
-        setText(DateParser.format.format(value));
+        if (checkValue(value)) {
+            setText(DateParser.format.format(value));
+        }
+    }
+
+    /**
+     * Проверить что дата не пуста и после заполнить удачное значение
+     *
+     * @param value дата
+     * @return если null то вернет false
+     */
+    private boolean checkValue(Date value) {
+        if (value == null) {
+            return false;
+        } else {
+            deferredValue = value;
+            return true;
+        }
     }
 
 }
