@@ -302,7 +302,7 @@ a, a:visited, a:hover {
 }
 
 .gwt-MenuBar-horizontal .gwt-MenuItem {
-    padding: 0 10px;
+    padding: 0 5px;
     vertical-align: bottom;
     color: #666666;
     font-weight: bold;

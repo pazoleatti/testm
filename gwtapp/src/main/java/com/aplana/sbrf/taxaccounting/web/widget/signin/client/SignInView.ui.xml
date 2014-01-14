@@ -14,12 +14,19 @@
             color: #FFFFFF !important;
         }
 
+        .forLabel {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            -ms-text-overflow: ellipsis;
+        }
+
     </ui:style>
 
     <g:HTMLPanel styleName="{style.signin}" height="30px">
-        <div style="float: left; text-align: center; margin-right: 20px; text-decoration: underline">
-            <g:Label height="15px" ui:field="roleAndDepartment"/>
-            <g:Label height="15px" ui:field="userName"/>
+        <div style="float: left; text-align: center; margin-right: 20px; width: 300px">
+            <g:Label ui:field="roleAndDepartment" addStyleNames="{style.forLabel}"/>
+            <g:Label ui:field="userName" addStyleNames="{style.forLabel}"/>
         </div>
 	    <div style="float: right; margin-top: 5px"><g:Anchor styleName="{style.whiteColor}" href="j_spring_security_logout" text="Выход"/></div>
 	</g:HTMLPanel>
