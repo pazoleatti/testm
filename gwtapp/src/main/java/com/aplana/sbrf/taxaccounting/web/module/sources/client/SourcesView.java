@@ -129,7 +129,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	}
 
 	@Override
-	public void init(boolean isForm) {
+	public void init(boolean isForm, TaxType nType) {
 		this.isForm = isForm;
 		formLabel.setVisible(isForm);
 		formAnchor.setVisible(!isForm);
@@ -137,7 +137,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		declarationAnchor.setVisible(isForm);
 		formReceiversTable.setVisible(isForm);
 		declarationReceiversTable.setVisible(!isForm);
-		taxTypePicker.setValue(TaxType.INCOME);
+        taxTypePicker.setValue((nType != null ? nType : TaxType.INCOME), false);
 
 		departmentReceiverPicker.setValue(null);
 		departmentSourcePicker.setValue(null);

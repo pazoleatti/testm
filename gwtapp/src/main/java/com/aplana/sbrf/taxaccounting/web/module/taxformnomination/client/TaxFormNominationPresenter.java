@@ -49,7 +49,7 @@ public class TaxFormNominationPresenter
         void setDepartments(List<Department> departments, Set<Integer> availableDepartment);
 
         // Инициализация
-        void init(Boolean isForm);
+        void init(Boolean isForm, TaxType nType);
 
 
         // установка данных
@@ -99,7 +99,10 @@ public class TaxFormNominationPresenter
                                     return;
                                 }
                                 getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
-                                getView().init(Boolean.valueOf(request.getParameter("isForm", "")));
+                                Boolean isForm = Boolean.valueOf(request.getParameter("isForm", ""));
+                                String value = request.getParameter("nType", "");
+                                TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);
+                                getView().init(isForm, nType);
 
                             }
                         }, this).addCallback(new ManualRevealCallback<GetOpenDataResult>(this)));

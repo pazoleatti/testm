@@ -352,7 +352,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
     // Событие "Открытие формы"
     @Override
-    public void init(Boolean isForm) {
+    public void init(Boolean isForm, TaxType nType) {
         this.isForm = isForm;
             depoId = null;
 
@@ -370,7 +370,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         initTableHeader();
 
         // "Вид налога": "Налог на прибыль"
-        boxTaxType.setValue(TaxType.INCOME, false);
+        boxTaxType.setValue((nType != null ? nType : TaxType.INCOME), false);
 
         // Кнопки "Назначить" и "Отменить назначение" — неактивны
         enableAnchor(assignAnchor, false);
