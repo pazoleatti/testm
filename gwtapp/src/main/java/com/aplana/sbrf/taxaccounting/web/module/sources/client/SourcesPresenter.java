@@ -31,7 +31,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 
 	public interface MyView extends View, HasUiHandlers<SourcesUiHandlers> {
 		
-		void init(boolean isForm);
+		void init(boolean isForm, TaxType nType);
 		void setDepartments(List<Department> departments, Set<Integer> availableDepartments);
 		
 		
@@ -93,7 +93,10 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 				.defaultCallback(new AbstractCallback<GetDepartmentsResult>() {
 					@Override
 					public void onSuccess(GetDepartmentsResult result) {
-						getView().init(Boolean.valueOf(request.getParameter("isForm", "")));
+                        Boolean isForm = Boolean.valueOf(request.getParameter("isForm", ""));
+                        String value = request.getParameter("nType", "");
+                        TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);
+                        getView().init(isForm, nType);
 						getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
 					}
 				}, this).addCallback(new ManualRevealCallback<GetDepartmentsResult>(SourcesPresenter.this)));
