@@ -9,6 +9,15 @@
             margin-top: 13px;
             margin-right: 30px;
         }
+
+        .signin {
+            margin-top: 5px;
+            margin-bottom: 5px;
+            float: right;
+            color: #FFFFFF;
+            font-size: 14px;
+            height: 30px;
+        }
     </ui:style>
 
     <g:HTMLPanel>
@@ -25,8 +34,7 @@
                         <div class="topLeftLogo"/>
                         <div class="topRightLogo"/>
 
-                        <!--TODO Размещение у signInContentPanel должно настраиваться не в нем самом а выше по дереву, либо в главном стиле-->
-                        <g:HTMLPanel ui:field="signInContentPanel"/>
+                        <g:HTMLPanel ui:field="signInContentPanel" styleName="{style.signin}"/>
 
                         <div style="float: right">
                             <g:MenuBar ui:field="helpMenu">

@@ -53,6 +53,6 @@
 
     </ui:style>
 
-	<g:HTMLPanel ui:field="panel"/>
+	<g:MenuBar ui:field="menu"/>
 
 </ui:UiBinder> 

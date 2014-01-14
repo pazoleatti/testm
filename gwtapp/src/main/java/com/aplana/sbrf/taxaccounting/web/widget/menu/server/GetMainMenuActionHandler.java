@@ -156,11 +156,9 @@ public class GetMainMenuActionHandler extends
             // добавить "Конфигурационные параметры"
             if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
                 settingMenuItem.getSubMenu().add(new MenuItem("Конфигурационные параметры",	NUMBER_SIGN + ConfigurationPresenter.TOKEN));
+                settingMenuItem.getSubMenu().add(new MenuItem("Миграция данных", NUMBER_SIGN + MigrationTokens.migration));
+                settingMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN + SchedulerTokens.taskList));
             }
-
-            settingMenuItem.getSubMenu().add(new MenuItem("Импорт данных", NUMBER_SIGN + MigrationTokens.migration));
-            settingMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN + SchedulerTokens.taskList));
-
             menuItems.add(settingMenuItem);
         }
 

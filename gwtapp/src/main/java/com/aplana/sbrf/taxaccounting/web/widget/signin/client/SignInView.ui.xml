@@ -2,14 +2,6 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:style>
-        .signin {
-            margin-top: 5px;
-            margin-bottom: 5px;
-            float: right;
-            color: #FFFFFF;
-            font-size: 14px;
-        }
-
         .whiteColor {
             color: #FFFFFF !important;
         }
@@ -23,11 +15,13 @@
 
     </ui:style>
 
-    <g:HTMLPanel styleName="{style.signin}" height="30px">
-        <div style="float: left; text-align: center; margin-right: 20px; width: 300px">
+    <g:HTMLPanel>
+        <div style="float: left; text-align: center; margin-right: 20px; margin-top: -2px; max-width: 300px;">
             <g:Label ui:field="roleAndDepartment" addStyleNames="{style.forLabel}"/>
             <g:Label ui:field="userName" addStyleNames="{style.forLabel}"/>
         </div>
-	    <div style="float: right; margin-top: 5px"><g:Anchor styleName="{style.whiteColor}" href="j_spring_security_logout" text="Выход"/></div>
+	    <div style="float: right; margin-top: 5px">
+            <g:Anchor styleName="{style.whiteColor}" href="j_spring_security_logout" text="Выход"/>
+        </div>
 	</g:HTMLPanel>
 </ui:UiBinder> 

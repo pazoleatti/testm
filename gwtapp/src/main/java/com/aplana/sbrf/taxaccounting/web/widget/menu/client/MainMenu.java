@@ -11,7 +11,6 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.MenuBar;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
@@ -26,11 +25,10 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 	interface Binder extends UiBinder<Widget, MainMenu> {
 	}
 
-	private static final MenuBar menu = new MenuBar();
 	private static final LocalHtmlTemplates template = GWT.create(LocalHtmlTemplates.class);
 
-	@UiField
-	Panel panel;
+    @UiField
+    MenuBar menu;
 
 	@Inject
 	public MainMenu(final Binder binder) {
@@ -39,15 +37,13 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 
 	@Override
 	public void setMenuItems(final List<MenuItem> menuItems) {
-		panel.clear();
-		menu.clearItems();
+        menu.clearItems();
 		for (MenuItem item : menuItems) {
 			MenuBar subMenuBar = new MenuBar(true);
 			addSubMenu(item, subMenuBar);
 			menu.addItem(item.getName() + " " + getArrowSymbol(), subMenuBar);
 			menu.addSeparator().getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
 		}
-		panel.add(menu);
 	}
 
 	private void addSubMenu(MenuItem menuItem, MenuBar menu) {
@@ -62,7 +58,7 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 				subMenuItem.setScheduledCommand(new Scheduler.ScheduledCommand() {
 					@Override
 					public void execute() {
-						MainMenu.menu.selectItem(null);
+                        getMenu().selectItem(null);
 					}
 				});
 				menu.addItem(subMenuItem);
@@ -74,4 +70,7 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 		return "\u25BC";
 	}
 
+    private MenuBar getMenu() {
+        return menu;
+    }
 }
