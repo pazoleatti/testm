@@ -2,6 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 			 xmlns:g="urn:import:com.google.gwt.user.client.ui"
 			 xmlns:my="urn:import:com.aplana.gwt.client"
+			 xmlns:mask="urn:import:com.aplana.gwt.client.mask"
 			 xmlns:fm="urn:import:com.aplana.gwt.client.form"
 		>
     <ui:style>
@@ -70,6 +71,9 @@
                     </g:HorizontalPanel>
                 </g:ScrollPanel>
                 <g:Button ui:field="showDialog">Показать окно</g:Button>
+                <mask:MaskDateBox ui:field="text"/>
+                <g:Label ui:field="lab"/>
+                <g:Label ui:field="lab2"/>
             </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>

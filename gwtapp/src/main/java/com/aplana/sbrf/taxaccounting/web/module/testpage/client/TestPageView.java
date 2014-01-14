@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.testpage.client;
 
 import com.aplana.gwt.client.*;
+import com.aplana.gwt.client.mask.MaskDateBox;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -16,6 +19,7 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> implements TestPagePresenter.MyView {
@@ -47,6 +51,14 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     Button showDialog;
 
     Label lbl1;
+
+    @UiField
+    MaskDateBox text;
+    @UiField
+    Label lab;
+    @UiField
+    Label lab2;
+
 
     @Inject
     public TestPageView(final Binder uiBinder) {
@@ -149,6 +161,21 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                 mw.show();
             }
 
+        });
+
+        text.setValue(new Date());
+        text.addValueChangeHandler(new ValueChangeHandler() {
+            @Override
+            public void onValueChange(ValueChangeEvent event) {
+                System.out.println("-HomePageView");
+                lab.setText(event.getValue().toString());
+            }
+        });
+        text.addKeyDownHandler(new KeyDownHandler() {
+            @Override
+            public void onKeyDown(KeyDownEvent event) {
+                lab2.setText(text.getValue().toString());
+            }
         });
     }
 
