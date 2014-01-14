@@ -1,7 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.testpage.client;
 
 import com.aplana.gwt.client.*;
-import com.aplana.gwt.client.mask.MaskDateBox;
+import com.aplana.gwt.client.mask.ui.TextMaskBox;
+import com.aplana.gwt.client.mask.ui.DateMaskBox;
+import com.aplana.gwt.client.mask.ui.MonthYearMaskBox;
+import com.aplana.gwt.client.mask.ui.YearMaskBox;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownEvent;
@@ -46,18 +49,28 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     Label showResult;
 
 
-
     @UiField
     Button showDialog;
 
     Label lbl1;
 
     @UiField
-    MaskDateBox text;
+    DateMaskBox boxDate;
     @UiField
-    Label lab;
+    MonthYearMaskBox boxMy;
     @UiField
-    Label lab2;
+    YearMaskBox boxY;
+    @UiField
+    TextMaskBox boxText;
+
+    @UiField
+    Label boxDateLb;
+    @UiField
+    Label boxMyLb;
+    @UiField
+    Label boxYLb;
+    @UiField
+    Label boxTextLb;
 
 
     @Inject
@@ -91,18 +104,18 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
             }
         });
 
-         mlistbox.setAvailableValues(itemList);
-         mlistbox.setValue(valueList);
-         mlistbox.addValueChangeHandler( new ValueChangeHandler<List>() {
-             @Override
-             public void onValueChange(ValueChangeEvent<List> event) {
-                 List<String> getM = (List<String>)mlistbox.getValue();
-                 String strCont = "";
-                 for (String str : getM)
-                     strCont = strCont + str + "; ";
-                 showResult.setText(strCont);
-             }
-         });
+        mlistbox.setAvailableValues(itemList);
+        mlistbox.setValue(valueList);
+        mlistbox.addValueChangeHandler(new ValueChangeHandler<List>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List> event) {
+                List<String> getM = (List<String>) mlistbox.getValue();
+                String strCont = "";
+                for (String str : getM)
+                    strCont = strCont + str + "; ";
+                showResult.setText(strCont);
+            }
+        });
 
 
         initWidget(uiBinder.createAndBindUi(this));
@@ -149,7 +162,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                 lbl1 = new Label("Тест");
                 //lbl1.setSize("200px","200px");
                 mw.add(lbl1);
-               // mw.addAdditionalButton(new ImageButtonLink("http://127.0.0.1:8888/resources/img/email.png", "Отправить письмо"));
+                // mw.addAdditionalButton(new ImageButtonLink("http://127.0.0.1:8888/resources/img/email.png", "Отправить письмо"));
             /*    mw.addSaveButtonClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
@@ -163,20 +176,49 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
         });
 
-        text.setValue(new Date());
-        text.addValueChangeHandler(new ValueChangeHandler() {
+        testMaskBox();
+    }
+
+
+    private void testMaskBox() {
+        Date date = new Date();
+        boxDate.setValue(date);
+        boxMy.setValue(date);
+        boxY.setValue(date);
+
+        boxText.setText("fdfsdfsdf");
+
+        boxDate.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
-            public void onValueChange(ValueChangeEvent event) {
-                System.out.println("-HomePageView");
-                lab.setText(event.getValue().toString());
+            public void onValueChange(ValueChangeEvent<Date> event) {
+                boxDateLb.setText(getTestMaskValues(event.getValue(), boxDate.getValue()));
             }
         });
-        text.addKeyDownHandler(new KeyDownHandler() {
+
+        boxMy.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
-            public void onKeyDown(KeyDownEvent event) {
-                lab2.setText(text.getValue().toString());
+            public void onValueChange(ValueChangeEvent<Date> event) {
+                boxMyLb.setText(getTestMaskValues(event.getValue(), boxMy.getValue()));
             }
         });
+
+        boxY.addValueChangeHandler(new ValueChangeHandler<Date>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Date> event) {
+                boxYLb.setText(getTestMaskValues(event.getValue(), boxY.getValue()));
+            }
+        });
+
+        boxText.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                boxTextLb.setText(getTestMaskValues(event.getValue(), boxText.getValue()));
+            }
+        });
+    }
+
+    private String getTestMaskValues(Object eventValue, Object elemValue){
+        return "Event: " + String.valueOf(eventValue) + " " + String.valueOf(elemValue) + " .";
     }
 
 }

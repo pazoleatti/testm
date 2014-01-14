@@ -1,4 +1,4 @@
-package com.aplana.gwt.client.mask;
+package com.aplana.gwt.client.mask.parser;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.text.shared.Parser;
@@ -7,24 +7,24 @@ import java.text.ParseException;
 import java.util.Date;
 
 /**
- * Кастомный парсер для MaskBox
+ * Кастомный парсер даты в виде года для DateMaskBox
  *
  * @author aivanov
  */
-public class DateParser implements Parser<Date> {
+public class YearDateParser implements Parser<Date> {
 
-    private static DateParser INSTANCE;
+    private static YearDateParser INSTANCE;
 
-    public static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy");
+    public static final DateTimeFormat formatY = DateTimeFormat.getFormat("yyyy");
 
-    public static Parser<Date> instance() {
+    public static Parser<Date> instanceY() {
         if (INSTANCE == null) {
-            INSTANCE = new DateParser();
+            INSTANCE = new YearDateParser();
         }
         return INSTANCE;
     }
 
-    protected DateParser() {
+    protected YearDateParser() {
     }
 
     public Date parse(CharSequence object) throws ParseException {
@@ -33,7 +33,7 @@ public class DateParser implements Parser<Date> {
         }
 
         try {
-            return format.parseStrict(object.toString());
+            return formatY.parseStrict(object.toString());
         } catch (IllegalArgumentException e) {
             throw new ParseException(e.getMessage(), 0);
         }

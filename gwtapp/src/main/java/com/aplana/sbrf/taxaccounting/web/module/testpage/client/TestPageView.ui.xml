@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 			 xmlns:g="urn:import:com.google.gwt.user.client.ui"
 			 xmlns:my="urn:import:com.aplana.gwt.client"
-			 xmlns:mask="urn:import:com.aplana.gwt.client.mask"
+			 xmlns:mask="urn:import:com.aplana.gwt.client.mask.ui"
 			 xmlns:fm="urn:import:com.aplana.gwt.client.form"
 		>
     <ui:style>
@@ -56,13 +56,13 @@
                                     text="my button hyperlink" ui:field="ibl"/>
                 <my:ImgBtnLnk text="my anorch" imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" href="#"
                               ui:field="ian"/>
-                <g:HorizontalPanel addStyleNames="{style.ms}" width="400px">
+                <g:HorizontalPanel addStyleNames="{style.ms}" width="100px">
                     <!--<my:MultiListBox ui:field="mlistbox" enable="true" multiselect="false" />-->
                     <my:MultiListBox ui:field="mlistbox"/>
 
                 </g:HorizontalPanel>
                 <g:Label ui:field="showResult"/>
-                <g:ScrollPanel ui:field="scrollPanel" width="300px" height="300px">
+                <g:ScrollPanel ui:field="scrollPanel" width="200px" height="50px">
                     <g:HorizontalPanel>
                         <g:CheckBox ui:field="chk"/>
                         <g:Label ui:field="lbl">
@@ -71,9 +71,25 @@
                     </g:HorizontalPanel>
                 </g:ScrollPanel>
                 <g:Button ui:field="showDialog">Показать окно</g:Button>
-                <mask:MaskDateBox ui:field="text"/>
-                <g:Label ui:field="lab"/>
-                <g:Label ui:field="lab2"/>
+                <g:VerticalPanel spacing="3" borderWidth="1" width="100%">
+                    <g:HorizontalPanel spacing="2">
+                        <mask:DateMaskBox ui:field="boxDate"/>
+                        <g:Label ui:field="boxDateLb" width="100%"/>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel  spacing="2">
+                        <mask:MonthYearMaskBox ui:field="boxMy"/>
+                        <g:Label ui:field="boxMyLb" width="100%"/>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel  spacing="2">
+                        <mask:YearMaskBox ui:field="boxY"/>
+                        <g:Label ui:field="boxYLb" width="100%"/>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel  spacing="2">
+                        <mask:TextMaskBox mask="XXXXXXX" ui:field="boxText"/>
+                        <g:Label ui:field="boxTextLb" width="100%"/>
+                    </g:HorizontalPanel>
+                </g:VerticalPanel>
+
             </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>

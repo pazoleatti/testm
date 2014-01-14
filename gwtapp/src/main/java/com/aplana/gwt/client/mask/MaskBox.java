@@ -1,5 +1,6 @@
 package com.aplana.gwt.client.mask;
 
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -31,14 +32,15 @@ public class MaskBox<T> extends ValueBox<T> {
 
     private MaskBox source = this;
 
-    public MaskBox(Element element, Renderer<T> renderer, final Parser<T> parser) {
-        super(element, renderer, parser);
+    protected MaskBox(Renderer<T> renderer, final Parser<T> parser) {
+        super(Document.get().createTextInputElement(), renderer, parser);
         setStyleName("gwt-TextBox");
 
         getSource().addValueChangeHandler(new ValueChangeHandler() {
             @Override
             public void onValueChange(ValueChangeEvent event) {
                 Object eventValue = event.getValue();
+                System.out.println("333 -> " + eventValue);
                 try {
                     setValue(parser.parse((CharSequence) eventValue));
                 } catch (ParseException e) {
