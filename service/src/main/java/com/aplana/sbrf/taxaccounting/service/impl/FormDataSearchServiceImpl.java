@@ -74,7 +74,9 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			return result;
 		}
 		
-		if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL) && !userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
+		if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                && !userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
 			throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
 		}
 		
@@ -162,13 +164,12 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         } else {
             formDataDaoFilter.setTaxTypes(Arrays.asList(formDataFilter.getTaxType()));
         }
-
         // Добавляем условия для отбрасывания форм, на которые у пользователя нет прав доступа
         // Эти условия должны быть согласованы с реализацией в FormDataAccessServiceImpl
         formDataDaoFilter.setUserDepartmentId(userInfo.getUser().getDepartmentId());
         if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
             formDataDaoFilter.setAccessFilterType(AccessFilterType.ALL);
-        } else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
+        } else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
             formDataDaoFilter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT_AND_SOURCES);
         } else if (userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
             formDataDaoFilter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT);

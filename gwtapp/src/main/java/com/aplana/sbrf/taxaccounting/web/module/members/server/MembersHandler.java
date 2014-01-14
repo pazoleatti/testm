@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_OPER')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_OPER', 'ROLE_CONTROL_NS')")
 public class MembersHandler extends AbstractActionHandler<GetMembersAction, GetMembersResult> {
 
     @Autowired
@@ -36,6 +36,5 @@ public class MembersHandler extends AbstractActionHandler<GetMembersAction, GetM
 
     @Override
     public void undo(GetMembersAction action, GetMembersResult result, ExecutionContext context) throws ActionException {
-
     }
 }

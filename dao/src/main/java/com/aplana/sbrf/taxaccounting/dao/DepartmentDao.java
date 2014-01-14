@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 /**
  * DAO для работы с информацией по подразделениям банка 
@@ -66,4 +67,10 @@ public interface DepartmentDao {
      */
     List<Department> getDepartmentsByType(int type);
 
+    /**
+     * Получение ТБ для подразделения (тип = 2)
+     * @param departmentId Подразделение пользователя
+     * @return ТБ
+     */
+    Department getDepartmenTB(int departmentId);
 }

@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -11,15 +13,17 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
+import static java.util.Arrays.asList;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
-
 
 public class DepartmentServiceImplTest {
 
     private static DepartmentService departmentService;
     private static DepartmentDao departmentDao;
     private static DepartmentReportPeriodDao departmentReportPeriodDao;
+    private static DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
+    private static DepartmentFormTypeDao departmentFormTypeDao;
 
     private static ArrayList<TARole> taRoles;
     private static Department root;
@@ -36,7 +40,14 @@ public class DepartmentServiceImplTest {
         departmentService = new DepartmentServiceImpl();
 
         departmentDao = mock(DepartmentDao.class);
+        departmentDeclarationTypeDao = mock(DepartmentDeclarationTypeDao.class);
+        departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
+        departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
+
         ReflectionTestUtils.setField(departmentService, "departmentDao", departmentDao);
+        ReflectionTestUtils.setField(departmentService, "departmentReportPeriodDao", departmentReportPeriodDao);
+        ReflectionTestUtils.setField(departmentService, "departmentDeclarationTypeDao", departmentDeclarationTypeDao);
+        ReflectionTestUtils.setField(departmentService, "departmentFormTypeDao", departmentFormTypeDao);
 
         root = new Department();
         root.setName("Bank");
@@ -65,80 +76,62 @@ public class DepartmentServiceImplTest {
 
         // TODO data for исполнители
 
-        when(departmentDao.getDepartment(departmentID[0])).thenReturn(root);
-        when(departmentDao.getDepartment(departmentID[1])).thenReturn(departmentTB2);
-        when(departmentDao.getDepartment(departmentID[2])).thenReturn(departmentTB3);
-        when(departmentDao.getDepartment(departmentID[3])).thenReturn(departmentGOSB31);
-        when(departmentDao.getDepartment(departmentID[4])).thenReturn(departmentOSB311);
-
-        when(departmentDao.getParent(departmentID[1])).thenReturn(root);
-        when(departmentDao.getParent(departmentID[2])).thenReturn(root);
-        when(departmentDao.getParent(departmentID[3])).thenReturn(departmentTB3);
-        when(departmentDao.getParent(departmentID[4])).thenReturn(departmentGOSB31);
-
-        ArrayList<Department> departments = new ArrayList<Department>();
-
-        departments.add(departmentTB3);
-        departments.add(departmentGOSB31);
-        departments.add(departmentOSB311);
-        when(departmentDao.getAllChildren(departmentID[2])).thenReturn(departments);
-        departments = new ArrayList<Department>();
-        departments.add(departmentTB2);
-        when(departmentDao.getAllChildren(departmentID[1])).thenReturn(departments);
-        departments = new ArrayList<Department>();
-        departments.add(root);
-        departments.add(departmentTB2);
-        departments.add(departmentTB3);
-        departments.add(departmentGOSB31);
-        departments.add(departmentOSB311);
-        when(departmentDao.getAllChildren(departmentID[0])).thenReturn(departments);
-
-        when(departmentDao.listDepartments()).thenReturn(departments);
-
-        departments = new ArrayList<Department>();
-        departments.add(root);
-        when(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode())).thenReturn(departments);
-        departments = new ArrayList<Department>();
-        departments.add(departmentTB2);
-        departments.add(departmentTB3);
-        when(departmentDao.getDepartmentsByType(DepartmentType.TERBANK.getCode())).thenReturn(departments);
-        departments = new ArrayList<Department>();
-        departments.add(departmentGOSB31);
-        when(departmentDao.getDepartmentsByType(DepartmentType.GOSB.getCode())).thenReturn(departments);
-        departments = new ArrayList<Department>();
-        departments.add(departmentOSB311);
-        when(departmentDao.getDepartmentsByType(DepartmentType.OSB.getCode())).thenReturn(departments);
-
+        // Подразделения
+        when(departmentDao.getDepartment(root.getId())).thenReturn(root);
+        when(departmentDao.getDepartment(departmentTB2.getId())).thenReturn(departmentTB2);
+        when(departmentDao.getDepartment(departmentTB3.getId())).thenReturn(departmentTB3);
+        when(departmentDao.getDepartment(departmentGOSB31.getId())).thenReturn(departmentGOSB31);
+        when(departmentDao.getDepartment(departmentOSB311.getId())).thenReturn(departmentOSB311);
+        // Иерархия подразделений (вверх)
+        when(departmentDao.getParent(departmentTB2.getId())).thenReturn(root);
+        when(departmentDao.getParent(departmentTB3.getId())).thenReturn(root);
+        when(departmentDao.getParent(departmentGOSB31.getId())).thenReturn(departmentTB3);
+        when(departmentDao.getParent(departmentOSB311.getId())).thenReturn(departmentGOSB31);
+        // Иерархия подразделений (вниз)
+        when(departmentDao.getAllChildren(root.getId())).thenReturn(asList(root, departmentTB2, departmentTB3, departmentGOSB31, departmentOSB311));
+        when(departmentDao.getAllChildren(departmentTB2.getId())).thenReturn(asList(departmentTB2));
+        when(departmentDao.getAllChildren(departmentTB3.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
+        // Все подразделения
+        when(departmentDao.listDepartments()).thenReturn(asList(root, departmentTB2, departmentTB3, departmentGOSB31, departmentOSB311));
+        // Типы подразделений
+        when(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode())).thenReturn(asList(root));
+        when(departmentDao.getDepartmentsByType(DepartmentType.TERBANK.getCode())).thenReturn(asList(departmentTB2, departmentTB3));
+        when(departmentDao.getDepartmentsByType(DepartmentType.GOSB.getCode())).thenReturn(asList(departmentGOSB31));
+        when(departmentDao.getDepartmentsByType(DepartmentType.OSB.getCode())).thenReturn(asList(departmentOSB311));
+        // ТБ для подразделения
+        when(departmentDao.getDepartmenTB(root.getId())).thenReturn(null);
+        when(departmentDao.getDepartmenTB(departmentTB2.getId())).thenReturn(departmentTB2);
+        when(departmentDao.getDepartmenTB(departmentTB3.getId())).thenReturn(departmentTB3);
+        when(departmentDao.getDepartmenTB(departmentGOSB31.getId())).thenReturn(departmentTB3);
+        when(departmentDao.getDepartmenTB(departmentOSB311.getId())).thenReturn(departmentTB3);
+        // Роли
         taRoles = new ArrayList<TARole>();
-        TARole taRole = new TARole();
-        taRole.setAlias(TARole.ROLE_CONTROL_UNP);
-        taRoles.add(taRole);
-        taRole = new TARole();
-        taRole.setAlias(TARole.ROLE_CONTROL_NS);
-        taRoles.add(taRole);
-        taRole = new TARole();
-        taRole.setAlias(TARole.ROLE_CONTROL);
-        taRoles.add(taRole);
-        taRole = new TARole();
-        taRole.setAlias(TARole.ROLE_OPER);
-        taRoles.add(taRole);
+        for (String alias : asList(TARole.ROLE_CONTROL_UNP, TARole.ROLE_CONTROL_NS, TARole.ROLE_CONTROL, TARole.ROLE_OPER)) {
+            TARole taRole = new TARole();
+            taRole.setAlias(alias);
+            taRoles.add(taRole);
+        }
 
-        departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
-        ReflectionTestUtils.setField(departmentService, "departmentReportPeriodDao", departmentReportPeriodDao);
         DepartmentReportPeriod drpOpen = new DepartmentReportPeriod();
         drpOpen.setActive(true);
         DepartmentReportPeriod drpClose = new DepartmentReportPeriod();
         drpClose.setActive(false);
-        when(departmentReportPeriodDao.get(0, Long.valueOf(departmentID[0]))).thenReturn(drpOpen);
-        when(departmentReportPeriodDao.get(0, Long.valueOf(departmentID[1]))).thenReturn(drpOpen);
-        when(departmentReportPeriodDao.get(0, Long.valueOf(departmentID[2]))).thenReturn(drpClose);
-        when(departmentReportPeriodDao.get(0, Long.valueOf(departmentID[3]))).thenReturn(drpClose);
-        when(departmentReportPeriodDao.get(0, Long.valueOf(departmentID[4]))).thenReturn(drpOpen);
-        when(departmentReportPeriodDao.get(1, Long.valueOf(departmentID[4]))).thenReturn(drpClose);
+        // Отчетные периоды
+        when(departmentReportPeriodDao.get(0, Long.valueOf(root.getId()))).thenReturn(drpOpen);
+        when(departmentReportPeriodDao.get(0, Long.valueOf(departmentTB2.getId()))).thenReturn(drpOpen);
+        when(departmentReportPeriodDao.get(0, Long.valueOf(departmentTB3.getId()))).thenReturn(drpClose);
+        when(departmentReportPeriodDao.get(0, Long.valueOf(departmentGOSB31.getId()))).thenReturn(drpClose);
+        when(departmentReportPeriodDao.get(0, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpOpen);
+        when(departmentReportPeriodDao.get(1, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpClose);
+        // Доступность по связям
+        when(departmentDeclarationTypeDao.getDepartmentsBySourceControl(anyInt(), any(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
+        when(departmentDeclarationTypeDao.getDepartmentsBySourceControlNs(anyInt(), any(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
+        when(departmentFormTypeDao.getDepartmentsBySourceControl(anyInt(), any(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
+        when(departmentFormTypeDao.getDepartmentsBySourceControlNs(anyInt(), any(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
     }
 
     @Test
-    public void testDepDao() {
+    public void depDaoTest() {
         Department department = new Department();
         DepartmentDao departmentDao = mock(DepartmentDao.class);
         List<Department> listDep = new ArrayList<Department>();
@@ -171,7 +164,7 @@ public class DepartmentServiceImplTest {
 
     @Test
     public void getRequiredForTreeDepartmentsTest() {
-        Set<Integer> available = new HashSet<Integer>(Arrays.asList(2, 3));
+        Set<Integer> available = new HashSet<Integer>(asList(2, 3));
 
         Collection<Department> result = departmentService.getRequiredForTreeDepartments(available).values();
         verify(departmentDao, times(1)).getDepartment(2);
@@ -185,15 +178,15 @@ public class DepartmentServiceImplTest {
     }
 
     @Test
-    public void testGetBADepartments() {
+    public void getBADepartmentsTest() {
         TAUser taUser = new TAUser();
         taUser.setRoles(taRoles);
-
+        // Контролер УНП - все подразделения
         List<Department> result = departmentService.getBADepartments(taUser);
         Assert.assertEquals(5, result.size());
-        Assert.assertEquals(true, result.contains(root) && result.contains(departmentTB2)
-                && result.contains(departmentTB3) && result.contains(departmentGOSB31) && result.contains(departmentOSB311));
+        Assert.assertTrue(result.containsAll(asList(root, departmentTB2, departmentTB3, departmentGOSB31, departmentOSB311)));
 
+        // Контролер НС
         taUser.getRoles().remove(0);
 
         for (int i = 0; i < departmentID.length; i++) {
@@ -202,22 +195,32 @@ public class DepartmentServiceImplTest {
 
             switch (departmentID[i]) {
                 case 0:
-                case 2:
-                case 3:
                     Assert.assertEquals(0, result.size());
                     break;
+                case 2:
+                    Assert.assertEquals(1, result.size());
+                    Assert.assertTrue(result.contains(departmentTB2));
+                    break;
+                case 3:
                 case 31:
                 case 311:
                     Assert.assertEquals(3, result.size());
-                    Assert.assertEquals(true, result.contains(departmentTB3) && result.contains(departmentGOSB31)
-                            && result.contains(departmentOSB311));
+                    Assert.assertTrue(result.containsAll(asList(departmentTB3, departmentGOSB31, departmentOSB311)));
                     break;
             }
+        }
+
+        // Контролер
+        taUser.getRoles().remove(0);
+
+        for (int i = 0; i < departmentID.length; i++) {
+            taUser.setDepartmentId(departmentID[i]);
+            Assert.assertEquals(0, departmentService.getBADepartments(taUser).size());
         }
     }
 
     @Test
-    public void testGetTBDepartments() {
+    public void getTBDepartmentsTest() {
         TAUser taUser = new TAUser();
         taUser.setRoles(taRoles);
 
@@ -251,20 +254,21 @@ public class DepartmentServiceImplTest {
     }
 
     @Test
-    public void testGetBankDepartment() {
+    public void getBankDepartmentTest() {
         Department result = departmentService.getBankDepartment();
         Assert.assertEquals(result, root);
     }
 
     @Test
-    public void testGetTaxFormDepartments() {
+    public void getTaxFormDepartmentsTest() {
         TAUser taUser = new TAUser();
         taUser.setRoles(taRoles);
 
-        List<Department> result = departmentService.getTaxFormDepartments(taUser);
+        List<Integer> result = departmentService.getTaxFormDepartments(taUser, TaxType.INCOME, true);
         Assert.assertEquals(5, result.size());
-        Assert.assertEquals(true, result.contains(root) && result.contains(departmentTB2)
-                && result.contains(departmentTB3) && result.contains(departmentGOSB31) && result.contains(departmentOSB311));
+        Assert.assertEquals(true, result.contains(root.getId()) && result.contains(departmentTB2.getId())
+                && result.contains(departmentTB3.getId()) && result.contains(departmentGOSB31.getId())
+                && result.contains(departmentOSB311.getId()));
 
         // TODO
         taUser.getRoles().remove(0);
@@ -276,16 +280,16 @@ public class DepartmentServiceImplTest {
     }
 
     @Test
-    public void testGetDestinationDepartments() {
+    public void getDestinationDepartmentsTest() {
         TAUser taUser = new TAUser();
         taUser.setRoles(taRoles);
 
+        // Контролер УНП
         List<Department> result = departmentService.getDestinationDepartments(taUser);
         Assert.assertEquals(5, result.size());
-        Assert.assertEquals(true, result.contains(root) && result.contains(departmentTB2)
-                && result.contains(departmentTB3) && result.contains(departmentGOSB31) && result.contains(departmentOSB311));
+        Assert.assertTrue(result.containsAll(asList(root, departmentTB2, departmentTB3, departmentGOSB31, departmentOSB311)));
 
-
+        // Контролер НС
         taUser.getRoles().remove(0);
 
         for (int i = 0; i < departmentID.length; i++) {
@@ -294,40 +298,48 @@ public class DepartmentServiceImplTest {
 
             switch (departmentID[i]) {
                 case 0:
-                case 2:
-                case 3:
                     Assert.assertEquals(1, result.size());
-                    Assert.assertEquals(true, result.contains(departmentGOSB31));
+                    Assert.assertTrue(result.contains(departmentGOSB31));
                     break;
+                case 2:
+                    Assert.assertEquals(2, result.size());
+                    Assert.assertTrue(result.containsAll(asList(departmentTB2, departmentGOSB31)));
+                    break;
+                case 3:
                 case 31:
                 case 311:
                     Assert.assertEquals(3, result.size());
-                    Assert.assertEquals(true, result.contains(departmentTB3)
-                            && result.contains(departmentGOSB31) && result.contains(departmentOSB311));
+                    Assert.assertTrue(result.containsAll(asList(departmentTB3, departmentGOSB31, departmentOSB311)));
                     break;
             }
+        }
+
+        // Контролер
+        taUser.getRoles().remove(0);
+        for (int i = 0; i < departmentID.length; i++) {
+            taUser.setDepartmentId(departmentID[i]);
+            Assert.assertEquals(0, departmentService.getDestinationDepartments(taUser).size());
         }
     }
 
     @Test
-    public void testGetPrintFormDepartments() {
-        // TODO
+    public void getPrintFormDepartmentsTest() {
+        // TODO Дописать тест после реализации getExecutorsDepartments http://jira.aplana.com/browse/SBRFACCTAX-5397
     }
 
     @Test
-    public void testGetOpenPeriodDepartments() {
+    public void getOpenPeriodDepartmentsTest() {
         TAUser taUser = new TAUser();
         taUser.setRoles(taRoles);
         ReportPeriod reportPeriod = new ReportPeriod();
 
         reportPeriod.setId(0);
-        List<Department> result = departmentService.getOpenPeriodDepartments(taUser, reportPeriod);
+        List<Integer> result = departmentService.getOpenPeriodDepartments(taUser, TaxType.INCOME, true, reportPeriod);
         Assert.assertEquals(3, result.size());
-        Assert.assertEquals(true, result.contains(root) && result.contains(departmentTB2)
-                && result.contains(departmentOSB311));
+        Assert.assertTrue(result.containsAll(asList(root.getId(), departmentTB2.getId(), departmentOSB311.getId())));
 
         reportPeriod.setId(1);
-        result = departmentService.getOpenPeriodDepartments(taUser, reportPeriod);
+        result = departmentService.getOpenPeriodDepartments(taUser, TaxType.INCOME, true, reportPeriod);
         Assert.assertEquals(0, result.size());
 
         // TODO

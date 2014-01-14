@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.List;
 import java.util.Map;
@@ -90,7 +87,7 @@ public interface DepartmentService {
     Department getDepartmentBySbrfCode(String sbrfCode);
 
     /**
-     * Выборка для бизнес-администрирования
+     * Выборка подразделений для бизнес-администрирования
      *
      * @param tAUser пользователь
      * @return
@@ -99,6 +96,9 @@ public interface DepartmentService {
 
     /**
      * Получение ТБ
+     * http://conf.aplana.com/pages/viewpage.action?pageId=11380723
+     * Для роли "Контролер УНП" может быть несколько подразделений
+     * Для роли "Контролер НС" только одно подразделение
      *
      * @param tAUser пользователь
      * @return
@@ -113,15 +113,16 @@ public interface DepartmentService {
     Department getBankDepartment();
 
     /**
-     * Выборка для доступа к экземплярам НФ/деклараций
-     *
+     * Выборка id подразделений для доступа к экземплярам НФ/деклараций
      * @param tAUser пользователь
+     * @param taxType Тип налога
+     * @param taxFormIsDeclaration true - декларация, false - налоговая форма
      * @return
      */
-    List<Department> getTaxFormDepartments(TAUser tAUser);
+    List<Integer> getTaxFormDepartments(TAUser tAUser, TaxType taxType, boolean taxFormIsDeclaration);
 
     /**
-     * Выборка для назначения подразделений-исполнителей
+     * Выборка id подразделений для назначения подразделений-исполнителей
      *
      * @param tAUser пользователь
      * @return
@@ -129,20 +130,22 @@ public interface DepartmentService {
     List<Department> getDestinationDepartments(TAUser tAUser);
 
     /**
-     * Выборка для параметров печатной формы
+     * Выборка id подразделений для параметров печатной формы
      *
      * @param formData НФ
      * @return
      */
-    List<Department> getPrintFormDepartments(FormData formData);
+    List<Integer> getPrintFormDepartments(FormData formData);
 
     /**
-     * Выборка подразделений по открытым периодам
+     * Выборка id подразделений по открытым периодам
      *
-     * @param tAUser       пользователь
+     * @param tAUser пользователь
+     * @param taxType Тип налога
+     * @param taxFormIsDeclaration true - декларация, false - налоговая форма
      * @param reportPeriod открытый период
      * @return
      */
-    List<Department> getOpenPeriodDepartments(TAUser tAUser, ReportPeriod reportPeriod);
-
+    List<Integer> getOpenPeriodDepartments(TAUser tAUser, TaxType taxType, boolean taxFormIsDeclaration,
+                                              ReportPeriod reportPeriod);
 }

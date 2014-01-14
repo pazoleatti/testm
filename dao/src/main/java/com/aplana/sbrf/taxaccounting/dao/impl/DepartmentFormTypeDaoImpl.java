@@ -3,9 +3,11 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -299,5 +301,86 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     	} 
     }
 
+    @Override
+    public List<Integer> getDepartmentsByFormDataSource(int userDepartmentId, TaxType taxType) {
+        try {
+            return getJdbcTemplate().queryForList(
+                    "select id from " +
+                            "(select distinct " +
+                            "case when t.c = 0 then dep2.id else dep3.id end as id " +
+                            "from  " +
+                            "(select distinct dep1.id, dft.form_type_id " +
+                            "from " +
+                            "(with " + (isWithRecursive() ? " recursive " : "") + " tree (id) as " +
+                            "(select id from department where id = ?" +
+                            "union all " +
+                            "select d.id from department d inner join tree t on (d.parent_id = t.id)) " +
+                            "select id from tree) dep1, department_form_type dft " +
+                            "where dft.department_id = dep1.id) dep2 " +
+                            "left join (select distinct dftp.form_type_id, dft.department_id as id " +
+                            "from form_data_source fds, department_form_type dft, department_form_type dftp, form_type ft " +
+                            "where fds.department_form_type_id = dftp.id and fds.src_department_form_type_id = dft.id and ft.id = dftp.form_type_id " +
+                            "and ft.tax_type = ?) dep3 " +
+                            "on dep2.form_type_id = dep3.form_type_id, (select 0 as c from dual union all select 1 as c from dual) t) " +
+                            "where id is not null",
+                    new Object[]{userDepartmentId, String.valueOf(taxType.getCode())}, Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Integer>(0);
+        }
+    }
 
+    @Override
+    public List<Integer> getDepartmentsBySourceControl(int userDepartmentId, TaxType taxType) {
+        return getDepartmentsBySource(userDepartmentId, taxType, false);
+    }
+
+    @Override
+    public List<Integer> getDepartmentsBySourceControlNs(int userDepartmentId, TaxType taxType) {
+        return getDepartmentsBySource(userDepartmentId, taxType, true);
+    }
+
+    /**
+     * Поиск подразделений, доступных по иерархии и подразделений доступных по связи приемник-источник для этих подразделений
+     * @param userDepartmentId Подразделение пользователя
+     * @param taxType Тип налога
+     * @param isNs true - для роли "Контролер НС", false для роли "Контролер"
+     * @return Список id подразделений
+     */
+    private List<Integer> getDepartmentsBySource(int userDepartmentId, TaxType taxType, boolean isNs) {
+        String recursive = isWithRecursive() ? "recursive" : "";
+
+        String availableDepartmentsSql = isNs ?
+                "with " + recursive + " tree1 (id, parent_id, type) as " +
+                        "(select id, parent_id, type from department where id = ? " +
+                        "union all " +
+                        "select d.id, d.parent_id, d.type from department d inner join tree1 t1 on d.id = t1.parent_id " +
+                        "where d.type >= 2), tree2 (id, root_id, type) as " +
+                        "(select id, id root_id, type from department where type = 2 " +
+                        "union all " +
+                        "select d.id, t2.root_id, d.type from department d inner join tree2 t2 on d.parent_id = t2.id) " +
+                        "select tree2.id from tree1, tree2 where tree1.type = 2 and tree2.root_id = tree1.id"
+                :
+                "with " + recursive + " tree (id) as " +
+                        "(select id from department where id = ? " +
+                        "union all " +
+                        "select d.id from department d inner join tree t on d.parent_id = t.id) " +
+                        "select id from tree";
+
+        try {
+            return getJdbcTemplate().queryForList("select id from " +
+                    "(select distinct " +
+                    "case when t3.c = 0 then av_dep.id else link_dep.id end as id " +
+                    "from (" + availableDepartmentsSql +
+                    ") av_dep left join ( " +
+                    "select distinct dft.department_id parent_id, dfts.department_id id " +
+                    "from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
+                    "where fds.department_form_type_id = dft.id and fds.src_department_form_type_id = dfts.id " +
+                    "and ft.id = dft.form_type_id and ft.tax_type = ?) link_dep " +
+                    "on av_dep.id = link_dep.parent_id, (select 0 as c from dual union all select 1 as c from dual) t3) " +
+                    "where id is not null",
+                    new Object[]{userDepartmentId, String.valueOf(taxType.getCode())}, Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Integer>(0);
+        }
+    }
 }

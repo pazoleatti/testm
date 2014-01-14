@@ -26,7 +26,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
  * @author Vitalii Samolovskikh
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class AddRowHandler extends
 		AbstractActionHandler<AddRowAction, DataRowResult> {
 

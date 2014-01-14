@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
  * 
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class DeleteRowHandler extends AbstractActionHandler<DeleteRowAction, DataRowResult> {
 
 	@Autowired
@@ -63,6 +63,5 @@ public class DeleteRowHandler extends AbstractActionHandler<DeleteRowAction, Dat
 	public void undo(DeleteRowAction action, DataRowResult result,
 			ExecutionContext context) throws ActionException {
 		// Nothing!
-		
 	}
 }

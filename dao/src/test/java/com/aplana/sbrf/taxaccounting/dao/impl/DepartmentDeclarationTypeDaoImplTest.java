@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -61,8 +62,28 @@ public class DepartmentDeclarationTypeDaoImplTest {
 		assertTrue(departmentIds.contains(1));
 		assertTrue(departmentIds.contains(2));
 		departmentIds = departmentDeclarationTypeDao.getDepartmentIdsByTaxType(TaxType.fromCode('I'));
-		assertEquals(1, departmentIds.size());
+		assertEquals(3, departmentIds.size());
 		assertTrue(departmentIds.contains(1));
+        assertTrue(departmentIds.contains(7));
+        assertTrue(departmentIds.contains(9));
 	}
 
+    @Test
+    public void getDepartmentsByDeclarationSourceTest() {
+        List<Integer> departmentIds;
+        // Контролер
+        departmentIds = departmentDeclarationTypeDao.getDepartmentsBySourceControl(6, TaxType.INCOME);
+        assertTrue(departmentIds.containsAll(Arrays.asList(6, 7, 9, 10, 11)));
+        departmentIds = departmentDeclarationTypeDao.getDepartmentsBySourceControl(6, TaxType.TRANSPORT);
+        assertTrue(departmentIds.containsAll(Arrays.asList(6, 7, 9)));
+        departmentIds = departmentDeclarationTypeDao.getDepartmentsBySourceControl(6, TaxType.DEAL);
+        assertTrue(departmentIds.containsAll(Arrays.asList(6, 7, 9)));
+        // Контролер НС
+        departmentIds = departmentDeclarationTypeDao.getDepartmentsBySourceControlNs(6, TaxType.INCOME);
+        assertTrue(departmentIds.containsAll(Arrays.asList(2, 6, 7, 8, 9, 10, 11)));
+        departmentIds = departmentDeclarationTypeDao.getDepartmentsBySourceControlNs(6, TaxType.TRANSPORT);
+        assertTrue(departmentIds.containsAll(Arrays.asList(1, 2, 6, 7, 8, 9, 10)));
+        departmentIds = departmentDeclarationTypeDao.getDepartmentsBySourceControlNs(6, TaxType.DEAL);
+        assertTrue(departmentIds.containsAll(Arrays.asList(2, 6, 7, 8, 9, 10)));
+    }
 }

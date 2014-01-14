@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Matchers;
@@ -143,11 +144,11 @@ public class DeclarationDataAccessServiceImplBalancePeriodTest {
 		// В подразделении DEPARTMENT_TB2_ID разрешена работа с декларациями DECLARATION_TYPE_2_ID
 		Department departmentTB2 = mockDepartment(DEPARTMENT_TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
 
-		DepartmentDao departmentDao = mock(DepartmentDao.class);
-		when(departmentDao.getDepartment(Department.ROOT_BANK_ID)).thenReturn(departmentBank);
-		when(departmentDao.getDepartment(DEPARTMENT_TB1_ID)).thenReturn(departmentTB1);
-		when(departmentDao.getDepartment(DEPARTMENT_TB2_ID)).thenReturn(departmentTB2);
-		ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
+		DepartmentService departmentService = mock(DepartmentService.class);
+		when(departmentService.getDepartment(Department.ROOT_BANK_ID)).thenReturn(departmentBank);
+		when(departmentService.getDepartment(DEPARTMENT_TB1_ID)).thenReturn(departmentTB1);
+		when(departmentService.getDepartment(DEPARTMENT_TB2_ID)).thenReturn(departmentTB2);
+		ReflectionTestUtils.setField(service, "departmentService", departmentService);
 		
 		DeclarationTemplate declarationTemplate1 = mockDeclarationTemplate(DECLARATION_TEMPLATE_1_ID, DECLARATION_TYPE_1_ID);
 		DeclarationTemplate declarationTemplate2 = mockDeclarationTemplate(DECLARATION_TEMPLATE_2_ID, DECLARATION_TYPE_2_ID);
@@ -156,7 +157,7 @@ public class DeclarationDataAccessServiceImplBalancePeriodTest {
 		when(declarationTemplateDao.get(DECLARATION_TEMPLATE_2_ID)).thenReturn(declarationTemplate2);
 		ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);
 
-		ReportPeriod reportPeriod = mockReportPeriod(REPORT_PERIOD_ID);
+		// ReportPeriod reportPeriod = mockReportPeriod(REPORT_PERIOD_ID);
 
 		DeclarationData declarationCreatedBank = mockDeclarationData(DECLARATION_CREATED_BANK_ID, Department.ROOT_BANK_ID, false, DECLARATION_TEMPLATE_1_ID, REPORT_PERIOD_ID);
 		DeclarationData declarationAcceptedBank = mockDeclarationData(DECLARATION_ACCEPTED_BANK_ID, Department.ROOT_BANK_ID, true, DECLARATION_TEMPLATE_1_ID, REPORT_PERIOD_ID);

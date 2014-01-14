@@ -11,7 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class UpdateDeclarationSourcesHandler extends AbstractActionHandler<UpdateDeclarationSourcesAction,
 		UpdateSourcesResult> {
 
@@ -34,5 +34,4 @@ public class UpdateDeclarationSourcesHandler extends AbstractActionHandler<Updat
 			throws ActionException {
         // Nothing!
     }
-
 }

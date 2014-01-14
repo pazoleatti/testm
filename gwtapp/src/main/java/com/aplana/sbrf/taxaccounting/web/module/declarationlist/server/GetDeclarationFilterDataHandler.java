@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
@@ -19,7 +20,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@Deprecated
 public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDeclarationFilterData, GetDeclarationFilterDataResult> {
 
 	public GetDeclarationFilterDataHandler() {
@@ -36,17 +38,19 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 	private DepartmentService departmentService;
 	
 	@Autowired
-	private DeclarationDataSearchService declarationDataSearchService;	
-
+	private DeclarationDataSearchService declarationDataSearchService;
 
 	@Override
-	public GetDeclarationFilterDataResult execute(GetDeclarationFilterData action, ExecutionContext executionContext) throws ActionException {
+	public GetDeclarationFilterDataResult execute(GetDeclarationFilterData action, ExecutionContext executionContext)
+            throws ActionException {
 		GetDeclarationFilterDataResult res = new GetDeclarationFilterDataResult();
-		DeclarationDataFilterAvailableValues declarationFilterValues =
-				declarationDataSearchService.getFilterAvailableValues(securityService.currentUserInfo(), action.getTaxType());
 
-		res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(declarationFilterValues
-				.getDepartmentIds()).values()));
+        DeclarationDataFilterAvailableValues declarationFilterValues =
+                declarationDataSearchService.getFilterAvailableValues(securityService.currentUserInfo(),
+                        action.getTaxType());
+
+		res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(
+                declarationFilterValues.getDepartmentIds()).values()));
 		res.setFilterValues(declarationFilterValues);
 		res.setPeriods(periodService.getAllPeriodsByTaxType(action.getTaxType(), true));
 
@@ -58,8 +62,9 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 	}
 
 	@Override
-	public void undo(GetDeclarationFilterData getDeclarationFilterData, GetDeclarationFilterDataResult getDeclarationFilterDataResult, ExecutionContext executionContext) throws ActionException {
+	public void undo(GetDeclarationFilterData getDeclarationFilterData,
+                     GetDeclarationFilterDataResult getDeclarationFilterDataResult,
+                     ExecutionContext executionContext) throws ActionException {
 		//Do nothing
 	}
-
 }

@@ -33,6 +33,9 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Класс, реализующий логику определения доступности пунктов меню навигации
+ */
 @Component
 public class GetMainMenuActionHandler extends
 		AbstractActionHandler<GetMainMenuAction, GetMainMenuResult> {
@@ -56,13 +59,14 @@ public class GetMainMenuActionHandler extends
 
         TAUser currentUser =  securityService.currentUserInfo().getUser();
 
+        // НАЛОГИ
 		if (currentUser.hasRole(TARole.ROLE_OPER)
 				|| currentUser.hasRole(TARole.ROLE_CONTROL)
+                || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
 				|| currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
 
 			// тут важен порядок, поэтому мы не можем просто пробежаться по значениям
 			MenuItem taxMenu = new MenuItem("Налоги");
-
 			taxMenu.getSubMenu().add(new MenuItem(TaxType.INCOME.getName(), "", TaxType.INCOME.name()));
 			taxMenu.getSubMenu().add(new MenuItem(TaxType.VAT.getName(), "", TaxType.VAT.name()));
 			taxMenu.getSubMenu().add(new MenuItem(TaxType.PROPERTY.getName(), "", TaxType.PROPERTY.name()));
@@ -76,36 +80,32 @@ public class GetMainMenuActionHandler extends
 
 				menu.getSubMenu().add(new MenuItem(formItemName, NUMBER_SIGN + FormDataListNameTokens.FORM_DATA_LIST
 					+ ";" + TYPE + "=" + menu.getMeta()));
-				if (currentUser.hasRole(TARole.ROLE_CONTROL) || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+				if (currentUser.hasRole(TARole.ROLE_CONTROL)
+                        || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+                        || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+
 					menu.getSubMenu().add(new MenuItem(declarationItemName, NUMBER_SIGN + DeclarationListNameTokens.DECLARATION_LIST
 						+ ";" + TYPE + "=" + menu.getMeta()));
-                    menu.getSubMenu().add(new MenuItem("Ведение периодов", NUMBER_SIGN + PeriodsTokens.PERIODS
-                            + ";" + TYPE + "=" + menu.getMeta()));
+
+                    if (!currentUser.hasRole(TARole.ROLE_CONTROL) ) {
+                        menu.getSubMenu().add(new MenuItem("Ведение периодов", NUMBER_SIGN + PeriodsTokens.PERIODS
+                                + ";" + TYPE + "=" + menu.getMeta()));
+                    }
 				}
 			}
 			menuItems.add(taxMenu);
-
-			/*settingMenuItem.getSubMenu().add(new MenuItem("Тест РНУ 26",
-					new StringBuilder(NUMBER_SIGN)
-					.append(FormDataImportPresenter.FDIMPORT)
-					.append(";").append(FormDataImportPresenter.DEPARTMENT_ID).append("=4")
-					.append(";").append(FormDataImportPresenter.FORM_DATA_TEMPLATE_ID).append("=325")
-					.append(";").append(FormDataImportPresenter.FORM_DATA_RPERIOD_ID).append("=101")
-					.append(";").append(FormDataImportPresenter.FORM_DATA_KIND_ID).append("=1")
-					.toString()
-					));*/
 		}
-		
-		
-		
+
+        // НАСТРОЙКИ
         if (currentUser.hasRole(TARole.ROLE_CONTROL)
+                || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                 || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)
 		        || currentUser.hasRole(TARole.ROLE_OPER)) {
         	MenuItem settingMenuItem = new MenuItem("Настройки");
 	        settingMenuItem.getSubMenu().add(new MenuItem("Список пользователей Системы", NUMBER_SIGN + MembersTokens.MEMBERS));
 
-
 	        if (currentUser.hasRole(TARole.ROLE_CONTROL)
+                    || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
 			        || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
 
 		        settingMenuItem.getSubMenu().add(new MenuItem("Настройка подразделений", NUMBER_SIGN + DepartmentConfigTokens.departamentConfig));
@@ -116,8 +116,6 @@ public class GetMainMenuActionHandler extends
 	            if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
 	                nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
 	            }
-
-
 	        }
 	        menuItems.add(settingMenuItem);
         }
@@ -142,8 +140,9 @@ public class GetMainMenuActionHandler extends
             menuItems.add(settingMenuItem);
         }
 
+        // АДМИНИСТРИРОВАНИЕ
         if (currentUser.hasRole(TARole.ROLE_ADMIN)
-                || currentUser.hasRole(TARole.ROLE_CONTROL)
+                || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                 || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             MenuItem settingMenuItem = new MenuItem("Администрирование");
             
@@ -152,7 +151,7 @@ public class GetMainMenuActionHandler extends
 	            settingMenuItem.getSubMenu().add(new MenuItem("Список пользователей Системы", NUMBER_SIGN + MembersTokens.MEMBERS));
             }
 
-            if (currentUser.hasRole(TARole.ROLE_CONTROL) || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+            if (currentUser.hasRole(TARole.ROLE_CONTROL_NS) || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                 settingMenuItem.getSubMenu().add(
                         new MenuItem("Назначение форм и деклараций",
                                 NUMBER_SIGN + TaxFormNominationToken.taxFormNomination +
@@ -160,7 +159,6 @@ public class GetMainMenuActionHandler extends
                 settingMenuItem.getSubMenu().add(
                         new MenuItem("Указание форм-источников",
                                 NUMBER_SIGN + SourcesTokens.SOURCES + ";" + SourcesTokens.FORM_FLAG + "=" + true));
-                settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + HistoryBusinessToken.HISTORY_BUSINESS));
             }
             
             menuItems.add(settingMenuItem);

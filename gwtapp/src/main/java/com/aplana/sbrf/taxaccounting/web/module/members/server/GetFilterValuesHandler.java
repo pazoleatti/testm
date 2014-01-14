@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 @Component
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_OPER')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_OPER', 'ROLE_CONTROL_NS')")
 public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValues, FilterValues> {
 
 	@Autowired
@@ -48,8 +48,8 @@ public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValue
 			for (Department dep : departmentService.listAll()) {
 				depIds.add(dep.getId());
 			}
-		} else if (currentUser.hasRole(TARole.ROLE_CONTROL)) {
-
+		} else if (currentUser.hasRole(TARole.ROLE_CONTROL) || currentUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+            // TODO SBRFACCTAX-5387 переделать
 			List<DepartmentFormType> formSrcList = departmentFormTypService.getDFTSourcesByDepartment(currentUser.getDepartmentId(), TaxType.PROPERTY);
 			formSrcList.addAll(departmentFormTypService.getDFTSourcesByDepartment(currentUser.getDepartmentId(), TaxType.TRANSPORT));
 			formSrcList.addAll(departmentFormTypService.getDFTSourcesByDepartment(currentUser.getDepartmentId(), TaxType.DEAL));

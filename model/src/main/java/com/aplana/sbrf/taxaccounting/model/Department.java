@@ -16,7 +16,9 @@ public class Department implements Serializable {
 
 	/**
 	 * Идентификатор подразделения "Банк", представляющего весь СБРФ
+     * @deprecated Необходимо использовать метод DepartmentService#getBankDepartment
 	 */
+    @Deprecated
 	public static final int ROOT_BANK_ID = 1;
 
 	private int id;

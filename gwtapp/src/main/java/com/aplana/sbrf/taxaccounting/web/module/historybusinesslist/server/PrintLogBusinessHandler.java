@@ -24,7 +24,7 @@ import java.io.InputStream;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class PrintLogBusinessHandler extends AbstractActionHandler<PrintLogBusinessAction, PrintLogBusinessResult> {
     public PrintLogBusinessHandler() {
         super(PrintLogBusinessAction.class);

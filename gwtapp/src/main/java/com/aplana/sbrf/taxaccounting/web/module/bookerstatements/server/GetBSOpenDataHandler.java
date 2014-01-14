@@ -23,7 +23,7 @@ import java.util.Set;
  * @author Dmitriy Levykin
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAction, GetBSOpenDataResult> {
 
     @Autowired
@@ -54,7 +54,7 @@ public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAct
         // Признак контролера
         if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             result.setControlUNP(true);
-        } else if (currUser.hasRole(TARole.ROLE_CONTROL)) {
+        } else if (currUser.hasRole(TARole.ROLE_CONTROL) || currUser.hasRole(TARole.ROLE_CONTROL_NS)) {
             result.setControlUNP(false);
         }
 
@@ -65,6 +65,7 @@ public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAct
 
         // Подразделения доступные пользователю
         Set<Integer> avSet = new HashSet<Integer>();
+        // TODO SBRFACCTAX-5387 переделать
         if (!currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // Первичные и консолид. отчеты для налога на прибыль
             List<DepartmentFormType> formIncomeSrcList = departmentFormTypService.getDFTSourcesByDepartment(currUser.getDepartmentId(), TaxType.INCOME);

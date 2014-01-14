@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
  * User: ekuvshinov
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class ImportHandler extends AbstractActionHandler<ImportAction, ImportResult> {
     @Autowired
     BookerStatementsService service;
@@ -40,6 +40,4 @@ public class ImportHandler extends AbstractActionHandler<ImportAction, ImportRes
     public void undo(ImportAction importAction, ImportResult importResult, ExecutionContext executionContext) throws ActionException {
         // Не обрабатывается
     }
-
-
 }
