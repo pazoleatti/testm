@@ -149,6 +149,11 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         return getParentDepartmentByType(departmentId, 2);
     }
 
+    @Override
+    public List<Department> getDepartmenTBChildren(int departmentId) {
+        return getParentDepartmentChildByType(departmentId, 2);
+    }
+
     /**
      * Подготовка строки вида "?,?,?,..."
      * @param length
@@ -186,9 +191,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     /**
      * Получение родительского узла заданного типа (указанное подразделение м.б. результатом, если его тип соответствует искомому)
-     * @param departmentId
-     * @param typeId
-     * @return
      */
     private Department getParentDepartmentByType(int departmentId, int typeId) {
         try {
@@ -203,6 +205,32 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             );
         } catch (EmptyResultDataAccessException e) {
             return null;
+        }
+    }
+
+    /**
+     * Получение родительского узла заданного типа (указанное подразделение м.б. результатом, если его тип соответствует искомому)
+     * + все дочерние подразделения
+     */
+    private List<Department> getParentDepartmentChildByType(int departmentId, int typeId) {
+        try {
+            String recursive = isWithRecursive() ? "recursive" : "";
+            return getJdbcTemplate().query("with " + recursive + " tree1 (id, parent_id, type) as " +
+                    "(select id, parent_id, type from department where id = ? " +
+                    "union all " +
+                    "select d.id, d.parent_id, d.type from " +
+                    "department d inner join tree1 t1 on d.id = t1.parent_id where d.type >= ?), " +
+                    "tree2 (id, root_id, type) as " +
+                    "(select id, id root_id, type from department where type = ? " +
+                    "union all select d.id, t2.root_id, d.type " +
+                    "from department d inner join tree2 t2 on d.parent_id = t2.id) " +
+                    "select d.* from tree1 t1, tree2 t2, department d where t1.type = ? " +
+                    "and t2.root_id = t1.id and t2.id = d.id",
+                    new Object[]{departmentId, typeId, typeId, typeId},
+                    new DepartmentJdbcMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Department>(0);
         }
     }
 

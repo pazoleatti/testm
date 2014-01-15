@@ -106,6 +106,12 @@ public class DepartmentServiceImplTest {
         when(departmentDao.getDepartmenTB(departmentTB3.getId())).thenReturn(departmentTB3);
         when(departmentDao.getDepartmenTB(departmentGOSB31.getId())).thenReturn(departmentTB3);
         when(departmentDao.getDepartmenTB(departmentOSB311.getId())).thenReturn(departmentTB3);
+        when(departmentDao.getDepartmenTBChildren(root.getId())).thenReturn(new ArrayList<Department>(0));
+        when(departmentDao.getDepartmenTBChildren(departmentTB2.getId())).thenReturn(asList(departmentTB2));
+        when(departmentDao.getDepartmenTBChildren(departmentTB3.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
+        when(departmentDao.getDepartmenTBChildren(departmentGOSB31.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
+        when(departmentDao.getDepartmenTBChildren(departmentOSB311.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
+
         // Роли
         taRoles = new ArrayList<TARole>();
         for (String alias : asList(TARole.ROLE_CONTROL_UNP, TARole.ROLE_CONTROL_NS, TARole.ROLE_CONTROL, TARole.ROLE_OPER)) {

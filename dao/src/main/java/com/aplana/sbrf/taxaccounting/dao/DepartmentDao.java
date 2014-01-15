@@ -75,6 +75,13 @@ public interface DepartmentDao {
     Department getDepartmenTB(int departmentId);
 
     /**
+     * Получение ТБ для подразделения (тип = 2) + все дочерние подразделения
+     * @param departmentId Подразделение пользователя
+     * @return Список подразделений
+     */
+    List<Department> getDepartmenTBChildren(int departmentId);
+
+    /**
      * Получение списка подразделений, необходимых для построения неразрывного дерева подразделений
      * @param availableDepartments
      * @return

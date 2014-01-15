@@ -92,13 +92,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartments());
-
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-            // TODO Объединить в один метод
-            Department departmenTB = departmentDao.getDepartmenTB(tAUser.getDepartmentId());
-            if (departmenTB != null) {
-                retList.addAll(departmentDao.getAllChildren(departmenTB.getId()));
-            }
+            retList.addAll(departmentDao.getDepartmenTBChildren(tAUser.getDepartmentId()));
         }
 
         return retList;
@@ -180,13 +175,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartments());
-
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-            // TODO Объединить в один метод
-            Department departmenTB = departmentDao.getDepartmenTB(tAUser.getDepartmentId());
-            if (departmenTB != null) {
-                retList.addAll(departmentDao.getAllChildren(departmenTB.getId()));
-            }
+            retList.addAll(departmentDao.getDepartmenTBChildren(tAUser.getDepartmentId()));
             // подразделения с типом 3
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.GOSB.getCode()));
         }

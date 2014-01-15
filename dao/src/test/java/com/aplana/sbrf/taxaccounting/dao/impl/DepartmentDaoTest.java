@@ -12,9 +12,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+
+import static java.util.Arrays.asList;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DepartmentDaoTest.xml"})
@@ -109,6 +110,27 @@ public class DepartmentDaoTest {
         Assert.assertEquals(result.getId(), 2);
     }
 
+    @Test
+    public void getDepartmenTBChildrenTest() {
+        List<Department> result;
+        result = departmentDao.getDepartmenTBChildren(0);
+        Assert.assertEquals(0, result.size());
+        result = departmentDao.getDepartmenTBChildren(1);
+        Assert.assertEquals(0, result.size());
+        result = departmentDao.getDepartmenTBChildren(2);
+        Assert.assertEquals(2, result.size());
+        Assert.assertTrue(getDepartmentIds(result).containsAll(asList(2, 6)));
+        result = departmentDao.getDepartmenTBChildren(3);
+        Assert.assertEquals(3, result.size());
+        Assert.assertTrue(getDepartmentIds(result).containsAll(asList(3, 4, 5)));
+        result = departmentDao.getDepartmenTBChildren(4);
+        Assert.assertEquals(3, result.size());
+        Assert.assertTrue(getDepartmentIds(result).containsAll(asList(3, 4, 5)));
+        result = departmentDao.getDepartmenTBChildren(5);
+        Assert.assertEquals(3, result.size());
+        Assert.assertTrue(getDepartmentIds(result).containsAll(asList(3, 4, 5)));
+    }
+
     private List<Integer> getDepartmentIds(List<Department> departmentList) {
         List<Integer> retVal = new LinkedList<Integer>();
         for (Department department : departmentList) {
@@ -121,16 +143,16 @@ public class DepartmentDaoTest {
     public void getRequiredForTreeDepartments() {
         List<Department> departmentList;
         // 1 -> 1
-        departmentList = departmentDao.getRequiredForTreeDepartments(Arrays.asList(1));
+        departmentList = departmentDao.getRequiredForTreeDepartments(asList(1));
         Assert.assertEquals(1, departmentList.size());
         Assert.assertEquals(1, departmentList.get(0).getId());
         // 2,5 -> 1,2,3,5
-        departmentList = departmentDao.getRequiredForTreeDepartments(Arrays.asList(2, 5));
+        departmentList = departmentDao.getRequiredForTreeDepartments(asList(2, 5));
         Assert.assertEquals(4, departmentList.size());
-        Assert.assertTrue(getDepartmentIds(departmentList).containsAll(Arrays.asList(1, 2, 3, 5)));
+        Assert.assertTrue(getDepartmentIds(departmentList).containsAll(asList(1, 2, 3, 5)));
         // 6 -> 1,2,6
-        departmentList = departmentDao.getRequiredForTreeDepartments(Arrays.asList(6));
+        departmentList = departmentDao.getRequiredForTreeDepartments(asList(6));
         Assert.assertEquals(3, departmentList.size());
-        Assert.assertTrue(getDepartmentIds(departmentList).containsAll(Arrays.asList(1, 2, 6)));
+        Assert.assertTrue(getDepartmentIds(departmentList).containsAll(asList(1, 2, 6)));
     }
 }
