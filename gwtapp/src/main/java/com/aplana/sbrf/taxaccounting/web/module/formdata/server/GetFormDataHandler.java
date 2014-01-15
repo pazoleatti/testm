@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetFormDataHandler extends
 		AbstractActionHandler<GetFormData, GetFormDataResult> {
 

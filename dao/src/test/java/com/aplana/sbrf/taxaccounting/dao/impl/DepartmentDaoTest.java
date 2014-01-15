@@ -4,14 +4,18 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -93,6 +97,27 @@ public class DepartmentDaoTest {
         result = departmentDao.getDepartmentsByType(DepartmentType.TERBANK.getCode());
         Assert.assertEquals(2, result.size());
         result = departmentDao.getDepartmentsByType(DepartmentType.GOSB.getCode());
+        Assert.assertEquals(3, result.size());
+        result = departmentDao.getDepartmentsByType(DepartmentType.OSB.getCode());
         Assert.assertEquals(0, result.size());
+    }
+
+    @Test
+    public void getDepartmenTBTest() {
+        Department result;
+        result = departmentDao.getDepartmenTB(0);
+        Assert.assertNull(result);
+        result = departmentDao.getDepartmenTB(1);
+        Assert.assertNull(result);
+        result = departmentDao.getDepartmenTB(2);
+        Assert.assertEquals(result.getId(), 2);
+        result = departmentDao.getDepartmenTB(3);
+        Assert.assertEquals(result.getId(), 3);
+        result = departmentDao.getDepartmenTB(4);
+        Assert.assertEquals(result.getId(), 3);
+        result = departmentDao.getDepartmenTB(5);
+        Assert.assertEquals(result.getId(), 3);
+        result = departmentDao.getDepartmenTB(6);
+        Assert.assertEquals(result.getId(), 2);
     }
 }

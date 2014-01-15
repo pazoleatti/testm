@@ -12,7 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class DeleteDeclarationDataHandler extends AbstractActionHandler<DeleteDeclarationDataAction, DeleteDeclarationDataResult> {
 	@Autowired
 	private DeclarationDataService declarationDataService;
@@ -34,5 +34,4 @@ public class DeleteDeclarationDataHandler extends AbstractActionHandler<DeleteDe
     public void undo(DeleteDeclarationDataAction action, DeleteDeclarationDataResult result, ExecutionContext context) throws ActionException {
         // Nothing!
     }
-
 }

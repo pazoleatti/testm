@@ -19,7 +19,7 @@ import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
 
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 @Component
 public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAction, GetPeriodDataResult> {
 
@@ -31,9 +31,6 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 
     @Autowired
     private NotificationService notificationService;
-
-    @Autowired
-    private SourceService sourceService;
 
 	public GetPeriodDataHandler() {
 		super(GetPeriodDataAction.class);
@@ -95,7 +92,8 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 	}
 
 	@Override
-	public void undo(GetPeriodDataAction getPeriodDataAction, GetPeriodDataResult getPeriodDataResult, ExecutionContext executionContext) throws ActionException {
+	public void undo(GetPeriodDataAction getPeriodDataAction, GetPeriodDataResult getPeriodDataResult,
+                     ExecutionContext executionContext) throws ActionException {
 		//ничего не делаем
 	}
 }

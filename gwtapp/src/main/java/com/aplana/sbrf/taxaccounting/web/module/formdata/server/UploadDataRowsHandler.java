@@ -24,7 +24,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
  * Хэнлер для обработки загруженного в файловой хранилище файла.
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class UploadDataRowsHandler extends
         AbstractActionHandler<UploadDataRowsAction, DataRowResult> {
 

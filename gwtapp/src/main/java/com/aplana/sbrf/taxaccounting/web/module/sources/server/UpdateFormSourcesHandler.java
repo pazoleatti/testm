@@ -11,7 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class UpdateFormSourcesHandler extends AbstractActionHandler<UpdateFormSourcesAction, UpdateSourcesResult> {
 
 	@Autowired
@@ -31,5 +31,4 @@ public class UpdateFormSourcesHandler extends AbstractActionHandler<UpdateFormSo
     public void undo(UpdateFormSourcesAction action, UpdateSourcesResult result, ExecutionContext context) throws ActionException {
         // Nothing!
     }
-
 }

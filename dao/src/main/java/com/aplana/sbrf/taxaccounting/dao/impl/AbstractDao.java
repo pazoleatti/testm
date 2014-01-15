@@ -34,4 +34,8 @@ public abstract class AbstractDao {
     protected boolean isSupportOver(){
         return dbInfo.isSupportOver();
     }
+
+    protected boolean isWithRecursive() {
+        return dbInfo.isWithRecursive();
+    }
 }

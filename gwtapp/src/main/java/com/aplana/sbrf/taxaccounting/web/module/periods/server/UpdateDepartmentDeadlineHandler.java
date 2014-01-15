@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 @Service
 public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<UpdateDepartmentDeadlineAction, UpdateDepartmentDeadlineResult> {
 
@@ -74,7 +74,9 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
     }
 
     @Override
-    public void undo(UpdateDepartmentDeadlineAction updateDepartmentDeadlineAction, UpdateDepartmentDeadlineResult updateDepartmentDeadlineResult, ExecutionContext executionContext) throws ActionException {
+    public void undo(UpdateDepartmentDeadlineAction updateDepartmentDeadlineAction,
+                     UpdateDepartmentDeadlineResult updateDepartmentDeadlineResult,
+                     ExecutionContext executionContext) throws ActionException {
         //do nothing
     }
 }

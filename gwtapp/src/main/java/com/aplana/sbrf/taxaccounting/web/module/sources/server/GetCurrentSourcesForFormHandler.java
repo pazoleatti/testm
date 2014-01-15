@@ -16,10 +16,9 @@ import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class GetCurrentSourcesForFormHandler
-		extends
-		AbstractActionHandler<GetCurrentSourcesForFormAction, GetCurrentSourcesResult> {
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+public class GetCurrentSourcesForFormHandler extends
+        AbstractActionHandler<GetCurrentSourcesForFormAction, GetCurrentSourcesResult> {
 
 	@Autowired
 	private SourceService departmentFormTypeService;
@@ -49,5 +48,4 @@ public class GetCurrentSourcesForFormHandler
 			throws ActionException {
 		// Nothing!
 	}
-
 }

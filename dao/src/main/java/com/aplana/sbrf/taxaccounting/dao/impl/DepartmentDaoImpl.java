@@ -1,20 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
@@ -22,18 +7,35 @@ import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 @Transactional(readOnly = true)
 public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 	private final Log logger = LogFactory.getLog(getClass());
-	
+
 	@Autowired
 	DepartmentFormTypeDao departmentFormTypeDao;
-	
+
 	@Autowired
 	DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
-	
+
+    @Autowired
+    DBInfo dbInfo;
+
 	@Override
 	@Cacheable(CacheConstants.DEPARTMENT)
 	public Department getDepartment(int id) {
@@ -90,7 +92,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             return new ArrayList<Department>(0);
         }
     }
-	
 
 	protected class DepartmentJdbcMapper implements RowMapper<Department> {
 		@Override
@@ -110,9 +111,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 			department.setSbrfCode(rs.getString("sbrf_code"));
 			return department;
 		}
-
 	}
-
 
 	@Override
 	public Department getDepartmentBySbrfCode(String sbrfCode) {
@@ -142,6 +141,33 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             );
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Department>(0);
+        }
+    }
+
+    @Override
+    public Department getDepartmenTB(int departmentId) {
+        return getParentDepartmentByType(departmentId, 2);
+    }
+
+    /**
+     * Получение родительского узла заданного типа (указанное подразделение м.б. результатом, если его тип соответствует искомому)
+     * @param departmentId
+     * @param typeId
+     * @return
+     */
+    private Department getParentDepartmentByType(int departmentId, int typeId) {
+        try {
+            String recursive = isWithRecursive() ? "recursive" : "";
+            return getJdbcTemplate().queryForObject("with " + recursive + " tree (id, parent_id, type) as " +
+                    "(select id, parent_id, type from department where id = ? " +
+                    "union all select d.id, d.parent_id, d.type from department d " +
+                    "inner join tree t on d.id = t.parent_id) " +
+                    "select d.* from department d, tree where d.id = tree.id and tree.type = ?",
+                    new Object[]{departmentId, typeId},
+                    new DepartmentJdbcMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
         }
     }
 

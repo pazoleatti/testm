@@ -1,40 +1,27 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static com.aplana.sbrf.taxaccounting.test.DeclarationTypeMockUtils.mockDeclarationType;
-import static com.aplana.sbrf.taxaccounting.test.DepartmentDeclarationTypeMockUtils.mockDepartmentDeclarationType;
-import static com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils.mockDepartment;
-import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.test.DeclarationTypeMockUtils.mockDeclarationType;
 import static com.aplana.sbrf.taxaccounting.test.DepartmentDeclarationTypeMockUtils.mockDepartmentDeclarationType;
 import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.mockito.Matchers;
-
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -83,7 +70,11 @@ public class DeclarationDataSearchServiceImplTest {
 		incomeDdts.add(mockDepartmentDeclarationType(1, INCOME_DECLARATION_TYPE_ID_1));
 		when(sourceService.getDDTByDepartment(Matchers.eq(1), Matchers.any(TaxType.class))).thenReturn(incomeDdts);
 		ReflectionTestUtils.setField(service, "sourceService", sourceService);
-	}
+
+        DepartmentService departmentService = mock(DepartmentService.class);
+        when(departmentService.getTaxFormDepartments(any(TAUser.class), eq(TaxType.INCOME), eq(true))).thenReturn(Arrays.asList(1));
+        ReflectionTestUtils.setField(service, "departmentService", departmentService);
+    }
 
 	// TODO: сделать тесты для остальных методов!
 	
@@ -98,25 +89,24 @@ public class DeclarationDataSearchServiceImplTest {
 		assertEquals(INCOME_DECLARATION_TYPE_ID_1, valuesIncome.getDeclarationTypes().get(0).getId());
 		assertEquals(INCOME_DECLARATION_TYPE_ID_2, valuesIncome.getDeclarationTypes().get(1).getId());
 		assertEquals(3, valuesIncome.getDepartmentIds().size());
-		assertTrue(valuesIncome.getDepartmentIds().contains(1));
-		assertTrue(valuesIncome.getDepartmentIds().contains(2));
-		assertTrue(valuesIncome.getDepartmentIds().contains(3));
+
+		assertTrue(valuesIncome.getDepartmentIds().containsAll(Arrays.asList(1, 2, 3)));
 	}
 	
 	@Test
 	public void testGetAvailableFilterValuesControl() {
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp(LOCAL_IP);
-		userInfo.setUser(mockUser(CONTROL_USER_ID, 1, TARole.ROLE_CONTROL));
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setIp(LOCAL_IP);
+        userInfo.setUser(mockUser(CONTROL_USER_ID, 1, TARole.ROLE_CONTROL));
 
-		DeclarationDataFilterAvailableValues valuesIncome = service.getFilterAvailableValues(userInfo, TaxType.INCOME);
-		assertEquals(1, valuesIncome.getDeclarationTypes().size());
-		assertEquals(INCOME_DECLARATION_TYPE_ID_1, valuesIncome.getDeclarationTypes().get(0).getId());
-		assertEquals(1, valuesIncome.getDepartmentIds().size());
-		assertTrue(valuesIncome.getDepartmentIds().contains(1));
-	}
-	
-	@Test(expected=AccessDeniedException.class)
+        DeclarationDataFilterAvailableValues valuesIncome = service.getFilterAvailableValues(userInfo, TaxType.INCOME);
+        assertEquals(1, valuesIncome.getDeclarationTypes().size());
+        assertEquals(INCOME_DECLARATION_TYPE_ID_1, valuesIncome.getDeclarationTypes().get(0).getId());
+        assertEquals(1, valuesIncome.getDepartmentIds().size());
+        assertTrue(valuesIncome.getDepartmentIds().contains(1));
+    }
+
+    @Test(expected=AccessDeniedException.class)
 	public void testGetAvailableFilterValuesOperator() {
 		TAUserInfo userInfo = new TAUserInfo();
 		userInfo.setIp(LOCAL_IP);

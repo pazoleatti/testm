@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -21,6 +23,12 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Autowired
     DepartmentReportPeriodDao departmentReportPeriodDao;
+
+    @Autowired
+    DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
+
+    @Autowired
+    DepartmentFormTypeDao departmentFormTypeDao;
 
     @Override
     public Department getUNPDepartment() {
@@ -95,26 +103,12 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departmentDao.getDepartmentBySbrfCode(sbrfCode);
     }
 
-
-    /**
-     * 70 - Дочерние подразделения
-     * http://conf.aplana.com/pages/viewpage.action?pageId=11381799
-     *
-     * @param parentDepartmentId
-     * @return
-     */
     @Override
     public List<Department> getAllChildren(int parentDepartmentId) {
         return departmentDao.getAllChildren(parentDepartmentId);
     }
 
-    /**
-     * 10 - Выборка для бизнес-администрирования
-     * http://conf.aplana.com/pages/viewpage.action?pageId=11380675
-     *
-     * @param tAUser
-     * @return
-     */
+    // http://conf.aplana.com/pages/viewpage.action?pageId=11380675
     @Override
     public List<Department> getBADepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
@@ -124,22 +118,17 @@ public class DepartmentServiceImpl implements DepartmentService {
             retList.addAll(departmentDao.listDepartments());
 
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-            Department parentType2 = getDepartmentType2(tAUser.getDepartmentId());
-            if (parentType2 != null) {
-                retList.addAll(departmentDao.getAllChildren(parentType2.getId()));
+            // TODO Объединить в один метод
+            Department departmenTB = departmentDao.getDepartmenTB(tAUser.getDepartmentId());
+            if (departmenTB != null) {
+                retList.addAll(departmentDao.getAllChildren(departmenTB.getId()));
             }
         }
 
         return retList;
     }
 
-    /**
-     * 20 - Получение ТБ
-     * http://conf.aplana.com/pages/viewpage.action?pageId=11380723
-     *
-     * @param tAUser
-     * @return
-     */
+    // http://conf.aplana.com/pages/viewpage.action?pageId=11380723
     @Override
     public List<Department> getTBDepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
@@ -149,7 +138,6 @@ public class DepartmentServiceImpl implements DepartmentService {
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode()));
             // подразделения с типом 2
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.TERBANK.getCode()));
-
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
             if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.TERBANK) {
                 // поразделение пользователя
@@ -157,9 +145,9 @@ public class DepartmentServiceImpl implements DepartmentService {
 
             } else {
                 // подразделение с типом 2, являющееся родительским по отношению к подразделению пользователя
-                Department parentType2 = getDepartmentType2(tAUser.getDepartmentId());
-                if (parentType2 != null) {
-                    retList.add(parentType2);
+                Department departmenTB = departmentDao.getDepartmenTB(tAUser.getDepartmentId());
+                if (departmenTB != null) {
+                    retList.add(departmenTB);
                 }
             }
         }
@@ -167,75 +155,49 @@ public class DepartmentServiceImpl implements DepartmentService {
         return retList;
     }
 
-    private Department getDepartmentType2(int departmentId) {
-        Department parentType2 = departmentDao.getParent(departmentId);
-        while (parentType2 != null && parentType2.getType() != DepartmentType.TERBANK) {
-            parentType2 = departmentDao.getParent(parentType2.getId());
-        }
-        return parentType2;
-    }
-
-    /**
-     * 30 - Получение Банка
-     * http://conf.aplana.com/pages/viewpage.action?pageId=11381063
-     *
-     * @return
-     */
+    // http://conf.aplana.com/pages/viewpage.action?pageId=11381063
     @Override
     public Department getBankDepartment() {
         // подразделение с типом 1
         return departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode()).get(0);
     }
 
-    /**
-     * 40 - Выборка для доступа к экземплярам НФ/деклараций
-     * http://conf.aplana.com/pages/viewpage.action?pageId=11380670
-     *
-     * @param tAUser
-     * @return
-     */
+    // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
     @Override
-    public List<Department> getTaxFormDepartments(TAUser tAUser) {
-        List<Department> retList = new ArrayList<Department>();
+    public List<Integer> getTaxFormDepartments(TAUser tAUser, TaxType taxType, boolean taxFormIsDeclaration) {
+        List<Integer> retList = new ArrayList<Integer>();
         if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // все подразделения из справочника подразделений
-            retList.addAll(departmentDao.listDepartments());
-
-        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-            Department parentType2 = getDepartmentType2(tAUser.getDepartmentId());
-            if (parentType2 != null) {
-                retList.addAll(departmentDao.getAllChildren(parentType2.getId()));
+            for (Department dep : departmentDao.listDepartments()) {
+                retList.add(dep.getId());
             }
-            // TODO пп.2
-            retList.addAll(getExecutorsDepartments(retList));
+        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+            retList.addAll(taxFormIsDeclaration ?
+                    departmentDeclarationTypeDao.getDepartmentsBySourceControlNs(tAUser.getDepartmentId(), taxType) :
+                    departmentFormTypeDao.getDepartmentsBySourceControlNs(tAUser.getDepartmentId(), taxType));
 
+            retList.addAll(getExecutorsDepartments(retList));
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL)) {
-            // все дочерние подразделения для подразделения пользователя
-            retList.addAll(departmentDao.getAllChildren(tAUser.getDepartmentId()));
-            // TODO пп.2 (тоже самое, что для ROLE_CONTROL_UNP)
+            retList.addAll(taxFormIsDeclaration ?
+                    departmentDeclarationTypeDao.getDepartmentsBySourceControl(tAUser.getDepartmentId(), taxType) :
+                    departmentFormTypeDao.getDepartmentsBySourceControl(tAUser.getDepartmentId(), taxType));
             retList.addAll(getExecutorsDepartments(retList));
-
-        } else if (tAUser.hasRole(TARole.ROLE_OPER)) {
+        } else if (tAUser.hasRole(TARole.ROLE_OPER) && !taxFormIsDeclaration) {
             // все дочерние подразделения для подразделения пользователя (включая его)
-            retList.addAll(departmentDao.getAllChildren(tAUser.getDepartmentId()));
+            for (Department dep : departmentDao.getAllChildren(tAUser.getDepartmentId())) {
+                retList.add(dep.getId());
+            }
             retList.addAll(getExecutorsDepartments(retList));
         }
 
         // Результат выборки должен содержать только уникальные подразделения
-        Set setItems = new HashSet(retList);
+        Set<Integer> setItems = new HashSet<Integer>(retList);
         retList.clear();
         retList.addAll(setItems);
-
         return retList;
     }
 
-    /**
-     * 50 - Выборка для назначения подразделений-исполнителей
-     * http://conf.aplana.com/pages/viewpage.action?pageId=11380678
-     *
-     * @param tAUser пользователь
-     * @return
-     */
+    // http://conf.aplana.com/pages/viewpage.action?pageId=11380678
     @Override
     public List<Department> getDestinationDepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
@@ -244,9 +206,10 @@ public class DepartmentServiceImpl implements DepartmentService {
             retList.addAll(departmentDao.listDepartments());
 
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-            Department parentType2 = getDepartmentType2(tAUser.getDepartmentId());
-            if (parentType2 != null) {
-                retList.addAll(departmentDao.getAllChildren(parentType2.getId()));
+            // TODO Объединить в один метод
+            Department departmenTB = departmentDao.getDepartmenTB(tAUser.getDepartmentId());
+            if (departmenTB != null) {
+                retList.addAll(departmentDao.getAllChildren(departmenTB.getId()));
             }
             // подразделения с типом 3
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.GOSB.getCode()));
@@ -260,40 +223,28 @@ public class DepartmentServiceImpl implements DepartmentService {
         return retList;
     }
 
-    /**
-     * 60 - Выборка для параметров печатной формы
-     * http://conf.aplana.com/pages/viewpage.action?pageId=11381089
-     *
-     * @param formData НФ
-     * @return
-     */
+    // http://conf.aplana.com/pages/viewpage.action?pageId=11381089
     @Override
-    public List<Department> getPrintFormDepartments(FormData formData) {
-        List<Department> retList = new ArrayList<Department>();
+    public List<Integer> getPrintFormDepartments(FormData formData) {
+        List<Integer> retList = new ArrayList<Integer>();
         // подразделение, которому назначена налоговая форма
-        retList.add(departmentDao.getDepartment(formData.getDepartmentId()));
+        retList.add(departmentDao.getDepartment(formData.getDepartmentId()).getId());
         // подразделения которые назначены исполнителями для налоговой формы
         retList.addAll(getExecutorsDepartments(retList));
         return retList;
     }
 
-    /**
-     * 80 - Выборка подразделений по открытым периодам
-     * http://conf.aplana.com/pages/viewpage.action?pageId=11383234
-     *
-     * @param reportPeriod открытый период
-     * @return
-     */
+    // http://conf.aplana.com/pages/viewpage.action?pageId=11383234
     @Override
-    public List<Department> getOpenPeriodDepartments(TAUser tAUser, ReportPeriod reportPeriod) {
-        List<Department> retList = new ArrayList<Department>();
+    public List<Integer> getOpenPeriodDepartments(TAUser tAUser, TaxType taxType, boolean taxFormIsDeclaration, ReportPeriod reportPeriod) {
+        List<Integer> retList = new ArrayList<Integer>();
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
-        List<Department> list = getTaxFormDepartments(tAUser);
-        for (Department department : list) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriod.getId(), Long.valueOf(department.getId()));
+        List<Integer> list = getTaxFormDepartments(tAUser, taxType, taxFormIsDeclaration);
+        for (Integer departmentId : list) {
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriod.getId(), departmentId.longValue());
             if (departmentReportPeriod != null && departmentReportPeriod.isActive()) {
                 // Подразделения, для которых открыт указанный период
-                retList.add(department);
+                retList.add(departmentId);
             }
         }
 
@@ -304,9 +255,9 @@ public class DepartmentServiceImpl implements DepartmentService {
         return retList;
     }
 
-    // TODO blocked by (реализацию подразделений-исполнителей сейчас Денис Лошкарев только запускает в работу)
-    private List<Department> getExecutorsDepartments(List<Department> departments) {
-        List<Department> retList = new ArrayList<Department>();
+    // TODO blocked by http://jira.aplana.com/browse/SBRFACCTAX-5397 (реализацию подразделений-исполнителей сейчас Денис Лошкарев только запускает в работу)
+    private List<Integer> getExecutorsDepartments(List<Integer> departments) {
+        List<Integer> retList = new ArrayList<Integer>();
         // TODO все подразделения, которые назначены исполнителями для форм подразделений списка departments
         return retList;
     }

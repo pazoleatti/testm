@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -187,6 +188,24 @@ public class DepartmentFormTypeDaoImplTest {
 		assertTrue(sourceIds.contains(5l));
 		assertTrue(sourceIds.contains(6l));
 		assertTrue(sourceIds.contains(22l));
-
 	}
+
+    @Test
+    public void getDepartmentsBySourceControlTest() {
+        List<Integer> departmentIds;
+        // Контролер
+        departmentIds = departmentFormTypeDao.getDepartmentsBySourceControl(4, TaxType.INCOME);
+        assertTrue(departmentIds.containsAll(Arrays.asList(4, 6, 7)));
+        departmentIds = departmentFormTypeDao.getDepartmentsBySourceControl(4, TaxType.TRANSPORT);
+        assertTrue(departmentIds.containsAll(Arrays.asList(4, 7)));
+        departmentIds = departmentFormTypeDao.getDepartmentsBySourceControl(4, TaxType.DEAL);
+        assertTrue(departmentIds.containsAll(Arrays.asList(4, 7)));
+        // Контролер НС
+        departmentIds = departmentFormTypeDao.getDepartmentsBySourceControlNs(4, TaxType.INCOME);
+        assertTrue(departmentIds.containsAll(Arrays.asList(1, 2, 4, 5, 6, 7)));
+        departmentIds = departmentFormTypeDao.getDepartmentsBySourceControlNs(4, TaxType.TRANSPORT);
+        assertTrue(departmentIds.containsAll(Arrays.asList(1, 2, 3, 4, 5, 6, 7)));
+        departmentIds = departmentFormTypeDao.getDepartmentsBySourceControlNs(4, TaxType.DEAL);
+        assertTrue(departmentIds.containsAll(Arrays.asList(2, 4, 5, 6, 7)));
+    }
 }
