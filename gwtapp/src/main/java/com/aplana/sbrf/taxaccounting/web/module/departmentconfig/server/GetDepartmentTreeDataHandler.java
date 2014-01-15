@@ -57,31 +57,23 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
             return result;
         }
 
-        // TODO SBRFACCTAX-5387 переделать
         // Подразделения доступные пользователю
         Set<Integer> avSet = new HashSet<Integer>();
-        if (!currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-            // Первичные и консолид. отчеты
-            List<DepartmentFormType> formSrcList = departmentFormTypService.getDFTSourcesByDepartment(currUser.getDepartmentId(), action.getTaxType());
-
-            for (DepartmentFormType ft : formSrcList) {
-                avSet.add(ft.getDepartmentId());
-            }
-
-            // Подразделение пользователя
-            avSet.add(currUser.getDepartmentId());
-
-            // Необходимые для дерева подразделения
-            result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));
-
-        } else {
+        if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // Все подразделения
             result.setDepartments(departmentService.listAll());
 
             for (Department dep : result.getDepartments()) {
                 avSet.add(dep.getId());
             }
+        } else {
+            // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
+            avSet.addAll(departmentService.getTaxFormDepartments(currUser, action.getTaxType()));
+
+            // Необходимые для дерева подразделения
+            result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));
         }
+
         result.setAvailableDepartments(avSet);
         result.setReportPeriods(periodService.getAllPeriodsByTaxType(action.getTaxType(), false));
 

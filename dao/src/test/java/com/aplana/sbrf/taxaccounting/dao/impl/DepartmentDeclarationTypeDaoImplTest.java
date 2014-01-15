@@ -1,12 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +12,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "DepartmentDeclarationTypeDaoImplTest.xml" })
@@ -67,23 +65,4 @@ public class DepartmentDeclarationTypeDaoImplTest {
         assertTrue(departmentIds.contains(7));
         assertTrue(departmentIds.contains(9));
 	}
-
-    @Test
-    public void getDepartmentsByDeclarationSourceTest() {
-        List<Integer> departmentIds;
-        // Контролер
-        departmentIds = departmentDeclarationTypeDao.getDepartmentsBySourceControl(6, TaxType.INCOME);
-        assertTrue(departmentIds.containsAll(Arrays.asList(6, 7, 9, 10, 11)));
-        departmentIds = departmentDeclarationTypeDao.getDepartmentsBySourceControl(6, TaxType.TRANSPORT);
-        assertTrue(departmentIds.containsAll(Arrays.asList(6, 7, 9)));
-        departmentIds = departmentDeclarationTypeDao.getDepartmentsBySourceControl(6, TaxType.DEAL);
-        assertTrue(departmentIds.containsAll(Arrays.asList(6, 7, 9)));
-        // Контролер НС
-        departmentIds = departmentDeclarationTypeDao.getDepartmentsBySourceControlNs(6, TaxType.INCOME);
-        assertTrue(departmentIds.containsAll(Arrays.asList(2, 6, 7, 8, 9, 10, 11)));
-        departmentIds = departmentDeclarationTypeDao.getDepartmentsBySourceControlNs(6, TaxType.TRANSPORT);
-        assertTrue(departmentIds.containsAll(Arrays.asList(1, 2, 6, 7, 8, 9, 10)));
-        departmentIds = departmentDeclarationTypeDao.getDepartmentsBySourceControlNs(6, TaxType.DEAL);
-        assertTrue(departmentIds.containsAll(Arrays.asList(2, 6, 7, 8, 9, 10)));
-    }
 }

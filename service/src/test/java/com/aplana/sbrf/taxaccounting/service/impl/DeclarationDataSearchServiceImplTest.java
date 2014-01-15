@@ -72,7 +72,7 @@ public class DeclarationDataSearchServiceImplTest {
 		ReflectionTestUtils.setField(service, "sourceService", sourceService);
 
         DepartmentService departmentService = mock(DepartmentService.class);
-        when(departmentService.getTaxFormDepartments(any(TAUser.class), eq(TaxType.INCOME), eq(true))).thenReturn(Arrays.asList(1));
+        when(departmentService.getTaxFormDepartments(any(TAUser.class), eq(TaxType.INCOME))).thenReturn(Arrays.asList(1));
         ReflectionTestUtils.setField(service, "departmentService", departmentService);
     }
 

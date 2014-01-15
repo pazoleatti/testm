@@ -105,7 +105,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		}
 
         // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
-        departmentIds.addAll(departmentService.getTaxFormDepartments(userInfo.getUser(), taxType, false));
+        departmentIds.addAll(departmentService.getTaxFormDepartments(userInfo.getUser(), taxType));
 
 		result.setDepartmentIds(departmentIds);
 		

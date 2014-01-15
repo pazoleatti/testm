@@ -130,7 +130,7 @@ public class DeclarationDataAccessServiceImplTest {
 		when(departmentService.getDepartment(DEPARTMENT_TB1_ID)).thenReturn(departmentTB1);
 		when(departmentService.getDepartment(DEPARTMENT_TB2_ID)).thenReturn(departmentTB2);
         // Привязанные подразделения
-        when(departmentService.getTaxFormDepartments(any(TAUser.class), any(TaxType.class), eq(true))).thenAnswer(new Answer<List<Integer>>() {
+        when(departmentService.getTaxFormDepartments(any(TAUser.class), any(TaxType.class))).thenAnswer(new Answer<List<Integer>>() {
             @Override
             public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
 
@@ -153,50 +153,6 @@ public class DeclarationDataAccessServiceImplTest {
                 }
 
                 return new ArrayList<Integer>(0);
-
-//                private final static int DEPARTMENT_TB1_ID = 2;
-//                private final static int DEPARTMENT_TB2_ID = 3;
-//
-//                private final static int USER_CONTROL_BANK_ID = 10;
-//                private final static int USER_CONTROL_UNP_ID = 11;
-//                private final static int USER_CONTROL_TB1_ID = 12;
-//                private final static int USER_OPERATOR_ID = 14;
-//
-//                private final static int DECLARATION_TYPE_1_ID = 101;
-//                private final static int DECLARATION_TYPE_2_ID = 102;
-//
-//                private final static int DECLARATION_TEMPLATE_1_ID = 111;
-//                private final static int DECLARATION_TEMPLATE_2_ID = 112;
-//
-//                private final static int DECLARATION_CREATED_BANK_ID = 119;
-//                private final static int DECLARATION_ACCEPTED_BANK_ID = 120;
-//                private final static int DECLARATION_CREATED_TB1_ID = 121;
-//                private final static int DECLARATION_ACCEPTED_TB1_ID = 122;
-//                private final static int DECLARATION_CREATED_TB2_ID = 123;
-//                private final static int DECLARATION_ACCEPTED_TB2_ID = 124;
-
-//                if (user.hasRole(TARole.ROLE_CONTROL_UNP)) {
-//                    return Arrays.asList(1, 2, 3, 10, 11, 12, 14);
-//                }
-//
-//                if (user.hasRole(TARole.ROLE_CONTROL_NS)) {
-//                    switch (user.getDepartmentId()){
-//                        case 10:
-//                            return Arrays.asList(1, 2, 3, 10, 11, 12, 14);
-//                        case 11:
-//                            return Arrays.asList(2, 10, 11, 12, 14);
-//                        case 12:
-//                            return Arrays.asList(2, 10, 11, 12, 14);
-//                        case 14:
-//                            return Arrays.asList(2, 10, 11, 12, 14);
-//                    }
-//                }
-//
-//                if (user.hasRole(TARole.ROLE_CONTROL)) {
-//
-//                }
-//
-//                return new ArrayList<Integer>(0);
             }
         });
 

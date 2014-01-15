@@ -53,24 +53,4 @@ public interface DepartmentDeclarationTypeDao {
      * Удаляет назначение декларации
      */
     void delete(Long id);
-
-    /**
-     * Список подразделений, в которых доступны декларации (по иерархии подразделений и по связям источник-приемник)
-     * Для роли "Контролер"
-     * http://conf.aplana.com/pages/viewpage.action?pageId=11380670
-     * @param userDepartmentId Подразделение пользователя
-     * @param taxType Тип налога
-     * @return Список id доступных подразделений
-     */
-    List<Integer> getDepartmentsBySourceControl(int userDepartmentId, TaxType taxType);
-
-    /**
-     * Список подразделений, в которых доступны декларации (по иерархии подразделений и по связям источник-приемник)
-     * Для роли "Контролер НС"
-     * http://conf.aplana.com/pages/viewpage.action?pageId=11380670
-     * @param userDepartmentId Подразделение пользователя
-     * @param taxType Тип налога
-     * @return Список id доступных подразделений
-     */
-    List<Integer> getDepartmentsBySourceControlNs(int userDepartmentId, TaxType taxType);
 }

@@ -12,16 +12,15 @@ import java.util.Set;
  * @author sgoryachkin
  */
 public interface DepartmentService {
-
-
     /**
      * Получаем подразделение UNP.
      * (Корень дерева, а не "Управление налогового планирования")
      *
+     * @deprecated Необходимо пользоваться getBankDepartment()
      * @return
      */
+    @Deprecated
     public Department getUNPDepartment();
-
 
     /**
      * Получить департамент
@@ -116,10 +115,9 @@ public interface DepartmentService {
      * Выборка id подразделений для доступа к экземплярам НФ/деклараций
      * @param tAUser пользователь
      * @param taxType Тип налога
-     * @param taxFormIsDeclaration true - декларация, false - налоговая форма
      * @return
      */
-    List<Integer> getTaxFormDepartments(TAUser tAUser, TaxType taxType, boolean taxFormIsDeclaration);
+    List<Integer> getTaxFormDepartments(TAUser tAUser, TaxType taxType);
 
     /**
      * Выборка id подразделений для назначения подразделений-исполнителей
@@ -142,10 +140,8 @@ public interface DepartmentService {
      *
      * @param tAUser пользователь
      * @param taxType Тип налога
-     * @param taxFormIsDeclaration true - декларация, false - налоговая форма
      * @param reportPeriod открытый период
      * @return
      */
-    List<Integer> getOpenPeriodDepartments(TAUser tAUser, TaxType taxType, boolean taxFormIsDeclaration,
-                                              ReportPeriod reportPeriod);
+    List<Integer> getOpenPeriodDepartments(TAUser tAUser, TaxType taxType, ReportPeriod reportPeriod);
 }

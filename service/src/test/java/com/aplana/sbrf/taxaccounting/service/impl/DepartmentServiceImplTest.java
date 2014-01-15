@@ -132,10 +132,8 @@ public class DepartmentServiceImplTest {
         when(departmentReportPeriodDao.get(0, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpOpen);
         when(departmentReportPeriodDao.get(1, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpClose);
         // Доступность по связям
-        when(departmentDeclarationTypeDao.getDepartmentsBySourceControl(anyInt(), any(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
-        when(departmentDeclarationTypeDao.getDepartmentsBySourceControlNs(anyInt(), any(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
-        when(departmentFormTypeDao.getDepartmentsBySourceControl(anyInt(), any(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
-        when(departmentFormTypeDao.getDepartmentsBySourceControlNs(anyInt(), any(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
+        when(departmentDao.getDepartmentsBySourceControl(anyInt(), any(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
+        when(departmentDao.getDepartmentsBySourceControlNs(anyInt(), any(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
         // Для дерева
         when(departmentDao.getRequiredForTreeDepartments(anyListOf(Integer.class))).thenAnswer(new Answer<List<Department>>() {
             @Override
@@ -311,7 +309,7 @@ public class DepartmentServiceImplTest {
         TAUser taUser = new TAUser();
         taUser.setRoles(taRoles);
 
-        List<Integer> result = departmentService.getTaxFormDepartments(taUser, TaxType.INCOME, true);
+        List<Integer> result = departmentService.getTaxFormDepartments(taUser, TaxType.INCOME);
         Assert.assertEquals(5, result.size());
         Assert.assertEquals(true, result.contains(root.getId()) && result.contains(departmentTB2.getId())
                 && result.contains(departmentTB3.getId()) && result.contains(departmentGOSB31.getId())
@@ -381,12 +379,12 @@ public class DepartmentServiceImplTest {
         ReportPeriod reportPeriod = new ReportPeriod();
 
         reportPeriod.setId(0);
-        List<Integer> result = departmentService.getOpenPeriodDepartments(taUser, TaxType.INCOME, true, reportPeriod);
+        List<Integer> result = departmentService.getOpenPeriodDepartments(taUser, TaxType.INCOME, reportPeriod);
         Assert.assertEquals(3, result.size());
         Assert.assertTrue(result.containsAll(asList(root.getId(), departmentTB2.getId(), departmentOSB311.getId())));
 
         reportPeriod.setId(1);
-        result = departmentService.getOpenPeriodDepartments(taUser, TaxType.INCOME, true, reportPeriod);
+        result = departmentService.getOpenPeriodDepartments(taUser, TaxType.INCOME, reportPeriod);
         Assert.assertEquals(0, result.size());
 
         // TODO
