@@ -82,31 +82,30 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		
 		// Собираем информацию о налоговых формах к которым имеет доступ пользователь
 		// К формам своего подразделения имеет доступ и контролёр и оператор
-		List<DepartmentFormType> dfts = sourceService.getDFTByDepartment(userInfo.getUser().getDepartmentId(), taxType);
-		
-		// Контролёр, вдобавок, имеет доступ к формам, которые являются источниками для форм и деклараций его подразделения 
-		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
-			dfts.addAll(sourceService.getDFTSourcesByDepartment(userInfo.getUser().getDepartmentId(), taxType));
+		Set<DepartmentFormType> dfts = new HashSet(sourceService.getDFTByDepartment(
+                userInfo.getUser().getDepartmentId(), taxType));
+
+		// TODO Исправить после появления обновленной постановки на форму в 0.3.5 http://conf.aplana.com/pages/viewpage.action?pageId=11382061
+		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
+			 dfts.addAll(sourceService.getDFTSourcesByDepartment(userInfo.getUser().getDepartmentId(), taxType));
 		}
-		
+
 		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();
 		Set<Integer> departmentIds = new HashSet<Integer>();
 		Set<FormDataKind> kinds = new HashSet<FormDataKind>();
-		for (DepartmentFormType dft: dfts) {
-			int formTypeId = dft.getFormTypeId();
+        for (DepartmentFormType dft : dfts) {
+            int formTypeId = dft.getFormTypeId();
 			if (!formTypes.containsKey(formTypeId)) {
+                // TODO Очень неоптимально. Надо переписать.
 				formTypes.put(formTypeId, formTypeDao.get(formTypeId));
 			}
-			
+
 			kinds.add(dft.getKind());
 			departmentIds.add(dft.getDepartmentId());
 		}
 
-		// Подразделение пользователя должно быть доступно
-		// Этот викс пришлось сделать для Ведения периодов.
-		// Для поиска форм департаметнт текущего подразделения сюда попадает, т.к. ему должны быть назначены формы. 
-		// А если они не назначены?
-		departmentIds.add(userInfo.getUser().getDepartmentId());
+        // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
+        departmentIds.addAll(departmentService.getTaxFormDepartments(userInfo.getUser(), taxType, false));
 
 		result.setDepartmentIds(departmentIds);
 		

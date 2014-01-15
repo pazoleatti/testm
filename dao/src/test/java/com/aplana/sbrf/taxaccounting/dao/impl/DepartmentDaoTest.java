@@ -4,18 +4,16 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -33,28 +31,18 @@ public class DepartmentDaoTest {
         Assert.assertEquals(DepartmentType.ROOT_BANK, d.getType());
         Assert.assertEquals("Банк", d.getName());
         Assert.assertNull(d.getParentId());
-        //Assert.assertEquals(4, d.getFormTypeIds().size());
-        //Assert.assertTrue(d.getFormTypeIds().contains(1));
-        //Assert.assertTrue(d.getFormTypeIds().contains(2));
-        //Assert.assertTrue(d.getFormTypeIds().contains(3));
-        //Assert.assertTrue(d.getFormTypeIds().contains(4));
 
         d = departmentDao.getDepartment(2);
         Assert.assertEquals(2, d.getId());
         Assert.assertEquals(DepartmentType.TERBANK, d.getType());
         Assert.assertEquals(new Integer(Department.ROOT_BANK_ID), d.getParentId());
         Assert.assertEquals("ТБ1", d.getName());
-        //Assert.assertEquals(2, d.getFormTypeIds().size());
-        //Assert.assertTrue(d.getFormTypeIds().contains(1));
-        //Assert.assertTrue(d.getFormTypeIds().contains(2));
 
         d = departmentDao.getDepartment(3);
         Assert.assertEquals(3, d.getId());
         Assert.assertEquals(DepartmentType.TERBANK, d.getType());
         Assert.assertEquals(new Integer(Department.ROOT_BANK_ID), d.getParentId());
         Assert.assertEquals("ТБ2", d.getName());
-        //Assert.assertEquals(2, d.getFormTypeIds().size());
-
     }
 
     @Test(expected = DaoException.class)
@@ -119,5 +107,30 @@ public class DepartmentDaoTest {
         Assert.assertEquals(result.getId(), 3);
         result = departmentDao.getDepartmenTB(6);
         Assert.assertEquals(result.getId(), 2);
+    }
+
+    private List<Integer> getDepartmentIds(List<Department> departmentList) {
+        List<Integer> retVal = new LinkedList<Integer>();
+        for (Department department : departmentList) {
+            retVal.add(department.getId());
+        }
+        return retVal;
+    }
+
+    @Test
+    public void getRequiredForTreeDepartments() {
+        List<Department> departmentList;
+        // 1 -> 1
+        departmentList = departmentDao.getRequiredForTreeDepartments(Arrays.asList(1));
+        Assert.assertEquals(1, departmentList.size());
+        Assert.assertEquals(1, departmentList.get(0).getId());
+        // 2,5 -> 1,2,3,5
+        departmentList = departmentDao.getRequiredForTreeDepartments(Arrays.asList(2, 5));
+        Assert.assertEquals(4, departmentList.size());
+        Assert.assertTrue(getDepartmentIds(departmentList).containsAll(Arrays.asList(1, 2, 3, 5)));
+        // 6 -> 1,2,6
+        departmentList = departmentDao.getRequiredForTreeDepartments(Arrays.asList(6));
+        Assert.assertEquals(3, departmentList.size());
+        Assert.assertTrue(getDepartmentIds(departmentList).containsAll(Arrays.asList(1, 2, 6)));
     }
 }

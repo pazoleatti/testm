@@ -73,4 +73,11 @@ public interface DepartmentDao {
      * @return ТБ
      */
     Department getDepartmenTB(int departmentId);
+
+    /**
+     * Получение списка подразделений, необходимых для построения неразрывного дерева подразделений
+     * @param availableDepartments
+     * @return
+     */
+    List<Department> getRequiredForTreeDepartments(List<Integer> availableDepartments);
 }

@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
@@ -21,7 +18,6 @@ import java.util.ArrayList;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
-@Deprecated
 public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDeclarationFilterData, GetDeclarationFilterDataResult> {
 
 	public GetDeclarationFilterDataHandler() {
@@ -43,6 +39,7 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 	@Override
 	public GetDeclarationFilterDataResult execute(GetDeclarationFilterData action, ExecutionContext executionContext)
             throws ActionException {
+        // Данные для панели фильтрации
 		GetDeclarationFilterDataResult res = new GetDeclarationFilterDataResult();
 
         DeclarationDataFilterAvailableValues declarationFilterValues =

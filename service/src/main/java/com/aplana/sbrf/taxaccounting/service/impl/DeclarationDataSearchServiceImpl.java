@@ -60,6 +60,7 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
             }
 
             // Контролёр видит виды деклараций, привязанные к его подразделению (для НС ближайший родительский ТБ)
+            // TODO Переписать после появления новой постановки на форму в 0.3.5 http://conf.aplana.com/pages/viewpage.action?pageId=11383562
             List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(userDepartmentId, taxType);
             Map<Integer, DeclarationType> dtMap = new HashMap<Integer, DeclarationType>();
             for (DepartmentDeclarationType ddt : ddts) {

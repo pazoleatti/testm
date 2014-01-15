@@ -150,6 +150,41 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     /**
+     * Подготовка строки вида "?,?,?,..."
+     * @param length
+     * @return
+     */
+    private String preparePlaceHolders(int length) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < length;) {
+            builder.append("?");
+            if (++i < length) {
+                builder.append(",");
+            }
+        }
+        return builder.toString();
+    }
+
+    @Override
+    public List<Department> getRequiredForTreeDepartments(List<Integer> availableDepartments) {
+        try {
+            String recursive = isWithRecursive() ? "recursive" : "";
+            return getJdbcTemplate().query(
+                    "with " + recursive + " tree (id, parent_id) as " +
+                            "(select id, parent_id from department where id in " +
+                            "(" + preparePlaceHolders(availableDepartments.size()) + ") " +
+                            "union all " +
+                            "select d.id, d.parent_id from department d inner join tree t on d.id = t.parent_id) " +
+                            "select distinct d.* from tree t, department d where d.id = t.id",
+                    new DepartmentJdbcMapper(),
+                    availableDepartments.toArray()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Department>(0);
+        }
+    }
+
+    /**
      * Получение родительского узла заданного типа (указанное подразделение м.б. результатом, если его тип соответствует искомому)
      * @param departmentId
      * @param typeId
