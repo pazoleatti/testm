@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentTreeItem;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentTreeWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -74,7 +74,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @UiField
     GenericDataGrid<TableModel> grid;
     @UiField(provided = true)
-    DepartmentPickerWidget tree;
+    DepartmentTreeWidget tree;
     @UiField
     DockLayoutPanel panelFormDataKind;
     @UiField
@@ -99,9 +99,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     }
 
     private void initTree() {
-        tree = new DepartmentPickerWidget("", false);
-        tree.ok.setVisible(false);
-
+        tree = new DepartmentTreeWidget("", false);
     }
 
     private void setDepoId(Long id) {
@@ -325,7 +323,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         }
     }
 
-    Map<CheckBox, Long> cbMap = new HashMap<CheckBox, Long>();
+    Map<Widget, Long> cbMap = new HashMap<Widget, Long>();
 
     ClickHandler handler = new ClickHandler() {
         @Override
@@ -336,17 +334,16 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
     @Override
     public void setDepartments(List<Department> departments, Set<Integer> availableDepartment) {
-        tree.setAvalibleValues(departments, availableDepartment);
+        tree.setAvailableValues(departments, availableDepartment);
 
         cbMap.clear();
-        Iterator<TreeItem> treeItemIterator = tree.tree.treeItemIterator();
-        TreeItem item;
+        Iterator<TreeItem> treeItemIterator = tree.treeItemIterator();
+        DepartmentTreeItem item;
 
         while (treeItemIterator.hasNext()) {
-            item = treeItemIterator.next();
-            CheckBox widget = (CheckBox) item.getWidget();
-            cbMap.put(widget, ((Integer) ((Pair) item.getUserObject()).getFirst()).longValue());
-            widget.addClickHandler(handler);
+            item = (DepartmentTreeItem) treeItemIterator.next();
+            cbMap.put(item.getWidget(), item.getId().longValue());
+            item.addClickHandler(handler);
         }
     }
 

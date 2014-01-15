@@ -77,6 +77,8 @@ public class DepartmentPickerWidget extends Composite implements
 	@Override
 	public void setAvalibleValues(List<Department> departments,
 			Set<Integer> availableDepartments) {
+        // TODO (Ramil Timerbaev) Возможно надо поменять дерево с SimpleTree на DeprtmentTreeWidget
+        // и использовать его методы, а эту реализацию убрать
 		tree.clear();
 		List<DepartmentTreeItem> itemsHierarchy = flatToHierarchy(departments,
 				availableDepartments);
