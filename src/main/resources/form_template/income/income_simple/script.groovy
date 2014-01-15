@@ -3,6 +3,7 @@ package form_template.income.income_simple
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.text.SimpleDateFormat
@@ -58,15 +59,29 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT:
+        importData()
+        break
 }
 
 //// Кэши и константы
 @Field
 def refBookCache = [:]
 
+//Все аттрибуты
+@Field
+def allColumns = ['incomeTypeId', 'incomeGroup', 'incomeTypeByOperation', 'accountNo',
+        'rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted',
+        'logicalCheck', 'accountingRecords', 'opuSumByEnclosure2', 'opuSumByTableD', 'opuSumTotal', 'difference']
+
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted']
+
+//Аттрибуты, очищаемые перед импортом формы
+@Field
+def resetColumns = ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted',
+        'logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableD', 'opuSumTotal', 'difference']
 
 @Field
 def rowsNotCalc = ['R1', 'R53', 'R54', 'R156']
@@ -85,6 +100,30 @@ def format = new SimpleDateFormat('dd.MM.yyyy')
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
+// Получение xml с общими проверками
+def getXML(def String startStr, def String endStr) {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        throw new ServiceException('Имя файла не должно быть пустым')
+    }
+    def is = ImportInputStream
+    if (is == null) {
+        throw new ServiceException('Поток данных пуст')
+    }
+    if (!fileName.endsWith('.xls')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xls!')
+    }
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
+    if (xmlString == null) {
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
+    }
+    return xml
 }
 
 void calc() {
@@ -431,4 +470,103 @@ def checkRequiredColumns(def row, def columns) {
         def errorMsg = colNames.join(', ')
         logger.error("Строка ${row.getIndex()}: не заполнены графы : $errorMsg.")
     }
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML('КНУ', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 8, 3)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): 'КНУ',
+            (xml.row[0].cell[1]): 'Группа дохода',
+            (xml.row[0].cell[2]): 'Вид дохода по операциям',
+            (xml.row[0].cell[3]): 'Балансовый счёт по учёту дохода',
+            (xml.row[0].cell[4]): 'РНУ-6 (графа 10) сумма',
+            (xml.row[0].cell[5]): 'РНУ-6 (графа 12)',
+            (xml.row[0].cell[7]): 'РНУ-4 (графа 5) сумма',
+            (xml.row[1].cell[5]): 'сумма',
+            (xml.row[1].cell[6]): 'в т.ч. учтено в предыдущих налоговых периодах по графе 10',
+            (xml.row[2].cell[0]): '1',
+            (xml.row[2].cell[1]): '2',
+            (xml.row[2].cell[2]): '3',
+            (xml.row[2].cell[3]): '4',
+            (xml.row[2].cell[4]): '5',
+            (xml.row[2].cell[5]): '6',
+            (xml.row[2].cell[6]): '7',
+            (xml.row[2].cell[7]): '8',
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def xmlIndexRow = -1
+    def int rowOffset = 3
+    def int colOffset = 0
+    def int maxRow = 156
+
+    def rows = dataRowHelper.allCached
+    def int rowIndex = 1
+    def row126used = false
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // пропустить шапку таблицы
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+        // прервать по загрузке нужных строк
+        if (rowIndex > maxRow) {
+            break
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        if (rowIndex == 126 && !row126used) { //ячейки 125(135) и 126(136) разделены
+            row126used = true
+            continue
+        }
+        def curRow = getDataRow(rows, "R" + rowIndex)
+        curRow.setIndex(rowIndex++)
+
+        //очищаем столбцы
+        resetColumns.each {
+            curRow[it] = null
+        }
+
+        def xmlIndexCol = 4
+
+        // графа 5
+        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
+            curRow.rnu6Field10Sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        }
+        xmlIndexCol++
+
+        // графа 6
+        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
+            curRow.rnu6Field12Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        }
+        xmlIndexCol++
+
+        // графа 7
+        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
+            curRow.rnu6Field12PrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        }
+        xmlIndexCol++
+
+        // графа 8
+        curRow.rnu4Field5Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
+    }
+    dataRowHelper.update(rows)
 }
