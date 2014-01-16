@@ -3,56 +3,13 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
     <ui:style>
-        @external .gwt-MenuBar-horizontal .gwt-MenuItem;
-        .gwt-MenuBar-horizontal .gwt-MenuItem {
-            color: white;
-            font-size: 14px;
-            font-weight: normal;
-            height: 30px;
-            vertical-align: middle;
-            padding: 0 5px;
-            white-space: nowrap;
-        }
 
-        @external .gwt-MenuBar .gwt-MenuItem-selected;
-        .gwt-MenuBar .gwt-MenuItem-selected {
-            cursor: pointer;
-            color: #000000;
-            background-color: #FFDC82;
-        }
-
-        @external .gwt-MenuBar-vertical .subMenuIcon-selected;
-        .gwt-MenuBar-vertical .subMenuIcon-selected {
-            background-color: #FFDC82;
-        }
-
-        @external .gwt-MenuBar-vertical .gwt-MenuItem;
-        .gwt-MenuBar-vertical .gwt-MenuItem {
-            margin-left: 15px !important;
-            /*width: 135px;*/
-            font-size: 12px;
-            padding: 3px 5px 3px 14px;
-        }
-
-        @external .gwt-MenuBar-horizontal;
-        .gwt-MenuBar-horizontal {
-            background: none;
-            border: none;
-            vertical-align: middle;
-            height: 32px;
-            padding-top: 3px;
-            padding-bottom: 5px;
-            /*padding-left: 135px; убрал чтобы при уменьшении ширины меню не сразу схлапывалось*/
-            overflow: hidden;
-        }
-
-        @external gwt-MenuBar-horizontal .gwt-MenuItem-selected;
-        .gwt-MenuBar-horizontal .gwt-MenuItem-selected {
-            background-color: white;
+        .menu table{
+            border-spacing: 0;
         }
 
     </ui:style>
 
-	<g:MenuBar ui:field="menu"/>
+	<g:MenuBar ui:field="menu" addStyleNames="{style.menu}"/>
 
 </ui:UiBinder> 

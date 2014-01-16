@@ -4,6 +4,7 @@
     <ui:style>
         .whiteColor {
             color: #FFFFFF !important;
+            text-decoration: none;
         }
 
         .forLabel {
@@ -11,17 +12,38 @@
             white-space: nowrap;
             text-overflow: ellipsis;
             -ms-text-overflow: ellipsis;
+            max-width: 300px;
+            height: 16px;
+            line-height: 1;     /*хитрый трюк*/
+        }
+
+        .separatorLikeInMenuLeft {
+            height: 32px;
+            border-left: 1px solid #e4e4e4;
+            margin-left: 5px;
+            margin-right: 10px;
+            float: left;
+        }
+
+        .separatorLikeInMenuRight {
+            height: 32px;
+            border-left: 1px solid #e4e4e4;
+            margin-right: 10px;
+            float: right;
         }
 
     </ui:style>
 
     <g:HTMLPanel>
-        <div style="float: left; text-align: center; margin-right: 20px; margin-top: -2px; max-width: 300px;">
+        <g:HTML addStyleNames="{style.separatorLikeInMenuLeft}"/>
+        <div style="float: left; text-align: center; margin-right: 10px;">
             <g:Label ui:field="roleAndDepartment" addStyleNames="{style.forLabel}"/>
             <g:Label ui:field="userName" addStyleNames="{style.forLabel}"/>
         </div>
+
 	    <div style="float: right; margin-top: 5px">
             <g:Anchor styleName="{style.whiteColor}" href="j_spring_security_logout" text="Выход"/>
         </div>
+        <g:HTML addStyleNames="{style.separatorLikeInMenuRight}"/>
 	</g:HTMLPanel>
 </ui:UiBinder> 
