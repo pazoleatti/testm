@@ -73,4 +73,38 @@ public interface DepartmentDao {
      * @return ТБ
      */
     Department getDepartmenTB(int departmentId);
+
+    /**
+     * Получение ТБ для подразделения (тип = 2) + все дочерние подразделения
+     * @param departmentId Подразделение пользователя
+     * @return Список подразделений
+     */
+    List<Department> getDepartmenTBChildren(int departmentId);
+
+    /**
+     * Получение списка подразделений, необходимых для построения неразрывного дерева подразделений
+     * @param availableDepartments
+     * @return
+     */
+    List<Department> getRequiredForTreeDepartments(List<Integer> availableDepartments);
+
+    /**
+     * Список подразделений, в которых доступны декларации/НФ (по иерархии подразделений и по связям источник-приемник)
+     * Только для роли "Контролер"
+     * http://conf.aplana.com/pages/viewpage.action?pageId=11380670
+     * @param userDepartmentId Подразделение пользователя
+     * @param taxTypes Типы налога
+     * @return Список id доступных подразделений
+     */
+    List<Integer> getDepartmentsBySourceControl(int userDepartmentId, List<TaxType> taxTypes);
+
+    /**
+     * Список подразделений, в которых доступны декларации/НФ (по иерархии подразделений и по связям источник-приемник)
+     * Только для роли "Контролер НС"
+     * http://conf.aplana.com/pages/viewpage.action?pageId=11380670
+     * @param userDepartmentId Подразделение пользователя
+     * @param taxTypes Типы налога
+     * @return Список id доступных подразделений
+     */
+    List<Integer> getDepartmentsBySourceControlNs(int userDepartmentId, List<TaxType> taxTypes);
 }

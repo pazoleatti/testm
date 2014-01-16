@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static java.util.Arrays.asList;
+
 @Service
 public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchService {
 
@@ -60,6 +62,7 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
             }
 
             // Контролёр видит виды деклараций, привязанные к его подразделению (для НС ближайший родительский ТБ)
+            // TODO Переписать после появления новой постановки на форму в 0.3.5 http://conf.aplana.com/pages/viewpage.action?pageId=11383562
             List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(userDepartmentId, taxType);
             Map<Integer, DeclarationType> dtMap = new HashMap<Integer, DeclarationType>();
             for (DepartmentDeclarationType ddt : ddts) {
@@ -75,7 +78,7 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 
             // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
             result.setDepartmentIds(new HashSet<Integer>(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    taxType, true)));
+                    asList(taxType))));
         } else {
 			throw new AccessDeniedException("Недостаточно прав для поиска деклараций");
 		}

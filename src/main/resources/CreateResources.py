@@ -78,14 +78,15 @@ print '--------------------------------'
 print '- JAASAuthData'
 jassAuthDataIds = AdminConfig.list('JAASAuthData').split(lineSeparator)
 jassAuthDataNotFound = 1
-for jassAuthDataId in jassAuthDataIds:
-	jassAuthDataAlias = AdminConfig.showAttribute(jassAuthDataId, 'alias')
-	if jassAuthDataAlias[-len(jaasAlias):] == jaasAlias:
-		jassAuthDataNotFound = 0
-		print 'Found existing JAASAuthData:'
-		print 'jassAuthDataAlias='+ jassAuthDataAlias
-		print 'jassAuthDataId='+ jassAuthDataId
-		break
+if jassAuthDataIds[0] != '':
+	for jassAuthDataId in jassAuthDataIds:
+		jassAuthDataAlias = AdminConfig.showAttribute(jassAuthDataId, 'alias')
+		if jassAuthDataAlias[-len(jaasAlias):] == jaasAlias:
+			jassAuthDataNotFound = 0
+			print 'Found existing JAASAuthData:'
+			print 'jassAuthDataAlias='+ jassAuthDataAlias
+			print 'jassAuthDataId='+ jassAuthDataId
+			break
 if jassAuthDataNotFound:
 	print 'Initiated the creation of an JAASAuthData'
 	print 'id='+ AdminConfig.create('JAASAuthData', AdminConfig.getid('/Security:/'), [['alias', jaasAlias], ['userId', jassUserId], ['password', jassUserPass]])

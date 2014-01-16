@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
@@ -104,6 +106,12 @@ public class DepartmentServiceImplTest {
         when(departmentDao.getDepartmenTB(departmentTB3.getId())).thenReturn(departmentTB3);
         when(departmentDao.getDepartmenTB(departmentGOSB31.getId())).thenReturn(departmentTB3);
         when(departmentDao.getDepartmenTB(departmentOSB311.getId())).thenReturn(departmentTB3);
+        when(departmentDao.getDepartmenTBChildren(root.getId())).thenReturn(new ArrayList<Department>(0));
+        when(departmentDao.getDepartmenTBChildren(departmentTB2.getId())).thenReturn(asList(departmentTB2));
+        when(departmentDao.getDepartmenTBChildren(departmentTB3.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
+        when(departmentDao.getDepartmenTBChildren(departmentGOSB31.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
+        when(departmentDao.getDepartmenTBChildren(departmentOSB311.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
+
         // Роли
         taRoles = new ArrayList<TARole>();
         for (String alias : asList(TARole.ROLE_CONTROL_UNP, TARole.ROLE_CONTROL_NS, TARole.ROLE_CONTROL, TARole.ROLE_OPER)) {
@@ -124,10 +132,35 @@ public class DepartmentServiceImplTest {
         when(departmentReportPeriodDao.get(0, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpOpen);
         when(departmentReportPeriodDao.get(1, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpClose);
         // Доступность по связям
-        when(departmentDeclarationTypeDao.getDepartmentsBySourceControl(anyInt(), any(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
-        when(departmentDeclarationTypeDao.getDepartmentsBySourceControlNs(anyInt(), any(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
-        when(departmentFormTypeDao.getDepartmentsBySourceControl(anyInt(), any(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
-        when(departmentFormTypeDao.getDepartmentsBySourceControlNs(anyInt(), any(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
+        when(departmentDao.getDepartmentsBySourceControl(anyInt(), anyListOf(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
+        when(departmentDao.getDepartmentsBySourceControlNs(anyInt(), anyListOf(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
+        // Для дерева
+        when(departmentDao.getRequiredForTreeDepartments(anyListOf(Integer.class))).thenAnswer(new Answer<List<Department>>() {
+            @Override
+            public List<Department> answer(InvocationOnMock invocation) throws Throwable {
+
+                List<Integer> availableList = (List<Integer>)invocation.getArguments()[0];
+                Set<Department> retVal = new HashSet<Department>();
+
+                if (availableList.contains(root.getId())) {
+                    retVal.addAll(Arrays.asList(root));
+                }
+                if (availableList.contains(departmentTB2.getId())) {
+                    retVal.addAll(Arrays.asList(departmentTB2, root));
+                }
+                if (availableList.contains(departmentTB3.getId())) {
+                    retVal.addAll(Arrays.asList(departmentTB3, root));
+                }
+                if (availableList.contains(departmentGOSB31.getId())) {
+                    retVal.addAll(Arrays.asList(departmentGOSB31, departmentTB3, root));
+                }
+                if (availableList.contains(departmentOSB311.getId())) {
+                    retVal.addAll(Arrays.asList(departmentOSB311, departmentGOSB31, departmentTB3, root));
+                }
+
+                return new ArrayList<Department>(retVal);
+            }
+        });
     }
 
     @Test
@@ -164,17 +197,29 @@ public class DepartmentServiceImplTest {
 
     @Test
     public void getRequiredForTreeDepartmentsTest() {
-        Set<Integer> available = new HashSet<Integer>(asList(2, 3));
+        Set<Integer> available = new HashSet<Integer>(asList(departmentTB2.getId(), departmentTB3.getId()));
 
         Collection<Department> result = departmentService.getRequiredForTreeDepartments(available).values();
-        verify(departmentDao, times(1)).getDepartment(2);
-        verify(departmentDao, times(1)).getParent(2);
-        verify(departmentDao, times(1)).getDepartment(3);
-        verify(departmentDao, times(1)).getParent(3);
         Assert.assertEquals(3, result.size());
         Assert.assertEquals(true, result.contains(root));
         Assert.assertEquals(true, result.contains(departmentTB2));
         Assert.assertEquals(true, result.contains(departmentTB3));
+
+        available = new HashSet<Integer>(asList(departmentOSB311.getId()));
+        result = departmentService.getRequiredForTreeDepartments(available).values();
+        Assert.assertEquals(4, result.size());
+        Assert.assertEquals(true, result.contains(root));
+        Assert.assertEquals(true, result.contains(departmentTB3));
+        Assert.assertEquals(true, result.contains(departmentGOSB31));
+        Assert.assertEquals(true, result.contains(departmentOSB311));
+
+        result = departmentService.getRequiredForTreeDepartments(null).values();
+        Assert.assertEquals(5, result.size());
+        Assert.assertEquals(true, result.contains(root));
+        Assert.assertEquals(true, result.contains(departmentTB2));
+        Assert.assertEquals(true, result.contains(departmentTB3));
+        Assert.assertEquals(true, result.contains(departmentGOSB31));
+        Assert.assertEquals(true, result.contains(departmentOSB311));
     }
 
     @Test
@@ -264,7 +309,7 @@ public class DepartmentServiceImplTest {
         TAUser taUser = new TAUser();
         taUser.setRoles(taRoles);
 
-        List<Integer> result = departmentService.getTaxFormDepartments(taUser, TaxType.INCOME, true);
+        List<Integer> result = departmentService.getTaxFormDepartments(taUser, asList(TaxType.INCOME));
         Assert.assertEquals(5, result.size());
         Assert.assertEquals(true, result.contains(root.getId()) && result.contains(departmentTB2.getId())
                 && result.contains(departmentTB3.getId()) && result.contains(departmentGOSB31.getId())
@@ -334,12 +379,12 @@ public class DepartmentServiceImplTest {
         ReportPeriod reportPeriod = new ReportPeriod();
 
         reportPeriod.setId(0);
-        List<Integer> result = departmentService.getOpenPeriodDepartments(taUser, TaxType.INCOME, true, reportPeriod);
+        List<Integer> result = departmentService.getOpenPeriodDepartments(taUser, asList(TaxType.INCOME), reportPeriod);
         Assert.assertEquals(3, result.size());
         Assert.assertTrue(result.containsAll(asList(root.getId(), departmentTB2.getId(), departmentOSB311.getId())));
 
         reportPeriod.setId(1);
-        result = departmentService.getOpenPeriodDepartments(taUser, TaxType.INCOME, true, reportPeriod);
+        result = departmentService.getOpenPeriodDepartments(taUser, asList(TaxType.INCOME), reportPeriod);
         Assert.assertEquals(0, result.size());
 
         // TODO
