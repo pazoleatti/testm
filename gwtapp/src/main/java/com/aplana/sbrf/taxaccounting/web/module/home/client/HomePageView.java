@@ -13,15 +13,8 @@ public class HomePageView extends ViewImpl implements MyView {
 	interface Binder extends UiBinder<Widget, HomePageView> {
 	}
 
-	@UiField
-	FlowPanel test;
-	
-//	@UiField(provided=true) 
-//	RefBookPickerWidget picker;
-
 	@Inject
 	public HomePageView(final Binder binder) {
-//		picker = new RefBookPickerWidget(2l);
 		initWidget(binder.createAndBindUi(this));
 	}
 
