@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Виджет для выбора подразделения в модальном окне
@@ -119,6 +120,12 @@ public class DepartmentPickerModalWidget extends Composite implements
     @Override
     public void setAvailableValues(List<Department> departments) {
         this.departmentTree.setAvailableValues(departments);
+    }
+
+    @Override
+    public void setAvailableValues(List<Department> departments, Set<Integer> availableDepartments) {
+        // TODO (Ramil Timerbaev)
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
