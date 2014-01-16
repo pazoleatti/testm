@@ -114,7 +114,8 @@ else:
 	print 'Initiated the creation of an data source'
 	dataSuorceId = AdminConfig.create('DataSource', jdbcProviderId, [['name', dataSuorceName], ['jndiName', dataSourceJndi], ['datasourceHelperClassname', dataSourceHelpClass], ['authDataAlias', jaasAlias]])
 	print 'id='+ dataSuorceId
-	AdminConfig.create('J2EEResourceProperty', AdminConfig.create('J2EEResourcePropertySet', dataSuorceId, []),	[['name', 'URL'], ['type', 'java.lang.String'], ['value', dataSourceUrl]])
+	AdminConfig.create('J2EEResourceProperty', AdminConfig.create('J2EEResourcePropertySet', dataSuorceId, []), [['name', 'URL'], ['type', 'java.lang.String'], ['value', dataSourceUrl]])
+	AdminConfig.create('J2EEResourceProperty', AdminConfig.showAttribute(dataSuorceId, 'propertySet'), [['name', 'connectionProperties'], ['type', 'java.lang.String'], ['value', 'defaultRowPrefetch=1000']])
 	print 'Parameters are set'
 	AdminConfig.save()
 	print 'Configuration is saved.'
