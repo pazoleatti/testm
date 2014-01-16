@@ -19,7 +19,7 @@ import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -72,7 +72,7 @@ public class DeclarationDataSearchServiceImplTest {
 		ReflectionTestUtils.setField(service, "sourceService", sourceService);
 
         DepartmentService departmentService = mock(DepartmentService.class);
-        when(departmentService.getTaxFormDepartments(any(TAUser.class), eq(TaxType.INCOME))).thenReturn(Arrays.asList(1));
+        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class))).thenReturn(Arrays.asList(1));
         ReflectionTestUtils.setField(service, "departmentService", departmentService);
     }
 

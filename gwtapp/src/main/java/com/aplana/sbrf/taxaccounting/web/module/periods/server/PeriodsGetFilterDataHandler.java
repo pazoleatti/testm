@@ -23,9 +23,6 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGetFilterData, PeriodsGetFilterDataResult> {
-
-	public static final long DICT_ID = 8L;
-	
 	@Autowired
 	private FormDataSearchService formDataSearchService;
 	@Autowired
@@ -52,12 +49,10 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	    // Используем сервис для инициализации фильтра форм даты (в аналитике ссылка)
 	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(userInfo, action.getTaxType());
 
-
 	    res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(filterValues
 			    .getDepartmentIds()).values()));
 	    res.setAvalDepartments(filterValues.getDepartmentIds());
 
-        //TODO переделать на источники-приемники
         Department userDepartment = departmentService.getDepartment(userInfo.getUser().getDepartmentId());
 	    res.setSelectedDepartment(new DepartmentPair(userDepartment.getId(), userDepartment.getParentId(), userDepartment.getName()));
 
@@ -78,11 +73,8 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 		}
 	    TaxType taxType = action.getTaxType();
 
-	    
-	    
 	    Calendar current = Calendar.getInstance();
 	    res.setCurrentYear(current.get(Calendar.YEAR));
-
 
 	    if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT) || (taxType == TaxType.DEAL)){
 	    	//Если контролеру назначено подразделение УНП, то ему доступно открытие периодов для федеральных налогов

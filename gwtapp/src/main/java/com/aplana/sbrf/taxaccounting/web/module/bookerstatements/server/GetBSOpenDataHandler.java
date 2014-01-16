@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
@@ -16,8 +19,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+
+import static java.util.Arrays.asList;
 
 /**
  * @author Dmitriy Levykin
@@ -65,28 +69,18 @@ public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAct
 
         // Подразделения доступные пользователю
         Set<Integer> avSet = new HashSet<Integer>();
-        // TODO SBRFACCTAX-5387 переделать
-        if (!currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-            // Первичные и консолид. отчеты для налога на прибыль
-            List<DepartmentFormType> formIncomeSrcList = departmentFormTypService.getDFTSourcesByDepartment(currUser.getDepartmentId(), TaxType.INCOME);
 
-            for (DepartmentFormType ft : formIncomeSrcList) {
-                avSet.add(ft.getDepartmentId());
-            }
-
-            // Подразделение пользователя
-            avSet.add(currUser.getDepartmentId());
-
-            // Необходимые для дерева подразделения
-            result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));
-
-        } else {
+        if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // Все подразделения
             result.setDepartments(departmentService.listAll());
-
             for (Department dep : result.getDepartments()) {
                 avSet.add(dep.getId());
             }
+        } else {
+            avSet.addAll(departmentService.getTaxFormDepartments(currUser, asList(TaxType.INCOME)));
+
+            // Необходимые для дерева подразделения
+            result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));
         }
         result.setAvailableDepartments(avSet);
 

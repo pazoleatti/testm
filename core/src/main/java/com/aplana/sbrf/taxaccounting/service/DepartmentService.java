@@ -114,10 +114,10 @@ public interface DepartmentService {
     /**
      * Выборка id подразделений для доступа к экземплярам НФ/деклараций
      * @param tAUser пользователь
-     * @param taxType Тип налога
+     * @param taxTypes Типы налога
      * @return
      */
-    List<Integer> getTaxFormDepartments(TAUser tAUser, TaxType taxType);
+    List<Integer> getTaxFormDepartments(TAUser tAUser, List<TaxType> taxTypes);
 
     /**
      * Выборка id подразделений для назначения подразделений-исполнителей
@@ -139,9 +139,9 @@ public interface DepartmentService {
      * Выборка id подразделений по открытым периодам
      *
      * @param tAUser пользователь
-     * @param taxType Тип налога
+     * @param taxTypes Типы налога
      * @param reportPeriod открытый период
      * @return
      */
-    List<Integer> getOpenPeriodDepartments(TAUser tAUser, TaxType taxType, ReportPeriod reportPeriod);
+    List<Integer> getOpenPeriodDepartments(TAUser tAUser, List<TaxType> taxTypes, ReportPeriod reportPeriod);
 }
