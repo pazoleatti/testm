@@ -18,6 +18,7 @@ public class MaskListener {
      * Образец маски, котрый отображается для пользователя
      */
     private String picture;
+    private boolean isDebug = false;
 
     private final MaskBox textbox;
 
@@ -26,19 +27,7 @@ public class MaskListener {
         this.textbox = box;
 
         // Рисуем пользовательскую маску
-        StringBuffer pic = new StringBuffer();
-
-        for (char mc : mask.toCharArray()) {
-            switch (mc) {
-                case '9':
-                case 'X':
-                    pic.append("_");
-                    break;
-                default:
-                    pic.append(mc);
-            }
-        }
-        picture = pic.toString();
+        picture = MaskBox.createMaskPicture(mask);
 
         /*
          *   Через KeyDown обрабатываем удаление
@@ -46,24 +35,25 @@ public class MaskListener {
         textbox.addKeyDownHandler(new KeyDownHandler() {
             public void onKeyDown(KeyDownEvent event) {
                 int nativeKeyCode = event.getNativeKeyCode();
-                System.out.println("KeyDown " + nativeKeyCode);
-
-                StringBuffer applied;   //буфер
+                debug("KeyDown " + nativeKeyCode);
 
                 if ((event.isAnyModifierKeyDown() && !event.isShiftKeyDown()) ||
                         (nativeKeyCode >= F1 && nativeKeyCode <= F12)) {
-                    System.out.println("KeyDown F1-F12, and non Shift press");
+                    debug("KeyDown F1-F12, and non Shift press");
                     return;
                 }
 
-                String input = textbox.getText();
-                int cursor = textbox.getCursorPos();
 
                 if (nativeKeyCode == KeyCodes.KEY_BACKSPACE || nativeKeyCode == KeyCodes.KEY_DELETE) {
-                    System.out.println("KeyDown: baskspace or delete");
+                    debug("KeyDown: baskspace or delete");
+
+                    StringBuffer applied;   //буфер
+
+                    String input = textbox.getText();
+                    int cursor = textbox.getCursorPos();
 
                     if (textbox.getSelectionLength() > 0) {
-                        System.out.println("KeyDown: textbox has selection");
+                        debug("KeyDown: textbox has selection");
 
                         applied = new StringBuffer();
 
@@ -109,7 +99,6 @@ public class MaskListener {
                     } else
                         applied.append(input);
 
-                    System.out.println(applied.length());
                     textbox.setText(applied.length() != 0 ? applied.toString() : picture);
                     textbox.setCursorPos(cursor);
 
@@ -130,7 +119,7 @@ public class MaskListener {
 
                 int keyCode = event.getNativeEvent().getKeyCode();
                 char ch = event.getCharCode();                          // клавиша которую нажал пользователь
-                System.out.println("KeyPress " + event.getCharCode());
+                debug("KeyPress " + event.getCharCode());
                 StringBuffer applied;                                   // буфер
 
                 if (event.isAnyModifierKeyDown() && !event.isShiftKeyDown()) {
@@ -147,7 +136,7 @@ public class MaskListener {
                 int cursor = textbox.getCursorPos();
 
                 if (textbox.getSelectionLength() > 0) {
-                    System.out.println("KeyPress: textbox has selection");
+                    debug("KeyPress: textbox has selection");
                     applied = new StringBuffer();
 
                     int selectStart = textbox.getText().indexOf(textbox.getSelectedText());
@@ -156,8 +145,7 @@ public class MaskListener {
                     applied.append(input.substring(0, selectStart));
 
                     for (int i = 0; i < textbox.getSelectionLength(); i++) {
-                        if (mask.toCharArray()[applied.length()] == '9' ||
-                                mask.toCharArray()[applied.length()] == 'X')
+                        if (mask.toCharArray()[applied.length()] == '9' || mask.toCharArray()[applied.length()] == 'X')
                             applied.append('_');
                         else
                             applied.append(mask.toCharArray()[applied.length()]);
@@ -178,7 +166,7 @@ public class MaskListener {
                 }
 
                 if (cursor >= mask.length()) {
-                    System.out.println("KeyPress: has limit on length of mask " + cursor);
+                    debug("KeyPress: has limit on length of mask " + cursor);
                     return;
                 }
 
@@ -232,8 +220,22 @@ public class MaskListener {
         this.mask = mask;
     }
 
+    public void setDebug(boolean isDebug) {
+        this.isDebug = isDebug;
+    }
+
+    public boolean isDebug() {
+        return isDebug;
+    }
+
     public String getMaskPicture() {
         return picture;
+    }
+
+    private void debug(String s) {
+        if (isDebug) {
+            System.out.println(s);
+        }
     }
 
 }
