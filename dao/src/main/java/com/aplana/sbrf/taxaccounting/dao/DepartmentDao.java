@@ -93,18 +93,18 @@ public interface DepartmentDao {
      * Только для роли "Контролер"
      * http://conf.aplana.com/pages/viewpage.action?pageId=11380670
      * @param userDepartmentId Подразделение пользователя
-     * @param taxType Тип налога
+     * @param taxTypes Типы налога
      * @return Список id доступных подразделений
      */
-    List<Integer> getDepartmentsBySourceControl(int userDepartmentId, TaxType taxType);
+    List<Integer> getDepartmentsBySourceControl(int userDepartmentId, List<TaxType> taxTypes);
 
     /**
      * Список подразделений, в которых доступны декларации/НФ (по иерархии подразделений и по связям источник-приемник)
      * Только для роли "Контролер НС"
      * http://conf.aplana.com/pages/viewpage.action?pageId=11380670
      * @param userDepartmentId Подразделение пользователя
-     * @param taxType Тип налога
+     * @param taxTypes Типы налога
      * @return Список id доступных подразделений
      */
-    List<Integer> getDepartmentsBySourceControlNs(int userDepartmentId, TaxType taxType);
+    List<Integer> getDepartmentsBySourceControlNs(int userDepartmentId, List<TaxType> taxTypes);
 }

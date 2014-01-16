@@ -47,12 +47,9 @@
             </g:VerticalPanel>
         </g:north>
         <g:center>
-
-
-
-                <g:VerticalPanel width="100%">
-                    <style:GenericCellTable ui:field="taUserFullCellTable" width="100%" />
-                </g:VerticalPanel>
+            <g:VerticalPanel width="100%">
+                <style:GenericCellTable ui:field="taUserFullCellTable" width="100%"/>
+            </g:VerticalPanel>
         </g:center>
         <g:south size="30">
             <g:VerticalPanel width="100%">
