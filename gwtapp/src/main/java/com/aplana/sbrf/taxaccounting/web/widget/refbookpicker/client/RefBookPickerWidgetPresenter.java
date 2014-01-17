@@ -8,11 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.GetRefBookValuesAction;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.GetRefBookValuesResult;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.InitRefBookAction;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.InitRefBookResult;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.RefBookItem;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.*;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasValue;
@@ -27,8 +23,10 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 	
 	private Long value;
 	private String dereferenceValue;
-	
-	private Long refBookAttrId;
+
+    private RefBookItem selectedItem;
+
+    private Long refBookAttrId;
 	private String filter;
 	
 
@@ -150,23 +148,62 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 	
 	@Override
 	public void onSelectionChange() {
-		RefBookItem item = getView().getSelectionValue();
-		dereferenceValue = item.getDereferenceValue();
-		setValue(item.getId(), true);
+		this.selectedItem = getView().getSelectionValue();
+		dereferenceValue = selectedItem.getDereferenceValue();
+        setValue(selectedItem.getId(), true);
 	}
-
 
 	@Override
 	public String getDereferenceValue() {
 		return dereferenceValue;
 	}
 
+    @Override
+    public String getOtherDereferenceValue(String alias) {
+        if (selectedItem != null && alias!= null && !alias.isEmpty()) {
 
-	@Override
+            Integer key = null;
+            List<String> attrAliases = selectedItem.getValuesAttrAlias();
+            for (int i = 0; i < attrAliases.size(); i++) {
+                if (alias.equals(attrAliases.get(i))) {
+                    key = i;
+                    break;
+                }
+            }
+
+            if(key != null){
+                return selectedItem.getValues().get(key);
+            }
+            return null;
+        }
+        return null;
+    }
+
+    @Override
+    public String getOtherDereferenceValue(Long id) {
+        if (selectedItem != null && id!= null) {
+
+            Integer key = null;
+            List<Long> attrIds = selectedItem.getValuesAttrId();
+            for (int i = 0; i < attrIds.size(); i++) {
+                if (id.equals(attrIds.get(i))) {
+                    key = i;
+                    break;
+                }
+            }
+
+            if(key != null){
+                return selectedItem.getValues().get(key);
+            }
+            return null;
+        }
+        return null;
+    }
+
+    @Override
 	public void clearValue() {
 		dereferenceValue = null;
+        selectedItem = null;
 		setValue(null, true);
 	}
-
-
 }
