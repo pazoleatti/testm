@@ -53,6 +53,7 @@ public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAct
         // Текущий пользователь
         TAUser currUser = securityService.currentUserInfo().getUser();
 
+        // Все отчетные периоды
         result.setReportPeriods(periodService.getAllPeriodsByTaxType(TaxType.INCOME, false));
 
         // Признак контролера
