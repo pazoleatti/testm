@@ -28,9 +28,7 @@ import static com.aplana.sbrf.taxaccounting.test.ReportPeriodMockUtils.mockRepor
 import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.refEq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -130,7 +128,7 @@ public class DeclarationDataAccessServiceImplTest {
 		when(departmentService.getDepartment(DEPARTMENT_TB1_ID)).thenReturn(departmentTB1);
 		when(departmentService.getDepartment(DEPARTMENT_TB2_ID)).thenReturn(departmentTB2);
         // Привязанные подразделения
-        when(departmentService.getTaxFormDepartments(any(TAUser.class), any(TaxType.class))).thenAnswer(new Answer<List<Integer>>() {
+        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class))).thenAnswer(new Answer<List<Integer>>() {
             @Override
             public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
 

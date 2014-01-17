@@ -38,9 +38,9 @@ insert into department_form_type (id, department_id, form_type_id, kind) values 
 insert into department_form_type (id, department_id, form_type_id, kind) values (3, 3, 1, 1);
 insert into department_form_type (id, department_id, form_type_id, kind) values (4, 1, 2, 2);
 insert into department_form_type (id, department_id, form_type_id, kind) values (5, 9, 2, 1);
-insert into department_form_type (id, department_id, form_type_id, kind) values (6, 10, 2, 1);
+insert into department_form_type (id, department_id, form_type_id, kind) values (6, 10, 3, 1);
 insert into department_form_type (id, department_id, form_type_id, kind) values (7, 11, 2, 2);
-insert into department_form_type (id, department_id, form_type_id, kind) values (8, 12, 2, 2);
+insert into department_form_type (id, department_id, form_type_id, kind) values (8, 12, 3, 2);
 insert into department_form_type (id, department_id, form_type_id, kind) values (9, 13, 2, 2);
 
 -- DECLARATION_SOURCE
@@ -52,6 +52,7 @@ insert into declaration_source (department_declaration_type_id, src_department_f
 insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (4, 5);
 insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (4, 6);
 insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (5, 7);
+
 
 -- FORM_DATA_SOURCE
 insert into form_data_source (department_form_type_id, src_department_form_type_id) values (6, 7);

@@ -60,4 +60,18 @@ public interface RefBookPicker extends HasValue<Long>, IsWidget {
 	 * @return
 	 */
 	public String getDereferenceValue();
+
+    /**
+     * Возвращает разименованное значение поля в выбранной строке по alias
+     * @param alias
+     * @return
+     */
+    String getOtherDereferenceValue(String alias);
+
+    /**
+     * Возвращает разименованное значение поля в выбранной строке по attrId
+     * @param attrId
+     * @return
+     */
+    String getOtherDereferenceValue(Long attrId);
 }

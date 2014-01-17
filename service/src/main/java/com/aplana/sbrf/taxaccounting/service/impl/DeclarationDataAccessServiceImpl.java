@@ -11,10 +11,11 @@ import com.aplana.sbrf.taxaccounting.service.SourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static java.util.Arrays.asList;
 
 /**
  * Реализация сервиса для проверки прав на доступ к декларациям
@@ -92,7 +93,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
             ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
             if (reportPeriod != null && departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    reportPeriod.getTaxType()).contains(declarationDepartment.getId())) {
+                    asList(reportPeriod.getTaxType())).contains(declarationDepartment.getId())) {
                 return;
             }
         }

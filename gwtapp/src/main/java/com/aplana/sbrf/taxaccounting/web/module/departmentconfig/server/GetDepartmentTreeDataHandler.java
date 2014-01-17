@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static java.util.Arrays.asList;
+
 /**
  * @author Dmitriy Levykin
  */
@@ -68,7 +70,7 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
             }
         } else {
             // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
-            avSet.addAll(departmentService.getTaxFormDepartments(currUser, action.getTaxType()));
+            avSet.addAll(departmentService.getTaxFormDepartments(currUser, asList(action.getTaxType())));
 
             // Необходимые для дерева подразделения
             result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));

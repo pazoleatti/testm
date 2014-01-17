@@ -249,23 +249,23 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public List<Integer> getDepartmentsBySourceControl(int userDepartmentId, TaxType taxType) {
-        return getDepartmentsBySource(userDepartmentId, taxType, false);
+    public List<Integer> getDepartmentsBySourceControl(int userDepartmentId, List<TaxType> taxTypes) {
+        return getDepartmentsBySource(userDepartmentId, taxTypes, false);
     }
 
     @Override
-    public List<Integer> getDepartmentsBySourceControlNs(int userDepartmentId, TaxType taxType) {
-        return getDepartmentsBySource(userDepartmentId, taxType, true);
+    public List<Integer> getDepartmentsBySourceControlNs(int userDepartmentId, List<TaxType> taxTypes) {
+        return getDepartmentsBySource(userDepartmentId, taxTypes, true);
     }
 
     /**
      * Поиск подразделений, доступных по иерархии и подразделений доступных по связи приемник-источник для этих подразделений
      * @param userDepartmentId Подразделение пользователя
-     * @param taxType Тип налога
+     * @param taxTypes Типы налога
      * @param isNs true - для роли "Контролер НС", false для роли "Контролер"
      * @return Список id подразделений
      */
-    private List<Integer> getDepartmentsBySource(int userDepartmentId, TaxType taxType, boolean isNs) {
+    private List<Integer> getDepartmentsBySource(int userDepartmentId, List<TaxType> taxTypes, boolean isNs) {
         String recursive = isWithRecursive() ? "recursive" : "";
 
         String availableDepartmentsSql = isNs ?
@@ -285,7 +285,15 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                         "select d.id from department d inner join tree t on d.parent_id = t.id) " +
                         "select id from tree";
 
-        String taxTypeCh = String.valueOf(taxType.getCode());
+        // Параметры запроса: id подразделения и типы налога (дважды)
+        Object[] sqlParams = new Object[taxTypes.size() * 2 + 1];
+        int cnt = 1;
+        sqlParams[0] = userDepartmentId;
+        for (TaxType taxType : taxTypes) {
+            sqlParams[cnt] = String.valueOf(taxType.getCode());
+            sqlParams[taxTypes.size() + cnt] = String.valueOf(taxType.getCode());
+            cnt++;
+        }
 
         try {
             return getJdbcTemplate().queryForList("select id from " +
@@ -296,15 +304,15 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                     "select distinct ddt.department_id parent_id, dft.department_id id " +
                     "from declaration_source ds, department_form_type dft, department_declaration_type ddt, declaration_type dt " +
                     "where ds.department_declaration_type_id = ddt.id and ds.src_department_form_type_id = dft.id " +
-                    "and dt.id = ddt.declaration_type_id and dt.tax_type = ? " +
+                    "and dt.id = ddt.declaration_type_id and dt.tax_type in (" + preparePlaceHolders(taxTypes.size()) + ") " +
                     "union " +
                     "select distinct dft.department_id parent_id, dfts.department_id id " +
                     "from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
                     "where fds.department_form_type_id = dft.id and fds.src_department_form_type_id = dfts.id " +
-                    "and ft.id = dft.form_type_id and ft.tax_type = ?) link_dep " +
+                    "and ft.id = dft.form_type_id and ft.tax_type in (" + preparePlaceHolders(taxTypes.size()) + ")) link_dep " +
                     "on av_dep.id = link_dep.parent_id, (select 0 as c from dual union all select 1 as c from dual) t3) " +
                     "where id is not null",
-                    new Object[]{userDepartmentId, taxTypeCh, taxTypeCh}, Integer.class);
+                    Integer.class, sqlParams);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Integer>(0);
         }
