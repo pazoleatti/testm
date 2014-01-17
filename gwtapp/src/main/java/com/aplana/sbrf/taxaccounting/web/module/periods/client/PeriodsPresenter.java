@@ -107,8 +107,13 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
 	@Override
 	public void openPeriod() {
+        DepartmentPair departmentPair = getView().getDepartmentId();
+        if (departmentPair == null) {
+            MessageEvent.fire(this, "Не выбрано подразделение!");
+            return;
+        }
         openDialogPresenter.resetToDefault();
-        openDialogPresenter.setSelectedDepartment(getView().getDepartmentId().getDepartmentId());
+        openDialogPresenter.setSelectedDepartment(departmentPair.getDepartmentId());
         addToPopupSlot(openDialogPresenter);
 	}
 
@@ -131,6 +136,11 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
             MessageEvent.fire(this, "В списке не выбран отчетный период");
             return;
         }
+        final DepartmentPair departmentPair = getView().getDepartmentId();
+        if (departmentPair == null) {
+            MessageEvent.fire(this, "Не выбрано подразделение!");
+            return;
+        }
 
         //TODO получать список департаментов по источникам-приемникам
         PeriodsGetFilterData getFilterData = new PeriodsGetFilterData();
@@ -141,7 +151,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
                     public void onSuccess(PeriodsGetFilterDataResult result) {
                         TableRow selectedPeriod = getView().getSelectedRow();
                         PeriodsPresenter.this.deadlineDialogPresenter.setTitle(selectedPeriod.getPeriodName(), result.getCurrentYear());
-                        deadlineDialogPresenter.setDepartments(result.getDepartments(), Arrays.asList(getView().getDepartmentId()));
+                        deadlineDialogPresenter.setDepartments(result.getDepartments(), Arrays.asList(departmentPair));
                         deadlineDialogPresenter.setDeadLine(selectedPeriod.getDeadline());
                         deadlineDialogPresenter.setSelectedPeriod(selectedPeriod);
                         deadlineDialogPresenter.setTaxType(taxType);

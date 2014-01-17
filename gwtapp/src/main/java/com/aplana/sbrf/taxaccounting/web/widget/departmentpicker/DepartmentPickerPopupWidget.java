@@ -70,6 +70,7 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 
 	private static Binder uiBinder = GWT.create(Binder.class);
 
+    /** Виджет для выбора подразделений. */
 	@UiConstructor
 	public DepartmentPickerPopupWidget(String header, boolean multiselection, boolean modal) {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -78,7 +79,6 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
         popupPanel.setModal(false);
         setHeader(header);
 	}
-
 
 	@UiHandler("selectButton")
 	void onSelectButtonClicked(ClickEvent event){
@@ -118,7 +118,7 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
         if (value == null){
             value = new ArrayList<Integer>();
         }
-        selectItems(value);
+        setValueById(value);
         selected.setText(joinListToString(valueDereference));
         this.value = value;
         if (fireEvents) {
@@ -155,6 +155,7 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
         popupPanel.setText(title);
     }
 
+    @Override
     public void setWidth(String width){
         wrappingPanel.setWidth(width);
     }
@@ -164,9 +165,10 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
         tree.setAvailableValues(departments, availableDepartments);
     }
 
-    @SuppressWarnings("unchecked")
-    private void selectItems(List<Integer> itemsIdToSelect) {
+    /** Установить выбранными элементы по идентификаторам. */
+    private void setValueById(List<Integer> itemsIdToSelect) {
         tree.setValueById(itemsIdToSelect, false);
+        valueDereference.clear();
         for (DepartmentPair item : tree.getValue()) {
             valueDereference.add(item.getDepartmentName());
         }
@@ -185,6 +187,7 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
         popupPanel.hide();
     }
 
+    /** Получить выбранные подразделения. */
     public List<DepartmentPair> getDepartmentPairValues() {
         return tree.getValue();
     }

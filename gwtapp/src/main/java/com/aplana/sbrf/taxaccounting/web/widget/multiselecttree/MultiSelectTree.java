@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.*;
 /**
  * Дерево множественного выбора.
  *
- * @author Timerbaev Ramil
+ * @author rtimerbaev
  */
 public abstract class MultiSelectTree<H extends List> extends Composite implements HasValue<H> {
 
@@ -81,7 +81,11 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         this("");
     }
 
-    /** Дерево множественного выбора. */
+    /**
+     * Дерево множественного выбора.
+     *
+     * @param text заголовок
+     */
     public MultiSelectTree(String text) {
         this(text, true);
     }
@@ -115,6 +119,8 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
      */
     protected abstract boolean equalsValue(Object value, Integer id);
 
+    /** Получить выбранные элементы. */
+    @Override
     public abstract H getValue();
 
     @Override
@@ -185,6 +191,7 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         }
     }
 
+    /** Добавить элемент в первый уровень дерева. */
     public void addTreeItem(MultiSelectTreeItem item) {
         addTreeItem(null, item);
     }
@@ -290,28 +297,34 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         return selectChild;
     }
 
+    /** Установить выбирать ли дочерние элементы при выборе узла дерева. */
     public void setSelectChild(boolean selectChild) {
         this.selectChild = selectChild;
     }
 
+    /** Получить выделенный узел. */
     public MultiSelectTreeItem getSelectedItem() {
         return (MultiSelectTreeItem) tree.getSelectedItem();
     }
 
+    /** Удалить элемент из дерева. */
     public void removeItem(MultiSelectTreeItem item) {
         item.remove();
     }
 
+    /** Удалить элементы из дерева. */
     public void removeItems(List<MultiSelectTreeItem> items) {
         for (MultiSelectTreeItem i : items) {
             tree.removeItem(i);
         }
     }
 
+    /** Получить количество корневых элементов. */
     public int getItemCount() {
         return tree.getItemCount();
     }
 
+    /** Получить элемент дерева по индексу. */
     public MultiSelectTreeItem getItem(int index) {
         return (MultiSelectTreeItem) tree.getItem(index);
     }

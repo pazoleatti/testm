@@ -50,7 +50,6 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 
 	@UiField
     DepartmentPickerPopupWidget departmentPicker;
-//	DepartmentPickerModalWidget departmentPicker;
 
 	@UiField(provided = true)
     MultiListBox<TARole> roleBox;

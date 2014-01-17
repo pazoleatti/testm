@@ -17,10 +17,12 @@ import java.util.*;
  */
 public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> implements PairDepartmentPicker {
 
+    /** Дерево для выбора подразделения. */
     public DepartmentTreeWidget(String header, boolean multiSelection) {
         super(header, multiSelection);
     }
 
+    /** Дерево для выбора подразделения. */
     public DepartmentTreeWidget() {
         super();
     }
@@ -102,6 +104,7 @@ public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> 
         }
     }
 
+    /** Установить выбранными элементы по идентификаторам. */
     public void setValueById(List<Integer> value, boolean fireEvents) {
         List<DepartmentPair> list = new ArrayList<DepartmentPair>();
         for (Integer i : value) {

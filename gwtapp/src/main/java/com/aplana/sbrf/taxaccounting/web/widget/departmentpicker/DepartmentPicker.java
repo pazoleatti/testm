@@ -12,9 +12,11 @@ import com.google.gwt.user.client.ui.HasValue;
 public interface DepartmentPicker extends HasValue<List<Integer>> {
 
 	void setAvalibleValues(List<Department> departments, Set<Integer> availableDepartments);
-	
+
+    /** Получить список названий выбранных подразделений. */
 	List<String> getValueDereference();
-	
+
+    /** Установить заголовок в окне выбора подразделений. */
 	void setHeader(String header);
 
 }
