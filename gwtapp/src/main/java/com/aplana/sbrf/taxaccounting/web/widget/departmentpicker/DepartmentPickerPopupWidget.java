@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.departmentpicker;
 
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -13,9 +14,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Виджет для выбора подразделений
@@ -23,18 +22,14 @@ import java.util.Set;
  */
 public class DepartmentPickerPopupWidget extends Composite implements HasEnabled, DepartmentPicker {
 
-	private PopupPanel popup;
-
-	private DepartmentPicker departmentPiker;
-
     @UiField
-    SimplePanel wrappingPanel;
+    FlowPanel wrappingPanel;
 
 	@UiField
 	HasText selected;
 
 	@UiField
-	Button selectButton;
+	public Button selectButton;
 	
 	@UiField
 	Button clearButton;
@@ -42,8 +37,22 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 	@UiField
 	Panel panel;
 
-    /** Признак модальности окна */
-    private boolean modal;
+    @UiField
+    public DepartmentTreeWidget tree;
+
+    @UiField
+    public Button ok;
+
+    @UiField
+    ModalWindow popupPanel;
+
+    /** Значения */
+    private List<Integer> value = new ArrayList<Integer>();
+
+    /** Разименованные значения. */
+    private List<String> valueDereference = new ArrayList<String>();
+
+    boolean multiselection;
 
 	@Override
 	public boolean isEnabled() {
@@ -64,45 +73,24 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 	@UiConstructor
 	public DepartmentPickerPopupWidget(String header, boolean multiselection, boolean modal) {
 		initWidget(uiBinder.createAndBindUi(this));
-		// TODO move to ui.xml
-        this.modal = modal;
-        if (modal) {
-            popup = new ModalWindow(header);
-        } else {
-            popup = new PopupPanel(true, true);
-        }
-		popup.setPixelSize(300, 370);
-		departmentPiker = new DepartmentPickerWidget("", multiselection);
-
-		popup.add((DepartmentPickerWidget)departmentPiker);
-		
-		departmentPiker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<List<Integer>> event) {
-                popup.hide();
-				selected.setText(joinListToString(departmentPiker.getValueDereference()));
-				ValueChangeEvent.fire(DepartmentPickerPopupWidget.this, event.getValue());
-			}
-		});
+        this.multiselection = multiselection;
+        tree.setMultiSelection(multiselection);
+        popupPanel.setModal(false);
+        setHeader(header);
 	}
 
 
 	@UiHandler("selectButton")
 	void onSelectButtonClicked(ClickEvent event){
-        if (!modal) {
-            popup.setPopupPosition(panel.getAbsoluteLeft(),
-                    panel.getAbsoluteTop() + panel.getOffsetHeight());
-            popup.show();
-        } else {
-            popup.center();
-        }
+        tree.setValueById(value, false);
+        popupPanel.center();
 	}
 	
 	@UiHandler("clearButton")
-	void onClearButtonClicked(ClickEvent event){
+	void onClearButtonClicked(ClickEvent event) {
+        valueDereference.clear();
 		this.setValue(null, true);
 	}
-
 
 	private String joinListToString(Collection<String> strings) {
 		if ((strings == null) || strings.isEmpty()) {
@@ -110,14 +98,14 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 		}
 		StringBuilder text = new StringBuilder();
 		for (String name : strings) {
-			text.append(name + "; ");
+			text.append(name).append("; ");
 		}
 		return text.toString();
 	}
 
 	@Override
 	public List<Integer> getValue() {
-		return departmentPiker.getValue();
+        return value;
 	}
 
 	@Override
@@ -127,43 +115,77 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 
 	@Override
 	public void setValue(List<Integer> value, boolean fireEvents) {
-		departmentPiker.setValue(value, fireEvents);
-		if (!fireEvents) {
-			selected.setText(joinListToString(departmentPiker.getValueDereference()));
-		}
+        if (value == null){
+            value = new ArrayList<Integer>();
+        }
+        selectItems(value);
+        selected.setText(joinListToString(valueDereference));
+        this.value = value;
+        if (fireEvents) {
+            ValueChangeEvent.fire(this, this.value);
+        }
 	}
 
+    /** Установить выбранными узлы дерева для указанных подразделений. */
+    public void setValueByDepartmentPair(List<DepartmentPair> values, boolean fireEvents) {
+        List<Integer> list = new ArrayList<Integer>();
+        for (DepartmentPair i : values) {
+            list.add(i.getDepartmentId());
+        }
+        setValue(list, fireEvents);
+    }
+
 	@Override
-	public HandlerRegistration addValueChangeHandler(
-			ValueChangeHandler<List<Integer>> handler) {
+	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<Integer>> handler) {
 		return addHandler(handler, ValueChangeEvent.getType());
 	}
 
 	@Override
-	public void setAvalibleValues(List<Department> departments,
-			Set<Integer> availableDepartments) {
-		departmentPiker.setAvalibleValues(departments, availableDepartments);
-	}
-
-	@Override
 	public List<String> getValueDereference() {
-		return departmentPiker.getValueDereference();
+        return valueDereference;
 	}
 
 	@Override
 	public void setHeader(String header) {
-		departmentPiker.setHeader(header);
+        popupPanel.setText(header);
 	}
 
     @Override
     public void setTitle(String title) {
-        if (popup instanceof ModalWindow) {
-            ((ModalWindow) popup).setText(title);
-        }
+        popupPanel.setText(title);
     }
 
     public void setWidth(String width){
         wrappingPanel.setWidth(width);
     }
 
+    @Override
+    public void setAvalibleValues(List<Department> departments, Set<Integer> availableDepartments) {
+        tree.setAvailableValues(departments, availableDepartments);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void selectItems(List<Integer> itemsIdToSelect) {
+        tree.setValueById(itemsIdToSelect, false);
+        for (DepartmentPair item : tree.getValue()) {
+            valueDereference.add(item.getDepartmentName());
+        }
+    }
+
+    @UiHandler("ok")
+    void onOkButtonClicked(ClickEvent event) {
+        this.value.clear();
+        this.valueDereference.clear();
+        for (DepartmentPair item : tree.getValue()) {
+            this.value.add(item.getDepartmentId());
+            this.valueDereference.add(item.getDepartmentName());
+        }
+        ValueChangeEvent.fire(this, this.value);
+        selected.setText(joinListToString(valueDereference));
+        popupPanel.hide();
+    }
+
+    public List<DepartmentPair> getDepartmentPairValues() {
+        return tree.getValue();
+    }
 }

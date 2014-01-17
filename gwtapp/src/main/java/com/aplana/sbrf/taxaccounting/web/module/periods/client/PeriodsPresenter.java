@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -115,7 +114,9 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
 	@Override
 	public void onFindButton() {
-		if ((getView().getFromYear() == null)
+        if (getView().getDepartmentId() == null) {
+            Window.alert("Не выбрано подразделение!");
+        } else if ((getView().getFromYear() == null)
 				|| (getView().getToYear() == null)
 				|| (getView().getFromYear() > getView().getToYear())){
 			Window.alert("Интервал периода поиска указан неверно!");

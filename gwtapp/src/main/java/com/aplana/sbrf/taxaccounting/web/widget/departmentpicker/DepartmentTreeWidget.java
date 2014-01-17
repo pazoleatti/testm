@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.departmentpicker;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTree;
+import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTreeItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -16,11 +17,6 @@ import java.util.*;
  */
 public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> implements PairDepartmentPicker {
 
-    /**
-     * Выбранные подразделения
-     */
-    private List<DepartmentPair> value = new ArrayList<DepartmentPair>();
-
     public DepartmentTreeWidget(String header, boolean multiSelection) {
         super(header, multiSelection);
     }
@@ -31,26 +27,13 @@ public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> 
 
     @Override
     public void setAvailableValues(List<Department> departments) {
-        setAvailableValues(departments, null, true);
+        setAvailableValues(departments, null);
     }
 
     @Override
     public void setAvailableValues(List<Department> departments, Set<Integer> availableDepartments) {
-        setAvailableValues(departments, availableDepartments, false);
-    }
-
-    /**
-     * Устанавливает список подразделений отображаемых в дереве.
-     *
-     * @param departments список подразделений
-     * @param availableDepartments список доступных подразделений
-     * @param needValueChangeHandler нужно ли добавить слушателей
-     */
-    private void setAvailableValues(List<Department> departments,
-                                    Set<Integer> availableDepartments,
-                                    boolean needValueChangeHandler) {
         tree.clear();
-        List<DepartmentTreeItem> itemsHierarchy = flatToHierarchy(departments, availableDepartments, needValueChangeHandler);
+        List<DepartmentTreeItem> itemsHierarchy = flatToHierarchy(departments, availableDepartments);
         for (DepartmentTreeItem item : itemsHierarchy) {
             item.setState(true);
             addTreeItem(item);
@@ -83,8 +66,29 @@ public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> 
     }
 
     @Override
+    protected boolean containInValues(List<DepartmentPair> values, Integer id) {
+        for (DepartmentPair item : values) {
+            if (item.getDepartmentId().equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    protected boolean equalsValue(Object value, Integer id) {
+        return ((DepartmentPair) value).getDepartmentId().equals(id);
+    }
+
+    @Override
     public List<DepartmentPair> getValue() {
-        return value;
+        List<DepartmentPair> result = new ArrayList<DepartmentPair>();
+        for (MultiSelectTreeItem item : getItems()) {
+            if (item.getValue()) {
+                result.add(((DepartmentTreeItem)item).getItemValue());
+            }
+        }
+        return result;
     }
 
     @Override
@@ -93,12 +97,18 @@ public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> 
         if (value == null || value.isEmpty()) {
             return;
         }
-        selectItems(value);
-        this.value.clear();
-        this.value.addAll(value);
         if (fireEvents) {
-            ValueChangeEvent.fire(this, this.value);
+            ValueChangeEvent.fire(this, value);
         }
+    }
+
+    public void setValueById(List<Integer> value, boolean fireEvents) {
+        List<DepartmentPair> list = new ArrayList<DepartmentPair>();
+        for (Integer i : value) {
+            DepartmentPair departmentPair = new DepartmentPair(i, null);
+            list.add(departmentPair);
+        }
+        setValue(list, fireEvents);
     }
 
     /**
@@ -106,13 +116,11 @@ public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> 
      *
      * @param departments список подразделений
      * @param availableDepartments список доступных подразделений
-     * @param needValueChangeHandler нужно ли добавить слушателей
      *
      * @return список элементов дерева
      */
     private List<DepartmentTreeItem> flatToHierarchy(final List<Department> departments,
-                                                     final Set<Integer> availableDepartments,
-                                                     boolean needValueChangeHandler) {
+                                                     final Set<Integer> availableDepartments) {
         final Map<Integer, DepartmentTreeItem> lookup = new LinkedHashMap<Integer, DepartmentTreeItem>();
         final List<DepartmentTreeItem> nested = new ArrayList<DepartmentTreeItem>();
         final Map<Integer, Department> idToDepMap = new HashMap<Integer, Department>();
@@ -150,23 +158,13 @@ public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> 
                 ((CheckBox) newItem.getWidget()).setEnabled(false);
             }
 
-            if (needValueChangeHandler) {
-                newItem.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-                    @Override
-                    public void onValueChange(ValueChangeEvent<Boolean> event) {
-                        value.clear();
-                        executeTreeAction(new TreeElementAction() {
-                            @Override
-                            public void apply(DepartmentTreeItem treeItem) {
-                                if (treeItem.getValue()) {
-                                    value.add(treeItem.getItemValue());
-                                }
-                            }
-                        });
-                        ValueChangeEvent.fire(DepartmentTreeWidget.this, value);
-                    }
-                });
-            }
+            // если элемент выбрали
+            newItem.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<Boolean> event) {
+                    ValueChangeEvent.fire(DepartmentTreeWidget.this, getValue());
+                }
+            });
 
             if (department.getParentId() != null && lookup.containsKey(department.getParentId())) {
                 lookup.get(department.getParentId()).addItem(newItem);
@@ -184,54 +182,5 @@ public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> 
             }
         });
         return nested;
-    }
-
-    /**
-     * Применяет действие к элементам дерева по правилу
-     *
-     * @param action правило выполнения действия к элементам дерева
-     */
-    public void executeTreeAction(TreeElementAction action) {
-        for (int i = 0; i < tree.getItemCount(); i++) {
-            traverseTree((DepartmentTreeItem) tree.getItem(i), action);
-        }
-    }
-
-    /**
-     * Обход дерева и применение правила к элементам
-     *
-     * @param item   элемент дерева
-     * @param action действие, выполняемое над элементом
-     */
-    private void traverseTree(DepartmentTreeItem item, TreeElementAction action) {
-        if (item.getChildCount() != 0) {
-            for (int i = 0; i < item.getChildCount(); i++) {
-                traverseTree((DepartmentTreeItem) item.getChild(i), action);
-            }
-        }
-        action.apply(item);
-    }
-
-    /**
-     * Выделяет подразделения с указанной комбинацией идентификаторов в дереве
-     *
-     * @param departmentsToSelect идентификаторы подразделений в парах. Первый - самого подразделения, второй - его родительское подразделение
-     */
-    @SuppressWarnings("unchecked")
-    private void selectItems(final List<DepartmentPair> departmentsToSelect) {
-        executeTreeAction(new TreeElementAction() {
-            @Override
-            public void apply(DepartmentTreeItem treeItem) {
-                CheckBox checkBox = (CheckBox) treeItem.getWidget();
-                if (departmentsToSelect.contains(treeItem.getItemValue())) {
-                    checkBox.setValue(true);
-                    if (treeItem.getParentItem() != null) {
-                        treeItem.getParentItem().setState(true);
-                    }
-                } else {
-                    checkBox.setValue(false);
-                }
-            }
-        });
     }
 }

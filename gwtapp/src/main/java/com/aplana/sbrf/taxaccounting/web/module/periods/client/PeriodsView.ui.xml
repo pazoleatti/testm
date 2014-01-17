@@ -90,8 +90,8 @@
                         <g:Label width="100px" text="Подразделение:" addStyleNames="{margin.right5}"/>
                     </g:cell>
                     <g:cell width="100%">
-                        <picker:DepartmentPickerModalWidget header="Подразделение" ui:field="departmentPicker"
-                                                            multiSelection="false" width="100%" />
+                        <picker:DepartmentPickerPopupWidget header="Подразделение" ui:field="departmentPicker"
+                                                            multiselection="false" width="100%" modal="true"/>
                     </g:cell>
 
                     <g:cell horizontalAlignment="right">

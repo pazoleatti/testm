@@ -25,6 +25,12 @@ public interface PairDepartmentPicker extends HasConstrainedValue<List<Departmen
      */
     void setAvailableValues(List<Department> departments);
 
+    /**
+     * Устанавливает список подразделений отображаемых в дереве.
+     *
+     * @param departments список подразделений
+     * @param availableDepartments список доступных подразделений
+     */
     void setAvailableValues(List<Department> departments, Set<Integer> availableDepartments);
 
     /**
@@ -34,7 +40,7 @@ public interface PairDepartmentPicker extends HasConstrainedValue<List<Departmen
     boolean isSelectedItemHasChildren();
 
     /**
-     * Возвращает все дочерние подразделения + выбранное подразделение
+     * Возвращает выбранное подразделение + все дочерние подразделения
      * @return список подразделений
      */
     List<DepartmentPair> getSelectedChildren();

@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.members.client;
 import com.aplana.gwt.client.MultiListBox;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.members.shared.FilterValues;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerModalWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -49,7 +49,8 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	ValueListBox<Boolean> isActiveBox;
 
 	@UiField
-	DepartmentPickerModalWidget departmentPicker;
+    DepartmentPickerPopupWidget departmentPicker;
+//	DepartmentPickerModalWidget departmentPicker;
 
 	@UiField(provided = true)
     MultiListBox<TARole> roleBox;
@@ -164,7 +165,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
         }
 		membersFilterData.setRoleIds(selectedRoleIds);
 		Set<Integer> depIds = new HashSet<Integer>();
-		for (DepartmentPair dep : departmentPicker.getValue()) {
+		for (DepartmentPair dep : departmentPicker.getDepartmentPairValues()) {
 			depIds.add(dep.getDepartmentId());
 		}
 		membersFilterData.setDepartmentIds(depIds);
@@ -201,7 +202,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	public void setFilterData(FilterValues values) {
 		isActiveBox.setAcceptableValues(Arrays.asList(new Boolean[]{Boolean.TRUE, Boolean.FALSE}));
         roleBox.setAvailableValues(values.getRoles());
-		departmentPicker.setAvailableValues(values.getDepartments());
+		departmentPicker.setAvalibleValues(values.getDepartments(), null);
 	}
 
 	@Override

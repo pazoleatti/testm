@@ -6,8 +6,7 @@ import com.aplana.gwt.client.Spinner;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.TableRow;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerModalWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -62,7 +61,8 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
     Button setDeadlineButton;
 
 	@UiField
-    DepartmentPickerModalWidget departmentPicker;
+    DepartmentPickerPopupWidget departmentPicker;
+
     @UiField
     Label nalogTypeLabel;
 
@@ -162,8 +162,8 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
 	@Override
 	public void setFilterData(List<Department> departments, List<DepartmentPair> selectedDepartments, int yearFrom, int yearTo) {
-		departmentPicker.setAvailableValues(departments);
-		departmentPicker.setValue(selectedDepartments);
+		departmentPicker.setAvalibleValues(departments, null);
+		departmentPicker.setValueByDepartmentPair(selectedDepartments, false);
 		fromBox.setValue(yearFrom);
 		toBox.setValue(yearTo);
 	}
@@ -186,7 +186,8 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
 	@Override
 	public DepartmentPair getDepartmentId() {
-		return departmentPicker.getValue().get(0);
+        List<DepartmentPair> departmentPairs = departmentPicker.getDepartmentPairValues();
+		return departmentPairs != null && !departmentPairs.isEmpty() ? departmentPairs.get(0) : null;
 	}
 
 	@Override

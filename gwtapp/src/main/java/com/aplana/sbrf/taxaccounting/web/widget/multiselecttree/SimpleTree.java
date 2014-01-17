@@ -18,6 +18,16 @@ public class SimpleTree extends MultiSelectTree<List<Integer>> {
     }
 
     @Override
+    protected boolean containInValues(List<Integer> values, Integer id) {
+        return values.contains(id);
+    }
+
+    @Override
+    protected boolean equalsValue(Object value, Integer id) {
+        return value.equals(id);
+    }
+
+    @Override
     public List<Integer> getValue() {
         List<Integer> result = new ArrayList<Integer>();
         for (MultiSelectTreeItem item : getItems()) {
@@ -29,6 +39,8 @@ public class SimpleTree extends MultiSelectTree<List<Integer>> {
     }
 
     public void setValue(Integer value) {
-
+        List<Integer> list = new ArrayList<Integer>();
+        list.add(value);
+        setValue(list);
     }
 }

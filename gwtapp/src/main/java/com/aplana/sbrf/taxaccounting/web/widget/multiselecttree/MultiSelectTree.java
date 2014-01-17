@@ -18,6 +18,8 @@ import com.google.gwt.user.client.ui.*;
 
 /**
  * Дерево множественного выбора.
+ *
+ * @author Timerbaev Ramil
  */
 public abstract class MultiSelectTree<H extends List> extends Composite implements HasValue<H> {
 
@@ -84,7 +86,6 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         this(text, true);
     }
 
-
     /**
      * Дерево множественного выбора.
      *
@@ -98,6 +99,21 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         setMultiSelection(multiSelection);
     }
 
+    /**
+     * Проверить содержиться ли среди списка значений элемент со значением id.
+     *
+     * @param values список значений
+     * @param id идентификатор узла
+     */
+    protected abstract boolean containInValues(H values, Integer id);
+
+    /**
+     * Сравнить идентификатор значения с идентификатором узла.
+     *
+     * @param value значение, идентификатор которого надо проверить
+     * @param id идентификатор узла
+     */
+    protected abstract boolean equalsValue(Object value, Integer id);
 
     public abstract H getValue();
 
@@ -116,7 +132,7 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         }
         for (MultiSelectTreeItem item : getItems()) {
             // выставлять или все значения или только первое
-            boolean isContain = (multiSelection ? values.contains(item.getId()) : values.get(0).equals(item.getId()));
+            boolean isContain = (multiSelection ? containInValues(values, item.getId()) : equalsValue(values.get(0), item.getId()));
             if (isContain) {
                 // раскрыть дерево до выбранного элемента
                 TreeItem parent = item.getParentItem();
@@ -137,6 +153,7 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         return addHandler(handler, ValueChangeEvent.getType());
     }
 
+    /** Получить все элементы дерева. */
     protected List<MultiSelectTreeItem> getItems() {
         List<MultiSelectTreeItem> result = new ArrayList<MultiSelectTreeItem>();
         for (int i = 0; i < tree.getItemCount(); i++) {
@@ -341,5 +358,9 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
 
     public Iterator<TreeItem> treeItemIterator() {
          return tree.treeItemIterator();
+    }
+
+    public void addOpenHandler(OpenHandler<TreeItem> handler) {
+        tree.addOpenHandler(handler);
     }
 }
