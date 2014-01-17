@@ -4,8 +4,10 @@ import au.com.bytecode.opencsv.CSVReader;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.script.Point;
 import com.aplana.sbrf.taxaccounting.service.script.ImportService;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 @Service("importService")
@@ -153,7 +156,7 @@ public class ImportServiceImpl implements ImportService {
         sb.append(TAB).append("<").append(rowName).append(">").append(ENTER);
         for (String cell : rowCells) {
             sb.append(TAB).append(TAB).append("<cell>");
-            sb.append(StringEscapeUtils.escapeXml(cell.trim()));
+            sb.append(StringEscapeUtils.escapeXml(StringUtils.cleanString(cell)));
             sb.append("</cell>").append(ENTER);
         }
         sb.append(TAB).append("</").append(rowName).append(">").append(ENTER);
@@ -353,7 +356,7 @@ public class ImportServiceImpl implements ImportService {
         String value = null;
         int type = cell.getCellType();
         if (type == HSSFCell.CELL_TYPE_STRING) {
-            value = cell.getRichStringCellValue().toString();
+            value = StringUtils.cleanString(cell.getRichStringCellValue().toString());
         } else if (type == HSSFCell.CELL_TYPE_NUMERIC) {
             if (DateUtil.isCellDateFormatted(cell)) {
                 // дата
