@@ -65,7 +65,7 @@ switch (formDataEvent) {
 def recordCache = [:]
 
 @Field
-def allColumns = ['consumptionTypeId', 'consumptionGroup', 'consumptionTypeByOperation', 'consumptionAccountNumber',
+def allColumns = ['consumptionTypeId', 'consumptionGroup', 'consumptionTypeByOperation', 'co    nsumptionAccountNumber',
         'rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted',
         'logicalCheck', 'accountingRecords', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference']
 
@@ -554,8 +554,6 @@ void addData(def xml, int headRowCount) {
     def int rowOffset = 3
     def int colOffset = 0
     def int maxRow = 212
-    // номера строк разбитых на несколько в файле
-    def doubleRows = [3, 12, 19, 35, 35, 38, 50, 72]
 
     def rows = dataRowHelper.allCached
     def int rowIndex = 1
@@ -575,19 +573,42 @@ void addData(def xml, int headRowCount) {
         if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
-        if ((rowIndex - 1) in doubleRows) { // если ячейки разделены
-            doubleRows.remove(doubleRows.indexOf(rowIndex - 1))
-            continue
-        }
-        def curRow = getDataRow(rows, "R" + rowIndex)
-        curRow.setIndex(rowIndex++)
 
-        def xmlIndexCol = 4
+        def curRow = getDataRow(rows, "R" + rowIndex)
 
         //очищаем столбцы
         resetColumns.each {
             curRow[it] = null
         }
+
+        def knu = normalize(curRow.consumptionTypeId)
+        def group = normalize(curRow.consumptionGroup)
+        def type = normalize(curRow.consumptionTypeByOperation)
+        def num = normalize(curRow.consumptionAccountNumber)
+
+        def xmlIndexCol = 0
+
+        def knuImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def groupImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def typeImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def numImport = normalize(row.cell[xmlIndexCol].text())
+
+        //если совпадают или хотя бы один из атрибутов не пустой и значения строк в файлах входят в значения строк в шаблоне,
+        //то продолжаем обработку строки иначе пропускаем строку
+        if (!((knu == knuImport && group == groupImport && type == typeImport && num == numImport) ||
+                ((!knuImport.isEmpty() || !groupImport.isEmpty() || !typeImport.isEmpty() || !numImport.isEmpty()) &&
+                        (knu.contains(knuImport) && group.contains(groupImport) && type.contains(typeImport) && num.contains(numImport))))) {
+            continue
+        }
+        rowIndex++
+
+        xmlIndexCol = 4
 
         // графа 5
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){

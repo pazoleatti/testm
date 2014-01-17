@@ -514,7 +514,6 @@ void addData(def xml, int headRowCount) {
 
     def rows = dataRowHelper.allCached
     def int rowIndex = 1
-    def row126used = false
     for (def row : xml.row) {
         xmlIndexRow++
         def int xlsIndexRow = xmlIndexRow + rowOffset
@@ -532,19 +531,41 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        if (rowIndex == 126 && !row126used) { //ячейки 125(135) и 126(136) разделены
-            row126used = true
-            continue
-        }
         def curRow = getDataRow(rows, "R" + rowIndex)
-        curRow.setIndex(rowIndex++)
 
         //очищаем столбцы
         resetColumns.each {
             curRow[it] = null
         }
 
-        def xmlIndexCol = 4
+        def knu = normalize(curRow.incomeTypeId)
+        //def group = normalize(curRow.incomeGroup)
+        def type = normalize(curRow.incomeTypeByOperation)
+        def num = normalize(curRow.accountNo)
+
+        def xmlIndexCol = 0
+
+        def knuImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        //def groupImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def typeImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def numImport = normalize(row.cell[xmlIndexCol].text()).replace(",", ".")
+
+        //если совпадают или хотя бы один из атрибутов не пустой и значения строк в файлах входят в значения строк в шаблоне,
+        //то продолжаем обработку строки иначе пропускаем строку
+        if (!((knu == knuImport && type == typeImport && num == numImport) ||
+                ((!knuImport.isEmpty() || !typeImport.isEmpty() || !numImport.isEmpty()) &&
+                        knu.contains(knuImport) && type.contains(typeImport) && num.contains(numImport)))) {
+            continue
+        }
+        rowIndex++
+
+        xmlIndexCol = 4
 
         // графа 5
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
