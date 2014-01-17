@@ -27,7 +27,7 @@ import static java.util.Arrays.asList;
  * @author Dmitriy Levykin
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAction, GetBSOpenDataResult> {
 
     @Autowired
@@ -53,6 +53,7 @@ public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAct
         // Текущий пользователь
         TAUser currUser = securityService.currentUserInfo().getUser();
 
+        // Все отчетные периоды
         result.setReportPeriods(periodService.getAllPeriodsByTaxType(TaxType.INCOME, false));
 
         // Признак контролера
