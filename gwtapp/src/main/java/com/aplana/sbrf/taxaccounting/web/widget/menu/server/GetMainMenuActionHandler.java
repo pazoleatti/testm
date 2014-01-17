@@ -81,14 +81,14 @@ public class GetMainMenuActionHandler extends
 
                 // добавить "декларации / уведомления"
 				if (currentUser.hasRole(TARole.ROLE_CONTROL)
-                        || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)
+                        || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
 					menu.getSubMenu().add(new MenuItem(declarationItemName, NUMBER_SIGN + DeclarationListNameTokens.DECLARATION_LIST
 						+ ";" + TYPE + "=" + menu.getMeta()));
                 }
 
                 if (currentUser.hasRole(TARole.ROLE_CONTROL)
-                        || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)
+                        || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                     // добавить "ведение периодов"
                     menu.getSubMenu().add(new MenuItem("Ведение периодов", NUMBER_SIGN + PeriodsTokens.PERIODS
@@ -115,8 +115,7 @@ public class GetMainMenuActionHandler extends
 					.toString()
 					));*/
 		}
-		
-		
+
         // нси
         MenuItem nsiMenuItem = new MenuItem("НСИ");
         // добавить "Справочники"
@@ -146,8 +145,7 @@ public class GetMainMenuActionHandler extends
             if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
                 settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
             } else {
-                settingMenuItem.getSubMenu().add(new MenuItem("Журнал истории изменений налоговых форм / декларации",
-                        NUMBER_SIGN + HistoryBusinessToken.HISTORY_BUSINESS));
+                settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + HistoryBusinessToken.HISTORY_BUSINESS));
             }
 
             // добавить "Список пользователей"
