@@ -112,9 +112,9 @@ public class DepartmentServiceImpl implements DepartmentService {
             // подразделение с типом 1
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode()));
             // подразделения с типом 2
-            retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.TERBANK.getCode()));
+            retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.TERR_BANK.getCode()));
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-            if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.TERBANK) {
+            if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.TERR_BANK) {
                 // поразделение пользователя
                 retList.add(departmentDao.getDepartment(tAUser.getDepartmentId()));
 
@@ -177,7 +177,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
             retList.addAll(departmentDao.getDepartmenTBChildren(tAUser.getDepartmentId()));
             // подразделения с типом 3
-            retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.GOSB.getCode()));
+            retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode()));
         }
 
         // Результат выборки должен содержать только уникальные подразделения

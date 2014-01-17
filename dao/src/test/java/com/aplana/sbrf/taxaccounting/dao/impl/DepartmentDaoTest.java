@@ -35,13 +35,13 @@ public class DepartmentDaoTest {
 
         d = departmentDao.getDepartment(2);
         Assert.assertEquals(2, d.getId());
-        Assert.assertEquals(DepartmentType.TERBANK, d.getType());
+        Assert.assertEquals(DepartmentType.TERR_BANK, d.getType());
         Assert.assertEquals(new Integer(Department.ROOT_BANK_ID), d.getParentId());
         Assert.assertEquals("ТБ1", d.getName());
 
         d = departmentDao.getDepartment(3);
         Assert.assertEquals(3, d.getId());
-        Assert.assertEquals(DepartmentType.TERBANK, d.getType());
+        Assert.assertEquals(DepartmentType.TERR_BANK, d.getType());
         Assert.assertEquals(new Integer(Department.ROOT_BANK_ID), d.getParentId());
         Assert.assertEquals("ТБ2", d.getName());
     }
@@ -83,11 +83,11 @@ public class DepartmentDaoTest {
     public void getDepartmentsByType() {
         List<Department> result = departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode());
         Assert.assertEquals(1, result.size());
-        result = departmentDao.getDepartmentsByType(DepartmentType.TERBANK.getCode());
+        result = departmentDao.getDepartmentsByType(DepartmentType.TERR_BANK.getCode());
         Assert.assertEquals(2, result.size());
-        result = departmentDao.getDepartmentsByType(DepartmentType.GOSB.getCode());
+        result = departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode());
         Assert.assertEquals(3, result.size());
-        result = departmentDao.getDepartmentsByType(DepartmentType.OSB.getCode());
+        result = departmentDao.getDepartmentsByType(DepartmentType.MANAGEMENT.getCode());
         Assert.assertEquals(0, result.size());
     }
 
