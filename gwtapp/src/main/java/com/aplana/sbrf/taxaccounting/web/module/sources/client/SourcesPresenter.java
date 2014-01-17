@@ -4,9 +4,9 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentFormTypeShared;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -15,11 +15,12 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.proxy.*;
+import com.gwtplatform.mvp.client.proxy.ManualRevealCallback;
+import com.gwtplatform.mvp.client.proxy.Place;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
+import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, SourcesPresenter.MyProxy>
 		implements SourcesUiHandlers {
@@ -30,32 +31,31 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	public interface MyView extends View, HasUiHandlers<SourcesUiHandlers> {
-		
-		void init(boolean isForm, TaxType nType);
+
+		void init(TaxType taxType, boolean isForm, Integer selectedReceiverId, Integer selectedSourceId);
 		void setDepartments(List<Department> departments, Set<Integer> availableDepartments);
-		
-		
+
 		/**
 		 * Обновляет на фрме таблицу с доступными для выбора типами НФ приемников (НФ назначениями) (левая)
-		 * 
+		 *
 		 * @param formTypes
 		 * @param departmentFormTypes
 		 */
-		void setAvalibleFormReceivers(Map<Integer, FormType> formTypes, 
+		void setAvalibleFormReceivers(Map<Integer, FormType> formTypes,
 				List<DepartmentFormType> departmentFormTypes);
-		
+
 		/**
 		 * Обновляет на фрме таблицу с доступными для выбора типами деклараций приемников  (левая)
-		 * 
+		 *
 		 * @param declarationTypes
 		 * @param departmentDeclarationTypes
 		 */
 		void setAvalibleDeclarationReceivers(Map<Integer, DeclarationType> declarationTypes,
 				List<DepartmentDeclarationType> departmentDeclarationTypes);
-		
+
 		/**
 		 * Обновляет на фрме таблицу с доступными для добавления источниками (которая справа)
-		 * 
+		 *
 		 * @param formTypes
 		 * @param departmentFormTypes
 		 */
@@ -63,14 +63,17 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 
 		/**
 		 * Обновляет на фрме таблицу с источниками для выбранного приемника (которая внизу)
-		 * 
+		 *
 		 * @param departmentFormTypes
 		 */
 		void setCurrentSources(List<DepartmentFormTypeShared> departmentFormTypes);
-
 	}
 
 	private final DispatchAsync dispatcher;
+
+    private TaxType taxType;
+
+    private boolean isForm = true;
 
 	@Inject
 	public SourcesPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher) {
@@ -86,23 +89,27 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
 
-		// При инициализации формы получаем списки департаментов и 
-		// чистим все данные на форме
+		// При инициализации формы получаем списки департаментов
 		GetDepartmentsAction action = new GetDepartmentsAction();
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetDepartmentsResult>() {
-					@Override
-					public void onSuccess(GetDepartmentsResult result) {
-                        Boolean isForm = Boolean.valueOf(request.getParameter("isForm", ""));
-                        String value = request.getParameter("nType", "");
-                        TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);
-                        getView().init(isForm, nType);
-						getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
-					}
-				}, this).addCallback(new ManualRevealCallback<GetDepartmentsResult>(SourcesPresenter.this)));
-		
-	}
 
+        taxType = TaxType.valueOf(request.getParameter("nType", ""));
+        isForm = Boolean.valueOf(request.getParameter("isForm", ""));
+
+        // Выбранные подразделения
+        String selectedReceiverStr = request.getParameter("dst", null);
+        String selectedSourceStr = request.getParameter("src", null);
+        final Integer selectedReceiverId = selectedReceiverStr == null ? null : Integer.valueOf(selectedReceiverStr);
+        final Integer selectedSourceId = selectedSourceStr == null ? null : Integer.valueOf(selectedSourceStr);
+
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetDepartmentsResult>() {
+                    @Override
+                    public void onSuccess(GetDepartmentsResult result) {
+                        getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
+                        getView().init(taxType, isForm, selectedReceiverId, selectedSourceId);
+                    }
+                }, this).addCallback(new ManualRevealCallback<GetDepartmentsResult>(SourcesPresenter.this)));
+    }
 
 	@Override
 	public boolean useManualReveal() {
@@ -110,7 +117,12 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	@Override
-	public void getFormSources(int departmentId, TaxType taxType) {
+	public void getFormSources(Integer departmentId) {
+        if (departmentId == null) {
+            getView().setAvalibleSources(new HashMap<Integer, FormType>(0), new ArrayList<DepartmentFormType>(0));
+            return;
+        }
+
 		GetFormDFTAction action = new GetFormDFTAction();
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
@@ -124,7 +136,12 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	@Override
-	public void getFormReceivers(int departmentId, TaxType taxType) {
+	public void getFormReceivers(Integer departmentId) {
+        if (departmentId == null) {
+            getView().setAvalibleFormReceivers(new HashMap<Integer, FormType>(0), new ArrayList<DepartmentFormType>(0));
+            return;
+        }
+
 		GetFormDFTAction action = new GetFormDFTAction();
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
@@ -167,7 +184,12 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	@Override
-	public void getDeclarationReceivers(int departmentId, TaxType taxType) {
+	public void getDeclarationReceivers(Integer departmentId) {
+        if (departmentId == null) {
+            getView().setAvalibleDeclarationReceivers(new HashMap<Integer, DeclarationType>(0), new ArrayList<DepartmentDeclarationType>(0));
+            return;
+        }
+
 		GetDeclarationDDTAction action = new GetDeclarationDDTAction();
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
@@ -180,15 +202,17 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 				}, this));
 	}
 
-	@Override
-	public void showAssignErrorMessage(boolean isForm) {
-		if (isForm) {
-			MessageEvent.fire(SourcesPresenter.this, "Налоговая форма уже назначена в качестве источника");
-		} else {
-			MessageEvent.fire(SourcesPresenter.this, "Источник уже назначен декларации");
-		}
-	}
+    @Override
+    public TaxType getTaxType() {
+        return taxType;
+    }
 
+    @Override
+	public void showAssignErrorMessage() {
+        // TODO Заменить на http://jira.aplana.com/browse/SBRFACCTAX-5398 по готовности
+        Window.alert("Выбранное назначение налоговой формы уже является источником " +
+                "для выбранного приемника!");
+    }
 
 	@Override
 	public void updateFormSources(final DepartmentFormType departmentFormType, List<Long> sourceDepartmentFormTypeIds) {
