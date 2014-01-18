@@ -1,19 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.widget.menu.client;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.http.client.*;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
+
+import java.util.List;
 
 public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 
@@ -30,9 +32,32 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
     @UiField
     MenuBar menu;
 
+    private Timer timer;
+
 	@Inject
 	public MainMenu(final Binder binder) {
 		initWidget(binder.createAndBindUi(this));
+        final RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, "download/timer/ping/");
+        final RequestCallback requestCallback = new RequestCallback() {
+            @Override
+            public void onResponseReceived(Request request, Response response) {
+            }
+
+            @Override
+            public void onError(Request request, Throwable throwable) {
+
+            }
+        };
+        timer = new Timer() {
+            @Override
+            public void run() {
+                try {
+                    requestBuilder.sendRequest(null, requestCallback);
+                } catch (RequestException e) {
+                }
+            }
+        };
+        timer.scheduleRepeating(300000);
 	}
 
 	@Override

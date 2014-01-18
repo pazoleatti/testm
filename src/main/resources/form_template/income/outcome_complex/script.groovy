@@ -14,6 +14,23 @@ import groovy.transform.Field
  * http://conf.aplana.com/pages/viewpage.action?pageId=8784122
  *
  * @author Stanislav Yasinskiy
+ *
+ * графа  1 - consumptionTypeId
+ * графа  2 - consumptionGroup
+ * графа  3 - consumptionTypeByOperation
+ * графа  4 - consumptionBuhSumAccountNumber
+ * графа  5 - consumptionBuhSumRnuSource
+ * графа  6 - consumptionBuhSumAccepted
+ * графа  7 - consumptionBuhSumPrevTaxPeriod
+ * графа  8 - consumptionTaxSumRnuSource
+ * графа  9 - consumptionTaxSumS
+ * графа 10 - rnuNo
+ * графа 11 - logicalCheck
+ * графа 12 - accountingRecords
+ * графа 13 - opuSumByEnclosure3
+ * графа 14 - opuSumByTableP
+ * графа 15 - opuSumTotal
+ * графа 16 - difference
  */
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -48,22 +65,6 @@ switch (formDataEvent) {
         break
 }
 
-// графа  1 - consumptionTypeId
-// графа  2 - consumptionGroup
-// графа  3 - consumptionTypeByOperation
-// графа  4 - consumptionBuhSumAccountNumber
-// графа  5 - consumptionBuhSumRnuSource
-// графа  6 - consumptionBuhSumAccepted
-// графа  7 - consumptionBuhSumPrevTaxPeriod
-// графа  8 - consumptionTaxSumRnuSource
-// графа  9 - consumptionTaxSumS
-// графа 10 - rnuNo
-// графа 11 - logicalCheck
-// графа 12 - accountingRecords
-// графа 13 - opuSumByEnclosure3
-// графа 14 - opuSumByTableP
-// графа 15 - opuSumTotal
-// графа 16 - difference
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -424,8 +425,6 @@ void addData(def xml, int headRowCount) {
     def int rowOffset = 3
     def int colOffset = 0
     def int maxRow = 93
-    // номера строк разбитых на несколько в файле
-    def doubleRows = [18, 80]
 
     def rows = dataRowHelper.allCached
     def int rowIndex = 1
@@ -445,19 +444,42 @@ void addData(def xml, int headRowCount) {
         if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
-        if ((rowIndex - 1) in doubleRows) { // если ячейки разделены
-            doubleRows.remove(doubleRows.indexOf(rowIndex - 1))
-            continue
-        }
-        def curRow = getDataRow(rows, "R" + rowIndex)
-        curRow.setIndex(rowIndex++)
 
-        def xmlIndexCol = 5
+        def curRow = getDataRow(rows, "R" + rowIndex)
 
         //очищаем столбцы
         resetColumns.each {
             curRow[it] = null
         }
+
+        def knu = normalize(curRow.consumptionTypeId)
+        def group = normalize(curRow.consumptionGroup)
+        //def type = normalize(curRow.consumptionTypeByOperation)
+        def num = normalize(curRow.consumptionBuhSumAccountNumber)
+
+        def xmlIndexCol = 0
+
+        def knuImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def groupImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        //def typeImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def numImport = normalize(row.cell[xmlIndexCol].text())
+
+        //если совпадают или хотя бы один из атрибутов не пустой и значения строк в файлах входят в значения строк в шаблоне,
+        //то продолжаем обработку строки иначе пропускаем строку
+        if (!((knu == knuImport && group == groupImport && num == numImport) ||
+                ((!knuImport.isEmpty() || !groupImport.isEmpty() || !numImport.isEmpty()) &&
+                        knu.contains(knuImport) && group.contains(groupImport) && num.contains(numImport)))) {
+            continue
+        }
+        rowIndex++
+
+        xmlIndexCol = 5
 
         // графа 6
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){

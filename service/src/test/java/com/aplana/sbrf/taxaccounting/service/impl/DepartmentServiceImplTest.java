@@ -59,22 +59,22 @@ public class DepartmentServiceImplTest {
         departmentTB2 = new Department();
         departmentTB2.setName("TB2");
         departmentTB2.setId(departmentID[1]);
-        departmentTB2.setType(DepartmentType.TERBANK);
+        departmentTB2.setType(DepartmentType.TERR_BANK);
 
         departmentTB3 = new Department();
         departmentTB3.setName("TB3");
         departmentTB3.setId(departmentID[2]);
-        departmentTB3.setType(DepartmentType.TERBANK);
+        departmentTB3.setType(DepartmentType.TERR_BANK);
 
         departmentGOSB31 = new Department();
         departmentGOSB31.setName("GOSB31");
         departmentGOSB31.setId(departmentID[3]);
-        departmentGOSB31.setType(DepartmentType.GOSB);
+        departmentGOSB31.setType(DepartmentType.CSKO_PCP);
 
         departmentOSB311 = new Department();
         departmentOSB311.setName("OSB311");
         departmentOSB311.setId(departmentID[4]);
-        departmentOSB311.setType(DepartmentType.OSB);
+        departmentOSB311.setType(DepartmentType.CSKO_PCP);
 
         // TODO data for исполнители
 
@@ -97,9 +97,9 @@ public class DepartmentServiceImplTest {
         when(departmentDao.listDepartments()).thenReturn(asList(root, departmentTB2, departmentTB3, departmentGOSB31, departmentOSB311));
         // Типы подразделений
         when(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode())).thenReturn(asList(root));
-        when(departmentDao.getDepartmentsByType(DepartmentType.TERBANK.getCode())).thenReturn(asList(departmentTB2, departmentTB3));
-        when(departmentDao.getDepartmentsByType(DepartmentType.GOSB.getCode())).thenReturn(asList(departmentGOSB31));
-        when(departmentDao.getDepartmentsByType(DepartmentType.OSB.getCode())).thenReturn(asList(departmentOSB311));
+        when(departmentDao.getDepartmentsByType(DepartmentType.TERR_BANK.getCode())).thenReturn(asList(departmentTB2, departmentTB3));
+        when(departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode())).thenReturn(asList(departmentGOSB31));
+        when(departmentDao.getDepartmentsByType(DepartmentType.MANAGEMENT.getCode())).thenReturn(asList(departmentOSB311));
         // ТБ для подразделения
         when(departmentDao.getDepartmenTB(root.getId())).thenReturn(null);
         when(departmentDao.getDepartmenTB(departmentTB2.getId())).thenReturn(departmentTB2);

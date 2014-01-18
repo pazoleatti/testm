@@ -28,7 +28,6 @@ import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.RangeChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent;
 
-
 /**
  * @author sgoryachkin
  *
@@ -208,8 +207,6 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 		version.setValue(versionDate);
 	}
 
-
-
 	@Override
 	public void setAcceptableValues(long refBookAttrId) {
 		uiHandlers.init(refBookAttrId, null, null, null);
@@ -266,8 +263,6 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 		return addHandler(handler, ValueChangeEvent.getType());
 	}
 
-
-
 	@Override
 	public RefBookItem getSelectionValue() {
 		return selectionModel.getLastSelectedObject();
@@ -278,4 +273,13 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 		return uiHandlers.getDereferenceValue();
 	}
 
+    @Override
+    public String getOtherDereferenceValue(String alias){
+        return uiHandlers.getOtherDereferenceValue(alias);
+    }
+
+    @Override
+    public String getOtherDereferenceValue(Long attrId){
+        return uiHandlers.getOtherDereferenceValue(attrId);
+    }
 }
