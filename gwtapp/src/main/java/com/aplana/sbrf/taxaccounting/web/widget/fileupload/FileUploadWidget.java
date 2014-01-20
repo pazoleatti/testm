@@ -107,4 +107,13 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
 
     }
 
+    /**
+     * Метод для совместимости с прошлой версией.
+     * Сейчас используется всегда uploadAsTemporal = false
+     * @param asTemporal true - через создание временной записи, false - сохраненние в постоянное хранилище
+     */
+    public void setUploadAsTemporal(boolean asTemporal){
+        // ignore
+    }
+
 }
