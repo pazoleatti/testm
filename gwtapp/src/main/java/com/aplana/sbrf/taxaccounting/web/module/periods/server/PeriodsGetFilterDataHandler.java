@@ -49,10 +49,10 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	    res.setTaxType(action.getTaxType());
 
 	    // Используем сервис для инициализации фильтра форм даты (в аналитике ссылка)
-	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(userInfo, action.getTaxType());
+//	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(userInfo, action.getTaxType());
 
 
-	    res.setAvalDepartments(filterValues.getDepartmentIds());
+//	    res.setAvalDepartments(filterValues.getDepartmentIds());
 
 	    // По умолчанию отчетный период не выбран
 	    res.setCurrentReportPeriod(null);
@@ -96,6 +96,11 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 		    depIds.add(dep.getId());
 	    }
 	    res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(depIds).values()));
+	    Set<Integer> ad = new HashSet<Integer>();
+	    for (Department dep : res.getDepartments()) {
+		    ad.add(dep.getId());
+	    }
+	    res.setAvalDepartments(ad);
 	    res.setSelectedDepartment(new DepartmentPair(res.getDepartments().get(0).getId(), res.getDepartments().get(0).getParentId(), res.getDepartments().get(0).getName()));
 
 	    DepartmentReportPeriod rp = reportPeriodService.getLastReportPeriod(taxType, action.getDepartmentId());
