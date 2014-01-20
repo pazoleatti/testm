@@ -70,6 +70,12 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         void setDepartmentCombined(DepartmentCombined combinedDepartmentParam);
 
         /**
+         * Устанавливаем всем справочникам на форме "ограничивающий период"
+         * @param reportPeriodId идентификатор отчетного периода
+         */
+        void resetRefBookWidgetsDatePeriod(Integer reportPeriodId);
+
+        /**
          * Установка доступных типов налога
          * @param types
          */
