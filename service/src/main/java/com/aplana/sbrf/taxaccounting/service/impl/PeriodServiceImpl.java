@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
@@ -11,9 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +50,18 @@ public class PeriodServiceImpl implements PeriodService{
 	@Autowired
 	private DepartmentService departmentService;
 
+	@Autowired
+	private ObjectLockDao objectLockDao;
+
+	@Autowired
+	private FormDataDao formDataDao;
+
+	@Autowired
+	private TAUserService userService;
+
+	@Autowired
+	private DeclarationDataSearchService declarationDataSearchService;
+
 	@Override
 	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
 		return reportPeriodDao.listByTaxPeriod(taxPeriodId);
@@ -78,34 +90,19 @@ public class PeriodServiceImpl implements PeriodService{
 	@Override
 	public void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
 	                 long departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate, boolean isCorrection) {
-		Calendar from = Calendar.getInstance();
-		from.set(Calendar.YEAR, year);
-		from.set(Calendar.MONTH, Calendar.JANUARY);
-		from.set(Calendar.DAY_OF_MONTH, 1);
-
-		Calendar to = Calendar.getInstance();
-		to.set(Calendar.YEAR, year);
-		to.set(Calendar.MONTH, Calendar.DECEMBER);
-		to.set(Calendar.DAY_OF_MONTH, 31);
-
-		List<TaxPeriod> taxPeriodList = taxPeriodDao.listByTaxTypeAndDate(taxType, from.getTime(), to.getTime());
-		if (taxPeriodList.size() > 1) {
-			throw new ServiceException("Слишком много налоговых периодов");
-		}
-
+		List<TaxPeriod> taxPeriods = taxPeriodDao.listByTaxTypeAndYear(taxType, year);
 		TaxPeriod taxPeriod;
-
-		if (taxPeriodList.isEmpty()) {
+		if (taxPeriods.size() > 1) {
+			// Что-то пошло не так
+			throw new ServiceException("На " + year + " год найдено несколько налоговых периодов");
+		} else if (taxPeriods.isEmpty()) {
 			taxPeriod = new TaxPeriod();
-			taxPeriod.setStartDate(from.getTime());
-			taxPeriod.setEndDate(to.getTime());
 			taxPeriod.setTaxType(taxType);
 			taxPeriod.setYear(year);
 			taxPeriodDao.add(taxPeriod);
 		} else {
-			taxPeriod = taxPeriodList.get(0);
+			taxPeriod = taxPeriods.get(0);
 		}
-
 
 		List<ReportPeriod> reportPeriods = listByTaxPeriod(taxPeriod.getId());
 		if (!reportPeriods.isEmpty()) {
@@ -125,90 +122,77 @@ public class PeriodServiceImpl implements PeriodService{
 			newReportPeriod = new ReportPeriod();
 			newReportPeriod.setTaxPeriod(taxPeriod);
 			newReportPeriod.setDictTaxPeriodId(dictionaryTaxPeriodId);
-			
+
 			String name = record.get("NAME").getStringValue();
 			Number ord = record.get("ORD").getNumberValue();
+
 			Number months = record.get("MONTHS").getNumberValue();
-			if (name == null || name.isEmpty() || ord == null || months == null){
+			if (name == null || name.isEmpty() || ord == null || months == null
+					|| record.get("START_DATE").getDateValue() == null || record.get("END_DATE").getDateValue() == null) {
 				throw new ServiceException("Не заполнен один из обязательных атрибутов справочника \"" + refBook.getName() + "\"");
 			}
+			Calendar start = new GregorianCalendar();
+			start.setTime(record.get("START_DATE").getDateValue());
+			start.set(Calendar.YEAR, year);
+			Date startDate = start.getTime();
+
+			Calendar end = new GregorianCalendar();
+			end.setTime(record.get("END_DATE").getDateValue());
+			end.set(Calendar.YEAR, year);
+			Date endDate = end.getTime();
+
 			newReportPeriod.setName(name);
-			newReportPeriod.setOrder(ord.intValue()); 
+			newReportPeriod.setOrder(ord.intValue());
+			newReportPeriod.setStartDate(startDate);
+			newReportPeriod.setEndDate(endDate);
 			newReportPeriod.setMonths(months.intValue());
 			reportPeriodDao.save(newReportPeriod);
-
 		} else {
 			newReportPeriod = reportPeriods.get(0);
 		}
-        // TODO Добавить создание корректирующего периода
-		if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT) || (taxType == TaxType.DEAL)) {
-			if ((user.getUser().hasRole("ROLE_CONTROL_UNP") || (user.getUser().hasRole("ROLE_CONTROL")))
-					&& (user.getUser().getDepartmentId() == Department.ROOT_BANK_ID)
-					&& (departmentId == Department.ROOT_BANK_ID)) {
-				for(Department dep : departmentService.listAll()) {
-					DepartmentReportPeriod depRP = new DepartmentReportPeriod();
-					depRP.setReportPeriod(newReportPeriod);
-					depRP.setDepartmentId(Long.valueOf(dep.getId()));
-					depRP.setActive(true);
-					depRP.setBalance(isBalance);
-					saveOrUpdate(depRP, logs);
-				}
-			} else {
-				throw new ServiceException("Невозможно открыть период с такими параметрами");
-			}
-		} else if ((taxType == TaxType.TRANSPORT) || (taxType == TaxType.PROPERTY)) {
-			if ((user.getUser().hasRole("ROLE_CONTROL") && (user.getUser().getDepartmentId() == departmentId))
-					|| user.getUser().hasRole("ROLE_CONTROL_UNP")) {
-				// Сохраняем для выбраного
-				DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
-				departmentReportPeriod.setActive(true);
-				departmentReportPeriod.setBalance(isBalance);
-				departmentReportPeriod.setDepartmentId(departmentId);
-				departmentReportPeriod.setReportPeriod(newReportPeriod);
-				saveOrUpdate(departmentReportPeriod, logs);
+		for (Department dep : getAvailableDepartments(taxType, user.getUser(), Operation.OPEN, (int)departmentId)) {
+			DepartmentReportPeriod depRP = new DepartmentReportPeriod();
+			depRP.setReportPeriod(newReportPeriod);
+			depRP.setDepartmentId(Long.valueOf(dep.getId()));
+			depRP.setActive(true);
+			depRP.setBalance(isBalance);
+			saveOrUpdate(depRP, logs);
+		}
+	}
 
-				// Сохраняем для источников
-				List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
-				departmentFormTypes.addAll(departmentFormTypeService.getDFTSourcesByDepartment((int) departmentId, taxType));
+	@Override
+	public void close(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user) {
 
-				for (DepartmentFormType dft : departmentFormTypes) {
-					DepartmentReportPeriod depRP = new DepartmentReportPeriod();
-					depRP.setReportPeriod(newReportPeriod);
-					depRP.setDepartmentId(Long.valueOf(dft.getDepartmentId()));
-					depRP.setActive(true);
-					depRP.setBalance(isBalance);
-					saveOrUpdate(depRP, logs);
-				}
-			} else if (user.getUser().hasRole("ROLE_CONTROL") && (user.getUser().getDepartmentId() != departmentId)) {
-				DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
-				departmentReportPeriod.setActive(true);
-				departmentReportPeriod.setBalance(isBalance);
-				departmentReportPeriod.setDepartmentId(departmentId);
-				departmentReportPeriod.setReportPeriod(newReportPeriod);
-				saveOrUpdate(departmentReportPeriod, logs);
-			} else {
-				throw new ServiceException("Невозможно открыть период с такими параметрами");
+		List<Integer> departments = new ArrayList<Integer>();
+		for (Department dep : departmentService.getAllChildren((int) departmentId)) {
+			departments.add(dep.getId());
+		}
+
+		if (checkBeforeClose(departments, reportPeriodId, logs)) {
+			for (Department dep : getAvailableDepartments(taxType, user.getUser(), Operation.CLOSE, (int)departmentId)) {
+				closePeriodWithLog(reportPeriodId, dep.getId(), logs);
 			}
-		} else {
-			throw new ServiceException("Вид налога не поддерживается");
 		}
 
 	}
 
-	@Override
-	public void close(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs) {
-		if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT)) {
-			for(Department dep : departmentService.listAll()) { //Закрываем для всех
-				closePeriodWithLog(reportPeriodId, dep.getId(), logs);
+	private boolean checkBeforeClose(List<Integer> departments, int reportPeriodId, List<LogEntry> logs) {
+		boolean allGood = true;
+		for (Integer id : departments) {
+			for (FormData formData : formDataDao.find(id, reportPeriodId)) {
+				ObjectLock<Long> lock = objectLockDao.getObjectLock(formData.getId(), FormData.class);
+				if (lock != null) {
+					logs.add(new LogEntry(LogLevel.WARNING,
+							"Форма " + formData.getFormType().getName() +
+							" " + formData.getKind().getName() +
+							" в подразделение " + departmentService.getDepartment(id).getName() +
+							" редактируется пользователем " + userService.getUser(lock.getUserId()).getName()));
+					allGood = false;
+				}
 			}
-		} else {
-			closePeriodWithLog(reportPeriodId, departmentId, logs);
-			List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
-			departmentFormTypes.addAll(departmentFormTypeService.getDFTSourcesByDepartment((int) departmentId, taxType));
-			for (DepartmentFormType dft : departmentFormTypes) {
-				closePeriodWithLog(reportPeriodId, dft.getDepartmentId(), logs);
-			}
+
 		}
+		return allGood;
 	}
 
 	private void closePeriodWithLog(int reportPeriodId, long departmentId, List<LogEntry> logs) {
@@ -390,4 +374,148 @@ public class PeriodServiceImpl implements PeriodService{
         dateStart.set(Calendar.DAY_OF_MONTH, dateStart.get(Calendar.DAY_OF_MONTH));
         return dateStart;
     }
+
+	@Override
+	public void removeReportPeriod(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user) {
+		List<Integer> departments = new ArrayList<Integer>();
+		List<Department> avalDeps = getAvailableDepartments(taxType, user.getUser(), Operation.DELETE, (int) departmentId);
+		for (Department dep : avalDeps) {
+			departments.add(dep.getId());
+		}
+
+		if (checkBeforeRemove(departments, reportPeriodId, logs)) {
+			removePeriodWithLog(reportPeriodId, departments, logs);
+		}
+	}
+
+	private boolean checkBeforeRemove(List<Integer> departments, int reportPeriodId, List<LogEntry> logs) {
+		boolean canRemove = true;
+		Set<Integer> blockedBy = new HashSet<Integer>();
+		for (Integer dep : departments) {
+			DeclarationDataFilter filter = new DeclarationDataFilter();
+			filter.setDepartmentIds(Arrays.asList(new Integer[]{dep}));
+			filter.setReportPeriodIds(Arrays.asList(new Integer[]{reportPeriodId}));
+			filter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
+			if (!declarationDataSearchService.search(filter).isEmpty()) {
+				blockedBy.add(dep);
+				canRemove = false;
+				continue;
+			}
+
+			if (!formDataDao.find(dep, reportPeriodId).isEmpty()) {
+				blockedBy.add(dep);
+				canRemove = false;
+				continue;
+			}
+		}
+
+		if (!canRemove) {
+			StringBuilder msg = new StringBuilder(
+					"Перед удалением периода необходимо удалить все налоговые формы и декларации в подразделениях, " +
+							"для которых удаляется период! На текущий момент не удалены налоговые формы / декларации " +
+							"в следующих подразделениях: "
+			);
+			for (Integer dep : blockedBy) {
+				msg.append(departmentService.getDepartment(dep).getName() + "; ");
+			}
+			logs.add(new LogEntry(LogLevel.ERROR, msg.toString()));
+		}
+
+		return canRemove;
+	}
+
+	private void removePeriodWithLog(int reportPeriodId, List<Integer> departmentId, List<LogEntry> logs) {
+		for (Integer id : departmentId) {
+			departmentReportPeriodDao.delete(reportPeriodId, id);
+			ReportPeriod rp = reportPeriodDao.get(reportPeriodId);
+			logs.add(new LogEntry(LogLevel.INFO,
+					rp.getName() + " " + rp.getYear() + " удалён для подразделения " + departmentService.getDepartment(id).getName()));
+		}
+
+		boolean canRemoveReportPeriod = true;
+		for (Department dep : departmentService.listAll()) {
+			if (departmentReportPeriodDao.existForDepartment(dep.getId(), reportPeriodId)) {
+				System.out.println("Exist for " + dep.getId());
+				canRemoveReportPeriod = false;
+				break;
+			}
+		}
+
+		if (canRemoveReportPeriod) {
+			System.out.println("Remove for " + reportPeriodDao);
+			reportPeriodDao.remove(reportPeriodId);
+		}
+
+	}
+
+	private enum Operation {
+		FIND, // Поиск периода
+		OPEN, // Открытие периода
+		CLOSE, // Закрытие периода
+		DELETE, // Удаление периода
+		EDIT_DEADLINE, // Изменение срока сдачи отчетности в периоде
+		EDIT // Редактирование периода
+	}
+	private List<Department> getAvailableDepartments(TaxType taxType, TAUser user, Operation operation, int departmentId) {
+		if (user.hasRole("ROLE_CONTROL_UNP")) {
+			switch (taxType) {
+				case INCOME:
+				case VAT:
+				case DEAL:
+					switch (operation) {
+						case FIND:
+							List<Department> dep = new ArrayList<Department>();
+							dep.add(departmentService.getBankDepartment());
+							return dep;
+						case OPEN:
+						case CLOSE:
+						case DELETE:
+						case EDIT_DEADLINE:
+								return departmentService.getBADepartments(user);
+					}
+					break;
+				case PROPERTY:
+				case TRANSPORT:
+					switch (operation) {
+						case FIND:
+							List<Department> dep = new ArrayList<Department>();
+							dep.add(departmentService.getDepartment(departmentId));
+							return dep;
+						case OPEN:
+						case CLOSE:
+						case DELETE:
+						case EDIT_DEADLINE:
+							return departmentService.getAllChildren(departmentId);
+					}
+					break;
+			}
+		} else if  (user.hasRole("ROLE_CONTROL_NS")) {
+			switch (taxType) {
+				case INCOME:
+				case VAT:
+				case DEAL:
+					switch (operation) {
+						case FIND:
+							return departmentService.getTBDepartments(user);
+						case EDIT_DEADLINE:
+							return departmentService.getBADepartments(user);
+					}
+					break;
+				case PROPERTY:
+				case TRANSPORT:
+					switch (operation) {
+						case FIND:
+							return departmentService.getTBDepartments(user);
+						case OPEN:
+						case CLOSE:
+						case DELETE:
+						case EDIT_DEADLINE:
+							return departmentService.getBADepartments(user);
+					}
+					break;
+			}
+		}
+		return Collections.EMPTY_LIST;
+	}
+
 }

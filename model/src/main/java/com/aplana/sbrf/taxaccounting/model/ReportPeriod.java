@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
-import java.math.BigInteger;
+import java.util.Date;
 
 
 /**
@@ -16,9 +16,12 @@ public class ReportPeriod implements Serializable {
 	private Integer id;
 	private String name;
 
+	@Deprecated
 	private int months;
 	private int order;
 	private TaxPeriod taxPeriod;
+	private Date startDate;
+	private Date endDate;
 	
 	private int dictTaxPeriodId;
 
@@ -53,6 +56,7 @@ public class ReportPeriod implements Serializable {
 	 * Получить количество месяцев в пероде
 	 * @return количество месяцев в периоде
 	 */
+	@Deprecated
 	public int getMonths() {
 		return months;
 	}
@@ -61,6 +65,7 @@ public class ReportPeriod implements Serializable {
 	 * Задать количество месяцев в периоде
 	 * @param months количество месяцев
 	 */
+	@Deprecated
 	public void setMonths(int months) {
 		this.months = months;
 	}
@@ -92,10 +97,8 @@ public class ReportPeriod implements Serializable {
 	/**
 	 * @return
 	 * 
-	 * @deprecated Для получения типа отчетного периода используйте <code>getTaxType()</code>
-	 * 
+	 *
 	 */
-	@Deprecated
 	public TaxPeriod getTaxPeriod() {
 		return taxPeriod;
 	}
@@ -110,13 +113,28 @@ public class ReportPeriod implements Serializable {
 		// И получаться из БД. http://jira.aplana.com/browse/SBRFACCTAX-4162
 		//http://stackoverflow.com/questions/7009655/how-to-use-java-util-calendar-in-gwt
 		// Эти вычисления работают правильно только до 3344 года.
-		long milisPerYear = new BigInteger("31536000000").longValue();
-		return (int) Math.floor(getTaxPeriod().getStartDate().getTime() / milisPerYear) + 1970;
+//		long milisPerYear = new BigInteger("31536000000").longValue();
+		return getTaxPeriod().getYear();
 	}
 	
 	@SuppressWarnings("deprecation")
 	public TaxType getTaxType(){
 		return getTaxPeriod().getTaxType();
 	}
-	
+
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
 }

@@ -38,6 +38,8 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
             reportPeriod.setTaxPeriod(taxPeriodDao.get(rs.getInt("tax_period_id")));
             reportPeriod.setOrder(rs.getInt("ord"));
             reportPeriod.setDictTaxPeriodId(rs.getInt("dict_tax_period_id"));
+	        reportPeriod.setStartDate(rs.getDate("START_DATE"));
+	        reportPeriod.setEndDate(rs.getDate("END_DATE"));
             return reportPeriod;
         }
     }
@@ -87,14 +89,23 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 				reportPeriod.getTaxPeriod().getId(),
 				reportPeriod.getOrder(),
 				reportPeriod.getDictTaxPeriodId(),
-				new Date(), // заменить на значение из модели (Marat Fayzullin 2014-01-10)
-				new Date()  // заменить на значение из модели (Marat Fayzullin 2014-01-10)
+				reportPeriod.getStartDate(),
+				reportPeriod.getEndDate()
 		);
 		reportPeriod.setId(id);
 		return id;
 	}
 
-    @Override
+	@Override
+	public void remove(int reportPeriodId) {
+		getJdbcTemplate().update(
+				"delete from report_period where id = ?",
+				new Object[] {reportPeriodId},
+				new int[] {Types.NUMERIC}
+		);
+	}
+
+	@Override
     public ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {
         try {
             return getJdbcTemplate().queryForObject(

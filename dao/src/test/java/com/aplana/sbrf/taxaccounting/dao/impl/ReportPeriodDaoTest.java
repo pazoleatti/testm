@@ -57,6 +57,8 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setMonths(3);
 		newReportPeriod.setTaxPeriod(taxPeriod);
 		newReportPeriod.setDictTaxPeriodId(21);
+		newReportPeriod.setStartDate(new Date());
+		newReportPeriod.setEndDate(new Date());
 		reportPeriodDao.save(newReportPeriod);
 		
 		newReportPeriod = new ReportPeriod();
@@ -65,6 +67,8 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setMonths(3);
 		newReportPeriod.setTaxPeriod(taxPeriod);
 		newReportPeriod.setDictTaxPeriodId(22);
+		newReportPeriod.setStartDate(new Date());
+		newReportPeriod.setEndDate(new Date());
 		reportPeriodDao.save(newReportPeriod);
 		
 		List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(taxPeriod.getId());
@@ -84,6 +88,8 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setMonths(3);
 		newReportPeriod.setTaxPeriod(taxPeriod);
 		newReportPeriod.setDictTaxPeriodId(21);
+		newReportPeriod.setStartDate(new Date());
+		newReportPeriod.setEndDate(new Date());
 
 		int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
 		ReportPeriod reportPeriod = reportPeriodDao.get(newReportPeriodId);

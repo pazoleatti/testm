@@ -42,6 +42,10 @@ public interface ReportPeriodDao {
 	 */
 	int save(ReportPeriod reportPeriod);
 
-
+	/**
+	 * Удалить период
+	 * @param reportPeriodId идентификатор периода
+	 */
+	void remove(int reportPeriodId);
 
 }
