@@ -101,11 +101,9 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 			department.setId(rs.getInt("id"));
 			department.setName(rs.getString("name"));
 			Integer parentId = rs.getInt("parent_id");
-			if(parentId == 0){
-				department.setParentId(null);
-			} else {
-				department.setParentId(parentId);
-			}
+            // В ResultSet есть особенность что если пришло значение нул то вернет значение по умолчанию - то есть для Integer'a вернет 0
+            // а так как у нас в базе 0 используется в качестве идентификатора то нужно null нужно првоерять через .wasNull()
+            department.setParentId(rs.wasNull() ? null : parentId);
 			department.setType(DepartmentType.fromCode(rs.getInt("type")));
 			department.setShortName(rs.getString("shortname"));
 			department.setTbIndex(rs.getString("tb_index"));
