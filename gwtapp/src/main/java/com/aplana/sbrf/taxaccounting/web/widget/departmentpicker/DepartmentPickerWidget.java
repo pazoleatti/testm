@@ -75,7 +75,9 @@ public class DepartmentPickerWidget extends Composite implements
 			Set<Integer> availableDepartments) {
 		tree.clear();
         availableValuesList.clear();
-        availableValuesList.addAll(availableDepartments);
+        if (availableDepartments != null) {
+            availableValuesList.addAll(availableDepartments);
+        }
 		List<TreeItem> itemsHierarchy = flatToHierarchy(departments,
 				availableDepartments);
 		Collections.sort(itemsHierarchy, new Comparator<TreeItem>() {
