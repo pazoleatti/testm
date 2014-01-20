@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.StyleElement;
 import com.google.gwt.dom.client.TableCellElement;
@@ -498,10 +499,17 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         reportPeriodLabel.getElement().getStyle().setPropertyPx("width", DEFAULT_REPORT_PERIOD_LABEL_WIDTH);
 
         // берется ширина ячейки в которой находится контейнер с информационном блоком формы
-        int width = centerBlock.getElement().getOffsetParent().getOffsetWidth() - 135;
-        if (width > 0) {
-            reportPeriodLabel.getElement().getStyle().setPropertyPx("width", width);
+        Element centerBlockParentElement = centerBlock.getElement().getParentElement();
+        if (centerBlockParentElement != null) {
+            Integer parentWidth = centerBlockParentElement.getOffsetWidth();
+            if (parentWidth != null) {
+                int width = parentWidth - 135;
+                if (width > 0) {
+                    reportPeriodLabel.getElement().getStyle().setPropertyPx("width", width);
+                }
+            }
         }
+
     }
 
 	@Override
