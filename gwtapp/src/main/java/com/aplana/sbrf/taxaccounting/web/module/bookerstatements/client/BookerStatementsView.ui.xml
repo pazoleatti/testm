@@ -51,7 +51,7 @@
                         <!--<style:LinkAnchor ui:field="showButton" text="Показать"/>-->
                     <!--</g:cell>-->
                     <g:cell>
-                        <fileuplod:FileUploadWidget ui:field="fileUploader"/>
+                        <fileuplod:FileUploadWidget ui:field="fileUploader" uploadAsTemporal="true"/>
                         <!--Инициализируем параметры внутри View uploadHandler actionUrl смотри объевление (магия Дмитрия Л.)-->
                     </g:cell>
                 </g:HorizontalPanel>
