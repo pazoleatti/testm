@@ -146,6 +146,11 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 		departmentPiker.setAvalibleValues(departments, availableDepartments);
 	}
 
+    @Override
+    public List<Integer> getAvalibleValues() {
+         return departmentPiker.getAvalibleValues();
+    }
+
 	@Override
 	public List<String> getValueDereference() {
 		return departmentPiker.getValueDereference();
@@ -166,5 +171,4 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
     public void setWidth(String width){
         wrappingPanel.setWidth(width);
     }
-
 }

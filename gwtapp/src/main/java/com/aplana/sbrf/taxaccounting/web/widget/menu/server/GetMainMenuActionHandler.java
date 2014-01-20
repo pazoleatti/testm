@@ -71,91 +71,99 @@ public class GetMainMenuActionHandler extends
 			taxMenu.getSubMenu().add(new MenuItem(TaxType.TRANSPORT.getName(), "", TaxType.TRANSPORT.name()));
 			taxMenu.getSubMenu().add(new MenuItem("Учет КС", "", TaxType.DEAL.name()));
 
-			for (MenuItem menu : taxMenu.getSubMenu()) {
+            for (MenuItem menu : taxMenu.getSubMenu()) {
                 boolean isDeal = menu.getMeta().equals(TaxType.DEAL.name());
                 String formItemName = isDeal ? "Список форм" : "Налоговые формы";
                 String declarationItemName = isDeal ? "Уведомления" : "Декларации";
 
-				menu.getSubMenu().add(new MenuItem(formItemName, NUMBER_SIGN + FormDataListNameTokens.FORM_DATA_LIST
-					+ ";" + TYPE + "=" + menu.getMeta()));
-				if (currentUser.hasRole(TARole.ROLE_CONTROL)
+                menu.getSubMenu().add(new MenuItem(formItemName, NUMBER_SIGN + FormDataListNameTokens.FORM_DATA_LIST
+                        + ";" + TYPE + "=" + menu.getMeta()));
+
+                if (currentUser.hasRole(TARole.ROLE_CONTROL)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
 
-					menu.getSubMenu().add(new MenuItem(declarationItemName, NUMBER_SIGN
+                    menu.getSubMenu().add(new MenuItem(declarationItemName, NUMBER_SIGN
                             + DeclarationListNameTokens.DECLARATION_LIST + ";"
                             + TYPE + "=" + menu.getMeta()));
 
-                    if (!currentUser.hasRole(TARole.ROLE_CONTROL) ) {
+                    if (!currentUser.hasRole(TARole.ROLE_CONTROL)) {
                         menu.getSubMenu().add(new MenuItem("Ведение периодов", NUMBER_SIGN + PeriodsTokens.PERIODS
                                 + ";" + TYPE + "=" + menu.getMeta()));
-
-                        if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                                || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                            menu.getSubMenu().add(
-                                    new MenuItem("Назначение форм и деклараций",
-                                            NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
-                                                    + TYPE + "=" + menu.getMeta() + ";"
-                                                    + TaxFormNominationToken.isForm + "=" + true));
-                            menu.getSubMenu().add(
-                                    new MenuItem("Назначение источников-приёмников",
-                                            NUMBER_SIGN + SourcesTokens.SOURCES + ";"
-                                                    + TYPE + "=" + menu.getMeta() + ";"
-                                                    + SourcesTokens.FORM_FLAG + "=" + true));
-                        }
                     }
-				}
-			}
-			menuItems.add(taxMenu);
-		}
+
+                    menu.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
+                            + DepartmentConfigTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
+
+                    if (!currentUser.hasRole(TARole.ROLE_CONTROL)) {
+                        menu.getSubMenu().add(
+                                new MenuItem("Назначение форм и деклараций",
+                                        NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
+                                                + TYPE + "=" + menu.getMeta() + ";"
+                                                + TaxFormNominationToken.isForm + "=" + true));
+                        menu.getSubMenu().add(
+                                new MenuItem("Назначение источников-приёмников",
+                                        NUMBER_SIGN + SourcesTokens.SOURCES + ";"
+                                                + TYPE + "=" + menu.getMeta() + ";"
+                                                + SourcesTokens.FORM_FLAG + "=" + true));
+                    }
+                }
+            }
+            menuItems.add(taxMenu);
+        }
 
         // НСИ
-        MenuItem nsiMenuItem = new MenuItem("НСИ");
-        nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
-
         if (currentUser.hasRole(TARole.ROLE_CONTROL)
                 || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                 || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-            nsiMenuItem.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
-                    + DepartmentConfigTokens.departamentConfig));
+            MenuItem nsiMenuItem = new MenuItem("НСИ");
+            nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
+
+            if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+                    || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                nsiMenuItem.getSubMenu().add(new MenuItem("Бухгалтерская отчётность", NUMBER_SIGN
+                        + BookerStatementsTokens.bookerStatements));
+            }
+            menuItems.add(nsiMenuItem);
         }
-        if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-            nsiMenuItem.getSubMenu().add(new MenuItem("Бухгалтерская отчётность", NUMBER_SIGN
-                    + BookerStatementsTokens.bookerStatements));
-        }
-        menuItems.add(nsiMenuItem);
 
         // АДМИНИСТРИРОВАНИЕ
         if (currentUser.hasRole(TARole.ROLE_ADMIN)
                 || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)
+                || currentUser.hasRole(TARole.ROLE_CONF)) {
+
             MenuItem adminMenuItem = new MenuItem("Администрирование");
-            adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
-            adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей Системы", NUMBER_SIGN
-                    + MembersTokens.MEMBERS));
+
+            if (currentUser.hasRole(TARole.ROLE_ADMIN)
+                    || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+                    || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
+                adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей Системы", NUMBER_SIGN
+                        + MembersTokens.MEMBERS));
+            }
 
             if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
                 adminMenuItem.getSubMenu().add(new MenuItem("Конфигурационные параметры", NUMBER_SIGN
                         + ConfigurationPresenter.TOKEN));
-                adminMenuItem.getSubMenu().add(new MenuItem("Импорт данных", NUMBER_SIGN
+                adminMenuItem.getSubMenu().add(new MenuItem("Миграция данных", NUMBER_SIGN
                         + MigrationTokens.migration));
                 adminMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN
                         + SchedulerTokens.taskList));
             }
+
+            if (currentUser.hasRole(TARole.ROLE_CONF)) {
+                MenuItem templateMenu = new MenuItem("Настройка макетов", "", null);
+                adminMenuItem.getSubMenu().add(templateMenu);
+                templateMenu.getSubMenu().add(new MenuItem("Макеты налоговых форм", NUMBER_SIGN
+                        + AdminConstants.NameTokens.adminPage));
+                templateMenu.getSubMenu().add(new MenuItem("Макеты деклараций", NUMBER_SIGN
+                        + DeclarationTemplateTokens.declarationTemplateList));
+                templateMenu.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
+            }
+
             menuItems.add(adminMenuItem);
         }
-
-        // НАСТРОЙКА МАКЕТОВ
-		if (currentUser.hasRole(TARole.ROLE_CONF)) {
-			MenuItem configMenuItem = new MenuItem("Настройка макетов");
-			configMenuItem.getSubMenu().add(new MenuItem("Макеты налоговых форм", NUMBER_SIGN
-                    + AdminConstants.NameTokens.adminPage));
-			configMenuItem.getSubMenu().add(new MenuItem("Макеты деклараций", NUMBER_SIGN
-                    + DeclarationTemplateTokens.declarationTemplateList));
-			configMenuItem.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
-			menuItems.add(configMenuItem);
-		}
 
 		GetMainMenuResult result = new GetMainMenuResult();
 		result.setMenuItems(menuItems);

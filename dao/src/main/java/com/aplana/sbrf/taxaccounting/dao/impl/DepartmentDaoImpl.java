@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -12,7 +13,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -101,11 +101,9 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 			department.setId(rs.getInt("id"));
 			department.setName(rs.getString("name"));
 			Integer parentId = rs.getInt("parent_id");
-			if(parentId == 0){
-				department.setParentId(null);
-			} else {
-				department.setParentId(parentId);
-			}
+            // В ResultSet есть особенность что если пришло значение нул то вернет значение по умолчанию - то есть для Integer'a вернет 0
+            // а так как у нас в базе 0 используется в качестве идентификатора то нужно null нужно првоерять через .wasNull()
+            department.setParentId(rs.wasNull() ? null : parentId);
 			department.setType(DepartmentType.fromCode(rs.getInt("type")));
 			department.setShortName(rs.getString("shortname"));
 			department.setTbIndex(rs.getString("tb_index"));
@@ -155,22 +153,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         return getParentDepartmentChildByType(departmentId, 2);
     }
 
-    /**
-     * Подготовка строки вида "?,?,?,..."
-     * @param length
-     * @return
-     */
-    private String preparePlaceHolders(int length) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length;) {
-            builder.append("?");
-            if (++i < length) {
-                builder.append(",");
-            }
-        }
-        return builder.toString();
-    }
-
     @Override
     public List<Department> getRequiredForTreeDepartments(List<Integer> availableDepartments) {
         try {
@@ -178,7 +160,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             return getJdbcTemplate().query(
                     "with " + recursive + " tree (id, parent_id) as " +
                             "(select id, parent_id from department where id in " +
-                            "(" + preparePlaceHolders(availableDepartments.size()) + ") " +
+                            "(" + SqlUtils.preparePlaceHolders(availableDepartments.size()) + ") " +
                             "union all " +
                             "select d.id, d.parent_id from department d inner join tree t on d.id = t.parent_id) " +
                             "select distinct d.* from tree t, department d where d.id = t.id",
@@ -304,12 +286,12 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                     "select distinct ddt.department_id parent_id, dft.department_id id " +
                     "from declaration_source ds, department_form_type dft, department_declaration_type ddt, declaration_type dt " +
                     "where ds.department_declaration_type_id = ddt.id and ds.src_department_form_type_id = dft.id " +
-                    "and dt.id = ddt.declaration_type_id and dt.tax_type in (" + preparePlaceHolders(taxTypes.size()) + ") " +
+                    "and dt.id = ddt.declaration_type_id and dt.tax_type in (" + SqlUtils.preparePlaceHolders(taxTypes.size()) + ") " +
                     "union " +
                     "select distinct dft.department_id parent_id, dfts.department_id id " +
                     "from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
                     "where fds.department_form_type_id = dft.id and fds.src_department_form_type_id = dfts.id " +
-                    "and ft.id = dft.form_type_id and ft.tax_type in (" + preparePlaceHolders(taxTypes.size()) + ")) link_dep " +
+                    "and ft.id = dft.form_type_id and ft.tax_type in (" + SqlUtils.preparePlaceHolders(taxTypes.size()) + ")) link_dep " +
                     "on av_dep.id = link_dep.parent_id, (select 0 as c from dual union all select 1 as c from dual) t3) " +
                     "where id is not null",
                     Integer.class, sqlParams);

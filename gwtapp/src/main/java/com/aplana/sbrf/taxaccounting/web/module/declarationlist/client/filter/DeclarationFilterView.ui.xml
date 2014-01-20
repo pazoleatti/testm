@@ -6,38 +6,45 @@
     xmlns:per="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
 
     <g:VerticalPanel>
-        <g:cell>
+        <g:cell height="50px">
             <g:HorizontalPanel>
                 <g:cell width="250px">
                     <g:FlowPanel>
-                        <g:Label width="200px" text="Подразделение" />
-                        <dep:DepartmentPickerPopupWidget width="200px" header="Выберите подразделение" multiselection="true" ui:field="departmentPicker" modal="true"/>
-                    </g:FlowPanel>
-
-                </g:cell>
-
-                <g:cell width="250px">
-                    <g:FlowPanel>
-                        <g:Label width="200px" text="Отчетный период" />
+                        <g:Label width="200px" text="Период"/>
                         <per:PeriodPickerPopupWidget multiselect="true" width="200px" ui:field="reportPeriodIds"/>
                     </g:FlowPanel>
                 </g:cell>
-
-                <g:VerticalPanel>
-                    <g:Label width="200px" text="Вид декларации" />
-                    <style:ListBoxWithTooltip width="200px"
-                                              ui:field="declarationTypeId" showTooltip="true" />
-                </g:VerticalPanel>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+                        <g:Label width="200px" text="Вид декларации" />
+                        <style:ListBoxWithTooltip width="200px" ui:field="declarationTypeId" showTooltip="true" />
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+                        <g:Label width="200px" text="Состояние"/>
+                        <g:ValueListBox width="200px" ui:field="formState" />
+                    </g:VerticalPanel>
+                </g:cell>
             </g:HorizontalPanel>
         </g:cell>
-        <g:cell height="50px" verticalAlignment="middle">
-            <style:Bar>
-                <style:LeftBar>
-                    <g:Button ui:field="create">Создать</g:Button>
-                    <g:Button ui:field="apply">Поиск</g:Button>
-                </style:LeftBar>
-            </style:Bar>
+        <g:cell height="50px">
+            <g:HorizontalPanel>
+                <g:cell width="250px" verticalAlignment="bottom">
+                    <g:FlowPanel>
+                        <g:Label width="200px" text="Подразделение"/>
+                        <dep:DepartmentPickerPopupWidget width="200px" header="Выберите подразделение" multiselection="true" ui:field="departmentPicker" modal="true"/>
+                    </g:FlowPanel>
+                </g:cell>
+                <g:cell verticalAlignment="bottom">
+                    <style:Bar>
+                        <style:LeftBar>
+                            <g:Button ui:field="create">Создать</g:Button>
+                            <g:Button ui:field="apply">Поиск</g:Button>
+                        </style:LeftBar>
+                    </style:Bar>
+                </g:cell>
+            </g:HorizontalPanel>
         </g:cell>
     </g:VerticalPanel>
-
 </ui:UiBinder> 

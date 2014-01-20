@@ -15,7 +15,9 @@ public class DeclarationDataFilter implements Serializable {
 
 	private Integer declarationTypeId;
 
-	/*Стартовый индекс списка записей */
+    private WorkflowState formState;
+
+    /*Стартовый индекс списка записей */
 	private int startIndex;
 
 	/*Количество записей, которые нужно вернуть*/
@@ -89,4 +91,12 @@ public class DeclarationDataFilter implements Serializable {
 	public void setDeclarationTypeId(Integer declarationTypeId) {
 		this.declarationTypeId = declarationTypeId;
 	}
+
+    public WorkflowState getFormState() {
+        return formState;
+    }
+
+    public void setFormState(WorkflowState formState) {
+        this.formState = formState;
+    }
 }

@@ -518,4 +518,9 @@ public class PeriodServiceImpl implements PeriodService{
 		return Collections.EMPTY_LIST;
 	}
 
+
+    @Override
+    public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList) {
+        return reportPeriodDao.getPeriodsByTaxTypeAndDepartments(taxType, departmentList);
+    }
 }

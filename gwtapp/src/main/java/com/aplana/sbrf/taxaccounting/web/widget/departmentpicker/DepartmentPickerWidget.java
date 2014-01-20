@@ -1,14 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.departmentpicker;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -52,6 +44,8 @@ public class DepartmentPickerWidget extends Composite implements
 	@UiField
 	public Button ok;
 
+    private List<Integer> availableValuesList = new LinkedList<Integer>();
+
 	/**
 	 * Значения
 	 */
@@ -65,7 +59,6 @@ public class DepartmentPickerWidget extends Composite implements
 	boolean multiselection;
 
 	public static final String CHECKBOX_GROUP = "MAIN_GROUP";
-
 	
 	public DepartmentPickerWidget(String header, boolean multiselection) {
 		this();
@@ -81,6 +74,8 @@ public class DepartmentPickerWidget extends Composite implements
 	public void setAvalibleValues(List<Department> departments,
 			Set<Integer> availableDepartments) {
 		tree.clear();
+        availableValuesList.clear();
+        availableValuesList.addAll(availableDepartments);
 		List<TreeItem> itemsHierarchy = flatToHierarchy(departments,
 				availableDepartments);
 		Collections.sort(itemsHierarchy, new Comparator<TreeItem>() {
@@ -96,7 +91,12 @@ public class DepartmentPickerWidget extends Composite implements
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+    @Override
+    public List<Integer> getAvalibleValues() {
+        return availableValuesList;
+    }
+
+    @SuppressWarnings("unchecked")
 	private void selectItems(List<Integer> itemsIdToSelect) {
 		this.valueDereference = new ArrayList<String>();
 		List<TreeItem> allItems = new ArrayList<TreeItem>();
@@ -269,5 +269,4 @@ public class DepartmentPickerWidget extends Composite implements
 	public void setHeader(String header) {
 		this.header.setText(header);
 	}
-
 }

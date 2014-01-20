@@ -3,7 +3,9 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -38,8 +40,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
             reportPeriod.setTaxPeriod(taxPeriodDao.get(rs.getInt("tax_period_id")));
             reportPeriod.setOrder(rs.getInt("ord"));
             reportPeriod.setDictTaxPeriodId(rs.getInt("dict_tax_period_id"));
-	        reportPeriod.setStartDate(rs.getDate("START_DATE"));
-	        reportPeriod.setEndDate(rs.getDate("END_DATE"));
             return reportPeriod;
         }
     }
@@ -106,6 +106,25 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 	}
 
 	@Override
+    public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList) {
+        Object[] params = new Object[departmentList.size() + 1];
+        int cnt = 0;
+        for (Integer departmentId : departmentList) {
+            params[cnt++] = departmentId;
+        }
+        params[cnt] = String.valueOf(taxType.getCode());
+
+        return getJdbcTemplate().query(
+                "select rp.* from report_period rp, tax_period tp where rp.id in " +
+                        "(select distinct report_period_id from department_report_period " +
+                        "where department_id in("+ SqlUtils.preparePlaceHolders(departmentList.size())+")) " +
+                        "and rp.tax_period_id = tp.id " +
+                        "and tp.tax_type = ?" +
+                        "order by tp.year desc, rp.ord",
+                new ReportPeriodMapper(), params);
+    }
+
+    @Override
     public ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {
         try {
             return getJdbcTemplate().queryForObject(

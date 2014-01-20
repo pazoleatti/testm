@@ -15,3 +15,10 @@ insert into report_period (id, name, months, tax_period_id, ord, dict_tax_period
 insert into report_period (id, name, months, tax_period_id, ord, dict_tax_period_id, start_date, end_date) values (2, 'Transport report period 2', 3,  1, 2, 22, date '2013-04-01', date '2013-06-30');
 insert into report_period (id, name, months, tax_period_id, ord, dict_tax_period_id, start_date, end_date) values (3, 'VAT report period 1'      , 3, 21, 1, 21, date '2013-01-01', date '2013-03-31');
 insert into report_period (id, name, months, tax_period_id, ord, dict_tax_period_id, start_date, end_date) values (4, 'Income report period 1'   , 3, 31, 1, 21, date '2013-01-01', date '2013-03-31');
+
+insert into department_report_period(department_id, report_period_id, is_active, is_balance_period) values (1, 1, 1, 0);
+insert into department_report_period(department_id, report_period_id, is_active, is_balance_period) values (1, 2, 1, 0);
+insert into department_report_period(department_id, report_period_id, is_active, is_balance_period) values (1, 3, 1, 0);
+insert into department_report_period(department_id, report_period_id, is_active, is_balance_period) values (1, 4, 1, 0);
+insert into department_report_period(department_id, report_period_id, is_active, is_balance_period) values (2, 1, 1, 0);
+insert into department_report_period(department_id, report_period_id, is_active, is_balance_period) values (2, 2, 1, 0);

@@ -193,4 +193,13 @@ public interface PeriodService {
 	 * @param user пользователь, который выполняет действие
 	 */
 	public void removeReportPeriod(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user);
+
+    /**
+     * Список отчетных периодов для указанного вида налога и для указанных подразделений
+     *
+     * @param taxType Вид налога
+     * @param departmentList Список подразделений
+     * @return Список отчетных периодов
+     */
+    public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList);
 }
