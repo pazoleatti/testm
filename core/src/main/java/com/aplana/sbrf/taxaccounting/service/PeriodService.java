@@ -175,4 +175,13 @@ public interface PeriodService {
      * @return
      */
     public Calendar getMonthReportDate(int reportPeriodId, int periodOrder);
+
+    /**
+     * Список отчетных периодов для указанного вида налога и для указанных подразделений
+     *
+     * @param taxType Вид налога
+     * @param departmentList Список подразделений
+     * @return Список отчетных периодов
+     */
+    public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList);
 }

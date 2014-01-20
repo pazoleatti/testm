@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -17,8 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -107,5 +110,25 @@ public class ReportPeriodDaoTest {
     @Test(expected = DaoException.class)
     public void getReportPeriodByTaxPeriodAndDictTest2() {
         reportPeriodDao.getByTaxPeriodAndDict(-1, -1);
+    }
+
+    private List<Integer> getReportPeriodIds(List<ReportPeriod> reportPeriodList) {
+        List<Integer> retVal = new LinkedList<Integer>();
+        for (ReportPeriod reportPeriod : reportPeriodList) {
+            retVal.add(reportPeriod.getId());
+        }
+        return retVal;
+    }
+
+    @Test
+    public void getPeriodsByTaxTypeAndDepartmentsTest() {
+        List<ReportPeriod> reportPeriods;
+        reportPeriods = reportPeriodDao.getPeriodsByTaxTypeAndDepartments(TaxType.INCOME, asList(1, 2, 3));
+        Assert.assertEquals(0, reportPeriods.size());
+        reportPeriods = reportPeriodDao.getPeriodsByTaxTypeAndDepartments(TaxType.TRANSPORT, asList(1, 2, 3));
+        Assert.assertEquals(2, reportPeriods.size());
+        Assert.assertTrue(getReportPeriodIds(reportPeriods).containsAll(asList(1, 2)));
+        reportPeriods = reportPeriodDao.getPeriodsByTaxTypeAndDepartments(TaxType.TRANSPORT, asList(3));
+        Assert.assertEquals(0, reportPeriods.size());
     }
 }

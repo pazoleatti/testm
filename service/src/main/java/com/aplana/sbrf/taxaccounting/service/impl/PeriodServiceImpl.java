@@ -390,4 +390,9 @@ public class PeriodServiceImpl implements PeriodService{
         dateStart.set(Calendar.DAY_OF_MONTH, dateStart.get(Calendar.DAY_OF_MONTH));
         return dateStart;
     }
+
+    @Override
+    public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList) {
+        return reportPeriodDao.getPeriodsByTaxTypeAndDepartments(taxType, departmentList);
+    }
 }
