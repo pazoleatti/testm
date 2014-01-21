@@ -7,6 +7,7 @@ import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
+import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidget;
@@ -28,6 +29,8 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
 import com.google.gwt.user.client.ui.PopupPanel;
+
+import java.util.List;
 
 /**
  * Ячейка для редактирования значений из справочника. 
@@ -116,8 +119,18 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 							.getDereferenceValue());
 
 					setValue(context, parent, value);
-					
-					if (valueUpdater != null) {
+
+                    // Разыменование для зависимых ячеек
+                    List<Cell> linkedCells = dataRow.getLinkedCells(column.getId());
+                    if (linkedCells != null) {
+                        for (Cell refCell : linkedCells) {
+                            ReferenceColumn referenceColumn = (ReferenceColumn)refCell.getColumn();
+                            refCell.setRefBookDereference(refBookPiker.getOtherDereferenceValue(
+                                    referenceColumn.getRefBookAttributeId()));
+                        }
+                    }
+
+                    if (valueUpdater != null) {
 						valueUpdater.update(value);
 					}
 					// Скрываем панель. При скрытии удаляется хендлер.
@@ -130,7 +143,6 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			
 		}
 	}
-
 
 	@Override
 	public void render(Context context, Long value, SafeHtmlBuilder sb) {

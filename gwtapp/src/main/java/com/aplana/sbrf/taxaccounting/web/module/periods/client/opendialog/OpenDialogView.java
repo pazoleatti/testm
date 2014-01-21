@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.aplana.gwt.client.Spinner;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
@@ -28,6 +29,9 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 
 	@UiField
 	DepartmentPickerPopupWidget departmentPicker;
+
+	@UiField
+	Label departmentPickerRO;
 
 	@UiField
 	Button continueButton;
@@ -66,10 +70,10 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	}
 
 	@Override
-	public void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, boolean enable) {
+	public void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<DepartmentPair> selectedDepartments, boolean enable) {
 		departmentPicker.setAvalibleValues(departments, avalDepartments);
-		departmentPicker.setValue(selectedDepartments);
 		departmentPicker.setEnabled(enable);
+		departmentPickerRO.setText(selectedDepartments.get(0).getDepartmentName());
 	}
 
 	@Override
@@ -141,4 +145,10 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
         onCorrectPeriodButton();
         term.setValue(null);
     }
+
+	@Override
+	public void setCanChangeDepartment(boolean canChange) {
+		departmentPicker.setVisible(canChange);
+		departmentPickerRO.setVisible(!canChange);
+	}
 }

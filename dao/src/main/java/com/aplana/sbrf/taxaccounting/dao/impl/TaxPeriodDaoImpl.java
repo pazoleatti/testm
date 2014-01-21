@@ -67,6 +67,7 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 	}
 
 	@Override
+	@Deprecated
 	public List<TaxPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to) {
 		try {
 			return getJdbcTemplate().query(
@@ -81,6 +82,16 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 	}
 
 	@Override
+	public List<TaxPeriod> listByTaxTypeAndYear(TaxType taxType, int year) {
+		return getJdbcTemplate().query(
+				"select * from tax_period where tax_type = ? and year = ?",
+				new Object[]{taxType.getCode(), year},
+				new int[] { Types.VARCHAR, Types.NUMERIC},
+				new TaxPeriodRowMapper()
+		);
+	}
+
+	@Override
 	public int add(TaxPeriod taxPeriod) {
 		JdbcTemplate jt = getJdbcTemplate();
 
@@ -89,16 +100,16 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 			id = generateId("seq_tax_period", Integer.class);
 		}
 		jt.update(
-				"insert into tax_period (id, tax_type, start_date, end_date, year)" +
+				"insert into tax_period (id, tax_type, year, start_date, end_date)" +
 						" values (?, ?, ?, ?, ?)",
 				new Object[]{
 						id,
 						taxPeriod.getTaxType().getCode(),
-						taxPeriod.getStartDate(),
-						taxPeriod.getEndDate(),
-						taxPeriod.getYear()
+						taxPeriod.getYear(),
+						new Date(), //TODO Выпилить
+						new Date()  //TODO Выпилить
 				},
-				new int[]{Types.NUMERIC, Types.VARCHAR, Types.DATE, Types.DATE, Types.NUMERIC,}
+				new int[]{Types.NUMERIC, Types.VARCHAR, Types.NUMERIC, Types.DATE, Types.DATE}
 
 		);
 		taxPeriod.setId(id);

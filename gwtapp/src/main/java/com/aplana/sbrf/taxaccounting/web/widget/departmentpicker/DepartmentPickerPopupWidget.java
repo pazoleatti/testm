@@ -26,17 +26,17 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
     @UiField
     FlowPanel wrappingPanel;
 
-	@UiField
-	HasText selected;
+    @UiField
+    HasText selected;
 
-	@UiField
-	Button selectButton;
-	
-	@UiField
-	Button clearButton;
-	
-	@UiField
-	Panel panel;
+    @UiField
+    Button selectButton;
+
+    @UiField
+    Button clearButton;
+
+    @UiField
+    Panel panel;
 
     @UiField
     public DepartmentTreeWidget tree;
@@ -65,32 +65,34 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
     /** Значения id */
     private List<Integer> value = new ArrayList<Integer>();
 
+    private List<Integer> availableValuesList = new LinkedList<Integer>();
+    
     /** Разименованные значения. */
     private List<String> valueDereference = new ArrayList<String>();
 
     boolean multiselection;
 
-	@Override
-	public boolean isEnabled() {
-		return (selectButton.isEnabled());
-	}
+    @Override
+    public boolean isEnabled() {
+        return (selectButton.isEnabled());
+    }
 
-	@Override
-	public void setEnabled(boolean enabled) {
-		selectButton.setEnabled(enabled);
-		clearButton.setEnabled(enabled);
-	}
+    @Override
+    public void setEnabled(boolean enabled) {
+        selectButton.setEnabled(enabled);
+        clearButton.setEnabled(enabled);
+    }
 
-	interface Binder extends UiBinder<Widget, DepartmentPickerPopupWidget> {
-	}
+    interface Binder extends UiBinder<Widget, DepartmentPickerPopupWidget> {
+    }
 
-	private static Binder uiBinder = GWT.create(Binder.class);
+    private static Binder uiBinder = GWT.create(Binder.class);
 
     /** Виджет для выбора подразделений. */
-	@UiConstructor
-	public DepartmentPickerPopupWidget(String header, boolean multiselection, boolean modal) {
+    @UiConstructor
+    public DepartmentPickerPopupWidget(String header, boolean multiselection, boolean modal) {
         version = new ValueListBox<Date>(new DateTimeFormatRenderer());
-		initWidget(uiBinder.createAndBindUi(this));
+        initWidget(uiBinder.createAndBindUi(this));
         this.multiselection = multiselection;
         tree.setMultiSelection(multiselection);
         selectChild.setVisible(multiselection);
@@ -99,43 +101,43 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 
         // TODO (Ramil Timerbaev) в "Дата актуальности" пока выставил текущую дату
         setVersion(new Date());
-	}
+    }
 
-	@UiHandler("selectButton")
-	void onSelectButtonClicked(ClickEvent event){
+    @UiHandler("selectButton")
+    void onSelectButtonClicked(ClickEvent event){
         tree.setValueById(value, false);
         popupPanel.center();
-	}
-	
-	@UiHandler("clearButton")
-	void onClearButtonClicked(ClickEvent event) {
+    }
+
+    @UiHandler("clearButton")
+    void onClearButtonClicked(ClickEvent event) {
         valueDereference.clear();
-		this.setValue(null, true);
-	}
+        this.setValue(null, true);
+    }
 
-	private String joinListToString(Collection<String> strings) {
-		if ((strings == null) || strings.isEmpty()) {
-			return "";
-		}
-		StringBuilder text = new StringBuilder();
-		for (String name : strings) {
-			text.append(name).append("; ");
-		}
-		return text.toString();
-	}
+    private String joinListToString(Collection<String> strings) {
+        if ((strings == null) || strings.isEmpty()) {
+            return "";
+        }
+        StringBuilder text = new StringBuilder();
+        for (String name : strings) {
+            text.append(name).append("; ");
+        }
+        return text.toString();
+    }
 
-	@Override
-	public List<Integer> getValue() {
+    @Override
+    public List<Integer> getValue() {
         return value;
-	}
+    }
 
-	@Override
-	public void setValue(List<Integer> value) {
-		setValue(value, false);
-	}
+    @Override
+    public void setValue(List<Integer> value) {
+        setValue(value, false);
+    }
 
-	@Override
-	public void setValue(List<Integer> value, boolean fireEvents) {
+    @Override
+    public void setValue(List<Integer> value, boolean fireEvents) {
         if (value == null){
             value = new ArrayList<Integer>();
         }
@@ -145,7 +147,7 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
         if (fireEvents) {
             ValueChangeEvent.fire(this, this.value);
         }
-	}
+    }
 
     /** Установить выбранными узлы дерева для указанных подразделений. */
     public void setValueByDepartmentPair(List<DepartmentPair> values, boolean fireEvents) {
@@ -156,20 +158,20 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
         setValue(list, fireEvents);
     }
 
-	@Override
-	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<Integer>> handler) {
-		return addHandler(handler, ValueChangeEvent.getType());
-	}
+    @Override
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<Integer>> handler) {
+        return addHandler(handler, ValueChangeEvent.getType());
+    }
 
-	@Override
-	public List<String> getValueDereference() {
+    @Override
+    public List<String> getValueDereference() {
         return valueDereference;
-	}
+    }
 
-	@Override
-	public void setHeader(String header) {
+    @Override
+    public void setHeader(String header) {
         popupPanel.setText(header);
-	}
+    }
 
     @Override
     public void setTitle(String title) {
@@ -184,6 +186,14 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
     @Override
     public void setAvalibleValues(List<Department> departments, Set<Integer> availableDepartments) {
         tree.setAvailableValues(departments, availableDepartments);
+        //TODO tree из DepartmentPickerWidget n++
+    }
+
+    @Override
+    public List<Integer> getAvalibleValues() {
+        return departmentPiker.getAvalibleValues();
+        //TODO tree из DepartmentPickerWidget n++
+    }
     }
 
     /** Установить выбранными элементы по идентификаторам. */

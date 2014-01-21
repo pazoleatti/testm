@@ -1,9 +1,9 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
-    xmlns:per="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+             xmlns:per="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
 
     <ui:style>
         .separator {
@@ -38,20 +38,26 @@
         <g:cell horizontalAlignment="right">
             <g:Label text="Подразделение:" addStyleNames="{margin.right5}"/>
         </g:cell>
-        <g:cell width="33%">
+        <g:cell width="24%">
             <dep:DepartmentPickerPopupWidget width="100%" header="Выберите подразделение" multiselection="true" ui:field="departmentPicker" modal="true"/>
         </g:cell>
         <g:cell horizontalAlignment="right">
             <g:Label wordWrap="false" text="Отчетный период:" addStyleNames="{margin.left10}, {margin.right5}"/>
         </g:cell>
-        <g:cell width="33%">
+        <g:cell width="24%">
             <per:PeriodPickerPopupWidget multiselect="true" width="100%" ui:field="reportPeriodIds"/>
         </g:cell>
         <g:cell horizontalAlignment="right">
             <g:Label wordWrap="false" text="Вид декларации:" addStyleNames="{margin.left10}, {margin.right5}"/>
         </g:cell>
-        <g:cell width="33%">
+        <g:cell width="24%">
             <style:ListBoxWithTooltip width="100%" ui:field="declarationTypeId" showTooltip="true" />
+        </g:cell>
+        <g:cell horizontalAlignment="right">
+            <g:Label wordWrap="false" text="Состояние:" addStyleNames="{margin.left10}, {margin.right5}"/>
+        </g:cell>
+        <g:cell width="24%">
+            <g:ValueListBox width="100%" ui:field="formState" />
         </g:cell>
         <g:cell verticalAlignment="middle">
             <g:HTML addStyleNames="{style.separator}"/>
@@ -60,4 +66,4 @@
         <g:Button title="Поиск" text="Поиск" ui:field="apply" addStyleNames="{margin.right15}"/>
     </g:HorizontalPanel>
 
-</ui:UiBinder> 
+</ui:UiBinder>

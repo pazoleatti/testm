@@ -92,6 +92,7 @@
                     <g:cell width="100%">
                         <picker:DepartmentPickerPopupWidget header="Подразделение" ui:field="departmentPicker"
                                                             multiselection="false" width="100%" modal="true"/>
+                        <g:Label ui:field="departmentPickerRO"/>
                     </g:cell>
 
                     <g:cell horizontalAlignment="right">
@@ -124,6 +125,7 @@
                                           ui:field="openPeriod"/>
                         <style:LinkButton img="resources/img/lock-16.png" text="Закрыть период"
                                           ui:field="closePeriod"/>
+                        <g:Button ui:field="removePeriod" text="Удалить период"/>
                         <g:Button ui:field="setDeadlineButton" text="Назначить срок сдачи"/>
                     </style:LeftBar>
                 </g:HorizontalPanel>

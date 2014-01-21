@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -29,11 +30,12 @@ import java.util.Set;
 public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyView> implements OpenDialogUiHandlers {
 
 	public interface MyView extends PopupView, HasUiHandlers<OpenDialogUiHandlers> {
-		void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, boolean enable);
+		void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<DepartmentPair> selectedDepartments, boolean enable);
 		void setYear(int year);
 		void setTaxType(TaxType taxType);
         void setSelectedDepartment(Integer departmentId);
         void resetForm();
+		void setCanChangeDepartment(boolean canChange);
 	}
 
 	private DispatchAsync dispatcher;
@@ -52,8 +54,12 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		getView().hide();
 	}
 
-	public void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<Integer> selectedDepartments, boolean enable) {
+	public void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<DepartmentPair> selectedDepartments, boolean enable) {
 		getView().setDepartments(departments, avalDepartments, selectedDepartments, enable);
+	}
+
+	public void setCanChangeDepartment(boolean canChange) {
+		getView().setCanChangeDepartment(canChange);
 	}
 
 	public void setYear(int year) {

@@ -198,10 +198,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 					public void onCellModified(CellModifiedEvent event, boolean withReference) {
                         if (getUiHandlers() != null) {
                             getUiHandlers().onCellModified(event.getDataRow());
-                            // Зависимые ячейки
+                            // Зависимые ячейки - обновление всей строки
                             if (withReference) {
-                                // TODO Возможно есть способ перерисовать только измененные ячейки
-                                formDataTable.redraw();
+                                formDataTable.redrawRow(event.getDataRow().getIndex() - 1);
                             }
 						}
 					}

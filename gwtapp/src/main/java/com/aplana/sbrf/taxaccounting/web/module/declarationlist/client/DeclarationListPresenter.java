@@ -47,7 +47,7 @@ public class DeclarationListPresenter extends
         DeclarationDataFilter dataFilter = filterPresenter.getFilterData();
         saveFilterState(dataFilter.getTaxType(), dataFilter);
         updateTitle(dataFilter.getTaxType());
-        getView().updateData();
+        getView().updateData(0);
     }
 
     @Override
@@ -124,6 +124,7 @@ public class DeclarationListPresenter extends
     }
 
     private void updateTitle(TaxType taxType){
+        // TODO Зачем это? В постановке нет. Виды налога перечислены не все.
 		String description = "";
 		if(taxType.getName().equals(TaxType.VAT.getName())){
 			description = "Деклараци по НДС";
@@ -153,6 +154,4 @@ public class DeclarationListPresenter extends
 
         filterStates.put(taxType, cloneFilter);
     }
-
-
 }

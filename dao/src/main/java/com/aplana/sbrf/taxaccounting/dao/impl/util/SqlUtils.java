@@ -61,4 +61,18 @@ public final class SqlUtils {
 		}
 		return '(' + result.substring(0, result.length() - 1) + ')';
 	}
+
+    /**
+     * Подготовка строки вида "?,?,?,..."
+     */
+    public static String preparePlaceHolders(int length) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < length;) {
+            builder.append("?");
+            if (++i < length) {
+                builder.append(",");
+            }
+        }
+        return builder.toString();
+    }
 }

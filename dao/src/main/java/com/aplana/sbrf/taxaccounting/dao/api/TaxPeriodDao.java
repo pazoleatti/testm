@@ -38,6 +38,14 @@ public interface TaxPeriodDao {
 	List<TaxPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to);
 
 	/**
+	 * Получить налоговые периоды
+	 * @param taxType тип налога
+	 * @param year год
+	 * @return список налоговых периодов по типу налога за год
+	 */
+	public List<TaxPeriod> listByTaxTypeAndYear(TaxType taxType, int year);
+
+	/**
 	 * Добавить новый налоговый период
 	 * @param taxPeriod налоговый период
 	 * @return идентификатор нового налогового периода
