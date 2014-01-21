@@ -104,11 +104,9 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-    public void createRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
+    public void createRecordVersion(Logger logger, Long recordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
         try {
             List<RefBookAttribute> attributes = refBookDao.getAttributes(refBookId);
-            //Получаем идентификатор записи справочника без учета версий
-            Long recordId = uniqueRecordId != null ? refBookDao.getRecordId(uniqueRecordId) : null;
             //Проверка обязательности заполнения записей справочника
             for (Map<String, RefBookValue> record : records) {
                 List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
@@ -233,7 +231,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-    public List<RefBookValue> getUniqueAttributeValues(Long uniqueRecordId) {
+    public List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long uniqueRecordId) {
         return refBookDao.getUniqueAttributeValues(refBookId, uniqueRecordId);
     }
 
@@ -336,6 +334,16 @@ public class RefBookUniversal implements RefBookDataProvider {
             throw new ServiceLoggerException("Версия элемента справочника не удалена, обнаружены фатальные ошибки!",
                     logEntryService.save(logger.getEntries()));
         }
+    }
+
+    @Override
+    public Long getFirstRecordId(Long uniqueRecordId) {
+        return refBookDao.getFirstRecordId(refBookId, uniqueRecordId);
+    }
+
+    @Override
+    public Long getRecordId(Long uniqueRecordId) {
+        return refBookDao.getRecordId(uniqueRecordId);
     }
 
     @Override

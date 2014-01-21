@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.UniversalFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
@@ -15,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +42,7 @@ public class RefBookUtils extends AbstractDao {
 		PreparedStatementData ps = new PreparedStatementData();
 		ps.appendQuery("SELECT ");
 		ps.appendQuery("id ");
-		ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+		ps.appendQuery(RefBook.RECORD_UNIQUE_ID_ALIAS);
 		for (RefBookAttribute attribute : refBook.getAttributes()) {
 			ps.appendQuery(", ");
 			ps.appendQuery(attribute.getAlias());

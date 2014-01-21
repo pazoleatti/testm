@@ -137,7 +137,7 @@ public class GetRefBookValuesHandler extends
 			RefBookItem item = new RefBookItem();
 			List<String> values = new ArrayList<String>();
 
-			item.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()
+			item.setId(record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue()
 					.longValue());
 			List<RefBookAttribute> attribute = refBook.getAttributes();
 

@@ -160,7 +160,7 @@ public interface RefBookDao {
      * @param recordId идентификатор записи
      * @return
      */
-    List<RefBookValue> getUniqueAttributeValues(Long refBookId, Long recordId);
+    List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long refBookId, Long recordId);
 
     /**
      * По коду справочника возвращает набор его атрибутов
@@ -255,7 +255,7 @@ public interface RefBookDao {
     Long getRecordId(Long uniqueRecordId);
     /**
      * Удаляет указанные версии записи из справочника
-     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
+     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_UNIQUE_ID_ALIAS Код записи}
      */
     void deleteRecordVersions(List<Long> uniqueRecordIds);
 
@@ -269,15 +269,24 @@ public interface RefBookDao {
     /**
      * Удаляет все версии записи из справочника
      * @param refBookId идентификатор справочника
-     * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
+     * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_UNIQUE_ID_ALIAS Код записи}
      */
     void deleteAllRecordVersions(Long refBookId, List<Long> uniqueRecordIds);
 
     /**
      * Возвращает список версий элементов справочника за указанный период времени
+     * @param refBookId идентификатор справочника
      * @param startDate начальная дата
      * @param endDate конечная дата
      * @return
      */
     List<Date> getVersions(Long refBookId, Date startDate, Date endDate);
+
+    /**
+     * Получает идентификатор записи, который имеет наименьшую дату начала актуальности для указанной версии
+     * @param refBookId идентификатор справочника
+     * @param uniqueRecordId идентификатор версии записи справочника
+     * @return
+     */
+    Long getFirstRecordId(Long refBookId, Long uniqueRecordId);
 }

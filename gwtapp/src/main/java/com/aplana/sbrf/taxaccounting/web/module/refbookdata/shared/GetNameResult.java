@@ -11,6 +11,9 @@ public class GetNameResult implements Result {
      */
     String uniqueAttributeValues;
 
+    /** Идентификатор текущей записи без учета версий (тип записи) */
+    Long recordId;
+
 	public String getName() {
 		return name;
 	}
@@ -25,5 +28,13 @@ public class GetNameResult implements Result {
 
     public void setUniqueAttributeValues(String uniqueAttributeValues) {
         this.uniqueAttributeValues = uniqueAttributeValues;
+    }
+
+    public Long getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(Long recordId) {
+        this.recordId = recordId;
     }
 }

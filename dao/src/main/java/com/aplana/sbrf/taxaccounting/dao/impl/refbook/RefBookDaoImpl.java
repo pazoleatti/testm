@@ -233,7 +233,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.appendQuery("SELECT * FROM ");
         ps.appendQuery("(select\n");
         ps.appendQuery("  r.id as \"");
-        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+        ps.appendQuery(RefBook.RECORD_UNIQUE_ID_ALIAS);
         ps.appendQuery("\",\n");
 
         if (version == null) {
@@ -336,7 +336,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         StringBuilder sql = new StringBuilder();
         sql.append("select\n");
         sql.append("  r.id as \"");
-        sql.append(RefBook.RECORD_ID_ALIAS);
+        sql.append(RefBook.RECORD_UNIQUE_ID_ALIAS);
         sql.append("\",\n");
         List<RefBookAttribute> attributes = refBook.getAttributes();
         for (int i = 0; i < attributes.size(); i++) {
@@ -421,7 +421,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
             for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
                 String attributeAlias = entry.getKey();
-                if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) ||
+                if (RefBook.RECORD_UNIQUE_ID_ALIAS.equals(attributeAlias) ||
                         RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
                     continue;
                 }
@@ -488,7 +488,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
                 for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
                     String attributeAlias = entry.getKey();
-                    if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) ||
+                    if (RefBook.RECORD_UNIQUE_ID_ALIAS.equals(attributeAlias) ||
                             RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
                         continue;
                     }
@@ -629,7 +629,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         @Override
         public RefBookRecordVersion mapRow(ResultSet rs, int rowNum) throws SQLException {
             RefBookRecordVersion result = new RefBookRecordVersion();
-            result.setRecordId(rs.getLong(RefBook.RECORD_ID_ALIAS));
+            result.setRecordId(rs.getLong(RefBook.RECORD_UNIQUE_ID_ALIAS));
             result.setVersionStart(rs.getDate("versionStart"));
             result.setVersionEnd(rs.getDate("versionEnd"));
             return result;
@@ -644,7 +644,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public RefBookRecordVersion getActiveRecordVersion(Long uniqueRecordId) {
         try {
             String sql = String.format(GET_RECORD_VERSION,
-                    RefBook.RECORD_ID_ALIAS);
+                    RefBook.RECORD_UNIQUE_ID_ALIAS);
             return getJdbcTemplate().queryForObject(sql,
                     new Object[] {
                             uniqueRecordId
@@ -697,6 +697,18 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         });
     }
 
+    private final static String GET_FIRST_RECORD_ID = "with allRecords as (select id, version from ref_book_record where record_id = (select record_id from ref_book_record where id = ?) and ref_book_id = ? and id != ?)\n" +
+            "select id from allRecords where version = (select min(version) from allRecords)";
+
+    @Override
+    public Long getFirstRecordId(Long refBookId, Long uniqueRecordId) {
+        try {
+            return getJdbcTemplate().queryForLong(GET_FIRST_RECORD_ID, uniqueRecordId, refBookId, uniqueRecordId);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersions(Long refBookId, Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         PreparedStatementData ps = getRefBookSql(refBookId, uniqueRecordId, null, sortAttribute, filter, pagingParams);
@@ -712,12 +724,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public List<RefBookValue> getUniqueAttributeValues(Long refBookId, Long uniqueRecordId) {
-        List<RefBookValue> values = new ArrayList<RefBookValue>();
+    public List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long refBookId, Long uniqueRecordId) {
+        List<Pair<RefBookAttribute, RefBookValue>> values = new ArrayList<Pair<RefBookAttribute, RefBookValue>>();
         List<RefBookAttribute> attributes = getAttributes(refBookId);
         for (RefBookAttribute attribute : attributes) {
             if (attribute.isUnique()) {
-                values.add(getValue(uniqueRecordId, attribute.getId()));
+                values.add(new Pair<RefBookAttribute, RefBookValue>(attribute, getValue(uniqueRecordId, attribute.getId())));
             }
         }
         return values;
@@ -776,7 +788,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long refBookId, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records) {
-        System.out.println("getMatchedRecordsByUniqueAttributes: "+refBookId+"; "+attributes+"; "+records);
         boolean hasUniqueAttributes = false;
         List<RefBookValue> attributeValues = new ArrayList<RefBookValue>();
         PreparedStatementData ps = new PreparedStatementData();
@@ -819,7 +830,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         if (hasUniqueAttributes) {
             String sql = String.format(ps.getQuery().toString(), attributeValues.toArray());
-            System.out.println("sql: "+sql);
 
             return getJdbcTemplate().query(sql, ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
                 @Override
@@ -946,7 +956,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public RefBookRecordVersion getNextVersion(Long refBookId, Long recordId, Date versionFrom) {
         String sql = String.format(GET_NEXT_RECORD_VERSION,
-                sdf.format(versionFrom), RefBook.RECORD_ID_ALIAS);
+                sdf.format(versionFrom), RefBook.RECORD_UNIQUE_ID_ALIAS);
         try {
             return getJdbcTemplate().queryForObject(sql,
                     new Object[] {
@@ -966,6 +976,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             throw new DaoException(String.format("Не найдена запись справочника с id = %d", uniqueRecordId));
         }
     }
+
     private static final String DELETE_ALL_VERSIONS = "delete from ref_book_record where ref_book_id=? and record_id in (select record_id from ref_book_record where id in %s)";
 
     @Override

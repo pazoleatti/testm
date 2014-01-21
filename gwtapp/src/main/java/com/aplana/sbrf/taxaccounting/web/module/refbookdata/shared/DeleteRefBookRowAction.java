@@ -10,6 +10,7 @@ public class DeleteRefBookRowAction extends UnsecuredActionImpl<DeleteRefBookRow
 
 	Long refBookId;
 	List<Long> recordsId;
+    /** Признак того, что удаляется одна версия, а не все версии записи */
     boolean deleteVersion;
 
     public boolean isDeleteVersion() {

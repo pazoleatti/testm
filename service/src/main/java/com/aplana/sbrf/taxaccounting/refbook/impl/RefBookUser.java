@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -105,7 +106,7 @@ public class RefBookUser implements RefBookDataProvider {
     }
 
     @Override
-    public List<RefBookValue> getUniqueAttributeValues(Long recordId) {
+    public List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long recordId) {
         throw new UnsupportedOperationException();
     }
 
@@ -121,6 +122,16 @@ public class RefBookUser implements RefBookDataProvider {
 
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Long getFirstRecordId(Long uniqueRecordId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Long getRecordId(Long uniqueRecordId) {
         throw new UnsupportedOperationException();
     }
 }

@@ -34,12 +34,16 @@ public class DeleteRefBookRowHandler extends AbstractActionHandler<DeleteRefBook
 
         DeleteRefBookRowResult result = new DeleteRefBookRowResult();
         Logger logger = new Logger();
-        if (action.isDeleteVersion()) {
-            refBookDataProvider.deleteRecordVersions(logger, action.getRecordsId());
-        } else {
-            refBookDataProvider.deleteAllRecordVersions(logger, action.getRecordsId());
+        if (action.getRecordsId().size() > 0) {
+            if (action.isDeleteVersion()) {
+                Long nextVersion = refBookDataProvider.getFirstRecordId(action.getRecordsId().get(0));
+                refBookDataProvider.deleteRecordVersions(logger, action.getRecordsId());
+                result.setNextVersion(nextVersion);
+            } else {
+                refBookDataProvider.deleteAllRecordVersions(logger, action.getRecordsId());
+            }
+            result.setUuid(logEntryService.save(logger.getEntries()));
         }
-        result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}
 

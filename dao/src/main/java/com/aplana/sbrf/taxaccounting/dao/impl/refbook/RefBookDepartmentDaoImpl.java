@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +38,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
     public Map<String, RefBookValue> getRecordData(Long recordId) {
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         StringBuilder sql = new StringBuilder("SELECT id ");
-        sql.append(RefBook.RECORD_ID_ALIAS);
+        sql.append(RefBook.RECORD_UNIQUE_ID_ALIAS);
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             sql.append(", ");
             sql.append(attribute.getAlias());
