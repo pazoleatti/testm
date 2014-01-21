@@ -142,7 +142,9 @@ public class GetMainMenuActionHandler extends
                 // добавить "Журнал аудита"
                 if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
                     adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
-                } else {
+                }
+                if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+                        || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)){
                     adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + HistoryBusinessToken.HISTORY_BUSINESS));
                 }
                 adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей", NUMBER_SIGN

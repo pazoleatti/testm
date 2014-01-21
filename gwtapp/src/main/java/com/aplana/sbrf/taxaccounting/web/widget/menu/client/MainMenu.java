@@ -7,6 +7,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.http.client.*;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -20,8 +21,11 @@ import java.util.List;
 public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 
 	interface LocalHtmlTemplates extends SafeHtmlTemplates {
-		@Template("<a style=\"color:#000000; text-decoration:none;\" href=\"{0}\"><div>{1}</div></a>")
-		SafeHtml link(String url, String name);
+		@Template("<a style=\"color:#000000; text-decoration:none;\" href=\"{0}\">{1}</a>")
+		SafeHtml link(String url, SafeHtml divName);
+
+        @Template("<div>{0}</div>")
+        SafeHtml div(String name);
 	}
 
 	interface Binder extends UiBinder<Widget, MainMenu> {
@@ -76,10 +80,10 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 			if (!item.getSubMenu().isEmpty()) {
 				MenuBar subMenuBar = new MenuBar(true);
 				addSubMenu(item, subMenuBar);
-				menu.addItem(item.getName(), subMenuBar);
+				menu.addItem(template.div(item.getName()).asString(), true, subMenuBar);
 			} else {
 				com.google.gwt.user.client.ui.MenuItem subMenuItem =
-						new com.google.gwt.user.client.ui.MenuItem(template.link(item.getLink(), item.getName()));
+						new com.google.gwt.user.client.ui.MenuItem(template.link(item.getLink(), template.div(item.getName())));
 				subMenuItem.setScheduledCommand(new Scheduler.ScheduledCommand() {
 					@Override
 					public void execute() {

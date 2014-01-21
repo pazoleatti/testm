@@ -334,8 +334,8 @@ a, a:visited, a:hover {
     border-collapse: collapse;
 }
 
-.gwt-MenuBar-vertical .gwt-MenuItem {
-    padding: 4px 14px 4px 1px;
+.gwt-MenuBar-vertical .gwt-MenuItem div {
+    padding: 3px 5px 3px 14px;
 }
 
 .gwt-MenuBar-vertical .gwt-MenuItemSeparator {
