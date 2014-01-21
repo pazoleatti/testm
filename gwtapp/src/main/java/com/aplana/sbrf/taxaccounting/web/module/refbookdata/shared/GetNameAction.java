@@ -7,7 +7,7 @@ public class GetNameAction extends UnsecuredActionImpl<GetNameResult> implements
 	Long refBookId;
 
     /** Идентификатор выбранной записи справочника. Используется в режиме версионирования */
-    Long recordId;
+    Long uniqueRecordId;
 
 	public Long getRefBookId() {
 		return refBookId;
@@ -17,12 +17,12 @@ public class GetNameAction extends UnsecuredActionImpl<GetNameResult> implements
 		this.refBookId = refBookId;
 	}
 
-    public Long getRecordId() {
-        return recordId;
+    public Long getUniqueRecordId() {
+        return uniqueRecordId;
     }
 
-    public void setRecordId(Long recordId) {
-        this.recordId = recordId;
+    public void setUniqueRecordId(Long uniqueRecordId) {
+        this.uniqueRecordId = uniqueRecordId;
     }
 
     @Override

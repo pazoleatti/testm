@@ -514,6 +514,9 @@ void addData(def xml, int headRowCount) {
 
     def rows = dataRowHelper.allCached
     def int rowIndex = 1
+    def knu
+    def type
+    def num
     for (def row : xml.row) {
         xmlIndexRow++
         def int xlsIndexRow = xmlIndexRow + rowOffset
@@ -538,10 +541,10 @@ void addData(def xml, int headRowCount) {
             curRow[it] = null
         }
 
-        def knu = normalize(curRow.incomeTypeId)
+        knu = normalize(curRow.incomeTypeId)
         //def group = normalize(curRow.incomeGroup)
-        def type = normalize(curRow.incomeTypeByOperation)
-        def num = normalize(curRow.accountNo)
+        type = normalize(curRow.incomeTypeByOperation)
+        num = normalize(curRow.accountNo)
 
         def xmlIndexCol = 0
 
@@ -587,7 +590,9 @@ void addData(def xml, int headRowCount) {
 
         // графа 8
         curRow.rnu4Field5Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-
+    }
+    if (rowIndex < maxRow) {
+        logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
 }

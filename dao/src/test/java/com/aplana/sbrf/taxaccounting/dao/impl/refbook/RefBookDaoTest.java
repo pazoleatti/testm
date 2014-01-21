@@ -6,10 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,12 +14,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
-import org.mockito.stubbing.Answer;
+
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -100,20 +96,20 @@ public class RefBookDaoTest {
 		// проверяем типы значений
 		for (int i = 0; i < 2; i++) {
 			Map<String, RefBookValue> record = data.get(0);
-			assertEquals(RefBookAttributeType.NUMBER, record.get(RefBook.RECORD_ID_ALIAS).getAttributeType());
+			assertEquals(RefBookAttributeType.NUMBER, record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getAttributeType());
 			assertEquals(RefBookAttributeType.STRING, record.get(ATTRIBUTE_NAME).getAttributeType());
 			assertEquals(RefBookAttributeType.NUMBER, record.get(ATTRIBUTE_PAGECOUNT).getAttributeType());
 			assertEquals(RefBookAttributeType.REFERENCE, record.get(ATTRIBUTE_AUTHOR).getAttributeType());
 		}
 		sort(data);
 		Map<String, RefBookValue> record = data.get(0);
-		assertEquals(1, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
+		assertEquals(1, record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().intValue());
 		assertEquals("Алиса в стране чудес", record.get(ATTRIBUTE_NAME).getStringValue());
 		assertEquals(1113, record.get(ATTRIBUTE_PAGECOUNT).getNumberValue().doubleValue(), 1e-5);
 		assertEquals(5, record.get(ATTRIBUTE_AUTHOR).getReferenceValue().intValue());
 
 		Map<String, RefBookValue> record2 = data.get(1);
-		assertEquals(4, record2.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
+		assertEquals(4, record2.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().intValue());
 		assertEquals("Вий", record2.get(ATTRIBUTE_NAME).getStringValue());
 		assertEquals(425, record2.get(ATTRIBUTE_PAGECOUNT).getNumberValue().doubleValue(), 1e-5);
 		assertEquals(6, record2.get(ATTRIBUTE_AUTHOR).getReferenceValue().intValue());
@@ -126,7 +122,7 @@ public class RefBookDaoTest {
 		assertEquals(2, data.size());
 		sort(data);
 		Map<String, RefBookValue> record = data.get(0);
-		assertEquals(2, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
+		assertEquals(2, record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().intValue());
 		assertEquals("Алиса в стране", record.get(ATTRIBUTE_NAME).getStringValue());
 		assertEquals(1213, record.get(ATTRIBUTE_PAGECOUNT).getNumberValue().doubleValue(), 1e-5);
 		assertEquals(7, record.get(ATTRIBUTE_AUTHOR).getReferenceValue().intValue());
@@ -138,13 +134,13 @@ public class RefBookDaoTest {
         // проверяем кол-во строк
 		assertEquals(2, data.size());
         Map<String, RefBookValue> record1 = data.get(0);
-        assertEquals(2, record1.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
+        assertEquals(2, record1.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().intValue());
         assertEquals("Алиса в стране", record1.get(ATTRIBUTE_NAME).getStringValue());
         assertEquals(1213, record1.get(ATTRIBUTE_PAGECOUNT).getNumberValue().doubleValue(), 1e-5);
         assertEquals(7L, record1.get(ATTRIBUTE_AUTHOR).getReferenceValue().intValue());
 
 		Map<String, RefBookValue> record2 = data.get(1);
-		assertEquals(4, record2.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
+		assertEquals(4, record2.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().intValue());
 		assertEquals("Вий", record2.get(ATTRIBUTE_NAME).getStringValue());
 		assertEquals(425, record2.get(ATTRIBUTE_PAGECOUNT).getNumberValue().doubleValue(), 1e-5);
 		assertEquals(6L, record2.get(ATTRIBUTE_AUTHOR).getReferenceValue().intValue());
@@ -172,8 +168,8 @@ public class RefBookDaoTest {
 		Collections.sort(data, new Comparator<Map<String, RefBookValue>>() {
 			@Override
 			public int compare(Map<String, RefBookValue> o1, Map<String, RefBookValue> o2) {
-				Long l1 = o1.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
-				Long l2 = o2.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
+				Long l1 = o1.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue();
+				Long l2 = o2.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue();
 				return l1.compareTo(l2);
 			}
 		});
@@ -193,7 +189,7 @@ public class RefBookDaoTest {
 	@Test
 	public void testGetRecordData(){
 		Map<String, RefBookValue> record = refBookDao.getRecordData(1L, 4L);
-		assertEquals(4, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
+		assertEquals(4, record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().intValue());
 		assertEquals("Вий", record.get(ATTRIBUTE_NAME).getStringValue());
 		assertEquals(425, record.get(ATTRIBUTE_PAGECOUNT).getNumberValue().doubleValue(), 1e-5);
 		assertEquals(6, record.get(ATTRIBUTE_AUTHOR).getReferenceValue().intValue());
@@ -300,8 +296,8 @@ public class RefBookDaoTest {
 		// сохраняем изменения
 		List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
 		records.add(record);
-        refBookDao.updateRecordVersion(refBook.getId(), record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), records);
-        refBookDao.updateVersionRelevancePeriod(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), version2);
+        refBookDao.updateRecordVersion(refBook.getId(), record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue(), records);
+        refBookDao.updateVersionRelevancePeriod(record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue(), version2);
 		// проверяем изменения
 		data = refBookDao.getRecords(refBook.getId(), version2, new PagingParams(), null, refBook.getAttribute(ATTRIBUTE_NAME));
         assertEquals(data.size(), 2);
@@ -326,7 +322,7 @@ public class RefBookDaoTest {
         record.get(RefBookDaoTest.ATTRIBUTE_NAME).setValue("Вий. Туда и обратно");
         record.get(ATTRIBUTE_PAGECOUNT).setValue(123);
         record.get(RefBookDaoTest.ATTRIBUTE_AUTHOR).setValue(7L);
-        refBookDao.updateRecordVersion(refBookId, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), Arrays.asList(record));
+        refBookDao.updateRecordVersion(refBookId, record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue(), Arrays.asList(record));
 
         data = refBookDao.getRecords(refBookId, version, new PagingParams(), null, null);
         record = data.get(1);
@@ -347,11 +343,11 @@ public class RefBookDaoTest {
 
         Map<String, RefBookValue> record = data.get(0);
         record.get(ATTRIBUTE_WEIGHT).setValue(0.123456789d);
-        refBookDao.updateRecordVersion(refBookId, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), Arrays.asList(record));
+        refBookDao.updateRecordVersion(refBookId, record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue(), Arrays.asList(record));
 
         record = data.get(1);
         record.get(ATTRIBUTE_WEIGHT).setValue(-345.9905);
-        refBookDao.updateRecordVersion(refBookId, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), Arrays.asList(record));
+        refBookDao.updateRecordVersion(refBookId, record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue(), Arrays.asList(record));
 
         data = refBookDao.getRecords(refBookId, version, new PagingParams(), null, null);
 
@@ -389,7 +385,7 @@ public class RefBookDaoTest {
 
     @Test
     public void getRecordVersion(){
-        RefBookRecordVersion info = refBookDao.getActiveRecordVersion(1L);
+        RefBookRecordVersion info = refBookDao.getRecordVersionInfo(1L);
         assertEquals(info.getRecordId().longValue(), 1L);
         assertEquals(getZeroTimeDate(info.getVersionStart()), getZeroTimeDate(getDate(1, 1, 2013)));
         assertEquals(getZeroTimeDate(info.getVersionEnd()), getZeroTimeDate(getDate(1, 2, 2013)));
@@ -397,7 +393,7 @@ public class RefBookDaoTest {
 
     @Test(expected = DaoException.class)
     public void getActiveRecordVersion(){
-        refBookDao.getActiveRecordVersion(10L);
+        refBookDao.getRecordVersionInfo(10L);
     }
 
     @Test
@@ -414,9 +410,9 @@ public class RefBookDaoTest {
 
     @Test
     public void getUniqueAttributeValues() {
-        List<RefBookValue> values = refBookDao.getUniqueAttributeValues(1L, 1L);
+        List<Pair<RefBookAttribute, RefBookValue>> values = refBookDao.getUniqueAttributeValues(1L, 1L);
         assertEquals(1, values.size());
-        assertEquals("Алиса в стране чудес", values.get(0).getStringValue());
+        assertEquals("Алиса в стране чудес", values.get(0).getSecond().getStringValue());
     }
 
     @Test
@@ -434,18 +430,18 @@ public class RefBookDaoTest {
         RefBook refBook = refBookDao.get(1L);
         PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(refBook.getId(), getDate(1, 1, 2013), null, null, null);
         assertEquals(2, records.size());
-        boolean isOk = refBookDao.checkReferenceValuesVersions(getDate(1, 1, 2013), refBook.getAttributes(), records);
+        boolean isOk = refBookDao.isReferenceValuesCorrect(getDate(1, 1, 2013), refBook.getAttributes(), records);
         assertEquals(true, isOk);
-        isOk = refBookDao.checkReferenceValuesVersions(new Date(), refBook.getAttributes(), records);
+        isOk = refBookDao.isReferenceValuesCorrect(new Date(), refBook.getAttributes(), records);
         assertEquals(false, isOk);
     }
 
     @Test
     public void checkVersionUsages() {
-        boolean isOk = !refBookDao.checkVersionUsages(Arrays.asList(1L));
+        boolean isOk = !refBookDao.isVersionUsed(Arrays.asList(1L));
         assertEquals(true, isOk);
 
-        isOk = !refBookDao.checkVersionUsages(1L, getDate(1, 1, 2013));
+        isOk = !refBookDao.isVersionUsed(1L, getDate(1, 1, 2013));
         assertEquals(true, isOk);
     }
 

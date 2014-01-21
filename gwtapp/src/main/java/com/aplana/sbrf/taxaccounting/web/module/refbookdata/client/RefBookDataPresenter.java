@@ -143,7 +143,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
         editFormPresenter.setVersionMode(false);
-        editFormPresenter.setCurrentRecordId(null);
+        editFormPresenter.setCurrentUniqueRecordId(null);
         editFormPresenter.setRecordId(null);
 		GetRefBookAttributesAction action = new GetRefBookAttributesAction();
 		refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));

@@ -69,7 +69,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
             Map<String, RefBookValue> paramsMap = new HashMap<String, RefBookValue>();
             // Id записи
-            paramsMap.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getRecordId()));
+            paramsMap.put(RefBook.RECORD_UNIQUE_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getRecordId()));
 
             // Общая часть
             paramsMap.put(DepartmentParamAliases.DEPARTMENT_ID.name(), new RefBookValue(RefBookAttributeType.REFERENCE, depCombined.getDepartmentId()));

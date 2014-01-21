@@ -84,7 +84,7 @@ public class RefBookIncome101DaoTest {
             Assert.assertEquals(map1.get("OUTCOME_CREDIT_REMAINS"), map2.get("OUTCOME_CREDIT_REMAINS"));
             Assert.assertEquals(map1.get("ACCOUNT_NAME"), map2.get("ACCOUNT_NAME"));
             Assert.assertEquals(map1.get("DEPARTMENT_ID"), map2.get("DEPARTMENT_ID"));
-            Assert.assertNotEquals(map1.get(RefBook.RECORD_ID_ALIAS), map2.get(RefBook.RECORD_ID_ALIAS));
+            Assert.assertNotEquals(map1.get(RefBook.RECORD_UNIQUE_ID_ALIAS), map2.get(RefBook.RECORD_UNIQUE_ID_ALIAS));
         }
     }
 
