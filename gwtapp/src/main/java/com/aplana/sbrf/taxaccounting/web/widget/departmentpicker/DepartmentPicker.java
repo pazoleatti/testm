@@ -19,4 +19,5 @@ public interface DepartmentPicker extends HasValue<List<Integer>> {
     /** Установить заголовок в окне выбора подразделений. */
 	void setHeader(String header);
 
+    void setSelectButtonFocus(boolean focused);
 }

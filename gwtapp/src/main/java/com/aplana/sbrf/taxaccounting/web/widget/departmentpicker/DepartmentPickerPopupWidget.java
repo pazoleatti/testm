@@ -30,7 +30,7 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 	HasText selected;
 
 	@UiField
-	public Button selectButton;
+	Button selectButton;
 	
 	@UiField
 	Button clearButton;
@@ -240,5 +240,10 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
     public void setVersions(List<Date> versions, Date defaultValue) {
         version.setValue(defaultValue);
         version.setAcceptableValues(versions);
+    }
+
+    @Override
+    public void setSelectButtonFocus(boolean focused) {
+        selectButton.setFocus(focused);
     }
 }
