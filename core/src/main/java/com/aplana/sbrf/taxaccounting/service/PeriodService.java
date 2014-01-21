@@ -113,32 +113,29 @@ public interface PeriodService {
 	
     /**
      * Возвращает дату начала отчетного периода
-     * Дата высчитывается прибавлением смещения в месяцах к дате налогового периода
-     * Смещение в месяцах вычисляется путем суммирования длительности предыдущих
-     * отчетных периодов в данном налоговом периоде.
-     *
-     * Для отчетных периодов относящихся к налоговому периоду с типом "налог на прибыль"
-     * смещение считается по другому алгоритму
-     * @param reportPeriodId
+	 *
+	 * <p>Информация о периодах в конфлюенсе
+	 * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=9600466">Как считать отчетные периоды для разных налогов</a><p/>
+     * @param reportPeriodId код отчетного периода
      * @return
      */
+	//TODO: избавиться от этого метода. Использовать {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod#getStartDate()}  (Marat Fayzullin 20.01.2014)
+	@Deprecated
     public Calendar getStartDate(int reportPeriodId);
 
     /**
+	 *
+	 *
      * Возвращает дату конца отчетного периода
-     * Дата высчитывается прибавлением смещения в месяцах к дате налогового периода
-     * Смещение в месяцах вычисляется путем суммирования длительности предыдущих
-     * отчетных периодов в данном налоговом периоде.
-     *
-     * Для отчетных периодов относящихся к налоговому периоду с типом "налог на прибыль"
-     * смещение считается по другому алгоритму
      *
      * <p>Информация о периодах в конфлюенсе
      * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=9600466">Как считать отчетные периоды для разных налогов</a><p/>
      *
-     * @param reportPeriodId
+     * @param reportPeriodId код отчетного периода
      * @return
      */
+	//TODO: избавиться от этого метода. Использовать {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod#getEndDate()}  (Marat Fayzullin 20.01.2014)
+	@Deprecated
     public Calendar getEndDate(int reportPeriodId);
 
     /**

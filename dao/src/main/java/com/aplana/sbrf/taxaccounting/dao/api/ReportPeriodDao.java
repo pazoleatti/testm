@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
+import java.util.Date;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 import java.util.List;
@@ -57,4 +59,14 @@ public interface ReportPeriodDao {
      * @return Список отчетных периодов
      */
     public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList);
+
+	/**
+	 * Получить список всех отчетных периодов по заданному виду налога за период. Алгоритм: ищет все отчетные периоды,
+	 * которые пересекаются с указанным временным интервалом. Сравнение идет по
+	 * @param taxType вид налога
+	 * @param from дата начала
+	 * @param to дата конца
+	 * @return  список отчетных периодов по данному виду налога за определенный период
+	 */
+	List<ReportPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to);
 }

@@ -244,81 +244,18 @@ public class PeriodServiceImpl implements PeriodService{
 		return taxPeriodDao.get(taxPeriodId);
 	}
 
-    /**
-     * Возвращает дату начала отчетного периода
-     * @param reportPeriodId
-     * @return
-     */
     @Override
     public Calendar getStartDate(int reportPeriodId){
-        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-        TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
-        // календарь
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(taxPeriod.getStartDate());
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(reportPeriodDao.get(reportPeriodId).getStartDate());
+		return cal;
+	}
 
-        // для налога на прибыль, периоды вложены в друг дгруга, и начало всегда совпадает
-        // В МУКС только один период
-        if (taxPeriod.getTaxType() != TaxType.INCOME && taxPeriod.getTaxType() != TaxType.DEAL &&
-                taxPeriod.getTaxType() != TaxType.TRANSPORT){
-            // получим отчетные периоды для данного налогового периода
-            List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriod().getId());
-            // смещение относительно налогового периода
-            int months = 0;
-            for (ReportPeriod cReportPeriod: reportPeriodList){
-                // если достигли текущего то выходим из цикла
-                if (cReportPeriod.getId().equals(reportPeriod.getId())){
-                    break;
-                }
-                // смещение в месяцах
-                months += cReportPeriod.getMonths();
-            }
-            cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + months);
-        }
-
-        return cal;
-    }
-
-    /**
-     * Возвращает дату конца отчетного периода
-     * @param reportPeriodId
-     * @return
-     */
     @Override
     public Calendar getEndDate(int reportPeriodId){
-        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-        TaxPeriod taxPeriod = taxPeriodDao.get(reportPeriod .getTaxPeriod().getId());
-        // календарь
-        Calendar cal = new GregorianCalendar();
-        cal.clear();
-        cal.set(Calendar.YEAR, reportPeriod.getYear());
-
-        // для налога на прибыль, периоды вложены в друг дгруга
-        if (taxPeriod.getTaxType() == TaxType.INCOME || taxPeriod.getTaxType() == TaxType.DEAL){
-            // Calendar.MONTH = 0 это январь
-            cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + reportPeriod.getMonths() - 1);
-        }
-        else{
-            // получим отчетные периоды для данного налогового периода
-            List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriod().getId());
-            // смещение относительно налогового периода
-            int months = 0;
-            for (int i = 0; i < reportPeriodList.size(); i++) {
-                ReportPeriod cReportPeriod = reportPeriodList.get(i);
-                // если достигли текущего то выходим из цикла
-                if (cReportPeriod.getId().equals(reportPeriod.getId())){
-                    months += cReportPeriod.getMonths();
-                    break;
-                }
-                // смещение в месяцах
-                months += cReportPeriod.getMonths();
-            }
-            // Calendar.MONTH = 0 это январь
-            cal.set(Calendar.MONTH, months - 1);
-        }
-
-        cal.set(Calendar.DATE, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-        return cal;
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(reportPeriodDao.get(reportPeriodId).getEndDate());
+		return cal;
     }
 
     @Override

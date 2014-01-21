@@ -138,5 +138,19 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
         }
     }
 
+	@Override
+	List<ReportPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to) {
+		try {
+			return getJdbcTemplate().query(
+					"select * from report_period where tax_type = ? and end_date>=? and start_date<=?",
+					new Object[]{taxType.getCode(), from, to},
+					new int[] { Types.VARCHAR, Types.DATE, Types.DATE },
+					new ReportPeriodMapper()
+			);
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException("Не удалось получить список налоговых периодов с типом = " + taxType.getCode());
+		}
+	}
+
 }
 

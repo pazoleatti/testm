@@ -122,6 +122,10 @@ public class ReportPeriod implements Serializable {
 		return getTaxPeriod().getTaxType();
 	}
 
+	/**
+	 * Возвращает начальную дату отчетного периода. Это может быть 1 января, 1 апреля и т.д.
+	 * @return
+	 */
 	public Date getStartDate() {
 		return startDate;
 	}
@@ -130,6 +134,10 @@ public class ReportPeriod implements Serializable {
 		this.startDate = startDate;
 	}
 
+	/**
+	 * Возвращает последнюю дату в отчетном периоде. Это может быть 31 марта, 31 декабря и т.д.
+	 * @return
+	 */
 	public Date getEndDate() {
 		return endDate;
 	}
