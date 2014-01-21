@@ -428,6 +428,10 @@ void addData(def xml, int headRowCount) {
 
     def rows = dataRowHelper.allCached
     def int rowIndex = 1
+    def knu
+    def group
+    //def type
+    def num
     for (def row : xml.row) {
         xmlIndexRow++
         def int xlsIndexRow = xmlIndexRow + rowOffset
@@ -452,10 +456,10 @@ void addData(def xml, int headRowCount) {
             curRow[it] = null
         }
 
-        def knu = normalize(curRow.consumptionTypeId)
-        def group = normalize(curRow.consumptionGroup)
-        //def type = normalize(curRow.consumptionTypeByOperation)
-        def num = normalize(curRow.consumptionBuhSumAccountNumber)
+        knu = normalize(curRow.consumptionTypeId)
+        group = normalize(curRow.consumptionGroup)
+        //type = normalize(curRow.consumptionTypeByOperation)
+        num = normalize(curRow.consumptionBuhSumAccountNumber)
 
         def xmlIndexCol = 0
 
@@ -501,6 +505,9 @@ void addData(def xml, int headRowCount) {
             curRow.consumptionTaxSumS = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
 
+    }
+    if (rowIndex < maxRow) {
+        logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
 }
