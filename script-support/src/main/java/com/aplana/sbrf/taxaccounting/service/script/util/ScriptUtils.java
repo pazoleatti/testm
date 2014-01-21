@@ -780,6 +780,8 @@ public final class ScriptUtils {
         StringBuilder builder = new StringBuilder(value.trim());
         replace(builder,"\n"," ", false);
         replace(builder,"  "," ", true);
+        replace(builder,"«","\"", true);
+        replace(builder,"»","\"", true);
         String returnValue = builder.toString();
         if (returnValue.equals("x") || returnValue.equals("х")) {//если x или икс
             return "";
@@ -797,7 +799,7 @@ public final class ScriptUtils {
     private static void replace(StringBuilder builder, String from, String to, boolean recursive) {
         int index = builder.indexOf(from);
         while (index != -1) {
-            builder.replace(index, index + 2, to);
+            builder.replace(index, index + from.length(), to);
             if (!recursive){
                 index+=to.length();
             }

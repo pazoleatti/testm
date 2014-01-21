@@ -39,6 +39,8 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
             reportPeriod.setMonths(rs.getInt("months"));
             reportPeriod.setTaxPeriod(taxPeriodDao.get(rs.getInt("tax_period_id")));
             reportPeriod.setOrder(rs.getInt("ord"));
+            reportPeriod.setStartDate(rs.getDate("start_date"));
+            reportPeriod.setEndDate(rs.getDate("end_date"));
             reportPeriod.setDictTaxPeriodId(rs.getInt("dict_tax_period_id"));
             return reportPeriod;
         }
