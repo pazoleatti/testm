@@ -8,6 +8,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -46,7 +47,22 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
     @UiField
     ModalWindow popupPanel;
 
-    /** Значения */
+    @UiField
+    TextBox filter;
+
+    @UiField
+    Button find;
+
+    @UiField
+    CheckBox selectChild;
+
+    @UiField(provided=true)
+    ValueListBox<Date> version;
+
+    @UiField
+    Button cancel;
+
+    /** Значения id */
     private List<Integer> value = new ArrayList<Integer>();
 
     /** Разименованные значения. */
@@ -73,11 +89,16 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
     /** Виджет для выбора подразделений. */
 	@UiConstructor
 	public DepartmentPickerPopupWidget(String header, boolean multiselection, boolean modal) {
+        version = new ValueListBox<Date>(new DateTimeFormatRenderer());
 		initWidget(uiBinder.createAndBindUi(this));
         this.multiselection = multiselection;
         tree.setMultiSelection(multiselection);
-        popupPanel.setModal(false);
+        selectChild.setVisible(multiselection);
+        popupPanel.setModal(modal);
         setHeader(header);
+
+        // TODO (Ramil Timerbaev) в "Дата актуальности" пока выставил текущую дату
+        setVersion(new Date());
 	}
 
 	@UiHandler("selectButton")
@@ -190,5 +211,34 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
     /** Получить выбранные подразделения. */
     public List<DepartmentPair> getDepartmentPairValues() {
         return tree.getValue();
+    }
+
+    @UiHandler("find")
+    void onFindButtonClicked(ClickEvent event) {
+        // TODO (Ramil Timerbaev)
+    }
+
+    @UiHandler("cancel")
+    void onCancelButtonClicked(ClickEvent event) {
+        popupPanel.hide();
+        setValue(value);
+    }
+
+    @UiHandler("selectChild")
+    void onSelectChildValueChange(ValueChangeEvent<Boolean> event) {
+        tree.setSelectChild(selectChild.getValue());
+    }
+
+    public Date getVersion() {
+        return version.getValue();
+    }
+
+    public void setVersion(Date versionDate) {
+        version.setValue(versionDate);
+    }
+
+    public void setVersions(List<Date> versions, Date defaultValue) {
+        version.setValue(defaultValue);
+        version.setAcceptableValues(versions);
     }
 }
