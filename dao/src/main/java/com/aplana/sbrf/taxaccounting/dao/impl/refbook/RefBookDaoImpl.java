@@ -641,7 +641,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "select cr.id as %s, cr.version as versionStart, nv.version as versionEnd from currentRecord cr, nextVersion nv";
 
     @Override
-    public RefBookRecordVersion getActiveRecordVersion(Long uniqueRecordId) {
+    public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
         try {
             String sql = String.format(GET_RECORD_VERSION,
                     RefBook.RECORD_UNIQUE_ID_ALIAS);
@@ -845,7 +845,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private final static String CHECK_REFERENCE_VERSIONS = "select count(*) from ref_book_record where VERSION < to_date('%s', 'DD.MM.YYYY') and ID in (%s)";
 
     @Override
-    public boolean checkReferenceValuesVersions(Date versionFrom, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records) {
+    public boolean isReferenceValuesCorrect(Date versionFrom, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records) {
         if (attributes.size() > 0) {
             StringBuilder in = new StringBuilder();
             for (Map<String, RefBookValue> record : records) {
@@ -924,7 +924,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public boolean checkVersionUsages(Long uniqueRecordId, Date versionFrom) {
+    public boolean isVersionUsed(Long uniqueRecordId, Date versionFrom) {
         //TODO добавить проверки по другим точкам запросов
         //Проверка использования в справочниках и настройках подразделений
         String sql = String.format("select count(r.id) from ref_book_record r, ref_book_value v where r.id=v.record_id and r.version >= to_date('%s', 'DD.MM.YYYY') and v.REFERENCE_VALUE=?",
@@ -938,7 +938,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String CHECK_USAGES_IN_FORMS = "select count(*) from numeric_value where column_id in (select id from form_column where attribute_id in (select attribute_id from ref_book_value where record_id in %s)) and value in %s";
 
     @Override
-    public boolean checkVersionUsages(List<Long> uniqueRecordIds) {
+    public boolean isVersionUsed(List<Long> uniqueRecordIds) {
         //Проверка использования в справочниках и настройках подразделений
         String in = SqlUtils.transformToSqlInStatement(uniqueRecordIds);
         String sql = String.format(CHECK_USAGES_IN_REFBOOK, in);
@@ -1006,5 +1006,271 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>();
         }
+    }
+
+    /**
+     *
+     * dloshkarev: Секция со старыми методами, оставленными для совместимости
+     *
+     * */
+
+    private static final String INSERT_REF_BOOK_RECORD_SQL_OLD = "insert into ref_book_record (id, ref_book_id, version," +
+            "status, record_id) values (?, %d, to_date('%s', 'DD.MM.YYYY'), 0, seq_ref_book_record_row_id.nextval)";
+    private static final String INSERT_REF_BOOK_VALUE_OLD = "insert into ref_book_value (record_id, attribute_id," +
+            "string_value, number_value, date_value, reference_value) values (?, ?, ?, ?, ?, ?)";
+
+    @Override
+    public void createRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records) {
+        // нет данных - нет работы
+        if (records.size() == 0) {
+            return;
+        }
+
+        RefBook refBook = get(refBookId);
+        List<Object[]> listValues = new ArrayList<Object[]>();
+
+        final List<Long> refBookRecordIds  = dbUtils.getNextRefBookRecordIds(new Long(records.size()));
+
+        BatchPreparedStatementSetter batchRefBookRecordsPS = new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setLong(1, refBookRecordIds.get(i));
+            }
+
+            @Override
+            public int getBatchSize() {
+                return refBookRecordIds.size();
+            }
+        };
+
+        for (int i = 0; i < records.size(); i++) {
+            // создаем строки справочника
+
+            // записываем значения ячеек
+            Map<String, RefBookValue> record = records.get(i);
+            List<RefBookAttribute> attributes = refBook.getAttributes();
+
+            // проверка обязательности заполнения записей справочника
+            List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
+            if (errors.size() > 0){
+                throw new DaoException("Поля " + errors.toString() + "являются обязательными для заполнения");
+            }
+
+            for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
+                String attributeAlias = entry.getKey();
+                if (RefBook.RECORD_UNIQUE_ID_ALIAS.equals(attributeAlias) ||
+                        RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
+                    continue;
+                }
+                RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
+                Object[] values = new Object[6];
+                values[0] = refBookRecordIds.get(i);
+                values[1] = attribute.getId();
+                values[2] = null;
+                values[3] = null;
+                values[4] = null;
+                values[5] = null;
+                switch (attribute.getAttributeType()) {
+                    case STRING: {
+                        values[2] = entry.getValue().getStringValue();
+                    }
+                    break;
+                    case NUMBER: {
+                        if (entry.getValue().getNumberValue() != null) {
+                            values[3] = BigDecimal.valueOf(entry.getValue().getNumberValue().doubleValue())
+                                    .setScale(attribute.getPrecision(), RoundingMode.HALF_UP).doubleValue();
+                        }
+                    }
+                    break;
+                    case DATE: {
+                        values[4] = entry.getValue().getDateValue();
+                    }
+                    break;
+                    case REFERENCE: {
+                        values[5] = entry.getValue().getReferenceValue();
+                    }
+                    break;
+                }
+                listValues.add(values);
+            }
+        }
+        JdbcTemplate jt = getJdbcTemplate();
+        jt.batchUpdate(String.format(INSERT_REF_BOOK_RECORD_SQL_OLD, refBookId, sdf.format(version)), batchRefBookRecordsPS);
+        jt.batchUpdate(INSERT_REF_BOOK_VALUE_OLD, listValues);
+    }
+
+
+    private static final String UPDATE_REF_BOOK_RECORD_SQL_OLD = "insert into ref_book_record (id, ref_book_id, version," +
+            "status, record_id) values (?, %d, to_date('%s', 'DD.MM.YYYY'), 0, ?)";
+
+    private static final String DELETE_REF_BOOK_VALUE_SQL_OLD = "delete from ref_book_value where record_id in " +
+            "(select id from ref_book_record where ref_book_id = ? and version = trunc(?, 'DD') and record_id = ?)";
+
+
+    private Long getRowId(Long recordId) {
+        return getJdbcTemplate().queryForLong("select record_id from ref_book_record where id = ?", new Object[]{recordId});
+    }
+
+    @Override
+    public void updateRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records) {
+        if (refBookId == null || version == null || records == null) {
+            throw new IllegalArgumentException("refBookId: " + refBookId + "; version: " + version + "; records: " + records);
+        }
+        try {
+            //TODO: возможно стоит добавить проверку, что запись еще не удалена (Marat Fayzullin 2013-07-26)
+            // нет данных - нет работы
+            if (records.size() == 0) {
+                return;
+            }
+            RefBook refBook = get(refBookId);
+            List<Object[]> recordAddIds = new ArrayList<Object[]>();
+            List<Object[]> listValues = new ArrayList<Object[]>();
+            List<Object[]> delValues = new LinkedList<Object[]>();
+            List<Long> recordsId = new ArrayList<Long>();
+            int needIdsCnt = 0;
+            for (int i = 0; i < records.size(); i++) {
+                Map<String, RefBookValue> record = records.get(i);
+
+                // проверка обязательности заполнения записей справочника
+                checkFillRequiredFields(record, refBook);
+
+                // создаем строки справочника
+                Long rowId = getRowId(record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue());
+
+                Long recordId = checkRecordUnique(refBookId, version, rowId);
+
+                if (recordId == null) {
+                    needIdsCnt++;
+                    recordAddIds.add(new Object[]{recordId, rowId});
+                } else {
+                    delValues.add(new Object[]{refBookId, version, rowId});
+                }
+                recordsId.add(i, recordId);
+            }
+
+            // генерация нужного количества id'шников
+            List<Long> refBookRecordIds  = dbUtils.getNextRefBookRecordIds(new Long(needIdsCnt));
+            Iterator<Long> idsIterator = refBookRecordIds.iterator();
+            for (int i=0; i < recordAddIds.size(); i++){
+                if (recordAddIds.get(i)[0] == null){
+                    recordAddIds.set(i, new Object[]{idsIterator.next(), recordAddIds.get(i)[1]});
+                }
+            }
+
+            Iterator<Long> iterator = refBookRecordIds.iterator();
+            for (int i=0; i < recordsId.size(); i++){
+                if (recordsId.get(i) == null) {
+                    recordsId.set(i, iterator.next());
+                }
+            }
+
+            for (int i = 0; i < records.size(); i++) {
+                Map<String, RefBookValue> record = records.get(i);
+                Long recordId = recordsId.get(i);
+                for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
+                    String attributeAlias = entry.getKey();
+                    if (RefBook.RECORD_UNIQUE_ID_ALIAS.equals(attributeAlias) ||
+                            RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
+                        continue;
+                    }
+                    RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
+                    Object[] values = new Object[]{recordId, attribute.getId(), null, null, null, null};
+                    switch (attribute.getAttributeType()) {
+                        case STRING: {
+                            values[2] = entry.getValue().getStringValue();
+                        }
+                        break;
+                        case NUMBER: {
+                            if (entry.getValue().getNumberValue() != null) {
+                                values[3] = BigDecimal.valueOf(entry.getValue().getNumberValue().doubleValue())
+                                        .setScale(attribute.getPrecision(), RoundingMode.HALF_UP).doubleValue();
+                            }
+                        }
+                        break;
+                        case DATE: {
+                            values[4] = entry.getValue().getDateValue();
+                        }
+                        break;
+                        case REFERENCE: {
+                            values[5] = entry.getValue().getReferenceValue();
+                        }
+                        break;
+                    }
+                    listValues.add(values);
+                }
+            }
+            JdbcTemplate jt = getJdbcTemplate();
+            // - REF_BOOK_VALUE
+            if (!delValues.isEmpty()) {
+                jt.batchUpdate(DELETE_REF_BOOK_VALUE_SQL_OLD, delValues);
+            }
+            // + REF_BOOK_RECORD
+            if (!recordAddIds.isEmpty()) {
+                jt.batchUpdate(String.format(UPDATE_REF_BOOK_RECORD_SQL_OLD, refBookId, sdf.format(version)), recordAddIds);
+            }
+            // + REF_BOOK_VALUE
+            jt.batchUpdate(INSERT_REF_BOOK_VALUE_OLD, listValues);
+        }
+        catch (DaoException ex) {
+            throw ex;
+        }
+        catch (Exception ex) {
+            throw new DaoException("Не удалось обновить значения справочника", ex);
+        }
+    }
+
+    private static final String DELETE_REF_BOOK_RECORD_SQL_I_OLD = "insert into ref_book_record (id, ref_book_id, version," +
+            "status, record_id) values (seq_ref_book_record.nextval, %d, to_date('%s', 'DD.MM.YYYY'), -1, ?)";
+    private static final String DELETE_REF_BOOK_RECORD_SQL_D_OLD = "delete from ref_book_record where id = ?";
+
+    @Override
+    public void deleteRecords(Long refBookId, Date version, List<Long> recordIds) {
+        //TODO: возможно стоит добавить проверку, что запись еще не удалена (Marat Fayzullin 2013-07-26)
+        if (refBookId == null || version == null || recordIds == null) {
+            throw new IllegalArgumentException("refBookId: " + refBookId + "; version: " + version + "; recordIds: " + recordIds);
+        }
+        // нет данных - нет работы
+        if (recordIds.size() == 0) {
+            return;
+        }
+        List<Object[]> insertValues = new ArrayList<Object[]>();
+        List<Object[]> deleteValues = new ArrayList<Object[]>();
+        for (int i = 0; i < recordIds.size(); i++) {
+            Long id = recordIds.get(i);
+            Long rowId = getRowId(id);
+            Long recordId = checkRecordUnique(refBookId, version, rowId);
+            if (recordId == null) {
+                insertValues.add(new Object[] {rowId});
+            } else {
+                deleteValues.add(new Object[] {id});
+            }
+        }
+        JdbcTemplate jt = getJdbcTemplate();
+        if (insertValues.size() > 0) {
+            jt.batchUpdate(String.format(DELETE_REF_BOOK_RECORD_SQL_I_OLD, refBookId, sdf.format(version)), insertValues);
+        }
+        if (deleteValues.size() > 0) {
+            jt.batchUpdate(String.format(DELETE_REF_BOOK_RECORD_SQL_D_OLD, refBookId, sdf.format(version)), deleteValues);
+        }
+    }
+
+    private static final String DELETE_MARK_ALL_REF_BOOK_RECORD_SQL_OLD = "insert into ref_book_record (id, ref_book_id, " +
+            "version, status, record_id) " +
+            "select seq_ref_book_record.nextval, ref_book_id, trunc(?, 'DD'), -1, record_id " +
+            "from ref_book_record " +
+            "where version = (select max(version) from ref_book_record where ref_book_id = ? " +
+            "and version <= trunc(?, 'DD')) " +
+            "and ref_book_id = ?";
+
+    @Override
+    public void deleteAllRecords(Long refBookId, Date version) {
+        if (refBookId == null || version == null) {
+            return;
+        }
+        //TODO Отрефакторить http://jira.aplana.com/browse/SBRFACCTAX-3891 (Marat Fayzullin 2013-08-31)
+        // Отметка записей ближайшей меньшей версии как удаленных
+        getJdbcTemplate().update(DELETE_MARK_ALL_REF_BOOK_RECORD_SQL_OLD,
+                new Object[] {version, refBookId, version, refBookId},
+                new int[] { Types.TIMESTAMP, Types.NUMERIC, Types.TIMESTAMP, Types.NUMERIC });
     }
 }

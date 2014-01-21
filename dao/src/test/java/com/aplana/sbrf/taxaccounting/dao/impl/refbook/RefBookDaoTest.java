@@ -385,7 +385,7 @@ public class RefBookDaoTest {
 
     @Test
     public void getRecordVersion(){
-        RefBookRecordVersion info = refBookDao.getActiveRecordVersion(1L);
+        RefBookRecordVersion info = refBookDao.getRecordVersionInfo(1L);
         assertEquals(info.getRecordId().longValue(), 1L);
         assertEquals(getZeroTimeDate(info.getVersionStart()), getZeroTimeDate(getDate(1, 1, 2013)));
         assertEquals(getZeroTimeDate(info.getVersionEnd()), getZeroTimeDate(getDate(1, 2, 2013)));
@@ -393,7 +393,7 @@ public class RefBookDaoTest {
 
     @Test(expected = DaoException.class)
     public void getActiveRecordVersion(){
-        refBookDao.getActiveRecordVersion(10L);
+        refBookDao.getRecordVersionInfo(10L);
     }
 
     @Test
@@ -430,18 +430,18 @@ public class RefBookDaoTest {
         RefBook refBook = refBookDao.get(1L);
         PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(refBook.getId(), getDate(1, 1, 2013), null, null, null);
         assertEquals(2, records.size());
-        boolean isOk = refBookDao.checkReferenceValuesVersions(getDate(1, 1, 2013), refBook.getAttributes(), records);
+        boolean isOk = refBookDao.isReferenceValuesCorrect(getDate(1, 1, 2013), refBook.getAttributes(), records);
         assertEquals(true, isOk);
-        isOk = refBookDao.checkReferenceValuesVersions(new Date(), refBook.getAttributes(), records);
+        isOk = refBookDao.isReferenceValuesCorrect(new Date(), refBook.getAttributes(), records);
         assertEquals(false, isOk);
     }
 
     @Test
     public void checkVersionUsages() {
-        boolean isOk = !refBookDao.checkVersionUsages(Arrays.asList(1L));
+        boolean isOk = !refBookDao.isVersionUsed(Arrays.asList(1L));
         assertEquals(true, isOk);
 
-        isOk = !refBookDao.checkVersionUsages(1L, getDate(1, 1, 2013));
+        isOk = !refBookDao.isVersionUsed(1L, getDate(1, 1, 2013));
         assertEquals(true, isOk);
     }
 

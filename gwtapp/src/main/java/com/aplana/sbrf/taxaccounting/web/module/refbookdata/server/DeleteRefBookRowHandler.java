@@ -40,7 +40,7 @@ public class DeleteRefBookRowHandler extends AbstractActionHandler<DeleteRefBook
                 refBookDataProvider.deleteRecordVersions(logger, action.getRecordsId());
                 result.setNextVersion(nextVersion);
             } else {
-                refBookDataProvider.deleteAllRecordVersions(logger, action.getRecordsId());
+                refBookDataProvider.deleteAllRecords(logger, action.getRecordsId());
             }
             result.setUuid(logEntryService.save(logger.getEntries()));
         }

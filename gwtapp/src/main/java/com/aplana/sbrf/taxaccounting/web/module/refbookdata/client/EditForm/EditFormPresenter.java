@@ -56,7 +56,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         Date getVersionTo();
         void setVersionFrom(Date value);
         void setVersionTo(Date value);
-        boolean isRelevancePeriodChanged();
     }
 
 	@Inject
@@ -182,7 +181,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 action.setValueToSave(getView().getFieldsValues());
                 action.setVersionFrom(getView().getVersionFrom());
                 action.setVersionTo(getView().getVersionTo());
-                action.setRelevancePeriodChanged(getView().isRelevancePeriodChanged());
                 dispatchAsync.execute(action,
                         CallbackUtils.defaultCallback(
                                 new AbstractCallback<SaveRefBookRowVersionResult>() {

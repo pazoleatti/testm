@@ -108,7 +108,7 @@ public class RefBookIncome102 implements RefBookDataProvider {
     }
 
     @Override
-    public RefBookRecordVersion getActiveRecordVersion(Long uniqueRecordId) {
+    public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
         throw new UnsupportedOperationException();
     }
 
@@ -128,12 +128,12 @@ public class RefBookIncome102 implements RefBookDataProvider {
     }
 
     @Override
-    public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, boolean isRelevancePeriodChanged, List<Map<String, RefBookValue>> records) {
+    public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void deleteAllRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
+    public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 
