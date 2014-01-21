@@ -19,6 +19,8 @@ public interface PairDepartmentPicker extends HasConstrainedValue<List<Departmen
      */
     void setHeader(String header);
 
+    List<Integer> getAvalibleValues();
+
     /**
      * Устанавливает список подразделений отображаемых в дереве
      * @param departments список подразделений

@@ -17,6 +17,8 @@ import java.util.*;
  */
 public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> implements PairDepartmentPicker {
 
+    private List<Integer> availableValuesList = new LinkedList<Integer>();
+
     /** Дерево для выбора подразделения. */
     public DepartmentTreeWidget(String header, boolean multiSelection) {
         super(header, multiSelection);
@@ -28,6 +30,11 @@ public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> 
     }
 
     @Override
+    public List<Integer> getAvalibleValues() {
+        return availableValuesList;
+    }
+
+    @Override
     public void setAvailableValues(List<Department> departments) {
         setAvailableValues(departments, null);
     }
@@ -35,6 +42,10 @@ public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> 
     @Override
     public void setAvailableValues(List<Department> departments, Set<Integer> availableDepartments) {
         tree.clear();
+        availableValuesList.clear();
+        if (availableDepartments != null) {
+            availableValuesList.addAll(availableDepartments);
+        }
         List<DepartmentTreeItem> itemsHierarchy = flatToHierarchy(departments, availableDepartments);
         for (DepartmentTreeItem item : itemsHierarchy) {
             item.setState(true);

@@ -65,8 +65,6 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
     /** Значения id */
     private List<Integer> value = new ArrayList<Integer>();
 
-    private List<Integer> availableValuesList = new LinkedList<Integer>();
-    
     /** Разименованные значения. */
     private List<String> valueDereference = new ArrayList<String>();
 
@@ -186,14 +184,11 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
     @Override
     public void setAvalibleValues(List<Department> departments, Set<Integer> availableDepartments) {
         tree.setAvailableValues(departments, availableDepartments);
-        //TODO tree из DepartmentPickerWidget n++
     }
 
     @Override
     public List<Integer> getAvalibleValues() {
-        return departmentPiker.getAvalibleValues();
-        //TODO tree из DepartmentPickerWidget n++
-    }
+        return tree.getAvalibleValues();
     }
 
     /** Установить выбранными элементы по идентификаторам. */
