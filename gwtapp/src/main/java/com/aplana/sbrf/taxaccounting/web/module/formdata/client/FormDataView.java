@@ -118,6 +118,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     private final static int DEFAULT_TABLE_TOP_POSITION = 104;
     private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
+    private final static int LOCK_INFO_BLOCK_HEIGHT = 25;
 
     @Inject
 	public FormDataView(final Binder binder) {
@@ -478,13 +479,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
      */
     private void changeTableTopPosition(Boolean isLockInfoVisible){
         Style formDataTableStyle = formDataTable.getElement().getStyle();
+        int downShift = 0;
         if (isLockInfoVisible){
-            formDataTableStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION + lockInformation.getOffsetHeight(), Style.Unit.PX);
-            formDataTable.onResize();
-        } else {
-            formDataTableStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION, Style.Unit.PX);
-            formDataTable.onResize();
-         }
+            downShift = LOCK_INFO_BLOCK_HEIGHT;
+        }
+        formDataTableStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION + downShift, Style.Unit.PX);
+        formDataTable.onResize();
     }
 
     /**
