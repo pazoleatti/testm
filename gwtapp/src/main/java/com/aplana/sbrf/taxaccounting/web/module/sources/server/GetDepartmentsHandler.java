@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -20,9 +21,8 @@ import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class GetDepartmentsHandler extends
-		AbstractActionHandler<GetDepartmentsAction, GetDepartmentsResult> {
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+public class GetDepartmentsHandler extends AbstractActionHandler<GetDepartmentsAction, GetDepartmentsResult> {
 
 	@Autowired
 	private SecurityService securityService;
@@ -35,28 +35,19 @@ public class GetDepartmentsHandler extends
 	}
 
 	@Override
-	public GetDepartmentsResult execute(GetDepartmentsAction action,
-			ExecutionContext context) throws ActionException {
+	public GetDepartmentsResult execute(GetDepartmentsAction action, ExecutionContext context) throws ActionException {
 		GetDepartmentsResult result = new GetDepartmentsResult();
 		TAUserInfo userInfo = securityService.currentUserInfo();
-		// Система должна предоставлять пользователю с ролью "Контролер УНП"
-		// доступ к "Назначению форм и деклараций" и "Указанию форм-источников"
-		// для всех подразделений
-		//
-		// Система должна предоставлять пользователю с ролью "Контролер" доступ
-		// к "Назначению форм и деклараций" и "Указанию форм-источников" только
-		// для следующих подразделений: назначенное пользователю и вся иерархия
-		// подчиненных подразделений.
+        // http://conf.aplana.com/pages/viewpage.action?pageId=11380675
 		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
 			result.setDepartments(departmentService.listDepartments());
 			result.setAvailableDepartments(null);
-		} else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
+		} else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
+
 			Set<Integer> availableDepartments = new HashSet<Integer>();
-			availableDepartments.add(userInfo.getUser().getDepartmentId());
-			for (Department department : departmentService
-					.getAllChildren(userInfo.getUser().getDepartmentId())) {
-				availableDepartments.add(department.getId());
-			}
+            for (Department dep : departmentService.getBADepartments(userInfo.getUser())) {
+                availableDepartments.add(dep.getId());
+            }
 			result.setDepartments(new ArrayList<Department>(departmentService
 					.getRequiredForTreeDepartments(availableDepartments)
 					.values()));

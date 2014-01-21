@@ -20,9 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.NumberFormat;
 import java.text.ParsePosition;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author sgoryachkin
@@ -135,7 +133,10 @@ public class GetRefBookValuesHandler extends
 
 		for (Map<String, RefBookValue> record : refBookPage) {
 			RefBookItem item = new RefBookItem();
-			List<String> values = new ArrayList<String>();
+            // соответсвие гарантируется LinkedList'ом
+			List<String> values = new LinkedList<String>();
+            List<Long> valuesAttrId = new LinkedList<Long>();
+            List<String> valuesAttrAlias = new LinkedList<String>();
 
 			item.setId(record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue()
 					.longValue());
@@ -149,13 +150,17 @@ public class GetRefBookValuesHandler extends
 						.get(refBookAttribute.getAlias());
 				if (refBookAttribute.isVisible()) {
 					values.add(dereferanceValue);
+                    valuesAttrId.add(refBookAttribute.getId());
+                    valuesAttrAlias.add(refBookAttribute.getAlias());
 				}
 				if (refBookAttribute.getId().equals(action.getRefBookAttrId())) {
 					item.setDereferenceValue(dereferanceValue);
 				}
 
 			}
-			item.setValues(values);
+            item.setValues(values);
+            item.setValuesAttrId(valuesAttrId);
+            item.setValuesAttrAlias(valuesAttrAlias);
 			items.add(item);
 		}
 

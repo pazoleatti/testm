@@ -2,7 +2,8 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:w='urn:import:com.aplana.sbrf.taxaccounting.web.widget.incrementbutton'
              xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
-             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:d="http://www.w3.org/1999/html">
 <ui:style>
     .titleLabel {
         font-size: 16px;
@@ -44,12 +45,14 @@
                             <w:IncrementButton minValue="1920" maxValue="2100" ui:field="toBox"></w:IncrementButton>
                             <g:Button ui:field="find">Поиск</g:Button>
                             <g:Button ui:field="closePeriod">Закрыть период</g:Button>
+                            <g:Button ui:field="removePeriod">Удалить период</g:Button>
                             <g:Button ui:field="setDeadlineButton">Назначить срок сдачи</g:Button>
 
                         </g:HorizontalPanel>
                         <g:HorizontalPanel>
                             <g:Label>Подразделение:</g:Label>
                             <picker:DepartmentPickerModalWidget header="Подразделение" multiSelection="false" ui:field="departmentPicker"/>
+                            <g:Label ui:field="departmentPickerRO"/>
                             <style:LinkAnchor img="resources/img/starfish-16.png" text="Открыть период" ui:field="openPeriod"/>
                         </g:HorizontalPanel>
 

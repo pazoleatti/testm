@@ -42,7 +42,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     }
 
     @Override
-    public List<Exemplar> getExemplarByRnuType(long rnuTypeId) {
+    public List<Exemplar> getExemplarByRnuType(long rnuTypeId, String yearSeq) {
         try {
             return getJdbcTemplate().query(
                     "select\n" +
@@ -65,7 +65,8 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
                             "inner join migration.department \"dep\" on \"prov\".fiddepartment = \"dep\".id\n" +
                             "inner join migration.department \"depter\" on \"depter\".id = \"dep\".par_field\n" +
                             "where\n" +
-                            "\"ex\".typeexemplar like 'ACTUAL' and\n" +
+                            "\"ex\".typeexemplar like 'ACTUAL' and\n " +
+                            "TO_CHAR(\"per\".datebegin, 'yyyy') in (" + yearSeq + ")  and\n " +
                             "\"objdict\".idobjdict = ?",
                     new Object[]{rnuTypeId},
                     new ExemplarRowMapper()
@@ -387,7 +388,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
             row.setCodecurrency(MapperUtils.getString(rs, 4));
             row.setNompaper(MapperUtils.getBD(rs, 5));
             row.setDrepo1(MapperUtils.getDate(rs, 6));
-            row.setDrepo1(MapperUtils.getDate(rs, 7));
+            row.setDrepo2(MapperUtils.getDate(rs, 7));
             row.setGetpricenkd(MapperUtils.getBD(rs, 8));
             row.setSalepricenkd(MapperUtils.getBD(rs, 9));
             row.setCostrepo(MapperUtils.getBD(rs, 10));

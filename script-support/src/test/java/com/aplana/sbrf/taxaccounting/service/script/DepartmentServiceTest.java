@@ -1,20 +1,19 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.service.script.impl.DepartmentServiceImpl;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Тест для сервиса работы с подразделениями
@@ -38,7 +37,7 @@ public class DepartmentServiceTest {
         validTB.setId(2);
         validTB.setName("ТерБанк для Банк");
         validTB.setTbIndex("1");
-        validTB.setType(DepartmentType.TERBANK);
+        validTB.setType(DepartmentType.TERR_BANK);
 
         List<Department> temp = new ArrayList<Department>();
         temp.add(valid);
@@ -98,5 +97,4 @@ public class DepartmentServiceTest {
         }
         assertTrue(exception);
     }
-
 }

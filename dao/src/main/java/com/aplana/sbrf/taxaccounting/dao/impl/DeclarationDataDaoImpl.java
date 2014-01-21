@@ -217,6 +217,14 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 		if (filter.getDeclarationTypeId() != null) {
 			sql.append(" AND dectype.id = ").append(filter.getDeclarationTypeId());
 		}
+
+        if (filter.getFormState() != null) {
+            if (filter.getFormState() == WorkflowState.CREATED) {
+                sql.append(" AND dec.is_accepted = 0");
+            } else if (filter.getFormState() == WorkflowState.ACCEPTED) {
+                sql.append(" AND dec.is_accepted = 1");
+            }
+        }
 	}
 
 	private void appendSelectClause(StringBuilder sql) {
@@ -282,6 +290,4 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             throw new DaoException("Не удалось обновить декларацию с id = %d, так как она не существует.");
         }
     }
-
-
 }

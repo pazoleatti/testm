@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetFieldNamesHandler extends AbstractActionHandler<GetFieldsNames, GetFieldsNamesResult> {
 
 	public GetFieldNamesHandler() {
@@ -50,5 +50,6 @@ public class GetFieldNamesHandler extends AbstractActionHandler<GetFieldsNames, 
 	}
 
 	@Override
-	public void undo(GetFieldsNames getFieldsNames, GetFieldsNamesResult getFieldsNamesResult, ExecutionContext executionContext) throws ActionException {}
+	public void undo(GetFieldsNames getFieldsNames, GetFieldsNamesResult getFieldsNamesResult,
+                     ExecutionContext executionContext) throws ActionException {}
 }

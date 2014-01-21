@@ -60,6 +60,9 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	@UiField
     DepartmentPickerModalWidget departmentPicker;
 
+    @UiField
+    Label departmentPickerRO;
+
 	private SingleSelectionModel<TableRow> selectionModel = new SingleSelectionModel<TableRow>();
 
 	@Inject
@@ -151,6 +154,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	public void setFilterData(List<Department> departments, List<DepartmentPair> selectedDepartments, int yearFrom, int yearTo) {
 		departmentPicker.setAvailableValues(departments);
 		departmentPicker.setValue(selectedDepartments);
+        departmentPickerRO.setText(selectedDepartments.get(0).getDepartmentName());
 		fromBox.setValue(yearFrom);
 		toBox.setValue(yearTo);
 	}
@@ -198,6 +202,13 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 		}
 	}
 
+	@UiHandler("removePeriod")
+	void onRemovePeriodClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			getUiHandlers().removePeriod();
+		}
+	}
+
 	@UiHandler("openPeriod")
 	void onOpenPeriodClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
@@ -213,12 +224,6 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
     }
 
 	@Override
-	public void setReadOnly(boolean readOnly) {
-		openPeriod.setVisible(!readOnly);
-		closePeriod.setVisible(!readOnly);
-	}
-
-	@Override
 	public boolean isFromYearEmpty() {
 		return fromBox.isEmpty();
 	}
@@ -227,4 +232,10 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	public boolean isToYearEmpty() {
 		return toBox.isEmpty();
 	}
+
+    @Override
+    public void setCanChangeDepartment(boolean canChange) {
+        departmentPicker.setVisible(canChange);
+        departmentPickerRO.setVisible(!canChange);
+    }
 }

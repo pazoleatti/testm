@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -226,7 +227,22 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		}
 	}
 
-    @Override
+	@Override
+	public List<FormData> find(int departmentId, int reportPeriodId) {
+		List<Long> formsId = getJdbcTemplate().queryForList(
+			"select id from form_data where department_id = ? and report_period_id = ?",
+			new Object[] {departmentId, reportPeriodId},
+			new int[] {Types.NUMERIC, Types.NUMERIC},
+			Long.class
+		);
+		List<FormData> forms = new ArrayList<FormData>();
+		for (Long id : formsId) {
+			forms.add(getWithoutRows(id));
+		}
+		return forms;
+	}
+
+	@Override
     public FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder) {
         try {
             Long formDataId = getJdbcTemplate().queryForLong(

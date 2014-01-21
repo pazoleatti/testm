@@ -10,6 +10,7 @@ import java.io.Serializable;
 public enum DepartmentXmlMapping implements Serializable {
     DEP_118_1("996100010", 109, "00", 118),
     DEP_118_2("996100010", 701, "00", 118),
+    DEP_118_3("996100010", 1500, "00", 118),
 
     DEP_701_00("999300010", 701, "00", 123),
     DEP_701_01("999300010", 701, "01", 143),
@@ -34,10 +35,10 @@ public enum DepartmentXmlMapping implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final String depCode;
-    private final int sysCodeNew;
-    private final String subSysCode;
-    private final int departmentId;
+    private final String depCode;       // значение подразделения в старой системе
+    private final int sysCodeNew;       // код системы
+    private final String subSysCode;    // код подсистемы
+    private final int departmentId;     // значение подразделения в новой системе
 
     private DepartmentXmlMapping(String depCodeOld, int sysCodeNew, String subSysCode, int departmentId) {
         this.depCode = depCodeOld;

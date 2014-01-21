@@ -82,11 +82,6 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 		TableRowBuilder tr = startRow();
 		tr.className(trClasses.toString());
 
-		// Issue 7131: DataGrid horizontal Scrollbar overlaps the last row on IE8
-		if (Window.Navigator.getUserAgent().contains(USER_AGENT_IE8) && cellTable.getRowCount() == absRowIndex + 1) {
-			tr.style().height(35, Style.Unit.PX).verticalAlign(Style.VerticalAlign.TEXT_TOP);
-		}
-
 		// Build the columns.
 		int columnCount = cellTable.getColumnCount();
 		int rowCount = cellTable.getRowCount();

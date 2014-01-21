@@ -78,14 +78,15 @@ print '--------------------------------'
 print '- JAASAuthData'
 jassAuthDataIds = AdminConfig.list('JAASAuthData').split(lineSeparator)
 jassAuthDataNotFound = 1
-for jassAuthDataId in jassAuthDataIds:
-	jassAuthDataAlias = AdminConfig.showAttribute(jassAuthDataId, 'alias')
-	if jassAuthDataAlias[-len(jaasAlias):] == jaasAlias:
-		jassAuthDataNotFound = 0
-		print 'Found existing JAASAuthData:'
-		print 'jassAuthDataAlias='+ jassAuthDataAlias
-		print 'jassAuthDataId='+ jassAuthDataId
-		break
+if jassAuthDataIds[0] != '':
+	for jassAuthDataId in jassAuthDataIds:
+		jassAuthDataAlias = AdminConfig.showAttribute(jassAuthDataId, 'alias')
+		if jassAuthDataAlias[-len(jaasAlias):] == jaasAlias:
+			jassAuthDataNotFound = 0
+			print 'Found existing JAASAuthData:'
+			print 'jassAuthDataAlias='+ jassAuthDataAlias
+			print 'jassAuthDataId='+ jassAuthDataId
+			break
 if jassAuthDataNotFound:
 	print 'Initiated the creation of an JAASAuthData'
 	print 'id='+ AdminConfig.create('JAASAuthData', AdminConfig.getid('/Security:/'), [['alias', jaasAlias], ['userId', jassUserId], ['password', jassUserPass]])
@@ -113,7 +114,8 @@ else:
 	print 'Initiated the creation of an data source'
 	dataSuorceId = AdminConfig.create('DataSource', jdbcProviderId, [['name', dataSuorceName], ['jndiName', dataSourceJndi], ['datasourceHelperClassname', dataSourceHelpClass], ['authDataAlias', jaasAlias]])
 	print 'id='+ dataSuorceId
-	AdminConfig.create('J2EEResourceProperty', AdminConfig.create('J2EEResourcePropertySet', dataSuorceId, []),	[['name', 'URL'], ['type', 'java.lang.String'], ['value', dataSourceUrl]])
+	AdminConfig.create('J2EEResourceProperty', AdminConfig.create('J2EEResourcePropertySet', dataSuorceId, []), [['name', 'URL'], ['type', 'java.lang.String'], ['value', dataSourceUrl]])
+	AdminConfig.create('J2EEResourceProperty', AdminConfig.showAttribute(dataSuorceId, 'propertySet'), [['name', 'connectionProperties'], ['type', 'java.lang.String'], ['value', 'defaultRowPrefetch=1000']])
 	print 'Parameters are set'
 	AdminConfig.save()
 	print 'Configuration is saved.'
