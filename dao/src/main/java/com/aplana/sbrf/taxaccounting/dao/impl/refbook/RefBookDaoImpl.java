@@ -525,9 +525,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             //Создаем новые значения атрибутов
             jt.batchUpdate(INSERT_REF_BOOK_VALUE, listValues);
         }
-        catch (DaoException ex) {
-            throw ex;
-        }
         catch (Exception ex) {
             throw new DaoException("Не удалось обновить значения справочника", ex);
         }

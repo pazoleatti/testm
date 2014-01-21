@@ -676,7 +676,7 @@ public final class ScriptUtils {
             }
             for (String alias : columns) {
                 if (!totalSums.containsKey(alias)) {
-                    totalSums.put(alias, BigDecimal.valueOf(0));
+                    totalSums.put(alias, BigDecimal.ZERO);
                 }
                 BigDecimal val = (BigDecimal) row.getCell(alias).getValue();
                 if (val != null) {
@@ -690,7 +690,7 @@ public final class ScriptUtils {
                     totalSums.put(alias, BigDecimal.valueOf(0));
                 }
                 BigDecimal value = (BigDecimal) totalRow.getCell(alias).getValue();
-                BigDecimal totalValue = (value != null ? value : new BigDecimal(0));
+                BigDecimal totalValue = (value != null ? value : BigDecimal.ZERO);
                 if (totalSums.get(alias).compareTo(totalValue) != 0) {
                     String msg = String.format(WRONG_TOTAL, getColumnName(totalRow, alias));
                     if (required) {
@@ -726,7 +726,7 @@ public final class ScriptUtils {
 
                 Map<String, BigDecimal> sums = new HashMap<String, BigDecimal>();
                 for (String alias : columns) {
-                    sums.put(alias, BigDecimal.valueOf(0));
+                    sums.put(alias, BigDecimal.ZERO);
                 }
                 totalSums.put(subAlias, sums);
             }
@@ -755,7 +755,7 @@ public final class ScriptUtils {
         for (String sub : subAliases) {
             for (String alias : columns) {
                 BigDecimal value = (BigDecimal) totalRows.get(sub).getCell(alias).getValue();
-                BigDecimal totalValue = (value != null ? value : new BigDecimal(0));
+                BigDecimal totalValue = (value != null ? value : BigDecimal.ZERO);
                 if (totalSums.get(sub).get(alias).compareTo(totalValue) != 0) {
                     String msg = String.format(WRONG_SUBTOTAL, sub, getColumnName(dataRows.get(0), alias));
                     if (required) {

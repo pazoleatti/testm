@@ -39,8 +39,7 @@ public final class Date_CustomFieldSerializer extends
 	public static Date instantiate(SerializationStreamReader streamReader)
 			throws SerializationException {
 		long time = streamReader.readLong();
-		Date date = new Date(offsetUTC(time, true));
-		return date;
+		return new Date(offsetUTC(time, true));
 	}
 
 	public static void serialize(SerializationStreamWriter streamWriter,
