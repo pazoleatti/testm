@@ -310,12 +310,15 @@ create sequence seq_income_102 start with 100;
 create table declaration_type (
   id       number(9) not null,
   tax_type    char(1) not null,
-  name      varchar2(80) not null
+  name      varchar2(80) not null,
+  status number(1) default 0 not null
 );
 comment on table declaration_type is ' Виды деклараций';
 comment on column declaration_type.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 comment on column declaration_type.name is 'Наименование';
+
+create sequence seq_declaration_type start with 100;
 -----------------------------------------------------------------------------------------------------------------------------------
 create table department_declaration_type (
   id         number(9) not null,
@@ -332,7 +335,8 @@ create sequence seq_dept_declaration_type start with 10000;
 create table declaration_template (
   id       number(9) not null,
   edition    number(9) not null,
-  version    varchar2(20) not null,
+  status number(1) default 0 not null,
+  version date not null,
   is_active   number(1) not null,
   create_script       clob,
   jrxml               varchar2(36),
@@ -348,6 +352,7 @@ comment on column declaration_template.create_script is 'Скрипт форми
 comment on column declaration_template.jrxml is 'Макет JasperReports для формирования печатного представления формы';
 comment on column declaration_template.declaration_type_id is 'Вид деклараций';
 comment on column declaration_template.XSD is 'XSD-схема';
+comment on column declaration_template.status is 'Статус версии (значения (-1, 0, 1, 2))';
 
 create sequence seq_declaration_template start with 10000;
 -----------------------------------------------------------------------------------------------------------------------------------

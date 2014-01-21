@@ -13,6 +13,7 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,7 @@ public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, U
 	private FormTemplateService formTemplateService;
 
     @Autowired
+    @Qualifier("formTemplateMainOperatingService")
     MainOperatingService mainOperatingService;
 
     @Autowired

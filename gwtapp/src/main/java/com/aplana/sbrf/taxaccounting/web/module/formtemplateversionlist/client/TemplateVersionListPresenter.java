@@ -8,8 +8,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualReveal
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.event.CreateNewVersionEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.history.VersionHistoryPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.VersionHistoryPresenter;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -22,7 +22,6 @@ import com.gwtplatform.mvp.client.annotations.Title;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
-import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
     public TemplateVersionListPresenter(EventBus eventBus, MyView view, MyProxy proxy,
                                         DispatchAsync dispatcher, PlaceManager placeManager,
                                         VersionHistoryPresenter versionHistoryPresenter) {
-        super(eventBus, view, proxy);
+        super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
         this.placeManager = placeManager;
         getView().setUiHandlers(this);
@@ -72,14 +71,8 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
 
     @Override
     public void onHistoryClick() {
-        GetVersionHistoryAction action = new GetVersionHistoryAction();
-        action.setFormTypeId(Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTypeId, "")));
-        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetVersionHistoryResult>() {
-            @Override
-            public void onSuccess(GetVersionHistoryResult result) {
-                versionHistoryPresenter.initHistory(result.getChangeses());
-            }
-        }, this));
+        versionHistoryPresenter.initHistory(Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTypeId, "")),
+                VersionHistoryPresenter.TemplateType.FORM);
         addToPopupSlot(versionHistoryPresenter);
     }
 
@@ -117,11 +110,5 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
                     }
                 }, this)
         );
-    }
-
-    @Override
-    protected void revealInParent() {
-        RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(),
-                this);
     }
 }

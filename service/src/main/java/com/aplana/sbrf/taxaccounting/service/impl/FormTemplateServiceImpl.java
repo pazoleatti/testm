@@ -200,6 +200,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public FormTemplate getNearestFTRight(FormTemplate formTemplate, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
 
+        formTemplate.setVersion(addCalendar(Calendar.DAY_OF_YEAR, 1, formTemplate.getVersion()));
         int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), statusList, formTemplate.getVersion());
         if (id == 0)
             return null;

@@ -46,6 +46,7 @@ drop table declaration_template;
 drop sequence seq_dept_declaration_type;
 drop table department_declaration_type;
 drop table declaration_type;
+drop sequence seq_declaration_type;
 drop sequence seq_income_102;
 drop table income_102;
 drop sequence seq_income_101;

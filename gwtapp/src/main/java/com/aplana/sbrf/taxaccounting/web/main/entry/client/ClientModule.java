@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.module.configuration.client.Configurati
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateModule;
+import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.DeclarationVersionListModule;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigModule;
 import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
@@ -99,5 +100,6 @@ public class ClientModule extends AbstractPresenterModule {
         install(new SchedulerModule());
         install(new HistoryBusinesstModule());
         install(new TestPageModule());
+        install(new DeclarationVersionListModule());
 	}
 }

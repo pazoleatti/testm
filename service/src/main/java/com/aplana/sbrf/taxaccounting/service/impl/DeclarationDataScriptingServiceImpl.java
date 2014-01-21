@@ -74,7 +74,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		// Биндим параметры для выполнения скрипта
 		Bindings b = scriptEngine.createBindings();
 		
-		Map<String, ?> scriptComponents =  getScriptExposedBeans(declarationTemplate.getDeclarationType().getTaxType(), event);
+		Map<String, ?> scriptComponents =  getScriptExposedBeans(declarationTemplate.getType().getTaxType(), event);
 		for (Object component : scriptComponents.values()) {
 			ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
 			scriptComponentContext.setUserInfo(userInfo);

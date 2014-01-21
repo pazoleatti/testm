@@ -136,12 +136,12 @@ public class CacheTest {
         declarationTemplate.setId(1);
         declarationTemplate.setEdition(1);
         declarationTemplate.setActive(true);
-        declarationTemplate.setVersion("0.01");
+        declarationTemplate.setVersion(new Date());
         declarationTemplate.setCreateScript("MyScript");
         String uuid1 = UUID.randomUUID().toString();
         declarationTemplate.setJrxmlBlobId(uuid1);
         DeclarationType declarationType = declarationTypeDao.get(1);
-        declarationTemplate.setDeclarationType(declarationType);
+        declarationTemplate.setType(declarationType);
 
         declarationTemplateDao.save(declarationTemplate);
 

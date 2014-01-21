@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Service(value = "formTemplateOperatingService")
 @Transactional
-public class VersionOperatingServiceImpl implements VersionOperatingService<FormTemplate> {
+public class VersionFTOperatingServiceImpl implements VersionOperatingService<FormTemplate> {
 
     @Autowired
     private FormTemplateService formTemplateService;
@@ -51,14 +51,15 @@ public class VersionOperatingServiceImpl implements VersionOperatingService<Form
                 formTemplateService.findFTVersionIntersections(template, versionActualDateEnd);
         //1 Шаг. Система проверяет пересечение с периодом актуальности хотя бы одной версии этого же макета, STATUS которой не равен -1.
         if (!formTemplateIds.isEmpty()){
-            System.out.println("Intersection " + formTemplateIds.get(0));
             //Обнаружена хотя бы одна версия, с которой есть пересечение.
             FormTemplate formTemplate = formTemplateService.get(formTemplateIds.get(0));
+            System.out.println(formTemplate.getVersion() + " " + formTemplate.getStatus());
             switch (formTemplate.getStatus()){
                 case NORMAL:
                 case DRAFT:
                     //Статус равен 0 или 1 и дата окончания актуальности существует.
-                    if (formTemplateService.getNearestFTRight(formTemplate).getVersion() != null){
+                    FormTemplate ftRight = formTemplateService.getNearestFTRight(formTemplate);
+                    if (ftRight != null && ftRight.getVersion() != null){
                         logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
                         return;
                     }
@@ -70,7 +71,6 @@ public class VersionOperatingServiceImpl implements VersionOperatingService<Form
                             /*calendar.set(calendar.get(Calendar.YEAR), Calendar.DECEMBER, 31);*/
                         isUsedVersion(formTemplate, null, logger);
                         if (logger.containsLevel(LogLevel.ERROR)){
-                            System.out.println();
                             logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
                             return;
                         }
@@ -120,7 +120,6 @@ public class VersionOperatingServiceImpl implements VersionOperatingService<Form
         //Дата окончания актуальности указана.
         //Дата окончания актуальности указана и имеет значение, равное дате начала актуальности следующей версии, уменьшенной на 1 день.
         if (versionActualDateEnd != null){
-            System.out.println("Exist " + versionActualDateEnd);
             //Следующая версия существует.
             FormTemplate nextFormTemplate = formTemplateService.getNearestFTRight(template);
             if (nextFormTemplate != null){
@@ -139,10 +138,9 @@ public class VersionOperatingServiceImpl implements VersionOperatingService<Form
             }
             //Следующая версия не существует.
             else{
-                System.out.println("Not exist : " + versionActualDateEnd);
                 Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd);
                 FormTemplate formTemplate =  createFakeTemplate(date, template);
-                System.out.println(formTemplateService.save(formTemplate));
+                formTemplateService.save(formTemplate);
             }
         }
         // Дата окончания актуальности не указана.

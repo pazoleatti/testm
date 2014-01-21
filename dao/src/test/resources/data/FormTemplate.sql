@@ -1,4 +1,4 @@
-insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code, status) values (1, 1, null, date '2013-01-01', 1, 1, 0, 1, 'name_1', 'fullname_1', 'code_1', 0);
+insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code, status) values (1, 1, null, to_date('01.01.2013 12.01.01', 'DD.MM.YY HH.MI.SS'), 1, 1, 0, 1, 'name_1', 'fullname_1', 'code_1', 0);
 insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code, status) values (2, 2, null, date '2013-01-01', 0, 1, 1, 0, 'name_2', 'fullname_2', 'code_2', 0);
 insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code, status) values (3, 2, null, date '2013-02-01', 0, 1, 1, 0, 'name_3', 'fullname_3', 'code_2', 1);
 

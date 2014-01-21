@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * User: avanteev
  */
-@Service
+@Service("formTemplateMainOperatingService")
 @Transactional
 public class MainOperatingFTServiceImpl implements MainOperatingService {
 
@@ -48,7 +48,6 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                 new Date(formTemplateService.getNearestFTRight(template).getVersion().getTime() - ONE_DAY_MILLISECONDS) : null;
         if ((dbVersionEndDate != null && (dbVersionBeginDate.compareTo(template.getVersion()) !=0 ||
                 dbVersionEndDate.compareTo(templateActualEndDate) !=0)) || templateActualEndDate != null || dbVersionBeginDate.compareTo(template.getVersion()) !=0 ){
-            System.out.println("Старт проверки.");
             versionOperatingService.isIntersectionVersion(template, templateActualEndDate, logger);
             checkError(logger);
         }
@@ -64,14 +63,14 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         /*versionOperatingService.isCorrectVersion(template, templateActualEndDate, logger);
         checkError(logger);*/
         FormType type = formTemplate.getType();
-        type.setStatus(VersionedObjectStatus.DRAFT);
+        type.setStatus(VersionedObjectStatus.NORMAL);
         type.setName(formTemplate.getName() != null ? formTemplate.getName() : "");
         int formTypeId = formTypeService.save(type);
         formTemplate.getType().setId(formTypeId);
         versionOperatingService.isIntersectionVersion(formTemplate, templateActualEndDate, logger);
         checkError(logger);
         formTemplate.setEdition(1);//т.к. первый
-        formTemplate.setStatus(VersionedObjectStatus.DRAFT);
+        formTemplate.setStatus(VersionedObjectStatus.NORMAL);
         return formTemplateService.save(formTemplate);
     }
 
@@ -129,8 +128,6 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         FormTemplate formTemplate = formTemplateService.get(templateId);
         if (formTemplate.getStatus() == VersionedObjectStatus.NORMAL){
             versionOperatingService.isUsedVersion(formTemplate, null, logger);
-            if (logger.containsLevel(LogLevel.ERROR))
-                throw new ServiceLoggerException("Макет используется и не может быть выведен из действия", logEntryService.save(logger.getEntries()));
             formTemplate.setStatus(VersionedObjectStatus.DRAFT);
             formTemplateService.save(formTemplate);
         } else {

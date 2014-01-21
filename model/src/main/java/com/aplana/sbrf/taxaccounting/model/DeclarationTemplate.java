@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.util.Date;
+
 /**
  * Шаблон декларации
  * @author dsultanbekov
@@ -8,7 +10,7 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 	private static final long serialVersionUID = 1L;
 
 	private DeclarationType type;
-	private String version;
+	private Date version;
 	private boolean active;
 	private Integer edition;
     private String xsdId;
@@ -16,11 +18,21 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 
 	private String createScript;
 
-	/**
+    private VersionedObjectStatus status;
+
+    public VersionedObjectStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(VersionedObjectStatus status) {
+        this.status = status;
+    }
+
+    /**
 	 * Получить вид декларации
 	 * @return вид декларации
 	 */
-	public DeclarationType getDeclarationType() {
+	public DeclarationType getType() {
 		return type;
 	}
 
@@ -28,7 +40,7 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 	 * Задать вид декларации
 	 * @param type вид декларации
 	 */	
-	public void setDeclarationType(DeclarationType type) {
+	public void setType(DeclarationType type) {
 		this.type = type;
 	}
 
@@ -36,7 +48,7 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 	 * Получить название версии шаблона
 	 * @return версия шаблона
 	 */
-	public String getVersion() {
+	public Date getVersion() {
 		return version;
 	}
 
@@ -44,7 +56,7 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 	 * Задать версию шаблона
 	 * @param version версия шаблона
 	 */
-	public void setVersion(String version) {
+	public void setVersion(Date version) {
 		this.version = version;
 	}
 	

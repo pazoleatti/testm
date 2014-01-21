@@ -6,6 +6,7 @@ import java.io.Serializable;
 
 /**
  * User: avanteev
+ * Ксласс представляющий историю изменений шаблонов на визуальной форме.
  */
 public class TemplateChangesExt implements Serializable {
     private TemplateChanges templateChanges;

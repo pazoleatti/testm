@@ -48,7 +48,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		public FormTemplate mapRow(ResultSet rs, int index) throws SQLException {
 			FormTemplate formTemplate = new FormTemplate();
 			formTemplate.setId(rs.getInt("id"));
-			formTemplate.setVersion(rs.getDate("version"));
+            formTemplate.setVersion(rs.getDate("version"));
 			formTemplate.setName(rs.getString("name"));
 			formTemplate.setFullName(rs.getString("fullname"));
             formTemplate.setType(formTypeDao.get(rs.getInt("type_id")));
@@ -92,8 +92,12 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 					new FormTemplateMapper(true)
 			);
 		} catch (EmptyResultDataAccessException e) {
+            logger.error("Не удалось найти описание налоговой формы с id = " + formId, e);
 			throw new DaoException("Не удалось найти описание налоговой формы с id = " + formId);
-		}
+		} catch (Error error) {
+            logger.error("",error);
+            throw new DaoException("", error.getMessage());
+        }
 	}
 
 	/**
@@ -304,7 +308,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             StringBuilder builder = new StringBuilder("select * from (select id");
             builder.append(" from form_template where type_id = :typeId");
             builder.append(" and version < :actualBeginVersion");
-            builder.append(" and status in (:statusList) order by version, edition) where rownum = 1");
+            builder.append(" and status in (:statusList) order by version desc, edition desc) where rownum = 1");
             return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
         } catch(EmptyResultDataAccessException e){
             return 0;
@@ -358,7 +362,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                             formTemplate.isFixedRows(),
                             formTemplate.getName() != null ? formTemplate.getName() : " ",
                             formTemplate.getFullName() != null ? formTemplate.getFullName() : " ",
-                            formTemplate.getCode(),
+                            formTemplate.getCode() != null?formTemplate.getCode() : "",
                             formTemplate.getScript() != null ? formTemplate.getScript() : " ",
                             formTemplate.getStatus().getId(),
                             formTemplate.getType().getId()

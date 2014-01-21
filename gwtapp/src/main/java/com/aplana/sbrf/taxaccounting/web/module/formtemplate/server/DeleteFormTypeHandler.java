@@ -9,6 +9,7 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 public class DeleteFormTypeHandler extends AbstractActionHandler<DeleteFormTypeAction, DeleteFormTypeResult> {
 
     @Autowired
+    @Qualifier("formTemplateMainOperatingService")
     private MainOperatingService mainOperatingService;
 
     @Autowired

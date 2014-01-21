@@ -188,5 +188,10 @@ public interface FormDataService {
      */
     void checkDestinations(long formDataId);
 
+    /**
+     * Ищет налоговые формы, которые использует данную версию макета
+     * @param formTemplateId идентификатор версии
+     * @return список НФ
+     */
     List<Long> getFormDataLisByVersionTemplate(int formTemplateId);
 }

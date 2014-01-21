@@ -32,6 +32,8 @@
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.testpage.TestPage"/>
 
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.HistoryBusinessList"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.DeclarationVersionList"/>
+
 
 
     <replace-with class="com.google.gwt.user.cellview.client.CustomCellBasedWidgetImplTrident">

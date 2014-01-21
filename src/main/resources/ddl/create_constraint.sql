@@ -87,6 +87,7 @@ alter table income_102 add constraint income_102_fk_department foreign key (depa
 
 alter table declaration_type add constraint declaration_type_pk primary key (id);
 alter table declaration_type add constraint declaration_type_chk_tax_type check (tax_type in ('I', 'P', 'T', 'V', 'D'));
+alter table declaration_type add constraint declaration_type_chk_status check (status in (-1, 0, 1, 2));
 
 alter table department_declaration_type add constraint dept_decl_type_pk primary key (id);
 alter table department_declaration_type add constraint dept_decl_type_fk_dept foreign key (department_id) references department (id);
@@ -97,6 +98,7 @@ alter table declaration_template add constraint declaration_template_pk primary 
 alter table declaration_template add constraint declaration_t_chk_is_active check (is_active in (0,1));
 alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type (id);
 alter table declaration_template add constraint declaration_tem_fk_blob_data foreign key (XSD) references blob_data (id);
+alter table declaration_template add constraint dec_template_check_status check (status in (-1, 0, 1, 2));
 
 alter table declaration_data add constraint declaration_data_pk primary key (id);
 alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template (id);

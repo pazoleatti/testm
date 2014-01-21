@@ -1,8 +1,10 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
-	xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'
-    xmlns:fileuplod='urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload'
-	xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
+             xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'
+             xmlns:fileuplod='urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload'
+             xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
+             xmlns:datepicker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker">
 
 	<ui:style>
 		.title {
@@ -20,6 +22,10 @@
 
 		<g:north size="30">
 			<g:HorizontalPanel>
+                <g:Label width="300px">Период актульности с</g:Label>
+                <datepicker:CustomDateBox ui:field="versionDateBegin"/>
+                <g:Label width="300px">по</g:Label>
+                <datepicker:CustomDateBox ui:field="versionDateEnd"/>
                 <t:Bar>
 				    <t:LeftBar>
 					    <g:Button text="Сохранить" ui:field="saveButton" />

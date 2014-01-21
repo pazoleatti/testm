@@ -1,16 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.server;
 
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
-import com.aplana.sbrf.taxaccounting.service.VersionOperatingService;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.DeleteVersionAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.DeleteVersionResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +20,9 @@ import org.springframework.stereotype.Service;
 @PreAuthorize("hasRole('ROLE_CONF')")
 public class DeleteVersionHandler extends AbstractActionHandler<DeleteVersionAction, DeleteVersionResult> {
 
-    @Autowired
-    private VersionOperatingService<FormTemplate> formTemplateVersionOperatingService;
-
 
     @Autowired
+    @Qualifier("formTemplateMainOperatingService")
     MainOperatingService mainOperatingService;
 
     @Autowired

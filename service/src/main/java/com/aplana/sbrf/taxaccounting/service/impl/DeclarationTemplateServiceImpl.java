@@ -20,7 +20,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+
+import static com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus.FAKE;
 
 /**
  * Сервис для работы с шаблонами деклараций
@@ -32,6 +36,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
 	private static final Log logger = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
     private final static String ENCODING = "UTF-8";
+    private Calendar calendar = Calendar.getInstance();
 
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
@@ -68,7 +73,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
         String jrxmBlobId = blobDataService.create(
                 jrxmlIO,
-                declarationTemplate.getDeclarationType().getName() +"_jrxml");
+                declarationTemplate.getType().getName() +"_jrxml");
 
         declarationTemplateDao.setJrxml(declarationTemplateId, jrxmBlobId);
 	}
@@ -129,6 +134,61 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
+    public List<DeclarationTemplate> getDecTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status) {
+        List<Integer> statusList = createStatusList(status);
+
+        List<Integer> declarationTemplateIds =  declarationTemplateDao.getDeclarationTemplateVersions(formTypeId, 0, statusList, null, null);
+        List<DeclarationTemplate> declarationTemplates = new ArrayList<DeclarationTemplate>();
+        for (Integer id : declarationTemplateIds)
+            declarationTemplates.add(declarationTemplateDao.get(id));
+        return declarationTemplates;
+    }
+
+    @Override
+    public List<Integer> findFTVersionIntersections(DeclarationTemplate declarationTemplate, Date actualEndVersion, VersionedObjectStatus... status) {
+        List<Integer> statusList = createStatusList(status);
+
+        Date actualBeginVersion = addCalendar(Calendar.DAY_OF_YEAR, -1, declarationTemplate.getVersion());
+        List<Integer> templateVersionIds = new ArrayList<Integer>();
+        templateVersionIds.addAll(declarationTemplateDao.getDeclarationTemplateVersions(declarationTemplate.getType().getId(),
+                declarationTemplate.getId() != null ? declarationTemplate.getId() : 0, statusList, actualBeginVersion, actualEndVersion));
+        if (!templateVersionIds.isEmpty() || declarationTemplate.getId() != null)
+            return templateVersionIds;
+        //Поиск только "левее" даты актуализации версии, т.к. остальные пересечения попали в предыдущую выборку
+        int id = declarationTemplateDao.getNearestDTVersionIdLeft(declarationTemplate.getType().getId(), statusList, declarationTemplate.getVersion());
+        if (id != 0)
+            templateVersionIds.add(id);
+        return templateVersionIds;
+    }
+
+    @Override
+    public int delete(DeclarationTemplate declarationTemplate) {
+        switch (declarationTemplate.getStatus()){
+            case FAKE:
+                return declarationTemplateDao.delete(declarationTemplate.getId());
+            default:
+                declarationTemplate.setStatus(VersionedObjectStatus.DELETED);
+                return declarationTemplateDao.save(declarationTemplate);
+        }
+    }
+
+    @Override
+    public DeclarationTemplate getNearestDTRight(DeclarationTemplate declarationTemplate, VersionedObjectStatus... status) {
+        List<Integer> statusList = createStatusList(status);
+
+        int id = declarationTemplateDao.getNearestDTVersionIdRight(declarationTemplate.getType().getId(), statusList, declarationTemplate.getVersion());
+        if (id == 0)
+            return null;
+        return declarationTemplateDao.get(id);
+    }
+
+    @Override
+    public int versionTemplateCount(int typeId, VersionedObjectStatus... status) {
+        List<Integer> statusList = createStatusList(status);
+        return declarationTemplateDao.versionTemplateCount(typeId, statusList);
+    }
+
+    @Override
 	public boolean lock(int declarationTemplateId, TAUserInfo userInfo){
 		ObjectLock<Integer> objectLock = lockDao.getObjectLock(declarationTemplateId, DeclarationTemplate.class);
 		if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
@@ -149,4 +209,26 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 			return true;
 		}
 	}
+
+    private List<Integer> createStatusList(VersionedObjectStatus[] status){
+        List<Integer> statusList = new ArrayList<Integer>();
+        if (status.length == 0){
+            statusList.add(VersionedObjectStatus.NORMAL.getId());
+            statusList.add(FAKE.getId());
+            statusList.add(VersionedObjectStatus.DRAFT.getId());
+        }else {
+            for (VersionedObjectStatus objectStatus : status)
+                statusList.add(objectStatus.getId());
+        }
+
+        return statusList;
+    }
+
+    private Date addCalendar(int fieldNumber, int numberDays, Date actualDate){
+        calendar.setTime(actualDate);
+        calendar.add(fieldNumber, numberDays);
+        Date time = calendar.getTime();
+        calendar.clear();
+        return time;
+    }
 }

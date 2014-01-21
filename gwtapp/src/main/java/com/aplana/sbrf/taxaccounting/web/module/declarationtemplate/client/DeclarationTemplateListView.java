@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -49,10 +50,10 @@ public class DeclarationTemplateListView extends ViewImpl
 							return;
 						}
 						sb.appendHtmlConstant("<a href=\"#"
-								+ DeclarationTemplateTokens.declarationTemplate + ";"
-								+ DeclarationTemplateTokens.declarationTemplateId + "="
-								+ declaration.getId() + "\">"
-								+ declaration.getDeclarationType().getName() + "</a>");
+								+ DeclarationTemplateTokens.declarationVersionList + ";"
+								+ DeclarationTemplateTokens.declarationType + "="
+								+ declaration.getType().getId() + "\">"
+								+ declaration.getType().getName() + "</a>");
 					}
 				}) {
 			@Override
@@ -73,7 +74,7 @@ public class DeclarationTemplateListView extends ViewImpl
 		declarationTemplateTable.addColumn(new TextColumn<DeclarationTemplate>() {
 			@Override
 			public String getValue(DeclarationTemplate declarationTemplate) {
-				return declarationTemplate.getVersion();
+				return DateTimeFormat.getFormat("dd.MM.yyyy").format(declarationTemplate.getVersion());
 			}
 		}, "Версия");
 	}

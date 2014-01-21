@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -26,6 +27,14 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	}
 
 	private final MyDriver driver = GWT.create(MyDriver.class);
+
+    @UiField
+    @Path("version")
+    CustomDateBox versionDateBegin;
+
+    @UiField
+    @Path("versionEnd")
+    CustomDateBox versionDateEnd;
 	
 	@UiField
 	@Editor.Ignore
@@ -58,9 +67,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	@UiField
 	@Editor.Ignore
 	Label title;
-
-	@UiField
-	TextBox version;
 
 	@UiField
 	CheckBox active;
@@ -110,7 +116,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 			@Override
 			public void execute() {
-				title.setText(declaration.getDeclarationType().getName());
+				title.setText(declaration.getType().getName());
 				driver.edit(declaration);				
 			}
 		});

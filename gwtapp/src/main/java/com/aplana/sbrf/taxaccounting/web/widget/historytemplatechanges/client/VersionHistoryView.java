@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.history;
+package com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.TemplateChangesExt;
