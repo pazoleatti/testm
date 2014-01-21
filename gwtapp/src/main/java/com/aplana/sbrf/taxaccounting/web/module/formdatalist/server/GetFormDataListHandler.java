@@ -14,7 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataList, GetFormDataListResult> {
 	@Autowired
 	private FormDataSearchService formDataSearchService;
@@ -43,6 +43,4 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
 	public void undo(GetFormDataList action, GetFormDataListResult result, ExecutionContext context) throws ActionException {
 		// ничего не делаем
 	}
-	
-
 }

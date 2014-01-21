@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client;
 
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.IsEditor;
 import com.google.gwt.editor.client.adapters.TakesValueEditor;
@@ -50,7 +51,8 @@ public class PeriodPickerPopupWidget extends Composite implements
 	private TakesValueEditor<List<Integer>> editor;
 	
 	private Map<Integer, String> dereferenceValue;
-	
+	private Map<Integer, Pair<Date, Date>> reportPeriodDates;
+
 	public PeriodPickerPopupWidget(){
 		periodPicker = new PeriodPickerWidget();
 		initWidget(binder.createAndBindUi(this));
@@ -65,8 +67,10 @@ public class PeriodPickerPopupWidget extends Composite implements
     @Override
     public void setPeriods(List<ReportPeriod> periods) {
         dereferenceValue = new HashMap<Integer, String>();
+        reportPeriodDates = new HashMap<Integer, Pair<Date, Date>>();
         for (ReportPeriod reportPeriod : periods) {
             dereferenceValue.put(reportPeriod.getId(), reportPeriod.getName());
+            reportPeriodDates.put(reportPeriod.getId(), new Pair<Date, Date>(reportPeriod.getStartDate(), reportPeriod.getEndDate()));
         }
         periodPicker.setPeriods(periods);
     }
@@ -110,6 +114,11 @@ public class PeriodPickerPopupWidget extends Composite implements
     public void setEnabled(boolean enabled) {
         selectButton.setEnabled(enabled);
         clearButton.setEnabled(enabled);
+    }
+
+    @Override
+    public Pair<Date, Date> getPeriodDates(Integer reportPeriodId){
+        return reportPeriodDates.get(reportPeriodId);
     }
 
     @UiHandler("okButton")

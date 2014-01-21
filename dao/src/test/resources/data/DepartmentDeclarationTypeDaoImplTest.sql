@@ -4,6 +4,14 @@ insert into department (id, name, parent_id, type) values (2, 'testName2', 1, 2)
 insert into department (id, name, parent_id, type) values (3, 'testName3', 1, 2);
 insert into department (id, name, parent_id, type) values (4, 'testName4', 1, 2);
 insert into department (id, name, parent_id, type) values (5, 'testName5', 1, 2);
+insert into department (id, name, parent_id, type) values (6, 'testName6', 2, 3);
+insert into department (id, name, parent_id, type) values (7, 'testName7', 6, 4);
+insert into department (id, name, parent_id, type) values (8, 'testName8', 2, 3);
+insert into department (id, name, parent_id, type) values (9, 'testName9', 6, 4)
+insert into department (id, name, parent_id, type) values (10, 'testName10', 2, 3)
+insert into department (id, name, parent_id, type) values (11, 'testName11', 1, 2)
+insert into department (id, name, parent_id, type) values (12, 'testName12', 1, 2)
+insert into department (id, name, parent_id, type) values (13, 'testName13', 1, 2)
 
 -- DECLARATION_TYPE
 insert into declaration_type (id, tax_type, name) values (1, 'T', 'testName1');
@@ -15,6 +23,8 @@ insert into declaration_type (id, tax_type, name) values (4, 'V', 'testName4');
 insert into department_declaration_type (id, department_id, declaration_type_id) values (1, 1, 1);
 insert into department_declaration_type (id, department_id, declaration_type_id) values (2, 1, 2);
 insert into department_declaration_type (id, department_id, declaration_type_id) values (3, 2, 1);
+insert into department_declaration_type (id, department_id, declaration_type_id) values (4, 7, 2);
+insert into department_declaration_type (id, department_id, declaration_type_id) values (5, 9, 2);
 
 -- FORM_TYPE
 insert into form_type (id, name, tax_type) values (1, 'FormType - Transport', 'T');
@@ -27,6 +37,11 @@ insert into department_form_type (id, department_id, form_type_id, kind) values 
 insert into department_form_type (id, department_id, form_type_id, kind) values (2, 2, 1, 1);
 insert into department_form_type (id, department_id, form_type_id, kind) values (3, 3, 1, 1);
 insert into department_form_type (id, department_id, form_type_id, kind) values (4, 1, 2, 2);
+insert into department_form_type (id, department_id, form_type_id, kind) values (5, 9, 2, 1);
+insert into department_form_type (id, department_id, form_type_id, kind) values (6, 10, 2, 1);
+insert into department_form_type (id, department_id, form_type_id, kind) values (7, 11, 2, 2);
+insert into department_form_type (id, department_id, form_type_id, kind) values (8, 12, 2, 2);
+insert into department_form_type (id, department_id, form_type_id, kind) values (9, 13, 2, 2);
 
 -- DECLARATION_SOURCE
 insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 1);
@@ -34,3 +49,11 @@ insert into declaration_source (department_declaration_type_id, src_department_f
 insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (3, 1);
 insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 4);
 insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (2, 4);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (4, 5);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (4, 6);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (5, 7);
+
+-- FORM_DATA_SOURCE
+insert into form_data_source (department_form_type_id, src_department_form_type_id) values (6, 7);
+insert into form_data_source (department_form_type_id, src_department_form_type_id) values (6, 8);
+insert into form_data_source (department_form_type_id, src_department_form_type_id) values (8, 9);

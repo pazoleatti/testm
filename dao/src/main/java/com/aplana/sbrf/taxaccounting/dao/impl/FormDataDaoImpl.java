@@ -1,15 +1,23 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -238,7 +246,22 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         }
     }
 
-    @Override
+	@Override
+	public List<FormData> find(int departmentId, int reportPeriodId) {
+		List<Long> formsId = getJdbcTemplate().queryForList(
+			"select id from form_data where department_id = ? and report_period_id = ?",
+			new Object[] {departmentId, reportPeriodId},
+			new int[] {Types.NUMERIC, Types.NUMERIC},
+			Long.class
+		);
+		List<FormData> forms = new ArrayList<FormData>();
+		for (Long id : formsId) {
+			forms.add(getWithoutRows(id));
+		}
+		return forms;
+	}
+
+	@Override
     public FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder) {
         try {
             Long formDataId = getJdbcTemplate().queryForLong(

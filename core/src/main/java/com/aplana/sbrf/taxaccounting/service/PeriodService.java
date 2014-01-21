@@ -53,7 +53,15 @@ public interface PeriodService {
 	void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
 	          long departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate, boolean isCorrection);
 
-	void close(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs);
+	/**
+	 * Закрыть период
+	 * @param taxType тип налога
+	 * @param reportPeriodId идентификатор отчетного периода
+	 * @param departmentId идентификатор подразделения, для которого закрывается период
+	 * @param logs логер, при необходимости
+	 * @param user пользователь, который выполняет действие
+	 */
+	void close(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user);
 
 	List<DepartmentReportPeriod> listByDepartmentId(long departmentId);
 	
@@ -175,4 +183,23 @@ public interface PeriodService {
      * @return
      */
     public Calendar getMonthReportDate(int reportPeriodId, int periodOrder);
+
+	/**
+	 * Удалить отчетный период
+	 * @param taxType тип налога
+	 * @param reportPeriodId идентификатор отчетного периода
+	 * @param departmentId идентификатор подразделения, для которого удаляется период
+	 * @param logs логер, при необходимости
+	 * @param user пользователь, который выполняет действие
+	 */
+	public void removeReportPeriod(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user);
+
+    /**
+     * Список отчетных периодов для указанного вида налога и для указанных подразделений
+     *
+     * @param taxType Вид налога
+     * @param departmentList Список подразделений
+     * @return Список отчетных периодов
+     */
+    public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList);
 }

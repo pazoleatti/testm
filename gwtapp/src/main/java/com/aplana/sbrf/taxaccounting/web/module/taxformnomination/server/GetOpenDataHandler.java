@@ -24,7 +24,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
  * @author Stanislav Yasinskiy
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 @Component("getNominationOpenDataHandler")
 public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction, GetOpenDataResult> {
 
@@ -45,12 +45,10 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
         // Текущий пользователь
         TAUser currUser = securityService.currentUserInfo().getUser();
 
-        // TODO вопрос в аналитике (УВиСАС), нужно ли сюда добавить администратора
-
         // Признак контролера
         if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             result.setControlUNP(true);
-        } else if (currUser.hasRole(TARole.ROLE_CONTROL)) {
+        } else if (currUser.hasRole(TARole.ROLE_CONTROL_NS)) {
             result.setControlUNP(false);
         }
 
@@ -61,23 +59,21 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
 
         // Подразделения доступные пользователю
         Set<Integer> avSet = new HashSet<Integer>();
-        if (!currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
 
-            // Подразделение пользователя и все дочерние
-            for (Department dep : departmentService.getAllChildren(currUser.getDepartmentId())) {
-                avSet.add(dep.getId());
-            }
-
-            // Необходимые для дерева подразделения
-            result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));
-
-        } else {
+        // http://conf.aplana.com/pages/viewpage.action?pageId=11380675
+        if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // Все подразделения
             result.setDepartments(departmentService.listAll());
 
             for (Department dep : result.getDepartments()) {
                 avSet.add(dep.getId());
             }
+        } else if (currUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+            for (Department dep : departmentService.getBADepartments(currUser)) {
+                avSet.add(dep.getId());
+            }
+            // Необходимые для дерева подразделения
+            result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));
         }
         result.setAvailableDepartments(avSet);
 
@@ -85,7 +81,8 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
     }
 
     @Override
-    public void undo(GetOpenDataAction action, GetOpenDataResult result, ExecutionContext executionContext) throws ActionException {
+    public void undo(GetOpenDataAction action, GetOpenDataResult result, ExecutionContext executionContext)
+            throws ActionException {
         // Не требуется
     }
 }

@@ -18,9 +18,8 @@ import com.gwtplatform.dispatch.shared.ActionException;
  * 
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class DeleteFormDataHandler extends
-		AbstractActionHandler<DeleteFormDataAction, DeleteFormDataResult> {
+@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataAction, DeleteFormDataResult> {
 
 	@Autowired
 	private FormDataService formDataService;

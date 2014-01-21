@@ -22,9 +22,8 @@ import com.gwtplatform.dispatch.shared.ActionException;
  * @author Eugene Stetsenko Обработчик запроса для пересчета формы.
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class RecalculateFormDataHandler extends
-		AbstractActionHandler<RecalculateDataRowsAction, DataRowResult> {
+@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+public class RecalculateFormDataHandler extends AbstractActionHandler<RecalculateDataRowsAction, DataRowResult> {
 
 	@Autowired
 	private FormDataService formDataService;

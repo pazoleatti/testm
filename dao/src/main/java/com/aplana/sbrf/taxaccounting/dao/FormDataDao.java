@@ -76,6 +76,14 @@ public interface FormDataDao {
 
     List<Long> findFormDataByFormTemplate(int formTemplateId);
 
+	/**
+	 * Поиск налоговой формы
+	 * @param departmentId подразделение
+	 * @param reportPeriodId отчетный период
+	 * @return список налоговых форм, удовлетворяющих критерию
+	 */
+	List<FormData> find(int departmentId, int reportPeriodId);
+
     /**
      * Поиск ежемесячной налоговой формы
      * @param formTypeId Вид формы

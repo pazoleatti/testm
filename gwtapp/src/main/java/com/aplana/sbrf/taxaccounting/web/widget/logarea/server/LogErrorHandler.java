@@ -20,7 +20,7 @@ import java.io.InputStream;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class LogErrorHandler extends AbstractActionHandler<LogErrorAction, LogErrorResult> {
 
     @Autowired
@@ -50,7 +50,7 @@ public class LogErrorHandler extends AbstractActionHandler<LogErrorAction, LogEr
     }
 
     @Override
-    public void undo(LogErrorAction logErrorAction, LogErrorResult logErrorResult, ExecutionContext executionContext) throws ActionException {
-
+    public void undo(LogErrorAction logErrorAction, LogErrorResult logErrorResult, ExecutionContext executionContext)
+            throws ActionException {
     }
 }

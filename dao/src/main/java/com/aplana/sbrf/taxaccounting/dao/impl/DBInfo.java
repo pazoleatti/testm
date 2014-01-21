@@ -24,6 +24,12 @@ public class DBInfo {
      */
     private boolean supportOver;
 
+    /**
+     * Признак добавления служебного слова 'recursive' в конструкцию рекурсивных запросов with...
+     * В hsqldb используется, в oracle - нет
+     */
+    private boolean withRecursive;
+
     private DBInfo() {
     }
 
@@ -34,9 +40,14 @@ public class DBInfo {
     private void init() throws SQLException {
         String dbName = ((JdbcTemplate)namedParameterJdbcTemplate.getJdbcOperations()).getDataSource().getConnection().getMetaData().getDatabaseProductName();
         supportOver = !HSQLDB_NAME_ENGINE.equals(dbName);
+        withRecursive = HSQLDB_NAME_ENGINE.equals(dbName);
     }
 
     public boolean isSupportOver(){
         return supportOver;
+    }
+
+    public boolean isWithRecursive() {
+        return withRecursive;
     }
 }

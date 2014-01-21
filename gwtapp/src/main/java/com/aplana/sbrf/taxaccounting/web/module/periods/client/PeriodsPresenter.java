@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -53,9 +52,9 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		Integer getToYear();
         DepartmentPair getDepartmentId();
 		TableRow getSelectedRow();
-		void setReadOnly(boolean readOnly);
 		boolean isFromYearEmpty();
 		boolean isToYearEmpty();
+        void setCanChangeDepartment(boolean canChange);
 	}
 
 	private final TaPlaceManager placeManager;
@@ -105,6 +104,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	public void openPeriod() {
         openDialogPresenter.resetToDefault();
         openDialogPresenter.setSelectedDepartment(getView().getDepartmentId().getDepartmentId());
+		openDialogPresenter.setYear(getView().getFromYear());
         addToPopupSlot(openDialogPresenter);
 	}
 
@@ -149,7 +149,23 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         addToPopupSlot(deadlineDialogPresenter);
     }
 
-    public void find() {
+	@Override
+	public void removePeriod() {
+		RemovePeriodAction requestData = new RemovePeriodAction();
+		requestData.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
+		requestData.setTaxType(taxType);
+		requestData.setDepartmentId(getView().getSelectedRow().getDepartmentId());
+		dispatcher.execute(requestData, CallbackUtils
+				.defaultCallback(new AbstractCallback<RemovePeriodResult>() {
+					@Override
+					public void onSuccess(RemovePeriodResult result) {
+						find();
+						LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
+					}
+				}, PeriodsPresenter.this));
+	}
+
+	public void find() {
 		GetPeriodDataAction requestData = new GetPeriodDataAction();
 		requestData.setTaxType(taxType);
 		requestData.setFrom(getView().getFromYear());
@@ -179,8 +195,9 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 						getView().setTitle(taxType.getName() + " / Ведение периодов");
 						PeriodsPresenter.this.openDialogPresenter.setTaxType(result.getTaxType());
                         getView().setFilterData(result.getDepartments(), Arrays.asList(result.getSelectedDepartment()), result.getYearFrom(), result.getYearTo());
-						getView().setReadOnly(result.isReadOnly());
-						openDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment().getDepartmentId()), result.isEnableDepartmentPicker());
+                        getView().setCanChangeDepartment(result.canChangeDepartment());
+						openDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), true);
+						openDialogPresenter.setCanChangeDepartment(result.canChangeDepartment());
 						find();
 					}
 				}, PeriodsPresenter.this).addCallback(TaManualRevealCallback.create(this, this.placeManager))

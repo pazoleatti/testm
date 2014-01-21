@@ -49,21 +49,21 @@
     <g:DockLayoutPanel>
         <g:north size="120">
             <g:VerticalPanel>
-                <g:Label addStyleNames="{style.titleLabel}">Указание форм источников</g:Label>
+                <g:Label addStyleNames="{style.titleLabel}" ui:field="titleLabel"/>
                 <g:HorizontalPanel height="45px">
                     <g:HorizontalPanel width="210px">
                         <g:Label addStyleNames="{style.searchLabel}">Назначение:</g:Label>
                         <g:VerticalPanel>
-                            <g:Anchor ui:field="formAnchor" href="#!sources;isForm=true">Налоговые формы</g:Anchor>
+                            <g:Anchor ui:field="formAnchor" href="#">Налоговые формы</g:Anchor>
                             <g:Label ui:field="formLabel">Налоговые формы</g:Label>
-                            <g:Anchor ui:field="declarationAnchor" href="#!sources;isForm=false">Декларации</g:Anchor>
+                            <g:Anchor ui:field="declarationAnchor" href="#">Декларации</g:Anchor>
                             <g:Label ui:field="declarationLabel">Декларации</g:Label>
                         </g:VerticalPanel>
                     </g:HorizontalPanel>
 
                     <g:FlowPanel width="400px" addStyleNames="{style.taxTypePanel}">
                         <g:Label styleName="{style.searchLabel}">Вид налога</g:Label>
-                        <g:ValueListBox ui:field="taxTypePicker" />
+                        <g:ValueListBox ui:field="taxTypePicker"/>
                     </g:FlowPanel>
 
                     <g:cell width="100px" verticalAlignment="bottom">

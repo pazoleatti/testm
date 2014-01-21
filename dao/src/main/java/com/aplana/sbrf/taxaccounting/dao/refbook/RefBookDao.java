@@ -133,7 +133,7 @@ public interface RefBookDao {
      * @param uniqueRecordId уникальный идентификатор версии записи справочника
      * @return
      */
-    RefBookRecordVersion getActiveRecordVersion(Long uniqueRecordId);
+    RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId);
 
     /**
      * Возвращает количество существующих версий для элемента справочника
@@ -160,7 +160,7 @@ public interface RefBookDao {
      * @param recordId идентификатор записи
      * @return
      */
-    List<RefBookValue> getUniqueAttributeValues(Long refBookId, Long recordId);
+    List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long refBookId, Long recordId);
 
     /**
      * По коду справочника возвращает набор его атрибутов
@@ -187,7 +187,7 @@ public interface RefBookDao {
      * @param records новые значения полей элемента справочника
      * @return ссылочные атрибуты в порядке?
      */
-    boolean checkReferenceValuesVersions(Date versionFrom, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records);
+    boolean isReferenceValuesCorrect(Date versionFrom, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records);
 
     /**
      * Поиск существующих версий, которые могут пересекаться с новой версией
@@ -222,21 +222,21 @@ public interface RefBookDao {
     void deleteVersion(Long uniqueRecordId);
 
     /**
-     * Проверяет есть ли ссылки на версию в какиз либо точках запроса
+     * Проверяет есть ли ссылки на версию в каких либо точках запроса
      *
      * @param uniqueRecordId уникальный идентификатор версии записи
      * @param versionFrom дата начала актуальности новой версии
      * @return есть ссылки на версию?
      */
-    boolean checkVersionUsages(Long uniqueRecordId, Date versionFrom);
+    boolean isVersionUsed(Long uniqueRecordId, Date versionFrom);
 
     /**
-     * Проверяет есть ли ссылки на версию в какиз либо точках запроса
+     * Проверяет есть ли ссылки на версию в каких либо точках запроса
      *
      * @param uniqueRecordIds список идентификаторов версий записей
      * @return есть ссылки на версию?
      */
-    boolean checkVersionUsages(List<Long> uniqueRecordIds);
+    boolean isVersionUsed(List<Long> uniqueRecordIds);
 
     /**
      * Возвращает данные о версии следующей за указанной
@@ -255,7 +255,7 @@ public interface RefBookDao {
     Long getRecordId(Long uniqueRecordId);
     /**
      * Удаляет указанные версии записи из справочника
-     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
+     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_UNIQUE_ID_ALIAS Код записи}
      */
     void deleteRecordVersions(List<Long> uniqueRecordIds);
 
@@ -269,15 +269,61 @@ public interface RefBookDao {
     /**
      * Удаляет все версии записи из справочника
      * @param refBookId идентификатор справочника
-     * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
+     * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_UNIQUE_ID_ALIAS Код записи}
      */
     void deleteAllRecordVersions(Long refBookId, List<Long> uniqueRecordIds);
 
     /**
      * Возвращает список версий элементов справочника за указанный период времени
+     * @param refBookId идентификатор справочника
      * @param startDate начальная дата
      * @param endDate конечная дата
      * @return
      */
     List<Date> getVersions(Long refBookId, Date startDate, Date endDate);
+
+    /**
+     * Получает идентификатор записи, который имеет наименьшую дату начала актуальности для указанной версии
+     * @param refBookId идентификатор справочника
+     * @param uniqueRecordId идентификатор версии записи справочника
+     * @return
+     */
+    Long getFirstRecordId(Long refBookId, Long uniqueRecordId);
+
+    /**
+     * Создает новые записи в справочнике
+     * @param refBookId код справочника
+     * @param version дата актуальности новых записей
+     * @param records список новых записей
+     */
+    @Deprecated
+    void createRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records);
+    
+    /**
+     * Обновляет значения в справочнике
+     * @param refBookId код справочника
+     * @param version задает дату актуальности
+     * @param records список обновленных записей
+     */
+    @Deprecated
+    void updateRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records);
+
+    /**
+     * Удаляет записи из справочника
+     * @param refBookId код справочника
+     * @param version задает дату удаления данных
+     * @param recordIds список кодов удаляемых записей. {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
+     */
+    @Deprecated    
+    void deleteRecords(Long refBookId, Date version, List<Long> recordIds);
+
+    /**
+     * Удаление всех записей справочника.<br>
+     * Записи ближайшей меньшей версии будут отмечены как удаленные на дату удаления
+     *
+     * @param refBookId Id справочника
+     * @param version Дата удаления записей
+     */
+    @Deprecated
+    void deleteAllRecords(Long refBookId, Date version);
 }

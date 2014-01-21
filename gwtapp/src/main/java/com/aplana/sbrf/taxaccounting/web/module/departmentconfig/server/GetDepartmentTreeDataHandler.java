@@ -16,11 +16,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static java.util.Arrays.asList;
+
 /**
  * @author Dmitriy Levykin
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepartmentTreeDataAction, GetDepartmentTreeDataResult> {
 
     @Autowired
@@ -46,7 +48,9 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
         // Текущий пользователь
         TAUser currUser = securityService.currentUserInfo().getUser();
 
-        if (!currUser.hasRole(TARole.ROLE_CONTROL_UNP) && !currUser.hasRole(TARole.ROLE_CONTROL)) {
+        if (!currUser.hasRole(TARole.ROLE_CONTROL_UNP)
+                && !currUser.hasRole(TARole.ROLE_CONTROL)
+                && !currUser.hasRole(TARole.ROLE_CONTROL_NS)) {
             // Не контролер, далее не загружаем
             return result;
         }
@@ -57,28 +61,21 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
 
         // Подразделения доступные пользователю
         Set<Integer> avSet = new HashSet<Integer>();
-        if (!currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-            // Первичные и консолид. отчеты
-            List<DepartmentFormType> formSrcList =  departmentFormTypService.getDFTSourcesByDepartment(currUser.getDepartmentId(), action.getTaxType());
-
-            for (DepartmentFormType ft : formSrcList) {
-                avSet.add(ft.getDepartmentId());
-            }
-
-            // Подразделение пользователя
-            avSet.add(currUser.getDepartmentId());
-
-            // Необходимые для дерева подразделения
-            result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));
-
-        } else {
+        if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // Все подразделения
             result.setDepartments(departmentService.listAll());
 
             for (Department dep : result.getDepartments()) {
                 avSet.add(dep.getId());
             }
+        } else {
+            // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
+            avSet.addAll(departmentService.getTaxFormDepartments(currUser, asList(action.getTaxType())));
+
+            // Необходимые для дерева подразделения
+            result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));
         }
+
         result.setAvailableDepartments(avSet);
         result.setReportPeriods(periodService.getAllPeriodsByTaxType(action.getTaxType(), false));
 

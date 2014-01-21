@@ -29,7 +29,7 @@ import java.util.Map;
  * @author Dmitriy Levykin
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepartmentCombinedAction,
         GetDepartmentCombinedResult> {
 
@@ -83,7 +83,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
              }
 
             // Id записи
-            depCombined.setRecordId(paramsMap.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+            depCombined.setRecordId(paramsMap.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue());
 
             // Общая часть
             depCombined.setDepartmentId(paramsMap.get(DepartmentParamAliases.DEPARTMENT_ID.name()).getReferenceValue());

@@ -22,15 +22,8 @@ public class RefBookUiColumn extends DataRowColumn<Long> {
             @Override
             public void update(int index, DataRow<Cell> dataRow, Long value) {
                 dataRow.put(getAlias(), value);
-
-                // TODO Levykin Реализовать обновление RefBookDereference зависимых ячеек после http://jira.aplana.com/browse/SBRFACCTAX-5382. Пока зависимые ячейки только сбрасываются.
-                // TODO Levykin http://jira.aplana.com/browse/SBRFACCTAX-5381
+                // Если у справочной графы есть заисисимые графы, то обновляется вся строка в таблице
                 List<Cell> linkedCells = dataRow.getLinkedCells(column.getId());
-                if (linkedCells != null) {
-                    for (Cell cell : linkedCells) {
-                        cell.setRefBookDereference(null);
-                    }
-                }
                 CellModifiedEvent event = new CellModifiedEvent(dataRow, linkedCells != null && !linkedCells.isEmpty());
                 fireEvent(event);
             }

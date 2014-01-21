@@ -109,5 +109,4 @@ public interface DepartmentFormTypeService {
      *         {@link DepartmentFormType}
      */
     List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId);
-
 }

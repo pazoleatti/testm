@@ -3,11 +3,10 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,13 +17,12 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
-
-
 /**
  * Реализация DAO для работы с информацией о назначении деклараций подразделениям
  * @author Eugene Stetsenko
  */
 @Repository
+@Transactional
 public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements DepartmentDeclarationTypeDao {
 
 	public static final RowMapper<DepartmentDeclarationType> DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER =
@@ -39,7 +37,6 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 			departmentDeclarationType.setDepartmentId(rs.getInt("department_id"));
 			return departmentDeclarationType;
 		}
-
 	};
 
 	@Override
@@ -78,6 +75,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 
 	private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_declaration_type ddt where department_id = ?" +
 			" and exists (select 1 from declaration_type dt where dt.id = ddt.declaration_type_id and dt.tax_type = ?)";
+
 	@Override
 	public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType) {
 		return getJdbcTemplate().query(
@@ -91,7 +89,6 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 	}
 
 	@Override
-	@Transactional(readOnly = false)
 	public void save(int departmentId, int declarationTypeId) {
 		try {
 	        getJdbcTemplate().update(
@@ -105,7 +102,6 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 	}
 
 	@Override
-    @Transactional(readOnly = false)
 	public void delete(Long id) {
 		try{
 	        getJdbcTemplate().update(

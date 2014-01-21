@@ -14,13 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
+import static java.util.Arrays.asList;
 
 @Component
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_OPER')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValues, FilterValues> {
 
 	@Autowired
@@ -48,29 +47,9 @@ public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValue
 			for (Department dep : departmentService.listAll()) {
 				depIds.add(dep.getId());
 			}
-		} else if (currentUser.hasRole(TARole.ROLE_CONTROL)) {
-
-			List<DepartmentFormType> formSrcList = departmentFormTypService.getDFTSourcesByDepartment(currentUser.getDepartmentId(), TaxType.PROPERTY);
-			formSrcList.addAll(departmentFormTypService.getDFTSourcesByDepartment(currentUser.getDepartmentId(), TaxType.TRANSPORT));
-			formSrcList.addAll(departmentFormTypService.getDFTSourcesByDepartment(currentUser.getDepartmentId(), TaxType.DEAL));
-			formSrcList.addAll(departmentFormTypService.getDFTSourcesByDepartment(currentUser.getDepartmentId(), TaxType.VAT));
-			formSrcList.addAll(departmentFormTypService.getDFTSourcesByDepartment(currentUser.getDepartmentId(), TaxType.INCOME));
-
-			List<DepartmentFormType> formDstList = departmentFormTypService.getDFTSourcesByDepartment(currentUser.getDepartmentId(), TaxType.PROPERTY);
-			formDstList.addAll(departmentFormTypService.getDFTSourcesByDepartment(currentUser.getDepartmentId(), TaxType.TRANSPORT));
-			formDstList.addAll(departmentFormTypService.getDFTSourcesByDepartment(currentUser.getDepartmentId(), TaxType.DEAL));
-			formDstList.addAll(departmentFormTypService.getDFTSourcesByDepartment(currentUser.getDepartmentId(), TaxType.VAT));
-			formDstList.addAll(departmentFormTypService.getDFTSourcesByDepartment(currentUser.getDepartmentId(), TaxType.INCOME));
-
-			for (DepartmentFormType dft : formSrcList) {
-				depIds.add(dft.getDepartmentId());
-			}
-			for (DepartmentFormType dft : formDstList) {
-				depIds.add(dft.getDepartmentId());
-			}
-			depIds.add(currentUser.getDepartmentId());
-		} else if (currentUser.hasRole(TARole.ROLE_OPER)) {
-			depIds.add(currentUser.getDepartmentId());
+		} else if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+            // Обработка иерархии и связй по всем типам налогов
+            depIds.addAll(departmentService.getTaxFormDepartments(currentUser, asList(TaxType.values())));
 		}
 		result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(depIds).values()));
 		return result;

@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 @Service
 public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<UpdateDepartmentDeadlineAction, UpdateDepartmentDeadlineResult> {
 
@@ -45,16 +45,7 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         TAUserInfo userInfo = securityService.currentUserInfo();
 
-        StringBuilder text = new StringBuilder(
-                userInfo.getUser().getName())
-                .append(" назначил новый срок сдачи отчетности подразделению %s для ")
-                .append(action.getTaxType().getName())
-                .append(" в периоде ")
-                .append(action.getReportPeriodName())
-                .append(" ")
-                .append(action.getCurrentYear())
-                .append(" года: ")
-                .append(df.format(action.getDeadline()));
+        String text = "%s назначил новый срок сдачи отчетности подразделению %s для %s в периоде %s %s года: %s";
         List<Notification> notifications = new ArrayList<Notification>();
         for (DepartmentPair pair : action.getDepartments()) {
             Department receiver = departmentService.getDepartment(pair.getParentDepartmentId());
@@ -64,7 +55,9 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
             notification.setReportPeriodId(action.getReportPeriodId());
             notification.setSenderDepartmentId(pair.getDepartmentId());
             notification.setReceiverDepartmentId(pair.getParentDepartmentId());
-            notification.setText(String.format(text.toString(), receiver.getName()));
+            notification.setText(String.format(text,
+                    userInfo.getUser().getName(), receiver.getName(), action.getTaxType().getName(),
+                    action.getReportPeriodName(), action.getCurrentYear(), df.format(action.getDeadline())));
 
             notifications.add(notification);
         }
@@ -74,7 +67,9 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
     }
 
     @Override
-    public void undo(UpdateDepartmentDeadlineAction updateDepartmentDeadlineAction, UpdateDepartmentDeadlineResult updateDepartmentDeadlineResult, ExecutionContext executionContext) throws ActionException {
+    public void undo(UpdateDepartmentDeadlineAction updateDepartmentDeadlineAction,
+                     UpdateDepartmentDeadlineResult updateDepartmentDeadlineResult,
+                     ExecutionContext executionContext) throws ActionException {
         //do nothing
     }
 }

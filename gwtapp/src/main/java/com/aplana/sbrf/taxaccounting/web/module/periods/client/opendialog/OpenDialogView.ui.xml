@@ -13,12 +13,11 @@
 				<g:VerticalPanel>
 					<g:VerticalPanel>
 						<g:HorizontalPanel verticalAlignment="middle" width="100%" spacing="3">
-							<g:cell horizontalAlignment="right">
+                            <g:cell horizontalAlignment="right">
 								<g:Label text="Подразделение: " width="150px" />
-							</g:cell>
-							<g:cell width="100%" horizontalAlignment="left">
+                            </g:cell>
 								<picker:DepartmentPickerPopupWidget width="100%" header="Подразделение" ui:field="departmentPicker"	multiselection="false" modal="true" />
-							</g:cell>
+                                <g:Label ui:field="departmentPickerRO"/>
 						</g:HorizontalPanel>
 
 						<g:HorizontalPanel ui:field="yearPnl" verticalAlignment="middle"

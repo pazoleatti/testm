@@ -32,9 +32,10 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     FormPanel uploadFormDataXls;
 
     @UiField
-    TextBox textBox;
+    Label label;
 
     private String value;
+    private static String actionUrlTemp = "upload/uploadController/patterntemp/";
     private static String actionUrl = "upload/uploadController/pattern/";
     private static String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
     private static String uploadPatternIE = "C:.+fakepath?."; //паттерн для IE
@@ -68,9 +69,9 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     private static Binder uiBinder = GWT.create(Binder.class);
 
     @UiConstructor
-    public FileUploadWidget() {
+    public FileUploadWidget(boolean uploadAsTemporal) {
         initWidget(uiBinder.createAndBindUi(this));
-        uploadFormDataXls.setAction(actionUrl);
+        uploadFormDataXls.setAction(uploadAsTemporal ? actionUrlTemp : actionUrl);
         uploadFormDataXls.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
@@ -85,25 +86,24 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
             }
         });
         uploader.getElement().setId("uploaderWidget");
-        textBox.getElement().setId("fakeInput");
-        textBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                uploader.getElement().<InputElement>cast().click();
-            }
-        });
+        label.getElement().setId("fakeInput");
         uploader.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 //В IE в случае скрытия поля <input type='file'/> к имени файла дополнительно добавляется fakepath
-                textBox.setValue(uploader.getFilename().replaceAll(uploadPatternIE, ""));
+                String filename = uploader.getFilename().replaceAll(uploadPatternIE, "");
+                label.setWidth("200px");
+                label.setText(filename);
+                label.setTitle(filename);
+                uploadFormDataXls.submit();
             }
         });
+
     }
 
     @UiHandler("uploadButton")
     void onUploadButtonClicked(ClickEvent event){
-        uploadFormDataXls.submit();
+        uploader.getElement().<InputElement>cast().click();
     }
 
 }

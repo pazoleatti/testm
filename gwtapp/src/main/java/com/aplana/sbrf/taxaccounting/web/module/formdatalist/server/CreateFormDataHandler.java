@@ -19,9 +19,8 @@ import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class CreateFormDataHandler extends
-		AbstractActionHandler<CreateFormData, CreateFormDataResult> {
+@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData, CreateFormDataResult> {
 
 	@Autowired
 	private SecurityService securityService;
@@ -40,15 +39,14 @@ public class CreateFormDataHandler extends
 	}
 
 	@Override
-	public CreateFormDataResult execute(CreateFormData action,
-			ExecutionContext context) throws ActionException {
+	public CreateFormDataResult execute(CreateFormData action, ExecutionContext context) throws ActionException {
 
 		TAUserInfo userInfo = securityService.currentUserInfo();
 		checkAction(action);
 		CreateFormDataResult result = new CreateFormDataResult();
 		Logger logger = new Logger();
 
-        // TODO Левыкин: для ежемесячных форм передавать periodOrder для ежемесячных форм
+        // TODO Левыкин: для ежемесячных форм передавать periodOrder
 		result.setFormDataId(formDataService.createFormData(logger, userInfo,
 				formTemplateService.getActiveFormTemplateId(action
 						.getFormDataTypeId().intValue()), action
@@ -57,9 +55,7 @@ public class CreateFormDataHandler extends
 						reportPeriodService.getReportPeriod(action.getReportPeriodId().intValue()), null));
 
 		return result;
-
 	}
-
 
 	private void checkAction(CreateFormData action) throws ActionException {
 		String errorMessage = "";
@@ -82,13 +78,10 @@ public class CreateFormDataHandler extends
 				throw new TaActionException(
 						"Не удалось создать налоговую форму:" + errorMessage);
 			}
-		
 	}
 
 	@Override
 	public void undo(CreateFormData action, CreateFormDataResult result,
 			ExecutionContext context) throws ActionException {
-		// TODO Auto-generated method stub
-		
 	}
 }
