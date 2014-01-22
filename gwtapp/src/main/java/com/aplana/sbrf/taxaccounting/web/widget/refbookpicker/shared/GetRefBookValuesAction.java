@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
@@ -20,6 +21,8 @@ public class GetRefBookValuesAction extends UnsecuredActionImpl<GetRefBookValues
 	private String filter;
 	private PagingParams pagingParams;
 	private Date version;
+    private int sortAttributeIndex;
+    private boolean isSortAscending;
 	
 	public long getRefBookAttrId() {
 		return refBookAttrId;
@@ -51,12 +54,25 @@ public class GetRefBookValuesAction extends UnsecuredActionImpl<GetRefBookValues
 	public void setFilter(String filter) {
 		this.filter = filter;
 	}
-	
-	@Override
-	public String getName() {
-		return "Получение значений справочника";
-	}
 
+    public int getSortAttributeIndex() {
+        return sortAttributeIndex;
+    }
 
+    public void setSortAttributeIndex(int sortAttributeIndex) {
+        this.sortAttributeIndex = sortAttributeIndex;
+    }
 
+    public boolean isSortAscending() {
+        return isSortAscending;
+    }
+
+    public void setSortAscending(boolean sortAscending) {
+        isSortAscending = sortAscending;
+    }
+
+    @Override
+    public String getName() {
+        return "Получение значений справочника";
+    }
 }

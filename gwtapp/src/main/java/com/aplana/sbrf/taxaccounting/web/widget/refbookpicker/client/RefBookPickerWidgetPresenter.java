@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -28,12 +30,12 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 
     private Long refBookAttrId;
 	private String filter;
+    private int sortColumnIndex;
+    private boolean isSortAscending;
 	
 
 	@Override
 	public void init(final long refBookAttrId, final String filter, Date date1, Date date2) {
-		
-		
 		InitRefBookAction initRefBookAction = new InitRefBookAction();
 		initRefBookAction.setRefBookAttrId(refBookAttrId);
 		initRefBookAction.setDate1(date1);
@@ -53,7 +55,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 			}
 			
 		}, this));
-		
+		isSortAscending = true;
 	}
 
 	
@@ -97,6 +99,8 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 		GetRefBookValuesAction action = new GetRefBookValuesAction();
 		action.setSearchPattern(getView().getSearchPattern());
 		action.setFilter(filter);
+        action.setSortAscending(isSortAscending);
+        action.setSortAttributeIndex(sortColumnIndex);
 		action.setPagingParams(new PagingParams(offset + 1, max));
 		action.setRefBookAttrId(refBookAttrId);
 		action.setVersion(version);
@@ -110,6 +114,13 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 				}, this));
 		
 	}
+
+    @Override
+    public void onSort(Integer columnIndex, boolean isSortAscending){
+        sortColumnIndex = columnIndex;
+        this.isSortAscending = isSortAscending;
+        getView().refreshDataAndGoToFirstPage();
+    }
 
 	@Override
 	public Long getValue() {

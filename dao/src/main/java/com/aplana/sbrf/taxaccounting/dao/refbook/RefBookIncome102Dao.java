@@ -26,6 +26,17 @@ public interface RefBookIncome102Dao {
      * @param sortAttribute
      * @return
      */
+    PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+
+    /**
+     * Перегруженный метод с восходящей сортировкой по умолчанию
+     *
+     * @param reportPeriodId
+     * @param pagingParams
+     * @param filter
+     * @param sortAttribute
+     * @return
+     */
     PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
     /**

@@ -22,6 +22,17 @@ public interface RefBookDepartmentDao {
      * @param sortAttribute может быть не задан (null)
      * @return
      */
+    PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+
+
+    /**
+     * Перегруженный метод с восходящей сортировкой по умолчанию
+     *
+     * @param pagingParams
+     * @param filter
+     * @param sortAttribute
+     * @return
+     */
     PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
     /**

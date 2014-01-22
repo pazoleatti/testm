@@ -47,18 +47,16 @@ public class GetRefBookValuesHandler extends
 		RefBook refBook = refBookFactory.getByAttribute(action
 				.getRefBookAttrId());
 
-		RefBookAttribute sortAttribute = refBook.getAttributes().iterator()
-				.next();
+        RefBookAttribute sortAttribute = getRefBookAttributeById(refBook, action.getSortAttributeIndex());
 
-		RefBookDataProvider refBookDataProvider = refBookFactory
-				.getDataProvider(refBook.getId());
+		RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
 
 		String filter = buildFilter(action.getFilter(),
 				action.getSearchPattern(), refBook);
 
 		PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider
 				.getRecords(action.getVersion(), action.getPagingParams(),
-						filter, sortAttribute);
+						filter, sortAttribute, action.isSortAscending());
 
 		GetRefBookValuesResult result = new GetRefBookValuesResult();
 		result.setPage(asseblRefBookPage(action, refBookDataProvider,
@@ -73,6 +71,17 @@ public class GetRefBookValuesHandler extends
 		//
 
 	}
+
+    private RefBookAttribute getRefBookAttributeById(RefBook refBook, int attributeId){
+        int i = 0;
+        for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
+            if (refBookAttribute.isVisible() && i++ == attributeId) {
+                return refBookAttribute;
+            }
+        }
+        return null;
+    }
+
 
 	private static String buildFilter(String filter, String serachPattern,
 			RefBook refBook) {
