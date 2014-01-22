@@ -19,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus.FAKE;
 
@@ -145,20 +142,60 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    public List<Integer> findFTVersionIntersections(DeclarationTemplate declarationTemplate, Date actualEndVersion, VersionedObjectStatus... status) {
+    public List<SegmentIntersection> findFTVersionIntersections(DeclarationTemplate declarationTemplate, Date actualEndVersion, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
 
-        Date actualBeginVersion = addCalendar(Calendar.DAY_OF_YEAR, -1, declarationTemplate.getVersion());
-        List<Integer> templateVersionIds = new ArrayList<Integer>();
-        templateVersionIds.addAll(declarationTemplateDao.getDeclarationTemplateVersions(declarationTemplate.getType().getId(),
-                declarationTemplate.getId() != null ? declarationTemplate.getId() : 0, statusList, actualBeginVersion, actualEndVersion));
-        if (!templateVersionIds.isEmpty() || declarationTemplate.getId() != null)
-            return templateVersionIds;
+        int decFormTypeId = declarationTemplate.getType().getId();
+        List<SegmentIntersection> segmentIntersections = new LinkedList<SegmentIntersection>();
+
+        /*Date actualBeginVersion = addCalendar(Calendar.DAY_OF_YEAR, -1, formTemplate.getVersion());*/
+        List<Integer> formTemplateVersionIds = new ArrayList<Integer>();
+        formTemplateVersionIds.addAll(declarationTemplateDao.getDeclarationTemplateVersions(decFormTypeId,
+                declarationTemplate.getId() != null ? declarationTemplate.getId() : 0,
+                statusList, declarationTemplate.getVersion(), actualEndVersion));
+
+        if (!formTemplateVersionIds.isEmpty()){
+            for (int i =0; i<formTemplateVersionIds.size() - 1; i++){
+                SegmentIntersection segmentIntersection = new SegmentIntersection();
+                DeclarationTemplate beginTemplate = declarationTemplateDao.get(i);
+                DeclarationTemplate endTemplate = declarationTemplateDao.get(i++);
+                segmentIntersection.setStatus(beginTemplate.getStatus());
+                segmentIntersection.setBeginDate(beginTemplate.getVersion());
+                segmentIntersection.setEndDate(addCalendar(Calendar.DAY_OF_YEAR, -1, endTemplate.getVersion()));
+                segmentIntersection.setTemplateId(beginTemplate.getId());
+
+                segmentIntersections.add(segmentIntersection);
+            }
+
+            SegmentIntersection lastSegmentIntersection = new SegmentIntersection();
+            DeclarationTemplate lastBeginTemplate = declarationTemplateDao.get(formTemplateVersionIds.get(formTemplateVersionIds.size() - 1));
+            int idRight = declarationTemplateDao.getNearestDTVersionIdRight(decFormTypeId, statusList, lastBeginTemplate.getVersion());
+            DeclarationTemplate lastEndTemplate = idRight != 0? declarationTemplateDao.get(idRight): null;
+            lastSegmentIntersection.setStatus(lastBeginTemplate.getStatus());
+            lastSegmentIntersection.setBeginDate(lastBeginTemplate.getVersion());
+            lastSegmentIntersection.setEndDate(lastEndTemplate != null ? addCalendar(Calendar.DAY_OF_YEAR, -1, lastEndTemplate.getVersion()) : null);
+            lastSegmentIntersection.setTemplateId(lastBeginTemplate.getId());
+            segmentIntersections.add(lastSegmentIntersection);
+            return segmentIntersections;
+        }
+
+        /*if (!formTemplateVersionIds.isEmpty() || formTemplate.getId() != null)
+            return formTemplateVersionIds;*/
         //Поиск только "левее" даты актуализации версии, т.к. остальные пересечения попали в предыдущую выборку
-        int id = declarationTemplateDao.getNearestDTVersionIdLeft(declarationTemplate.getType().getId(), statusList, declarationTemplate.getVersion());
-        if (id != 0)
-            templateVersionIds.add(id);
-        return templateVersionIds;
+        int idLeft = declarationTemplateDao.getNearestDTVersionIdLeft(decFormTypeId, statusList, declarationTemplate.getVersion());
+        if (idLeft != 0){
+            DeclarationTemplate beginTemplate = declarationTemplateDao.get(idLeft);
+            int idLeftRight = declarationTemplateDao.getNearestDTVersionIdRight(decFormTypeId, statusList, beginTemplate.getVersion());
+            DeclarationTemplate endTemplate = idLeftRight != 0 ? declarationTemplateDao.get(idLeftRight) : null;
+            SegmentIntersection segmentIntersection = new SegmentIntersection();
+            segmentIntersection.setStatus(beginTemplate.getStatus());
+            segmentIntersection.setBeginDate(beginTemplate.getVersion());
+            segmentIntersection.setEndDate(endTemplate != null ? addCalendar(Calendar.DAY_OF_YEAR, -1, endTemplate.getVersion()) : null);
+            segmentIntersection.setTemplateId(beginTemplate.getId());
+
+            segmentIntersections.add(segmentIntersection);
+        }
+        return segmentIntersections;
     }
 
     @Override

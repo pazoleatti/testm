@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 
@@ -112,7 +109,7 @@ public interface DeclarationTemplateService {
      */
     List<DeclarationTemplate> getDecTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status);
 
-    List<Integer> findFTVersionIntersections(DeclarationTemplate declarationTemplate, Date actualEndVersion, VersionedObjectStatus... status);
+    List<SegmentIntersection> findFTVersionIntersections(DeclarationTemplate declarationTemplate, Date actualEndVersion, VersionedObjectStatus... status);
 
     /**
      * Удаление макета.

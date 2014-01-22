@@ -16,7 +16,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 	
 	private FormType type;
 	private Date version;
-	private Integer edition;
+	private int edition;
 	private boolean numberedColumns;
     private boolean fixedRows;
     
@@ -219,7 +219,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 	 * @param edition - номер редакции
 	 */
 	public void setEdition(int edition) {
-		if (this.edition != null) {
+		if (this.edition != 0) {
 			throw new IllegalStateException(
 					"Edition property already initialized");
 		} else {

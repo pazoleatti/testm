@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.SegmentIntersection;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -44,6 +46,63 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
 
     @Override
     public void isIntersectionVersion(DeclarationTemplate template, Date versionActualDateEnd, Logger logger) {
+        //1 Шаг. Система проверяет пересечение с периодом актуальности хотя бы одной версии этого же макета, STATUS которой не равен -1.
+        SegmentIntersection newIntersection = new SegmentIntersection();
+        newIntersection.setBeginDate(template.getVersion());
+        newIntersection.setEndDate(versionActualDateEnd);
+        newIntersection.setTemplateId(template.getId() != null?template.getId() : 0);
+        newIntersection.setStatus(template.getStatus());
+        List<SegmentIntersection> segmentIntersections = declarationTemplateService.findFTVersionIntersections(template, versionActualDateEnd);
+        if (!segmentIntersections.isEmpty()){
+            for (SegmentIntersection intersection : segmentIntersections){
+                int compareResult = 0;
+                switch (intersection.getStatus()){
+                    case NORMAL:
+                    case DRAFT:
+                        compareResult = newIntersection.compareTo(intersection);
+                        //Варианты 1, 2, 3, 4, 5, 6, 9, 10
+                        if (compareResult == 2 || compareResult == 0 ||compareResult == -2 || compareResult == 7 || compareResult == -7 || compareResult == -1){
+                            logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
+                            return;
+                        }
+                        // Варианты 7,8
+                        else if(compareResult == 1 || compareResult == -5){
+                            isUsedVersion(declarationTemplateService.get(intersection.getTemplateId()), null, logger);
+                            if (logger.containsLevel(LogLevel.ERROR)){
+                                logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
+                                return;
+                            } else
+                                logger.info("Установлена дата окончания актуальности версии %td.%tm.%tY для предыдущей версии %d",
+                                        intersection.getEndDate(), intersection.getEndDate(), intersection.getEndDate(), intersection.getTemplateId());
+                        }
+                        //2 Шаг. Система проверяет наличие даты окончания актуальности.
+                        //Пересечений нет
+                        else if (compareResult == -9 || compareResult == 4 || compareResult == -4){
+                            Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd);
+                            DeclarationTemplate formTemplate =  createFakeTemplate(date, template.getType());
+                            declarationTemplateService.save(formTemplate);
+                        }
+                        break;
+                    case FAKE:
+                        compareResult = newIntersection.compareTo(intersection);
+                        //Варианты 15
+                        if (compareResult == -2){
+                            DeclarationTemplate formTemplate = declarationTemplateService.get(intersection.getTemplateId());
+                            formTemplate.setVersion(createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd));
+                            declarationTemplateService.save(formTemplate);
+                        }
+                        //Варианты 16,19,20
+                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1){
+                            declarationTemplateService.delete(declarationTemplateService.get(intersection.getTemplateId()));
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
+   /* @Override
+    public void isIntersectionVersion(DeclarationTemplate template, Date versionActualDateEnd, Logger logger) {
         List<Integer> formTemplateIds =
                 declarationTemplateService.findFTVersionIntersections(template, versionActualDateEnd);
         //1 Шаг. Система проверяет пересечение с периодом актуальности хотя бы одной версии этого же макета, STATUS которой не равен -1.
@@ -61,10 +120,10 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
                     }
                     //Статус равен 0 или 1 и дата окончания актуальности не существует.
                     else {
-                            /*calendar.setTime(formTemplate.getVersion());*/
+                            *//*calendar.setTime(formTemplate.getVersion());*//*
                         //Т.к. по постановке, в случае если отсутствует дата окончания актуальности версии
                         // то датой запроса является крайний день текущего года. Крайний день всегда 31 декабря.
-                            /*calendar.set(calendar.get(Calendar.YEAR), Calendar.DECEMBER, 31);*/
+                            *//*calendar.set(calendar.get(Calendar.YEAR), Calendar.DECEMBER, 31);*//*
                         isUsedVersion(declarationTemplate, null, logger);
                         if (logger.containsLevel(LogLevel.ERROR)){
                             logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
@@ -80,17 +139,17 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
                     break;
                 case FAKE:
                     //Система проверяет период актуальности обнаруженной версии.
-                        /* Дата начала ее актуальности меньше даты начала актуальности проверяемой версии
-                        Переход к шагу 2 основного сценария.*/
+                        *//* Дата начала ее актуальности меньше даты начала актуальности проверяемой версии
+                        Переход к шагу 2 основного сценария.*//*
 
                     //Дата начала ее актуальности больше или равна дате начала актуальности проверяемой версии и
                     // дата окончания ее актуальности больше даты окончания актуальности проверяемой версии.
-                        /*
+                        *//*
                         Вариант когда:
                             Дата начала ее актуальности больше или равна дате начала актуальности проверяемой версии
                             и дата окончания ее актуальности больше даты окончания актуальности проверяемой версии
                             не стал реализовывать, т.к.перекрывается реализованным.
-                         */
+                         *//*
                     // Дата начала ее актуальности меньше даты начала актуальности проверяемой версии
                     if (declarationTemplate.getVersion().compareTo(template.getVersion()) >= 0){
                         DeclarationTemplate nextDeclarationTemplate = declarationTemplateService.getNearestDTRight(declarationTemplate);
@@ -152,7 +211,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
 
             }
         }
-    }
+    }*/
 
     @Override
     public void createNewVersion(DeclarationTemplate template, Date versionActualDateEnd, Logger logger) {
@@ -166,12 +225,12 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
             declarationTemplateService.delete(declarationTemplateFake);
     }
 
-    private DeclarationTemplate createFakeTemplate(Date date, DeclarationTemplate realTemplate){
+    private DeclarationTemplate createFakeTemplate(Date date, DeclarationType type){
         DeclarationTemplate declarationTemplate =  new DeclarationTemplate();
         declarationTemplate.setVersion(date);
         declarationTemplate.setStatus(VersionedObjectStatus.FAKE);
         declarationTemplate.setEdition(0);
-        declarationTemplate.setType(realTemplate.getType());
+        declarationTemplate.setType(type);
         return declarationTemplate;
     }
 

@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.SegmentIntersection;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -46,6 +48,64 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
 
     @Override
     public void isIntersectionVersion(FormTemplate template, Date versionActualDateEnd, Logger logger) {
+        //1 Шаг. Система проверяет пересечение с периодом актуальности хотя бы одной версии этого же макета, STATUS которой не равен -1.
+        SegmentIntersection newIntersection = new SegmentIntersection();
+        newIntersection.setBeginDate(template.getVersion());
+        newIntersection.setEndDate(versionActualDateEnd);
+        newIntersection.setTemplateId(template.getId() != null?template.getId() : 0);
+        newIntersection.setStatus(template.getStatus());
+        List<SegmentIntersection> segmentIntersections = formTemplateService.findFTVersionIntersections(template, versionActualDateEnd);
+        if (!segmentIntersections.isEmpty()){
+            for (SegmentIntersection intersection : segmentIntersections){
+                int compareResult = 0;
+                switch (intersection.getStatus()){
+                    case NORMAL:
+                    case DRAFT:
+                        compareResult = newIntersection.compareTo(intersection);
+                        //Варианты 1, 2, 3, 4, 5, 6, 9, 10
+                        if (compareResult == 2 || compareResult == 0 ||compareResult == -2 || compareResult == 7 || compareResult == -7 || compareResult == -1){
+                            logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
+                            return;
+                        }
+                        // Варианты 7,8
+                        else if(compareResult == 1 || compareResult == -5){
+                            isUsedVersion(formTemplateService.get(intersection.getTemplateId()), null, logger);
+                            if (logger.containsLevel(LogLevel.ERROR)){
+                                logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
+                                return;
+                            } else
+                                logger.info("Установлена дата окончания актуальности версии %td.%tm.%tY для предыдущей версии %d",
+                                        intersection.getEndDate(), intersection.getEndDate(), intersection.getEndDate(), intersection.getTemplateId());
+                        }
+                        //2 Шаг. Система проверяет наличие даты окончания актуальности.
+                        //Пересечений нет
+                        else if (compareResult == -9 || compareResult == 4 || compareResult == -4){
+                            Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd);
+                            FormTemplate formTemplate =  createFakeTemplate(date, template.getType());
+                            formTemplateService.save(formTemplate);
+                        }
+                        break;
+                    case FAKE:
+                        compareResult = newIntersection.compareTo(intersection);
+                        //Варианты 15
+                        if (compareResult == -2){
+                            FormTemplate formTemplate = formTemplateService.get(intersection.getTemplateId());
+                            formTemplate.setVersion(createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd));
+                            formTemplateService.save(formTemplate);
+                        }
+                        //Варианты 16,19,20
+                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1){
+                            formTemplateService.delete(formTemplateService.get(intersection.getTemplateId()));
+                        }
+                        break;
+                }
+            }
+        }
+
+    }
+
+    /*@Override
+    public void isIntersectionVersion(FormTemplate template, Date versionActualDateEnd, Logger logger) {
 
         List<Integer> formTemplateIds =
                 formTemplateService.findFTVersionIntersections(template, versionActualDateEnd);
@@ -65,10 +125,10 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
                     }
                         //Статус равен 0 или 1 и дата окончания актуальности не существует.
                     else {
-                            /*calendar.setTime(formTemplate.getVersion());*/
+                            *//*calendar.setTime(formTemplate.getVersion());*//*
                         //Т.к. по постановке, в случае если отсутствует дата окончания актуальности версии
                         // то датой запроса является крайний день текущего года. Крайний день всегда 31 декабря.
-                            /*calendar.set(calendar.get(Calendar.YEAR), Calendar.DECEMBER, 31);*/
+                            *//*calendar.set(calendar.get(Calendar.YEAR), Calendar.DECEMBER, 31);*//*
                         isUsedVersion(formTemplate, null, logger);
                         if (logger.containsLevel(LogLevel.ERROR)){
                             logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
@@ -84,17 +144,17 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
                     break;
                 case FAKE:
                     //Система проверяет период актуальности обнаруженной версии.
-                        /* Дата начала ее актуальности меньше даты начала актуальности проверяемой версии
-                        Переход к шагу 2 основного сценария.*/
+                        *//* Дата начала ее актуальности меньше даты начала актуальности проверяемой версии
+                        Переход к шагу 2 основного сценария.*//*
 
                     //Дата начала ее актуальности больше или равна дате начала актуальности проверяемой версии и
                     // дата окончания ее актуальности больше даты окончания актуальности проверяемой версии.
-                        /* TODO http://conf.aplana.com/pages/viewpage.action?pageId=11377480 п. 1А.1Б.1А
+                        *//*
                         Вариант когда:
                             Дата начала ее актуальности больше или равна дате начала актуальности проверяемой версии
                             и дата окончания ее актуальности больше даты окончания актуальности проверяемой версии
                             не стал реализовывать, т.к.перекрывается реализованным.
-                         */
+                         *//*
                     // Дата начала ее актуальности меньше даты начала актуальности проверяемой версии
                     if (formTemplate.getVersion().compareTo(template.getVersion()) >= 0){
                         FormTemplate nextFormTemplate = formTemplateService.getNearestFTRight(formTemplate);
@@ -156,7 +216,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
 
             }
         }
-    }
+    }*/
 
     @Override
     public void createNewVersion(FormTemplate template, Date versionActualDateEnd, Logger logger) {
@@ -170,12 +230,12 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
             formTemplateService.delete(formTemplateFake);
     }
 
-    private FormTemplate createFakeTemplate(Date date, FormTemplate realTemplate){
+    private FormTemplate createFakeTemplate(Date date, FormType formType){
         FormTemplate formTemplate =  new FormTemplate();
         formTemplate.setVersion(date);
         formTemplate.setStatus(VersionedObjectStatus.FAKE);
         formTemplate.setEdition(0);
-        formTemplate.setType(realTemplate.getType());
+        formTemplate.setType(formType);
         formTemplate.setName("fake");
         formTemplate.setFullName("fake");
         formTemplate.setCode("fake");

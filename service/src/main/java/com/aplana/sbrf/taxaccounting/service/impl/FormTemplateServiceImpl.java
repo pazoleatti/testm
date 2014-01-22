@@ -168,21 +168,59 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public List<Integer> findFTVersionIntersections(FormTemplate formTemplate, Date actualEndVersion, VersionedObjectStatus... status) {
+    public List<SegmentIntersection> findFTVersionIntersections(FormTemplate formTemplate, Date actualEndVersion, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
 
-        Date actualBeginVersion = addCalendar(Calendar.DAY_OF_YEAR, -1, formTemplate.getVersion());
+        int formTypeId = formTemplate.getType().getId();
+        List<SegmentIntersection> segmentIntersections = new LinkedList<SegmentIntersection>();
+
+        /*Date actualBeginVersion = addCalendar(Calendar.DAY_OF_YEAR, -1, formTemplate.getVersion());*/
         List<Integer> formTemplateVersionIds = new ArrayList<Integer>();
-        formTemplateVersionIds.addAll(formTemplateDao.getFormTemplateVersions(formTemplate.getType().getId(), formTemplate.getId() != null ? formTemplate.getId() : 0,
-                statusList, actualBeginVersion, actualEndVersion));
-        System.out.println(formTemplate.getId() + " " + formTemplateVersionIds.isEmpty());
-        if (!formTemplateVersionIds.isEmpty() || formTemplate.getId() != null)
-            return formTemplateVersionIds;
+        formTemplateVersionIds.addAll(formTemplateDao.getFormTemplateVersions(formTypeId, formTemplate.getId() != null ? formTemplate.getId() : 0,
+                statusList, formTemplate.getVersion(), actualEndVersion));
+
+        if (!formTemplateVersionIds.isEmpty()){
+            for (int i =0; i<formTemplateVersionIds.size() - 1; i++){
+                SegmentIntersection segmentIntersection = new SegmentIntersection();
+                FormTemplate beginTemplate = formTemplateDao.get(i);
+                FormTemplate endTemplate = formTemplateDao.get(i++);
+                segmentIntersection.setStatus(beginTemplate.getStatus());
+                segmentIntersection.setBeginDate(beginTemplate.getVersion());
+                segmentIntersection.setEndDate(addCalendar(Calendar.DAY_OF_YEAR, -1, endTemplate.getVersion()));
+                segmentIntersection.setTemplateId(beginTemplate.getId());
+
+                segmentIntersections.add(segmentIntersection);
+            }
+
+            SegmentIntersection lastSegmentIntersection = new SegmentIntersection();
+            FormTemplate lastBeginTemplate = formTemplateDao.get(formTemplateVersionIds.get(formTemplateVersionIds.size() - 1));
+            int idRight = formTemplateDao.getNearestFTVersionIdRight(formTypeId, statusList, lastBeginTemplate.getVersion());
+            FormTemplate lastEndTemplate = idRight != 0? formTemplateDao.get(idRight): null;
+            lastSegmentIntersection.setStatus(lastBeginTemplate.getStatus());
+            lastSegmentIntersection.setBeginDate(lastBeginTemplate.getVersion());
+            lastSegmentIntersection.setEndDate(lastEndTemplate != null ? addCalendar(Calendar.DAY_OF_YEAR, -1, lastEndTemplate.getVersion()) : null);
+            lastSegmentIntersection.setTemplateId(lastBeginTemplate.getId());
+            segmentIntersections.add(lastSegmentIntersection);
+            return segmentIntersections;
+        }
+
+        /*if (!formTemplateVersionIds.isEmpty() || formTemplate.getId() != null)
+            return formTemplateVersionIds;*/
         //Поиск только "левее" даты актуализации версии, т.к. остальные пересечения попали в предыдущую выборку
-        int id = formTemplateDao.getNearestFTVersionIdLeft(formTemplate.getType().getId(), statusList, formTemplate.getVersion());
-        if (id != 0)
-            formTemplateVersionIds.add(id);
-        return formTemplateVersionIds;
+        int idLeft = formTemplateDao.getNearestFTVersionIdLeft(formTypeId, statusList, formTemplate.getVersion());
+        if (idLeft != 0){
+            FormTemplate beginTemplate = formTemplateDao.get(idLeft);
+            int idLeftRight = formTemplateDao.getNearestFTVersionIdRight(formTypeId, statusList, beginTemplate.getVersion());
+            FormTemplate endTemplate = idLeftRight != 0 ? formTemplateDao.get(idLeftRight) : null;
+            SegmentIntersection segmentIntersection = new SegmentIntersection();
+            segmentIntersection.setStatus(beginTemplate.getStatus());
+            segmentIntersection.setBeginDate(beginTemplate.getVersion());
+            segmentIntersection.setEndDate(endTemplate != null ? addCalendar(Calendar.DAY_OF_YEAR, -1, endTemplate.getVersion()) : null);
+            segmentIntersection.setTemplateId(beginTemplate.getId());
+
+            segmentIntersections.add(segmentIntersection);
+        }
+        return segmentIntersections;
     }
 
     @Override

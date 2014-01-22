@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.util.Date;
@@ -108,7 +105,7 @@ public interface FormTemplateService {
      */
     List<FormTemplate> getFormTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status);
 
-    List<Integer> findFTVersionIntersections(FormTemplate formTemplate, Date actualEndVersion, VersionedObjectStatus... status);
+    List<SegmentIntersection> findFTVersionIntersections(FormTemplate formTemplate, Date actualEndVersion, VersionedObjectStatus... status);
 
     /**
      * Удаление макета.

@@ -35,7 +35,7 @@ public class GetFTVersionListHandler extends AbstractActionHandler<GetFTVersionL
         super(GetFTVersionListAction.class);
     }
 
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH.mm.ss");
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
     public GetFTVersionListResult execute(GetFTVersionListAction action, ExecutionContext context) throws ActionException {
