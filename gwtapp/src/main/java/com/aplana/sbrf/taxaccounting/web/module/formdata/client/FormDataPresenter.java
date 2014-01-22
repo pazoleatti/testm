@@ -364,7 +364,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         buildPeriodName(result),
                                         result.getFormData().getState()
                                                 .getName(),
-		                                result.getTaxPeriodStartDate(), result.getTaxPeriodEndDate());
+		                                result.getReportPeriodStartDate(), result.getReportPeriodEndDate());
                                 
                                 getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
                                         + result.getFormData().getFormType().getTaxType());

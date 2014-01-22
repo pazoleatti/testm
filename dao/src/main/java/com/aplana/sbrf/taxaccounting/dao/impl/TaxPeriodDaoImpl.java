@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -31,8 +30,6 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 			TaxPeriod t = new TaxPeriod();
 			t.setId(rs.getInt("id"));
 			t.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
-			t.setStartDate(rs.getDate("start_date"));
-			t.setEndDate(rs.getDate("end_date"));
 			t.setYear(rs.getInt("year"));
 			return t;
 		}
@@ -42,7 +39,7 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 	public TaxPeriod get(int taxPeriodId) {
 		try {
 			return getJdbcTemplate().queryForObject(
-					"select id, tax_type, year, start_date, end_date from tax_period where id = ?",
+					"select id, tax_type, year from tax_period where id = ?",
 					new Object[] { taxPeriodId },
 					new int[] { Types.NUMERIC },
 					new TaxPeriodRowMapper()
@@ -56,35 +53,20 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 	public List<TaxPeriod> listByTaxType(TaxType taxType) {
 		try {
 			return getJdbcTemplate().query(
-					"select * from tax_period where tax_type = ? order by start_date",
+					"select id, tax_type, year from tax_period where tax_type = ? order by year",
 					new Object[]{taxType.getCode()},
 					new int[] { Types.VARCHAR },
 					new TaxPeriodRowMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Не удалось получить список налоговых периодов с типом = " + taxType.getCode());
-		}
-	}
-
-	@Override
-	@Deprecated
-	public List<TaxPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to) {
-		try {
-			return getJdbcTemplate().query(
-					"select * from tax_period where tax_type = ? and end_date>=? and start_date<=?",
-					new Object[]{taxType.getCode(), from, to},
-					new int[] { Types.VARCHAR, Types.DATE, Types.DATE },
-					new TaxPeriodRowMapper()
-			);
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Не удалось получить список налоговых периодов с типом = " + taxType.getCode());
+			throw new DaoException("Не удалось найти налоговые периоды с типом = " + taxType.getCode());
 		}
 	}
 
 	@Override
 	public List<TaxPeriod> listByTaxTypeAndYear(TaxType taxType, int year) {
 		return getJdbcTemplate().query(
-				"select * from tax_period where tax_type = ? and year = ?",
+				"select id, tax_type, year from tax_period where tax_type = ? and year = ?",
 				new Object[]{taxType.getCode(), year},
 				new int[] { Types.VARCHAR, Types.NUMERIC},
 				new TaxPeriodRowMapper()
@@ -100,16 +82,14 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 			id = generateId("seq_tax_period", Integer.class);
 		}
 		jt.update(
-				"insert into tax_period (id, tax_type, year, start_date, end_date)" +
-						" values (?, ?, ?, ?, ?)",
+				"insert into tax_period (id, tax_type, year)" +
+						" values (?, ?, ?)",
 				new Object[]{
 						id,
 						taxPeriod.getTaxType().getCode(),
-						taxPeriod.getYear(),
-						new Date(), //TODO Выпилить
-						new Date()  //TODO Выпилить
+						taxPeriod.getYear()
 				},
-				new int[]{Types.NUMERIC, Types.VARCHAR, Types.NUMERIC, Types.DATE, Types.DATE}
+				new int[]{Types.NUMERIC, Types.VARCHAR, Types.NUMERIC}
 
 		);
 		taxPeriod.setId(id);
@@ -120,8 +100,8 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 	public TaxPeriod getLast(TaxType taxType) {
 		try {
 			return getJdbcTemplate().queryForObject( //TODO Вероятно, это можно оптимизировать
-					"select * from tax_period where tax_type = ? and " +
-							"start_date = (select max(start_date) from (select * from tax_period where tax_type=?))",
+					"select id, tax_type, year from tax_period where tax_type = ? and " +
+							"year = (select max(year) from tax_period where tax_type = ?)",
 					new Object[]{taxType.getCode(), taxType.getCode()},
 					new int[] { Types.VARCHAR, Types.VARCHAR},
 					new TaxPeriodRowMapper()

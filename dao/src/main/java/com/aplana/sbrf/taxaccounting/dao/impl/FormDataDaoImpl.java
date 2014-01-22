@@ -265,14 +265,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             return null;
         } catch (IncorrectResultSizeDataAccessException e) {
             TaxPeriod taxPeriod = taxPeriodDao.get(taxPeriodId);
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(taxPeriod.getStartDate());
             throw new DaoException(
                     "Для заданного сочетания параметров найдено несколько налоговых форм: вид \"%s\", тип \"%s\", подразделение \"%s\", налоговый период \"%s\", месяц \"%s\"",
                     formTypeDao.get(formTypeId).getName(),
                     kind.getName(),
                     departmentDao.getDepartment(departmentId).getName(),
-                    cal.get(Calendar.YEAR),
+					taxPeriod.getYear(),
                     periodOrder <= 12 && periodOrder >= 1 ? Formats.months[periodOrder] : periodOrder
             );
         }

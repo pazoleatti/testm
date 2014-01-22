@@ -29,7 +29,9 @@ public class TaxPeriodServiceImpl implements TaxPeriodService {
 
 	@Override
 	public List<TaxPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to) {
-		return dao.listByTaxTypeAndDate(taxType, from, to);
+		//TODO: переделать на com.aplana.sbrf.taxaccounting.dao.impl.ReportPeriodDaoImpl#getReportPeriodsByDate (Marat Fayzullin 22.01.2014)
+		//return dao.listByTaxTypeAndDate(taxType, from, to); - метод был удален
+		return null;
 	}
 
 	@Override

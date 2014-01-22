@@ -106,8 +106,8 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	    DepartmentReportPeriod rp = reportPeriodService.getLastReportPeriod(taxType, action.getDepartmentId());
 	    Calendar current = Calendar.getInstance();
 	    if (rp != null) {
-		    res.setYearFrom(rp.getReportPeriod().getYear());
-		    res.setYearTo(rp.getReportPeriod().getYear());
+		    res.setYearFrom(rp.getReportPeriod().getTaxPeriod().getYear());
+		    res.setYearTo(rp.getReportPeriod().getTaxPeriod().getYear());
 		    res.setCurrentYear(current.get(Calendar.YEAR));
 	    } else {
 		    res.setYearFrom(current.get(Calendar.YEAR));

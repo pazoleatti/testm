@@ -73,4 +73,13 @@ public interface ReportPeriodDao {
 	 * @return  список отчетных периодов
 	 */
 	ReportPeriod getReportPeriodByDate(TaxType taxType, Date date);
+
+	/**
+	 * Поиск отчетных периодов за период дат
+	 * @param taxType
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
+	List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate);
 }

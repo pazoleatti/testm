@@ -94,7 +94,7 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
         TextColumn<LogSearchResultItem> reportPeriodColumn = new TextColumn<LogSearchResultItem>() {
             @Override
             public String getValue(LogSearchResultItem object) {
-                return object.getReportPeriod()!=null?object.getReportPeriod().getName() + " " + object.getReportPeriod().getYear()
+                return object.getReportPeriod()!=null?object.getReportPeriod().getName() + " " + object.getReportPeriod().getTaxPeriod().getYear()
                         : "";
             }
         };

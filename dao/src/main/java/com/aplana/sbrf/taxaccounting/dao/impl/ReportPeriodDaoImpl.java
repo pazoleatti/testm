@@ -173,5 +173,21 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 		}
 	}
 
+	@Override
+	public List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate) {
+		try {
+			return getJdbcTemplate().query(
+					"select rp.id, rp.name, rp.tax_period_id, rp.ord, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
+							"rp.calendar_start_date from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
+							"where tp.tax_type = ? and rp.end_date>=? and rp.calendar_start_date<=?",
+					new Object[]{taxType.getCode(), startDate, endDate},
+					new int[] { Types.VARCHAR, Types.DATE, Types.DATE },
+					new ReportPeriodMapper()
+			);
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException(String.format("Не найдены отчетные периоды с типом = \"%s\" за период (%s; %s)", taxType.getCode(), startDate, endDate));
+		}
+	}
+
 }
 

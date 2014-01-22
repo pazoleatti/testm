@@ -219,7 +219,7 @@ public class MappingServiceImpl implements MappingService {
             //по году определяем TAX_PERIOD
             String year = yearFormat.format(exemplar.getBeginDate());
             year = DATE_APPENDER_RNU + year;
-            exemplar.setTaxPeriod(reportPeriodMappingDao.getTaxPeriodByDate(dateFormat.parse(year)));
+            exemplar.setTaxPeriod(reportPeriodMappingDao.getTaxPeriodByDate(year));
 
             // по коду отчетного периода 7 символа в назавании файла DICT_TAX_PERIOD
             String periodCode = rnuFilename.substring(7, 8);
@@ -259,7 +259,7 @@ public class MappingServiceImpl implements MappingService {
             //по году определяем TAX_PERIOD
             String yearCut = xmlFilename.substring(29, 31);                     // 13
             yearCut = DATE_APPENDER_XML + yearCut;                                  // 01.01.20 + 13 - > 01.01.2013
-            exemplar.setTaxPeriod(reportPeriodMappingDao.getTaxPeriodByDate(dateFormat.parse(yearCut)));
+            exemplar.setTaxPeriod(reportPeriodMappingDao.getTaxPeriodByDate(yearCut));
 
             String period = xmlFilename.substring(26, 29);                      // q06
             exemplar.setDictTaxPeriodId(PeriodMapping.fromCodeXml(period).getDictTaxPeriodId());

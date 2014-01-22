@@ -119,13 +119,9 @@ public interface PeriodService {
      * @param reportPeriodId код отчетного периода
      * @return
      */
-	//TODO: избавиться от этого метода. Использовать {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod#getStartDate()}  (Marat Fayzullin 20.01.2014)
-	@Deprecated
     public Calendar getStartDate(int reportPeriodId);
 
     /**
-	 *
-	 *
      * Возвращает дату конца отчетного периода
      *
      * <p>Информация о периодах в конфлюенсе
@@ -134,8 +130,6 @@ public interface PeriodService {
      * @param reportPeriodId код отчетного периода
      * @return
      */
-	//TODO: избавиться от этого метода. Использовать {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod#getEndDate()}  (Marat Fayzullin 20.01.2014)
-	@Deprecated
     public Calendar getEndDate(int reportPeriodId);
 
     /**
@@ -144,7 +138,7 @@ public interface PeriodService {
      * @param reportPeriodId
      * @return
      */
-	// TODO: возможно имеется в виду дата сдачи отчетности (Marat Fayzullin 22.01.2014)
+	// TODO: возможно имеется в виду дата сдачи отчетности. Надо проверить (Marat Fayzullin 22.01.2014)
     public Calendar getReportDate(int reportPeriodId);
 
     /**

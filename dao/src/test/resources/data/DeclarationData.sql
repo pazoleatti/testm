@@ -4,17 +4,17 @@ insert into department (id, name, parent_id, type) values (2, 'Department name 5
 insert into department (id, name, parent_id, type) values (3, 'Department name 2', 1, 2);
 insert into department (id, name, parent_id, type) values (4, 'Department name 3', 1, 2);
 insert into department (id, name, parent_id, type) values (5, 'Department name 4', 1, 2);
-insert into tax_period(id, tax_type, year, start_date, end_date) values (1, 'T', 2013, date '2013-01-01', date '2013-12-31');
+insert into tax_period(id, tax_type, year) values (1, 'T', 2013);
 
 -- для проверки get, getXmlData и hasXmlData
 insert into ref_book(id, name) values (8, 'Коды, определяющие налоговый (отчётный) период');
-insert into ref_book_record(id, record_id, ref_book_id, version, status) values (21, 1, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);
-insert into ref_book_record(id, record_id, ref_book_id, version, status) values (22, 2, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);
-insert into ref_book_record(id, record_id, ref_book_id, version, status) values (23, 3, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);
-insert into ref_book_record(id, record_id, ref_book_id, version, status) values (24, 4, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);
-insert into ref_book_record(id, record_id, ref_book_id, version, status) values (25, 5, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);
-insert into ref_book_record(id, record_id, ref_book_id, version, status) values (26, 6, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);
-insert into ref_book_record(id, record_id, ref_book_id, version, status) values (27, 7, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);
+insert into ref_book_record(id, record_id, ref_book_id, version, status) values (21, 1, 8, date '2013-01-01', 0);
+insert into ref_book_record(id, record_id, ref_book_id, version, status) values (22, 2, 8, date '2013-01-01', 0);
+insert into ref_book_record(id, record_id, ref_book_id, version, status) values (23, 3, 8, date '2013-01-01', 0);
+insert into ref_book_record(id, record_id, ref_book_id, version, status) values (24, 4, 8, date '2013-01-01', 0);
+insert into ref_book_record(id, record_id, ref_book_id, version, status) values (25, 5, 8, date '2013-01-01', 0);
+insert into ref_book_record(id, record_id, ref_book_id, version, status) values (26, 6, 8, date '2013-01-01', 0);
+insert into ref_book_record(id, record_id, ref_book_id, version, status) values (27, 7, 8, date '2013-01-01', 0);
 insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (1, 'Transport report period 2', 1, 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (2, 'Transport report period 3', 1, 2, 22, date '2013-04-01', date '2013-06-30', date '2013-04-01');
 insert into declaration_data(id, declaration_template_id, report_period_id, department_id, data, is_accepted) values (1, 1, 1, 2, null, 1);
