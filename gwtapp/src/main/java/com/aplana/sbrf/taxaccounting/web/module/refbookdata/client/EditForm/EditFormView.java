@@ -48,8 +48,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     LinkAnchor allVersion;
 
     private boolean isVersionMode = false;
-    private Date savedVersionFrom;
-    private Date savedVersionTo;
 
 	@Inject
 	@UiConstructor
@@ -83,7 +81,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					widget = new CustomDateBox();
 					break;
 				case REFERENCE:
-					RefBookPickerPopupWidget refbookWidget = new RefBookPickerPopupWidget(true);
+                    RefBookPickerPopupWidget refbookWidget = new RefBookPickerPopupWidget(true);
+                    refbookWidget.setPeriodDates(versionStart.getValue(), versionEnd.getValue());
 					refbookWidget.setAttributeId(col.getRefBookAttributeId());
 					widget = refbookWidget;
 					break;
@@ -149,6 +148,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				RefBookValueSerializable recordValue = record.get(w.getKey().getAlias());
 				if (w.getValue() instanceof RefBookPickerPopupWidget) {
 					RefBookPickerPopupWidget rbw = (RefBookPickerPopupWidget) w.getValue();
+                    rbw.setPeriodDates(versionStart.getValue(), versionEnd.getValue());
 					rbw.setDereferenceValue(recordValue.getDereferenceValue());
 					rbw.setValue(recordValue.getReferenceValue());
                     rbw.setTitle(String.valueOf(rbw.getDereferenceValue()));
@@ -280,8 +280,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
     @Override
     public void fillVersionData(RefBookRecordVersionData versionData, Long refBookId, Long refBookRecordId) {
-        this.savedVersionFrom = versionData.getVersionStart();
-        this.savedVersionTo = versionData.getVersionEnd();
         versionStart.setValue(versionData.getVersionStart());
         versionEnd.setValue(versionData.getVersionEnd());
         allVersion.setVisible(!isVersionMode);

@@ -45,8 +45,6 @@ public class ReportPeriodDaoTest {
 	@Before
 	public void init(){
 		taxPeriod = new TaxPeriod();
-		taxPeriod.setStartDate(new Date());
-		taxPeriod.setEndDate(new Date());
 		taxPeriod.setTaxType(TaxType.TRANSPORT);
 		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
 		taxPeriodDao.add(taxPeriod);
@@ -57,21 +55,21 @@ public class ReportPeriodDaoTest {
 		ReportPeriod newReportPeriod = new ReportPeriod();
 		newReportPeriod.setName("MyTestName1");
 		newReportPeriod.setOrder(9);
-		newReportPeriod.setMonths(3);
 		newReportPeriod.setTaxPeriod(taxPeriod);
 		newReportPeriod.setDictTaxPeriodId(21);
 		newReportPeriod.setStartDate(new Date());
 		newReportPeriod.setEndDate(new Date());
+		newReportPeriod.setCalendarStartDate(new Date());
 		reportPeriodDao.save(newReportPeriod);
 		
 		newReportPeriod = new ReportPeriod();
 		newReportPeriod.setName("MyTestName2");
 		newReportPeriod.setOrder(10);
-		newReportPeriod.setMonths(3);
 		newReportPeriod.setTaxPeriod(taxPeriod);
 		newReportPeriod.setDictTaxPeriodId(22);
 		newReportPeriod.setStartDate(new Date());
 		newReportPeriod.setEndDate(new Date());
+		newReportPeriod.setCalendarStartDate(new Date());
 		reportPeriodDao.save(newReportPeriod);
 		
 		List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(taxPeriod.getId());
@@ -88,17 +86,16 @@ public class ReportPeriodDaoTest {
 		ReportPeriod newReportPeriod = new ReportPeriod();
 		newReportPeriod.setName("MyTestName");
 		newReportPeriod.setOrder(9);
-		newReportPeriod.setMonths(3);
 		newReportPeriod.setTaxPeriod(taxPeriod);
 		newReportPeriod.setDictTaxPeriodId(21);
 		newReportPeriod.setStartDate(new Date());
 		newReportPeriod.setEndDate(new Date());
+		newReportPeriod.setCalendarStartDate(new Date());
 
 		int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
 		ReportPeriod reportPeriod = reportPeriodDao.get(newReportPeriodId);
 
 		assertEquals("MyTestName", reportPeriod.getName());
-		assertEquals(3, reportPeriod.getMonths());
 		assertEquals(taxPeriod.getId(), Integer.valueOf(reportPeriod.getTaxPeriod().getId()));
 		assertEquals(9, reportPeriod.getOrder());
 		assertEquals(taxPeriod.getId(), Integer.valueOf(reportPeriod.getTaxPeriod().getId()));

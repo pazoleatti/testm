@@ -38,7 +38,19 @@ public interface RefBookDataProvider {
 	 * @return
 	 */
 	PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
-		String filter, RefBookAttribute sortAttribute);
+		String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+
+    /**
+     * Перегруженный метод с восходящей сортировкой по умолчанию
+     *
+     * @param version
+     * @param pagingParams
+     * @param filter
+     * @param sortAttribute
+     * @return
+     */
+    PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
+                                                       String filter, RefBookAttribute sortAttribute);
 
 	/**
 	 * Загружает данные иерархического справочника на определенную дату актуальности

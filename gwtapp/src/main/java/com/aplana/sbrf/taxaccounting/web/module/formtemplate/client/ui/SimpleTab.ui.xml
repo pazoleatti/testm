@@ -23,7 +23,13 @@
 
         .active a,.active a:visited,.active a:hover {
             text-decoration: none;
-            color: black;
+            color: white;
+        }
+
+        .inactive a,.inactive a:visited,.inactive a:hover {
+            text-decoration: none;
+            color: white;
+            font-weight: normal;
         }
     </ui:style>
 

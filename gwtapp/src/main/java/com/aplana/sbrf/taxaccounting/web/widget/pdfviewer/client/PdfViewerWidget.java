@@ -104,7 +104,7 @@ public class PdfViewerWidget extends Composite implements PdfViewerView {
 
 	@UiHandler("fitToWidthButton")
 	public void fitToWidthButtonClick(ClickEvent event) {
-		double mul = (pdfPanel.getOffsetWidth() - pdfPanel.getAbsoluteLeft() - 10)/(double)pdfPage.getWidth();
+		double mul = (pdfPanel.getOffsetWidth() - pdfPanel.getAbsoluteLeft() - 15)/(double)pdfPage.getWidth();
 		if (mul >= 0.9938 && mul <= 1.0062) {
 			pdfPage.setPixelSize(DEFAULT_PAGE_WIDTH, DEFAULT_PAGE_HEIGHT);
 			scale.setSelectedIndex(DEFAULT_SCALE_POSITION);

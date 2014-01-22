@@ -2,124 +2,188 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:pdf='urn:import:com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client'
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
-             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:fm="urn:import:com.aplana.gwt.client.form">
 <ui:style>
-    .titleLabel {
-        font-size: 16px;
-        max-height: 28px;
-        overflow: hidden;
-        line-height: 28px;
+    .titleText {
+        font-size: 14px !important;
+        color: #636460;
+        white-space: nowrap;
     }
 
-    .titleGradient {
-        position: absolute;
-        background: url("resources/img/form_title_gradient.png");
-        width: 64px;
-        height: 32px;
-        right: 790px;
+    .titleText div {
+        font-size: 14px !important;
     }
 
-    .dateDoc {
-        max-height: 28px;
-        overflow: hidden;
-        line-height: 28px;
-    }
-
-    .headerRight {
-        float: right;
+    .infoPanel {
+        padding: 5px 25px 0 30px;
     }
 
     .headerAttr {
-        margin-left: 5px;
-        text-align: right;
         font-size: 12px;
         font-weight: bold;
+        max-height: 54px;
+        overflow: hidden;
+    }
+
+    .depAttr{
+        line-height: 17px;
     }
 
     .headerAttrName {
-        text-align: right;
         font-size: 12px;
+        line-height: 17px;
     }
+
+    .reportPeriodLabel {
+        font-size: 12px;
+        font-weight: bold;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        -ms-text-overflow: ellipsis;
+    }
+
+    .depatmentBlock {
+        max-width: 560px;
+        min-width: 350px;
+    }
+
+    .centerBlock {
+        padding-left: 5px;
+    }
+
+    .infoValuesBlock {
+        min-width: 100px;
+    }
+
+    .btnPanel {
+        padding-left: 7px;
+        height: 23px;
+    }
+
+    .btnPanel td{
+        vertical-align: middle !important;
+    }
+
+    .horSep {
+        height: 1px;
+        margin: 4px 9px;
+        border-top: 1px solid #aeaeac;
+    }
+
+    .pdfWidget {
+        position: absolute !important;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        top: 104px;
+    }
+
 </ui:style>
 
-    <g:DockLayoutPanel unit='PX' height="100%" width="100%">
 
-        <g:north size="100">
-            <g:HorizontalPanel height="100px" width="100%">
-                <g:FlowPanel>
-                    <g:HorizontalPanel height="28px">
-                        <g:cell width="25px">
-                            <style:LinkAnchor title="Перейти к списку деклараций" ui:field="returnAnchor" img="resources/img/arrow-left-24.png"/>
-                        </g:cell>
-                        <g:HorizontalPanel>
-                            <g:Label ui:field="title" addStyleNames="{style.titleLabel}"/>
-                            <g:SimplePanel styleName="{style.titleGradient}"/>
+    <fm:MainContainer>
+        <fm:header>
+            <fm:HeaderContainer>
+                <fm:left>
+                    <fm:Left>
+                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
+                            <style:LinkAnchor title="Перейти к списку деклараций" ui:field="returnAnchor" text="Cписок деклараций"
+                                              disableImage="true" addStyleNames="{style.titleText}"/>
+                            <g:Label text="—" addStyleNames="{style.titleText}"/>
+                        </style:LeftBar>
+                    </fm:Left>
+                </fm:left>
+                <fm:right>
+                    <fm:Right>
+                    </fm:Right>
+                </fm:right>
+                <fm:resizable>
+                    <fm:Resizable>
+                        <g:Label ui:field="title"/>
+                    </fm:Resizable>
+                </fm:resizable>
+            </fm:HeaderContainer>
+        </fm:header>
+
+        <fm:body>
+            <fm:BodyContainer>
+
+                <g:HorizontalPanel width="100%" addStyleNames="{style.infoPanel}">
+                    <!--Подразделение. Левая часть-->
+                    <g:cell>
+                        <g:HorizontalPanel spacing="2" height="58px" addStyleNames="{style.depatmentBlock}">
+                            <g:cell width="95px">
+                                <g:Label text="Подразделение:" addStyleNames="{style.headerAttrName}"/>
+                            </g:cell>
+                            <g:cell horizontalAlignment="left">
+                                <g:Label ui:field="department" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
+                            </g:cell>
                         </g:HorizontalPanel>
-                    </g:HorizontalPanel>
-                    <g:HorizontalPanel height="35px">
-                        <g:cell verticalAlignment="middle">
-                            <g:SimplePanel width="140px" ui:field="downloadXml">
-                                <style:LinkAnchor text="Выгрузить в xml" ui:field="downloadXmlButton" img="resources/img/download-xml-16.png"
-                                    title="Скачать декларацию в формате законодателя"/>
-                            </g:SimplePanel>
-                        </g:cell>
-                        <g:cell verticalAlignment="middle">
-                            <g:SimplePanel width="145px">
-                                <style:LinkAnchor text="Выгрузить в xlsx" ui:field="downloadExcelButton" img="resources/img/download-xls-16.png"
-                                    title="Скачать декларацию в формате Excel-документа"/>
-                            </g:SimplePanel>
-                        </g:cell>
-                        <g:cell verticalAlignment="middle">
-                            <g:HorizontalPanel>
-                                <g:cell width="205px" verticalAlignment="middle">
-                                    <g:Label title="Дата формирования декларации" styleName="{style.dateDoc}" text="Дата формирования декларации:" />
-                                </g:cell>
-                                <g:cell verticalAlignment="middle">
-                                    <d:CustomDateBox ui:field="dateBox" />
-                                </g:cell>
-                            </g:HorizontalPanel>
-                        </g:cell>
-                    </g:HorizontalPanel>
-                    <style:Bar height="30px">
-                        <style:LeftBar>
+                    </g:cell>
+                    <!--Инфо по форме. Середина-->
+                    <g:cell horizontalAlignment="left" width="90%">
+                        <g:HorizontalPanel ui:field="centerBlock" height="58px" addStyleNames="{style.centerBlock}" >
+                            <g:cell>
+                                <g:VerticalPanel spacing="2" horizontalAlignment="right" width="80px">
+                                    <g:Label text="Тип:" addStyleNames="{style.headerAttrName}"/>
+                                    <g:Label text="Период:" addStyleNames="{style.headerAttrName}"/>
+                                    <g:Label text="Состояние:" addStyleNames="{style.headerAttrName}"/>
+                                </g:VerticalPanel>
+                            </g:cell>
+                            <g:cell>
+                                <g:VerticalPanel spacing="2" addStyleNames="{style.infoValuesBlock}">
+                                    <g:Label ui:field="type" addStyleNames="{style.headerAttr}, {style.depAttr} "/>
+                                    <g:Label ui:field="reportPeriod" addStyleNames="{style.reportPeriodLabel}, {style.depAttr}"/>
+                                    <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
+                                </g:VerticalPanel>
+                            </g:cell>
+                        </g:HorizontalPanel>
+                    </g:cell>
+                    <g:cell width="10%">
+                        <g:Label width="100%"/>
+                    </g:cell>
+                    <!--Правые кнопки ссылки-->
+                    <g:cell horizontalAlignment="right">
+                        <g:VerticalPanel width="150px" spacing="2">
+                            <style:LinkButton ui:field="infoAnchor" text="История изменений" img="resources/img/exclamation_mark.png"
+                                              title="Отобразить историю налоговой формы"/>
+                            <style:LinkAnchor text="Выгрузить в xml" ui:field="downloadXmlButton" img="resources/img/download-xml-16.png"
+                                              title="Скачать декларацию в формате законодателя"/>
+                            <style:LinkAnchor text="Выгрузить в xlsx" ui:field="downloadExcelButton" img="resources/img/download-xls-16.png"
+                                              title="Скачать декларацию в формате Excel-документа"/>
+                        </g:VerticalPanel>
+                    </g:cell>
+
+                </g:HorizontalPanel>
+
+                <g:Label addStyleNames="{style.horSep}"/>
+
+                <!--Панель кнопок-->
+
+                <g:HorizontalPanel addStyleNames="{style.btnPanel}">
+                        <style:LeftBar childValign="middle" marginRight="9">
                             <g:Button text="Проверить" ui:field="checkButton" />
                             <g:Button text="Обновить" ui:field="refreshButton" />
                             <g:Button text="Удалить" ui:field="deleteButton" />
                             <g:Button text="Принять" ui:field="acceptButton" />
                             <g:Button text="Отменить принятие" ui:field="cancelButton" />
                         </style:LeftBar>
-                    </style:Bar>
-                </g:FlowPanel>
-                <g:FlowPanel width="790px" addStyleNames="{style.headerRight}">
-                    <g:HorizontalPanel>
-                        <g:Label width="100px" addStyleNames="{style.headerAttrName}">Подразделение:</g:Label>
-                        <g:Label ui:field="department" addStyleNames="{style.headerAttr}"/>
-                    </g:HorizontalPanel>
+                        <g:HorizontalPanel>
+                            <g:cell width="205px" verticalAlignment="middle">
+                                <g:Label title="Дата формирования декларации" wordWrap="false" text="Дата формирования декларации:" />
+                            </g:cell>
+                            <g:cell verticalAlignment="middle">
+                                <d:CustomDateBox ui:field="dateBox" />
+                            </g:cell>
+                        </g:HorizontalPanel>
+                </g:HorizontalPanel>
 
-                    <g:HorizontalPanel>
-                        <g:Label width="100px" addStyleNames="{style.headerAttrName}">Тип:</g:Label>
-                        <g:Label ui:field="type" addStyleNames="{style.headerAttr}"/>
-                    </g:HorizontalPanel>
+                <pdf:PdfViewerWidget ui:field="pdfViewer" addStyleNames="{style.pdfWidget}"/>
 
-                    <g:HorizontalPanel>
-                        <g:Label width="100px" addStyleNames="{style.headerAttrName}">Период:</g:Label>
-                        <g:Label ui:field="reportPeriod" addStyleNames="{style.headerAttr}"/>
-                    </g:HorizontalPanel>
-
-                    <g:HorizontalPanel>
-                        <g:Label width="100px" addStyleNames="{style.headerAttrName}">Состояние:</g:Label>
-                        <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}" />
-                        <style:LinkAnchor ui:field="infoAnchor" text="Информация" />
-                    </g:HorizontalPanel>
-                </g:FlowPanel>
-            </g:HorizontalPanel>
-        </g:north>
-
-        <g:center>
-            <pdf:PdfViewerWidget ui:field="pdfViewer" />
-        </g:center>
-
-    </g:DockLayoutPanel>
-
+            </fm:BodyContainer>
+        </fm:body>
+    </fm:MainContainer>
 
 </ui:UiBinder>

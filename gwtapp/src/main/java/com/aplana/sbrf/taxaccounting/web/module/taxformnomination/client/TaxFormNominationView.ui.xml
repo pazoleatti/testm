@@ -32,6 +32,12 @@
             margin-left: 30px;
         }
 
+        .forTree {
+            border-style: none !important;
+            width: 100% !important;
+            height: 350px;
+            min-width: 150px;
+        }
     </ui:style>
     <g:DockLayoutPanel>
 
@@ -77,7 +83,10 @@
                                     <g:Label addStyleNames="{style.label}">Подразделение</g:Label>
                                 </g:north>
                                 <g:center>
-                                    <t:DepartmentPickerWidget ui:field="tree"/>
+                                    <g:VerticalPanel width="100%" height="100">
+                                        <t:DepartmentTreeWidget ui:field="tree" headerVisible="false"
+                                                                addStyleNames="{style.forTree}"/>
+                                    </g:VerticalPanel>
                                 </g:center>
                             </g:DockLayoutPanel>
                         </g:west>

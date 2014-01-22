@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -7,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreated;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.CheckPeriodStatusAction;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.CheckPeriodStatusResult;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodResult;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -34,7 +37,6 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		void setYear(int year);
 		void setTaxType(TaxType taxType);
         void setSelectedDepartment(Integer departmentId);
-		boolean isYearEmpty();
         void resetForm();
 		void setCanChangeDepartment(boolean canChange);
 	}
@@ -69,10 +71,46 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 
 	@Override
 	public void onContinue(final OpenFilterData openFilterData) {
-		if (getView().isYearEmpty() || (openFilterData.getDictionaryTaxPeriod() == null)) {
-			Window.alert("Не заданы все обязательные параметры!");
+        if (openFilterData.getDictionaryTaxPeriod() == null) {
+            Dialog.warningMessage("Не заданы все обязательные параметры!");
 			return;
 		}
+
+		CheckPeriodStatusAction checkPeriodStatusAction = new CheckPeriodStatusAction();
+		checkPeriodStatusAction.setYear(openFilterData.getYear());
+		checkPeriodStatusAction.setTaxType(this.taxType);
+		checkPeriodStatusAction.setDepartmentId(openFilterData.getDepartmentId());
+		checkPeriodStatusAction.setDictionaryTaxPeriodId(openFilterData.getDictionaryTaxPeriod());
+		checkPeriodStatusAction.setBalancePeriod(openFilterData.isBalancePeriod());
+		dispatcher.execute(checkPeriodStatusAction, CallbackUtils
+                .defaultCallback(new AbstractCallback<CheckPeriodStatusResult>() {
+                    @Override
+                    public void onSuccess(CheckPeriodStatusResult result) {
+                        switch (result.getStatus()) {
+                            case OPEN:
+                                Window.alert("Периорд уже открыт!");
+                                break;
+                            case NOT_EXIST:
+                                open(openFilterData);
+                                break;
+                            case CLOSE:
+                                if (Window.confirm("Период закрыт, выполнить его переоткрытие?")) {
+                                    open(openFilterData);
+                                }
+                                break;
+                            case BALANCE_STATUS_CHANGED:
+                                Window.alert("В Системе может быть заведён только один период с (без) указания признака ввода остатков!");
+                                break;
+                            default:
+                                getView().hide();
+                                break;
+                        }
+                    }
+                }, OpenDialogPresenter.this)
+        );
+	}
+
+	private void open(final OpenFilterData openFilterData) {
 		OpenPeriodAction action = new OpenPeriodAction();
 		action.setYear(openFilterData.getYear());
 		action.setEndDate(openFilterData.getEndDate());
@@ -80,8 +118,8 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		action.setDepartmentId(openFilterData.getDepartmentId());
 		action.setBalancePeriod(openFilterData.isBalancePeriod());
 		action.setDictionaryTaxPeriodId(openFilterData.getDictionaryTaxPeriod());
-        action.setHasCorrectPeriod(openFilterData.hasCorrectPeriod);
-        action.setCorrectPeriod(openFilterData.getCorrectPeriod());
+		action.setHasCorrectPeriod(openFilterData.isHasCorrectPeriod());
+		action.setCorrectPeriod(openFilterData.getCorrectPeriod());
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<OpenPeriodResult>() {
 					@Override

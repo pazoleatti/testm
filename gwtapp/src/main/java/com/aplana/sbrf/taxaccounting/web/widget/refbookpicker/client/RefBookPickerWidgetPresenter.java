@@ -28,32 +28,28 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 
     private Long refBookAttrId;
 	private String filter;
+    private Date relevanceDate;
+    private int sortColumnIndex;
+    private boolean isSortAscending;
 	
 
 	@Override
-	public void init(final long refBookAttrId, final String filter, Date date1, Date date2) {
-		
-		
+	public void init(final long refBookAttrId, final String filter, Date relevanceDate) {
+        this.refBookAttrId = refBookAttrId;
+        this.relevanceDate = relevanceDate;
+        this.filter = filter;
+
 		InitRefBookAction initRefBookAction = new InitRefBookAction();
 		initRefBookAction.setRefBookAttrId(refBookAttrId);
-		initRefBookAction.setDate1(date1);
-		initRefBookAction.setDate2(date2);
 		
 		dispatcher.execute(initRefBookAction, CallbackUtils.defaultCallback(new AbstractCallback<InitRefBookResult>() {
-
 			@Override
 			public void onSuccess(InitRefBookResult result) {
-				RefBookPickerWidgetPresenter.this.refBookAttrId = refBookAttrId;
 				getView().setHeaders(result.getHeaders());
-				if (!result.getVersions().isEmpty()){
-					getView().setVersions(result.getVersions(), result.getDefaultValue());
-				}
-				RefBookPickerWidgetPresenter.this.filter = filter;
 				getView().refreshDataAndGoToFirstPage();
 			}
-			
 		}, this));
-		
+		isSortAscending = true;
 	}
 
 	
@@ -64,11 +60,9 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 	}
 
 	interface MyView extends View, HasValue<Long>, HasUiHandlers<RefBookPickerWidgetUiHandlers>{
-		void setVersions(List<Date> versions, Date defaultValue);
 		void setHeaders(List<String> headers);
 		
 		void setVersion(Date version);
-		Date getVersion();
 		
 		String getSearchPattern();
 		
@@ -86,8 +80,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 		if (refBookAttrId == null){
 			return;
 		}
-		Date version = getView().getVersion();
-		if (version == null){
+		if (relevanceDate == null){
             getView().setRowData(0, new ArrayList<RefBookItem>(), 0);
             return;
 		}
@@ -97,9 +90,11 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 		GetRefBookValuesAction action = new GetRefBookValuesAction();
 		action.setSearchPattern(getView().getSearchPattern());
 		action.setFilter(filter);
+        action.setSortAscending(isSortAscending);
+        action.setSortAttributeIndex(sortColumnIndex);
 		action.setPagingParams(new PagingParams(offset + 1, max));
 		action.setRefBookAttrId(refBookAttrId);
-		action.setVersion(version);
+		action.setVersion(relevanceDate);
 
 		dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(
 				new AbstractCallback<GetRefBookValuesResult>() {
@@ -110,6 +105,13 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 				}, this));
 		
 	}
+
+    @Override
+    public void onSort(Integer columnIndex, boolean isSortAscending){
+        sortColumnIndex = columnIndex;
+        this.isSortAscending = isSortAscending;
+        getView().refreshDataAndGoToFirstPage();
+    }
 
 	@Override
 	public Long getValue() {
@@ -150,7 +152,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 	public void onSelectionChange() {
 		this.selectedItem = getView().getSelectionValue();
 		dereferenceValue = selectedItem.getDereferenceValue();
-        setValue(selectedItem.getId(), true);
+        setValue(selectedItem.getId(), false);
 	}
 
 	@Override

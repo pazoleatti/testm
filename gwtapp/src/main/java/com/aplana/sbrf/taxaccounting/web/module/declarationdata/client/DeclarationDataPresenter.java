@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -122,9 +124,7 @@ public class DeclarationDataPresenter
 														+ DeclarationListNameTokens.DECLARATION_LIST
 														+ ";nType="
 														+ result.getTaxType());
-								getView().setTitle(
-										result.getTaxType().getName() + " / "
-												+ result.getDeclarationType());
+								getView().setTitle(result.getDeclarationType());
 								updateTitle(result.getDeclarationType());
 
 								getView().showAccept(result.isCanAccept());
@@ -194,29 +194,44 @@ public class DeclarationDataPresenter
 
 	@Override
 	public void delete() {
-		if (Window.confirm("Вы уверены, что хотите удалить декларацию?")) {
-			LogCleanEvent.fire(this);
-			DeleteDeclarationDataAction action = new DeleteDeclarationDataAction();
-			action.setDeclarationId(declarationId);
-			dispatcher
-					.execute(
-							action,
-							CallbackUtils
-									.defaultCallback(new AbstractCallback<DeleteDeclarationDataResult>() {
-										@Override
-										public void onSuccess(
-												DeleteDeclarationDataResult result) {
-											MessageEvent
-													.fire(DeclarationDataPresenter.this,
-															"Декларация удалена");
-											placeManager
-													.revealPlace(new PlaceRequest(
-															DeclarationListNameTokens.DECLARATION_LIST)
-															.with("nType",
-																	taxName));
-										}
-									}, DeclarationDataPresenter.this));
-		}
+        final DeclarationDataPresenter t = this;
+        Dialog.confirmMessage("Вы уверены, что хотите удалить декларацию?", new DialogHandler() {
+            @Override
+            public void yes() {
+                LogCleanEvent.fire(t);
+                DeleteDeclarationDataAction action = new DeleteDeclarationDataAction();
+                action.setDeclarationId(declarationId);
+                dispatcher
+                        .execute(
+                                action,
+                                CallbackUtils
+                                        .defaultCallback(new AbstractCallback<DeleteDeclarationDataResult>() {
+                                            @Override
+                                            public void onSuccess(
+                                                    DeleteDeclarationDataResult result) {
+                                                MessageEvent
+                                                        .fire(DeclarationDataPresenter.this,
+                                                                "Декларация удалена");
+                                                placeManager
+                                                        .revealPlace(new PlaceRequest(
+                                                                DeclarationListNameTokens.DECLARATION_LIST)
+                                                                .with("nType",
+                                                                        taxName));
+                                            }
+                                        }, DeclarationDataPresenter.this));
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void no() {
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void close() {
+                Dialog.hideMessage();
+            }
+        });
 	}
 
 	@Override

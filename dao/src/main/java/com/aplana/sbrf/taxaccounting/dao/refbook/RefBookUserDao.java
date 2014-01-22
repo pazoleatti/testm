@@ -16,7 +16,7 @@ public interface RefBookUserDao {
     public static final Long REF_BOOK_ID = 74L;
 
     /**
-     * Получение записей справочника
+     * Вариант перегрузки, для обратной совместимости интерфейса
      *
      *
      * @param pagingParams
@@ -25,6 +25,16 @@ public interface RefBookUserDao {
      * @return
      */
     PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
+
+    /**
+     * Получение записей справочника
+     *
+     * @param pagingParams
+     * @param filter
+     * @param sortAttribute
+     * @return
+     */
+    PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
 
     /**
      * Получение записи справочника по recordId

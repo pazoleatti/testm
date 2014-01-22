@@ -83,9 +83,7 @@ public class GetDeclarationDataHandler
                 declaration.getReportPeriodId());
 		result.setReportPeriod(reportPeriod.getName());
 
-        Date reportPeriodStartDate = reportPeriod.getTaxPeriod().getStartDate();
-        String year = new SimpleDateFormat("yyyy").format(reportPeriodStartDate);
-        result.setReportPeriodYear(Integer.valueOf(year));
+        result.setReportPeriodYear(reportPeriod.getTaxPeriod().getYear());
 
 		result.setPdf(generatePdfViewerModel(action, userInfo));
 

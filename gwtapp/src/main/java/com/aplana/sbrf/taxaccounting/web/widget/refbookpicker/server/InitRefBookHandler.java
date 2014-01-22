@@ -46,18 +46,6 @@ public class InitRefBookHandler extends
 		
 		result.setRefBookId(refBook.getId());
 		result.setHeaders(headers);
-
-		List<Date> versions = new ArrayList<Date>();
-		if (action.getDate1()!=null && action.getDate2()!=null){
-			versions.addAll(refBookFactory.getDataProvider(refBook.getId()).getVersions(action.getDate1(), action.getDate2()));
-		} else {
-			versions.add(new Date());
-		}
-
-        Date defaultValue = Collections.max(versions);
-
-		result.setVersions(versions);
-        result.setDefaultValue(defaultValue);
 		
 		return result;
 	}

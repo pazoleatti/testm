@@ -23,8 +23,8 @@ public interface ReportPeriodMappingDao {
 
     /**
      * Возвращает идентификатор периода
-     * @param start дата начала периода
+     * @param year год налогового периода
      * @return taxPeriodId
      */
-    Integer getTaxPeriodByDate(Date start);
+    Integer getTaxPeriodByDate(String year);
 }

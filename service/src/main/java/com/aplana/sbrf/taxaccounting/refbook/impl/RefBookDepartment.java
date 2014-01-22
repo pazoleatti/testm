@@ -42,8 +42,13 @@ public class RefBookDepartment implements RefBookDataProvider {
     private RefBookDepartmentDao refBookDepartmentDao;
 
     @Override
+    public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        return refBookDepartmentDao.getRecords(pagingParams, filter, sortAttribute, isSortAscending);
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return refBookDepartmentDao.getRecords(pagingParams, filter, sortAttribute);
+        return getRecords(version, pagingParams, filter, sortAttribute, true);
     }
 
     @Override

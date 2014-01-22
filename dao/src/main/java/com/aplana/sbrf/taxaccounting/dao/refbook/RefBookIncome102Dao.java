@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -17,8 +18,21 @@ public interface RefBookIncome102Dao {
 
 	public static final Long REF_BOOK_ID = 52L;
 
+	static final String TABLE_NAME = "INCOME_102";
+
     /**
      * Получение записей справочника
+     *
+     * @param reportPeriodId
+     * @param pagingParams
+     * @param filter
+     * @param sortAttribute
+     * @return
+     */
+    PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+
+    /**
+     * Перегруженный метод с восходящей сортировкой по умолчанию
      *
      * @param reportPeriodId
      * @param pagingParams
@@ -36,10 +50,10 @@ public interface RefBookIncome102Dao {
     Map<String, RefBookValue> getRecordData(Long recordId);
 
     /**
-     * Перечень имеющихся отчетных периодов среди записей
+     * Перечень версий записей за период
      * @return
      */
-    List<ReportPeriod> gerReportPeriods();
+	List<Date> getVersions(Date startDate, Date endDate);
 
     /**
      * Обновление записей справочника

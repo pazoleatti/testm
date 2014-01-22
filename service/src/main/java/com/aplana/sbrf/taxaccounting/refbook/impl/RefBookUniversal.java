@@ -67,9 +67,15 @@ public class RefBookUniversal implements RefBookDataProvider {
 
 	@Override
 	public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
-			String filter, RefBookAttribute sortAttribute) {
-		return refBookDao.getRecords(refBookId, version, pagingParams, filter, sortAttribute);
+			String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+		return refBookDao.getRecords(refBookId, version, pagingParams, filter, sortAttribute, isSortAscending);
 	}
+
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
+                                                              String filter, RefBookAttribute sortAttribute) {
+        return getRecords(version, pagingParams, filter, sortAttribute, true);
+    }
 
 	@Override
 	public Map<String, RefBookValue> getRecordData(Long recordId) {
@@ -360,14 +366,12 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     @Override
 	public void insertRecords(Date version, List<Map<String, RefBookValue>> records) {
-        System.out.println("insertRecords started");
         refBookDao.createRecords(refBookId, version, records);
         //createRecordVersion(Logger logger, Long recordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records)
 	}
 
 	@Override
 	public void updateRecords(Date version, List<Map<String, RefBookValue>> records) {
-        System.out.println("updateRecords started");
         refBookDao.updateRecords(refBookId, version, records);
         //updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, boolean isRelevancePeriodChanged, List<Map<String, RefBookValue>> records)
 	}

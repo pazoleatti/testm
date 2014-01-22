@@ -67,8 +67,7 @@ public class FilterDeclarationTemplateView extends ViewWithUiHandlers<FilterDecl
 
     @Override
     public TemplateFilter getDataFilter() {
-    	TemplateFilter filter = driver.flush();
-        return filter;
+    	return driver.flush();
     }
 
 	@Override

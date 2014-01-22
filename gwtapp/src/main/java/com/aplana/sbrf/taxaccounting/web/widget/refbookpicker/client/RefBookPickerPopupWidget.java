@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client;
 
 import java.util.Date;
 
-import com.aplana.sbrf.taxaccounting.web.widget.closabledialog.ClosableDialogBox;
+import com.aplana.gwt.client.ModalWindow;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -26,8 +26,8 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 
 	private Long attributeId;
 
-	private Date date1;
-    private Date date2;
+	private Date startDate;
+    private Date endDate;
     private String filter;
 
     private static Binder binder = GWT.create(Binder.class);
@@ -50,7 +50,7 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
         initWidget(binder.createAndBindUi(this));
         this.modal = modal;
         if (modal) {
-            popupPanel = new ClosableDialogBox(false, true);
+            popupPanel = new ModalWindow();
         } else {
             popupPanel = new PopupPanel(true, true);
         }
@@ -68,7 +68,7 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 
     @UiHandler("selectButton")
     void onSelectButtonClicked(ClickEvent event){
-        refBookPiker.setAcceptableValues(this.attributeId, this.filter, this.date1, this.date2);
+        refBookPiker.setAcceptableValues(this.attributeId, this.filter, this.startDate, this.endDate);
 	    popupPanel.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
 		    public void setPosition(int offsetWidth, int offsetHeight) {
 			    int windowHeight = Window.getClientHeight();
@@ -149,7 +149,22 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
     public void setAttributeId(long attributeId) {
 		this.attributeId = attributeId;
 	}
-    
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
 
     /**
      * Для совместимости с UiBinder
@@ -158,22 +173,6 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
      */
     public void setAttributeIdInt(int attributeId) {
 		this.attributeId = Long.valueOf(attributeId);
-	}
-
-	public Date getDate1() {
-		return date1;
-	}
-
-	public void setDate1(Date date1) {
-		this.date1 = date1;
-	}
-
-	public Date getDate2() {
-		return date2;
-	}
-
-	public void setDate2(Date date2) {
-		this.date2 = date2;
 	}
 
 	public String getFilter() {
@@ -185,14 +184,14 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 	}
 
     public void setPeriodDates(Date startDate, Date endDate){
-        this.date1 = startDate;
-        this.date2 = endDate;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     @Override
     public void setTitle(String title) {
-        if (popupPanel instanceof ClosableDialogBox) {
-            ((ClosableDialogBox) popupPanel).setText(title);
+        if (popupPanel instanceof ModalWindow) {
+            ((ModalWindow) popupPanel).setText(title);
         }
     }
 }

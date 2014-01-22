@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
@@ -13,7 +15,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.Range;
@@ -188,12 +189,25 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 		if (selectionModel.getSelectedObject() == null) {
 			return;
 		}
-		boolean confirm = Window.confirm("Удалить выбранную запись справочника?");
-		if (confirm) {
-			if (getUiHandlers() != null) {
-				getUiHandlers().onDeleteRowClicked();
-			}
-		}
+        Dialog.confirmMessage("Удалить выбранную запись справочника?", new DialogHandler() {
+            @Override
+            public void yes() {
+                if (getUiHandlers() != null) {
+                    getUiHandlers().onDeleteRowClicked();
+                }
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void no() {
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void close() {
+                no();
+            }
+        });
 	}
 
 	private HasHorizontalAlignment.HorizontalAlignmentConstant convertAlignment(HorizontalAlignment alignment) {

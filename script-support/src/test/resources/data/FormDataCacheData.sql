@@ -76,14 +76,14 @@ insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_cod
 insert into form_type (id, name, tax_type) values (1, 'FormType - Transport', 'T');
 
 -- TaxPeriod
-insert into tax_period(id, tax_type, year, start_date, end_date) values (1, 'T', 2013, date '2013-01-01', date '2013-12-31');
+insert into tax_period(id, tax_type, year) values (1, 'T', 2013);
 
 -- dict_tax_period_id
 insert into ref_book(id, name) values (8, 'Коды, определяющие налоговый (отчётный) период');
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values (21, 1, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);
 
 -- ReportPeriod
-insert into report_period (id, name, months, tax_period_id, ord, dict_tax_period_id, start_date, end_date) values (1, 'Transport report period 1', 3,  1, 1, 21, date '2013-01-01', date '2013-03-31');
+insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (1, 'Transport report period 1', 1, 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 
 -- FormTemplate
 insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code)

@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 
+//TODO (19.12.13) aivanov предлагаю вынести форму в модальное окно.
 public class AboutView extends ViewImpl implements AboutPresenter.MyView {
 	interface Binder extends UiBinder<Widget, AboutView> {
 	}

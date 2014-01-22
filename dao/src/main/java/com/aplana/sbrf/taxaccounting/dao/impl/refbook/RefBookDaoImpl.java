@@ -152,16 +152,21 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
-                                                              String filter, RefBookAttribute sortAttribute) {
-        PreparedStatementData ps = getRefBookSql(refBookId, null, version, sortAttribute, filter, pagingParams);
+                                                              String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        PreparedStatementData ps = getRefBookSql(refBookId, null, version, sortAttribute, filter, pagingParams, isSortAscending);
         RefBook refBook = get(refBookId);
         List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // Получение количества данных в справкочнике
-        PreparedStatementData psForCount = getRefBookSql(refBookId, null, version, sortAttribute, filter, null);
+        PreparedStatementData psForCount = getRefBookSql(refBookId, null, version, sortAttribute, filter, null, true);
         psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
         result.setTotalCount(getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray()));
         return result;
+    }
+
+    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
+                                                              String filter, RefBookAttribute sortAttribute) {
+        return getRecords(refBookId, version, pagingParams, filter, sortAttribute, true);
     }
 
     @Override
@@ -202,7 +207,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      * @param pagingParams
      * @return
      */
-    private PreparedStatementData getRefBookSql(Long refBookId, Long recordId, Date version, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams) {
+    private PreparedStatementData getRefBookSql(Long refBookId, Long recordId, Date version, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams, boolean isSortAscending) {
         // модель которая будет возвращаться как результат
         PreparedStatementData ps = new PreparedStatementData();
 
@@ -255,7 +260,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(sortAttribute.getAlias());
             ps.appendQuery(".");
             ps.appendQuery(sortAttribute.getAttributeType().toString());
-            ps.appendQuery("_value");
+            ps.appendQuery("_value ");
+            ps.appendQuery(isSortAscending ? "ASC":"DESC");
             ps.appendQuery(")");
             ps.appendQuery(" as row_number_over,\n");
         } else {
@@ -525,9 +531,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             //Создаем новые значения атрибутов
             jt.batchUpdate(INSERT_REF_BOOK_VALUE, listValues);
         }
-        catch (DaoException ex) {
-            throw ex;
-        }
         catch (Exception ex) {
             throw new DaoException("Не удалось обновить значения справочника", ex);
         }
@@ -711,7 +714,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersions(Long refBookId, Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        PreparedStatementData ps = getRefBookSql(refBookId, uniqueRecordId, null, sortAttribute, filter, pagingParams);
+        PreparedStatementData ps = getRefBookSql(refBookId, uniqueRecordId, null, sortAttribute, filter, pagingParams, true);
         RefBook refBook = get(refBookId);
         refBook.getAttributes().add(RefBook.getVersionFromAttribute());
         refBook.getAttributes().add(RefBook.getVersionToAttribute());

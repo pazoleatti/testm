@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookIncome101DaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -37,17 +35,20 @@ public class RefBookIncome101 implements RefBookDataProvider {
     RefBookDao refBookDao;
 
     @Autowired
-    private RefBookIncome101Dao refBookIncome101Dao;
-
-    @Autowired
-    private TaxPeriodDao taxPeriodDao;
+    private RefBookIncome101Dao dao;
 
     @Autowired
     private ReportPeriodDao reportPeriodDao;
 
     @Override
+    public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+		ReportPeriod period = reportPeriodDao.getReportPeriodByDate(TaxType.INCOME, version);
+        return dao.getRecords(period.getId(), pagingParams, filter, sortAttribute, isSortAscending);
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return refBookIncome101Dao.getRecords(getReportPeriod(version).getId(), pagingParams, filter, sortAttribute);
+        return getRecords(version, pagingParams, filter, sortAttribute, true);
     }
 
     @Override
@@ -57,23 +58,12 @@ public class RefBookIncome101 implements RefBookDataProvider {
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long recordId) {
-        return refBookIncome101Dao.getRecordData(recordId);
+        return dao.getRecordData(recordId);
     }
 
     @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
-        List<Date> result = new ArrayList<Date>();
-        List<ReportPeriod> reportPeriods = refBookIncome101Dao.gerReportPeriods();
-        Calendar cal = new GregorianCalendar();
-        for (ReportPeriod reportPeriod: reportPeriods) {
-            TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
-            cal.setTime(taxPeriod.getStartDate());
-            cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + reportPeriod.getMonths());
-            if (startDate.after(cal.getTime()) && endDate.before(cal.getTime()) && !result.contains(cal.getTime())) {
-                result.add(cal.getTime());
-            }
-        }
-        return result;
+        return dao.getVersions(startDate, endDate);
     }
 
     @Override
@@ -88,7 +78,7 @@ public class RefBookIncome101 implements RefBookDataProvider {
 
     @Override
     public void updateRecords(Date version, List<Map<String, RefBookValue>> records) {
-        refBookIncome101Dao.updateRecords(records);
+        dao.updateRecords(records);
     }
 
     @Override
@@ -105,7 +95,7 @@ public class RefBookIncome101 implements RefBookDataProvider {
     public RefBookValue getValue(Long recordId, Long attributeId) {
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         RefBookAttribute attribute = refBook.getAttribute(attributeId);
-        return refBookIncome101Dao.getRecordData(recordId).get(attribute.getAlias());
+        return dao.getRecordData(recordId).get(attribute.getAlias());
     }
 
     @Override
@@ -153,29 +143,4 @@ public class RefBookIncome101 implements RefBookDataProvider {
         throw new UnsupportedOperationException();
     }
 
-    private ReportPeriod getReportPeriod(Date version) {
-        List<TaxPeriod> taxPeriods = taxPeriodDao.listByTaxTypeAndDate(TaxType.INCOME, version, version);    // Данный справочник будет применятся в налоге на прибыль (Ф. Марат)
-        if (taxPeriods.size() != 1) {
-            throw new IllegalArgumentException("Invalid version for refbook");
-        }
-        TaxPeriod taxPeriod = taxPeriods.get(0);
-        List<ReportPeriod> reportPeriods = reportPeriodDao.listByTaxPeriod(taxPeriod.getId());
-        Calendar startCal = new GregorianCalendar();
-        Long time = null;
-        ReportPeriod reportPeriodResult = null;
-        Long resultTime;
-        for (ReportPeriod reportPeriod : reportPeriods) {
-            startCal.setTime(taxPeriod.getStartDate());
-            startCal.set(Calendar.MONTH, startCal.get(Calendar.MONTH) + reportPeriod.getMonths());
-            resultTime = startCal.getTime().getTime() - version.getTime();
-            if (resultTime >= 0 && ((reportPeriodResult == null) || (time > resultTime))) {
-                time = resultTime;
-                reportPeriodResult = reportPeriod;
-            }
-        }
-        if (reportPeriodResult == null) {
-            throw new IllegalArgumentException("Invalid version repord period not found");
-        }
-        return reportPeriodResult;
-    }
 }

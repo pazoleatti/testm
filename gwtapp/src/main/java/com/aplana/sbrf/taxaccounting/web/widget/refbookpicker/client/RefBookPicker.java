@@ -12,35 +12,16 @@ import com.google.gwt.user.client.ui.IsWidget;
  * 
  */
 public interface RefBookPicker extends HasValue<Long>, IsWidget {
-	
-	/**
-	 * Устанавливает параметры и инициализирует компонент.
-	 * В компоненте доступны для выбора все версии справочника.
-	 * 
-	 * @param refBookAttrId
-	 */
-	public void setAcceptableValues(long refBookAttrId);
 
 	/**
 	 * Устанавливает параметры и инициализирует компонент.
 	 * В компоненте доступны версии справочника из диапазона дат.
 	 * 
 	 * @param refBookAttrId
-	 * @param date1
-	 * @param date2
+	 * @param startDate начало ограничивающего периода
+	 * @param endDate начало ограничивающего периода
 	 */
-	public void setAcceptableValues(long refBookAttrId, Date date1, Date date2);
-	
-	
-	/**
-	 * Устанавливает параметры и инициализирует компонент.
-	 * В компоненте доступны версии справочника c учетом фильтра.
-	 * В компоненте доступны версии справочника из диапазона дат.
-	 * 
-	 * @param refBookAttrId
-	 * @param filter
-	 */
-	public void setAcceptableValues(long refBookAttrId, String filter);
+	public void setAcceptableValues(long refBookAttrId, Date startDate, Date endDate);
 	
 	
 	/**
@@ -50,10 +31,10 @@ public interface RefBookPicker extends HasValue<Long>, IsWidget {
 	 * 
 	 * @param refBookAttrId
 	 * @param filter
-	 * @param date1
-	 * @param date2
+     * @param startDate начало ограничивающего периода
+     * @param endDate начало ограничивающего периода
 	 */
-	public void setAcceptableValues(long refBookAttrId, String filter, Date date1, Date date2);
+	public void setAcceptableValues(long refBookAttrId, String filter, Date startDate, Date endDate);
 	
 	
 	/**

@@ -16,5 +16,7 @@ public interface FormDataListUiHandlers extends UiHandlers{
 	 * @param length
 	 */
 	void onRangeChange(int start, int length);
+
+    void onCreateClicked();
 	
 }

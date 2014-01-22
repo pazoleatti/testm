@@ -14,6 +14,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.datepicker.client.DatePicker;
 
 import java.util.Date;
 
@@ -42,8 +43,9 @@ public class CustomDateBox extends Composite implements HasEnabled, HasVisibilit
 		initWidget(ourUiBinder.createAndBindUi(this));
         VerticalPanel vPanel = new VerticalPanel();
 
-		datePickerPanel.setWidth("200");
-		datePickerPanel.setHeight("200");
+//      (aivanov) 8.1.14. Убрал потому как в ие размеры не уменьшались, если что то не то сделал - сообщите
+//		datePickerPanel.setWidth("200");
+//		datePickerPanel.setHeight("200");
         vPanel.add(datePicker);
 
         clearButton.setText("Очистить");
@@ -67,6 +69,10 @@ public class CustomDateBox extends Composite implements HasEnabled, HasVisibilit
 		datePickerPanel.setPopupPosition(event.getClientX(), event.getClientY() + 10);
 		datePickerPanel.show();
 	}
+
+    public DatePicker getDatePicker() {
+        return datePicker;
+    }
 
 	private void addDatePickerHandlers() {
 		datePicker.addValueChangeHandler(new ValueChangeHandler<Date>() {

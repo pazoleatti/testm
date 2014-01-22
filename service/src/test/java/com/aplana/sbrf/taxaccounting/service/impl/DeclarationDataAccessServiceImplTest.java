@@ -166,7 +166,7 @@ public class DeclarationDataAccessServiceImplTest {
 		ReportPeriod reportPeriod = mockReportPeriod(REPORT_PERIOD_ID);
         TaxPeriod taxPeriod = new TaxPeriod();
         taxPeriod.setTaxType(TaxType.INCOME);
-        reportPeriod.setTaxPeriod(taxPeriod);
+		when(reportPeriod.getTaxPeriod()).thenReturn(taxPeriod);
 
 		DeclarationData declarationCreatedBank = mockDeclarationData(DECLARATION_CREATED_BANK_ID, Department.ROOT_BANK_ID, false, DECLARATION_TEMPLATE_1_ID, REPORT_PERIOD_ID);
 		DeclarationData declarationAcceptedBank = mockDeclarationData(DECLARATION_ACCEPTED_BANK_ID, Department.ROOT_BANK_ID, true, DECLARATION_TEMPLATE_1_ID, REPORT_PERIOD_ID);

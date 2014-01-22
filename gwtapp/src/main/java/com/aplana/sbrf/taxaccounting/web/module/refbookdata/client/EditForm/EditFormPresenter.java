@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -100,17 +102,31 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 			return;
 		}
 		if (isFormModified) {
-			boolean confirmed = Window.confirm(DIALOG_MESSAGE);
-			if (confirmed) {
-				isFormModified = false;
-				showRecord(refBookRecordId);
-			} else {
-				RollbackTableRowSelection.fire(this, currentUniqueRecordId);
-			}
+            Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
+                @Override
+                public void yes() {
+                    isFormModified = false;
+                    showRecord(refBookRecordId);
+                }
+
+                @Override
+                public void no() {
+                    rollbackIfNo();
+                }
+
+                @Override
+                public void close() {
+                    no();
+                }
+            });
 		} else {
 			showRecord(refBookRecordId);
 		}
 	}
+
+    private void rollbackIfNo(){
+        RollbackTableRowSelection.fire(this, currentUniqueRecordId);
+    }
 
 	private void showRecord(final Long refBookRecordId) {
 		if (refBookRecordId == null) {
