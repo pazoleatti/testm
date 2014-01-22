@@ -142,6 +142,7 @@ public class CacheTest {
         declarationTemplate.setJrxmlBlobId(uuid1);
         DeclarationType declarationType = declarationTypeDao.get(1);
         declarationTemplate.setType(declarationType);
+        declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
 
         declarationTemplateDao.save(declarationTemplate);
 

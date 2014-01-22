@@ -76,4 +76,9 @@ public class FilterDeclarationTemplatePresenter extends PresenterWidget<FilterDe
 		DeclarationTemplateApplyEvent.fire(this);
 	}
 
+    @Override
+    public void onDeleteClicked() {
+        DeclarationTemplateDeleteEvent.fire(this);
+    }
+
 }

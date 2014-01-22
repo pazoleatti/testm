@@ -47,11 +47,11 @@ public class UpdateDeclarationHandler extends AbstractActionHandler<UpdateDeclar
         TemplateChanges changes = new TemplateChanges();
 
         Logger logger = new Logger();
-        if (action.getDeclarationTemplateExt().getDeclarationTemplate().getId() == null && action.getDeclarationTemplateExt().getDeclarationTemplate().getType() != null){
+        if (action.getDeclarationTemplateExt().getDeclarationTemplate().getId() == null
+                && action.getDeclarationTemplateExt().getDeclarationTemplate().getType().getId() != 0){
             int dtId = mainOperatingService.createNewTemplateVersion(action.getDeclarationTemplateExt().getDeclarationTemplate(),
                     action.getDeclarationTemplateExt().getEndDate(), logger);
-            result.setLogUuid(logEntryService.save(logger.getEntries()));
-            result.setDeclarationTemplateId(dtId);
+            fillResult(result, dtId, logger);
 
             changes.setEvent(TemplateChangesEvent.CREATED);
             changes.setEventDate(new Date());
@@ -62,10 +62,20 @@ public class UpdateDeclarationHandler extends AbstractActionHandler<UpdateDeclar
         }else if(action.getDeclarationTemplateExt().getDeclarationTemplate().getId() != null){
             int dtId = mainOperatingService.edit(action.getDeclarationTemplateExt().getDeclarationTemplate().getId(),
                     action.getDeclarationTemplateExt().getEndDate(), logger);
-            result.setLogUuid(logEntryService.save(logger.getEntries()));
-            result.setDeclarationTemplateId(dtId);
+            fillResult(result, dtId, logger);
 
             changes.setEvent(TemplateChangesEvent.MODIFIED);
+            changes.setEventDate(new Date());
+            changes.setDeclarationTemplateId(dtId);
+            changes.setAuthor(securityService.currentUserInfo().getUser());
+            templateChangesService.save(changes);
+        }else if (action.getDeclarationTemplateExt().getDeclarationTemplate().getId() == null &&
+                action.getDeclarationTemplateExt().getDeclarationTemplate().getType().getId() == 0){
+            int dtId = mainOperatingService.createNewType(action.getDeclarationTemplateExt().getDeclarationTemplate(),
+                    action.getDeclarationTemplateExt().getEndDate(), logger);
+            fillResult(result, dtId, logger);
+
+            changes.setEvent(TemplateChangesEvent.CREATED);
             changes.setEventDate(new Date());
             changes.setDeclarationTemplateId(dtId);
             changes.setAuthor(securityService.currentUserInfo().getUser());
@@ -77,6 +87,12 @@ public class UpdateDeclarationHandler extends AbstractActionHandler<UpdateDeclar
     @Override
     public void undo(UpdateDeclarationAction action, UpdateDeclarationResult result, ExecutionContext context) throws ActionException {
         // Nothing!
+    }
+
+    private void fillResult(UpdateDeclarationResult result, int dtId, Logger logger){
+        if (!logger.getEntries().isEmpty())
+            result.setLogUuid(logEntryService.save(logger.getEntries()));
+        result.setDeclarationTemplateId(dtId);
     }
 
 }

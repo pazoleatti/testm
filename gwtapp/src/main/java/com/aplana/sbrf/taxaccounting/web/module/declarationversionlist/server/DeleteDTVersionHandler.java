@@ -1,8 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.server;
 
+import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
+import com.aplana.sbrf.taxaccounting.model.TemplateChangesEvent;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
+import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.DeleteDTVersionAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.DeleteDTVersionResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -12,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 /**
  * User: avanteev
@@ -27,6 +33,13 @@ public class DeleteDTVersionHandler extends AbstractActionHandler<DeleteDTVersio
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private TemplateChangesService templateChangesService;
+
+    @Autowired
+    private SecurityService securityService;
+
+
     public DeleteDTVersionHandler() {
         super(DeleteDTVersionAction.class);
     }
@@ -37,6 +50,13 @@ public class DeleteDTVersionHandler extends AbstractActionHandler<DeleteDTVersio
         Logger logger = new Logger();
         mainOperatingService.deleteVersionTemplate(action.getDeclarationTemplateId(), null, logger);
         result.setLogEntryUuid(logEntryService.save(logger.getEntries()));
+
+        TemplateChanges changes = new TemplateChanges();
+        changes.setEvent(TemplateChangesEvent.DELETED);
+        changes.setEventDate(new Date());
+        changes.setDeclarationTemplateId(action.getDeclarationTemplateId());
+        changes.setAuthor(securityService.currentUserInfo().getUser());
+
         return result;
     }
 

@@ -58,7 +58,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     }
 
     @Override
-    public <T> int createNewFormType(T template, Date templateActualEndDate, Logger logger) {
+    public <T> int createNewType(T template, Date templateActualEndDate, Logger logger) {
         FormTemplate formTemplate = (FormTemplate)template;
         /*versionOperatingService.isCorrectVersion(template, templateActualEndDate, logger);
         checkError(logger);*/

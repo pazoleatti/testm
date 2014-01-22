@@ -12,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.Decla
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
-import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.HistoryBusinessToken;
 import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersTokens;
 import com.aplana.sbrf.taxaccounting.web.module.migration.client.MigrationTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
@@ -114,7 +113,7 @@ public class GetMainMenuActionHandler extends
             menuItems.add(taxMenu);
         }
 		
-		if (currentUser.hasRole(TARole.ROLE_CONF)) {
+		/*if (currentUser.hasRole(TARole.ROLE_CONF)) {
 			MenuItem confMenuItem = new MenuItem("Конфигурация");
 			confMenuItem.getSubMenu().add(
 					new MenuItem("Шаблоны налоговых форм", NUMBER_SIGN + AdminConstants.NameTokens.adminPage));
@@ -129,6 +128,7 @@ public class GetMainMenuActionHandler extends
             settingMenuItem.getSubMenu().add(new MenuItem("Импорт данных", NUMBER_SIGN + MigrationTokens.migration));
             settingMenuItem.getSubMenu().add(new MenuItem("Конфигурационные параметры",	NUMBER_SIGN + ConfigurationPresenter.TOKEN));
             settingMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN + SchedulerTokens.taskList));
+        }*/
         // НСИ
         if (currentUser.hasRole(TARole.ROLE_CONTROL)
                 || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
@@ -187,6 +187,7 @@ public class GetMainMenuActionHandler extends
 
 		return result;
 	}
+
 
 	@Override
 	public void undo(GetMainMenuAction action, GetMainMenuResult result,

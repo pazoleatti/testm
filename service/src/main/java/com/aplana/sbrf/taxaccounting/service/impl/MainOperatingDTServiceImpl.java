@@ -57,7 +57,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     }
 
     @Override
-    public <T> int createNewFormType(T template, Date templateActualEndDate, Logger logger) {
+    public <T> int createNewType(T template, Date templateActualEndDate, Logger logger) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
         /*versionOperatingService.isCorrectVersion(template, templateActualEndDate, logger);
         checkError(logger);*/
@@ -69,7 +69,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         versionOperatingService.isIntersectionVersion(declarationTemplate, templateActualEndDate, logger);
         checkError(logger);
         declarationTemplate.setEdition(1);//т.к. первый
-        declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
+        declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         return declarationTemplateService.save(declarationTemplate);
     }
 

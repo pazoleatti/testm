@@ -207,7 +207,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         StringBuilder query = new StringBuilder("select declaration_template.id " +
                        "from declaration_template " +
                        "left join declaration_type on declaration_template.declaration_type_id = declaration_type.id " +
-                       "where is_active = ?"
+                       "where declaration_template.status = 0"
         );
 
         if (filter.getTaxType() != null) {
@@ -215,8 +215,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         }
         return getJdbcTemplate().queryForList(
                 query.toString(),
-                new Object[] { filter.isActive()},
-                new int[]{Types.NUMERIC},
                 Integer.class
         );
     }

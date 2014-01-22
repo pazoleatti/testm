@@ -80,6 +80,9 @@ public class FilterDeclarationTemplateView extends ViewWithUiHandlers<FilterDecl
 
     @UiHandler("create")
 	void onCreateButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onCreateClicked();
+        }
 	}
 
 	@UiHandler("apply")
@@ -88,4 +91,11 @@ public class FilterDeclarationTemplateView extends ViewWithUiHandlers<FilterDecl
 			getUiHandlers().onApplyClicked();
 		}
 	}
+
+    @UiHandler("delete")
+    void onDeleteButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onDeleteClicked();
+        }
+    }
 }

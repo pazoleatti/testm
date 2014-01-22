@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
@@ -19,21 +19,21 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTemplateUiHandlers>
-		implements DeclarationTemplatePresenter.MyView, Editor<DeclarationTemplate> {
+		implements DeclarationTemplatePresenter.MyView, Editor<DeclarationTemplateExt> {
 
     interface Binder extends UiBinder<Widget, DeclarationTemplateView> { }
 
-	interface MyDriver extends SimpleBeanEditorDriver<DeclarationTemplate, DeclarationTemplateView> {
+	interface MyDriver extends SimpleBeanEditorDriver<DeclarationTemplateExt, DeclarationTemplateView> {
 	}
 
 	private final MyDriver driver = GWT.create(MyDriver.class);
 
     @UiField
-    @Path("version")
+    @Path("declarationTemplate.version")
     CustomDateBox versionDateBegin;
 
     @UiField
-    @Path("versionEnd")
+    @Path("endDate")
     CustomDateBox versionDateEnd;
 	
 	@UiField
@@ -69,14 +69,20 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	Label title;
 
 	@UiField
+    @Path("declarationTemplate.active")
 	CheckBox active;
 
 	@UiField
+    @Path("declarationTemplate.createScript")
 	CodeMirror createScript;
 
     @UiField
     @Editor.Ignore
     FileUploadWidget fileUploader;
+
+    @UiField
+    @Editor.Ignore
+    Button activateVersion;
 
 	@Inject
 	@UiConstructor
@@ -110,14 +116,14 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	}
 
 	@Override
-	public void setDeclarationTemplate(final DeclarationTemplate declaration) {
-		uploadDectForm.setAction(GWT.getHostPageBaseURL() + "download/declarationTemplate/uploadDect/" + declaration.getId());
-		uploadJrxmlForm.setAction(GWT.getHostPageBaseURL() + "download/uploadJrxml/" + declaration.getId());
+	public void setDeclarationTemplate(final DeclarationTemplateExt declarationTemplateExt) {
+		uploadDectForm.setAction(GWT.getHostPageBaseURL() + "download/declarationTemplate/uploadDect/" + declarationTemplateExt.getDeclarationTemplate().getId());
+		uploadJrxmlForm.setAction(GWT.getHostPageBaseURL() + "download/uploadJrxml/" + declarationTemplateExt.getDeclarationTemplate().getId());
 		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 			@Override
 			public void execute() {
-				title.setText(declaration.getType().getName());
-				driver.edit(declaration);				
+				title.setText(declarationTemplateExt.getDeclarationTemplate().getType().getName());
+				driver.edit(declarationTemplateExt);
 			}
 		});
 	}
@@ -125,6 +131,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @Override
     public void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler) {
         fileUploader.addValueChangeHandler(valueChangeHandler);
+    }
+
+    @Override
+    public void activateButtonName(String name) {
+        activateVersion.setText(name);
     }
 
     @UiHandler("saveButton")
@@ -161,5 +172,10 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 		getUiHandlers().downloadDect();
 	}
 
+    @UiHandler("activateVersion")
+    public void onActivatetButton(ClickEvent event){
+        if (getUiHandlers() != null)
+            getUiHandlers().activate();
+    }
 
 }

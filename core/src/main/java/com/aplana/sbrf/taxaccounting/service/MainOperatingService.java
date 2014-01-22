@@ -11,7 +11,7 @@ import java.util.Date;
 public interface MainOperatingService {
 
     int edit(int templateId, Date templateActualEndDate, Logger logger);
-    <T> int createNewFormType(T template, Date templateActualEndDate, Logger logger);
+    <T> int createNewType(T template, Date templateActualEndDate, Logger logger);
     <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger);
     void deleteTemplate(int typeId, Logger logger);
     void deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger);
