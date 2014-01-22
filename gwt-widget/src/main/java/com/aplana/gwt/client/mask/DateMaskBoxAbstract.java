@@ -1,5 +1,6 @@
 package com.aplana.gwt.client.mask;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.text.shared.Parser;
@@ -14,11 +15,9 @@ import java.util.Date;
  */
 public abstract class DateMaskBoxAbstract extends MaskBox<Date> {
 
-    private Date value;
-
     private Date deferredValue;
-
     private DateTimeFormat format;
+    private boolean mayBeNull = false;
 
     protected DateMaskBoxAbstract(DateTimeFormat dateFormat, Parser<Date> dateParser, String mask) {
         super(new DateTimeFormatRenderer(dateFormat), dateParser);
@@ -31,26 +30,35 @@ public abstract class DateMaskBoxAbstract extends MaskBox<Date> {
         if (!checkValue(super.getValue())) {
             return deferredValue;
         }
-        return value;
+        return super.getValue();
     }
 
 
     @Override
     public void setValue(Date value) {
-        this.value = value;
+        this.setValue(value, false);
+    }
+
+    @Override
+    public void setValue(Date value, boolean fireEvents) {
         if (checkValue(value)) {
-            setText(format.format(value));
+            super.setValue(value, false);
+            setText(value == null ? getTextPicture() : format.format(value));
+            removeExceptionStyle();
+        }
+        if (fireEvents) {
+            ValueChangeEvent.fire(this, value);
         }
     }
 
     /**
-     * Проверить что дата не пуста и после заполнить удачное значение
+     * Проверить что дата не пуста и после запомнить удачное значение
      *
      * @param value дата
      * @return если null то вернет false
      */
     private boolean checkValue(Date value) {
-        if (value == null) {
+        if (value == null && !mayBeNull) {
             return false;
         } else {
             deferredValue = value;
@@ -58,4 +66,11 @@ public abstract class DateMaskBoxAbstract extends MaskBox<Date> {
         }
     }
 
+    public boolean isMayBeNull() {
+        return mayBeNull;
+    }
+
+    public void setMayBeNull(boolean mayBeNull) {
+        this.mayBeNull = mayBeNull;
+    }
 }
