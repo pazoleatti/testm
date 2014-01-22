@@ -53,6 +53,8 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 	FlexiblePager pager;
 
     private HashMap<RefBookItemTextColumn, Integer> sortableColumns;
+
+    private RefBookItem defaultRefBookItem = null;
 	
 	private AsyncDataProvider<RefBookItem> dataProvider = new AsyncDataProvider<RefBookItem>() {
 		@Override
@@ -140,6 +142,7 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 	@UiHandler("clearButton")
 	void onBtnClearClick(ClickEvent event) {
 		uiHandlers.clearValue();
+        defaultRefBookItem = null;
 	}
 	
 	@UiHandler("searchButton")
@@ -292,5 +295,24 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
     @Override
     public String getOtherDereferenceValue(Long attrId){
         return uiHandlers.getOtherDereferenceValue(attrId);
+    }
+
+    @UiHandler("ok")
+    void onBtnOkClick(ClickEvent event) {
+        if (uiHandlers.getValue() != null) {
+            defaultRefBookItem = selectionModel.getLastSelectedObject();
+            widgetFireChangeEvent(uiHandlers.getValue());
+        }
+    }
+
+    @UiHandler("cancel")
+    void onBtnCancelClick(ClickEvent event) {
+        if (defaultRefBookItem != null) {
+            selectionModel.setSelected(defaultRefBookItem, true);
+            uiHandlers.onSelectionChange();
+            widgetFireChangeEvent(defaultRefBookItem.getId());
+        } else {
+            uiHandlers.clearValue();
+        }
     }
 }
