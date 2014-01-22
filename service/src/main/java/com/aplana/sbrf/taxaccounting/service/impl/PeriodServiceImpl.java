@@ -155,6 +155,8 @@ public class PeriodServiceImpl implements PeriodService{
 			depRP.setDepartmentId(Long.valueOf(dep.getId()));
 			depRP.setActive(true);
 			depRP.setBalance(isBalance);
+			depRP.setHasCorrectPeriod(isCorrection);
+			depRP.setCorrectPeriod(correctionDate);
 			saveOrUpdate(depRP, logs);
 		}
 	}
@@ -316,6 +318,57 @@ public class PeriodServiceImpl implements PeriodService{
         return cal;
     }
 
+
+	@Override
+	public boolean existForDepartment(Integer departmentId, long reportPeriodId) {
+		return departmentReportPeriodDao.existForDepartment(departmentId, reportPeriodId);
+	}
+
+	@Override
+	public PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(TaxType taxType, int year, boolean balancePeriod, long departmentId, long dictionaryTaxPeriodId) {
+		List<TaxPeriod> taxPeriods = taxPeriodDao.listByTaxTypeAndYear(taxType, year);
+		TaxPeriod taxPeriod;
+		if (taxPeriods.size() > 1) {
+			// Что-то пошло не так
+			throw new ServiceException("На " + year + " год найдено несколько налоговых периодов");
+		} else if (taxPeriods.isEmpty()) {
+			return PeriodStatusBeforeOpen.NOT_EXIST;
+		} else {
+			taxPeriod = taxPeriods.get(0);
+		}
+
+		List<ReportPeriod> reportPeriods = listByTaxPeriod(taxPeriod.getId());
+		if (!reportPeriods.isEmpty()) {
+			Iterator<ReportPeriod> it = reportPeriods.iterator();
+			while (it.hasNext()) {
+				if (it.next().getDictTaxPeriodId() != dictionaryTaxPeriodId) {
+					it.remove();
+				}
+			}
+		}
+
+		if (reportPeriods.isEmpty()) {
+			return PeriodStatusBeforeOpen.NOT_EXIST;
+		} else if (reportPeriods.size() > 1) {
+			throw new ServiceException("На " + year + " год найдено несколько отчетных периодов");
+		}
+		else {
+			if (existForDepartment((int) departmentId, reportPeriods.get(0).getId())) {
+				DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriods.get(0).getId(), departmentId);
+				if (drp.isBalance() == balancePeriod) {
+					if (drp.isActive()) {
+						return PeriodStatusBeforeOpen.OPEN;
+					} else {
+						return PeriodStatusBeforeOpen.CLOSE;
+					}
+				} else {
+					return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
+				}
+			}
+			return PeriodStatusBeforeOpen.NOT_EXIST;
+		}
+	}
+
 	@Override
 	public void removeReportPeriod(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user) {
 		List<Integer> departments = new ArrayList<Integer>();
@@ -375,7 +428,7 @@ public class PeriodServiceImpl implements PeriodService{
 
 		boolean canRemoveReportPeriod = true;
 		for (Department dep : departmentService.listAll()) {
-			if (departmentReportPeriodDao.existForDepartment(dep.getId(), reportPeriodId)) {
+			if (existForDepartment(dep.getId(), reportPeriodId)) {
 				System.out.println("Exist for " + dep.getId());
 				canRemoveReportPeriod = false;
 				break;

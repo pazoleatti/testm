@@ -6,7 +6,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 public class RefBookItemTextColumn extends TextColumn<RefBookItem> {
 	
 	private final int valueIndex;
-	
+
 	RefBookItemTextColumn(int valueIndex){
 		this.valueIndex = valueIndex;
 	}
@@ -16,4 +16,8 @@ public class RefBookItemTextColumn extends TextColumn<RefBookItem> {
 		return object.getValues().get(valueIndex);
 	}
 
+    @Override
+    public int hashCode() {
+        return valueIndex;
+    }
 }
