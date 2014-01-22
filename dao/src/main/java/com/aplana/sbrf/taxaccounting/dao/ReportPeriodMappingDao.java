@@ -1,9 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import java.util.Date;
 
 /**
  * DAO-Интерфейс для маппинга отчетного периода
+ *
+ * Используется только при миграции
+ *
  * @author Alexander Ivanov
  */
 public interface ReportPeriodMappingDao {
@@ -17,4 +20,11 @@ public interface ReportPeriodMappingDao {
      * @return отченый период
      */
     Integer getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId);
+
+    /**
+     * Возвращает идентификатор периода
+     * @param start дата начала периода
+     * @return taxPeriodId
+     */
+    Integer getTaxPeriodByDate(Date start);
 }

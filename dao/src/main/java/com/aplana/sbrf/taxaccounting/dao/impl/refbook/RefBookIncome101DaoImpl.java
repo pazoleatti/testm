@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -45,14 +44,18 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
 	private RefBookUtils refBookUtils;
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams,
-			String filter, RefBookAttribute sortAttribute) {
-		if (filter == null || filter.isEmpty()) {
-			filter = " REPORT_PERIOD_ID = " + reportPeriodId;
-		} else {
-			filter += " AND REPORT_PERIOD_ID = " + reportPeriodId;
-		}
-		return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute);
+    public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        if (filter == null || filter.isEmpty()) {
+            filter = " REPORT_PERIOD_ID = " + reportPeriodId;
+        } else {
+            filter += " AND REPORT_PERIOD_ID = " + reportPeriodId;
+        }
+        return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, isSortAscending);
+    }
+
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        return getRecords(reportPeriodId, pagingParams, filter, sortAttribute, true);
     }
 
     @Override

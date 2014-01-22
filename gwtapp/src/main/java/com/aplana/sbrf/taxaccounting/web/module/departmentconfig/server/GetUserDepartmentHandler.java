@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
  * @author Dmitriy Levykin
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetUserDepartmentHandler extends AbstractActionHandler<GetUserDepartmentAction, GetUserDepartmentResult> {
 
     @Autowired

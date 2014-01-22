@@ -184,6 +184,11 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 		this.filter = filter;
 	}
 
+    public void setPeriodDates(Date startDate, Date endDate){
+        this.date1 = startDate;
+        this.date2 = endDate;
+    }
+
     @Override
     public void setTitle(String title) {
         if (popupPanel instanceof ModalWindow) {

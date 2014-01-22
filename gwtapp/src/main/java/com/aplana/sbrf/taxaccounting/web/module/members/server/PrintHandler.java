@@ -18,7 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 @Component
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_OPER')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_OPER', 'ROLE_CONTROL_NS')")
 public class PrintHandler  extends AbstractActionHandler<PrintAction, PrintResult> {
 
 	@Autowired

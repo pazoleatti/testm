@@ -16,6 +16,8 @@ import com.gwtplatform.mvp.client.View;
 
 import java.util.*;
 
+import static java.util.Arrays.asList;
+
 public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilterPresenter.MyView>
 		implements DeclarationFilterUIHandlers {
 
@@ -35,6 +37,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
 		void setReportPeriods(List<ReportPeriod> reportPeriods);
 
+        void setFormStateList(List<WorkflowState> list);
 	}
 
 	private final DispatchAsync dispatchAsync;
@@ -65,7 +68,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 							getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
 							getView().setReportPeriods(result.getPeriods());
 							getView().setDeclarationTypeMap(fillDeclarationTypesMap(filterValues));
-
+                            getView().setFormStateList(asList(null, WorkflowState.CREATED, WorkflowState.ACCEPTED));
                             if (dataFilter != null){
                                 getView().setDataFilter(dataFilter);
                             } else {
@@ -94,5 +97,4 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
                     }
 				}, this));
 	}
-
 }

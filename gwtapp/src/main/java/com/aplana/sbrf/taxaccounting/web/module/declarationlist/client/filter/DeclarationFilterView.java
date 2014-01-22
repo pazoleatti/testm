@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
@@ -14,6 +15,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -41,11 +43,25 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	@UiField(provided = true)
 	ListBoxWithTooltip<Integer> declarationTypeId;
 
+    @UiField(provided = true)
+    ValueListBox<WorkflowState> formState;
+
 	private Map<Integer, String> declarationTypeMap;
 
     @Inject
 	@UiConstructor
     public DeclarationFilterView(final MyBinder binder, MyDriver driver) {
+        super();
+
+        formState = new ValueListBox<WorkflowState>(new AbstractRenderer<WorkflowState>() {
+            @Override
+            public String render(WorkflowState object) {
+                if (object == null) {
+                    return "";
+                }
+                return object.getName();
+            }
+        });
 
 		declarationTypeId = new ListBoxWithTooltip<Integer>(new AbstractRenderer<Integer>() {
 			@Override
@@ -56,7 +72,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 				return declarationTypeMap.get(object);
 			}
 		});
-		
+
 	    initWidget(binder.createAndBindUi(this));
         this.driver = driver;
         this.driver.initialize(this);
@@ -66,7 +82,14 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
         reportPeriodIds.setPeriods(reportPeriods);
 	}
-	@Override
+
+    @Override
+    public void setFormStateList(List<WorkflowState> list){
+        formState.setValue(null);
+        formState.setAcceptableValues(list);
+    }
+
+    @Override
 	public void setDataFilter(DeclarationDataFilter formDataFilter) {
 		driver.edit(formDataFilter);
 		departmentPicker.setValue(formDataFilter.getDepartmentIds());
@@ -75,7 +98,13 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	@Override
 	public DeclarationDataFilter getFilterData() {
 		DeclarationDataFilter dataFilter = driver.flush();
-		dataFilter.setDepartmentIds(departmentPicker.getValue());
+        if (departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty()) {
+		    dataFilter.setDepartmentIds(departmentPicker.getValue());
+        } else {
+            // Если конкретное подразделение не выбрано, то считаем такой случай идентичным случаю,
+            // когда выбраны все доступные подразделения
+            dataFilter.setDepartmentIds(departmentPicker.getAvalibleValues());
+        }
 		return dataFilter;
 	}
 
@@ -87,8 +116,6 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	@Override
 	public void setDeclarationTypeMap(Map<Integer, String> declarationTypeMap){
 		this.declarationTypeMap = declarationTypeMap;
-		/** .setValue(null) see
-		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
 		declarationTypeId.setValue(null);
 		declarationTypeId.setAcceptableValues(declarationTypeMap.keySet());
 	}

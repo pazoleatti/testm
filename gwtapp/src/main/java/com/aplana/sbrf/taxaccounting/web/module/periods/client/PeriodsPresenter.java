@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
@@ -15,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.web.module.periods.client.deadlinedialog.De
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreated;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog.OpenDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -27,9 +31,6 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, PeriodsPresenter.MyProxy>
 								implements PeriodsUiHandlers, PeriodCreated.OpenPeriodHandler {
@@ -53,6 +54,9 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		Integer getToYear();
         DepartmentPair getDepartmentId();
 		TableRow getSelectedRow();
+		boolean isFromYearEmpty();
+		boolean isToYearEmpty();
+        void setCanChangeDepartment(boolean canChange);
 		void setReadOnly(boolean readOnly);
 	}
 
@@ -107,17 +111,25 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
 	@Override
 	public void openPeriod() {
+        DepartmentPair departmentPair = getView().getDepartmentId();
+        if (departmentPair == null) {
+            MessageEvent.fire(this, "Не выбрано подразделение!");
+            return;
+        }
         openDialogPresenter.resetToDefault();
-        openDialogPresenter.setSelectedDepartment(getView().getDepartmentId().getDepartmentId());
+        openDialogPresenter.setSelectedDepartment(departmentPair.getDepartmentId());
+        openDialogPresenter.setYear(getView().getFromYear());
         addToPopupSlot(openDialogPresenter);
 	}
 
 	@Override
 	public void onFindButton() {
-		if ((getView().getFromYear() == null)
+        if (getView().getDepartmentId() == null) {
+            Dialog.warningMessage("Не выбрано подразделение!");
+        } else if ((getView().getFromYear() == null)
 				|| (getView().getToYear() == null)
 				|| (getView().getFromYear() > getView().getToYear())){
-            Dialog.warningMessage("Интервал периода поиска указан неверно!");
+			Dialog.warningMessage("Интервал периода поиска указан неверно!");
 		} else {
 			find();
 		}
@@ -127,6 +139,11 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
     public void setDeadline() {
         if (getView().getSelectedRow() == null) {
             MessageEvent.fire(this, "В списке не выбран отчетный период");
+            return;
+        }
+        final DepartmentPair departmentPair = getView().getDepartmentId();
+        if (departmentPair == null) {
+            MessageEvent.fire(this, "Не выбрано подразделение!");
             return;
         }
 
@@ -139,7 +156,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
                     public void onSuccess(PeriodsGetFilterDataResult result) {
                         TableRow selectedPeriod = getView().getSelectedRow();
                         PeriodsPresenter.this.deadlineDialogPresenter.setTitle(selectedPeriod.getPeriodName(), result.getCurrentYear());
-                        deadlineDialogPresenter.setDepartments(result.getDepartments(), Arrays.asList(getView().getDepartmentId()));
+                        deadlineDialogPresenter.setDepartments(result.getDepartments(), Arrays.asList(departmentPair));
                         deadlineDialogPresenter.setDeadLine(selectedPeriod.getDeadline());
                         deadlineDialogPresenter.setSelectedPeriod(selectedPeriod);
                         deadlineDialogPresenter.setTaxType(taxType);
@@ -149,7 +166,23 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         addToPopupSlot(deadlineDialogPresenter);
     }
 
-    public void find() {
+	@Override
+	public void removePeriod() {
+		RemovePeriodAction requestData = new RemovePeriodAction();
+		requestData.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
+		requestData.setTaxType(taxType);
+		requestData.setDepartmentId(getView().getSelectedRow().getDepartmentId());
+		dispatcher.execute(requestData, CallbackUtils
+				.defaultCallback(new AbstractCallback<RemovePeriodResult>() {
+					@Override
+					public void onSuccess(RemovePeriodResult result) {
+						find();
+						LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
+					}
+				}, PeriodsPresenter.this));
+	}
+
+	public void find() {
 		GetPeriodDataAction requestData = new GetPeriodDataAction();
 		requestData.setTaxType(taxType);
 		requestData.setFrom(getView().getFromYear());
@@ -180,8 +213,9 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 						getView().setTitle("Ведение периодов");
 						PeriodsPresenter.this.openDialogPresenter.setTaxType(result.getTaxType());
                         getView().setFilterData(result.getDepartments(), Arrays.asList(result.getSelectedDepartment()), result.getYearFrom(), result.getYearTo());
-						getView().setReadOnly(result.isReadOnly());
-						openDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment().getDepartmentId()), result.isEnableDepartmentPicker());
+                        getView().setCanChangeDepartment(result.canChangeDepartment());
+						openDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), true);
+						openDialogPresenter.setCanChangeDepartment(result.canChangeDepartment());
 						find();
 					}
 				}, PeriodsPresenter.this).addCallback(TaManualRevealCallback.create(this, this.placeManager))

@@ -27,14 +27,15 @@ public enum PeriodMapping implements Serializable {
     K_18("X", "y09", 34, -1),  //2009 год
     K_19("Y", "y10", 34, -1),  //2010 год
     K_20("Z", "y11", 34, -1),  //2011 год
-    K_21("+", "y12", 34, -1);  //2012 год
+    K_21("+", "y12", 34, -1),  //2012 год   - в XML для годового РНУ используется только этот
+    K_22("-", "y13", 34, -1);  //2013 год
 
     private static final long serialVersionUID = 1L;
 
-    private final String code;
-    private final String codeXml;
-    private final int dictTaxPeriodId;
-    private final int dictTaxPeriodIdForMonthly;
+    private final String code;                  // значения периода в названии файлов RNU
+    private final String codeXml;               // значения периодов в названии файлов XML
+    private final int dictTaxPeriodId;          // значение dictTaxPeriodId в новой системе
+    private final int dictTaxPeriodIdForMonthly;// значение dictTaxPeriodId если месяцный отчет
 
     private PeriodMapping(String code, String codeXml, int dictTaxPeriodId, int dictTaxPeriodIdForMonthly) {
         this.code = code;

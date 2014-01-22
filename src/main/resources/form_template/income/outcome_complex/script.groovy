@@ -3,6 +3,7 @@ package form_template.income.outcome_complex
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
@@ -13,6 +14,23 @@ import groovy.transform.Field
  * http://conf.aplana.com/pages/viewpage.action?pageId=8784122
  *
  * @author Stanislav Yasinskiy
+ *
+ * графа  1 - consumptionTypeId
+ * графа  2 - consumptionGroup
+ * графа  3 - consumptionTypeByOperation
+ * графа  4 - consumptionBuhSumAccountNumber
+ * графа  5 - consumptionBuhSumRnuSource
+ * графа  6 - consumptionBuhSumAccepted
+ * графа  7 - consumptionBuhSumPrevTaxPeriod
+ * графа  8 - consumptionTaxSumRnuSource
+ * графа  9 - consumptionTaxSumS
+ * графа 10 - rnuNo
+ * графа 11 - logicalCheck
+ * графа 12 - accountingRecords
+ * графа 13 - opuSumByEnclosure3
+ * графа 14 - opuSumByTableP
+ * графа 15 - opuSumTotal
+ * графа 16 - difference
  */
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -42,32 +60,48 @@ switch (formDataEvent) {
             calcTotal()
         }
         break
+    case FormDataEvent.IMPORT:
+        importData()
+        break
 }
 
-// графа  1 - consumptionTypeId
-// графа  2 - consumptionGroup
-// графа  3 - consumptionTypeByOperation
-// графа  4 - consumptionBuhSumAccountNumber
-// графа  5 - consumptionBuhSumRnuSource
-// графа  6 - consumptionBuhSumAccepted
-// графа  7 - consumptionBuhSumPrevTaxPeriod
-// графа  8 - consumptionTaxSumRnuSource
-// графа  9 - consumptionTaxSumS
-// графа 10 - rnuNo
-// графа 11 - logicalCheck
-// графа 12 - accountingRecords
-// графа 13 - opuSumByEnclosure3
-// графа 14 - opuSumByTableP
-// графа 15 - opuSumTotal
-// графа 16 - difference
 
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS']
 
+//Аттрибуты, очищаемые перед импортом формы
+@Field
+def resetColumns = ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS', 'logicalCheck',
+    'opuSumByEnclosure3', 'opuSumByTableP', 'opuSumTotal', 'difference']
+
 @Field
 def rowsCalc = ['R3','R4','R5','R6','R7','R8','R9','R10','R11','R12','R13','R14','R15','R16','R17','R1','R26','R27',
         'R28','R29', 'R30','R31','R32', 'R70','R71']
+
+// Получение xml с общими проверками
+def getXML(def String startStr, def String endStr) {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        throw new ServiceException('Имя файла не должно быть пустым')
+    }
+    def is = ImportInputStream
+    if (is == null) {
+        throw new ServiceException('Поток данных пуст')
+    }
+    if (!fileName.endsWith('.xls')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xls!')
+    }
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
+    if (xmlString == null) {
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        throw new ServiceException('Отсутствие значении после обработки потока данных')
+    }
+    return xml
+}
 
 //// Кастомные методы
 
@@ -345,4 +379,135 @@ def checkRequiredColumns(def row, def columns) {
         def errorMsg = colNames.join(', ')
         logger.error("Строка ${row.getIndex()}: не заполнены графы : $errorMsg.")
     }
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML('КНУ', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 10, 3)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): 'КНУ',
+            (xml.row[0].cell[1]): 'Группа расхода',
+            (xml.row[0].cell[2]): 'Вид расхода по операции',
+            (xml.row[0].cell[3]): 'Расход по данным бухгалтерского учёта',
+            (xml.row[0].cell[7]): 'Расход по данным налогового учёта',
+            (xml.row[1].cell[3]): 'номер счёта учёта',
+            (xml.row[1].cell[4]): 'источник информации в РНУ',
+            (xml.row[1].cell[5]): 'сумма',
+            (xml.row[1].cell[6]): 'в т.ч. учтено в предыдущих налоговых периодах',
+            (xml.row[1].cell[7]): 'источник информации в РНУ',
+            (xml.row[1].cell[8]): 'сумма',
+            (xml.row[1].cell[9]): 'форма РНУ',
+            (xml.row[2].cell[0]): '1',
+            (xml.row[2].cell[1]): '2',
+            (xml.row[2].cell[2]): '3',
+            (xml.row[2].cell[3]): '4',
+            (xml.row[2].cell[4]): '5',
+            (xml.row[2].cell[5]): '6',
+            (xml.row[2].cell[6]): '7',
+            (xml.row[2].cell[7]): '8',
+            (xml.row[2].cell[8]): '9',
+            (xml.row[2].cell[9]): '10'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def xmlIndexRow = -1
+    def int rowOffset = 3
+    def int colOffset = 0
+    def int maxRow = 93
+
+    def rows = dataRowHelper.allCached
+    def int rowIndex = 1
+    def knu
+    def group
+    //def type
+    def num
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // пропустить шапку таблицы
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+        // прервать по загрузке нужных строк
+        if (rowIndex > maxRow) {
+            break
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def curRow = getDataRow(rows, "R" + rowIndex)
+
+        //очищаем столбцы
+        resetColumns.each {
+            curRow[it] = null
+        }
+
+        knu = normalize(curRow.consumptionTypeId)
+        group = normalize(curRow.consumptionGroup)
+        //type = normalize(curRow.consumptionTypeByOperation)
+        num = normalize(curRow.consumptionBuhSumAccountNumber)
+
+        def xmlIndexCol = 0
+
+        def knuImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def groupImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        //def typeImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def numImport = normalize(row.cell[xmlIndexCol].text())
+
+        //если совпадают или хотя бы один из атрибутов не пустой и значения строк в файлах входят в значения строк в шаблоне,
+        //то продолжаем обработку строки иначе пропускаем строку
+        if (!((knu == knuImport && group == groupImport && num == numImport) ||
+                ((!knuImport.isEmpty() || !groupImport.isEmpty() || !numImport.isEmpty()) &&
+                        knu.contains(knuImport) && group.contains(groupImport) && num.contains(numImport)))) {
+            continue
+        }
+        rowIndex++
+
+        xmlIndexCol = 5
+
+        // графа 6
+        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
+            curRow.consumptionBuhSumAccepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        }
+        xmlIndexCol++
+
+        // графа 7
+        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
+            curRow.consumptionBuhSumPrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        }
+        xmlIndexCol++
+
+        // графа 8
+        xmlIndexCol++
+
+        // графа 9
+        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
+            curRow.consumptionTaxSumS = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        }
+
+    }
+    if (rowIndex < maxRow) {
+        logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
+    }
+    dataRowHelper.update(rows)
 }

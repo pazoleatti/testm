@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetNameAction;
@@ -31,17 +33,18 @@ public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetName
 		String name = refBookFactory.get(action.getRefBookId()).getName();
 		GetNameResult result = new GetNameResult();
 		result.setName(name);
+        RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
 
-        if (action.getRecordId() != null) {
+        if (action.getUniqueRecordId() != null) {
             //Получение значений уникальных параметров
-            RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
-            List<RefBookValue> values = refBookDataProvider.getUniqueAttributeValues(action.getRecordId());
+            List<Pair<RefBookAttribute, RefBookValue>> values = refBookDataProvider.getUniqueAttributeValues(action.getUniqueRecordId());
 
             StringBuilder uniqueValues = new StringBuilder();
 
             for(int i = 0; i < values.size(); i++) {
-                RefBookValue value = values.get(i);
-                switch (value.getAttributeType()) {
+                RefBookAttribute attribute = values.get(i).getFirst();
+                RefBookValue value = values.get(i).getSecond();
+                switch (attribute.getAttributeType()) {
                     case NUMBER:
                         if (value.getNumberValue() != null) {
                             uniqueValues.append(value.getNumberValue().toString());
@@ -58,11 +61,11 @@ public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetName
                         }
                         break;
                     case REFERENCE:
-                        uniqueValues.append("caramba");//TODO
-                        /*if (value.getReferenceValue() != null) {
-                            Map<String, RefBookValue> refValue = refProviders.get(attribute.getAlias()).getRecordData(value.getReferenceValue());
-                            tableCell = refValue.get(refAliases.get(attribute.getAlias())).toString();
-                        }*/
+                        if (value.getReferenceValue() != null) {
+                            RefBookDataProvider referenceDataProvider = refBookFactory.getDataProvider(attribute.getRefBookId());
+                            Map<String, RefBookValue> refValue = referenceDataProvider.getRecordData(value.getReferenceValue());
+                            uniqueValues.append(refValue.get(attribute.getAlias()).toString());
+                        }
                         break;
                     default:
                         uniqueValues.append("undefined");
@@ -73,6 +76,8 @@ public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetName
                 }
             }
             result.setUniqueAttributeValues(uniqueValues.toString());
+            Long recordId = refBookDataProvider.getRecordId(action.getUniqueRecordId());
+            result.setRecordId(recordId);
         }
 
 		return result;

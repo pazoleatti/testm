@@ -65,6 +65,7 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 	public void suspendAccount(String accountId)
 			throws GenericAccountManagementException_Exception {
 		try {
+            validationService.validate(userService.getUser(accountId));
 			userService.setUserIsActive(accountId, false);
             TAUserInfo userInfo = getUserInfo();
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
@@ -113,6 +114,7 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 		
 		try {
 			TAUser user = gais.assembleUser(accountInfo);
+            validationService.validate(userService.getUser(user.getLogin()));
 			userService.updateUser(user);
             TAUserInfo userInfo = getUserInfo();
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
@@ -133,7 +135,9 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 
 	public void restoreAccount(String accountId)
 			throws GenericAccountManagementException_Exception {
-		try {
+
+        try {
+            validationService.validate(userService.getUser(accountId));
 			userService.setUserIsActive(accountId, true);
             TAUserInfo userInfo = getUserInfo();
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
@@ -178,7 +182,9 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 		List<GenericAccountInfo> listUsersByLogin = new ArrayList<GenericAccountInfo>();
 		try {
 			List<TAUser> listTAUsersByLogin = new ArrayList<TAUser>();
-			listTAUsersByLogin.add(userService.getUser(accountId));
+			TAUser user = userService.getUser(accountId.toLowerCase());
+			validationService.validate(user);
+			listTAUsersByLogin.add(user);
 			listUsersByLogin.addAll(gais.desassembleUsers(listTAUsersByLogin));
             TAUserInfo userInfo = getUserInfo();
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,

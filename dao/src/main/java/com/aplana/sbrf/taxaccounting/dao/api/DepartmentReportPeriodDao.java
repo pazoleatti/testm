@@ -47,6 +47,20 @@ public interface DepartmentReportPeriodDao {
 	 * @return
 	 */
 	DepartmentReportPeriod get(int reportPeriodId, Long departmentId);
+
+	/**
+	 * Удалить период
+	 * @param reportPeriodId идентификатор отчетного периода
+	 * @param departmentId подразделение, для которого удаляется период
+	 */
+	void delete(int reportPeriodId, Integer departmentId);
+
+	/**
+	 * Проверяет существование периода для подразделения
+	 * @param departmentId подразделение, для которого осуществляется проверка существования периода
+	 * @return true - существует, false - не существует
+	 */
+	boolean existForDepartment(Integer departmentId, long reportPeriodId);
 	
 
 	

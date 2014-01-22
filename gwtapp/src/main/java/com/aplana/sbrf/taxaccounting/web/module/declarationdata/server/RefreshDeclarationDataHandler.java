@@ -16,7 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class RefreshDeclarationDataHandler extends AbstractActionHandler<RefreshDeclarationDataAction, RefreshDeclarationDataResult> {
 	@Autowired
 	private DeclarationDataService declarationDataService;

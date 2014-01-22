@@ -92,4 +92,24 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 								mapper));
 	}
 
+	@Override
+	public void delete(int reportPeriodId, Integer departmentId) {
+		getJdbcTemplate().update(
+				"delete from department_report_period where department_id = ? and report_period_id = ?",
+				new Object[] {departmentId, reportPeriodId},
+				new int[] {Types.NUMERIC, Types.NUMERIC}
+		);
+	}
+
+	@Override
+	public boolean existForDepartment(Integer departmentId, long reportPeriodId) {
+		Integer count = getJdbcTemplate().queryForInt(
+				"select count(*) from department_report_period where department_id = ? and report_period_id = ?",
+				new Object[] {departmentId, reportPeriodId},
+				new int[] {Types.NUMERIC, Types.NUMERIC}
+		) ;
+
+		return count != 0;
+	}
+
 }

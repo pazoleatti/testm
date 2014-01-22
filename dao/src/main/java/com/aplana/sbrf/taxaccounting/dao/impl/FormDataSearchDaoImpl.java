@@ -65,6 +65,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		if (filter.getAccessFilterType() == AccessFilterType.USER_DEPARTMENT) {
 			sql.append(" and fd.department_id = ").append(filter.getUserDepartmentId());
 		} else if (filter.getAccessFilterType() == AccessFilterType.USER_DEPARTMENT_AND_SOURCES) {
+           // TODO USER_DEPARTMENT_AND_SOURCES для роли "Контролер НС" должна быть реализована по-другому. Постановка не готова http://conf.aplana.com/pages/viewpage.action?pageId=11382061
 			// Форма либо сама относится к подразделению пользователя
 			sql.append(" and (fd.department_id = ").append(filter.getUserDepartmentId())
 			// Либо является источником для одной из форм подразделения пользователя
@@ -196,6 +197,4 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		appendFromAndWhereClause(sql, filter);
 		return getJdbcTemplate().queryForInt(sql.toString());
 	}
-
-
 }

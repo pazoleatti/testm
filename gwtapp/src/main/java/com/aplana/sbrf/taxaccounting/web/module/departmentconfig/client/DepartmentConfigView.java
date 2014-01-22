@@ -5,6 +5,7 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
@@ -527,6 +528,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
         updateVisibility();
         reloadDepartmentParams();
+        resetRefBookWidgetsDatePeriod(currentReportPeriodId);
     }
 
     @Override
@@ -577,6 +579,25 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             okvedCode.setDereferenceValue(rbTextValues.get(okvedCode.getAttributeId()));
             type.setDereferenceValue(rbTextValues.get(type.getAttributeId()));
         }
+    }
+
+    @Override
+    public void resetRefBookWidgetsDatePeriod(Integer reportPeriodId) {
+        Date startDate = null;
+        Date endDate = null;
+        Pair<Date, Date> dates = periodPickerPopup.getPeriodDates(reportPeriodId);
+        if (dates != null) {
+            startDate = dates.getFirst();
+            endDate = dates.getSecond();
+        }
+        dictRegionId.setPeriodDates(startDate, endDate);
+        reorgFormCode.setPeriodDates(startDate, endDate);
+        signatoryId.setPeriodDates(startDate, endDate);
+        taxPlaceTypeCode.setPeriodDates(startDate, endDate);
+        obligation.setPeriodDates(startDate, endDate);
+        okato.setPeriodDates(startDate, endDate);
+        okvedCode.setPeriodDates(startDate, endDate);
+        type.setPeriodDates(startDate, endDate);
     }
 
     @Override

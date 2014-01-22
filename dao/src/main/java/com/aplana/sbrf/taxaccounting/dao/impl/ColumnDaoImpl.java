@@ -11,7 +11,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,16 +19,10 @@ import java.sql.Types;
 import java.util.*;
 
 @Repository
-@Transactional(readOnly=true)
 public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
     @Autowired
     private BDUtils bdUtils;
-
-    @Override
-    public void setDbUtils(BDUtils bdUtils) {
-        this.bdUtils = bdUtils;
-    }
 
 	private final static class ColumnMapper implements RowMapper<Column> {
 		public Column mapRow(ResultSet rs, int index) throws SQLException {
@@ -80,7 +73,6 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		);
 	}
 
-	@Transactional(readOnly = false)
 	@Override
 	public void saveFormColumns(final FormTemplate form) {
 		final Logger log = new Logger();

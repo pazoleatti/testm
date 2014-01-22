@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static java.util.Arrays.asList;
+
 @Service
 public class FormDataSearchServiceImpl implements FormDataSearchService {
 
@@ -59,7 +61,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			result.setDepartmentIds(null);
 			
 			List<FormDataKind> kinds = new ArrayList<FormDataKind>(FormDataKind.values().length);
-			kinds.addAll(Arrays.asList(FormDataKind.values()));
+			kinds.addAll(asList(FormDataKind.values()));
 			if (taxType != TaxType.INCOME) {
 				// Выходные формы и формы УНП существуют только для налога на прибыль
 				kinds.remove(FormDataKind.ADDITIONAL);
@@ -74,37 +76,38 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			return result;
 		}
 		
-		if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL) && !userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
+		if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                && !userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
 			throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
 		}
 		
 		// Собираем информацию о налоговых формах к которым имеет доступ пользователь
 		// К формам своего подразделения имеет доступ и контролёр и оператор
-		List<DepartmentFormType> dfts = sourceService.getDFTByDepartment(userInfo.getUser().getDepartmentId(), taxType);
-		
-		// Контролёр, вдобавок, имеет доступ к формам, которые являются источниками для форм и деклараций его подразделения 
-		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
-			dfts.addAll(sourceService.getDFTSourcesByDepartment(userInfo.getUser().getDepartmentId(), taxType));
+		Set<DepartmentFormType> dfts = new HashSet(sourceService.getDFTByDepartment(
+                userInfo.getUser().getDepartmentId(), taxType));
+
+		// TODO Исправить после появления обновленной постановки на форму в 0.3.5 http://conf.aplana.com/pages/viewpage.action?pageId=11382061
+		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
+			 dfts.addAll(sourceService.getDFTSourcesByDepartment(userInfo.getUser().getDepartmentId(), taxType));
 		}
-		
+
 		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();
 		Set<Integer> departmentIds = new HashSet<Integer>();
 		Set<FormDataKind> kinds = new HashSet<FormDataKind>();
-		for (DepartmentFormType dft: dfts) {
-			int formTypeId = dft.getFormTypeId();
+        for (DepartmentFormType dft : dfts) {
+            int formTypeId = dft.getFormTypeId();
 			if (!formTypes.containsKey(formTypeId)) {
+                // TODO Очень неоптимально. Надо переписать.
 				formTypes.put(formTypeId, formTypeDao.get(formTypeId));
 			}
-			
+
 			kinds.add(dft.getKind());
 			departmentIds.add(dft.getDepartmentId());
 		}
 
-		// Подразделение пользователя должно быть доступно
-		// Этот викс пришлось сделать для Ведения периодов.
-		// Для поиска форм департаметнт текущего подразделения сюда попадает, т.к. ему должны быть назначены формы. 
-		// А если они не назначены?
-		departmentIds.add(userInfo.getUser().getDepartmentId());
+        // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
+        departmentIds.addAll(departmentService.getTaxFormDepartments(userInfo.getUser(), asList(taxType)));
 
 		result.setDepartmentIds(departmentIds);
 		
@@ -134,22 +137,22 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 
         if(formDataFilter.getFormDataKind() == null){
             FormDataKind[] formDataKinds = FormDataKind.values();
-            formDataDaoFilter.setFormDataKind(Arrays.asList(formDataKinds));
+            formDataDaoFilter.setFormDataKind(asList(formDataKinds));
         } else {
-            formDataDaoFilter.setFormDataKind(Arrays.asList(formDataFilter.getFormDataKind()));
+            formDataDaoFilter.setFormDataKind(asList(formDataFilter.getFormDataKind()));
         }
 
         if(formDataFilter.getFormTypeId() == null){
             formDataDaoFilter.setFormTypeIds(null);
         } else {
-            formDataDaoFilter.setFormTypeIds(Arrays.asList(formDataFilter.getFormTypeId()));
+            formDataDaoFilter.setFormTypeIds(asList(formDataFilter.getFormTypeId()));
         }
 
         if(formDataFilter.getFormState() == null){
             WorkflowState[] formStates = WorkflowState.values();
-            formDataDaoFilter.setStates(Arrays.asList(formStates));
+            formDataDaoFilter.setStates(asList(formStates));
         } else {
-            formDataDaoFilter.setStates(Arrays.asList(formDataFilter.getFormState()));
+            formDataDaoFilter.setStates(asList(formDataFilter.getFormState()));
         }
 
         formDataDaoFilter.setReturnState(formDataFilter.getReturnState());
@@ -158,17 +161,16 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
             //В текущей реализации мы всегда идем по ветке else и сюда не попадаем, но  данное условие
             //добавлено, на случай, если в дальнейщем будет функциональность выбора по всем типам налога.
             TaxType[] taxTypes = TaxType.values();
-            formDataDaoFilter.setTaxTypes(Arrays.asList(taxTypes));
+            formDataDaoFilter.setTaxTypes(asList(taxTypes));
         } else {
-            formDataDaoFilter.setTaxTypes(Arrays.asList(formDataFilter.getTaxType()));
+            formDataDaoFilter.setTaxTypes(asList(formDataFilter.getTaxType()));
         }
-
         // Добавляем условия для отбрасывания форм, на которые у пользователя нет прав доступа
         // Эти условия должны быть согласованы с реализацией в FormDataAccessServiceImpl
         formDataDaoFilter.setUserDepartmentId(userInfo.getUser().getDepartmentId());
         if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
             formDataDaoFilter.setAccessFilterType(AccessFilterType.ALL);
-        } else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
+        } else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
             formDataDaoFilter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT_AND_SOURCES);
         } else if (userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
             formDataDaoFilter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT);

@@ -19,8 +19,7 @@ public class PeriodsGetFilterDataResult implements Result {
 	private List<Department> departments;
 	private Set<Integer> avalDepartments;
 	private DepartmentPair selectedDepartment;
-	private boolean enableDepartmentPicker;
-	private boolean readOnly;
+    private boolean canChangeDepartment;
 
     public PeriodsGetFilterDataResult(){
 
@@ -33,10 +32,6 @@ public class PeriodsGetFilterDataResult implements Result {
     public void setDepartments(List<Department> departments) {
         this.departments = departments;
     }
-
-	public ReportPeriod getCurrentReportPeriod() {
-		return currentReportPeriod;
-	}
 
 	public void setCurrentReportPeriod(ReportPeriod currentReportPeriod) {
 		this.currentReportPeriod = currentReportPeriod;
@@ -58,23 +53,6 @@ public class PeriodsGetFilterDataResult implements Result {
 		this.yearTo = yearTo;
 	}
 
-	public int getCurrentYear() {
-		return currentYear;
-	}
-
-	public void setCurrentYear(int currentYear) {
-		this.currentYear = currentYear;
-	}
-
-
-	public boolean isEnableDepartmentPicker() {
-		return enableDepartmentPicker;
-	}
-
-	public void setEnableDepartmentPicker(boolean enableDepartmentPicker) {
-		this.enableDepartmentPicker = enableDepartmentPicker;
-	}
-
 	public Set<Integer> getAvalDepartments() {
 		return avalDepartments;
 	}
@@ -91,19 +69,27 @@ public class PeriodsGetFilterDataResult implements Result {
 		this.selectedDepartment = selectedDepartment;
 	}
 
-	public boolean isReadOnly() {
-		return readOnly;
-	}
-
-	public void setReadOnly(boolean readOnly) {
-		this.readOnly = readOnly;
-	}
-
 	public TaxType getTaxType() {
 		return taxType;
 	}
 
 	public void setTaxType(TaxType taxType) {
 		this.taxType = taxType;
+	}
+
+    public boolean canChangeDepartment() {
+        return canChangeDepartment;
+    }
+
+    public void setCanChangeDepartment(boolean canChangeDepartment) {
+        this.canChangeDepartment = canChangeDepartment;
+    }
+
+	public int getCurrentYear() {
+		return currentYear;
+	}
+
+	public void setCurrentYear(int currentYear) {
+		this.currentYear = currentYear;
 	}
 }

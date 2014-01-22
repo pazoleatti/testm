@@ -20,9 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.NumberFormat;
 import java.text.ParsePosition;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author sgoryachkin
@@ -49,18 +47,16 @@ public class GetRefBookValuesHandler extends
 		RefBook refBook = refBookFactory.getByAttribute(action
 				.getRefBookAttrId());
 
-		RefBookAttribute sortAttribute = refBook.getAttributes().iterator()
-				.next();
+        RefBookAttribute sortAttribute = getRefBookAttributeById(refBook, action.getSortAttributeIndex());
 
-		RefBookDataProvider refBookDataProvider = refBookFactory
-				.getDataProvider(refBook.getId());
+		RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
 
 		String filter = buildFilter(action.getFilter(),
 				action.getSearchPattern(), refBook);
 
 		PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider
 				.getRecords(action.getVersion(), action.getPagingParams(),
-						filter, sortAttribute);
+						filter, sortAttribute, action.isSortAscending());
 
 		GetRefBookValuesResult result = new GetRefBookValuesResult();
 		result.setPage(asseblRefBookPage(action, refBookDataProvider,
@@ -75,6 +71,17 @@ public class GetRefBookValuesHandler extends
 		//
 
 	}
+
+    private RefBookAttribute getRefBookAttributeById(RefBook refBook, int attributeId){
+        int i = 0;
+        for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
+            if (refBookAttribute.isVisible() && i++ == attributeId) {
+                return refBookAttribute;
+            }
+        }
+        return null;
+    }
+
 
 	private static String buildFilter(String filter, String serachPattern,
 			RefBook refBook) {
@@ -135,9 +142,12 @@ public class GetRefBookValuesHandler extends
 
 		for (Map<String, RefBookValue> record : refBookPage) {
 			RefBookItem item = new RefBookItem();
-			List<String> values = new ArrayList<String>();
+            // соответсвие гарантируется LinkedList'ом
+			List<String> values = new LinkedList<String>();
+            List<Long> valuesAttrId = new LinkedList<Long>();
+            List<String> valuesAttrAlias = new LinkedList<String>();
 
-			item.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue()
+			item.setId(record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue()
 					.longValue());
 			List<RefBookAttribute> attribute = refBook.getAttributes();
 
@@ -149,13 +159,17 @@ public class GetRefBookValuesHandler extends
 						.get(refBookAttribute.getAlias());
 				if (refBookAttribute.isVisible()) {
 					values.add(dereferanceValue);
+                    valuesAttrId.add(refBookAttribute.getId());
+                    valuesAttrAlias.add(refBookAttribute.getAlias());
 				}
 				if (refBookAttribute.getId().equals(action.getRefBookAttrId())) {
 					item.setDereferenceValue(dereferanceValue);
 				}
 
 			}
-			item.setValues(values);
+            item.setValues(values);
+            item.setValuesAttrId(valuesAttrId);
+            item.setValuesAttrAlias(valuesAttrAlias);
 			items.add(item);
 		}
 

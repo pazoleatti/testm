@@ -53,5 +53,4 @@ public interface DepartmentDeclarationTypeDao {
      * Удаляет назначение декларации
      */
     void delete(Long id);
-
 }

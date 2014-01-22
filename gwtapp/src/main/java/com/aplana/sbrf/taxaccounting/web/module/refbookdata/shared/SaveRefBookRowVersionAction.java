@@ -13,7 +13,6 @@ public class SaveRefBookRowVersionAction extends UnsecuredActionImpl<SaveRefBook
 	Map<String, RefBookValueSerializable> valueToSave;
     Date versionFrom;
     Date versionTo;
-    boolean relevancePeriodChanged;
 
 	public Long getRefBookId() {
 		return refBookId;
@@ -53,14 +52,6 @@ public class SaveRefBookRowVersionAction extends UnsecuredActionImpl<SaveRefBook
 
     public void setVersionTo(Date versionTo) {
         this.versionTo = versionTo;
-    }
-
-    public boolean isRelevancePeriodChanged() {
-        return relevancePeriodChanged;
-    }
-
-    public void setRelevancePeriodChanged(boolean relevancePeriodChanged) {
-        this.relevancePeriodChanged = relevancePeriodChanged;
     }
 
     @Override

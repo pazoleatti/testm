@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -44,6 +45,7 @@ public class PrintingServiceImplTest {
         ReportPeriod rp =  new ReportPeriod();
         TaxPeriod taxPeriod = new TaxPeriod();
         taxPeriod.setStartDate(new Date());
+		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
         rp.setTaxPeriod(taxPeriod);
         rp.setName("1 квартал");
         item.setReportPeriod(rp);

@@ -2,10 +2,10 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,20 +15,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Arrays.asList;
+
 /**
  * Реализация сервиса для проверки прав на доступ к декларациям
  * 
  * @author dsultanbekov
  */
 @Service
-public class DeclarationDataAccessServiceImpl implements
-		DeclarationDataAccessService {
+public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessService {
 
 	@Autowired
 	private DeclarationTemplateDao declarationTemplateDao;
 
-	@Autowired
-	private DepartmentDao departmentDao;
+    @Autowired
+    private DepartmentService departmentService;
 
 	@Autowired
 	private DeclarationDataDao declarationDataDao;
@@ -54,7 +55,7 @@ public class DeclarationDataAccessServiceImpl implements
 	 */
 	private void checkRolesForReading(TAUserInfo userInfo,
 			int declarationDepartmentId, int reportPeriodId) {
-		Department declarationDepartment = departmentDao.getDepartment(declarationDepartmentId);
+		Department declarationDepartment = departmentService.getDepartment(declarationDepartmentId);
 		checkRolesForReading(userInfo, declarationDepartment, reportPeriodId);
 	}
 
@@ -73,32 +74,32 @@ public class DeclarationDataAccessServiceImpl implements
 	 *            подразделение, к которому относится декларация
 	 * @param reportPeriodId
 	 *            код отчетного периода
-	 * @return true - права есть, false - прав нет
 	 */
-	private void checkRolesForReading(TAUserInfo userInfo,
-			Department declarationDepartment, int reportPeriodId) {
-
-		// Нельзя работать с декларациями в отчетном периоде вида
-		// "ввод остатков"
+	private void checkRolesForReading(TAUserInfo userInfo, Department declarationDepartment, int reportPeriodId) {
+		// Нельзя работать с декларациями в отчетном периоде вида "ввод остатков"
 		if (reportPeriodService.isBalancePeriod(reportPeriodId, Long.valueOf(declarationDepartment.getId()))) {
 			throw new AccessDeniedException("Декларация в отчетном периоде вида для ввода остатков");
 		}
+
+        // Выборка для доступа к экземплярам деклараций
+        // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
 
 		// Контролёр УНП может просматривать все декларации
 		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
 			return;
 		}
 
+        // Контролёр или Контролёр НС
+        if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
+            ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
+            if (reportPeriod != null && departmentService.getTaxFormDepartments(userInfo.getUser(),
+                    asList(reportPeriod.getTaxType())).contains(declarationDepartment.getId())) {
+                return;
+            }
+        }
 
-		// Обычный контролёр может просматривать декларации либо только в своём
-		// обособленном подразделении, либо все декларации если он находится в головном подразделении
-        // http://jira.aplana.com/browse/SBRFACCTAX-4474
-		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-				&& (userInfo.getUser().getDepartmentId() == declarationDepartment.getId()
-				|| Department.ROOT_BANK_ID ==userInfo.getUser().getDepartmentId())) {
-			return;
-		}
-		throw new AccessDeniedException("Нет прав на доступ к декларации");
+        // Прочие
+        throw new AccessDeniedException("Нет прав на доступ к декларации");
 	}
 
 	private void canRead(TAUserInfo userInfo, long declarationDataId) {
@@ -175,15 +176,16 @@ public class DeclarationDataAccessServiceImpl implements
 		if (declaration.isAccepted()) {
 			throw new AccessDeniedException("Декларация не должна быть принята");
 		}
-		// Обновлять декларацию могут только контолёр текущего уровня и
+
+        // Обновлять декларацию могут только контолёр текущего уровня и
 		// контролёр УНП
 		checkRolesForReading(userInfo, declaration.getDepartmentId(),
-				declaration.getReportPeriodId());
+                declaration.getReportPeriodId());
 	}
 
 	@Override
-	public void checkEvents(TAUserInfo userInfo, Long declarationDataId,
-			FormDataEvent... scriptEvents) {
+	public void checkEvents(TAUserInfo userInfo, Long declarationDataId, FormDataEvent... scriptEvents) {
+        // TODO Оптимизировать http://jira.aplana.com/browse/SBRFACCTAX-5412
 		for (FormDataEvent scriptEvent : scriptEvents) {
 			switch (scriptEvent) {
 			case MOVE_CREATED_TO_ACCEPTED:
@@ -203,8 +205,7 @@ public class DeclarationDataAccessServiceImpl implements
 				canRefresh(userInfo, declarationDataId);
 				break;
 			default:
-				throw new AccessDeniedException(
-						"Операция не предусмотрена в системе");
+				throw new AccessDeniedException("Операция не предусмотрена в системе");
 			}
 		}
 	}
@@ -219,8 +220,7 @@ public class DeclarationDataAccessServiceImpl implements
 				canCreate(userInfo, declarationTemplateId, departmentId, reportPeriodId);
 				break;
 			default:
-				throw new AccessDeniedException(
-						"Операция не предусмотрена в системе");
+				throw new AccessDeniedException("Операция не предусмотрена в системе");
 			}
 		}
 	}
@@ -255,5 +255,4 @@ public class DeclarationDataAccessServiceImpl implements
 		}
 		return result;
 	}
-
 }

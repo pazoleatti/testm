@@ -128,6 +128,11 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Override
     public void consolidationSimple(FormData formData, int departmentId, Logger logger) {
+        consolidationTotal(formData, departmentId, logger, null);
+    }
+
+    @Override
+    public void consolidationTotal(FormData formData, int departmentId, Logger logger, List<String> totalAliases){
         DataRowHelper dataRowHelper = getDataRowHelper(formData);
         // Новый список строк
         List<DataRow<Cell>> rows = new LinkedList<DataRow<Cell>>();
@@ -166,6 +171,24 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
                 }
             }
         }
+
+        // Добавление итоговых строк
+        if (totalAliases != null) {
+            for (DataRow<Cell> row : dataRowHelper.getAllCached()) {
+                for (int i=0;i<totalAliases.size();i++) {
+                    String alias = totalAliases.get(i);
+                    if (alias.equals(row.getAlias())) {
+                        rows.add(row);
+                        totalAliases.remove(alias);
+                        i--;
+                    }
+                }
+            }
+            for (String alias : totalAliases) {
+                throw new IllegalArgumentException("Wrong row alias requested: " + alias);
+            }
+        }
+
         dataRowHelper.save(rows);
         if (logger != null) {
             logger.info(COMPOSE_SUCCESS);
@@ -281,7 +304,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
                     return refBookCache.get(recordId);
                 } else {
                     Map<String, RefBookValue> retVal = new HashMap<String, RefBookValue>();
-                    retVal.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId));
+                    retVal.put(RefBook.RECORD_UNIQUE_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId));
                     return retVal;
                 }
             }
@@ -294,7 +317,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         PagingResult<Map<String, RefBookValue>> records = provider.getRecords(date, null, filter, null);
         if (records.size() == 1) {
             Map<String, RefBookValue> retVal = records.get(0);
-            Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
+            Long recordId = retVal.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue();
             recordCache.get(refBookId).put(dateStr + filter, recordId);
             if (refBookCache != null) {
                 refBookCache.put(recordId, retVal);
@@ -336,7 +359,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         Map<String, RefBookValue> record = getRefBookRecord(refBookId, recordCache, providerCache, alias, value, date);
 
         if (record != null) {
-            Long retVal = record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
+            Long retVal = record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue();
             if (retVal != null) {
                 return retVal;
             }
@@ -358,7 +381,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         Map<String, RefBookValue> record = getRefBookRecord(refBookId, recordCache, providerCache, alias, value, date);
 
         if (record != null) {
-            Long retVal = record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
+            Long retVal = record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue();
             if (retVal != null) {
                 return retVal;
             }

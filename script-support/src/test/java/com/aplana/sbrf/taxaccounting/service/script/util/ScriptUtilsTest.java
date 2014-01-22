@@ -161,6 +161,25 @@ public class ScriptUtilsTest {
         ScriptUtils.parseDate("Hello", "dd.MM.yyyy", 1, 1, null, true);
     }
 
+    @Test
+    public void normalizeTest() {
+        String str1 = null;
+        String str2 = "  ";
+        String str3 = "x";//икс
+        String str4 = "  х  ";//х
+        String str5 = "a  b  c   d";
+        String str6 = "  a  b  c ч  d";
+        String str7 = "  a\n  b  c ч  d";
+
+        Assert.assertEquals(ScriptUtils.normalize(str1), "");
+        Assert.assertEquals(ScriptUtils.normalize(str2), "");
+        Assert.assertEquals(ScriptUtils.normalize(str3), "");
+        Assert.assertEquals(ScriptUtils.normalize(str4), "");
+        Assert.assertEquals(ScriptUtils.normalize(str5), "a b c d");
+        Assert.assertEquals(ScriptUtils.normalize(str6), "a b c ч d");
+        Assert.assertEquals(ScriptUtils.normalize(str7), "a b c ч d");
+    }
+
 /*
     @Test
 	public void summBDTest() {

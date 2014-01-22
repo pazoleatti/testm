@@ -767,4 +767,44 @@ public final class ScriptUtils {
             }
         }
     }
+
+    /**
+     * Приводит текст к удобному для сравнения виду (обрезает, убирает лишние пробелы, если остается только крестик, то заменяет на пустую строку)
+     * @param value
+     * @return
+     */
+    public static String normalize(String value) {
+        if (value == null) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder(value.trim());
+        replace(builder,"\n"," ", false);
+        replace(builder,"  "," ", true);
+        replace(builder,"«","\"", true);
+        replace(builder,"»","\"", true);
+        String returnValue = builder.toString();
+        if (returnValue.equals("x") || returnValue.equals("х")) {//если x или икс
+            return "";
+        }
+        return returnValue;
+    }
+
+    /**
+     * Заменяет в строке вхождения одних на другие
+     * @param builder исходная строка
+     * @param from заменяемая строка
+     * @param to заменяющая строка
+     * @param recursive делать ли повторные замены
+     */
+    private static void replace(StringBuilder builder, String from, String to, boolean recursive) {
+        int index = builder.indexOf(from);
+        while (index != -1) {
+            builder.replace(index, index + from.length(), to);
+            if (!recursive){
+                index+=to.length();
+            }
+            index = builder.indexOf(from, index);
+        }
+
+    }
 }

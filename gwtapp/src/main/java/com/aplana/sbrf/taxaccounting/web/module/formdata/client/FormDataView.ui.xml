@@ -118,8 +118,8 @@
 
     <ui:style field="lockInformationStyle">
         .lockInformation {
-            height: 25px;
-            line-height: 25px;
+            height: 25px;   /*@see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataView.LOCK_INFO_BLOCK_HEIGHT*/
+            line-height: 24px;
             background: #FFDC82;
             padding-left: 15px;
             margin: 2px;

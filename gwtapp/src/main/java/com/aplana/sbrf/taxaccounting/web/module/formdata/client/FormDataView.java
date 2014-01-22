@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.StyleElement;
 import com.google.gwt.dom.client.TableCellElement;
@@ -117,6 +118,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     private final static int DEFAULT_TABLE_TOP_POSITION = 104;
     private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
+    private final static int LOCK_INFO_BLOCK_HEIGHT = 25;
 
     @Inject
 	public FormDataView(final Binder binder) {
@@ -194,9 +196,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 				formDataTable.addColumn(tableCol, col.getName());
 				((DataRowColumn<?>)tableCol).addCellModifiedEventHandler(new CellModifiedEventHandler() {
 					@Override
-					public void onCellModified(CellModifiedEvent event) {
-						if(getUiHandlers()!=null){
-							getUiHandlers().onCellModified(event.getDataRow());
+					public void onCellModified(CellModifiedEvent event, boolean withReference) {
+                        if (getUiHandlers() != null) {
+                            getUiHandlers().onCellModified(event.getDataRow());
+                            // Зависимые ячейки - обновление всей строки
+                            if (withReference) {
+                                formDataTable.redrawRow(event.getDataRow().getIndex() - 1);
+                            }
 						}
 					}
 				});
@@ -473,13 +479,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
      */
     private void changeTableTopPosition(Boolean isLockInfoVisible){
         Style formDataTableStyle = formDataTable.getElement().getStyle();
+        int downShift = 0;
         if (isLockInfoVisible){
-            formDataTableStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION + lockInformation.getOffsetHeight(), Style.Unit.PX);
-            formDataTable.onResize();
-        } else {
-            formDataTableStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION, Style.Unit.PX);
-            formDataTable.onResize();
-         }
+            downShift = LOCK_INFO_BLOCK_HEIGHT;
+        }
+        formDataTableStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION + downShift, Style.Unit.PX);
+        formDataTable.onResize();
     }
 
     /**
@@ -493,10 +498,17 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         reportPeriodLabel.getElement().getStyle().setPropertyPx("width", DEFAULT_REPORT_PERIOD_LABEL_WIDTH);
 
         // берется ширина ячейки в которой находится контейнер с информационном блоком формы
-        int width = centerBlock.getElement().getOffsetParent().getOffsetWidth() - 135;
-        if (width > 0) {
-            reportPeriodLabel.getElement().getStyle().setPropertyPx("width", width);
+        Element centerBlockParentElement = centerBlock.getElement().getParentElement();
+        if (centerBlockParentElement != null) {
+            Integer parentWidth = centerBlockParentElement.getOffsetWidth();
+            if (parentWidth != null) {
+                int width = parentWidth - 135;
+                if (width > 0) {
+                    reportPeriodLabel.getElement().getStyle().setPropertyPx("width", width);
+                }
+            }
         }
+
     }
 
 	@Override

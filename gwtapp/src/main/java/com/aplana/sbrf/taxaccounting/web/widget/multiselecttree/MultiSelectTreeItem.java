@@ -9,6 +9,8 @@ import com.google.gwt.user.client.ui.*;
 
 /**
  * Элемент дерева множественного выбора.
+ *
+ * @author rtimerbaev
  */
 public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
         HasDoubleClickHandlers, HasMouseDownHandlers, HasValue<Boolean> {

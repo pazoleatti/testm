@@ -44,7 +44,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['total'])
         prevPeriodCheck()
         calc()
         logicCheck()
@@ -131,10 +131,8 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
 
     if (!dataRows.isEmpty()) {
-        // Удаление подитогов
-        deleteAllAliased(dataRows)
         // сортируем
-        dataRowHelper.save(dataRows.sort { getKnu(it.bill) })
+        dataRowHelper.save(dataRows.sort { it.bill })
 
         def rnu55DataRows = getRNU(348)
         def rnu56DataRows = getRNU(349)
@@ -167,8 +165,10 @@ void calc() {
         dataRowHelper.save(dataRows)
     }
 
-    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size + 1)
-    dataRowHelper.save(dataRows)
+    // пересчитываем строки итого
+    calcTotalSum(dataRows, getDataRow(dataRows, 'total'), totalColumns)
+
+    dataRowHelper.update(dataRows)
 }
 
 def getRNU(def id) {

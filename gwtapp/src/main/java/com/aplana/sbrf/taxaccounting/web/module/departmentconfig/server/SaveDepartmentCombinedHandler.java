@@ -26,7 +26,7 @@ import java.util.Map;
  * @author Dmitriy Levykin
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDepartmentCombinedAction,
         SaveDepartmentCombinedResult> {
 
@@ -69,7 +69,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
             Map<String, RefBookValue> paramsMap = new HashMap<String, RefBookValue>();
             // Id записи
-            paramsMap.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getRecordId()));
+            paramsMap.put(RefBook.RECORD_UNIQUE_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getRecordId()));
 
             // Общая часть
             paramsMap.put(DepartmentParamAliases.DEPARTMENT_ID.name(), new RefBookValue(RefBookAttributeType.REFERENCE, depCombined.getDepartmentId()));

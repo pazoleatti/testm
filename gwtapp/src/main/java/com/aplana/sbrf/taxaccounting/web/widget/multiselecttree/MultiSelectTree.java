@@ -18,6 +18,8 @@ import com.google.gwt.user.client.ui.*;
 
 /**
  * Дерево множественного выбора.
+ *
+ * @author rtimerbaev
  */
 public abstract class MultiSelectTree<H extends List> extends Composite implements HasValue<H> {
 
@@ -79,11 +81,14 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         this("");
     }
 
-    /** Дерево множественного выбора. */
+    /**
+     * Дерево множественного выбора.
+     *
+     * @param text заголовок
+     */
     public MultiSelectTree(String text) {
         this(text, true);
     }
-
 
     /**
      * Дерево множественного выбора.
@@ -98,7 +103,24 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         setMultiSelection(multiSelection);
     }
 
+    /**
+     * Проверить содержиться ли среди списка значений элемент со значением id.
+     *
+     * @param values список значений
+     * @param id идентификатор узла
+     */
+    protected abstract boolean containInValues(H values, Integer id);
 
+    /**
+     * Сравнить идентификатор значения с идентификатором узла.
+     *
+     * @param value значение, идентификатор которого надо проверить
+     * @param id идентификатор узла
+     */
+    protected abstract boolean equalsValue(Object value, Integer id);
+
+    /** Получить выбранные элементы. */
+    @Override
     public abstract H getValue();
 
     @Override
@@ -116,7 +138,7 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         }
         for (MultiSelectTreeItem item : getItems()) {
             // выставлять или все значения или только первое
-            boolean isContain = (multiSelection ? values.contains(item.getId()) : values.get(0).equals(item.getId()));
+            boolean isContain = (multiSelection ? containInValues(values, item.getId()) : equalsValue(values.get(0), item.getId()));
             if (isContain) {
                 // раскрыть дерево до выбранного элемента
                 TreeItem parent = item.getParentItem();
@@ -137,6 +159,7 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         return addHandler(handler, ValueChangeEvent.getType());
     }
 
+    /** Получить все элементы дерева. */
     protected List<MultiSelectTreeItem> getItems() {
         List<MultiSelectTreeItem> result = new ArrayList<MultiSelectTreeItem>();
         for (int i = 0; i < tree.getItemCount(); i++) {
@@ -168,6 +191,7 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         }
     }
 
+    /** Добавить элемент в первый уровень дерева. */
     public void addTreeItem(MultiSelectTreeItem item) {
         addTreeItem(null, item);
     }
@@ -273,28 +297,34 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         return selectChild;
     }
 
+    /** Установить выбирать ли дочерние элементы при выборе узла дерева. */
     public void setSelectChild(boolean selectChild) {
         this.selectChild = selectChild;
     }
 
+    /** Получить выделенный узел. */
     public MultiSelectTreeItem getSelectedItem() {
         return (MultiSelectTreeItem) tree.getSelectedItem();
     }
 
+    /** Удалить элемент из дерева. */
     public void removeItem(MultiSelectTreeItem item) {
         item.remove();
     }
 
+    /** Удалить элементы из дерева. */
     public void removeItems(List<MultiSelectTreeItem> items) {
         for (MultiSelectTreeItem i : items) {
             tree.removeItem(i);
         }
     }
 
+    /** Получить количество корневых элементов. */
     public int getItemCount() {
         return tree.getItemCount();
     }
 
+    /** Получить элемент дерева по индексу. */
     public MultiSelectTreeItem getItem(int index) {
         return (MultiSelectTreeItem) tree.getItem(index);
     }
@@ -341,5 +371,9 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
 
     public Iterator<TreeItem> treeItemIterator() {
          return tree.treeItemIterator();
+    }
+
+    public void addOpenHandler(OpenHandler<TreeItem> handler) {
+        tree.addOpenHandler(handler);
     }
 }

@@ -18,6 +18,11 @@
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.periodpicker.PeriodPicker" />
     <inherits name="com.aplana.gwt.GwtWidgetLocal"/>
 
+    <!--в этом модуле имеется механизм подменны классов относительно браузера -->
+    <!--необходимый для работы com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils-->
+    <inherits name="com.google.gwt.user.TextBox"/>
+    <source path="utils"/>
+
     <source path="cell"/>
     <source path="datepicker"/>
     <source path="style"/>

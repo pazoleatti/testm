@@ -133,5 +133,4 @@ public interface DepartmentFormTypeDao {
      * Удаляет назначение НФ
      */
     void delete(Long id);
-
 }
