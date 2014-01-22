@@ -6,8 +6,10 @@ import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -36,12 +38,12 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
             ReportPeriod reportPeriod = new ReportPeriod();
             reportPeriod.setId(rs.getInt("id"));
             reportPeriod.setName(rs.getString("name"));
-            reportPeriod.setMonths(rs.getInt("months"));
             reportPeriod.setTaxPeriod(taxPeriodDao.get(rs.getInt("tax_period_id")));
             reportPeriod.setOrder(rs.getInt("ord"));
             reportPeriod.setStartDate(rs.getDate("start_date"));
             reportPeriod.setEndDate(rs.getDate("end_date"));
             reportPeriod.setDictTaxPeriodId(rs.getInt("dict_tax_period_id"));
+			reportPeriod.setCalendarStartDate(rs.getDate("calendar_start_date"));
             return reportPeriod;
         }
     }
@@ -51,7 +53,8 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 		try {
 			return 0 == id? null :
                     getJdbcTemplate().queryForObject(
-					"select * from report_period where id = ?",
+					"select id, name, tax_period_id, ord, start_date, end_date, dict_tax_period_id, calendar_start_date  " +
+							"from report_period where id = ?",
 					new Object[]{id},
 					new int[]{Types.NUMERIC},
 					new ReportPeriodMapper()
@@ -62,9 +65,19 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 	}
 
 	@Override
+	public List<ReportPeriod> get(List<Integer> ids) {
+		return getJdbcTemplate().query(
+				"select id, name, tax_period_id, ord, start_date, end_date, dict_tax_period_id, calendar_start_date " +
+						"from report_period where id in (" + StringUtils.join(ids, ',') + ")",
+				new ReportPeriodMapper()
+		);
+	}
+
+	@Override
 	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
 		return getJdbcTemplate().query(
-				"select * from report_period where tax_period_id = ? order by ord",
+				"select id, name, tax_period_id, ord, start_date, end_date, dict_tax_period_id, calendar_start_date " +
+						"from report_period where tax_period_id = ? order by ord",
 				new Object[]{taxPeriodId},
 				new int[]{Types.NUMERIC},
 				new ReportPeriodMapper()
@@ -82,17 +95,17 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 		}
 
 		jt.update(
-				"insert into report_period (id, name, months, tax_period_id, ord," +
-						" dict_tax_period_id, start_date, end_date)" +
+				"insert into report_period (id, name, tax_period_id, ord," +
+						" dict_tax_period_id, start_date, end_date, calendar_start_date)" +
 						" values (?, ?, ?, ?, ?, ?, ?, ?)",
 				id,
 				reportPeriod.getName(),
-				reportPeriod.getMonths(),
 				reportPeriod.getTaxPeriod().getId(),
 				reportPeriod.getOrder(),
 				reportPeriod.getDictTaxPeriodId(),
 				reportPeriod.getStartDate(),
-				reportPeriod.getEndDate()
+				reportPeriod.getEndDate(),
+				reportPeriod.getCalendarStartDate()
 		);
 		reportPeriod.setId(id);
 		return id;
@@ -117,7 +130,8 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
         params[cnt] = String.valueOf(taxType.getCode());
 
         return getJdbcTemplate().query(
-                "select rp.* from report_period rp, tax_period tp where rp.id in " +
+                "select rp.id, rp.name, rp.tax_period_id, rp.ord, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
+						"rp.calendar_start_date from report_period rp, tax_period tp where rp.id in " +
                         "(select distinct report_period_id from department_report_period " +
                         "where department_id in("+ SqlUtils.preparePlaceHolders(departmentList.size())+")) " +
                         "and rp.tax_period_id = tp.id " +
@@ -130,7 +144,8 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     public ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select * from report_period where tax_period_id = ? and dict_tax_period_id = ?",
+                    "select id, name, tax_period_id, ord, start_date, end_date, dict_tax_period_id, calendar_start_date " +
+							"from report_period where tax_period_id = ? and dict_tax_period_id = ?",
                     new Object[]{taxPeriodId, dictTaxPeriodId},
                     new int[]{Types.NUMERIC, Types.NUMERIC},
                     new ReportPeriodMapper()
@@ -139,6 +154,24 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
             throw new DaoException("Не существует периода с tax_period_id=" + taxPeriodId + " и dict_tax_period_id = " + dictTaxPeriodId);
         }
     }
+
+	@Override
+	public ReportPeriod getReportPeriodByDate(TaxType taxType, Date date) {
+		try {
+			return getJdbcTemplate().queryForObject(
+					"select rp.id, rp.name, rp.tax_period_id, rp.ord, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
+							"rp.calendar_start_date from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
+							"where tp.tax_type = ? and rp.end_date>=? and rp.calendar_start_date<=?",
+					new Object[]{taxType.getCode(), date, date},
+					new int[] { Types.VARCHAR, Types.DATE, Types.DATE },
+					new ReportPeriodMapper()
+			);
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException(String.format("Не найден отчетный период с типом = \"%1\" на дату \"%2\"", taxType.getCode(), date));
+		} catch (IncorrectResultSizeDataAccessException e) {
+			throw new DaoException(String.format("Найдено более одного отчетного периода с типом = \"%1\" на дату \"%2\"", taxType.getCode(), date));
+		}
+	}
 
 }
 

@@ -66,8 +66,7 @@ public class FilterFormTemplateView extends ViewWithUiHandlers<FilterFormTemplat
 
     @Override
     public TemplateFilter getDataFilter() {
-    	TemplateFilter filter = driver.flush();
-        return filter;
+    	return driver.flush();
     }
 
 	@Override

@@ -7,6 +7,8 @@ import com.google.gwt.text.shared.testing.PassthroughRenderer;
 /**
  * Виджет для ввода текста с маской
  *
+ * beta-версия
+ *
  * @author aivanov
  */
 public class TextMaskBox extends MaskBox<String> {

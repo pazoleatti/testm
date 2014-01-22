@@ -74,7 +74,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 			    if (object == null) {
 				    return "";
 			    }
-			    return object == true ? "Да" : "Нет";
+			    return object ? "Да" : "Нет";
 		    }
 	    });
 	    roleBox = new MultiListBox<TARole>(new AbstractRenderer<TARole>() {
